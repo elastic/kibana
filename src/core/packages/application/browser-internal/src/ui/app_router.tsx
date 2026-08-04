@@ -9,6 +9,7 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
+import type { RouteComponentProps } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { History } from 'history';
 import type { Observable } from 'rxjs';
@@ -21,7 +22,6 @@ import { type AppLeaveHandler, AppStatus } from '@kbn/core-application-browser';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { Mounter } from '../types';
-import { resolveAppRoute } from '../utils';
 import { AppContainer } from './app_container';
 import { CoreScopedHistory } from '../scoped_history';
 
@@ -34,7 +34,12 @@ interface Props {
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
   setIsMounting: (isMounting: boolean) => void;
+  setAppNotFoundState: (active: boolean) => void;
   hasCustomBranding$?: Observable<boolean>;
+}
+
+interface Params {
+  appId: string;
 }
 
 export const AppRouter: FunctionComponent<Props> = ({
@@ -46,6 +51,7 @@ export const AppRouter: FunctionComponent<Props> = ({
   setAppActionMenu,
   appStatuses$,
   setIsMounting,
+  setAppNotFoundState,
   hasCustomBranding$,
 }) => {
   const appStatuses = useObservable(appStatuses$, new Map());
@@ -61,26 +67,56 @@ export const AppRouter: FunctionComponent<Props> = ({
       <KibanaErrorBoundary>
         <Router history={history}>
           <Routes>
+            {[...mounters].map(([appId, mounter]) => (
+              <Route
+                key={mounter.appRoute}
+                path={mounter.appRoute}
+                exact={mounter.exactRoute}
+                render={({ match: { path } }) => (
+                  <AppContainer
+                    appPath={path}
+                    appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
+                    createScopedHistory={createScopedHistory}
+                    setAppNotFoundState={setAppNotFoundState}
+                    {...{
+                      appId,
+                      mounter,
+                      setAppLeaveHandler,
+                      setAppActionMenu,
+                      setIsMounting,
+                      theme$,
+                      showPlainSpinner,
+                    }}
+                  />
+                )}
+              />
+            ))}
+            {/* handler for legacy apps and used as a catch-all to display 404 page on not existing /app/appId apps*/}
             <Route
-              render={({ location }) => {
-                const resolved = resolveAppRoute(location.pathname, mounters);
-                if (!resolved) {
-                  return null;
-                }
-
+              path="/app/:appId"
+              render={({
+                match: {
+                  params: { appId },
+                  url,
+                },
+              }: RouteComponentProps<Params>) => {
+                // the id/mounter retrieval can be removed once #76348 is addressed
+                const [id, mounter] = mounters.has(appId) ? [appId, mounters.get(appId)] : [];
                 return (
                   <AppContainer
-                    key={resolved.appId}
-                    appPath={resolved.appPath}
-                    appId={resolved.appId}
-                    appStatus={appStatuses.get(resolved.appId) ?? AppStatus.inaccessible}
-                    mounter={resolved.mounter}
+                    appPath={url}
+                    appId={id ?? appId}
+                    appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
                     createScopedHistory={createScopedHistory}
-                    setAppLeaveHandler={setAppLeaveHandler}
-                    setAppActionMenu={setAppActionMenu}
-                    setIsMounting={setIsMounting}
-                    theme$={theme$}
-                    showPlainSpinner={showPlainSpinner}
+                    setAppNotFoundState={setAppNotFoundState}
+                    {...{
+                      mounter,
+                      setAppLeaveHandler,
+                      setAppActionMenu,
+                      setIsMounting,
+                      theme$,
+                      showPlainSpinner,
+                    }}
                   />
                 );
               }}

@@ -8,7 +8,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, EMPTY, of } from 'rxjs';
 import { useObservable } from '@kbn/use-observable';
 import { createVisibilityState } from './visibility_state';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
@@ -24,7 +24,7 @@ const createMockApplication = ({
 } = {}): Pick<InternalApplicationStart, 'currentAppId$' | 'applications$' | 'appNotFound$'> => {
   const apps = new Map(currentAppId ? [['testApp', { chromeless }]] : []);
   return {
-    currentAppId$: new BehaviorSubject(currentAppId),
+    currentAppId$: currentAppId ? of(currentAppId) : EMPTY,
     applications$: of(apps as any),
     appNotFound$: new BehaviorSubject(appNotFound),
   };

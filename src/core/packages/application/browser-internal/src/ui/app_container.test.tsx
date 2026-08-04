@@ -25,11 +25,27 @@ describe('AppContainer', () => {
   const setAppLeaveHandler = jest.fn();
   const setAppActionMenu = jest.fn();
   const setIsMounting = jest.fn();
+  const setAppNotFoundState = jest.fn();
   const theme$ = themeServiceMock.createTheme$();
+
+  const createScopedHistory = (appPath: string) =>
+    new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath);
+
+  const defaultProps = {
+    appPath: `/app/${appId}`,
+    appId,
+    setAppLeaveHandler,
+    setAppActionMenu,
+    setIsMounting,
+    setAppNotFoundState,
+    createScopedHistory,
+    theme$,
+  };
 
   beforeEach(() => {
     setAppLeaveHandler.mockClear();
     setIsMounting.mockClear();
+    setAppNotFoundState.mockClear();
   });
 
   const flushPromises = async () => {
@@ -64,7 +80,29 @@ describe('AppContainer', () => {
     },
   });
 
-  it('should call the `mount` function with the correct parameters', async () => {
+  it('registers unavailable state for an inaccessible registered app', () => {
+    const mounter = createMounter(Promise.resolve());
+
+    mountWithIntl(
+      <AppContainer
+        {...defaultProps}
+        appStatus={AppStatus.inaccessible}
+        mounter={mounter}
+      />
+    );
+
+    expect(setAppNotFoundState).toHaveBeenCalledWith(true);
+  });
+
+  it('registers unavailable state when the mounter is missing', () => {
+    mountWithIntl(
+      <AppContainer {...defaultProps} appStatus={AppStatus.inaccessible} mounter={undefined} />
+    );
+
+    expect(setAppNotFoundState).toHaveBeenCalledWith(true);
+  });
+
+  it('clears unavailable state and mounts an accessible app normally', async () => {
     const mounter: Mounter = {
       appBasePath: '/base-path',
       appRoute: '/some-route',
@@ -79,21 +117,10 @@ describe('AppContainer', () => {
     };
 
     const wrapper = mountWithIntl(
-      <AppContainer
-        appPath={`/app/${appId}`}
-        appId={appId}
-        appStatus={AppStatus.accessible}
-        mounter={mounter}
-        setAppLeaveHandler={setAppLeaveHandler}
-        setAppActionMenu={setAppActionMenu}
-        setIsMounting={setIsMounting}
-        createScopedHistory={(appPath: string) =>
-          // Create a history using the appPath as the current location
-          new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
-        }
-        theme$={theme$}
-      />
+      <AppContainer {...defaultProps} appStatus={AppStatus.accessible} mounter={mounter} />
     );
+
+    expect(setAppNotFoundState).toHaveBeenCalledWith(false);
 
     await act(async () => {
       await flushPromises();
@@ -111,37 +138,45 @@ describe('AppContainer', () => {
     });
   });
 
-  it('should hide the "not found" page before mounting the route', async () => {
+  it('clears unavailable state on unmount', () => {
+    const wrapper = mountWithIntl(
+      <AppContainer
+        {...defaultProps}
+        appStatus={AppStatus.inaccessible}
+        mounter={createMounter(Promise.resolve())}
+      />
+    );
+
+    setAppNotFoundState.mockClear();
+
+    wrapper.unmount();
+
+    expect(setAppNotFoundState).toHaveBeenCalledWith(false);
+  });
+
+  it('clears unavailable state when transitioning from unavailable to accessible', async () => {
     const [waitPromise, resolvePromise] = createResolver();
     const mounter = createMounter(waitPromise);
 
     const wrapper = mountWithIntl(
       <AppContainer
-        appPath={`/app/${appId}`}
-        appId={appId}
+        {...defaultProps}
         appStatus={AppStatus.inaccessible}
         mounter={mounter}
-        setAppLeaveHandler={setAppLeaveHandler}
-        setAppActionMenu={setAppActionMenu}
-        setIsMounting={setIsMounting}
-        createScopedHistory={(appPath: string) =>
-          // Create a history using the appPath as the current location
-          new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
-        }
-        theme$={theme$}
       />
     );
 
     expect(wrapper.text()).toContain('Application unavailable');
+    expect(setAppNotFoundState).toHaveBeenCalledWith(true);
+
+    setAppNotFoundState.mockClear();
 
     wrapper.setProps({
-      appId,
-      setAppLeaveHandler,
-      mounter,
       appStatus: AppStatus.accessible,
     });
     wrapper.update();
 
+    expect(setAppNotFoundState).toHaveBeenCalledWith(false);
     expect(wrapper.text()).toEqual('');
 
     await act(async () => {
@@ -158,20 +193,7 @@ describe('AppContainer', () => {
     const mounter = createMounter(waitPromise);
 
     const wrapper = mountWithIntl(
-      <AppContainer
-        appPath={`/app/${appId}`}
-        appId={appId}
-        appStatus={AppStatus.accessible}
-        mounter={mounter}
-        setAppLeaveHandler={setAppLeaveHandler}
-        setAppActionMenu={setAppActionMenu}
-        setIsMounting={setIsMounting}
-        createScopedHistory={(appPath: string) =>
-          // Create a history using the appPath as the current location
-          new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
-        }
-        theme$={theme$}
-      />
+      <AppContainer {...defaultProps} appStatus={AppStatus.accessible} mounter={mounter} />
     );
 
     expect(setIsMounting).toHaveBeenCalledTimes(1);
@@ -193,18 +215,9 @@ describe('AppContainer', () => {
 
     const wrapper = mountWithIntl(
       <AppContainer
-        appPath={`/app/${appId}`}
-        appId={appId}
+        {...defaultProps}
         appStatus={AppStatus.accessible}
         mounter={mounter}
-        setAppLeaveHandler={setAppLeaveHandler}
-        setAppActionMenu={setAppActionMenu}
-        setIsMounting={setIsMounting}
-        createScopedHistory={(appPath: string) =>
-          // Create a history using the appPath as the current location
-          new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
-        }
-        theme$={theme$}
         showPlainSpinner={true}
       />
     );
@@ -228,20 +241,7 @@ describe('AppContainer', () => {
     const wrapper = mountWithIntl(
       <KibanaErrorBoundaryProvider analytics={analytics}>
         <KibanaErrorBoundary>
-          <AppContainer
-            appPath={`/app/${appId}`}
-            appId={appId}
-            appStatus={AppStatus.accessible}
-            mounter={mounter}
-            setAppLeaveHandler={setAppLeaveHandler}
-            setAppActionMenu={setAppActionMenu}
-            setIsMounting={setIsMounting}
-            createScopedHistory={(appPath: string) =>
-              // Create a history using the appPath as the current location
-              new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
-            }
-            theme$={theme$}
-          />
+          <AppContainer {...defaultProps} appStatus={AppStatus.accessible} mounter={mounter} />
         </KibanaErrorBoundary>
       </KibanaErrorBoundaryProvider>
     );
@@ -249,13 +249,11 @@ describe('AppContainer', () => {
     expect(setIsMounting).toHaveBeenCalledTimes(1);
     expect(setIsMounting).toHaveBeenLastCalledWith(true);
 
-    // await expect(
     await act(async () => {
       resolvePromise();
       await flushPromises();
       wrapper.update();
     });
-    // ).rejects.toThrow();
 
     expect(setIsMounting).toHaveBeenCalledTimes(2);
     expect(setIsMounting).toHaveBeenLastCalledWith(false);

@@ -11,7 +11,6 @@ import React from 'react';
 import { flushSync } from 'react-dom';
 import {
   BehaviorSubject,
-  combineLatest,
   firstValueFrom,
   type Observable,
   Subject,
@@ -52,8 +51,6 @@ import {
   relativeToAbsolute,
   getAppInfo,
   getLocationObservable,
-  isAppNotFound,
-  pathnameFromLocationUrl,
 } from './utils';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 
@@ -122,6 +119,7 @@ export class ApplicationService {
   private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
   private currentActionMenu$ = new BehaviorSubject<MountPoint | undefined>(undefined);
   private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppUpdaterWrapper>>(new Map());
+  private readonly appNotFoundSubject = new BehaviorSubject(false);
   private readonly subscriptions: Subscription[] = [];
   private stop$ = new Subject<void>();
   private registrationClosed = false;
@@ -291,16 +289,7 @@ export class ApplicationService {
       shareReplay(1)
     );
 
-    const appNotFound$ = combineLatest([
-      this.location$!.pipe(takeUntil(this.stop$)),
-      applicationStatuses$,
-    ]).pipe(
-      map(([locationUrl, statuses]) =>
-        isAppNotFound(pathnameFromLocationUrl(locationUrl), availableMounters, statuses)
-      ),
-      distinctUntilChanged(),
-      shareReplay(1)
-    );
+    const appNotFound$ = this.appNotFoundSubject.asObservable().pipe(takeUntil(this.stop$));
 
     const navigateToApp: InternalApplicationStart['navigateToApp'] = async (
       appId,
@@ -416,6 +405,7 @@ export class ApplicationService {
             setAppLeaveHandler={this.setAppLeaveHandler}
             setAppActionMenu={this.setAppActionMenu}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
+            setAppNotFoundState={this.setAppNotFoundState}
             hasCustomBranding$={this.hasCustomBranding$}
           />
         );
@@ -470,6 +460,12 @@ export class ApplicationService {
     return true;
   }
 
+  private setAppNotFoundState = (active: boolean) => {
+    if (active !== this.appNotFoundSubject.value) {
+      this.appNotFoundSubject.next(active);
+    }
+  };
+
   private onBeforeUnload = (event: Event) => {
     const currentAppId = this.currentAppId$.value;
     if (currentAppId === undefined) {
@@ -485,6 +481,7 @@ export class ApplicationService {
 
   public stop() {
     this.stop$.next();
+    this.appNotFoundSubject.complete();
     this.currentAppId$.complete();
     this.currentActionMenu$.complete();
     this.statusUpdaters$.complete();
