@@ -62,6 +62,8 @@ shadowSize and lineWidth are derived as well from the points series.
 
 */
 
+import jQuery from 'jquery';
+
 (function ($) {
     var options = {
         series: {

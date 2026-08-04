@@ -43,6 +43,8 @@ as "categories" on the axis object, e.g. plot.getAxes().xaxis.categories.
 
 */
 
+import jQuery from 'jquery';
+
 (function ($) {
     var options = {
         xaxis: {

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// This bit of hackiness is required because this isn't part of the main kibana bundle
-import 'jquery';
+import $ from 'jquery';
 
 import { debounce } from 'lodash';
 import { RendererStrings } from '../../../i18n';

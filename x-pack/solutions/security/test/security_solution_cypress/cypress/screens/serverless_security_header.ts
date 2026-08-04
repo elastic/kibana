@@ -111,10 +111,26 @@ export const openNavigationPanelFor = (pageName: string) => {
 };
 
 /**
+ * Wait for serverless SideNav chrome to finish measuring/laying out. A transient overlay
+ * can cover nav controls during this window and make Cypress report
+ * "element is being covered by another element".
+ * https://github.com/elastic/kibana/issues/239331
+ */
+const waitForServerlessChromeSettle = () => {
+  cy.get('[data-test-subj~="nav-item"]').should('exist');
+  cy.get('[data-test-subj="globalLoadingIndicator-hidden"]').should('exist');
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+};
+
+/**
  * Serverless chrome can move top-level nav items into the "More" overflow when the strip is full.
  * Unconditionally opening "More" when the control is already visible is a common flake (extra overlay, layout races).
  */
 const clickWhenVisibleElseOpenMore = (selector: string) => {
+  // Settle before the visibility branch — otherwise a still-measuring SideNav can make the
+  // control look visible while an overlay still covers it (or hide it under "More").
+  waitForServerlessChromeSettle();
+
   cy.get('body').then(($body) => {
     const hasVisible = $body.find(selector).filter(':visible').length > 0;
     if (hasVisible) {
@@ -137,16 +153,16 @@ export const clickServerlessChromeNavControl = (selector: string) => {
 };
 
 export const showMoreItems = () => {
-  // TODO: more menu item is flaky in security because of initial rendering and heigh measurement
-  // so we really try to get a stable reference here before proceeding
-  // https://github.com/elastic/kibana/issues/239331
-  cy.get('[data-test-subj~="nav-item"]').should('exist');
-  cy.get('[data-test-subj="globalLoadingIndicator-hidden"]').should('exist');
-  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+  waitForServerlessChromeSettle();
 
-  // TODO: https://github.com/elastic/kibana/issues/239331
-  // eslint-disable-next-line cypress/no-unnecessary-waiting
-  cy.wait(1000);
-  cy.get(MORE_MENU_BTN).click();
+  // The More trigger toggles — only click when the menu is not already open.
+  cy.get(MORE_MENU_BTN).then(($btn) => {
+    if ($btn.attr('aria-expanded') !== 'true') {
+      // TODO: https://github.com/elastic/kibana/issues/239331
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
+      cy.wait(1000);
+      cy.get(MORE_MENU_BTN).click();
+    }
+  });
   cy.get(MORE_MENU_BTN).should('have.attr', 'aria-expanded', 'true');
 };

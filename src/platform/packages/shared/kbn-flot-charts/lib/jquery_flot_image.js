@@ -52,6 +52,8 @@ Google Maps).
 
 */
 
+import jQuery from 'jquery';
+
 (function ($) {
     var options = {
         series: {

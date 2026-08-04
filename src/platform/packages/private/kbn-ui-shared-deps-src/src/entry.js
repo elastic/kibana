@@ -19,7 +19,6 @@ if (window.__kbnHardenPrototypes__) {
 }
 
 export const Jquery = require('jquery');
-window.$ = window.jQuery = Jquery;
 
 // stateful deps
 export const KbnUiTheme = require('@kbn/ui-theme');

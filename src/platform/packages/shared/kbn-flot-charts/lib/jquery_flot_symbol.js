@@ -13,6 +13,8 @@ The symbols are accessed as strings through the standard symbol options:
 
 */
 
+import jQuery from 'jquery';
+
 (function ($) {
     function processRawData(plot, series, datapoints) {
         // we normalize the area of each symbol so it is approximately the

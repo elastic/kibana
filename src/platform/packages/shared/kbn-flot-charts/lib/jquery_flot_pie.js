@@ -56,6 +56,7 @@ More detail and specific examples can be found in the included HTML file.
 */
 
 import { i18n } from '@kbn/i18n';
+import jQuery from 'jquery';
 
 (function($) {
 	// Maximum redraw attempts when fitting labels within the plot
