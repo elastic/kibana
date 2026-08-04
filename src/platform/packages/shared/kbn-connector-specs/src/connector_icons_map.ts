@@ -154,6 +154,15 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.google_cloud_monitoring',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGoogleCloudMonitoring" */ './specs/google_cloud_monitoring/icon'
+        )
+    ),
+  ],
+  [
     '.google_cloud_storage',
     lazy(
       () =>

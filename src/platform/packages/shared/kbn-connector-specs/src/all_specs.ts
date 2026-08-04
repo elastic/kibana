@@ -47,6 +47,7 @@ export { GcpCloudFunctionsConnector } from './specs/gcp_cloud_functions/gcp_clou
 export { GithubConnector } from './specs/github/github';
 export { GmailConnector } from './specs/gmail/gmail';
 export { GoogleCalendar } from './specs/google_calendar/google_calendar';
+export { GoogleCloudMonitoring } from './specs/google_cloud_monitoring/google_cloud_monitoring';
 export { GoogleCloudStorageConnector } from './specs/google_cloud_storage/google_cloud_storage';
 export { GoogleDriveConnector } from './specs/google_drive/google_drive';
 export { Grafana } from './specs/grafana/grafana';
