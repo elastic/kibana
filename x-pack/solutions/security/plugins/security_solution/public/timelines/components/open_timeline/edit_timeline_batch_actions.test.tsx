@@ -232,7 +232,10 @@ describe('useEditTimelineBatchActions — "View Super Timeline" action', () => {
         isLoading: true,
       });
       renderPopoverContent([makeItem('a'), makeItem('b')]);
-      expect(screen.getByTestId('view-super-timeline-action')).toBeDisabled();
+      expect(screen.getByTestId('view-super-timeline-action')).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
     });
   });
 

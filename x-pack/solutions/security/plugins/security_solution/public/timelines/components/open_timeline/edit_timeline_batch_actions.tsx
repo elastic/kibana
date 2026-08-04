@@ -33,12 +33,14 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 export const useEditTimelineBatchActions = ({
   deleteTimelines,
   selectedItems,
+  searchResults,
   showExportAction = true,
   tableRef,
   timelineType = TimelineTypeEnum.default,
 }: {
   deleteTimelines?: DeleteTimelines;
   selectedItems?: OpenTimelineResult[];
+  searchResults?: OpenTimelineResult[] | null;
   showExportAction?: boolean;
   tableRef: React.MutableRefObject<EuiBasicTable<OpenTimelineResult> | null>;
   timelineType: TimelineType | null;
@@ -93,10 +95,15 @@ export const useEditTimelineBatchActions = ({
     [selectedItems]
   );
 
-  const unmergeableSelections = useMemo(
-    () => getUnmergeableSelections(selectedItems ?? []),
-    [selectedItems]
-  );
+  const unmergeableSelections = useMemo(() => {
+    const items = selectedItems ?? [];
+    if (!isSuperTimelineEnabled || !searchResults || searchResults.length === 0) {
+      return getUnmergeableSelections(items);
+    }
+    const byId = new Map(searchResults.map((r) => [r.savedObjectId, r]));
+    const freshItems = items.map((item) => byId.get(item.savedObjectId ?? '') ?? item);
+    return getUnmergeableSelections(freshItems);
+  }, [selectedItems, searchResults, isSuperTimelineEnabled]);
 
   const isSuperTimelineActionEnabled = useMemo(
     () =>

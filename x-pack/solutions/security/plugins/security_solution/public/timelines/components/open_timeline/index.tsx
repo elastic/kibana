@@ -227,24 +227,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       prevActiveTimelineVisible.current = activeTimelineVisible;
     }, [activeTimelineVisible, isSuperTimelineEnabled, refetch]);
 
-    // Super timeline: when timelines data changes after a refetch, update selectedItems to
-    // use fresh row objects so savedSearchId reflects the latest server state. EUI does not
-    // re-fire onSelectionChange when searchResults change, so without this the compatibility
-    // check (getUnmergeableSelections) would see stale data and leave "View Super Timeline"
-    // incorrectly enabled.
-    const selectedItemsRef = useRef(selectedItems);
-    selectedItemsRef.current = selectedItems;
-    useEffect(() => {
-      if (!isSuperTimelineEnabled) return;
-      const current = selectedItemsRef.current;
-      if (current.length === 0) return;
-      const byId = new Map(timelines.map((r) => [r.savedObjectId, r]));
-      const refreshed = current.map((item) => byId.get(item.savedObjectId ?? '') ?? item);
-      if (refreshed.some((r, i) => r !== current[i])) {
-        setSelectedItems(refreshed);
-      }
-    }, [isSuperTimelineEnabled, timelines]);
-
     /** Invoked when the user presses enters to submit the text in the search input */
     const onQueryChange: OnQueryChange = useCallback((query: EuiSearchBarQuery) => {
       setSearch(query.queryText.trim());

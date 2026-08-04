@@ -103,21 +103,6 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({ case
     prevActiveTimelineVisible.current = activeTimelineVisible;
   }, [activeTimelineVisible, isSuperTimelineEnabled, refetch]);
 
-  // Super timeline: when timelines data changes after a refetch, update selectedItems to
-  // use fresh row objects so savedSearchId reflects the latest server state.
-  const selectedItemsRef = useRef(selectedItems);
-  selectedItemsRef.current = selectedItems;
-  useEffect(() => {
-    if (!isSuperTimelineEnabled) return;
-    const current = selectedItemsRef.current;
-    if (current.length === 0) return;
-    const byId = new Map(timelines.map((r) => [r.savedObjectId, r]));
-    const refreshed = current.map((item) => byId.get(item.savedObjectId ?? '') ?? item);
-    if (refreshed.some((r, i) => r !== current[i])) {
-      setSelectedItems(refreshed);
-    }
-  }, [isSuperTimelineEnabled, timelines]);
-
   const queryTimelineById = useQueryTimelineById();
   const onOpenTimeline = useCallback<OnOpenTimeline>(
     ({ duplicate, timelineId, timelineType }) =>
@@ -131,6 +116,7 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({ case
 
   const { getBatchItemsPopoverContent } = useEditTimelineBatchActions({
     selectedItems,
+    searchResults: timelines,
     showExportAction: false,
     tableRef,
     timelineType: TimelineTypeEnum.default,
