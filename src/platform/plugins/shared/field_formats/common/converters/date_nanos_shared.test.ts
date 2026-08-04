@@ -105,6 +105,37 @@ describe('Date Nanos Format', () => {
     const dateMath = 'now+1M/d';
     expect(convert(dateMath)).toBe(dateMath);
   });
+
+  test('should format numeric values (ms) with the dateFormat fallback pattern', () => {
+    const fallback = 'MMM D, YYYY @ HH:mm:ss.SSS';
+    const getConfig: FieldFormatsGetConfigFn = (key: string) =>
+      ({
+        dateNanosFormat: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
+        dateFormat: fallback,
+        'dateFormat:tz': 'Browser',
+      }[key] as string);
+    const formatter = new DateNanosFormat({}, getConfig);
+
+    // e.g. a min/max aggregation result, returned by Elasticsearch in ms
+    const ms = 1558361096357;
+    expect(formatter.convert(ms)).toBe(moment(ms).format(fallback));
+  });
+
+  test('should clear the memoization cache when the fallback pattern changes', () => {
+    const config: Record<string, string> = {
+      dateNanosFormat: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
+      dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+      'dateFormat:tz': 'Browser',
+    };
+    const getConfig: FieldFormatsGetConfigFn = (key: string) => config[key];
+    const formatter = new DateNanosFormat({}, getConfig);
+
+    const ms = 1558361096357;
+    expect(formatter.convert(ms)).toBe(moment(ms).format('MMM D, YYYY @ HH:mm:ss.SSS'));
+
+    config.dateFormat = 'YYYY-MM-DD';
+    expect(formatter.convert(ms)).toBe(moment(ms).format('YYYY-MM-DD'));
+  });
 });
 
 describe('analysePatternForFract', () => {

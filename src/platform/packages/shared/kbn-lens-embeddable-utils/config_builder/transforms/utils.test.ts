@@ -12,8 +12,8 @@ import {
   buildReferences,
   getDataSourceIndex,
   getAdHocDataViewSpec,
+  generateAdHocDataViewId,
   addLayerColumn,
-  getDefaultReferences,
   operationFromColumn,
   buildDataSourceState,
   isSingleLayer,
@@ -51,6 +51,30 @@ test('build references correctly builds references', () => {
       Object {
         "id": "test-dataview",
         "name": "indexpattern-datasource-layer-layer2",
+        "type": "index-pattern",
+      },
+    ]
+  `);
+});
+
+test('build references uses the xy annotation prefix for annotation layer ids', () => {
+  const results = buildReferences(
+    {
+      layer1: dataView,
+      annotations_1: dataView,
+    },
+    new Set(['annotations_1'])
+  );
+  expect(results).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "id": "test-dataview",
+        "name": "indexpattern-datasource-layer-layer1",
+        "type": "index-pattern",
+      },
+      Object {
+        "id": "test-dataview",
+        "name": "xy-visualization-layer-annotations_1",
         "type": "index-pattern",
       },
     ]
@@ -327,21 +351,6 @@ describe('buildDatasourceStates', () => {
           },
         },
       }
-    `);
-  });
-});
-
-describe('getDefaultReferences', () => {
-  test('generates correct references for index and layer id', () => {
-    const result = getDefaultReferences('my-index', 'layer_1');
-    expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "my-index",
-          "name": "indexpattern-datasource-layer-layer_1",
-          "type": "index-pattern",
-        },
-      ]
     `);
   });
 });
@@ -927,5 +936,140 @@ describe('filtersAndQueryToApiFormat', () => {
     const result = filtersAndQueryToApiFormat(lensState);
 
     expect(result).toEqual({});
+  });
+});
+
+describe('generateAdHocDataViewId', () => {
+  test('form-based data views differing only in name get distinct ids', () => {
+    const idA = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'Logs A',
+    });
+    const idB = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'Logs B',
+    });
+
+    expect(idA).not.toBe(idB);
+    // Both keep the readable `index-timeField` base
+    expect(idA.startsWith('logs-*-@timestamp-')).toBe(true);
+    expect(idB.startsWith('logs-*-@timestamp-')).toBe(true);
+  });
+
+  test('identical form-based data views share the same base-<hash> id', () => {
+    const idA = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'Logs',
+    });
+    const idB = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'Logs',
+    });
+
+    expect(idA).toBe(idB);
+  });
+
+  test('form-based data views over the same index+timeField but different field settings get distinct ids', () => {
+    const base = {
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    };
+    const withoutRuntimeField = generateAdHocDataViewId(base);
+    const withRuntimeField = generateAdHocDataViewId({
+      ...base,
+      fieldSettings: {
+        my_runtime_field: { type: 'keyword', script: "emit('x')" },
+      },
+    });
+
+    expect(withoutRuntimeField).not.toBe(withRuntimeField);
+  });
+
+  test('form-based data views over the same index+timeField but different allowHidden get distinct ids', () => {
+    const base = {
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    };
+    const withoutAllowHidden = generateAdHocDataViewId(base);
+    const withAllowHidden = generateAdHocDataViewId({
+      ...base,
+      allowHidden: true,
+    });
+
+    expect(withoutAllowHidden).not.toBe(withAllowHidden);
+  });
+
+  test('form-based data views with name undefined === name === index, get the same id', () => {
+    const noName = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    });
+    const nameEqualsIndex = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'logs-*',
+    });
+
+    expect(noName).toBe(nameEqualsIndex);
+  });
+
+  test('form-based data views with allowHidden false === allowHidden omitted, get the same id', () => {
+    const omitted = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    });
+    const explicitFalse = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      allowHidden: false,
+    });
+
+    expect(explicitFalse).toBe(omitted);
+  });
+
+  test('form-based data views with empty field settings === no field settings, get the same id', () => {
+    const noFieldSettings = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    });
+    const emptyFieldSettings = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      fieldSettings: {},
+    });
+
+    expect(emptyFieldSettings).toBe(noFieldSettings);
+  });
+
+  test('ES|QL data views with an explicit time field keep the readable base id (no canonical hash)', () => {
+    const id = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      dataSourceType: 'esql',
+      esqlQuery: 'FROM logs-*',
+    });
+
+    expect(id).toBe('logs-*-@timestamp');
+  });
+
+  test('ES|QL data views without an explicit time field disambiguate distinct queries by query hash', () => {
+    const idA = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: undefined,
+      dataSourceType: 'esql',
+      esqlQuery: 'FROM logs-* | LIMIT 10',
+    });
+    const idB = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: undefined,
+      dataSourceType: 'esql',
+      esqlQuery: 'FROM logs-* | LIMIT 20',
+    });
+
+    expect(idA).not.toBe(idB);
   });
 });

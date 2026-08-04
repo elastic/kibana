@@ -8,7 +8,8 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "types/**/*"
+    "types/**/*",
+    "test/scout/api/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -138,7 +139,8 @@
     "@kbn/controls-constants",
     "@kbn/cps-utils",
     "@kbn/es-query-constants",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/scout-oblt"
   ],
   "exclude": ["target/**/*"]
 }
