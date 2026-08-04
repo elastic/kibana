@@ -13,6 +13,7 @@ import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 import { fetchTagSuggestions } from '../../../../state';
+import { useCanUsePublicLocationsPermission } from '../../../../../../hooks/use_capabilities';
 import type { BulkEditMode } from './bulk_edit_flyout';
 import {
   BulkEditFlyout,
@@ -38,9 +39,11 @@ export const BulkTagsFlyout = ({
   const [mode, setMode] = useState<BulkEditMode>('add');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
+  const canUsePublicLocations = useCanUsePublicLocationsPermission();
+
   const { editableMonitors, skippedMonitors } = useMemo(
-    () => partitionEditableMonitors(monitors),
-    [monitors]
+    () => partitionEditableMonitors(monitors, canUsePublicLocations),
+    [monitors, canUsePublicLocations]
   );
 
   const { data: suggestions } = useFetcher(() => fetchTagSuggestions(), []);
@@ -59,7 +62,7 @@ export const BulkTagsFlyout = ({
           next = uniqueSorted([...current, ...selectedTags]);
           break;
         case 'remove':
-          next = current.filter((tag) => !selectedTags.includes(tag));
+          next = uniqueSorted(current.filter((tag) => !selectedTags.includes(tag)));
           break;
         case 'overwrite':
         default:
