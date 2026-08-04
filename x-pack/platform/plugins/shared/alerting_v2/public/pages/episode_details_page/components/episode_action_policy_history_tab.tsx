@@ -26,10 +26,14 @@ import {
   FilteredEmptyState,
   PoliciesEmptyState,
   PoliciesExecutionHistoryTable,
+  type PolicyOutcomeFilter,
 } from '../../execution_history_page/components';
 
 const DEFAULT_PER_PAGE = 10;
-const DEFAULT_OUTCOME: PolicyExecutionOutcomeFilter = 'all';
+const DEFAULT_OUTCOME: PolicyOutcomeFilter = 'all';
+
+const toOutcomeParam = (filter: PolicyOutcomeFilter): PolicyExecutionOutcomeFilter | undefined =>
+  filter === 'all' ? undefined : [filter];
 
 interface Props {
   episodeId: string;
@@ -43,17 +47,18 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [search, setSearch] = useState('');
-  const [outcome, setOutcome] = useState<PolicyExecutionOutcomeFilter>(DEFAULT_OUTCOME);
+  const [outcome, setOutcome] = useState<PolicyOutcomeFilter>(DEFAULT_OUTCOME);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
 
   const trimmedSearch = search.trim();
   const searchParam = trimmedSearch.length > 0 ? trimmedSearch : undefined;
+  const outcomeParam = toOutcomeParam(outcome);
 
   const { data, isFetching, isError, refetch } = useFetchExecutionHistory({
     page: page + 1,
     perPage,
     search: searchParam,
-    outcome,
+    outcome: outcomeParam,
     episodeIds: [episodeId],
     startDate: episodeStart,
   });
@@ -63,7 +68,7 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
     setPage(0);
   }, []);
 
-  const onOutcomeChange = useCallback((value: PolicyExecutionOutcomeFilter) => {
+  const onOutcomeChange = useCallback((value: PolicyOutcomeFilter) => {
     setOutcome(value);
     setPage(0);
   }, []);
