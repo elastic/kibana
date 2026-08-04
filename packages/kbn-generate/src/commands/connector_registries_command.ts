@@ -12,7 +12,11 @@ import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { computeGeneratedFiles } from '@kbn/connector-specs/codegen';
+import {
+  computeGeneratedFiles,
+  validateConnectorDocsList,
+  CONNECTOR_DOCS_LIST_PATH,
+} from '@kbn/connector-specs/codegen';
 
 import type { GenerateCommand } from '../generate_command';
 
@@ -29,6 +33,20 @@ export const ConnectorRegistriesCommand: GenerateCommand = {
   },
   async run({ log, flags }) {
     const { entries, files } = await computeGeneratedFiles();
+
+    // Not one of `files` above: this one's descriptions are hand-written prose, so it can only be
+    // structurally validated (ordering, duplicate links), not fully regenerated. Checked in both
+    // modes, since a bad ordering/duplicate here isn't something running without --check would fix.
+    const docsListProblems = validateConnectorDocsList(
+      readFileSync(CONNECTOR_DOCS_LIST_PATH, 'utf8')
+    );
+    if (docsListProblems.length > 0) {
+      throw createFailError(
+        `${Path.relative(REPO_ROOT, CONNECTOR_DOCS_LIST_PATH)} has ${
+          docsListProblems.length
+        } issue(s):\n` + docsListProblems.map((p) => `  - ${p}`).join('\n')
+      );
+    }
 
     if (flags.check) {
       const stale = files.filter(({ path, content }) => readFileSync(path, 'utf8') !== content);

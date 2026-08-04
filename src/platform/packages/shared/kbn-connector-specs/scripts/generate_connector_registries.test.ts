@@ -11,6 +11,7 @@ import { readFileSync } from 'fs';
 import {
   ALL_SPECS_PATH,
   CODEOWNERS_PATH,
+  CONNECTOR_DOCS_LIST_PATH,
   CONNECTOR_OWNERS_MARKER_END,
   CONNECTOR_OWNERS_MARKER_START,
   ICONS_MAP_PATH,
@@ -25,6 +26,7 @@ import {
   renderConnectorIconsMapFile,
   renderConnectorOwnersCodeownersLines,
   toChunkName,
+  validateConnectorDocsList,
 } from './generate_connector_registries';
 
 function assertUpToDate(label: string, actual: string, expected: string) {
@@ -95,6 +97,13 @@ describe('generate_connector_registries', () => {
         extractGeneratedCodeownersLines(currentContent),
         renderConnectorOwnersCodeownersLines(entries)
       );
+    });
+  });
+
+  describe('data-context-sources-connectors-list.md', () => {
+    it('has no ordering or duplicate-link issues', () => {
+      const content = readFileSync(CONNECTOR_DOCS_LIST_PATH, 'utf8');
+      expect(validateConnectorDocsList(content)).toEqual([]);
     });
   });
 
@@ -306,6 +315,63 @@ describe('generate_connector_registries', () => {
   describe('findIconImportPath', () => {
     it('returns null when there is no icon directory', () => {
       expect(findIconImportPath(__dirname)).toBeNull();
+    });
+  });
+
+  describe('validateConnectorDocsList', () => {
+    it('returns no problems for a well-formed, sorted list', () => {
+      const content = [
+        '**Third-party search**',
+        '',
+        '- [Amazon S3](/reference/connectors-kibana/amazon-s3-action-type.md): Desc.',
+        '- [Box](/reference/connectors-kibana/box-action-type.md): Desc.',
+        '',
+        '**Identity management**',
+        '',
+        '- [1Password](/reference/connectors-kibana/one-password-action-type.md): Desc.',
+        '',
+      ].join('\n');
+      expect(validateConnectorDocsList(content)).toEqual([]);
+    });
+
+    it('flags an entry that is out of alphabetical order within its category', () => {
+      const content = [
+        '**Third-party search**',
+        '',
+        '- [Firecrawl](/reference/connectors-kibana/firecrawl-action-type.md): Desc.',
+        '- [Figma](/reference/connectors-kibana/figma-action-type.md): Desc.',
+        '',
+      ].join('\n');
+      expect(validateConnectorDocsList(content)).toEqual([
+        '"Figma" is out of alphabetical order in the "Third-party search" category (it comes after "Firecrawl").',
+      ]);
+    });
+
+    it('does not compare across a category boundary', () => {
+      const content = [
+        '**Third-party search**',
+        '',
+        '- [Zoom](/reference/connectors-kibana/zoom-action-type.md): Desc.',
+        '',
+        '**Identity management**',
+        '',
+        '- [1Password](/reference/connectors-kibana/one-password-action-type.md): Desc.',
+        '',
+      ].join('\n');
+      expect(validateConnectorDocsList(content)).toEqual([]);
+    });
+
+    it('flags the same doc linked twice under different display names', () => {
+      const content = [
+        '**Third-party search**',
+        '',
+        '- [Gmail](/reference/connectors-kibana/gmail-action-type.md): Desc.',
+        '- [Google Gmail](/reference/connectors-kibana/gmail-action-type.md): Desc.',
+        '',
+      ].join('\n');
+      expect(validateConnectorDocsList(content)).toEqual([
+        '"/reference/connectors-kibana/gmail-action-type.md" is linked twice, as "Gmail" and as "Google Gmail". Remove the duplicate entry.',
+      ]);
     });
   });
 });

@@ -187,7 +187,7 @@ export const ConnectorCommand: GenerateCommand = {
     // update snippet file (data-context-sources-connectors-list.md)
     {
       const content = await Fsp.readFile(SNIPPET_FILE, 'utf8');
-      const newEntry = `* [${displayName}](/reference/connectors-kibana/${kebabName}-action-type.md): TODO: Add brief description.`;
+      const newEntry = `- [${displayName}](/reference/connectors-kibana/${kebabName}-action-type.md): TODO: Add brief description.`;
 
       if (content.includes(`${kebabName}-action-type.md`)) {
         log.info('Snippet file already references', kebabName);
@@ -206,7 +206,7 @@ export const ConnectorCommand: GenerateCommand = {
           rawLines.pop();
         }
         const isCategoryHeader = (l: string) => /^\*\*.+\*\*$/.test(l.trim());
-        const isListItem = (l: string) => l.trim().startsWith('*') && !isCategoryHeader(l);
+        const isListItem = (l: string) => l.trim().startsWith('-') && !isCategoryHeader(l);
         let inserted = false;
         let pastFirstCategory = false;
         let sawFirstCategoryItem = false;

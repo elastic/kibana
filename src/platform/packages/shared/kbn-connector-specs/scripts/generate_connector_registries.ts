@@ -26,6 +26,14 @@
  * CI if any of the three drifts from what the generator would produce, so a bad manual edit can
  * never reach a reviewer silently.
  *
+ * This module also exports `validateConnectorDocsList`, a structural (not full-regeneration)
+ * check for the fourth hotspot file, `data-context-sources-connectors-list.md`. Unlike the three
+ * files above, its descriptions are hand-written prose, so it can't be fully derived from
+ * `src/specs/` — but ordering and duplicate-link mistakes (both found, in the wild, in that file:
+ * an out-of-order "Firecrawl"/"Figma" pair, and "Gmail" linked twice under two different display
+ * names) are still mechanically detectable, so `generate_connector_registries.test.ts` fails CI
+ * on those without needing to regenerate the file's content.
+ *
  * This module has no `.js`/CLI wrapper of its own: it's Node-only tooling (imports `fs`, `eslint`,
  * `prettier`), so it can't live in this package's isomorphic `src/`, but it's also small and
  * single-purpose enough that it doesn't need its own CLI — it's consumed as a library, via the
@@ -73,6 +81,10 @@ const SPECS_DIR = join(SRC_DIR, 'specs');
 export const ALL_SPECS_PATH = join(SRC_DIR, 'all_specs.ts');
 export const ICONS_MAP_PATH = join(SRC_DIR, 'connector_icons_map.ts');
 export const CODEOWNERS_PATH = join(REPO_ROOT, '.github/CODEOWNERS');
+export const CONNECTOR_DOCS_LIST_PATH = join(
+  REPO_ROOT,
+  'docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md'
+);
 
 export const REGENERATE_COMMAND = 'node scripts/generate connector-registries';
 
@@ -435,6 +447,65 @@ export function computeUpdatedCodeowners(
     CONNECTOR_OWNERS_MARKER_END,
   ].join('\n');
   return `${before}${newSection}${after}`;
+}
+
+const DOCS_LIST_CATEGORY_HEADER = /^\*\*(.+)\*\*$/;
+const DOCS_LIST_ITEM = /^-\s*\[([^\]]+)\]\(([^)]+)\)/;
+
+/**
+ * Checks `data-context-sources-connectors-list.md` for the two failure modes a manually-resolved
+ * merge conflict (or a bad hand-edit) tends to introduce there: an entry landing out of
+ * alphabetical order within its `**Category**` block, or the same connector doc getting linked
+ * twice under different display names (e.g. once as "Gmail" and again as "Google Gmail"). Returns
+ * a list of human-readable problem descriptions; an empty array means the file is clean.
+ *
+ * This file's descriptions are hand-written prose, so — unlike `all_specs.ts`,
+ * `connector_icons_map.ts`, and CODEOWNERS — it can't be fully regenerated from `src/specs/`.
+ * This only validates structure, not content.
+ */
+export function validateConnectorDocsList(content: string): string[] {
+  const problems: string[] = [];
+  const seenHrefs = new Map<string, string>();
+  let currentCategory = '(start of file)';
+  let previousDisplayName: string | null = null;
+
+  for (const rawLine of content.split('\n')) {
+    const line = rawLine.trim();
+
+    const headerMatch = line.match(DOCS_LIST_CATEGORY_HEADER);
+    if (headerMatch) {
+      currentCategory = headerMatch[1];
+      previousDisplayName = null;
+      continue;
+    }
+
+    const itemMatch = line.match(DOCS_LIST_ITEM);
+    if (!itemMatch) continue;
+    const [, displayName, href] = itemMatch;
+
+    const existingDisplayName = seenHrefs.get(href);
+    if (existingDisplayName) {
+      problems.push(
+        `"${href}" is linked twice, as "${existingDisplayName}" and as "${displayName}". Remove ` +
+          `the duplicate entry.`
+      );
+    } else {
+      seenHrefs.set(href, displayName);
+    }
+
+    if (
+      previousDisplayName !== null &&
+      displayName.toLowerCase() < previousDisplayName.toLowerCase()
+    ) {
+      problems.push(
+        `"${displayName}" is out of alphabetical order in the "${currentCategory}" category ` +
+          `(it comes after "${previousDisplayName}").`
+      );
+    }
+    previousDisplayName = displayName;
+  }
+
+  return problems;
 }
 
 export interface GeneratedConnectorFile {

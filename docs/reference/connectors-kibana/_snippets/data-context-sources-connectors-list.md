@@ -14,14 +14,13 @@
 - [Datadog](/reference/connectors-kibana/datadog-action-type.md): List and mute monitors, manage downtimes and incidents, post events, and query metrics and logs.
 - [Dropbox](/reference/connectors-kibana/dropbox-action-type.md): Search files and folders, retrieve file content and metadata, and manage shared links in Dropbox.
 - [Dynatrace](/reference/connectors-kibana/dynatrace-action-type.md): Triage Davis problems, ingest events, query metrics and entities, and manage maintenance windows.
-- [Firecrawl](/reference/connectors-kibana/firecrawl-action-type.md): Scrape, search, map, and crawl the web using the Firecrawl API.
 - [Figma](/reference/connectors-kibana/figma-action-type.md): Browse design files, inspect structure, render nodes as images, and explore team projects in Figma.
+- [Firecrawl](/reference/connectors-kibana/firecrawl-action-type.md): Scrape, search, map, and crawl the web using the Firecrawl API.
 - [GitHub](/reference/connectors-kibana/github-action-type.md): Search code, issues, and pull requests, and access repository contents and metadata from GitHub.
 - [Gmail](/reference/connectors-kibana/gmail-action-type.md): Search and read emails from Gmail.
 - [Google Calendar](/reference/connectors-kibana/google-calendar-action-type.md): Search and access events and calendars in Google Calendar.
 - [Google Cloud Storage](/reference/connectors-kibana/google-cloud-storage-action-type.md): Search and access objects in Google Cloud Storage buckets.
 - [Google Drive](/reference/connectors-kibana/google-drive-action-type.md): Search and access files and folders in Google Drive.
-- [Google Gmail](/reference/connectors-kibana/gmail-action-type.md): Search and read emails from Gmail.
 - [Grafana](/reference/connectors-kibana/grafana-action-type.md): Read alerts and rules, manage silences, and post annotations.
 - [GraphQL](/reference/connectors-kibana/graphql-action-type.md): Run queries and mutations, and introspect schemas on any GraphQL endpoint.
 - [HubSpot](/reference/connectors-kibana/hubspot-action-type.md): Search and retrieve contacts, companies, deals, and tickets from HubSpot CRM.
