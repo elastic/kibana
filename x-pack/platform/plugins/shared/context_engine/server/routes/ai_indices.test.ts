@@ -187,7 +187,7 @@ describe('ai indices routes', () => {
     expect(aiIndexService.delete).not.toHaveBeenCalled();
   });
 
-  it('registers all routes as public with the expected privileges', () => {
+  it('registers routes with the expected access and privileges', () => {
     expect(getRoute('POST', aiIndexPath).config).toMatchObject({
       access: 'public',
       security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
@@ -201,7 +201,7 @@ describe('ai indices routes', () => {
       security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
     });
     expect(getRoute('GET', aiIndexKiSummaryPath).config).toMatchObject({
-      access: 'public',
+      access: 'internal',
       security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
     });
     expect(getRoute('GET', aiIndexPath).config).toMatchObject({
@@ -424,7 +424,7 @@ describe('ai indices routes', () => {
     });
   });
 
-  describe('GET /api/context_engine/ai_index/{aiIndexId}/ki_summary', () => {
+  describe('GET /internal/context_engine/ai_index/{aiIndexId}/ki_summary', () => {
     it('returns the Knowledge Indicator count for the destination', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
       esqlQuery.mockResolvedValue({
@@ -441,7 +441,8 @@ describe('ai indices routes', () => {
       });
 
       expect(esqlQuery).toHaveBeenCalledWith({
-        query: 'FROM ai-index-ds-customer_support* | STATS count = COUNT(*) BY type | INLINE STATS total = SUM(count) | SORT count DESC | LIMIT 5',
+        query:
+          'FROM ai-index-ds-customer_support* | STATS count = COUNT(*) BY type | INLINE STATS total = SUM(count) | SORT count DESC | LIMIT 5',
       });
       expect(response.ok).toHaveBeenCalledWith({
         body: {
@@ -992,14 +993,14 @@ describe('ai indices routes', () => {
       return validate.request.params.validate(params);
     };
 
-    it.each(['customer_support', 'logs-app', 'index-123', 'a', '1', 'a_b-c'])(
-      'accepts a valid id %p',
-      (aiIndexId) => {
+    const validIds = ['customer_support', 'logs-app', 'index-123', 'a', '1', 'a_b-c'] as const;
+    validIds.forEach((aiIndexId) => {
+      it(`accepts a valid id ${aiIndexId}`, () => {
         expect(() => validateParams({ aiIndexId })).not.toThrow();
-      }
-    );
+      });
+    });
 
-    it.each([
+    const invalidIds = [
       'Customer_Support',
       'has space',
       'has.dot',
@@ -1008,8 +1009,11 @@ describe('ai indices routes', () => {
       'tilde~',
       '_leading_underscore',
       '-leading-hyphen',
-    ])('rejects an id with disallowed characters %p', (aiIndexId) => {
-      expect(() => validateParams({ aiIndexId })).toThrow(/lowercase letters, numbers, hyphens/);
+    ] as const;
+    invalidIds.forEach((aiIndexId) => {
+      it(`rejects an id with disallowed characters ${aiIndexId}`, () => {
+        expect(() => validateParams({ aiIndexId })).toThrow(/lowercase letters, numbers, hyphens/);
+      });
     });
 
     it('rejects an empty id', () => {

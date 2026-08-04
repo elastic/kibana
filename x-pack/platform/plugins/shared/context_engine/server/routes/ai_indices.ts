@@ -12,6 +12,7 @@ import type { RouteSecurity } from '@kbn/core-http-server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import {
   AI_INDEX_API_VERSION,
+  AI_INDEX_KI_SUMMARY_API_VERSION,
   MAX_AI_INDEX_AUTOMATION_LENGTH,
   MAX_AI_INDEX_AUTOMATIONS,
   MAX_AI_INDEX_DESCRIPTION_LENGTH,
@@ -333,18 +334,14 @@ export const registerAiIndexRoutes = ({
     .get({
       path: aiIndexKiSummaryPath,
       security: READ_SECURITY,
-      access: 'public',
+      access: 'internal',
       summary: 'Get Knowledge Indicator summary',
       description:
         'Returns the number of Knowledge Indicators stored in the AI index destination backing store.',
-      options: {
-        tags: ['oas-tag:context engine'],
-        availability: { stability: 'experimental' },
-      },
     })
     .addVersion(
       {
-        version: AI_INDEX_API_VERSION,
+        version: AI_INDEX_KI_SUMMARY_API_VERSION,
         validate: {
           request: {
             params: aiIndexIdParamsSchema,

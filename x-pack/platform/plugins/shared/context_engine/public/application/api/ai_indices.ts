@@ -9,6 +9,7 @@ import { buildPath } from '@kbn/core-http-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import {
   AI_INDEX_API_VERSION,
+  AI_INDEX_KI_SUMMARY_API_VERSION,
   aiIndexByIdPath,
   aiIndexKiSummaryPath,
   aiIndexPath,
@@ -62,7 +63,7 @@ export const getAiIndexKiSummary = (
   { aiIndexId, signal }: GetAiIndexKiSummaryArgs
 ): Promise<GetAiIndexKiSummaryResponse> =>
   http.get<GetAiIndexKiSummaryResponse>(buildPath(aiIndexKiSummaryPath, { aiIndexId }), {
-    version: AI_INDEX_API_VERSION,
+    version: AI_INDEX_KI_SUMMARY_API_VERSION,
     ...(signal ? { signal } : {}),
   });
 
