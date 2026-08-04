@@ -6,6 +6,7 @@
  */
 
 import type { InvestigationState } from '@kbn/significant-events-schema';
+import type { EvidenceListProps } from './evidence_list';
 
 /**
  * Where an investigation is in its lifecycle, from the point of view of a consumer rendering it:
@@ -24,4 +25,8 @@ export interface InvestigationOutputProps {
   state?: InvestigationState;
   /** Detail message for the `failed` and `unavailable` statuses. */
   error?: string;
+  /**
+   * Turns an evidence query into a Discover URL.
+   */
+  getQueryHref?: EvidenceListProps['getQueryHref'];
 }

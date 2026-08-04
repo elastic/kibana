@@ -12,7 +12,11 @@ import {
   getManagedWorkflowDefinition,
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import { INVESTIGATE_STEP_ID, investigationStateSchema } from './investigation_state';
+import {
+  INVESTIGATE_STEP_ID,
+  investigationStateSchema,
+  MAX_HYPOTHESIS_EVIDENCE,
+} from './investigation_state';
 
 interface ParsedInvestigationWorkflow {
   steps: Array<{ name: string; with?: { schema?: object } }>;
@@ -183,6 +187,89 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
 
     expect(validate(invalidHypothesis)).toBe(false);
     expect(investigationStateSchema.safeParse(invalidHypothesis).success).toBe(false);
+  });
+
+  it('accepts hypothesis evidence carrying a query and its window under both schemas', () => {
+    const withEvidence = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'Connection pool exhaustion after the 14:02 deploy',
+          confidence: 0.9,
+          status: 'confirmed',
+          reason: 'Pool metrics spiked exactly at deploy time.',
+          evidence: [
+            {
+              description: 'Pool utilization saturates at 14:02.',
+              esql_query: 'FROM metrics-* | STATS max = MAX(pool.utilization)',
+              time_range: { from: '2026-07-28T13:30:00Z', to: '2026-07-28T15:00:00Z' },
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(validate(withEvidence)).toBe(true);
+    expect(investigationStateSchema.safeParse(withEvidence).success).toBe(true);
+  });
+
+  it('accepts evidence that is an observation with no query under both schemas', () => {
+    const observationOnly = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'Missing null check',
+          confidence: 0.8,
+          status: 'confirmed',
+          evidence: [{ description: 'All checkout pods were in CrashLoopBackOff.' }],
+        },
+      ],
+    };
+
+    expect(validate(observationOnly)).toBe(true);
+    expect(investigationStateSchema.safeParse(observationOnly).success).toBe(true);
+  });
+
+  it('rejects hypothesis evidence exceeding MAX_HYPOTHESIS_EVIDENCE under both schemas', () => {
+    const tooMuchEvidence = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'X',
+          confidence: 0.5,
+          status: 'investigating',
+          evidence: Array.from({ length: MAX_HYPOTHESIS_EVIDENCE + 1 }, (_, index) => ({
+            description: `Observation ${index}`,
+          })),
+        },
+      ],
+    };
+
+    expect(validate(tooMuchEvidence)).toBe(false);
+    expect(investigationStateSchema.safeParse(tooMuchEvidence).success).toBe(false);
+  });
+
+  it('rejects evidence with a half-specified time range under both schemas', () => {
+    const missingTo = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'X',
+          confidence: 0.5,
+          status: 'investigating',
+          evidence: [
+            {
+              description: 'Ran a query.',
+              esql_query: 'FROM logs-* | LIMIT 1',
+              time_range: { from: '2026-07-28T13:30:00Z' },
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(validate(missingTo)).toBe(false);
+    expect(investigationStateSchema.safeParse(missingTo).success).toBe(false);
   });
 
   it('rejects an invalid hypothesis status under both schemas', () => {

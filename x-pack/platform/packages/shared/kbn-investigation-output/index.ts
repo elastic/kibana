@@ -11,3 +11,8 @@ export {
   type UseInvestigationStateResult,
 } from './src/use_investigation_state';
 export type { InvestigationOutputProps, InvestigationStatus } from './src/types';
+export { EvidenceList, type EvidenceListProps } from './src/evidence_list';
+export {
+  buildEvidenceDiscoverParams,
+  type InvestigationDiscoverParams,
+} from './src/evidence_links';
