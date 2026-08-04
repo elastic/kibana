@@ -6,16 +6,24 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
-import { renderWithTestingProviders } from '../../common/mock';
+import { screen, renderHook } from '@testing-library/react';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { renderWithTestingProviders, TestProviders } from '../../common/mock';
 import type { CaseUI } from '../../../common/ui/types';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { FieldType } from '../../../common/types/domain/template/fields';
+import { useGetFieldDefinitions } from '../field_library/hooks/use_get_field_definitions';
 import {
   getExtendedFieldCellValue,
   getExtendedFieldColumnKey,
+  getExtendedFieldTableColumn,
+  getUserPickerUidsFromCase,
   renderExtendedFieldValue,
+  useGlobalInlineFields,
 } from './extended_field_columns';
+
+jest.mock('../field_library/hooks/use_get_field_definitions');
+const useGetFieldDefinitionsMock = useGetFieldDefinitions as jest.Mock;
 
 const field = (control: FieldType, type = 'keyword'): InlineField =>
   ({ name: 'my_field', type, control } as InlineField);
@@ -119,6 +127,149 @@ describe('extended_field_columns helpers', () => {
         </>
       );
       expect(container).toHaveTextContent('—');
+    });
+  });
+
+  describe('getExtendedFieldTableColumn', () => {
+    const userPickerField = {
+      name: 'reviewers',
+      type: 'keyword',
+      control: FieldType.USER_PICKER,
+      label: 'Reviewers',
+    } as InlineField;
+
+    const damagedRaccoon = {
+      uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+      enabled: true,
+      data: {},
+      user: {
+        username: 'damaged_raccoon',
+        email: 'damaged_raccoon@elastic.co',
+        full_name: 'Damaged Raccoon',
+      },
+    } as UserProfileWithAvatar;
+    const userProfiles = new Map([[damagedRaccoon.uid, damagedRaccoon]]);
+
+    it('renders avatars for a user-picker field using the resolved profile', () => {
+      const theCase = {
+        extendedFields: {
+          reviewersAsKeyword: JSON.stringify([{ uid: damagedRaccoon.uid, name: 'stale name' }]),
+        },
+      } as unknown as CaseUI;
+
+      const column = getExtendedFieldTableColumn(userPickerField, userProfiles);
+      renderWithTestingProviders(<>{column.render?.(theCase, theCase)}</>);
+
+      expect(
+        screen.getByTestId('case-table-column-extendedField-reviewers_as_keyword')
+      ).toBeInTheDocument();
+      // Avatar rendering always prefers the live profile over the stored name snapshot.
+      expect(screen.getByText('DR')).toBeInTheDocument();
+    });
+
+    it('renders an empty avatar row for a user-picker field with no stored value', () => {
+      const theCase = { extendedFields: {} } as unknown as CaseUI;
+
+      const column = getExtendedFieldTableColumn(userPickerField, userProfiles);
+      const { container } = renderWithTestingProviders(<>{column.render?.(theCase, theCase)}</>);
+
+      expect(container).toHaveTextContent('—');
+    });
+
+    it('renders plain text (not avatars) for a non-user-picker field', () => {
+      const theCase = {
+        extendedFields: { priorityAsKeyword: 'high' },
+      } as unknown as CaseUI;
+      const priorityField = {
+        name: 'priority',
+        type: 'keyword',
+        control: FieldType.INPUT_TEXT,
+      } as InlineField;
+
+      const column = getExtendedFieldTableColumn(priorityField, userProfiles);
+      renderWithTestingProviders(<>{column.render?.(theCase, theCase)}</>);
+
+      expect(screen.getByText('high')).toBeInTheDocument();
+      expect(screen.queryByTestId('case-table-column-assignee')).not.toBeInTheDocument();
+    });
+
+    it('bounds the column width so a single field cannot push the rest off-screen', () => {
+      const column = getExtendedFieldTableColumn(userPickerField, userProfiles);
+      expect(column.maxWidth).toBe('18em');
+      expect(column.minWidth).toBe('6em');
+    });
+  });
+
+  describe('getUserPickerUidsFromCase', () => {
+    const userPickerField = {
+      name: 'reviewers',
+      type: 'keyword',
+      control: FieldType.USER_PICKER,
+    } as InlineField;
+    const textField = {
+      name: 'priority',
+      type: 'keyword',
+      control: FieldType.INPUT_TEXT,
+    } as InlineField;
+
+    it('collects uids from every user-picker field on the case', () => {
+      const theCase = {
+        extendedFields: {
+          reviewersAsKeyword: JSON.stringify([
+            { uid: 'u-1', name: 'a' },
+            { uid: 'u-2', name: 'b' },
+          ]),
+          priorityAsKeyword: 'high',
+        },
+      } as unknown as CaseUI;
+
+      expect(getUserPickerUidsFromCase(theCase, [userPickerField, textField])).toEqual([
+        'u-1',
+        'u-2',
+      ]);
+    });
+
+    it('returns an empty array when the case has no user-picker value', () => {
+      const theCase = { extendedFields: { priorityAsKeyword: 'high' } } as unknown as CaseUI;
+
+      expect(getUserPickerUidsFromCase(theCase, [userPickerField])).toEqual([]);
+    });
+
+    it('ignores malformed user-picker JSON without throwing', () => {
+      const theCase = {
+        extendedFields: { reviewersAsKeyword: 'not-json' },
+      } as unknown as CaseUI;
+
+      expect(getUserPickerUidsFromCase(theCase, [userPickerField])).toEqual([]);
+    });
+  });
+
+  describe('useGlobalInlineFields', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('filters out display-only (e.g. MARKDOWN) fields — they hold no per-case value', () => {
+      useGetFieldDefinitionsMock.mockReturnValue({
+        data: {
+          fieldDefinitions: [
+            {
+              definition: 'name: priority\nlabel: Priority\ncontrol: INPUT_TEXT\ntype: keyword\n',
+            },
+            {
+              definition:
+                'name: instructions\nlabel: Instructions\ncontrol: MARKDOWN\ntype: keyword\nmetadata:\n  content: "read me"\n',
+            },
+          ],
+        },
+        isFetching: false,
+      });
+
+      const { result } = renderHook(() => useGlobalInlineFields(), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.globalInlineFields.map((f) => f.name)).toEqual(['priority']);
     });
   });
 });

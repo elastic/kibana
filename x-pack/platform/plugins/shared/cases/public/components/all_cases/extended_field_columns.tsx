@@ -6,9 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { CaseUI } from '../../../common/ui/types';
 import type { InlineField } from '../../../common/types/domain/template/fields';
-import { FieldType } from '../../../common/types/domain/template/fields';
+import { FieldType, isDisplayOnlyField } from '../../../common/types/domain/template/fields';
 import {
   getFieldCamelKey,
   getFieldSnakeKey,
@@ -18,6 +20,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { useGetFieldDefinitions } from '../field_library/hooks/use_get_field_definitions';
 import { getEmptyCellValue } from '../empty_value';
 import { TOGGLE_FIELD_ON_LABEL, TOGGLE_FIELD_OFF_LABEL } from '../custom_fields/translations';
+import { AssigneesColumn } from './assignees_column';
 
 /**
  * Fetches and parses the owner's global field definitions into inline fields.
@@ -25,6 +28,11 @@ import { TOGGLE_FIELD_ON_LABEL, TOGGLE_FIELD_OFF_LABEL } from '../custom_fields/
  * legacy custom fields also surface here (migration writes them as global fields).
  * The fetch is skipped (owner undefined) when `enabled` is false so the legacy
  * customFields path pays no extra request.
+ *
+ * Display-only fields (e.g. MARKDOWN) are excluded: they hold no per-case value (they're static
+ * authored content on the template form, not case data — see `isDisplayOnlyField`), so they can
+ * never render anything in a column/field cell. Offering one as a toggleable column/field would
+ * just be an always-empty option that looks broken.
  */
 export const useGlobalInlineFields = ({ enabled = true }: { enabled?: boolean } = {}): {
   globalInlineFields: InlineField[];
@@ -39,7 +47,10 @@ export const useGlobalInlineFields = ({ enabled = true }: { enabled?: boolean } 
   });
 
   const globalInlineFields = useMemo(
-    () => parseFieldDefinitionsToInlineFields(data?.fieldDefinitions ?? []),
+    () =>
+      parseFieldDefinitionsToInlineFields(data?.fieldDefinitions ?? []).filter(
+        (field) => !isDisplayOnlyField(field)
+      ),
     [data]
   );
 
@@ -80,6 +91,49 @@ const parseUserPickerNames = (raw: string): string[] | null => {
   } catch {
     return null;
   }
+};
+
+/**
+ * Parses a stored user-picker value into the `{ uid }` shape `AssigneesColumn` expects. Only the
+ * uid is kept — like assignees, avatar rendering always prefers the live profile over the
+ * point-in-time `name` snapshot stored alongside it. Exported so both the table and the
+ * redesigned list (card) view can render user-picker fields as avatars identically.
+ */
+export const parseUserPickerAssignees = (raw: string): Array<{ uid: string }> | null => {
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return null;
+    }
+    const uids = parsed
+      .map((item) => (item != null && typeof item === 'object' ? item.uid : undefined))
+      .filter((uid): uid is string => typeof uid === 'string');
+    return uids.length > 0 ? uids.map((uid) => ({ uid })) : null;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Collects every uid referenced by a case's user-picker global-field values, so callers (the
+ * all-cases list views) can aggregate uids across all rows into a single bulk profile fetch —
+ * matching the existing `assignees` pattern — instead of fetching per row.
+ */
+export const getUserPickerUidsFromCase = (
+  theCase: CaseUI,
+  userPickerFields: readonly InlineField[]
+): string[] => {
+  const uids: string[] = [];
+  for (const field of userPickerFields) {
+    const rawValue = theCase.extendedFields?.[getFieldCamelKey(field.name, field.type)];
+    if (rawValue) {
+      const parsed = parseUserPickerAssignees(rawValue);
+      if (parsed) {
+        uids.push(...parsed.map(({ uid }) => uid));
+      }
+    }
+  }
+  return uids;
 };
 
 /**
@@ -138,3 +192,49 @@ export const getExtendedFieldCellValue = (field: InlineField, theCase: CaseUI): 
     field,
     theCase.extendedFields?.[getFieldCamelKey(field.name, field.type)]
   );
+
+/**
+ * Renders a user-picker global field as avatars (reusing `AssigneesColumn` — same overflow and
+ * empty-state behavior as the assignees column) instead of the comma-joined name text used for
+ * every other control type. `testSubjPrefix` keeps each user-picker column's test subjects unique
+ * from the assignees column and from each other when multiple user-picker fields are shown.
+ */
+const UserPickerFieldCell: React.FC<{
+  field: InlineField;
+  theCase: CaseUI;
+  userProfiles: Map<string, UserProfileWithAvatar>;
+}> = ({ field, theCase, userProfiles }) => {
+  const rawValue = theCase.extendedFields?.[getFieldCamelKey(field.name, field.type)];
+  const assignees = useMemo(() => parseUserPickerAssignees(rawValue ?? '') ?? [], [rawValue]);
+
+  return (
+    <AssigneesColumn
+      assignees={assignees}
+      userProfiles={userProfiles}
+      testSubjPrefix={`extendedField-${getExtendedFieldColumnKey(field)}`}
+    />
+  );
+};
+
+UserPickerFieldCell.displayName = 'UserPickerFieldCell';
+
+/**
+ * Builds the all-cases table column for a global field. Width is bounded (matching the legacy
+ * text custom-field column) so a single extended-field column can't push the rest off-screen.
+ * User-picker fields render avatars (via `userProfiles`, bulk-fetched once by the caller from all
+ * rows' uids — see `getUserPickerUidsFromCase`); every other control type renders as text.
+ */
+export const getExtendedFieldTableColumn = (
+  field: InlineField,
+  userProfiles: Map<string, UserProfileWithAvatar>
+): EuiBasicTableColumn<CaseUI> => ({
+  name: field.label ?? field.name,
+  maxWidth: '18em',
+  minWidth: '6em',
+  render: (theCase: CaseUI) =>
+    field.control === FieldType.USER_PICKER ? (
+      <UserPickerFieldCell field={field} theCase={theCase} userProfiles={userProfiles} />
+    ) : (
+      getExtendedFieldCellValue(field, theCase)
+    ),
+});

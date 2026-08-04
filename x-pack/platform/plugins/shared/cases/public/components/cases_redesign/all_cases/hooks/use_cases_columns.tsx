@@ -38,8 +38,8 @@ import {
   useKibana,
 } from '../../../../common/lib/kibana';
 import {
-  getExtendedFieldCellValue,
   getExtendedFieldColumnKey,
+  getExtendedFieldTableColumn,
   useGlobalInlineFields,
 } from '../../../all_cases/extended_field_columns';
 import { TruncatedText } from '../../../truncated_text';
@@ -362,10 +362,7 @@ export const useCasesColumns = ({
     // `extendedFields`; otherwise they come from the legacy customFields config.
     if (templatesEnabled) {
       globalInlineFields.forEach((field) => {
-        dict[getExtendedFieldColumnKey(field)] = {
-          name: field.label ?? field.name,
-          render: (theCase: CaseUI) => getExtendedFieldCellValue(field, theCase),
-        };
+        dict[getExtendedFieldColumnKey(field)] = getExtendedFieldTableColumn(field, userProfiles);
       });
 
       return dict;
@@ -393,7 +390,7 @@ export const useCasesColumns = ({
     });
 
     return dict;
-  }, [columnsDict, customFields, templatesEnabled, globalInlineFields]);
+  }, [columnsDict, customFields, templatesEnabled, globalInlineFields, userProfiles]);
 
   const columns: CasesColumns[] = [];
 
