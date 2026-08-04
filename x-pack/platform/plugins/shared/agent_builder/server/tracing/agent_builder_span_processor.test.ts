@@ -25,6 +25,9 @@ import {
   AGENT_BUILDER_OWNER_BAGGAGE_KEY,
   AGENT_BUILDER_OWNER_BAGGAGE_VALUE,
   DATA_STREAM_NAMESPACE_ATTR,
+  USER_HASH_ATTR,
+  USER_ID_ATTR,
+  USER_NAME_ATTR,
 } from './agent_builder_context';
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
@@ -661,6 +664,45 @@ describe('AgentBuilderSpanProcessor', () => {
       );
     });
 
+    it('replaces user.id with user.hash when includeRealIds is false', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () => createSettings({ includeRealIds: false }),
+      });
+
+      const readable = createMockReadableSpan({
+        [SHOULD_TRACK_ATTR]: true,
+        [USER_ID_ATTR]: 'profile-uid-or-realm-id',
+      });
+
+      processor.onEnd(readable);
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(exported.attributes[USER_HASH_ATTR]).toMatch(/^[a-f0-9]{16}$/);
+      expect(exported.attributes[USER_HASH_ATTR]).not.toBe('profile-uid-or-realm-id');
+      expect(exported.attributes[USER_ID_ATTR]).toBeUndefined();
+    });
+
+    it('preserves user.id when includeRealIds is true', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () => createSettings({ includeRealIds: true }),
+      });
+
+      const readable = createMockReadableSpan({
+        [SHOULD_TRACK_ATTR]: true,
+        [USER_ID_ATTR]: 'profile-uid-or-realm-id',
+      });
+
+      processor.onEnd(readable);
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(exported.attributes[USER_ID_ATTR]).toBe('profile-uid-or-realm-id');
+      expect(exported.attributes[USER_HASH_ATTR]).toBeUndefined();
+    });
+
     it('hashes workflow IDs and execution IDs', () => {
       const processor = new AgentBuilderSpanProcessor({
         exporter: createExporter(),
@@ -849,6 +891,42 @@ describe('AgentBuilderSpanProcessor', () => {
 
       const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
       expect(exported.attributes[ElasticGenAIAttributes.ConversationTitle]).toBeUndefined();
+    });
+
+    it('strips user names when includeRealNames is false', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () => createSettings({ includeRealNames: false }),
+      });
+
+      const readable = createMockReadableSpan({
+        [SHOULD_TRACK_ATTR]: true,
+        [USER_NAME_ATTR]: 'jane.doe',
+      });
+
+      processor.onEnd(readable);
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(exported.attributes[USER_NAME_ATTR]).toBeUndefined();
+    });
+
+    it('preserves user names when includeRealNames is true', () => {
+      const processor = new AgentBuilderSpanProcessor({
+        exporter: createExporter(),
+        scheduledDelayMillis: 1,
+        getSettings: () => createSettings({ includeRealNames: true }),
+      });
+
+      const readable = createMockReadableSpan({
+        [SHOULD_TRACK_ATTR]: true,
+        [USER_NAME_ATTR]: 'jane.doe',
+      });
+
+      processor.onEnd(readable);
+
+      const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+      expect(exported.attributes[USER_NAME_ATTR]).toBe('jane.doe');
     });
 
     it('preserves conversation titles when includeRealNames is true', () => {

@@ -14,6 +14,9 @@ export const AGENT_BUILDER_OWNER_BAGGAGE_KEY = 'kibana.agent_builder';
 export const AGENT_BUILDER_OWNER_BAGGAGE_VALUE = '1';
 export const SPACE_ID_BAGGAGE_KEY = 'agent_builder.space_id';
 export const DATA_STREAM_NAMESPACE_ATTR = 'data_stream.namespace';
+export const USER_ID_ATTR = 'user.id';
+export const USER_HASH_ATTR = 'user.hash';
+export const USER_NAME_ATTR = 'user.name';
 
 /**
  * Executes a function within a context that has the Agent Builder ownership baggage set,

@@ -18,7 +18,7 @@ import {
   attachOpikDistributedTrace,
   type OpikDistributedTraceHeaders,
 } from './opik_distributed_tracing';
-import { withAgentBuilderContext } from './agent_builder_context';
+import { withAgentBuilderContext, USER_ID_ATTR, USER_NAME_ATTR } from './agent_builder_context';
 
 interface WithConverseSpanOptions {
   agentId: string;
@@ -26,6 +26,8 @@ interface WithConverseSpanOptions {
   providerName: string;
   conversationId: string | undefined;
   spaceId: string;
+  userId?: string;
+  userName?: string;
   opikHeaders?: OpikDistributedTraceHeaders;
 }
 
@@ -36,6 +38,8 @@ export function withConverseSpan(
     providerName,
     conversationId,
     spaceId,
+    userId,
+    userName,
     opikHeaders,
   }: WithConverseSpanOptions,
   cb: (span?: Span) => Observable<ChatEvent>
@@ -53,6 +57,8 @@ export function withConverseSpan(
             [GenAISemanticConventions.GenAIAgentName]: agentName,
             [GenAISemanticConventions.GenAIProviderName]: providerName,
             [GenAISemanticConventions.GenAIConversationId]: conversationId,
+            ...(userId ? { [USER_ID_ATTR]: userId } : {}),
+            ...(userName ? { [USER_NAME_ATTR]: userName } : {}),
           },
         },
         (span) => {

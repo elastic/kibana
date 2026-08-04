@@ -11,7 +11,7 @@ import type {
   SecurityServiceStart,
   ElasticsearchServiceStart,
 } from '@kbn/core/server';
-import type { Conversation, ConversationRoundAuthor } from '@kbn/agent-builder-common';
+import type { Conversation, ConversationRoundAuthor, CurrentUser } from '@kbn/agent-builder-common';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -23,6 +23,7 @@ import { createClient } from './client';
 
 export interface ConversationService {
   getScopedClient(options: { request: KibanaRequest }): Promise<ConversationClient>;
+  getCurrentUser(options: { request: KibanaRequest }): Promise<CurrentUser>;
   getConversationRoundAuthor(options: {
     request: KibanaRequest;
     conversation: Conversation;
@@ -96,7 +97,7 @@ export class ConversationServiceImpl implements ConversationService {
     return { id, ...(user.username ? { username: user.username } : {}) };
   }
 
-  private async getCurrentUser({ request }: { request: KibanaRequest }) {
+  async getCurrentUser({ request }: { request: KibanaRequest }): Promise<CurrentUser> {
     return getUserFromRequest({
       request,
       security: this.security,
