@@ -89,7 +89,7 @@ export const CreateTransformButton: FC<CreateTransformButtonProps> = ({
   const getTransformTypeOptionName = (title: string, description: string, iconType: string) => (
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiIcon type={iconType} size="l" />
+        <EuiIcon type={iconType} size="l" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText size="m">{title}</EuiText>
