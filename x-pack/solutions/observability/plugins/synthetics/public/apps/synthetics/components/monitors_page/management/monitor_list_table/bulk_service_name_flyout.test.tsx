@@ -11,13 +11,18 @@ import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 import { ConfigKey, SourceType } from '../../../../../../../common/runtime_types';
 import { render } from '../../../../utils/testing/rtl_helpers';
-import { useGetUrlParams } from '../../../../hooks';
+import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
+import { useCanUsePublicLocationsPermission } from '../../../../../../hooks/use_capabilities';
 import { fetchBulkUpdateMonitors } from '../../../../state';
 import { BulkServiceNameFlyout } from './bulk_service_name_flyout';
 
-jest.mock('../../../../hooks', () => ({
-  ...jest.requireActual('../../../../hooks'),
-  useGetUrlParams: jest.fn(),
+jest.mock('../../../../../../hooks/use_kibana_space', () => ({
+  useKibanaSpace: jest.fn(),
+}));
+
+jest.mock('../../../../../../hooks/use_capabilities', () => ({
+  ...jest.requireActual('../../../../../../hooks/use_capabilities'),
+  useCanUsePublicLocationsPermission: jest.fn(),
 }));
 
 jest.mock('../../../../state', () => ({
@@ -30,7 +35,11 @@ jest.mock('@kbn/observability-shared-plugin/public', () => ({
   useFetcher: jest.fn(),
 }));
 
-const useGetUrlParamsMock = useGetUrlParams as jest.MockedFunction<typeof useGetUrlParams>;
+const useKibanaSpaceMock = useKibanaSpace as jest.MockedFunction<typeof useKibanaSpace>;
+const useCanUsePublicLocationsPermissionMock =
+  useCanUsePublicLocationsPermission as jest.MockedFunction<
+    typeof useCanUsePublicLocationsPermission
+  >;
 const fetchBulkUpdateMonitorsMock = fetchBulkUpdateMonitors as jest.MockedFunction<
   typeof fetchBulkUpdateMonitors
 >;
@@ -54,9 +63,10 @@ describe('<BulkServiceNameFlyout />', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useGetUrlParamsMock.mockReturnValue({ spaceId: 'default' } as ReturnType<
-      typeof useGetUrlParams
+    useKibanaSpaceMock.mockReturnValue({ space: { id: 'default' } } as ReturnType<
+      typeof useKibanaSpace
     >);
+    useCanUsePublicLocationsPermissionMock.mockReturnValue(true);
     fetchBulkUpdateMonitorsMock.mockResolvedValue({ result: [] });
     useFetcherMock.mockReturnValue({
       data: { serviceNames: ['cart', 'checkout'], labelKeys: [] },
@@ -101,7 +111,7 @@ describe('<BulkServiceNameFlyout />', () => {
     await waitFor(() => {
       // ui-2 already uses 'cart' so it is skipped as unchanged.
       expect(fetchBulkUpdateMonitorsMock).toHaveBeenCalledWith({
-        spaceId: 'default',
+        spaceId: undefined,
         updates: [{ id: 'ui-1', attributes: { [ConfigKey.APM_SERVICE_NAME]: 'cart' } }],
       });
     });

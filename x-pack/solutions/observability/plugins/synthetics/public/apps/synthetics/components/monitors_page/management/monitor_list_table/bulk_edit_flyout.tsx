@@ -28,11 +28,14 @@ import type {
   EncryptedSyntheticsMonitor,
   EncryptedSyntheticsSavedMonitor,
 } from '../../../../../../../common/runtime_types';
-import { ConfigKey, SourceType } from '../../../../../../../common/runtime_types';
-import { useGetUrlParams } from '../../../../hooks';
+import { ConfigKey } from '../../../../../../../common/runtime_types';
+import { useCanUsePublicLocationsPermission } from '../../../../../../hooks/use_capabilities';
+import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
+import { getMonitorSpaceToAppend } from '../../../../hooks';
 import type { BulkUpdateMonitorRequest } from '../../../../state';
 import { fetchBulkUpdateMonitors } from '../../../../state';
 import { kibanaService } from '../../../../../../utils/kibana_service';
+import { isMonitorBulkEditable } from './bulk_edit_eligibility';
 
 export interface SkippedMonitor {
   id: string;
@@ -95,12 +98,13 @@ const OVERWRITE_LABEL = i18n.translate('xpack.synthetics.bulkEditFlyout.mode.ove
  * out up front and surface them as skipped.
  */
 export const partitionEditableMonitors = (
-  monitors: EncryptedSyntheticsSavedMonitor[]
+  monitors: EncryptedSyntheticsSavedMonitor[],
+  canUsePublicLocations: boolean
 ): { editableMonitors: EncryptedSyntheticsSavedMonitor[]; skippedMonitors: SkippedMonitor[] } => {
   const editableMonitors: EncryptedSyntheticsSavedMonitor[] = [];
   const skippedMonitors: SkippedMonitor[] = [];
   for (const monitor of monitors) {
-    if (monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.UI) {
+    if (isMonitorBulkEditable(monitor, canUsePublicLocations)) {
       editableMonitors.push(monitor);
     } else {
       skippedMonitors.push({ id: monitor[ConfigKey.CONFIG_ID], name: monitor[ConfigKey.NAME] });
@@ -137,18 +141,30 @@ export const useBulkEditSubmit = ({
   messages: BulkEditSubmitMessages;
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { spaceId } = useGetUrlParams();
+  const { space } = useKibanaSpace();
 
   const submit = useCallback(async () => {
-    const updates: BulkUpdateMonitorRequest[] = [];
+    const updatesBySpace = new Map<string | undefined, BulkUpdateMonitorRequest[]>();
+
     for (const monitor of editableMonitors) {
       const attributes = buildAttributes(monitor);
       if (attributes) {
-        updates.push({ id: monitor[ConfigKey.CONFIG_ID], attributes });
+        const { spaceId: targetSpaceId } = getMonitorSpaceToAppend(
+          space,
+          monitor[ConfigKey.KIBANA_SPACES]
+        );
+        const spaceUpdates = updatesBySpace.get(targetSpaceId) ?? [];
+        spaceUpdates.push({ id: monitor[ConfigKey.CONFIG_ID], attributes });
+        updatesBySpace.set(targetSpaceId, spaceUpdates);
       }
     }
 
-    if (updates.length === 0) {
+    const totalUpdates = [...updatesBySpace.values()].reduce(
+      (count, spaceUpdates) => count + spaceUpdates.length,
+      0
+    );
+
+    if (totalUpdates === 0) {
       if (messages.noChangesMessage) {
         kibanaService.toasts.addWarning({
           title: messages.noChangesMessage,
@@ -161,7 +177,12 @@ export const useBulkEditSubmit = ({
 
     setIsSubmitting(true);
     try {
-      const { result } = await fetchBulkUpdateMonitors({ updates, spaceId });
+      const responses = await Promise.all(
+        [...updatesBySpace.entries()].map(([targetSpaceId, spaceUpdates]) =>
+          fetchBulkUpdateMonitors({ updates: spaceUpdates, spaceId: targetSpaceId })
+        )
+      );
+      const result = responses.flatMap((response) => response.result);
       const failedCount = result.filter((entry) => !entry.updated).length;
       const updatedCount = result.length - failedCount;
 
@@ -186,7 +207,7 @@ export const useBulkEditSubmit = ({
       reloadPage();
       onClose();
     }
-  }, [editableMonitors, buildAttributes, spaceId, messages, onClose, reloadPage]);
+  }, [editableMonitors, buildAttributes, space, messages, onClose, reloadPage]);
 
   return { submit, isSubmitting };
 };
@@ -272,7 +293,7 @@ export const BulkEditFlyout = ({
                 <p>
                   {i18n.translate('xpack.synthetics.bulkEditFlyout.skippedWarning.description', {
                     defaultMessage:
-                      'Project and Terraform-managed monitors cannot be edited here. Update them from their source instead.',
+                      'Project and Terraform-managed monitors cannot be edited here (update them from their source instead), and monitors using Elastic managed locations require additional permissions.',
                   })}
                 </p>
               </EuiText>

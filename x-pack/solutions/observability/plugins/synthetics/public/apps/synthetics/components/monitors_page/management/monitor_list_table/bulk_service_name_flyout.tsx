@@ -13,6 +13,7 @@ import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 import { fetchFieldSuggestions } from '../../../../state';
+import { useCanUsePublicLocationsPermission } from '../../../../../../hooks/use_capabilities';
 import { BulkEditFlyout, partitionEditableMonitors, useBulkEditSubmit } from './bulk_edit_flyout';
 
 export const BulkServiceNameFlyout = ({
@@ -28,9 +29,11 @@ export const BulkServiceNameFlyout = ({
   // clears the service name on the selected monitors.
   const [serviceName, setServiceName] = useState<string | undefined>(undefined);
 
+  const canUsePublicLocations = useCanUsePublicLocationsPermission();
+
   const { editableMonitors, skippedMonitors } = useMemo(
-    () => partitionEditableMonitors(monitors),
-    [monitors]
+    () => partitionEditableMonitors(monitors, canUsePublicLocations),
+    [monitors, canUsePublicLocations]
   );
 
   const { data: suggestions } = useFetcher(() => fetchFieldSuggestions(), []);
