@@ -203,6 +203,19 @@ const stringifyErrorBodyForMessage = (body: unknown): string => {
     : text;
 };
 
+const validateSpaceRelativePath = (path: string): void => {
+  let decodedPath: string;
+  try {
+    decodedPath = decodeURIComponent(path);
+  } catch {
+    throw new Error(`Invalid Kibana API path "${path}".`);
+  }
+  const normalizedPath = new URL(decodedPath, 'http://kibana.local').pathname;
+  if (!path.startsWith('/') || normalizedPath !== decodedPath || decodedPath.includes('\\')) {
+    throw new Error(`Invalid Kibana API path "${path}".`);
+  }
+};
+
 /**
  * Calls a Kibana HTTP route on the running Kibana instance using the workflow's fake request
  * for authentication and origin marking. Throws a {@link KibanaApiCallError} on non-2xx
@@ -251,9 +264,7 @@ export async function callKibanaApi<T = unknown>(
 
   // Callers provide space-relative paths; this helper owns the space prefix exactly once. The
   // server base path stays outermost.
-  if (/(^|\/)(?:\.{1,2}|%2e(?:%2e)?)($|\/)/i.test(params.path)) {
-    throw new Error(`Invalid Kibana API path "${params.path}".`);
-  }
+  validateSpaceRelativePath(params.path);
   const path = coreStart.http.basePath.prepend(applySpacePrefix(params.path, spaceId));
   const { response } = await coreStart.http.selfClient.asScoped(fakeRequest).fetch(path, {
     method: params.method,

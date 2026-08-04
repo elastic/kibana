@@ -224,12 +224,14 @@ describe('callKibanaApi', () => {
         { method: 'GET', path: '/s/current/../victim' }
       )
     ).rejects.toThrow('Invalid Kibana API path');
-    await expect(
-      callKibanaApi(
-        { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'current' },
-        { method: 'GET', path: '/api/%2e%2e/victim' }
-      )
-    ).rejects.toThrow('Invalid Kibana API path');
+    for (const path of ['/api/.%2e/victim', '/api/%2e./victim', '/api/%2e%2e/victim', '/api/../victim']) {
+      await expect(
+        callKibanaApi(
+          { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'current' },
+          { method: 'GET', path }
+        )
+      ).rejects.toThrow('Invalid Kibana API path');
+    }
   });
 
   it('prefixes the path with /s/{spaceId} for a non-default space', async () => {
