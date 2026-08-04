@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiToastWrapper, type ScoutPage } from '@kbn/scout-oblt';
+import type { ScoutPage } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT } from './constants';
 
 /**
@@ -44,6 +44,5 @@ export async function waitForSearchBarReady(page: ScoutPage): Promise<void> {
  * interactions (e.g. Investigate menu) while still visible (#246662 CI flakes).
  */
 export async function dismissGlobalToastsIfPresent(page: ScoutPage): Promise<void> {
-  const toast = new EuiToastWrapper(page, { locator: '.euiToast' });
-  await toast.closeAllToasts();
+  await page.components.globalToastList().closeAll();
 }
