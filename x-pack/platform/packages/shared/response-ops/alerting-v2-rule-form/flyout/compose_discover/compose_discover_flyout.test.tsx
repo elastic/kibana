@@ -1570,9 +1570,6 @@ describe('ComposeDiscoverFlyout', () => {
       act(() => {
         getLatestFormProps().onKindChange('signal');
       });
-      act(() => {
-        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-      });
 
       expect(readRecoveryStrategy?.()).toBeUndefined();
     });
@@ -1582,9 +1579,6 @@ describe('ComposeDiscoverFlyout', () => {
 
       act(() => {
         getLatestFormProps().onKindChange('signal');
-      });
-      act(() => {
-        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
       });
       act(() => {
         getLatestFormProps().onKindChange('alert');
@@ -1605,10 +1599,6 @@ describe('ComposeDiscoverFlyout', () => {
       act(() => {
         getLatestFormProps().onKindChange('signal');
       });
-      // Confirm merge for composed query
-      act(() => {
-        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-      });
 
       expect(readNoDataStrategy?.()).toBe('recover');
       expect(readCommittedQuery?.()).toMatchObject({ format: 'standalone' });
@@ -1625,9 +1615,6 @@ describe('ComposeDiscoverFlyout', () => {
         getLatestFormProps().onKindChange('signal');
       });
       act(() => {
-        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-      });
-      act(() => {
         getLatestFormProps().onKindChange('alert');
       });
 
@@ -1636,54 +1623,18 @@ describe('ComposeDiscoverFlyout', () => {
       expect(readNoDataStrategy?.()).toBe('none');
     });
 
-    it('shows a merge confirmation modal when switching to signal with a composed query', () => {
+    it('silently merges a composed query to standalone when switching to signal', () => {
       renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
 
       act(() => {
         getLatestFormProps().onKindChange('signal');
       });
 
-      expect(screen.getByTestId('alertingV2ConfirmSignalMergeModal')).toBeInTheDocument();
-      // Kind and query unchanged until confirm
-      expect(getLatestFormProps().state).toBeDefined();
-      expect(readCommittedQuery?.()).toMatchObject({ format: 'composed' });
-    });
-
-    it('cancelling the signal merge modal leaves kind and the split query untouched', () => {
-      renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
-
-      act(() => {
-        getLatestFormProps().onKindChange('signal');
-      });
-      act(() => {
-        fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
-      });
-
-      expect(screen.queryByTestId('alertingV2ConfirmSignalMergeModal')).not.toBeInTheDocument();
-      expect(readCommittedQuery?.()).toMatchObject({
-        format: 'composed',
-        base: 'FROM logs-*',
-        breach: { segment: 'WHERE count > 100' },
-      });
-      expect(readRecoveryStrategy?.()).toBe('no_breach');
-    });
-
-    it('confirming the signal merge modal merges to standalone and switches kind', () => {
-      renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
-
-      act(() => {
-        getLatestFormProps().onKindChange('signal');
-      });
-      act(() => {
-        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-      });
-
-      expect(screen.queryByTestId('alertingV2ConfirmSignalMergeModal')).not.toBeInTheDocument();
       expect(readCommittedQuery?.()).toMatchObject({ format: 'standalone' });
       expect(readRecoveryStrategy?.()).toBeUndefined();
     });
 
-    it('merges silently when switching to signal with an already-unified query', () => {
+    it('keeps a standalone query as standalone when switching to signal', () => {
       const rule = {
         ...ruleWithRecoveryStrategy,
         query: {
@@ -1697,7 +1648,6 @@ describe('ComposeDiscoverFlyout', () => {
         getLatestFormProps().onKindChange('signal');
       });
 
-      expect(screen.queryByTestId('alertingV2ConfirmSignalMergeModal')).not.toBeInTheDocument();
       expect(readCommittedQuery?.()).toEqual({
         format: 'standalone',
         breach: { query: 'FROM logs-* | WHERE count > 100' },

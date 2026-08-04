@@ -32,7 +32,6 @@ import { inlineEsqlVariables } from '../../utils/esql_rule_utils';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import { ConfirmRuleClose } from '../confirm_rule_close';
-import { ConfirmSignalMerge } from './confirm_signal_merge';
 import type { FormValues, RuleNotificationsValue, RuleQuery } from '../../form/types';
 import { getBreachQuery } from '../../form/utils/query_helpers';
 import { enterManualSplitQuery, exitManualSplitQuery } from './manual_split_query';
@@ -370,7 +369,6 @@ export function ComposeDiscoverFlyout({
 
   const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues });
   const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);
-  const [isConfirmSignalMergeVisible, setIsConfirmSignalMergeVisible] = useState(false);
   /*
    * EuiFlyout with session="start" uses EUI's managed flyout system, which
    * calls closeAllFlyouts() synchronously (via flushSync) *before* invoking
@@ -606,22 +604,6 @@ export function ComposeDiscoverFlyout({
     }
   }, [flyoutKey, dispatch]);
 
-  const applySignalKindChange = useCallback(() => {
-    // Assemble from committed query — discards any unapplied sandbox edits cleanly.
-    const assembled = getBreachQuery(methods.getValues('query'));
-    const standalone: RuleQuery = {
-      format: 'standalone',
-      breach: { query: assembled },
-    };
-    setSandboxQuery(standalone);
-    methods.setValue('query', standalone, { shouldDirty: true });
-    // Keep noDataStrategy in form state so alert↔signal round-trips can restore a
-    // still-valid choice when the query shape supports it; mappers omit it for signal.
-    methods.setValue('recoveryStrategy', undefined, { shouldDirty: true });
-    methods.setValue('kind', 'signal', { shouldDirty: true });
-    dispatch({ type: 'KIND_CHANGE', kind: 'signal' });
-  }, [methods, dispatch]);
-
   const handleKindChange = useCallback(
     (kind: 'signal' | 'alert') => {
       if (kind === 'alert') {
@@ -643,25 +625,22 @@ export function ComposeDiscoverFlyout({
         return;
       }
 
-      const currentQuery = methods.getValues('query');
-      if (currentQuery.format === 'composed') {
-        // Split query is not representable as a signal rule — confirm before merging.
-        setIsConfirmSignalMergeVisible(true);
-        return;
-      }
-      applySignalKindChange();
+      // Signal stores a single query — assemble composed base+condition silently.
+      const assembled = getBreachQuery(methods.getValues('query'));
+      const standalone: RuleQuery = {
+        format: 'standalone',
+        breach: { query: assembled },
+      };
+      setSandboxQuery(standalone);
+      methods.setValue('query', standalone, { shouldDirty: true });
+      // Keep noDataStrategy in form state so alert↔signal round-trips can restore a
+      // still-valid choice when the query shape supports it; mappers omit it for signal.
+      methods.setValue('recoveryStrategy', undefined, { shouldDirty: true });
+      methods.setValue('kind', 'signal', { shouldDirty: true });
+      dispatch({ type: 'KIND_CHANGE', kind: 'signal' });
     },
-    [methods, dispatch, applySignalKindChange]
+    [methods, dispatch]
   );
-
-  const handleConfirmSignalMerge = useCallback(() => {
-    setIsConfirmSignalMergeVisible(false);
-    applySignalKindChange();
-  }, [applySignalKindChange]);
-
-  const handleCancelSignalMerge = useCallback(() => {
-    setIsConfirmSignalMergeVisible(false);
-  }, []);
 
   useEffect(() => {
     if (!isBuilderMode) return;
@@ -863,9 +842,7 @@ export function ComposeDiscoverFlyout({
     }
     /*
      * Signal rules must persist as standalone (schema). Split remains available during
-     * authoring, but Apply collapses any composed result into one query block. The
-     * mode-switch merge modal is the only confirmation — Apply while already on signal
-     * merges silently.
+     * authoring, but Apply collapses any composed result into one query block.
      */
     let collapsedForSignal = false;
     if (!isAlert && queryToCommit.format === 'composed') {
@@ -1344,12 +1321,6 @@ export function ComposeDiscoverFlyout({
           </EuiFlyout>
           {isConfirmCloseVisible && (
             <ConfirmRuleClose onCancel={handleCancelDiscard} onConfirm={handleConfirmDiscard} />
-          )}
-          {isConfirmSignalMergeVisible && (
-            <ConfirmSignalMerge
-              onCancel={handleCancelSignalMerge}
-              onConfirm={handleConfirmSignalMerge}
-            />
           )}
         </>
       </FormProvider>

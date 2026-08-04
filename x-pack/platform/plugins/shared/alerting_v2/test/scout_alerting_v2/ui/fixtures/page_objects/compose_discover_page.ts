@@ -46,10 +46,6 @@ export class ComposeDiscoverPage {
   public readonly noAlertConditionCallout: Locator;
   /** Callout shown after Apply when the query is empty. */
   public readonly emptyQueryCallout: Locator;
-  /** Confirmation modal when switching to Signal with a split (composed) query. */
-  public readonly signalMergeModal: Locator;
-  public readonly signalMergeConfirmButton: Locator;
-  public readonly signalMergeCancelButton: Locator;
   public readonly sandboxSettingsButton: Locator;
   public readonly splitBaseAndAlertButton: Locator;
 
@@ -84,9 +80,6 @@ export class ComposeDiscoverPage {
     this.createEsqlRuleCard = this.page.testSubj.locator('createEsqlRuleCard');
     this.noAlertConditionCallout = this.page.testSubj.locator('esqlSummaryNoAlertConditionCallout');
     this.emptyQueryCallout = this.page.testSubj.locator('esqlSummaryEmptyCallout');
-    this.signalMergeModal = this.page.testSubj.locator('alertingV2ConfirmSignalMergeModal');
-    this.signalMergeConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
-    this.signalMergeCancelButton = this.page.testSubj.locator('confirmModalCancelButton');
     this.sandboxSettingsButton = this.page.testSubj.locator('querySandboxSettingsButton');
     this.splitBaseAndAlertButton = this.page.testSubj.locator('querySandboxSplitBaseAndAlert');
   }
@@ -174,26 +167,13 @@ export class ComposeDiscoverPage {
   /**
    * Switches Alert / Signal mode via the radio-style checkable cards. The sandbox
    * must be closed first — ModeSelect is disabled while the query sandbox is open.
-   * When switching to signal with a composed query, call
-   * {@link confirmSignalMerge} or {@link cancelSignalMerge} afterwards.
+   * Switching to signal with a composed query merges to standalone silently.
    */
   async selectMode(kind: 'alert' | 'signal') {
     await this.modeOption(kind).getByRole('radio').click();
   }
 
-  async confirmSignalMerge() {
-    await this.signalMergeModal.waitFor({ state: 'visible' });
-    await this.signalMergeConfirmButton.click();
-    await this.signalMergeModal.waitFor({ state: 'hidden' });
-  }
-
-  async cancelSignalMerge() {
-    await this.signalMergeModal.waitFor({ state: 'visible' });
-    await this.signalMergeCancelButton.click();
-    await this.signalMergeModal.waitFor({ state: 'hidden' });
-  }
-
-  /** Opt into manual base / filtering-condition tabs from the sandbox settings menu. */
+  /** Opt into manual base / alert-condition tabs from the sandbox settings menu. */
   async enableManualSplit() {
     await this.sandboxSettingsButton.click();
     await this.splitBaseAndAlertButton.click();
