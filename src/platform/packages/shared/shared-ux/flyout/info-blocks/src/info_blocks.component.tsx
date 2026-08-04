@@ -127,6 +127,10 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
       }
 
       /* ── 3-column state ── row 1 holds only the first block, so rows now start at 2, 5, 8… */
+      /* Reset first: after the shift the base 3n rule lands on the middle column. */
+      & > :nth-child(n)::before {
+        display: block;
+      }
       & > :nth-child(3n + 1)::before {
         display: none;
       }
