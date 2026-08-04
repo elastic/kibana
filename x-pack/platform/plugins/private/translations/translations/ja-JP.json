@@ -49609,8 +49609,6 @@
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.referenceSet.title": "参照セットをアップロード",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.referenceSets.referenceSetsFileUpload.title": "参照セットのエクスポートを更新",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.retryTranslateButton": "変換を再試行",
-    "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.checkResources.description": "最適な変換結果を得るために、データがレビューされ、マクロとルックアップの存在が確認されます。見つかった場合は、次にアップロードするようにメッセージが表示されます。",
-    "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.checkResources.title": "マクロとルックアップを確認",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.copyExportQuery.description.section": "検索とレポート",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.copyExportQuery.title": "ルールをエクスポート",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.promptQradar": "エクスポートされたXMLファイルを選択するか、ドラッグしてドロップします",
