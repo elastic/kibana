@@ -28,10 +28,8 @@ import {
 } from '@kbn/unified-histogram';
 import { useEpisodesHistogramQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_histogram_query';
 import { useSpaceId } from '@kbn/alerting-v2-episodes-ui/hooks/use_space_id';
-import {
-  buildEpisodesHistogramQuery,
-  type EpisodesFilterState,
-} from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import { buildEpisodesHistogramQuery } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { computeBucketInterval } from '@kbn/alerting-v2-episodes-ui/utils/histogram_utils';
 import { HISTOGRAM_BREAKDOWN_COLUMNS } from '@kbn/alerting-v2-episodes-ui/constants';
 import { buildModifiedVisAttributes } from '@kbn/alerting-v2-episodes-ui/utils/episodes_color_mapping';
