@@ -22,6 +22,10 @@ export { DASHBOARD_API_TYPE } from './dashboard_api/types';
 export type { DashboardRendererProps } from './dashboard_renderer/dashboard_renderer';
 export { LazyDashboardRenderer as DashboardRenderer } from './dashboard_renderer/lazy_dashboard_renderer';
 export type { DashboardStart, DashboardSetup } from './plugin';
+export type {
+  DashboardAppMenuItemGenerator,
+  DashboardAppMenuItemContext,
+} from './dashboard_app/top_nav/app_menu_item_registry';
 export type { DashboardListingTab } from './dashboard_listing/types';
 export { OPEN_DASHBOARD_CHAT_ACTION_ID } from './dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat_action';
 export type { OpenDashboardChatActionContext } from './dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat_action';

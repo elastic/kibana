@@ -6,15 +6,18 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { EuiFlyout, EuiFlyoutBody, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
+import { useSubmitMessage } from '../../../../../hooks/use_submit_message';
 import { AttachmentHeader } from './attachment_header';
 import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
 import { useCanvasContext } from './canvas_context';
@@ -39,14 +42,24 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const { euiTheme } = useEuiTheme();
   const { canvasState, closeCanvas, setCanvasAttachmentOrigin } = useCanvasContext();
   const conversationId = useConversationId();
-  const { conversationActions } = useConversationContext();
+  const { conversationActions, upsertAttachments } = useConversationContext();
   const agentId = useAgentId();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
+  const submitMessage = useSubmitMessage();
   const isNarrowViewport = useIsWithinBreakpoints(['xs', 's', 'm']);
 
   const openSidebarConversation = useCallback(() => {
     openSidebarConversationInternal({ conversationId });
   }, [conversationId, openSidebarConversationInternal]);
+
+  const addAttachment = useCallback(
+    (attachment: AttachmentInput) => {
+      flushSync(() => {
+        upsertAttachments?.([attachment]);
+      });
+    },
+    [upsertAttachments]
+  );
 
   // Track previous conversation ID to detect changes
   const prevConversationIdRef = useRef(conversationId);
@@ -186,6 +199,8 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
                 registerActionButtons,
                 updateOrigin,
                 closeCanvas,
+                submitMessage,
+                addAttachment,
               }
             )
           }

@@ -29,6 +29,13 @@ jest.mock('../../../hooks/use_agent_builder_service', () => ({
   }),
 }));
 
+jest.mock('../../../context/conversation/conversation_context', () => ({
+  useConversationContext: () => ({
+    isEmbeddedContext: false,
+    conversationActions: {},
+  }),
+}));
+
 const makeVersioned = (
   id: string,
   description?: string,

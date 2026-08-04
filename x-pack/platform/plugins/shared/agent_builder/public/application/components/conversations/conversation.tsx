@@ -30,6 +30,7 @@ import { useIsAnyConversationStreaming } from '../../hooks/use_is_any_conversati
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useConversationStatus } from '../../hooks/use_conversation';
 import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
+import { useSubmitMessage } from '../../hooks/use_submit_message';
 import {
   conversationElementPaddingStyles,
   conversationElementWidthStyles,
@@ -72,6 +73,13 @@ export const Conversation: React.FC<{}> = () => {
   const { staleAttachments, scheduleStaleCheck } = useStaleAttachments(conversationId);
   const [dismissStaleAttachments, setDismissStaleAttachments] = useState(false);
   useSendPredefinedInitialMessage();
+
+  const submitMessage = useSubmitMessage();
+  const { registerSidebarSubmitMessage } = useAgentBuilderServices();
+  useEffect(() => {
+    registerSidebarSubmitMessage?.(submitMessage);
+    return () => registerSidebarSubmitMessage?.(undefined);
+  }, [registerSidebarSubmitMessage, submitMessage]);
 
   // Page-leave guard fires for any in-flight stream, not just this conversation's.
   // On confirmed leave, cancel every stream so background mutations don't keep running.

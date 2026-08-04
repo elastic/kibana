@@ -17,6 +17,7 @@ export enum AttachmentType {
   text = 'text',
   esql = 'esql',
   connector = 'connector',
+  image = 'image',
 }
 
 interface AttachmentDataMap {
@@ -24,7 +25,15 @@ interface AttachmentDataMap {
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.connector]: ConnectorAttachmentData;
+  [AttachmentType.image]: ImageAttachmentData;
 }
+
+/** Max base64 character length accepted for image attachment payloads (~1.5MB). */
+export const IMAGE_ATTACHMENT_MAX_BASE64_LENGTH = 1_500_000;
+
+export const IMAGE_ATTACHMENT_MEDIA_TYPES = ['image/png', 'image/jpeg', 'image/webp'] as const;
+
+export type ImageAttachmentMediaType = (typeof IMAGE_ATTACHMENT_MEDIA_TYPES)[number];
 
 export const esqlAttachmentDataSchema = z.object({
   query: z.string(),
@@ -51,6 +60,21 @@ export const textAttachmentDataSchema = z.object({
 export interface TextAttachmentData {
   /** text content of the attachment */
   content: string;
+}
+
+export const imageAttachmentDataSchema = z.object({
+  media_type: z.enum(IMAGE_ATTACHMENT_MEDIA_TYPES),
+  data: z.string().min(1).max(IMAGE_ATTACHMENT_MAX_BASE64_LENGTH),
+});
+
+/**
+ * Data for an image attachment (raw base64, no data-URL prefix).
+ */
+export interface ImageAttachmentData {
+  /** MIME type of the image */
+  media_type: ImageAttachmentMediaType;
+  /** Raw base64-encoded image bytes (no `data:` prefix) */
+  data: string;
 }
 
 export const screenContextTimeRangeSchema = z.object({

@@ -15,13 +15,19 @@ import type {
   MetadataFieldValue,
 } from '@kbn/agent-builder-common';
 import { createBadRequestError } from '@kbn/agent-builder-common';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput, ImageAttachmentData } from '@kbn/agent-builder-common/attachments';
 import {
   ATTACHMENT_REF_ACTOR,
+  AttachmentType,
   getLatestVersion,
   getContentKey,
+  imageAttachmentDataSchema,
 } from '@kbn/agent-builder-common/attachments';
-import type { ProcessedAttachmentType, ProcessedRoundInput } from '@kbn/agent-builder-server';
+import type {
+  ProcessedAttachmentType,
+  ProcessedImagePart,
+  ProcessedRoundInput,
+} from '@kbn/agent-builder-server';
 import type {
   AttachmentResolveContext,
   AttachmentStateManager,
@@ -314,6 +320,7 @@ const prepareRoundInput = ({
         attachmentStateManager
       );
     }
+    inputAttachments.image_parts = collectImageParts(input.attachment_refs, attachmentStateManager);
   }
 
   return {
@@ -324,4 +331,28 @@ const prepareRoundInput = ({
     ...(author !== undefined ? { author } : {}),
     ...inputAttachments,
   };
+};
+
+const collectImageParts = (
+  refs: NonNullable<RoundInput['attachment_refs']>,
+  attachmentStateManager: AttachmentStateManager
+): ProcessedImagePart[] => {
+  const imageParts: ProcessedImagePart[] = [];
+  for (const ref of refs) {
+    const snapshot = attachmentStateManager.get(ref.attachment_id, { version: ref.version });
+    if (!snapshot || snapshot.type !== AttachmentType.image) {
+      continue;
+    }
+    const parseResult = imageAttachmentDataSchema.safeParse(snapshot.data.data);
+    if (!parseResult.success) {
+      continue;
+    }
+    const imageData: ImageAttachmentData = parseResult.data;
+    imageParts.push({
+      attachmentId: snapshot.id,
+      mediaType: imageData.media_type,
+      data: imageData.data,
+    });
+  }
+  return imageParts;
 };

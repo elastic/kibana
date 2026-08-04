@@ -87,3 +87,8 @@ export const useCanvasContext = (): CanvasContextValue => {
   }
   return context;
 };
+
+/** Returns null when rendered outside a CanvasProvider (e.g. isolated unit tests). */
+export const useOptionalCanvasContext = (): CanvasContextValue | null => {
+  return useContext(CanvasContext);
+};

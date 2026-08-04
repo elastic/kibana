@@ -6,13 +6,24 @@
  */
 
 import { v4 } from 'uuid';
-import type { BaseMessage, MessageContentComplex } from '@langchain/core/messages';
+import type {
+  BaseMessage,
+  MessageContentComplex,
+  MessageContentImageUrl,
+  MessageContentText,
+} from '@langchain/core/messages';
 import { ToolMessage, AIMessage, HumanMessage } from '@langchain/core/messages';
 import { isAIMessage } from '@langchain/core/messages';
 import type { RunToolReturn } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { isArray } from 'lodash';
 import { cleanPrompt } from '../prompts';
+
+/**
+ * Multimodal user content parts supported by inference-langchain (`image_url` / text).
+ * Kept as the OpenAI-style blocks that InferenceChatModel already converts.
+ */
+export type UserMessageContentPart = MessageContentText | MessageContentImageUrl;
 
 /**
  * Extract the text content from a langchain message or chunk.
@@ -107,10 +118,20 @@ export const generateFakeToolCallId = () => {
 };
 
 export const createUserMessage = (
-  content: string,
+  content: string | UserMessageContentPart[],
   { clean = false }: { clean?: boolean } = {}
 ): HumanMessage => {
-  return new HumanMessage({ content: clean ? cleanPrompt(content) : content });
+  if (typeof content === 'string') {
+    return new HumanMessage({ content: clean ? cleanPrompt(content) : content });
+  }
+  const parts: UserMessageContentPart[] = clean
+    ? content.map((part) =>
+        part.type === 'text' ? { ...part, text: cleanPrompt(part.text) } : part
+      )
+    : content;
+  // LangChain's typed ContentBlock union no longer includes legacy image_url parts,
+  // but InferenceChatModel still converts them via isMessageContentImageUrl.
+  return new HumanMessage({ content: parts as HumanMessage['content'] });
 };
 
 export const createAIMessage = (

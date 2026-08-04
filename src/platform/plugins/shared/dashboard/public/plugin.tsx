@@ -83,6 +83,10 @@ import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 import type { FindDashboardsService } from './dashboard_client';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/telemetry/dashboard_duration_start_mark';
 import type { DashboardApi } from './dashboard_api/types';
+import {
+  registerAppMenuItemGenerator,
+  type DashboardAppMenuItemGenerator,
+} from './dashboard_app/top_nav/app_menu_item_registry';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -141,6 +145,13 @@ export interface DashboardStart {
   findDashboardsService: () => Promise<FindDashboardsService>;
 
   dashboardAppClientApi$: PublishingSubject<DashboardApi | undefined>;
+
+  /**
+   * Register an optional App Menu item generator. Items appear in the dashboard
+   * top nav (edit/view) based on the generator's return value. Returns an
+   * unregister function.
+   */
+  registerAppMenuItemGenerator: (generator: DashboardAppMenuItemGenerator) => () => void;
 }
 
 export class DashboardPlugin
@@ -372,6 +383,7 @@ export class DashboardPlugin
         return findService;
       },
       dashboardAppClientApi$: this.dashboardAppApi$,
+      registerAppMenuItemGenerator,
     };
   }
 

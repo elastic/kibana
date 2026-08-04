@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { ActionButton, AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -23,6 +24,8 @@ export type DashboardCanvasAttachmentProps = AttachmentRenderProps<DashboardAtta
   registerActionButtons: (buttons: ActionButton[]) => void;
   updateOrigin: (origin: string) => Promise<unknown>;
   closeCanvas: () => void;
+  submitMessage?: (message: string) => void;
+  addAttachment?: (attachment: AttachmentInput) => void;
   dashboardLocator?: DashboardRendererProps['locator'];
   openSidebarConversation?: () => void;
   searchBarComponent: UnifiedSearchPublicPluginStart['ui']['SearchBar'];

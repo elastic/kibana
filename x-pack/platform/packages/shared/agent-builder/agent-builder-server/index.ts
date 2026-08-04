@@ -9,6 +9,7 @@ export type {
   ProcessedAttachment,
   ProcessedAttachmentType,
   ProcessedRoundInput,
+  ProcessedImagePart,
 } from './processed_input';
 export type {
   ToolProvider,

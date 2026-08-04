@@ -247,6 +247,12 @@ export interface AgentBuilderPluginStart {
    */
   removeAttachment: (attachmentId: string) => void;
   /**
+   * Send a user message in the active conversation sidebar.
+   * Opens the sidebar if needed and queues the message until the conversation
+   * is ready to accept it.
+   */
+  submitMessage: (message: string) => void;
+  /**
    * Updates the origin of an attachment in a conversation.
    * Use this after saving a by-value attachment to link it to its persistent store.
    *

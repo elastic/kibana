@@ -10,6 +10,7 @@ import type { EuiButtonColor, IconType } from '@elastic/eui';
 import type {
   UnknownAttachment,
   AttachmentVersion,
+  AttachmentInput,
   UpdateOriginResponse,
   ScreenContextAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
@@ -45,6 +46,15 @@ export interface CanvasRenderCallbacks {
   updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
   /** Close the canvas (expanded flyout view) */
   closeCanvas: () => void;
+  /**
+   * Send a user message in the active conversation (creates a conversation if needed).
+   * Used by canvas actions that kick off an agent turn (e.g. Prettify).
+   */
+  submitMessage?: (message: string) => void;
+  /**
+   * Add an attachment to the active conversation input (e.g. a screenshot before Prettify).
+   */
+  addAttachment?: (attachment: AttachmentInput) => void;
   /**
    * Optional callback for externally-controlled inline preview state.
    * Use to mark an attachment as currently previewed outside canvas.

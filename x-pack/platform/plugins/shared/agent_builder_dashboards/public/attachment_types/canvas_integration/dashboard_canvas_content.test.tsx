@@ -16,8 +16,10 @@ import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/t
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { DashboardCanvasAttachment } from './dashboard_canvas_attachment';
+import { PRETTIFY_DASHBOARD_PROMPT } from './use_register_canvas_action_buttons';
 import * as agentBuilderDashboardsCommon from '@kbn/agent-builder-dashboards-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
+import { submitPrettifyWithScreenshotInConversation } from '../submit_prettify_with_screenshot';
 
 jest.mock('@kbn/dashboard-plugin/public', () => ({
   DashboardRenderer: jest.fn(() => <div data-test-subj="dashboardRenderer" />),
@@ -31,6 +33,15 @@ jest.mock('@kbn/agent-builder-dashboards-common', () => {
     attachmentDataToDashboardState: jest.fn(actual.attachmentDataToDashboardState),
   };
 });
+
+jest.mock('../submit_prettify_with_screenshot', () => ({
+  submitPrettifyWithScreenshotInConversation: jest.fn().mockResolvedValue(undefined),
+}));
+
+const submitPrettifyWithScreenshotInConversationMock =
+  submitPrettifyWithScreenshotInConversation as jest.MockedFunction<
+    typeof submitPrettifyWithScreenshotInConversation
+  >;
 
 const MockSearchBar = jest.fn(() => <div data-test-subj="searchBar" />);
 
@@ -191,6 +202,7 @@ describe('DashboardCanvasAttachment', () => {
     const mockData = createMockData(mockFilterManager, mockTimefilter);
     const mockApi = createMockDashboardApi(mockApiOverrides);
     const openSidebarConversation = jest.fn();
+    const submitMessage = jest.fn();
 
     const props: DashboardCanvasAttachmentProps = {
       ...defaultProps,
@@ -200,6 +212,7 @@ describe('DashboardCanvasAttachment', () => {
       closeCanvas,
       checkSavedDashboardExist,
       openSidebarConversation,
+      submitMessage,
       canWriteDashboards,
       ...propsOverride,
     };
@@ -224,6 +237,7 @@ describe('DashboardCanvasAttachment', () => {
       closeCanvas,
       checkSavedDashboardExist: props.checkSavedDashboardExist,
       openSidebarConversation,
+      submitMessage,
     };
   };
 
@@ -241,8 +255,40 @@ describe('DashboardCanvasAttachment', () => {
       expect.arrayContaining([
         expect.objectContaining({ label: 'Edit in Dashboards' }),
         expect.objectContaining({ label: 'Save' }),
+        expect.objectContaining({ label: 'Prettify' }),
       ])
     );
+  });
+
+  it('omits the Prettify action when submitMessage is unavailable', async () => {
+    const { registerActionButtons } = await renderDashboardCanvasAttachment({
+      submitMessage: undefined,
+    });
+
+    const buttons = registerActionButtons.mock.calls.at(-1)?.[0] ?? [];
+    expect(buttons.map((button) => button.label)).not.toContain('Prettify');
+  });
+
+  it('submits the prettify prompt and returns to the conversation when Prettify is clicked', async () => {
+    const { registerActionButtons, submitMessage, closeCanvas, openSidebarConversation } =
+      await renderDashboardCanvasAttachment();
+
+    const prettifyButton = registerActionButtons.mock.calls
+      .at(-1)?.[0]
+      .find((button) => button.label === 'Prettify');
+
+    expect(prettifyButton).toBeDefined();
+    await prettifyButton!.handler();
+
+    expect(submitPrettifyWithScreenshotInConversationMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        submitMessage,
+      })
+    );
+    expect(closeCanvas).toHaveBeenCalled();
+    expect(openSidebarConversation).toHaveBeenCalled();
+    // prompt still available for other consumers
+    expect(PRETTIFY_DASHBOARD_PROMPT).toBe('Prettify this dashboard');
   });
 
   it('registers disabled action buttons with an explanation when dashboard write access is unavailable', async () => {

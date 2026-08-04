@@ -37,7 +37,10 @@ describe('convertPreviousRounds', () => {
     message: string,
     attachments: ProcessedAttachment[] = [],
     overrides: Partial<
-      Pick<ProcessedRoundInput, 'attachment_refs' | 'attachment_context' | 'author'>
+      Pick<
+        ProcessedRoundInput,
+        'attachment_refs' | 'attachment_context' | 'author' | 'image_parts'
+      >
     > = {}
   ): ProcessedRoundInput => ({
     message,
@@ -509,6 +512,54 @@ describe('convertPreviousRounds', () => {
       expect(result[0].content).toContain('This is the formatted text content');
       expect(result[0].content).toContain('</attachment>');
       expect(result[0].content).toContain('</attachments>');
+    });
+
+    it('emits multimodal image_url parts when image_parts are present', async () => {
+      const nextInput = makeRoundInput('Prettify this dashboard', [], {
+        image_parts: [
+          {
+            attachmentId: 'img-1',
+            mediaType: 'image/png',
+            data: 'abc123',
+          },
+        ],
+      });
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ previousRounds: [], nextInput }),
+      });
+
+      expect(result).toHaveLength(1);
+      expect(isHumanMessage(result[0])).toBe(true);
+      expect(Array.isArray(result[0].content)).toBe(true);
+      const content = result[0].content as Array<{ type: string; text?: string; image_url?: any }>;
+      expect(content[0]).toEqual({ type: 'text', text: 'Prettify this dashboard' });
+      expect(content[1]).toEqual({
+        type: 'image_url',
+        image_url: { url: 'data:image/png;base64,abc123' },
+      });
+    });
+
+    it('stubs image representation in legacy inline XML attachments', async () => {
+      const attachment: ProcessedAttachment = {
+        attachment: {
+          id: 'img-1',
+          type: 'image',
+          data: { media_type: 'image/png', data: 'abc123' },
+        },
+        representation: {
+          type: 'image',
+          mediaType: 'image/png',
+          data: 'abc123',
+        },
+        tools: [],
+      };
+      const nextInput = makeRoundInput('see image', [attachment]);
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ previousRounds: [], nextInput }),
+      });
+
+      expect(result[0].content).toContain('[image media_type=image/png]');
+      expect(result[0].content).not.toContain('abc123');
     });
 
     it('includes multiple attachments in the user message', async () => {

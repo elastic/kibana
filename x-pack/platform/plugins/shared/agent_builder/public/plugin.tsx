@@ -96,6 +96,8 @@ export class AgentBuilderPlugin
     addAttachment: (attachment: AttachmentInput) => void;
     removeAttachmentById: (attachmentId: string) => void;
   } | null = null;
+  private sidebarSubmitMessage: ((message: string) => void) | undefined;
+  private pendingSubmitMessage: string | undefined;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private isEarsEnabled = false;
   private isEarsExperimentalEnabled = false;
@@ -208,6 +210,7 @@ export class AgentBuilderPlugin
         onClose: () => {
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
+          this.sidebarSubmitMessage = undefined;
           clearSidebarRuntimeContext();
         },
       });
@@ -219,6 +222,7 @@ export class AgentBuilderPlugin
           sidebar.close();
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
+          this.sidebarSubmitMessage = undefined;
           clearSidebarRuntimeContext();
         },
       };
@@ -250,6 +254,14 @@ export class AgentBuilderPlugin
       isEarsExperimentalEnabled: this.isEarsExperimentalEnabled,
       openSidebarConversation: (options?: OpenSidebarInternalOptions) => {
         return openSidebarInternal(options);
+      },
+      registerSidebarSubmitMessage: (submitMessage) => {
+        this.sidebarSubmitMessage = submitMessage;
+        if (submitMessage && this.pendingSubmitMessage !== undefined) {
+          const pending = this.pendingSubmitMessage;
+          this.pendingSubmitMessage = undefined;
+          submitMessage(pending);
+        }
       },
     };
 
@@ -338,6 +350,15 @@ export class AgentBuilderPlugin
           this.sidebarCallbacks.removeAttachmentById(attachmentId);
         }
       },
+      submitMessage: (message: string) => {
+        if (this.sidebarSubmitMessage) {
+          this.sidebarSubmitMessage(message);
+          return;
+        }
+        this.pendingSubmitMessage = message;
+        // Ensure the sidebar is open so Conversation can register a submit handler.
+        openSidebarInternal();
+      },
       setChatConfig: (config: EmbeddableConversationProps) => {
         // Set config until sidebar is next opened
         this.conversationActiveConfig = config;
@@ -364,6 +385,7 @@ export class AgentBuilderPlugin
           // synchronously invoke our onClose callback.
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
+          this.sidebarSubmitMessage = undefined;
           sidebarRef.close();
           return;
         }

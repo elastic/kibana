@@ -70,10 +70,16 @@ export const createAttachmentReadTool = ({
           );
           if (formatted.getRepresentation) {
             const representation = await formatted.getRepresentation();
-            formattedData =
-              representation.type === 'text'
-                ? representation.value
-                : JSON.stringify(representation);
+            if (representation.type === 'text') {
+              formattedData = representation.value;
+            } else {
+              // Avoid dumping base64 into tool results; vision is inlined on the user message.
+              formattedData = {
+                media_type: representation.mediaType,
+                byte_length: Math.floor((representation.data.length * 3) / 4),
+                note: 'Image content is already available in the user message as multimodal content.',
+              };
+            }
           }
         } catch {
           formattedData = versionData.data;

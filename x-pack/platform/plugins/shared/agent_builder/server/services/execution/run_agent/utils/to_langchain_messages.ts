@@ -230,7 +230,7 @@ const formatRoundInput = ({
   attachmentTypes?: ProcessedAttachmentType[];
   attachmentTypeInstructionsProvided?: Set<string>;
 }): HumanMessage => {
-  const { message, attachments, attachment_context, attachment_refs, author } = input;
+  const { message, attachments, attachment_context, attachment_refs, author, image_parts } = input;
 
   let content = message;
 
@@ -276,7 +276,19 @@ const formatRoundInput = ({
     content = `${prefix}\n\n${content}`;
   }
 
-  return createUserMessage(content);
+  if (!image_parts || image_parts.length === 0) {
+    return createUserMessage(content);
+  }
+
+  return createUserMessage([
+    { type: 'text', text: content },
+    ...image_parts.map((imagePart) => ({
+      type: 'image_url' as const,
+      image_url: {
+        url: `data:${imagePart.mediaType};base64,${imagePart.data}`,
+      },
+    })),
+  ]);
 };
 
 const formatInputPrefix = ({
@@ -306,13 +318,19 @@ const getAuthorLabel = (author?: ConversationRoundAuthor): string | undefined =>
 };
 
 const formatAttachment = ({ attachment }: { attachment: ProcessedAttachment }): XmlNode => {
+  const representation = attachment.representation;
+  const child =
+    representation.type === 'image'
+      ? `[image media_type=${representation.mediaType}]`
+      : representation.value;
+
   return {
     tagName: 'attachment',
     attributes: {
       type: attachment.attachment.type,
       id: attachment.attachment.id,
     },
-    children: [attachment.representation.value],
+    children: [child],
   };
 };
 

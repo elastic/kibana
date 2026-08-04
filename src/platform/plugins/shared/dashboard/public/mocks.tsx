@@ -23,7 +23,9 @@ export type Start = jest.Mocked<DashboardStart>;
 
 const createStartContract = (): DashboardStart => {
   // @ts-ignore
-  const startContract: DashboardStart = {};
+  const startContract: DashboardStart = {
+    registerAppMenuItemGenerator: jest.fn(() => jest.fn()),
+  };
 
   return startContract;
 };
