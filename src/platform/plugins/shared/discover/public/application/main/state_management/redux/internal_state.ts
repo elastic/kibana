@@ -79,7 +79,6 @@ const initialState: DiscoverInternalState = {
   defaultProfileAdHocDataViewIds: [],
   defaultProfileEsqlQuery: undefined,
   savedDataViews: [],
-  isESQLToDataViewTransitionModalVisible: false,
   tabsBarVisibility: TabsBarVisibility.default,
   tabs: {
     areInitializing: false,
@@ -406,10 +405,6 @@ export const internalStateSlice = createSlice({
       withTab(state, action.payload, (tab) => {
         tab.esqlVariables = action.payload.esqlVariables;
       }),
-
-    setIsESQLToDataViewTransitionModalVisible: (state, action: PayloadAction<boolean>) => {
-      state.isESQLToDataViewTransitionModalVisible = action.payload;
-    },
 
     setProfileStateFieldsToReset: {
       prepare: (

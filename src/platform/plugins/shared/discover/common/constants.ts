@@ -24,9 +24,6 @@ export const getDefaultRowsPerPage = (uiSettings: IUiSettingsClient): number => 
   return parseInt(uiSettings.get(SAMPLE_ROWS_PER_PAGE_SETTING), 10) || DEFAULT_ROWS_PER_PAGE;
 };
 
-// local storage key for the ES|QL to Dataviews transition modal
-export const ESQL_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
-
 // local storage key for the query mode when starting a new discover session
 export const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
 
