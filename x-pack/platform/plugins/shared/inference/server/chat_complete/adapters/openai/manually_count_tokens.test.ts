@@ -71,6 +71,11 @@ describe('manuallyCountCompletionTokens', () => {
     ).not.toThrow();
   });
 
+  it('returns a positive count when a chunk contains a GPT special token', () => {
+    const count = manuallyCountCompletionTokens([chunkEvent('Result: <|endoftext|>')]);
+    expect(count).toBeGreaterThan(0);
+  });
+
   it('counts tokens from chunks with tool calls', () => {
     const count = manuallyCountCompletionTokens([
       chunkEvent('chunk-1', [

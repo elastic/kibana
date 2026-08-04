@@ -12,13 +12,23 @@ import { mergeChunks } from '../../utils';
 
 const ENCODE_OPTIONS = { allowedSpecial: 'all' as const };
 
+function contentToString(
+  content: string | Array<{ type: string; text?: string; refusal?: string }> | null | undefined
+): string {
+  if (!content) return '';
+  if (typeof content === 'string') return content;
+  return content
+    .map((part) => (part.type === 'text' ? part.text ?? '' : part.refusal ?? ''))
+    .join('\n');
+}
+
 export const manuallyCountPromptTokens = (request: OpenAIRequest) => {
   // per https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
   const tokensFromMessages = encode(
     request.messages
       .map(
         (msg) =>
-          `<|start|>${msg.role}\n${msg.content}\n${
+          `<|start|>${msg.role}\n${contentToString(msg.content)}\n${
             'name' in msg
               ? msg.name
               : 'function_call' in msg && msg.function_call
