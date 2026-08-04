@@ -44,6 +44,7 @@
     "@kbn/react-query",
     "@kbn/share-plugin",
     "@kbn/shared-ux-utility",
+    "@kbn/scout-oblt",
     "@kbn/significant-events-plugin",
     "@kbn/significant-events-schema",
     "@kbn/spaces-plugin",
