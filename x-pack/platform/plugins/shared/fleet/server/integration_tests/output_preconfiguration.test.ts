@@ -37,10 +37,13 @@ describe('Fleet preconfigured outputs', () => {
       },
     });
 
-    esServer = await startES();
     if (kbnServer) {
       await kbnServer.stop();
     }
+    if (esServer) {
+      await esServer.stop();
+    }
+    esServer = await startES();
 
     const root = createRootWithCorePlugins(
       {
