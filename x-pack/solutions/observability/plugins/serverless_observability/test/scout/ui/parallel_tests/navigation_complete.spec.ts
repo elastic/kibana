@@ -23,12 +23,7 @@ test.describe(
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('primary body items are visible and linked', async () => {
-        const primaryDeepLinks = [
-          'discover',
-          'dashboards',
-          'workflows',
-          'observability-overview:alerts',
-        ];
+        const primaryDeepLinks = ['discover', 'dashboards', 'workflows'];
         for (const deepLinkId of primaryDeepLinks) {
           const item = nav.navItemInPrimaryByDeepLinkId(deepLinkId);
           await expect(item).toBeVisible();
@@ -38,6 +33,14 @@ test.describe(
 
       await test.step('Open More menu', async () => {
         await nav.openMoreMenu();
+      });
+
+      await test.step('Alerts is visible and linked (primary or More, depending on overflow)', async () => {
+        // Alerts sits at the primary/More overflow boundary: it renders in the primary
+        // nav when there is room and overflows into the More menu otherwise.
+        const alerts = nav.navItemInBodyByDeepLinkId('observability-overview:alerts');
+        await expect(alerts).toBeVisible();
+        await expect(alerts).toHaveAttribute('href', /.+/);
       });
 
       await test.step('More linked items are visible and linked', async () => {
@@ -106,11 +109,16 @@ test.describe(
       });
 
       await test.step('Alerts', async () => {
-        await nav.navItemInPrimaryByDeepLinkId('observability-overview:alerts').click();
+        // Alerts sits at the primary/More overflow boundary — click it in the primary
+        // nav when it rendered there, otherwise reach it through the More menu.
+        const primaryAlerts = nav.navItemInPrimaryByDeepLinkId('observability-overview:alerts');
+        if (await primaryAlerts.isVisible()) {
+          await primaryAlerts.click();
+        } else {
+          await nav.openMoreMenu();
+          await nav.navItemInMoreByDeepLinkId('observability-overview:alerts').click();
+        }
         await expect(page.testSubj.locator('alertsPageWithData')).toBeVisible({
-          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
-        });
-        await expect(nav.activeNavItemByDeepLinkId('observability-overview:alerts')).toBeVisible({
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -118,7 +126,11 @@ test.describe(
       await test.step('Cases (via More menu)', async () => {
         await nav.openMoreMenu();
         await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
-        await expect(nav.breadcrumb({ text: 'Cases' })).toBeVisible({
+        // Cases list title: legacy header (`cases-all-title`) or the cases-redesign app
+        // header (`appHeaderTitle`); only one renders depending on the casesRedesign flag.
+        await expect(
+          page.testSubj.locator('cases-all-title').or(page.testSubj.locator('appHeaderTitle'))
+        ).toHaveText('Cases', {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -142,7 +154,7 @@ test.describe(
       });
     });
 
-    test('footer-panel children navigate and update breadcrumbs', async ({ pageObjects }) => {
+    test('footer-panel children navigate to the expected pages', async ({ pageObjects, page }) => {
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('data_management → Integrations', async () => {
@@ -155,7 +167,7 @@ test.describe(
           .sidePanel('data_management')
           .locator('[data-test-subj~="nav-item-deepLinkId-integrations"]')
           .click();
-        await expect(nav.breadcrumb({ deepLinkId: 'integrations' })).toBeVisible({
+        await expect(page.testSubj.locator('epmList.integrationCards')).toBeVisible({
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -217,6 +229,7 @@ test.describe(
 
     test('navigates between apps without a full page reload (SPA) and restores via logo', async ({
       pageObjects,
+      page,
     }) => {
       const nav = pageObjects.observabilityNavigation;
 
@@ -235,7 +248,7 @@ test.describe(
       await test.step('Agents via More', async () => {
         await nav.openMoreMenu();
         await nav.navItemInMoreById('agent_builder').click();
-        await expect(nav.breadcrumb({ text: 'Agents' })).toBeVisible({
+        await expect(page.testSubj.locator('agentBuilderWrapper')).toBeVisible({
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });

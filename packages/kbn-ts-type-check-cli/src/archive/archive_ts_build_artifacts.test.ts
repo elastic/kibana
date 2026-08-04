@@ -102,7 +102,7 @@ describe('archiveTSBuildArtifacts', () => {
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({
       files,
-      cacheInvalidationFiles: ['pnpm-lock.yaml', '.nvmrc', '.node-version'],
+      cacheInvalidationFiles: ['pnpm-lock.yaml', '.nvmrc', '.node-version', 'tsconfig.base.json'],
       prNumber: '789',
       sha: 'abc123',
     });

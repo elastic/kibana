@@ -173,4 +173,22 @@ describe('shouldSkipFtrTests', () => {
   it('returns false for config/serverless.yml', () => {
     expect(shouldSkipFtrTests(new Set(), ['config/serverless.yml'])).toBe(false);
   });
+
+  it('returns true for a Scout-only diff even when the owning module is not excluded', () => {
+    expect(
+      shouldSkipFtrTests(new Set(['@kbn/discover-plugin']), [
+        'src/platform/plugins/shared/discover/test/scout/core/api/fixtures/constants.ts',
+        'src/platform/plugins/shared/discover/test/scout/core/ui/tests/foo.spec.ts',
+      ])
+    ).toBe(true);
+  });
+
+  it('returns false when a Scout diff is mixed with non-Scout module changes', () => {
+    expect(
+      shouldSkipFtrTests(new Set(['@kbn/discover-plugin']), [
+        'src/platform/plugins/shared/discover/test/scout/core/ui/tests/foo.spec.ts',
+        'src/platform/plugins/shared/discover/public/application/main.tsx',
+      ])
+    ).toBe(false);
+  });
 });

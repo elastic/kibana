@@ -427,6 +427,7 @@ src/platform/plugins/shared/console/packaging/react/translations
 /x-pack/platform/plugins/shared/elastic_console/package.json
 /x-pack/platform/plugins/shared/embeddable_alerts_table/package.json
 /x-pack/platform/plugins/shared/encrypted_saved_objects/package.json
+/x-pack/platform/plugins/shared/evals_skills/package.json
 /x-pack/platform/plugins/shared/event_log/package.json
 /x-pack/platform/plugins/shared/features/package.json
 /x-pack/platform/plugins/shared/fields_metadata/package.json
@@ -455,6 +456,7 @@ src/platform/plugins/shared/console/packaging/react/translations
 /x-pack/platform/plugins/shared/searchprofiler/package.json
 /x-pack/platform/plugins/shared/security/package.json
 /x-pack/platform/plugins/shared/significant_events/package.json
+/x-pack/platform/plugins/shared/significant_events_app/package.json
 /x-pack/platform/plugins/shared/slo_shared/package.json
 /x-pack/platform/plugins/shared/spaces/package.json
 /x-pack/platform/plugins/shared/stack_alerts/package.json

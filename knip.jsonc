@@ -23,8 +23,6 @@
     "^@babel/plugin-",
     "^babel-plugin-",
     "^eslint-plugin-",
-    // This is required transitively via EUI's testing utilities; knip can't trace this.
-    "@testing-library/react-hooks",
     // @types/d3-color is used by @elastic/kibana-d3-color; knip can't trace this.
     "@types/d3-color",
     // used by our FTR; knip can't trace this.
@@ -55,7 +53,10 @@
     // locally with a complete module graph — keep them: CI's partial graph still flags them.
     "svgo",
     "http-proxy",
-    "@types/http-proxy"
+    "@types/http-proxy",
+    // typescript-7 is invoked via resolveTypeCheckCompiler() in kbn-ts-type-check-cli;
+    // knip can't trace dynamic require.resolve() calls.
+    "typescript-7"
   ],
   "workspaces": {
     ".": {

@@ -145,6 +145,12 @@ export class DataGrid {
     return this.page.testSubj.locator(`dataGridHeaderCell-${name}`);
   }
 
+  async getColumnTitles(
+    scope: Locator = this.page.testSubj.locator('docTable')
+  ): Promise<string[]> {
+    return this.readHeaderLabels(scope, Number.MAX_SAFE_INTEGER);
+  }
+
   async getColumnWidth(field: string): Promise<number> {
     const header = this.getColumnHeader(field);
     await header.waitFor({ state: 'visible' });
@@ -477,6 +483,10 @@ export class DataGrid {
     const minDurationMs = 2_000;
     const pollIntervalMs = 100;
     const totalTimeoutMs = 30_000;
+
+    // Gate on the data fetch first so the visibility budget below isn't spent
+    // waiting for an in-flight search rather than for the table to render.
+    await this.waitForLoad();
 
     await table.waitFor({ state: 'visible', timeout: totalTimeoutMs });
 

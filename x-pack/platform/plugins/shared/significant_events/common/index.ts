@@ -6,7 +6,7 @@
  */
 
 export { QUERY_STATUSES } from './queries';
-export type { Query, QueryStatus } from './queries';
+export type { QueryStatus } from './queries';
 
 export {
   STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
@@ -15,11 +15,11 @@ export {
 } from './feature_flags';
 
 export {
+  SIGNIFICANT_EVENTS_APP_ROUTE,
   SIGNIFICANT_EVENT_TIERED_FEATURES,
   SIGNIFICANT_EVENTS_TIERED_FEATURE,
   // backward-compat alias used by streams_app and serverless_observability
   SIGNIFICANT_EVENTS_TIERED_FEATURE as STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
-  ATTACHMENT_SUGGESTIONS_LIMIT,
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   MIN_EXTRACTION_INTERVAL_HOURS,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
@@ -47,13 +47,11 @@ export {
   decodeFeatureAttachmentOrigin,
   encodeFeatureAttachmentOrigin,
   type KiFeatureAttachment,
-  type PendingKiFeatureAttachment,
 } from './ki_feature_attachment';
 
 export {
   SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
   type SignificantEventDetectionAttachment,
-  type PendingSignificantEventDetectionAttachment,
 } from './significant_event_detection_attachment';
 
 export { SIGNIFICANT_EVENTS_REQUIRED_PLUGINS } from './significant_events_availability';
@@ -66,9 +64,14 @@ export type {
 export { RELAY_APP_CONNECTION_STATUS } from './slack_app/types';
 export type {
   RelayAppConnectionStatus,
+  SlackAppBindChannelResponse,
+  SlackAppBindingsResponse,
   SlackAppConnectResponse,
-  SlackAppStatusResponse,
   SlackAppDisconnectResponse,
+  SlackAppStatusResponse,
+  SlackAppUnbindChannelResponse,
+  SlackChannelBinding,
+  SlackChannelBindingStatus,
 } from './slack_app/types';
 
 export type {
