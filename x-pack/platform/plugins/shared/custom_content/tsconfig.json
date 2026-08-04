@@ -23,7 +23,17 @@
     "@kbn/es-query",
     "@kbn/es-types",
     "@kbn/datemath",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
+    "@kbn/code-editor",
+    "@kbn/esql",
+    "@kbn/zod",
+    "@kbn/code-editor-mock",
+    "@kbn/core-http-server",
+    "@kbn/ui-callout",
+    "@kbn/shared-ux-ai-components"
   ],
   "exclude": ["target/**/*"]
 }
