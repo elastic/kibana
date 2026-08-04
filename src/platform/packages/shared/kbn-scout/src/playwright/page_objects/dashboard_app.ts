@@ -1070,11 +1070,11 @@ export class DashboardApp {
   }
 
   async addNewLensPanel() {
-    await this.addNewPanel('Visualization');
+    await this.addNewPanel('Create visualization');
   }
 
   async addNewESQLPanel() {
-    await this.addNewPanel('Visualization (query)');
+    await this.addNewPanel('Create visualization (query)');
   }
 
   /** Opens the add-panel flyout, selects the given panel type, and waits for the flyout to close. */
