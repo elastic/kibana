@@ -156,7 +156,7 @@ export function buildExecutionHistoryItem(
     .map((id) => ({ id, name: workflowNames.get(id) ?? null }));
 
   return {
-    '@timestamp': timestamp,
+    dispatched_at: timestamp,
     policy: { id: policyId, name: policyNames.get(policyId) ?? null },
     outcome: action,
     episode_count: Number(dispatcher.episode_count ?? 0),

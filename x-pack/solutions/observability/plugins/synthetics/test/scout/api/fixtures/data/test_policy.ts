@@ -491,7 +491,7 @@ export const getBrowserInput = ({ id, params, isBrowser }: PolicyProps) => {
   return {
     type: 'synthetics/browser',
     policy_template: 'synthetics',
-    enabled: false,
+    enabled: Boolean(isBrowser),
     streams: [
       {
         enabled: true,
@@ -551,20 +551,16 @@ export const comparePolicies = (aPolicy: PackagePolicy | undefined, bPolicy: Pac
   const a = omitIds(aPolicy);
   const b = omitIds(bPolicy);
 
-  const aHttpInput = a.inputs?.find((input) => input.type === 'synthetics/http');
-  const aTcpInput = b.inputs?.find((input) => input.type === 'synthetics/tcp');
-  const aIcmpInput = b.inputs?.find((input) => input.type === 'synthetics/icmp');
-  const aBrowserInput = b.inputs?.find((input) => input.type === 'synthetics/browser');
+  // The Synthetics app persists only the single active (enabled) input and drops the disabled ones,
+  // while the expected fixture still describes the full package template. Compare the actual inputs
+  // against just the fixture's enabled input(s) so the stripped policy is validated end-to-end.
+  const actualInputs = a.inputs ?? [];
+  const expectedInputs = sortBy(
+    (b.inputs ?? []).filter((input) => input.enabled),
+    'type'
+  );
 
-  const bHttpInput = b.inputs?.find((input) => input.type === 'synthetics/http');
-  const bTcpInput = b.inputs?.find((input) => input.type === 'synthetics/tcp');
-  const bIcmpInput = b.inputs?.find((input) => input.type === 'synthetics/icmp');
-  const bBrowserInput = b.inputs?.find((input) => input.type === 'synthetics/browser');
-
-  expect(aHttpInput).toStrictEqual(bHttpInput);
-  expect(aTcpInput).toStrictEqual(bTcpInput);
-  expect(aIcmpInput).toStrictEqual(bIcmpInput);
-  expect(aBrowserInput).toStrictEqual(bBrowserInput);
+  expect(actualInputs).toStrictEqual(expectedInputs);
 
   // delete inputs to compare rest of policy
   delete a.inputs;

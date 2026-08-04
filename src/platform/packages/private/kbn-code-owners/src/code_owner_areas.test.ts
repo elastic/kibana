@@ -56,6 +56,7 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
   search: ['elastic/jinastic', 'elastic/search-design', 'elastic/search-kibana'],
   observability: [
     'elastic/actionable-obs-team',
+    'elastic/apm-agent-approvers',
     'elastic/nightshift-context-and-research-team',
     'elastic/nightshift-sre-agent-team',
     'elastic/obs-cloudnative-monitoring',
@@ -70,6 +71,7 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/observability-design',
     'elastic/observability-ui',
     'elastic/obs-sig-events-team',
+    'elastic/obs-signals-logs-team',
     'elastic/obs-signals-metrics-team',
     'elastic/observablt-robots',
     'elastic/streams-program-team',

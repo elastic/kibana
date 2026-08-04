@@ -10,6 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { EuiPageTemplate } from '@elastic/eui';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { NightshiftApp } from './app/nightshift_app';
 import { NightshiftAppHeader } from './app/nightshift_app_header';
@@ -26,8 +27,8 @@ export function NightshiftPage(): React.ReactElement | null {
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
-  const settingsHref = application.getUrlForApp('streams', {
-    path: '/_discovery/settings',
+  const settingsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
+    path: '/settings',
   });
   const navigateToSettings = useCallback(
     () => application.navigateToUrl(settingsHref),
