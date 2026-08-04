@@ -21,6 +21,7 @@ const serverFields = {
   createdAt: '2025-01-01T00:00:00.000Z',
   updatedBy: 'user-1',
   updatedAt: '2025-01-01T00:00:00.000Z',
+  version: 1,
 };
 
 const baseCreateData: CreateRuleData = {
@@ -78,6 +79,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.name).toBe('original');
@@ -95,6 +97,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.name).toBe('renamed');
@@ -112,6 +115,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.state_transition).toBeNull();
@@ -126,6 +130,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.state_transition).toEqual({ pending_count: 3 });
@@ -140,6 +145,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.state_transition).toEqual({ pending_count: 5 });
@@ -156,6 +162,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.builder_type).toBe('threshold');
@@ -172,6 +179,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.builder_type).toBeUndefined();
@@ -189,6 +197,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.builder_type).toBe('threshold');
@@ -205,6 +214,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.builder_type).toBeUndefined();
@@ -222,6 +232,7 @@ describe('utils', () => {
       const result = buildUpdateRuleAttributes(existing, updateData, {
         updatedBy: 'user-2',
         updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
       });
 
       expect(result.metadata.builder_type).toBe('threshold');
@@ -289,6 +300,20 @@ describe('utils', () => {
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
       expect(result.version).toBeUndefined();
+    });
+
+    it('exposes the persisted version as metadata.version on the API response', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule', version: 7 } });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+      expect(result.metadata.version).toBe(7);
+    });
+
+    it('falls back to the baseline version when the rule has no version yet', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule', version: undefined } });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+      expect(result.metadata.version).toBe(1);
     });
   });
 
