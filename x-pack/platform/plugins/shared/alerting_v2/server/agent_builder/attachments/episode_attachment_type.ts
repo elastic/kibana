@@ -130,7 +130,7 @@ export const createEpisodeAttachmentType = ({
   }),
 
   getAgentDescription: () =>
-    `An episode attachment represents an Alerting v2 alert episode — a stateful lifecycle of related alert events for a rule and group. It is read-only context: use it to reason about status, timing, severity, tags, assignee, and snooze state of the episode the user is viewing.`,
+    `An episode attachment represents an alert episode — a stateful lifecycle of related alert events for a rule and group. It is read-only context: use it to reason about status, timing, severity, tags, assignee, and snooze state of the alert episode the user is viewing.`,
 
   isReadonly: true,
 
