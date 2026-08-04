@@ -30,7 +30,7 @@ const TS_SUBMITTED = '2024-01-02T00:00:00.000Z';
 const TS_LATER = '2024-01-03T00:00:00.000Z';
 
 const baseInput: EventsWriteInput = {
-  status: 'open' as const,
+  status: 'open',
   stream_names: ['logs.checkout'],
   title: 'Checkout latency',
   symptom_hypothesis: 'Checkout requests are delayed because the payment dependency is timing out.',
@@ -516,7 +516,7 @@ describe('mergeEpisodeContext', () => {
 describe('eventsWriteBulkHandler — dedup mode', () => {
   const dedupInput: EventsWriteInput = {
     ...baseInput,
-    status: 'pending' as const,
+    status: 'open' as const,
     stream_names: ['logs.checkout'],
     signals: [
       {
@@ -907,7 +907,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
 });
 
 describe('eventsWriteBulkHandler — continuation status', () => {
-  it('preserves open status when discovery sends pending on an open continuation', async () => {
+  it('persists open status sent by discovery on an open continuation', async () => {
     const priorOpen = {
       '@timestamp': TS_EARLIER,
       event_uuid: 'prior-uuid',
@@ -932,7 +932,7 @@ describe('eventsWriteBulkHandler — continuation status', () => {
         {
           ...baseInput,
           event_id: 'checkout-open',
-          status: 'pending',
+          status: 'open',
         },
       ],
     });
@@ -941,7 +941,7 @@ describe('eventsWriteBulkHandler — continuation status', () => {
     expect(eventClient.bulkCreate.mock.calls[0][0][0].status).toBe('open');
   });
 
-  it('preserves closed status when discovery sends pending on a closed continuation', async () => {
+  it('persists closed status sent by discovery on a closed continuation', async () => {
     const priorClosed = {
       '@timestamp': TS_EARLIER,
       event_uuid: 'prior-uuid',
@@ -966,7 +966,7 @@ describe('eventsWriteBulkHandler — continuation status', () => {
         {
           ...baseInput,
           event_id: 'checkout-closed',
-          status: 'pending',
+          status: 'closed',
         },
       ],
     });
