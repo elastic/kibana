@@ -68,7 +68,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
     const { description, tags, time_restore, project_routing_restore, title, ...options } =
       stateManager.getLatestState();
     return {
-      ...(description && { description }),
+      description,
       tags,
       title,
       options,

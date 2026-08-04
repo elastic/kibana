@@ -13,7 +13,7 @@ import { BehaviorSubject, combineLatestWith, debounceTime, map, skip, startWith 
 import type { DashboardState } from '../../common';
 
 export function initializeApproximationManager(initialState: DashboardState) {
-  const isApproximate$ = new BehaviorSubject<boolean>(initialState.esql_approximation ?? false);
+  const isApproximate$ = new BehaviorSubject<boolean | undefined>(initialState.esql_approximation);
 
   function setEsqlApproximation(value: boolean) {
     if (value !== isApproximate$.value) {

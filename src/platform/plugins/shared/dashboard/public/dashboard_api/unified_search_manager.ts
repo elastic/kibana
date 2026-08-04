@@ -287,7 +287,7 @@ export function initializeUnifiedSearchManager(
 
     return {
       ...(asCodeQuery && { query: asCodeQuery }),
-      ...(serializableFilters?.length && { filters: serializableFilters }),
+      filters: serializableFilters,
       ...(refreshInterval && { refresh_interval: refreshInterval }),
       ...(timeRange && { time_range: timeRange }),
     };

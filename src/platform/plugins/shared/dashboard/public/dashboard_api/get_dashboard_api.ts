@@ -207,6 +207,7 @@ export function getDashboardApi({
     hasOverlays$: trackOverlayApi.hasOverlays$,
     setState,
     getState,
+    initialState,
     dataLoadingManager,
   });
 

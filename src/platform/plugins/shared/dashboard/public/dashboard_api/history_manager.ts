@@ -23,13 +23,13 @@ import type { DashboardState } from '../../common';
 import type { initializeDataLoadingManager } from './data_loading_manager';
 import type { initializeTrackOverlay } from './track_overlay';
 import type { initializeUnsavedChangesManager } from './unsaved_changes_manager';
-import { cloneDeep } from 'lodash';
 
 export function initializeHistoryManager({
   unsavedChanges$,
   hasOverlays$,
   setState,
   getState,
+  initialState,
   dataLoadingManager: {
     api: { dataLoading$ },
   },
@@ -38,6 +38,7 @@ export function initializeHistoryManager({
     typeof initializeUnsavedChangesManager
   >['internalApi']['unsavedChanges$'];
   hasOverlays$: ReturnType<typeof initializeTrackOverlay>['hasOverlays$'];
+  initialState: DashboardState;
   getState: () => DashboardState;
   setState: (state: DashboardState) => Promise<void>;
   dataLoadingManager: ReturnType<typeof initializeDataLoadingManager>;
@@ -45,8 +46,9 @@ export function initializeHistoryManager({
   api: ReturnType<typeof startTrackingHistory<DashboardState>>['api'];
   cleanup: () => void;
 } {
+  const { viewMode, ...rest } = initialState;
   const disableUndoRedo$ = new BehaviorSubject<boolean>(false);
-  const dashboardCurrentState$ = new BehaviorSubject<DashboardState>(getState());
+  const dashboardCurrentState$ = new BehaviorSubject<DashboardState>(rest);
 
   combineLatest([hasOverlays$, dataLoading$])
     .pipe(map(([hasOverlays, dataLoading]) => Boolean(hasOverlays || dataLoading)))

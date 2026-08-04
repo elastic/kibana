@@ -48,8 +48,9 @@ import {
   shouldLogStateDiff,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
-
 import type { PinnedControlLayoutState } from '@kbn/controls-schemas';
+import type { MaybePromise } from '@kbn/utility-types';
+
 import type { DashboardState } from '../../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/constants';
 import type { DashboardPanel } from '../../../server';
@@ -167,7 +168,7 @@ export function initializeLayoutManager(
 
     let childrenModified = false;
     const currentChildren = { ...children$.value };
-    const setStatePromises: Promise[] = [];
+    const setStatePromises: MaybePromise<void>[] = [];
     for (const uuid of Object.keys(currentChildren)) {
       if (layoutToApply.panels[uuid] || layoutToApply.pinnedPanels[uuid]) {
         const child = currentChildren[uuid];
@@ -272,9 +273,7 @@ export function initializeLayoutManager(
   };
 
   // On initialization, place incoming embeddables if there is at least one
-  new Promise((resolve) => setTimeout(resolve, 1000)).then(() => {
-    addIncomingEmbeddables(incomingEmbeddables);
-  });
+  addIncomingEmbeddables(incomingEmbeddables);
 
   // --------------------------------------------------------------------------------------
   // API definition
@@ -524,7 +523,9 @@ export function initializeLayoutManager(
       gridLayout$,
       childrenLoading$,
       reset: resetLayout,
-      serializeLayout: () => serializeLayout(layout$.value, currentChildState),
+      serializeLayout: () => {
+        return serializeLayout(layout$.value, currentChildState);
+      },
 
       startComparing: (
         lastSavedState$: BehaviorSubject<DashboardState>
