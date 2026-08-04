@@ -19,7 +19,7 @@ import { ServiceStatusLevels } from '@kbn/core/server';
 const READ_ONLY_FILESYSTEM_ERROR_CODES = new Set(['EROFS', 'EACCES', 'EPERM']);
 
 export interface AuditLogWriteAccess {
-  writable: boolean;
+  granted: boolean;
   path: string;
   code?: string;
   reason?: string;
@@ -38,14 +38,14 @@ export const probeAuditLogWriteAccess = (path: string): AuditLogWriteAccess => {
     mkdirSync(dirname(path), { recursive: true });
     appendFileSync(path, '');
 
-    return { writable: true, path, checkedAt };
+    return { granted: true, path, checkedAt };
   } catch (error) {
     if (!READ_ONLY_FILESYSTEM_ERROR_CODES.has(error.code)) {
-      return { writable: true, path, checkedAt };
+      return { granted: true, path, checkedAt };
     }
 
     return {
-      writable: false,
+      granted: false,
       path,
       code: error.code,
       reason: error.message,
@@ -68,17 +68,16 @@ export const getAuditStatus$ = ({
 
   return combineLatest([derivedStatus$, writeAccess$]).pipe(
     map(([derived, writeAccess]) => {
-      if (writeAccess.writable || derived.level > ServiceStatusLevels.degraded) {
+      if (writeAccess.granted || derived.level > ServiceStatusLevels.degraded) {
         return derived;
       }
 
       return {
         level: ServiceStatusLevels.degraded,
         summary: 'Audit log cannot be written',
-        detail:
-          `${writeAccess.code ?? 'Error'} writing to ${writeAccess.path} as of ` +
-          `${writeAccess.checkedAt}. Audit logging is turned off and audit events are being ` +
-          `discarded. Kibana is otherwise operational.`,
+        detail: `${writeAccess.code ?? 'Error'} writing to ${writeAccess.path} as of ${
+          writeAccess.checkedAt
+        }. Audit logging is turned off and audit events are being discarded. Kibana is otherwise operational.`,
         meta: { auditLogWriteAccess: writeAccess },
       };
     })

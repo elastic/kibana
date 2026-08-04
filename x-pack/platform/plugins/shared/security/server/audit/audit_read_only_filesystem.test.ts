@@ -49,7 +49,7 @@ describe('createLoggingConfig', () => {
 
   it('keeps the configured appender and `info` level while the log is writable', () => {
     const loggingConfig = createLoggingConfig(config, false, {
-      writable: true,
+      granted: true,
       path: '/var/log/kibana/audit.log',
       checkedAt: '2026-08-03T10:00:00.000Z',
     })(allowAuditLogging);
@@ -61,7 +61,7 @@ describe('createLoggingConfig', () => {
   describe('when the audit log cannot be written', () => {
     const loggingConfig = (): LoggerContextConfigInput =>
       createLoggingConfig(config, false, {
-        writable: false,
+        granted: false,
         path: '/var/log/kibana/audit.log',
         code: 'EROFS',
         reason: 'EROFS: read-only file system',
@@ -205,7 +205,7 @@ describeUnlessRoot('AuditService on a read-only filesystem', () => {
       expect(reported.detail).toContain(logPath);
       expect(reported.meta).toEqual({
         auditLogWriteAccess: {
-          writable: false,
+          granted: false,
           path: logPath,
           code: 'EACCES',
           reason: expect.stringContaining('permission denied'),

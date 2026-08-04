@@ -203,7 +203,7 @@ export class AuditService {
 export const createLoggingConfig =
   (config: ConfigType['audit'], isServerless = false, writeAccess?: AuditLogWriteAccess) =>
   (features: Pick<SecurityLicenseFeatures, 'allowAuditLogging'>): LoggerContextConfigInput => {
-    if (writeAccess && !writeAccess.writable) {
+    if (writeAccess && !writeAccess.granted) {
       return {
         appenders: {
           auditTrailAppender: { type: 'console' as const, layout: { type: 'json' as const } },

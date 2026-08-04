@@ -77,7 +77,7 @@ describeUnlessRoot('probeAuditLogWriteAccess', () => {
       const result = probeAuditLogWriteAccess(join(testDir, 'audit.log'));
 
       expect(result).toEqual({
-        writable: true,
+        granted: true,
         path: join(testDir, 'audit.log'),
         checkedAt: expect.any(String),
       });
@@ -86,7 +86,7 @@ describeUnlessRoot('probeAuditLogWriteAccess', () => {
     it('creates the parent directory, as the appender would', () => {
       const logPath = join(testDir, 'nested', 'deeper', 'audit.log');
 
-      expect(probeAuditLogWriteAccess(logPath).writable).toBe(true);
+      expect(probeAuditLogWriteAccess(logPath).granted).toBe(true);
       expect(existsSync(join(testDir, 'nested', 'deeper'))).toBe(true);
     });
 
@@ -118,7 +118,7 @@ describeUnlessRoot('probeAuditLogWriteAccess', () => {
       const result = probeAuditLogWriteAccess(logPath);
 
       expect(result).toEqual({
-        writable: false,
+        granted: false,
         path: logPath,
         code: 'EACCES',
         reason: expect.stringContaining('permission denied'),
@@ -133,17 +133,17 @@ describeUnlessRoot('probeAuditLogWriteAccess', () => {
     it('reports not writable when the parent directory cannot be created either', () => {
       const result = probeAuditLogWriteAccess(join(readOnlyDir, 'nested', 'audit.log'));
 
-      expect(result.writable).toBe(false);
+      expect(result.granted).toBe(false);
       expect(result.code).toEqual('EACCES');
     });
 
     it('reports writable again once permissions are restored', () => {
       const logPath = join(readOnlyDir, 'audit.log');
-      expect(probeAuditLogWriteAccess(logPath).writable).toBe(false);
+      expect(probeAuditLogWriteAccess(logPath).granted).toBe(false);
 
       chmodSync(readOnlyDir, 0o755);
 
-      expect(probeAuditLogWriteAccess(logPath).writable).toBe(true);
+      expect(probeAuditLogWriteAccess(logPath).granted).toBe(true);
     });
   });
 
@@ -156,7 +156,7 @@ describeUnlessRoot('probeAuditLogWriteAccess', () => {
 
       const result = probeAuditLogWriteAccess(asDirectory);
 
-      expect(result.writable).toBe(true);
+      expect(result.granted).toBe(true);
       expect(result.code).toBeUndefined();
     });
   });
@@ -169,14 +169,14 @@ const available: ServiceStatus = {
   summary: 'All dependencies are available',
 };
 
-const writable: AuditLogWriteAccess = {
-  writable: true,
+const granted: AuditLogWriteAccess = {
+  granted: true,
   path: AUDIT_LOG_PATH,
   checkedAt: '2026-08-03T10:00:00.000Z',
 };
 
-const notWritable: AuditLogWriteAccess = {
-  writable: false,
+const notGranted: AuditLogWriteAccess = {
+  granted: false,
   path: AUDIT_LOG_PATH,
   code: 'EROFS',
   reason: `EROFS: read-only file system, open '${AUDIT_LOG_PATH}'`,
@@ -197,20 +197,20 @@ const getStatus = (
 describe('getAuditStatus$', () => {
   describe('when the audit log is writable', () => {
     it('passes the derived status through', async () => {
-      await expect(getStatus(writable)).resolves.toEqual(available);
+      await expect(getStatus(granted)).resolves.toEqual(available);
     });
   });
 
   describe('when the audit log cannot be written', () => {
     it('reports degraded rather than letting the lost audit trail go unnoticed', async () => {
-      const status = await getStatus(notWritable);
+      const status = await getStatus(notGranted);
 
       expect(status.level).toEqual(ServiceStatusLevels.degraded);
       expect(status.summary).toEqual('Audit log cannot be written');
     });
 
     it('names the file, the error and the check time in the detail', async () => {
-      const status = await getStatus(notWritable);
+      const status = await getStatus(notGranted);
 
       expect(status.detail).toContain('EROFS');
       expect(status.detail).toContain(AUDIT_LOG_PATH);
@@ -218,34 +218,36 @@ describe('getAuditStatus$', () => {
     });
 
     it('says audit events are being discarded, not merely delayed', async () => {
-      const status = await getStatus(notWritable);
+      const status = await getStatus(notGranted);
 
       expect(status.detail).toContain('audit events are being discarded');
     });
 
     it('carries the raw write access in meta', async () => {
-      const status = await getStatus(notWritable);
+      const status = await getStatus(notGranted);
 
-      expect(status.meta).toEqual({ auditLogWriteAccess: notWritable });
+      expect(status.meta).toEqual({ auditLogWriteAccess: notGranted });
     });
 
     it('does not mask a more severe derived status', async () => {
+      // Reporting `degraded` here would lower the level, and anything depending on security
+      // would inherit the understated status too.
       const unavailable: ServiceStatus = {
         level: ServiceStatusLevels.unavailable,
-        summary: 'Elasticsearch is unavailable',
+        summary: 'Task Manager is unavailable',
       };
 
-      await expect(getStatus(notWritable, unavailable)).resolves.toEqual(unavailable);
+      await expect(getStatus(notGranted, unavailable)).resolves.toEqual(unavailable);
     });
 
     it('recovers to the derived status once the filesystem becomes writable', async () => {
-      const writeAccess$ = new BehaviorSubject<AuditLogWriteAccess>(notWritable);
+      const writeAccess$ = new BehaviorSubject<AuditLogWriteAccess>(notGranted);
       const status$ = getAuditStatus$({ writeAccess$, derivedStatus$: of(available) });
 
       const seen: ServiceStatus[] = [];
       const subscription = status$.subscribe((status) => seen.push(status));
 
-      writeAccess$.next(writable);
+      writeAccess$.next(granted);
       subscription.unsubscribe();
 
       expect(seen.map(({ level }) => level)).toEqual([
