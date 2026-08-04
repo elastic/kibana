@@ -26,9 +26,7 @@ import { StreamsAppHeader, StreamsAppPageTemplate } from '../../../streams_app_p
 import { WiredStreamBadge } from '../../../stream_badges';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { buildLifecycleTabActions } from './lifecycle_tab_label_with_actions';
-import { StreamDetailCanvas } from '../stream_detail_canvas';
 import {
   ImportLifecycleFlyoutProvider,
   useImportLifecycleFlyoutContext,
@@ -42,7 +40,6 @@ const wiredStreamManagementSubTabs = [
   'lifecycle',
   'dataQuality',
   'attachments',
-  'canvas',
 ] as const;
 
 type WiredStreamManagementSubTab = (typeof wiredStreamManagementSubTabs)[number];
@@ -96,10 +93,6 @@ function WiredStreamDetailManagementContent({
   const importLifecycleFlyout = useImportLifecycleFlyoutContext();
 
   const isProcessingEnabled = !definition.replicated;
-  const {
-    features: { canvas, significantEvents },
-    isLoading: isPrivilegesLoading,
-  } = useStreamsPrivileges();
 
   const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
     defaultMessage: 'Streams',
@@ -283,16 +276,6 @@ function WiredStreamDetailManagementContent({
         defaultMessage: 'Attachments',
       }),
     },
-    ...(canvas.enabled
-      ? {
-          canvas: {
-            content: <StreamDetailCanvas definition={definition} />,
-            label: i18n.translate('xpack.streams.streamDetailView.canvasTab', {
-              defaultMessage: 'Canvas',
-            }),
-          },
-        }
-      : {}),
   };
 
   const redirectConfig = tabRedirects[tab];
@@ -305,32 +288,7 @@ function WiredStreamDetailManagementContent({
     );
   }
 
-  if (tab === 'significantEvents') {
-    if (isPrivilegesLoading) {
-      return null;
-    }
-
-    if (significantEvents?.available) {
-      return (
-        <RedirectTo
-          path="/_discovery/{tab}"
-          params={{ path: { tab: 'knowledge_indicators' }, query: { stream: key } }}
-        />
-      );
-    }
-
-    return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
-    );
-  }
-
   if (isValidManagementSubTab(tab) && tabs[tab]?.content) {
-    if (tab === 'canvas' && !canvas.enabled) {
-      return (
-        <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
-      );
-    }
-
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 

@@ -15,10 +15,12 @@ import {
   EVALS_DATASET_URL,
   EVALS_EXPERIMENT_SCORES_URL,
   EVALS_EXPERIMENT_URL,
+  EVALS_EXPERIMENTS_URL,
   EVALS_SCORES_URL,
   GetEvaluationDatasetResponse,
   GetEvaluationExperimentResponse,
   GetEvaluationExperimentScoresResponse,
+  GetEvaluationExperimentsResponse,
   IngestScoresRequestBody,
   IngestScoresResponse,
   MAX_SCORES_PER_QUERY,
@@ -96,6 +98,13 @@ interface IngestScoresResult {
 export interface IngestScoresError extends Error {
   statusCode: 400 | 429 | 500;
   body: IngestScoresResult;
+}
+
+export interface BaselineExperiment {
+  executionId: string;
+  timestamp: string | undefined;
+  gitCommitSha: string | null;
+  gitBranch: string | null;
 }
 
 const EVALS_PLUGIN_DISABLED_MESSAGE =
@@ -290,6 +299,109 @@ export class EvalsClient {
         return null;
       }
       throw error;
+    }
+  }
+
+  async findLatestExperimentForBuild({
+    suiteId,
+    branch,
+    baseExecutionId,
+  }: {
+    suiteId: string;
+    branch?: string;
+    baseExecutionId: string;
+  }): Promise<BaselineExperiment | undefined> {
+    try {
+      // metadata.ci.build_id stores the raw BUILDKITE_BUILD_ID without the "bk-" prefix.
+      const rawBuildId = baseExecutionId.startsWith('bk-')
+        ? baseExecutionId.slice(3)
+        : baseExecutionId;
+
+      const response = await this.kbnClient.request({
+        path: EVALS_EXPERIMENTS_URL,
+        method: 'GET',
+        query: {
+          suite_id: suiteId,
+          build_id: rawBuildId,
+          ...(branch != null && { branch }),
+          page: 1,
+          per_page: 20,
+        },
+        headers: VERSIONED_HEADERS,
+      });
+
+      const parsed = GetEvaluationExperimentsResponse.parse(getResponseData(response));
+      const match = parsed.experiments.find(
+        (exp) => exp.execution_id != null && exp.execution_id.startsWith(`${baseExecutionId}::`)
+      );
+
+      if (!match || !match.execution_id) {
+        return undefined;
+      }
+
+      return {
+        executionId: match.execution_id,
+        timestamp: match.timestamp,
+        gitCommitSha: match.git_commit_sha ?? null,
+        gitBranch: match.git_branch ?? null,
+      };
+    } catch (error: unknown) {
+      this.log.error(
+        `Failed to find experiment for build ${baseExecutionId} on branch ${branch}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return undefined;
+    }
+  }
+
+  async findLatestBaselineExperiment({
+    suiteId,
+    branch,
+    taskModelId,
+    excludeExecutionId,
+  }: {
+    suiteId: string;
+    branch: string;
+    taskModelId?: string;
+    excludeExecutionId?: string;
+  }): Promise<BaselineExperiment | undefined> {
+    try {
+      const response = await this.kbnClient.request({
+        path: EVALS_EXPERIMENTS_URL,
+        method: 'GET',
+        query: {
+          suite_id: suiteId,
+          branch,
+          ...(taskModelId && { model_id: taskModelId }),
+          page: 1,
+          per_page: 5,
+        },
+        headers: VERSIONED_HEADERS,
+      });
+
+      const parsed = GetEvaluationExperimentsResponse.parse(getResponseData(response));
+      const match = parsed.experiments.find(
+        (exp) => exp.execution_id != null && exp.execution_id !== excludeExecutionId
+      );
+
+      if (!match || !match.execution_id) {
+        return undefined;
+      }
+
+      return {
+        executionId: match.execution_id,
+        timestamp: match.timestamp,
+        gitCommitSha: match.git_commit_sha ?? null,
+        gitBranch: match.git_branch ?? null,
+      };
+    } catch (error: unknown) {
+      this.log.error(
+        `Failed to find baseline experiment for suite ${suiteId} on branch ${branch}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return undefined;
     }
   }
 

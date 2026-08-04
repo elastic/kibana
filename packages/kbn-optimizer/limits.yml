@@ -1,8 +1,8 @@
 pageLoadAssetSize:
-  actions: 20500
+  actions: 20800
   advancedSettings: 6119
   agentBuilder: 51190
-  agentBuilderDashboards: 7786
+  agentBuilderDashboards: 8685
   agentBuilderPlatform: 26248
   agentBuilderSml: 2103
   agentBuilderVisualizations: 7356
@@ -33,10 +33,10 @@ pageLoadAssetSize:
   contentManagement: 8350
   contextEngine: 5837
   controls: 10300
-  core: 563984
+  core: 563693
   cps: 9209
   crossClusterReplication: 12662
-  customContent: 4765
+  customContent: 6111
   customIntegrations: 11715
   dashboard: 20000
   dashboardMarkdown: 8613
@@ -133,7 +133,7 @@ pageLoadAssetSize:
   newsfeed: 11110
   noDataPage: 1749
   notificationCenter: 1791
-  observability: 107797
+  observability: 122800
   observabilityAgentBuilder: 10178
   observabilityAIAssistant: 67295
   observabilityAIAssistantApp: 17100
@@ -184,7 +184,8 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 4855
   sessionView: 47912
   share: 64059
-  significant_events: 4270
+  significantEvents: 12119
+  significantEventsApp: 13163
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871

@@ -10,6 +10,10 @@ import type { SignificantEventInvestigation } from '@kbn/significant-events-sche
 import { attachInvestigationToEvent } from './attach_investigation';
 import { EventClient } from './event_client';
 import type { SignificantEvent } from './data_stream';
+import {
+  EVENT_STATUS_CHANGED_TRIGGER_ID,
+  INVESTIGATION_COMPLETED_TRIGGER_ID,
+} from '../../../../common/workflows/triggers';
 
 const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
@@ -55,12 +59,14 @@ const createEventClient = (hits: SignificantEvent[], lineageHits?: SignificantEv
   }
 
   const esClient = { esql: { query: queryMock } };
+  const triggerEmitter = jest.fn();
   const client = new EventClient({
     dataStreamClient: dataStreamClient as never,
     esClient: esClient as never,
     space: 'default',
+    triggerEmitter,
   });
-  return { client, dataStreamClient };
+  return { client, dataStreamClient, triggerEmitter };
 };
 
 describe('attachInvestigationToEvent', () => {
@@ -84,6 +90,7 @@ describe('attachInvestigationToEvent', () => {
     expect(written.investigations).toEqual([investigation]);
     expect(written.previous_event_uuid).toBe('event-1');
     expect(written.event_uuid).not.toBe('event-1');
+    expect(written.workflow_execution_id).toBe(investigation.workflow_execution_id);
   });
 
   it('replaces a pending entry with a terminal one, preserving started_at', async () => {
@@ -259,6 +266,77 @@ describe('attachInvestigationToEvent', () => {
     expect(dataStreamClient.create).not.toHaveBeenCalled();
   });
 
+  it('applies reassessed fields in the same version as the completed investigation', async () => {
+    const existing = createEvent({ event_uuid: 'event-1', severity: '40-medium', status: 'open' });
+    const { client, dataStreamClient } = createEventClient([existing]);
+    const investigation = createInvestigation({ completed_at: '2026-01-01T02:00:00.000Z' });
+
+    const result = await attachInvestigationToEvent({
+      eventClient: client,
+      eventUuid: 'event-1',
+      investigation,
+      reassessedFields: { severity: '80-critical' },
+    });
+
+    expect(result.updated).toBe(1);
+
+    const [[callArg]] = dataStreamClient.create.mock.calls;
+    const written: SignificantEvent = callArg.documents[0];
+
+    // Single version carries both the investigation entry and the reassessed field.
+    expect(written.investigations).toEqual([investigation]);
+    expect(written.severity).toBe('80-critical');
+    expect(written.status).toBe('open');
+    expect(written.workflow_execution_id).toBe(investigation.workflow_execution_id);
+  });
+
+  it('writes a field-only change even when the investigation entry is unchanged', async () => {
+    const investigation = createInvestigation({ completed_at: '2026-01-01T02:00:00.000Z' });
+    const existing = createEvent({
+      event_uuid: 'event-1',
+      severity: '40-medium',
+      investigations: [investigation],
+    });
+    const { client, dataStreamClient } = createEventClient([existing]);
+
+    // Same investigation entry (idempotent attach) but a genuinely new severity.
+    const result = await attachInvestigationToEvent({
+      eventClient: client,
+      eventUuid: 'event-1',
+      investigation,
+      reassessedFields: { severity: '80-critical' },
+    });
+
+    expect(result.updated).toBe(1);
+
+    const [[callArg]] = dataStreamClient.create.mock.calls;
+    const written: SignificantEvent = callArg.documents[0];
+
+    expect(written.investigations).toHaveLength(1);
+    expect(written.severity).toBe('80-critical');
+  });
+
+  it('ignores when neither the investigation entry nor the reassessed fields changed', async () => {
+    const investigation = createInvestigation({ completed_at: '2026-01-01T02:00:00.000Z' });
+    const existing = createEvent({
+      event_uuid: 'event-1',
+      severity: '40-medium',
+      investigations: [investigation],
+    });
+    const { client, dataStreamClient } = createEventClient([existing]);
+
+    const result = await attachInvestigationToEvent({
+      eventClient: client,
+      eventUuid: 'event-1',
+      investigation,
+      reassessedFields: { severity: '40-medium' },
+    });
+
+    expect(result.updated).toBe(0);
+    expect(result.ignored).toBe(1);
+    expect(dataStreamClient.create).not.toHaveBeenCalled();
+  });
+
   it('resolves lineage: terminal attach targets the latest event version, not the frozen caller version', async () => {
     /**
      * Regression: the investigation workflow passes the frozen inputs.context.event_uuid (E0) to
@@ -299,5 +377,45 @@ describe('attachInvestigationToEvent', () => {
     expect(written.investigations).toHaveLength(1);
     expect(written.investigations![0].started_at).toBe(pending.started_at);
     expect(written.investigations![0].completed_at).toBe('2026-01-01T02:00:00.000Z');
+  });
+
+  it('emits eventStatusChanged when a reassessment changes the status', async () => {
+    const existing = createEvent({ event_uuid: 'event-1', status: 'open' });
+    const { client, triggerEmitter } = createEventClient([existing]);
+    const investigation = createInvestigation({ completed_at: '2026-01-01T02:00:00.000Z' });
+
+    await attachInvestigationToEvent({
+      eventClient: client,
+      eventUuid: 'event-1',
+      investigation,
+      reassessedFields: { status: 'closed' },
+    });
+
+    expect(triggerEmitter).toHaveBeenCalledWith(
+      EVENT_STATUS_CHANGED_TRIGGER_ID,
+      expect.objectContaining({ status: 'closed', previous_status: 'open' })
+    );
+    expect(triggerEmitter).toHaveBeenCalledWith(
+      INVESTIGATION_COMPLETED_TRIGGER_ID,
+      expect.objectContaining({ workflow_execution_id: investigation.workflow_execution_id })
+    );
+  });
+
+  it('does not emit eventStatusChanged when the status is unchanged', async () => {
+    const existing = createEvent({ event_uuid: 'event-1', status: 'open' });
+    const { client, triggerEmitter } = createEventClient([existing]);
+    const investigation = createInvestigation({ completed_at: '2026-01-01T02:00:00.000Z' });
+
+    await attachInvestigationToEvent({
+      eventClient: client,
+      eventUuid: 'event-1',
+      investigation,
+      reassessedFields: { severity: '80-critical' },
+    });
+
+    expect(triggerEmitter).not.toHaveBeenCalledWith(
+      EVENT_STATUS_CHANGED_TRIGGER_ID,
+      expect.anything()
+    );
   });
 });

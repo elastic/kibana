@@ -1,0 +1,37 @@
+{
+  "sha1": "f0c149dd22defd96afb1e06648df7743801ab4f9",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "47e7c7af3660008-c129e7cf5767d21",
+      "title": "Ingest Synthetics test data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "14e974fce970238-76560b416d87b10",
+      "title": "PrivateLocationsSettings manages private locations lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/ui/tests/private_locations.spec.ts",
+        "line": 23,
+        "column": 8
+      }
+    }
+  ]
+}

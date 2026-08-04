@@ -62,7 +62,7 @@ export const migrateIndex = async ({
 
   return migrationStateActionMachine({
     initialState,
-    next: next(context),
+    next: next(context, logger),
     model,
     context,
     logger,
