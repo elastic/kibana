@@ -381,9 +381,9 @@ Follow this format:
 - **Proposed fix for a version branch** (no PR opened — see "Fixes that must target a version branch"). Hand over the whole PR — title, labels, description, and diff — so a human can open it from the comment alone, keeping the two long parts collapsed.
 
   ````markdown
-  ### 📋 A fix for `<version-branch>` is ready to open manually
+  ### 🔧 <version-branch> fix ready (open PR manually)
 
-  This workflow can only open fix PRs against `main`, so nothing was pushed — everything needed to open one against `<version-branch>` is below. <one very concise sentence on what the fix changes>. cc @<github-handle-here>
+  This workflow can only open fix PRs against `main`, so we ask that you create the PR manually. Use the information below to open a PR against <version-branch>. <one very concise sentence on what the fix changes>. cc @<github-handle-here>
 
   - **Title:** `<PR title, per "PR format">`
   - **Labels:** `flaky-test-fixer`, `release_note:skip`, `<backport label(s), per "Backport label" — write "no backport label" if you weren't sure>`
