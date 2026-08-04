@@ -10,28 +10,28 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { apm } from '@elastic/apm-rum';
-import type { ExportJsonSanitizedState, ExportJsonStatus, SanitizeStateFunction } from './types';
+import type { ExportJsonPreparedState, ExportJsonStatus, PrepareExportJsonFunction } from './types';
 
-export type UseSanitizedStateResult<SanitizedState extends object> =
-  ExportJsonSanitizedState<SanitizedState> & {
+export type UsePreparedStateResult<PreparedState extends object> =
+  ExportJsonPreparedState<PreparedState> & {
     retry: () => void;
   };
 
-export function useSanitizedState<State extends object, SanitizedState extends object>({
+export function usePreparedState<State extends object, PreparedState extends object = State>({
   state,
-  sanitizeState,
+  prepareExportJson,
 }: {
   state: State;
-  sanitizeState: SanitizeStateFunction<State, SanitizedState>;
-}): UseSanitizedStateResult<SanitizedState> {
+  prepareExportJson: PrepareExportJsonFunction<State, PreparedState>;
+}): UsePreparedStateResult<PreparedState> {
   const [status, setStatus] = useState<ExportJsonStatus>('loading');
   const [error, setError] = useState<Error | undefined>(undefined);
-  const [data, setData] = useState<SanitizedState | undefined>(undefined);
+  const [data, setData] = useState<PreparedState | undefined>(undefined);
   const [warnings, setWarnings] = useState<string[]>([]);
   // reloadCount is used to trigger a reload of the state when retry is called
   const [reloadCount, setReloadCount] = useState(0);
 
-  const [debouncedState, setDebouncedState] = useState<ExportJsonSanitizedState<SanitizedState>>({
+  const [debouncedState, setDebouncedState] = useState<ExportJsonPreparedState<PreparedState>>({
     status,
     error,
     data,
@@ -65,10 +65,10 @@ export function useSanitizedState<State extends object, SanitizedState extends o
     setData(undefined);
     setWarnings([]);
 
-    sanitizeState(state)
+    prepareExportJson(state)
       .then((response) => {
         if (!isMounted) return;
-        setWarnings(response.warnings.map(({ message }) => message));
+        setWarnings([...response.warnings]);
         setData(response.data);
         setStatus('success');
       })
@@ -77,7 +77,7 @@ export function useSanitizedState<State extends object, SanitizedState extends o
         const err = e instanceof Error ? e : new Error(String(e));
         apm.captureError(err, {
           labels: {
-            error_type: 'SanitizeDashboardFailure',
+            error_type: 'PrepareExportJsonFailure',
           },
         });
         setError(err);
@@ -87,7 +87,7 @@ export function useSanitizedState<State extends object, SanitizedState extends o
     return () => {
       isMounted = false;
     };
-  }, [state, reloadCount, sanitizeState]);
+  }, [state, reloadCount, prepareExportJson]);
 
   return { ...debouncedState, retry };
 }
