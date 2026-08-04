@@ -60,7 +60,7 @@ steps:
 
   - name: investigate
     type: ai.agent
-    agent-id: significant_events.investigation
+    agent-id: significantEvents.investigation
     # Keep connector-id-by-feature/plugin-id/aggregate-by in sync with @kbn/significant-events-schema
     # inference_feature_ids.ts (SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID /
     # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
@@ -249,11 +249,11 @@ steps:
                       const: status
                     from:
                       type: string
-                      enum: ['open', 'closed', 'dismissed']
+                      enum: ['pending', 'open', 'closed', 'dismissed']
                       description: The status from inputs.context.status — the value before this investigation ran.
                     to:
                       type: string
-                      enum: ['open', 'closed', 'dismissed']
+                      enum: ['pending', 'open', 'closed', 'dismissed']
                       description: The proposed new status.
                     reason:
                       type: string
