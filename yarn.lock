@@ -4937,6 +4937,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/as-code-export-flyout-component@link:src/platform/packages/shared/as-code/export-flyout-component":
+  version "0.0.0"
+  uid ""
+
 "@kbn/as-code-filters-constants@link:src/platform/packages/shared/as-code/filters-constants":
   version "0.0.0"
   uid ""
