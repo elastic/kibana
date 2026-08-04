@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/** Shared by the metric and datatable mixins when reading computed colors off the DOM. */
+/** Shared helper for reading computed colors off the DOM (metric / datatable). */
 export const normalizeComputedColor = (color: string | undefined): string | undefined => {
   if (!color) {
     return undefined;
@@ -19,7 +19,7 @@ export const normalizeComputedColor = (color: string | undefined): string | unde
   return color;
 };
 
-/** Shared by the metric and datatable mixins when reading inline `style` attributes. */
+/** Shared helper for reading inline `style` attributes (metric / datatable). */
 export const parseInlineStyle = (styleString: string): Record<string, string> => {
   return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
     const [prop, value] = cssLine.split(':');
