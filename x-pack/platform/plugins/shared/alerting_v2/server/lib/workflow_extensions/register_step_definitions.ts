@@ -17,7 +17,5 @@ export function registerStepDefinitions(
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
   logger: Logger
 ): void {
-  workflowsExtensions.registerStepDefinition(
-    getCreateAlertEventStepDefinition(() => logger)
-  );
+  workflowsExtensions.registerStepDefinition(getCreateAlertEventStepDefinition(() => logger));
 }

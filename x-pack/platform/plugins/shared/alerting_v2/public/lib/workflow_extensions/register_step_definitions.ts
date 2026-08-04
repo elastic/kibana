@@ -15,8 +15,6 @@ export function registerStepDefinitions(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ): void {
   workflowsExtensions.registerStepDefinition(() =>
-    import('./steps/create_alert_event_step').then(
-      (m) => m.createAlertEventStepPublicDefinition
-    )
+    import('./steps/create_alert_event_step').then((m) => m.createAlertEventStepPublicDefinition)
   );
 }

@@ -7,12 +7,12 @@
 
 import { ExecutionError } from '@kbn/workflows/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import type { Logger } from '@kbn/logging';
 import { createAlertEventStepCommonDefinition } from '../../../../common/workflows/steps/create_alert_event_step_common';
 import { AlertEventsClient } from '../../alert_events_client';
 import { StorageService } from '../../services/storage_service/storage_service';
 import { QueryService } from '../../services/query_service/query_service';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
-import type { Logger } from '@kbn/logging';
 
 function toLoggerService(logger: Logger): LoggerServiceContract {
   return {
