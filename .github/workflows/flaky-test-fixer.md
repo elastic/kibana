@@ -234,7 +234,13 @@ timeout-minutes: 90
 
 # Flaky Test Fixer
 
-Open a single draft PR with the smallest possible test-side fix for this flaky-test issue. Do not open a PR if any of the following is true: you find an existing open PR with an identical or similar fix (search PRs for ones that reference this issue number in their body, or check the issue timeline for PRs that reference it), you cannot identify a credible fix, or the fix has to target a version branch (see "Fixes that must target a version branch"). Whatever the outcome, always finish by leaving one concise comment on the issue (see "Outcome comment").
+Open a single draft PR with the smallest possible test-side fix for this flaky-test issue. Do not open a PR if any of the following is true:
+
+- you find an existing open PR with an identical or similar fix (search PRs for ones that reference this issue number in their body, or check the issue timeline for PRs that reference it);
+- you cannot identify a credible fix; or
+- the fix has to target a version branch (see "Fixes that must target a version branch").
+
+Whatever the outcome, always finish by leaving one concise comment on the issue (see "Outcome comment").
 
 ## Requester mention
 
