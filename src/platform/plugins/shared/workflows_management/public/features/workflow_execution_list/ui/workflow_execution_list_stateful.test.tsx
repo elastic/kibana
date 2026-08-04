@@ -32,6 +32,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 
 jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
   getIndexSelectionHandler: jest.fn(() => jest.fn()),
   useWorkflowsApi: () => mockWorkflowApi,
   useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
