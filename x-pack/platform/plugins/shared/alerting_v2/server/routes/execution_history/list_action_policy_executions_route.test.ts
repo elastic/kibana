@@ -1,0 +1,158 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { KibanaRequest } from '@kbn/core-http-server';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
+import { createRouteDependencies } from '../test_utils';
+import {
+  ListActionPolicyExecutionsRoute,
+  toListExecutionHistoryArgs,
+} from './list_action_policy_executions_route';
+
+const createMocks = () => {
+  const deps = createRouteDependencies();
+  const executionHistoryClient: jest.Mocked<
+    Pick<ActionPolicyExecutionHistoryClient, 'listExecutionHistory'>
+  > = {
+    listExecutionHistory: jest.fn().mockResolvedValue({
+      items: [],
+      page: 1,
+      perPage: 100,
+      totalEvents: 0,
+      searchMatches: null,
+    }),
+  };
+  return { deps, executionHistoryClient };
+};
+
+const buildRoute = (request: KibanaRequest, mocks: ReturnType<typeof createMocks>) =>
+  new ListActionPolicyExecutionsRoute(
+    mocks.deps.ctx,
+    request as any,
+    mocks.executionHistoryClient as unknown as ActionPolicyExecutionHistoryClient
+  );
+
+describe('ListActionPolicyExecutionsRoute', () => {
+  it('forwards page, perPage, search and outcome from the query to the client', async () => {
+    const mocks = createMocks();
+    const request = httpServerMock.createKibanaRequest({
+      query: { page: 2, per_page: 25, search: 'foo', outcome: ['throttled'] },
+    });
+    const route = buildRoute(request as unknown as KibanaRequest, mocks);
+
+    await route.handle();
+
+    expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith({
+      request,
+      page: 2,
+      perPage: 25,
+      search: 'foo',
+      ruleIds: undefined,
+      outcome: ['throttled'],
+      episodeIds: undefined,
+      startDate: undefined,
+    });
+  });
+
+  it('forwards episode_ids from the query to the client as episodeIds', async () => {
+    const mocks = createMocks();
+    const request = httpServerMock.createKibanaRequest({
+      query: { episode_ids: ['ep-1', 'ep-2'] },
+    });
+    const route = buildRoute(request as unknown as KibanaRequest, mocks);
+
+    await route.handle();
+
+    expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith(
+      expect.objectContaining({ episodeIds: ['ep-1', 'ep-2'] })
+    );
+  });
+
+  it('forwards start_date from the query to the client', async () => {
+    const mocks = createMocks();
+    const request = httpServerMock.createKibanaRequest({
+      query: { start_date: '2026-01-01T00:00:00.000Z' },
+    });
+    const route = buildRoute(request as unknown as KibanaRequest, mocks);
+
+    await route.handle();
+
+    expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith(
+      expect.objectContaining({ startDate: '2026-01-01T00:00:00.000Z' })
+    );
+  });
+
+  it('passes undefined params when query is empty (defaults applied by schema)', async () => {
+    const mocks = createMocks();
+    const request = httpServerMock.createKibanaRequest();
+    const route = buildRoute(request as unknown as KibanaRequest, mocks);
+
+    await route.handle();
+
+    expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith({
+      request,
+      page: undefined,
+      perPage: undefined,
+      search: undefined,
+      ruleIds: undefined,
+      outcome: undefined,
+      episodeIds: undefined,
+      startDate: undefined,
+    });
+  });
+
+  it('returns the client result verbatim in the response body', async () => {
+    const mocks = createMocks();
+    const clientResult = { items: [{ id: 'x' }], page: 4, perPage: 25, totalEvents: 137 };
+    mocks.executionHistoryClient.listExecutionHistory.mockResolvedValue(clientResult as any);
+
+    const request = httpServerMock.createKibanaRequest();
+    const route = buildRoute(request as unknown as KibanaRequest, mocks);
+
+    await route.handle();
+
+    const okCall = (mocks.deps.response.ok as jest.Mock).mock.calls[0][0];
+    expect(okCall.body).toEqual(clientResult);
+  });
+
+  it('lets errors propagate so BaseAlertingRoute.onError handles the response', async () => {
+    const mocks = createMocks();
+    mocks.executionHistoryClient.listExecutionHistory.mockRejectedValueOnce(new Error('boom'));
+    const request = httpServerMock.createKibanaRequest();
+    const route = buildRoute(request as unknown as KibanaRequest, mocks);
+
+    await route.handle();
+
+    expect(mocks.deps.response.customError).toHaveBeenCalledTimes(1);
+    expect(mocks.deps.response.ok).not.toHaveBeenCalled();
+  });
+});
+
+describe('toListExecutionHistoryArgs', () => {
+  it('maps the snake_case request to camelCase client args (without request)', () => {
+    expect(
+      toListExecutionHistoryArgs({
+        page: 1,
+        per_page: 100,
+        search: 'foo',
+        rule_ids: ['rule-1', 'rule-2'],
+        outcome: ['dispatched'],
+        episode_ids: ['ep-1'],
+        start_date: '2026-01-01T00:00:00.000Z',
+      })
+    ).toEqual({
+      page: 1,
+      perPage: 100,
+      search: 'foo',
+      ruleIds: ['rule-1', 'rule-2'],
+      outcome: ['dispatched'],
+      episodeIds: ['ep-1'],
+      startDate: '2026-01-01T00:00:00.000Z',
+    });
+  });
+});
