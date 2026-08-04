@@ -33,7 +33,6 @@ import { useEnhanceRules } from '../../../../service/hooks/use_enhance_rules';
 import * as i18n from './translations';
 import { EnhancementType, type AddedEnhancement } from './types';
 import { QradarDataInputStep } from '../../types';
-import { useRuleMigrationVendorCopy } from '../../../../hooks/use_rule_migration_vendor_copy';
 
 export const EnhancementsDataInput = React.memo<MigrationStepProps>(
   ({ dataInputStep, migrationStats }) => {
