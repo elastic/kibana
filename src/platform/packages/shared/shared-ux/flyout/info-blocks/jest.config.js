@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { InfoBlocks } from './src/info_blocks.component';
-export { InfoBlock } from './src/info_block.component';
-export type { InfoBlockItem, InfoBlocksProps } from './src/types';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/flyout/info-blocks'],
+};

@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
 import {
   EuiAvatar,
@@ -29,11 +28,11 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
 } from '@elastic/eui';
+import type { InfoBlockItem } from '@kbn/shared-ux-flyout-common';
 import { InfoBlocks } from './info_blocks.component';
-import type { InfoBlockItem } from './types';
 
 const meta: Meta<typeof InfoBlocks> = {
-  title: 'Flyout Template/InfoBlocks',
+  title: 'Info Blocks/InfoBlocks',
   component: InfoBlocks,
 };
 export default meta;
@@ -69,7 +68,6 @@ const SAMPLE_ITEMS: InfoBlockItem[] = [
               color="text"
               size="xs"
               aria-label="Copy resource identifier"
-              onClick={action('Copy')}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -81,6 +79,9 @@ const SAMPLE_ITEMS: InfoBlockItem[] = [
   { title: 'Error rate', value: <EuiHealth color="warning">0.4%</EuiHealth> },
   { title: 'Version', value: 'v8.19.0' },
 ];
+
+// No-op handler for the interactive controls below.
+const noop = () => {};
 
 // A truncating link with a trailing copy action.
 const RESOURCE_LINK = (
@@ -108,7 +109,7 @@ const RESOURCE_LINK = (
           color="text"
           size="xs"
           aria-label="Copy resource identifier"
-          onClick={action('Copy')}
+          onClick={noop}
         />
       </EuiToolTip>
     </EuiFlexItem>
@@ -126,7 +127,7 @@ const ACTIONABLE_ITEMS: InfoBlockItem[] = [
           display="base"
           size="xs"
           aria-label="Assign"
-          onClick={action('Assign')}
+          onClick={noop}
         />
       </EuiToolTip>
     ),
@@ -145,7 +146,7 @@ const ACTIONABLE_ITEMS: InfoBlockItem[] = [
               display="base"
               size="xs"
               aria-label="Assign another"
-              onClick={action('Assign another')}
+              onClick={noop}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -155,7 +156,7 @@ const ACTIONABLE_ITEMS: InfoBlockItem[] = [
   {
     title: 'Notes',
     value: (
-      <EuiButtonEmpty iconType="plusInCircle" size="s" flush="left" onClick={action('Add note')}>
+      <EuiButtonEmpty iconType="plusInCircle" size="s" flush="left" onClick={noop}>
         Add note
       </EuiButtonEmpty>
     ),
@@ -195,36 +196,11 @@ interface DefaultArgs {
 
 type Story = StoryObj<typeof InfoBlocks>;
 
-const FlyoutDemo: React.FC<{ children: React.ReactNode; title: string }> = ({
-  children,
-  title,
-}) => {
-  return (
-    <EuiFlyout
-      onClose={action('Close flyout')}
-      size="m"
-      aria-labelledby="flyoutTitle"
-      minWidth={324}
-      resizable
-      type="push"
-      pushMinBreakpoint="xs"
-    >
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id="flyoutTitle">{title}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-
-      <EuiFlyoutBody>{children}</EuiFlyoutBody>
-    </EuiFlyout>
-  );
-};
-
-const CompressableDemo: React.FC = () => {
+const GalleryDemo: React.FC = () => {
   const [useCompressed, setUseCompressed] = React.useState(false);
 
   return (
-    <>
+    <div>
       <EuiSwitch
         id="compressed-toggle"
         label="Use compressed layout"
@@ -232,22 +208,32 @@ const CompressableDemo: React.FC = () => {
         onChange={() => setUseCompressed(!useCompressed)}
       />
 
-      <FlyoutDemo title="InfoBlocks with compressed layout toggle">
-        <InfoBlocks items={[...SAMPLE_ITEMS, ...ACTIONABLE_ITEMS]} compressed={useCompressed} />
-        <EuiSpacer size="xl" />
-        <InfoBlocks items={BIG_NUMBER_ITEMS} compressed={useCompressed} />
-        <EuiSpacer size="xl" />
-        <InfoBlocks items={LEADING_SPACER_ITEMS} hasLeadingSpacer compressed={useCompressed} />
-      </FlyoutDemo>
-    </>
+      <EuiSpacer size="xl" />
+      <EuiTitle size="l">
+        <h2>Sample set</h2>
+      </EuiTitle>
+      <InfoBlocks items={[...SAMPLE_ITEMS, ...ACTIONABLE_ITEMS]} compressed={useCompressed} />
+
+      <EuiSpacer size="xl" />
+      <EuiTitle size="l">
+        <h2>Big number</h2>
+      </EuiTitle>
+      <InfoBlocks items={BIG_NUMBER_ITEMS} compressed={useCompressed} />
+
+      <EuiSpacer size="xl" />
+      <EuiTitle size="l">
+        <h2>Leading spacer</h2>
+      </EuiTitle>
+      <InfoBlocks items={LEADING_SPACER_ITEMS} hasLeadingSpacer compressed={useCompressed} />
+    </div>
   );
 };
 
-export const CompressableLayout: Story = {
+export const Gallery: Story = {
   args: {
     items: SAMPLE_ITEMS,
   },
-  render: () => <CompressableDemo />,
+  render: () => <GalleryDemo />,
 };
 
 // A mix of large and regular values.
@@ -288,6 +274,22 @@ const SVG_ITEMS: InfoBlockItem[] = [
   ...SAMPLE_ITEMS.slice(0, 3),
 ];
 
+export const InFlyout: Story = {
+  render: () => (
+    <EuiFlyout onClose={noop} size="m" aria-labelledby="flyoutTitle" minWidth={324} resizable>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id="flyoutTitle">Info blocks in a flyout</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+
+      <EuiFlyoutBody>
+        <InfoBlocks items={[...SAMPLE_ITEMS, ...ACTIONABLE_ITEMS]} />
+      </EuiFlyoutBody>
+    </EuiFlyout>
+  ),
+};
+
 export const LeadingSpacer: StoryObj<DefaultArgs> = {
   argTypes: {
     numberOfItems: {
@@ -299,9 +301,7 @@ export const LeadingSpacer: StoryObj<DefaultArgs> = {
     numberOfItems: LEADING_SPACER_ITEMS.length,
   },
   render: ({ numberOfItems }) => (
-    <FlyoutDemo title="InfoBlocks with leading spacer">
-      <InfoBlocks items={LEADING_SPACER_ITEMS.slice(0, numberOfItems)} hasLeadingSpacer />
-    </FlyoutDemo>
+    <InfoBlocks items={LEADING_SPACER_ITEMS.slice(0, numberOfItems)} hasLeadingSpacer />
   ),
 };
 
@@ -309,9 +309,4 @@ export const InlineSvg: Story = {
   args: {
     items: SVG_ITEMS,
   },
-  render: () => (
-    <FlyoutDemo title="InfoBlocks with inline SVG">
-      <InfoBlocks items={SVG_ITEMS} />
-    </FlyoutDemo>
-  ),
 };

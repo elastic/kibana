@@ -1,11 +1,11 @@
-# @kbn/shared-ux-info-blocks
+# @kbn/shared-ux-flyout-info-blocks
 
 Presentational "info blocks" card: a responsive row of labeled key attributes, each a fixed-style text title above an arbitrary `ReactNode` value.
 
 ## Usage
 
 ```tsx
-import { InfoBlocks } from '@kbn/shared-ux-info-blocks';
+import { InfoBlocks } from '@kbn/shared-ux-flyout-info-blocks';
 
 <InfoBlocks
   items={[
@@ -24,7 +24,7 @@ import { InfoBlocks } from '@kbn/shared-ux-info-blocks';
 - `compressed` tightens spacing; it is intended to be driven by the flyout header's collapse state. In compressed mode, `hasLeadingSpacer` is ignored and custom value sizes are suppressed so the layout stays dense.
 
 ```tsx
-import { InfoBlocks } from '@kbn/shared-ux-info-blocks';
+import { InfoBlocks } from '@kbn/shared-ux-flyout-info-blocks';
 
 <InfoBlocks
   hasLeadingSpacer

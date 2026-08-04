@@ -25,15 +25,9 @@ export interface InfoBlockItem {
 export interface InfoBlocksProps {
   /** The blocks to render. Designed for small sets, typically up to 6 blocks. */
   items: readonly InfoBlockItem[];
-  /**
-   * When true, the first block fills its row alone and the rest start on the
-   * next row. Ignored when `compressed`.
-   */
+  /** Makes the first block fill its row alone; ignored when `compressed`. */
   hasLeadingSpacer?: boolean;
-  /**
-   * Compact spacing/sizing. Intended to be driven by the flyout header's
-   * collapsed state.
-   */
+  /** Compact spacing/sizing for dense presentations. */
   compressed?: boolean;
   'data-test-subj'?: string;
 }

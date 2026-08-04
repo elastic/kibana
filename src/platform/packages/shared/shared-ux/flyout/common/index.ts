@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/info-blocks'],
-};
+export {
+  FLYOUT_MIN_CELL_WIDTH,
+  FLYOUT_MAX_GRID_COLUMNS,
+  MAX_METADATA_ITEMS,
+} from './src/constants';
+
+export type { InfoBlockItem, InfoBlocksProps } from './src/info_block_types';

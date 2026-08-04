@@ -10,7 +10,7 @@
 import React, { type CSSProperties, type FunctionComponent } from 'react';
 import { css } from '@emotion/react';
 import { EuiText, EuiTextTruncate, euiFontSize, useEuiTheme } from '@elastic/eui';
-import type { InfoBlockItem } from './types';
+import type { InfoBlockItem } from '@kbn/shared-ux-flyout-common';
 
 export interface InfoBlockProps extends InfoBlockItem {
   compressed?: boolean;
@@ -48,8 +48,7 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
       <EuiText
         size="s"
         color={color}
-        // Link weight only, so `a`'s inherited font-weight always tracks the
-        // value's own (dynamic) font-weight set via the `style` prop below.
+        // Keep links in custom values aligned with the computed value weight.
         css={css`
           a {
             font-weight: inherit;

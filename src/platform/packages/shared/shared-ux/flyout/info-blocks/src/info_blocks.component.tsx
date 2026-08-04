@@ -11,25 +11,26 @@ import React, { type FunctionComponent } from 'react';
 import { css } from '@emotion/react';
 import { EuiPanel, useEuiMemoizedStyles } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
+import {
+  FLYOUT_MIN_CELL_WIDTH,
+  FLYOUT_MAX_GRID_COLUMNS,
+  type InfoBlocksProps,
+} from '@kbn/shared-ux-flyout-common';
 import { InfoBlock } from './info_block.component';
-import type { InfoBlocksProps } from './types';
-
-/** Maximum number of columns */
-const MAX_COLUMNS = 3;
-/** Minimum cell width before the grid drops a column. */
-const MIN_BLOCK_WIDTH = 140;
 
 const CONTAINER_NAME = 'infoBlocks';
 
 const styles = ({ euiTheme }: UseEuiTheme) => {
-  const twoColumnBelow = MAX_COLUMNS * MIN_BLOCK_WIDTH; // 420
-  const oneColumnBelow = 2 * MIN_BLOCK_WIDTH; // 280
+  // Shared with MetadataPairs: both grids drop a column at the same container width.
+  const twoColumnBelow = FLYOUT_MAX_GRID_COLUMNS * FLYOUT_MIN_CELL_WIDTH; // 420
+  const oneColumnBelow = 2 * FLYOUT_MIN_CELL_WIDTH; // 280
   const color = euiTheme.border.color;
   const thickness = euiTheme.border.width.thin;
   // Horizontal divider insets keep the line off the rounded card corners.
   const cornerGap = euiTheme.size.base;
 
   return {
+    // Bare wrapper so container-type measures the same box as MetadataPairs (no border offset).
     wrapper: css`
       container-type: inline-size;
       container-name: ${CONTAINER_NAME};
