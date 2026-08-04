@@ -92,20 +92,6 @@ describe('AllFieldDefinitionsPage', () => {
     ]);
   });
 
-  it('renders the Label column immediately after the Name column', () => {
-    mockGetFieldDefinitions.mockReturnValue({
-      data: { fieldDefinitions: [buildFieldDefinition({})] },
-      isLoading: false,
-    });
-
-    renderWithTestingProviders(<AllFieldDefinitionsPage />);
-
-    const headerCells = screen.getAllByRole('columnheader').map((cell) => cell.textContent);
-
-    expect(headerCells[0]).toContain('Name');
-    expect(headerCells[1]).toContain('Label');
-  });
-
   it("shows the field's label parsed from its definition YAML", () => {
     mockGetFieldDefinitions.mockReturnValue({
       data: {
@@ -122,12 +108,13 @@ describe('AllFieldDefinitionsPage', () => {
 
     renderWithTestingProviders(<AllFieldDefinitionsPage />);
 
-    expect(
-      within(screen.getByTestId('fieldDefinitionLabelCell')).getByText('Summary')
-    ).toBeInTheDocument();
+    // The row leads with the label and carries the raw name beneath it, so both are present.
+    const row = screen.getByTestId('fieldDefinitionRow-summary');
+    expect(within(row).getByText('Summary')).toBeInTheDocument();
+    expect(within(row).getByText('summary')).toBeInTheDocument();
   });
 
-  it('falls back to a placeholder when the definition has no label', () => {
+  it('falls back to the field name when the definition has no label', () => {
     mockGetFieldDefinitions.mockReturnValue({
       data: {
         fieldDefinitions: [
@@ -141,9 +128,10 @@ describe('AllFieldDefinitionsPage', () => {
 
     renderWithTestingProviders(<AllFieldDefinitionsPage />);
 
-    expect(
-      within(screen.getByTestId('fieldDefinitionLabelCell')).getByText('—')
-    ).toBeInTheDocument();
+    // No placeholder dash: an unlabelled field falls back to its name rather than rendering
+    // an empty-looking cell.
+    expect(within(screen.getByTestId('fieldDefinitionRow-my_field')).getAllByText('my_field')
+      .length).toBeGreaterThan(0);
   });
 
   describe('Required column', () => {
@@ -184,23 +172,22 @@ describe('AllFieldDefinitionsPage', () => {
       expect(screen.getByTestId('fieldDefinitionRequiredOnCloseBadge')).toBeInTheDocument();
     });
 
-    it('shows a placeholder when neither flag is set (including required: false)', () => {
+    // No placeholder dash any more: an optional field simply carries no requirement badge,
+    // which is the absence of a marker rather than a marker meaning "none".
+    it('shows no badge when neither flag is set (including required: false)', () => {
       renderWithDefinition(
         'name: my_field\ncontrol: INPUT_TEXT\ntype: keyword\nvalidation:\n  required: false\n'
       );
 
-      expect(
-        within(screen.getByTestId('fieldDefinitionRequiredCell')).getByText('—')
-      ).toBeInTheDocument();
       expect(screen.queryByTestId('fieldDefinitionRequiredBadge')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('fieldDefinitionRequiredOnCloseBadge')).not.toBeInTheDocument();
     });
 
-    it('shows a placeholder for a malformed definition', () => {
+    it('shows no badge for a malformed definition', () => {
       renderWithDefinition('control: [ {oops');
 
-      expect(
-        within(screen.getByTestId('fieldDefinitionRequiredCell')).getByText('—')
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('fieldDefinitionRow-my_field')).toBeInTheDocument();
+      expect(screen.queryByTestId('fieldDefinitionRequiredBadge')).not.toBeInTheDocument();
     });
   });
 });
