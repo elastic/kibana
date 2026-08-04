@@ -389,6 +389,142 @@ describe('ruleActionsItem', () => {
     });
   });
 
+  describe('messageField param protection', () => {
+    test('preserves message key on group change when connector has messageField', async () => {
+      const messageFieldActionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+      messageFieldActionTypeRegistry.register(
+        getActionTypeModel('1', {
+          id: 'actionType-1',
+          defaultActionParams: { actionParamKey: 'actionParamValue', message: 'generated msg' },
+          defaultRecoveredActionParams: {
+            actionParamKey: 'recoveredValue',
+            message: 'recovered msg',
+          },
+          messageField: {
+            get: (params: Record<string, unknown>) => params.message as string | undefined,
+            set: (_: Record<string, unknown>, message: string) => ({ message }),
+          },
+          validateParams: mockValidate,
+        })
+      );
+
+      useRuleFormState.mockReturnValue({
+        plugins: {
+          actionTypeRegistry: messageFieldActionTypeRegistry,
+          http: { basePath: { publicBaseUrl: 'publicUrl' } },
+        },
+        connectors: mockConnectors,
+        connectorTypes: mockActionTypes,
+        aadTemplateFields: [],
+        actionsParamsErrors: {},
+        selectedRuleType: ruleType,
+        selectedRuleTypeModel: ruleModel,
+      });
+
+      render(
+        <RuleActionsItem
+          action={getAction('1', {
+            actionTypeId: 'actionType-1',
+            group: 'testActionGroup',
+            params: { message: 'user customized message', actionParamKey: 'old' },
+          })}
+          index={0}
+          producerId="stackAlerts"
+        />
+      );
+
+      await userEvent.click(screen.getByText('Settings'));
+      await userEvent.click(screen.getByText('onActionGroupChange'));
+
+      const setActionParamsCalls = (mockOnChange as jest.Mock).mock.calls.filter(
+        (call: [{ type: string }]) => call[0].type === 'setActionParams'
+      );
+      expect(setActionParamsCalls.length).toBeGreaterThan(0);
+      const lastCall = setActionParamsCalls[setActionParamsCalls.length - 1][0];
+      // actionParamKey was updated from default, but message was NOT overwritten by default
+      expect(lastCall.payload.value.actionParamKey).toBe('recoveredValue');
+      expect(lastCall.payload.value.message).toBe('user customized message');
+    });
+
+    test('applies non-message default params on group change when connector has messageField', async () => {
+      const messageFieldActionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+      messageFieldActionTypeRegistry.register(
+        getActionTypeModel('1', {
+          id: 'actionType-1',
+          defaultActionParams: { actionParamKey: 'actionParamValue', message: 'generated msg' },
+          defaultRecoveredActionParams: {
+            actionParamKey: 'recoveredValue',
+            message: 'recovered msg',
+          },
+          messageField: {
+            get: (params: Record<string, unknown>) => params.message as string | undefined,
+            set: (_: Record<string, unknown>, message: string) => ({ message }),
+          },
+          validateParams: mockValidate,
+        })
+      );
+
+      useRuleFormState.mockReturnValue({
+        plugins: {
+          actionTypeRegistry: messageFieldActionTypeRegistry,
+          http: { basePath: { publicBaseUrl: 'publicUrl' } },
+        },
+        connectors: mockConnectors,
+        connectorTypes: mockActionTypes,
+        aadTemplateFields: [],
+        actionsParamsErrors: {},
+        selectedRuleType: ruleType,
+        selectedRuleTypeModel: ruleModel,
+      });
+
+      render(
+        <RuleActionsItem
+          action={getAction('1', {
+            actionTypeId: 'actionType-1',
+            group: 'testActionGroup',
+            params: { message: 'user msg', actionParamKey: 'old' },
+          })}
+          index={0}
+          producerId="stackAlerts"
+        />
+      );
+
+      await userEvent.click(screen.getByText('Settings'));
+      await userEvent.click(screen.getByText('onActionGroupChange'));
+
+      const setActionParamsCalls = (mockOnChange as jest.Mock).mock.calls.filter(
+        (call: [{ type: string }]) => call[0].type === 'setActionParams'
+      );
+      const lastCall = setActionParamsCalls[setActionParamsCalls.length - 1][0];
+      // Non-message default params are still applied
+      expect(lastCall.payload.value.actionParamKey).toBe('recoveredValue');
+    });
+
+    test('overwrites all params on group change when connector has no messageField', async () => {
+      render(
+        <RuleActionsItem
+          action={getAction('1', {
+            actionTypeId: 'actionType-1',
+            group: 'testActionGroup',
+            params: { message: 'user customized message', actionParamKey: 'old' },
+          })}
+          index={0}
+          producerId="stackAlerts"
+        />
+      );
+
+      await userEvent.click(screen.getByText('Settings'));
+      await userEvent.click(screen.getByText('onActionGroupChange'));
+
+      const setActionParamsCalls = (mockOnChange as jest.Mock).mock.calls.filter(
+        (call: [{ type: string }]) => call[0].type === 'setActionParams'
+      );
+      const lastCall = setActionParamsCalls[setActionParamsCalls.length - 1][0];
+      // No messageField — recovered default is applied (which is recoveredParamKey, not message)
+      expect(lastCall.payload.value.recoveredParamKey).toBe('recoveredParamValue');
+    });
+  });
+
   test('should allow action to be deleted', async () => {
     render(
       <RuleActionsItem

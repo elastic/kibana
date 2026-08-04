@@ -261,9 +261,13 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
       if (!defaultParams) {
         return;
       }
+      const messageOwnedKeys = actionTypeModel.messageField
+        ? new Set(Object.keys(actionTypeModel.messageField.set(action.params, '')))
+        : new Set<string>();
       const newDefaultParams: ParamsType = {};
       const defaultAADParams: ParamsType = {};
       for (const [key, paramValue] of Object.entries(defaultParams)) {
+        if (messageOwnedKeys.has(key)) continue;
         newDefaultParams[key] = paramValue;
         // Collects AAD params by checking if the value is {x}.{y}
         if (typeof paramValue !== 'string' || !paramValue.match(/{{.*?}}/g)) {
