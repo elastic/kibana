@@ -120,11 +120,9 @@ safe-outputs:
     # reviewer, so the handler just logs a warning and the PR is still created.
     reviewers: ${{ github.actor }}
     base-branch: main
-    # `main` only: for any other base, the handler runs an unbounded
-    # `git fetch origin <base>` into its shallow main-only checkout, which on a repo
-    # Kibana's size cannot finish within the job timeout. A fix that has to land on a
-    # version branch is handed over in the outcome comment instead — see
-    # "Fixes that must target a version branch".
+    # `main` only: any other base makes the handler run an unbounded `git fetch` that
+    # can't finish on a repo Kibana's size. Version-branch fixes are handed over in the
+    # outcome comment instead — see "Fixes that must target a version branch".
     allowed-base-branches: ['main']
     if-no-changes: 'ignore'
     # Open the PR as `kibanamachine` (a user), not the default GITHUB_TOKEN bot, so
