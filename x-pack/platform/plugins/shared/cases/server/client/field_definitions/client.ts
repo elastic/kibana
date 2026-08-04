@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { castArray } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
+import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import type {
   CreateFieldDefinitionInput,
   FieldDefinition,
@@ -20,6 +21,9 @@ import type {
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import { MAX_FIELD_DEFINITIONS_PER_OWNER } from '../../../common/constants';
+import { CASES_API_ERROR_CODES } from '../../../common/constants/error_codes';
+import { createTypedApiError } from '../../common/api_errors';
+import { parseFieldDefinitionIdentity } from './utils';
 
 /**
  * API for interacting with field definitions (the reusable fields library).
@@ -40,10 +44,34 @@ export interface FieldDefinitionsSubClient {
  *
  * @ignore
  */
+const assertNameMatchesYamlDefinition = (name: string, yamlName: string): void => {
+  if (name !== yamlName) {
+    throw Boom.badRequest(
+      `The name attribute ("${name}") must match the name in the YAML definition ("${yamlName}").`
+    );
+  }
+};
+
+const incrementIdentityRejectionCounters = (
+  usageCounter: IUsageCounter | undefined,
+  changed: Array<'name' | 'type'>
+): void => {
+  try {
+    if (changed.includes('name')) {
+      usageCounter?.incrementCounter({ counterName: 'fieldIdentityImmutableName' });
+    }
+    if (changed.includes('type')) {
+      usageCounter?.incrementCounter({ counterName: 'fieldIdentityImmutableType' });
+    }
+  } catch {
+    // Telemetry must never mask the API response.
+  }
+};
+
 export const createFieldDefinitionsSubClient = (
   clientArgs: CasesClientArgs
 ): FieldDefinitionsSubClient => {
-  const { services, authorization } = clientArgs;
+  const { services, authorization, usageCounter } = clientArgs;
   const { fieldDefinitionsService } = services;
 
   const fieldDefinitionsSubClient: FieldDefinitionsSubClient = {
@@ -92,6 +120,14 @@ export const createFieldDefinitionsSubClient = (
         );
       }
 
+      // The name attribute and the YAML `name` must agree from the moment the
+      // definition is created — they become the immutable identity. A malformed
+      // YAML is left for the service's full validation to reject.
+      const identity = parseFieldDefinitionIdentity(input.definition);
+      if (identity) {
+        assertNameMatchesYamlDefinition(input.name, identity.name);
+      }
+
       return fieldDefinitionsService.createFieldDefinition(input);
     },
 
@@ -109,19 +145,45 @@ export const createFieldDefinitionsSubClient = (
         );
       }
 
-      const existing = await fieldDefinitionsService.getFieldDefinitions([
-        fieldDef.attributes.owner,
-      ]);
-      const nameLower = input.name.toLowerCase();
-      const conflict = existing.fieldDefinitions.find(
-        (fd) => fd.name.toLowerCase() === nameLower && fd.fieldDefinitionId !== id
-      );
-      if (conflict) {
-        throw Boom.conflict(
-          `A field definition with name "${conflict.name}" already exists for this owner.`
-        );
+      // Identity guard: `name` and YAML `type` determine the `${name}_as_${type}`
+      // key under which existing case values are stored (and the Cases analytics
+      // runtime field), so they are immutable after creation. Only run the
+      // comparison when the submitted YAML parses — a malformed YAML falls
+      // through to the service's full validation and is rejected there before
+      // any write.
+      const submitted = parseFieldDefinitionIdentity(input.definition);
+      if (submitted) {
+        assertNameMatchesYamlDefinition(input.name, submitted.name);
+
+        const persisted = parseFieldDefinitionIdentity(fieldDef.attributes.definition);
+        const changed: Array<'name' | 'type'> = [];
+
+        if (submitted.name !== fieldDef.attributes.name) {
+          changed.push('name');
+        }
+        if (persisted && submitted.type !== persisted.type) {
+          changed.push('type');
+        }
+
+        if (changed.length > 0) {
+          incrementIdentityRejectionCounters(usageCounter, changed);
+          throw createTypedApiError({
+            statusCode: 409,
+            message:
+              `Cannot change the ${changed.join(' or ')} of field definition ` +
+              `"${fieldDef.attributes.name}". A field's name and type determine how its values ` +
+              `are stored in case data and Cases analytics, so they cannot be changed after creation.`,
+            attributes: {
+              code: CASES_API_ERROR_CODES.FIELD_IDENTITY_IMMUTABLE,
+              changed,
+            },
+          });
+        }
       }
 
+      // No per-owner name-uniqueness check on update: the identity guard above
+      // guarantees the name cannot change, and the persisted name is already
+      // unique for the owner.
       return fieldDefinitionsService.updateFieldDefinition(id, input);
     },
 

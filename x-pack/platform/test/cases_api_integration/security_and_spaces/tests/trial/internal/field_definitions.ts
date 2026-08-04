@@ -107,6 +107,17 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(409);
       });
 
+      it('returns 400 when the name attribute does not match the YAML name', async () => {
+        const { body } = await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .send(buildCreateBody({ name: 'not_priority' }))
+          .expect(400);
+
+        expect(body.message).to.contain('must match the name in the YAML definition');
+      });
+
       it('name conflict check is case-insensitive', async () => {
         await supertestWithoutAuth
           .post(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
@@ -280,19 +291,99 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(403);
       });
 
-      it('returns 409 when updating to a name already used by another definition', async () => {
-        await supertest
-          .post(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
-          .set('kbn-xsrf', 'true')
-          .send(buildCreateBody({ name: 'severity' }))
-          .expect(200);
-
-        await supertestWithoutAuth
+      it('rejects a rename with a structured field_identity_immutable 409', async () => {
+        // FAILURE SCENARIO: renaming "priority" would orphan every case value
+        // stored under priority_as_keyword and break Cases analytics.
+        const { body } = await supertestWithoutAuth
           .put(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}/${fieldDefinitionId}`)
           .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
           .set('kbn-xsrf', 'true')
-          .send(buildCreateBody({ name: 'severity' }))
+          .send(
+            buildCreateBody({
+              name: 'severity',
+              definition: 'name: severity\ncontrol: INPUT_TEXT\ntype: keyword\n',
+            })
+          )
           .expect(409);
+
+        expect(body.statusCode).to.eql(409);
+        expect(body.error).to.eql('Conflict');
+        expect(body.message).to.contain('name and type determine how its values are stored');
+        expect(body.attributes).to.eql({
+          code: 'field_identity_immutable',
+          changed: ['name'],
+        });
+      });
+
+      it('rejects a type change with a structured field_identity_immutable 409', async () => {
+        const { body } = await supertestWithoutAuth
+          .put(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}/${fieldDefinitionId}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .send(
+            buildCreateBody({
+              definition: 'name: priority\ncontrol: INPUT_NUMBER\ntype: integer\n',
+            })
+          )
+          .expect(409);
+
+        expect(body.attributes).to.eql({
+          code: 'field_identity_immutable',
+          changed: ['type'],
+        });
+      });
+
+      it('rejects a combined name and type change listing both changed parts', async () => {
+        const { body } = await supertestWithoutAuth
+          .put(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}/${fieldDefinitionId}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .send(
+            buildCreateBody({
+              name: 'severity',
+              definition: 'name: severity\ncontrol: INPUT_NUMBER\ntype: integer\n',
+            })
+          )
+          .expect(409);
+
+        expect(body.attributes).to.eql({
+          code: 'field_identity_immutable',
+          changed: ['name', 'type'],
+        });
+      });
+
+      it('returns 400 when the name attribute does not match the YAML name', async () => {
+        const { body } = await supertestWithoutAuth
+          .put(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}/${fieldDefinitionId}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .send(
+            buildCreateBody({
+              name: 'priority',
+              definition: 'name: severity\ncontrol: INPUT_TEXT\ntype: keyword\n',
+            })
+          )
+          .expect(400);
+
+        expect(body.message).to.contain('must match the name in the YAML definition');
+      });
+
+      it('allows a metadata-only update that keeps the identity', async () => {
+        const { body } = await supertestWithoutAuth
+          .put(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}/${fieldDefinitionId}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .send(
+            buildCreateBody({
+              description: 'updated description',
+              definition:
+                'name: priority\ncontrol: INPUT_TEXT\ntype: keyword\nlabel: "New Label"\nvalidation:\n  required: true\n',
+            })
+          )
+          .expect(200);
+
+        expect(body.name).to.eql('priority');
+        expect(body.description).to.eql('updated description');
       });
 
       it('allows renaming a definition to its own current name', async () => {

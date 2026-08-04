@@ -7,9 +7,12 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
+  EuiCode,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -86,8 +89,32 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
 
   const isDefinitionValid = parsedDefinition?.success === true;
 
+  // A definition's name and (YAML) type are its permanent identity: they form the
+  // storage key for case values and the Cases analytics field. Editing them is
+  // rejected by the server (409 field_identity_immutable), so prevent it inline.
+  const originalIdentity = useMemo(() => {
+    if (!fieldDefinition) return undefined;
+    try {
+      const parsed = InlineFieldSchema.safeParse(parseYaml(fieldDefinition.definition));
+      return {
+        name: fieldDefinition.name,
+        type: parsed.success ? parsed.data.type : undefined,
+      };
+    } catch {
+      return { name: fieldDefinition.name, type: undefined };
+    }
+  }, [fieldDefinition]);
+
+  const identityChanged =
+    isEditing &&
+    parsedDefinition?.success === true &&
+    originalIdentity !== undefined &&
+    (parsedDefinition.data.name !== originalIdentity.name ||
+      (originalIdentity.type !== undefined &&
+        parsedDefinition.data.type !== originalIdentity.type));
+
   const handleSave = useCallback(() => {
-    if (!parsedDefinition?.success) return;
+    if (!parsedDefinition?.success || identityChanged) return;
 
     onSave({
       name: parsedDefinition.data.name,
@@ -95,7 +122,7 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
       definition,
       isGlobal,
     });
-  }, [parsedDefinition, onSave, description, definition, isGlobal]);
+  }, [parsedDefinition, identityChanged, onSave, description, definition, isGlobal]);
 
   const handleDefaultChange = useCallback((fieldName: string, value: string, control: string) => {
     const trimmedValue = value.trim();
@@ -152,6 +179,48 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm component="form" data-test-subj="fieldDefinitionForm">
+          {isEditing && originalIdentity && (
+            <>
+              <EuiPanel
+                hasBorder
+                paddingSize="m"
+                color="subdued"
+                data-test-subj="fieldDefinitionIdentityPanel"
+              >
+                <EuiDescriptionList
+                  type="column"
+                  compressed
+                  listItems={[
+                    {
+                      title: i18n.FIELD_IDENTITY_NAME_LABEL,
+                      description: (
+                        <EuiCode data-test-subj="fieldDefinitionIdentityName">
+                          {originalIdentity.name}
+                        </EuiCode>
+                      ),
+                    },
+                    ...(originalIdentity.type !== undefined
+                      ? [
+                          {
+                            title: i18n.FIELD_IDENTITY_TYPE_LABEL,
+                            description: (
+                              <EuiBadge color="hollow" data-test-subj="fieldDefinitionIdentityType">
+                                {originalIdentity.type}
+                              </EuiBadge>
+                            ),
+                          },
+                        ]
+                      : []),
+                  ]}
+                />
+                <EuiSpacer size="s" />
+                <EuiText size="xs" color="subdued">
+                  <p>{i18n.FIELD_IDENTITY_HELP_TEXT}</p>
+                </EuiText>
+              </EuiPanel>
+              <EuiSpacer size="l" />
+            </>
+          )}
           <EuiFormRow label={i18n.FIELD_DEFINITION_DESCRIPTION_LABEL} fullWidth>
             <EuiTextArea
               value={description}
@@ -174,7 +243,24 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
           <EuiSpacer size="l" />
           <EuiFormRow
             label={i18n.FIELD_DEFINITION_YAML_LABEL}
-            helpText={i18n.FIELD_DEFINITION_YAML_HELP_TEXT}
+            helpText={
+              isEditing
+                ? i18n.FIELD_DEFINITION_YAML_HELP_TEXT
+                : `${i18n.FIELD_DEFINITION_YAML_HELP_TEXT} ${i18n.FIELD_IDENTITY_CREATE_NOTE}`
+            }
+            isInvalid={identityChanged}
+            error={
+              identityChanged && originalIdentity
+                ? [
+                    originalIdentity.type !== undefined
+                      ? i18n.FIELD_IDENTITY_CHANGED_ERROR(
+                          originalIdentity.name,
+                          originalIdentity.type
+                        )
+                      : i18n.FIELD_IDENTITY_NAME_CHANGED_ERROR(originalIdentity.name),
+                  ]
+                : undefined
+            }
             fullWidth
           >
             <FieldDefinitionYamlEditor
@@ -205,7 +291,7 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
               fill
               onClick={handleSave}
               isLoading={isSaving}
-              disabled={!isDefinitionValid}
+              disabled={!isDefinitionValid || identityChanged}
               data-test-subj="fieldDefinitionSaveButton"
             >
               {i18n.SAVE_FIELD_DEFINITION}
