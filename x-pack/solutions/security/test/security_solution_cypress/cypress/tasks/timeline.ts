@@ -327,13 +327,12 @@ export const navigateToCaseFromSuccessToaster = () => {
   cy.get(VIEW_CASE_TOASTER_LINK).click();
 };
 
-export const closeTimeline = () => {
-  // Retry closing the timeline until the overlay mask gets the --hidden class.
-  // Each iteration first checks whether the overlay is already hidden to avoid
-  // clicking a button that is no longer in the visible portal. When the overlay is
-  // still open, .should('be.visible') retries until the close button is actionable,
-  // letting any concurrent React re-renders (e.g. from markAsFavorite's Redux
-  // dispatches) settle before the click is issued.
+/**
+ * Retry until the timeline overlay mask is hidden. When the overlay is still open,
+ * click the close button so concurrent React re-renders (e.g. from markAsFavorite's
+ * timelines refresh) can settle before the next attempt.
+ */
+export const ensureTimelineOverlayHidden = () => {
   recurse(
     () => {
       return cy.get(TIMELINE_WRAPPER).then(($wrapper) => {
@@ -345,6 +344,10 @@ export const closeTimeline = () => {
     },
     ($timelineWrapper) => $timelineWrapper.hasClass('timeline-portal-overlay-mask--hidden')
   );
+};
+
+export const closeTimeline = () => {
+  ensureTimelineOverlayHidden();
 };
 
 export const createNewTimeline = () => {

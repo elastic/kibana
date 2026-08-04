@@ -72,7 +72,7 @@ export const allowedExperimentalValues = Object.freeze({
    * `cancel` response action for Elastic Defend Endpoint
    * Release: 9.5
    */
-  responseActionsEndpointCancel: false,
+  responseActionsEndpointCancel: true,
 
   /**
    * `kill_descendants` parameter option for the `kill-process` response action for Elastic Defend Endpoint
