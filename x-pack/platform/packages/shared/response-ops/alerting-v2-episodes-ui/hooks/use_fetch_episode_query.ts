@@ -9,10 +9,10 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { rowsFromEsql, type AlertEpisode } from '@kbn/alerting-v2-common-queries';
+import { normalizeTags } from '@kbn/alerting-v2-utils';
 import { buildEpisodeQuery } from '../queries/episode_query';
 import { QUERY_STALE_TIME } from '../constants';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
-import { normalizeTags } from '../utils/normalize_tags';
 import { queryKeys } from '../query_keys';
 import { useSpaceId } from './use_space_id';
 
