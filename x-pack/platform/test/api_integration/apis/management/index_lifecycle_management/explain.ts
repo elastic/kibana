@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { API_BASE_PATH } from './constants';
-import { getRandomString } from './lib';
+import { getRandomString } from './lib/random';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
