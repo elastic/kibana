@@ -9,7 +9,7 @@
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { UploadTemplateModal } from './upload_template_modal';
+import { UploadTemplateFlyout } from './upload_template_flyout';
 
 const VALID_TEMPLATE = `
 template-metadata:
@@ -34,10 +34,10 @@ const selectFile = (content: string, name = 'template.yml') => {
   fireEvent.change(input, { target: { files: [file] } });
 };
 
-describe('UploadTemplateModal', () => {
+describe('UploadTemplateFlyout', () => {
   it('validates a valid template and enables Continue, then hands back the raw YAML', async () => {
     const onUploaded = jest.fn();
-    render(<UploadTemplateModal onClose={jest.fn()} onUploaded={onUploaded} />);
+    render(<UploadTemplateFlyout onClose={jest.fn()} onUploaded={onUploaded} />);
 
     expect(screen.getByTestId('workflowLibraryUploadContinue')).toBeDisabled();
 
@@ -54,7 +54,7 @@ describe('UploadTemplateModal', () => {
 
   it('shows a descriptive error for an invalid template and keeps Continue disabled', async () => {
     const onUploaded = jest.fn();
-    render(<UploadTemplateModal onClose={jest.fn()} onUploaded={onUploaded} />);
+    render(<UploadTemplateFlyout onClose={jest.fn()} onUploaded={onUploaded} />);
 
     selectFile('not: a valid template\n');
 
@@ -67,7 +67,7 @@ describe('UploadTemplateModal', () => {
 
   it('calls onClose when Cancel is clicked', () => {
     const onClose = jest.fn();
-    render(<UploadTemplateModal onClose={onClose} onUploaded={jest.fn()} />);
+    render(<UploadTemplateFlyout onClose={onClose} onUploaded={jest.fn()} />);
 
     fireEvent.click(screen.getByTestId('workflowLibraryUploadCancel'));
     expect(onClose).toHaveBeenCalled();

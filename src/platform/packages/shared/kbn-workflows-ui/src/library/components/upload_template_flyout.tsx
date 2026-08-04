@@ -12,21 +12,23 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiFilePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiFormRow,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { parseTemplateYaml, TemplateParseError } from '@kbn/workflows-library';
 
-export interface UploadTemplateModalProps {
+export interface UploadTemplateFlyoutProps {
   onClose: () => void;
   /** Called with the raw YAML of a successfully parsed template. */
   onUploaded: (rawYaml: string) => void;
@@ -42,12 +44,12 @@ interface ParsedFile {
 const MAX_FILE_BYTES = 512 * 1024;
 
 /**
- * Modal for the catalog's "Install template from file" flow: pick a template
+ * Flyout for the catalog's "Create workflow from file" flow: pick a template
  * YAML file, validate it client-side (metadata only, via `parseTemplateYaml`),
  * and hand the raw YAML back so the host can open the setup/install page. No
  * upload to the server happens here — the file is processed in the browser.
  */
-export const UploadTemplateModal = React.memo<UploadTemplateModalProps>(
+export const UploadTemplateFlyout = React.memo<UploadTemplateFlyoutProps>(
   ({ onClose, onUploaded }) => {
     const titleId = useGeneratedHtmlId();
     const [error, setError] = useState<string | undefined>();
@@ -97,20 +99,23 @@ export const UploadTemplateModal = React.memo<UploadTemplateModalProps>(
     }, [parsed, onUploaded]);
 
     return (
-      <EuiModal
+      <EuiFlyout
         onClose={onClose}
+        size="m"
         aria-labelledby={titleId}
-        data-test-subj="workflowLibraryUploadModal"
+        data-test-subj="workflowLibraryUploadFlyout"
       >
-        <EuiModalHeader>
-          <EuiModalHeaderTitle id={titleId}>
-            {i18n.translate('workflows.library.upload.title', {
-              defaultMessage: 'Install template from file',
-            })}
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2 id={titleId}>
+              {i18n.translate('workflows.library.upload.title', {
+                defaultMessage: 'Install template from file',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
 
-        <EuiModalBody>
+        <EuiFlyoutBody>
           <EuiText size="s" color="subdued">
             <p>
               {i18n.translate('workflows.library.upload.description', {
@@ -170,25 +175,36 @@ export const UploadTemplateModal = React.memo<UploadTemplateModalProps>(
               />
             </>
           ) : null}
-        </EuiModalBody>
+        </EuiFlyoutBody>
 
-        <EuiModalFooter>
-          <EuiButtonEmpty onClick={onClose} data-test-subj="workflowLibraryUploadCancel">
-            {i18n.translate('workflows.library.upload.cancel', { defaultMessage: 'Cancel' })}
-          </EuiButtonEmpty>
-          <EuiButton
-            fill
-            onClick={handleContinue}
-            disabled={!parsed}
-            data-test-subj="workflowLibraryUploadContinue"
-          >
-            {i18n.translate('workflows.library.upload.continue', {
-              defaultMessage: 'Continue',
-            })}
-          </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="cross"
+                onClick={onClose}
+                flush="left"
+                data-test-subj="workflowLibraryUploadCancel"
+              >
+                {i18n.translate('workflows.library.upload.cancel', { defaultMessage: 'Cancel' })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={handleContinue}
+                disabled={!parsed}
+                data-test-subj="workflowLibraryUploadContinue"
+              >
+                {i18n.translate('workflows.library.upload.continue', {
+                  defaultMessage: 'Continue',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
     );
   }
 );
-UploadTemplateModal.displayName = 'UploadTemplateModal';
+UploadTemplateFlyout.displayName = 'UploadTemplateFlyout';

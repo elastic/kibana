@@ -15,6 +15,10 @@ export { CatalogTemplateIcons, type CatalogTemplateIconsProps } from './catalog_
 export { TemplateDetail, type TemplateDetailProps } from './template_detail';
 export { WorkflowYamlPreview, type WorkflowYamlPreviewProps } from './template_yaml_preview';
 export {
+  UploadTemplateFlyout,
+  type UploadTemplateFlyoutProps,
+} from './upload_template_flyout';
+export {
   ConnectorField,
   type ConnectorFieldProps,
   InstallForm,
