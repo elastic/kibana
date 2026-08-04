@@ -22,3 +22,4 @@ export * from './use_monitor_detail_locator';
 export * from './use_url_space_id';
 export * from './use_fetch_maintenance_windows';
 export * from './use_fetch_all_maintenance_windows';
+export * from './get_active_maintenance_windows';

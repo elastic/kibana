@@ -19,6 +19,7 @@ jest.mock('react-redux-v7', () => ({
 }));
 
 jest.mock('../../../hooks', () => ({
+  ...jest.requireActual('../../../hooks'),
   useFetchMaintenanceWindows: jest.fn().mockReturnValue({ data: undefined }),
 }));
 

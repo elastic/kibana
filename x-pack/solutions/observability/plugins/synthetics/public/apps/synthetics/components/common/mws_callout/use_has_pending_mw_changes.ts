@@ -7,8 +7,7 @@
 
 import { useMemo } from 'react';
 import { useSyncInterval } from './use_sync_interval';
-import type { SyntheticsMaintenanceWindow } from '../../../hooks';
-import { useFetchMaintenanceWindows } from '../../../hooks';
+import { getActiveMaintenanceWindows, useFetchMaintenanceWindows } from '../../../hooks';
 
 export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
   const { data } = useFetchMaintenanceWindows();
@@ -17,9 +16,10 @@ export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
 
   const hasMonitorMWs = monitorMWIds.length > 0;
 
-  const activeMWs: SyntheticsMaintenanceWindow[] = hasMonitorMWs
-    ? allMWs.filter((mw) => mw.status === 'running' && monitorMWIds.includes(mw.id))
-    : [];
+  const activeMWs = useMemo(
+    () => getActiveMaintenanceWindows(allMWs, monitorMWIds),
+    [allMWs, monitorMWIds]
+  );
 
   const needsPendingCheck = hasMonitorMWs && activeMWs.length === 0;
 

@@ -6,15 +6,14 @@
  */
 
 import type { OverviewStatusMetaData } from '../../../../../../common/runtime_types';
-import { useFetchMaintenanceWindows } from '../../../hooks';
+import { getActiveMaintenanceWindows, useFetchMaintenanceWindows } from '../../../hooks';
 
 export const useMonitorMWs = (monitor: OverviewStatusMetaData) => {
   const { data } = useFetchMaintenanceWindows();
 
-  const monitorMWs = monitor.maintenanceWindows;
-
-  const activeMWs = (data?.maintenanceWindows ?? []).filter(
-    (mw) => mw.status === 'running' && monitorMWs?.includes(mw.id)
+  const activeMWs = getActiveMaintenanceWindows(
+    data?.maintenanceWindows,
+    monitor.maintenanceWindows
   );
 
   return { activeMWs };
