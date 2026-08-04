@@ -8,6 +8,8 @@
 import type { Logger } from '@kbn/core/server';
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import { SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID } from '@kbn/significant-events-plugin/server';
+import type { SignificantEventStatus } from '@kbn/significant-events-schema';
+import { SIGNIFICANT_EVENT_STATUS_OPTIONS } from '@kbn/significant-events-schema';
 
 /**
  * Prior Significant Events context tool for the KI extraction evals.
@@ -80,8 +82,9 @@ export const createEvalSignificantEventSearchTool = ({
           },
           status: {
             type: 'string' as const,
+            enum: SIGNIFICANT_EVENT_STATUS_OPTIONS,
             description:
-              'Optional status filter (e.g. "dismissed" to find known-noisy / demoted patterns).',
+              'Optional status filter. One of "pending", "open", "closed", "dismissed" (e.g. "dismissed" to find known-noisy / demoted patterns).',
           },
           view: {
             type: 'string' as const,
@@ -98,7 +101,7 @@ export const createEvalSignificantEventSearchTool = ({
     significant_event_search: async (toolCall) => {
       const { query, status, view } = toolCall.function.arguments as {
         query?: string;
-        status?: string;
+        status?: SignificantEventStatus;
         view?: 'compact' | 'full';
       };
       try {
