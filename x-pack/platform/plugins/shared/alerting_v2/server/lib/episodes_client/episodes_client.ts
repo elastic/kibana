@@ -16,14 +16,6 @@ import type { QueryServiceContract } from '../services/query_service/query_servi
 import { QueryServiceScopedToken } from '../services/query_service/tokens';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 
-/**
- * Server-side reads of the aggregated episode rows that the episodes UI renders.
- *
- * Uses the request-scoped {@link QueryServiceScopedToken} rather than the internal
- * flavor the ingest-side clients use: the browser reads these same rows through the
- * ES|QL search strategy as the current user, so running as the internal user here
- * would grant callers more than they can already see.
- */
 @injectable()
 export class EpisodesClient {
   constructor(
