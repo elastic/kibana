@@ -122,6 +122,7 @@ describe('RulesClientFactory', () => {
       shouldGrantUiam: false,
       featureFlags: coreFeatureFlagsMock.createStart(),
       isServerless: false,
+      analytics: { reportEvent: jest.fn() },
     };
 
     rulesClientFactoryParams.actions = actionsMock.createStart();

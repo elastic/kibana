@@ -73962,6 +73962,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -74120,6 +74121,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -74375,6 +74377,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -74527,6 +74530,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -76982,6 +76986,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -80441,6 +80446,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -82699,6 +82705,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -84814,6 +84821,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -89597,6 +89605,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -91896,6 +91905,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -92163,6 +92173,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -93230,6 +93241,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -93348,6 +93360,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -93466,6 +93479,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -93584,6 +93598,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -93702,6 +93717,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -93820,6 +93836,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -93938,6 +93955,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -94056,6 +94074,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -94174,6 +94193,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -94292,6 +94312,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -94408,6 +94429,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -94524,6 +94546,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -94642,6 +94665,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -94763,6 +94787,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -97152,6 +97177,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -97855,6 +97881,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -103326,6 +103353,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -106072,6 +106100,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -110379,6 +110408,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -110592,6 +110622,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -110771,6 +110802,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -110925,6 +110957,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -111040,6 +111073,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -111219,6 +111253,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
@@ -111333,6 +111368,7 @@ components:
           type: array
         template_id:
           description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
           type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.

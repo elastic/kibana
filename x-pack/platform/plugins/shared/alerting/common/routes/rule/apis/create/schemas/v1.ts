@@ -195,6 +195,7 @@ const baseCreateBodyFields = {
   artifacts: schema.maybe(artifactsSchemaV1),
   template_id: schema.maybe(
     schema.string({
+      maxLength: 1024,
       meta: {
         description: 'The identifier for the rule template this rule was created from, when known.',
       },
