@@ -12,7 +12,7 @@
  */
 
 import type { PageObjects, ScoutPage } from '@kbn/scout';
-import { EuiToastWrapper, spaceTest } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../fixtures';
 
@@ -35,11 +35,11 @@ const clickCopyColumnValues = async (page: ScoutPage, dataGrid: DataGridPage, fi
 };
 
 const expectSingleToastThenDismiss = async (page: ScoutPage) => {
-  const toasts = new EuiToastWrapper(page, { locator: '.euiToast' });
+  const toastList = page.components.globalToastList();
 
-  await expect(toasts.getWrapper()).toHaveCount(1);
+  await expect(toastList.toasts).toHaveCount(1);
 
-  await toasts.closeAllToasts();
+  await toastList.closeAll();
 };
 
 const readClipboard = async (page: ScoutPage): Promise<string> => {

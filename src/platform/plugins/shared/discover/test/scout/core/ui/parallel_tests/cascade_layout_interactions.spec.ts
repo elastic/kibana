@@ -14,7 +14,6 @@
  * to classic mode) renders the expected layout.
  */
 
-import { EuiDataGridWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../common/ui/fixtures';
 import { runCascadeQuery } from '../../../common/ui/fixtures/helpers';
@@ -90,20 +89,19 @@ spaceTest.describe(
 
           // Scoped to the expanded row: while scrolled, the sticky pinned group header
           // renders a `createPortal` duplicate of row content elsewhere in the DOM, so an
-          // unscoped page-wide `discoverDocTable` locator can match the wrong copy. The
-          // locator must resolve to `.euiDataGrid` itself (not its `discoverDocTable`
-          // container) since that's the element EUI toggles the fullscreen class on.
-          const expandedRowGrid = new EuiDataGridWrapper(page, {
-            locator: `[id="${firstRowId}"] [data-test-subj="discoverDocTable"] .euiDataGrid`,
-          });
-          expect(await expandedRowGrid.getRowsCount()).toBeGreaterThan(0);
+          // unscoped page-wide `discoverDocTable` locator can match the wrong copy.
+          const expandedRowGrid = page.components.dataGrid(
+            'discoverDocTable',
+            page.locator(`[id="${firstRowId}"]`)
+          );
+          await expect(expandedRowGrid.rows).not.toHaveCount(0);
 
           await expandedRowGrid.openFullScreenMode();
-          expect(await expandedRowGrid.getRowsCount()).toBeGreaterThan(0);
+          await expect(expandedRowGrid.rows).not.toHaveCount(0);
 
           await expandedRowGrid.closeFullScreenMode();
           // Rows are still rendered (the grid didn't unmount/lose its data) after exiting fullscreen.
-          expect(await expandedRowGrid.getRowsCount()).toBeGreaterThan(0);
+          await expect(expandedRowGrid.rows).not.toHaveCount(0);
         });
 
         await spaceTest.step('opting out of grouping shows the flat doc table', async () => {
