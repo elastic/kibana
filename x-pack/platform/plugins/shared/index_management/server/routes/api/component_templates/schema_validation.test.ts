@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { componentTemplateSchema } from './schema_validation';
+import { componentTemplateNameSchema, componentTemplateSchema } from './schema_validation';
 
 describe('componentTemplateSchema', () => {
   it('SHOULD accept minimal valid payload', () => {
@@ -36,6 +36,16 @@ describe('componentTemplateSchema', () => {
         _kbnMeta: { usedBy: [], isManaged: false },
       })
     ).toThrow();
+  });
+
+  it('SHOULD reject a name containing a forward slash', () => {
+    expect(() =>
+      componentTemplateSchema.validate({
+        name: 'a/b',
+        template: {},
+        _kbnMeta: { usedBy: [], isManaged: false },
+      })
+    ).toThrowError(/must not contain the character "\/"/);
   });
 
   it('SHOULD require _kbnMeta fields', () => {
@@ -118,5 +128,19 @@ describe('componentTemplateSchema', () => {
       _kbnMeta: { usedBy: [], isManaged: false },
     });
     expect(value).toBeTruthy();
+  });
+});
+
+describe('componentTemplateNameSchema', () => {
+  it('SHOULD accept a name without a forward slash', () => {
+    expect(componentTemplateNameSchema.validate('my-component-template')).toBe(
+      'my-component-template'
+    );
+  });
+
+  it('SHOULD reject a name containing a forward slash', () => {
+    expect(() => componentTemplateNameSchema.validate('a/b')).toThrowError(
+      /must not contain the character "\/"/
+    );
   });
 });
