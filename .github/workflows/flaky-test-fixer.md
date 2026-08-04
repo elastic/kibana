@@ -383,7 +383,7 @@ Follow this format:
   ````markdown
   ### 🔧 Manual PR needed: apply this fix to <version-branch>
 
-  Open this PR against <version-branch> manually — this workflow can only target `main`. <one very concise sentence on what the fix changes>. Everything you need is below. cc @<requester-github-handle-here-if-not-a-bot>
+  Open this PR against <version-branch> manually — this workflow can only target `main`. Everything you need is below. cc @<requester-github-handle-here-if-not-a-bot>
 
   - **Title:** `<PR title, per "PR format">`
   - **Labels:** `flaky-test-fixer`, `release_note:skip`, `<backport label(s), per "Backport label" — write "no backport label" if you weren't sure>`
