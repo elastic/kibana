@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const toasts = getService('toasts');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'console', 'header']);
+  const PageObjects = getPageObjects(['common', 'console']);
   const testSubjects = getService('testSubjects');
 
   describe('console output panel', function describeIndexTests() {
@@ -31,17 +31,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const sendRequest = async (request: string) => {
       await PageObjects.console.enterText(request);
-      await PageObjects.console.clickPlay();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      // Typing opens Monaco's autocomplete widget, which can sit over the send
+      // button and swallow the click; dismiss it, then wait for the output to
+      // actually render rather than for the header spinner (which clears
+      // immediately when no request was dispatched).
+      await PageObjects.console.pressEscape();
+      await PageObjects.console.clickPlayAndWaitForResults();
     };
 
     const sendMultipleRequests = async (requests: string[]) => {
       await asyncForEach(requests, async (request) => {
         await PageObjects.console.enterText(request);
       });
+      await PageObjects.console.pressEscape();
       await PageObjects.console.selectAllRequests();
-      await PageObjects.console.clickPlay();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.console.clickPlayAndWaitForResults();
     };
 
     it('should be able to copy the response of a request', async () => {
