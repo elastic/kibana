@@ -68,6 +68,8 @@ import {
   type SignificantEventsScheduledWorkflowsService,
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
+import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers/register_triggers';
+import { createTriggerEmitter } from './workflows/triggers/emit';
 import { installInvestigationAgent } from './memory_and_investigation/lib/investigation/install_investigation_agent';
 import { registerInvestigationAgentType } from './memory_and_investigation/agents/investigation';
 import {
@@ -166,6 +168,11 @@ export class SignificantEventsPlugin
         services: significantEventsServices,
         esClient: scopedClusterClient.asCurrentUser,
         space,
+        triggerEmitter: createTriggerEmitter({
+          workflowsExtensions: pluginsStart.workflowsExtensions,
+          request,
+          logger: this.logger,
+        }),
       });
 
       const getAlertingV2RulesClient = async () =>
@@ -291,6 +298,9 @@ export class SignificantEventsPlugin
     plugins.workflowsExtensions?.registerManagedWorkflowOwner(
       SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
     );
+
+    // Custom event-driven triggers users can subscribe to from their own workflows.
+    registerSignificantEventsWorkflowTriggers(plugins.workflowsExtensions);
 
     if (plugins.workflowsManagement && plugins.workflowsExtensions) {
       significantEventsScheduledWorkflowsService = createSignificantEventsScheduledWorkflowsService(
