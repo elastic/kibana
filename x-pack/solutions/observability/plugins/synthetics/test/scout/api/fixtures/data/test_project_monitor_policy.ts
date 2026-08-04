@@ -525,10 +525,12 @@ export const getTestProjectSyntheticsPolicy = (
   {
     inputs = {},
     id,
+    configId,
     projectId = 'test-suite',
     locationId,
     locationName = 'Fleet Managed',
     namespace,
+    kibanaUrl,
   }: {
     name?: string;
     inputs: Record<string, { value: string | boolean; type: string }>;
@@ -538,6 +540,7 @@ export const getTestProjectSyntheticsPolicy = (
     locationName?: string;
     locationId: string;
     namespace?: string;
+    kibanaUrl?: string;
   } = {
     name: 'check if title is present-Test private location 0',
     inputs: {},
@@ -717,24 +720,39 @@ export const getTestProjectSyntheticsPolicy = (
             'service.name': { value: null, type: 'text' },
             timeout: { value: null, type: 'text' },
             tags: { value: null, type: 'yaml' },
-            'source.zip_url.url': { type: 'text' },
-            'source.zip_url.username': { type: 'text' },
-            'source.zip_url.folder': { type: 'text' },
-            'source.zip_url.password': { type: 'password' },
-            'source.inline.script': { value: null, type: 'yaml' },
+            'source.inline.script': { value: '', type: 'yaml' },
+            'source.inline.encoding': { type: 'text' },
             'source.project.content': {
               value:
                 'UEsDBBQACAAIAON5qVQAAAAAAAAAAAAAAAAfAAAAZXhhbXBsZXMvdG9kb3MvYmFzaWMuam91cm5leS50c22Q0WrDMAxF3/sVF7MHB0LMXlc6RvcN+wDPVWNviW0sdUsp/fe5SSiD7UFCWFfHujIGlpnkybwxFTZfoY/E3hsaLEtwhs9RPNWKDU12zAOxkXRIbN4tB9d9pFOJdO6EN2HMqQguWN9asFBuQVMmJ7jiWNII9fIXrbabdUYr58l9IhwhQQZCYORCTFFUC31Btj21NRc7Mq4Nds+4bDD/pNVgT9F52Jyr2Fa+g75LAPttg8yErk+S9ELpTmVotlVwnfNCuh2lepl3+JflUmSBJ3uggt1v9INW/lHNLKze9dJe1J3QJK8pSvWkm6aTtCet5puq+x63+AFQSwcIAPQ3VfcAAACcAQAAUEsBAi0DFAAIAAgA43mpVAD0N1X3AAAAnAEAAB8AAAAAAAAAAAAgAKSBAAAAAGV4YW1wbGVzL3RvZG9zL2Jhc2ljLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBNAAAARAEAAAAA',
               type: 'text',
             },
             params: {
-              value:
-                '{"testGlobalParam2":"testGlobalParamValue2","testGlobalParam":"testGlobalParamValue"}',
+              value: '{"testGlobalParam":"testGlobalParamValue"}',
               type: 'yaml',
             },
             playwright_options: {
               value: '{"headless":true,"chromiumSandbox":false}',
               type: 'yaml',
+            },
+            processors: {
+              type: 'yaml',
+              value: JSON.stringify([
+                {
+                  add_fields: {
+                    fields: {
+                      'monitor.fleet_managed': true,
+                      config_id: configId,
+                      'monitor.project.name': projectId,
+                      'monitor.project.id': projectId,
+                      'monitor.interval': 600,
+                      meta: { space_id: 'default' },
+                      ...(kibanaUrl ? { kibanaUrl } : {}),
+                    },
+                    target: '',
+                  },
+                },
+              ]),
             },
             screenshots: { value: 'on', type: 'text' },
             synthetics_args: { value: null, type: 'text' },
@@ -745,17 +763,16 @@ export const getTestProjectSyntheticsPolicy = (
             },
             'filter_journeys.tags': { value: null, type: 'yaml' },
             'filter_journeys.match': { value: '"check if title is present"', type: 'text' },
-            'source.zip_url.ssl.certificate_authorities': { type: 'yaml' },
-            'source.zip_url.ssl.certificate': { type: 'yaml' },
-            'source.zip_url.ssl.key': { type: 'yaml' },
-            'source.zip_url.ssl.key_passphrase': { type: 'text' },
-            'source.zip_url.ssl.verification_mode': { type: 'text' },
-            'source.zip_url.ssl.supported_protocols': { type: 'yaml' },
-            'source.zip_url.proxy_url': { type: 'text' },
-            location_name: { value: 'Test private location 0', type: 'text' },
+            location_name: {
+              type: 'text',
+              value: JSON.stringify(locationName),
+            },
             ...commonVars,
-            location_id: { value: 'fleet_managed', type: 'text' },
-            id: { value: id, type: 'text' },
+            location_id: {
+              type: 'text',
+              value: locationId ?? 'fleet_managed',
+            },
+            id: { value: JSON.stringify(id), type: 'text' },
             origin: { value: 'project', type: 'text' },
             ...inputs,
           },
@@ -773,6 +790,7 @@ export const getTestProjectSyntheticsPolicy = (
             'run_from.geo.name': locationName,
             'run_from.id': locationId,
             timeout: null,
+            max_attempts: 2,
             throttling: { download: 5, upload: 3, latency: 20 },
             'source.project.content':
               'UEsDBBQACAAIAON5qVQAAAAAAAAAAAAAAAAfAAAAZXhhbXBsZXMvdG9kb3MvYmFzaWMuam91cm5leS50c22Q0WrDMAxF3/sVF7MHB0LMXlc6RvcN+wDPVWNviW0sdUsp/fe5SSiD7UFCWFfHujIGlpnkybwxFTZfoY/E3hsaLEtwhs9RPNWKDU12zAOxkXRIbN4tB9d9pFOJdO6EN2HMqQguWN9asFBuQVMmJ7jiWNII9fIXrbabdUYr58l9IhwhQQZCYORCTFFUC31Btj21NRc7Mq4Nds+4bDD/pNVgT9F52Jyr2Fa+g75LAPttg8yErk+S9ELpTmVotlVwnfNCuh2lepl3+JflUmSBJ3uggt1v9INW/lHNLKze9dJe1J3QJK8pSvWkm6aTtCet5puq+x63+AFQSwcIAPQ3VfcAAACcAQAAUEsBAi0DFAAIAAgA43mpVAD0N1X3AAAAnAEAAB8AAAAAAAAAAAAgAKSBAAAAAGV4YW1wbGVzL3RvZG9zL2Jhc2ljLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBNAAAARAEAAAAA',
@@ -781,8 +799,24 @@ export const getTestProjectSyntheticsPolicy = (
             'filter_journeys.match': 'check if title is present',
             params: {
               testGlobalParam: 'testGlobalParamValue',
-              testGlobalParam2: 'testGlobalParamValue2',
             },
+            processors: [
+              {
+                add_fields: {
+                  fields: {
+                    'monitor.fleet_managed': true,
+                    config_id: configId,
+                    'monitor.project.name': projectId,
+                    'monitor.project.id': projectId,
+                    'monitor.interval': 600,
+                    meta: { space_id: 'default' },
+                    ...(kibanaUrl ? { kibanaUrl } : {}),
+                  },
+                  target: '',
+                },
+              },
+            ],
+            maintenance_windows: null,
             ...Object.keys(inputs).reduce((acc: Record<string, unknown>, key) => {
               acc[key] = inputs[key].value;
               return acc;
