@@ -73,8 +73,7 @@ export type ColumnsProvider = (providerOptions: {
   hit: DataTableRecord;
   /**
    * Optional wrapper that renders a preview link for supported field types (host, ip, rule).
-   * Injected by the caller: the new flyout passes `OpenFlyoutLink`, the legacy flyout omits it
-   * so the value cell keeps using the expandable-flyout `PreviewLink`.
+   * When omitted, the value cell falls back to the `PreviewLink` preview panel.
    */
   renderFlyoutLink?: OpenFlyoutLinkRenderer;
 }) => Array<EuiBasicTableColumn<TimelineEventsDetailsItem>>;

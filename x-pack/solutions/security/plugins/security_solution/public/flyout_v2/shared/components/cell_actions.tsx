@@ -44,7 +44,7 @@ export interface CreateCellActionRendererOptions {
   triggerId?: string;
   /**
    * Number of actions shown before the overflow menu. Defaults to `5` (the default trigger's action
-   * count); the details-flyout trigger uses `6` to match the legacy flyout.
+   * count); the details-flyout trigger uses `6`.
    */
   visibleCellActions?: number;
   /**
@@ -109,16 +109,13 @@ export const createCellActionRenderer = (
 };
 
 /**
- * Default cell action renderer for Security Solution. This component is used to render cell actions for fields in Security Solution.
- * This is used in the expandable flyout and in the new flyout (though only when used in Security Solution).
+ * Default cell action renderer for Security Solution.
  */
 export const cellActionRenderer: CellActionRenderer = createCellActionRenderer('');
 
 /**
  * Cell action renderer for rule preview contexts. Disables Filter-for/Filter-out and
  * Toggle-column because those actions are meaningless against transient preview alerts.
- * Mirrors the v1 behavior in
- * `flyout/document_details/shared/components/cell_actions.tsx:48-52`.
  */
 export const rulePreviewCellActionRenderer: CellActionRenderer = createCellActionRenderer('', {
   disabledActionTypes: [SecurityCellActionType.FILTER, SecurityCellActionType.TOGGLE_COLUMN],
@@ -126,7 +123,6 @@ export const rulePreviewCellActionRenderer: CellActionRenderer = createCellActio
 
 /**
  * Cell action renderer for Cases.
- * This is used in the expandable flyout and in the new flyout (though only when used in Security Solution).
  */
 export const casesCellActionRenderer: CellActionRenderer = createCellActionRenderer('', {
   triggerId: SECURITY_CELL_ACTIONS_CASE_EVENTS,

@@ -159,7 +159,7 @@ const RowActionComponent = ({
       if (tableId === TableId.rulePreview) {
         // Rule preview alert rows reference their backing .internal.preview. index, which is
         // not included in any data view pattern. Convert to the alias and resolve via the
-        // pattern-based wrapper, mirroring what the old flyout did.
+        // pattern-based wrapper.
         const resolvedIndex = indexName
           ? getAlertIndexAlias(indexName, spaceId) ?? indexName
           : undefined;

@@ -18,10 +18,6 @@ import { DEFAULT_PREVIEW_INDEX } from '../../../../common/constants';
  * matched because `DEFAULT_PREVIEW_INDEX` (`.preview.alerts-security.alerts`)
  * is a substring of both.
  *
- * This mirrors the guard in
- * `flyout/document_details/right/hooks/use_get_flyout_link.ts` and the
- * `isRemoteDocument` derivation in
- * `flyout_v2/document/main/components/investigation_section.tsx`.
  */
 export const isRulePreviewDocument = (hit: DataTableRecord): boolean =>
   ((hit.raw._index as string) ?? (getFieldValue(hit, '_index') as string) ?? '').includes(

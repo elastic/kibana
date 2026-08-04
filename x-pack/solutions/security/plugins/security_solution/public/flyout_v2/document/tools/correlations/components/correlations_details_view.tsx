@@ -43,7 +43,7 @@ export interface CorrelationsDetailsViewProps {
    */
   onShowAttack?: (id: string, indexName: string, title?: string) => void;
   /**
-   * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of OpenFlyoutLink (new flyout system)
+   * Whether to render rule links as PreviewLink instead of OpenFlyoutLink
    */
   useLegacyExpandableFlyout: boolean;
 }

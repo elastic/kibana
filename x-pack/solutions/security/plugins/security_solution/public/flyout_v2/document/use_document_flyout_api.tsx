@@ -252,10 +252,6 @@ export interface DocumentFlyoutApi {
  * properties so call sites don't have to repeat them. `useOpenFlyout` also reports open/close
  * telemetry for every method below.
  *
- * This API only ever opens the NEW flyout. It does not know about the legacy expandable flyout:
- * callers remain responsible for gating on `useIsNewFlyoutEnabled()` and falling back to the
- * legacy flyout when it is off.
- *
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {

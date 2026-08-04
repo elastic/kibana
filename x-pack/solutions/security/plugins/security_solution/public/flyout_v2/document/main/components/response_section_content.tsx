@@ -27,16 +27,13 @@ export interface ResponseSectionContentProps {
    */
   hit: DataTableRecord;
   /**
-   * Callback to show Response details. The host (Flyout v2 or legacy expandable flyout)
-   * decides whether this opens a tools flyout or navigates to the legacy left panel.
+   * Callback to show Response details.
    */
   onShowResponseDetails: () => void;
 }
 
 /**
- * Renders the Response overview section. Host-agnostic: takes an `onShowResponseDetails`
- * callback so it can be reused in both Flyout v2 and the legacy expandable flyout
- * without constructing a v2 tools flyout when not needed.
+ * Renders the Response overview section.
  */
 export const ResponseSectionContent = memo<ResponseSectionContentProps>(
   ({ hit, onShowResponseDetails }) => {

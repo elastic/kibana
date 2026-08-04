@@ -129,8 +129,7 @@ export interface TableTabProps {
   renderCellActions: CellActionRenderer;
   /**
    * Optional wrapper that turns supported field values (host, ip, rule) into links that open the
-   * relevant system flyout. Injected by the new flyout; when omitted (legacy expandable flyout),
-   * the value cell keeps using the `PreviewLink` preview panel.
+   * relevant system flyout. When omitted, the value cell falls back to the `PreviewLink` preview panel.
    */
   renderFlyoutLink?: OpenFlyoutLinkRenderer;
 }

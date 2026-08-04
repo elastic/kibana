@@ -107,8 +107,7 @@ export const DocumentFlyout = memo(
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
 
     // The Table and JSON tabs are only available in Security Solution, not in Discover.
-    // The selected tab is persisted to localStorage, sharing the key with the legacy
-    // document flyout so the user's preference carries across both implementations.
+    // The selected tab is persisted to localStorage.
     const { selectedTabId, setSelectedTabId } = useTabs<DocumentFlyoutTabId>({
       validTabIds: VALID_TAB_IDS,
       storageKey: FLYOUT_STORAGE_KEYS.SELECTED_TAB,

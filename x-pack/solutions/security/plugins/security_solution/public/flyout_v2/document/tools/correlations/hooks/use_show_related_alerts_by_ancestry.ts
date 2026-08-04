@@ -32,8 +32,7 @@ export interface UseShowRelatedAlertsByAncestryResult {
 
 /**
  * Returns true if the user has at least platinum privilege, and if the document has ancestry data.
- * For rule preview documents the ancestry document id is the ancestor's id rather than the hit id,
- * matching v1 behaviour (`flyout/document_details/shared/hooks/use_show_related_alerts_by_ancestry`).
+ * For rule preview documents the ancestry document id is the ancestor's id rather than the hit id.
  */
 export const useShowRelatedAlertsByAncestry = ({
   hit,
