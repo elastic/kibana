@@ -9,7 +9,14 @@
 
 import React from 'react';
 import { flushSync } from 'react-dom';
-import { BehaviorSubject, firstValueFrom, type Observable, Subject, type Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  firstValueFrom,
+  type Observable,
+  Subject,
+  type Subscription,
+} from 'rxjs';
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs';
 import type { History } from 'history';
 import { createBrowserHistory } from 'history';
@@ -45,6 +52,8 @@ import {
   relativeToAbsolute,
   getAppInfo,
   getLocationObservable,
+  isAppNotFound,
+  pathnameFromLocationUrl,
 } from './utils';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 
@@ -282,6 +291,17 @@ export class ApplicationService {
       shareReplay(1)
     );
 
+    const appNotFound$ = combineLatest([
+      this.location$!.pipe(takeUntil(this.stop$)),
+      applicationStatuses$,
+    ]).pipe(
+      map(([locationUrl, statuses]) =>
+        isAppNotFound(pathnameFromLocationUrl(locationUrl), availableMounters, statuses)
+      ),
+      distinctUntilChanged(),
+      shareReplay(1)
+    );
+
     const navigateToApp: InternalApplicationStart['navigateToApp'] = async (
       appId,
       {
@@ -332,6 +352,7 @@ export class ApplicationService {
         distinctUntilChanged(),
         takeUntil(this.stop$)
       ),
+      appNotFound$,
       currentActionMenu$: this.currentActionMenu$.pipe(
         distinctUntilChanged(),
         takeUntil(this.stop$)

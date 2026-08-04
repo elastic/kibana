@@ -132,7 +132,7 @@ describe('AppContainer', () => {
       />
     );
 
-    expect(wrapper.text()).toContain('Application not found');
+    expect(wrapper.text()).toContain('Application unavailable');
 
     wrapper.setProps({
       appId,
