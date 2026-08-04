@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, useEuiFontSize } from '@elastic/eui';
 
 /**
  * Styles for user-authored markdown (case descriptions, comments).
@@ -27,10 +27,17 @@ import { useEuiTheme } from '@elastic/eui';
  */
 export const useProseCss = () => {
   const { euiTheme } = useEuiTheme();
+  const sFontSize = useEuiFontSize('s');
 
   return useMemo(
     () => css`
       &&& {
+        /* EUI's markdown renderer defaults to a 16px base, a whole step above the 14px the rest of
+           the case page uses. Every heading below is sized in em, so correcting the base brings the
+           entire ladder into scale with its surroundings instead of shouting over them. */
+        font-size: ${sFontSize.fontSize};
+        line-height: ${sFontSize.lineHeight};
+
         h1,
         h2,
         h3,
@@ -115,6 +122,6 @@ export const useProseCss = () => {
         }
       }
     `,
-    [euiTheme]
+    [euiTheme, sFontSize]
   );
 };
