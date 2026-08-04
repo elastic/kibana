@@ -12,6 +12,3 @@ export const FLYOUT_MIN_CELL_WIDTH = 140;
 
 /** Maximum column count for any flyout grid, however wide the container. */
 export const FLYOUT_MAX_GRID_COLUMNS = 3;
-
-/** Soft cap on metadata pairs; exceeding it warns in development but still renders. */
-export const MAX_METADATA_ITEMS = 3;

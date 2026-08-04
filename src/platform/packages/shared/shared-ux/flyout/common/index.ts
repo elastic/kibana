@@ -7,8 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  FLYOUT_MIN_CELL_WIDTH,
-  FLYOUT_MAX_GRID_COLUMNS,
-  MAX_METADATA_ITEMS,
-} from './src/constants';
+export { FLYOUT_MIN_CELL_WIDTH, FLYOUT_MAX_GRID_COLUMNS } from './src/constants';
