@@ -46,6 +46,10 @@ const loadRulesBodySchema = z.object({
   lookback: z.string().min(1).default('365d'),
   tag: z.string().min(1).default('perf-esql'),
   concurrency: z.number().int().min(1).max(100).default(20),
+  // Rows returned per execution. The v2 Arrow-streaming path is NOT bound by
+  // ES|QL's default row cap, so without an explicit LIMIT each run streams the
+  // whole source index. Default 10_000 matches the perf-test spec (~50MB/run).
+  rowLimit: z.number().int().min(1).max(1_000_000).default(10_000),
 });
 
 type LoadRulesBody = z.infer<typeof loadRulesBodySchema>;
@@ -80,9 +84,9 @@ export class LoadRulesRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { count, index, every, lookback, tag, concurrency } = this.request.body;
+    const { count, index, every, lookback, tag, concurrency, rowLimit } = this.request.body;
     const batchId = Date.now().toString(36);
-    const query = `FROM ${index} | KEEP @timestamp, host.name, message`;
+    const query = `FROM ${index} | KEEP @timestamp, host.name, message | LIMIT ${rowLimit}`;
 
     const makeData = (i: number): CreateRuleData => ({
       kind: 'signal',
