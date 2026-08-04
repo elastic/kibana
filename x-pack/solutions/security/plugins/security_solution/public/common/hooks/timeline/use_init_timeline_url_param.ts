@@ -13,16 +13,12 @@ import type { State } from '../../store';
 import { TimelineId } from '../../../../common/types';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
-import { useOpenSuperTimeline } from '../../../timelines/components/super_timeline/use_open_super_timeline';
 import type { TimelineModel, TimelineUrl } from '../../../timelines/store/model';
 import { selectTimelineById } from '../../../timelines/store/selectors';
 import { URL_PARAM_KEY } from '../use_url_state';
-import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 
 export const useInitTimelineFromUrlParam = () => {
   const queryTimelineById = useQueryTimelineById();
-  const { openSuperTimeline } = useOpenSuperTimeline();
-  const isSuperTimelineEnabled = useIsExperimentalFeatureEnabled('superTimeline');
   const activeTimeline = useSelector((state: State) =>
     selectTimelineById(state, TimelineId.active)
   );
@@ -30,25 +26,17 @@ export const useInitTimelineFromUrlParam = () => {
   const onInitialize = useCallback(
     (initialState: TimelineUrl | null) => {
       if (initialState != null) {
-        if (initialState.superTimelineSourceIds?.length) {
-          // Super Timeline URLs have no 'id'; skip queryTimelineById when the flag is off
-          // rather than calling it with timelineId: undefined.
-          if (isSuperTimelineEnabled) {
-            openSuperTimeline(initialState.superTimelineSourceIds);
-          }
-        } else {
-          queryTimelineById({
-            activeTimelineTab: initialState.activeTab,
-            duplicate: false,
-            timelineId: initialState.id,
-            openTimeline: initialState.isOpen,
-            savedSearchId: initialState.savedSearchId,
-            query: initialState.query,
-          });
-        }
+        queryTimelineById({
+          activeTimelineTab: initialState.activeTab,
+          duplicate: false,
+          timelineId: initialState.id,
+          openTimeline: initialState.isOpen,
+          savedSearchId: initialState.savedSearchId,
+          query: initialState.query,
+        });
       }
     },
-    [queryTimelineById, openSuperTimeline, isSuperTimelineEnabled]
+    [queryTimelineById]
   );
 
   useEffect(() => {
@@ -86,8 +74,6 @@ export function hasTimelineStateChanged(
     activeTimeline &&
     newState &&
     ((activeTimeline.savedObjectId ?? null) !== (newState.id ?? null) ||
-      (activeTimeline.savedSearchId ?? null) !== (newState.savedSearchId ?? null) ||
-      JSON.stringify([...(activeTimeline.superTimelineSourceIds ?? [])].sort()) !==
-        JSON.stringify([...(newState.superTimelineSourceIds ?? [])].sort()))
+      (activeTimeline.savedSearchId ?? null) !== (newState.savedSearchId ?? null))
   );
 }
