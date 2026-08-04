@@ -101,6 +101,38 @@ _citadel_experiment() {
     return 0
   fi
 
+  # --- Confirmed bypasses ----------------------------------------------------
+  # Applied unconditionally, not behind a flag: a PR build is triggered
+  # automatically and cannot carry build-level env vars. Everything here is
+  # evidence-backed — a specific build demonstrates the failure — as opposed to
+  # the candidate list below. Each of these must also land in
+  # vault-buildkite-plugin hooks/environment and be recorded in
+  # citadel-proxy docs/ci-egress-proxy.md.
+  #
+  # us-central1-elastic-kibana-184716.cloudfunctions.net
+  #   Kibana CI binary cache: CHROMEDRIVER_CDNURL / GECKODRIVER_CDNURL /
+  #   CYPRESS_DOWNLOAD_MIRROR, and node's SHASUMS256.txt + tarballs.
+  #   Proxied, build_kibana fails deterministically in DownloadNodeBuilds with
+  #   "sha256 checksum of ...node-<ver>-linux-x64.tar.gz not provided"
+  #   (flaky-test-suite-runner 13513 and 13517; passes with the proxy blanked,
+  #   13510). curl through the same proxy in the same job returns byte-identical
+  #   correct content, so the fault is client-side rather than on the wire —
+  #   tracked separately, this is the unblock.
+  #   Static hostname: elastic-kibana-184716 is the GCP project id and
+  #   us-central1 is where the Cloud Function is deployed. Agent region and build
+  #   vary in the URL path, not the host, so one entry covers every region.
+  local confirmed=(
+    us-central1-elastic-kibana-184716.cloudfunctions.net
+  )
+  local bypass_host
+  for bypass_host in "${confirmed[@]}"; do
+    NO_PROXY="${NO_PROXY:+${NO_PROXY},}${bypass_host},.${bypass_host}"
+  done
+  export NO_PROXY
+  export no_proxy="${NO_PROXY}"
+  echo "NO_PROXY extended (confirmed): ${confirmed[*]}"
+  applied="${applied}confirmed-bypass "
+
   # --- Candidate bypasses ----------------------------------------------------
   if [[ "${CITADEL_EXP_EXTRA_NO_PROXY:-}" == "true" ]]; then
     local extra=(
