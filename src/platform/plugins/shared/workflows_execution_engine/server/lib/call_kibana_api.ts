@@ -70,8 +70,9 @@ export interface CallKibanaApiParams {
   rawBody?: BufferedRawBody | null;
   query?: Record<string, string | number | boolean | undefined>;
   /**
-   * Caller-supplied headers. Cross-cutting headers (Authorization, x-elastic-internal-origin-request,
-   * event-chain headers, Content-Type) are managed by the helper and cannot be overridden.
+   * Caller-supplied headers. Authentication, internal-origin, and event-chain headers are managed
+   * by the helper. JSON requests default to `application/json`, while an explicit caller content
+   * type is preserved; FormData controls its own multipart boundary.
    */
   headers?: Record<string, string>;
   signal?: AbortSignal;
@@ -232,10 +233,18 @@ export async function callKibanaApi<T = unknown>(
   }
 
   // Only the headers Core's self client does not manage for us: caller-supplied custom headers
-  // (reserved ones stripped) plus the engine's event-chain propagation. Authorization, Content-Type,
-  // x-elastic-internal-origin, and kbn-version/xsrf are set by the self client itself.
+  // (reserved ones stripped) plus the engine's event-chain propagation. Authorization,
+  // x-elastic-internal-origin, and kbn-version/xsrf are set by the self client itself; JSON
+  // requests receive a default content type unless the caller supplied one.
+  const callerHeaders = stripReservedHeaders(params.headers, params.rawBody !== undefined);
+  const hasContentType = Object.keys(callerHeaders).some(
+    (name) => name.toLowerCase() === 'content-type'
+  );
   const outboundHeaders: Record<string, string> = {
-    ...stripReservedHeaders(params.headers, params.rawBody !== undefined),
+    ...(!hasContentType && params.rawBody === undefined
+      ? { 'content-type': 'application/json' }
+      : {}),
+    ...callerHeaders,
     ...getOutboundEventChainHeaders(fakeRequest, workflowRunId),
     ...getInternalUiamCallerAttestationHeaders(coreStart, fakeRequest),
   };

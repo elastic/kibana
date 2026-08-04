@@ -413,7 +413,22 @@ describe('callKibanaApi', () => {
     expect(headers['x-kibana-workflow-execution-id']).toBe('run-42');
   });
 
-  it('drops caller-supplied reserved headers (Core-owned or engine-stamped) but keeps custom ones', async () => {
+  it('defaults JSON string bodies to application/json while preserving explicit content types', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      { method: 'POST', path: '/api/foo', body: '{"a":1}' }
+    );
+    expect(lastFetchHeaders()['content-type']).toBe('application/json');
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      { method: 'POST', path: '/api/foo', body: '{"a":1}', headers: { 'Content-Type': 'text/plain' } }
+    );
+    expect(lastFetchHeaders()['Content-Type']).toBe('text/plain');
+  });
+
+  it('drops caller-supplied protected headers but keeps custom ones', async () => {
     mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
 
     await callKibanaApi(
@@ -433,9 +448,9 @@ describe('callKibanaApi', () => {
     );
 
     const headers = lastFetchHeaders();
-    // Core owns these; forwarding them would make the self client throw, so they are stripped here.
+    // Core owns authorization; the explicit caller content type is preserved for JSON requests.
     expect(headers.Authorization).toBeUndefined();
-    expect(headers['content-type']).toBeUndefined();
+    expect(headers['content-type']).toBe('text/plain');
     expect(headers['x-elastic-internal-origin']).toBeUndefined();
     // Engine-stamped, not caller-forgeable.
     expect(headers['x-kibana-event-chain-depth']).toBeUndefined();

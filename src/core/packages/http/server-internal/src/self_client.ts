@@ -190,10 +190,10 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
   private createUrl<TRequestBody>(path: string, options: HttpSelfFetchOptions<TRequestBody>): URL {
     const baseUrl = this.getBaseUrl();
     const requestBasePath =
-      this.request.basePath || (options.prependBasePath === false ? this.params.basePath.serverBasePath : '');
-    const pathname = options.prependBasePath === false
-      ? `${requestBasePath}${path}`
-      : `${this.request.basePath}${path}`;
+      options.prependBasePath === false
+        ? this.params.basePath.serverBasePath
+        : this.request.basePath;
+    const pathname = `${requestBasePath}${path}`;
     const url = new URL(pathname, baseUrl);
 
     if (url.origin !== baseUrl.origin) {

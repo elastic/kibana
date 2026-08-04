@@ -115,6 +115,15 @@ describe('InternalHttpSelfScopedClient', () => {
     expect(request.url).toBe('https://kibana.example.com/base/api/status');
   });
 
+  it('strips a request space prefix when prependBasePath is false', async () => {
+    const { self } = createClient({ publicBaseUrl: 'https://kibana.example.com/base' });
+    await self.asScoped(createRequest({ basePath: '/base/s/space' })).fetch('/api/status', {
+      prependBasePath: false,
+    });
+    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(request.url).toBe('https://kibana.example.com/base/api/status');
+  });
+
   it('supports buffered raw bodies and rejects streams', async () => {
     const { self } = createClient();
     await self.asScoped(createRequest()).fetch('/api/upload', {

@@ -1,4 +1,14 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
+import { CallKibanaApiResponseTooLargeError } from '../lib/call_kibana_api';
 import { KibanaActionStepImpl } from './kibana_action_step';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -61,6 +71,16 @@ describe('KibanaActionStepImpl', () => {
     const call = contextManager.callKibanaApi.mock.calls[0][0];
     expect(call.rawBody).toBeInstanceOf(FormData);
     expect(call.body).toBeUndefined();
+  });
+
+  it('converts adapter response-size failures to the step error', async () => {
+    contextManager.callKibanaApi.mockRejectedValue(
+      new CallKibanaApiResponseTooLargeError(1000)
+    );
+    step = createStep({ request: { method: 'GET', path: '/api/test' } });
+    const result = await (step as any)._run();
+    expect(result.error).toBeDefined();
+    expect(result.error.message).toContain('response size limit');
   });
 
   it('does not double-prefix generated non-default-space paths', async () => {
