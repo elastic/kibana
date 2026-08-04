@@ -298,8 +298,6 @@ class ConversationClientImpl implements ConversationClient {
           : {}),
         ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
         read: false,
-        // `title` is deliberately absent: generated once at creation, so a
-        // round would only write back the title it read, undoing a rename
       }),
     });
   }
