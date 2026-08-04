@@ -5,24 +5,19 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-
-type ServerStepDefinitionOrLoader = Parameters<
-  WorkflowsExtensionsServerPluginSetup['registerStepDefinition']
->[0];
+import { getCreateAlertEventStepDefinition } from './steps/create_alert_event_step';
 
 /**
  * Registers all alerting-v2 server-side workflow step definitions.
  * Called once during plugin setup.
  */
 export function registerStepDefinitions(
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
+  logger: Logger
 ): void {
-  const stepDefinitions: ServerStepDefinitionOrLoader[] = [
-    // Add ServerStepDefinition or loader entries here.
-  ];
-
-  for (const definition of stepDefinitions) {
-    workflowsExtensions.registerStepDefinition(definition);
-  }
+  workflowsExtensions.registerStepDefinition(
+    getCreateAlertEventStepDefinition(() => logger)
+  );
 }
