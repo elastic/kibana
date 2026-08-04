@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { getFlattenedTraceDocumentOverview, type DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import {
+  AGENT_NAME,
   AT_TIMESTAMP,
   DURATION,
+  ENVIRONMENT_ALL_VALUE,
   HTTP_RESPONSE_STATUS_CODE,
+  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DURATION,
@@ -38,6 +41,10 @@ import {
   getTransactionFieldConfigurations,
 } from './field_configurations';
 import { useFetchTraceRootSpanContext } from '../../doc_viewer_overview/hooks/use_fetch_trace_root_span';
+import { getUnifiedDocViewerServices } from '../../../../../plugin';
+import { useFlyoutHistoryKey } from '../../../../doc_viewer_flyout/flyout_history_key_context';
+import { useDocViewerExtensionActionsContext } from '../../../../../hooks/use_doc_viewer_extension_actions';
+import { TRACES_DOC_VIEWER_EBT_SOURCES } from '../../ebt_constants';
 
 const spanFieldNames = [
   SPAN_ID,
@@ -81,12 +88,26 @@ export const About = ({
   const isSpan = !isTransaction(hit);
   const flattenedHit = useMemo(() => getFlattenedTraceDocumentOverview(hit), [hit]);
   const traceRootSpan = useFetchTraceRootSpanContext();
-
   const traceRootSpanDuration = traceRootSpan?.span?.duration;
+
+  const [serviceFlyoutOpen, setServiceFlyoutOpen] = useState(false);
+  const flyoutHistoryKey = useFlyoutHistoryKey();
+  const docViewerActions = useDocViewerExtensionActionsContext();
+  const openInNewTab = docViewerActions?.openInNewTab;
+
+  const { data: dataService, core, discoverShared } = getUnifiedDocViewerServices();
+  const canViewApm = core.application.capabilities.apm?.show || false;
+  const serviceFlyoutFeature = discoverShared.features.registry.getById(
+    'observability-service-flyout'
+  );
+  const { from: timeRangeFrom, to: timeRangeTo } =
+    dataService.query.timefilter.timefilter.getTime();
+
+  const onServiceNameClick = useCallback(() => setServiceFlyoutOpen(true), []);
 
   const aboutFieldConfigurations = useMemo(() => {
     const configurations = {
-      ...getSharedFieldConfigurations(flattenedHit),
+      ...getSharedFieldConfigurations(flattenedHit, onServiceNameClick),
       ...(isSpan
         ? getSpanFieldConfigurations(flattenedHit)
         : getTransactionFieldConfigurations(flattenedHit)),
@@ -108,21 +129,46 @@ export const About = ({
     };
 
     return configurations;
-  }, [flattenedHit, isSpan, traceRootSpanDuration]);
+  }, [flattenedHit, isSpan, traceRootSpanDuration, onServiceNameClick]);
 
   return (
-    <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
-      <ContentFrameworkTable
-        fieldNames={isSpan ? spanFieldNames : transactionFieldNames}
-        id={'aboutTable'}
-        fieldConfigurations={aboutFieldConfigurations}
-        dataView={dataView}
-        hit={hit}
-        filter={filter}
-        onAddColumn={onAddColumn}
-        onRemoveColumn={onRemoveColumn}
-        columns={columns}
-      />
-    </EuiPanel>
+    <>
+      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
+        <ContentFrameworkTable
+          fieldNames={isSpan ? spanFieldNames : transactionFieldNames}
+          id={'aboutTable'}
+          fieldConfigurations={aboutFieldConfigurations}
+          dataView={dataView}
+          hit={hit}
+          filter={filter}
+          onAddColumn={onAddColumn}
+          onRemoveColumn={onRemoveColumn}
+          columns={columns}
+        />
+      </EuiPanel>
+      {serviceFlyoutOpen &&
+        serviceFlyoutFeature &&
+        canViewApm &&
+        serviceFlyoutFeature.renderServiceFlyout({
+          service: {
+            name: flattenedHit[SERVICE_NAME] ?? '',
+            agentName: flattenedHit[AGENT_NAME],
+          },
+          filters: {
+            environment: flattenedHit[SERVICE_ENVIRONMENT] ?? ENVIRONMENT_ALL_VALUE,
+            rangeFrom: timeRangeFrom,
+            rangeTo: timeRangeTo,
+          },
+          source: TRACES_DOC_VIEWER_EBT_SOURCES.ABOUT,
+          onClose: () => setServiceFlyoutOpen(false),
+          flyoutHistoryKey,
+          contextActions: {
+            openInNewDiscoverTab: openInNewTab
+              ? ({ esqlQuery, timeRange, tabLabel }) =>
+                  openInNewTab({ query: { esql: esqlQuery }, timeRange, tabLabel })
+              : undefined,
+          },
+        })}
+    </>
   );
 };

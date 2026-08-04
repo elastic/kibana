@@ -43,7 +43,8 @@ const aboutEbt = {
 };
 
 export const getSharedFieldConfigurations = (
-  flattenedHit: TraceDocumentOverview
+  flattenedHit: TraceDocumentOverview,
+  onOpenServiceFlyout: () => void
 ): ContentFrameworkTableProps['fieldConfigurations'] => {
   return {
     [SERVICE_NAME]: {
@@ -55,10 +56,10 @@ export const getSharedFieldConfigurations = (
               <ServiceNameLink
                 serviceName={value as string}
                 agentName={flattenedHit[AGENT_NAME] ?? ''}
-                environment={flattenedHit[SERVICE_ENVIRONMENT]}
                 formattedServiceName={content}
                 data-test-subj="unifiedDocViewerObservabilityTracesServiceNameLink"
                 ebt={aboutEbt}
+                onClick={onOpenServiceFlyout}
               />
             )}
           </HighlightField>

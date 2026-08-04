@@ -24,6 +24,10 @@ jest.mock('../../../../../hooks/use_doc_viewer_extension_actions', () => ({
   useDocViewerExtensionActionsContext: () => undefined,
 }));
 
+jest.mock('../../../../doc_viewer_flyout/flyout_history_key_context', () => ({
+  useFlyoutHistoryKey: () => undefined,
+}));
+
 jest.mock('@kbn/apm-ui-shared', () => ({
   ...jest.requireActual('@kbn/apm-ui-shared'),
   Timestamp: () => <span>timestamp</span>,
