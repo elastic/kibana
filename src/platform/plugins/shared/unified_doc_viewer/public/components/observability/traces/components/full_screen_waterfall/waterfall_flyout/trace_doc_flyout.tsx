@@ -12,6 +12,7 @@ import React from 'react';
 import { DataSourcesProvider } from '../../../../../../hooks/use_data_sources';
 import { DocViewerExtensionActionsProvider } from '../../../../../../hooks/use_doc_viewer_extension_actions';
 import { DocumentDetailFlyout, type DocumentDetailFlyoutProps } from './document_detail_flyout';
+import { TRACES_DOC_VIEWER_EBT_HOSTS } from '../../../ebt_constants';
 
 export type { TraceDocFlyoutType } from '../../../common/types';
 
@@ -25,7 +26,7 @@ export function TraceDocFlyout({ indexes, ...rest }: TraceDocFlyoutProps) {
     // we might want to pass it as prop and reuse the concept
     <DataSourcesProvider indexes={indexes} profileId="null">
       <DocViewerExtensionActionsProvider>
-        <DocumentDetailFlyout {...rest} />
+        <DocumentDetailFlyout ebtHost={TRACES_DOC_VIEWER_EBT_HOSTS.APM} {...rest} />
       </DocViewerExtensionActionsProvider>
     </DataSourcesProvider>
   );

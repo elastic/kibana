@@ -17,6 +17,7 @@ import { FlyoutContentId } from '../../../common/constants';
 import type { TraceDocFlyoutType } from '../../../common/types';
 import { LogFlyoutContent } from './logs_flyout';
 import { useDocumentFlyoutData, type DocumentFlyoutData } from './use_document_flyout_data';
+import type { TracesDocViewerEbtHost } from '../../../ebt_constants';
 
 interface FlyoutContentProps {
   data: DocumentFlyoutData;
@@ -66,6 +67,8 @@ export interface DocumentDetailFlyoutProps {
   activeSection?: TraceOverviewSections;
   skipNextEventReport?: boolean;
   size?: EuiFlyoutProps['size'];
+  /** Host app discriminator used as `detail` in the flyout tab click EBT events. */
+  ebtHost?: TracesDocViewerEbtHost;
 }
 
 export function DocumentDetailFlyout({
@@ -80,6 +83,7 @@ export function DocumentDetailFlyout({
   activeSection,
   skipNextEventReport,
   size,
+  ebtHost,
 }: DocumentDetailFlyoutProps) {
   const data = useDocumentFlyoutData({ type, docId, traceId, docIndex });
 
@@ -98,6 +102,7 @@ export function DocumentDetailFlyout({
       flyoutContentId={flyoutConfig.contentId}
       skipNextEventReport={skipNextEventReport}
       size={size}
+      ebtHost={ebtHost}
     >
       {data.error && <EuiCallOut announceOnMount title={data.error} color="danger" />}
       {flyoutConfig.render({ data, dataView, activeSection })}

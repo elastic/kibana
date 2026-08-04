@@ -22,18 +22,28 @@ import {
   type EuiFlyoutProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { GenAiTechnicalPreviewBadge, hasGenAiData } from '@kbn/apm-ui-shared';
+import {
+  GenAiTechnicalPreviewBadge,
+  GENAI_EBT_CLICK_ACTIONS,
+  hasGenAiData,
+} from '@kbn/apm-ui-shared';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDocViewerSpanLogViewedEvent } from '@kbn/unified-doc-viewer';
+import { getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
 import DocViewerSource from '../../../../../doc_viewer_source';
 import DocViewerTable from '../../../../../doc_viewer_table';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
 import { useOriginDocType } from '../../../../../doc_viewer_flyout/origin_doc_type_context';
 import type { FlyoutContentId } from '../../../common/constants';
 import { DocViewerObsTracesGenAi } from '../../../doc_viewer_genai';
+import {
+  TRACES_DOC_VIEWER_EBT_ELEMENTS,
+  TRACES_DOC_VIEWER_EBT_HOSTS,
+  type TracesDocViewerEbtHost,
+} from '../../../ebt_constants';
 
 const tabIds = {
   OVERVIEW: 'unifiedDocViewerTracesDocDetailFlyoutOverview',
@@ -47,9 +57,16 @@ interface FlyoutTab {
   name: string;
   prepend?: React.ReactElement;
   'data-test-subj'?: string;
+  ebt?: EbtClickAttrs;
 }
 
-const getTabs = ({ showGenAi }: { showGenAi: boolean }): FlyoutTab[] => [
+const getTabs = ({
+  showGenAi,
+  ebtHost,
+}: {
+  showGenAi: boolean;
+  ebtHost: TracesDocViewerEbtHost;
+}): FlyoutTab[] => [
   {
     id: tabIds.OVERVIEW,
     name: i18n.translate(
@@ -71,6 +88,11 @@ const getTabs = ({ showGenAi }: { showGenAi: boolean }): FlyoutTab[] => [
           ),
           prepend: <GenAiTechnicalPreviewBadge />,
           'data-test-subj': 'unifiedDocViewerTracesGenAiTab',
+          ebt: {
+            action: GENAI_EBT_CLICK_ACTIONS.VIEW_GENAI,
+            element: TRACES_DOC_VIEWER_EBT_ELEMENTS.FLYOUT_TABS,
+            detail: ebtHost,
+          },
         },
       ]
     : []),
@@ -101,6 +123,7 @@ const FlyoutTabs = ({ tabs, onClick, selectedTabId }: FlyoutTabsProps) => {
       isSelected={tab.id === selectedTabId}
       prepend={tab.prepend}
       data-test-subj={tab['data-test-subj']}
+      {...(tab.ebt ? getEbtProps(tab.ebt) : {})}
     >
       {tab.name}
     </EuiTab>
@@ -162,6 +185,8 @@ export interface Props {
   children: React.ReactNode;
   skipNextEventReport?: boolean;
   size?: EuiFlyoutProps['size'];
+  /** Host app discriminator used as `detail` in the flyout tab click EBT events. */
+  ebtHost?: TracesDocViewerEbtHost;
 }
 
 export function WaterfallFlyout({
@@ -177,6 +202,7 @@ export function WaterfallFlyout({
   flyoutContentId,
   skipNextEventReport,
   size = 's',
+  ebtHost = TRACES_DOC_VIEWER_EBT_HOSTS.DISCOVER,
 }: Props) {
   const { analytics } = getUnifiedDocViewerServices();
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
@@ -185,8 +211,8 @@ export function WaterfallFlyout({
   const originDocType = useOriginDocType();
 
   const tabs = useMemo(
-    () => getTabs({ showGenAi: hit != null && hasGenAiData(hit.flattened) }),
-    [hit]
+    () => getTabs({ showGenAi: hit != null && hasGenAiData(hit.flattened), ebtHost }),
+    [hit, ebtHost]
   );
 
   // The GenAI tab is conditional: when switching to a document without GenAI

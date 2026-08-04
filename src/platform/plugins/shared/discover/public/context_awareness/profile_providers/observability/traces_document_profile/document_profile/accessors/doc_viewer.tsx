@@ -9,8 +9,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { GenAiTechnicalPreviewBadge, hasGenAiData } from '@kbn/apm-ui-shared';
 import {
+  GenAiTechnicalPreviewBadge,
+  GENAI_EBT_CLICK_ACTIONS,
+  hasGenAiData,
+} from '@kbn/apm-ui-shared';
+import {
+  TRACES_DOC_VIEWER_EBT_ELEMENTS,
   UnifiedDocViewerObservabilityTracesGenAi,
   UnifiedDocViewerObservabilityTracesOverview,
 } from '@kbn/unified-doc-viewer-plugin/public';
@@ -55,6 +60,10 @@ export const createGetDocViewer =
             }),
             order: 5,
             prepend: <GenAiTechnicalPreviewBadge />,
+            ebt: {
+              action: GENAI_EBT_CLICK_ACTIONS.VIEW_GENAI,
+              element: TRACES_DOC_VIEWER_EBT_ELEMENTS.TABS,
+            },
             render: (props) => <UnifiedDocViewerObservabilityTracesGenAi {...props} />,
           });
         }

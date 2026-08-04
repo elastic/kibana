@@ -45,5 +45,6 @@ export { UnifiedDocViewerObservabilityAttributesOverview } from './components/ob
 export { UnifiedDocViewerObservabilityTraceDocFlyout } from './components/observability/traces/components/full_screen_waterfall/waterfall_flyout/lazy_trace_doc_flyout';
 export type { TraceDocFlyoutProps as UnifiedDocViewerObservabilityTraceDocFlyoutProps } from './components/observability/traces/components/full_screen_waterfall/waterfall_flyout/trace_doc_flyout';
 export type { TraceDocFlyoutType as UnifiedDocViewerObservabilityTracesDocumentType } from './components/observability/traces/components/full_screen_waterfall/waterfall_flyout/trace_doc_flyout';
+export { TRACES_DOC_VIEWER_EBT_ELEMENTS } from './components/observability/traces/ebt_constants';
 
 export const plugin = () => new UnifiedDocViewerPublicPlugin();

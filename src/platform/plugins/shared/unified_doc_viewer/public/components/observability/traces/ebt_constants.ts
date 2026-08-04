@@ -18,6 +18,8 @@ export const TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS = {
 export const TRACES_DOC_VIEWER_EBT_ELEMENTS = {
   ERRORS: 'docViewerErrors',
   SPAN_LINKS: 'docViewerSpanLinks',
+  TABS: 'docViewerTabs',
+  FLYOUT_TABS: 'docViewerFlyoutTabs',
   TRACE_SUMMARY: 'docViewerTraceSummary',
   TRACE_SUMMARY_EXPAND_BUTTON: 'docViewerTraceSummaryExpandButton',
   TRACE_SUMMARY_WATERFALL_AREA: 'docViewerTraceSummaryWaterfallArea',
@@ -34,6 +36,18 @@ export const TRACES_DOC_VIEWER_EBT_DETAILS = {
   SPAN_DOC: 'spanDoc',
   LOG_DOC: 'logDoc',
 } as const;
+
+/**
+ * Discriminates the host app in click events emitted from components shared
+ * between the APM UI and Discover (e.g. the trace waterfall span flyout).
+ */
+export const TRACES_DOC_VIEWER_EBT_HOSTS = {
+  APM: 'apm',
+  DISCOVER: 'discover',
+} as const;
+
+export type TracesDocViewerEbtHost =
+  (typeof TRACES_DOC_VIEWER_EBT_HOSTS)[keyof typeof TRACES_DOC_VIEWER_EBT_HOSTS];
 
 export const TRACES_DOC_VIEWER_EBT_SOURCES = {
   ABOUT: 'docViewerAbout',

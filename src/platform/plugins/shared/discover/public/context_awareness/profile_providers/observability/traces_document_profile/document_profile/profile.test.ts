@@ -131,6 +131,21 @@ describe('tracesDocumentProfileProvider', () => {
         'doc_view_obs_traces_genai',
       ]);
     });
+
+    it('registers the GenAI tab with viewGenAi EBT click attributes', () => {
+      const docViewer = getDocViewer({
+        record: buildTraceMockRecord('traces-index', {
+          'trace.id': ['c0ffee'],
+          'attributes.gen_ai.request.model': ['gpt-4o'],
+        }),
+      });
+
+      const registry = new DocViewsRegistry();
+      docViewer.docViewsRegistry(registry);
+
+      const genAiDocView = registry.getAll().find(({ id }) => id === 'doc_view_obs_traces_genai');
+      expect(genAiDocView?.ebt).toEqual({ action: 'viewGenAi', element: 'docViewerTabs' });
+    });
   });
 
   describe('when root profile is NOT observability', () => {

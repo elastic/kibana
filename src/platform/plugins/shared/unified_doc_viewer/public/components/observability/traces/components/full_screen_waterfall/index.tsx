@@ -29,7 +29,7 @@ import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
 import { DocumentDetailFlyout } from './waterfall_flyout/document_detail_flyout';
 import { FlyoutContentId } from '../../common/constants';
 import type { TraceDocFlyoutType } from '../../common/types';
-import { TRACES_DOC_VIEWER_EBT_ELEMENTS } from '../../ebt_constants';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS, TRACES_DOC_VIEWER_EBT_HOSTS } from '../../ebt_constants';
 
 export interface FullScreenWaterfallProps {
   traceId: string;
@@ -170,6 +170,7 @@ export const FullScreenWaterfall = ({
           onCloseFlyout={onCloseFlyout}
           activeSection={activeSection}
           skipNextEventReport={skipNextEventReport}
+          ebtHost={TRACES_DOC_VIEWER_EBT_HOSTS.DISCOVER}
         />
       ) : null}
     </EuiFlyout>

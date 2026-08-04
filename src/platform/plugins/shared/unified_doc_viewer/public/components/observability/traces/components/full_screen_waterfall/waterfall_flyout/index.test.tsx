@@ -189,6 +189,24 @@ describe('WaterfallFlyout', () => {
       expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
     });
 
+    it('adds the viewGenAi EBT click attributes with the host app as detail', () => {
+      render(<WaterfallFlyout {...defaultProps} hit={genAiHit} ebtHost="apm" />);
+
+      const genAiTab = screen.getByTestId('unifiedDocViewerTracesGenAiTab');
+      expect(genAiTab).toHaveAttribute('data-ebt-action', 'viewGenAi');
+      expect(genAiTab).toHaveAttribute('data-ebt-element', 'docViewerFlyoutTabs');
+      expect(genAiTab).toHaveAttribute('data-ebt-detail', 'apm');
+    });
+
+    it('defaults the EBT detail to the discover host', () => {
+      render(<WaterfallFlyout {...defaultProps} hit={genAiHit} />);
+
+      expect(screen.getByTestId('unifiedDocViewerTracesGenAiTab')).toHaveAttribute(
+        'data-ebt-detail',
+        'discover'
+      );
+    });
+
     it('falls back to the Overview tab when switching to a document without gen_ai fields', async () => {
       const { rerender } = render(<WaterfallFlyout {...defaultProps} hit={genAiHit} />);
 

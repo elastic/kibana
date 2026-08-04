@@ -12,6 +12,7 @@ import React, { forwardRef, useCallback, useImperativeHandle, useState, useEffec
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiTabbedContent } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { DocViewerTab } from './doc_viewer_tab';
 import type { DocView, DocViewRenderProps } from '../../types';
@@ -56,6 +57,7 @@ const InternalDocViewer = forwardRef<InternalDocViewerApi, InternalDocViewerProp
           />
         ),
         ['data-test-subj']: `docViewerTab-${docView.id}`,
+        ...(docView.ebt ? getEbtProps(docView.ebt) : {}),
       }));
 
     const [storedInitialTabId, setInitialTabId] = useLocalStorage<string>(INITIAL_TAB);
