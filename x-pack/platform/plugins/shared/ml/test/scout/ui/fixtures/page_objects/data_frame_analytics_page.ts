@@ -57,20 +57,25 @@ export class DataFrameAnalyticsPage {
   }
 
   async selectSource(sourceName: string): Promise<void> {
-    // EuiBasicTable sets aria-busy="true" while loading and removes it when done;
-    // wait for the initial load to clear before searching.
-    const resultsTable = this.page.testSubj.locator('savedObjectsFinderTable');
-    const settledResultsTable = resultsTable.locator('table:not([aria-busy="true"])');
-    await settledResultsTable.waitFor({ state: 'visible', timeout: 40_000 });
-
-    // SavedObjectFinder uses an incremental EuiSearchBar with a 300 ms debounce.
-    // Sequential keyboard events reliably trigger the full EUI search interaction;
-    // the matching result is the definitive signal that the search completed.
+    // SavedObjectFinder fires an async fetch on mount; mlDFAPageSourceSelection becoming
+    // visible does not guarantee the item list is populated yet. Wait for the initial load
+    // to settle before typing. EuiBasicTable sets aria-busy="true" on the inner <table>
+    // while loading and removes the attribute when done (it is never set to "false").
+    await this.page.testSubj
+      .locator('savedObjectsFinderTable')
+      .locator('table:not([aria-busy="true"])')
+      .waitFor({ state: 'visible', timeout: 40_000 });
     const searchInput = this.page.testSubj.locator('savedObjectFinderSearchInput');
+    // The finder's EuiSearchBar (incremental) only fetches filtered results from its onChange
+    // handler, which fires on real keyboard events. Playwright's fill() sets the value via
+    // insertText without firing those events, so the fetch never runs, the list stays
+    // unfiltered and the target row never appears. Drive the search with native type() to
+    // fire the keydown/keyup events onChange listens for.
     await searchInput.click();
     await searchInput.clear();
     await searchInput.type(sourceName, { delay: 50 });
-
+    // Wait for the debounced search + fetch to render the matching source row rather than
+    // relying on the default action timeout — it can be slow under CI load.
     const resultItem = this.page.testSubj.locator(`savedObjectTitle${sourceName}`);
     await resultItem.waitFor({ state: 'visible', timeout: 40_000 });
     await resultItem.click();
