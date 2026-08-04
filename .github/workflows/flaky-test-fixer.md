@@ -360,7 +360,7 @@ So when the fix has to land on a version branch, don't call `create_pull_request
 
 - Read the version branch's copy of every file you touch through the GitHub API (`get_file_contents` with `ref: <version-branch>`), not with git: you are on a shallow `main` clone, and fetching a version branch is exactly the operation this path exists to avoid.
 - Write those copies to a scratch directory under `/tmp`, edit them there, and generate the diff with `diff -u --label a/<path> --label b/<path> <original> <edited>`, so the hunk headers are real and the result applies onto that branch with `git apply`. Never hand-count line numbers.
-- You can't lint, type check, or run the test against the version branch from a `main` checkout — list those under "Not verified locally" in the PR description, noting it targets `<version-branch>` and relies on that branch's CI.
+- Nothing here can be verified from a `main` checkout — no lint, type check, or test run against the version branch — so leave the PR description's "Verification" block out entirely rather than filling it with everything you couldn't check. That branch's CI covers the fix once the PR is open.
 
 ## Outcome comment
 
@@ -378,7 +378,7 @@ Follow this format:
   ```
   Include the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders verbatim — the `link_fix_pr` tool replaces them with the PR link and a live PR-state badge. Never write the PR URL, number, or badge yourself.
 
-- **Proposed fix for a version branch** (no PR opened — see "Fixes that must target a version branch"). Hand over the whole PR — title, labels, description, and diff — so a human can open it from the comment alone, keeping the two long parts collapsed.
+- **Proposed fix for a version branch** (no PR opened — see "Fixes that must target a version branch"). Hand over the whole PR — title, labels, description, backporting guidance, and diff — so a human can open it from the comment alone, keeping the long parts collapsed.
 
   ````markdown
   ### 🔧 Manual PR needed: apply this fix to <version-branch>
@@ -391,7 +391,14 @@ Follow this format:
   <details>
   <summary>PR description</summary>
 
-  <the PR body exactly as "PR format" specifies>
+  <the PR body per "PR format", without its "Verification" and "Backporting guidance" blocks>
+
+  </details>
+
+  <details>
+  <summary>Backporting guidance</summary>
+
+  <the "Backporting guidance" content per "PR format", explaining the labels listed above>
 
   </details>
 
