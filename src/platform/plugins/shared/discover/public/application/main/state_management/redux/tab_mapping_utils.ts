@@ -191,18 +191,13 @@ export const fromTabStateToSavedObjectTab = ({
 
   const usesAdHocDataView = isObject(serializedSearchSource.index);
 
-  const persistentProfileState = services.profileStateRegistry.pickStateByType({
+  // `pickStateByType` omits empty entries, so the cast only narrows the map's
+  // value type from `SerializableRecord | undefined`.
+  const profileState = services.profileStateRegistry.pickStateByType({
     profileStateMap: tab.profileState,
     stateTypes: [ProfileStateType.Persistent],
     defaultsHandling: 'strip',
-  });
-  const profileState: DiscoverSessionTabProfileState = {};
-
-  for (const [stateKey, state] of Object.entries(persistentProfileState)) {
-    if (state) {
-      profileState[stateKey] = state;
-    }
-  }
+  }) as DiscoverSessionTabProfileState;
 
   return {
     id: tab.id,
