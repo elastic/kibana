@@ -8,22 +8,40 @@
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { useBreadcrumbs, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { METRICS_APP } from '../../common/constants';
-import { metricsTitle } from '../translations';
+import { inventoryTitle } from '../translations';
 import { useKibanaContextForPlugin } from './use_kibana';
 
-export const useMetricsBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
+export interface UseMetricsBreadcrumbsOptions {
+  /**
+   * Parent crumb used by Chrome Next's compatibility back control.
+   * - `inventory`: prepend Infrastructure Inventory (Hosts, Explorer, Settings).
+   * - `none`: do not prepend a parent (Inventory home, and detail pages that supply their own parent).
+   */
+  parent?: 'inventory' | 'none';
+}
+
+export const useMetricsBreadcrumbs = (
+  extraCrumbs: ChromeBreadcrumb[],
+  { parent = 'inventory' }: UseMetricsBreadcrumbsOptions = {}
+) => {
   const {
     services: { serverless },
   } = useKibanaContextForPlugin();
-  const appLinkProps = useLinkProps({ app: METRICS_APP });
+  const inventoryLinkProps = useLinkProps({
+    app: METRICS_APP,
+    pathname: 'inventory',
+  });
 
-  const breadcrumbs = [
-    {
-      ...appLinkProps,
-      text: metricsTitle,
-    },
-    ...extraCrumbs,
-  ];
+  const breadcrumbs =
+    parent === 'none'
+      ? extraCrumbs
+      : [
+          {
+            ...inventoryLinkProps,
+            text: inventoryTitle,
+          },
+          ...extraCrumbs,
+        ];
 
   useBreadcrumbs(breadcrumbs, { serverless });
 };
