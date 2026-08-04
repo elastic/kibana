@@ -442,67 +442,76 @@ describe('action_type_form', () => {
       },
     });
     actionTypeRegistry.get.mockReturnValue(actionType);
-    const actionItem = {
+    const actionItemInitial = {
       id: '123',
       actionTypeId: '.pagerduty',
       group: 'default',
       params: {},
       frequency: DEFAULT_FREQUENCY,
     };
-    const wrapper = render(
+    const actionItemSummary = {
+      ...actionItemInitial,
+      frequency: {
+        notifyWhen: RuleNotifyWhen.ACTIVE,
+        throttle: null,
+        summary: true,
+      },
+    };
+    const { rerender, getByTestId } = render(
       <I18nProvider>
         {getActionTypeForm({
           index: 1,
-          actionItem,
+          actionItem: actionItemInitial,
           ruleTypeId: '.es-query',
-          setActionFrequencyProperty: () => {
-            actionItem.frequency = {
-              notifyWhen: RuleNotifyWhen.ACTIVE,
-              throttle: null,
-              summary: true,
-            };
-          },
         })}
       </I18nProvider>
     );
 
-    const summaryOrPerRuleSelect = wrapper.getByTestId('summaryOrPerRuleSelect');
-    expect(summaryOrPerRuleSelect).toBeTruthy();
+    expect(getByTestId('summaryOrPerRuleSelect')).toBeTruthy();
 
-    const button = wrapper.getByText('For each alert');
-    await userEvent.click(button);
-    await userEvent.click(wrapper.getByText('Summary of alerts'));
+    // Re-render with the updated actionItem to simulate parent updating after summary selection
+    rerender(
+      <I18nProvider>
+        {getActionTypeForm({
+          index: 1,
+          actionItem: actionItemSummary,
+          ruleTypeId: '.es-query',
+        })}
+      </I18nProvider>
+    );
 
-    expect(mockTransformActionVariables.mock.calls).toEqual([
-      [
-        {
-          context: [],
-          params: [],
-          state: [],
-        },
-        {
-          context: [],
-          params: [],
-          state: [],
-        },
-        undefined,
-        false,
-      ],
-      [
-        {
-          context: [],
-          params: [],
-          state: [],
-        },
-        {
-          context: [],
-          params: [],
-          state: [],
-        },
-        undefined,
-        true,
-      ],
-    ]);
+    await waitFor(() => {
+      expect(mockTransformActionVariables.mock.calls).toEqual([
+        [
+          {
+            context: [],
+            params: [],
+            state: [],
+          },
+          {
+            context: [],
+            params: [],
+            state: [],
+          },
+          undefined,
+          false,
+        ],
+        [
+          {
+            context: [],
+            params: [],
+            state: [],
+          },
+          {
+            context: [],
+            params: [],
+            state: [],
+          },
+          undefined,
+          true,
+        ],
+      ]);
+    });
   });
 
   describe('Customize notify when options', () => {

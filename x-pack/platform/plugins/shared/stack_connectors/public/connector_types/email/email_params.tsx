@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -55,12 +55,10 @@ export const EmailParamsFields = ({
   index,
   errors,
   messageVariables,
-  defaultMessage,
   isLoading,
   isDisabled,
   onBlur = noop,
   showEmailSubjectAndMessage = true,
-  useDefaultMessage,
   ruleTypeId,
   actionConnector,
 }: ActionParamsProps<EmailActionParams>) => {
@@ -74,23 +72,6 @@ export const EmailParamsFields = ({
   const [addReplyTo, setAddReplyTo] = useState<boolean>(false);
 
   const emailSender: string[] = getEmailSender(actionConnector);
-
-  const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
-    [boolean, string | undefined]
-  >([false, defaultMessage]);
-  useEffect(() => {
-    if (
-      useDefaultMessage ||
-      !actionParams?.message ||
-      (isUsingDefault &&
-        actionParams?.message === defaultMessageUsed &&
-        defaultMessageUsed !== defaultMessage)
-    ) {
-      setDefaultMessageUsage([true, defaultMessage]);
-      editAction('message', defaultMessage, index);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultMessage]);
   const isToInvalid: boolean =
     to !== undefined && errors.to !== undefined && Number(errors.to.length) > 0;
   const isSubjectInvalid: boolean =

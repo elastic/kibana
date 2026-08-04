@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
+  MessageField,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CONNECTOR_ID } from '@kbn/connector-schemas/teams/constants';
 import type { TeamsActionParams, TeamsSecrets } from '../types';
@@ -39,5 +40,9 @@ export function getConnectorType(): ConnectorTypeModel<unknown, TeamsSecrets, Te
     },
     actionConnectorFields: lazy(() => import('./teams_connectors')),
     actionParamsFields: lazy(() => import('./teams_params')),
+    messageField: {
+      get: (params) => params.message,
+      set: (_, message) => ({ message }),
+    } satisfies MessageField<TeamsActionParams>,
   };
 }

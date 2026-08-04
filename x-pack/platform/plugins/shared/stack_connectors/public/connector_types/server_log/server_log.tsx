@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
+  MessageField,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CONNECTOR_ID } from '@kbn/connector-schemas/server_log/constants';
 import type { ServerLogActionParams } from '../types';
@@ -48,5 +49,9 @@ export function getConnectorType(): ConnectorTypeModel<unknown, unknown, ServerL
     },
     actionConnectorFields: null,
     actionParamsFields: lazy(() => import('./server_log_params')),
+    messageField: {
+      get: (params) => params.message,
+      set: (_, message) => ({ message }),
+    } satisfies MessageField<ServerLogActionParams>,
   };
 }

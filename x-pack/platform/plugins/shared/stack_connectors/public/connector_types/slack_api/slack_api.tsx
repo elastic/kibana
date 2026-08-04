@@ -9,6 +9,7 @@ import { lazy } from 'react';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
+  MessageField,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CONNECTOR_ID as SLACK_CONNECTOR_ID } from '@kbn/connector-schemas/slack/constants';
 import { CONNECTOR_ID as SLACK_API_CONNECTOR_ID } from '@kbn/connector-schemas/slack_api/constants';
@@ -147,4 +148,10 @@ export const getConnectorType = (): ConnectorTypeModel<
   },
   defaultActionParams: DEFAULT_PARAMS,
   defaultRecoveredActionParams: DEFAULT_PARAMS,
+  messageField: {
+    get: (params) => (params as Partial<PostMessageParams>).subActionParams?.text,
+    set: (params, text) => ({
+      subActionParams: { ...(params as Partial<PostMessageParams>).subActionParams, text },
+    }),
+  } satisfies MessageField<PostMessageParams | PostBlockkitParams>,
 });

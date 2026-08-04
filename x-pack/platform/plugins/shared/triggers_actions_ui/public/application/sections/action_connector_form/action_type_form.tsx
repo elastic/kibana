@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useEffect, useState, useMemo } from 'react';
+import React, { Suspense, useEffect, useState, useMemo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -49,7 +49,11 @@ import {
   RuleActionsAlertsFilter,
   RuleActionsAlertsFilterTimeframe,
 } from '@kbn/response-ops-rule-form';
-import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
+import {
+  checkActionFormActionTypeEnabled,
+  transformActionVariables,
+  useGeneratedActionMessage,
+} from '@kbn/alerts-ui-shared';
 import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
@@ -183,8 +187,6 @@ export const ActionTypeForm = ({
     's',
   ];
   const [warning, setWarning] = useState<string | null>(null);
-
-  const [useDefaultMessage, setUseDefaultMessage] = useState(false);
 
   const isSummaryAction = actionItem.frequency?.summary;
 
@@ -375,6 +377,31 @@ export const ActionTypeForm = ({
       uiSettings,
     });
 
+  const messageGroupKey = selectedActionGroup
+    ? `${selectedActionGroup.id}|${isSummaryAction ? 'summary' : 'action'}`
+    : 'system';
+
+  const messageTemplate = isSummaryAction
+    ? defaultSummaryMessage
+    : selectedActionGroup?.defaultActionMessage ?? defaultActionMessage;
+
+  const onMessageOwnerChange = useCallback(
+    (partial: Partial<Record<string, unknown>>) => {
+      for (const [key, value] of Object.entries(partial)) {
+        setActionParamsProperty(key, value as RuleActionParam, index);
+      }
+    },
+    [setActionParamsProperty, index]
+  );
+
+  useGeneratedActionMessage({
+    template: messageTemplate,
+    groupKey: messageGroupKey,
+    messageField: actionTypeRegistered?.messageField,
+    params: actionItem.params,
+    onChange: onMessageOwnerChange,
+  });
+
   if (isLoadingActionTypeModel) {
     return (
       <EuiFlexGroup justifyContent="center">
@@ -421,7 +448,6 @@ export const ActionTypeForm = ({
       showMinimumThrottleWarning={showMinimumThrottleWarning}
       showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
       notifyWhenSelectOptions={notifyWhenSelectOptions}
-      onUseDefaultMessage={() => setUseDefaultMessage(true)}
       isRecoveredActionGroup={isRecoveredActionGroup}
     />
   );
@@ -564,7 +590,6 @@ export const ActionTypeForm = ({
                         ? defaultSummaryMessage
                         : selectedActionGroup?.defaultActionMessage ?? defaultActionMessage
                     }
-                    useDefaultMessage={useDefaultMessage}
                     actionConnector={actionConnector}
                     executionMode={ActionConnectorMode.ActionForm}
                     ruleTypeId={ruleTypeId}

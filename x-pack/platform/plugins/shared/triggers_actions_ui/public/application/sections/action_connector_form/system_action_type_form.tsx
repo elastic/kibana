@@ -30,7 +30,11 @@ import { css } from '@emotion/react';
 import { isEmpty, partition, some } from 'lodash';
 import type { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
-import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
+import {
+  checkActionFormActionTypeEnabled,
+  transformActionVariables,
+  useGeneratedActionMessage,
+} from '@kbn/alerts-ui-shared';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import type {
   IErrorObject,
@@ -198,6 +202,23 @@ export const SystemActionTypeForm = ({
     ? actionTypeRegistry.get(actionConnector.actionTypeId)
     : null;
 
+  const onMessageOwnerChange = useCallback(
+    (partial: Partial<Record<string, unknown>>) => {
+      for (const [key, value] of Object.entries(partial)) {
+        setActionParamsProperty(key, value as RuleActionParam, index);
+      }
+    },
+    [setActionParamsProperty, index]
+  );
+
+  useGeneratedActionMessage({
+    template: defaultSummaryMessage,
+    groupKey: 'system',
+    messageField: actionTypeRegistered?.messageField,
+    params: actionItem.params,
+    onChange: onMessageOwnerChange,
+  });
+
   if (!actionTypeRegistered) return null;
 
   const showActionGroupErrorIcon = (): boolean => {
@@ -233,8 +254,6 @@ export const SystemActionTypeForm = ({
                       setActionParamsProperty(key, value, i);
                     }}
                     messageVariables={alertFields}
-                    defaultMessage={defaultSummaryMessage}
-                    useDefaultMessage={true}
                     actionConnector={actionConnector}
                     executionMode={ActionConnectorMode.ActionForm}
                     ruleTypeId={ruleTypeId}

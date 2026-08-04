@@ -81,6 +81,7 @@ export type {
   ConnectorValidationFunc,
   CustomConnectorSelectionItem,
   GenericValidationResult,
+  MessageField,
   PreConfiguredActionConnector,
   SystemAction,
 } from '@kbn/alerts-ui-shared/src/common/types';

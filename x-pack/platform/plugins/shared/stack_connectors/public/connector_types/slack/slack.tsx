@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
+  MessageField,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import {
   CONNECTOR_ID as SLACK_CONNECTOR_ID,
@@ -59,6 +60,10 @@ export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, Sl
     },
     actionConnectorFields: lazy(() => import('./slack_connectors')),
     actionParamsFields: lazy(() => import('./slack_params')),
+    messageField: {
+      get: (params) => params.message,
+      set: (_, message) => ({ message }),
+    } satisfies MessageField<SlackActionParams>,
     convertParamsBetweenGroups: (
       params: PostMessageParams | SlackActionParams
     ): PostMessageParams | SlackActionParams | {} => {

@@ -13,6 +13,7 @@ import { InvalidEmailReason } from '@kbn/actions-plugin/common';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
+  MessageField,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import {
   CONNECTOR_ID,
@@ -166,6 +167,10 @@ export function getConnectorType(
     },
     actionConnectorFields: lazy(() => import('./email_connector')),
     actionParamsFields: lazy(() => import('./email_params')),
+    messageField: {
+      get: (params) => params.message,
+      set: (_, message) => ({ message }),
+    } satisfies MessageField<EmailActionParams>,
   };
 }
 

@@ -188,30 +188,7 @@ describe('SlackParamsFields', () => {
     });
   });
 
-  it('uses the default value if the text is not defined', async () => {
-    appMockRenderer.render(
-      <SlackParamsFields
-        actionParams={{}}
-        editAction={editAction}
-        index={0}
-        errors={{ message: [] }}
-        actionConnector={actionConnector}
-        defaultMessage="my default message"
-      />
-    );
-
-    expect(screen.getByTestId('webApiTextTextArea')).toHaveValue('my default message');
-
-    await waitFor(() => {
-      expect(editAction).toHaveBeenCalledWith(
-        'subActionParams',
-        { channels: [], channelIds: [], channelNames: [], text: 'my default message' },
-        0
-      );
-    });
-  });
-
-  it('does not uses the default value if text is defined', async () => {
+  it('preserves existing text value when default message changes', async () => {
     appMockRenderer.render(
       <SlackParamsFields
         actionParams={actionParams}
@@ -219,8 +196,6 @@ describe('SlackParamsFields', () => {
         index={0}
         errors={{ message: [] }}
         actionConnector={actionConnector}
-        useDefaultMessage={true}
-        defaultMessage="my default message"
       />
     );
 

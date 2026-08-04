@@ -30,7 +30,7 @@ import type {
 type ParamsProps = ActionParamsProps<PostMessageParams | PostBlockkitParams>;
 
 const SlackParamsFields: React.FunctionComponent<ParamsProps> = (props) => {
-  const { editAction, index, useDefaultMessage, defaultMessage } = props;
+  const { editAction, index } = props;
   const { subActionParams } = props.actionParams;
   const { channels = [], channelIds = [], channelNames = [], text } = subActionParams ?? {};
 
@@ -52,17 +52,6 @@ const SlackParamsFields: React.FunctionComponent<ParamsProps> = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectorId, index]);
 
-  useEffect(() => {
-    if (shouldUseDefaultValue({ useDefaultMessage, defaultMessage, text })) {
-      editAction(
-        'subActionParams',
-        { channels, channelIds, channelNames, text: defaultMessage },
-        index
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultMessage, useDefaultMessage]);
-
   return <SlackParamsFieldsComponent {...props} key={key} />;
 };
 
@@ -73,8 +62,6 @@ const SlackParamsFieldsComponent: React.FunctionComponent<ParamsProps> = ({
   index,
   errors,
   messageVariables,
-  defaultMessage,
-  useDefaultMessage,
 }) => {
   const channelsLabelId = useGeneratedHtmlId();
 
@@ -87,9 +74,7 @@ const SlackParamsFieldsComponent: React.FunctionComponent<ParamsProps> = ({
     channelNames,
   });
 
-  const initialTextValue = shouldUseDefaultValue({ useDefaultMessage, defaultMessage, text })
-    ? defaultMessage
-    : text;
+  const initialTextValue = text;
 
   const [messageType, setMessageType] = useState('text');
   const [textValue, setTextValue] = useState<string | undefined>(initialTextValue);
@@ -361,13 +346,3 @@ const formatChannel = (channel: string): string => {
 
 const getSubAction = (messageType: string) =>
   messageType === 'text' ? 'postMessage' : 'postBlockkit';
-
-const shouldUseDefaultValue = ({
-  useDefaultMessage,
-  defaultMessage,
-  text,
-}: {
-  useDefaultMessage?: boolean;
-  defaultMessage?: string;
-  text?: string;
-}) => (Boolean(useDefaultMessage) || Boolean(defaultMessage)) && !Boolean(text);
