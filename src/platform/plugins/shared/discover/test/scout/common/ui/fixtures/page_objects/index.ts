@@ -7,16 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../ftr_provider_context';
-
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const browser = getService('browser');
-
-  describe('discover/esql_3', function () {
-    before(async function () {
-      await browser.setWindowSize(1600, 1200);
-    });
-
-    loadTestFile(require.resolve('./_index_editor'));
-  });
-}
+export { LookupIndexEditor } from './lookup_index_editor';
