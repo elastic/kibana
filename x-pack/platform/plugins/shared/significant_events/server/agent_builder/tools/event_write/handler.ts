@@ -13,6 +13,7 @@ import {
   type CausalFeature,
   type SignificantEvent,
   type SignalEntry,
+  MAX_SIGNAL_DESCRIPTION_LENGTH,
   SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
 } from '@kbn/significant-events-schema';
 import { resolveTimeBound } from '../../../lib/significant_events/latest_source_query';
@@ -257,6 +258,10 @@ export const mergeSignalsLatestPerRule = (
       { timestamp: submittedTimestamp, values: submitted },
     ],
     (signal) => (signal.type === 'detection' ? signal.metadata?.rule_uuid ?? undefined : undefined)
+  ).map((signal) =>
+    signal.description.length <= MAX_SIGNAL_DESCRIPTION_LENGTH
+      ? signal
+      : { ...signal, description: signal.description.slice(0, MAX_SIGNAL_DESCRIPTION_LENGTH) }
   );
 
 export const mergeEpisodeContext = (

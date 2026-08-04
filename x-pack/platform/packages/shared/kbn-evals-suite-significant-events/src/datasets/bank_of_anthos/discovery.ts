@@ -44,7 +44,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verification: { assessment: 'active', lens: 'failure' },
       description:
         'Found: SQLState 08001 connection refused from transactionhistory. Impact: transaction-history reads blocked. Verdict: confirms.',
       evidence: {
@@ -63,7 +63,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verification: { assessment: 'active', lens: 'failure' },
       description:
         'Found: connection refused to transactionhistory:8080 on /transactions. Impact: users cannot view transaction history. Verdict: confirms.',
       evidence: {
@@ -82,7 +82,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verification: { assessment: 'active', lens: 'failure' },
       description:
         'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
       evidence: {
@@ -101,7 +101,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verification: { assessment: 'active', lens: 'failure' },
       description:
         'Found: Cache error from transactionhistory and balancereader. Impact: balance and transaction-history lookups degraded. Verdict: confirms.',
       evidence: {
@@ -120,7 +120,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verification: { assessment: 'active', lens: 'failure' },
       description:
         'Found: Failed to retrieve account balance. Impact: payment and deposit submissions fail. Verdict: confirms.',
       evidence: {
@@ -139,7 +139,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verification: { assessment: 'active', lens: 'failure' },
       description:
         'Found: connection refused to ledgerwriter:8080 on deposit /transactions. Impact: users cannot complete deposits. Verdict: confirms.',
       evidence: {
@@ -158,7 +158,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verification: { assessment: 'active', lens: 'failure' },
       description:
         'Found: connection refused to ledgerwriter:8080 on payment /transactions. Impact: users cannot complete payments. Verdict: confirms.',
       evidence: {
@@ -244,13 +244,13 @@ const BENIGN_LOGIN_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
-      description:
-        'Found: successful login event, no error signature. Impact: none — volume spike only. Verdict: refutes.',
+      verification: { assessment: 'non_incident', lens: 'failure' },
+      description: 'Successful login activity does not indicate a user-facing failure.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Login Successful") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
         result: 'found',
+        signature: 'successful login event',
       },
       metadata: {
         detection_id: '0dfb4f2f-2060-5369-9d75-02287ea4e060-det',
@@ -278,13 +278,13 @@ const BENIGN_SIGNUP_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
-      description:
-        'Found: successful account creation, no error signature. Impact: none — volume spike only. Verdict: refutes.',
+      verification: { assessment: 'non_incident', lens: 'failure' },
+      description: 'Successful account creation does not indicate a user-facing failure.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Successfully created user") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
         result: 'found',
+        signature: 'successful account creation',
       },
       metadata: {
         detection_id: '334488fe-8405-5e30-b538-ba028b6b0961-det',

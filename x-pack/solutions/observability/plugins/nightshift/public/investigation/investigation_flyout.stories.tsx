@@ -52,7 +52,7 @@ interface NightshiftFlyoutStoryProps {
 const noop = () => undefined;
 const unconfirmedDetectionSignal = {
   ...checkoutDetectionSignal,
-  confirmed: false,
+  verification: { assessment: 'non_incident' as const, lens: 'failure' as const },
 };
 
 const renderScenario = (scenario: FlyoutScenario): React.ReactElement => {

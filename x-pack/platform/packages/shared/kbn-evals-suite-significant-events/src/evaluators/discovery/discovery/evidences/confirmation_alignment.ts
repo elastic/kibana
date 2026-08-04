@@ -13,21 +13,21 @@ interface EventWithSignals {
   signals?: Array<{
     type?: string;
     metadata?: { rule_uuid?: string };
-    confirmed?: boolean;
+    verification?: { assessment?: string };
   }>;
 }
 
 const getRuleSignals = (event: EventWithSignals) =>
   (event.signals ?? []).flatMap((signal) =>
     signal.type === 'detection' && signal.metadata?.rule_uuid
-      ? [{ ruleUuid: signal.metadata.rule_uuid, confirmed: signal.confirmed }]
+      ? [{ ruleUuid: signal.metadata.rule_uuid, assessment: signal.verification?.assessment }]
       : []
   );
 
 const sharedRuleCount = (event: EventWithSignals, expectedRuleUuids: Set<string>) => {
   const eventRuleUuids = new Set(
     getRuleSignals(event)
-      .filter((signal) => signal.confirmed !== false)
+      .filter((signal) => signal.assessment === 'active' || signal.assessment === 'inconclusive')
       .map((signal) => signal.ruleUuid)
   );
   return [...eventRuleUuids].filter((ruleUuid) => expectedRuleUuids.has(ruleUuid)).length;
@@ -81,10 +81,16 @@ export const confirmationAlignmentEvaluator: DiscoveryEvaluator = {
       // evidence, KI grounding) are outside the expected-membership contract.
       const ruleSignals = getRuleSignals(event);
       const actualRuleUuids = asSet(
-        ruleSignals.filter((signal) => signal.confirmed === true).map((signal) => signal.ruleUuid)
+        ruleSignals
+          .filter((signal) => signal.assessment === 'active')
+          .map((signal) => signal.ruleUuid)
       );
       const nonMembersWithoutRejection = ruleSignals
-        .filter((signal) => !expectedRuleSet.has(signal.ruleUuid) && signal.confirmed !== false)
+        .filter(
+          (signal) =>
+            !expectedRuleSet.has(signal.ruleUuid) &&
+            (signal.assessment === 'active' || signal.assessment === 'inconclusive')
+        )
         .map((signal) => signal.ruleUuid);
       const isExactMatch =
         actualRuleUuids.size === expectedRuleSet.size &&
@@ -101,7 +107,9 @@ export const confirmationAlignmentEvaluator: DiscoveryEvaluator = {
             .sort()
             .join(', ')}]${
             nonMembersWithoutRejection.length > 0
-              ? `; expected confirmed:false for [${nonMembersWithoutRejection.sort().join(', ')}]`
+              ? `; expected non-blocking assessment for [${nonMembersWithoutRejection
+                  .sort()
+                  .join(', ')}]`
               : ''
           }`
         );

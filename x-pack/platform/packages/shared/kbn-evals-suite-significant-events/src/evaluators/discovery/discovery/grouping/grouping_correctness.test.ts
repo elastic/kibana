@@ -16,7 +16,7 @@ const buildEvent = (...ruleUuids: string[]): Partial<SignificantEvent> => ({
     (rule_uuid): SignalEntry => ({
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verification: { assessment: 'active', lens: 'failure' },
       description: 'Testing: something.',
       metadata: {
         rule_uuid,
