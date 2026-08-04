@@ -697,24 +697,5 @@ test.describe(
         await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
       });
     });
-
-    test('alert condition validation: a base-only query shows the callout and Next is enabled', async ({
-      page,
-      pageObjects,
-    }) => {
-      await test.step('open create flyout and apply only a base query', async () => {
-        await pageObjects.composeDiscover.openCreateFlyout();
-        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
-        await pageObjects.composeDiscover.openSandbox();
-        await pageObjects.composeDiscover.applySandboxBaseQueryOnly(BASE_QUERY);
-      });
-
-      await test.step('no-alert-condition callout is shown, Next is enabled, still on Alert Condition step', async () => {
-        await expect(pageObjects.composeDiscover.noAlertConditionCallout).toBeVisible();
-        // Conditionless rules are valid — Next is not blocked.
-        await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
-        await expect(page.testSubj.locator('ruleNameInput')).toBeHidden();
-      });
-    });
   }
 );

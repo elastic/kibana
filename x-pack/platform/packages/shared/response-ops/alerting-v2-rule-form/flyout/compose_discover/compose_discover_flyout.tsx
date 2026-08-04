@@ -1096,12 +1096,6 @@ export function ComposeDiscoverFlyout({
     dispatch({ type: 'DISABLE_MANUAL_SPLIT' });
   }, [sandboxQuery, dispatch]);
 
-  /*
-   * Triggered by the split-failed CTA on the form step (sandbox is closed).
-   * Opens the sandbox in manual split mode. When the heuristic cannot isolate a
-   * base, the full pipeline is placed in the base tab for the user to carve out
-   * the alert condition manually.
-   */
   const handleSandboxClose = useCallback(() => {
     if (manualSplitUncommittedRef.current) {
       // Clear manual split before syncing so the next render sees manualSplitEnabled: false.
