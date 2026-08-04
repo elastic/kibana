@@ -51,6 +51,25 @@ export const ALERTING_V2_ERROR_CODES = {
   SCHEDULE_INTERVAL_TOO_SHORT: 'SCHEDULE_INTERVAL_TOO_SHORT',
   /** Scheduling the rule would exceed the configured maximum rule runs per minute. */
   MAX_SCHEDULES_PER_MINUTE_EXCEEDED: 'MAX_SCHEDULES_PER_MINUTE_EXCEEDED',
+  /**
+   * A bulk operation persisted the rule saved object, but the paired Task
+   * Manager call failed, leaving the rule's task state diverged from its saved object.
+   * The saved-object change already committed; this entry flags the drift so the client
+   * can detect and (optionally) retry.
+   */
+  TASK_MANAGER_DRIFT: 'TASK_MANAGER_DRIFT',
+  /** A manual "run now" was requested for a disabled rule (it has no executor task to run). */
+  RULE_DISABLED: 'RULE_DISABLED',
+  /** A manual "run now" was requested for a rule whose executor task is already running. */
+  RULE_ALREADY_RUNNING: 'RULE_ALREADY_RUNNING',
+  /** A manual "run now" raced with another writer updating the executor task; retry. */
+  RULE_RUN_CONFLICT: 'RULE_RUN_CONFLICT',
+  /**
+   * A manual "run now" failed for an unexpected reason (e.g. the executor task
+   * is missing despite the rule being enabled). Catch-all for `runSoon` errors
+   * that are not already-running or conflict.
+   */
+  RULE_RUN_ERROR: 'RULE_RUN_ERROR',
 
   // ────────────────────── Action policies ────────────────────
   /** An action policy with the given identifier does not exist. */
@@ -63,10 +82,28 @@ export const ALERTING_V2_ERROR_CODES = {
   INVALID_ACTION_POLICY_DATA: 'INVALID_ACTION_POLICY_DATA',
   /** A user-supplied date string failed ISO-8601 parsing. */
   INVALID_DATE_STRING: 'INVALID_DATE_STRING',
+  /**
+   * A delete could not queue the action policy's API key for invalidation, so
+   * the policy was left in place rather than deleted. The single delete throws
+   * it; bulk delete reports it per item.
+   */
+  API_KEY_INVALIDATION_FAILED: 'API_KEY_INVALIDATION_FAILED',
 
   // ──────────────────────── Alert actions ────────────────────
   /** No alert event matched the supplied `group_hash` (and `episode_id`). */
   ALERT_EVENT_NOT_FOUND: 'ALERT_EVENT_NOT_FOUND',
+  /**
+   * No alert event matched the supplied `group_hash`. Bulk-only refinement of
+   * `ALERT_EVENT_NOT_FOUND` that pins the miss to the group (rather than a
+   * superseded episode) so a client can tell the two apart per item.
+   */
+  ALERT_GROUP_NOT_FOUND: 'ALERT_GROUP_NOT_FOUND',
+  /**
+   * The `group_hash` resolved to a latest alert event, but its `episode_id`
+   * did not match the one the item targeted (the episode was superseded).
+   * Bulk-only refinement of `ALERT_EVENT_NOT_FOUND`.
+   */
+  ALERT_EPISODE_NOT_FOUND: 'ALERT_EPISODE_NOT_FOUND',
   /** The requested action is incompatible with the episode's current `episode.status`. */
   INVALID_EPISODE_STATE_TRANSITION: 'INVALID_EPISODE_STATE_TRANSITION',
 
@@ -103,6 +140,24 @@ export type AlertingV2ErrorCode =
  * of enrichment).
  */
 export const ALERTING_V2_LOG_CODES = {
+  // ──────────────── Action policy API key invalidation ───────────────
+  /**
+   * A delete refused to remove one or more action policies because their API
+   * keys could not be queued for invalidation. Nothing was destroyed, so the
+   * keys are still referenced and a retry can invalidate them — but the
+   * pending-invalidation saved object store is failing writes and needs
+   * attention.
+   */
+  ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION:
+    'ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION',
+  /**
+   * A delete queued action policy API keys for invalidation and then failed
+   * to remove the matching policies. The policies survive with keys that are
+   * about to be invalidated, so they will stop being able to dispatch until
+   * their keys are rotated.
+   */
+  ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED: 'ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED',
+
   // ─────────────── Execution history (graceful degradation) ──────────────
   /**
    * One or more `task-run` hits returned by Elasticsearch on the rule

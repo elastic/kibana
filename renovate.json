@@ -158,7 +158,6 @@
     {
       "groupName": "@elastic/appex-qa dependencies",
       "matchDepNames": [
-        "callsites",
         "chance",
         "cheerio",
         "@types/chance",
@@ -885,7 +884,7 @@
     },
     {
       "groupName": "typescript",
-      "matchDepNames": ["typescript"],
+      "matchDepNames": ["typescript", "typescript-7"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1026,8 +1025,7 @@
         "ora",
         "@parcel/watcher",
         "@types/cli-progress",
-        "@types/dedent",
-        "@types/ora"
+        "@types/dedent"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -1497,7 +1495,6 @@
         "react-dropzone",
         "react-recompose",
         "react-shortcuts",
-        "redux-thunks",
         "@types/react-recompose"
       ],
       "reviewers": ["team:kibana-presentation"],
@@ -1517,7 +1514,7 @@
     },
     {
       "groupName": "kibana-presentation misc canvas dependencies",
-      "matchDepNames": ["object-path-immutable", "safe-squel"],
+      "matchDepNames": ["safe-squel"],
       "reviewers": ["team:kibana-presentation"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
@@ -1726,7 +1723,7 @@
     },
     {
       "groupName": "adm-zip",
-      "matchDepNames": ["adm-zip", "@types/adm-zip"],
+      "matchDepNames": ["adm-zip"],
       "reviewers": ["team:security-solution"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team: SecuritySolution"],
@@ -1840,7 +1837,7 @@
     },
     {
       "groupName": "redux-thunk",
-      "matchDepNames": ["redux-thunk", "redux-thunk-v2"],
+      "matchDepNames": ["redux-thunk-v2"],
       "reviewers": ["team:kibana-presentation", "team:kibana-management", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
@@ -1868,7 +1865,6 @@
         "magic-bytes.js",
         "minimist",
         "object-hash",
-        "require-in-the-middle",
         "tough-cookie",
         "xml-crypto",
         "@elastic/node-crypto",
@@ -1885,11 +1881,20 @@
       "enabled": true
     },
     {
-      "groupName": "platform security modules - ESM required",
-      "matchDepNames": ["@kayahr/text-encoding", "uuid", "@types/uuid"],
+      "groupName": "@kayahr/text-encoding",
+      "matchDepNames": ["@kayahr/text-encoding"],
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security", "blocked"],
+      "addLabels": ["Team:Security"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "uuid",
+      "matchDepNames": ["uuid"],
+      "reviewers": ["team:kibana-security"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:Security"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -1959,7 +1964,6 @@
         "@testing-library/dom",
         "@testing-library/jest-dom",
         "@testing-library/react",
-        "@testing-library/react-hooks",
         "@testing-library/user-event"
       ],
       "reviewers": ["team:kibana-operations"],
@@ -2035,15 +2039,6 @@
     {
       "groupName": "react-window-infinite-loader",
       "matchDepNames": ["react-window-infinite-loader", "@types/react-window-infinite-loader"],
-      "reviewers": ["team:actionable-obs-team"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "redux-saga-testing",
-      "matchDepNames": ["redux-saga-testing"],
       "reviewers": ["team:actionable-obs-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
@@ -2150,11 +2145,12 @@
         "@aws-sdk/client-bedrock-agent-runtime",
         "@aws-sdk/client-bedrock-runtime",
         "@aws-sdk/client-kendra",
-        "@aws-sdk/credential-provider-node"
+        "@aws-sdk/credential-provider-node",
+        "google-auth-library"
       ],
-      "reviewers": ["team:security-generative-ai"],
+      "reviewers": ["team:workchat-eng"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security Generative AI"],
+      "addLabels": ["Team:agent-builder"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2170,9 +2166,9 @@
     {
       "groupName": "seedrandom",
       "matchDepNames": ["seedrandom", "@types/seedrandom"],
-      "reviewers": ["team:integration-experience"],
+      "reviewers": ["team:cloud-services"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Integration-Experience"],
+      "addLabels": ["Team:Security-Cloud Services"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2339,7 +2335,6 @@
       "matchDepNames": [
         "@types/http-proxy",
         "get-port",
-        "google-auth-library",
         "http-proxy",
         "http-proxy-agent",
         "https-proxy-agent",
@@ -2354,11 +2349,10 @@
       "groupName": "Response Ops misc dependencies",
       "matchDepNames": [
         "@types/stats-lite",
-        "@types/textarea-caret",
         "email-addresses",
+        "graphql",
         "murmurhash",
-        "stats-lite",
-        "textarea-caret"
+        "stats-lite"
       ],
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],

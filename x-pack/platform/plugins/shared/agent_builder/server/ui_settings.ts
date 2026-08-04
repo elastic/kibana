@@ -12,6 +12,7 @@ import {
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID,
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
   AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID,
@@ -66,6 +67,23 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       experimental: true,
       requiresPageReload: false,
       readonly: false,
+    },
+    [AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID]: {
+      description: i18n.translate(
+        'xpack.agentBuilder.uiSettings.uiamOAuthClientManagement.description',
+        {
+          defaultMessage:
+            'Allows managing OAuth clients that external applications use to connect to Elastic Agent Builder over MCP.',
+        }
+      ),
+      name: i18n.translate('xpack.agentBuilder.uiSettings.uiamOAuthClientManagement.name', {
+        defaultMessage: 'Manage OAuth clients for MCP',
+      }),
+      schema: schema.boolean(),
+      value: false,
+      requiresPageReload: true,
+      readonly: true,
+      readonlyMode: 'ui',
     },
     [AGENT_BUILDER_TRACING_ENABLED_SETTING_ID]: {
       name: i18n.translate('xpack.agentBuilder.uiSettings.tracing.enabled.name', {
@@ -142,10 +160,11 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
 
     [AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID]: {
       name: i18n.translate('xpack.agentBuilder.uiSettings.tracing.realNames.name', {
-        defaultMessage: 'Include real tool and agent names in traces',
+        defaultMessage: 'Include real tool, agent, and conversation names in traces',
       }),
       description: i18n.translate('xpack.agentBuilder.uiSettings.tracing.realNames.description', {
-        defaultMessage: 'Tool and agent names are anonymized by default.',
+        defaultMessage:
+          'Tool and agent names are anonymized by default. Conversation titles are omitted by default.',
       }),
       schema: schema.boolean(),
       value: false,

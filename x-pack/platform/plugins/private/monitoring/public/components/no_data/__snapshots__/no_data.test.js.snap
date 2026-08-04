@@ -93,6 +93,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
               class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
             >
               <span
+                aria-hidden="true"
                 data-euiicon-type="monitoringApp"
               />
             </div>
@@ -267,6 +268,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
               class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
             >
               <span
+                aria-hidden="true"
                 data-euiicon-type="monitoringApp"
               />
             </div>

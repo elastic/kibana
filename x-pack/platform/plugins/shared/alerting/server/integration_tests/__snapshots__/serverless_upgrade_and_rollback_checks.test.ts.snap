@@ -6044,6 +6044,7 @@ Object {
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
+                  "endpoint_custom_yara_signatures",
                 ],
                 "type": "string",
               },
@@ -6820,6 +6821,7 @@ Object {
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
+                  "endpoint_custom_yara_signatures",
                 ],
                 "type": "string",
               },
@@ -7581,6 +7583,7 @@ Object {
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
+                  "endpoint_custom_yara_signatures",
                 ],
                 "type": "string",
               },
@@ -8297,6 +8300,7 @@ Object {
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
+                  "endpoint_custom_yara_signatures",
                 ],
                 "type": "string",
               },
@@ -9136,6 +9140,7 @@ Object {
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
+                  "endpoint_custom_yara_signatures",
                 ],
                 "type": "string",
               },
@@ -9924,6 +9929,7 @@ Object {
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
+                  "endpoint_custom_yara_signatures",
                 ],
                 "type": "string",
               },
@@ -10638,6 +10644,7 @@ Object {
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
+                  "endpoint_custom_yara_signatures",
                 ],
                 "type": "string",
               },
@@ -12448,6 +12455,50 @@ Object {
                           ],
                           "type": "alternatives",
                         },
+                        "docsCountPercentage": Object {
+                          "flags": Object {
+                            "default": null,
+                            "error": [Function],
+                            "presence": "optional",
+                          },
+                          "matches": Array [
+                            Object {
+                              "schema": Object {
+                                "flags": Object {
+                                  "error": [Function],
+                                },
+                                "rules": Array [
+                                  Object {
+                                    "args": Object {
+                                      "limit": 1,
+                                    },
+                                    "name": "min",
+                                  },
+                                  Object {
+                                    "args": Object {
+                                      "limit": 100,
+                                    },
+                                    "name": "max",
+                                  },
+                                ],
+                                "type": "number",
+                              },
+                            },
+                            Object {
+                              "schema": Object {
+                                "allow": Array [
+                                  null,
+                                ],
+                                "flags": Object {
+                                  "error": [Function],
+                                  "only": true,
+                                },
+                                "type": "any",
+                              },
+                            },
+                          ],
+                          "type": "alternatives",
+                        },
                         "enabled": Object {
                           "flags": Object {
                             "default": true,
@@ -12455,6 +12506,45 @@ Object {
                             "presence": "optional",
                           },
                           "type": "boolean",
+                        },
+                        "thresholdType": Object {
+                          "flags": Object {
+                            "default": [Function],
+                            "error": [Function],
+                            "presence": "optional",
+                          },
+                          "matches": Array [
+                            Object {
+                              "schema": Object {
+                                "allow": Array [
+                                  "count",
+                                ],
+                                "flags": Object {
+                                  "error": [Function],
+                                  "only": true,
+                                },
+                                "type": "any",
+                              },
+                            },
+                            Object {
+                              "schema": Object {
+                                "allow": Array [
+                                  "percentage",
+                                ],
+                                "flags": Object {
+                                  "error": [Function],
+                                  "only": true,
+                                },
+                                "type": "any",
+                              },
+                            },
+                          ],
+                          "metas": Array [
+                            Object {
+                              "x-oas-optional": true,
+                            },
+                          ],
+                          "type": "alternatives",
                         },
                         "timeInterval": Object {
                           "flags": Object {
