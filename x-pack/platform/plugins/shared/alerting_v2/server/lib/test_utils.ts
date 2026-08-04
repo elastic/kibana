@@ -49,11 +49,15 @@ export function createMockLogger(): jest.Mocked<Logger> {
 /**
  * Creates a standard RuleResponse for testing.
  */
-export function createRuleResponse(overrides: Partial<RuleResponse> = {}): RuleResponse {
+export function createRuleResponse(
+  overrides: Partial<Omit<RuleResponse, 'metadata'>> & {
+    metadata?: Partial<RuleResponse['metadata']>;
+  } = {}
+): RuleResponse {
+  const { metadata, ...rest } = overrides;
   return {
     id: 'rule-1',
     kind: 'alert',
-    metadata: { name: 'test-rule' },
     time_field: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
     recovery_strategy: 'no_breach',
@@ -64,7 +68,8 @@ export function createRuleResponse(overrides: Partial<RuleResponse> = {}): RuleR
     createdAt: '2025-01-01T00:00:00.000Z',
     updatedBy: 'elastic_profile_uid',
     updatedAt: '2025-01-01T00:00:00.000Z',
-    ...overrides,
+    ...rest,
+    metadata: { name: 'test-rule', ...metadata, version: metadata?.version ?? 1 },
   };
 }
 
