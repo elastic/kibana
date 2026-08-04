@@ -39,6 +39,7 @@
     "@kbn/workflows-ui",
     "@kbn/deeplinks-workflows",
     "@kbn/deeplinks-management",
+    "@kbn/deeplinks-analytics",
     "@kbn/code-editor",
     "@kbn/ui-callout"
   ]

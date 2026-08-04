@@ -21,7 +21,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { AutomationsPanel, DescriptionPanel, SourcesPanel } from '../components/ai_index_detail';
+import {
+  AutomationsPanel,
+  DescriptionPanel,
+  KnowledgeIndicatorsPanel,
+  SourcesPanel,
+} from '../components/ai_index_detail';
 import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useNavigation } from '../hooks/use_navigation';
@@ -128,6 +133,8 @@ export const AiIndexDetailPage = () => {
           onEditSources={() => setIsEditingSources(true)}
           isManaged={hideEditControls}
         />
+        <EuiSpacer size="m" />
+        <KnowledgeIndicatorsPanel isLoading={isLoading} aiIndex={aiIndex} />
         <EuiSpacer size="m" />
         <AutomationsPanel
           isLoading={isLoading}

@@ -8,4 +8,5 @@
 export { AutomationRow } from './automation_row';
 export { AutomationsPanel } from './automations_panel';
 export { DescriptionPanel } from './description_panel';
+export { KnowledgeIndicatorsPanel } from './knowledge_indicators_panel';
 export { SourcesPanel } from './sources_panel';

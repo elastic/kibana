@@ -7,10 +7,16 @@
 
 import { buildPath } from '@kbn/core-http-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { AI_INDEX_API_VERSION, aiIndexByIdPath, aiIndexPath } from '../../../common/constants';
+import {
+  AI_INDEX_API_VERSION,
+  aiIndexByIdPath,
+  aiIndexKiSummaryPath,
+  aiIndexPath,
+} from '../../../common/constants';
 import type {
   AiIndexProperties,
   CreateAiIndexResponse,
+  GetAiIndexKiSummaryResponse,
   GetAiIndexResponse,
   ListAiIndexResponse,
   PutAiIndexResponse,
@@ -42,6 +48,20 @@ export const getAiIndex = (
   { aiIndexId, signal }: GetAiIndexArgs
 ): Promise<GetAiIndexResponse> =>
   http.get<GetAiIndexResponse>(buildPath(aiIndexByIdPath, { aiIndexId }), {
+    version: AI_INDEX_API_VERSION,
+    ...(signal ? { signal } : {}),
+  });
+
+interface GetAiIndexKiSummaryArgs {
+  aiIndexId: string;
+  signal?: AbortSignal;
+}
+
+export const getAiIndexKiSummary = (
+  http: HttpStart,
+  { aiIndexId, signal }: GetAiIndexKiSummaryArgs
+): Promise<GetAiIndexKiSummaryResponse> =>
+  http.get<GetAiIndexKiSummaryResponse>(buildPath(aiIndexKiSummaryPath, { aiIndexId }), {
     version: AI_INDEX_API_VERSION,
     ...(signal ? { signal } : {}),
   });

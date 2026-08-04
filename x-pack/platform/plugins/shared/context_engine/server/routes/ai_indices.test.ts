@@ -15,6 +15,7 @@ import {
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   aiIndexByIdPath,
+  aiIndexKiSummaryPath,
   aiIndexPath,
 } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
@@ -90,6 +91,7 @@ describe('ai indices routes', () => {
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
   let actions: ReturnType<typeof actionsMock.createStart>;
   let auditLogger: { log: jest.Mock };
+  let esqlQuery: jest.Mock;
 
   const createContext = () =>
     ({
@@ -98,6 +100,13 @@ describe('ai indices routes', () => {
           client: { get: jest.fn().mockImplementation(async () => featureFlagEnabled) },
         },
         security: { audit: { logger: auditLogger } },
+        elasticsearch: {
+          client: {
+            asCurrentUser: {
+              esql: { query: esqlQuery },
+            },
+          },
+        },
       }),
     } as unknown as Parameters<RequestHandler>[0]);
 
@@ -116,6 +125,7 @@ describe('ai indices routes', () => {
     actions.getActionsClientWithRequest.mockResolvedValue(actionsClient);
     actionsClient.listTypes.mockResolvedValue(SUPPORTED_TYPE_IDS.map(buildConnectorType));
     auditLogger = { log: jest.fn() };
+    esqlQuery = jest.fn();
     aiIndexService = {
       create: jest.fn(),
       put: jest.fn(),
@@ -164,10 +174,11 @@ describe('ai indices routes', () => {
     await callRoute('POST', aiIndexPath, { body: { id: 'a' } });
     await callRoute('PUT', aiIndexByIdPath, { params: { aiIndexId: 'a' }, body: {} });
     await callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'a' } });
+    await callRoute('GET', aiIndexKiSummaryPath, { params: { aiIndexId: 'a' } });
     await callRoute('GET', aiIndexPath, {});
     await callRoute('DELETE', aiIndexByIdPath, { params: { aiIndexId: 'a' } });
 
-    expect(response.notFound).toHaveBeenCalledTimes(5);
+    expect(response.notFound).toHaveBeenCalledTimes(6);
     expect(aiIndexService.create).not.toHaveBeenCalled();
     expect(aiIndexService.put).not.toHaveBeenCalled();
     expect(aiIndexService.get).not.toHaveBeenCalled();
@@ -185,6 +196,10 @@ describe('ai indices routes', () => {
       security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
     });
     expect(getRoute('GET', aiIndexByIdPath).config).toMatchObject({
+      access: 'public',
+      security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
+    });
+    expect(getRoute('GET', aiIndexKiSummaryPath).config).toMatchObject({
       access: 'public',
       security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
     });
@@ -405,6 +420,40 @@ describe('ai indices routes', () => {
           kibana: { saved_object: { type: 'ai_index', id: 'customer_support' } },
         })
       );
+    });
+  });
+
+  describe('GET /api/context_engine/ai_index/{aiIndexId}/ki_summary', () => {
+    it('returns the Knowledge Indicator count for the destination', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esqlQuery.mockResolvedValue({
+        columns: [{ name: 'type' }, { name: 'count' }],
+        values: [
+          ['index_metadata', 10],
+          ['document', 8],
+          ['detection', 7],
+        ],
+      });
+
+      await callRoute('GET', aiIndexKiSummaryPath, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      expect(esqlQuery).toHaveBeenCalledWith({
+        query: 'FROM ai-index-ds-customer_support* | STATS count = COUNT(*) BY type',
+        allow_partial_results: true,
+      });
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          count: 25,
+          dest: aiIndexItem.dest,
+          counts_by_type: [
+            { type: 'index_metadata', count: 10 },
+            { type: 'document', count: 8 },
+            { type: 'detection', count: 7 },
+          ],
+        },
+      });
     });
   });
 

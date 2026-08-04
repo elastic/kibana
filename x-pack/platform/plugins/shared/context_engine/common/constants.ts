@@ -9,6 +9,7 @@ export const publicApiPath = '/api/context_engine';
 
 export const aiIndexPath = `${publicApiPath}/ai_index`;
 export const aiIndexByIdPath = `${aiIndexPath}/{aiIndexId}`;
+export const aiIndexKiSummaryPath = `${aiIndexByIdPath}/ki_summary`;
 
 /**
  * Version of the public AI index API, shared between the server route
