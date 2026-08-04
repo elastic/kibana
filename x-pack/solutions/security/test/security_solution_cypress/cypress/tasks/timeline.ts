@@ -353,13 +353,11 @@ export const createNewTimeline = () => {
 };
 
 export const openCreateTimelineOptionsPopover = () => {
-  recurse(
-    () => {
-      cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
-      return cy.get(CREATE_NEW_TIMELINE);
-    },
-    (sub) => sub.is(':visible')
-  );
+  // NEW_TIMELINE_ACTION toggles the popover, so click it once and wait on the
+  // menu item instead of re-clicking in a retry loop, which would re-toggle the
+  // popover shut and detach CREATE_NEW_TIMELINE mid-click.
+  cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
+  cy.get(CREATE_NEW_TIMELINE).should('be.visible');
 };
 
 export const createTimelineFromBottomBar = () => {
