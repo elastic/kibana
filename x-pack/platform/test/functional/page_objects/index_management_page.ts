@@ -24,6 +24,10 @@ export function IndexManagementPageProvider({ getService, getPageObjects }: FtrP
       expect(headingText).to.be('Index Management');
     },
 
+    async expectToBeOnIndicesTab() {
+      await testSubjects.existOrFail('indexTable');
+    },
+
     async reloadIndices() {
       await testSubjects.click('reloadIndicesButton');
     },

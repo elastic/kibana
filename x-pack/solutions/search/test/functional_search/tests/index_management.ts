@@ -43,9 +43,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.common.navigateToApp('indexManagement', {
             basePath: `s/${spaceCreated.id}`,
           });
-          // Navigate to the indices tab
-          await pageObjects.indexManagement.changeTabs('indicesTab');
           await pageObjects.header.waitUntilLoadingHasFinished();
+          // Indices is the default tab; wait for its table to render instead of re-clicking
+          // the already-selected tab, which can be intercepted by transient overlays (#239152).
+          await pageObjects.indexManagement.expectToBeOnIndicesTab();
         });
         describe('manage index action', () => {
           beforeEach(async () => {
@@ -69,8 +70,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('mappings');
           });
         });
-        // FLAKY: https://github.com/elastic/kibana/issues/239152
-        describe.skip('can view search index details', function () {
+        describe('can view search index details', function () {
           it('renders search index details with no documents', async () => {
             await pageObjects.searchIndexDetailsPage.openIndicesDetailFromIndexManagementIndicesListTable(
               0
@@ -117,9 +117,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.common.navigateToApp('indexManagement', {
             basePath: `s/${spaceCreated.id}`,
           });
-          // Navigate to the indices tab
-          await pageObjects.indexManagement.changeTabs('indicesTab');
           await pageObjects.header.waitUntilLoadingHasFinished();
+          // Indices is the default tab; wait for its table to render instead of re-clicking
+          // the already-selected tab, which can be intercepted by transient overlays (#239152).
+          await pageObjects.indexManagement.expectToBeOnIndicesTab();
         });
         after(async () => {
           await esDeleteAllIndices(indexName);
