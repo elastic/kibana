@@ -61,9 +61,6 @@ export interface UpdateRuleInMemoryOpts<Params extends RuleParams> {
   shouldInvalidateApiKeys: boolean;
   paramsModifier?: ParamsModifier<Params>;
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;
-  // Runs the rule type's params authorizer. Disabled on the read-auth path, where
-  // the caller has already authorized the field-level edit.
-  shouldAuthorizeRuleTypeParams?: boolean;
 }
 
 export async function updateRuleInMemory<Params extends RuleParams>(
@@ -79,7 +76,6 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     username,
     shouldInvalidateApiKeys,
     shouldIncrementRevision = () => true,
-    shouldAuthorizeRuleTypeParams = true,
   }: UpdateRuleInMemoryOpts<Params>
 ): Promise<void> {
   context.logger.info(`Updating rule in memory for rule: ${rule.id}`);
@@ -158,12 +154,10 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     rule.attributes.params,
     ruleType.validate.params
   );
-  if (shouldAuthorizeRuleTypeParams) {
-    await authorizeRuleTypeParams(validatedMutatedAlertTypeParams, ruleType.authorize?.params, {
-      request: context.request,
-      previousParams: rule.attributes.params,
-    });
-  }
+  await authorizeRuleTypeParams(validatedMutatedAlertTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+    previousParams: rule.attributes.params,
+  });
 
   const {
     references,
