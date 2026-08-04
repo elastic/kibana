@@ -9,6 +9,4 @@
 
 export { InfoBlocks } from './src/info_blocks.component';
 export { InfoBlock } from './src/info_block.component';
-
-// Re-exported so consumers can adopt these components with a single import.
-export type { InfoBlockItem, InfoBlocksProps } from '@kbn/shared-ux-flyout-common';
+export type { InfoBlockItem, InfoBlocksProps } from './src/types';

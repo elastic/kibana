@@ -10,7 +10,7 @@
 import React, { type CSSProperties, type FunctionComponent } from 'react';
 import { css } from '@emotion/react';
 import { EuiText, EuiTextTruncate, euiFontSize, useEuiTheme } from '@elastic/eui';
-import type { InfoBlockItem } from '@kbn/shared-ux-flyout-common';
+import type { InfoBlockItem } from './types';
 
 export interface InfoBlockProps extends InfoBlockItem {
   compressed?: boolean;

@@ -12,5 +12,3 @@ export {
   FLYOUT_MAX_GRID_COLUMNS,
   MAX_METADATA_ITEMS,
 } from './src/constants';
-
-export type { InfoBlockItem, InfoBlocksProps } from './src/info_block_types';

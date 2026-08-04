@@ -29,8 +29,8 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
 } from '@elastic/eui';
-import type { InfoBlockItem } from '@kbn/shared-ux-flyout-common';
 import { InfoBlocks } from './info_blocks.component';
+import type { InfoBlockItem } from './types';
 
 const meta: Meta<typeof InfoBlocks> = {
   title: 'Flyout Template/Info Blocks',

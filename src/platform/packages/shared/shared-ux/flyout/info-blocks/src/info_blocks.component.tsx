@@ -11,17 +11,13 @@ import React, { type FunctionComponent } from 'react';
 import { css } from '@emotion/react';
 import { EuiPanel, useEuiMemoizedStyles } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
-import {
-  FLYOUT_MIN_CELL_WIDTH,
-  FLYOUT_MAX_GRID_COLUMNS,
-  type InfoBlocksProps,
-} from '@kbn/shared-ux-flyout-common';
+import { FLYOUT_MIN_CELL_WIDTH, FLYOUT_MAX_GRID_COLUMNS } from '@kbn/shared-ux-flyout-common';
+import type { InfoBlocksProps } from './types';
 import { InfoBlock } from './info_block.component';
 
 const CONTAINER_NAME = 'infoBlocks';
 
 const styles = ({ euiTheme }: UseEuiTheme) => {
-  // Shared with MetadataPairs: both grids drop a column at the same container width.
   const twoColumnBelow = FLYOUT_MAX_GRID_COLUMNS * FLYOUT_MIN_CELL_WIDTH; // 420
   const oneColumnBelow = 2 * FLYOUT_MIN_CELL_WIDTH; // 280
   const color = euiTheme.border.color;
