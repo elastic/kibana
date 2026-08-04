@@ -9,6 +9,10 @@ import { renderHook } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
+import {
+  IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED,
+  IS_VENDOR_ENDPOINTS_ENABLED,
+} from '../../../common/feature_flags';
 import { useApiEndpoints } from './use_api_endpoints';
 
 jest.mock('../../hooks/use_fetcher', () => {
@@ -38,6 +42,7 @@ interface Options {
   isManagedOtlpServiceAvailable?: boolean;
   isServerless?: boolean;
   managedOtlpPrwEndpointEnabled?: boolean;
+  vendorEndpointsEnabled?: boolean;
   elasticsearchUrl?: string;
   managedOtlpServiceUrl?: string;
   status?: FETCH_STATUS;
@@ -47,6 +52,7 @@ const setup = ({
   isManagedOtlpServiceAvailable = false,
   isServerless = false,
   managedOtlpPrwEndpointEnabled = false,
+  vendorEndpointsEnabled = true,
   elasticsearchUrl = 'https://es.example.com',
   managedOtlpServiceUrl = '',
   status = FETCH_STATUS.SUCCESS,
@@ -56,7 +62,15 @@ const setup = ({
     services: {
       context: { isServerless },
       featureFlags: {
-        getBooleanValue: jest.fn().mockReturnValue(managedOtlpPrwEndpointEnabled),
+        getBooleanValue: jest.fn().mockImplementation((key: string) => {
+          if (key === IS_VENDOR_ENDPOINTS_ENABLED) {
+            return vendorEndpointsEnabled;
+          }
+          if (key === IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED) {
+            return managedOtlpPrwEndpointEnabled;
+          }
+          return false;
+        }),
       },
     },
   } as unknown as ReturnType<typeof useKibana>);
@@ -280,5 +294,16 @@ describe('useApiEndpoints', () => {
 
     expect(findEndpoint(result, 'prometheus')?.additionalEndpoints).toEqual([]);
     expect(findEndpoint(result, 'elasticsearch')?.additionalEndpoints).toEqual([]);
+  });
+
+  it('hides vendor endpoints when the vendor endpoints flag is disabled', () => {
+    const { result } = setup({
+      isManagedOtlpServiceAvailable: true,
+      managedOtlpServiceUrl: 'https://otlp.example.com:443',
+      vendorEndpointsEnabled: false,
+    });
+
+    expect(findEndpoint(result, 'opentelemetry')?.additionalEndpoints).toEqual([]);
+    expect(result.current.popoverEndpoints).toEqual([]);
   });
 });

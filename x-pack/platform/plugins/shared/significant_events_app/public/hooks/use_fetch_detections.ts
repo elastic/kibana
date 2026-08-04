@@ -21,7 +21,7 @@ export const useFetchDetections = ({ from, to }: UseFetchDetectionsParams) => {
   const {
     dependencies: {
       start: {
-        significant_events: { significantEventsRepositoryClient },
+        significantEvents: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();
@@ -66,7 +66,7 @@ export const useFetchDetectionHistory = (ruleUuid: string | undefined) => {
   const {
     dependencies: {
       start: {
-        significant_events: { significantEventsRepositoryClient },
+        significantEvents: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();

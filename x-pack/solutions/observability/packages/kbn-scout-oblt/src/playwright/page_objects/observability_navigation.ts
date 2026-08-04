@@ -146,6 +146,26 @@ export class ObservabilityNavigation {
     return this.breadcrumbs.locator('[data-test-subj~="breadcrumb"]', { hasText: by.text });
   }
 
+  /**
+   * Resolve a body nav item wherever it renders. It lives in the primary nav on some
+   * deployments but overflows into the "More" menu on others (e.g. cloud-serverless);
+   * open "More" when it is not in the primary nav so the returned locator is reachable.
+   */
+  async revealBodyNavItemByDeepLinkId(deepLinkId: string): Promise<Locator> {
+    const primaryItem = this.navItemInPrimaryByDeepLinkId(deepLinkId);
+    if (await primaryItem.isVisible()) {
+      return primaryItem;
+    }
+    await this.openMoreMenu();
+    return this.navItemInMoreByDeepLinkId(deepLinkId);
+  }
+
+  /** Click a body nav item wherever it renders — primary nav or the "More" overflow menu. */
+  async clickBodyNavItemByDeepLinkId(deepLinkId: string) {
+    const item = await this.revealBodyNavItemByDeepLinkId(deepLinkId);
+    await item.click();
+  }
+
   /** If More is already open, Escape first so the next open is the root list. */
   async openMoreMenu() {
     if (await this.morePopover.isVisible()) {

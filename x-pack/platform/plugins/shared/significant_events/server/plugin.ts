@@ -68,6 +68,8 @@ import {
   type SignificantEventsScheduledWorkflowsService,
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
+import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers/register_triggers';
+import { createTriggerEmitter } from './workflows/triggers/emit';
 import { installInvestigationAgent } from './memory_and_investigation/lib/investigation/install_investigation_agent';
 import { registerInvestigationAgentType } from './memory_and_investigation/agents/investigation';
 import {
@@ -80,7 +82,7 @@ import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_fla
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 
-const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significant_events';
+const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 
 export class SignificantEventsPlugin
   implements
@@ -148,6 +150,13 @@ export class SignificantEventsPlugin
       const globalUiSettingsClient = coreStart.uiSettings.globalAsScopedToClient(scopedSoClient);
 
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
+      // A Query Stream's ES|QL view can resolve to indices that live on remote CPS-connected
+      // projects, so reads of stream data must follow the space's project routing expression
+      // rather than the origin project only. `scopedClusterClient` deliberately stays
+      // origin-only: the plugin's own hidden data streams only ever exist in the origin project.
+      const streamDataEsClient = coreStart.elasticsearch.client.asScoped(request, {
+        projectRouting: 'space',
+      }).asCurrentUser;
       const soClient = scopedSoClient;
       const inferenceClient = pluginsStart.inference.getClient({ request });
       const licensing = pluginsStart.licensing;
@@ -166,6 +175,11 @@ export class SignificantEventsPlugin
         services: significantEventsServices,
         esClient: scopedClusterClient.asCurrentUser,
         space,
+        triggerEmitter: createTriggerEmitter({
+          workflowsExtensions: pluginsStart.workflowsExtensions,
+          request,
+          logger: this.logger,
+        }),
       });
 
       const getAlertingV2RulesClient = async () =>
@@ -208,6 +222,7 @@ export class SignificantEventsPlugin
 
       return {
         scopedClusterClient,
+        streamDataEsClient,
         soClient,
         attachmentClient,
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
@@ -291,6 +306,9 @@ export class SignificantEventsPlugin
     plugins.workflowsExtensions?.registerManagedWorkflowOwner(
       SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
     );
+
+    // Custom event-driven triggers users can subscribe to from their own workflows.
+    registerSignificantEventsWorkflowTriggers(plugins.workflowsExtensions);
 
     if (plugins.workflowsManagement && plugins.workflowsExtensions) {
       significantEventsScheduledWorkflowsService = createSignificantEventsScheduledWorkflowsService(
@@ -515,7 +533,7 @@ export class SignificantEventsPlugin
   ): Promise<void> {
     if (!(await isAvailable())) {
       this.logger.debug(
-        'significant_events: availability flag disabled, skipping managed resource installation'
+        'significantEvents: availability flag disabled, skipping managed resource installation'
       );
       return;
     }
@@ -571,7 +589,7 @@ export class SignificantEventsPlugin
 
   private logManagedResourceError(context: string, error: unknown): void {
     this.logger.error(
-      `significant_events: failed to install managed resources (${context}): ${
+      `significantEvents: failed to install managed resources (${context}): ${
         error instanceof Error ? error.message : String(error)
       }`
     );
@@ -579,7 +597,7 @@ export class SignificantEventsPlugin
 
   private logSkillsRegistrationError(scope: string, error: unknown): void {
     this.logger.error(
-      `significant_events: failed to register ${scope} skills: ${
+      `significantEvents: failed to register ${scope} skills: ${
         error instanceof Error ? error.message : String(error)
       }`
     );
