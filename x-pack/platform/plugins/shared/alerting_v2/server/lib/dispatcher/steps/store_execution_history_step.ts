@@ -22,6 +22,12 @@ import type {
   Rule,
   RuleId,
 } from '../types';
+
+/**
+ * Index of workflow ids that recorded a dispatch failure, keyed by action group id.
+ * Used to exclude failed destinations from the `dispatched` policy summary.
+ */
+type FailedDestinations = ReadonlyMap<ActionGroupId, ReadonlySet<string>>;
 import {
   ACTION_POLICY_EVENT_ACTIONS,
   type ActionPolicyEventAction,
@@ -120,7 +126,13 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     const timestamp = input.startedAt.toISOString();
     const { executionUuid } = input;
 
-    for (const summary of aggregateByPolicy(dispatch, dispatchedExecutions).values()) {
+    const failedDestinations = indexFailedDestinations(dispatchFailures);
+
+    for (const summary of aggregateByPolicy(
+      dispatch,
+      dispatchedExecutions,
+      failedDestinations
+    ).values()) {
       this.emitPolicySummary({
         timestamp,
         executionUuid,
@@ -140,6 +152,9 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       });
     }
 
+    // Pass the full `dispatch` list — including fully-failed groups — so that
+    // their episodes are not double-reported as `unmatched`. Those episodes did
+    // match a policy; `dispatch_failed` already carries their episode_ids.
     const unmatched = aggregateUnmatchedBySubject(
       getUnmatchedEpisodes(dispatchable, dispatch, throttled)
     );
@@ -280,10 +295,28 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
 
 function aggregateByPolicy(
   groups: readonly ActionGroup[],
-  dispatchedExecutions?: Map<ActionGroupId, string[]>
+  dispatchedExecutions?: Map<ActionGroupId, string[]>,
+  failedDestinations?: FailedDestinations
 ): Map<ActionPolicyId, PolicySummary> {
   const summaries = new Map<ActionPolicyId, PolicySummary>();
   for (const group of groups) {
+    // Compute the subset of destinations that were successfully dispatched.
+    // When failedDestinations is provided (dispatched path), destinations that
+    // recorded a DispatchFailure are excluded. Groups with at least one
+    // destination but no delivered destinations (total failure) are skipped
+    // entirely — their episodes and rules are already captured in
+    // `dispatch_failed` events and must not appear in the `dispatched` summary.
+    const failed = failedDestinations?.get(group.id);
+    const delivered =
+      failed != null
+        ? group.destinations.filter((destination) => !failed.has(destination.id))
+        : group.destinations;
+
+    if (group.destinations.length > 0 && delivered.length === 0) {
+      // All destinations failed — skip this group entirely for this summary.
+      continue;
+    }
+
     let summary = summaries.get(group.policyId);
     if (!summary) {
       summary = {
@@ -298,7 +331,7 @@ function aggregateByPolicy(
       summaries.set(group.policyId, summary);
     }
     summary.actionGroupIds.add(group.id);
-    for (const destination of group.destinations) {
+    for (const destination of delivered) {
       summary.workflowIds.add(destination.id);
     }
     for (const executionId of dispatchedExecutions?.get(group.id) ?? []) {
@@ -312,6 +345,19 @@ function aggregateByPolicy(
     }
   }
   return summaries;
+}
+
+function indexFailedDestinations(failures: readonly DispatchFailure[]): FailedDestinations {
+  const index = new Map<ActionGroupId, Set<string>>();
+  for (const failure of failures) {
+    let workflowIds = index.get(failure.actionGroupId);
+    if (!workflowIds) {
+      workflowIds = new Set();
+      index.set(failure.actionGroupId, workflowIds);
+    }
+    workflowIds.add(failure.workflowId);
+  }
+  return index;
 }
 
 function aggregateUnmatchedBySubject(
