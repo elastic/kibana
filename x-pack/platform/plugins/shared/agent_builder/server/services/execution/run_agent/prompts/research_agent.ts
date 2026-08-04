@@ -18,6 +18,7 @@ import { convertPreviousRounds } from '../utils/to_langchain_messages';
 import { attachmentToolsInstructions, renderAttachmentPrompt } from './utils/attachments';
 import { structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
+import { keepOnlyLatestImageUrlParts } from './utils/keep_only_latest_image';
 import { getFileSystemInstructions } from './utils/filestore';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 import { renderVisualizationPrompt } from './utils/visualizations';
@@ -55,7 +56,7 @@ export const getResearchAgentPrompt = async (
       ? [createRelevantSkillsNoticeMessage(relevantSkills.skills)]
       : [];
 
-  return [
+  return keepOnlyLatestImageUrlParts([
     ['system', await getAgentSystemMessage(params)],
     ...previousRoundsAsMessages,
     ...relevantSkillsMessages,
@@ -65,7 +66,7 @@ export const getResearchAgentPrompt = async (
       resultTransformer,
       toolManager,
     })),
-  ];
+  ]);
 };
 
 const renderFieldValue = (value: SerializedMetadataValue | undefined): string => {

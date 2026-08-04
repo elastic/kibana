@@ -42,6 +42,7 @@ import {
 import type { ToolCallResultTransformer } from '../../utils/tool_summarization';
 import { extractToolReturn } from '../../utils/extract_tool_return';
 import { estimateMessagesTokens } from '../../utils/estimate_conversation_tokens';
+import { PRIOR_SCREENSHOT_OMITTED_STUB } from './keep_only_latest_image';
 
 const PRESERVED_RECENT_CYCLES = 2;
 
@@ -93,6 +94,11 @@ const formatActions = async ({
 }): Promise<BaseMessageLike[]> => {
   const compactionCutoff = compaction ? getCompactionCutoffCycle(actions) : undefined;
   const formatted: BaseMessageLike[] = [];
+  // Only the latest UserImage keeps pixels; earlier screenshots are text stubs.
+  const latestUserImageIndex = actions.reduce(
+    (latest, action, index) => (isUserImageAction(action) ? index : latest),
+    -1
+  );
 
   for (let i = 0; i < actions.length; i++) {
     const action = actions[i];
@@ -149,17 +155,23 @@ const formatActions = async ({
       formatted.push(createUserMessage(formatSubagentRosterNotice(action.roster)));
     }
     if (isUserImageAction(action)) {
-      formatted.push(
-        createUserMessage([
-          { type: 'text', text: action.caption },
-          {
-            type: 'image_url',
-            image_url: {
-              url: `data:${action.image.media_type};base64,${action.image.data}`,
+      if (i === latestUserImageIndex) {
+        formatted.push(
+          createUserMessage([
+            { type: 'text', text: action.caption },
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:${action.image.media_type};base64,${action.image.data}`,
+              },
             },
-          },
-        ])
-      );
+          ])
+        );
+      } else {
+        formatted.push(
+          createUserMessage(`${action.caption}\n\n${PRIOR_SCREENSHOT_OMITTED_STUB}`)
+        );
+      }
     }
   }
 

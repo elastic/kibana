@@ -36,6 +36,30 @@ describe('generateDashboardTool', () => {
       expect(schema.safeParse({ operations: [] }).success).toBe(false);
       expect(schema.safeParse({}).success).toBe(false);
     });
+
+    it('allows finalize-only persist of an existing draft with empty operations', () => {
+      expect(
+        schema.safeParse({
+          dashboardAttachmentId: 'draft-1',
+          operations: [],
+          persistAttachment: true,
+        }).success
+      ).toBe(true);
+    });
+
+    it('accepts persistAttachment false for draft iteration', () => {
+      expect(
+        schema.safeParse({
+          operations: [
+            {
+              operation: 'set_metadata',
+              title: 'Draft dashboard',
+            },
+          ],
+          persistAttachment: false,
+        }).success
+      ).toBe(true);
+    });
   });
 
   it('projects panels without their config and attaches authoring notes by panel id', () => {

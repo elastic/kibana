@@ -27,13 +27,14 @@ export const dashboardTools = {
 
 /**
  * `tool_ui` custom event name emitted by {@link dashboardTools.generateDashboard}
- * after the dashboard attachment is persisted. The dashboard app listens and applies
- * the payload to the live UI so a mid-round screenshot can see the new state.
+ * after a draft or persisted dashboard payload is ready. The dashboard app listens
+ * and applies the payload to the live UI so a mid-round screenshot can see the new state.
  */
 export const DASHBOARD_APPLY_UI_EVENT = 'dashboard_apply' as const;
 
 export interface DashboardApplyUiEventData {
+  /** Draft or persisted attachment id associated with this apply. */
   attachment_id: string;
-  /** Full dashboard attachment payload (same shape as the persisted attachment data). */
+  /** Full dashboard attachment payload (same shape as the attachment data). */
   data: Record<string, unknown>;
 }

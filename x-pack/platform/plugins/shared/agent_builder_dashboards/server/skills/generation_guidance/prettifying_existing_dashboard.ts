@@ -38,7 +38,9 @@ If the layout already conforms, do not emit layout operations — \`prettifyPane
 
 ## Visual validation (browser screenshot)
 
-After a successful \`generate_dashboard\` that changed layout or panels, you **must** call \`browser_capture_dashboard_screenshot\` alone with \`settle_ms\` ≥ 1500 (the live dashboard is applied mid-round before this tool runs). Use the screenshot to describe visual problems — overlap, empty charts, cramped titles, uneven composition — and fix them with another \`generate_dashboard\` when warranted. Prefer structural layout rules first; the screenshot is confirmation, not a substitute for grid rules. Do not call it in parallel with other tools. Skip only when generation failed or there was no visible UI change.
+Use \`persistAttachment: false\` on every \`generate_dashboard\` during the prettify loop so only a hidden draft is kept (pass returned \`draft_id\` as \`dashboardAttachmentId\` on follow-ups). After a successful generate that changed layout or panels, you **must** call \`browser_capture_dashboard_screenshot\` alone with \`settle_ms\` ≥ 1500. Use the screenshot to describe visual problems — overlap, empty charts, cramped titles, uneven composition — and fix them with another draft \`generate_dashboard\` when warranted. Prefer structural layout rules first; the screenshot is confirmation, not a substitute for grid rules. Do not call it in parallel with other tools. Skip only when generation failed or there was no visible UI change.
+
+When the dashboard looks good, call \`generate_dashboard\` once with \`persistAttachment: true\` and the \`draft_id\` (operations may be empty) to publish a single attachment, then \`render_attachment\`. Do not render or publish intermediate drafts.
 
 ## Composition pass (only when new panels are allowed)
 

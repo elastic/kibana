@@ -106,7 +106,11 @@ export const createAgentLiveUpdatesSubscription = ({
         return;
       }
 
-      const dashboardAttachments = event.data.attachments?.filter(isDashboardAttachment) ?? [];
+      // Ignore hidden drafts from persistAttachment: false generate loops.
+      const dashboardAttachments =
+        event.data.attachments?.filter(
+          (attachment) => isDashboardAttachment(attachment) && attachment.hidden !== true
+        ) ?? [];
       const incomingAttachments = dashboardAttachments.filter((attachment) => {
         return (
           event.data.round.input.attachment_refs?.some((ref) =>

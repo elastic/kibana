@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
-  DASHBOARD_ATTACHMENT_TYPE,
   isSection,
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
@@ -30,6 +28,7 @@ import {
   prettifyPanelConfigs,
 } from './core';
 import { applyDefaultDashboardTimeRange } from './time_range';
+import { persistDashboardAttachment } from './persist_dashboard_attachment';
 
 const newDashboardMetadataErrorMessage =
   'New dashboards require a set_metadata operation with a non-empty title.';
@@ -41,7 +40,7 @@ const generateDashboardSchema = z
       .max(256)
       .optional()
       .describe(
-        '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
+        '(optional) The id of the dashboard attachment or draft to update. Omit to create a new dashboard. After a draft call (persistAttachment: false), pass the returned draft_id here. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
       ),
     operations: z.array(dashboardOperationSchema),
     prettifyPanelConfigs: z
@@ -49,6 +48,12 @@ const generateDashboardSchema = z
       .optional()
       .describe(
         '(optional) Refresh surviving pre-existing ES|QL Lens panel configs. Strong default: do not set this for normal create or update requests because generated panels already follow chart best practices. Set it only when the user explicitly asks to prettify, polish, or improve the visualization configs of an existing dashboard.'
+      ),
+    persistAttachment: z
+      .boolean()
+      .optional()
+      .describe(
+        '(optional) When false, applies the dashboard to the live UI and keeps a hidden draft only — no user-visible attachment yet. Use false during generate → screenshot → fix loops; set true (or omit, default true) on the final call so a single attachment is published. Do not render_attachment until persistAttachment is true / data.persisted is true.'
       ),
   })
   .check((ctx) => {
@@ -61,10 +66,18 @@ const generateDashboardSchema = z
       });
     }
 
-    if (ctx.value.operations.length === 0 && !ctx.value.prettifyPanelConfigs) {
+    const persistAttachment = ctx.value.persistAttachment !== false;
+    const finalizeOnly =
+      persistAttachment &&
+      Boolean(ctx.value.dashboardAttachmentId) &&
+      ctx.value.operations.length === 0 &&
+      !ctx.value.prettifyPanelConfigs;
+
+    if (ctx.value.operations.length === 0 && !ctx.value.prettifyPanelConfigs && !finalizeOnly) {
       ctx.issues.push({
         code: 'custom',
-        message: 'At least one operation or prettifyPanelConfigs: true is required.',
+        message:
+          'At least one operation or prettifyPanelConfigs: true is required (unless finalizing an existing draft with persistAttachment: true).',
         input: ctx.value,
         path: ['operations'],
       });
@@ -140,8 +153,8 @@ Use custom content only as a last resort:
  * Wraps the environment-agnostic {@link executeDashboardOperations} core with
  * Kibana attachment persistence so the LLM works against a lightweight reference:
  * - the prior payload is read server-side from `dashboardAttachmentId`,
- * - the generated payload is persisted as a `dashboard` attachment,
- * - the result returns only the attachment id, version, and a compact dashboard summary.
+ * - drafts (`persistAttachment: false`) stay hidden until a final publish,
+ * - the result returns only ids, version (when persisted), and a compact summary.
  *
  * This keeps the heavy payload out of the LLM transcript — the model references
  * the attachment id to render it rather than copying it into the next tool call.
@@ -156,9 +169,9 @@ export const generateDashboardTool = ({
     type: ToolType.builtin,
     description: `Generate or update a dashboard from ordered operations.
 
-Persists the resulting dashboard as an attachment and returns its id plus a compact summary (not the full payload). Reference the returned attachment id to render the dashboard; do not copy the payload into follow-up tool calls.
+By default (\`persistAttachment\` omitted/true) persists a user-visible dashboard attachment and returns its id, version, and a compact summary. During generate → screenshot → fix loops, set \`persistAttachment: false\` so only a hidden draft is kept and the live dashboard is updated mid-round; pass the returned \`draft_id\` as \`dashboardAttachmentId\` on follow-ups. When the layout looks good, call again with \`persistAttachment: true\` (operations may be empty) to publish a single attachment — only then use render_attachment.
 
-After a successful call, the live dashboard is updated mid-round. You MUST then call \`browser_capture_dashboard_screenshot\` alone (not in parallel) with a settle_ms of at least 1500 so panels can render. Use the returned screenshot to describe visual problems (overlap, empty charts, cramped titles, uneven composition) and fix them with a follow-up generate_dashboard call when needed. Skip the screenshot only when this call failed or made no visible layout/panel changes.
+After a successful call that changed layout/panels, the live dashboard is updated mid-round. You MUST then call \`browser_capture_dashboard_screenshot\` alone (not in parallel) with a settle_ms of at least 1500 so panels can render. Use the returned screenshot to describe visual problems and fix them with a follow-up generate_dashboard (still persistAttachment: false) when needed. Skip the screenshot only when this call failed or made no visible layout/panel changes.
 
 Use operations[] to:
 1. set metadata
@@ -172,9 +185,16 @@ Use operations[] to:
     }`,
     schema: generateDashboardSchema,
     handler: async (
-      { dashboardAttachmentId: previousAttachmentId, operations, prettifyPanelConfigs: prettify },
+      {
+        dashboardAttachmentId: previousAttachmentId,
+        operations,
+        prettifyPanelConfigs: prettify,
+        persistAttachment: persistAttachmentParam,
+      },
       { logger, attachments, events, esClient, modelProvider }
     ) => {
+      const persistAttachment = persistAttachmentParam !== false;
+
       try {
         const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
         const isNewDashboard = !latestVersion;
@@ -182,12 +202,47 @@ Use operations[] to:
           ? [...indexPanelsById(latestVersion.data.panels).values()]
           : [];
 
-        if (isNewDashboard && !hasValidCreateMetadataOperations(operations)) {
+        if (
+          isNewDashboard &&
+          operations.length > 0 &&
+          !hasValidCreateMetadataOperations(operations)
+        ) {
           logger.error(newDashboardMetadataErrorMessage);
           return missingNewDashboardMetadataErrorResult;
         }
 
-        const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
+        // Finalize-only: publish the current draft with no further ops.
+        if (persistAttachment && operations.length === 0 && !prettify && latestVersion) {
+          const description = `Dashboard: ${latestVersion.data.title}`;
+          const published = await persistDashboardAttachment({
+            attachments,
+            previousAttachmentId,
+            dashboardData: latestVersion.data,
+            description,
+            persistAttachment: true,
+          });
+
+          events.sendUiEvent(DASHBOARD_APPLY_UI_EVENT, {
+            attachment_id: published.attachmentId,
+            data: latestVersion.data,
+          });
+
+          return {
+            results: [
+              {
+                type: ToolResultType.dashboard,
+                tool_result_id: getToolResultId(),
+                data: {
+                  attachment_id: published.attachmentId,
+                  version: published.version,
+                  persisted: true,
+                  dashboard: summarizeDashboard(latestVersion.data, new Map()),
+                },
+              },
+            ],
+          };
+        }
+
         const resolvePanelContent = createVisPanelResolver({
           logger,
           modelProvider,
@@ -227,30 +282,26 @@ Use operations[] to:
         });
 
         const description = `Dashboard: ${finalDashboardData.title}`;
-        const attachment = isNewDashboard
-          ? await attachments.add({
-              id: dashboardAttachmentId,
-              type: DASHBOARD_ATTACHMENT_TYPE,
-              description,
-              data: finalDashboardData,
-            })
-          : await attachments.update(dashboardAttachmentId, {
-              data: finalDashboardData,
-              description,
-            });
-
-        if (!attachment) {
-          throw new Error(`Failed to persist dashboard attachment "${dashboardAttachmentId}".`);
-        }
+        const persistedResult = await persistDashboardAttachment({
+          attachments,
+          previousAttachmentId,
+          dashboardData: finalDashboardData,
+          description,
+          persistAttachment,
+        });
 
         // Push the new payload to the open dashboard app immediately so a mid-round
         // browser_capture_dashboard_screenshot sees the applied UI (round_complete is too late).
         events.sendUiEvent(DASHBOARD_APPLY_UI_EVENT, {
-          attachment_id: attachment.id,
+          attachment_id: persistedResult.attachmentId,
           data: finalDashboardData,
         });
 
-        logger.info(`Dashboard payload ${isNewDashboard ? 'generated' : 'updated'}`);
+        logger.info(
+          `Dashboard payload ${
+            persistedResult.persisted ? 'persisted' : 'drafted'
+          } (${persistedResult.attachmentId})`
+        );
 
         return {
           results: [
@@ -258,8 +309,15 @@ Use operations[] to:
               type: ToolResultType.dashboard,
               tool_result_id: getToolResultId(),
               data: {
-                attachment_id: attachment.id,
-                version: attachment.current_version ?? 1,
+                ...(persistedResult.persisted
+                  ? {
+                      attachment_id: persistedResult.attachmentId,
+                      version: persistedResult.version,
+                    }
+                  : {
+                      draft_id: persistedResult.draftId ?? persistedResult.attachmentId,
+                    }),
+                persisted: persistedResult.persisted,
                 dashboard: summarizeDashboard(
                   finalDashboardData,
                   new Map(
@@ -287,6 +345,7 @@ Use operations[] to:
                   dashboardAttachmentId: previousAttachmentId,
                   operations,
                   prettifyPanelConfigs: prettify,
+                  persistAttachment,
                 },
               },
             },

@@ -6,15 +6,17 @@
  */
 
 import { isAIMessage, isHumanMessage, isToolMessage } from '@langchain/core/messages';
-import type { AIMessage, ToolMessage, BaseMessageLike } from '@langchain/core/messages';
+import type { AIMessage, HumanMessage, ToolMessage, BaseMessageLike } from '@langchain/core/messages';
 import { AgentActionType } from '../../actions';
 import type {
   ResearchAgentAction,
   ToolCallAction,
   ExecuteToolAction,
   BackgroundExecutionCompleteAction,
+  UserImageAction,
 } from '../../actions';
 import { formatResearcherActionHistory, formatSystemNotice } from './actions';
+import { PRIOR_SCREENSHOT_OMITTED_STUB } from './keep_only_latest_image';
 import { ExecutionStatus, ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolResult } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
@@ -258,6 +260,39 @@ describe('formatResearcherActionHistory', () => {
 
       expect(toolMessageById(messages, 'c1')!.content).toContain(bigContent);
     });
+  });
+
+  it('keeps only the latest UserImage pixels and stubs earlier screenshots', async () => {
+    const firstImage: UserImageAction = {
+      type: AgentActionType.UserImage,
+      caption: 'first caption',
+      image: { media_type: 'image/png', data: 'aaa' },
+    };
+    const secondImage: UserImageAction = {
+      type: AgentActionType.UserImage,
+      caption: 'second caption',
+      image: { media_type: 'image/png', data: 'bbb' },
+    };
+    const actions: ResearchAgentAction[] = [
+      makeToolCallAction([{ toolCallId: 'c1', toolName: 'browser_capture' }]),
+      makeExecuteToolAction([{ toolCallId: 'c1', content: 'ok' }]),
+      firstImage,
+      makeToolCallAction([{ toolCallId: 'c2', toolName: 'browser_capture' }]),
+      makeExecuteToolAction([{ toolCallId: 'c2', content: 'ok' }]),
+      secondImage,
+    ];
+
+    const messages = await formatResearcherActionHistory({ actions, cycleLimit: 100 });
+    const humanMessages = messages.filter((m) => isHumanMessage(m as HumanMessage)) as HumanMessage[];
+
+    expect(humanMessages).toHaveLength(2);
+    expect(humanMessages[0].content).toContain('first caption');
+    expect(humanMessages[0].content).toContain(PRIOR_SCREENSHOT_OMITTED_STUB);
+    expect(JSON.stringify(humanMessages[0].content)).not.toContain('aaa');
+
+    expect(Array.isArray(humanMessages[1].content)).toBe(true);
+    expect(JSON.stringify(humanMessages[1].content)).toContain('bbb');
+    expect(JSON.stringify(humanMessages[1].content)).toContain('second caption');
   });
 });
 
