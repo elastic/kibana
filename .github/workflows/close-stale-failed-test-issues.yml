@@ -4,18 +4,9 @@ name: Close stale failed-test issues
 # they have had no activity for 21 days. Any activity that updates the issue
 # (a new failure comment, a human comment, an edit) restarts the countdown.
 #
-# Issues for tests that are currently skipped are never closed, so teams can
-# keep tracking them in their backlogs. A test counts as skipped when:
-#   - the issue has the `skipped-test` label (added by the /skip automation
-#     when it commits a skip), or
-#   - the source code on `main` references the issue, e.g.
-#     `// Failing: See https://github.com/elastic/kibana/issues/x` (added by
-#     the /skip automation) or `// FLAKY: ...` (the manual-skip convention).
-#     Unskip PRs remove that comment, so once a test is re-enabled its issue
-#     becomes eligible for auto-close again.
-#
 # Closing is safe: the failed test reporter reopens the issue automatically
-# if the test fails again.
+# if the test fails again. Issues labeled `skipped-test` are excluded because
+# they stay open on purpose as a reminder to unskip the test.
 
 on:
   schedule:
@@ -34,33 +25,20 @@ permissions:
 jobs:
   sweep:
     name: Close failed-test issues with no activity for 21 days
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     if: github.repository == 'elastic/kibana'
     concurrency:
       group: close-stale-failed-test-issues
       cancel-in-progress: true
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: Collect issue numbers referenced in source code
-        run: |
-          git grep -IohE 'github\.com/elastic/kibana/issues/[0-9]+' -- '*.ts' '*.tsx' '*.js' '*.jsx' \
-            | grep -oE '[0-9]+$' \
-            | sort -u > "$RUNNER_TEMP/issues-referenced-in-code.txt"
-          echo "Found $(wc -l < "$RUNNER_TEMP/issues-referenced-in-code.txt") issue reference(s) in source code"
-
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           DRY_RUN: ${{ inputs.dry_run == true }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const fs = require('fs');
-
             const LABEL = 'failed-test';
-            const SKIPPED_LABEL = 'skipped-test';
+            const EXCLUDED_LABELS = ['skipped-test'];
             const CREATOR = 'kibanamachine';
             const DAYS_UNTIL_CLOSE = 21;
             // Drain the backlog gradually to avoid rate limits and a
@@ -69,36 +47,8 @@ jobs:
             const dryRun = process.env.DRY_RUN === 'true';
             const cutoff = Date.now() - DAYS_UNTIL_CLOSE * 24 * 60 * 60 * 1000;
 
-            // Issue numbers referenced in the source code on `main`, collected
-            // by the previous step. Skipped tests link their issue in a code
-            // comment next to the skip, so a reference means the test is
-            // likely still skipped.
-            const referencedInCode = new Set(
-              fs
-                .readFileSync(`${process.env.RUNNER_TEMP}/issues-referenced-in-code.txt`, 'utf8')
-                .split('\n')
-                .filter(Boolean)
-                .map(Number)
-            );
-
             const getLabels = (item) =>
               item.labels.map((label) => (typeof label === 'string' ? label : label.name));
-
-            // The `skipped-test` label alone is not reliable: an automation
-            // strips it (with `blocker` and version labels) whenever the issue
-            // is closed, and nothing restores it on reopen, so issues that go
-            // through a close/reopen cycle lose it while the test is still
-            // skipped. The code reference covers those cases, and it
-            // disappears when the test is unskipped.
-            const getSkipReason = (item) => {
-              if (getLabels(item).includes(SKIPPED_LABEL)) {
-                return `it has the "${SKIPPED_LABEL}" label`;
-              }
-              if (referencedInCode.has(item.number)) {
-                return 'the source code on main references it';
-              }
-              return undefined;
-            };
 
             const items = await github.paginate(github.rest.issues.listForRepo, {
               owner: context.repo.owner,
@@ -110,20 +60,16 @@ jobs:
             });
 
             let closed = 0;
-            let keptOpen = 0;
             for (const item of items) {
               if (closed >= MAX_CLOSES_PER_RUN) {
                 core.info(`Reached the limit of ${MAX_CLOSES_PER_RUN} closes, stopping`);
                 break;
               }
-              if (item.pull_request || new Date(item.updated_at).getTime() > cutoff) {
-                continue;
-              }
-
-              const skipReason = getSkipReason(item);
-              if (skipReason) {
-                keptOpen += 1;
-                core.info(`Keeping #${item.number} open, the test looks skipped: ${skipReason}`);
+              if (
+                item.pull_request ||
+                new Date(item.updated_at).getTime() > cutoff ||
+                getLabels(item).some((label) => EXCLUDED_LABELS.includes(label))
+              ) {
                 continue;
               }
 
@@ -134,16 +80,17 @@ jobs:
               }
 
               // Re-check right before closing to narrow the race with new
-              // failures, fresh skips, and manual label changes
+              // failures and manual label changes
               const { data: fresh } = await github.rest.issues.get({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: item.number,
               });
+              const freshLabels = getLabels(fresh);
               if (
                 fresh.state !== 'open' ||
-                !getLabels(fresh).includes(LABEL) ||
-                getSkipReason(fresh) !== undefined ||
+                !freshLabels.includes(LABEL) ||
+                freshLabels.some((label) => EXCLUDED_LABELS.includes(label)) ||
                 new Date(fresh.updated_at).getTime() > cutoff
               ) {
                 continue;
@@ -170,5 +117,5 @@ jobs:
               core.info(`Closed #${item.number} (updated ${item.updated_at}): ${item.title}`);
             }
             core.info(
-              `Checked ${items.length} open "${LABEL}" issue(s) created by ${CREATOR}: closed ${closed}${dryRun ? ' (dry run)' : ''}, kept ${keptOpen} stale issue(s) open for skipped tests`
+              `Checked ${items.length} open "${LABEL}" issue(s) created by ${CREATOR}, closed ${closed}${dryRun ? ' (dry run)' : ''}`
             );
