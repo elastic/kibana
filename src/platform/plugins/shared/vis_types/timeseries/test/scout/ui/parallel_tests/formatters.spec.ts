@@ -16,67 +16,80 @@ import {
   testData,
 } from '../fixtures';
 
-spaceTest.describe('TSVB Time Series - data formatters', { tag: testData.DEPLOYMENT_TAGS }, () => {
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await setupTsvbSpace(scoutSpace);
-  });
+spaceTest.describe(
+  'TSVB Time Series - data formatters',
+  { tag: testData.TSVB_DEPLOYMENT_TAGS },
+  () => {
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await setupTsvbSpace(scoutSpace);
+    });
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await openTimeSeriesEditor(pageObjects);
-    await pageObjects.visualBuilder.clickSeriesOption();
-  });
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await openTimeSeriesEditor(pageObjects);
+      await pageObjects.visualBuilder.clickSeriesOption();
+    });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await cleanupTsvbSpace(scoutSpace);
-  });
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await cleanupTsvbSpace(scoutSpace);
+    });
 
-  spaceTest('formats the legend value with a custom numeric template', async ({ pageObjects }) => {
-    const { visualBuilder } = pageObjects;
+    spaceTest(
+      'formats the legend value with a custom numeric template',
+      async ({ pageObjects }) => {
+        const { visualBuilder } = pageObjects;
 
-    await visualBuilder.changeDataFormatter('number');
-    await visualBuilder.enterSeriesTemplate('$ {{value}}');
+        await visualBuilder.changeDataFormatter('number');
+        await visualBuilder.enterSeriesTemplate('$ {{value}}');
 
-    await expect.poll(() => visualBuilder.getLegendValue()).toBe('$ 156');
-  });
+        await expect.poll(() => visualBuilder.getLegendValue()).toBe('$ 156');
+      }
+    );
 
-  spaceTest('formats the legend value as a percentage', async ({ pageObjects }) => {
-    const { visualBuilder } = pageObjects;
-
-    await visualBuilder.changeDataFormatter('percent');
-
-    await expect.poll(() => visualBuilder.getLegendValue()).toBe('15,600%');
-  });
-
-  spaceTest('formats the legend value as bytes', async ({ pageObjects }) => {
-    const { visualBuilder } = pageObjects;
-
-    await visualBuilder.changeDataFormatter('bytes');
-
-    await expect.poll(() => visualBuilder.getLegendValue()).toBe('156B');
-  });
-
-  spaceTest(
-    'formats the legend value with the "Human readable" duration formatter',
-    async ({ pageObjects }) => {
+    spaceTest('formats the legend value as a percentage', async ({ pageObjects }) => {
       const { visualBuilder } = pageObjects;
 
-      await visualBuilder.changeDataFormatter('duration');
+      await visualBuilder.changeDataFormatter('percent');
 
-      await spaceTest.step('with the default source unit', async () => {
-        await visualBuilder.setDurationFormatterSettings({ to: 'Human readable' });
-        await expect.poll(() => visualBuilder.getLegendValue()).toBe('a few seconds');
-      });
+      await expect.poll(() => visualBuilder.getLegendValue()).toBe('15,600%');
+    });
 
-      await spaceTest.step('from seconds', async () => {
-        await visualBuilder.setDurationFormatterSettings({ to: 'Human readable', from: 'Seconds' });
-        await expect.poll(() => visualBuilder.getLegendValue()).toBe('3 minutes');
-      });
+    spaceTest('formats the legend value as bytes', async ({ pageObjects }) => {
+      const { visualBuilder } = pageObjects;
 
-      await spaceTest.step('from minutes', async () => {
-        await visualBuilder.setDurationFormatterSettings({ to: 'Human readable', from: 'Minutes' });
-        await expect.poll(() => visualBuilder.getLegendValue()).toBe('3 hours');
-      });
-    }
-  );
-});
+      await visualBuilder.changeDataFormatter('bytes');
+
+      await expect.poll(() => visualBuilder.getLegendValue()).toBe('156B');
+    });
+
+    spaceTest(
+      'formats the legend value with the "Human readable" duration formatter',
+      async ({ pageObjects }) => {
+        const { visualBuilder } = pageObjects;
+
+        await visualBuilder.changeDataFormatter('duration');
+
+        await spaceTest.step('with the default source unit', async () => {
+          await visualBuilder.setDurationFormatterSettings({ to: 'Human readable' });
+          await expect.poll(() => visualBuilder.getLegendValue()).toBe('a few seconds');
+        });
+
+        await spaceTest.step('from seconds', async () => {
+          await visualBuilder.setDurationFormatterSettings({
+            to: 'Human readable',
+            from: 'Seconds',
+          });
+          await expect.poll(() => visualBuilder.getLegendValue()).toBe('3 minutes');
+        });
+
+        await spaceTest.step('from minutes', async () => {
+          await visualBuilder.setDurationFormatterSettings({
+            to: 'Human readable',
+            from: 'Minutes',
+          });
+          await expect.poll(() => visualBuilder.getLegendValue()).toBe('3 hours');
+        });
+      }
+    );
+  }
+);

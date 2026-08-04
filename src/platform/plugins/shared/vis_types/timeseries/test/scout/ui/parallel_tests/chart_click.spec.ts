@@ -54,7 +54,7 @@ const saveAndClickChart = async (
 
 spaceTest.describe(
   'TSVB Time Series - clicking on the chart',
-  { tag: testData.DEPLOYMENT_TAGS },
+  { tag: testData.TSVB_DEPLOYMENT_TAGS },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await setupTsvbSpace(scoutSpace);

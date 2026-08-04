@@ -47,4 +47,4 @@ export const ALLOW_STRING_INDICES_SETTING = 'metrics:allowStringIndices';
  * the literal tag is used instead of `tags.stateful.classic`, which would also
  * schedule the specs on Elastic Cloud hosted.
  */
-export const DEPLOYMENT_TAGS = ['@local-stateful-classic'];
+export const TSVB_DEPLOYMENT_TAGS = ['@local-stateful-classic'];

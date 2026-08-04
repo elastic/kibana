@@ -30,57 +30,67 @@ const expectVisibleLegendNames = async (
     .toStrictEqual(expectedNames);
 };
 
-spaceTest.describe('TSVB Time Series - hiding series', { tag: testData.DEPLOYMENT_TAGS }, () => {
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await setupTsvbSpace(scoutSpace);
-  });
+spaceTest.describe(
+  'TSVB Time Series - hiding series',
+  { tag: testData.TSVB_DEPLOYMENT_TAGS },
+  () => {
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await setupTsvbSpace(scoutSpace);
+    });
 
-  spaceTest.beforeEach(async ({ browserAuth, context, pageObjects }) => {
-    // Has to run before the app is loaded: the chart reads the flag while mounting.
-    await enableElasticChartDebug(context);
-    await browserAuth.loginAsPrivilegedUser();
+    spaceTest.beforeEach(async ({ browserAuth, context, pageObjects }) => {
+      // Has to run before the app is loaded: the chart reads the flag while mounting.
+      await enableElasticChartDebug(context);
+      await browserAuth.loginAsPrivilegedUser();
 
-    const { visualBuilder } = pageObjects;
-    await openTimeSeriesEditor(pageObjects);
-    await visualBuilder.clickPanelOptions('timeSeries');
-    await visualBuilder.setIntervalValue('12h');
-    await visualBuilder.clickDataTab('timeSeries');
-  });
+      const { visualBuilder } = pageObjects;
+      await openTimeSeriesEditor(pageObjects);
+      await visualBuilder.clickPanelOptions('timeSeries');
+      await visualBuilder.setIntervalValue('12h');
+      await visualBuilder.clickDataTab('timeSeries');
+    });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await cleanupTsvbSpace(scoutSpace);
-  });
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await cleanupTsvbSpace(scoutSpace);
+    });
 
-  spaceTest('hides series on legend item click', async ({ pageObjects }) => {
-    const { visualBuilder } = pageObjects;
+    spaceTest('hides series on legend item click', async ({ pageObjects }) => {
+      const { visualBuilder } = pageObjects;
 
-    await visualBuilder.setMetricsGroupByTerms('@tags.raw');
+      await visualBuilder.setMetricsGroupByTerms('@tags.raw');
 
-    await expect
-      .poll(async () => getAreasCount(await visualBuilder.getChartDebugState()), CHART_POLL_OPTIONS)
-      .toBe(6);
+      await expect
+        .poll(
+          async () => getAreasCount(await visualBuilder.getChartDebugState()),
+          CHART_POLL_OPTIONS
+        )
+        .toBe(6);
 
-    // Clicking a legend item isolates its series, so only the clicked ones stay visible.
-    await visualBuilder.clickSeriesLegendItem('success');
-    await visualBuilder.clickSeriesLegendItem('info');
-    await visualBuilder.clickSeriesLegendItem('error');
+      // Clicking a legend item isolates its series, so only the clicked ones stay visible.
+      await visualBuilder.clickSeriesLegendItem('success');
+      await visualBuilder.clickSeriesLegendItem('info');
+      await visualBuilder.clickSeriesLegendItem('error');
 
-    await expect
-      .poll(async () => getAreasCount(await visualBuilder.getChartDebugState()), CHART_POLL_OPTIONS)
-      .toBe(3);
-  });
+      await expect
+        .poll(
+          async () => getAreasCount(await visualBuilder.getChartDebugState()),
+          CHART_POLL_OPTIONS
+        )
+        .toBe(3);
+    });
 
-  spaceTest('keeps series hidden after a refresh', async ({ pageObjects }) => {
-    const { visualBuilder } = pageObjects;
+    spaceTest('keeps series hidden after a refresh', async ({ pageObjects }) => {
+      const { visualBuilder } = pageObjects;
 
-    await visualBuilder.setMetricsGroupByTerms('extension.raw');
-    await expectVisibleLegendNames(visualBuilder, ['jpg', 'css', 'png', 'gif', 'php']);
+      await visualBuilder.setMetricsGroupByTerms('extension.raw');
+      await expectVisibleLegendNames(visualBuilder, ['jpg', 'css', 'png', 'gif', 'php']);
 
-    await visualBuilder.clickSeriesLegendItem('png');
-    await visualBuilder.clickSeriesLegendItem('php');
-    await expectVisibleLegendNames(visualBuilder, ['png', 'php']);
+      await visualBuilder.clickSeriesLegendItem('png');
+      await visualBuilder.clickSeriesLegendItem('php');
+      await expectVisibleLegendNames(visualBuilder, ['png', 'php']);
 
-    await visualBuilder.refresh();
-    await expectVisibleLegendNames(visualBuilder, ['png', 'php']);
-  });
-});
+      await visualBuilder.refresh();
+      await expectVisibleLegendNames(visualBuilder, ['png', 'php']);
+    });
+  }
+);

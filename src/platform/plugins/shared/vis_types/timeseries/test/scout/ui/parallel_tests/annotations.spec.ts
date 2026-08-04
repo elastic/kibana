@@ -33,7 +33,7 @@ const expectAnnotationsData = async (
     .toStrictEqual(expectedAnnotations);
 };
 
-spaceTest.describe('TSVB Time Series - annotations', { tag: testData.DEPLOYMENT_TAGS }, () => {
+spaceTest.describe('TSVB Time Series - annotations', { tag: testData.TSVB_DEPLOYMENT_TAGS }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await setupTsvbSpace(scoutSpace);
   });
@@ -83,7 +83,11 @@ spaceTest.describe('TSVB Time Series - annotations', { tag: testData.DEPLOYMENT_
 
       await expectAnnotationsData(visualBuilder, [
         { dataValue: 1442721600000, details: 'OS: win 7, memory: 0', header: '2015-09-20 04:00' },
-        { dataValue: 1442743200000, details: 'OS: win xp, memory: 0', header: '2015-09-20 10:00' },
+        {
+          dataValue: 1442743200000,
+          details: 'OS: win xp, memory: 0',
+          header: '2015-09-20 10:00',
+        },
         {
           dataValue: 1442772000000,
           details: 'OS: ios, memory: 246280',

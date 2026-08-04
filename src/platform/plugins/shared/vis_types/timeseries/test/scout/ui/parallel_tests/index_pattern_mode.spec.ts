@@ -28,7 +28,7 @@ const openPanelOptions = async (pageObjects: TimeseriesPageObjects) => {
 
 spaceTest.describe(
   'TSVB Time Series - data view selection mode',
-  { tag: testData.DEPLOYMENT_TAGS },
+  { tag: testData.TSVB_DEPLOYMENT_TAGS },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await setupTsvbSpace(scoutSpace);

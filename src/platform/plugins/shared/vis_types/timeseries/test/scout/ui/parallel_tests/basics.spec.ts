@@ -16,7 +16,7 @@ import {
   testData,
 } from '../fixtures';
 
-spaceTest.describe('TSVB Time Series - basics', { tag: testData.DEPLOYMENT_TAGS }, () => {
+spaceTest.describe('TSVB Time Series - basics', { tag: testData.TSVB_DEPLOYMENT_TAGS }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await setupTsvbSpace(scoutSpace);
   });

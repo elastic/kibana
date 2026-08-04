@@ -45,7 +45,7 @@ const expectAreasCount = async (visualBuilder: VisualBuilder, expectedCount: num
     .toBe(expectedCount);
 };
 
-spaceTest.describe('TSVB Time Series - chart data', { tag: testData.DEPLOYMENT_TAGS }, () => {
+spaceTest.describe('TSVB Time Series - chart data', { tag: testData.TSVB_DEPLOYMENT_TAGS }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await setupTsvbSpace(scoutSpace);
   });
