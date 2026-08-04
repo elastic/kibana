@@ -10,19 +10,21 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { PreviewTable } from './preview_table';
 
-jest.mock('../../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    core: {},
-    dependencies: {
-      start: {
-        share: {},
-        fieldFormats: {},
-        data: {
-          dataViews: {},
-        },
+const mockKibana = {
+  core: {},
+  dependencies: {
+    start: {
+      share: {},
+      fieldFormats: {},
+      data: {
+        dataViews: {},
       },
     },
-  }),
+  },
+};
+
+jest.mock('../../../../hooks/use_kibana', () => ({
+  useKibana: () => mockKibana,
 }));
 
 // EuiDataGrid relies on ColumnHeaderTruncateContainer which imports from kbn-unified-data-table.
