@@ -84,6 +84,7 @@ toc:
           - file: connectors-kibana/aws-cloudwatch-action-type.md
           - file: connectors-kibana/aws-x-ray-action-type.md
           - file: connectors-kibana/azure-blob-action-type.md
+          - file: connectors-kibana/azure-monitor-action-type.md
           - file: connectors-kibana/bigquery-action-type.md
           - file: connectors-kibana/box-action-type.md
           - file: connectors-kibana/brave-search-action-type.md
