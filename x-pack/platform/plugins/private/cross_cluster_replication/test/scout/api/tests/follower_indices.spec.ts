@@ -8,7 +8,10 @@
 import type { ApiClientFixture, EsClient, RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '../../../../common/constants';
+// Separate TS project: import by package name (a relative path crosses the project boundary and
+// makes tsc emit stray in-place `.d.ts`). `uniform_imports` wants relative here — override it.
+// eslint-disable-next-line @kbn/imports/uniform_imports
+import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '@kbn/cross-cluster-replication-plugin/common/constants';
 import { apiTest, testData, registerSelfReferentialRemote, removeRemote } from '../fixtures';
 
 const { API_BASE_PATH, FOLLOWER_REMOTE_CLUSTER, COMMON_HEADERS } = testData;
