@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiImage,
-  EuiLink,
   EuiNotificationBadge,
   EuiTab,
   EuiTabs,
@@ -402,12 +401,20 @@ function StepDetailPanel({
           </EuiFlexItem>
           {docUrl && (
             <EuiFlexItem grow={false}>
-              <EuiLink href={docUrl} target="_blank" external>
+              <EuiButtonEmpty
+                size="xs"
+                href={docUrl}
+                target="_blank"
+                iconType="popout"
+                iconSide="right"
+                flush="left"
+                data-test-subj="actionsMenuPreviewDocumentation"
+              >
                 <FormattedMessage
                   id="workflows.actionsMenu.preview.documentationLink"
                   defaultMessage="Documentation"
                 />
-              </EuiLink>
+              </EuiButtonEmpty>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
