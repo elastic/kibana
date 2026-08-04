@@ -36,7 +36,6 @@ import {
   TimelineTypeEnum,
 } from '../../../../../common/api/timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { selectNotesTablePendingDeleteIds } from '../../../../notes';
 
 /**
@@ -51,7 +50,6 @@ export const getTimelinesTableColumns = ({
   deleteTimelines,
   enableExportTimelineDownloader,
   itemIdToExpandedNotesRowMap,
-  isSuperTimelineEnabled,
   onCreateRule,
   onCreateRuleFromEql,
   onOpenDeleteTimelineModal,
@@ -65,7 +63,6 @@ export const getTimelinesTableColumns = ({
   deleteTimelines?: DeleteTimelines;
   enableExportTimelineDownloader?: EnableExportTimelineDownloader;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
-  isSuperTimelineEnabled: boolean;
   onCreateRule?: OnCreateRuleFromTimeline;
   onCreateRuleFromEql?: OnCreateRuleFromTimeline;
   onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
@@ -85,9 +82,7 @@ export const getTimelinesTableColumns = ({
     }),
     ...getExtendedColumns(showExtendedColumns),
     ...getIconHeaderColumns({ timelineType }),
-    ...(isSuperTimelineEnabled && timelineType !== TimelineTypeEnum.template
-      ? [getSuperTimelineQueryTypeColumn()]
-      : []),
+    ...(timelineType !== TimelineTypeEnum.template ? [getSuperTimelineQueryTypeColumn()] : []),
     ...(actionTimelineToShow.length
       ? getActionsColumns({
           onCreateRule,
@@ -193,7 +188,6 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
       };
     }, [onSelectionChange]);
     const { timelinePrivileges } = useUserPrivileges();
-    const isSuperTimelineEnabled = useIsExperimentalFeatureEnabled('superTimeline');
     const columns = useMemo(
       () =>
         getTimelinesTableColumns({
@@ -201,7 +195,6 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
           deleteTimelines,
           itemIdToExpandedNotesRowMap,
           enableExportTimelineDownloader,
-          isSuperTimelineEnabled,
           onCreateRule,
           onCreateRuleFromEql,
           onOpenDeleteTimelineModal,
@@ -217,7 +210,6 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         deleteTimelines,
         itemIdToExpandedNotesRowMap,
         enableExportTimelineDownloader,
-        isSuperTimelineEnabled,
         onCreateRule,
         onCreateRuleFromEql,
         onOpenDeleteTimelineModal,

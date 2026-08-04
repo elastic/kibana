@@ -56,7 +56,6 @@ import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../../store/defaults';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -134,7 +133,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
   }) => {
     const dispatch = useDispatch();
     const { startTransaction } = useStartTransaction();
-    const isSuperTimelineEnabled = useIsExperimentalFeatureEnabled('superTimeline');
     const noteIds = useSelector((state: State) => state.notes.ids);
     /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
     const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
@@ -220,12 +218,11 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     );
     const prevActiveTimelineVisible = useRef(activeTimelineVisible);
     useEffect(() => {
-      if (!isSuperTimelineEnabled) return;
       if (prevActiveTimelineVisible.current && !activeTimelineVisible) {
         refetch();
       }
       prevActiveTimelineVisible.current = activeTimelineVisible;
-    }, [activeTimelineVisible, isSuperTimelineEnabled, refetch]);
+    }, [activeTimelineVisible, refetch]);
 
     /** Invoked when the user presses enters to submit the text in the search input */
     const onQueryChange: OnQueryChange = useCallback((query: EuiSearchBarQuery) => {

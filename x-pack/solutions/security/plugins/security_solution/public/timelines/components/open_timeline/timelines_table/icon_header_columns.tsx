@@ -106,10 +106,7 @@ export const getIconHeaderColumns = ({
   return timelineType === TimelineTypeEnum.template ? templateColumns : defaultColumns;
 };
 
-/**
- * Returns the column that flags ES|QL and EQL timelines as incompatible with Super Timeline.
- * Only include this column when the superTimeline feature flag is on.
- */
+/** Returns the column that flags ES|QL and EQL timelines as incompatible with Super Timeline. */
 export const getSuperTimelineQueryTypeColumn = (): EuiTableFieldDataColumnType<object> => ({
   align: 'center' as HorizontalAlignment,
   field: 'savedSearchId',

@@ -37,7 +37,6 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../common/components/utility_bar';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/store/selectors';
 import type { State } from '../../../common/store';
@@ -65,7 +64,6 @@ const extractTimelineIds = (caseData: CommonAttachmentTabViewProps['caseData']):
 };
 
 export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({ caseData }) => {
-  const isSuperTimelineEnabled = useIsExperimentalFeatureEnabled('superTimeline');
   const timelineIds = useMemo(() => extractTimelineIds(caseData), [caseData]);
 
   const [pageIndex, setPageIndex] = useState(1);
@@ -96,12 +94,11 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({ case
   );
   const prevActiveTimelineVisible = useRef(activeTimelineVisible);
   useEffect(() => {
-    if (!isSuperTimelineEnabled) return;
     if (prevActiveTimelineVisible.current && !activeTimelineVisible) {
       refetch();
     }
     prevActiveTimelineVisible.current = activeTimelineVisible;
-  }, [activeTimelineVisible, isSuperTimelineEnabled, refetch]);
+  }, [activeTimelineVisible, refetch]);
 
   const queryTimelineById = useQueryTimelineById();
   const onOpenTimeline = useCallback<OnOpenTimeline>(
@@ -148,57 +145,55 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({ case
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="case-view-timelines">
-      {isSuperTimelineEnabled && (
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            padding-top: 16px;
-            padding-bottom: 8px;
-          `}
-        >
-          <UtilityBar>
-            <UtilityBarSection>
-              <UtilityBarGroup>
-                <UtilityBarText data-test-subj="case-view-timelines-showing-count">
-                  <>
-                    {SHOWING}{' '}
-                    <FormattedMessage
-                      id="xpack.securitySolution.cases.timelineAttachment.nTimelines"
-                      defaultMessage="{totalCount} {totalCount, plural, =1 {timeline} other {timelines}}"
-                      values={{ totalCount }}
-                    />
-                  </>
-                </UtilityBarText>
-              </UtilityBarGroup>
-              <UtilityBarGroup>
-                <UtilityBarText data-test-subj="case-view-timelines-selected-count">
-                  {SELECTED_TIMELINES(selectedItems.length)}
-                </UtilityBarText>
-                <UtilityBarAction
-                  dataTestSubj="case-view-timelines-batch-actions-button"
-                  iconSide="right"
-                  iconType="chevronSingleDown"
-                  popoverContent={getBatchItemsPopoverContent}
-                  popoverPanelPaddingSize="none"
-                >
-                  {BATCH_ACTIONS}
-                </UtilityBarAction>
-                <UtilityBarAction
-                  dataTestSubj="case-view-timelines-refresh-button"
-                  iconSide="right"
-                  iconType="refresh"
-                  onClick={refetch}
-                >
-                  {REFRESH}
-                </UtilityBarAction>
-              </UtilityBarGroup>
-            </UtilityBarSection>
-          </UtilityBar>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          padding-top: 16px;
+          padding-bottom: 8px;
+        `}
+      >
+        <UtilityBar>
+          <UtilityBarSection>
+            <UtilityBarGroup>
+              <UtilityBarText data-test-subj="case-view-timelines-showing-count">
+                <>
+                  {SHOWING}{' '}
+                  <FormattedMessage
+                    id="xpack.securitySolution.cases.timelineAttachment.nTimelines"
+                    defaultMessage="{totalCount} {totalCount, plural, =1 {timeline} other {timelines}}"
+                    values={{ totalCount }}
+                  />
+                </>
+              </UtilityBarText>
+            </UtilityBarGroup>
+            <UtilityBarGroup>
+              <UtilityBarText data-test-subj="case-view-timelines-selected-count">
+                {SELECTED_TIMELINES(selectedItems.length)}
+              </UtilityBarText>
+              <UtilityBarAction
+                dataTestSubj="case-view-timelines-batch-actions-button"
+                iconSide="right"
+                iconType="chevronSingleDown"
+                popoverContent={getBatchItemsPopoverContent}
+                popoverPanelPaddingSize="none"
+              >
+                {BATCH_ACTIONS}
+              </UtilityBarAction>
+              <UtilityBarAction
+                dataTestSubj="case-view-timelines-refresh-button"
+                iconSide="right"
+                iconType="refresh"
+                onClick={refetch}
+              >
+                {REFRESH}
+              </UtilityBarAction>
+            </UtilityBarGroup>
+          </UtilityBarSection>
+        </UtilityBar>
+      </EuiFlexItem>
       <EuiFlexItem>
         <TimelinesTable
-          actionTimelineToShow={isSuperTimelineEnabled ? ['selectable'] : []}
+          actionTimelineToShow={['selectable']}
           defaultPageSize={DEFAULT_PAGE_SIZE}
           loading={loading}
           itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}

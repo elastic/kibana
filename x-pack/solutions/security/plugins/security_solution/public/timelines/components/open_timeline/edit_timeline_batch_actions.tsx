@@ -28,7 +28,6 @@ import {
   useOpenSuperTimeline,
 } from '../super_timeline/use_open_super_timeline';
 import { getUnmergeableSelections } from '../super_timeline/get_unmergeable_selections';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export const useEditTimelineBatchActions = ({
   deleteTimelines,
@@ -55,7 +54,6 @@ export const useEditTimelineBatchActions = ({
   } = useEditTimelineActions();
 
   const { openSuperTimeline, isLoading: isSuperTimelineLoading } = useOpenSuperTimeline();
-  const isSuperTimelineEnabled = useIsExperimentalFeatureEnabled('superTimeline');
 
   const onCompleteBatchActions = useCallback(
     (closePopover?: () => void) => {
@@ -97,13 +95,13 @@ export const useEditTimelineBatchActions = ({
 
   const unmergeableSelections = useMemo(() => {
     const items = selectedItems ?? [];
-    if (!isSuperTimelineEnabled || !searchResults || searchResults.length === 0) {
+    if (!searchResults || searchResults.length === 0) {
       return getUnmergeableSelections(items);
     }
     const byId = new Map(searchResults.map((r) => [r.savedObjectId, r]));
     const freshItems = items.map((item) => byId.get(item.savedObjectId ?? '') ?? item);
     return getUnmergeableSelections(freshItems);
-  }, [selectedItems, searchResults, isSuperTimelineEnabled]);
+  }, [selectedItems, searchResults]);
 
   const isSuperTimelineActionEnabled = useMemo(
     () =>
@@ -158,7 +156,7 @@ export const useEditTimelineBatchActions = ({
           </EuiContextMenuItem>
         );
       }
-      if (isSuperTimelineEnabled && timelineType === TimelineTypeEnum.default) {
+      if (timelineType === TimelineTypeEnum.default) {
         items.push(
           <EuiContextMenuItem
             data-test-subj="view-super-timeline-action"
@@ -222,7 +220,6 @@ export const useEditTimelineBatchActions = ({
       handleEnableExportTimelineDownloader,
       handleOnOpenDeleteTimelineModal,
       isSuperTimelineActionEnabled,
-      isSuperTimelineEnabled,
       handleOpenSuperTimeline,
       superTimelineTooltip,
     ]
