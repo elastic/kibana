@@ -70,7 +70,7 @@ describe('HistorySnapshotClient', () => {
         expect(result.docCount).toBe(5);
         expect(result.resetCount).toBe(5);
         expect(result.historySnapshotIndex).toMatch(
-          /\.entities\.v2\.history\.security_default\.\d{4}-\d{2}-\d{2}-\d{2}$/
+          /\.entities\.v2\.history\.default\.\d{4}-\d{2}-\d{2}-\d{2}$/
         );
       }
       expect(mockCreateIndex).toHaveBeenCalledTimes(1);
@@ -78,7 +78,7 @@ describe('HistorySnapshotClient', () => {
         mockEsClient,
         expect.objectContaining({
           source: { index: '.entities.v2.latest.default-00001' },
-          dest: { index: expect.stringMatching(/\.entities\.v2\.history\.security_default\./) },
+          dest: { index: expect.stringMatching(/\.entities\.v2\.history\.default\./) },
           waitForTask: {
             logger: expect.anything(),
             minTimeout: 5 * 1000,

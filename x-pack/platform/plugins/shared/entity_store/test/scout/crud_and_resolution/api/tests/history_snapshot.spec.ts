@@ -111,7 +111,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
       expect(body.ok).toBe(true);
 
       expect(body.historySnapshotIndex).toMatch(
-        /\.entities\.v2\.history\.security_default\.\d{4}-\d{2}-\d{2}-\d{2}$/
+        /\.entities\.v2\.history\.default\.\d{4}-\d{2}-\d{2}-\d{2}$/
       );
       expect(typeof body.docCount).toBe('number');
       expect(typeof body.resetCount).toBe('number');

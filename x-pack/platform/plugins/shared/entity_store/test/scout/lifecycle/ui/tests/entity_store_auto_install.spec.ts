@@ -13,6 +13,10 @@ import {
   ENTITY_STORE_ROUTES,
   FF_ENABLE_ENTITY_STORE_V2,
 } from '../../../../../common';
+import {
+  EntityAnalyticsManagementPage,
+  waitForEntityStoreStatus,
+} from '../fixtures/entity_analytics_management';
 
 // Installing/starting the store is slow and blocking, so timeouts sit well above Scout's 60s default.
 const TEST_TIMEOUT = 240_000; // per-test cap
@@ -88,10 +92,9 @@ test.describe.serial(
 
     test('auto-installs the entity store when visiting a Security page', async ({
       page,
-      pageObjects,
-      apiServices,
+      kbnClient,
     }) => {
-      const managementPage = pageObjects.entityAnalyticsManagementPage;
+      const managementPage = new EntityAnalyticsManagementPage(page);
 
       // The auto-install hook POSTs /install on first navigation; wait for the request to confirm it fired.
       const installRequested = page.waitForRequest(
@@ -102,12 +105,12 @@ test.describe.serial(
       await installRequested;
 
       // /install blocks until the store is installed; poll status instead of the blocking response.
-      await apiServices.entityAnalytics.waitForEntityStoreStatus('running', REQUEST_TIMEOUT);
+      await waitForEntityStoreStatus(kbnClient, 'running', REQUEST_TIMEOUT);
       await expect(managementPage.entityAnalyticsSwitch).toBeChecked({ timeout: REQUEST_TIMEOUT });
     });
 
-    test('does not auto-install after stopping', async ({ page, pageObjects, apiServices }) => {
-      const managementPage = pageObjects.entityAnalyticsManagementPage;
+    test('does not auto-install after stopping', async ({ page, kbnClient }) => {
+      const managementPage = new EntityAnalyticsManagementPage(page);
       const toggle = managementPage.entityAnalyticsSwitch;
 
       // The store is installed from the previous test, so the toggle loads checked.
@@ -115,7 +118,7 @@ test.describe.serial(
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
         await managementPage.toggleEntityAnalytics();
-        await apiServices.entityAnalytics.waitForEntityStoreStatus('stopped', REQUEST_TIMEOUT);
+        await waitForEntityStoreStatus(kbnClient, 'stopped', REQUEST_TIMEOUT);
         await expect(toggle).not.toBeChecked({ timeout: REQUEST_TIMEOUT });
       });
 
@@ -130,8 +133,8 @@ test.describe.serial(
       });
     });
 
-    test('does not auto-install after uninstalling', async ({ page, pageObjects, apiServices }) => {
-      const managementPage = pageObjects.entityAnalyticsManagementPage;
+    test('does not auto-install after uninstalling', async ({ page, kbnClient }) => {
+      const managementPage = new EntityAnalyticsManagementPage(page);
       const toggle = managementPage.entityAnalyticsSwitch;
 
       // The store is stopped from the previous test, so the toggle loads unchecked.
@@ -139,16 +142,13 @@ test.describe.serial(
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
         await managementPage.toggleEntityAnalytics();
-        await apiServices.entityAnalytics.waitForEntityStoreStatus('running', REQUEST_TIMEOUT);
+        await waitForEntityStoreStatus(kbnClient, 'running', REQUEST_TIMEOUT);
         await expect(toggle).toBeChecked({ timeout: REQUEST_TIMEOUT });
       });
 
       await test.step('uninstall by clearing entity data', async () => {
         await managementPage.clearEntityData();
-        await apiServices.entityAnalytics.waitForEntityStoreStatus(
-          'not_installed',
-          REQUEST_TIMEOUT
-        );
+        await waitForEntityStoreStatus(kbnClient, 'not_installed', REQUEST_TIMEOUT);
         await expect(toggle).not.toBeChecked({ timeout: REQUEST_TIMEOUT });
       });
 
