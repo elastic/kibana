@@ -9,7 +9,7 @@ applies_to:
 
 # Cribl connector [cribl-action-type]
 
-The Cribl connector calls the [Cribl API](https://docs.cribl.io/api-reference/) on a Cribl Stream/Edge Leader (Cribl.Cloud, hybrid, or a customer-managed deployment). It exposes a generic `request` action for any API path, plus typed convenience actions for listing Worker Groups/Fleets and Worker Nodes, reading and replacing the routing table, committing and deploying configuration changes, managing pipelines/sources/destinations/lookups, restarting a Worker Group, and running Cribl Search queries. It authenticates with a Cribl API bearer token and can verify the server TLS certificate against a pasted PEM CA.
+The Cribl connector calls the [Cribl API](https://docs.cribl.io/api-reference/) on a Cribl Stream/Edge Leader (Cribl.Cloud, hybrid, or a customer-managed deployment). It exposes a generic `request` action for any API path, plus typed convenience actions for listing Worker Groups/Fleets and Worker Nodes, reading and replacing the routing table, committing and deploying configuration changes, managing pipelines/sources/destinations/lookups, restarting a Worker Group, and running Cribl Search queries. It authenticates with a Cribl API bearer token and can verify the server TLS certificate against an uploaded PEM CA.
 
 ::::{warning}
 This connector can perform any operation the configured token is authorized for, including replacing a Worker Group's entire routing table (`updateRoutes` deletes any route you don't include) and deploying configuration changes to live Worker Nodes. There are no additional restrictions in {{kib}}: access is governed entirely by the token's Cribl permissions. API credential management, local user accounts, RBAC, and the secrets/certificate stores are blocked on the `request` action.
@@ -34,7 +34,7 @@ Bearer token
 :   A Cribl API bearer token (a JSON Web Token). The connector sends it in the `Authorization: Bearer <token>` header. On Cribl.Cloud/hybrid, tokens are valid for 24 hours; on a customer-managed deployment they expire according to the Leader's "Auth token TTL" setting (default 1 hour). This connector does not refresh the token automatically — an administrator must obtain a new one and update the connector before it expires.
 
 Server CA certificate (PEM)
-:   Optional PEM-encoded certificate authority used to verify the Leader's certificate, if it presents a private or self-signed certificate. Leave empty to rely on the system trust store.
+:   Optional PEM-encoded certificate authority file (`.pem` or `.crt`) uploaded to verify the Leader's certificate, if it presents a private or self-signed certificate. Leave empty to rely on the system trust store.
 
 ## Test connectors [cribl-action-configuration]
 
@@ -133,6 +133,6 @@ Obtain a Cribl API bearer token for the connector:
 
 1. Call `POST https://${hostname}:${port}/api/v1/auth/login` with an admin username and password. The response's `token` field is the bearer token.
 2. Tokens expire according to the Leader's **Settings > Global > General Settings > API Server Settings > Advanced > Auth token TTL** setting (default 3600 seconds).
-3. Enter the Leader URL, the bearer token, and (if the Leader presents a private CA) its PEM certificate when configuring the connector in {{kib}}.
+3. Enter the Leader URL and the bearer token, and (if the Leader presents a private CA) upload its PEM certificate file when configuring the connector in {{kib}}.
 
 Because tokens expire, plan to periodically regenerate the token and update the connector — this connector does not refresh it automatically.

@@ -10,7 +10,6 @@ import { getWidgetComponent } from './registry';
 import { WidgetType } from './types';
 import { getMeta, addMeta } from '../schema_connector_metadata';
 import { TextWidget } from './components/text_widget';
-import { TextareaWidget } from './components/textarea_widget';
 import { PasswordWidget } from './components/password_widget';
 import { HiddenWidget } from './components/hidden_widget';
 
@@ -164,14 +163,6 @@ describe('Widget Registry', () => {
       const component = getWidgetComponent(schema);
 
       expect(component).toBe(HiddenWidget);
-    });
-
-    it('should return TextareaWidget for z.string() with widget: textarea', () => {
-      const schema = z.string();
-      addMeta(schema, { widget: WidgetType.Textarea });
-      const component = getWidgetComponent(schema);
-
-      expect(component).toBe(TextareaWidget);
     });
   });
 
