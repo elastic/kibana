@@ -162,7 +162,10 @@ export const FieldValueView: React.FC<FieldValueViewProps> = ({
       affordance: css`
         flex-shrink: 0;
         margin-block-start: ${euiTheme.size.xs};
-        opacity: 0;
+        /* Quietly persistent rather than hover-only: one subdued pencil per row is not the visual
+           noise the old column of "Edit" links was, and hiding it entirely would leave the row's
+           only signifier undiscoverable on touch. */
+        opacity: 0.5;
         transition: opacity ${euiTheme.animation.fast};
         color: ${euiTheme.colors.textSubdued};
       `,
@@ -184,7 +187,10 @@ export const FieldValueView: React.FC<FieldValueViewProps> = ({
         <span css={styles.label}>
           {label}
           {requirementLabel ? (
-            <span css={styles.requirement} data-test-subj={`template-field-requirement-${field.name}`}>
+            <span
+              css={styles.requirement}
+              data-test-subj={`template-field-requirement-${field.name}`}
+            >
               {requirementLabel}
             </span>
           ) : null}
@@ -210,6 +216,7 @@ export const FieldValueView: React.FC<FieldValueViewProps> = ({
           size="s"
           className="templateFieldEditAffordance"
           css={styles.affordance}
+          aria-hidden={true}
         />
       ) : null}
     </>
