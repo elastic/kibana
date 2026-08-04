@@ -294,6 +294,25 @@ export class SyntheticsAppPage {
     await this.page.click('text="100 rows"');
   }
 
+  async selectAllMonitors() {
+    await this.page.testSubj.click('checkboxSelectAll');
+  }
+
+  async openBulkActionsMenu() {
+    // The bulk actions button only renders once at least one monitor is selected.
+    await this.page.testSubj.click('syntheticsBulkActionsButton');
+  }
+
+  async selectMaintenanceWindowInFlyout(title: string) {
+    const flyout = this.page.testSubj.locator('syntheticsBulkMaintenanceWindowsFlyout');
+    await flyout.locator('[data-test-subj="comboBoxSearchInput"]').click();
+    await this.page.getByRole('option', { name: title }).click();
+  }
+
+  async saveBulkMaintenanceWindows() {
+    await this.page.testSubj.click('syntheticsBulkMaintenanceWindowsSave');
+  }
+
   async findEditMonitorConfiguration(monitorEditDetails: Array<[string, string]>) {
     await this.page.click('text="Advanced options"');
     for (const [selector, expected] of monitorEditDetails) {
