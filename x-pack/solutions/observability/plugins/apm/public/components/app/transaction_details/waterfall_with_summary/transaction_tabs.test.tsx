@@ -116,6 +116,7 @@ describe('TransactionTabs', () => {
     const genAiTab = screen.getByTestId('genAiTab');
     expect(genAiTab).toHaveAttribute('data-ebt-action', 'viewGenAi');
     expect(genAiTab).toHaveAttribute('data-ebt-element', 'traceSampleTabs');
+    expect(genAiTab).toHaveAttribute('data-ebt-detail', 'apm');
   });
 
   it('calls onTabClick with the genAi tab when the GenAI tab is clicked', async () => {

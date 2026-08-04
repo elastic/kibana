@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { LazySavedSearchComponent, type SavedSearchTableConfig } from '@kbn/saved-search-component';
 import { getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
-import { GENAI_EBT_CLICK_ACTIONS } from '@kbn/apm-ui-shared';
+import { GENAI_EBT_CLICK_ACTIONS, GENAI_EBT_HOSTS } from '@kbn/apm-ui-shared';
 import { getTimestampUs } from '../../../../../common/utils/get_timestamp_us';
 import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
@@ -148,6 +148,7 @@ export function TransactionTabs({
               ebt: {
                 action: GENAI_EBT_CLICK_ACTIONS.VIEW_GENAI,
                 element: TRACE_SAMPLE_EBT_ELEMENTS.TABS,
+                detail: GENAI_EBT_HOSTS.APM,
               },
             },
           }

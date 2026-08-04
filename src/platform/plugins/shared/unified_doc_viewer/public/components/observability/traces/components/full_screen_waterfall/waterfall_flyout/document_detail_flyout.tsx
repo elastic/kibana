@@ -10,6 +10,7 @@
 import { EuiCallOut, type EuiFlyoutProps } from '@elastic/eui';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React from 'react';
+import type { GenAiEbtHost } from '@kbn/apm-ui-shared';
 import { WaterfallFlyout } from '.';
 import type { TraceOverviewSections } from '../../../doc_viewer_overview/overview';
 import { SpanFlyoutContent } from './span_flyout';
@@ -17,7 +18,6 @@ import { FlyoutContentId } from '../../../common/constants';
 import type { TraceDocFlyoutType } from '../../../common/types';
 import { LogFlyoutContent } from './logs_flyout';
 import { useDocumentFlyoutData, type DocumentFlyoutData } from './use_document_flyout_data';
-import type { TracesDocViewerEbtHost } from '../../../ebt_constants';
 
 interface FlyoutContentProps {
   data: DocumentFlyoutData;
@@ -68,7 +68,7 @@ export interface DocumentDetailFlyoutProps {
   skipNextEventReport?: boolean;
   size?: EuiFlyoutProps['size'];
   /** Host app discriminator used as `detail` in the flyout tab click EBT events. */
-  ebtHost?: TracesDocViewerEbtHost;
+  ebtHost?: GenAiEbtHost;
 }
 
 export function DocumentDetailFlyout({

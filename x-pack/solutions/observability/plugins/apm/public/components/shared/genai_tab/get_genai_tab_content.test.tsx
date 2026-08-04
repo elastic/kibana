@@ -37,6 +37,7 @@ describe('getGenAiTabContent', () => {
       'data-test-subj': 'genAiTab',
       'data-ebt-action': 'viewGenAi',
       'data-ebt-element': 'spanFlyoutTabs',
+      'data-ebt-detail': 'apm',
     });
   });
 });

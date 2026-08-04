@@ -8,7 +8,12 @@
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { GenAiTab, GENAI_EBT_CLICK_ACTIONS, type GenAiFields } from '@kbn/apm-ui-shared';
+import {
+  GenAiTab,
+  GENAI_EBT_CLICK_ACTIONS,
+  GENAI_EBT_HOSTS,
+  type GenAiFields,
+} from '@kbn/apm-ui-shared';
 import { getEbtProps } from '@kbn/ebt-click';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
 
@@ -32,6 +37,7 @@ export function getGenAiTabContent({ isGenAiSpan, genAi, ebt }: Props) {
     ...getEbtProps({
       action: GENAI_EBT_CLICK_ACTIONS.VIEW_GENAI,
       element: ebt.element,
+      detail: GENAI_EBT_HOSTS.APM,
     }),
     content: (
       <>

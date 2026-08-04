@@ -15,6 +15,17 @@
 export const GENAI_EBT_CLICK_ACTIONS = {
   /** User copies a prompt/response message from the GenAI conversation view. */
   COPY_MESSAGE: 'copyGenAiMessage',
-  /** User opens the GenAI tab; the `element` identifies the host surface. */
+  /**
+   * User opens the GenAI tab; the `element` identifies the host surface and
+   * the `detail` the host app ({@link GENAI_EBT_HOSTS}).
+   */
   VIEW_GENAI: 'viewGenAi',
 } as const;
+
+/** Host app discriminator used as `detail` in GenAI click events. */
+export const GENAI_EBT_HOSTS = {
+  APM: 'apm',
+  DISCOVER: 'discover',
+} as const;
+
+export type GenAiEbtHost = (typeof GENAI_EBT_HOSTS)[keyof typeof GENAI_EBT_HOSTS];

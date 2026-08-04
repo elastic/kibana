@@ -37,18 +37,6 @@ export const TRACES_DOC_VIEWER_EBT_DETAILS = {
   LOG_DOC: 'logDoc',
 } as const;
 
-/**
- * Discriminates the host app in click events emitted from components shared
- * between the APM UI and Discover (e.g. the trace waterfall span flyout).
- */
-export const TRACES_DOC_VIEWER_EBT_HOSTS = {
-  APM: 'apm',
-  DISCOVER: 'discover',
-} as const;
-
-export type TracesDocViewerEbtHost =
-  (typeof TRACES_DOC_VIEWER_EBT_HOSTS)[keyof typeof TRACES_DOC_VIEWER_EBT_HOSTS];
-
 export const TRACES_DOC_VIEWER_EBT_SOURCES = {
   ABOUT: 'docViewerAbout',
 } as const;

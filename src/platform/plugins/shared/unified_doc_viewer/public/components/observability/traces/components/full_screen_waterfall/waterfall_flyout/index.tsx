@@ -25,7 +25,9 @@ import { css } from '@emotion/react';
 import {
   GenAiTechnicalPreviewBadge,
   GENAI_EBT_CLICK_ACTIONS,
+  GENAI_EBT_HOSTS,
   hasGenAiData,
+  type GenAiEbtHost,
 } from '@kbn/apm-ui-shared';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
@@ -39,11 +41,7 @@ import { getUnifiedDocViewerServices } from '../../../../../../plugin';
 import { useOriginDocType } from '../../../../../doc_viewer_flyout/origin_doc_type_context';
 import type { FlyoutContentId } from '../../../common/constants';
 import { DocViewerObsTracesGenAi } from '../../../doc_viewer_genai';
-import {
-  TRACES_DOC_VIEWER_EBT_ELEMENTS,
-  TRACES_DOC_VIEWER_EBT_HOSTS,
-  type TracesDocViewerEbtHost,
-} from '../../../ebt_constants';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS } from '../../../ebt_constants';
 
 const tabIds = {
   OVERVIEW: 'unifiedDocViewerTracesDocDetailFlyoutOverview',
@@ -65,7 +63,7 @@ const getTabs = ({
   ebtHost,
 }: {
   showGenAi: boolean;
-  ebtHost: TracesDocViewerEbtHost;
+  ebtHost: GenAiEbtHost;
 }): FlyoutTab[] => [
   {
     id: tabIds.OVERVIEW,
@@ -186,7 +184,7 @@ export interface Props {
   skipNextEventReport?: boolean;
   size?: EuiFlyoutProps['size'];
   /** Host app discriminator used as `detail` in the flyout tab click EBT events. */
-  ebtHost?: TracesDocViewerEbtHost;
+  ebtHost?: GenAiEbtHost;
 }
 
 export function WaterfallFlyout({
@@ -202,7 +200,7 @@ export function WaterfallFlyout({
   flyoutContentId,
   skipNextEventReport,
   size = 's',
-  ebtHost = TRACES_DOC_VIEWER_EBT_HOSTS.DISCOVER,
+  ebtHost = GENAI_EBT_HOSTS.DISCOVER,
 }: Props) {
   const { analytics } = getUnifiedDocViewerServices();
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
