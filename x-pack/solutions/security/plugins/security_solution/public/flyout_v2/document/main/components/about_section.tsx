@@ -9,6 +9,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import React, { memo, useCallback, useMemo } from 'react';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID, EVENT_KIND } from '@kbn/rule-data-utils';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { EventKind } from '../constants/event_kinds';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
@@ -30,6 +31,7 @@ import { EventKindDescription } from './event_kind_description';
 import { EventRenderer } from './event_renderer';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { isRulePreviewDocument } from '../../../shared/utils/is_rule_preview_document';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export const ABOUT_SECTION_TEST_ID = `${PREFIX}AboutSection` as const;
 
@@ -50,11 +52,16 @@ export interface AboutSectionProps {
  */
 export const AboutSection = memo(({ hit }: AboutSectionProps) => {
   const { openRuleFlyout } = useFlyoutApi();
+  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
 
   const eventKind = useMemo(() => getFieldValue(hit, EVENT_KIND) as string, [hit]);
   const isAlert = eventKind === EventKind.signal;
   const eventKindInECS = eventKind ? isEcsAllowedValue(EVENT_KIND, eventKind) : false;
   const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
+  const isRemoteDocument = useMemo(
+    () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
+    [hit]
+  );
 
   const ruleId = useMemo(
     () => (isAlert ? (getFieldValue(hit, ALERT_RULE_UUID) as string) : undefined),
@@ -96,7 +103,7 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
             <AlertDescription
               hit={hit}
               onShowRuleSummary={ruleId ? onShowRuleSummary : undefined}
-              ruleSummaryDisabled={isRulePreview}
+              ruleSummaryDisabled={isRulePreview || !canReadRules || isRemoteDocument}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
