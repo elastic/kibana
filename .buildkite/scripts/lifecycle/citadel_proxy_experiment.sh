@@ -21,7 +21,10 @@
 #                                    trust and all other proxy setup intact. Use this
 #                                    first: it answers whether a failure is
 #                                    proxy-mediated at all.
-#   CITADEL_EXP_EXTRA_NO_PROXY=true  append the candidate bypass list to NO_PROXY.
+#
+# Note: the confirmed and under-test bypass lists apply UNCONDITIONALLY, because a
+# PR build is auto-triggered and cannot carry build-level env vars. Only the
+# switches below are opt-in.
 #   CITADEL_EXP_PROXY_CHROME=true    also set the lowercase proxy vars, so Chromium
 #                                    uses the proxy (it reads only lowercase, so it
 #                                    bypasses the proxy entirely by default).
@@ -145,25 +148,41 @@ _citadel_experiment() {
   echo "NO_PROXY extended (confirmed): ${confirmed[*]}"
   applied="${applied}confirmed-bypass "
 
-  # --- Candidate bypasses ----------------------------------------------------
-  if [[ "${CITADEL_EXP_EXTRA_NO_PROXY:-}" == "true" ]]; then
-    local extra=(
-      telemetry-staging.elastic.co
-      telemetry.elastic.co
-      fake-cloud.elastic.co
-      ci-stats.kibana.dev
-      kibana-stats.elastic.dev
-      kibana-coverage.elastic.dev
-    )
-    local host
-    for host in "${extra[@]}"; do
-      NO_PROXY="${NO_PROXY:+${NO_PROXY},}${host},.${host}"
-    done
-    export NO_PROXY
-    export no_proxy="${NO_PROXY}"
-    echo "NO_PROXY extended with: ${extra[*]}"
-    applied="${applied}extra-no-proxy "
-  fi
+  # --- Under test ------------------------------------------------------------
+  # NOT evidence-backed. Promoted from flag-gated to unconditional for one
+  # experiment: proxied 480488 produced 52 failures against 1 in the unproxied
+  # control 480427, and the sampled failures are UI timeouts rather than proxy
+  # rejections. This run distinguishes the two explanations:
+  #
+  #   failures drop a lot  -> destination-driven, keep bypassing, green is
+  #                           reachable inside #3163
+  #   failures stay ~50    -> latency-driven, and #3163 is blocked on the
+  #                           single-worker / single-region fleet (#3137) rather
+  #                           than the allowlist
+  #
+  # If the second, DELETE this block — do not let unproven entries accumulate
+  # into permanent holes in audit coverage. Only promote to `confirmed` above
+  # once a specific build demonstrates the failure.
+  #
+  # telemetry-staging.elastic.co is the strongest of these: 480488 FTR Configs #7
+  # logged `browser[SEVERE] https://telemetry-staging.elastic.co/v3/send/
+  # kibana-browser - Failed to load resource: net::ERR_NETWORK_CHANGED`.
+  local under_test=(
+    telemetry-staging.elastic.co
+    telemetry.elastic.co
+    fake-cloud.elastic.co
+    ci-stats.kibana.dev
+    kibana-stats.elastic.dev
+    kibana-coverage.elastic.dev
+  )
+  local test_host
+  for test_host in "${under_test[@]}"; do
+    NO_PROXY="${NO_PROXY:+${NO_PROXY},}${test_host},.${test_host}"
+  done
+  export NO_PROXY
+  export no_proxy="${NO_PROXY}"
+  echo "NO_PROXY extended (under test): ${under_test[*]}"
+  applied="${applied}under-test-bypass "
 
   # --- Put Chromium on the proxy --------------------------------------------
   if [[ "${CITADEL_EXP_PROXY_CHROME:-}" == "true" ]]; then
