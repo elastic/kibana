@@ -1782,7 +1782,7 @@
     },
     {
       "groupName": "adm-zip",
-      "matchDepNames": ["adm-zip", "@types/adm-zip"],
+      "matchDepNames": ["adm-zip"],
       "reviewers": ["team:security-solution"],
       "matchBaseBranches": ["main"],
       "labels": ["Team: SecuritySolution", "backport:all-open", "release_note:skip"],
