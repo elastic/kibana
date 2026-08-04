@@ -91,7 +91,12 @@ spaceTest.describe(
         // immediate reload could race the write. Poll storage until the sort
         // lands to deterministically test "persisted sort survives a reload".
         await expect
-          .poll(() => page.evaluate(() => window.localStorage.getItem('discover.tabs') ?? ''))
+          .poll(() =>
+            page.evaluate(
+              (storageKey) => window.localStorage.getItem(storageKey) ?? '',
+              testData.DISCOVER_TABS_LOCAL_STORAGE_KEY
+            )
+          )
           .toContain('metricsGridSort');
       });
 
