@@ -35,33 +35,18 @@ import {
   type QueryOccurrences,
 } from '../../../../lib/significant_events/fetch_query_occurrences_from_alerts';
 import { searchModeSchema } from '../../../utils/search_mode';
+import { assertValidDateRange, makeIsoDateFromString } from '../../../utils/iso_date_param';
+import { resolveStreamNames } from '../../../utils/resolve_stream_names';
 import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
 import { persistQueries } from '../../../../lib/significant_events/persist_queries';
 import { queryFromLink } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
+import type { PromoteQueriesResult } from '../../../../lib/knowledge_indicators';
 
 const RECONCILE_STREAM_CONCURRENCY = 3;
 // Manual repair endpoint: keep each request small so operators batch large migrations explicitly.
 const RECONCILE_MAX_STREAMS = 10;
 
-/**
- * `findQueries` / `findIndicators` early-return on an empty stream list, while
- * `getQueryLinks` treats empty as "all streams". Resolve accessible stream names
- * (same pattern as `listAllFeaturesRoute`) so search and list stay aligned.
- */
-const resolveStreamNames = async (
-  streamNames: string[] | undefined,
-  listStreams: () => Promise<Array<{ name: string }>>
-): Promise<string[]> => {
-  if (streamNames?.length) {
-    return streamNames;
-  }
-  return (await listStreams()).map((stream) => stream.name);
-};
-
-const dateFromString = z
-  .string()
-  .max(MAX_ID_LENGTH)
-  .transform((input) => new Date(input));
+const dateFromString = makeIsoDateFromString('ISO 8601 datetime');
 
 const baseRequestParamsSchema = z.object({
   from: dateFromString.describe('Start of the time range'),
@@ -90,11 +75,12 @@ const requestParamsSchema = baseRequestParamsSchema.extend({
 });
 
 /**
- * Promotes unbacked queries to rule-backed status. Returns
- * `{ promoted, skipped_stats }`. STATS queries are never promoted until
- * rule-on-rule provisioning (#265778); `skipped_stats` counts those.
+ * Promotes unbacked queries to rule-backed status. Ineligible queries are
+ * skipped and counted by reason: `skipped_stats` for STATS (unbacked until
+ * #265778) and `skipped_ineligible` for MATCH that is not filter-only. The two
+ * are reported separately so the UI can tell the user which one they hit.
  */
-export const promoteUnbackedQueriesRoute = createServerRoute({
+const promoteUnbackedQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/queries/_promote',
   options: {
     access: 'internal',
@@ -121,7 +107,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
     getScopedClients,
     server,
     maintenanceService,
-  }): Promise<{ promoted: number; skipped_stats: number }> => {
+  }): Promise<PromoteQueriesResult> => {
     const scopedClients = await getScopedClients({ request });
     const { streamsClient, licensing } = scopedClients;
 
@@ -141,7 +127,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
   },
 });
 
-export const demoteBackedQueriesRoute = createServerRoute({
+const demoteBackedQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/queries/_demote',
   options: {
     access: 'internal',
@@ -213,7 +199,7 @@ export const demoteBackedQueriesRoute = createServerRoute({
   },
 });
 
-export const bulkDeleteQueriesRoute = createServerRoute({
+const bulkDeleteQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/queries/_bulk_delete',
   options: {
     access: 'internal',
@@ -473,6 +459,7 @@ const getDiscoveryQueriesRoute = createServerRoute({
       status,
       searchMode,
     } = params.query;
+    assertValidDateRange(from, to);
 
     const resolvedStreamNames = await resolveStreamNames(streamNames, () =>
       scopedClients.streamsClient.listStreams()
@@ -550,6 +537,7 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const { from, to, bucketSize, query, streamNames } = params.query;
+    assertValidDateRange(from, to);
 
     const resolvedStreamNames = await resolveStreamNames(streamNames, () =>
       scopedClients.streamsClient.listStreams()
@@ -647,6 +635,7 @@ const generateQueriesRoute = createServerRoute({
       inferenceClient,
       soClient,
       scopedClusterClient,
+      streamDataEsClient,
       licensing,
       tuningConfig,
     } = scopedClients;
@@ -671,6 +660,7 @@ const generateQueriesRoute = createServerRoute({
         soClient,
         kiClient,
         esClient: scopedClusterClient.asCurrentUser,
+        streamDataEsClient,
         featureFlags: server.core.featureFlags,
         searchInferenceEndpoints: server.searchInferenceEndpoints,
         request,
