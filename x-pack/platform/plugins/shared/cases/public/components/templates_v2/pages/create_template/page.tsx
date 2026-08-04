@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import type { YamlEditorFormValues } from '../../components/template_form';
@@ -16,9 +16,14 @@ import { useCasesContext } from '../../../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../../../common/use_cases_features';
 import { useAvailableCasesOwners } from '../../../app/use_available_owners';
 import { getOwnerDefaultValue } from '../../../create/utils';
-import { useCasesEditTemplateNavigation } from '../../../../common/navigation';
+import {
+  useCasesEditTemplateNavigation,
+  useCasesTemplatesNavigation,
+} from '../../../../common/navigation';
 import { LOCAL_STORAGE_KEYS, SECURITY_SOLUTION_OWNER } from '../../../../../common/constants';
 import { useCasesTemplatesBreadcrumbs } from '../../../use_breadcrumbs';
+import { useCasesLocalStorage } from '../../../../common/use_cases_local_storage';
+import { CreateTemplateModal } from '../../components/create_template_modal';
 import type { TemplateMetadata } from '../../utils/template_metadata';
 import type { TemplateSettings } from '../../../../../common/types/domain/template/v1';
 
@@ -27,13 +32,32 @@ import * as i18n from '../../translations';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CreateTemplatePageProps {}
 
+const EMPTY_METADATA: TemplateMetadata = { name: '', description: '', tags: [] };
+
 export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
   useCasesTemplatesBreadcrumbs(i18n.ADD_TEMPLATE_TITLE);
-  const initialMetadata: TemplateMetadata = {
-    name: '',
-    description: '',
-    tags: [],
-  };
+  const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
+
+  // The layout reads its metadata draft from this key, so writing the modal's result here is what
+  // hands the name over — one storage key stays the single source of truth for template identity,
+  // rather than the modal and the Configuration tab each holding their own copy.
+  const [metadataDraft, setMetadataDraft] = useCasesLocalStorage<TemplateMetadata>(
+    `${LOCAL_STORAGE_KEYS.templatesYamlEditorCreateState}.metadata`,
+    EMPTY_METADATA
+  );
+
+  // A returning user with a named draft has already answered this, so don't ask again.
+  const [isNamed, setIsNamed] = useState(() => (metadataDraft?.name ?? '').trim().length > 0);
+
+  const handleModalConfirm = useCallback(
+    (metadata: TemplateMetadata) => {
+      setMetadataDraft(metadata);
+      setIsNamed(true);
+    },
+    [setMetadataDraft]
+  );
+
+  const initialMetadata = metadataDraft ?? EMPTY_METADATA;
 
   const form = useForm<YamlEditorFormValues>({
     defaultValues: {
@@ -77,6 +101,16 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
     },
     [defaultOwnerValue, mutateAsync, navigateToCasesEditTemplate]
   );
+
+  if (!isNamed) {
+    return (
+      <CreateTemplateModal
+        initialMetadata={initialMetadata}
+        onCancel={navigateToCasesTemplates}
+        onConfirm={handleModalConfirm}
+      />
+    );
+  }
 
   return (
     <TemplateFormLayout

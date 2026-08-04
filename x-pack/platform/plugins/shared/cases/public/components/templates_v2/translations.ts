@@ -19,6 +19,24 @@ export const SAVE_TEMPLATE = i18n.translate('xpack.cases.templates.save', {
   defaultMessage: 'Save',
 });
 
+export const CREATE_TEMPLATE_MODAL_TITLE = i18n.translate(
+  'xpack.cases.templates.createTemplateModalTitle',
+  { defaultMessage: 'Create template' }
+);
+
+export const CREATE_TEMPLATE_MODAL_DESCRIPTION = i18n.translate(
+  'xpack.cases.templates.createTemplateModalDescription',
+  {
+    defaultMessage:
+      'Name your template. You can change this and everything else after the editor opens.',
+  }
+);
+
+export const CREATE_TEMPLATE_MODAL_CONFIRM = i18n.translate(
+  'xpack.cases.templates.createTemplateModalConfirm',
+  { defaultMessage: 'Continue' }
+);
+
 export const ADD_TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.addTemplateTitle', {
   defaultMessage: 'Add template',
 });
