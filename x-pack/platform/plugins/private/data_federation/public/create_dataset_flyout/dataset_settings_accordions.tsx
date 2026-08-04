@@ -6,17 +6,100 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useMemo } from 'react';
-import { EuiAccordion, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import React, { useCallback, useMemo, useRef } from 'react';
+import { css } from '@emotion/react';
+import { EuiAccordion, EuiPanel, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
+import { useWatch } from 'react-hook-form';
 
-import type { CreateDatasetFormValues, DatasetFormatFormValue } from './create_dataset_flyout_form_state';
+import type {
+  CreateDatasetFormValues,
+  DatasetErrorModeFormValue,
+  DatasetFormatFormValue,
+} from './create_dataset_flyout_form_state';
 import { DatasetSettingsField } from './dataset_settings_field';
-import type { DatasetSettingsAccordionId } from './dataset_settings_visibility';
+import type { DatasetSettingsAccordionId, DatasetSettingsFieldId } from './dataset_settings_visibility';
 import {
   getVisibleAccordionsForFormat,
   getVisibleFieldsForAccordion,
 } from './dataset_settings_visibility';
+
+const accordionButtonCss = css`
+  &:hover {
+    text-decoration: none;
+  }
+`;
+
+const ACCORDION_EXPAND_ANIMATION_MS = 300;
+
+const scrollAccordionIntoView = (element: HTMLElement) => {
+  window.setTimeout(() => {
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, ACCORDION_EXPAND_ANIMATION_MS);
+};
+
+interface DatasetSettingsAccordionItemProps {
+  accordionDomId: string;
+  testSubj: string;
+  title: string;
+  control: Control<CreateDatasetFormValues>;
+  fields: DatasetSettingsFieldId[];
+  testSubjPrefix: string;
+}
+
+const DatasetSettingsAccordionItem: FunctionComponent<DatasetSettingsAccordionItemProps> = ({
+  accordionDomId,
+  testSubj,
+  title,
+  control,
+  fields,
+  testSubjPrefix,
+}) => {
+  const accordionRef = useRef<HTMLDivElement>(null);
+
+  const handleToggle = useCallback((isOpen: boolean) => {
+    if (!isOpen || !accordionRef.current) {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      if (accordionRef.current) {
+        scrollAccordionIntoView(accordionRef.current);
+      }
+    });
+  }, []);
+
+  return (
+    <div ref={accordionRef}>
+      <EuiAccordion
+        id={accordionDomId}
+        element="fieldset"
+        borders="horizontal"
+        buttonProps={{ paddingSize: 'm', css: accordionButtonCss }}
+        buttonContent={
+          <EuiTitle size="xs">
+            <h3>{title}</h3>
+          </EuiTitle>
+        }
+        data-test-subj={testSubj}
+        initialIsOpen={false}
+        paddingSize="none"
+        onToggle={handleToggle}
+      >
+        <EuiPanel color="subdued" paddingSize="m" hasShadow={false}>
+          {fields.map((fieldId) => (
+            <DatasetSettingsField
+              key={fieldId}
+              control={control}
+              fieldId={fieldId}
+              testSubjPrefix={testSubjPrefix}
+            />
+          ))}
+        </EuiPanel>
+      </EuiAccordion>
+    </div>
+  );
+};
 
 export interface DatasetSettingsAccordionTitles {
   structure: string;
@@ -55,6 +138,7 @@ export const DatasetSettingsAccordions: FunctionComponent<DatasetSettingsAccordi
   accordionTitles,
   testSubjPrefix = 'datasetWizard',
 }) => {
+  const errorMode = useWatch({ control, name: 'settings.error_mode' }) as DatasetErrorModeFormValue;
   const visibleAccordions = useMemo(() => getVisibleAccordionsForFormat(format), [format]);
 
   const structureAccordionId = useGeneratedHtmlId({ prefix: ACCORDION_ID_PREFIX.structure });
@@ -80,30 +164,19 @@ export const DatasetSettingsAccordions: FunctionComponent<DatasetSettingsAccordi
   return (
     <>
       <EuiSpacer size="l" />
-      {visibleAccordions.map((accordionId) => {
-        const fields = getVisibleFieldsForAccordion(accordionId, format);
-        const title = accordionTitles[accordionId];
-
-        return (
-          <EuiAccordion
+      <div data-test-subj={`${testSubjPrefix}SettingsAccordions`}>
+        {visibleAccordions.map((accordionId) => (
+          <DatasetSettingsAccordionItem
             key={accordionId}
-            id={accordionIds[accordionId]}
-            data-test-subj={`${testSubjPrefix}${ACCORDION_TEST_SUBJ[accordionId]}`}
-            buttonContent={title}
-            initialIsOpen={false}
-          >
-            {fields.map((fieldId) => (
-              <React.Fragment key={fieldId}>
-                <DatasetSettingsField
-                  control={control}
-                  fieldId={fieldId}
-                  testSubjPrefix={testSubjPrefix}
-                />
-              </React.Fragment>
-            ))}
-          </EuiAccordion>
-        );
-      })}
+            accordionDomId={accordionIds[accordionId]}
+            testSubj={`${testSubjPrefix}${ACCORDION_TEST_SUBJ[accordionId]}`}
+            title={accordionTitles[accordionId]}
+            control={control}
+            fields={getVisibleFieldsForAccordion(accordionId, format, errorMode)}
+            testSubjPrefix={testSubjPrefix}
+          />
+        ))}
+      </div>
     </>
   );
 };

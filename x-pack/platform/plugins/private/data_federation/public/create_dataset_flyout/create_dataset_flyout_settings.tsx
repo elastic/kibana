@@ -554,45 +554,49 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
           inputRef={errorModeField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsMaxErrorsLabel()}
-        helpText={createDatasetFlyoutStrings.settingsMaxErrorsHelp()}
-        fullWidth
-        isInvalid={Boolean(maxErrorsState.error)}
-        error={maxErrorsState.error?.message}
-      >
-        <EuiFieldNumber
-          data-test-subj="createDatasetFlyoutSettingsMaxErrors"
-          fullWidth
-          min={0}
-          step={1}
-          isInvalid={Boolean(maxErrorsState.error)}
-          value={maxErrorsField.value}
-          onChange={(e) => maxErrorsField.onChange(e.target.value)}
-          name={maxErrorsField.name}
-          inputRef={maxErrorsField.ref}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsMaxErrorRatioLabel()}
-        helpText={createDatasetFlyoutStrings.settingsMaxErrorRatioHelp()}
-        fullWidth
-        isInvalid={Boolean(maxErrorRatioState.error)}
-        error={maxErrorRatioState.error?.message}
-      >
-        <EuiFieldNumber
-          data-test-subj="createDatasetFlyoutSettingsMaxErrorRatio"
-          fullWidth
-          min={0}
-          max={1}
-          step={0.01}
-          isInvalid={Boolean(maxErrorRatioState.error)}
-          value={maxErrorRatioField.value}
-          onChange={(e) => maxErrorRatioField.onChange(e.target.value)}
-          name={maxErrorRatioField.name}
-          inputRef={maxErrorRatioField.ref}
-        />
-      </EuiFormRow>
+      {errorModeField.value !== 'fail_fast' ? (
+        <>
+          <EuiFormRow
+            label={createDatasetFlyoutStrings.settingsMaxErrorsLabel()}
+            helpText={createDatasetFlyoutStrings.settingsMaxErrorsHelp()}
+            fullWidth
+            isInvalid={Boolean(maxErrorsState.error)}
+            error={maxErrorsState.error?.message}
+          >
+            <EuiFieldNumber
+              data-test-subj="createDatasetFlyoutSettingsMaxErrors"
+              fullWidth
+              min={0}
+              step={1}
+              isInvalid={Boolean(maxErrorsState.error)}
+              value={maxErrorsField.value}
+              onChange={(e) => maxErrorsField.onChange(e.target.value)}
+              name={maxErrorsField.name}
+              inputRef={maxErrorsField.ref}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={createDatasetFlyoutStrings.settingsMaxErrorRatioLabel()}
+            helpText={createDatasetFlyoutStrings.settingsMaxErrorRatioHelp()}
+            fullWidth
+            isInvalid={Boolean(maxErrorRatioState.error)}
+            error={maxErrorRatioState.error?.message}
+          >
+            <EuiFieldNumber
+              data-test-subj="createDatasetFlyoutSettingsMaxErrorRatio"
+              fullWidth
+              min={0}
+              max={1}
+              step={0.01}
+              isInvalid={Boolean(maxErrorRatioState.error)}
+              value={maxErrorRatioField.value}
+              onChange={(e) => maxErrorRatioField.onChange(e.target.value)}
+              name={maxErrorRatioField.name}
+              inputRef={maxErrorRatioField.ref}
+            />
+          </EuiFormRow>
+        </>
+      ) : null}
     </>
   );
 }

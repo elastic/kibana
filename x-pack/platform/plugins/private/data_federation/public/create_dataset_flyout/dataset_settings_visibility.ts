@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DatasetFormatFormValue } from './create_dataset_flyout_form_state';
+import type { DatasetErrorModeFormValue, DatasetFormatFormValue } from './create_dataset_flyout_form_state';
 
 export type DatasetSettingsAccordionId =
   | 'structure'
@@ -102,10 +102,23 @@ const ACCORDION_FIELDS: Record<DatasetSettingsAccordionId, DatasetSettingsFieldI
   limits: ['max_field_size', 'segment_size', 'optimized_reader', 'late_materialization'],
 };
 
+const ERROR_MODE_LIMIT_FIELDS: DatasetSettingsFieldId[] = ['max_errors', 'max_error_ratio'];
+
 export const isFieldVisibleForFormat = (
   field: DatasetSettingsFieldId,
   format: Exclude<DatasetFormatFormValue, ''>
 ): boolean => FIELD_VISIBILITY[field].includes(format);
+
+export const isFieldVisibleForErrorMode = (
+  field: DatasetSettingsFieldId,
+  errorMode: DatasetErrorModeFormValue
+): boolean => {
+  if (!ERROR_MODE_LIMIT_FIELDS.includes(field)) {
+    return true;
+  }
+
+  return errorMode !== 'fail_fast';
+};
 
 export const getVisibleAccordionsForFormat = (
   format: Exclude<DatasetFormatFormValue, ''>
@@ -116,8 +129,12 @@ export const getVisibleAccordionsForFormat = (
 
 export const getVisibleFieldsForAccordion = (
   accordionId: DatasetSettingsAccordionId,
-  format: Exclude<DatasetFormatFormValue, ''>
+  format: Exclude<DatasetFormatFormValue, ''>,
+  errorMode: DatasetErrorModeFormValue = ''
 ): DatasetSettingsFieldId[] =>
-  ACCORDION_FIELDS[accordionId].filter((field) => isFieldVisibleForFormat(field, format));
+  ACCORDION_FIELDS[accordionId].filter(
+    (field) =>
+      isFieldVisibleForFormat(field, format) && isFieldVisibleForErrorMode(field, errorMode)
+  );
 
 export const CSV_TSV_FIELD_IDS = CSV_TSV;

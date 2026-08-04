@@ -42,8 +42,8 @@ export const DatasetSettingsCommonPanel: FunctionComponent<DatasetSettingsCommon
         hasShadow={false}
         data-test-subj={`${testSubjPrefix}CommonSettingsPanel`}
       >
-        <EuiTitle size="xxs">
-          <h4>{panelTitle}</h4>
+        <EuiTitle size="xs">
+          <h3>{panelTitle}</h3>
         </EuiTitle>
         <EuiSpacer size="m" />
 

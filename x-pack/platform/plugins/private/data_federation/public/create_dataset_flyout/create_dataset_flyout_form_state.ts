@@ -185,11 +185,13 @@ export const buildDatasetSettingsFromFormValues = (
     if (settings.multi_value_syntax) applied.multi_value_syntax = settings.multi_value_syntax;
     if (settings.error_mode) applied.error_mode = settings.error_mode;
 
-    const maxErrors = parseNonNegativeInteger(settings.max_errors);
-    if (maxErrors !== undefined) applied.max_errors = maxErrors;
+    if (settings.error_mode !== 'fail_fast') {
+      const maxErrors = parseNonNegativeInteger(settings.max_errors);
+      if (maxErrors !== undefined) applied.max_errors = maxErrors;
 
-    const maxErrorRatio = parseRatio(settings.max_error_ratio);
-    if (maxErrorRatio !== undefined) applied.max_error_ratio = maxErrorRatio;
+      const maxErrorRatio = parseRatio(settings.max_error_ratio);
+      if (maxErrorRatio !== undefined) applied.max_error_ratio = maxErrorRatio;
+    }
 
     const maxFieldSize = parseNonNegativeInteger(settings.max_field_size);
     if (maxFieldSize !== undefined) applied.max_field_size = maxFieldSize;

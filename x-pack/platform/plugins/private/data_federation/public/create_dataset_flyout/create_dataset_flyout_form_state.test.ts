@@ -138,6 +138,18 @@ describe('create_dataset_flyout_form_state', () => {
       ).toEqual({ format: 'csv', max_error_ratio: 0.5 });
     });
 
+    it('omits max error fields when error mode is fail_fast', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'csv',
+          error_mode: 'fail_fast',
+          max_errors: '5',
+          max_error_ratio: '0.5',
+        })
+      ).toEqual({ format: 'csv', error_mode: 'fail_fast' });
+    });
+
     it('includes format and CSV fields together', () => {
       expect(
         buildDatasetSettingsFromFormValues({
