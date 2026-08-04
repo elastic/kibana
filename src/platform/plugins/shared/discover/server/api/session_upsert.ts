@@ -46,7 +46,7 @@ export const upsertDiscoverSession = async (
     }
 
     // Creating a session with an invalid legacy ID returns a 400 response.
-    asCodeIdSchema.validate(id);
+    asCodeIdSchema.parse(id);
   }
 
   const updateResponse = await core.savedObjects.client.update<DiscoverSessionAttributes>(

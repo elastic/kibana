@@ -38,7 +38,7 @@ jest.mock('../shared/components/flyout_provider', () => ({
 }));
 jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
   useDefaultDocumentFlyoutProperties: jest.fn(() => ({ size: 's' })),
-  defaultToolsFlyoutProperties: { size: 'm' },
+  useDefaultToolsFlyoutProperties: jest.fn(() => ({ minWidth: 384, size: 'm' })),
 }));
 
 const mockWriteOnOpen = jest.fn();
@@ -167,7 +167,7 @@ describe('useDocumentFlyoutApi', () => {
 
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
       'FLYOUT_CONTENT',
-      expect.objectContaining({ size: 'm', session: 'start' })
+      expect.objectContaining({ minWidth: 384, size: 'm', session: 'start' })
     );
     expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
       surface: FLYOUT_SURFACE.TOOL,

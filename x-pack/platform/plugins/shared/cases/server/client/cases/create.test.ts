@@ -190,6 +190,80 @@ describe('create', () => {
     });
   });
 
+  describe('assignee identity population', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+      clientArgs.config = { ...clientArgs.config, assigneeIdentity: { enabled: true } };
+    });
+
+    it('populates assignee identity from user profiles when enabled', async () => {
+      clientArgs.securityStartPlugin.userProfiles.bulkGet.mockResolvedValue([
+        {
+          uid: '1',
+          enabled: true,
+          data: {},
+          user: { username: 'u1', full_name: 'User One', email: 'u1@e.com' },
+        },
+      ] as never);
+
+      await create({ ...theCase, assignees: [{ uid: '1' }] }, clientArgs, casesClientMock);
+
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: expect.objectContaining({
+            assignees: [{ uid: '1', username: 'u1', full_name: 'User One', email: 'u1@e.com' }],
+          }),
+        })
+      );
+    });
+
+    it('keeps assignees uid-only for uids without a resolvable profile', async () => {
+      clientArgs.securityStartPlugin.userProfiles.bulkGet.mockResolvedValue([] as never);
+
+      await create({ ...theCase, assignees: [{ uid: '1' }] }, clientArgs, casesClientMock);
+
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: expect.objectContaining({
+            assignees: [{ uid: '1' }],
+          }),
+        })
+      );
+    });
+
+    it('does not resolve profiles when the flag is disabled', async () => {
+      clientArgs.config = { ...clientArgs.config, assigneeIdentity: { enabled: false } };
+
+      await create({ ...theCase, assignees: [{ uid: '1' }] }, clientArgs, casesClientMock);
+
+      expect(clientArgs.securityStartPlugin.userProfiles.bulkGet).not.toHaveBeenCalled();
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: expect.objectContaining({ assignees: [{ uid: '1' }] }),
+        })
+      );
+    });
+
+    it('is non-fatal: stores assignees uid-only when profile resolution fails', async () => {
+      (clientArgs.securityStartPlugin.userProfiles.bulkGet as jest.Mock).mockRejectedValue(
+        new Error('profiles service down')
+      );
+
+      await expect(
+        create({ ...theCase, assignees: [{ uid: '1' }] }, clientArgs, casesClientMock)
+      ).resolves.not.toThrow();
+
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: expect.objectContaining({ assignees: [{ uid: '1' }] }),
+        })
+      );
+    });
+  });
+
   describe('Attributes', () => {
     const clientArgs = createCasesClientMockArgs();
     clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
