@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { isResponseError } from '@kbn/es-errors';
+import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import {
   groupKiTypeCountsForSummary,
   MAX_KI_TYPE_SUMMARY_COUNT,
@@ -66,7 +66,7 @@ export const getKiSummary = async (
     });
     return parseKiCountByTypeResponse(response);
   } catch (error) {
-    if (isResponseError(error) && error.statusCode === 400) {
+    if (isEsqlUnknownIndexError(error)) {
       return { count: 0, countsByType: [] };
     }
     throw error;

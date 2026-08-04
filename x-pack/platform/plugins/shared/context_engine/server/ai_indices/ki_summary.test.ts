@@ -115,6 +115,36 @@ describe('ki_summary', () => {
     });
   });
 
+  it('rethrows verification errors that are not missing-index', async () => {
+    const unknownColumnError = new errors.ResponseError({
+      meta: {
+        aborted: false,
+        attempts: 1,
+        connection: null,
+        context: null,
+        name: 'verification_exception',
+        request: {} as unknown as DiagnosticResult['meta']['request'],
+      },
+      warnings: [],
+      body: {
+        error: {
+          type: 'verification_exception',
+          reason: 'Found 1 problem\nline 1:39: Unknown column [type]',
+        },
+      },
+      statusCode: 400,
+      headers: {},
+    });
+
+    const esClient = {
+      esql: {
+        query: jest.fn().mockRejectedValue(unknownColumnError),
+      },
+    } as unknown as ElasticsearchClient;
+
+    await expect(getKiSummary(esClient, 'ai-index-idx-sample-ki')).rejects.toThrow();
+  });
+
   it('rethrows non-400 ES errors', async () => {
     const serverError = new errors.ResponseError({
       meta: {
