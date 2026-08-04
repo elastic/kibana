@@ -14,7 +14,13 @@ import type {
   SavedObjectsSearchResponse,
 } from '@kbn/core-saved-objects-api-server';
 import type { Template } from '../../../common/types/domain/template/v1';
-import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_TEMPLATE_SAVED_OBJECT,
+  MAX_EXTENDED_FIELD_VALUE_BYTES,
+  MAX_FIELDS_PER_TEMPLATE,
+  MAX_TEMPLATE_DEFINITION_LENGTH,
+  MAX_TEMPLATES_PER_OWNER,
+} from '../../../common/constants';
 import { TemplatesService } from '.';
 
 const buildDefinition = (
@@ -72,12 +78,13 @@ const createTemplateSO = (
   } as SavedObject<Template>);
 
 const createMockFindResponse = (
-  savedObjects: Array<SavedObject<Template>>
+  savedObjects: Array<SavedObject<Template>>,
+  totalOverride?: number
 ): SavedObjectsFindResponse<Template> =>
   ({
     page: 1,
     per_page: savedObjects.length,
-    total: savedObjects.length,
+    total: totalOverride ?? savedObjects.length,
     saved_objects: savedObjects,
   } as SavedObjectsFindResponse<Template>);
 
@@ -1523,6 +1530,303 @@ describe('TemplatesService', () => {
     });
   });
 
+  describe('resource limits', () => {
+    const buildDefinitionWithFields = (name: string, fieldCount: number) =>
+      yamlStringify({
+        name,
+        fields: Array.from({ length: fieldCount }, (_, index) => ({
+          control: 'INPUT_TEXT',
+          name: `field_${index}`,
+          type: 'keyword',
+        })),
+      });
+
+    const buildDefinitionWithDefault = (name: string, defaultValue: string) =>
+      yamlStringify({
+        name,
+        fields: [
+          {
+            control: 'INPUT_TEXT',
+            name: 'field_one',
+            type: 'keyword',
+            metadata: { default: defaultValue },
+          },
+        ],
+      });
+
+    const buildDefinitionWithRefDefault = (name: string, defaultValue: string) =>
+      yamlStringify({
+        name,
+        fields: [
+          {
+            $ref: 'library_field',
+            metadata: { default: defaultValue },
+          },
+        ],
+      });
+
+    it('rejects create when the owner is at the template limit', async () => {
+      const service = createService();
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+      );
+
+      await expect(
+        service.createTemplate(
+          {
+            name: 'One Too Many',
+            owner: 'securitySolution',
+            definition: buildDefinition('One Too Many'),
+          },
+          'alice',
+          'generated-id'
+        )
+      ).rejects.toThrow(`Cannot create more than ${MAX_TEMPLATES_PER_OWNER} templates per owner.`);
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('allows create when the owner is below the template limit', async () => {
+      const service = createService();
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createMockFindResponse([], MAX_TEMPLATES_PER_OWNER - 1)
+      );
+
+      await service.createTemplate(
+        {
+          name: 'Just Fits',
+          owner: 'securitySolution',
+          definition: buildDefinition('Just Fits'),
+        },
+        'alice',
+        'generated-id'
+      );
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+    });
+
+    it('rejects an owner-changing update when the target owner is at the template limit', async () => {
+      const service = createService();
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue(
+          createTemplateSO('template-so-id', {
+            templateId: 'template-id',
+            name: 'Existing',
+            owner: 'securitySolution',
+          })
+        );
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+      );
+
+      await expect(
+        service.updateTemplate('template-id', {
+          name: 'Existing',
+          owner: 'observability',
+          definition: buildDefinition('Existing'),
+        })
+      ).rejects.toThrow(`Cannot create more than ${MAX_TEMPLATES_PER_OWNER} templates per owner.`);
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('allows a same-owner update when the owner is at the template limit', async () => {
+      const service = createService();
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue(
+          createTemplateSO('template-so-id', {
+            templateId: 'template-id',
+            name: 'Existing',
+            owner: 'securitySolution',
+          })
+        );
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+      );
+
+      await service.updateTemplate('template-id', {
+        name: 'Updated',
+        owner: 'securitySolution',
+        definition: buildDefinition('Updated'),
+      });
+
+      expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalledWith(
+        expect.objectContaining({ perPage: 0 })
+      );
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        CASE_TEMPLATE_SAVED_OBJECT,
+        expect.objectContaining({ name: 'Updated', owner: 'securitySolution' }),
+        expect.any(Object)
+      );
+    });
+
+    it('rejects create when a definition declares too many fields', async () => {
+      const service = createService();
+
+      await expect(
+        service.createTemplate(
+          {
+            name: 'Too Many Fields',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithFields('Too Many Fields', MAX_FIELDS_PER_TEMPLATE + 1),
+          },
+          'alice',
+          'generated-id'
+        )
+      ).rejects.toThrow(`A template cannot define more than ${MAX_FIELDS_PER_TEMPLATE} fields.`);
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('allows create with exactly the maximum number of fields', async () => {
+      const service = createService();
+
+      await service.createTemplate(
+        {
+          name: 'Exactly At Limit',
+          owner: 'securitySolution',
+          definition: buildDefinitionWithFields('Exactly At Limit', MAX_FIELDS_PER_TEMPLATE),
+        },
+        'alice',
+        'generated-id'
+      );
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+    });
+
+    it('rejects create when an ASCII template default exceeds the maximum byte size', async () => {
+      const service = createService();
+
+      await expect(
+        service.createTemplate(
+          {
+            name: 'Large Default',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithDefault(
+              'Large Default',
+              'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1)
+            ),
+          },
+          'alice',
+          'generated-id'
+        )
+      ).rejects.toThrow(
+        `Template field "field_one" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('allows create when a multibyte template default is exactly the maximum byte size', async () => {
+      const service = createService();
+      const cjkCharacter = '界';
+      const defaultValue = cjkCharacter.repeat(
+        MAX_EXTENDED_FIELD_VALUE_BYTES / new TextEncoder().encode(cjkCharacter).byteLength
+      );
+      const definition = buildDefinitionWithDefault('Boundary Default', defaultValue);
+
+      expect(definition.length).toBeLessThanOrEqual(MAX_TEMPLATE_DEFINITION_LENGTH);
+
+      await service.createTemplate(
+        {
+          name: 'Boundary Default',
+          owner: 'securitySolution',
+          definition,
+        },
+        'alice',
+        'generated-id'
+      );
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+    });
+
+    it('rejects create when a $ref default override exceeds the maximum byte size', async () => {
+      const service = createService();
+
+      await expect(
+        service.createTemplate(
+          {
+            name: 'Large Ref Default',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithRefDefault(
+              'Large Ref Default',
+              'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1)
+            ),
+          },
+          'alice',
+          'generated-id'
+        )
+      ).rejects.toThrow(
+        `Template field "library_field" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects update when a definition declares too many fields', async () => {
+      const service = createService();
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue(
+          createTemplateSO('template-so-id', {
+            templateId: 'template-id',
+            name: 'Existing',
+          })
+        );
+
+      await expect(
+        service.updateTemplate('template-id', {
+          name: 'Existing',
+          owner: 'securitySolution',
+          definition: buildDefinitionWithFields('Existing', MAX_FIELDS_PER_TEMPLATE + 1),
+        })
+      ).rejects.toThrow(`A template cannot define more than ${MAX_FIELDS_PER_TEMPLATE} fields.`);
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects update when a non-ASCII template default exceeds the maximum byte size', async () => {
+      const service = createService();
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue(
+          createTemplateSO('template-so-id', {
+            templateId: 'template-id',
+            name: 'Existing',
+          })
+        );
+
+      await expect(
+        service.updateTemplate('template-id', {
+          name: 'Existing',
+          owner: 'securitySolution',
+          definition: buildDefinitionWithDefault(
+            'Existing',
+            '界'.repeat(Math.floor(MAX_EXTENDED_FIELD_VALUE_BYTES / 3) + 1)
+          ),
+        })
+      ).rejects.toThrow(
+        `Template field "field_one" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+  });
+
   describe('incrementUsageStats', () => {
     it('increments usageCount and sets lastUsedAt for an existing template', async () => {
       const service = createService();
@@ -1681,6 +1985,174 @@ describe('TemplatesService', () => {
       await service.deleteTemplate('non-existent');
 
       expect(unsecuredSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getActiveTemplatesReferencingField', () => {
+    const SO = CASE_TEMPLATE_SAVED_OBJECT;
+
+    const makeHit = (id: string) => ({ _id: id, _index: '.kibana_cases' });
+
+    const makeSO = (id: string, definition: string, name = 'Template'): SavedObject<Template> =>
+      createTemplateSO(id, { templateId: id, name, definition });
+
+    it('sends a search call with a match_phrase pre-filter on definition and the owner/isLatest/deletedAt filters', async () => {
+      const service = createService();
+      unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([]));
+
+      await service.getActiveTemplatesReferencingField('securitySolution', 'priority');
+
+      expect(unsecuredSavedObjectsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: SO,
+          namespaces: ['default'],
+          from: 0,
+          size: 10000,
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([
+                // owner filter
+                expect.objectContaining({
+                  bool: expect.objectContaining({
+                    should: expect.arrayContaining([
+                      expect.objectContaining({
+                        match_phrase: expect.objectContaining({
+                          [`${SO}.owner`]: 'securitySolution',
+                        }),
+                      }),
+                    ]),
+                  }),
+                }),
+              ]),
+              must: [
+                {
+                  match_phrase: {
+                    [`${SO}.definition`]: '$ref: priority',
+                  },
+                },
+              ],
+            }),
+          }),
+        })
+      );
+
+      // Verify owner, isLatest, and NOT deletedAt are all in the filter
+      const searchCall = unsecuredSavedObjectsClient.search.mock.calls[0][0];
+      const filterStr = JSON.stringify(searchCall?.query?.bool?.filter);
+      expect(filterStr).toContain('securitySolution');
+      expect(filterStr).toContain('isLatest');
+      expect(filterStr).toContain('deletedAt');
+    });
+
+    it('returns templates where YAML parse confirms $ref === fieldName', async () => {
+      // FAILURE SCENARIO: two ES hits returned by match_phrase; one is a genuine
+      // $ref: priority, the other is a false-positive (text that happens to
+      // tokenize as ref+priority but has no actual $ref key). Only the real one
+      // should appear in the result.
+      const service = createService();
+
+      const realRefDefinition = yamlStringify({
+        name: 'Incident Template',
+        fields: [{ $ref: 'priority' }],
+      });
+      const falsePositiveDefinition =
+        // "ref priority" appears as description text — same tokens, no YAML $ref key
+        'name: Other Template\ndescription: "This is a ref priority note"\nfields: []\n';
+
+      const soReal = makeSO('so-real', realRefDefinition, 'Incident Template');
+      const soFalse = makeSO('so-false', falsePositiveDefinition, 'Other Template');
+
+      unsecuredSavedObjectsClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 2, relation: 'eq' },
+          max_score: null,
+          hits: [makeHit('so-real'), makeHit('so-false')],
+        },
+      } as unknown as ReturnType<typeof createMockSearchResponse>);
+
+      savedObjectsSerializer.rawToSavedObject
+        .mockReturnValueOnce(soReal)
+        .mockReturnValueOnce(soFalse);
+
+      const result = await service.getActiveTemplatesReferencingField(
+        'securitySolution',
+        'priority'
+      );
+
+      expect(result).toEqual([{ name: 'Incident Template' }]);
+    });
+
+    it('returns an empty array when no hits are returned from ES', async () => {
+      const service = createService();
+      unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([]));
+
+      const result = await service.getActiveTemplatesReferencingField(
+        'securitySolution',
+        'priority'
+      );
+
+      expect(result).toEqual([]);
+    });
+
+    it('skips a template with unparseable YAML rather than blocking the delete', async () => {
+      // FAILURE SCENARIO: a corrupt definition is in ES — the guard must not
+      // throw; it should skip the corrupt template and return [] (unblocked).
+      const service = createService();
+
+      const soCorrupt = makeSO('so-corrupt', ': {not valid yaml', 'Corrupt Template');
+
+      unsecuredSavedObjectsClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 1, relation: 'eq' },
+          max_score: null,
+          hits: [makeHit('so-corrupt')],
+        },
+      } as unknown as ReturnType<typeof createMockSearchResponse>);
+
+      savedObjectsSerializer.rawToSavedObject.mockReturnValueOnce(soCorrupt);
+
+      const result = await service.getActiveTemplatesReferencingField(
+        'securitySolution',
+        'priority'
+      );
+
+      expect(result).toEqual([]);
+    });
+
+    it('collects all referencing templates when multiple real references exist', async () => {
+      const service = createService();
+
+      const makeRefDef = (refName: string, templateName: string) =>
+        yamlStringify({ name: templateName, fields: [{ $ref: refName }] });
+
+      const soA = makeSO('so-a', makeRefDef('priority', 'Template A'), 'Template A');
+      const soB = makeSO('so-b', makeRefDef('priority', 'Template B'), 'Template B');
+
+      unsecuredSavedObjectsClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: {
+          total: { value: 2, relation: 'eq' },
+          max_score: null,
+          hits: [makeHit('so-a'), makeHit('so-b')],
+        },
+      } as unknown as ReturnType<typeof createMockSearchResponse>);
+
+      savedObjectsSerializer.rawToSavedObject.mockReturnValueOnce(soA).mockReturnValueOnce(soB);
+
+      const result = await service.getActiveTemplatesReferencingField(
+        'securitySolution',
+        'priority'
+      );
+
+      expect(result).toEqual([{ name: 'Template A' }, { name: 'Template B' }]);
     });
   });
 

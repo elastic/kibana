@@ -53,10 +53,38 @@ export const validateWorkflowInputs = async (
   const templateEngine = new WorkflowTemplatingEngine({
     liquidSettings: workflowExecution.workflowDefinition.settings?.liquid,
   });
+
+  // Caller-provided values are data. Evaluate only the explicit whole-expression
+  // form and preserve ordinary strings that happen to resemble Liquid templates.
+  const renderProvidedValue = (value: unknown): unknown => {
+    if (typeof value === 'string') {
+      return value.startsWith('${{') && value.endsWith('}}')
+        ? templateEngine.render(value, renderContext)
+        : value;
+    }
+
+    if (Array.isArray(value)) {
+      return value.map(renderProvidedValue);
+    }
+
+    if (value !== null && typeof value === 'object') {
+      return Object.fromEntries(
+        Object.entries(value).map(([key, nestedValue]) => [key, renderProvidedValue(nestedValue)])
+      );
+    }
+
+    return value;
+  };
+
   let inputsWithDefaults: Record<string, unknown> | undefined;
   try {
-    inputsWithDefaults = applyInputDefaults(renderContext.inputs, normalizedSchema, (value) =>
-      templateEngine.render(value, renderContext)
+    inputsWithDefaults = applyInputDefaults(
+      renderContext.inputs,
+      normalizedSchema,
+      (value, source) =>
+        source === 'default'
+          ? templateEngine.render(value, renderContext)
+          : renderProvidedValue(value)
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
