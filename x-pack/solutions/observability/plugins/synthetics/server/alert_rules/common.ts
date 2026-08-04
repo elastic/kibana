@@ -140,13 +140,7 @@ export const getRelativeViewInAppUrl = ({
   });
 };
 
-export const getRelativeCertificatesViewInAppUrl = ({
-  commonName,
-  issuer,
-}: {
-  commonName?: string;
-  issuer?: string;
-}) => getSyntheticsCertificatesRoute({ commonName, issuer });
+export const getRelativeCertificatesViewInAppUrl = () => getSyntheticsCertificatesRoute();
 
 export const setRecoveredAlertsContext = ({
   alertsClient,

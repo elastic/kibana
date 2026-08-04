@@ -23,16 +23,7 @@ describe('getSyntheticsErrorRouteFromMonitorId', () => {
 });
 
 describe('getSyntheticsCertificatesRoute', () => {
-  it('returns the certificates page when no filters are provided', () => {
-    expect(getSyntheticsCertificatesRoute({})).toBe('/app/synthetics/certificates');
-  });
-
-  it('pre-filters the certificates page by common name and issuer', () => {
-    expect(
-      getSyntheticsCertificatesRoute({
-        commonName: 'example.com',
-        issuer: 'Test CA',
-      })
-    ).toBe('/app/synthetics/certificates?search=example.com&issuers=%5B%22Test%20CA%22%5D');
+  it('returns the certificates page route', () => {
+    expect(getSyntheticsCertificatesRoute()).toBe('/app/synthetics/certificates');
   });
 });

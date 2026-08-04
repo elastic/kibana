@@ -27,25 +27,5 @@ export const getSyntheticsErrorRouteFromMonitorId = ({
     },
   });
 
-export const getSyntheticsCertificatesRoute = ({
-  commonName,
-  issuer,
-}: {
-  commonName?: string;
-  issuer?: string;
-}) => {
-  const query: Record<string, string> = {};
-
-  if (commonName) {
-    query.search = commonName;
-  }
-
-  if (issuer) {
-    query.issuers = JSON.stringify([issuer]);
-  }
-
-  return format({
-    pathname: `${SYNTHETICS_APP_BASE_PATH}${CERTIFICATES_ROUTE}`,
-    query,
-  });
-};
+export const getSyntheticsCertificatesRoute = () =>
+  `${SYNTHETICS_APP_BASE_PATH}${CERTIFICATES_ROUTE}`;

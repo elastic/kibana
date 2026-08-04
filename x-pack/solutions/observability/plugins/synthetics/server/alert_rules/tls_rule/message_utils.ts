@@ -151,31 +151,12 @@ export const getCertSummary = (
   };
 };
 
-interface TlsCertIdentity {
-  commonName?: string;
-  issuer?: string;
-}
+const getTlsViewInAppUrl = (basePath: IBasePath, spaceId: string) =>
+  getViewInAppUrl(basePath, spaceId, getRelativeCertificatesViewInAppUrl());
 
-const getTlsCertIdentity = (state: { commonName?: string; issuer?: string }): TlsCertIdentity => ({
-  commonName: state.commonName,
-  issuer: state.issuer,
-});
-
-const getTlsViewInAppUrl = (
-  basePath: IBasePath,
-  spaceId: string,
-  { commonName, issuer }: TlsCertIdentity
-) =>
-  getViewInAppUrl(basePath, spaceId, getRelativeCertificatesViewInAppUrl({ commonName, issuer }));
-
-const getTlsAlertUrlContext = async (
-  basePath: IBasePath,
-  spaceId: string,
-  alertUuid: string,
-  certIdentity: TlsCertIdentity
-) => ({
+const getTlsAlertUrlContext = async (basePath: IBasePath, spaceId: string, alertUuid: string) => ({
   [ALERT_DETAILS_URL]: await getAlertDetailsUrl(basePath, spaceId, alertUuid),
-  [VIEW_IN_APP_URL]: getTlsViewInAppUrl(basePath, spaceId, certIdentity),
+  [VIEW_IN_APP_URL]: getTlsViewInAppUrl(basePath, spaceId),
 });
 
 export const getTLSAlertContext = async ({
@@ -189,7 +170,7 @@ export const getTLSAlertContext = async ({
   summary: CertSummary;
   alertUuid: string;
 }) => ({
-  ...(await getTlsAlertUrlContext(basePath, spaceId, alertUuid, summary)),
+  ...(await getTlsAlertUrlContext(basePath, spaceId, alertUuid)),
   ...summary,
 });
 
@@ -243,7 +224,6 @@ export const setTLSRecoveredAlertsContext = async ({
 
     const state = recoveredAlert.alert.getState();
     const alertUrl = await getAlertDetailsUrl(basePath, spaceId, alertUuid);
-    const certIdentity = getTlsCertIdentity(state);
 
     const configId = state.configId;
     const latestPing = latestPings.find((ping) => ping.config_id === configId);
@@ -275,7 +255,7 @@ export const setTLSRecoveredAlertsContext = async ({
           previousStatus,
           summary: newSummary,
           [ALERT_DETAILS_URL]: alertUrl,
-          [VIEW_IN_APP_URL]: getTlsViewInAppUrl(basePath, spaceId, certIdentity),
+          [VIEW_IN_APP_URL]: getTlsViewInAppUrl(basePath, spaceId),
         },
       });
       continue;
@@ -311,7 +291,7 @@ export const setTLSRecoveredAlertsContext = async ({
       previousStatus,
       summary: newSummary,
       [ALERT_DETAILS_URL]: alertUrl,
-      [VIEW_IN_APP_URL]: getTlsViewInAppUrl(basePath, spaceId, certIdentity),
+      [VIEW_IN_APP_URL]: getTlsViewInAppUrl(basePath, spaceId),
     };
     alertsClient.setAlertData({ id: recoveredAlertId, context });
   }

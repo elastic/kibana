@@ -73,8 +73,7 @@ describe('getTLSAlertContext', () => {
       })
     ).resolves.toEqual({
       alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
-      viewInAppUrl:
-        'https://localhost:5601/app/synthetics/certificates?search=cert-1&issuers=%5B%22test-issuer%22%5D',
+      viewInAppUrl: 'https://localhost:5601/app/synthetics/certificates',
       ...summary,
     });
   });
@@ -88,8 +87,7 @@ describe('getTLSAlertContext', () => {
         alertUuid: 'alert-id',
       })
     ).resolves.toMatchObject({
-      viewInAppUrl:
-        'https://localhost:5601/s/team-a/app/synthetics/certificates?search=cert-1&issuers=%5B%22test-issuer%22%5D',
+      viewInAppUrl: 'https://localhost:5601/s/team-a/app/synthetics/certificates',
     });
   });
 });
@@ -161,8 +159,7 @@ describe('setTLSRecoveredAlertsContext', () => {
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       context: {
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
-        viewInAppUrl:
-          'https://localhost:5601/app/synthetics/certificates?search=cert-1&issuers=%5B%22test-issuer%22%5D',
+        viewInAppUrl: 'https://localhost:5601/app/synthetics/certificates',
         commonName: 'cert-1',
         configId: '12345',
         issuer: 'test-issuer',
@@ -226,8 +223,7 @@ describe('setTLSRecoveredAlertsContext', () => {
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       context: {
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
-        viewInAppUrl:
-          'https://localhost:5601/app/synthetics/certificates?search=cert-1&issuers=%5B%22test-issuer%22%5D',
+        viewInAppUrl: 'https://localhost:5601/app/synthetics/certificates',
         commonName: 'cert-1',
         configId: '12345',
         issuer: 'test-issuer',
@@ -277,8 +273,7 @@ describe('setTLSRecoveredAlertsContext', () => {
       id: 'alert-id',
       context: expect.objectContaining({
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
-        viewInAppUrl:
-          'https://localhost:5601/app/synthetics/certificates?search=browser-cert-cn&issuers=%5B%22test-issuer%22%5D',
+        viewInAppUrl: 'https://localhost:5601/app/synthetics/certificates',
         commonName: 'browser-cert-cn',
         previousStatus: 'Certificate browser-cert-cn test-summary',
         newStatus: expect.stringContaining('browser-cert-cn'),
