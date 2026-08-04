@@ -6,10 +6,14 @@
  */
 
 import { APP_ALERTS_PATH } from '../../../../common/constants';
-import { loadPage } from '../tasks/common';
+import { closeKibanaBrowserSecurityToastIfNecessary } from '../tasks/toasts';
 
 export const navigateToAlertsList = (urlQueryParams: string = '') => {
-  loadPage(`${APP_ALERTS_PATH}${urlQueryParams ? `?${urlQueryParams}` : ''}`);
+  cy.visit(`${APP_ALERTS_PATH}${urlQueryParams ? `?${urlQueryParams}` : ''}`);
+  // Wait on the Alerts table's own readiness signal instead of the global chrome
+  // loading indicator, which can stay visible while a background request is in flight.
+  cy.getByTestSubj('alertsTableIsLoaded');
+  closeKibanaBrowserSecurityToastIfNecessary();
 };
 
 export const clickAlertListRefreshButton = (): Cypress.Chainable => {
