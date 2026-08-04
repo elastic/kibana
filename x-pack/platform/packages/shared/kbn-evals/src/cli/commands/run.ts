@@ -13,9 +13,6 @@ import {
   resolveProfileEnvOverrides,
 } from '../run_helpers';
 
-const EXECUTORS = ['kibana'] as const;
-type Executor = (typeof EXECUTORS)[number];
-
 const formatEnvPrefix = (overrides: Record<string, string>) =>
   Object.entries(overrides)
     .map(([key, value]) => {
@@ -44,7 +41,6 @@ export const runSuiteCmd: Command<void> = {
       'suite',
       'config',
       'project',
-      'executor',
       'evaluation-connector-id',
       'repetitions',
       'grep',
@@ -62,7 +58,6 @@ export const runSuiteCmd: Command<void> = {
   },
   run: async ({ log, flagsReader }) => {
     const repoRoot = process.cwd();
-    const executor = flagsReader.enum('executor', EXECUTORS) as Executor | undefined;
 
     const { suite, resolvedConfigPath } = await resolveEvalSuite(repoRoot, log, flagsReader);
 
