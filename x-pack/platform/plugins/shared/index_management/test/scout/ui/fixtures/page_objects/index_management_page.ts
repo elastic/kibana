@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { type ScoutPage, EuiFieldTextWrapper } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 export class AbstractPageObject {
@@ -114,13 +114,12 @@ export class IndexManagement extends AbstractPageObject {
 
   indexTemplateWizard = {
     completeStepOne: async () => {
-      const nameField = new EuiFieldTextWrapper(this.page, { dataTestSubj: 'nameField' });
-      await nameField.fill('test-index-template');
+      await this.page.testSubj.locator('nameField').locator('input').fill('test-index-template');
 
-      const indexPatternsField = new EuiFieldTextWrapper(this.page, {
-        dataTestSubj: 'indexPatternsField',
-      });
-      await indexPatternsField.fill('test-index-pattern');
+      await this.page.testSubj
+        .locator('indexPatternsField')
+        .locator('input')
+        .fill('test-index-pattern');
 
       await this.clickNextButton();
     },
