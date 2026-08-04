@@ -22,9 +22,7 @@ export const ResponseSection = memo(() => {
   });
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
-  return (
-    <ResponseSectionContent hit={hit} onShowResponseDetails={goToResponseTab} />
-  );
+  return <ResponseSectionContent hit={hit} onShowResponseDetails={goToResponseTab} />;
 });
 
 ResponseSection.displayName = 'ResponseSection';

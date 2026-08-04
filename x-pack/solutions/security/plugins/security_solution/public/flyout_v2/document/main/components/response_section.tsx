@@ -29,9 +29,7 @@ export const ResponseSection = memo<ResponseSectionProps>(({ hit }) => {
     openDocumentResponse({ hit, origin: FLYOUT_ORIGIN.RESPONSE_SECTION });
   }, [openDocumentResponse, hit]);
 
-  return (
-    <ResponseSectionContent hit={hit} onShowResponseDetails={onShowResponseDetails} />
-  );
+  return <ResponseSectionContent hit={hit} onShowResponseDetails={onShowResponseDetails} />;
 });
 
 ResponseSection.displayName = 'ResponseSection';
