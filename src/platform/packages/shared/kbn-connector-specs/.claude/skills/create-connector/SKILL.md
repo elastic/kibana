@@ -242,6 +242,16 @@ labels (a brand-new connector only ever lands on `main`, so it doesn't need back
 the PR yourself, add them with `gh pr create --label "release_note:feature" --label "Feature:Actions/ConnectorTypes" --label "backport:skip" ...`
 (or `gh pr edit <number> --add-label ...` afterward). If a human opens the PR, remind them to add all three.
 
+Finally, before the PR is opened (or before pushing, if it already exists), run the repo's
+`branch-readiness-checks` skill (in `.agents/skills/`; its `disable-model-invocation` flag only blocks
+*spontaneous* invocation — an explicit instruction like this one is the intended path) plus
+`node scripts/generate connector-registries --check`. The readiness skill covers what the checks
+earlier in this skill don't: `check_changes`, type errors in downstream dependents of
+`@kbn/connector-specs` (other packages consume `all_specs.ts`), and CODEOWNERS/moon drift. Run it once
+as a final gate — its coverage and repo-wide lint steps cost minutes — and fix findings before pushing;
+note coverage numbers but don't chase the 80% threshold with filler tests. If this skill was invoked by
+`build-connector`, skip this here — its Task 12 runs the same gate.
+
 ## Handling merge conflicts
 
 `all_specs.ts`, `connector_icons_map.ts`, the generated block in `.github/CODEOWNERS`, `docs/reference/toc.yml`,

@@ -354,6 +354,19 @@ under a `## Validated` heading in the PR description when this connector's PR is
 happens later in this same session or by a human afterward. If a PR already exists for this connector,
 add or update the `## Validated` section in its description now rather than waiting.
 
+### Run the branch-readiness gate
+
+Before marking this task complete, run the repo's `branch-readiness-checks` skill (in
+`.agents/skills/`; its `disable-model-invocation` flag only blocks *spontaneous* invocation — running
+it because this step says so is the intended path) as the final local gate, alongside
+`node scripts/generate connector-registries --check` (which it doesn't cover). Run it **once, here** —
+not per iteration; the coverage and repo-wide lint steps cost minutes. It catches what the piecemeal
+checks above miss: `check_changes`, type errors in *downstream dependents* of `@kbn/connector-specs`
+(other packages consume `all_specs.ts`, so a spec change can break a package this PR never touched),
+and CODEOWNERS/moon drift. Fix what it reports before the PR is opened — every failure it finds
+locally is a full CI round-trip saved. For its coverage report, note the numbers but don't chase the
+80% threshold with filler tests; add tests only for meaningful untested handler logic.
+
 Mark task 12 as `completed`.
 
 ---
