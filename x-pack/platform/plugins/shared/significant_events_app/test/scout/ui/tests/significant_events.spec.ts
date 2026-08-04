@@ -81,7 +81,7 @@ test.describe(
       }
     });
 
-    test('redirects to Streams when the feature flag is disabled', async ({
+    test('shows the not-enabled empty prompt when the feature flag is disabled', async ({
       apiServices,
       page,
     }) => {
@@ -91,7 +91,10 @@ test.describe(
         },
       });
       await page.gotoApp('significant_events/streams');
-      await expect(page).toHaveURL(/\/app\/streams/, { timeout: 60_000 });
+      await expect(page).toHaveURL(/\/app\/significant_events/, { timeout: 60_000 });
+      await expect(page.testSubj.locator('significantEventsNotEnabledPrompt')).toBeVisible({
+        timeout: 60_000,
+      });
     });
   }
 );
