@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   esqlColumnWithFormatSchema,
   esqlColumnSchema,
@@ -19,42 +19,48 @@ import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } fr
 import { getMetricsWithChartDimensionSchema } from './shared';
 import { simpleOrientationSchema } from '../enums';
 
-const bulletShapeSchema = z
-  .object({
-    type: z.literal('bullet'),
-    orientation: simpleOrientationSchema.default('horizontal'),
-  })
-  .strict()
-  .meta({
-    id: 'gaugeShapeBullet',
-    title: 'Shape (Bullet)',
-    description: 'Bullet gauge shape.',
-  });
+const bulletShapeSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('bullet'),
+      orientation: simpleOrientationSchema.default('horizontal'),
+    })
+    .strict()
+    .meta({
+      id: 'gaugeShapeBullet',
+      title: 'Shape (Bullet)',
+      description: 'Bullet gauge shape.',
+    })
+);
 
-const circularShapeSchema = z
-  .object({
-    type: z.enum(['circle', 'semi_circle', 'arc']),
-  })
-  .strict()
-  .meta({
-    id: 'gaugeShapeCircular',
-    title: 'Shape (Circular)',
-    description: 'Circular gauge shape.',
-  });
+const circularShapeSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.enum(['circle', 'semi_circle', 'arc']),
+    })
+    .strict()
+    .meta({
+      id: 'gaugeShapeCircular',
+      title: 'Shape (Circular)',
+      description: 'Circular gauge shape.',
+    })
+);
 
-const gaugeStylingSchema = z
-  .object({
-    shape: z
-      .union([bulletShapeSchema, circularShapeSchema])
-      .default({ type: 'bullet', orientation: 'horizontal' })
-      .optional(),
-  })
-  .strict()
-  .meta({
-    id: 'gaugeStyling',
-    title: 'Gauge styling',
-    description: 'Visual chart styling options',
-  });
+const gaugeStylingSchema = lazySchema(() =>
+  z
+    .object({
+      shape: z
+        .union([bulletShapeSchema, circularShapeSchema])
+        .default({ type: 'bullet', orientation: 'horizontal' })
+        .optional(),
+    })
+    .strict()
+    .meta({
+      id: 'gaugeStyling',
+      title: 'Gauge styling',
+      description: 'Visual chart styling options',
+    })
+);
 
 const gaugeConfigMetricInnerNoESQLOpsShape = {
   /**
@@ -142,59 +148,65 @@ const gaugeConfigMetricOptionsShape = {
     .meta({ description: 'Ticks configuration' }),
 };
 
-export const gaugeConfigSchemaNoESQL = z
-  .object({
-    type: z.literal('gauge'),
-    ...sharedPanelInfoSchema.shape,
-    ...dslOnlyPanelInfoSchema.shape,
-    ...layerSettingsSchema.shape,
-    ...dataSourceSchema.shape,
-    styling: gaugeStylingSchema.optional(),
-    /**
-     * Primary value configuration, must define operation.
-     */
-    metric: getMetricsWithChartDimensionSchema('gaugeMetric').and(
-      z.object({
-        ...gaugeConfigMetricOptionsShape,
-        ...gaugeConfigMetricInnerNoESQLOpsShape,
-      })
-    ),
-  })
-  .meta({
-    id: 'gaugeNoESQL',
-    title: 'Gauge Chart (DSL)',
-    description: 'Gauge configuration using a data view.',
-  });
+export const gaugeConfigSchemaNoESQL = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('gauge'),
+      ...sharedPanelInfoSchema.shape,
+      ...dslOnlyPanelInfoSchema.shape,
+      ...layerSettingsSchema.shape,
+      ...dataSourceSchema.shape,
+      styling: gaugeStylingSchema.optional(),
+      /**
+       * Primary value configuration, must define operation.
+       */
+      metric: getMetricsWithChartDimensionSchema('gaugeMetric').and(
+        z.object({
+          ...gaugeConfigMetricOptionsShape,
+          ...gaugeConfigMetricInnerNoESQLOpsShape,
+        })
+      ),
+    })
+    .meta({
+      id: 'gaugeNoESQL',
+      title: 'Gauge Chart (DSL)',
+      description: 'Gauge configuration using a data view.',
+    })
+);
 
-export const gaugeConfigSchemaESQL = z
-  .object({
-    type: z.literal('gauge'),
-    ...sharedPanelInfoSchema.shape,
-    ...layerSettingsSchema.shape,
-    ...dataSourceEsqlTableSchema.shape,
-    styling: gaugeStylingSchema.optional(),
-    /**
-     * Primary value configuration, must define operation.
-     */
-    metric: esqlColumnWithFormatSchema
-      .extend({
-        ...gaugeConfigMetricOptionsShape,
-        ...gaugeConfigMetricInnerESQLOpsShape,
-      })
-      .strict(),
-  })
-  .meta({
-    id: 'gaugeESQL',
-    title: 'Gauge Chart (ES|QL)',
-    description: 'Gauge configuration using an ES|QL query.',
-  });
+export const gaugeConfigSchemaESQL = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('gauge'),
+      ...sharedPanelInfoSchema.shape,
+      ...layerSettingsSchema.shape,
+      ...dataSourceEsqlTableSchema.shape,
+      styling: gaugeStylingSchema.optional(),
+      /**
+       * Primary value configuration, must define operation.
+       */
+      metric: esqlColumnWithFormatSchema
+        .extend({
+          ...gaugeConfigMetricOptionsShape,
+          ...gaugeConfigMetricInnerESQLOpsShape,
+        })
+        .strict(),
+    })
+    .meta({
+      id: 'gaugeESQL',
+      title: 'Gauge Chart (ES|QL)',
+      description: 'Gauge configuration using an ES|QL query.',
+    })
+);
 
-export const gaugeConfigSchema = z.union([gaugeConfigSchemaNoESQL, gaugeConfigSchemaESQL]).meta({
-  id: 'gaugeChart',
-  title: 'Gauge Chart',
-  description:
-    'A gauge chart with a metric value and optional minimum, maximum, and goal markers, in bullet or circular shape.',
-});
+export const gaugeConfigSchema = lazySchema(() =>
+  z.union([gaugeConfigSchemaNoESQL, gaugeConfigSchemaESQL]).meta({
+    id: 'gaugeChart',
+    title: 'Gauge Chart',
+    description:
+      'A gauge chart with a metric value and optional minimum, maximum, and goal markers, in bullet or circular shape.',
+  })
+);
 
 export type GaugeConfig = z.output<typeof gaugeConfigSchema>;
 export type GaugeConfigNoESQL = z.output<typeof gaugeConfigSchemaNoESQL>;

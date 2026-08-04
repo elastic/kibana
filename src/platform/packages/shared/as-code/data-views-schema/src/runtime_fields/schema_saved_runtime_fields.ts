@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   MAX_NAME_LENGTH,
   primitiveTypeSchema,
@@ -16,31 +16,36 @@ import {
 } from './common';
 import { fieldSettingsWithPopularitySchema } from '../schema_field_settings';
 
-export const savedRuntimeFieldBaseSchema = fieldSettingsWithPopularitySchema
-  .extend({
-    type: primitiveTypeSchema,
-  })
-  .meta({ id: 'kbn-saved-runtime-field-base-schema', title: 'Saved runtime field base' });
+export const savedRuntimeFieldBaseSchema = lazySchema(() =>
+  fieldSettingsWithPopularitySchema
+    .extend({
+      type: primitiveTypeSchema,
+    })
+    .meta({ id: 'kbn-saved-runtime-field-base-schema', title: 'Saved runtime field base' })
+);
 
-export const savedPrimitiveRuntimeFieldSchema = savedRuntimeFieldBaseSchema
-  .extend({
-    script: scriptSchema,
-  })
-  .meta({ id: 'kbn-saved-runtime-field-schema', title: 'Saved runtime field' });
+export const savedPrimitiveRuntimeFieldSchema = lazySchema(() =>
+  savedRuntimeFieldBaseSchema
+    .extend({
+      script: scriptSchema,
+    })
+    .meta({ id: 'kbn-saved-runtime-field-schema', title: 'Saved runtime field' })
+);
 
-export const savedCompositeRuntimeFieldSchema = z
-  .object({
-    type: z.literal(RUNTIME_FIELD_COMPOSITE_TYPE),
-    fields: z.record(z.string().min(1).max(MAX_NAME_LENGTH), savedRuntimeFieldBaseSchema),
-    script: scriptSchema,
-  })
-  .strict()
-  .meta({
-    id: 'kbn-saved-composite-runtime-field-schema',
-    title: 'Saved composite runtime field',
-  });
+export const savedCompositeRuntimeFieldSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal(RUNTIME_FIELD_COMPOSITE_TYPE),
+      fields: z.record(z.string().min(1).max(MAX_NAME_LENGTH), savedRuntimeFieldBaseSchema),
+      script: scriptSchema,
+    })
+    .strict()
+    .meta({
+      id: 'kbn-saved-composite-runtime-field-schema',
+      title: 'Saved composite runtime field',
+    })
+);
 
-export const savedRuntimeFieldSchema = z.discriminatedUnion('type', [
-  savedPrimitiveRuntimeFieldSchema,
-  savedCompositeRuntimeFieldSchema,
-]);
+export const savedRuntimeFieldSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [savedPrimitiveRuntimeFieldSchema, savedCompositeRuntimeFieldSchema])
+);

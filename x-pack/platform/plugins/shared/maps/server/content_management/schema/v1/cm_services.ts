@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
   savedObjectSchema,
@@ -14,39 +14,49 @@ import {
 } from '@kbn/content-management-utils/zod';
 import { mapAttributesSchema } from './map_attributes_schema/map_attributes_schema';
 
-export const mapSavedObjectSchema = savedObjectSchema(mapAttributesSchema);
+export const mapSavedObjectSchema = lazySchema(() => savedObjectSchema(mapAttributesSchema));
 
-export const searchOptionsSchema = z
-  .object({
-    onlyTitle: z.boolean().optional(),
-  })
-  .strict()
-  .optional();
+export const searchOptionsSchema = lazySchema(() =>
+  z
+    .object({
+      onlyTitle: z.boolean().optional(),
+    })
+    .strict()
+    .optional()
+);
 
-export const mapsSearchOptionsSchema = z
-  .object({
-    onlyTitle: z.boolean().optional(),
-  })
-  .strict()
-  .optional();
+export const mapsSearchOptionsSchema = lazySchema(() =>
+  z
+    .object({
+      onlyTitle: z.boolean().optional(),
+    })
+    .strict()
+    .optional()
+);
 
-export const mapsCreateOptionsSchema = z
-  .object({
-    references: referencesSchema.optional(),
-  })
-  .strict()
-  .optional();
+export const mapsCreateOptionsSchema = lazySchema(() =>
+  z
+    .object({
+      references: referencesSchema.optional(),
+    })
+    .strict()
+    .optional()
+);
 
-export const mapsUpdateOptionsSchema = z
-  .object({
-    references: referencesSchema.optional(),
-  })
-  .strict()
-  .optional();
+export const mapsUpdateOptionsSchema = lazySchema(() =>
+  z
+    .object({
+      references: referencesSchema.optional(),
+    })
+    .strict()
+    .optional()
+);
 
-export const mapsGetResultSchema = objectTypeToGetResultSchema(mapSavedObjectSchema);
+export const mapsGetResultSchema = lazySchema(() =>
+  objectTypeToGetResultSchema(mapSavedObjectSchema)
+);
 
-export const mapsCreateResultSchema = createResultSchema(mapSavedObjectSchema);
+export const mapsCreateResultSchema = lazySchema(() => createResultSchema(mapSavedObjectSchema));
 
 // Content management service definition.
 // We need it for BWC support between different versions of the content

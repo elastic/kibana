@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { createResultSchema, updateOptionsSchema } from '@kbn/content-management-utils/zod';
 
 import { lensItemAttributesSchemaV1, lensSavedObjectSchemaV1 } from './common';
 
-export const lensCMUpdateOptionsSchema = updateOptionsSchema.pick({ references: true }).strict();
+export const lensCMUpdateOptionsSchema = lazySchema(() =>
+  updateOptionsSchema.pick({ references: true }).strict()
+);
 
-export const lensCMUpdateBodySchema = z
-  .object({
-    options: lensCMUpdateOptionsSchema,
-    data: lensItemAttributesSchemaV1,
-  })
-  .strict();
+export const lensCMUpdateBodySchema = lazySchema(() =>
+  z
+    .object({
+      options: lensCMUpdateOptionsSchema,
+      data: lensItemAttributesSchemaV1,
+    })
+    .strict()
+);
 
-export const lensCMUpdateResultSchema = createResultSchema(lensSavedObjectSchemaV1);
+export const lensCMUpdateResultSchema = lazySchema(() =>
+  createResultSchema(lensSavedObjectSchemaV1)
+);

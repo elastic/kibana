@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const lensDeleteRequestParamsSchema = z
-  .object({
-    id: z.string().meta({
-      description: 'The visualization identifier, as returned by the create or search endpoints.',
-    }),
-  })
-  .strict();
+export const lensDeleteRequestParamsSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().meta({
+        description: 'The visualization identifier, as returned by the create or search endpoints.',
+      }),
+    })
+    .strict()
+);

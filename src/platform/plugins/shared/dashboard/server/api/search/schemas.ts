@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import {
   asCodeMetaSchema,
@@ -17,118 +17,124 @@ import {
 } from '@kbn/as-code-shared-schemas';
 import { accessControlSchema } from '../dashboard_state_schemas';
 
-export const legacySearchRequestParamsSchema = z
-  .object({
-    page: z.coerce.number().optional().meta({
-      description: 'The page of results to return. Defaults to `1`.',
-    }),
-    per_page: z.coerce.number().optional().meta({
-      description: 'The number of results to return per page. Defaults to `20`.',
-    }),
-    query: z.string().optional().meta({
-      description:
-        'Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
-    }),
-    tags: z
-      .union([z.string(), z.array(z.string()).max(100)])
-      .optional()
-      .meta({
-        description:
-          'A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, dashboards matching any of the tag IDs are included.',
+export const legacySearchRequestParamsSchema = lazySchema(() =>
+  z
+    .object({
+      page: z.coerce.number().optional().meta({
+        description: 'The page of results to return. Defaults to `1`.',
       }),
-    excluded_tags: z
-      .union([z.string(), z.array(z.string()).max(100)])
-      .optional()
-      .meta({
-        description:
-          'A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, dashboards matching any of the tag IDs are excluded.',
+      per_page: z.coerce.number().optional().meta({
+        description: 'The number of results to return per page. Defaults to `20`.',
       }),
-    tag_names: z
-      .union([z.string(), z.array(z.string()).max(100)])
-      .optional()
-      .meta({
-        openapi: { availability: { stability: 'stable', since: '9.6.0' } },
+      query: z.string().optional().meta({
         description:
-          'A tag name to include. Accepts a single tag name or multiple tag names. When multiple are specified, dashboards matching any of the tag names are included. If the same name is shared by multiple tags, dashboards matching any of those tags are included.',
+          'Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
       }),
-    excluded_tag_names: z
-      .union([z.string(), z.array(z.string()).max(100)])
-      .optional()
-      .meta({
-        openapi: { availability: { stability: 'stable', since: '9.6.0' } },
-        description:
-          'A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, dashboards matching any of the tag names are excluded. If the same name is shared by multiple tags, dashboards matching any of those tags are excluded.',
-      }),
-  })
-  .strict();
+      tags: z
+        .union([z.string(), z.array(z.string()).max(100)])
+        .optional()
+        .meta({
+          description:
+            'A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, dashboards matching any of the tag IDs are included.',
+        }),
+      excluded_tags: z
+        .union([z.string(), z.array(z.string()).max(100)])
+        .optional()
+        .meta({
+          description:
+            'A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, dashboards matching any of the tag IDs are excluded.',
+        }),
+      tag_names: z
+        .union([z.string(), z.array(z.string()).max(100)])
+        .optional()
+        .meta({
+          openapi: { availability: { stability: 'stable', since: '9.6.0' } },
+          description:
+            'A tag name to include. Accepts a single tag name or multiple tag names. When multiple are specified, dashboards matching any of the tag names are included. If the same name is shared by multiple tags, dashboards matching any of those tags are included.',
+        }),
+      excluded_tag_names: z
+        .union([z.string(), z.array(z.string()).max(100)])
+        .optional()
+        .meta({
+          openapi: { availability: { stability: 'stable', since: '9.6.0' } },
+          description:
+            'A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, dashboards matching any of the tag names are excluded. If the same name is shared by multiple tags, dashboards matching any of those tags are excluded.',
+        }),
+    })
+    .strict()
+);
 
-export const legacySearchResponseBodySchema = z
-  .object({
-    dashboards: z
-      .array(
-        z
-          .object({
-            id: z.string().meta({ description: 'The dashboard ID.' }),
-            data: z
-              .object({
-                description: z
-                  .string()
-                  .optional()
-                  .meta({ description: 'A short description of the dashboard.' }),
-                tags: getAsCodeTagsSchema('Tag IDs associated with this dashboard.').optional(),
-                time_range: timeRangeSchema.optional(),
-                title: z.string().meta({ description: 'The dashboard title.' }),
-                access_control: accessControlSchema,
-              })
-              .strict(),
-            meta: asCodeMetaSchema,
-          })
-          .strict()
-      )
-      .meta({
-        description:
-          'List of dashboards matching the query. Each entry includes summary fields but not the full panel layout.',
+export const legacySearchResponseBodySchema = lazySchema(() =>
+  z
+    .object({
+      dashboards: z
+        .array(
+          z
+            .object({
+              id: z.string().meta({ description: 'The dashboard ID.' }),
+              data: z
+                .object({
+                  description: z
+                    .string()
+                    .optional()
+                    .meta({ description: 'A short description of the dashboard.' }),
+                  tags: getAsCodeTagsSchema('Tag IDs associated with this dashboard.').optional(),
+                  time_range: timeRangeSchema.optional(),
+                  title: z.string().meta({ description: 'The dashboard title.' }),
+                  access_control: accessControlSchema,
+                })
+                .strict(),
+              meta: asCodeMetaSchema,
+            })
+            .strict()
+        )
+        .meta({
+          description:
+            'List of dashboards matching the query. Each entry includes summary fields but not the full panel layout.',
+        }),
+      page: z.number().meta({
+        description: 'The page of results returned.',
       }),
-    page: z.number().meta({
-      description: 'The page of results returned.',
-    }),
-    total: z.number().meta({
-      description: 'The total number of dashboards matching the query.',
-    }),
-  })
-  .strict();
+      total: z.number().meta({
+        description: 'The total number of dashboards matching the query.',
+      }),
+    })
+    .strict()
+);
 
-export const searchResponseBodySchema = z
-  .object({
-    data: z
-      .array(
-        z
-          .object({
-            id: z.string().meta({ description: 'The dashboard ID.' }),
-            data: z
-              .object({
-                description: z
-                  .string()
-                  .optional()
-                  .meta({ description: 'A short description of the dashboard.' }),
-                tags: getAsCodeTagsSchema(
-                  'Tag IDs associated with this dashboard.',
-                  100
-                ).optional(),
-                time_range: timeRangeSchema.optional(),
-                title: z.string().meta({ description: 'The dashboard title.' }),
-                access_control: accessControlSchema,
-              })
-              .strict(),
-            meta: asCodeMetaSchema,
-          })
-          .strict()
-      )
-      .max(PAGINATION_MAX_SIZE)
-      .meta({
-        description:
-          'List of dashboards matching the query. Each entry includes summary fields but not the full panel layout.',
-      }),
-    meta: asCodePaginationResponseMetaSchema,
-  })
-  .strict();
+export const searchResponseBodySchema = lazySchema(() =>
+  z
+    .object({
+      data: z
+        .array(
+          z
+            .object({
+              id: z.string().meta({ description: 'The dashboard ID.' }),
+              data: z
+                .object({
+                  description: z
+                    .string()
+                    .optional()
+                    .meta({ description: 'A short description of the dashboard.' }),
+                  tags: getAsCodeTagsSchema(
+                    'Tag IDs associated with this dashboard.',
+                    100
+                  ).optional(),
+                  time_range: timeRangeSchema.optional(),
+                  title: z.string().meta({ description: 'The dashboard title.' }),
+                  access_control: accessControlSchema,
+                })
+                .strict(),
+              meta: asCodeMetaSchema,
+            })
+            .strict()
+        )
+        .max(PAGINATION_MAX_SIZE)
+        .meta({
+          description:
+            'List of dashboards matching the query. Each entry includes summary fields but not the full panel layout.',
+        }),
+      meta: asCodePaginationResponseMetaSchema,
+    })
+    .strict()
+);

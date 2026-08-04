@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
 
 import {
@@ -16,23 +16,27 @@ import { lensItemDataSchemaV0 } from '../../../../../content_management/zod/v0';
 import { lensItemDataSchemaV1 } from '../../../../../content_management/zod/v1';
 import { lensResponseItemSchema } from './common';
 
-export const lensUpdateRequestParamsSchema = z
-  .object({
-    id: z.string().meta({
-      description: 'The saved object id of a Lens visualization.',
-    }),
-  })
-  .strict();
+export const lensUpdateRequestParamsSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().meta({
+        description: 'The saved object id of a Lens visualization.',
+      }),
+    })
+    .strict()
+);
 
-export const lensUpdateRequestQuerySchema = lensCMUpdateOptionsSchema
-  .omit({ references: true })
-  .strict();
+export const lensUpdateRequestQuerySchema = lazySchema(() =>
+  lensCMUpdateOptionsSchema.omit({ references: true }).strict()
+);
 
-export const lensUpdateRequestBodySchema = z.union([
-  lensApiConfigSchema,
-  lensItemDataSchemaV2,
-  lensItemDataSchemaV1,
-  lensItemDataSchemaV0, // Temporarily permit passing old v0 SO attributes on create
-]);
+export const lensUpdateRequestBodySchema = lazySchema(() =>
+  z.union([
+    lensApiConfigSchema,
+    lensItemDataSchemaV2,
+    lensItemDataSchemaV1,
+    lensItemDataSchemaV0, // Temporarily permit passing old v0 SO attributes on create
+  ])
+);
 
-export const lensUpdateResponseBodySchema = lensResponseItemSchema;
+export const lensUpdateResponseBodySchema = lazySchema(() => lensResponseItemSchema);

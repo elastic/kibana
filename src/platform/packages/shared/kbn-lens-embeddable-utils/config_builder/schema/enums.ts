@@ -7,19 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const orientationSchema = z.enum(['horizontal', 'vertical', 'angled']).meta({
-  id: 'vis_api_orientation',
-  description: 'Orientation',
-});
+export const orientationSchema = lazySchema(() =>
+  z.enum(['horizontal', 'vertical', 'angled']).meta({
+    id: 'vis_api_orientation',
+    description: 'Orientation',
+  })
+);
 
-export const simpleOrientationSchema = z.enum(['horizontal', 'vertical']).meta({
-  id: 'vis_api_simple_orientation',
-  description: 'Orientation',
-});
+export const simpleOrientationSchema = lazySchema(() =>
+  z.enum(['horizontal', 'vertical']).meta({
+    id: 'vis_api_simple_orientation',
+    description: 'Orientation',
+  })
+);
 
-export const directionSchema = z.enum(['asc', 'desc']).meta({
-  id: 'vis_api_direction',
-  description: 'Direction',
-});
+export const directionSchema = lazySchema(() =>
+  z.enum(['asc', 'desc']).meta({
+    id: 'vis_api_direction',
+    description: 'Direction',
+  })
+);

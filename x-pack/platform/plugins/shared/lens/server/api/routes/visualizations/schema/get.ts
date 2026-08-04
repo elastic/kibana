@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { lensResponseItemSchema } from './common';
 
-export const lensGetRequestParamsSchema = z
-  .object({
-    id: z.string().meta({
-      description: 'The visualization identifier, as returned by the create or search endpoints.',
-    }),
-  })
-  .strict();
+export const lensGetRequestParamsSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().meta({
+        description: 'The visualization identifier, as returned by the create or search endpoints.',
+      }),
+    })
+    .strict()
+);
 
-export const lensGetResponseBodySchema = lensResponseItemSchema;
+export const lensGetResponseBodySchema = lazySchema(() => lensResponseItemSchema);

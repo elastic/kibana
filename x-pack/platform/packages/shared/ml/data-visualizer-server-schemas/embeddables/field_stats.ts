@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
@@ -19,34 +19,38 @@ const baseProps = {
   }),
 };
 
-const fieldStatsDataViewSchema = z
-  .object({
-    ...baseProps,
-    view_type: z.literal('dataview'),
-    data_view_id: z
-      .string()
-      .min(1)
-      .max(1000)
-      .meta({ description: 'Data view ID (stored as a panel reference).' }),
-  })
-  .strict();
+const fieldStatsDataViewSchema = lazySchema(() =>
+  z
+    .object({
+      ...baseProps,
+      view_type: z.literal('dataview'),
+      data_view_id: z
+        .string()
+        .min(1)
+        .max(1000)
+        .meta({ description: 'Data view ID (stored as a panel reference).' }),
+    })
+    .strict()
+);
 
-const fieldStatsEsqlSchema = z
-  .object({
-    ...baseProps,
-    view_type: z.literal('esql'),
-    query: z
-      .object({ esql: z.string().max(1000).meta({ description: 'The ES|QL query string.' }) })
-      .strict()
-      .meta({ description: 'ES|QL query.' }),
-  })
-  .strict();
+const fieldStatsEsqlSchema = lazySchema(() =>
+  z
+    .object({
+      ...baseProps,
+      view_type: z.literal('esql'),
+      query: z
+        .object({ esql: z.string().max(1000).meta({ description: 'The ES|QL query string.' }) })
+        .strict()
+        .meta({ description: 'ES|QL query.' }),
+    })
+    .strict()
+);
 
-export const fieldStatsTableEmbeddableSchema = z
-  .discriminatedUnion('view_type', [fieldStatsDataViewSchema, fieldStatsEsqlSchema])
-  .meta({
+export const fieldStatsTableEmbeddableSchema = lazySchema(() =>
+  z.discriminatedUnion('view_type', [fieldStatsDataViewSchema, fieldStatsEsqlSchema]).meta({
     id: 'data_visualizer_field_stats',
     description: 'Field statistics table embeddable schema',
-  });
+  })
+);
 
 export type FieldStatsTableEmbeddableState = z.output<typeof fieldStatsTableEmbeddableSchema>;

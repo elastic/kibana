@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { monitorFiltersSchema } from './common_schemas';
@@ -14,11 +14,13 @@ import { SYNTHETICS_STATS_SUPPORTED_TRIGGERS } from '../../common/embeddables/st
 /**
  * Schema for the custom state of the stats overview embeddable
  */
-export const statsOverviewCustomStateSchema = z
-  .object({
-    filters: monitorFiltersSchema.optional(),
-  })
-  .strict();
+export const statsOverviewCustomStateSchema = lazySchema(() =>
+  z
+    .object({
+      filters: monitorFiltersSchema.optional(),
+    })
+    .strict()
+);
 
 /**
  * Complete schema for the Synthetics Stats Overview embeddable

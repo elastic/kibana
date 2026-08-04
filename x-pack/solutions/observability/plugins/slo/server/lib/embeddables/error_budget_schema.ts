@@ -6,22 +6,24 @@
  */
 
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS } from '../../../common/embeddables/error_budget/constants';
 
-const ErrorBudgetCustomSchema = z
-  .object({
-    slo_id: z.string().max(64).meta({
-      description: 'The ID of the SLO to display the error budget for',
-    }),
-    slo_instance_id: z.string().max(512).default(ALL_VALUE).meta({
-      description:
-        'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).',
-    }),
-  })
-  .strict();
+const ErrorBudgetCustomSchema = lazySchema(() =>
+  z
+    .object({
+      slo_id: z.string().max(64).meta({
+        description: 'The ID of the SLO to display the error budget for',
+      }),
+      slo_instance_id: z.string().max(512).default(ALL_VALUE).meta({
+        description:
+          'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).',
+      }),
+    })
+    .strict()
+);
 
 export const getErrorBudgetEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
   return z

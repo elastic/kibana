@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { lensApiConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 
@@ -14,11 +14,13 @@ import { lensCommonSavedObjectSchemaV2 } from '../../../../content_management/zo
 /**
  * The Lens response item returned from the server
  */
-export const lensResponseItemSchema = z
-  .object({
-    id: lensCommonSavedObjectSchemaV2.shape.id,
-    data: lensApiConfigSchemaNoESQL,
-    meta: asCodeMetaSchema,
-  })
-  .strict()
-  .meta({ id: 'lensResponseItem', title: 'Visualization Response' });
+export const lensResponseItemSchema = lazySchema(() =>
+  z
+    .object({
+      id: lensCommonSavedObjectSchemaV2.shape.id,
+      data: lensApiConfigSchemaNoESQL,
+      meta: asCodeMetaSchema,
+    })
+    .strict()
+    .meta({ id: 'lensResponseItem', title: 'Visualization Response' })
+);

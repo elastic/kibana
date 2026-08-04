@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { markdownStateSchema } from '../embeddable/schemas';
 
-export const markdownLibraryItemSchema = z
-  .object({
-    ...markdownStateSchema.shape,
-    description: z
-      .string()
-      .optional()
-      .meta({ description: 'A short description of the markdown library item.' }),
-    title: z.string().min(1).meta({ description: 'The markdown library item title.' }),
-  })
-  .strict();
+export const markdownLibraryItemSchema = lazySchema(() =>
+  z
+    .object({
+      ...markdownStateSchema.shape,
+      description: z
+        .string()
+        .optional()
+        .meta({ description: 'A short description of the markdown library item.' }),
+      title: z.string().min(1).meta({ description: 'The markdown library item title.' }),
+    })
+    .strict()
+);

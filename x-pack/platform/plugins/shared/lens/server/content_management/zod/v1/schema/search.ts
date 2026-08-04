@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import { lazySchema } from '@kbn/zod';
 import { searchOptionsSchema, searchResultSchema } from '@kbn/content-management-utils/zod';
 
 import { lensSavedObjectSchemaV1 } from './common';
 
-export const lensCMSearchOptionsSchema = searchOptionsSchema
-  .pick({
-    // TODO: add support for more search options
-    fields: true,
-    searchFields: true,
-  })
-  .strict();
+export const lensCMSearchOptionsSchema = lazySchema(() =>
+  searchOptionsSchema
+    .pick({
+      // TODO: add support for more search options
+      fields: true,
+      searchFields: true,
+    })
+    .strict()
+);
 
-export const lensCMSearchResultSchema = searchResultSchema(lensSavedObjectSchemaV1);
+export const lensCMSearchResultSchema = lazySchema(() =>
+  searchResultSchema(lensSavedObjectSchemaV1)
+);

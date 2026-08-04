@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import {
   countMetricOperationSchema,
@@ -34,24 +34,30 @@ import {
   BUCKET_OP_TITLES,
 } from '../bucket_ops';
 
-export const baseLegendVisibilitySchema = z
-  .union([z.literal('visible'), z.literal('hidden')])
-  .optional()
-  .meta({ description: 'Legend visibility.' });
+export const baseLegendVisibilitySchema = lazySchema(() =>
+  z
+    .union([z.literal('visible'), z.literal('hidden')])
+    .optional()
+    .meta({ description: 'Legend visibility.' })
+);
 
-export const legendVisibilitySchemaWithAuto = z
-  .union([z.literal('auto'), z.literal('visible'), z.literal('hidden')])
-  .optional()
-  .meta({ description: 'Legend visibility.' });
+export const legendVisibilitySchemaWithAuto = lazySchema(() =>
+  z
+    .union([z.literal('auto'), z.literal('visible'), z.literal('hidden')])
+    .optional()
+    .meta({ description: 'Legend visibility.' })
+);
 
-export const legendSizeSchema = z
-  .union([z.literal('auto'), z.literal('s'), z.literal('m'), z.literal('l'), z.literal('xl')])
-  .optional()
-  .meta({
-    id: 'legendSize',
-    title: 'Legend Size',
-    description: 'Legend size.',
-  });
+export const legendSizeSchema = lazySchema(() =>
+  z
+    .union([z.literal('auto'), z.literal('s'), z.literal('m'), z.literal('l'), z.literal('xl')])
+    .optional()
+    .meta({
+      id: 'legendSize',
+      title: 'Legend Size',
+      description: 'Legend size.',
+    })
+);
 
 function ctxMeta(context: string, suffix: string, title: string) {
   return { id: `${context}${suffix}`, title };
@@ -142,11 +148,11 @@ export function getBucketsWithChartDimensionSchema(context: string) {
 /**
  * X-axis scale type for data transformation
  */
-export const xScaleSchema = z
-  .union([z.literal('ordinal'), z.literal('temporal'), z.literal('linear')])
-  .meta({
+export const xScaleSchema = lazySchema(() =>
+  z.union([z.literal('ordinal'), z.literal('temporal'), z.literal('linear')]).meta({
     // IMPORTANT: This description guides LLM agents - modify with caution and test agent behavior after changes
     description:
       "X-axis scale type. Use 'temporal' for timestamp/date fields (for example, @timestamp or DATE_TRUNC results). Use 'ordinal' for categorical/text fields. Use 'linear' for numeric fields.",
-  });
+  })
+);
 export type XScaleSchemaType = z.output<typeof xScaleSchema>;

@@ -15,37 +15,39 @@ import {
   MAX_TITLE_LENGTH,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const searchResponseBodySchema = z
-  .object({
-    data: z
-      .array(
-        z
-          .object({
-            id: z.string().max(MAX_ID_LENGTH),
-            data: z
-              .object({
-                description: z
-                  .string()
-                  .max(MAX_DESCRIPTION_LENGTH)
-                  .optional()
-                  .meta({ description: 'A short description of the links library item.' }),
-                title: z
-                  .string()
-                  .max(MAX_TITLE_LENGTH)
-                  .meta({ description: 'The links library item title.' }),
-              })
-              .strict(),
-            meta: asCodeMetaSchema,
-          })
-          .strict()
-      )
-      .min(0)
-      .max(PAGINATION_MAX_SIZE)
-      .meta({
-        description: 'List of links library items matching the query.',
-      }),
-    meta: asCodePaginationResponseMetaSchema,
-  })
-  .strict();
+export const searchResponseBodySchema = lazySchema(() =>
+  z
+    .object({
+      data: z
+        .array(
+          z
+            .object({
+              id: z.string().max(MAX_ID_LENGTH),
+              data: z
+                .object({
+                  description: z
+                    .string()
+                    .max(MAX_DESCRIPTION_LENGTH)
+                    .optional()
+                    .meta({ description: 'A short description of the links library item.' }),
+                  title: z
+                    .string()
+                    .max(MAX_TITLE_LENGTH)
+                    .meta({ description: 'The links library item title.' }),
+                })
+                .strict(),
+              meta: asCodeMetaSchema,
+            })
+            .strict()
+        )
+        .min(0)
+        .max(PAGINATION_MAX_SIZE)
+        .meta({
+          description: 'List of links library items matching the query.',
+        }),
+      meta: asCodePaginationResponseMetaSchema,
+    })
+    .strict()
+);

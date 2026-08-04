@@ -7,25 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const querySchema = z
-  .object({
-    query: z.union([
-      z.string().meta({
-        description:
-          'A text-based query such as Kibana Query Language (KQL) or Lucene query language.',
-      }),
-      z.record(z.string(), z.any()),
-    ]),
-    language: z.string(),
-  })
-  .strict()
-  .meta({ id: 'kbn-es-query-server-querySchema' });
+export const querySchema = lazySchema(() =>
+  z
+    .object({
+      query: z.union([
+        z.string().meta({
+          description:
+            'A text-based query such as Kibana Query Language (KQL) or Lucene query language.',
+        }),
+        z.record(z.string(), z.any()),
+      ]),
+      language: z.string(),
+    })
+    .strict()
+    .meta({ id: 'kbn-es-query-server-querySchema' })
+);
 
-export const aggregateQuerySchema = z
-  .object({
-    esql: z.string(),
-  })
-  .strict()
-  .meta({ id: 'kbn-es-query-server-aggregateQuerySchema' });
+export const aggregateQuerySchema = lazySchema(() =>
+  z
+    .object({
+      esql: z.string(),
+    })
+    .strict()
+    .meta({ id: 'kbn-es-query-server-aggregateQuerySchema' })
+);

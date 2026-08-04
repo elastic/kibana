@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { lensCMGetResultSchema } from '../../../../../content_management/zod';
 import { lensItemMetaSchema, lensResponseItemSchema } from './common';
 
-export const lensGetRequestParamsSchema = z
-  .object({
-    id: z.string().meta({
-      description: 'The saved object id of a Lens visualization.',
-    }),
-  })
-  .strict();
+export const lensGetRequestParamsSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().meta({
+        description: 'The saved object id of a Lens visualization.',
+      }),
+    })
+    .strict()
+);
 
-export const lensGetResponseBodySchema = lensResponseItemSchema
-  .extend({
-    meta: lensItemMetaSchema.extend(lensCMGetResultSchema.shape.meta.shape).strict(),
-  })
-  .strict();
+export const lensGetResponseBodySchema = lazySchema(() =>
+  lensResponseItemSchema
+    .extend({
+      meta: lensItemMetaSchema.extend(lensCMGetResultSchema.shape.meta.shape).strict(),
+    })
+    .strict()
+);

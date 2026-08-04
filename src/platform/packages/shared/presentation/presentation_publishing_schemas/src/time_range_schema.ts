@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { timeRangeSchema } from '@kbn/es-query-server';
 
-export const serializedTimeRangeSchema = z
-  .object({
-    time_range: timeRangeSchema.optional(),
-  })
-  .strict();
+export const serializedTimeRangeSchema = lazySchema(() =>
+  z
+    .object({
+      time_range: timeRangeSchema.optional(),
+    })
+    .strict()
+);

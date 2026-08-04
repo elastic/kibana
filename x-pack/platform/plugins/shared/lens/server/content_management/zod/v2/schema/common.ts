@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { lazySchema } from '@kbn/zod';
 import { LENS_ITEM_VERSION_V2 } from '@kbn/lens-common/content_management/constants';
 import { createVersionedLensSchemas } from '../../schema/versioned';
 
-export const {
-  lensItemAttributesSchema: lensItemAttributesSchemaV2,
-  lensSavedObjectSchema: lensSavedObjectSchemaV2,
-  lensItemSchema: lensItemSchemaV2,
-  lensCommonSavedObjectSchema: lensCommonSavedObjectSchemaV2,
-  lensItemDataSchema: lensItemDataSchemaV2,
-} = createVersionedLensSchemas(LENS_ITEM_VERSION_V2);
+const _v2Schemas = createVersionedLensSchemas(LENS_ITEM_VERSION_V2);
+
+export const lensItemAttributesSchemaV2 = lazySchema(() => _v2Schemas.lensItemAttributesSchema);
+export const lensSavedObjectSchemaV2 = lazySchema(() => _v2Schemas.lensSavedObjectSchema);
+export const lensItemSchemaV2 = lazySchema(() => _v2Schemas.lensItemSchema);
+export const lensCommonSavedObjectSchemaV2 = lazySchema(
+  () => _v2Schemas.lensCommonSavedObjectSchema
+);
+export const lensItemDataSchemaV2 = lazySchema(() => _v2Schemas.lensItemDataSchema);

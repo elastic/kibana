@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   asCodeMetaSchema,
   asCodePaginationParamsSchema,
@@ -13,70 +13,82 @@ import {
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
 
-export const tagsSearchRequestQuerySchema = z
-  .object({
-    query: z.string().max(2048).optional().meta({
-      description:
-        'Filters results by `name` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
-    }),
-    ...asCodePaginationParamsSchema.shape,
-  })
-  .strict();
+export const tagsSearchRequestQuerySchema = lazySchema(() =>
+  z
+    .object({
+      query: z.string().max(2048).optional().meta({
+        description:
+          'Filters results by `name` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
+      }),
+      ...asCodePaginationParamsSchema.shape,
+    })
+    .strict()
+);
 
-export const tagIdParamSchema = z
-  .object({
-    id: z.string().min(1).max(256).meta({
-      description: 'The tag ID, as returned by the create or search endpoints.',
-    }),
-  })
-  .strict();
+export const tagIdParamSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().min(1).max(256).meta({
+        description: 'The tag ID, as returned by the create or search endpoints.',
+      }),
+    })
+    .strict()
+);
 
-export const tagAttributesSchema = z
-  .object({
-    name: z.string().min(1).max(256).meta({
-      description: 'The display name of the tag.',
-    }),
-    description: z.string().max(2048).optional().meta({
-      description: 'Optional description of the tag.',
-    }),
-    color: z.string().min(1).max(256).meta({
-      description:
-        'The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.',
-    }),
-  })
-  .strict()
-  .meta({
-    id: 'kbn-tags-attributes',
-  });
+export const tagAttributesSchema = lazySchema(() =>
+  z
+    .object({
+      name: z.string().min(1).max(256).meta({
+        description: 'The display name of the tag.',
+      }),
+      description: z.string().max(2048).optional().meta({
+        description: 'Optional description of the tag.',
+      }),
+      color: z.string().min(1).max(256).meta({
+        description:
+          'The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.',
+      }),
+    })
+    .strict()
+    .meta({
+      id: 'kbn-tags-attributes',
+    })
+);
 
-export const tagRequestAttributesSchema = tagAttributesSchema
-  .extend({
-    color: tagAttributesSchema.shape.color.optional(),
-  })
-  .strict()
-  .meta({
-    id: 'kbn-tags-request-attributes',
-  });
+export const tagRequestAttributesSchema = lazySchema(() =>
+  tagAttributesSchema
+    .extend({
+      color: tagAttributesSchema.shape.color.optional(),
+    })
+    .strict()
+    .meta({
+      id: 'kbn-tags-request-attributes',
+    })
+);
 
-export const tagResponseItemSchema = z
-  .object({
-    // codeql[js/kibana/unbounded-string-in-schema] output schema — server controls the response size
-    id: z.string().meta({ description: 'The tag ID.' }),
-    data: tagAttributesSchema,
-    meta: asCodeMetaSchema,
-  })
-  .strict();
+export const tagResponseItemSchema = lazySchema(() =>
+  z
+    .object({
+      // codeql[js/kibana/unbounded-string-in-schema] output schema — server controls the response size
+      id: z.string().meta({ description: 'The tag ID.' }),
+      data: tagAttributesSchema,
+      meta: asCodeMetaSchema,
+    })
+    .strict()
+);
 
-export const tagsSearchResponseBodySchema = z
-  .object({
-    data: z
-      .array(tagResponseItemSchema)
-      .min(0)
-      .max(PAGINATION_MAX_SIZE)
-      .meta({ description: 'List of tags matching the query.' }),
-    meta: asCodePaginationResponseMetaSchema,
-  })
-  .strict();
+export const tagsSearchResponseBodySchema = lazySchema(() =>
+  z
+    .object({
+      data: z
+        .array(tagResponseItemSchema)
+        .min(0)
+        .max(PAGINATION_MAX_SIZE)
+        .meta({ description: 'List of tags matching the query.' }),
+      meta: asCodePaginationResponseMetaSchema,
+    })
+    .strict()
+);
 
 export type TagResponseItem = z.output<typeof tagResponseItemSchema>;
 export type TagsSearchResponseBody = z.output<typeof tagsSearchResponseBodySchema>;

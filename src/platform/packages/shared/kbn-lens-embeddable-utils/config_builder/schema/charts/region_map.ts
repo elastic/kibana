@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   fieldMetricOrFormulaOperationDefinitionSchema,
   esqlColumnSchema,
@@ -27,60 +27,64 @@ const regionMapConfigRegionOptionsShape = {
     .optional(),
 };
 
-export const regionMapConfigSchemaNoESQL = z
-  .object({
-    type: z.literal('region_map'),
-    ...sharedPanelInfoSchema.shape,
-    ...dslOnlyPanelInfoSchema.shape,
-    ...layerSettingsSchema.shape,
-    ...dataSourceSchema.shape,
-    /**
-     * Metric configuration
-     */
-    metric: fieldMetricOrFormulaOperationDefinitionSchema,
-    /**
-     * Configure how to break down to regions
-     */
-    region: getBucketsWithChartDimensionSchema('regionMapRegion').and(
-      z.object(regionMapConfigRegionOptionsShape)
-    ),
-  })
-  .meta({
-    id: 'regionMapNoESQL',
-    title: 'Region Map (DSL)',
-    description:
-      'Region Map configuration using a data view, mapping metric values to geographic regions by color.',
-  });
+export const regionMapConfigSchemaNoESQL = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('region_map'),
+      ...sharedPanelInfoSchema.shape,
+      ...dslOnlyPanelInfoSchema.shape,
+      ...layerSettingsSchema.shape,
+      ...dataSourceSchema.shape,
+      /**
+       * Metric configuration
+       */
+      metric: fieldMetricOrFormulaOperationDefinitionSchema,
+      /**
+       * Configure how to break down to regions
+       */
+      region: getBucketsWithChartDimensionSchema('regionMapRegion').and(
+        z.object(regionMapConfigRegionOptionsShape)
+      ),
+    })
+    .meta({
+      id: 'regionMapNoESQL',
+      title: 'Region Map (DSL)',
+      description:
+        'Region Map configuration using a data view, mapping metric values to geographic regions by color.',
+    })
+);
 
-export const regionMapConfigSchemaESQL = z
-  .object({
-    type: z.literal('region_map'),
-    ...sharedPanelInfoSchema.shape,
-    ...layerSettingsSchema.shape,
-    ...dataSourceEsqlTableSchema.shape,
-    /**
-     * Metric configuration
-     */
-    metric: esqlColumnWithFormatSchema,
-    /**
-     * Configure how to break down to regions
-     */
-    region: esqlColumnSchema.extend(regionMapConfigRegionOptionsShape),
-  })
-  .meta({
-    id: 'regionMapESQL',
-    title: 'Region Map (ES|QL)',
-    description:
-      'Region Map configuration using an ES|QL query, mapping metric values to geographic regions by color.',
-  });
+export const regionMapConfigSchemaESQL = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('region_map'),
+      ...sharedPanelInfoSchema.shape,
+      ...layerSettingsSchema.shape,
+      ...dataSourceEsqlTableSchema.shape,
+      /**
+       * Metric configuration
+       */
+      metric: esqlColumnWithFormatSchema,
+      /**
+       * Configure how to break down to regions
+       */
+      region: esqlColumnSchema.extend(regionMapConfigRegionOptionsShape),
+    })
+    .meta({
+      id: 'regionMapESQL',
+      title: 'Region Map (ES|QL)',
+      description:
+        'Region Map configuration using an ES|QL query, mapping metric values to geographic regions by color.',
+    })
+);
 
-export const regionMapConfigSchema = z
-  .union([regionMapConfigSchemaNoESQL, regionMapConfigSchemaESQL])
-  .meta({
+export const regionMapConfigSchema = lazySchema(() =>
+  z.union([regionMapConfigSchemaNoESQL, regionMapConfigSchemaESQL]).meta({
     id: 'regionMapChart',
     title: 'Region Map',
     description: 'A choropleth map with geographic regions colored by the aggregated metric value.',
-  });
+  })
+);
 
 export type RegionMapConfig = z.output<typeof regionMapConfigSchema>;
 export type RegionMapConfigNoESQL = z.output<typeof regionMapConfigSchemaNoESQL>;

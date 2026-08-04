@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
@@ -24,29 +24,33 @@ const baseProps = {
   }),
 };
 
-const anomalySwimLaneOverallSchema = z
-  .object({
-    ...baseProps,
-    swimlane_type: z.literal('overall'),
-  })
-  .strip();
+const anomalySwimLaneOverallSchema = lazySchema(() =>
+  z
+    .object({
+      ...baseProps,
+      swimlane_type: z.literal('overall'),
+    })
+    .strip()
+);
 
-const anomalySwimLaneViewBySchema = z
-  .object({
-    ...baseProps,
-    swimlane_type: z.literal('viewBy'),
-    view_by: z.string().min(1).max(1000).meta({
-      description: 'Field name used to split anomalies into a view-by swim lane.',
-    }),
-  })
-  .strip();
+const anomalySwimLaneViewBySchema = lazySchema(() =>
+  z
+    .object({
+      ...baseProps,
+      swimlane_type: z.literal('viewBy'),
+      view_by: z.string().min(1).max(1000).meta({
+        description: 'Field name used to split anomalies into a view-by swim lane.',
+      }),
+    })
+    .strip()
+);
 
-export const anomalySwimLaneEmbeddableStateSchema = z
-  .union([anomalySwimLaneOverallSchema, anomalySwimLaneViewBySchema])
-  .meta({
+export const anomalySwimLaneEmbeddableStateSchema = lazySchema(() =>
+  z.union([anomalySwimLaneOverallSchema, anomalySwimLaneViewBySchema]).meta({
     id: 'ml_anomaly_swimlane',
     description: 'Anomaly Swim Lane embeddable',
-  });
+  })
+);
 
 export type AnomalySwimLaneEmbeddableState = z.output<typeof anomalySwimLaneEmbeddableStateSchema>;
 
