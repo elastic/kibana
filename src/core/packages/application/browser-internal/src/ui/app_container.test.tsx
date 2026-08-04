@@ -84,11 +84,7 @@ describe('AppContainer', () => {
     const mounter = createMounter(Promise.resolve());
 
     mountWithIntl(
-      <AppContainer
-        {...defaultProps}
-        appStatus={AppStatus.inaccessible}
-        mounter={mounter}
-      />
+      <AppContainer {...defaultProps} appStatus={AppStatus.inaccessible} mounter={mounter} />
     );
 
     expect(setAppNotFoundState).toHaveBeenCalledWith(true);
@@ -159,11 +155,7 @@ describe('AppContainer', () => {
     const mounter = createMounter(waitPromise);
 
     const wrapper = mountWithIntl(
-      <AppContainer
-        {...defaultProps}
-        appStatus={AppStatus.inaccessible}
-        mounter={mounter}
-      />
+      <AppContainer {...defaultProps} appStatus={AppStatus.inaccessible} mounter={mounter} />
     );
 
     expect(wrapper.text()).toContain('Application unavailable');
