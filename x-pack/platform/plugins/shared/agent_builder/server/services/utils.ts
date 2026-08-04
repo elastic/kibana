@@ -70,7 +70,7 @@ export const toStableUserId = async ({
 /**
  * Resolves the API key creator's profile uid via Elasticsearch, when available.
  *
- * `getUserIdAndName` for API-key auth often omits `profile_uid`. Looking up the key with
+ * `getCurrentUser` for API-key auth often omits `profile_uid`. Looking up the key with
  * `with_profile_uid` recovers the creator's profile so ownership can match interactive
  * sessions for the same user. Older keys or creators without an activated profile return
  * undefined and callers fall back to username matching.
@@ -105,10 +105,10 @@ const resolveApiKeyOwnerProfileUid = async ({
 /**
  * Resolves the current user from a request.
  *
- * For real HTTP requests, `security.authc.getUserIdAndName` returns the authenticated user
+ * For real HTTP requests, `security.authc.getCurrentUser` returns the authenticated user
  * (including profile_uid, username, and authentication_realm).
  *
- * For fake requests (e.g. from Task Manager using an API key), `getUserIdAndName` returns the
+ * For fake requests (e.g. from Task Manager using an API key), `getCurrentUser` returns the
  * originating user's identity when the request was enriched at schedule time (profile_uid and
  * username persisted on the task's userScope). This is required for Cross-Project Search, where
  * the API key owner's username does not match the originating user.
@@ -125,7 +125,7 @@ export const getUserFromRequest = async ({
   security: SecurityServiceStart;
   esClient: ElasticsearchClient;
 }): Promise<UserIdAndName> => {
-  const authUser = security.authc.getUserIdAndName(request);
+  const authUser = security.authc.getCurrentUser(request);
   if (authUser?.username) {
     return {
       id: await toStableUserId({
