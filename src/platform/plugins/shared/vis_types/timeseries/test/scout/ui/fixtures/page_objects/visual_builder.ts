@@ -495,7 +495,7 @@ export class VisualBuilder {
    */
   private async fillQueryBar(queryBar: Locator, query: string) {
     await queryBar.clear();
-    await queryBar.fill(query);
+    await queryBar.pressSequentially(query);
     await queryBar.blur();
   }
 
