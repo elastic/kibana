@@ -9,7 +9,6 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { platformSignificantEventsTools, platformCoreTools } from '@kbn/agent-builder-common/tools';
 import instructions from './instructions/judge.md.text';
-import { SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID } from '../../skills/significant_events_ki_grounding';
 
 export const SIGNIFICANT_EVENTS_JUDGE_AGENT_ID = 'significant_events.discovery-judge';
 export const SIGNIFICANT_EVENTS_JUDGE_AGENT_TYPE_ID = 'platform.sig_events.discovery-judge-type';
@@ -22,7 +21,7 @@ export const judgeAgentType = {
   avatar_icon: 'logoElastic',
   baseConfiguration: {
     instructions,
-    skill_ids: [SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID],
+    skill_ids: ['significant-events-memory'],
     // The tool set below is fully explicit — the generic platform_core_* tools are irrelevant
     // to discovery and only add noise to tool selection, so elastic capabilities stay disabled.
     enable_elastic_capabilities: false,
@@ -33,7 +32,7 @@ export const judgeAgentType = {
       {
         tool_ids: [
           platformCoreTools.executeEsql,
-          platformSignificantEventsTools.searchKnowledgeIndicators,
+          platformSignificantEventsTools.searchEvent,
           platformSignificantEventsTools.eventsWrite,
         ],
       },

@@ -2,6 +2,7 @@ disabled:
   # Base config files, only necessary to inform config finding script
   - x-pack/solutions/security/test/security_solution_api_integration/config/ess/config.base.ts
   - x-pack/solutions/security/test/security_solution_api_integration/config/ess/config.base.basic.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/config/ess/config.base.edr_workflows.basic.ts
   - x-pack/solutions/security/test/security_solution_api_integration/config/ess/config.base.edr_workflows.trial.ts
   - x-pack/solutions/security/test/security_solution_api_integration/config/ess/config.base.edr_workflows.ts
   - x-pack/solutions/security/test/security_solution_api_integration/config/ess/config.base.trial.ts
@@ -85,6 +86,7 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_delete/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_delete/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/trial_license_complete_tier/configs/ess.large_payload.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_import_export/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_management/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_management/trial_license_complete_tier/configs/ess.config.ts
@@ -122,6 +124,7 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/artifacts/trial_license_complete_tier/configs/ess.config.ts:
       queue: n2-4-spot
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/artifacts/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/authentication/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/metadata/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/package/trial_license_complete_tier/configs/ess.config.ts

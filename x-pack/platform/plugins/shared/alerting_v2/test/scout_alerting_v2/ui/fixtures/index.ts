@@ -49,12 +49,12 @@ export const test = baseTest.extend<
   },
   apiServices: [
     async (
-      { apiServices, esClient, kbnClient, log },
+      { apiServices, esClient, kbnClient, log, config },
       use: (extendedApiServices: AlertingApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices: AlertingApiServicesFixture = {
         ...apiServices,
-        alertingV2: buildAlertingApiServices({ esClient, kbnClient, log }),
+        alertingV2: buildAlertingApiServices({ esClient, kbnClient, log, config }),
       };
       await use(extendedApiServices);
     },
@@ -73,10 +73,12 @@ export {
   ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE,
+  ALERTING_V2_ACTION_POLICY_FORM_ROLE,
 } from '../../common/roles';
 export {
   buildAlertEvent,
   buildCreateRuleData,
   buildCreateActionPolicyData,
+  buildWorkflowYaml,
 } from '../../common/builders';
 export * as testData from '../../common/constants';

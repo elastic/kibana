@@ -16,7 +16,7 @@ export interface AiIndexDest {
   value: string;
 }
 
-export type AiIndexSourceType = 'esql';
+export type AiIndexSourceType = 'esql' | 'connector';
 
 export interface AiIndexSource {
   type: AiIndexSourceType;
@@ -39,6 +39,7 @@ export interface AiIndexProperties {
 
 export interface AiIndexHttpItem extends AiIndexProperties {
   id: string;
+  managed: boolean;
   date_created: string;
   date_modified: string;
 }
@@ -47,6 +48,14 @@ export type GetAiIndexResponse = AiIndexHttpItem;
 
 export interface ListAiIndexResponse {
   ai_indices: AiIndexHttpItem[];
+}
+
+export interface CreateAiIndexRequest extends AiIndexProperties {
+  id: string;
+}
+
+export interface CreateAiIndexResponse {
+  status: 'created';
 }
 
 export interface PutAiIndexResponse {
