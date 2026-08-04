@@ -20,10 +20,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import React from 'react';
-import { getGenAiFields, hasGenAiData } from '@kbn/apm-ui-shared';
 import { TransactionMetadata } from '../metadata_table/transaction_metadata';
 import { getSpanLinksTabContent } from '../span_links/span_links_tab_content';
 import { getGenAiTabContent } from '../genai_tab/get_genai_tab_content';
+import { useGenAiData } from '../genai_tab/use_genai_data';
 import { TransactionSummary } from '../summary/transaction_summary';
 import { TransactionActionMenu } from '../transaction_action_menu/transaction_action_menu';
 import { FlyoutTopLevelProperties } from './flyout_top_level_properties';
@@ -135,24 +135,11 @@ function TransactionFlyoutBody({
     processorEvent: ProcessorEvent.transaction,
   });
 
-  const transactionId = transaction.transaction?.id;
-  const { data: eventMetadata, status: metadataStatus } = useFetcher(
-    (callApmApi) => {
-      if (!transactionId) return;
-      return callApmApi('GET /internal/apm/event_metadata/{processorEvent}/{id}', {
-        params: {
-          path: { processorEvent: ProcessorEvent.transaction, id: transactionId },
-          query: { start: transaction['@timestamp'], end: transaction['@timestamp'] },
-        },
-      });
-    },
-    [transactionId, transaction]
-  );
-
-  const metadata = eventMetadata?.metadata ?? {};
-  const isMetadataLoading = isPending(metadataStatus);
-  const isGenAiSpan = hasGenAiData(metadata);
-  const genAi = isGenAiSpan ? getGenAiFields(metadata) : undefined;
+  const { metadata, isMetadataLoading, isGenAiSpan, genAi } = useGenAiData({
+    processorEvent: ProcessorEvent.transaction,
+    id: transaction.transaction?.id,
+    timestamp: transaction['@timestamp'],
+  });
 
   const genAiTabContent = getGenAiTabContent({ isGenAiSpan, genAi });
 

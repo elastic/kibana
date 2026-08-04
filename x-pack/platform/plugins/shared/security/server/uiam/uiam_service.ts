@@ -133,6 +133,18 @@ interface UiamErrorDetails {
 }
 
 /**
+ * Telemetry `errorType` for an OAuth token exchange that Kibana itself rejected
+ * as opposed to a failure reported by UIAM.
+ */
+const OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE = 'KIBANA.AUDIENCE_MISMATCH';
+
+/**
+ * Telemetry `errorType` for an OAuth token exchange failure that carries no
+ * recognizable classification.
+ */
+const OAUTH_UNKNOWN_ERROR_TYPE = 'UNKNOWN';
+
+/**
  * Response containing a list of OAuth clients.
  */
 export interface OAuthClientsResponse {
@@ -478,7 +490,8 @@ export class UiamService implements UiamServicePublic {
       const audience = response.credentials?.oauth?.audience;
       if (audience !== expectedAudience) {
         throw Boom.badRequest(
-          `OAuth token audience mismatch: expected "${expectedAudience}" but got "${audience}".`
+          `OAuth token audience mismatch: expected "${expectedAudience}" but got "${audience}".`,
+          { errorType: OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE }
         );
       }
 
@@ -490,6 +503,7 @@ export class UiamService implements UiamServicePublic {
     } catch (err) {
       securityTelemetry.recordOAuthTokenExchangeAttempt(performance.now() - startTime, {
         outcome: 'failure',
+        errorType: UiamService.#getOAuthTokenExchangeErrorType(err),
       });
 
       this.#logger.error(
@@ -1037,5 +1051,15 @@ export class UiamService implements UiamServicePublic {
     };
 
     throw err;
+  }
+
+  static #getOAuthTokenExchangeErrorType(err: unknown): string {
+    if (!Boom.isBoom(err)) {
+      return OAUTH_UNKNOWN_ERROR_TYPE;
+    }
+
+    const payload = err.output?.payload as { error?: UiamErrorDetails } | undefined;
+
+    return err.data?.errorType ?? payload?.error?.type ?? OAUTH_UNKNOWN_ERROR_TYPE;
   }
 }

@@ -43,6 +43,8 @@ export const CASE_DETAILS_REPORTER = '[data-test-subj="case-view-reported-by"]';
 export const CASE_DETAILS_PARTICIPANTS_PANEL =
   '[data-test-subj="case-view-participants-field-panel"]';
 
+export const CASE_DETAILS_PARTICIPANT_AVATARS = `${CASE_DETAILS_PARTICIPANTS_PANEL} [data-test-subj^="case-user-profile-avatar-"]`;
+
 export const CONNECTOR_CARD_DETAILS = '[data-test-subj="connector-card-details"]';
 
 export const CONNECTOR_TITLE = '[data-test-subj="connector-card-title"]';
