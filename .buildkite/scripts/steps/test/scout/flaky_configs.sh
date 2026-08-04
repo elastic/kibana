@@ -11,6 +11,9 @@ if [[ -z "${SCOUT_REPORTER_ENABLED:-}" ]]; then
   echo "⚠️ SCOUT_REPORTER_ENABLED not set; defaulting to true for flaky runner"
 fi
 
+# Disabling retries to ensure that the flaky test runner measures failure rates accurately.
+export SCOUT_TEST_RETRIES=0
+
 if [[ -z "$SCOUT_CONFIG" ]]; then
   echo "Missing SCOUT_CONFIG env var"
   exit 1
