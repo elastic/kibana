@@ -23,7 +23,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiFilePickerClass } from '@elastic/eui/src/components/form/file_picker/file_picker';
-import type { MigrationStepProps } from '../../../../../common/types';
+import type { MigrationSource, MigrationStepProps } from '../../../../../common/types';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { QRadarMitreMappingsData } from '../../../../../../../common/siem_migrations/model/vendor/rules/qradar.gen';
 import { FILE_UPLOAD_ERROR } from '../../../../../common/translations/file_upload_error';
@@ -33,9 +33,10 @@ import { useEnhanceRules } from '../../../../service/hooks/use_enhance_rules';
 import * as i18n from './translations';
 import { EnhancementType, type AddedEnhancement } from './types';
 import { QradarDataInputStep } from '../../types';
+import { useRuleMigrationVendorCopy } from '../../../../hooks/use_rule_migration_vendor_copy';
 
 export const EnhancementsDataInput = React.memo<MigrationStepProps>(
-  ({ dataInputStep, migrationStats }) => {
+  ({ dataInputStep, migrationStats, migrationSource }) => {
     const dataInputStatus = useMemo(
       () => getEuiStepStatus(QradarDataInputStep.Enhancements, dataInputStep),
       [dataInputStep]
@@ -63,7 +64,10 @@ export const EnhancementsDataInput = React.memo<MigrationStepProps>(
           </EuiFlexItem>
           {dataInputStatus === 'current' && migrationStats && (
             <EuiFlexItem>
-              <EnhancementsDataInputContent migrationStats={migrationStats} />
+              <EnhancementsDataInputContent
+                migrationStats={migrationStats}
+                migrationSource={migrationSource}
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -75,10 +79,13 @@ EnhancementsDataInput.displayName = 'EnhancementsDataInput';
 
 interface EnhancementsDataInputContentProps {
   migrationStats: RuleMigrationTaskStats;
+  migrationSource: MigrationSource;
 }
 
 const EnhancementsDataInputContent = React.memo<EnhancementsDataInputContentProps>(
-  ({ migrationStats }) => {
+  ({ migrationStats, migrationSource }) => {
+    const { enhancements } = useRuleMigrationVendorCopy(migrationSource);
+
     const [selectedType, setSelectedType] = useState<EnhancementType>(EnhancementType.MITRE);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [parsedData, setParsedData] = useState<QRadarMitreMappingsData | null>(null);
