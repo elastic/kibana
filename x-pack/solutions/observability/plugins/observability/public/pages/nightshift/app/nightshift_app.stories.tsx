@@ -44,7 +44,7 @@ const NightshiftLandingStory = ({
       <EuiPageTemplate restrictWidth={false}>
         <NightshiftAppHeader
           onSettingsClick={noop}
-          settingsHref="/app/streams/_discovery/settings"
+          settingsHref="/app/significant_events/settings"
         />
         <EuiPageTemplate.Section component="div" color="subdued" restrictWidth="900px">
           <NightshiftApp />
