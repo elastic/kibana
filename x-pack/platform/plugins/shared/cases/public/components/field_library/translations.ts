@@ -253,6 +253,69 @@ export const GLOBAL_FIELD_NO = i18n.translate('xpack.cases.fieldLibrary.globalFi
   defaultMessage: 'No',
 });
 
+export const GLOBAL_FIELDS_SECTION_TITLE = i18n.translate(
+  'xpack.cases.fieldLibrary.globalFieldsSectionTitle',
+  { defaultMessage: 'Applies to every case' }
+);
+
+export const GLOBAL_FIELDS_SECTION_DESCRIPTION = i18n.translate(
+  'xpack.cases.fieldLibrary.globalFieldsSectionDescription',
+  {
+    defaultMessage:
+      'These fields appear on every case, in this order. Drag a field to rearrange it.',
+  }
+);
+
+export const GLOBAL_FIELDS_SECTION_EMPTY = i18n.translate(
+  'xpack.cases.fieldLibrary.globalFieldsSectionEmpty',
+  {
+    defaultMessage:
+      'No fields apply to every case yet. Use a field’s actions menu to add one here.',
+  }
+);
+
+export const TEMPLATE_FIELDS_SECTION_TITLE = i18n.translate(
+  'xpack.cases.fieldLibrary.templateFieldsSectionTitle',
+  { defaultMessage: 'Available in templates' }
+);
+
+export const TEMPLATE_FIELDS_SECTION_DESCRIPTION = i18n.translate(
+  'xpack.cases.fieldLibrary.templateFieldsSectionDescription',
+  { defaultMessage: 'These fields appear only on cases created from a template that uses them.' }
+);
+
+export const TEMPLATE_FIELDS_SECTION_EMPTY = i18n.translate(
+  'xpack.cases.fieldLibrary.templateFieldsSectionEmpty',
+  { defaultMessage: 'No template-only fields yet.' }
+);
+
+export const SEARCH_FIELD_DEFINITIONS = i18n.translate(
+  'xpack.cases.fieldLibrary.searchFieldDefinitions',
+  { defaultMessage: 'Search fields' }
+);
+
+export const FIELD_ACTIONS_MENU = (name: string) =>
+  i18n.translate('xpack.cases.fieldLibrary.fieldActionsMenu', {
+    defaultMessage: 'Actions for {name}',
+    values: { name },
+  });
+
+export const REORDER_FIELD_HANDLE = (name: string) =>
+  i18n.translate('xpack.cases.fieldLibrary.reorderFieldHandle', {
+    defaultMessage: 'Reorder {name}',
+    values: { name },
+  });
+
+export const SAVING_FIELD_ORDER = i18n.translate('xpack.cases.fieldLibrary.savingFieldOrder', {
+  defaultMessage: 'Saving order…',
+});
+
+export const FIELD_MOVED_ANNOUNCEMENT = (name: string, position: number, total: number) =>
+  i18n.translate('xpack.cases.fieldLibrary.fieldMovedAnnouncement', {
+    defaultMessage: 'Moved {name} to position {position} of {total}.',
+    values: { name, position, total },
+  });
+
 export const FIELD_DEFINITIONS_TABLE_CAPTION = i18n.translate(
   'xpack.cases.fieldLibrary.tableCaption',
   {

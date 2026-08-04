@@ -917,6 +917,18 @@ export const FIELD_VALUE_NOT_SET = i18n.translate('xpack.cases.templates.fieldVa
   defaultMessage: 'Not set',
 });
 
+export const ADD_FIELD_VALUE = (label: string) =>
+  i18n.translate('xpack.cases.templates.addFieldValue', {
+    defaultMessage: 'Add {label}',
+    values: { label },
+  });
+
+export const EDIT_FIELD_LABEL = (label: string) =>
+  i18n.translate('xpack.cases.templates.editFieldAriaLabel', {
+    defaultMessage: 'Edit {label}',
+    values: { label },
+  });
+
 export const FIELD_TYPE_TITLE_INPUT_TEXT = i18n.translate(
   'xpack.cases.templates.fieldType.inputText',
   { defaultMessage: 'Text Input' }

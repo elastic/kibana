@@ -7,10 +7,12 @@
 
 import type { EuiCommentProps, EuiThemeComputed } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCommentList,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -118,19 +120,26 @@ export const UserActionsList = React.memo(
       });
     }, []);
 
+    // Some registered attachments share a data-test-subj because it identifies their attachment
+    // type. Keep collapse state scoped to the rendered activity instead, so one attachment cannot
+    // collapse another one of the same type.
+    const collapsibleCommentIds = useMemo(
+      () =>
+        comments.flatMap((comment, index) =>
+          comment.children != null &&
+          comment.className !== 'isEdit' &&
+          comment.className !== 'showMoreActivities'
+            ? [`activity-${index}`]
+            : []
+        ),
+      [comments]
+    );
+
     const collapsibleComments = useMemo(
       () =>
         comments.map((comment, index) => {
-          // Some registered attachments share a data-test-subj because it identifies
-          // their attachment type. Keep collapse state scoped to the rendered activity
-          // instead, so one attachment cannot collapse another one of the same type.
           const commentId = `activity-${index}`;
-          const isCollapsible =
-            comment.children != null &&
-            comment.className !== 'isEdit' &&
-            comment.className !== 'showMoreActivities';
-
-          if (!isCollapsible) {
+          if (!collapsibleCommentIds.includes(commentId)) {
             return comment;
           }
 
@@ -139,25 +148,45 @@ export const UserActionsList = React.memo(
 
           return {
             ...comment,
-            children: (
-              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="flexStart">
+            // The toggle belongs beside the other per-activity controls in the header, not inside
+            // the body: in the body it occupied a column of its own, pushed the content sideways,
+            // and was left stranded next to nothing once the content was hidden.
+            actions: (
+              <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
                     <EuiButtonIcon
                       aria-label={toggleLabel}
+                      aria-expanded={!isCollapsed}
+                      color="text"
                       iconType={isCollapsed ? 'unfold' : 'fold'}
                       onClick={() => toggleComment(commentId)}
                       data-test-subj={`case-user-action-collapse-${index}`}
                     />
                   </EuiToolTip>
                 </EuiFlexItem>
-                {!isCollapsed ? <EuiFlexItem>{comment.children}</EuiFlexItem> : null}
+                {comment.actions ? <EuiFlexItem grow={false}>{comment.actions}</EuiFlexItem> : null}
               </EuiFlexGroup>
             ),
+            // Collapsing all the way to the header makes the row read exactly like the one-line
+            // update events it sits between, so a compacted feed stays visually uniform. The
+            // content is removed rather than clipped, which also keeps it out of the tab order.
+            children: isCollapsed ? undefined : comment.children,
           };
         }),
-      [comments, collapsedCommentIds, toggleComment]
+      [comments, collapsedCommentIds, collapsibleCommentIds, toggleComment]
     );
+
+    const hasCollapsibleComments = collapsibleCommentIds.length > 1;
+    const allCollapsed =
+      hasCollapsibleComments && collapsibleCommentIds.every((id) => collapsedCommentIds.has(id));
+    const allExpanded = collapsibleCommentIds.every((id) => !collapsedCommentIds.has(id));
+
+    const collapseAll = React.useCallback(
+      () => setCollapsedCommentIds(new Set(collapsibleCommentIds)),
+      [collapsibleCommentIds]
+    );
+    const expandAll = React.useCallback(() => setCollapsedCommentIds(new Set()), []);
 
     const commentRenderingContext = useMemo(
       () => ({
@@ -192,6 +221,36 @@ export const UserActionsList = React.memo(
 
     return (
       <CommentRenderingProvider value={commentRenderingContext}>
+        {/* Sits directly above the feed it acts on, so the scope of "all" is never in question. */}
+        {hasCollapsibleComments ? (
+          <>
+            <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="fold"
+                  onClick={collapseAll}
+                  disabled={allCollapsed}
+                  data-test-subj="case-user-actions-collapse-all"
+                >
+                  {i18n.COLLAPSE_ALL_ACTIVITIES}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="unfold"
+                  onClick={expandAll}
+                  disabled={allExpanded}
+                  data-test-subj="case-user-actions-expand-all"
+                >
+                  {i18n.EXPAND_ALL_ACTIVITIES}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </>
+        ) : null}
         <EuiCommentList
           css={getCommentListCss(euiTheme)}
           comments={collapsibleComments}

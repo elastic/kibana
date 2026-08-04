@@ -41,3 +41,13 @@ export const EXPAND_ACTIVITY = i18n.translate(
   'xpack.cases.caseView.redesign.userActions.expandActivity',
   { defaultMessage: 'Expand activity' }
 );
+
+export const COLLAPSE_ALL_ACTIVITIES = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.collapseAllActivities',
+  { defaultMessage: 'Collapse all' }
+);
+
+export const EXPAND_ALL_ACTIVITIES = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.expandAllActivities',
+  { defaultMessage: 'Expand all' }
+);

@@ -67,13 +67,14 @@ export const CaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
             <SidebarToggleButton />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
         <Description
           isLoadingDescription={isLoadingDescription}
           caseData={caseData}
           onUpdateField={onUpdateField}
         />
       </EuiFlexItem>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="l" />
       {(isLoadingUserActionsStats || isLoadingCaseConnectors || isLoadingCaseUsers) && (
         <EuiLoadingSpinner data-test-subj="case-view-loading-content" size="l" />
       )}

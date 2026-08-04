@@ -262,10 +262,13 @@ export const CaseViewAttachments = ({
         )}
         {visibleAttachmentIds.length > 1 && (
           <>
-            <EuiFlexGroup gutterSize="s" responsive={false}>
+            {/* Right-aligned and icon-led, matching the activity feed's equivalent control so the
+                same gesture looks the same on both tabs. */}
+            <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="xs"
+                  iconType="fold"
                   onClick={collapseAllAttachments}
                   disabled={allAttachmentsCollapsed}
                   data-test-subj="case-view-attachments-collapse-all"
@@ -276,6 +279,7 @@ export const CaseViewAttachments = ({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="xs"
+                  iconType="unfold"
                   onClick={expandAllAttachments}
                   disabled={allAttachmentsExpanded}
                   data-test-subj="case-view-attachments-expand-all"

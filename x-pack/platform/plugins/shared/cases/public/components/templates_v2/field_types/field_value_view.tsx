@@ -6,11 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiTextColor, useEuiTheme, useEuiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FieldType } from '../../../../common/types/domain/template/fields';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
-import { getFieldRequirementLabel } from '../../optional_field_label';
+import * as commonI18n from '../../../common/translations';
 import * as i18n from '../translations';
 
 interface FieldValueViewProps {
@@ -63,25 +63,25 @@ const getUserNames = (value: unknown): string[] => {
     : [];
 };
 
-const getValueText = (field: InlineField, value: unknown): string => {
+const getValueText = (field: InlineField, value: unknown): string | undefined => {
   if (field.control === FieldType.TOGGLE) {
     if (value === true || value === 'true') return i18n.TOGGLE_ON;
     if (value === false || value === 'false') return i18n.TOGGLE_OFF;
-    return i18n.FIELD_VALUE_NOT_SET;
+    return undefined;
   }
 
   if (field.control === FieldType.CHECKBOX_GROUP) {
     const selectedValues = getSelectedValues(value);
-    return selectedValues.length > 0 ? selectedValues.join(', ') : i18n.FIELD_VALUE_NOT_SET;
+    return selectedValues.length > 0 ? selectedValues.join(', ') : undefined;
   }
 
   if (field.control === FieldType.USER_PICKER) {
     const userNames = getUserNames(value);
-    return userNames.length > 0 ? userNames.join(', ') : i18n.FIELD_VALUE_NOT_SET;
+    return userNames.length > 0 ? userNames.join(', ') : undefined;
   }
 
   if (value === undefined || value === null || value === '') {
-    return i18n.FIELD_VALUE_NOT_SET;
+    return undefined;
   }
 
   return String(value);
@@ -94,50 +94,147 @@ export const FieldValueView: React.FC<FieldValueViewProps> = ({
   isRequiredOnClose,
   onEdit,
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const xsFontSize = useEuiFontSize('xs');
+  const sFontSize = useEuiFontSize('s');
+
   const valueText = useMemo(() => getValueText(field, value), [field, value]);
+  const label = field.label ?? field.name;
   const isTextValue =
     field.control === FieldType.INPUT_TEXT || field.control === FieldType.TEXTAREA;
 
+  const styles = useMemo(
+    () => ({
+      // The row itself is the edit control. A per-row "Edit" button turns a sidebar of eight
+      // fields into a column of eight identical blue links that outweigh the values they sit
+      // beside; making the value clickable removes the chrome and halves the targeting work.
+      row: css`
+        display: flex;
+        align-items: flex-start;
+        gap: ${euiTheme.size.s};
+        inline-size: calc(100% + ${euiTheme.size.base});
+        margin-inline: -${euiTheme.size.s};
+        padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+        border: none;
+        border-radius: ${euiTheme.border.radius.small};
+        background: transparent;
+        text-align: start;
+        color: inherit;
+      `,
+      interactiveRow: css`
+        cursor: pointer;
+
+        &:hover,
+        &:focus-visible {
+          background: ${euiTheme.colors.backgroundBaseInteractiveHover};
+        }
+
+        &:hover .templateFieldEditAffordance,
+        &:focus-visible .templateFieldEditAffordance {
+          opacity: 1;
+        }
+      `,
+      // Label sits directly above its value at a smaller scale, so proximity and contrast — not a
+      // divider — say which value belongs to which label.
+      label: css`
+        display: flex;
+        align-items: center;
+        gap: ${euiTheme.size.xs};
+        font-size: ${xsFontSize.fontSize};
+        line-height: ${xsFontSize.lineHeight};
+        font-weight: ${euiTheme.font.weight.medium};
+        color: ${euiTheme.colors.textSubdued};
+      `,
+      requirement: css`
+        font-size: ${xsFontSize.fontSize};
+        font-weight: ${euiTheme.font.weight.regular};
+        color: ${euiTheme.colors.textWarning};
+      `,
+      value: css`
+        margin-block-start: ${euiTheme.size.xxs};
+        font-size: ${sFontSize.fontSize};
+        line-height: ${sFontSize.lineHeight};
+      `,
+      textValue: css`
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+      `,
+      affordance: css`
+        flex-shrink: 0;
+        margin-block-start: ${euiTheme.size.xs};
+        opacity: 0;
+        transition: opacity ${euiTheme.animation.fast};
+        color: ${euiTheme.colors.textSubdued};
+      `,
+    }),
+    [euiTheme, xsFontSize, sFontSize]
+  );
+
+  // "Required" is only actionable while the field is empty; repeating it on filled fields is noise.
+  // "Required on close" is a standing obligation, so it stays regardless.
+  const requirementLabel = isRequiredOnClose
+    ? commonI18n.REQUIRED_ON_CLOSE
+    : isRequired && valueText === undefined
+    ? commonI18n.REQUIRED
+    : undefined;
+
+  const content = (
+    <>
+      <span css={{ minInlineSize: 0, flexGrow: 1 }}>
+        <span css={styles.label}>
+          {label}
+          {requirementLabel ? (
+            <span css={styles.requirement} data-test-subj={`template-field-requirement-${field.name}`}>
+              {requirementLabel}
+            </span>
+          ) : null}
+        </span>
+        <EuiText
+          size="s"
+          data-test-subj={`template-field-value-text-${field.name}`}
+          css={[styles.value, isTextValue ? styles.textValue : undefined]}
+        >
+          {valueText !== undefined ? (
+            valueText
+          ) : (
+            // An empty value states what to do, not just that nothing is there.
+            <EuiTextColor color="subdued">
+              <em>{onEdit ? i18n.ADD_FIELD_VALUE(label) : i18n.FIELD_VALUE_NOT_SET}</em>
+            </EuiTextColor>
+          )}
+        </EuiText>
+      </span>
+      {onEdit ? (
+        <EuiIcon
+          type="pencil"
+          size="s"
+          className="templateFieldEditAffordance"
+          css={styles.affordance}
+        />
+      ) : null}
+    </>
+  );
+
+  if (!onEdit) {
+    return (
+      <div data-test-subj={`template-field-value-${field.name}`} css={styles.row}>
+        {content}
+      </div>
+    );
+  }
+
   return (
-    <div data-test-subj={`template-field-value-${field.name}`}>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <strong>{field.label ?? field.name}</strong>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {getFieldRequirementLabel(isRequired, isRequiredOnClose)}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        {onEdit ? (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="pencil"
-              onClick={onEdit}
-              data-test-subj={`template-field-edit-${field.name}`}
-            >
-              {i18n.EDIT_FIELD}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-      <EuiText
-        size="s"
-        data-test-subj={`template-field-value-text-${field.name}`}
-        css={isTextValue ? css({ overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }) : undefined}
-      >
-        <p>
-          <EuiTextColor color={valueText === i18n.FIELD_VALUE_NOT_SET ? 'subdued' : 'default'}>
-            {valueText}
-          </EuiTextColor>
-        </p>
-      </EuiText>
-    </div>
+    <button
+      type="button"
+      onClick={onEdit}
+      aria-label={i18n.EDIT_FIELD_LABEL(label)}
+      data-test-subj={`template-field-edit-${field.name}`}
+      css={[styles.row, styles.interactiveRow]}
+    >
+      <span data-test-subj={`template-field-value-${field.name}`} css={{ display: 'contents' }}>
+        {content}
+      </span>
+    </button>
   );
 };
 
