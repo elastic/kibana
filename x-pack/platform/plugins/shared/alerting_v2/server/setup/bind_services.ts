@@ -244,7 +244,9 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
           'encryptedSavedObjects'
         )
       );
-      return eso.getClient({ includedHiddenTypes: [ACTION_POLICY_SAVED_OBJECT_TYPE] });
+      return eso.getClient({
+        includedHiddenTypes: [ACTION_POLICY_SAVED_OBJECT_TYPE, API_KEY_PENDING_INVALIDATION_TYPE],
+      });
     })
     .inSingletonScope();
 

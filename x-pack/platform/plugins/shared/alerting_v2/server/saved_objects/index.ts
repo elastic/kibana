@@ -30,9 +30,22 @@ export {
   API_KEY_PENDING_INVALIDATION_TYPE,
 };
 
-export const ActionPolicyAttributesToEncrypt = ['auth.apiKey'];
+export const ActionPolicyAttributesToEncrypt = ['apiKey'];
 
-export const ActionPolicyAttributesIncludedInAAD = ['auth.owner', 'auth.createdByUser'];
+/**
+ * Use caution when removing items from this array! These fields are used to
+ * construct decryption AAD and must remain to prevent decryption failures.
+ */
+export const ActionPolicyAttributesIncludedInAAD = ['apiKeyOwner', 'apiKeyCreatedByUser'];
+
+export type ActionPolicyAttributesNotPartiallyUpdatable =
+  | 'apiKey'
+  | 'apiKeyOwner'
+  | 'apiKeyCreatedByUser';
+
+export type PartiallyUpdateableActionPolicyAttributes = Partial<
+  Omit<ActionPolicySavedObjectAttributes, ActionPolicyAttributesNotPartiallyUpdatable>
+>;
 
 export function registerSavedObjects({
   savedObjects,
@@ -87,6 +100,12 @@ export function registerSavedObjects({
     enforceRandomId: false,
     attributesToEncrypt: new Set(ActionPolicyAttributesToEncrypt),
     attributesToIncludeInAAD: new Set(ActionPolicyAttributesIncludedInAAD),
+  });
+
+  encryptedSavedObjects.registerType({
+    type: API_KEY_PENDING_INVALIDATION_TYPE,
+    attributesToEncrypt: new Set(['apiKeyId', 'uiamApiKey']),
+    attributesToIncludeInAAD: new Set(['createdAt']),
   });
 }
 

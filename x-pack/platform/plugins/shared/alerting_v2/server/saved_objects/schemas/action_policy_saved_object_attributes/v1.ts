@@ -47,11 +47,9 @@ export const actionPolicySavedObjectAttributesSchema = schema.object({
     )
   ),
   snoozedUntil: schema.maybe(schema.nullable(schema.string())),
-  auth: schema.object({
-    apiKey: schema.maybe(schema.string()),
-    owner: schema.string(),
-    createdByUser: schema.boolean(),
-  }),
+  apiKey: schema.maybe(schema.string()),
+  apiKeyOwner: schema.string(),
+  apiKeyCreatedByUser: schema.boolean(),
   createdBy: schema.nullable(schema.string()),
   updatedBy: schema.nullable(schema.string()),
   createdAt: schema.string(),

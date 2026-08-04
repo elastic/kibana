@@ -9,6 +9,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
@@ -30,6 +31,10 @@ describe('ApiKeyInvalidationTaskRunner', () => {
   const savedObjectsClient = savedObjectsClientMock.create();
   const securityStart = securityMock.createStart();
   const securityCore = securityServiceMock.createStart();
+  const encryptedSavedObjectsClient = {
+    getDecryptedAsInternalUser: jest.fn(),
+    createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
+  } as unknown as EncryptedSavedObjectsClient;
 
   let runner: ApiKeyInvalidationTaskRunner;
 
@@ -41,11 +46,12 @@ describe('ApiKeyInvalidationTaskRunner', () => {
       savedObjectsClient,
       securityCore,
       securityStart,
+      encryptedSavedObjectsClient,
       config
     );
   });
 
-  it('calls runInvalidate with correct parameters and no encryptedSavedObjectsClient', async () => {
+  it('calls runInvalidate with correct parameters including encryptedSavedObjectsClient', async () => {
     const result = await runner.run({
       taskInstance: { state: { runs: 0, total_invalidated: 0 } } as never,
       signal: new AbortController().signal,
@@ -60,11 +66,7 @@ describe('ApiKeyInvalidationTaskRunner', () => {
         logger,
         invalidateApiKeyFn: securityStart.authc.apiKeys.invalidateAsInternalUser,
         invalidateUiamApiKeyFn: securityCore.authc.apiKeys.uiam?.invalidate,
-      })
-    );
-    expect(runInvalidate).toHaveBeenCalledWith(
-      expect.not.objectContaining({
-        encryptedSavedObjectsClient: expect.anything(),
+        encryptedSavedObjectsClient,
       })
     );
 
