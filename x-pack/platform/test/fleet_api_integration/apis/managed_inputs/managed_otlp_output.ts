@@ -13,6 +13,12 @@
  * comment anticipated this addition. Enabling `managedOtlpOutput` only in this config keeps
  * the flag scoped to where it is meaningful.
  *
+ * Coverage:
+ *   - Create: grpc happy path, http/protobuf with optional fields, protocol-validation 400s,
+ *     secret round-trip (otlp_exporter.tls.key_pem via .fleet-secrets).
+ *   - Update: otlp_exporter update, ES→OTLP type change, OTLP→ES type change.
+ *   - Delete: ESO secret is removed when the output is deleted.
+ *   - Policy gating: pure-OTel policy accepted, mixed OTel+beats policy rejected.
  */
 
 import expect from '@kbn/expect';
@@ -30,6 +36,8 @@ export default function (providerContext: FtrProviderContext) {
     const supertest = getService('supertest');
     const es = getService('es');
     const kibanaServer = getService('kibanaServer');
+
+    const getSecretById = (id: string) => es.get({ index: '.fleet-secrets', id });
 
     skipIfNoDockerRegistry(providerContext);
 
@@ -189,22 +197,34 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.message).to.contain('[request body.otlp_exporter.tls.1.key_pem]');
       });
 
-      it('stores tls secrets as ESO secret refs and returns them on GET', async () => {
+      it('extracts tls.key_pem as an ESO secret on OTLP create', async () => {
         const { body } = await supertest
           .post('/api/fleet/outputs')
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: `otlp-inline-key-${uuidv4()}`,
+            name: `otlp-secrets-${uuidv4()}`,
             type: 'otlp',
             otlp_exporter: {
               endpoint: 'https://otlp.example.com:4317',
               protocol: 'grpc',
-              tls: { key_pem: 'my-private-key' },
+            },
+            secrets: {
+              otlp_exporter: {
+                tls: { key_pem: 'test-tls-key-pem-value' },
+              },
             },
           })
-          .expect(400);
+          .expect(200);
 
-        expect(body.message).to.contain('[request body.otlp_exporter.tls.1.key_pem]');
+        const { item } = body;
+        const tlsKeyPemSecretId: string = item.secrets?.otlp_exporter?.tls?.key_pem?.id;
+
+        expect(tlsKeyPemSecretId).to.be.a('string');
+
+        const tlsKeyPemSecret = await getSecretById(tlsKeyPemSecretId);
+        expect((tlsKeyPemSecret._source as Record<string, string>).value).to.be(
+          'test-tls-key-pem-value'
+        );
       });
     });
 
@@ -277,6 +297,95 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
 
         expect(body.message).to.contain('non-OTel inputs');
+      });
+
+      it('converts an ES output to OTLP and clears hosts', async () => {
+        const { body: createBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `es-to-otlp-${uuidv4()}`,
+            type: 'elasticsearch',
+            hosts: ['http://localhost:9200'],
+          })
+          .expect(200);
+
+        const { id } = createBody.item;
+
+        const { body: updateBody } = await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+          })
+          .expect(200);
+
+        expect(updateBody.item.type).to.be('otlp');
+        expect(updateBody.item.otlp_exporter).to.eql({
+          endpoint: 'https://otlp.example.com:4317',
+          protocol: 'grpc',
+        });
+        expect(updateBody.item.hosts).to.be(null);
+      });
+
+      it('converts an OTLP output to ES and clears otlp_exporter', async () => {
+        const { body: createBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-to-es-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+          })
+          .expect(200);
+
+        const { id } = createBody.item;
+
+        const { body: updateBody } = await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            type: 'elasticsearch',
+            hosts: ['https://es.example.com:9200'],
+          })
+          .expect(200);
+
+        expect(updateBody.item.type).to.be('elasticsearch');
+        expect(updateBody.item.otlp_exporter).to.be(null);
+        expect(updateBody.item.hosts).to.eql(['https://es.example.com:9200']);
+      });
+    });
+
+    describe('DELETE /api/fleet/outputs/{id}', () => {
+      it('removes the associated ESO secret when an OTLP output is deleted', async () => {
+        const { body: createBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-delete-secrets-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+            secrets: { otlp_exporter: { tls: { key_pem: 'to-be-deleted-key' } } },
+          })
+          .expect(200);
+
+        const { id } = createBody.item;
+        const secretId: string = createBody.item.secrets?.otlp_exporter?.tls?.key_pem?.id;
+        expect(secretId).to.be.a('string');
+
+        // Secret exists before delete
+        await getSecretById(secretId);
+
+        await supertest.delete(`/api/fleet/outputs/${id}`).set('kbn-xsrf', 'xxxx').expect(200);
+
+        // Secret must be cleaned up
+        try {
+          await getSecretById(secretId);
+          throw new Error('Expected ESO secret to be deleted alongside the output');
+        } catch (err) {
+          expect(err.meta?.statusCode).to.be(404);
+        }
       });
     });
 

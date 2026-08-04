@@ -11,14 +11,14 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { Logger } from '@kbn/logging';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
-import { RESERVED_CONFIG_YML_KEYS, SERVERLESS_PRIVATE_OUTPUT_ID } from '../../common/constants';
+import {
+  RESERVED_CONFIG_YML_KEYS,
+  SERVERLESS_DEFAULT_OUTPUT_ID,
+  SERVERLESS_PRIVATE_OUTPUT_ID,
+} from '../../common/constants';
 import type { OutputSOAttributes } from '../types';
 import type { NewElasticsearchOutput } from '../../common/types';
-import {
-  OUTPUT_SAVED_OBJECT_TYPE,
-  SO_SEARCH_LIMIT,
-  SERVERLESS_DEFAULT_OUTPUT_ID,
-} from '../constants';
+import { OUTPUT_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
 
 import { outputService, outputIdToUuid } from './output';
 import { appContextService } from './app_context';
@@ -1533,6 +1533,12 @@ describe('Output Service', () => {
       } as any);
       savedEsoImpl = esoClientMock.getDecryptedAsInternalUser.getMockImplementation();
       esoClientMock.getDecryptedAsInternalUser.mockImplementation(async (type, id) => {
+        if (id === outputIdToUuid(SERVERLESS_DEFAULT_OUTPUT_ID)) {
+          return mockOutputSO(SERVERLESS_DEFAULT_OUTPUT_ID, {
+            type: 'elasticsearch',
+            hosts: [DEFAULT_HOST],
+          });
+        }
         if (id === outputIdToUuid(SERVERLESS_PRIVATE_OUTPUT_ID)) {
           return mockOutputSO(SERVERLESS_PRIVATE_OUTPUT_ID, {
             type: 'elasticsearch',
