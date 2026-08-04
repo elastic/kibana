@@ -11,4 +11,4 @@ export const SLO_COMPOSITE_ENABLED = 'slo.compositeSloEnabled';
 export const OBSERVABILITY_SLO_CPS_ENABLED_FEATURE_FLAG = 'observability.slo.cpsEnabled' as const;
 
 /** Fallback when the flag is unset and no override exists. */
-export const OBSERVABILITY_SLO_CPS_ENABLED_DEFAULT = false;
+export const OBSERVABILITY_SLO_CPS_ENABLED_DEFAULT = true;
