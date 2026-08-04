@@ -6,7 +6,7 @@
  */
 
 import { tags } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt/ui';
+import { expect } from '@kbn/scout/ui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { test } from '../fixtures';
@@ -90,18 +90,8 @@ test.describe(
           [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: false,
         },
       });
-
-      try {
-        await page.gotoApp('significant_events/streams');
-        await expect(page).toHaveURL(/\/app\/streams/, { timeout: 60_000 });
-      } finally {
-        // Restore flag so subsequent tests in this worker are not affected.
-        await apiServices.core.settings({
-          'feature_flags.overrides': {
-            [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
-          },
-        });
-      }
+      await page.gotoApp('significant_events/streams');
+      await expect(page).toHaveURL(/\/app\/streams/, { timeout: 60_000 });
     });
   }
 );
