@@ -7,7 +7,11 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import { getSkillsInstructions } from './utils/skills';
+import {
+  getSkillsInstructions,
+  getRelevantSkillsPointerInstructions,
+  createRelevantSkillsNoticeMessage,
+} from './utils/skills';
 import { convertPreviousRounds } from '../utils/to_langchain_messages';
 import { attachmentToolsInstructions, renderAttachmentPrompt } from './utils/attachments';
 import { structuredOutputDescription } from './utils/custom_instructions';
@@ -29,6 +33,8 @@ export const getResearchAgentPrompt = async (
     resultTransformer,
     toolManager,
     conversationTimestamp,
+    relevantSkillsEnabled,
+    relevantSkills,
   } = params;
 
   // Generate messages from the conversation's rounds, optionally
@@ -42,9 +48,15 @@ export const getResearchAgentPrompt = async (
     conversationTimestamp,
   });
 
+  const relevantSkillsMessages =
+    relevantSkillsEnabled && relevantSkills && relevantSkills.skills.length > 0
+      ? [createRelevantSkillsNoticeMessage(relevantSkills.skills)]
+      : [];
+
   return [
     ['system', await getAgentSystemMessage(params)],
     ...previousRoundsAsMessages,
+    ...relevantSkillsMessages,
     ...(await formatResearcherActionHistory({
       actions,
       cycleLimit,
@@ -59,6 +71,7 @@ const getAgentSystemMessage = async ({
   outputSchema,
   skills,
   experimentalFeatures,
+  relevantSkillsEnabled,
   capabilities,
   renderers,
 }: ResearchAgentPromptParams): Promise<string> => {
@@ -120,7 +133,13 @@ Assume users can't see most tool calls or thinking - only your text output.
 
 ${getFileSystemInstructions({ bashEnabled: experimentalFeatures.bash })}
 
-${experimentalFeatures.skills ? getSkillsInstructions({ skills }) : ''}
+${
+  experimentalFeatures.skills
+    ? relevantSkillsEnabled
+      ? getRelevantSkillsPointerInstructions()
+      : getSkillsInstructions({ skills })
+    : ''
+}
 
 ## INSTRUCTIONS
 
