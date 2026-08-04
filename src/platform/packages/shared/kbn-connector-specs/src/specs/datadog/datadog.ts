@@ -112,6 +112,12 @@ function formatDatadogError(action: string, error: unknown): Error {
 const joinCsv = (values: string[] | undefined): string | undefined =>
   values && values.length > 0 ? values.join(',') : undefined;
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/workflows-eng';
+
 export const Datadog: ConnectorSpec = {
   metadata: {
     id: '.datadog',

@@ -39,6 +39,12 @@ import {
 
 const ODATA_HEADERS = { Accept: 'application/json;odata=nometadata' };
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/workchat-eng';
+
 export const SharepointServer: ConnectorSpec = {
   metadata: {
     id: '.sharepoint-server',

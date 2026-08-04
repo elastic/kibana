@@ -13,6 +13,12 @@ import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 const buildBaseUrl = (ctx: ActionContext): string =>
   `https://${String((ctx.config?.subdomain as string) ?? '').trim()}.zendesk.com/api/v2`;
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/workchat-eng';
+
 export const ZendeskConnector: ConnectorSpec = {
   metadata: {
     id: '.zendesk',

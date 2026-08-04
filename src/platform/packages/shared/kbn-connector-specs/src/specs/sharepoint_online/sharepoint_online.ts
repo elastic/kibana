@@ -49,6 +49,12 @@ const isAppOnlyAuth = (ctx: ActionContext): boolean => {
   return typeof authType === 'string' && APP_ONLY_AUTH_TYPES.has(authType);
 };
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/workchat-eng';
+
 export const SharepointOnline: ConnectorSpec = {
   metadata: {
     id: '.sharepoint-online',

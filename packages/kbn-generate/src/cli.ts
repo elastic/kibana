@@ -15,6 +15,7 @@ import type { ContextExtensions } from './generate_command';
 import { PackageCommand } from './commands/package_command';
 import { CodeownersCommand } from './commands/codeowners_command';
 import { ConnectorCommand } from './commands/connector_command';
+import { ConnectorRegistriesCommand } from './commands/connector_registries_command';
 import { UserActivityActionsDocsCommand } from './commands/user_activity_actions_docs_command';
 
 /**
@@ -30,6 +31,12 @@ export function runGenerateCli() {
         };
       },
     },
-    [PackageCommand, CodeownersCommand, ConnectorCommand, UserActivityActionsDocsCommand]
+    [
+      PackageCommand,
+      CodeownersCommand,
+      ConnectorCommand,
+      ConnectorRegistriesCommand,
+      UserActivityActionsDocsCommand,
+    ]
   ).execute();
 }

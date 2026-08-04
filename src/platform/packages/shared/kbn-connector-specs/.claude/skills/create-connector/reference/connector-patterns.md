@@ -7,27 +7,39 @@ This document describes the file structure and patterns for creating new connect
 Connector specs live in: `src/platform/packages/shared/kbn-connector-specs/src/specs/`
 
 ```
-kbn-connector-specs/src/specs/
-├── all_specs.ts                # Registration file - ADD YOUR SPEC HERE
-├── slack/
-│   ├── slack.ts                # Connector spec
-│   ├── slack.test.ts           # Tests
-│   ├── types.ts                # Zod schemas and inferred types
-│   └── icon/
-│       └── index.tsx           # Brand icon component
-├── github/
-│   ├── github.ts
-│   ├── github.test.ts
-│   ├── types.ts
-│   └── icon/
-│       └── index.tsx
-└── {your_connector}/           # YOUR NEW CONNECTOR
-    ├── {your_connector}.ts
-    ├── {your_connector}.test.ts
-    ├── types.ts
-    └── icon/
-        └── index.tsx
+kbn-connector-specs/src/
+├── all_specs.ts                 # GENERATED — never hand-edit, see Scaffold Generator below
+├── connector_icons_map.ts       # GENERATED — never hand-edit, see Scaffold Generator below
+└── specs/
+    ├── slack/
+    │   ├── slack.ts              # Connector spec (incl. `export const OWNER`, used to generate CODEOWNERS)
+    │   ├── slack.test.ts         # Tests
+    │   ├── types.ts              # Zod schemas and inferred types
+    │   └── icon/
+    │       └── index.tsx         # Brand icon component
+    ├── github/
+    │   ├── github.ts
+    │   ├── github.test.ts
+    │   ├── types.ts
+    │   └── icon/
+    │       └── index.tsx
+    └── {your_connector}/         # YOUR NEW CONNECTOR
+        ├── {your_connector}.ts
+        ├── {your_connector}.test.ts
+        ├── types.ts
+        └── icon/
+            └── index.tsx
 ```
+
+`all_specs.ts`, `connector_icons_map.ts`, and the per-connector ownership block in
+`.github/CODEOWNERS` are all **generated** from whatever connector folders exist under `src/specs/`
+— see `scripts/generate_connector_registries.ts` in this package. They used to be hand-edited (one
+new line appended per connector, in each of the three), which made them frequent merge-conflict
+hotspots: at least twice a manually-resolved TS-file conflict left an unbalanced `lazy(...)` call
+that broke the build, and the CODEOWNERS append logic drifted over several PRs into
+misplaced/misordered entries. Never add or edit an entry in any of them by hand; regenerate them
+instead (see Scaffold Generator below), and a CI-enforced test fails the build if any of the three
+ever drifts from what the generator would produce.
 
 ## Scaffold Generator
 
@@ -37,12 +49,25 @@ For new connectors, run:
 node scripts/generate connector <name> --id ".<id>" --owner "<team>"
 ```
 
-Replace `<team>` with the owning GitHub team. Ask the user if unsure.
+Replace `<team>` with the owning GitHub team. Ask the user if unsure. This writes an
+`export const OWNER = '<team>';` into the connector's spec file — the source of truth the generator
+reads to keep CODEOWNERS in sync.
 
 The generator creates:
-- Connector spec stub, test stub, icon placeholder
+- Connector spec stub (with its `OWNER` export), test stub, icon placeholder
 - Documentation page at `docs/reference/connectors-kibana/`
-- Updates to `all_specs.ts`, `connector_icons_map.ts`, CODEOWNERS, docs TOC
+- Docs TOC entry
+
+And regenerates `all_specs.ts`, `connector_icons_map.ts`, and the CODEOWNERS ownership block from
+scratch (by scanning `src/specs/`) so your new connector's export, icon mapping, and CODEOWNERS
+entry all appear automatically — nothing to hand-edit in any of them.
+
+If you need to regenerate the three artifacts directly (e.g. after renaming or deleting a connector
+folder, or to resolve a merge conflict instead of resolving it by hand), run:
+
+```bash
+node scripts/generate connector-registries
+```
 
 After running the generator, fill in the TODO placeholders.
 
@@ -440,15 +465,12 @@ export default (props: ConnectorIconProps) => {
 
 ### Register the Icon
 
-Add to `src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts`:
+Once `icon/index.tsx` exists in your connector's spec folder, it's picked up automatically the next
+time `connector_icons_map.ts` is regenerated — do **not** hand-add an entry to that file. If you didn't
+use the scaffold generator (e.g. you added the icon after the fact), run:
 
-```typescript
-[
-  '.your_connector',
-  lazy(
-    () => import(/* webpackChunkName: "connectorIconYourConnector" */ './specs/your_connector/icon')
-  ),
-],
+```bash
+node scripts/generate connector-registries
 ```
 
 ## Where to Find Existing Logos
@@ -479,7 +501,10 @@ The following IDs **MUST all match exactly**:
 1. `ConnectorSpec.metadata.id` in the connector spec
 2. Key in `ConnectorIconsMap` in `connector_icons_map.ts`
 
-If a connector already exists with a given ID, use a unique variant (like `.servicenow_search`).
+Since `connector_icons_map.ts` is generated directly from each spec's `metadata.id` (see Scaffold
+Generator above), these two can no longer drift once you regenerate — the only thing to get right is
+the id itself. If a connector already exists with a given ID, use a unique variant (like
+`.servicenow_search`).
 
 ## LLM-Quality Descriptions and Skill Content
 

@@ -177,6 +177,12 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
 }
 
 /**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/workchat-eng';
+
+/**
  * Slack connector using OAuth2 Authorization Code flow (Slack OAuth v2),
  * with an additional temporary bearer token option for local testing.
  *

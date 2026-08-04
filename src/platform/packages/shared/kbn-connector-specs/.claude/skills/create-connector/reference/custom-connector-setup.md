@@ -17,11 +17,15 @@ The generator creates:
 - `docs/reference/connectors-kibana/<kebab-name>-action-type.md` — documentation page
 
 And updates:
-- `src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts` — export
-- `src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts` — icon mapping
-- `.github/CODEOWNERS` — ownership rule
+- `src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts` — **regenerated** (export added)
+- `src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts` — **regenerated** (icon mapping added)
+- `.github/CODEOWNERS` — **regenerated** (ownership rule added, derived from the spec's `OWNER` export)
 - `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md` — third-party connectors list
 - `docs/reference/toc.yml` — table of contents
+
+`all_specs.ts`, `connector_icons_map.ts`, and the CODEOWNERS ownership block are fully regenerated
+from `src/specs/`, not hand-appended to — never edit any of them directly, even to fix a merge
+conflict. See "Register the Icon" in `connector-patterns.md` for the standalone regenerate command.
 
 **Doc placement**: the generator adds the new entry to the third-party
 `data-context-sources-connectors-list.md`/`data-context-sources-connectors.md` list, inside the first

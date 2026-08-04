@@ -59,6 +59,12 @@ const maybeReturnJinaErrorResponse = (err: unknown) => {
   return Promise.reject(err);
 };
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/jinastic';
+
 export const JinaReaderConnector: ConnectorSpec = {
   metadata: {
     id: JINA_READER_CONNECTOR_ID,

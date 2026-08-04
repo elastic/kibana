@@ -30,6 +30,12 @@ import type {
  */
 const MAX_DOWNLOAD_FILE_SIZE_BYTES = 128 * 1024;
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/workchat-eng';
+
 export const AmazonS3: ConnectorSpec = {
   metadata: {
     id: '.amazon_s3',

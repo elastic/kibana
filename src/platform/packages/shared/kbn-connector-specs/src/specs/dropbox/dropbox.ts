@@ -43,6 +43,12 @@ import {
 
 const DROPBOX_MCP_SERVER_URL = 'https://mcp.dropbox.com/mcp';
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/workchat-eng';
+
 export const Dropbox: ConnectorSpec = {
   metadata: {
     id: '.dropbox',

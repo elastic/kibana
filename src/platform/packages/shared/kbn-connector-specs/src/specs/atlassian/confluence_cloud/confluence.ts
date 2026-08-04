@@ -50,6 +50,12 @@ const CONFLUENCE_V2_PREFIX = '/wiki/api/v2';
 /** Default page size when listing spaces or pages and no limit is provided. */
 const DEFAULT_LIST_LIMIT = 25;
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/workchat-eng';
+
 export const ConfluenceCloudConnector: ConnectorSpec = {
   metadata: {
     id: '.confluence-cloud',

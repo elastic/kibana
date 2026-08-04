@@ -64,11 +64,10 @@ node scripts/generate connector my_connector --id ".myConnector" --owner "@elast
 ```
 
 This will:
-- Create `src/specs/my_connector/my_connector.ts` (spec scaffold)
+- Create `src/specs/my_connector/my_connector.ts` (spec scaffold, including an `export const OWNER`)
 - Create `src/specs/my_connector/icon/index.tsx` (placeholder icon component)
-- Update `src/all_specs.ts`
-- Update `src/connector_icons_map.ts`
-- Append a CODEOWNERS rule for the new folder
+- Regenerate `src/all_specs.ts`, `src/connector_icons_map.ts`, and the per-connector ownership
+  block in `.github/CODEOWNERS` from `src/specs/` (see `scripts/generate_connector_registries.ts`)
 
 ### Connector ID constraints
 

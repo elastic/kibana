@@ -479,6 +479,12 @@ const slimTestReport = (report: JenkinsTestReport) => {
 // Connector spec
 // =============================================================================
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/workflows-eng';
+
 export const Jenkins: ConnectorSpec = {
   metadata: {
     id: '.jenkins',

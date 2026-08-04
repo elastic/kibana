@@ -7,62 +7,76 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './specs/abuseipdb/abuseipdb';
-export * from './specs/alienvault_otx/alienvault_otx';
-export * from './specs/atlassian/jira-cloud/jira';
-export * from './specs/atlassian/confluence_cloud/confluence';
-export * from './specs/aws_lambda/aws_lambda';
-export * from './specs/bigquery/bigquery';
-export * from './specs/brave_search/brave_search';
-export * from './specs/databricks/databricks';
-export * from './specs/gcp_cloud_functions/gcp_cloud_functions';
-export * from './specs/figma/figma';
-export * from './specs/github/github';
-export * from './specs/google_calendar/google_calendar';
-export * from './specs/google_drive/google_drive';
-export * from './specs/graphql/graphql';
-export * from './specs/greynoise/greynoise';
-export * from './specs/notion/notion';
-export * from './specs/shodan/shodan';
-export * from './specs/urlvoid/urlvoid';
-export * from './specs/virustotal/virustotal';
-export * from './specs/jina/jina_reader';
-export * from './specs/salesforce/salesforce';
-export * from './specs/servicenow_search/servicenow_search';
-export * from './specs/sharepoint_online/sharepoint_online';
-export * from './specs/slack/slack';
-export * from './specs/azure_blob/azure_blob';
-export * from './specs/gmail/gmail';
-export * from './specs/one_password/one_password';
-export * from './specs/firecrawl/firecrawl';
-export * from './specs/zoom/zoom';
-export * from './specs/zendesk/zendesk';
-export * from './specs/amazon_s3/amazon_s3';
-export * from './specs/hubspot/hubspot';
-export * from './specs/google_cloud_storage/google_cloud_storage';
-export * from './specs/sharepoint_server/sharepoint_server';
-export * from './specs/microsoft_teams/microsoft_teams';
-export * from './specs/monday_com/monday_com';
-export * from './specs/outlook/outlook';
-export * from './specs/tavily/tavily';
-export * from './specs/pagerduty/pagerduty';
-export * from './specs/snowflake/snowflake';
-export * from './specs/box/box';
-export * from './specs/dropbox/dropbox';
-export * from './specs/one_drive/one_drive';
-export * from './specs/ansible_controller/ansible_controller';
-export * from './specs/argocd/argocd';
-export * from './specs/sublime_security/sublime_security';
-export * from './specs/workday/workday';
-export * from './specs/kubernetes/kubernetes';
-export * from './specs/posthog/posthog';
-export * from './specs/new_relic/new_relic';
-export * from './specs/grafana/grafana';
-export * from './specs/rootly/rootly';
-export * from './specs/sentry/sentry';
-export * from './specs/buildkite/buildkite';
-export * from './specs/dynatrace/dynatrace';
-export * from './specs/datadog/datadog';
-export * from './specs/jenkins/jenkins';
-export * from './specs/aws_x_ray/aws_x_ray';
-export * from './specs/prometheus_alertmanager/prometheus_alertmanager';
+/**
+ * GENERATED FILE - DO NOT EDIT BY HAND.
+ *
+ * Barrel file re-exporting every connector spec.
+ * It is derived by scanning `src/specs/` for connector spec definitions.
+ *
+ * To add, remove, or rename a connector, change its source under `src/specs/` and run:
+ *   node scripts/generate connector-registries
+ *
+ * A test in `generate_connector_registries.test.ts` fails CI if this file drifts from what
+ * the generator would produce, so it can never go stale or be hand-edited into an
+ * inconsistent state (e.g. an unbalanced paren from a manually-resolved merge conflict).
+ */
+
+export { OnePasswordConnector } from './specs/one_password/one_password';
+export { AbuseIPDBConnector } from './specs/abuseipdb/abuseipdb';
+export { AlienVaultOTXConnector } from './specs/alienvault_otx/alienvault_otx';
+export { AmazonS3 } from './specs/amazon_s3/amazon_s3';
+export { AnsibleControllerConnector } from './specs/ansible_controller/ansible_controller';
+export { ArgocdConnector } from './specs/argocd/argocd';
+export { AwsLambdaConnector } from './specs/aws_lambda/aws_lambda';
+export { AwsXRay } from './specs/aws_x_ray/aws_x_ray';
+export { AzureBlob } from './specs/azure_blob/azure_blob';
+export { BigQuery } from './specs/bigquery/bigquery';
+export { Box } from './specs/box/box';
+export { BraveSearchConnector } from './specs/brave_search/brave_search';
+export { Buildkite } from './specs/buildkite/buildkite';
+export { ConfluenceCloudConnector } from './specs/atlassian/confluence_cloud/confluence';
+export { Databricks } from './specs/databricks/databricks';
+export { Datadog } from './specs/datadog/datadog';
+export { Dropbox } from './specs/dropbox/dropbox';
+export { Dynatrace } from './specs/dynatrace/dynatrace';
+export { FigmaConnector } from './specs/figma/figma';
+export { FirecrawlConnector } from './specs/firecrawl/firecrawl';
+export { GcpCloudFunctionsConnector } from './specs/gcp_cloud_functions/gcp_cloud_functions';
+export { GithubConnector } from './specs/github/github';
+export { GmailConnector } from './specs/gmail/gmail';
+export { GoogleCalendar } from './specs/google_calendar/google_calendar';
+export { GoogleCloudStorageConnector } from './specs/google_cloud_storage/google_cloud_storage';
+export { GoogleDriveConnector } from './specs/google_drive/google_drive';
+export { Grafana } from './specs/grafana/grafana';
+export { GraphQLConnector } from './specs/graphql/graphql';
+export { GreyNoiseConnector } from './specs/greynoise/greynoise';
+export { HubSpotConnector } from './specs/hubspot/hubspot';
+export { Jenkins } from './specs/jenkins/jenkins';
+export { JinaReaderConnector } from './specs/jina/jina_reader';
+export { JiraConnector } from './specs/atlassian/jira-cloud/jira';
+export { KubernetesConnector } from './specs/kubernetes/kubernetes';
+export { MicrosoftTeams } from './specs/microsoft_teams/microsoft_teams';
+export { MondayCom } from './specs/monday_com/monday_com';
+export { NewRelic } from './specs/new_relic/new_relic';
+export { NotionConnector } from './specs/notion/notion';
+export { OneDrive } from './specs/one_drive/one_drive';
+export { Outlook } from './specs/outlook/outlook';
+export { PagerdutyConnector } from './specs/pagerduty/pagerduty';
+export { PostHog } from './specs/posthog/posthog';
+export { PrometheusAlertmanager } from './specs/prometheus_alertmanager/prometheus_alertmanager';
+export { Rootly } from './specs/rootly/rootly';
+export { SalesforceConnector } from './specs/salesforce/salesforce';
+export { Sentry } from './specs/sentry/sentry';
+export { ServicenowSearch } from './specs/servicenow_search/servicenow_search';
+export { SharepointOnline } from './specs/sharepoint_online/sharepoint_online';
+export { SharepointServer } from './specs/sharepoint_server/sharepoint_server';
+export { ShodanConnector } from './specs/shodan/shodan';
+export { Slack } from './specs/slack/slack';
+export { Snowflake } from './specs/snowflake/snowflake';
+export { SublimeSecurityConnector } from './specs/sublime_security/sublime_security';
+export { TavilyConnector } from './specs/tavily/tavily';
+export { URLVoidConnector } from './specs/urlvoid/urlvoid';
+export { VirusTotalConnector } from './specs/virustotal/virustotal';
+export { Workday } from './specs/workday/workday';
+export { ZendeskConnector } from './specs/zendesk/zendesk';
+export { Zoom } from './specs/zoom/zoom';

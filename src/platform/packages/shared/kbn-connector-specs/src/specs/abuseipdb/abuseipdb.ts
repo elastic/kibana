@@ -23,6 +23,12 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/workflows-eng';
+
 export const AbuseIPDBConnector: ConnectorSpec = {
   metadata: {
     id: '.abuseipdb',

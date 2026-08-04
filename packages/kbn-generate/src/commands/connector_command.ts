@@ -13,6 +13,7 @@ import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { ESLint } from 'eslint';
+import { writeConnectorRegistries } from '@kbn/connector-specs/codegen';
 
 import type { GenerateCommand } from '../generate_command';
 import { ask } from '../lib/ask';
@@ -23,17 +24,6 @@ const CONNECTORS_ROOT = Path.resolve(
   'src/platform/packages/shared/kbn-connector-specs/src/specs'
 );
 
-const ICONS_MAP_FILE = Path.resolve(
-  REPO_ROOT,
-  'src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts'
-);
-
-const ALL_SPECS_FILE = Path.resolve(
-  REPO_ROOT,
-  'src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts'
-);
-
-const CODEOWNERS_FILE = Path.resolve(REPO_ROOT, '.github/CODEOWNERS');
 const DOCS_DIR = Path.resolve(REPO_ROOT, 'docs/reference/connectors-kibana');
 // `elastic-connectors-list.md` / `elastic-connectors.md` are reserved for the small, fixed set of
 // Kibana-native connectors (Cases, Index, ServerLog, Obs AI Assistant). Every connector scaffolded
@@ -144,6 +134,7 @@ export const ConnectorCommand: GenerateCommand = {
         id: connectorId,
         displayName,
         className,
+        owner,
       },
     });
     log.info('Wrote', Path.relative(REPO_ROOT, specIndexPath));
@@ -181,96 +172,17 @@ export const ConnectorCommand: GenerateCommand = {
     });
     log.info('Wrote', Path.relative(REPO_ROOT, docsFilePath));
 
-    // update connector_icons_map.ts
-    {
-      const content = await Fsp.readFile(ICONS_MAP_FILE, 'utf8');
-      const entry = `  [
-    '${connectorId}',
-    lazy(
-      () =>
-        import(
-          /* webpackChunkName: "connectorIcon${connectorName
-            .replace(/(^\\w|[-_]\\w)/g, (m) => m.replace(/[-_]/, '').toUpperCase())
-            .replace(/[^a-zA-Z0-9]/g, '')}" */ './specs/${connectorName}/icon'
-        )
-    ),
-  ],`;
-      if (content.includes(`'${connectorId}'`)) {
-        log.info('Icon mapping already exists for', connectorId);
-      } else {
-        const insertPoint = content.lastIndexOf(']');
-        const updated =
-          content.slice(0, insertPoint) +
-          (content[insertPoint - 1] === '[' ? '' : '\n') +
-          entry +
-          '\n' +
-          content.slice(insertPoint);
-        await Fsp.writeFile(ICONS_MAP_FILE, updated);
-        log.info('Updated', Path.relative(REPO_ROOT, ICONS_MAP_FILE));
-      }
-    }
-
-    // update all_specs.ts
-    {
-      const relExport = `export * from './specs/${connectorName}/${connectorName}';`;
-      const content = await Fsp.readFile(ALL_SPECS_FILE, 'utf8');
-      if (!content.includes(relExport)) {
-        const updated = content.trimEnd() + '\n' + relExport + '\n';
-        await Fsp.writeFile(ALL_SPECS_FILE, updated);
-        log.info('Updated', Path.relative(REPO_ROOT, ALL_SPECS_FILE));
-      } else {
-        log.info('Export already exists in', Path.relative(REPO_ROOT, ALL_SPECS_FILE));
-      }
-    }
-
-    // append to CODEOWNERS: insert within the # Connector Specs section, alphabetically
-    // Each connector gets its own line to allow different team ownership
-    {
-      const content = await Fsp.readFile(CODEOWNERS_FILE, 'utf8');
-      const line = `src/platform/packages/shared/kbn-connector-specs/src/specs/${connectorName}/** ${owner}`;
-      if (content.includes(line)) {
-        log.info('CODEOWNERS already has rule for', connectorName);
-      } else {
-        const lines = content.split('\n');
-        let inConnectorSpecsSection = false;
-        let insertAt = -1;
-        let lastSpecsIdx = -1;
-
-        for (let i = 0; i < lines.length; i++) {
-          const trimmed = lines[i].trim();
-          if (trimmed === '# Connector Specs') {
-            inConnectorSpecsSection = true;
-            continue;
-          }
-          if (!inConnectorSpecsSection) continue;
-          // Stop at the next section header
-          if (trimmed.startsWith('#') && trimmed.length > 1) break;
-
-          const m = trimmed.match(
-            /^src\/platform\/packages\/shared\/kbn-connector-specs\/src\/specs\/([^/]+)\//
-          );
-          if (m) {
-            lastSpecsIdx = i;
-            if (insertAt === -1 && m[1] > connectorName) {
-              insertAt = i;
-            }
-          }
-        }
-
-        // No alphabetically later entry — append after the last specs/** line
-        if (insertAt === -1 && lastSpecsIdx !== -1) {
-          insertAt = lastSpecsIdx + 1;
-        }
-
-        if (insertAt !== -1) {
-          lines.splice(insertAt, 0, line);
-          await Fsp.writeFile(CODEOWNERS_FILE, lines.join('\n'));
-          log.info('Updated', Path.relative(REPO_ROOT, CODEOWNERS_FILE));
-        } else {
-          log.warning('Could not find # Connector Specs section in CODEOWNERS');
-        }
-      }
-    }
+    // Regenerate connector_icons_map.ts, all_specs.ts, and the per-connector ownership block in
+    // CODEOWNERS from src/specs/ (rather than hand-splicing an entry into each). All three are
+    // generated and CI-checked precisely so that many connector PRs landing concurrently no
+    // longer produce merge conflicts or misplaced entries on hand-maintained append points — the
+    // freshly-scaffolded connector's spec/icon files (which already declare `OWNER` above) just
+    // need to exist on disk beforehand; this call picks them up automatically. See
+    // `@kbn/connector-specs/codegen` for details.
+    const registryEntries = await writeConnectorRegistries();
+    log.info(
+      `Regenerated all_specs.ts, connector_icons_map.ts, and CODEOWNERS (${registryEntries.length} connectors)`
+    );
 
     // update snippet file (data-context-sources-connectors-list.md)
     {
@@ -352,7 +264,11 @@ export const ConnectorCommand: GenerateCommand = {
       }
     }
 
-    // update toc.yml (add to the data-context-sources-connectors section)
+    // update toc.yml (add to the data-context-sources-connectors section, alphabetically among
+    // its existing children by doc slug — mirrors the snippet-file alphabetical insertion above.
+    // Appending unconditionally here previously let entries drift out of order whenever connector
+    // PRs landed concurrently (e.g. "posthog" ended up after "prometheus-alertmanager"), the same
+    // failure mode the CODEOWNERS/all_specs.ts generation fixes addressed elsewhere in this package.
     {
       const content = await Fsp.readFile(TOC_FILE, 'utf8');
       const docEntry = `connectors-kibana/${kebabName}-action-type.md`;
@@ -361,54 +277,62 @@ export const ConnectorCommand: GenerateCommand = {
         log.info('TOC already references', kebabName);
       } else {
         const lines = content.split('\n');
-        let insertAt = -1;
+        const sectionIdx = lines.findIndex((l) => l.includes(`file: ${TOC_SECTION_FILE}`));
 
-        // Find the data-context-sources-connectors section and its children
-        for (let i = 0; i < lines.length; i++) {
-          if (lines[i].includes(`file: ${TOC_SECTION_FILE}`)) {
-            // Found the section, look for the children block
-            let childIndent = '';
-            for (let j = i + 1; j < lines.length; j++) {
-              const currentIndent = lines[j].match(/^(\s*)/)?.[1] || '';
+        if (sectionIdx === -1) {
+          log.warning('Could not find data-context-sources-connectors section in TOC');
+        } else {
+          let childIndent = '';
+          let insertAt = -1;
+          let lastChildIdx = -1;
 
-              // First, find the children: line
-              if (lines[j].trim() === 'children:') {
-                continue;
-              }
+          for (let j = sectionIdx + 1; j < lines.length; j++) {
+            const trimmed = lines[j].trim();
+            const currentIndent = lines[j].match(/^(\s*)/)?.[1] || '';
 
-              // Capture the indentation of the first child
-              if (!childIndent && lines[j].trim().startsWith('- file:')) {
-                childIndent = currentIndent;
+            if (trimmed === 'children:') continue;
+
+            if (!childIndent && trimmed.startsWith('- file:')) {
+              childIndent = currentIndent;
+            }
+
+            if (!childIndent) continue;
+
+            if (currentIndent.length < childIndent.length) {
+              // We've outdented, meaning we left the children section
+              break;
+            }
+            if (currentIndent !== childIndent || !trimmed.startsWith('- file:')) {
+              continue;
+            }
+
+            lastChildIdx = j;
+            if (insertAt === -1) {
+              const existingSlug = trimmed.match(/connectors-kibana\/([^/]+)-action-type\.md/)?.[1];
+              if (existingSlug && existingSlug > kebabName) {
                 insertAt = j;
-                continue;
-              }
-
-              // If we have child indent, only consider lines at the same level
-              if (childIndent) {
-                if (currentIndent === childIndent && lines[j].trim().startsWith('- file:')) {
-                  insertAt = j;
-                } else if (currentIndent.length < childIndent.length) {
-                  // We've outdented, meaning we left the children section
-                  break;
-                }
               }
             }
-            break;
           }
-        }
 
-        if (insertAt !== -1) {
-          const indentation = lines[insertAt].match(/^(\s*)/)?.[1] || '          ';
-          lines.splice(insertAt + 1, 0, `${indentation}- file: ${docEntry}`);
-          await Fsp.writeFile(TOC_FILE, lines.join('\n'));
-          log.info('Updated', Path.relative(REPO_ROOT, TOC_FILE));
-        } else {
-          log.warning('Could not find appropriate location in TOC to insert connector doc');
+          // No alphabetically later entry found: append after the last child.
+          if (insertAt === -1 && lastChildIdx !== -1) {
+            insertAt = lastChildIdx + 1;
+          }
+
+          if (insertAt !== -1) {
+            lines.splice(insertAt, 0, `${childIndent}- file: ${docEntry}`);
+            await Fsp.writeFile(TOC_FILE, lines.join('\n'));
+            log.info('Updated', Path.relative(REPO_ROOT, TOC_FILE));
+          } else {
+            log.warning('Could not find appropriate location in TOC to insert connector doc');
+          }
         }
       }
     }
 
-    // run eslint --fix on the generated connector folder and updated spec/icon maps
+    // run eslint --fix on the scaffolded connector folder. all_specs.ts and connector_icons_map.ts
+    // are already prettier-formatted by the registry generator above and don't need linting.
     {
       log.info('Linting generated connector files');
       const eslint = new ESLint({
@@ -417,9 +341,7 @@ export const ConnectorCommand: GenerateCommand = {
         fix: true,
         extensions: ['.js', '.mjs', '.ts', '.tsx'],
       });
-      await ESLint.outputFixes(
-        await eslint.lintFiles([connectorDir, ICONS_MAP_FILE, ALL_SPECS_FILE])
-      );
+      await ESLint.outputFixes(await eslint.lintFiles([connectorDir]));
     }
 
     log.success(`Connector scaffolded at ${Path.relative(REPO_ROOT, connectorDir)}`);

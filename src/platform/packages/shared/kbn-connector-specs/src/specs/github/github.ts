@@ -64,6 +64,12 @@ import {
 
 const GITHUB_MCP_SERVER_URL = 'https://api.githubcopilot.com/mcp/';
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/workchat-eng';
+
 export const GithubConnector: ConnectorSpec = {
   metadata: {
     id: '.github',

@@ -17,6 +17,12 @@ const FILE_PATH_PREFIXES = ['design', 'file', 'board', 'proto', 'slides'] as con
 const FILE_PATH_PREFIX_SET: Set<string> = new Set(FILE_PATH_PREFIXES);
 const FILE_KEY_REGEX = /^[0-9a-zA-Z_-]+$/;
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/workchat-eng';
+
 export const FigmaConnector: ConnectorSpec = {
   metadata: {
     id: '.figma',

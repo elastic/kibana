@@ -48,12 +48,15 @@ Create the connector spec in `src/platform/packages/shared/kbn-connector-specs/s
 
 Follow the patterns in [reference/connector-patterns.md](reference/connector-patterns.md):
 
-1. **`{connector_name}.ts`** — ConnectorSpec definition with metadata, auth, schema, and actions
+1. **`{connector_name}.ts`** — ConnectorSpec definition with metadata, auth, schema, and actions,
+   plus an `export const OWNER = '@elastic/team';` declaration for the owning team
 2. **`types.ts`** — Zod input schemas and inferred TypeScript types for each action
 3. **`{connector_name}.test.ts`** — Unit tests
 4. **`icon/index.tsx`** — Brand icon component
 
-Register in `src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts` and `connector_icons_map.ts`.
+Run `node scripts/generate connector-registries` to register the spec in `all_specs.ts`, its icon in
+`connector_icons_map.ts`, and its `OWNER` in `.github/CODEOWNERS` — all three are generated from
+`src/specs/`, so never hand-edit them (see [reference/connector-patterns.md](reference/connector-patterns.md)).
 
 ### `supportedFeatureIds` on a brand-new connector: two-step release
 

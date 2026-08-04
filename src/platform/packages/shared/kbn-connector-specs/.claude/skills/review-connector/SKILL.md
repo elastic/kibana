@@ -69,8 +69,13 @@ Use this skill when reviewing or preparing changes to a **connector spec** (spec
   For fields where the user must enter their own value (e.g. tenant-specific URLs), use `placeholder` in
   `overrides.meta` instead of a `default`. For fields that should never be edited (e.g. fixed OAuth endpoints, scopes),
   use both a `default` and `{ hidden: true }`. Flag any visible auth field that has a `default` without `{ hidden: true }`.
-- Spec is exported from `all_specs.ts`. Do not add unused/cargo-culted flags; only set flags the platform or this
-  connector actually uses.
+- Spec is exported from `all_specs.ts`, its icon is registered in `connector_icons_map.ts`, and its
+  `OWNER` export is reflected in `.github/CODEOWNERS`. All three are generated from `src/specs/`
+  (see `scripts/generate_connector_registries.ts`) — a CI test fails if any of them drifts from what
+  the generator produces, so a passing CI run already confirms they're consistent. If CI is red on
+  that test (most often after a hand-resolved merge conflict), tell the author to run
+  `node scripts/generate connector-registries` and commit the result, rather than hand-editing any of them.
+  Do not add unused/cargo-culted flags; only set flags the platform or this connector actually uses.
 - **Input schemas & types**: Action input schemas and their `z.infer<>` types must live in a separate
   `types.ts` file alongside the spec (not inline in the spec file, and not as `as` casts in handlers).
   Handlers must be typed with the inferred type (e.g. `handler: async (ctx, input: SearchInput) => {}`),
@@ -229,9 +234,11 @@ Report documentation issues alongside code issues.
 - Directory and file names follow repo conventions (snake_case for dirs/files; camelCase for TS exports)
 - Connector IDs don't collide with existing ones. If a connector already exists for the same product, use
   a distinct ID (e.g. `.servicenow_search`)
-- **CODEOWNERS section**: The connector's entry must appear in `# Connector Specs`, inserted
-  alphabetically among the other `src/platform/packages/shared/kbn-connector-specs/src/specs/**`
-  lines, not in `# Connector Agent Skills` or any other section. Flag misplacement.
+- **CODEOWNERS section**: the per-connector lines between `# BEGIN GENERATED CONNECTOR OWNERS` and
+  `# END GENERATED CONNECTOR OWNERS` are generated from each spec file's `export const OWNER = '@elastic/team';`
+  (see `generate_connector_registries.ts`) — don't hand-edit them, and don't flag their placement/order.
+  Instead, check that the connector's spec file declares the intended `OWNER`, and that
+  `node scripts/generate connector-registries --check` passes (CI enforces this).
 - If the PR changes behavior that could affect existing callers, document why and address backwards compatibility in
   the PR description
 - **TypeScript** (touched files): Use strict equality (`===` / `!==`), follow repo style (early returns, explicit

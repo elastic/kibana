@@ -18,6 +18,7 @@
     "@kbn/tooling-log",
     "@kbn/repo-packages",
     "@kbn/projects-solutions-groups",
+    "@kbn/connector-specs",
   ],
   "exclude": [
     "target/**/*",
