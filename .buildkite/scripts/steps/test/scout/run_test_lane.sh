@@ -319,7 +319,12 @@ upload_report_events() {
 get_config_status() {
   local config="$1" s
   for s in "${SKIPPED[@]+"${SKIPPED[@]}"}"; do [[ "$s" == "$config" ]] && echo "skipped" && return; done
-  for s in "${PASSED[@]+"${PASSED[@]}"}"; do [[ "$s" == "$config"* ]] && echo "passed" && return; done
+  for s in "${PASSED[@]+"${PASSED[@]}"}"; do
+    if [[ "$s" == "$config"* ]]; then
+      [[ "$s" == *"⚠️"* ]] && echo "passed (⚠️ Flaky)" || echo "passed"
+      return
+    fi
+  done
   for s in "${FAILED[@]+"${FAILED[@]}"}"; do [[ "$s" == "$config" ]] && echo "failed" && return; done
   echo "unknown"
 }
@@ -349,10 +354,13 @@ print_summary() {
   echo "  Server config set: $SCOUT_TEST_SERVER_CONFIG_SET"
   echo ""
   echo "Test count by status:"
-  [[ ${#PASSED[@]}   -gt 0 ]] && echo "✅  Passed: ${#PASSED[@]}"
+  if [[ ${#PASSED[@]} -gt 0 ]]; then
+    local passed_suffix=""
+    [[ "$TOTAL_FLAKY" -gt 0 ]] && passed_suffix=" (⚠️ $TOTAL_FLAKY Flaky)"
+    echo "✅  Passed: ${#PASSED[@]}${passed_suffix}"
+  fi
   [[ ${#FAILED[@]}   -gt 0 ]] && echo "❌  Failed: ${#FAILED[@]}"
   [[ ${#SKIPPED[@]}  -gt 0 ]] && echo "⏩️ Skipped: ${#SKIPPED[@]}"
-  [[ "$TOTAL_FLAKY" -gt 0 ]] && echo "⚠️  Flaky: $TOTAL_FLAKY"
   echo ""
   echo "Test loads ran in the following order:"
   echo ""
