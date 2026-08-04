@@ -11,8 +11,13 @@ import React, { useRef, type MouseEvent } from 'react';
 import { upperFirst } from 'lodash';
 import { EuiButton, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { getRouterLinkProps } from '@kbn/router-utils';
-import { createReturnFocus, getIsSelectedColor, getTooltip, isDisabled } from '../utils';
+import {
+  createReturnFocus,
+  getIsSelectedColor,
+  getLinkProps,
+  getTooltip,
+  isDisabled,
+} from '../utils';
 import { AppMenuPopover } from './app_menu_popover';
 import { SplitButtonWithNotification } from './split_button_with_notification';
 import type { AppMenuPrimaryActionItem, AppMenuSplitButtonProps } from '../types';
@@ -101,11 +106,11 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     });
   };
 
-  const routerLinkProps =
-    href && run ? getRouterLinkProps({ href, onClick: handleClick }) : { onClick: handleClick };
+  const linkProps =
+    href && run ? getLinkProps({ href, onClick: handleClick }) : { onClick: handleClick };
 
   const commonProps = {
-    ...routerLinkProps,
+    ...linkProps,
     id: htmlId,
     'data-test-subj': testId || getAppMenuActionButtonTestSubj(id),
     iconType,
