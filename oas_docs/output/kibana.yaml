@@ -23807,7 +23807,7 @@ paths:
           name: product_name
   /api/exception_lists:
     delete:
-      description: |-
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exception_lists</span></div>
@@ -23815,6 +23815,10 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Delete an exception list using the `id` or `list_id` field.
+
+        Before deleting an exception list that is linked to detection rules, remove or unlink the
+        exception list from those rules. Deleting a linked exception list can leave rules referencing
+        an exception list that no longer exists.
       operationId: DeleteExceptionList
       parameters:
         - description: Exception list's identifier. Either `id` or `list_id` must be specified.
