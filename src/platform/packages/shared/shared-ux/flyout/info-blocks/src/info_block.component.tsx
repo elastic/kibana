@@ -16,6 +16,18 @@ export interface InfoBlockProps extends InfoBlockItem {
   compressed?: boolean;
 }
 
+const styles = {
+  block: css`
+    min-width: 0;
+  `,
+  // Links in custom values track the value's own weight.
+  value: css`
+    a {
+      font-weight: inherit;
+    }
+  `,
+};
+
 /** Fixed-style title/value block used by {@link InfoBlock}. */
 export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
   title,
@@ -32,6 +44,7 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
   // Primitive values get built-in single-line truncation.
   const isTextValue = typeof value === 'string' || typeof value === 'number';
 
+  // Inline: the font scale resolves per item, so it never repeats across blocks.
   const valueStyle: CSSProperties = valueFontSize
     ? {
         fontSize: valueFontSize.fontSize,
@@ -41,21 +54,11 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
     : { fontWeight: euiTheme.font.weight.bold };
 
   return (
-    <div data-test-subj={rest['data-test-subj'] ?? 'infoBlock'} style={{ minWidth: 0 }}>
+    <div data-test-subj={rest['data-test-subj'] ?? 'infoBlock'} css={styles.block}>
       <EuiText size="xs" color="subdued">
         <EuiTextTruncate text={title} />
       </EuiText>
-      <EuiText
-        size="s"
-        color={color}
-        // Keep links in custom values aligned with the computed value weight.
-        css={css`
-          a {
-            font-weight: inherit;
-          }
-        `}
-        style={valueStyle}
-      >
+      <EuiText size="s" color={color} css={styles.value} style={valueStyle}>
         {isTextValue ? <EuiTextTruncate text={String(value)} /> : value}
       </EuiText>
     </div>

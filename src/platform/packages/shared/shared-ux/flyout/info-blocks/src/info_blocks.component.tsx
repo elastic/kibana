@@ -12,8 +12,8 @@ import { css } from '@emotion/react';
 import { EuiPanel, useEuiMemoizedStyles } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { FLYOUT_MIN_CELL_WIDTH, FLYOUT_MAX_GRID_COLUMNS } from '@kbn/shared-ux-flyout-common';
-import type { InfoBlocksProps } from './types';
 import { InfoBlock } from './info_block.component';
+import type { InfoBlocksProps } from './types';
 
 const CONTAINER_NAME = 'infoBlocks';
 
@@ -22,11 +22,12 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
   const oneColumnBelow = 2 * FLYOUT_MIN_CELL_WIDTH; // 280
   const color = euiTheme.border.color;
   const thickness = euiTheme.border.width.thin;
-  // Horizontal divider insets keep the line off the rounded card corners.
+  // Keeps dividers clear of the panel's rounded corners.
   const cornerGap = euiTheme.size.base;
+  // Container-wide, so a row separator stays continuous across a partial row; 2px covers the borders.
+  const rowLineWidth = `calc(100cqw - ${cornerGap} * 2 - 2px)`;
 
   return {
-    // Bare wrapper so container-type measures the same box as MetadataPairs (no border offset).
     wrapper: css`
       container-type: inline-size;
       container-name: ${CONTAINER_NAME};
@@ -34,19 +35,14 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
 
     panel: css`
       display: grid;
+      grid-template-columns: repeat(${FLYOUT_MAX_GRID_COLUMNS}, minmax(0, 1fr));
 
-      /* Every cell needs position: relative so its absolute pseudo-elements stay inside it. */
       & > * {
         position: relative;
         min-width: 0;
       }
 
-      /*
-       * Pseudo-element shells — defined once, present on every cell.
-       * ::before  = vertical divider on the inline-end edge
-       * ::after   = horizontal divider on the block-end edge
-       * display and inset-inline-* are overridden per column state below.
-       */
+      /* ::before is the column divider on each cell's inline-end edge. */
       & > *::before {
         content: '';
         position: absolute;
@@ -56,45 +52,35 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
         background-color: ${color};
         display: block;
       }
+
+      /* ::after is the row separator, drawn on the block-start edge by each row's first cell. */
       & > *::after {
         content: '';
         position: absolute;
-        inset-block-end: 0;
-        inset-inline-start: 0;
-        inset-inline-end: 0;
+        inset-block-start: 0;
+        inset-inline-start: ${cornerGap};
+        inline-size: ${rowLineWidth};
         block-size: ${thickness};
         background-color: ${color};
-        display: block;
+        display: none;
       }
 
       /* ── 3-column state (default) ── */
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-
-      /* Vertical divider: hide on trailing column. */
       & > :nth-child(3n)::before {
         display: none;
       }
-
-      /* Horizontal divider: hide for the ~last row (:nth-last-child is exact when the last
-         row is full; it hides one extra item per missing cell when the last row is partial). */
-      & > :nth-last-child(-n + 3)::after {
-        display: none;
-      }
-
-      /* Corner insets — first and last columns only; middle columns keep the 0/0 default. */
       & > :nth-child(3n + 1)::after {
-        inset-inline-start: ${cornerGap};
+        display: block;
       }
-      & > :nth-child(3n)::after {
-        inset-inline-end: ${cornerGap};
+      & > :nth-child(1)::after {
+        display: none;
       }
 
       /* ── 2-column state ── */
       @container ${CONTAINER_NAME} (width < ${twoColumnBelow}px) {
         grid-template-columns: repeat(2, minmax(0, 1fr));
 
-        /* :nth-child(n) matches every item at the same specificity as :nth-child(3n), so
-           the container-query rule wins by source order, resetting the 3-col hide. */
+        /* :nth-child(n) resets every cell at equal specificity; the exceptions below win on order. */
         & > :nth-child(n)::before {
           display: block;
         }
@@ -103,19 +89,13 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
         }
 
         & > :nth-child(n)::after {
-          display: block;
-        }
-        & > :nth-last-child(-n + 2)::after {
           display: none;
         }
-
         & > :nth-child(2n + 1)::after {
-          inset-inline-start: ${cornerGap};
-          inset-inline-end: 0;
+          display: block;
         }
-        & > :nth-child(2n)::after {
-          inset-inline-start: 0;
-          inset-inline-end: ${cornerGap};
+        & > :nth-child(1)::after {
+          display: none;
         }
       }
 
@@ -126,42 +106,75 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
         & > :nth-child(n)::before {
           display: none;
         }
-
-        /* Full-width divider with corner insets on both sides. */
         & > :nth-child(n)::after {
           display: block;
-          inset-inline-start: ${cornerGap};
-          inset-inline-end: ${cornerGap};
         }
-        & > :nth-last-child(1)::after {
+        & > :nth-child(1)::after {
           display: none;
         }
       }
     `,
 
     /*
-     * Applied only when hasLeadingSpacer is active: forces the 2nd item to the first
-     * column of the next row so the first item occupies a single cell with its dividers
-     * intact. Written as a separate style so it can be conditionally composed via css array.
+     * The panel's own ::before is a grid item reserving the rest of row 1, so the first block
+     * stands alone. Every later block shifts one column over, which the selectors below mirror.
      */
     leadingSpacer: css`
-      & > :nth-child(2) {
-        grid-column-start: 1;
-        grid-row-start: 2;
+      &::before {
+        content: '';
+        grid-column: 2 / -1;
+        grid-row: 1;
       }
 
+      /* ── 3-column state ── row 1 holds only the first block, so rows now start at 2, 5, 8… */
+      & > :nth-child(3n + 1)::before {
+        display: none;
+      }
+      & > :nth-child(3n + 1)::after {
+        display: none;
+      }
+      & > :nth-child(3n + 2)::after {
+        display: block;
+      }
+      /* The block before the spacer keeps its column divider. */
+      & > :nth-child(1)::before {
+        display: block;
+      }
+
+      /* ── 2-column state ── rows start at 2, 4, 6… */
       @container ${CONTAINER_NAME} (width < ${twoColumnBelow}px) {
-        & > :nth-child(2) {
-          grid-column-start: 1;
-          grid-row-start: 2;
+        & > :nth-child(n)::before {
+          display: block;
+        }
+        & > :nth-child(2n + 1)::before {
+          display: none;
+        }
+        & > :nth-child(1)::before {
+          display: block;
+        }
+
+        & > :nth-child(n)::after {
+          display: none;
+        }
+        & > :nth-child(2n)::after {
+          display: block;
         }
       }
 
-      /* Single column: items flow naturally; no forced placement needed. */
+      /* ── 1-column state ── a single column has no room to reserve. */
       @container ${CONTAINER_NAME} (width < ${oneColumnBelow}px) {
-        & > :nth-child(2) {
-          grid-column-start: 1;
-          grid-row-start: auto;
+        &::before {
+          content: none;
+        }
+
+        & > :nth-child(n)::before {
+          display: none;
+        }
+        & > :nth-child(n)::after {
+          display: block;
+        }
+        & > :nth-child(1)::after {
+          display: none;
         }
       }
     `,
