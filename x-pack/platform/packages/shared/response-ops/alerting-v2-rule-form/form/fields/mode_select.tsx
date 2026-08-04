@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
+import {
+  EuiCheckableCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleKind } from '@kbn/alerting-v2-schemas';
 
@@ -45,56 +53,72 @@ const SIGNAL_DESCRIPTION = i18n.translate(
 
 const MODE_OPTIONS: Array<{
   value: RuleKind;
-  inputDisplay: string;
-  dropdownDisplay: React.ReactNode;
+  title: string;
+  description: string;
 }> = [
   {
     value: 'alert',
-    inputDisplay: ALERT_TITLE,
-    dropdownDisplay: (
-      <>
-        <strong>{ALERT_TITLE}</strong>
-        <EuiText size="s" color="subdued">
-          <p>{ALERT_DESCRIPTION}</p>
-        </EuiText>
-      </>
-    ),
+    title: ALERT_TITLE,
+    description: ALERT_DESCRIPTION,
   },
   {
     value: 'signal',
-    inputDisplay: SIGNAL_TITLE,
-    dropdownDisplay: (
-      <>
-        <strong>{SIGNAL_TITLE}</strong>
-        <EuiText size="s" color="subdued">
-          <p>{SIGNAL_DESCRIPTION}</p>
-        </EuiText>
-      </>
-    ),
+    title: SIGNAL_TITLE,
+    description: SIGNAL_DESCRIPTION,
   },
 ];
 
 /**
  * Presentational Mode select. Switches a rule between `alert` (stateful lifecycle)
- * and `signal` (stateless detection) modes. Each option renders its title and a
- * description in the dropdown.
+ * and `signal` (stateless detection) modes. Uses radio-style checkable cards so the
+ * consequence of each mode is legible before the user commits (and so #812 can lift
+ * this control onto the Outcome step with minimal churn).
  */
 export const ModeSelect = ({
   value,
   onChange,
   disabled = false,
-  compressed = false,
   'data-test-subj': dataTestSubj = 'ruleV2ModeSelect',
-}: ModeSelectProps) => (
-  <EuiFormRow label={LABEL_TEXT} fullWidth>
-    <EuiSuperSelect<RuleKind>
-      options={MODE_OPTIONS}
-      valueOfSelected={value}
-      onChange={onChange}
-      disabled={disabled}
-      compressed={compressed}
-      fullWidth
-      data-test-subj={dataTestSubj}
-    />
-  </EuiFormRow>
-);
+}: ModeSelectProps) => {
+  const radioGroupId = useGeneratedHtmlId({ prefix: 'ruleV2ModeSelect' });
+
+  return (
+    <EuiFormRow label={LABEL_TEXT} fullWidth data-test-subj={dataTestSubj}>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        role="radiogroup"
+        aria-label={LABEL_TEXT}
+        id={radioGroupId}
+      >
+        {MODE_OPTIONS.map((option) => {
+          const optionId = `${radioGroupId}-${option.value}`;
+          return (
+            <EuiFlexItem key={option.value} grow={false}>
+              <EuiCheckableCard
+                id={optionId}
+                data-test-subj={`${dataTestSubj}-${option.value}`}
+                label={
+                  <>
+                    <EuiText size="s">
+                      <strong>{option.title}</strong>
+                    </EuiText>
+                    <EuiSpacer size="xs" />
+                    <EuiText size="xs" color="subdued">
+                      {option.description}
+                    </EuiText>
+                  </>
+                }
+                checkableType="radio"
+                name={radioGroupId}
+                checked={value === option.value}
+                disabled={disabled}
+                onChange={() => onChange(option.value)}
+              />
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
+    </EuiFormRow>
+  );
+};

@@ -32,6 +32,7 @@ import { inlineEsqlVariables } from '../../utils/esql_rule_utils';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import { ConfirmRuleClose } from '../confirm_rule_close';
+import { ConfirmSignalMerge } from './confirm_signal_merge';
 import type { FormValues, RuleNotificationsValue, RuleQuery } from '../../form/types';
 import { getBreachQuery } from '../../form/utils/query_helpers';
 import { enterManualSplitQuery, exitManualSplitQuery } from './manual_split_query';
@@ -369,6 +370,7 @@ export function ComposeDiscoverFlyout({
 
   const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues });
   const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);
+  const [isConfirmSignalMergeVisible, setIsConfirmSignalMergeVisible] = useState(false);
   /*
    * EuiFlyout with session="start" uses EUI's managed flyout system, which
    * calls closeAllFlyouts() synchronously (via flushSync) *before* invoking
@@ -604,41 +606,62 @@ export function ComposeDiscoverFlyout({
     }
   }, [flyoutKey, dispatch]);
 
+  const applySignalKindChange = useCallback(() => {
+    // Assemble from committed query — discards any unapplied sandbox edits cleanly.
+    const assembled = getBreachQuery(methods.getValues('query'));
+    const standalone: RuleQuery = {
+      format: 'standalone',
+      breach: { query: assembled },
+    };
+    setSandboxQuery(standalone);
+    methods.setValue('query', standalone, { shouldDirty: true });
+    // Keep noDataStrategy in form state so alert↔signal round-trips can restore a
+    // still-valid choice when the query shape supports it; mappers omit it for signal.
+    methods.setValue('recoveryStrategy', undefined, { shouldDirty: true });
+    methods.setValue('kind', 'signal', { shouldDirty: true });
+    dispatch({ type: 'KIND_CHANGE', kind: 'signal' });
+  }, [methods, dispatch]);
+
   const handleKindChange = useCallback(
     (kind: 'signal' | 'alert') => {
       if (kind === 'alert') {
-        const full = getBreachQuery(methods.getValues('query'));
         /*
-         * A query with no alert condition (no_where) maps to a standalone breach
-         * query (every row is a breach); a real split yields a composed query.
+         * Do not re-split. Switching back from signal leaves the query as a
+         * single block (issue #820 / #812 corollary). Remap no-data only when
+         * the current value is invalid for the current query shape.
          */
-        const alertQuery = splitResultToRuleQuery(full).query;
+        const alertQuery = methods.getValues('query');
         setSandboxQuery(alertQuery);
-        methods.setValue('query', alertQuery, { shouldDirty: true });
         const currentNoData = methods.getValues('noDataStrategy');
         const resolvedNoData = resolveNoDataStrategyForQuery(currentNoData, alertQuery.format);
         if (resolvedNoData !== currentNoData) {
           methods.setValue('noDataStrategy', resolvedNoData, { shouldDirty: true });
         }
         methods.setValue('recoveryStrategy', 'no_breach', { shouldDirty: true });
-      } else {
-        // Assemble from committed query — discards any unapplied sandbox edits cleanly.
-        const assembled = getBreachQuery(methods.getValues('query'));
-        const standalone: RuleQuery = {
-          format: 'standalone',
-          breach: { query: assembled },
-        };
-        setSandboxQuery(standalone);
-        methods.setValue('query', standalone, { shouldDirty: true });
-        // Keep noDataStrategy in form state so alert↔signal round-trips preserve a
-        // still-valid choice; request mappers omit it for signal rules.
-        methods.setValue('recoveryStrategy', undefined, { shouldDirty: true });
+        methods.setValue('kind', 'alert', { shouldDirty: true });
+        dispatch({ type: 'KIND_CHANGE', kind: 'alert' });
+        return;
       }
-      methods.setValue('kind', kind, { shouldDirty: true });
-      dispatch({ type: 'KIND_CHANGE', kind });
+
+      const currentQuery = methods.getValues('query');
+      if (currentQuery.format === 'composed') {
+        // Split query is not representable as a signal rule — confirm before merging.
+        setIsConfirmSignalMergeVisible(true);
+        return;
+      }
+      applySignalKindChange();
     },
-    [methods, dispatch]
+    [methods, dispatch, applySignalKindChange]
   );
+
+  const handleConfirmSignalMerge = useCallback(() => {
+    setIsConfirmSignalMergeVisible(false);
+    applySignalKindChange();
+  }, [applySignalKindChange]);
+
+  const handleCancelSignalMerge = useCallback(() => {
+    setIsConfirmSignalMergeVisible(false);
+  }, []);
 
   useEffect(() => {
     if (!isBuilderMode) return;
@@ -827,10 +850,7 @@ export function ComposeDiscoverFlyout({
      * base/alert verbatim without running the heuristic.
      */
     const shouldRunHeuristicSplit =
-      currentStep?.id === 'alertCondition' &&
-      !uiState.yamlMode &&
-      isAlert &&
-      !uiState.manualSplitEnabled;
+      currentStep?.id === 'alertCondition' && !uiState.yamlMode && !uiState.manualSplitEnabled;
 
     let queryToCommit: RuleQuery = sandboxQuery;
     if (shouldRunHeuristicSplit) {
@@ -840,6 +860,20 @@ export function ComposeDiscoverFlyout({
       // Manual split with an empty alert condition: fall back to conditionless standalone.
       // The schema rejects composed+empty-segment at save; standalone with no WHERE is valid.
       queryToCommit = { format: 'standalone', breach: { query: queryToCommit.base } };
+    }
+    /*
+     * Signal rules must persist as standalone (schema). Split remains available during
+     * authoring, but Apply collapses any composed result into one query block. The
+     * mode-switch merge modal is the only confirmation — Apply while already on signal
+     * merges silently.
+     */
+    let collapsedForSignal = false;
+    if (!isAlert && queryToCommit.format === 'composed') {
+      queryToCommit = {
+        format: 'standalone',
+        breach: { query: getBreachQuery(queryToCommit) },
+      };
+      collapsedForSignal = true;
     }
     setSandboxQuery(queryToCommit);
 
@@ -865,6 +899,9 @@ export function ComposeDiscoverFlyout({
     }
     dispatch({ type: 'COMMIT_QUERY' });
     manualSplitUncommittedRef.current = false;
+    if (collapsedForSignal) {
+      dispatch({ type: 'DISABLE_MANUAL_SPLIT' });
+    }
     if (!uiState.yamlMode) {
       dispatch({ type: 'CLOSE_CHILD' });
     }
@@ -1045,11 +1082,7 @@ export function ComposeDiscoverFlyout({
    * Alert Condition step only — not shown on recovery or later steps.
    */
   const sandboxHelpText =
-    isAlert &&
-    !isBuilderMode &&
-    !uiState.yamlMode &&
-    supportsUnifiedEditorToggle &&
-    isAlertConditionStep ? (
+    !isBuilderMode && !uiState.yamlMode && supportsUnifiedEditorToggle && isAlertConditionStep ? (
       uiState.manualSplitEnabled ? (
         <EuiText size="s" color="subdued" data-test-subj="querySandboxManualSplitHelper">
           <FormattedMessage
@@ -1121,7 +1154,6 @@ export function ComposeDiscoverFlyout({
       isBuilderMode ||
       uiState.yamlMode ||
       !supportsUnifiedEditorToggle ||
-      !isAlert ||
       currentStep?.id !== 'alertCondition'
     ) {
       return undefined;
@@ -1138,7 +1170,6 @@ export function ComposeDiscoverFlyout({
     uiState.yamlMode,
     supportsUnifiedEditorToggle,
     uiState.manualSplitEnabled,
-    isAlert,
     currentStep?.id,
     handleEnableManualSplit,
     handleDisableManualSplit,
@@ -1313,6 +1344,12 @@ export function ComposeDiscoverFlyout({
           </EuiFlyout>
           {isConfirmCloseVisible && (
             <ConfirmRuleClose onCancel={handleCancelDiscard} onConfirm={handleConfirmDiscard} />
+          )}
+          {isConfirmSignalMergeVisible && (
+            <ConfirmSignalMerge
+              onCancel={handleCancelSignalMerge}
+              onConfirm={handleConfirmSignalMerge}
+            />
           )}
         </>
       </FormProvider>

@@ -66,17 +66,19 @@ export const createInitialState = ({
 /**
  * Returns the tabs to show in the Sandbox for the current step.
  *
+ * Query-authoring tabs (base/alert) are kind-agnostic — split is a property of
+ * the query text, not of alert vs signal. Recovery tabs remain alert-only
+ * because signal rules have no recovery step (`getStepIds(false)`).
+ *
  * create/edit/clone + alertCondition + manualSplitEnabled → ['base', 'alert']
- * create/edit/clone + alertCondition                      → undefined (unified editor; create runs heuristic on Apply)
- * isAlert + recoveryCondition  + custom                 → ['recovery']
+ * create/edit/clone + alertCondition                      → undefined (unified editor; heuristic on Apply)
+ * alert + recoveryCondition + custom                      → ['recovery']
  * everything else                                         → undefined (single editor)
  */
 export function getSandboxTabs(
   isAlert: boolean,
   state: Pick<ComposeDiscoverState, 'step' | 'recoveryType' | 'mode' | 'manualSplitEnabled'>
 ): QueryTab[] | undefined {
-  if (!isAlert) return undefined;
-
   const stepId = getStepIds(isAlert)[state.step];
 
   if (stepId === 'alertCondition') {

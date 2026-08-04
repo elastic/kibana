@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { RuleQuery } from '../../../form/types';
+import type { RuleKind, RuleQuery } from '../../../form/types';
 import {
   EsqlQuerySummarySection,
   getEsqlSummaryState,
@@ -40,6 +40,7 @@ describe('getEsqlSummaryState', () => {
     description: string;
     queryCommitted: boolean;
     query: RuleQuery;
+    forceUnified?: boolean;
     expected: EsqlSummaryState;
   }> = [
     {
@@ -73,10 +74,16 @@ describe('getEsqlSummaryState', () => {
       expected: 'empty',
     },
     {
-      description: 'no_alert_condition for standalone with breach query (every row is a breach)',
+      description: 'no_alert_condition for standalone without an alert condition',
       queryCommitted: true,
       query: standaloneQuery(BASE),
       expected: 'no_alert_condition',
+    },
+    {
+      description: 'success for standalone with a WHERE alert condition (no STATS)',
+      queryCommitted: true,
+      query: standaloneQuery('FROM logs-* | WHERE c > 3'),
+      expected: 'success',
     },
     {
       description: 'empty for standalone with empty breach query',
@@ -84,11 +91,21 @@ describe('getEsqlSummaryState', () => {
       query: standaloneQuery(''),
       expected: 'empty',
     },
+    {
+      description: 'success for composed query when forceUnified (signal) and text has WHERE',
+      queryCommitted: true,
+      query: composedQuery(BASE, ALERT_SEGMENT),
+      forceUnified: true,
+      expected: 'success',
+    },
   ];
 
-  it.each(cases)('$description → $expected', ({ queryCommitted, query, expected }) => {
-    expect(getEsqlSummaryState(queryCommitted, query)).toBe(expected);
-  });
+  it.each(cases)(
+    '$description → $expected',
+    ({ queryCommitted, query, forceUnified, expected }) => {
+      expect(getEsqlSummaryState(queryCommitted, query, { forceUnified })).toBe(expected);
+    }
+  );
 
   /*
    * Callout priority is encoded by getEsqlSummaryState branch order:
@@ -105,12 +122,13 @@ describe('getEsqlSummaryState', () => {
 });
 
 describe('EsqlQuerySummarySection callouts', () => {
-  const renderSection = (queryCommitted: boolean, query: RuleQuery) =>
+  const renderSection = (queryCommitted: boolean, query: RuleQuery, kind: RuleKind = 'alert') =>
     render(
       <IntlProvider locale="en">
         <EsqlQuerySummarySection
           query={query}
           queryCommitted={queryCommitted}
+          kind={kind}
           isEditorOpen={false}
           onOpenEditor={jest.fn()}
         />
@@ -143,5 +161,22 @@ describe('EsqlQuerySummarySection callouts', () => {
     renderSection(true, composedQuery(BASE, ALERT_SEGMENT));
     expect(screen.queryByTestId('esqlSummaryEmptyCallout')).not.toBeInTheDocument();
     expect(screen.queryByTestId('esqlSummaryNoAlertConditionCallout')).not.toBeInTheDocument();
+  });
+
+  it('renders the no-alert-condition callout copy', () => {
+    renderSection(true, composedQuery(BASE, ''));
+    expect(screen.getByText('No alert condition')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Without an alert condition, every row returned by the base query is treated as a breach.'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('always shows a single query block for signal kind, never a guessed split', () => {
+    renderSection(true, composedQuery(BASE, ALERT_SEGMENT), 'signal');
+    expect(screen.getByText('Query')).toBeInTheDocument();
+    expect(screen.queryByText('Base query')).not.toBeInTheDocument();
+    expect(screen.queryByText('Alert condition')).not.toBeInTheDocument();
   });
 });

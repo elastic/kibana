@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import type { RuleQuery } from '../../../form/types';
-import { getBreachQuery } from '../../../form/utils/query_helpers';
 
 const QUERY_REQUIRED_ERROR = i18n.translate(
   'xpack.alertingV2.composeDiscover.validation.queryRequiredError',
@@ -19,26 +18,23 @@ const QUERY_REQUIRED_ERROR = i18n.translate(
  * RHF `rules.validate` for the committed query field.
  * Returns `true` when valid, otherwise an i18n error message.
  *
- * Alert kind: valid if the query has a non-empty source (base for composed,
+ * Kind-agnostic: valid if the query has a non-empty source (base for composed,
  * breach.query for standalone). The alert segment is optional — conditionless
  * rules are valid per the schema.
  */
 export const validateCommittedQuery = (
   query: RuleQuery,
-  kind: RuleKind,
+  _kind: RuleKind,
   queryCommitted: boolean
 ): true | string => {
   if (!queryCommitted) {
     return QUERY_REQUIRED_ERROR;
   }
-  if (kind === 'alert') {
-    const hasContent =
-      query.format === 'composed'
-        ? query.base.trim().length > 0
-        : query.breach.query.trim().length > 0;
-    return hasContent ? true : QUERY_REQUIRED_ERROR;
-  }
-  return getBreachQuery(query).trim().length > 0 ? true : QUERY_REQUIRED_ERROR;
+  const hasContent =
+    query.format === 'composed'
+      ? query.base.trim().length > 0
+      : query.breach.query.trim().length > 0;
+  return hasContent ? true : QUERY_REQUIRED_ERROR;
 };
 
 /** Shared boolean gate for footer submit / step helpers. */

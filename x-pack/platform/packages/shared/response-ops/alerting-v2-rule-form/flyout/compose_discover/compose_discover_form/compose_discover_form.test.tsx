@@ -9,7 +9,7 @@ import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -413,10 +413,14 @@ describe('shell shared fields', () => {
     expect(screen.queryByText('Lookback Window')).not.toBeInTheDocument();
   });
 
+  const getModeRadio = (kind: 'alert' | 'signal') =>
+    within(screen.getByTestId(`composeDiscoverModeSelect-${kind}`)).getByRole('radio');
+
   it('disables ModeSelect when query is not committed', () => {
     renderShell({ step: 0, queryCommitted: false });
 
-    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
+    expect(getModeRadio('alert')).toBeDisabled();
+    expect(getModeRadio('signal')).toBeDisabled();
   });
 
   it('disables ModeSelect in edit mode', () => {
@@ -433,18 +437,21 @@ describe('shell shared fields', () => {
       { wrapper: createComposeFormWrapper({ ...BASE_COMPOSE_VALUES }, services) }
     );
 
-    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
+    expect(getModeRadio('alert')).toBeDisabled();
+    expect(getModeRadio('signal')).toBeDisabled();
   });
 
   it('enables ModeSelect in create mode when query is committed and sandbox is closed', () => {
     renderShell({ step: 0, queryCommitted: true, childOpen: false });
 
-    expect(screen.getByTestId('composeDiscoverModeSelect')).not.toBeDisabled();
+    expect(getModeRadio('alert')).not.toBeDisabled();
+    expect(getModeRadio('signal')).not.toBeDisabled();
   });
 
   it('disables ModeSelect when sandbox is open', () => {
     renderShell({ step: 0, queryCommitted: true, childOpen: true });
 
-    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
+    expect(getModeRadio('alert')).toBeDisabled();
+    expect(getModeRadio('signal')).toBeDisabled();
   });
 });

@@ -58,6 +58,16 @@ describe('committed query validation', () => {
         )
       ).toBe(false);
     });
+
+    it('returns true for a signal rule with a composed query that has a base (kind-agnostic)', () => {
+      expect(
+        isCommittedQueryValid(
+          { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
+          'signal',
+          true
+        )
+      ).toBe(true);
+    });
   });
 
   describe('validateCommittedQuery', () => {

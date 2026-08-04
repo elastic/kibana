@@ -11,19 +11,18 @@ const FROM_QUERY_PATTERN = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i;
 
 /**
  * Returns the ES|QL query used to resolve index date fields for time-field
- * selection. Uses the base query in alert (tracking) mode and the full breach
- * query in signal mode. Standalone alerts have no base, so they fall back to
- * the breach query (FROM is still extracted before field caps). Empty when the
+ * selection. Prefers the composed base when present; otherwise the standalone
+ * breach query (FROM is still extracted before field caps). Kind-agnostic —
+ * composed queries can exist during authoring for either mode. Empty when the
  * query is not committed or has no FROM.
  */
 export function getTimeFieldResolutionQuery(
   query: RuleQuery,
-  isAlert: boolean,
+  _isAlert: boolean,
   queryCommitted: boolean
 ): string {
   const baseQuery = query.format === 'composed' ? query.base : '';
   const fullQuery = query.format === 'standalone' ? query.breach.query : '';
-  // Prefer composed base for alerts; standalone alerts only have breach.query.
-  const candidate = isAlert ? baseQuery || fullQuery : fullQuery;
+  const candidate = baseQuery || fullQuery;
   return FROM_QUERY_PATTERN.test(candidate) && queryCommitted ? candidate : '';
 }

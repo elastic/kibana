@@ -24,10 +24,14 @@ describe('getTimeFieldResolutionQuery', () => {
     expect(getTimeFieldResolutionQuery(composedQuery, true, true)).toBe(composedQuery.base);
   });
 
-  it('returns the breach query in signal mode when committed', () => {
+  it('returns the breach query for standalone signal rules when committed', () => {
     expect(getTimeFieldResolutionQuery(standaloneQuery, false, true)).toBe(
       standaloneQuery.breach.query
     );
+  });
+
+  it('returns the composed base for signal rules during authoring when committed', () => {
+    expect(getTimeFieldResolutionQuery(composedQuery, false, true)).toBe(composedQuery.base);
   });
 
   it('returns the breach query for standalone alert rules when committed', () => {

@@ -1570,6 +1570,9 @@ describe('ComposeDiscoverFlyout', () => {
       act(() => {
         getLatestFormProps().onKindChange('signal');
       });
+      act(() => {
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      });
 
       expect(readRecoveryStrategy?.()).toBeUndefined();
     });
@@ -1581,13 +1584,16 @@ describe('ComposeDiscoverFlyout', () => {
         getLatestFormProps().onKindChange('signal');
       });
       act(() => {
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      });
+      act(() => {
         getLatestFormProps().onKindChange('alert');
       });
 
       expect(readRecoveryStrategy?.()).toBe('no_breach');
     });
 
-    it('preserves a valid noDataStrategy across an alert→signal→alert round-trip', () => {
+    it('preserves noDataStrategy in form state when switching to signal (mappers omit it)', () => {
       const rule = {
         ...ruleWithRecoveryStrategy,
         no_data_strategy: 'recover' as const,
@@ -1599,40 +1605,104 @@ describe('ComposeDiscoverFlyout', () => {
       act(() => {
         getLatestFormProps().onKindChange('signal');
       });
-      // Left in form state so mappers can omit it for signal without losing the choice.
-      expect(readNoDataStrategy?.()).toBe('recover');
-
+      // Confirm merge for composed query
       act(() => {
-        getLatestFormProps().onKindChange('alert');
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
       });
 
-      // Query re-splits to composed (has WHERE), so recover remains valid.
-      expect(readCommittedQuery?.()).toMatchObject({ format: 'composed' });
       expect(readNoDataStrategy?.()).toBe('recover');
+      expect(readCommittedQuery?.()).toMatchObject({ format: 'standalone' });
     });
 
-    it('coerces noDataStrategy to none when switching to alert yields a conditionless standalone query', () => {
+    it('coerces noDataStrategy to none when switching back to alert after a merge left a standalone query', () => {
       const rule = {
         ...ruleWithRecoveryStrategy,
-        query: {
-          format: 'standalone' as const,
-          breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
-        },
-        no_data_strategy: 'last_known_status' as const,
+        no_data_strategy: 'recover' as const,
       };
       renderFlyout({ mode: 'edit', rule: rule as any });
-
-      expect(readNoDataStrategy?.()).toBe('last_known_status');
 
       act(() => {
         getLatestFormProps().onKindChange('signal');
       });
       act(() => {
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      });
+      act(() => {
         getLatestFormProps().onKindChange('alert');
       });
 
+      // No automatic re-split — standalone cannot keep recover.
       expect(readCommittedQuery?.()).toMatchObject({ format: 'standalone' });
       expect(readNoDataStrategy?.()).toBe('none');
+    });
+
+    it('shows a merge confirmation modal when switching to signal with a composed query', () => {
+      renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
+
+      act(() => {
+        getLatestFormProps().onKindChange('signal');
+      });
+
+      expect(screen.getByTestId('alertingV2ConfirmSignalMergeModal')).toBeInTheDocument();
+      // Kind and query unchanged until confirm
+      expect(getLatestFormProps().state).toBeDefined();
+      expect(readCommittedQuery?.()).toMatchObject({ format: 'composed' });
+    });
+
+    it('cancelling the signal merge modal leaves kind and the split query untouched', () => {
+      renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
+
+      act(() => {
+        getLatestFormProps().onKindChange('signal');
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+      });
+
+      expect(screen.queryByTestId('alertingV2ConfirmSignalMergeModal')).not.toBeInTheDocument();
+      expect(readCommittedQuery?.()).toMatchObject({
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: 'WHERE count > 100' },
+      });
+      expect(readRecoveryStrategy?.()).toBe('no_breach');
+    });
+
+    it('confirming the signal merge modal merges to standalone and switches kind', () => {
+      renderFlyout({ mode: 'edit', rule: ruleWithRecoveryStrategy as any });
+
+      act(() => {
+        getLatestFormProps().onKindChange('signal');
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      });
+
+      expect(screen.queryByTestId('alertingV2ConfirmSignalMergeModal')).not.toBeInTheDocument();
+      expect(readCommittedQuery?.()).toMatchObject({ format: 'standalone' });
+      expect(readRecoveryStrategy?.()).toBeUndefined();
+    });
+
+    it('merges silently when switching to signal with an already-unified query', () => {
+      const rule = {
+        ...ruleWithRecoveryStrategy,
+        query: {
+          format: 'standalone' as const,
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        },
+      };
+      renderFlyout({ mode: 'edit', rule: rule as any });
+
+      act(() => {
+        getLatestFormProps().onKindChange('signal');
+      });
+
+      expect(screen.queryByTestId('alertingV2ConfirmSignalMergeModal')).not.toBeInTheDocument();
+      expect(readCommittedQuery?.()).toEqual({
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | WHERE count > 100' },
+      });
+      expect(readRecoveryStrategy?.()).toBeUndefined();
     });
 
     it('keeps noDataStrategy as none when re-applying an unchanged conditionless standalone query', () => {

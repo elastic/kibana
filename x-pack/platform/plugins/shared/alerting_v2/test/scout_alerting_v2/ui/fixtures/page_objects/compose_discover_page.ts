@@ -6,7 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { EuiSuperSelectWrapper, KibanaCodeEditorWrapper } from '@kbn/scout';
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
 
 export class ComposeDiscoverPage {
   public readonly flyout: Locator;
@@ -16,20 +16,9 @@ export class ComposeDiscoverPage {
   /** YAML-mode save button (non-representable rules such as alert + standalone). */
   public readonly yamlSubmitButton: Locator;
   /**
-   * "Open query editor" — visible on the Alert Condition step in signal
-   * (non-alert) mode when no query has been committed yet.
-   */
-  public readonly openEditorButton: Locator;
-  /**
-   * "Edit query" — visible on the Alert Condition step when a query is committed
-   * in signal (non-alert) mode.
-   */
-  public readonly editQueryButton: Locator;
-  /**
-   * Edit CTA in the alert-mode query summary on the Alert Condition step. Labeled
+   * Edit CTA in the query summary on the Alert Condition step. Labeled
    * "Open query editor" before a query is applied and "Edit query" afterwards; both
-   * render the same test subject. Replaces the legacy base/alert "Edit queries" button —
-   * create now uses a single unified editor and the heuristic split runs on Apply.
+   * render the same test subject for alert and signal modes.
    */
   public readonly alertSummaryEditorButton: Locator;
   public readonly sandboxCloseButton: Locator;
@@ -52,26 +41,28 @@ export class ComposeDiscoverPage {
   public readonly modeSelect: Locator;
   /**
    * Callout shown after Apply when the query has a base but no alert condition
-   * (no WHERE) — the whole query is treated as the breach query (every row breaches).
+   * (no WHERE) — informational for both alert and signal modes.
    */
   public readonly noAlertConditionCallout: Locator;
   /** Callout shown after Apply when the query is empty. */
   public readonly emptyQueryCallout: Locator;
+  /** Confirmation modal when switching to Signal with a split (composed) query. */
+  public readonly signalMergeModal: Locator;
+  public readonly signalMergeConfirmButton: Locator;
+  public readonly signalMergeCancelButton: Locator;
+  public readonly sandboxSettingsButton: Locator;
+  public readonly splitBaseAndAlertButton: Locator;
 
   private readonly codeEditor: KibanaCodeEditorWrapper;
-  private readonly modeSuperSelect: EuiSuperSelectWrapper;
 
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
-    this.modeSuperSelect = new EuiSuperSelectWrapper(page, 'composeDiscoverModeSelect');
 
     this.flyout = this.page.locator('[aria-labelledby="composeDiscoverFlyoutTitle"]');
     this.nextButton = this.page.testSubj.locator('composeDiscoverNext');
     this.backButton = this.page.testSubj.locator('composeDiscoverBack');
     this.submitButton = this.page.testSubj.locator('composeDiscoverSubmit');
     this.yamlSubmitButton = this.page.testSubj.locator('composeDiscoverYamlSubmit');
-    this.openEditorButton = this.page.testSubj.locator('composeDiscoverOpenEditor');
-    this.editQueryButton = this.page.testSubj.locator('composeDiscoverEditQuery');
     this.alertSummaryEditorButton = this.page.testSubj.locator('esqlSummaryOpenEditor');
     this.sandboxCloseButton = this.page.testSubj.locator('querySandboxClose');
     this.sandboxSearchButton = this.page.testSubj.locator('composeDiscoverRunQuery');
@@ -93,6 +84,11 @@ export class ComposeDiscoverPage {
     this.createEsqlRuleCard = this.page.testSubj.locator('createEsqlRuleCard');
     this.noAlertConditionCallout = this.page.testSubj.locator('esqlSummaryNoAlertConditionCallout');
     this.emptyQueryCallout = this.page.testSubj.locator('esqlSummaryEmptyCallout');
+    this.signalMergeModal = this.page.testSubj.locator('alertingV2ConfirmSignalMergeModal');
+    this.signalMergeConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+    this.signalMergeCancelButton = this.page.testSubj.locator('confirmModalCancelButton');
+    this.sandboxSettingsButton = this.page.testSubj.locator('querySandboxSettingsButton');
+    this.splitBaseAndAlertButton = this.page.testSubj.locator('querySandboxSplitBaseAndAlert');
   }
 
   /**
@@ -103,6 +99,10 @@ export class ComposeDiscoverPage {
     state: 'before_apply' | 'success' | 'no_alert_condition' | 'split_failed' | 'empty'
   ) {
     return this.page.testSubj.locator(`esqlQuerySummarySection-${state}`);
+  }
+
+  modeOption(kind: 'alert' | 'signal') {
+    return this.page.testSubj.locator(`composeDiscoverModeSelect-${kind}`);
   }
 
   editRuleButton(ruleId: string) {
@@ -130,7 +130,7 @@ export class ComposeDiscoverPage {
   }
 
   /**
-   * Opens the query sandbox from the Alert Condition step (alert mode).
+   * Opens the query sandbox from the Alert Condition step.
    */
   async openSandbox() {
     await this.alertSummaryEditorButton.click();
@@ -172,11 +172,31 @@ export class ComposeDiscoverPage {
   }
 
   /**
-   * Switches Alert / Signal mode. The sandbox must be closed first — ModeSelect
-   * is disabled while the query sandbox is open in form mode.
+   * Switches Alert / Signal mode via the radio-style checkable cards. The sandbox
+   * must be closed first — ModeSelect is disabled while the query sandbox is open.
+   * When switching to signal with a composed query, call
+   * {@link confirmSignalMerge} or {@link cancelSignalMerge} afterwards.
    */
   async selectMode(kind: 'alert' | 'signal') {
-    await this.modeSuperSelect.selectOption(kind);
+    await this.modeOption(kind).getByRole('radio').click();
+  }
+
+  async confirmSignalMerge() {
+    await this.signalMergeModal.waitFor({ state: 'visible' });
+    await this.signalMergeConfirmButton.click();
+    await this.signalMergeModal.waitFor({ state: 'hidden' });
+  }
+
+  async cancelSignalMerge() {
+    await this.signalMergeModal.waitFor({ state: 'visible' });
+    await this.signalMergeCancelButton.click();
+    await this.signalMergeModal.waitFor({ state: 'hidden' });
+  }
+
+  /** Opt into manual base / filtering-condition tabs from the sandbox settings menu. */
+  async enableManualSplit() {
+    await this.sandboxSettingsButton.click();
+    await this.splitBaseAndAlertButton.click();
   }
 
   /** Waits until a time-field `<select>` option is present (field-caps resolution). */

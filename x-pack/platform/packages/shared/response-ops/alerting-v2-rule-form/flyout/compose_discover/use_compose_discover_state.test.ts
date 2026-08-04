@@ -264,9 +264,14 @@ describe('reducer', () => {
 // ── getSandboxTabs ────────────────────────────────────────────────────────────
 
 describe('getSandboxTabs', () => {
-  it('returns undefined when isAlert is false', () => {
-    const state = createState();
+  it('returns undefined for signal on alertCondition when manual split is off (unified editor)', () => {
+    const state = createState({ step: 0, mode: 'create', manualSplitEnabled: false });
     expect(getSandboxTabs(false, state)).toBeUndefined();
+  });
+
+  it('returns [base, alert] for signal on alertCondition when manual split is enabled', () => {
+    const state = createState({ step: 0, mode: 'create', manualSplitEnabled: true });
+    expect(getSandboxTabs(false, state)).toEqual(['base', 'alert']);
   });
 
   it('returns undefined on alertCondition step in create mode (single unified editor)', () => {

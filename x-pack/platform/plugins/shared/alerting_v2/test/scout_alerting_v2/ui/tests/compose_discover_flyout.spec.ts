@@ -325,7 +325,7 @@ test.describe(
       });
 
       await test.step('editing the query to target data with a date field clears the error', async () => {
-        await pageObjects.composeDiscover.editQueryButton.click();
+        await pageObjects.composeDiscover.alertSummaryEditorButton.click();
         await pageObjects.composeDiscover.setSandboxQuery(TEST_QUERY);
         await pageObjects.composeDiscover.clickApply();
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
@@ -506,7 +506,9 @@ test.describe(
         await expect(pageObjects.composeDiscover.sandboxTimeFieldSelector).toHaveValue('timestamp');
         await pageObjects.composeDiscover.clickApply();
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
+        // WHERE query commits as composed in alert mode — switching to signal needs merge confirm.
         await pageObjects.composeDiscover.selectMode('signal');
+        await pageObjects.composeDiscover.confirmSignalMerge();
       });
 
       await test.step('name the rule and submit', async () => {
@@ -695,6 +697,69 @@ test.describe(
         await expect(pageObjects.composeDiscover.summarySection('success')).toBeVisible();
         await expect(pageObjects.composeDiscover.noAlertConditionCallout).toBeHidden();
         await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
+      });
+    });
+
+    test('mode switch: composed query shows merge confirmation; cancel preserves split', async ({
+      pageObjects,
+    }) => {
+      await test.step('commit a split query in alert mode', async () => {
+        await pageObjects.composeDiscover.openCreateFlyout();
+        await pageObjects.composeDiscover.openSandbox();
+        await pageObjects.composeDiscover.setSandboxQuery(UNIFIED_QUERY);
+        await pageObjects.composeDiscover.clickApply();
+        await expect(pageObjects.composeDiscover.summarySection('success')).toBeVisible();
+      });
+
+      await test.step('switching to signal opens the merge modal; cancel leaves alert + split', async () => {
+        await pageObjects.composeDiscover.selectMode('signal');
+        await expect(pageObjects.composeDiscover.signalMergeModal).toBeVisible();
+        await pageObjects.composeDiscover.cancelSignalMerge();
+        await expect(pageObjects.composeDiscover.signalMergeModal).toBeHidden();
+        // Still on alert with a composed summary (base + alert condition blocks).
+        await expect(pageObjects.composeDiscover.summarySection('success')).toBeVisible();
+        await expect(pageObjects.composeDiscover.flyout.getByText('Base query')).toBeVisible();
+      });
+    });
+
+    test('mode switch: confirming merge combines the split and switches to signal', async ({
+      pageObjects,
+    }) => {
+      await test.step('commit a split query and confirm signal merge', async () => {
+        await pageObjects.composeDiscover.openCreateFlyout();
+        await pageObjects.composeDiscover.openSandbox();
+        await pageObjects.composeDiscover.setSandboxQuery(UNIFIED_QUERY);
+        await pageObjects.composeDiscover.clickApply();
+        await pageObjects.composeDiscover.selectMode('signal');
+        await pageObjects.composeDiscover.confirmSignalMerge();
+      });
+
+      await test.step('signal shows a single query block; Next is still enabled', async () => {
+        await expect(pageObjects.composeDiscover.summarySection('success')).toBeVisible();
+        await expect(pageObjects.composeDiscover.flyout.getByText('Base query')).toBeHidden();
+        await expect(pageObjects.composeDiscover.flyout.getByText('Query')).toBeVisible();
+        await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
+      });
+    });
+
+    test('query step: split is available after switching to signal with a unified query', async ({
+      pageObjects,
+    }) => {
+      await test.step('commit a unified query and silently switch to signal', async () => {
+        await pageObjects.composeDiscover.openCreateFlyout();
+        await pageObjects.composeDiscover.openSandbox();
+        // No WHERE → commits standalone; signal switch merges silently (no modal).
+        await pageObjects.composeDiscover.setSandboxQuery(TEST_QUERY);
+        await pageObjects.composeDiscover.clickApply();
+        await pageObjects.composeDiscover.selectMode('signal');
+        await expect(pageObjects.composeDiscover.signalMergeModal).toBeHidden();
+      });
+
+      await test.step('sandbox settings expose Split for signal mode', async () => {
+        await pageObjects.composeDiscover.openSandbox();
+        await expect(pageObjects.composeDiscover.sandboxSettingsButton).toBeVisible();
+        await pageObjects.composeDiscover.enableManualSplit();
+        await expect(pageObjects.composeDiscover.flyout.getByText('Base query')).toBeVisible();
       });
     });
   }

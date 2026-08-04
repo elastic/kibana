@@ -6,17 +6,21 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ModeSelect } from './mode_select';
 
-// Failing: See https://github.com/elastic/kibana/issues/277206
-describe.skip('ModeSelect', () => {
-  it('renders the Mode label and the selected value', () => {
+const getOptionRadio = (testSubj: string) =>
+  within(screen.getByTestId(testSubj)).getByRole('radio');
+
+describe('ModeSelect', () => {
+  it('renders the Mode label and radio-style cards for each kind', () => {
     render(<ModeSelect value="alert" onChange={jest.fn()} />);
 
     expect(screen.getByText('Mode')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleV2ModeSelect')).toHaveTextContent('Alert');
+    expect(screen.getByTestId('ruleV2ModeSelect')).toBeInTheDocument();
+    expect(getOptionRadio('ruleV2ModeSelect-alert')).toBeChecked();
+    expect(getOptionRadio('ruleV2ModeSelect-signal')).not.toBeChecked();
   });
 
   it('calls onChange with the selected kind', async () => {
@@ -24,8 +28,7 @@ describe.skip('ModeSelect', () => {
     const onChange = jest.fn();
     render(<ModeSelect value="alert" onChange={onChange} />);
 
-    await user.click(screen.getByTestId('ruleV2ModeSelect'));
-    await user.click(screen.getByText('Signal'));
+    await user.click(getOptionRadio('ruleV2ModeSelect-signal'));
 
     expect(onChange).toHaveBeenCalledWith('signal');
   });
@@ -33,12 +36,14 @@ describe.skip('ModeSelect', () => {
   it('honors a custom data-test-subj', () => {
     render(<ModeSelect value="signal" onChange={jest.fn()} data-test-subj="customMode" />);
 
-    expect(screen.getByTestId('customMode')).toHaveTextContent('Signal');
+    expect(screen.getByTestId('customMode')).toBeInTheDocument();
+    expect(getOptionRadio('customMode-signal')).toBeChecked();
   });
 
-  it('disables the select when disabled', () => {
+  it('disables the cards when disabled', () => {
     render(<ModeSelect value="alert" onChange={jest.fn()} disabled />);
 
-    expect(screen.getByTestId('ruleV2ModeSelect')).toBeDisabled();
+    expect(getOptionRadio('ruleV2ModeSelect-alert')).toBeDisabled();
+    expect(getOptionRadio('ruleV2ModeSelect-signal')).toBeDisabled();
   });
 });
