@@ -884,7 +884,7 @@
     },
     {
       "groupName": "typescript",
-      "matchDepNames": ["typescript"],
+      "matchDepNames": ["typescript", "typescript-7"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1724,7 +1724,7 @@
     },
     {
       "groupName": "adm-zip",
-      "matchDepNames": ["adm-zip", "@types/adm-zip"],
+      "matchDepNames": ["adm-zip"],
       "reviewers": ["team:security-solution"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team: SecuritySolution"],
@@ -2140,9 +2140,9 @@
         "@aws-sdk/credential-provider-node",
         "google-auth-library"
       ],
-      "reviewers": ["team:security-generative-ai"],
+      "reviewers": ["team:workchat-eng"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security Generative AI"],
+      "addLabels": ["Team:agent-builder"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2342,6 +2342,7 @@
       "matchDepNames": [
         "@types/stats-lite",
         "email-addresses",
+        "graphql",
         "murmurhash",
         "stats-lite"
       ],

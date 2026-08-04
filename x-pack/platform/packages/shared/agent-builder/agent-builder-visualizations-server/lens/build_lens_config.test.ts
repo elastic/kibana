@@ -96,7 +96,10 @@ describe('buildLensConfig', () => {
   it('preserves the existing supported chart type when none is provided', async () => {
     const result = await buildLensConfig({
       nlQuery: 'change the title',
-      parsedExistingConfig: { type: SupportedChartType.XY },
+      parsedExistingConfig: {
+        type: SupportedChartType.XY,
+        layers: [],
+      },
       modelProvider,
       logger,
       events,
@@ -113,7 +116,10 @@ describe('buildLensConfig', () => {
     await expect(
       buildLensConfig({
         nlQuery: 'change the title',
-        parsedExistingConfig: { type: 'unsupported' },
+        parsedExistingConfig: {
+          // @ts-expect-error - invalid type
+          type: 'unsupported',
+        },
         modelProvider,
         logger,
         events,
