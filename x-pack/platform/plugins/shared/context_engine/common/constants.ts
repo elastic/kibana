@@ -19,9 +19,9 @@ export const aiIndexKiSummaryPath = `${internalApiPath}/ai_index/{aiIndexId}/ki_
 export const AI_INDEX_API_VERSION = '2023-10-31';
 
 /**
- * Version of the internal KI summary API.
+ * Version of internal Context Engine AI index routes.
  */
-export const AI_INDEX_KI_SUMMARY_API_VERSION = '1';
+export const AI_INDEX_INTERNAL_API_VERSION = '1';
 
 /**
  * Backing data streams and indices follow type-specific naming conventions,

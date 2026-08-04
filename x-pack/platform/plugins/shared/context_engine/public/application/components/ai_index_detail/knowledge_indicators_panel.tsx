@@ -26,6 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useLocatorUrl } from '@kbn/share-plugin/public';
 import React, { useMemo } from 'react';
 import type { AiIndexDest, GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
+import { isIndexPattern } from '../../../../common/ai_index_dest';
 import { useAiIndexKiSummary } from '../../hooks/use_ai_index_ki_summary';
 import { useKibana } from '../../hooks/use_kibana';
 import { getKiTypeLabel } from '../../utils/ki_type_labels';
@@ -42,13 +43,11 @@ const kiTypeLabelStyle = css`
 `;
 
 const getIndexManagementLocatorParams = (dest: AiIndexDest): IndexManagementLocatorParams => {
-  const name = dest.value.replace(/\*$/, '');
-
   if (dest.type === 'data_stream') {
-    return { page: 'data_streams_details', dataStreamName: name };
+    return { page: 'data_streams_details', dataStreamName: dest.value };
   }
 
-  return { page: 'index_details', indexName: name };
+  return { page: 'index_details', indexName: dest.value };
 };
 
 export const KnowledgeIndicatorsPanel = ({
@@ -66,19 +65,21 @@ export const KnowledgeIndicatorsPanel = ({
   const totalCount = kiSummary?.count ?? 0;
   const canOpenDiscover = application.capabilities.discover_v2?.show === true;
   const typeCounts = kiSummary?.counts_by_type ?? [];
+  const canLinkToIndexManagement = dest !== undefined && !isIndexPattern(dest.value);
 
-  const indexManagementLocator = dest
+  const indexManagementLocator = canLinkToIndexManagement
     ? share.url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID)
     : undefined;
   const indexManagementUrl = useLocatorUrl(
     indexManagementLocator,
-    dest
+    canLinkToIndexManagement && dest
       ? getIndexManagementLocatorParams(dest)
       : { page: 'index_details' as const, indexName: '' },
     undefined,
-    [dest]
+    [dest, canLinkToIndexManagement]
   );
-  const indexManagementHref = indexManagementUrl || undefined;
+  const indexManagementHref =
+    canLinkToIndexManagement && indexManagementUrl ? indexManagementUrl : undefined;
 
   const discoverHref = useMemo(() => {
     if (!destValue || !canOpenDiscover) {

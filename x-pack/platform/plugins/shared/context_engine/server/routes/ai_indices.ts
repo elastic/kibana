@@ -12,7 +12,7 @@ import type { RouteSecurity } from '@kbn/core-http-server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import {
   AI_INDEX_API_VERSION,
-  AI_INDEX_KI_SUMMARY_API_VERSION,
+  AI_INDEX_INTERNAL_API_VERSION,
   MAX_AI_INDEX_AUTOMATION_LENGTH,
   MAX_AI_INDEX_AUTOMATIONS,
   MAX_AI_INDEX_DESCRIPTION_LENGTH,
@@ -341,7 +341,7 @@ export const registerAiIndexRoutes = ({
     })
     .addVersion(
       {
-        version: AI_INDEX_KI_SUMMARY_API_VERSION,
+        version: AI_INDEX_INTERNAL_API_VERSION,
         validate: {
           request: {
             params: aiIndexIdParamsSchema,
