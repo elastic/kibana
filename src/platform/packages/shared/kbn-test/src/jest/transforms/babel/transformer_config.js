@@ -20,6 +20,7 @@ module.exports = () => ({
       },
     ],
   ],
+  plugins: [require.resolve('@babel/plugin-transform-class-static-block')],
   overrides: [
     {
       exclude: require('@kbn/babel-preset/styled_components_files').USES_STYLED_COMPONENTS,
