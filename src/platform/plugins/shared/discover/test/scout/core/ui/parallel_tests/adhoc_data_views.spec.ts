@@ -51,6 +51,7 @@ spaceTest.describe('Discover — adhoc data views', { tag: '@local-stateful-clas
         // Actions are: [0] View single document, [1] View surrounding documents
         await actions[1].click();
 
+        // context page can take longer to hydrate after navigating from surrounding-docs action
         await page.testSubj
           .locator('discoverContextAppTitle')
           .waitFor({ state: 'visible', timeout: 30_000 });
@@ -65,6 +66,7 @@ spaceTest.describe('Discover — adhoc data views', { tag: '@local-stateful-clas
         const actions = await dataGrid.getRowActions();
         // Actions are: [0] View single document, [1] View surrounding documents
         await actions[0].click();
+        // single-doc page can take longer to hydrate after navigating from the row action
         await page.testSubj
           .locator('discoverSingleDocTitle')
           .waitFor({ state: 'visible', timeout: 30_000 });
@@ -150,12 +152,7 @@ spaceTest.describe('Discover — adhoc data views', { tag: '@local-stateful-clas
         await dashboard.addSavedSearch('logst*-ss-_bytes-runtimefield');
         await dashboard.addSavedSearch('logst*-ss-_bytes-runtimefield-updated');
 
-        const cellLocator = page.locator(
-          '[data-test-subj="euiDataGridBody"] ' +
-            '[data-test-subj="dataGridRowCell"]' +
-            '[data-gridcell-column-id="_bytes-runtimefield"]' +
-            '[data-gridcell-visible-row-index="0"]'
-        );
+        const cellLocator = dataGrid.getCellsAtVisibleRowIndex('_bytes-runtimefield', 0);
         await expect(cellLocator).toHaveCount(2);
         const cells = await cellLocator.all();
         const first = parseFloat((await cells[0].innerText()).replace(/,/g, ''));

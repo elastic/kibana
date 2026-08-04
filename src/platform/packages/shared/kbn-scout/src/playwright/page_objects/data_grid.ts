@@ -132,6 +132,17 @@ export class DataGrid {
   }
 
   /**
+   * Returns all cells for a given column at a specific visible row index across all embedded grids
+   * on the page (e.g. two saved-search panels on a dashboard). Use this instead of inlining the
+   * multi-attribute selector when you need to count or compare cells across multiple grid instances.
+   */
+  getCellsAtVisibleRowIndex(columnId: string, visibleRowIndex: number): Locator {
+    return this.page.testSubj.locator('euiDataGridBody').locator(
+      `[data-test-subj="dataGridRowCell"][data-gridcell-column-id="${columnId}"][data-gridcell-visible-row-index="${visibleRowIndex}"]`
+    );
+  }
+
+  /**
    * Returns the leaf value node of a data-grid cell. Prefer this over
    * `getCell` when asserting on the rendered value: the gridcell wrapper's
    * text content concatenates child nodes (adding stray newlines), whereas the
