@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/charts-plugin'
   - '@kbn/core'
   - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/data-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/deeplinks-analytics'
   - '@kbn/deeplinks-observability'
@@ -47,6 +48,7 @@ dependsOn:
   - '@kbn/significant-events-schema'
   - '@kbn/spaces-plugin'
   - '@kbn/streams-plugin'
+  - '@kbn/unified-search-plugin'
 tags:
   - plugin
   - prod
