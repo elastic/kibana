@@ -41,29 +41,36 @@ const PREVIEW_SETTLED_MS = 1_000;
 const PREVIEW_POLL_INTERVAL_MS = 100;
 
 /**
- * Selectors for the elements TSVB renders more than once (one per series, agg row
- * or filter row), which therefore have to be addressed by position.
+ * CSS selectors for elements TSVB renders more than once (one per series, agg row
+ * or filter row), which therefore have to be addressed by position. Elements with
+ * a data-test-subj are addressed through the testSubj API in the class below.
  */
-const REPEATED = {
+const REPEATED_CSS = {
   legendValue: '.echLegendItem .echLegendItem__legendValue',
-  seriesOptionsTab: '[data-test-subj="seriesOptions"]',
-  cloneSeriesButton: '[data-test-subj="AddCloneBtn"]',
-  togglePanelPreviewButton: '[data-test-subj="AddActivatePanelBtn"]',
-  aggRow: '[data-test-subj="aggRow"]',
-  groupByFilterQueryBar: '[data-test-subj="filterItemsQueryBar"]',
-  groupByFilterLabel: '[data-test-subj="filterItemsLabel"]',
-  colorPickerAnchor: '[data-test-subj="euiColorPickerAnchor"]',
   /** A chart stacks several canvases, the top one receives the clicks. */
   chartCanvas: '.echChart canvas:last-of-type',
 } as const;
 
+/** data-test-subj identifiers for repeated elements. */
+const REPEATED_TEST_SUBJ = {
+  seriesOptionsTab: 'seriesOptions',
+  cloneSeriesButton: 'AddCloneBtn',
+  togglePanelPreviewButton: 'AddActivatePanelBtn',
+  aggRow: 'aggRow',
+  groupByFilterQueryBar: 'filterItemsQueryBar',
+  groupByFilterLabel: 'filterItemsLabel',
+  colorPickerAnchor: 'euiColorPickerAnchor',
+} as const;
+
 /**
  * Picks the match at `index` through Playwright's positional selector, the form the
- * `playwright/no-nth-methods` rule leaves available. Position is what the elements
- * above have to be told apart by, since each of them is the same component repeated
- * under one `data-test-subj`.
+ * `playwright/no-nth-methods` rule leaves available. Position is what the CSS
+ * selector elements above have to be told apart by.
  */
-const at = (selector: string, index: number) => `${selector} >> nth=${index}`;
+const cssAt = (selector: string, index: number) => `${selector} >> nth=${index}`;
+
+const testSubjAt = (testSubj: string, index: number) =>
+  `[data-test-subj="${testSubj}"] >> nth=${index}`;
 
 /**
  * Page object for the TSVB (Visual Builder) editor and its Time Series preview.
@@ -91,7 +98,7 @@ export class VisualBuilder {
     this.seriesEditors = this.page.locator('.tvbSeriesEditor');
     this.visualizationError = this.page.testSubj.locator('visualization-error');
     this.colorPickerPopover = this.page.testSubj.locator('euiColorPickerPopover');
-    this.chartCanvas = this.page.locator(at(REPEATED.chartCanvas, 0));
+    this.chartCanvas = this.page.locator(cssAt(REPEATED_CSS.chartCanvas, 0));
     this.preview = this.page.testSubj.locator('visualizationLoader');
     this.chartStatus = this.page.locator('.tvbVisTimeSeries .echChartStatus');
     this.renderedChartStatus = this.page.locator(
@@ -138,7 +145,10 @@ export class VisualBuilder {
   private async switchEditorTab(panelType: PanelType, tab: EditorTab) {
     const tabButton = this.page.testSubj.locator(`${panelType}Editor${tab}Btn`);
     await tabButton.click();
-    await expect(tabButton).toHaveAttribute('aria-selected', 'true');
+    // Wait for the tab to become selected after the click
+    await expect
+      .poll(() => tabButton.getAttribute('aria-selected'), { timeout: 5000 })
+      .toBe('true');
   }
 
   // ============================================================
@@ -181,7 +191,8 @@ export class VisualBuilder {
     }
     await this.applyAndWaitForRerender(async () => {
       await radio.locator('label').click();
-      await expect(input).toBeChecked();
+      // Wait for the radio input to become checked
+      await expect.poll(() => input.isChecked(), { timeout: 5000 }).toBe(true);
     });
   }
 
@@ -190,7 +201,7 @@ export class VisualBuilder {
   // ============================================================
 
   async clickSeriesOption(nth = 0) {
-    await this.page.locator(at(REPEATED.seriesOptionsTab, nth)).click();
+    await this.seriesEditor(nth).getByTestId(REPEATED_TEST_SUBJ.seriesOptionsTab).click();
   }
 
   async enterOffsetSeries(offset: string) {
@@ -214,20 +225,21 @@ export class VisualBuilder {
   async cloneSeries(nth = 0) {
     const seriesCount = await this.seriesEditors.count();
     await this.applyAndWaitForRerender(async () => {
-      await this.page.locator(at(REPEATED.cloneSeriesButton, nth)).click();
-      await expect(this.seriesEditors).toHaveCount(seriesCount + 1);
+      await this.seriesEditor(nth).getByTestId(REPEATED_TEST_SUBJ.cloneSeriesButton).click();
+      // Wait for the new series editor to appear
+      await expect.poll(() => this.seriesEditors.count(), { timeout: 5000 }).toBe(seriesCount + 1);
     });
   }
 
   /** Toggles the "temporarily disable"/"re-enable" state of a series panel. */
   async togglePanelPreview(nth = 0) {
-    await this.page.locator(at(REPEATED.togglePanelPreviewButton, nth)).click();
+    await this.seriesEditor(nth).getByTestId(REPEATED_TEST_SUBJ.togglePanelPreviewButton).click();
   }
 
   /** Legend value of the nth series, e.g. the aggregated count rendered next to its label. */
   async getLegendValue(nth = 0): Promise<string> {
     await this.waitForChartRenderComplete();
-    const legendValue = this.page.locator(at(REPEATED.legendValue, nth));
+    const legendValue = this.page.locator(cssAt(REPEATED_CSS.legendValue, nth));
     await legendValue.hover();
     return (await legendValue.innerText()).trim();
   }
@@ -257,7 +269,7 @@ export class VisualBuilder {
   }
 
   private aggRow(nth: number): Locator {
-    return this.page.locator(at(REPEATED.aggRow, nth));
+    return this.page.locator(testSubjAt(REPEATED_TEST_SUBJ.aggRow, nth));
   }
 
   // ============================================================
@@ -298,7 +310,7 @@ export class VisualBuilder {
       this.groupByFieldSelect.getByTestId('fieldSelectItemAddBtn').click()
     );
     const addedFieldRow = this.groupByFieldSelect.getByTestId('multiFieldSelectRow-1');
-    await expect(addedFieldRow).toBeVisible();
+    await addedFieldRow.waitFor({ state: 'visible' });
 
     await this.setGroupByTermsField(field, addedFieldRow);
   }
@@ -308,19 +320,23 @@ export class VisualBuilder {
     const rowCount = await filterQueryBars.count();
     await this.applyAndWaitForRerender(async () => {
       await this.page.testSubj.click('filterRowAddBtn');
-      await expect(filterQueryBars).toHaveCount(rowCount + 1);
+      // Wait for the new filter row to appear
+      await expect.poll(() => filterQueryBars.count(), { timeout: 5000 }).toBe(rowCount + 1);
     });
   }
 
   async setGroupByFilterQuery(query: string, nth = 0) {
     await this.applyAndWaitForRerender(() =>
-      this.fillQueryBar(this.page.locator(at(REPEATED.groupByFilterQueryBar, nth)), query)
+      this.fillQueryBar(
+        this.page.locator(testSubjAt(REPEATED_TEST_SUBJ.groupByFilterQueryBar, nth)),
+        query
+      )
     );
   }
 
   async setGroupByFilterLabel(label: string, nth = 0) {
     await this.applyAndWaitForRerender(() =>
-      this.page.locator(at(REPEATED.groupByFilterLabel, nth)).fill(label)
+      this.page.locator(testSubjAt(REPEATED_TEST_SUBJ.groupByFilterLabel, nth)).fill(label)
     );
   }
 
@@ -386,12 +402,12 @@ export class VisualBuilder {
   // ============================================================
 
   async clickColorPicker(nth = 0) {
-    await this.page.locator(at(REPEATED.colorPickerAnchor, nth)).click();
+    await this.page.locator(testSubjAt(REPEATED_TEST_SUBJ.colorPickerAnchor, nth)).click();
   }
 
   async setColorPickerValue(colorHex: string, nth = 0) {
     await this.clickColorPicker(nth);
-    await expect(this.colorPickerPopover).toBeVisible();
+    await this.colorPickerPopover.waitFor({ state: 'visible' });
     await this.applyAndWaitForRerender(() =>
       this.page.testSubj.locator('euiColorPickerInput_top').fill(colorHex)
     );
@@ -399,7 +415,7 @@ export class VisualBuilder {
     // it is still open — clicking the anchor again would otherwise re-open it.
     if (await this.colorPickerPopover.isVisible()) {
       await this.clickColorPicker(nth);
-      await expect(this.colorPickerPopover).toBeHidden();
+      await this.colorPickerPopover.waitFor({ state: 'hidden' });
     }
   }
 
@@ -432,7 +448,7 @@ export class VisualBuilder {
       return;
     }
     await this.page.testSubj.click('switchIndexPatternSelectionModePopoverButton');
-    await expect(this.indexPatternSelectionModePopover).toBeVisible();
+    await this.indexPatternSelectionModePopover.waitFor({ state: 'visible' });
   }
 
   async closeIndexPatternSelectionModePopover() {
@@ -440,7 +456,7 @@ export class VisualBuilder {
       return;
     }
     await this.page.testSubj.click('switchIndexPatternSelectionModePopoverButton');
-    await expect(this.indexPatternSelectionModePopover).toBeHidden();
+    await this.indexPatternSelectionModePopover.waitFor({ state: 'hidden' });
   }
 
   async switchIndexPatternSelectionMode(useKibanaIndices: boolean) {
@@ -456,7 +472,7 @@ export class VisualBuilder {
     // re-queries and the select is swapped for the other variant — which unmounts
     // the popover, and the switch with it.
     await this.applyAndWaitForRerender(() => this.indexPatternSelectionModeSwitch.click());
-    await expect(this.indexPatternSelectionModePopover).toBeHidden();
+    await this.indexPatternSelectionModePopover.waitFor({ state: 'hidden' });
     // The click updates the form right away, but the editor only adopts the new mode
     // a debounce later, when it writes the model into the app state in the URL. Until
     // then a reload or a navigation drops the change, so the URL is what proves the
@@ -572,5 +588,9 @@ export class VisualBuilder {
    */
   private async getPreviewRenderCount(): Promise<number> {
     return Number(await this.preview.getAttribute('data-rendering-count'));
+  }
+
+  private seriesEditor(nth: number): Locator {
+    return this.page.locator(cssAt('.tvbSeriesEditor', nth));
   }
 }
