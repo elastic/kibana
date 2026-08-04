@@ -70,7 +70,7 @@ The OpenSearch connector has the following actions:
 :   Create a new query-level, bucket-level, or doc-level monitor (`monitorType`) with a `schedule`, `inputs`, and `triggers`. The `inputs`/`triggers` shape follows the [OpenSearch monitor definition](https://docs.opensearch.org/latest/observing-your-data/alerting/api/#create-a-query-level-monitor) and varies by monitor type.
 
 `updateMonitor`
-:   Update an existing monitor's (`monitorId`) name, schedule, inputs, or triggers. Only the fields you provide are changed; everything else on the monitor is preserved.
+:   Update an existing monitor's (`monitorId`) name, schedule, inputs, or triggers. Only the fields you provide are changed. Everything else on the monitor is preserved.
 
 `deleteMonitor`
 :   Permanently delete a monitor (`monitorId`). This does not delete alerts already raised by the monitor.

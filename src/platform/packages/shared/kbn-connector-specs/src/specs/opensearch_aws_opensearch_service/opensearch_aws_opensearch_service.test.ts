@@ -9,7 +9,7 @@
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { OpensearchAwsOpensearchService } from './opensearch_aws_opensearch_service';
-import { UpdateMonitorInputSchema } from './types';
+import { GetDetectorFindingsInputSchema, UpdateMonitorInputSchema } from './types';
 
 const ENDPOINT = 'https://search-my-domain-abc123.us-east-1.es.amazonaws.com';
 
@@ -471,6 +471,11 @@ describe('OpenSearch (AWS OpenSearch Service) connector', () => {
           params: expect.objectContaining({ detector_id: 'detector-1', severity: 'high' }),
         })
       );
+    });
+
+    it('rejects an input with neither detectorId nor detectorType', () => {
+      const result = GetDetectorFindingsInputSchema.safeParse({ severity: 'high' });
+      expect(result.success).toBe(false);
     });
   });
 
