@@ -47,6 +47,8 @@ import {
   getBothSettingsUserActions,
   patchExtendedFieldsCasesRequest,
   patchUpdateExtendedFieldsCasesRequest,
+  patchPairedFieldsCasesRequest,
+  patchPairedClearCasesRequest,
   getExtendedFieldsUserActions,
   patchTemplateCasesRequest,
   patchRemoveTemplateCasesRequest,
@@ -475,6 +477,75 @@ describe('UserActionPersister', () => {
             user: testUser,
           })
         ).toEqual({ '1': [] });
+      });
+    });
+
+    describe('paired-field duplicate suppression (#282474)', () => {
+      it('suppresses the duplicate customFields action when the canonical extended_fields action records the same edit', () => {
+        const result = persister.buildUserActions({
+          updatedCases: patchPairedFieldsCasesRequest,
+          user: testUser,
+        });
+
+        expect(result['1']).toHaveLength(1);
+        expect(result['1'][0].parameters.attributes.type).toBe(UserActionTypes.extended_fields);
+        expect(result['1'][0].parameters.attributes.payload).toEqual({
+          extended_fields: { priority_as_keyword: 'high' },
+        });
+      });
+
+      it('keeps both actions when the update carries no paired keys', () => {
+        const unpaired = {
+          cases: [
+            {
+              ...patchPairedFieldsCasesRequest.cases[0],
+              pairedCustomFieldStorageKeys: undefined,
+            },
+          ],
+        };
+
+        const result = persister.buildUserActions({ updatedCases: unpaired, user: testUser });
+        const types = result['1'].map((ua) => ua.parameters.attributes.type);
+
+        expect(types).toContain(UserActionTypes.customFields);
+        expect(types).toContain(UserActionTypes.extended_fields);
+      });
+
+      it('keeps the customFields action for a paired clear (extended_fields does not record deletions)', () => {
+        const result = persister.buildUserActions({
+          updatedCases: patchPairedClearCasesRequest,
+          user: testUser,
+        });
+
+        expect(result['1']).toHaveLength(1);
+        expect(result['1'][0].parameters.attributes.type).toBe(UserActionTypes.customFields);
+      });
+
+      it('suppresses only the paired keys, keeping actions for unpaired customFields in the same update', () => {
+        const mixed = {
+          cases: [
+            {
+              ...patchPairedFieldsCasesRequest.cases[0],
+              updatedAttributes: {
+                customFields: [
+                  { key: 'priority', type: 'text', value: 'high' },
+                  { key: 'unpaired_key', type: 'text', value: 'standalone' },
+                ],
+                extended_fields: { priority_as_keyword: 'high' },
+              },
+            },
+          ],
+        } as typeof patchPairedFieldsCasesRequest;
+
+        const result = persister.buildUserActions({ updatedCases: mixed, user: testUser });
+        const customFieldActions = result['1'].filter(
+          (ua) => ua.parameters.attributes.type === UserActionTypes.customFields
+        );
+
+        expect(customFieldActions).toHaveLength(1);
+        expect(customFieldActions[0].parameters.attributes.payload).toEqual({
+          customFields: [{ key: 'unpaired_key', type: 'text', value: 'standalone' }],
+        });
       });
     });
 

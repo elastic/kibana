@@ -80,13 +80,19 @@ import {
 } from './validators';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { emptyCasesAssigneesSanitizer } from './sanitizers';
-import type { FieldLinkIndexes } from '../../common/utils/field_link_resolution';
 import {
   loadFieldLinkIndexes,
   logUnresolvedMirrorKeys,
-  mergeCustomFieldsIntoExtendedFieldsResolved,
   throwIfMalformedFieldLinkage,
 } from '../../common/utils/mirror_custom_fields';
+import type { ActiveLinkMaps } from '../../common/utils/pair_field_representations';
+import {
+  buildActiveLinkMaps,
+  incrementPairedWriteCounter,
+  pairUpdatedCaseFields,
+  throwIfFieldRepresentationConflicts,
+  throwIfInvalidLinkedFieldValues,
+} from '../../common/utils/pair_field_representations';
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
  */
@@ -694,32 +700,35 @@ export const bulkUpdate = async (
       });
     }
 
-    // Preload per-owner link indexes for the customFields → extended_fields mirror. Only
-    // owners with at least one customFields update pay the (bounded) definitions fetch.
-    const linkIndexesByOwner = new Map<string, FieldLinkIndexes>();
-    if (clientArgs.config.templates.enabled) {
-      const ownersNeedingIndexes = [
-        ...new Set(
-          casesToUpdate
-            .filter(({ updateReq }) => updateReq.customFields?.length)
-            .map(({ originalCase }) => originalCase.attributes.owner)
-        ),
-      ];
-      for (const ownerNeedingIndexes of ownersNeedingIndexes) {
-        linkIndexesByOwner.set(
-          ownerNeedingIndexes,
-          await loadFieldLinkIndexes(ownerNeedingIndexes, fieldDefinitionsService)
-        );
-      }
+    // Preload per-owner active-link maps for the customFields ⇄ extended_fields
+    // pairing adapter. Only owners with at least one update touching either
+    // representation pay the (bounded) definitions fetch. Pairing for existing
+    // links runs independently of the templates feature flag (addendum A1).
+    const linkMapsByOwner = new Map<string, ActiveLinkMaps>();
+    const ownersNeedingLinks = [
+      ...new Set(
+        casesToUpdate
+          .filter(
+            ({ updateReq }) => updateReq.customFields?.length || updateReq.extended_fields != null
+          )
+          .map(({ originalCase }) => originalCase.attributes.owner)
+      ),
+    ];
+    for (const ownerNeedingLinks of ownersNeedingLinks) {
+      const indexes = await loadFieldLinkIndexes(ownerNeedingLinks, fieldDefinitionsService);
+      linkMapsByOwner.set(
+        ownerNeedingLinks,
+        buildActiveLinkMaps(customFieldsConfigurationMap.get(ownerNeedingLinks) ?? [], indexes)
+      );
     }
 
     const patchCasesPayload = createPatchCasesPayload({
       user,
       casesToUpdate,
       customFieldsConfigurationMap,
-      templatesEnabled: clientArgs.config.templates.enabled,
-      linkIndexesByOwner,
+      linkMapsByOwner,
       logger,
+      usageCounter: clientArgs.usageCounter,
     });
 
     // Resolve names of newly-applied templates so the "applied template" user action records the
@@ -971,16 +980,16 @@ const createPatchCasesPayload = ({
   casesToUpdate,
   user,
   customFieldsConfigurationMap,
-  templatesEnabled,
-  linkIndexesByOwner,
+  linkMapsByOwner,
   logger,
+  usageCounter,
 }: {
   casesToUpdate: UpdateRequestWithOriginalCase[];
   user: User;
   customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration>;
-  templatesEnabled: boolean;
-  linkIndexesByOwner: Map<string, FieldLinkIndexes>;
+  linkMapsByOwner: Map<string, ActiveLinkMaps>;
   logger: CasesClientArgs['logger'];
+  usageCounter: CasesClientArgs['usageCounter'];
 }): PatchCasesArgs => {
   const updatedDt = new Date().toISOString();
 
@@ -1022,47 +1031,79 @@ const createPatchCasesPayload = ({
         };
       }
 
-      // Mirror customFields into extended_fields so that automations writing to the legacy API
-      // keep the v2 analytics / UI surface populated. Only run when the update includes
-      // customFields — an update that omits customFields must not change extended_fields.
+      // Pair the two representations of every linked field the request touches
+      // (customFields ⇄ extended_fields) so one case write persists a consistent
+      // pair. Runs whenever the update includes either representation — an
+      // update touching neither must not change either map.
       //
-      // CustomFields-win semantics: the incoming value always overrides the mirror key; a null
-      // value the caller explicitly submitted clears the mirror key. Storage keys come from
-      // the owner's linked field definitions (preloaded indexes) — never the raw v1 key.
-      // Unresolved fields are skipped with a diagnostic; malformed linkage rejects the update
-      // with a structured 400.
+      // Pass the RAW request values (updateCaseAttributes.customFields and
+      // updateReq.extended_fields), never post-fill / post-merge derivatives:
+      // fillMissingCustomFields pads absent optional-no-default fields with
+      // { key, value: null }, and the PATCH merge above folds existing keys into
+      // the map — both would otherwise be mistaken for explicit caller intent
+      // and clear or conflict with values the update never touched.
       //
-      // Pass the RAW request customFields (updateCaseAttributes.customFields), not the
-      // post-fill array (trimmedCaseAttributes.customFields). fillMissingCustomFields pads
-      // absent optional-no-default fields with { key, value: null }; those synthetic nulls
-      // would otherwise hit the merge's delete branch and wipe mirror keys the update never
-      // intended to clear — silently destroying values stored via the v2 UI.
-      //
-      // The merge returns the *same reference* when the result is value-identical — guard on
-      // reference inequality to avoid spurious writes/user-actions.
-      const linkIndexes = linkIndexesByOwner.get(originalCase.attributes.owner);
-      if (templatesEnabled && updateCaseAttributes.customFields && linkIndexes) {
-        const currentExtendedFields =
+      // Explicit conflicting dual input rejects with a structured 400; malformed
+      // linkage rejects with a structured 400; codec failures reject with a 400;
+      // unresolved fields are skipped with a diagnostic. Same-reference results
+      // mean "unchanged" — guard on reference inequality to avoid spurious
+      // writes/user-actions.
+      const links = linkMapsByOwner.get(originalCase.attributes.owner);
+      let pairedStorageKeys: Record<string, string> | undefined;
+      if (
+        links !== undefined &&
+        (updateCaseAttributes.customFields || updateCaseAttributes.extended_fields)
+      ) {
+        const baseCustomFields =
+          trimmedCaseAttributes.customFields ?? originalCase.attributes.customFields ?? [];
+        const baseExtendedFields =
           trimmedCaseAttributes.extended_fields ?? originalCase.attributes.extended_fields;
-        const mirror = mergeCustomFieldsIntoExtendedFieldsResolved(
-          updateCaseAttributes.customFields,
-          currentExtendedFields,
-          linkIndexes
-        );
-        throwIfMalformedFieldLinkage(mirror.malformedFields);
-        logUnresolvedMirrorKeys(mirror.unresolvedKeys, {
+        const paired = pairUpdatedCaseFields({
+          requestCustomFields: updateCaseAttributes.customFields,
+          requestExtendedFields: updateCaseAttributes.extended_fields as
+            | Record<string, unknown>
+            | undefined,
+          baseCustomFields,
+          baseExtendedFields,
+          links,
+        });
+        throwIfMalformedFieldLinkage(paired.malformedFields);
+        throwIfFieldRepresentationConflicts(paired.conflictFields, usageCounter);
+        throwIfInvalidLinkedFieldValues(paired.invalidValues);
+        logUnresolvedMirrorKeys(paired.unresolvedKeys, {
           owner: originalCase.attributes.owner,
           logger,
         });
-        if (mirror.extendedFields !== currentExtendedFields && mirror.extendedFields != null) {
-          trimmedCaseAttributes.extended_fields = mirror.extendedFields;
+        const extendedFieldsChanged =
+          paired.extendedFields !== baseExtendedFields && paired.extendedFields != null;
+        const customFieldsChanged =
+          paired.customFields !== undefined && paired.customFields !== baseCustomFields;
+        if (extendedFieldsChanged) {
+          trimmedCaseAttributes.extended_fields = paired.extendedFields as Record<string, string>;
         }
+        if (customFieldsChanged) {
+          // Values were decoded through the per-type codecs, so they satisfy the
+          // customFields union even though the adapter is structurally typed.
+          trimmedCaseAttributes.customFields =
+            paired.customFields as unknown as CaseAttributes['customFields'];
+        }
+        if (Object.keys(paired.pairedKeyToStorageKey).length > 0) {
+          pairedStorageKeys = paired.pairedKeyToStorageKey;
+        }
+        incrementPairedWriteCounter(
+          usageCounter,
+          paired,
+          extendedFieldsChanged || customFieldsChanged
+        );
       }
 
       return {
         caseId,
         originalCase,
         closeReason: updateReq.closeReason,
+        ...(pairedStorageKeys !== undefined && {
+          pairedCustomFieldStorageKeys: pairedStorageKeys,
+        }),
         updatedAttributes: {
           ...trimmedCaseAttributes,
           ...(dedupedAssignees && { assignees: dedupedAssignees }),

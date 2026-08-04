@@ -26,6 +26,14 @@ export const CASES_API_ERROR_CODES = {
    * this code rather than guessing a storage key.
    */
   FIELD_LINKAGE_MALFORMED: 'field_linkage_malformed',
+  /**
+   * One create/update request explicitly supplied both representations of the
+   * same linked field (`customFields` and `extended_fields`) with semantically
+   * different values. There is no meaningful "last" within one request, so the
+   * write is rejected with a 400 carrying this code instead of silently
+   * choosing a side.
+   */
+  FIELD_REPRESENTATIONS_CONFLICT: 'field_representations_conflict',
 } as const;
 
 export type CasesApiErrorCode = (typeof CASES_API_ERROR_CODES)[keyof typeof CASES_API_ERROR_CODES];
@@ -46,13 +54,21 @@ export interface FieldLinkageMalformedErrorAttributes {
   }>;
 }
 
+/** `attributes` payload for `field_representations_conflict` (HTTP 400). */
+export interface FieldRepresentationsConflictErrorAttributes {
+  code: typeof CASES_API_ERROR_CODES.FIELD_REPRESENTATIONS_CONFLICT;
+  /** Immutable v2 field-definition names only — never values. */
+  fields: string[];
+}
+
 /**
  * Union of every typed error-attributes shape Cases serializes. Extend this
  * union when introducing a new machine-readable error code.
  */
 export type CasesApiErrorAttributes =
   | FieldIdentityImmutableErrorAttributes
-  | FieldLinkageMalformedErrorAttributes;
+  | FieldLinkageMalformedErrorAttributes
+  | FieldRepresentationsConflictErrorAttributes;
 
 const ALL_ERROR_CODES: readonly string[] = Object.values(CASES_API_ERROR_CODES);
 

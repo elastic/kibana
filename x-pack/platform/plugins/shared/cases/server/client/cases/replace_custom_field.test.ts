@@ -461,10 +461,14 @@ describe('Replace custom field', () => {
       });
     });
 
-    it('does not mirror into extended_fields when templates flag is disabled', async () => {
-      // FAILURE SCENARIO: adapter runs unconditionally — extended_fields is written when flag is off.
+    it('mirrors into extended_fields even when templates flag is disabled (addendum A1)', async () => {
+      // Pairing for existing links runs independently of the feature flag: once
+      // a link exists, live sync must not depend on xpack.cases.templates.enabled.
       const clientArgsNoFlag = createCasesClientMockArgs();
       clientArgsNoFlag.config = { ...clientArgsNoFlag.config, templates: { enabled: false } };
+      clientArgsNoFlag.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue(
+        mirrorFieldDefinitions
+      );
       clientArgsNoFlag.services.caseService.getCase.mockResolvedValue(theCase);
       clientArgsNoFlag.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue(
         { [mockCases[0].id]: 1 }
@@ -493,7 +497,9 @@ describe('Replace custom field', () => {
       );
 
       const [[patchArgs]] = clientArgsNoFlag.services.caseService.patchCase.mock.calls;
-      expect(patchArgs.updatedAttributes.extended_fields).toBeUndefined();
+      expect(patchArgs.updatedAttributes.extended_fields).toMatchObject({
+        first_key_as_keyword: 'new_value',
+      });
     });
 
     it('overrides an existing extended_fields entry when the value changes (customFields-win)', async () => {
@@ -643,6 +649,44 @@ describe('Replace custom field', () => {
       expect(patchArgs.updatedAttributes.extended_fields).toEqual({
         first_key_as_keyword: 'new_value',
         second_key_as_boolean: 'true',
+      });
+    });
+
+    it('records the paired storage key on the patch payload for user-action suppression', async () => {
+      const clientArgsWithFlag = createCasesClientMockArgs();
+      clientArgsWithFlag.config = { ...clientArgsWithFlag.config, templates: { enabled: true } };
+      clientArgsWithFlag.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue(
+        mirrorFieldDefinitions
+      );
+      clientArgsWithFlag.services.caseService.getCase.mockResolvedValue(theCase);
+      clientArgsWithFlag.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue(
+        { [mockCases[0].id]: 1 }
+      );
+      clientArgsWithFlag.services.caseService.patchCase.mockResolvedValue({ ...theCase });
+
+      const casesClientLocal = createCasesClientMock();
+      casesClientLocal.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: mockCases[0].attributes.owner,
+          customFields: [
+            { key: 'first_key', type: CustomFieldTypes.TEXT, label: 'First', required: true },
+          ],
+        },
+      ]);
+
+      await replaceCustomField(
+        {
+          caseId: mockCases[0].id,
+          customFieldId: 'first_key',
+          request: { caseVersion: mockCases[0].version ?? '', value: 'new_value' },
+        },
+        clientArgsWithFlag,
+        casesClientLocal
+      );
+
+      const [[patchArgs]] = clientArgsWithFlag.services.caseService.patchCase.mock.calls;
+      expect(patchArgs.pairedCustomFieldStorageKeys).toEqual({
+        first_key: 'first_key_as_keyword',
       });
     });
   });

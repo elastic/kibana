@@ -2814,9 +2814,10 @@ describe('update', () => {
         casesClientMock
       );
 
-      // One call per unique owner (2 owners), not one per case.
+      // Bounded per unique owner (2 owners), not per case: one fetch for global-field
+      // resolution plus one for the pairing-adapter link indexes per owner.
       expect(clientArgs.services.fieldDefinitionsService.getFieldDefinitions).toHaveBeenCalledTimes(
-        2
+        4
       );
     });
 
@@ -3027,8 +3028,9 @@ describe('update', () => {
       });
     });
 
-    it('does not mirror customFields when templates flag is disabled', async () => {
-      // FAILURE SCENARIO: adapter runs unconditionally — extended_fields is written when flag is off.
+    it('mirrors customFields even when templates flag is disabled (addendum A1)', async () => {
+      // Pairing for existing links runs independently of the feature flag: once
+      // a link exists, live sync must not depend on xpack.cases.templates.enabled.
       const clientArgs = createCasesClientMockArgs();
       clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
       setupMocks(clientArgs);
@@ -3049,7 +3051,10 @@ describe('update', () => {
 
       const updatedAttributes =
         clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
-      expect(updatedAttributes.extended_fields).toBeUndefined();
+      expect(updatedAttributes.extended_fields).toMatchObject({
+        priority_as_keyword: 'high',
+        count_as_integer: '3',
+      });
     });
 
     it('does not touch extended_fields when update omits customFields', async () => {
@@ -3190,6 +3195,116 @@ describe('update', () => {
         clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
       // Explicit null — the mirror key must be deleted.
       expect(updatedAttributes.extended_fields).not.toHaveProperty('priority_as_keyword');
+    });
+
+    it('derives the linked customFields entry from a v2-originated extended_fields update', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupMocks(clientArgs);
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              extended_fields: { count_as_integer: '42' },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock2
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      expect(updatedAttributes.extended_fields).toMatchObject({ count_as_integer: '42' });
+      // The linked v1 entry is derived through the reversible codec (42, not '42').
+      expect(updatedAttributes.customFields).toEqual(
+        expect.arrayContaining([{ key: 'count', type: CustomFieldTypes.NUMBER, value: 42 }])
+      );
+    });
+
+    it('treats an explicit v2 empty string as clear: removes the key and nulls the v1 entry', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupMocks(clientArgs, { priority_as_keyword: 'crit' });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              extended_fields: { priority_as_keyword: '' },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock2
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      expect(updatedAttributes.extended_fields).not.toHaveProperty('priority_as_keyword');
+      expect(updatedAttributes.customFields).toEqual(
+        expect.arrayContaining([{ key: 'priority', type: CustomFieldTypes.TEXT, value: null }])
+      );
+    });
+
+    it('rejects conflicting explicit dual input with a structured 400 instead of picking a side', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupMocks(clientArgs);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields: [
+                  { key: 'priority', type: CustomFieldTypes.TEXT as const, value: 'low' },
+                ],
+                extended_fields: { priority_as_keyword: 'critical' },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock2
+        )
+      ).rejects.toThrow(
+        'conflicting values for both representations of the linked field(s): "priority"'
+      );
+
+      expect(clientArgs.services.caseService.patchCases).not.toHaveBeenCalled();
+    });
+
+    it('records the paired storage keys on the patch payload for user-action suppression', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupMocks(clientArgs);
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              customFields: patchPayload,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock2
+      );
+
+      const patchedCase = clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0];
+      expect(patchedCase.pairedCustomFieldStorageKeys).toEqual({
+        priority: 'priority_as_keyword',
+        count: 'count_as_integer',
+      });
     });
   });
 });

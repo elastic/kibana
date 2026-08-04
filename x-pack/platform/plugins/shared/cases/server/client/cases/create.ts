@@ -33,10 +33,16 @@ import {
   buildExtendedFieldsDefaults,
   loadFieldLinkIndexes,
   logUnresolvedMirrorKeys,
-  mergeCustomFieldsIntoExtendedFieldsResolved,
   throwIfMalformedFieldLinkage,
   pickExtendedFieldsDifferingFromDefaults,
 } from '../../common/utils/mirror_custom_fields';
+import {
+  buildActiveLinkMaps,
+  incrementPairedWriteCounter,
+  pairCreatedCaseFields,
+  throwIfFieldRepresentationConflicts,
+  throwIfInvalidLinkedFieldValues,
+} from '../../common/utils/pair_field_representations';
 import {
   applyTemplateDefaultsToCreateRequest,
   ensureTemplateVersionIsPinned,
@@ -231,39 +237,49 @@ export const create = async (
 
     const normalizedCase = normalizeCreateCaseRequest(query, customFieldsConfiguration);
 
-    // Mirror customFields into extended_fields so that automations writing to the legacy API
-    // keep the v2 analytics / UI surface populated. CustomFields-win semantics: the incoming
-    // value overrides any pre-set mirror key (e.g. a template default in the request).
+    // Pair the two representations of every linked field for the create, applying
+    // the default precedence of addendum A2: explicit caller value (either
+    // representation, conflicting dual input rejects with a structured 400) →
+    // template v2 default (copied to v1) → v1 configuration default (copied to
+    // v2). Values cross representations through the reversible per-type codecs —
+    // never String(value).
     //
-    // Storage keys are resolved through the owner's linked field definitions (legacyKey →
-    // exact name → unique normalized name) — never derived from the raw v1 key. Fields with
-    // no linked definition are skipped with a diagnostic; malformed linkage rejects the
-    // create with a structured 400.
-    //
-    // Pass the RAW request customFields (query.customFields), not the post-fill array
-    // (normalizedCase.customFields). fillMissingCustomFields pads absent optional-no-default
-    // fields with { key, value: null }; those synthetic nulls would otherwise hit the merge's
-    // delete branch and wipe mirror keys the request never intended to clear.
-    if (clientArgs.config.templates.enabled && query.customFields?.length) {
+    // Caller intent comes from the RAW request (rawQuery.customFields /
+    // rawQuery.extended_fields, captured before template expansion and before
+    // fillMissingCustomFields pads synthetic nulls); effective values are the
+    // post-fill array and the post-template-merge map. Pairing for existing
+    // links runs independently of the templates feature flag (addendum A1).
+    if (customFieldsConfiguration?.length) {
       const linkIndexes = await loadFieldLinkIndexes(query.owner, fieldDefinitionsService);
-      const mirror = mergeCustomFieldsIntoExtendedFieldsResolved(
-        query.customFields,
-        normalizedCase.extended_fields,
-        linkIndexes
+      const links = buildActiveLinkMaps(customFieldsConfiguration, linkIndexes);
+      const paired = pairCreatedCaseFields({
+        callerCustomFields: rawQuery.customFields,
+        callerExtendedFields: rawQuery.extended_fields,
+        effectiveCustomFields: normalizedCase.customFields ?? [],
+        effectiveExtendedFields: normalizedCase.extended_fields,
+        links,
+      });
+      throwIfMalformedFieldLinkage(paired.malformedFields);
+      throwIfFieldRepresentationConflicts(paired.conflictFields, clientArgs.usageCounter);
+      throwIfInvalidLinkedFieldValues(paired.invalidValues);
+      logUnresolvedMirrorKeys(paired.unresolvedKeys, { owner: query.owner, logger });
+      incrementPairedWriteCounter(
+        clientArgs.usageCounter,
+        paired,
+        paired.extendedFields !== normalizedCase.extended_fields ||
+          paired.customFields !== undefined
       );
-      throwIfMalformedFieldLinkage(mirror.malformedFields);
-      logUnresolvedMirrorKeys(mirror.unresolvedKeys, { owner: query.owner, logger });
 
-      // Definition-aware validation of the FINAL map: the pre-mirror validation above only saw
-      // the request's extended_fields; mirrored entries must also be valid keys with valid
-      // values. `partial: true` — the mirror never makes an absent field "required-missing".
+      // Definition-aware validation of the FINAL map: the pre-pairing validation above only
+      // saw the request's extended_fields; paired entries must also be valid keys with valid
+      // values. `partial: true` — pairing never makes an absent field "required-missing".
       if (
-        mirror.extendedFields != null &&
-        mirror.extendedFields !== normalizedCase.extended_fields
+        paired.extendedFields != null &&
+        paired.extendedFields !== normalizedCase.extended_fields
       ) {
         const globalFields = await resolveGlobalFields(query.owner, fieldDefinitionsService);
         await validateCaseExtendedFields({
-          extendedFields: mirror.extendedFields,
+          extendedFields: paired.extendedFields as Record<string, string>,
           templateId: query.template?.id,
           globalFields,
           templatesService,
@@ -275,7 +291,14 @@ export const create = async (
       }
 
       // Return type includes null when input is null; CasePostRequest.extended_fields is never null.
-      normalizedCase.extended_fields = mirror.extendedFields ?? undefined;
+      normalizedCase.extended_fields =
+        (paired.extendedFields as Record<string, string>) ?? undefined;
+      if (paired.customFields !== undefined) {
+        // Values were decoded through the per-type codecs, so they satisfy the
+        // customFields union even though the adapter is structurally typed.
+        normalizedCase.customFields =
+          paired.customFields as unknown as typeof normalizedCase.customFields;
+      }
     }
 
     const attributes = transformNewCase({
