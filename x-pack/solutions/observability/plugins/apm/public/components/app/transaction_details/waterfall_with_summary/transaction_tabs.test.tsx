@@ -109,6 +109,15 @@ describe('TransactionTabs', () => {
     expect(screen.queryByTestId('genAiTab')).toBeNull();
   });
 
+  it('adds the viewGenAi EBT click attributes to the GenAI tab', () => {
+    mockGenAiData({ isGenAiSpan: true });
+    renderTabs();
+
+    const genAiTab = screen.getByTestId('genAiTab');
+    expect(genAiTab).toHaveAttribute('data-ebt-action', 'viewGenAi');
+    expect(genAiTab).toHaveAttribute('data-ebt-element', 'traceSampleTabs');
+  });
+
   it('calls onTabClick with the genAi tab when the GenAI tab is clicked', async () => {
     mockGenAiData({ isGenAiSpan: true });
     const { onTabClick } = renderTabs();

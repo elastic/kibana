@@ -11,6 +11,8 @@ import { apmTraceLogsDefaultColumns, ProcessorEvent } from '@kbn/observability-p
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { LazySavedSearchComponent, type SavedSearchTableConfig } from '@kbn/saved-search-component';
+import { getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
+import { GENAI_EBT_CLICK_ACTIONS } from '@kbn/apm-ui-shared';
 import { getTimestampUs } from '../../../../../common/utils/get_timestamp_us';
 import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
@@ -26,6 +28,7 @@ import {
   isDiscoverDefaultLogColumns,
   shouldPersistTraceLogsColumnsToUrl,
 } from '../distribution/get_trace_logs_columns';
+import { TRACE_SAMPLE_EBT_ELEMENTS } from './ebt_constants';
 
 const EMPTY_TRACE_LOGS_DEFAULT_COLUMNS: string[] = [];
 
@@ -41,6 +44,7 @@ interface TabContentDefinition {
   component: React.ReactNode;
   prepend?: React.ReactNode;
   dataTestSubj?: string;
+  ebt?: EbtClickAttrs;
 }
 
 interface Props {
@@ -79,7 +83,11 @@ export function TransactionTabs({
   });
 
   const tabs: Partial<Record<TransactionTab, TabContentDefinition>> = useMemo(() => {
-    const genAiTabContent = getGenAiTabContent({ isGenAiSpan, genAi });
+    const genAiTabContent = getGenAiTabContent({
+      isGenAiSpan,
+      genAi,
+      ebt: { element: TRACE_SAMPLE_EBT_ELEMENTS.TABS },
+    });
 
     return {
       [TransactionTab.timeline]: {
@@ -137,6 +145,10 @@ export function TransactionTabs({
               component: genAiTabContent.content,
               prepend: genAiTabContent.prepend,
               dataTestSubj: genAiTabContent['data-test-subj'],
+              ebt: {
+                action: GENAI_EBT_CLICK_ACTIONS.VIEW_GENAI,
+                element: TRACE_SAMPLE_EBT_ELEMENTS.TABS,
+              },
             },
           }
         : {}),
@@ -167,7 +179,7 @@ export function TransactionTabs({
     <>
       <EuiTabs>
         {(Object.keys(tabs) as TransactionTab[]).map((key) => {
-          const { label, prepend, dataTestSubj } = tabs[key]!;
+          const { label, prepend, dataTestSubj, ebt } = tabs[key]!;
           return (
             <EuiTab
               onClick={() => {
@@ -177,6 +189,7 @@ export function TransactionTabs({
               key={key}
               prepend={prepend}
               data-test-subj={dataTestSubj}
+              {...(ebt ? getEbtProps(ebt) : {})}
             >
               {label}
             </EuiTab>

@@ -7,9 +7,9 @@
 
 import { useMemo } from 'react';
 import type { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { useFetcher, isPending } from '../../../hooks/use_fetcher';
 import type { GenAiFields } from '@kbn/apm-ui-shared';
 import { getGenAiFields, hasGenAiData } from '@kbn/apm-ui-shared';
+import { useFetcher, isPending } from '../../../hooks/use_fetcher';
 
 interface UseGenAiDataParams {
   processorEvent: ProcessorEvent.transaction | ProcessorEvent.span;

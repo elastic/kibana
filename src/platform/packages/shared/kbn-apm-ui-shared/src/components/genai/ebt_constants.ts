@@ -15,4 +15,6 @@
 export const GENAI_EBT_CLICK_ACTIONS = {
   /** User copies a prompt/response message from the GenAI conversation view. */
   COPY_MESSAGE: 'copyGenAiMessage',
+  /** User opens the GenAI tab; the `element` identifies the host surface. */
+  VIEW_GENAI: 'viewGenAi',
 } as const;

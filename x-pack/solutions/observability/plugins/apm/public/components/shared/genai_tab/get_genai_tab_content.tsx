@@ -8,15 +8,18 @@
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { GenAiTab, type GenAiFields } from '@kbn/apm-ui-shared';
+import { GenAiTab, GENAI_EBT_CLICK_ACTIONS, type GenAiFields } from '@kbn/apm-ui-shared';
+import { getEbtProps } from '@kbn/ebt-click';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
 
 interface Props {
   isGenAiSpan: boolean;
   genAi: GenAiFields | undefined;
+  /** Identifies the host surface in the `viewGenAi` tab-click EBT events. */
+  ebt: { element: string };
 }
 
-export function getGenAiTabContent({ isGenAiSpan, genAi }: Props) {
+export function getGenAiTabContent({ isGenAiSpan, genAi, ebt }: Props) {
   if (!isGenAiSpan || !genAi) return undefined;
 
   return {
@@ -25,6 +28,10 @@ export function getGenAiTabContent({ isGenAiSpan, genAi }: Props) {
     prepend: <TechnicalPreviewBadge icon="flask" />,
     name: i18n.translate('xpack.apm.propertiesTable.tabs.genAi', {
       defaultMessage: 'GenAI',
+    }),
+    ...getEbtProps({
+      action: GENAI_EBT_CLICK_ACTIONS.VIEW_GENAI,
+      element: ebt.element,
     }),
     content: (
       <>

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export const SPAN_FLYOUT_EBT_ELEMENTS = {
-  HEADER: 'spanFlyoutHeader',
-  TABS: 'spanFlyoutTabs',
+export const TRACE_SAMPLE_EBT_ELEMENTS = {
+  TABS: 'traceSampleTabs',
 } as const;
