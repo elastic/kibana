@@ -23,10 +23,14 @@ function useDateRangeRedirect() {
     },
   } = useKibana();
 
-  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
-  const isDateRangeSet = searchParams.has('rangeFrom') && searchParams.has('rangeTo');
-  const rangeFrom = searchParams.get('rangeFrom');
-  const rangeTo = searchParams.get('rangeTo');
+  const { isDateRangeSet, rangeFrom, rangeTo } = useMemo(() => {
+    const searchParams = new URLSearchParams(location.search);
+    return {
+      isDateRangeSet: searchParams.has('rangeFrom') && searchParams.has('rangeTo'),
+      rangeFrom: searchParams.get('rangeFrom'),
+      rangeTo: searchParams.get('rangeTo'),
+    };
+  }, [location.search]);
 
   const redirect = useCallback(() => {
     const { timefilter } = queryService.timefilter;
@@ -39,7 +43,7 @@ function useDateRangeRedirect() {
     const defaultFrom = 'now-24h';
     const defaultTo = 'now';
 
-    const nextParams = new URLSearchParams(searchParams);
+    const nextParams = new URLSearchParams(location.search);
     nextParams.set('rangeFrom', isTimeTouched ? timePickerSharedState.from : defaultFrom);
     nextParams.set('rangeTo', isTimeTouched ? timePickerSharedState.to : defaultTo);
 
@@ -47,7 +51,7 @@ function useDateRangeRedirect() {
       ...location,
       search: nextParams.toString(),
     });
-  }, [history, location, queryService, searchParams]);
+  }, [history, location, queryService]);
 
   return { isDateRangeSet, rangeFrom, rangeTo, redirect, queryService };
 }
