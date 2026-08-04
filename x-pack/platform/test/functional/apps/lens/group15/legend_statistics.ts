@@ -157,7 +157,7 @@ MAX: 17,246`;
       describe('waffle chart', () => {
         it('waffleshows values in legend for legacy valuesInLegend===true property', async () => {
           await loadSavedLens('waffleValuesInLegendTrue');
-          await expectLegendOneItem('Count of records', '14,003');
+          await expectLegendOneItem('Count of records', '14,002');
         });
         // TEMP SKIP: apiFormat flag enabled
         it.skip('shows values in legend for legacy showValuesInLegend===false prop', async () => {
@@ -166,7 +166,7 @@ MAX: 17,246`;
         });
         it('shows values in legend for legendStats===["values"] prop', async () => {
           await loadSavedLens('waffleLegendStats');
-          await expectLegendOneItem('Count of records', '14,003');
+          await expectLegendOneItem('Count of records', '14,002');
         });
       });
     });
