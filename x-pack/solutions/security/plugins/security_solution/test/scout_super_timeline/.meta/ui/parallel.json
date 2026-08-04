@@ -11,7 +11,7 @@
       "expectedStatus": "passed",
       "tags": [],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/timelines_super/ui/parallel_tests/global.setup.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_super_timeline/ui/parallel_tests/global.setup.ts",
         "line": 10,
         "column": 16
       }
@@ -25,7 +25,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/timelines_super/ui/parallel_tests/timeline_super.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_super_timeline/ui/parallel_tests/timeline_super.spec.ts",
         "line": 45,
         "column": 14
       }

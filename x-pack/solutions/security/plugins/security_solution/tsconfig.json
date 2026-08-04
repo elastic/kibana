@@ -12,6 +12,7 @@
     "test/scout_ai_value_report/**/*",
     "test/scout_cps_local/**/*",
     "test/scout_security_attacks_alignment/**/*",
+    "test/scout_super_timeline/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
