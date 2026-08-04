@@ -41,6 +41,9 @@ const FIELD_LABELS: Record<SignificantEventUpdate['field'], string> = {
 };
 
 const STATUS_LABELS: Record<SignificantEventStatus, string> = {
+  pending: i18n.translate('xpack.investigationOutput.update.status.pending', {
+    defaultMessage: 'Pending',
+  }),
   open: i18n.translate('xpack.investigationOutput.update.status.open', { defaultMessage: 'Open' }),
   closed: i18n.translate('xpack.investigationOutput.update.status.closed', {
     defaultMessage: 'Closed',
