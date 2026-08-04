@@ -8,17 +8,10 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiFontSize } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import {
-  buildRows,
-  collectExpandableIds,
-  getRootLayout,
-  type FormatValue,
-  type JsonValue,
-} from './tree_model';
+import { buildRows, collectExpandableIds, type FormatValue, type JsonValue } from './tree_model';
 import { collectContainersWithMatch, getDocScan, EMPTY_ID_SET } from './doc_scan';
 import {
   useRovingTreeNavigation,
@@ -37,12 +30,12 @@ export interface JsonTreeViewerProps {
   /** Fires whenever expand/reveal state changes, so a host can persist it across remounts. */
   onStateChange?: (state: TreeExpansionState) => void;
   /**
-   * The active in-table search term. Every collection whose subtree contains it is auto-expanded so
-   * the match renders — in-table search can only count/highlight rendered DOM text.
+   * Every collection whose subtree contains it, is auto-expanded so that
+   * the matched value renders. Used to expand nodes when searching.
    */
   expandNodesContainingTerm?: string;
   /**
-   * Function called for each leaf node to render its value.
+   * Function called for each leaf node to render its value. Used by highlighting.
    */
   formatValue?: FormatValue;
 }
@@ -55,11 +48,9 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   formatValue,
 }: JsonTreeViewerProps) {
   const styles = useMemoCss(treeStyles);
-  const codeFontCss = css(useEuiFontSize('xs'));
 
   const { nodes, text } = useMemo(() => getDocScan(json), [json]);
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
-  const root = useMemo(() => getRootLayout(json), [json]);
 
   // Collections to force-open for the active search term (empty unless the document has a match).
   const searchTermLower = expandNodesContainingTerm?.trim().toLowerCase() ?? '';
@@ -78,14 +69,16 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
     expandableIds,
   });
 
+  const rootType = useMemo(() => (Array.isArray(json) ? 'array' : 'object'), [json]);
+
   const rows = useMemo(
-    () => buildRows(nodes, root.type, expansion.effectiveExpanded, expansion.revealed),
-    [nodes, root.type, expansion.effectiveExpanded, expansion.revealed]
+    () => buildRows(nodes, rootType, expansion.effectiveExpanded, expansion.revealed),
+    [nodes, rootType, expansion.effectiveExpanded, expansion.revealed]
   );
 
   const nav = useRovingTreeNavigation(rows, expansion);
 
-  const { hasControls, isAllExpanded, expandAll, collapseAll, toggle, activatePager, showFewer } =
+  const { hasControls, isAllExpanded, expandAll, collapseAll, toggle, revealMore, showFewer } =
     expansion;
   const { activeRowId, setActive, registerRow, onRowKeyDown, onControlKeyDown, expandAllRef } = nav;
 
@@ -115,7 +108,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
         </EuiFlexGroup>
       )}
 
-      <div css={[styles.wrapper, codeFontCss]}>
+      <div css={styles.wrapper}>
         <div
           role="tree"
           aria-label={i18n.translate('unifiedDataTable.jsonTreeViewer.treeAriaLabel', {
@@ -134,7 +127,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
                   row={row}
                   isActive={row.id === activeRowId}
                   rowRef={registerRow(row.id)}
-                  onActivate={() => activatePager(row)}
+                  onShowMore={() => revealMore(row.collectionId)}
                   onShowFewer={() => showFewer(row.collectionId)}
                   onFocus={() => setActive(row.id)}
                   onKeyDown={(event) => onRowKeyDown(event, row)}

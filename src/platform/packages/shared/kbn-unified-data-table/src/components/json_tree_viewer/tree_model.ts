@@ -190,16 +190,6 @@ export interface RootLayout {
   brackets: { open: string; close: string } | null;
 }
 
-export const getRootLayout = (json: JsonValue): RootLayout => {
-  if (Array.isArray(json)) {
-    return { type: 'array', brackets: { open: OPEN_BRACKET.array, close: CLOSE_BRACKET.array } };
-  }
-  if (isJsonObject(json)) {
-    return { type: 'object', brackets: { open: OPEN_BRACKET.object, close: CLOSE_BRACKET.object } };
-  }
-  return { type: 'object', brackets: null };
-};
-
 // ---- Flatten visible rows (drives rendering order and keyboard navigation) ----
 //
 // An expanded collection also emits a synthetic `closing` row after its children, so the tree

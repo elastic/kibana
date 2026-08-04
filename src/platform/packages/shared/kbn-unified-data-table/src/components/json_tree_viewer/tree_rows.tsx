@@ -8,10 +8,9 @@
  */
 
 /**
- * This file contains the presentational layer of the JSON tree: one component per render-row kind
+ * This file contains the presentational layer of the JSON tree: one component per row kind
  * (`NodeRowView`, `ClosingBracketRow`,`PagerRowView`). These hold no state.
  */
-
 import React, { memo, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -40,18 +39,21 @@ import {
   type PrimitiveType,
 } from './tree_model';
 
-// ---- Row views (one per render-row kind) ----
+// ---- Row view components (one per render-row kind) ----
 
-// Interaction wiring shared by the two focusable row kinds (node and pager). The container owns
-// the state, so it binds each callback to the row and passes the result down.
+// Focus and roving-tabindex wiring shared by the focusable row kinds.
 interface FocusableRowProps {
   isActive: boolean;
   rowRef: (element: HTMLDivElement | null) => void;
-  onActivate: () => void;
   onFocus: () => void;
   onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => void;
 }
 
+interface NodeRowViewProps extends FocusableRowProps {
+  row: NodeRow;
+  onActivate: () => void;
+  formatValue?: FormatValue;
+}
 export const NodeRowView = function NodeRowView({
   row,
   isActive,
@@ -60,7 +62,7 @@ export const NodeRowView = function NodeRowView({
   onFocus,
   onKeyDown,
   formatValue,
-}: FocusableRowProps & { row: NodeRow; formatValue?: FormatValue }) {
+}: NodeRowViewProps) {
   const styles = useMemoCss(treeStyles);
   const { euiTheme } = useEuiTheme();
   const { node, hasChildren, isExpanded } = row;
@@ -93,19 +95,26 @@ export const NodeRowView = function NodeRowView({
   );
 };
 
+interface PagerRowViewProps extends FocusableRowProps {
+  row: PagerRow;
+  onShowMore: () => void;
+  onShowFewer: () => void;
+}
 export const PagerRowView = function PagerRowView({
   row,
   isActive,
   rowRef,
-  onActivate,
   onFocus,
   onKeyDown,
+  onShowMore,
   onShowFewer,
-}: FocusableRowProps & { row: PagerRow; onShowFewer: () => void }) {
+}: PagerRowViewProps) {
   const styles = useMemoCss(treeStyles);
   const { euiTheme } = useEuiTheme();
   const showMore = row.hiddenCount > 0;
 
+  // The primary control shows more while items remain, otherwise it collapses back ("show fewer").
+  const onPrimary = showMore ? onShowMore : onShowFewer;
   const primaryLabel = showMore
     ? showMoreLabel(row.collectionType, Math.min(CHILDREN_INCREMENT, row.hiddenCount))
     : showFewerLabel(row.collectionType);
@@ -128,7 +137,7 @@ export const PagerRowView = function PagerRowView({
         iconType={showMore ? 'plus' : 'minus'}
         onClick={(event: React.MouseEvent) => {
           event.stopPropagation();
-          onActivate();
+          onPrimary();
         }}
         onKeyDown={pagerButtonKeyDown}
       >
@@ -171,34 +180,6 @@ export const ClosingBracketRow = memo(function ClosingBracketRow({ row }: { row:
     </div>
   );
 });
-
-// Accesibility handling for the control buttons (copy / pager buttons).
-const nestedControlKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
-  if (event.key.startsWith('Arrow')) {
-    event.preventDefault();
-    event.stopPropagation();
-    event.currentTarget.closest<HTMLElement>('[role="treeitem"]')?.focus();
-  } else if (event.key === 'Enter' || event.key === ' ') {
-    event.stopPropagation();
-  }
-};
-
-// Accesibility handling for the pager buttons.
-const pagerButtonKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
-  if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
-    const sibling =
-      event.key === 'ArrowRight'
-        ? event.currentTarget.nextElementSibling
-        : event.currentTarget.previousElementSibling;
-    if (sibling instanceof HTMLElement) {
-      event.preventDefault();
-      event.stopPropagation();
-      sibling.focus();
-      return;
-    }
-  }
-  nestedControlKeyDown(event);
-};
 
 // ---- Token Components ----
 
@@ -377,6 +358,34 @@ const NodeLabel = memo(function NodeLabel({
   );
 });
 
+// Accesibility handling for the control buttons (copy / pager buttons).
+const nestedControlKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+  if (event.key.startsWith('Arrow')) {
+    event.preventDefault();
+    event.stopPropagation();
+    event.currentTarget.closest<HTMLElement>('[role="treeitem"]')?.focus();
+  } else if (event.key === 'Enter' || event.key === ' ') {
+    event.stopPropagation();
+  }
+};
+
+// Accesibility handling for the pager buttons.
+const pagerButtonKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+  if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+    const sibling =
+      event.key === 'ArrowRight'
+        ? event.currentTarget.nextElementSibling
+        : event.currentTarget.previousElementSibling;
+    if (sibling instanceof HTMLElement) {
+      event.preventDefault();
+      event.stopPropagation();
+      sibling.focus();
+      return;
+    }
+  }
+  nestedControlKeyDown(event);
+};
+
 // ---- i18n labels ----
 const collectionCountLabel = (node: CollectionNode) => {
   const count = node.children.length;
@@ -416,6 +425,7 @@ const treeStyles = {
   wrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
       fontFamily: euiTheme.font.familyCode,
+      fontSize: euiTheme.font.scale.xs * euiTheme.base,
       margin: 0,
       padding: 0,
     }),
