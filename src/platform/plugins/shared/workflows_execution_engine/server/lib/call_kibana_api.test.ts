@@ -425,7 +425,7 @@ describe('callKibanaApi', () => {
       { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
       { method: 'POST', path: '/api/foo', body: '{"a":1}', headers: { 'Content-Type': 'text/plain' } }
     );
-    expect(lastFetchHeaders()['Content-Type']).toBe('text/plain');
+    expect((mockSelfFetch.mock.calls[1][1] as any).headers['Content-Type']).toBe('text/plain');
   });
 
   it('drops caller-supplied protected headers but keeps custom ones', async () => {

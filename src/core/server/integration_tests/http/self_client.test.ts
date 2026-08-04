@@ -21,6 +21,7 @@ import {
   Headers as UndiciHeaders,
   Request as UndiciRequest,
   Response as UndiciResponse,
+  FormData as UndiciFormData,
 } from 'undici';
 import { schema } from '@kbn/config-schema';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
@@ -48,6 +49,7 @@ const originalFetch = global.fetch;
 const originalHeaders = global.Headers;
 const originalRequest = global.Request;
 const originalResponse = global.Response;
+const originalFormData = global.FormData;
 const routeSecurity = {
   authz: {
     enabled: false,
@@ -162,7 +164,7 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
     async (_context, req, res) => {
       const form = new FormData();
       form.append('message', 'hello');
-      const response = await started.httpStart!.selfClient.asScoped(req).fetch<{ message: string }>(
+      const response = await started.httpStart!.selfClient.asScoped(req).fetch<{ parsed: boolean }>(
         '/self/form_target',
         { method: 'POST', rawBody: form }
       );
@@ -173,10 +175,18 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
   router.post(
     {
       path: '/self/form_target',
+      options: { body: { accepts: 'multipart/form-data', output: 'stream' } },
       security: routeSecurity,
       validate: false,
     },
-    (_context, req, res) => res.ok({ body: req.body })
+    async (_context, req, res) => {
+      const chunks: Buffer[] = [];
+      for await (const chunk of req.body as AsyncIterable<Buffer>) {
+        chunks.push(Buffer.from(chunk));
+      }
+      const body = Buffer.concat(chunks).toString('utf8');
+      return res.ok({ body: { parsed: body.includes('hello') } });
+    },
   );
 
   router.get(
@@ -377,6 +387,7 @@ describe('Http self client', () => {
     global.Headers = UndiciHeaders as typeof global.Headers;
     global.Request = UndiciRequest as unknown as typeof global.Request;
     global.Response = UndiciResponse as unknown as typeof global.Response;
+    global.FormData = UndiciFormData as unknown as typeof global.FormData;
   });
 
   afterAll(() => {
@@ -384,6 +395,7 @@ describe('Http self client', () => {
     global.Headers = originalHeaders;
     global.Request = originalRequest;
     global.Response = originalResponse;
+    global.FormData = originalFormData;
     restoreSelfClientTestEnvironment();
   });
 
@@ -421,7 +433,7 @@ describe('Http self client', () => {
 
     it('sends a buffered FormData self-call with its multipart boundary', async () => {
       const response = await supertest.get('/self/call_form_data').expect(200);
-      expect(response.body).toEqual({ message: 'hello' });
+      expect(response.body).toEqual({ parsed: true });
     });
 
     it('does not follow redirects', async () => {

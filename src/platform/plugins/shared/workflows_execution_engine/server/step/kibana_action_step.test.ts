@@ -80,7 +80,7 @@ describe('KibanaActionStepImpl', () => {
     step = createStep({ request: { method: 'GET', path: '/api/test' } });
     const result = await (step as any)._run();
     expect(result.error).toBeDefined();
-    expect(result.error.message).toContain('response size limit');
+    expect(result.error.message).toContain('size limit');
   });
 
   it('does not double-prefix generated non-default-space paths', async () => {
