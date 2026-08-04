@@ -135,7 +135,7 @@ export const GithubConnector: ConnectorSpec = {
   actions: {
     getMe: {
       isTool: true,
-      annotations: { readOnlyHint: true, idempotentHint: true },
+      annotations: { readOnlyHint: true },
       description: 'Get the authenticated GitHub user profile.',
       input: GetMeInputSchema,
       handler: async (ctx) => {
@@ -312,7 +312,7 @@ export const GithubConnector: ConnectorSpec = {
 
     getCommit: {
       isTool: true,
-      annotations: { readOnlyHint: true, idempotentHint: true },
+      annotations: { readOnlyHint: true },
       description: 'Get details of a specific commit.',
       input: GetCommitInputSchema,
       handler: async (ctx, input: GetCommitInput) => {
@@ -396,7 +396,7 @@ export const GithubConnector: ConnectorSpec = {
 
     listTools: {
       isTool: true,
-      annotations: { readOnlyHint: true, idempotentHint: true },
+      annotations: { readOnlyHint: true },
       description:
         'List all tools available on the GitHub MCP server. Use this to discover available capabilities or refresh tool context for the LLM.',
       input: ListToolsInputSchema,

@@ -424,7 +424,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.list
     resolveChannelId: {
       isTool: true,
-      annotations: { readOnlyHint: true, idempotentHint: true },
+      annotations: { readOnlyHint: true },
       description:
         'Look up a Slack channel/conversation ID from a human-readable channel name (e.g. "general" or "#general"). Use before sendMessage when you already know the target name but need its ID. To list or explore channels, use listChannels instead of many resolveChannelId calls.',
       input: SlackResolveChannelIdInputSchema,
@@ -580,7 +580,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.info
     getConversationInfo: {
       isTool: true,
-      annotations: { readOnlyHint: true, idempotentHint: true },
+      annotations: { readOnlyHint: true },
       description:
         'Look up metadata for a single Slack channel or DM by ID. Returns the channel object (name, privacy, membership, topic, purpose).',
       input: SlackGetConversationInfoInputSchema,
@@ -622,7 +622,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/users.lookupByEmail
     lookupUserByEmail: {
       isTool: true,
-      annotations: { readOnlyHint: true, idempotentHint: true },
+      annotations: { readOnlyHint: true },
       description:
         'Find a Slack user by email address. Returns the matching user object including id, name, and profile. Throws if no user has that email.',
       input: SlackLookupUserByEmailInputSchema,
@@ -795,7 +795,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/auth.test
     whoAmI: {
       isTool: true,
-      annotations: { readOnlyHint: true, idempotentHint: true },
+      annotations: { readOnlyHint: true },
       description:
         'Return the identity the Slack connector is authenticated as. Useful before sendMessage to confirm the workspace, or to resolve "me" to a user ID for other actions.',
       input: SlackWhoAmIInputSchema,
@@ -840,7 +840,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/files.info
     getFileInfo: {
       isTool: true,
-      annotations: { readOnlyHint: true, idempotentHint: true },
+      annotations: { readOnlyHint: true },
       description:
         'Look up a single Slack file by ID. Returns the file metadata (name, mimetype, size, urls, sharing channels).',
       input: SlackGetFileInfoInputSchema,

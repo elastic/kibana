@@ -152,7 +152,7 @@ export const JiraConnector: ConnectorSpec = {
     },
     getIssue: {
       isTool: true,
-      annotations: { readOnlyHint: true, idempotentHint: true },
+      annotations: { readOnlyHint: true },
       description:
         'Fetch full details of a single Jira issue by its ID or key. Use when you already have the issue key (e.g. PROJ-123) or issue ID and need the complete record including fields, comments, and metadata.',
       input: GetIssueInputSchema,
@@ -186,7 +186,7 @@ export const JiraConnector: ConnectorSpec = {
     },
     getProject: {
       isTool: true,
-      annotations: { readOnlyHint: true, idempotentHint: true },
+      annotations: { readOnlyHint: true },
       description:
         'Fetch full details of a single Jira project by its ID or key. Use when you already have the project key (e.g. PROJ) or numeric project ID and need the complete project record.',
       input: GetProjectInputSchema,
