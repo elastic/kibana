@@ -126,11 +126,7 @@ import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_t
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
 import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts, GetCredentialFnOpts } from './lib/get_axios_instance';
-import {
-  buildUserAgent,
-  getAxiosInstanceWithAuth,
-  getCredentialWithAuth,
-} from './lib/get_axios_instance';
+import { getAxiosInstanceWithAuth, getCredentialWithAuth } from './lib/get_axios_instance';
 import { RelayClient, type RelayClientContract } from './lib/relay';
 
 export interface PluginSetupContract {
@@ -171,7 +167,6 @@ export interface PluginSetupContract {
   >;
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
   getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
-  getUserAgent(): string;
   getRelayClient: () => RelayClientContract | undefined;
   setEnabledConnectorTypes: (connectorTypes: EnabledConnectorTypes) => void;
 
@@ -519,7 +514,6 @@ export class ActionsPlugin
       ),
       getCredential: this.getCredentialHelper(actionsConfigUtils),
       getClientLeasePool: () => this.clientLeasePool,
-      getUserAgent: () => buildUserAgent(plugins.cloud),
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.inMemoryConnectors.find(
           (inMemoryConnector) =>

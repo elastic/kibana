@@ -7,12 +7,13 @@
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import {
+  getAuthModeForAuthTypeId,
   getConnectorActionErrorMeta,
   getFinitePositiveNumber,
   getHeaderValue,
   clientTypes as defaultClientTypes,
 } from '@kbn/connector-specs';
-import type { ActionContext, ClientTypeSpec, ConnectorNetwork } from '@kbn/connector-specs';
+import type { ActionContext, ClientTypeSpec, ConnectorNetworkSettings } from '@kbn/connector-specs';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource, isUserError } from '@kbn/task-manager-plugin/server/task_running';
 import type { ExecutorParams } from '../../sub_action_framework/types';
@@ -23,7 +24,7 @@ import type {
 import type { GetAxiosInstanceWithAuthFn, GetCredentialFn } from '../get_axios_instance';
 import type { LeasePool } from '../lease_pool';
 import { buildClientLeaseKey } from './build_client_lease_key';
-import { AllowlistDeniedError } from './create_connector_network';
+import { AllowlistDeniedError } from './create_connector_network_settings';
 
 type RecordUnknown = Record<string, unknown>;
 interface FetchOptions {
@@ -98,14 +99,14 @@ export const generateExecutorFunction = ({
   getAxiosInstanceWithAuth,
   getCredential,
   getClientLeasePool,
-  network,
+  networkSettings,
   clientTypes = defaultClientTypes,
 }: {
   actions: ConnectorSpec['actions'];
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
   getCredential: GetCredentialFn;
   getClientLeasePool: () => LeasePool<unknown>;
-  network: ConnectorNetwork;
+  networkSettings: ConnectorNetworkSettings;
   clientTypes?: Readonly<Record<string, ClientTypeSpec<unknown>>>;
 }) =>
   async function (
@@ -161,7 +162,27 @@ export const generateExecutorFunction = ({
       if (!clientType) {
         throw new Error(`[Action][ExternalService] Unknown client type ${id}.`);
       }
-      if (authMode === 'per-user' && !profileUid) {
+      // The lease key is derived from the auth type in `secrets` rather than the connector's
+      // persisted `authMode`. A per-user credential leased under a `shared` identity would serve
+      // one user's warm client, and its captured credential accessor, to every other user.
+      // `authMode` is inferred once when the connector is created, so it can be absent (no
+      // `authType` field, an auth type unknown at creation time, or an in-memory connector) and
+      // would then fall back to `shared`.
+      const authTypeId = (secrets as { authType?: string }).authType ?? 'none';
+      const derivedAuthMode = getAuthModeForAuthTypeId(authTypeId);
+
+      if (derivedAuthMode === 'per-user' && authMode !== 'per-user') {
+        throw createTaskRunError(
+          new Error(
+            `[Action][ExternalService] Refusing to lease a pooled client: auth type "${authTypeId}" is per-user but connector "${connectorId}" resolved to "${
+              authMode ?? 'shared'
+            }".`
+          ),
+          TaskErrorSource.FRAMEWORK
+        );
+      }
+
+      if (derivedAuthMode === 'per-user' && !profileUid) {
         throw createTaskRunError(
           new Error('A profile UID is required to lease a per-user connector client.'),
           TaskErrorSource.USER
@@ -175,11 +196,11 @@ export const generateExecutorFunction = ({
           buildClientLeaseKey({
             connectorId,
             clientTypeId: id,
-            authMode,
+            authMode: derivedAuthMode,
             profileUid,
             connectorVersion,
           }),
-          () => clientType.build({ logger, config, network, credential }),
+          () => clientType.build({ logger, config, networkSettings, credential }),
           (client) => clientType.terminate(client)
         );
       } catch (err) {

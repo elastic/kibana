@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { createConnectorNetwork, AllowlistDeniedError } from './create_connector_network';
+import {
+  createConnectorNetworkSettings,
+  AllowlistDeniedError,
+} from './create_connector_network_settings';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 
-describe('createConnectorNetwork', () => {
+describe('createConnectorNetworkSettings', () => {
   const mockConfigUtils = {
     ensureUriAllowed: jest.fn(),
     ensureHostnameAllowed: jest.fn(),
@@ -17,14 +20,13 @@ describe('createConnectorNetwork', () => {
     getCustomHostSettings: jest.fn(),
     getResponseSettings: jest.fn(),
   } as unknown as ActionsConfigurationUtilities;
-  const mockGetUserAgent = jest.fn().mockReturnValue('Kibana/test');
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('returns the complete network policy surface', () => {
-    const network = createConnectorNetwork(mockConfigUtils, mockGetUserAgent);
+    const network = createConnectorNetworkSettings(mockConfigUtils);
     expect(Object.keys(network).sort()).toEqual([
       'ensureHostnameAllowed',
       'ensureUriAllowed',
@@ -32,18 +34,17 @@ describe('createConnectorNetwork', () => {
       'getProxySettings',
       'getResponseSettings',
       'getSslSettings',
-      'getUserAgent',
     ]);
   });
 
   it('delegates ensureUriAllowed to configUtils', () => {
-    const network = createConnectorNetwork(mockConfigUtils, mockGetUserAgent);
+    const network = createConnectorNetworkSettings(mockConfigUtils);
     network.ensureUriAllowed('https://allowed.example.com');
     expect(mockConfigUtils.ensureUriAllowed).toHaveBeenCalledWith('https://allowed.example.com');
   });
 
   it('delegates ensureHostnameAllowed to configUtils', () => {
-    const network = createConnectorNetwork(mockConfigUtils, mockGetUserAgent);
+    const network = createConnectorNetworkSettings(mockConfigUtils);
     network.ensureHostnameAllowed('allowed.example.com');
     expect(mockConfigUtils.ensureHostnameAllowed).toHaveBeenCalledWith('allowed.example.com');
   });
@@ -53,7 +54,7 @@ describe('createConnectorNetwork', () => {
     (mockConfigUtils.ensureUriAllowed as jest.Mock).mockImplementation(() => {
       throw original;
     });
-    const network = createConnectorNetwork(mockConfigUtils, mockGetUserAgent);
+    const network = createConnectorNetworkSettings(mockConfigUtils);
 
     const thrown = (() => {
       try {
@@ -72,7 +73,7 @@ describe('createConnectorNetwork', () => {
     (mockConfigUtils.ensureHostnameAllowed as jest.Mock).mockImplementation(() => {
       throw new Error('hostname not allowed');
     });
-    const network = createConnectorNetwork(mockConfigUtils, mockGetUserAgent);
+    const network = createConnectorNetworkSettings(mockConfigUtils);
 
     expect(() => network.ensureHostnameAllowed('denied.example.com')).toThrow(AllowlistDeniedError);
     expect(() => network.ensureHostnameAllowed('denied.example.com')).toThrow(
@@ -86,7 +87,7 @@ describe('createConnectorNetwork', () => {
     (mockConfigUtils.getSSLSettings as jest.Mock)
       .mockReturnValueOnce(firstValue)
       .mockReturnValueOnce(secondValue);
-    const network = createConnectorNetwork(mockConfigUtils, mockGetUserAgent);
+    const network = createConnectorNetworkSettings(mockConfigUtils);
 
     expect(network.getSslSettings()).toBe(firstValue);
     expect(network.getSslSettings()).toBe(secondValue);
@@ -99,7 +100,7 @@ describe('createConnectorNetwork', () => {
     (mockConfigUtils.getProxySettings as jest.Mock)
       .mockReturnValueOnce(firstValue)
       .mockReturnValueOnce(secondValue);
-    const network = createConnectorNetwork(mockConfigUtils, mockGetUserAgent);
+    const network = createConnectorNetworkSettings(mockConfigUtils);
 
     expect(network.getProxySettings()).toBe(firstValue);
     expect(network.getProxySettings()).toBe(secondValue);
@@ -112,7 +113,7 @@ describe('createConnectorNetwork', () => {
     (mockConfigUtils.getCustomHostSettings as jest.Mock)
       .mockReturnValueOnce(firstValue)
       .mockReturnValueOnce(secondValue);
-    const network = createConnectorNetwork(mockConfigUtils, mockGetUserAgent);
+    const network = createConnectorNetworkSettings(mockConfigUtils);
 
     expect(network.getCustomHostSettings('https://example.com')).toBe(firstValue);
     expect(network.getCustomHostSettings('https://example.com')).toBe(secondValue);
@@ -126,17 +127,10 @@ describe('createConnectorNetwork', () => {
     (mockConfigUtils.getResponseSettings as jest.Mock)
       .mockReturnValueOnce(firstValue)
       .mockReturnValueOnce(secondValue);
-    const network = createConnectorNetwork(mockConfigUtils, mockGetUserAgent);
+    const network = createConnectorNetworkSettings(mockConfigUtils);
 
     expect(network.getResponseSettings()).toBe(firstValue);
     expect(network.getResponseSettings()).toBe(secondValue);
     expect(mockConfigUtils.getResponseSettings).toHaveBeenCalledTimes(2);
-  });
-
-  it('returns the injected User-Agent', () => {
-    const network = createConnectorNetwork(mockConfigUtils, mockGetUserAgent);
-
-    expect(network.getUserAgent()).toBe('Kibana/test');
-    expect(mockGetUserAgent).toHaveBeenCalledTimes(1);
   });
 });

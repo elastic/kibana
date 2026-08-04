@@ -16,11 +16,15 @@ export interface ConnectorResponseSettings {
 }
 
 /**
- * Outbound-network policy for a client type. The framework guarantees access to the policy;
- * each client type is responsible for applying it through its own library's native options
- * (see the new-client-type review guide).
+ * The Kibana `xpack.actions.*` outbound-network settings, handed to a client type unchanged.
+ *
+ * These are the same settings the axios path applies via `get_axios_instance`. The framework only
+ * makes them reachable; each client type is responsible for applying them through its own
+ * library's native options (see the new-client-type review guide). The two `ensure*` methods are
+ * the exception: they are checks rather than values, because the `allowedHosts` matching logic
+ * lives in the Actions plugin and cannot be re-implemented in this package.
  */
-export interface ConnectorNetwork {
+export interface ConnectorNetworkSettings {
   /** Throws AllowlistDeniedError if the URL is not on xpack.actions.allowedHosts. */
   ensureUriAllowed(url: string): void;
   /** Throws AllowlistDeniedError if the hostname is not on xpack.actions.allowedHosts. */
@@ -29,8 +33,6 @@ export interface ConnectorNetwork {
   getProxySettings(): ProxySettings | undefined;
   getCustomHostSettings(url: string): CustomHostSettings | undefined;
   getResponseSettings(): ConnectorResponseSettings;
-  /** Cloud-aware User-Agent, matching what the axios path sends. */
-  getUserAgent(): string;
 }
 
 export interface CredentialAccessor {
@@ -40,7 +42,7 @@ export interface CredentialAccessor {
 export interface BuildContext {
   logger: Logger;
   config?: Record<string, unknown>;
-  network: ConnectorNetwork;
+  networkSettings: ConnectorNetworkSettings;
   credential: CredentialAccessor;
 }
 

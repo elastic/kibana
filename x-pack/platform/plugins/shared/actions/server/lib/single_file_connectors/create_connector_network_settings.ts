@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConnectorNetwork } from '@kbn/connector-specs';
+import type { ConnectorNetworkSettings } from '@kbn/connector-specs';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 
 /**
@@ -26,10 +26,9 @@ const toAllowlistDeniedError = (err: unknown): never => {
   throw new AllowlistDeniedError(err instanceof Error ? err.message : String(err), { cause: err });
 };
 
-export const createConnectorNetwork = (
-  configUtils: ActionsConfigurationUtilities,
-  getUserAgent: () => string
-): ConnectorNetwork => ({
+export const createConnectorNetworkSettings = (
+  configUtils: ActionsConfigurationUtilities
+): ConnectorNetworkSettings => ({
   ensureUriAllowed: (url) => {
     try {
       configUtils.ensureUriAllowed(url);
@@ -48,5 +47,4 @@ export const createConnectorNetwork = (
   getProxySettings: () => configUtils.getProxySettings(),
   getCustomHostSettings: (url) => configUtils.getCustomHostSettings(url),
   getResponseSettings: () => configUtils.getResponseSettings(),
-  getUserAgent,
 });

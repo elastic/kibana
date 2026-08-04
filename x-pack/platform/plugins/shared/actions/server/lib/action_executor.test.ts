@@ -35,6 +35,7 @@ import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/ser
 import { ConnectorAuthorizationError } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
+import { IN_MEMORY_CONNECTOR_REVISION } from './single_file_connectors/build_client_lease_key';
 import type { ConnectorRateLimiter } from './connector_rate_limiter';
 import { createMockInMemoryConnector } from '../application/connector/mocks';
 
@@ -330,6 +331,27 @@ describe('Action Executor', () => {
     expect(connectorType.executor).not.toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: expect.anything() })
     );
+  });
+
+  test('passes the in-memory revision sentinel for preconfigured spec connectors', async () => {
+    connectorTypeRegistry.get.mockReturnValueOnce({
+      ...connectorType,
+      source: ACTION_TYPE_SOURCES.spec,
+      validate: {
+        config: { schema: z.object({ bar: z.string() }) },
+        secrets: { schema: z.object({ apiKey: z.string() }) },
+        params: { schema: z.object({ foo: z.boolean() }) },
+      },
+    });
+
+    // A preconfigured connector has no saved object, so it has no version. Without an explicit
+    // sentinel the executor would reject it as a missing-version framework error.
+    await actionExecutor.execute({ ...executeParams, actionId: 'preconfigured' });
+
+    expect(connectorType.executor).toHaveBeenCalledWith(
+      expect.objectContaining({ connectorVersion: IN_MEMORY_CONNECTOR_REVISION })
+    );
+    expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
   });
 
   test('does not pass connectorVersion to non-spec connector executors', async () => {

@@ -36,7 +36,6 @@ const createSetupMock = () => {
     getAxiosInstanceWithAuth: jest.fn(),
     getCredential: jest.fn(),
     getClientLeasePool: jest.fn(),
-    getUserAgent: jest.fn().mockReturnValue('Kibana'),
     isPreconfiguredConnector: jest.fn(),
     getSubActionConnectorClass: jest.fn(),
     getCaseConnectorClass: jest.fn(),

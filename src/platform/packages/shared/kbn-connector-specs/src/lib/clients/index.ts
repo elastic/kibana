@@ -12,7 +12,7 @@ import type { ClientTypeSpec } from './client_type_spec';
 export type {
   ClientTypeSpec,
   BuildContext,
-  ConnectorNetwork,
+  ConnectorNetworkSettings,
   ConnectorResponseSettings,
   CredentialAccessor,
 } from './client_type_spec';
