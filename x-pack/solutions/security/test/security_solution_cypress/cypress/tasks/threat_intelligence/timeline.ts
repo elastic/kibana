@@ -24,16 +24,8 @@ import {
  * Add data to timeline from barchart legend menu item
  */
 export const addToTimelineFromBarchartLegend = () => {
-  /**
-   * We need to wait for the JS chunk to load after opening the popover
-   * otherwise the click will not trigger any action
-   */
-  cy.intercept('GET', '**/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.chunk*.js').as(
-    'lazyChunk'
-  );
   openBarchartPopoverMenu();
-  cy.wait('@lazyChunk');
-  cy.get(BARCHART_TIMELINE_BUTTON).first().click();
+  cy.get(BARCHART_TIMELINE_BUTTON).first().should('be.visible').click();
 };
 /**
  * Add data to timeline from indicators table cell menu
