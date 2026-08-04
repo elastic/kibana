@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
@@ -39,7 +40,7 @@ export const getSyntheticsFieldSuggestionsRoute: SyntheticsRestApiRouteFactory<
   writeAccess: false,
   path: SYNTHETICS_API_URLS.FIELD_SUGGESTIONS,
   validate: {},
-  handler: async ({ syntheticsEsClient }): Promise<FieldSuggestionsResult> => {
+  handler: async ({ syntheticsEsClient, spaceId }): Promise<FieldSuggestionsResult> => {
     const { body } = await syntheticsEsClient.search({
       size: MONITOR_SAMPLE_SIZE,
       _source: ['labels'],
@@ -47,7 +48,11 @@ export const getSyntheticsFieldSuggestionsRoute: SyntheticsRestApiRouteFactory<
       sort: [{ '@timestamp': { order: 'desc' } }],
       query: {
         bool: {
-          filter: [FINAL_SUMMARY_FILTER, EXCLUDE_RUN_ONCE_FILTER],
+          filter: [
+            FINAL_SUMMARY_FILTER,
+            EXCLUDE_RUN_ONCE_FILTER,
+            { terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] } },
+          ],
         },
       },
       aggs: {
@@ -58,7 +63,7 @@ export const getSyntheticsFieldSuggestionsRoute: SyntheticsRestApiRouteFactory<
     });
 
     const aggs = body.aggregations as ServiceNameAggs | undefined;
-    const serviceNames = (aggs?.serviceNames?.buckets ?? []).map(({ key }) => key);
+    const serviceNames = (aggs?.serviceNames?.buckets ?? []).map(({ key }) => key).sort();
 
     const labelKeys = new Set<string>();
     for (const hit of body.hits.hits) {
