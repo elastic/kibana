@@ -14,7 +14,6 @@ const FORMAT_PARAM_DEBOUNCE_FLUSH_MS = 500;
 
 /**
  * Default timeout for `page.waitForFunction` readiness waits.
- * Unlike `expect` / action timeouts, Playwright's `waitForFunction` has no Scout default.
  */
 const WAIT_FOR_FUNCTION_TIMEOUT_MS = 10_000;
 

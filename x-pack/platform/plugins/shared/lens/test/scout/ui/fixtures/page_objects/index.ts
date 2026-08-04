@@ -18,8 +18,6 @@ export type LensPageObjects = Omit<PageObjects, 'lens'> & {
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): LensPageObjects {
   return {
     ...pageObjects,
-    // Replace the shared slim LensApp instance with LensEditorApp (extends LensApp, so
-    // shared methods remain; adds Lens-editor-only helpers for this plugin's Scout suites).
     lens: createLazyPageObject(LensEditorApp, page),
     inspector: createLazyPageObject(Inspector, page),
   };

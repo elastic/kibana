@@ -11,18 +11,10 @@ import type { ScoutPage } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 
 /**
- * Cross-plugin Lens editor surface: navigation, saving, chart switching, the flyout
- * apply/cancel actions, `dragFieldToWorkspace`, and dimension configuration (used e.g. by
- * Dashboard and Discover Scout suites that embed/inspect Lens panels but don't own the
- * Lens editor).
- *
- * Lens-editor-only helpers (layers, formula text, drag-and-drop variants, palette/style
- * details, metric/datatable readers, etc.) live in the Lens plugin's own Scout fixtures
- * (`x-pack/platform/plugins/shared/lens/test/scout/ui/fixtures/page_objects/lens`) as a
- * `LensEditorApp` that extends this class, so edits to editor-only behavior don't widen the
- * blast radius of changes to this shared package. See
- * https://github.com/elastic/kibana/issues/282064.
+ * Default timeout for `page.waitForFunction` readiness waits.
  */
+const WAIT_FOR_FUNCTION_TIMEOUT_MS = 10_000;
+
 export class LensApp {
   readonly lensApp;
   readonly chartSwitchPopover;
@@ -252,8 +244,7 @@ export class LensApp {
         document.querySelector(`[data-test-subj="${selector}"]`)?.getAttribute('aria-pressed') ===
         'true',
       operationSelector,
-      // waitForFunction has no Scout default (unlike expect/actionTimeout).
-      { timeout: 10_000 }
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
   }
 
@@ -322,7 +313,7 @@ export class LensApp {
         document.querySelector(`[data-test-subj="${subj}"]`)?.getAttribute('aria-checked') ===
         expected,
       [testSubj, want] as const,
-      { timeout: 10_000 }
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
   }
 
