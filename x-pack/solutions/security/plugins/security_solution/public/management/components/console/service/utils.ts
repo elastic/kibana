@@ -7,9 +7,9 @@
 
 import type { CommandArgs, CommandDefinition } from '../types';
 
-export const getCommandNameWithArgs = (command: Partial<CommandDefinition>) => {
+export const getCommandNameWithArgs = (command: Partial<CommandDefinition>): string => {
   if (!command.mustHaveArgs || !command.args) {
-    return command.name;
+    return command.name ?? '';
   }
 
   let hasAnExclusiveOrArg = false;
