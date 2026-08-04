@@ -372,7 +372,7 @@ Follow this format:
   ```markdown
   ### ➡️ A fix PR is ready for review: %%FIX_PR_URL%%
 
-  <one very concise sentence on what the PR changes>. cc @<github-handle-here>
+  <one very concise sentence on what the PR changes>. cc @<requester-github-handle-here-if-not-a-bot>
 
   %%FIX_PR_BADGE%%
   ```
@@ -383,7 +383,7 @@ Follow this format:
   ````markdown
   ### 🔧 Manual PR needed: apply this fix to <version-branch>
 
-  Open this PR against <version-branch> manually — this workflow can only target `main`. <one very concise sentence on what the fix changes>. Everything you need is below. cc @<github-handle-here>
+  Open this PR against <version-branch> manually — this workflow can only target `main`. <one very concise sentence on what the fix changes>. Everything you need is below. cc @<requester-github-handle-here-if-not-a-bot>
 
   - **Title:** `<PR title, per "PR format">`
   - **Labels:** `flaky-test-fixer`, `release_note:skip`, `<backport label(s), per "Backport label" — write "no backport label" if you weren't sure>`
@@ -418,19 +418,19 @@ Follow this format:
   ```markdown
   ### 🔁 A fix is already in flight
 
-  #<PR number> already covers this, so no duplicate PR was opened. cc @<github-handle-here>
+  #<PR number> already covers this, so no duplicate PR was opened. cc @<requester-github-handle-here-if-not-a-bot>
   ```
 - **No PR opened**:
   ```markdown
   ### ⏭️ No fix PR was opened
 
-  The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), not test-side, so there's nothing to patch here. cc @<github-handle-here>
+  The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), not test-side, so there's nothing to patch here. cc @<requester-github-handle-here-if-not-a-bot>
   ```
   Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified.
 - **Backport the existing fix** (fix already on `main`, contained PR — no PR opened):
   ```markdown
   ### The fix is already on `main` — it needs backporting
 
-  #<main-PR> already fixed this on `main`; add the `backport:version` + `<vX.Y.Z>` label(s) to it to backport to <branch(es)>. cc @<github-handle-here>
+  #<main-PR> already fixed this on `main`; add the `backport:version` + `<vX.Y.Z>` label(s) to it to backport to <branch(es)>. cc @<requester-github-handle-here-if-not-a-bot>
   ```
   Fill `<vX.Y.Z>` from the branch → version mapping in "Backport label" (only the branches that still need the fix).
