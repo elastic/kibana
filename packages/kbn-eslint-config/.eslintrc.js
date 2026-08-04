@@ -48,6 +48,7 @@ const JS_YAML_LEGACY_CONSUMERS = [
   'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.ts',
   'src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/ftr_configs_manifest.ts',
   'src/platform/plugins/private/interactive_setup/server/kibana_config_writer.ts',
+  'x-pack/platform/packages/shared/kbn-inference-cli/src/util/write_kibana_config.ts',
   'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/yaml_form_utils.test.ts',
   'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/yaml_form_utils.ts',
   'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/yaml_rule_form.test.tsx',
