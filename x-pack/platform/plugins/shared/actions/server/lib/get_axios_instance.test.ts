@@ -440,8 +440,10 @@ describe('getAxiosInstance', () => {
       connectorId: '1',
       secrets: { authType: 'basic', username: 'u', password: 'p' },
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    result.defaults.adapter = jest.fn().mockResolvedValue({ data: {}, status: 200, statusText: 'OK', headers: {} } as any);
+
+    result.defaults.adapter = jest
+      .fn()
+      .mockResolvedValue({ data: {}, status: 200, statusText: 'OK', headers: {} } as any);
 
     await result.request({ url: 'https://example.com/api' });
 
@@ -465,8 +467,10 @@ describe('getAxiosInstance', () => {
       connectorId: '1',
       secrets: { authType: 'basic', username: 'u', password: 'p' },
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    result.defaults.adapter = jest.fn().mockResolvedValue({ data: {}, status: 200, statusText: 'OK', headers: {} } as any);
+
+    result.defaults.adapter = jest
+      .fn()
+      .mockResolvedValue({ data: {}, status: 200, statusText: 'OK', headers: {} } as any);
 
     await expect(result.request({ url: 'https://denied.example.com/api' })).rejects.toBe(
       allowlistError
@@ -484,8 +488,10 @@ describe('getAxiosInstance', () => {
       connectorId: '1',
       secrets: { authType: 'basic', username: 'u', password: 'p' },
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    result.defaults.adapter = jest.fn().mockResolvedValue({ data: {}, status: 200, statusText: 'OK', headers: {} } as any);
+
+    result.defaults.adapter = jest
+      .fn()
+      .mockResolvedValue({ data: {}, status: 200, statusText: 'OK', headers: {} } as any);
     result.defaults.baseURL = 'https://myhost.example.com';
 
     await result.request({ url: '/api/resource' });
@@ -510,8 +516,10 @@ describe('getAxiosInstance', () => {
         ca: Buffer.from("Hi i'm a ca"),
       },
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    result.defaults.adapter = jest.fn().mockResolvedValue({ data: {}, status: 200, statusText: 'OK', headers: {} } as any);
+
+    result.defaults.adapter = jest
+      .fn()
+      .mockResolvedValue({ data: {}, status: 200, statusText: 'OK', headers: {} } as any);
 
     await result.request({ url: 'https://pfx-target.example.com/api' });
 
