@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { getDataTestSubjectSelector } from '../../helpers/common';
+import {
+  getDataTestSubjectSelector,
+  getDataTestSubjectSelectorStartWith,
+} from '../../helpers/common';
 
 /* Indicators Table */
 
@@ -69,6 +72,8 @@ export const FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON = getDataTestSubjec
 );
 export const FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM =
   getDataTestSubjectSelector('iocHeaderBlockItem');
+export const FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK =
+  getDataTestSubjectSelectorStartWith('iocHeaderBlock-');
 export const FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_IN_BUTTON = getDataTestSubjectSelector(
   'actionItem-security-default-cellActions-filterIn'
 );

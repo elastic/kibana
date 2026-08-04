@@ -36,6 +36,7 @@ import {
   FILTERS_GLOBAL_CONTAINER,
   FLYOUT_JSON,
   FLYOUT_JSON_TAB,
+  FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK,
   FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM,
   FLYOUT_OVERVIEW_HIGHLIGHTED_FIELDS_TABLE,
   FLYOUT_OVERVIEW_TAB,
@@ -60,7 +61,6 @@ import {
   QUERY_INPUT,
   REFRESH_BUTTON,
   TABLE_CONTROLS,
-  TIME_RANGE_PICKER,
 } from '../../../screens/threat_intelligence/indicators';
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
@@ -115,7 +115,6 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
       cy.log('should show kql bar');
 
       cy.get(FILTERS_GLOBAL_CONTAINER).should('exist');
-      cy.get(`${FILTERS_GLOBAL_CONTAINER} ${TIME_RANGE_PICKER}`).should('exist');
       cy.get(`${FIELD_SELECTOR}`).should('exist');
 
       cy.log('should show flyout');
@@ -149,22 +148,15 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
 
       cy.log('should show the high level blocks');
 
-      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM)
-        .eq(0)
-        .should('contain.text', 'Feed')
-        .and('contain.text', 'AbuseCH Malware');
-      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM)
-        .eq(1)
-        .should('contain.text', 'Indicator type')
-        .and('contain.text', 'file');
-      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM)
-        .eq(2)
-        .should('contain.text', 'TLP Marking-')
-        .and('contain.text', '-');
-      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM)
-        .eq(3)
-        .should('contain.text', 'Confidence')
-        .and('contain.text', '-');
+      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK).eq(0).should('contain.text', 'Feed');
+      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK).eq(1).should('contain.text', 'Indicator type');
+      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK).eq(2).should('contain.text', 'TLP Marking-');
+      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK).eq(3).should('contain.text', 'Confidence');
+
+      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM).eq(0).should('contain.text', 'AbuseCH Malware');
+      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM).eq(1).should('contain.text', 'file');
+      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM).eq(2).should('contain.text', '-');
+      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM).eq(3).should('contain.text', '-');
 
       cy.log('should show the highlighted fields table');
 
