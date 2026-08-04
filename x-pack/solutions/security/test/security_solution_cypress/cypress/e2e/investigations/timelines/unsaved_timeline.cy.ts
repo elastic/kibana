@@ -37,8 +37,7 @@ import {
 } from '../../../tasks/timeline';
 import { GET_STARTED_URL, hostsUrl, MANAGE_URL, TIMELINES_URL } from '../../../urls/navigation';
 
-// Failing: See https://github.com/elastic/kibana/issues/276796
-describe.skip('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
+describe('[ESS] Save Timeline Prompts', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
