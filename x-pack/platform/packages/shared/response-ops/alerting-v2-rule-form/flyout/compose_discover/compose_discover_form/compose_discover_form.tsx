@@ -13,6 +13,7 @@ import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type {
   ComposeDiscoverState,
   ComposeDiscoverAction,
+  CustomRecoveryRenderProps,
   RecoveryType,
   StepDefinition,
   StepRenderProps,
@@ -151,7 +152,14 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
     return base;
   });
 
-  const renderCustomRecovery = definition?.renderRecoveryStep ?? EsqlRecoveryContent;
+  /*
+   * Always wrap as a render function that returns an element. Assigning a
+   * hook-using FC (EsqlRecoveryContent) as the render prop and invoking it as a
+   * plain function would leak hooks into RecoveryConditionStep.
+   */
+  const renderCustomRecovery =
+    definition?.renderRecoveryStep ??
+    ((props: CustomRecoveryRenderProps) => <EsqlRecoveryContent {...props} />);
 
   return { steps, renderCustomRecovery };
 };

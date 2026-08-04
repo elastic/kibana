@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { createElement } from 'react';
 import { useWatch } from 'react-hook-form';
 import { EuiFormRow, EuiHorizontalRule, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -159,12 +159,17 @@ export function RecoveryConditionStep({
         customDisabled={isQueryStandalone}
       />
 
-      {state.recoveryType === 'custom' && renderCustomRecovery && (
+      {state.recoveryType === 'custom' && renderCustomRecovery != null && (
         <>
           <EuiSpacer size="l" />
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="m" />
-          {renderCustomRecovery({ state, dispatch })}
+          {/*
+            Mount as a real component. Calling a hook-using FC as a plain function
+            (e.g. EsqlRecoveryContent) attributes those hooks to this parent and
+            crashes when custom recovery is toggled on ("Rendered more hooks…").
+          */}
+          {createElement(renderCustomRecovery, { state, dispatch })}
         </>
       )}
 

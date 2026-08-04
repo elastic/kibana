@@ -128,6 +128,36 @@ describe('RecoveryConditionStep', () => {
     expect(screen.getByTestId('composeDiscoverEditRecovery')).toBeInTheDocument();
   });
 
+  it('can toggle from default to custom without a hooks-order crash', () => {
+    const dispatch = jest.fn();
+    const onRecoveryTypeChange = jest.fn();
+    const services = createMockServices();
+    const state = createState({ queryCommitted: true, recoveryType: 'default' });
+
+    const { rerender } = render(
+      <RecoveryConditionStep
+        state={state}
+        dispatch={dispatch}
+        onRecoveryTypeChange={onRecoveryTypeChange}
+        renderCustomRecovery={EsqlRecoveryContent}
+      />,
+      { wrapper: createComposeFormWrapper(CUSTOM_RECOVERY_QUERY, services) }
+    );
+
+    expect(screen.queryByTestId('composeDiscoverEditRecovery')).not.toBeInTheDocument();
+
+    rerender(
+      <RecoveryConditionStep
+        state={{ ...state, recoveryType: 'custom' }}
+        dispatch={dispatch}
+        onRecoveryTypeChange={onRecoveryTypeChange}
+        renderCustomRecovery={EsqlRecoveryContent}
+      />
+    );
+
+    expect(screen.getByTestId('composeDiscoverEditRecovery')).toBeInTheDocument();
+  });
+
   it('disables the edit button when the child flyout is open', () => {
     renderRecoveryStep({ recoveryType: 'custom', childOpen: true }, CUSTOM_RECOVERY_QUERY);
 

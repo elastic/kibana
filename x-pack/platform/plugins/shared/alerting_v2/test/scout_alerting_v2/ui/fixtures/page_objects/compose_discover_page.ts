@@ -98,6 +98,15 @@ export class ComposeDiscoverPage {
     return this.page.testSubj.locator(`composeDiscoverModeSelect-${kind}`);
   }
 
+  /** Read-only summary block label (`Query` / `Base query` / `Alert condition`). */
+  summaryBlockLabel(label: 'Query' | 'Base query' | 'Alert condition') {
+    return this.flyout.getByText(label, { exact: true });
+  }
+
+  sandboxTab(tab: 'base' | 'alert' | 'recovery') {
+    return this.page.testSubj.locator(`querySandboxTab-${tab}`);
+  }
+
   editRuleButton(ruleId: string) {
     return this.page.testSubj.locator(`quickEditRule-${ruleId}`);
   }

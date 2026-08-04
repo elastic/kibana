@@ -372,9 +372,7 @@ describe('shell shared fields', () => {
 
     const querySection = screen.getByTestId('mockAlertConditionStep');
     const modeSelect = screen.getByTestId('composeDiscoverModeSelect');
-    expect(
-      querySection.compareDocumentPosition(modeSelect) && Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
+    expect(querySection.compareDocumentPosition(modeSelect)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it('does not render AlertDelayField when kind is signal', () => {

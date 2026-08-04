@@ -712,8 +712,32 @@ test.describe(
 
       await test.step('signal shows a single query block; Next is still enabled', async () => {
         await expect(pageObjects.composeDiscover.summarySection('success')).toBeVisible();
-        await expect(pageObjects.composeDiscover.flyout.getByText('Base query')).toBeHidden();
-        await expect(pageObjects.composeDiscover.flyout.getByText('Query')).toBeVisible();
+        await expect(pageObjects.composeDiscover.summaryBlockLabel('Base query')).toBeHidden();
+        await expect(pageObjects.composeDiscover.summaryBlockLabel('Query')).toBeVisible();
+        await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
+      });
+    });
+
+    test('mode switch: signal→alert re-splits without opening the sandbox', async ({
+      pageObjects,
+    }) => {
+      await test.step('commit a split query, switch to signal, then back to alert', async () => {
+        await pageObjects.composeDiscover.openCreateFlyout();
+        await pageObjects.composeDiscover.openSandbox();
+        await pageObjects.composeDiscover.setSandboxQuery(UNIFIED_QUERY);
+        await pageObjects.composeDiscover.clickApply();
+        await pageObjects.composeDiscover.selectMode('signal');
+        await pageObjects.composeDiscover.selectMode('alert');
+      });
+
+      await test.step('composed summary is restored and the sandbox stays closed', async () => {
+        await expect(pageObjects.composeDiscover.summarySection('success')).toBeVisible();
+        await expect(pageObjects.composeDiscover.summaryBlockLabel('Base query')).toBeVisible();
+        await expect(
+          pageObjects.composeDiscover.summaryBlockLabel('Alert condition')
+        ).toBeVisible();
+        await expect(pageObjects.composeDiscover.summaryBlockLabel('Query')).toBeHidden();
+        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
         await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
       });
     });
@@ -731,7 +755,8 @@ test.describe(
         await pageObjects.composeDiscover.openSandbox();
         await expect(pageObjects.composeDiscover.sandboxSettingsButton).toBeVisible();
         await pageObjects.composeDiscover.enableManualSplit();
-        await expect(pageObjects.composeDiscover.flyout.getByText('Base query')).toBeVisible();
+        await expect(pageObjects.composeDiscover.sandboxTab('base')).toBeVisible();
+        await expect(pageObjects.composeDiscover.sandboxTab('alert')).toBeVisible();
       });
     });
   }
