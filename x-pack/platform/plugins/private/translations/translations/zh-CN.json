@@ -58233,7 +58233,6 @@
     "xpack.synthetics.settings.getParams.failed": "无法获取全局参数。",
     "xpack.synthetics.settings.index": "Synthetics 设置",
     "xpack.synthetics.settings.invalid.nanError": "值必须为整数。",
-    "xpack.synthetics.settings.mws.failed": "无法获取维护窗口。",
     "xpack.synthetics.settings.noSpace.error": "索引名称不得包含空格",
     "xpack.synthetics.settings.saveSuccess": "设置已保存！",
     "xpack.synthetics.settings.statusRule.inspect": "无法检查监测状态规则类型。",
