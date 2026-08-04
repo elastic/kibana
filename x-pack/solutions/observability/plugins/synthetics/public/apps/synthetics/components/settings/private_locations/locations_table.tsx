@@ -17,6 +17,7 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -120,14 +121,17 @@ export const PrivateLocationsTable = ({
       ),
       render: (item: ListItem) => {
         const isExpanded = expandedIds.has(item.id);
+        const label = isExpanded ? COLLAPSE_ROW_LABEL : EXPAND_ROW_LABEL;
         return (
-          <EuiButtonIcon
-            data-test-subj="syntheticsExpandLocationAgents"
-            size="xs"
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-            aria-label={isExpanded ? COLLAPSE_ROW_LABEL : EXPAND_ROW_LABEL}
-            onClick={() => toggleRow(item.id)}
-          />
+          <EuiToolTip content={label} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="syntheticsExpandLocationAgents"
+              size="xs"
+              iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+              aria-label={label}
+              onClick={() => toggleRow(item.id)}
+            />
+          </EuiToolTip>
         );
       },
     },
