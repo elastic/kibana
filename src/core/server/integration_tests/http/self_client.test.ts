@@ -13,6 +13,7 @@
 
 import { restoreSelfClientTestEnvironment } from './self_client_test_environment';
 import { readFileSync } from 'node:fs';
+import type { Readable } from 'node:stream';
 import { ReadableStream as NodeReadableStream, TransformStream as NodeTransformStream } from 'node:stream/web';
 import http from 'node:http';
 import https from 'node:https';
@@ -166,28 +167,39 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
     },
     async (_context, req, res) => {
       const form = new FormData();
-      form.append('message', 'hello');
-      try {
-        const response = await started.httpStart!.selfClient.asScoped(req).fetch<{ parsed: boolean }>(
-          '/self/form_target',
-          { method: 'POST', rawBody: form }
-        );
-        return res.ok({ body: response });
-      } catch (error) {
-        return res.ok({ body: { error: (error as Error).stack } });
-      }
+      form.append('message', new Blob(['hello'], { type: 'text/plain' }), 'message.txt');
+      const response = await started.httpStart!.selfClient.asScoped(req).fetch<{ body: string; contentType: string }>(
+        '/self/form_target',
+        { method: 'POST', rawBody: form }
+      );
+      return res.ok({ body: response });
     }
   );
 
   router.post(
     {
       path: '/self/form_target',
-      options: { body: { accepts: 'multipart/form-data', output: 'data' } },
+      options: { body: { accepts: 'multipart/form-data', output: 'stream' } },
       security: routeSecurity,
       validate: { body: schema.any() },
     },
-    (_context, req, res) =>
-      res.ok({ body: { contentType: req.raw.req.headers['content-type'], received: req.body } }),
+    async (_context, req, res) => {
+      try {
+        const file = (req.body as { message: Readable }).message;
+        const chunks: Buffer[] = [];
+        for await (const chunk of file) {
+          chunks.push(Buffer.from(chunk));
+        }
+        return res.ok({
+          body: {
+            body: Buffer.concat(chunks).toString('utf8'),
+            contentType: req.raw.req.headers['content-type'] as string,
+          },
+        });
+      } catch (error) {
+        return res.ok({ body: { error: (error as Error).stack } });
+      }
+    },
   );
 
   router.get(
@@ -438,7 +450,8 @@ describe('Http self client', () => {
 
     it('sends a buffered FormData self-call with its multipart boundary', async () => {
       const response = await supertest.get('/self/call_form_data').expect(200);
-      expect(response.body.received).toEqual(expect.any(Object));
+      expect(response.body.body).toBe('hello');
+      expect(response.body.contentType).toMatch(/^multipart\/form-data; boundary=/);
     });
 
     it('does not follow redirects', async () => {
