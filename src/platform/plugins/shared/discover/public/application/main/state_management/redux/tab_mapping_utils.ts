@@ -193,7 +193,10 @@ export const fromTabStateToSavedObjectTab = ({
     hideAggregatedPreview: tab.appState.hideAggregatedPreview,
     rowHeight: tab.appState.rowHeight,
     headerRowHeight: tab.appState.headerRowHeight,
-    isApproximate: isTextBasedQuery && typeof tab.appState.isApproximate === 'boolean' ? tab.appState.isApproximate : undefined,
+    isApproximate:
+      isTextBasedQuery && typeof tab.appState.isApproximate === 'boolean'
+        ? tab.appState.isApproximate
+        : undefined,
     timeRestore,
     timeRange: timeRestore ? tab.globalState.timeRange : undefined,
     refreshInterval: timeRestore ? tab.globalState.refreshInterval : undefined,
