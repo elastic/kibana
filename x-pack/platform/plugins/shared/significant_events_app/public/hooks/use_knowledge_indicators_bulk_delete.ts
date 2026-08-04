@@ -31,7 +31,7 @@ export function useKnowledgeIndicatorsBulkDelete({
     },
     dependencies: {
       start: {
-        significant_events: { significantEventsRepositoryClient },
+        significantEvents: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();

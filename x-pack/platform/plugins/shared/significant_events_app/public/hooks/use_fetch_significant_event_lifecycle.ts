@@ -14,7 +14,7 @@ export const useFetchSignificantEventLifecycle = (eventUuid: string | undefined)
   const {
     dependencies: {
       start: {
-        significant_events: { significantEventsRepositoryClient },
+        significantEvents: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();
