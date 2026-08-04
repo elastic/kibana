@@ -91,4 +91,39 @@ describe('hasTimelineStateChanged', () => {
       )
     ).toBe(false);
   });
+
+  it('returns false for an active Super Timeline when the URL carries the same sourceIds (savedObjectId null vs id undefined)', () => {
+    // WHY: Super Timelines have savedObjectId: null (transient, never persisted). The URL sync
+    // omits 'id' when isSuperTimeline is true, so parsedState.id is undefined. The old comparison
+    // (null !== undefined → true) always returned true, causing openSuperTimeline to re-fire on
+    // every back/forward navigation. The ?? null normalization makes null === undefined for this
+    // comparison, matching the savedSearchId fix already in this function.
+    const superTimeline: TimelineModel = {
+      ...activeTimeline,
+      savedObjectId: null,
+      superTimelineSourceIds: ['src-1', 'src-2'],
+    };
+    expect(
+      hasTimelineStateChanged(superTimeline, {
+        isOpen: true,
+        activeTab: TimelineTabs.query,
+        superTimelineSourceIds: ['src-1', 'src-2'],
+      })
+    ).toBe(false);
+  });
+
+  it('returns true for an active Super Timeline when the sourceIds change (navigation to different Super Timeline)', () => {
+    const superTimeline: TimelineModel = {
+      ...activeTimeline,
+      savedObjectId: null,
+      superTimelineSourceIds: ['src-1', 'src-2'],
+    };
+    expect(
+      hasTimelineStateChanged(superTimeline, {
+        isOpen: true,
+        activeTab: TimelineTabs.query,
+        superTimelineSourceIds: ['src-1', 'src-3'],
+      })
+    ).toBe(true);
+  });
 });
