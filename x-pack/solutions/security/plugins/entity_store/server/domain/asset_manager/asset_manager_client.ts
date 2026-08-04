@@ -27,6 +27,10 @@ import {
   stopHistorySnapshotTask,
 } from '../../tasks/history_snapshot_task';
 import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
+import {
+  scheduleResilienceTask,
+  stopResilienceTask,
+} from '../../tasks/resilience_task';
 import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
 import {
   EngineDescriptorTypeName,
@@ -179,6 +183,13 @@ export class AssetManagerClient {
           request,
         }),
 
+        scheduleResilienceTask({
+          logger: this.logger,
+          taskManager: this.taskManager,
+          namespace: this.namespace,
+          request,
+        }),
+
         // Stored scripts are managed assets with no granular ES privilege (only `manage`/`all`),
         // so create them as the internal user rather than forcing the enabling user to hold
         // broad cluster `manage`.
@@ -270,6 +281,11 @@ export class AssetManagerClient {
           }),
           this.globalStateClient.delete(),
           stopStatusReportTask({
+            taskManager: this.taskManager,
+            logger: this.logger,
+            namespace: this.namespace,
+          }),
+          stopResilienceTask({
             taskManager: this.taskManager,
             logger: this.logger,
             namespace: this.namespace,
@@ -540,6 +556,45 @@ export class AssetManagerClient {
       }
       throw e;
     }
+  }
+
+  /**
+   * Checks whether the three shared per-namespace assets exist (latest index, updates data stream,
+   * metadata data stream) and reinstalls any that are missing. Returns true if anything was
+   * recreated, false if all assets were already present.
+   *
+   * Safe to call from a running task — the underlying creates use `throwIfExists: false`.
+   */
+  public async reinstallSharedAssetsIfMissing(): Promise<boolean> {
+    const latestIndex = getLatestEntitiesIndexName(this.namespace);
+    const updatesDataStream = getUpdatesEntitiesDataStreamName(this.namespace);
+    const metadataDataStream = getMetadataEntitiesDataStreamName(this.namespace);
+
+    const [latestExists, updatesExists, metadataExists] = await Promise.all([
+      this.esClient.indices.exists({ index: latestIndex }),
+      this.tryAsBoolean(this.esClient.indices.getDataStream({ name: updatesDataStream })),
+      this.tryAsBoolean(this.esClient.indices.getDataStream({ name: metadataDataStream })),
+    ]);
+
+    if (latestExists && updatesExists && metadataExists) {
+      return false;
+    }
+
+    const missing = [
+      !latestExists && latestIndex,
+      !updatesExists && updatesDataStream,
+      !metadataExists && metadataDataStream,
+    ].filter(Boolean);
+    this.logger.warn(
+      `Recreating missing entity store assets in ${this.namespace}: ${missing.join(', ')}`
+    );
+
+    await installSharedElasticsearchAssets({
+      esClient: this.esClient,
+      logger: this.logger,
+      namespace: this.namespace,
+    });
+    return true;
   }
 
   /**

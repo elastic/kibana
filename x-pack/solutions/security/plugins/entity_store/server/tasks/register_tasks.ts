@@ -10,6 +10,7 @@ import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 
 import { registerExtractEntityTasks } from './extract_entity_task';
 import { registerHistorySnapshotTask } from './history_snapshot_task';
+import { registerResilienceTask } from './resilience_task';
 import { registerStatusReportTask } from './status_report_task';
 import type { EntityStoreCoreSetup } from '../types';
 import { ALL_ENTITY_TYPES } from '../../common/domain/definitions/entity_schema';
@@ -33,5 +34,6 @@ export function registerTasks(
     isServerless,
   });
   registerHistorySnapshotTask({ taskManager, logger, core });
+  registerResilienceTask({ taskManager, logger, core });
   registerStatusReportTask({ taskManager, logger, core });
 }
