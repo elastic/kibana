@@ -20,8 +20,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
 
   const dateStart = new Date(Date.now() - 600000).toISOString();
 
-  // FLAKY: https://github.com/elastic/kibana/issues/229751
-  describe.skip('getActionErrorLog', () => {
+  describe('getActionErrorLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     beforeEach(async () => {
@@ -148,7 +147,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         .send(
           getTestRuleData({
             rule_type_id: 'test.cumulative-firing',
-            schedule: { interval: '6s' },
+            schedule: { interval: '24h' },
             actions: [
               {
                 id: createdConnector1.id,
@@ -176,6 +175,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
       );
 
       expect(response.body.totalErrors).to.eql(2);
+      expect(response.body.errors.length).to.eql(2);
 
       const filteredResponse = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
@@ -185,14 +185,8 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
 
       expect(filteredResponse.body.totalErrors).to.eql(1);
 
-      // Fetch rule execution, try to filter on that
-      const execResponse = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
-          createdRule.id
-        }/_execution_log?date_start=${dateStart}`
-      );
-
-      const runId = execResponse.body.data[0].id;
+      const runId = response.body.errors[0].id;
+      expect(runId).to.be.ok();
 
       const filteredByIdResponse = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
