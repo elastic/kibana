@@ -39,6 +39,7 @@ import { getTransforms as getMonitorsTransforms } from '../common/embeddables/mo
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../common/embeddables/monitors_overview/constants';
 import { getStatsOverviewEmbeddableSchema, syntheticsMonitorsEmbeddableSchema } from './schemas';
 import { registerDataProviders } from './agent_builder/register_data_provider';
+import { SyntheticsIndicesCache } from './services/synthetics_indices_cache';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -84,6 +85,7 @@ export class Plugin implements PluginType {
       isDev: this.initContext.env.mode.dev,
       share: plugins.share,
       alerting: plugins.alerting,
+      syntheticsIndicesCache: new SyntheticsIndicesCache(),
     } as SyntheticsServerSetup;
 
     this.syntheticsService = new SyntheticsService(this.server);
