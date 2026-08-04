@@ -14,6 +14,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
   getChartTypeFromLensConfig,
   getEsqlQueriesFromLensConfig,
+  getPrettifyConfigInstructions,
 } from '@kbn/agent-builder-visualizations-server';
 import { indexPanelsById, updatePanelInDashboard } from './dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
@@ -23,8 +24,6 @@ import type { PanelFailure } from './utils';
 
 const prettifyNlQuery =
   'Bring this existing visualization in line with the configuration rules stated in this prompt, preserving its analysis intent, chart type, and ES|QL query.';
-const prettifyConfigInstructions =
-  'This is a cleanup pass over the existing configuration, not a redesign. Change only what is needed to satisfy the rules stated in this prompt; keep everything else exactly as it is in the existing configuration. Do not introduce features the existing configuration does not already have (reference lines, annotations, markers, extra styling) unless a stated rule requires them. If the existing configuration already satisfies the rules, return it unchanged. Keep the provided ES|QL query unchanged. The "authoring_note" must be one factual sentence describing only what changed from the existing chart configuration.';
 
 interface PrettifyRequest {
   panelId: string;
@@ -102,7 +101,7 @@ export const prettifyPanelConfigs = async ({
         nlQuery: prettifyNlQuery,
         chartType,
         esql,
-        additionalChartConfigInstructions: prettifyConfigInstructions,
+        additionalChartConfigInstructions: getPrettifyConfigInstructions(chartType),
         existingPanel: panel,
       }),
     }))

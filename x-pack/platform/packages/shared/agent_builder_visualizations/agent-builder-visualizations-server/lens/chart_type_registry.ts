@@ -45,6 +45,11 @@ interface ChartTypeRegistryEntry<T extends z.ZodType> {
        */
       coloringRules?: string[];
       /**
+       * Chart-specific rules appended only during prettify passes.
+       * These are added on top of (and may override) `rules`.
+       */
+      prettifyRules?: string[];
+      /**
        * Structured config-generation options consumed by specialized prompt
        * builders.
        */
@@ -157,6 +162,9 @@ export const chartTypeRegistry: ChartTypeRegistry = {
           'When editing an existing XY chart, preserve its existing explicit colors unless the user asks to change them; do not introduce new color overrides.',
           'Never introduce or switch to legacy palette IDs (`eui_amsterdam`, `kibana_v7_legacy`, or `elastic_brand_2023`).',
         ],
+        prettifyRules: [
+          'Strip all explicit color overrides from layers and breakdown_by fields so Lens applies its current default palette. This overrides the preserved-colors rule that applies to regular edits.',
+        ],
       },
     },
   },
@@ -242,3 +250,13 @@ export const chartTypeRegistry: ChartTypeRegistry = {
 };
 
 export type VisualizationConfig = z.output<ChartTypeRegistry[SupportedChartType]['schema']>;
+
+const prettifyBaseInstructions =
+  'This is a cleanup pass over the existing configuration, not a redesign. Change only what is needed to satisfy the rules stated in this prompt; keep everything else exactly as it is in the existing configuration. Do not introduce features the existing configuration does not already have (reference lines, annotations, markers, extra styling) unless a stated rule requires them. If the existing configuration already satisfies the rules, return it unchanged. Keep the provided ES|QL query unchanged. The "authoring_note" must be one factual sentence describing only what changed from the existing chart configuration.';
+
+export const getPrettifyConfigInstructions = (chartType: SupportedChartType): string => {
+  const prettifyRules = chartTypeRegistry[chartType].prompt.config?.prettifyRules ?? [];
+  return prettifyRules.length > 0
+    ? `${prettifyBaseInstructions} ${prettifyRules.join(' ')}`
+    : prettifyBaseInstructions;
+};

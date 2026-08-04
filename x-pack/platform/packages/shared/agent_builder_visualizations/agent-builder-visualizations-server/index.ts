@@ -7,6 +7,7 @@
 
 export { buildLensConfig } from './lens/build_lens_config';
 export { getChartTypeSelectionPromptContent } from './lens/chart_type_guidance';
+export { getPrettifyConfigInstructions } from './lens/chart_type_registry';
 export {
   getChartTypeFromLensConfig,
   getEsqlQueriesFromLensConfig,
