@@ -42,6 +42,19 @@ export interface ConfigurationPersistedAttributes {
    * only (the migration task never filters/sorts by it), same as the sibling flags.
    */
   legacyCasesMigrated?: boolean;
+  /**
+   * Server-managed reconciliation marker (never accepted from API callers):
+   * set once every existing case in this space has verified semantic parity
+   * between its linked v1 `customFields` and v2 `extended_fields` values.
+   * `linkFingerprint` hashes the active v1-key/type → definition links the
+   * verification ran under — a configuration/link change makes the stored
+   * fingerprint stale and reschedules reconciliation. Unmapped (stored in
+   * `_source` only), same as the sibling migration flags.
+   */
+  legacyFieldValuesReconciled?: {
+    at: string;
+    linkFingerprint: string;
+  };
 }
 
 type PersistedObservableTypesConfiguration = Array<{

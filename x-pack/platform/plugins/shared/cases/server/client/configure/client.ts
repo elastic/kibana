@@ -420,6 +420,13 @@ export async function update(
       originalConfiguration: configuration,
     });
 
+    // The persisted update may have changed the active v1→v2 link fingerprint —
+    // nudge the reconciliation singleton (best-effort, A3). Only fired when the
+    // patch touched customFields; the durable stale fingerprint covers the rest.
+    if (request.customFields != null) {
+      clientArgs.nudgeFieldValueReconciliation?.();
+    }
+
     const res = {
       ...configuration.attributes,
       ...patch.attributes,
@@ -565,6 +572,12 @@ export async function create(
       },
       id: savedObjectID,
     });
+
+    // A new configuration with custom fields establishes new active links —
+    // nudge the reconciliation singleton (best-effort, A3).
+    if ((validatedConfigurationRequest.customFields?.length ?? 0) > 0) {
+      clientArgs.nudgeFieldValueReconciliation?.();
+    }
 
     const res = {
       ...post.attributes,

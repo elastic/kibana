@@ -28,7 +28,12 @@ import {
   CASES_TEMPLATES_MIGRATION_TASK_TYPE,
   CASES_TEMPLATES_MIGRATION_TASK_ID,
 } from './constants';
-import { CASE_BACKFILL_RESCHEDULE_DELAY_MS, MAX_CASE_BACKFILL_FAILED_RUNS } from './types';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
+import {
+  CASE_BACKFILL_RESCHEDULE_DELAY_MS,
+  MAX_CASE_BACKFILL_FAILED_RUNS,
+  MIGRATION_TASK_INTERVAL,
+} from './types';
 
 const createSavedObjectsRepositoryMock = () => ({
   find: jest.fn(),
@@ -219,6 +224,34 @@ describe('TemplatesMigrationTaskManager', () => {
         expect.objectContaining({ [CASES_TEMPLATES_MIGRATION_TASK_TYPE]: expect.any(Object) })
       );
     });
+
+    it('registers a long-running background definition with a versioned state schema (A3)', () => {
+      new TemplatesMigrationTaskManager(taskManagerSetupMock, logger);
+      const taskDef =
+        taskManagerSetupMock.registerTaskDefinitions.mock.calls[0][0][
+          CASES_TEMPLATES_MIGRATION_TASK_TYPE
+        ];
+      expect(taskDef).toMatchObject({
+        timeout: '10m',
+        maxAttempts: 3,
+        priority: TaskPriority.NormalLongRunning,
+      });
+      expect(taskDef.stateSchemaByVersion?.[1]).toBeDefined();
+      // v1 must accept both the fresh initial state and pre-versioning persisted state.
+      expect(() => taskDef.stateSchemaByVersion![1].schema.validate({})).not.toThrow();
+      expect(() =>
+        taskDef.stateSchemaByVersion![1].schema.validate({
+          failedRuns: 2,
+          caseBackfill: {
+            configureId: 'c1',
+            owner: 'cases',
+            namespace: 'default',
+            pitId: 'pit',
+            searchAfter: [1],
+          },
+        })
+      ).not.toThrow();
+    });
   });
 
   describe('scheduleMigrationTask', () => {
@@ -239,10 +272,13 @@ describe('TemplatesMigrationTaskManager', () => {
       );
     });
 
-    it('calls ensureScheduled with the migration task id', async () => {
+    it('schedules the permanent singleton on the recurring interval (A3)', async () => {
       await buildAndSchedule();
       expect(taskManagerStartMock.ensureScheduled).toHaveBeenCalledWith(
-        expect.objectContaining({ id: CASES_TEMPLATES_MIGRATION_TASK_ID })
+        expect.objectContaining({
+          id: CASES_TEMPLATES_MIGRATION_TASK_ID,
+          schedule: { interval: MIGRATION_TASK_INTERVAL },
+        })
       );
     });
   });
@@ -1711,7 +1747,9 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(caseFinds).toHaveLength(2);
       expect(caseFinds[1][0]).toEqual(expect.objectContaining({ searchAfter: [1] }));
 
-      // Exhausted ? PIT closed, flag set, task deleted (no reschedule).
+      // Exhausted ? PIT closed, flag set. The permanent singleton (A3) never deletes itself: a run
+      // that finished outstanding backfill work reschedules promptly so reconciliation can start
+      // against the fresh configure flags.
       expect(repo.closePointInTime).toHaveBeenCalled();
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
@@ -1719,7 +1757,7 @@ describe('TemplatesMigrationTaskManager', () => {
         { legacyCasesMigrated: true },
         expect.anything()
       );
-      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+      expect(result).toEqual({ state: {}, runAt: expect.any(Date) });
     });
 
     it('reschedules with a resume cursor when the per-run scan budget is exhausted', async () => {
@@ -1991,7 +2029,7 @@ describe('TemplatesMigrationTaskManager', () => {
       );
     });
 
-    it('gives up (deletes the task) after the max consecutive failing runs', async () => {
+    it('backs off to the recurring interval after the max consecutive failing runs', async () => {
       const cfg = buildConfigureSO({
         customFields: [buildLegacyCustomField('cf_text')],
         legacyCustomFieldsMigrated: true,
@@ -2009,7 +2047,8 @@ describe('TemplatesMigrationTaskManager', () => {
       });
 
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Giving up'));
-      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+      // No hot reschedule (no runAt) � the permanent task's interval retries instead of deleting.
+      expect(result).toEqual({ state: {} });
     });
 
     it('increments failedRuns and backs off the reschedule when a run has update failures', async () => {
@@ -2152,8 +2191,9 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(docs[TOTAL - 1].attributes.extended_fields).toEqual({
         cf_text_as_keyword: `v-${TOTAL - 1}`,
       });
-      // Fully done ? task deleted, space flagged.
-      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+      // Fully done ? space flagged; the permanent task reschedules promptly so
+      // reconciliation picks up the freshly flagged space on the next run.
+      expect(result).toEqual({ state: {}, runAt: expect.any(Date) });
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         cfg.id,
@@ -2288,7 +2328,7 @@ describe('TemplatesMigrationTaskManager', () => {
 
       expect(repo.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(hook).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+      expect(result).toEqual({ state: {}, runAt: expect.any(Date) });
     });
 
     it('fires when the space had pending backfill work even if this run wrote nothing (multi-run finish / post-restart re-scan)', async () => {
@@ -2312,7 +2352,7 @@ describe('TemplatesMigrationTaskManager', () => {
 
       expect(repo.bulkUpdate).not.toHaveBeenCalled();
       expect(hook).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+      expect(result).toEqual({ state: {}, runAt: expect.any(Date) });
     });
 
     it('does NOT fire on a no-op restart where every space is already fully migrated', async () => {
@@ -2389,7 +2429,8 @@ describe('TemplatesMigrationTaskManager', () => {
       mockFindByType(configSO, [
         buildCaseSO('c1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'v' }]),
       ]);
-      // Every update fails ? resuming one run short of the cap makes this run give up and delete.
+      // Every update fails ? resuming one run short of the cap makes this run give up hot
+      // rescheduling and fall back to the recurring interval.
       repo.bulkUpdate.mockResolvedValue({
         saved_objects: [{ id: 'c1', type: CASE_SAVED_OBJECT, error: { message: 'boom' } }],
       });
@@ -2401,10 +2442,11 @@ describe('TemplatesMigrationTaskManager', () => {
 
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Giving up'));
       expect(hook).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+      // Backed off to the recurring interval (no hot reschedule) instead of deleting.
+      expect(result).toEqual({ state: {} });
     });
 
-    it('swallows a hook rejection and still completes + deletes the task (no retry loop)', async () => {
+    it('swallows a hook rejection and still completes the run (no retry loop)', async () => {
       const configSO = buildConfigureSO({
         customFields: [buildLegacyCustomField('cf_text')],
         legacyCustomFieldsMigrated: true,
@@ -2417,16 +2459,16 @@ describe('TemplatesMigrationTaskManager', () => {
 
       const result = await getTaskRunner(await buildWithHook(hook)).run();
 
-      // The migration is unaffected: it still reports complete and deletes the one-shot task, so
-      // Task Manager does not retry and re-fire the hook.
-      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+      // The migration is unaffected: the run still completes normally (prompt reschedule after
+      // finishing outstanding backfill), so Task Manager does not error-retry and re-fire the hook.
+      expect(result).toEqual({ state: {}, runAt: expect.any(Date) });
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('onCaseBackfillComplete hook failed'),
         expect.objectContaining({ error: expect.any(Error) })
       );
     });
 
-    it('does not require a hook - a completing backfill with no hook configured still deletes the task', async () => {
+    it('does not require a hook — a completing backfill with no hook configured still completes the run', async () => {
       const configSO = buildConfigureSO({
         customFields: [buildLegacyCustomField('cf_text')],
         legacyCustomFieldsMigrated: true,
@@ -2439,7 +2481,148 @@ describe('TemplatesMigrationTaskManager', () => {
       const manager = await buildAndSchedule(); // constructed without an onCaseBackfillComplete hook
       const result = await getTaskRunner(manager).run();
 
-      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+      expect(result).toEqual({ state: {}, runAt: expect.any(Date) });
+    });
+  });
+
+  describe('field-value reconciliation phase (runs after the backfill)', () => {
+    // A space where fields/templates and the case backfill already completed on earlier runs, so
+    // this run goes straight to reconciliation.
+    const reconciledConfigSO = () =>
+      buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyTemplatesMigrated: true,
+        legacyCustomFieldsMigrated: true,
+        legacyCasesMigrated: true,
+      });
+
+    const linkedDefinitionSO = () => ({
+      id: 'def-1',
+      type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+      references: [],
+      version: 'def-v1',
+      attributes: {
+        fieldDefinitionId: 'def-1',
+        name: 'label_for_cf_text',
+        owner: 'cases',
+        isGlobal: true,
+        legacyKey: 'cf_text',
+        definition:
+          'name: label_for_cf_text\nlabel: Label for cf_text\ntype: keyword\ncontrol: INPUT_TEXT\n',
+      },
+    });
+
+    const routeReconcileFinds = (configSO: unknown, caseSOs: unknown[]) => {
+      repo.find.mockImplementation((opts: { type: string }) => {
+        if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [configSO], total: 1 });
+        }
+        if (opts.type === CASE_FIELD_DEFINITION_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [linkedDefinitionSO()], total: 1 });
+        }
+        if (opts.type === CASE_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: caseSOs, total: caseSOs.length });
+        }
+        return Promise.resolve({ saved_objects: [], total: 0 });
+      });
+      // tryMarkSpaceReconciled re-fetches the configure SO fresh for its OCC check.
+      repo.get.mockResolvedValue(configSO);
+    };
+
+    it('verifies a consistent space and writes the fingerprint marker, then idles on the interval', async () => {
+      const configSO = reconciledConfigSO();
+      routeReconcileFinds(configSO, [
+        {
+          id: 'case-1',
+          type: CASE_SAVED_OBJECT,
+          references: [],
+          version: 'v1',
+          attributes: {
+            owner: 'cases',
+            customFields: [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'same' }],
+            extended_fields: { label_for_cf_text_as_keyword: 'same' },
+          },
+          sort: [1],
+        },
+      ]);
+
+      const manager = await buildAndSchedule();
+      const result = await getTaskRunner(manager).run();
+
+      expect(repo.bulkUpdate).not.toHaveBeenCalled();
+      expect(repo.update).toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configSO.id,
+        {
+          legacyFieldValuesReconciled: {
+            at: expect.any(String),
+            linkFingerprint: expect.stringMatching(/^[0-9a-f]{64}$/),
+          },
+        },
+        expect.objectContaining({ refresh: false })
+      );
+      // Nothing pending anywhere: no hot reschedule, the recurring interval takes over.
+      expect(result).toEqual({ state: {} });
+    });
+
+    it('repairs a mismatched case (v2 wins) and reschedules for a verification pass before marking', async () => {
+      routeReconcileFinds(reconciledConfigSO(), [
+        {
+          id: 'case-1',
+          type: CASE_SAVED_OBJECT,
+          references: [],
+          version: 'case-v1',
+          attributes: {
+            owner: 'cases',
+            customFields: [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'v1-value' }],
+            extended_fields: { label_for_cf_text_as_keyword: 'v2-value' },
+          },
+          sort: [1],
+        },
+      ]);
+
+      const manager = await buildAndSchedule();
+      const result = await getTaskRunner(manager).run();
+
+      expect(repo.bulkUpdate).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            type: CASE_SAVED_OBJECT,
+            id: 'case-1',
+            version: 'case-v1',
+            attributes: {
+              customFields: [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'v2-value' }],
+            },
+          }),
+        ],
+        { refresh: false }
+      );
+      // Repaired but not yet verified: no marker, reschedule for the verification pass.
+      expect(repo.update).not.toHaveBeenCalled();
+      expect(result).toEqual({ state: {}, runAt: expect.any(Date) });
+    });
+
+    it('skips reconciliation entirely while the marker fingerprint is current', async () => {
+      // First run computes and persists the marker; feed it back as the stored attribute.
+      const configSO = reconciledConfigSO();
+      routeReconcileFinds(configSO, []);
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+      const marker = repo.update.mock.calls[0][2].legacyFieldValuesReconciled;
+
+      const markedConfigSO = {
+        ...configSO,
+        attributes: { ...configSO.attributes, legacyFieldValuesReconciled: marker },
+      };
+      routeReconcileFinds(markedConfigSO, []);
+      repo.update.mockClear();
+      repo.openPointInTimeForType.mockClear();
+
+      const result = await getTaskRunner(manager).run();
+
+      expect(repo.openPointInTimeForType).not.toHaveBeenCalled();
+      expect(repo.update).not.toHaveBeenCalled();
+      expect(result).toEqual({ state: {} });
     });
   });
 });

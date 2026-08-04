@@ -62,6 +62,7 @@ import type { ServerlessProjectType } from '../common/constants/types';
 
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { TemplatesMigrationTaskManager } from './tasks/templates_migration/templates_migration_task_manager';
+import { CASES_TEMPLATES_MIGRATION_TASK_ID } from './tasks/templates_migration/constants';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
 import {
@@ -486,6 +487,23 @@ export class CasePlugin
       // service calls it fire-and-forget after every template mutation.
       analyticsV2DataViewRefresher:
         this.casesAnalyticsV2Service?.getDataViewRefresher() ?? V2_NOOP_DATA_VIEW_REFRESHER,
+      // Best-effort runSoon nudge for the templates-migration singleton after a
+      // configuration write that may change the active v1→v2 link fingerprint
+      // (addendum A3). Never removeIfExists here — a lost nudge (e.g. the task
+      // is mid-run) is recovered by the durable stale fingerprint on the next
+      // interval. Only wired when the task itself is registered.
+      nudgeFieldValueReconciliation:
+        plugins.taskManager && this.caseConfig.templates.enabled
+          ? () => {
+              plugins.taskManager
+                ?.runSoon(CASES_TEMPLATES_MIGRATION_TASK_ID)
+                .catch((err: Error) =>
+                  this.logger.debug(
+                    `Best-effort reconciliation runSoon failed (the interval will recover): ${err.message}`
+                  )
+                );
+            }
+          : undefined,
     });
 
     return {

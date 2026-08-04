@@ -1450,6 +1450,52 @@ describe('client', () => {
           // The configuration must never be persisted without its linked definitions.
           expect(clientArgs.services.caseConfigureService.patch).not.toHaveBeenCalled();
         });
+
+        describe('reconciliation nudge', () => {
+          it('nudges the reconciliation task after a patch that touches customFields', async () => {
+            clientArgs.services.caseConfigureService.get.mockResolvedValue(baseGetResult as never);
+            clientArgs.services.caseConfigureService.patch.mockResolvedValue(
+              basePatchResult as never
+            );
+            const nudge = jest.fn();
+
+            await update(
+              'test-id',
+              {
+                version: 'test-version',
+                customFields: [
+                  {
+                    key: 'my_text',
+                    label: 'My Text',
+                    type: CustomFieldTypes.TEXT,
+                    required: false,
+                  },
+                ],
+              },
+              { ...clientArgs, nudgeFieldValueReconciliation: nudge },
+              casesClientInternal
+            );
+
+            expect(nudge).toHaveBeenCalledTimes(1);
+          });
+
+          it('does not nudge when the patch does not touch customFields', async () => {
+            clientArgs.services.caseConfigureService.get.mockResolvedValue(baseGetResult as never);
+            clientArgs.services.caseConfigureService.patch.mockResolvedValue(
+              basePatchResult as never
+            );
+            const nudge = jest.fn();
+
+            await update(
+              'test-id',
+              { version: 'test-version', closure_type: 'close-by-pushing' },
+              { ...clientArgs, nudgeFieldValueReconciliation: nudge },
+              casesClientInternal
+            );
+
+            expect(nudge).not.toHaveBeenCalled();
+          });
+        });
       });
     });
   });
@@ -2005,6 +2051,37 @@ describe('client', () => {
 
         // The configuration must never be persisted without its linked definitions.
         expect(clientArgs.services.caseConfigureService.post).not.toHaveBeenCalled();
+      });
+
+      describe('reconciliation nudge', () => {
+        it('nudges the reconciliation task when a new configuration has customFields', async () => {
+          const nudge = jest.fn();
+
+          await create(
+            {
+              ...baseRequest,
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+            { ...clientArgs, nudgeFieldValueReconciliation: nudge },
+            casesClientInternal
+          );
+
+          expect(nudge).toHaveBeenCalledTimes(1);
+        });
+
+        it('does not nudge when a new configuration has no customFields', async () => {
+          const nudge = jest.fn();
+
+          await create(
+            baseRequest,
+            { ...clientArgs, nudgeFieldValueReconciliation: nudge },
+            casesClientInternal
+          );
+
+          expect(nudge).not.toHaveBeenCalled();
+        });
       });
     });
   });

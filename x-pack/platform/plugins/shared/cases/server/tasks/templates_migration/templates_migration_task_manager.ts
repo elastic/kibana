@@ -13,6 +13,7 @@ import type {
   TaskManagerStartContract,
   RunContext,
 } from '@kbn/task-manager-plugin/server';
+import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import {
@@ -30,21 +31,28 @@ import {
   CASE_BACKFILL_RESCHEDULE_DELAY_MS,
   MAX_CASE_BACKFILL_FAILED_RUNS,
   MAX_CONCURRENT_MIGRATIONS,
+  MIGRATION_TASK_INTERVAL,
+  migrationTaskStateSchemaV1,
 } from './types';
-import type { MigrationTaskState } from './types';
+import type { MigrationTaskState, ReconcileCounts } from './types';
 import { findAllConfigurations, migrateOneConfigure } from './migrate_configuration';
 import {
   configureNeedsCaseBackfill,
   hasPendingCaseBackfill,
   runCaseBackfillPhase,
 } from './run_case_backfill';
+import { runFieldValueReconciliationPhase } from './run_field_value_reconciliation';
 
 /**
- * Registers and schedules the one-shot task that migrates legacy (v1) templates and custom fields
- * into the v2 saved objects, and backfills existing cases' `extended_fields`. Each run has two
- * phases:
+ * Registers and schedules the **low-frequency permanent singleton** task (plan addendum A3: same
+ * type/id, interval schedule, no self-delete) that migrates legacy (v1) templates and custom fields
+ * into the v2 saved objects, backfills existing cases' `extended_fields`, and reconciles linked
+ * v1/v2 case field values. Each run has three phases:
  *   1. Field definitions + templates — fast, one pass per space, idempotent via per-space flags.
  *   2. Existing-case backfill — resumable and budgeted; reschedules itself until every space is done.
+ *   3. Field-value reconciliation — verifies/repairs linked v1↔v2 value parity per space, guarded by
+ *      the durable `legacyFieldValuesReconciled` fingerprint marker. Configuration changes nudge the
+ *      task with a best-effort `runSoon`; a lost nudge is recovered by the interval.
  * All writes go through an internal (unscoped) SO repository; the whole task is gated by the
  * `xpack.cases.templates.enabled` feature flag at the plugin level.
  */
@@ -53,13 +61,13 @@ export class TemplatesMigrationTaskManager {
   private internalRepo?: ISavedObjectsRepository;
   private migrationUsageCounter?: IUsageCounter;
   /**
-   * Best-effort hook fired once, when the existing-case `extended_fields` backfill reaches a terminal
-   * state (fully complete OR gives up) AND there was outstanding backfill work at the start of that
-   * final run. Wired by the plugin to `CasesAnalyticsV2Service.triggerBackfillReconciliation`: the
-   * backfill's raw SO `bulkUpdate` bumps only the SO-framework `updated_at`, not the case-domain
+   * Best-effort analytics-v2 nudge, fired when the existing-case `extended_fields` backfill
+   * finishes outstanding work and after any run whose reconciliation phase repaired cases. Wired by
+   * the plugin to `CasesAnalyticsV2Service.triggerBackfillReconciliation`: both phases write raw SO
+   * updates that bump only the SO-framework `updated_at`, not the case-domain
    * `attributes.updated_at` that analytics-v2's incremental reconciliation filters on, so without a
-   * nudge the backfilled `extended_fields` would never be mirrored to `.cases`. Optional and
-   * fire-and-forget — failures are logged, never propagated (see `notifyCaseBackfillComplete`).
+   * nudge those writes would never be mirrored to `.cases`. Optional and fire-and-forget — failures
+   * are logged, never propagated (see `notifyAnalyticsReconciliation`).
    */
   private readonly onCaseBackfillComplete?: () => Promise<void> | void;
 
@@ -80,9 +88,22 @@ export class TemplatesMigrationTaskManager {
     taskManager.registerTaskDefinitions({
       [CASES_TEMPLATES_MIGRATION_TASK_TYPE]: {
         title: 'Cases Templates V2 Migration',
-        description: 'One-shot migration of legacy templates and custom fields to the v2 system',
+        description:
+          'Migration of legacy templates and custom fields to the v2 system, plus linked field-value reconciliation',
         timeout: '10m',
         maxAttempts: 3,
+        priority: TaskPriority.NormalLongRunning,
+        cost: TaskCost.Normal,
+        // Params stay empty (no paramsSchema needed). The versioned state schema
+        // covers the phase/cursor/failure state; v1 accepts the initial `{}` AND
+        // the `caseBackfill`/`failedRuns` state persisted by older in-progress
+        // instances of this (pre-versioning) task type.
+        stateSchemaByVersion: {
+          1: {
+            schema: migrationTaskStateSchemaV1,
+            up: (state: Record<string, unknown>) => state,
+          },
+        },
         createTaskRunner: ({ taskInstance, signal }: RunContext) => {
           // Same guard as IncrementalIdTaskManager: if Task Manager fires between setup() and
           // start(), we throw and let TM mark the run as failed — it will retry on next startup.
@@ -90,15 +111,12 @@ export class TemplatesMigrationTaskManager {
             throw new Error('TemplatesMigrationTaskManager: internal repository not initialized');
           }
           const repo = this.internalRepo;
-          const log = this.logger;
           const previousState = (taskInstance?.state ?? {}) as MigrationTaskState;
-          // Task Manager aborts this signal on timeout/cancel; the backfill checks it between pages
-          // and persists its cursor so the next run resumes rather than running past the timeout.
+          // Task Manager aborts this signal on timeout/cancel; the scans check it between pages
+          // and persist their cursor so the next run resumes rather than running past the timeout.
+          // No `cancel` callback: the runner holds no external resource needing cleanup.
           return {
             run: () => this.run(repo, previousState, signal),
-            cancel: async () => {
-              log.debug('Cases templates v2 migration task cancelled — aborting scan');
-            },
           };
         },
       },
@@ -106,9 +124,13 @@ export class TemplatesMigrationTaskManager {
   }
 
   /**
-   * Creates the internal SO repository and (re)schedules the task on every Kibana startup. The
-   * removeIfExists + ensureScheduled pair guarantees a fresh run each startup; per-space flags keep
-   * already-migrated spaces cheap no-ops. Scheduling failures are logged, never fatal to startup.
+   * Creates the internal SO repository and (re)schedules the permanent singleton on every Kibana
+   * startup. The startup-only removeIfExists + ensureScheduled pair upgrades any pre-existing
+   * one-shot task document to the recurring-interval shape and guarantees a prompt post-startup run;
+   * per-space flags and fingerprint markers keep already-processed spaces cheap no-ops. This remove
+   * is startup-only — the configuration-change hot path uses `runSoon`, never removeIfExists (A3).
+   * Scheduling failures are logged, never fatal to startup: the durable per-space markers let the
+   * next startup (or another node) recover.
    */
   public async scheduleMigrationTask(
     taskManager: TaskManagerStartContract,
@@ -133,6 +155,10 @@ export class TemplatesMigrationTaskManager {
         taskType: CASES_TEMPLATES_MIGRATION_TASK_TYPE,
         params: {},
         state: {},
+        // Low-frequency permanent singleton (A3): the interval picks up stale
+        // reconciliation fingerprints even when a configure-change `runSoon`
+        // nudge was lost. Runs on a fully-processed cluster are cheap no-ops.
+        schedule: { interval: MIGRATION_TASK_INTERVAL },
         scope: ['cases'],
       });
       this.logger.info(`${CASES_TEMPLATES_MIGRATION_TASK_ID} scheduled`);
@@ -146,9 +172,11 @@ export class TemplatesMigrationTaskManager {
   }
 
   /**
-   * One task run: migrate every space's field definitions + templates, then advance the resumable
-   * case backfill by one budgeted chunk. Returns a Task Manager run result — a `runAt` (with the
-   * resume cursor in state) while the backfill has more to do, or a task deletion once it's complete.
+   * One task run: migrate every space's field definitions + templates, advance the resumable case
+   * backfill by one budgeted chunk, and — once the backfill is done — advance the field-value
+   * reconciliation. Returns a Task Manager run result: a `runAt` (with the resume cursor in state)
+   * while a phase has more to do, or empty state when idle — the recurring interval schedules the
+   * next run (the task never deletes itself, per addendum A3).
    */
   private async run(
     repo: ISavedObjectsRepository,
@@ -252,86 +280,159 @@ export class TemplatesMigrationTaskManager {
       log
     );
 
+    if (!backfill.complete) {
+      log.info(
+        `[${executionId}] Cases templates v2 migration run: backfilled=${backfill.backfilled} ` +
+          `(more cases remain — rescheduling)`
+      );
+      const { backedOff, result } = this.rescheduleIncompletePhase({
+        hadFailures: backfill.hadFailures,
+        previousState,
+        nextState: backfill.nextCursor ? { caseBackfill: backfill.nextCursor } : {},
+        phaseName: 'extended_fields backfill',
+        executionId,
+      });
+      if (backedOff) {
+        // Cases already backfilled across prior runs must not stay stranded
+        // from analytics until the poison space eventually succeeds on the
+        // interval — nudge now (idempotent; fires again on real completion).
+        await this.notifyAnalyticsReconciliation(hadPendingCaseBackfill, executionId);
+      }
+      return result;
+    }
+
+    // Backfill done — nudge analytics once (only when this run finished real outstanding work).
+    await this.notifyAnalyticsReconciliation(hadPendingCaseBackfill, executionId);
+
+    // ── Phase 3: linked field-value reconciliation (resumable, budgeted, fingerprint-guarded) ────
+    const reconcile = await runFieldValueReconciliationPhase(
+      repo,
+      configures,
+      previousState.reconcile,
+      signal,
+      executionId,
+      log
+    );
+    this.incrementReconcileCounters(reconcile.counts);
+
     log.info(
       `[${executionId}] Cases templates v2 migration run complete: ` +
         `${configures.length} configure SOs inspected ` +
         `(fieldsAndTemplates migrated=${totals.migrated}, skipped=${totals.skipped}, errored=${totals.errored}); ` +
         `field definitions created=${totals.fieldDefsCreated}, reused=${totals.fieldDefsReused}; ` +
         `templates created=${totals.templatesCreated}, reused=${totals.templatesReused}; ` +
-        `cases backfilled this run=${backfill.backfilled}` +
-        `${backfill.complete ? '' : ' (more cases remain — rescheduling)'}`
+        `cases backfilled this run=${backfill.backfilled}; ` +
+        `reconciliation scanned=${reconcile.counts.scanned}, mismatched=${reconcile.counts.mismatched}, ` +
+        `repaired=${reconcile.counts.repaired}, conflicted=${reconcile.counts.conflicted}, ` +
+        `malformed=${reconcile.counts.malformed}, spacesCompleted=${reconcile.counts.completed}` +
+        `${reconcile.complete ? '' : ' (reconciliation has more to do — rescheduling)'}`
     );
 
-    // A space whose Phase-1 migrateOneConfigure keeps throwing never gets its
-    // legacyCustomFieldsMigrated/legacyTemplatesMigrated flags set, so configureNeedsCaseBackfill
-    // (and therefore backfill.complete) silently excludes it from "pending" rather than blocking
-    // on it — `backfill.complete` alone is not "every space fully migrated," just "every space
-    // Phase 1 considers eligible for backfill is backfilled." Gate deletion on both, otherwise the
-    // one-shot task would delete itself while that space's legacy data is never migrated, leaving
-    // it recoverable only via a Kibana restart re-scheduling a fresh task.
-    const phase1HasErrors = totals.errored > 0;
+    // Reconciliation repairs are raw SO updates that bump only the framework
+    // `updated_at`, so analytics-v2's incremental cursor never sees them —
+    // nudge a full reconciliation, same as the backfill (best-effort).
+    await this.notifyAnalyticsReconciliation(reconcile.counts.repaired > 0, executionId);
 
-    // Backfill fully done and no space is stuck on an unresolved Phase-1 error — delete this
-    // one-shot task.
-    if (backfill.complete && !phase1HasErrors) {
-      await this.notifyCaseBackfillComplete(hadPendingCaseBackfill, executionId);
-      return { state: {}, shouldDeleteTask: true };
+    if (!reconcile.complete) {
+      return this.rescheduleIncompletePhase({
+        hadFailures: reconcile.hadFailures,
+        previousState,
+        nextState: reconcile.nextCursor ? { reconcile: reconcile.nextCursor } : {},
+        phaseName: 'field-value reconciliation',
+        executionId,
+      }).result;
     }
 
-    // Count consecutive runs that couldn't fully complete because either a case update kept
-    // failing (Phase 2) or a space's field-definitions/templates migration kept throwing
-    // (Phase 1). A run that only stopped for budget/cancellation — with no Phase-1 errors — is
-    // normal progress and resets the count. After the cap, give up rather than rescheduling a
-    // poison space forever.
-    const failedRuns =
-      backfill.hadFailures || phase1HasErrors ? (previousState.failedRuns ?? 0) + 1 : 0;
-    if (failedRuns >= MAX_CASE_BACKFILL_FAILED_RUNS) {
-      const failingPhases = [
-        ...(phase1HasErrors ? ['field-definitions/templates phase'] : []),
-        ...(backfill.hadFailures ? ['case extended_fields backfill'] : []),
-      ].join(', ');
-      log.error(
-        `[${executionId}] Giving up the cases templates v2 migration after ${failedRuns} consecutive runs ` +
-          `with failures (${failingPhases}) — some spaces were not fully migrated. Resolve the ` +
-          `underlying error (see earlier "Migration failed" / "updates failed" logs) and restart ` +
-          `Kibana to re-run the migration.`
-      );
-      // Some cases/spaces may still have been migrated/backfilled successfully across prior runs;
-      // nudge analytics to re-index so those aren't stranded. A later restart re-runs the
-      // migration and completes it, firing this again (idempotent) once the remaining work
-      // succeeds.
-      await this.notifyCaseBackfillComplete(hadPendingCaseBackfill, executionId);
-      return { state: {}, shouldDeleteTask: true };
+    // A run that just finished outstanding backfill work reschedules promptly: the reconciliation
+    // predicate reads the per-space `legacyCasesMigrated` flags from the START-of-run configure
+    // snapshot, so the freshly backfilled spaces become reconcilable on the next run — don't make
+    // them wait for the low-frequency interval.
+    if (hadPendingCaseBackfill) {
+      return {
+        state: {},
+        runAt: new Date(Date.now() + CASE_BACKFILL_RESCHEDULE_DELAY_MS),
+      };
     }
 
-    // Otherwise self-reschedule with the resume cursor + failure count, backing off when a run failed.
-    const nextState: Record<string, unknown> = {
-      ...(backfill.nextCursor ? { caseBackfill: backfill.nextCursor } : {}),
-      ...(failedRuns > 0 ? { failedRuns } : {}),
-    };
-    const delayMs =
-      backfill.hadFailures || phase1HasErrors
-        ? CASE_BACKFILL_FAILURE_RESCHEDULE_DELAY_MS
-        : CASE_BACKFILL_RESCHEDULE_DELAY_MS;
-    return { state: nextState, runAt: new Date(Date.now() + delayMs) };
+    // Idle: everything is migrated/verified (or blocked awaiting operator remediation). Return
+    // empty state and let the recurring interval schedule the next (cheap no-op) run.
+    return { state: {} };
   }
 
   /**
-   * Fires the `onCaseBackfillComplete` hook exactly at the migration's terminal points, and only
-   * when there was outstanding case-backfill work when the final run began. Called from the two
-   * `shouldDeleteTask` branches, so it runs once per migration lifetime (the task deletes itself
-   * after; a subsequent restart of a fully-migrated cluster sees no pending work and does not fire).
+   * Reschedules an incomplete phase with its resume cursor, backing off when the run had update
+   * failures and — after `MAX_CASE_BACKFILL_FAILED_RUNS` consecutive failing runs — falling back to
+   * the recurring interval instead of hot-rescheduling a poison space forever. The durable
+   * per-space flags/markers make the interval retry safe.
+   */
+  private rescheduleIncompletePhase({
+    hadFailures,
+    previousState,
+    nextState,
+    phaseName,
+    executionId,
+  }: {
+    hadFailures: boolean;
+    previousState: MigrationTaskState;
+    nextState: Record<string, unknown>;
+    phaseName: string;
+    executionId: string;
+  }): { backedOff: boolean; result: { state: Record<string, unknown>; runAt?: Date } } {
+    // A run that only stopped for budget/cancellation is normal progress and resets the count.
+    const failedRuns = hadFailures ? (previousState.failedRuns ?? 0) + 1 : 0;
+    if (failedRuns >= MAX_CASE_BACKFILL_FAILED_RUNS) {
+      this.logger.error(
+        `[${executionId}] Giving up rescheduling the cases ${phaseName} after ${failedRuns} ` +
+          `consecutive runs with update failures. Resolve the underlying error (see earlier ` +
+          `"updates failed" logs); the task retries automatically on its ` +
+          `${MIGRATION_TASK_INTERVAL} interval.`
+      );
+      return { backedOff: true, result: { state: {} } };
+    }
+
+    const delayMs = hadFailures
+      ? CASE_BACKFILL_FAILURE_RESCHEDULE_DELAY_MS
+      : CASE_BACKFILL_RESCHEDULE_DELAY_MS;
+    return {
+      backedOff: false,
+      result: {
+        state: { ...nextState, ...(failedRuns > 0 ? { failedRuns } : {}) },
+        runAt: new Date(Date.now() + delayMs),
+      },
+    };
+  }
+
+  /** Mirrors the per-run reconciliation counts into low-cardinality usage counters. */
+  private incrementReconcileCounters(counts: ReconcileCounts): void {
+    try {
+      for (const [name, value] of Object.entries(counts)) {
+        if (value > 0) {
+          this.migrationUsageCounter?.incrementCounter({
+            counterName: `reconciliation${name[0].toUpperCase()}${name.slice(1)}`,
+            incrementBy: value,
+          });
+        }
+      }
+    } catch {
+      // Telemetry must never affect reconciliation correctness.
+    }
+  }
+
+  /**
+   * Fires the analytics-v2 full-reconciliation hook when `shouldNotify` is true: once when the
+   * case backfill finishes real outstanding work, and after any run whose reconciliation phase
+   * submitted repairs (both write paths bump only the SO-framework `updated_at`, which the
+   * analytics incremental cursor never sees). A no-op run of a fully-processed cluster passes
+   * `false` and does not fire.
    *
    * Best-effort by contract: the hook is awaited so its own logging orders sensibly, but any error
-   * is caught and swallowed. Letting it throw would prevent the caller from returning
-   * `shouldDeleteTask: true`, so Task Manager would retry the already-finished migration and re-fire
-   * the hook — a pointless retry loop. The migration's own success does not depend on the hook.
+   * is caught and swallowed — the migration's own success does not depend on the hook.
    */
-  private async notifyCaseBackfillComplete(
-    hadPendingCaseBackfill: boolean,
+  private async notifyAnalyticsReconciliation(
+    shouldNotify: boolean,
     executionId: string
   ): Promise<void> {
-    if (!hadPendingCaseBackfill || this.onCaseBackfillComplete == null) {
+    if (!shouldNotify || this.onCaseBackfillComplete == null) {
       return;
     }
     try {
