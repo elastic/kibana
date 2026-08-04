@@ -35,7 +35,7 @@ const baseEventSchema = z.object({
   summary: z.string().describe('Short human-readable description of what is happening.'),
   status: z
     .enum(SIGNIFICANT_EVENT_STATUS_OPTIONS)
-    .describe('Current lifecycle status: "open", "closed", or "dismissed".'),
+    .describe('Current lifecycle status: "pending", "open", "closed", or "dismissed".'),
   severity: z
     .enum(SEVERITY_OPTIONS)
     .describe('Severity: "80-critical", "60-high", "40-medium", or "20-low".'),
