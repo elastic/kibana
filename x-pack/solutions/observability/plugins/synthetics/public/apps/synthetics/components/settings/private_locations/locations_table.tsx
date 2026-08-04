@@ -138,6 +138,7 @@ export const PrivateLocationsTable = ({
     {
       field: 'label',
       name: LOCATION_NAME_LABEL,
+      width: '20%',
       render: (label: string) => <CopyName text={label} />,
     },
     {
