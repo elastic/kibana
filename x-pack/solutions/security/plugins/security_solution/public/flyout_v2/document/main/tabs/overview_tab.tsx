@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
@@ -14,7 +14,6 @@ import { InsightsSection } from '../components/insights_section';
 import { InvestigationSection } from '../components/investigation_section';
 import { ResponseSection } from '../components/response_section';
 import { VisualizationsSection } from '../components/visualizations_section';
-import { isRulePreviewDocument } from '../../../shared/utils/is_rule_preview_document';
 
 export interface OverviewTabProps {
   /**
@@ -35,7 +34,6 @@ export interface OverviewTabProps {
  * Overview view displayed in the document details expandable flyout right section
  */
 export const OverviewTab = memo(({ hit, renderCellActions, onAlertUpdated }: OverviewTabProps) => {
-  const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
   return (
     <>
       <AboutSection hit={hit} />
@@ -54,7 +52,7 @@ export const OverviewTab = memo(({ hit, renderCellActions, onAlertUpdated }: Ove
         onAlertUpdated={onAlertUpdated}
       />
       <EuiHorizontalRule margin="m" />
-      <ResponseSection hit={hit} isRulePreview={isRulePreview} />
+      <ResponseSection hit={hit} />
     </>
   );
 });

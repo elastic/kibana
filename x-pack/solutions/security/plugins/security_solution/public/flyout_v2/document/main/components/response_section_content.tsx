@@ -27,12 +27,6 @@ export interface ResponseSectionContentProps {
    */
   hit: DataTableRecord;
   /**
-   * Whether the flyout is opened in rule preview mode. When omitted the value is derived
-   * from the document's index name — callers may pass it explicitly if they already have it
-   * to avoid re-deriving.
-   */
-  isRulePreview?: boolean;
-  /**
    * Callback to show Response details. The host (Flyout v2 or legacy expandable flyout)
    * decides whether this opens a tools flyout or navigates to the legacy left panel.
    */
@@ -45,11 +39,8 @@ export interface ResponseSectionContentProps {
  * without constructing a v2 tools flyout when not needed.
  */
 export const ResponseSectionContent = memo<ResponseSectionContentProps>(
-  ({ hit, isRulePreview: isRulePreviewProp, onShowResponseDetails }) => {
-    const isRulePreview = useMemo(
-      () => isRulePreviewProp ?? isRulePreviewDocument(hit),
-      [isRulePreviewProp, hit]
-    );
+  ({ hit, onShowResponseDetails }) => {
+    const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
     const indexName = useMemo(
       () => hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? '',
       [hit]

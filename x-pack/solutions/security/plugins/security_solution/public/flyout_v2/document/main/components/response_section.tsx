@@ -16,17 +16,13 @@ export interface ResponseSectionProps {
    * Document to display in the overview tab.
    */
   hit: DataTableRecord;
-  /**
-   * Whether the flyout is opened in rule preview mode.
-   */
-  isRulePreview?: boolean;
 }
 
 /**
  * Most bottom section of the overview tab. It contains a summary of the response tab.
  * Constructs the v2 tools flyout callback and forwards rendering to {@link ResponseSectionContent}.
  */
-export const ResponseSection = memo<ResponseSectionProps>(({ hit, isRulePreview = false }) => {
+export const ResponseSection = memo<ResponseSectionProps>(({ hit }) => {
   const { openDocumentResponse } = useFlyoutApi();
 
   const onShowResponseDetails = useCallback(() => {
@@ -34,11 +30,7 @@ export const ResponseSection = memo<ResponseSectionProps>(({ hit, isRulePreview 
   }, [openDocumentResponse, hit]);
 
   return (
-    <ResponseSectionContent
-      hit={hit}
-      isRulePreview={isRulePreview}
-      onShowResponseDetails={onShowResponseDetails}
-    />
+    <ResponseSectionContent hit={hit} onShowResponseDetails={onShowResponseDetails} />
   );
 });
 
