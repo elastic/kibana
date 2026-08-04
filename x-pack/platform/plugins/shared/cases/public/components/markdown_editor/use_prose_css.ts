@@ -35,8 +35,11 @@ export const useProseCss = () => {
         /* EUI's markdown renderer defaults to a 16px base, a whole step above the 14px the rest of
            the case page uses. Every heading below is sized in em, so correcting the base brings the
            entire ladder into scale with its surroundings instead of shouting over them. */
-        font-size: ${sFontSize.fontSize};
-        line-height: ${sFontSize.lineHeight};
+        &,
+        .euiMarkdownFormat {
+          font-size: ${sFontSize.fontSize};
+          line-height: ${sFontSize.lineHeight};
+        }
 
         h1,
         h2,
