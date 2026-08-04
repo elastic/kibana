@@ -312,6 +312,42 @@ export class DiscoverApp {
     await this.waitUntilTabIsLoaded();
   }
 
+  async getCurrentDataViewId(): Promise<string> {
+    const currentUrl = this.page.url();
+    const matches = [...currentUrl.matchAll(/dataViewId:[^,]*/g)];
+    const ids = matches.map(([m]) =>
+      decodeURIComponent(m).replace('dataViewId:', '').replaceAll("'", '')
+    );
+    if (!ids.length) {
+      throw new Error(
+        `Discover URL state doesn't contain a dataViewId reference. URL: ${currentUrl}`
+      );
+    }
+    const first = ids[0];
+    if (!ids.every((id) => id === first)) {
+      throw new Error('Discover URL state contains different dataViewId references.');
+    }
+    return first;
+  }
+
+  async deleteRuntimeField(fieldName: string) {
+    // The field may appear in multiple sidebar sections (Popular + Available);
+    // scope to Available fields to avoid strict-mode violations.
+    const fieldItem = this.page.testSubj
+      .locator('fieldListGroupedAvailableFields')
+      .locator(`[data-test-subj="field-${fieldName}"]`);
+    await fieldItem.waitFor({ state: 'visible' });
+    await fieldItem.click();
+    await this.page.locator('[data-popover-open="true"]').waitFor({ state: 'visible' });
+    await this.page.testSubj.click(`discoverFieldListPanelDelete-${fieldName}`);
+    const confirmModal = this.page.testSubj.locator('runtimeFieldDeleteConfirmModal');
+    await confirmModal.waitFor({ state: 'visible' });
+    await this.page.testSubj.typeWithDelay('deleteModalConfirmText', 'remove');
+    await this.page.testSubj.click('confirmModalConfirmButton');
+    await confirmModal.waitFor({ state: 'hidden' });
+    await this.waitUntilTabIsLoaded();
+  }
+
   async renameRuntimeField(newFieldName: string) {
     const fieldEditor = this.page.getByRole('dialog', { name: /Edit .* field/ });
     await fieldEditor.waitFor({ state: 'visible' });

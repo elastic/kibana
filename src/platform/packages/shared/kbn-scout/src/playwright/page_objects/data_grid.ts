@@ -617,6 +617,12 @@ export class DataGrid {
       .toBe(true);
   }
 
+  async getRowActions(): Promise<Locator[]> {
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    await flyout.waitFor({ state: 'visible' });
+    return flyout.locator('[data-test-subj~="docTableRowAction"]').all();
+  }
+
   async waitForLoad() {
     try {
       await this.page.testSubj.waitForSelector('discoverDataGridUpdating', {
