@@ -55,7 +55,6 @@
     "@kbn/streams-schema",
     "@kbn/typed-react-router-config",
     "@kbn/unified-search-plugin",
-    "@kbn/utility-types",
-    "@kbn/scout"
+    "`@kbn/utility-types`"
   ]
 }
