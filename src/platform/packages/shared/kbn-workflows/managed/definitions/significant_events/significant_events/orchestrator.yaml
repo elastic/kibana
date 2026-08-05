@@ -8,7 +8,8 @@ tags:
   - significant-events
   - orchestrator
 settings:
-  timeout: "40m"
+  # detection (≤5m) + discovery (≤45m) + 5m buffer
+  timeout: "55m"
   concurrency:
     key: "significant-events-orchestrator"
     strategy: drop
