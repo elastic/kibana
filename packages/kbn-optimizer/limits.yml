@@ -97,7 +97,7 @@ pageLoadAssetSize:
   inbox: 5344
   indexLifecycleManagement: 54326
   indexManagement: 39694
-  inference: 10368
+  inference: 12795
   inferenceWorkflows: 4472
   infra: 56302
   ingestHub: 12730
@@ -192,7 +192,7 @@ pageLoadAssetSize:
   spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
-  streams: 32595
+  streams: 36479
   streamsApp: 340704
   synthetics: 31571
   telemetry: 25755

@@ -11,18 +11,17 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import OpenAI from 'openai';
 import { PassThrough } from 'stream';
-import type { Agent as HttpsAgent } from 'https';
-import type { Agent as HttpAgent, IncomingMessage } from 'http';
+import type { IncomingMessage } from 'http';
+import { ProxyAgent, fetch as undiciFetch } from 'undici';
 import type {
   ChatCompletionChunk,
   ChatCompletionCreateParamsStreaming,
   ChatCompletionMessageParam,
 } from 'openai/resources/chat/completions';
-import type { Stream } from 'openai/streaming';
+import type { Stream } from 'openai/core/streaming';
 import { trace } from '@opentelemetry/api';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
-import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
 import {
   DEFAULT_MODEL,
   DEFAULT_TIMEOUT_MS,
@@ -80,12 +79,11 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     };
 
     try {
-      let httpAgent;
       let baseURL = this.config.apiUrl;
       const defaultHeaders = { ...this.headers };
       let defaultQuery: Record<string, string> | undefined;
-
-      const isHttps = this.url.toLowerCase().startsWith('https');
+      let clientFetch: typeof globalThis.fetch | undefined;
+      let clientFetchOptions: { dispatcher?: unknown } | undefined;
 
       if (
         this.provider === OpenAiProviderType.Other &&
@@ -103,17 +101,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           caData: this.secrets.caData,
           verificationMode: this.config.verificationMode,
         });
-        const agents = getCustomAgents(
-          this.configurationUtilities,
-          this.logger,
-          this.url,
-          this.sslOverrides
-        );
-        httpAgent = isHttps ? agents.httpsAgent : agents.httpAgent;
         baseURL = removeEndpointFromUrl(this.url);
       } else {
-        const agents = getCustomAgents(this.configurationUtilities, this.logger, this.url);
-        httpAgent = isHttps ? agents.httpsAgent : agents.httpAgent;
         if (this.config.apiProvider === OpenAiProviderType.AzureAi) {
           baseURL = this.config.apiUrl;
           defaultHeaders['api-key'] = this.key;
@@ -126,12 +115,33 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         }
       }
 
+      // Configure proxy for the OpenAI SDK (used in invokeAsyncIterator).
+      // The openai v6 SDK no longer supports httpAgent; use undici ProxyAgent via fetchOptions.
+      const proxySettings = this.configurationUtilities.getProxySettings();
+      if (proxySettings?.proxyUrl) {
+        try {
+          const { hostname } = new URL(this.url);
+          const shouldBypass = proxySettings.proxyBypassHosts?.has(hostname) ?? false;
+          const shouldUseProxy = proxySettings.proxyOnlyHosts
+            ? proxySettings.proxyOnlyHosts.has(hostname)
+            : true;
+
+          if (!shouldBypass && shouldUseProxy) {
+            clientFetch = undiciFetch as unknown as typeof globalThis.fetch;
+            clientFetchOptions = { dispatcher: new ProxyAgent(proxySettings.proxyUrl) };
+          }
+        } catch {
+          this.logger.warn('Error configuring proxy for OpenAI client');
+        }
+      }
+
       this.openAI = this.createOpenAIClient({
         apiKey: this.key,
         baseURL,
         defaultHeaders,
-        httpAgent,
         defaultQuery,
+        ...(clientFetch ? { fetch: clientFetch } : {}),
+        ...(clientFetchOptions ? { fetchOptions: clientFetchOptions } : {}),
       });
     } catch (error) {
       this.logger.error(`Error initializing OpenAI client: ${error.message}`);
@@ -145,21 +155,24 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     apiKey,
     baseURL,
     defaultHeaders,
-    httpAgent,
     defaultQuery,
+    fetch: fetchImpl,
+    fetchOptions,
   }: {
     apiKey: string;
     baseURL: string;
     defaultHeaders: Record<string, string>;
-    httpAgent?: HttpsAgent | HttpAgent;
     defaultQuery?: Record<string, string>;
+    fetch?: typeof globalThis.fetch;
+    fetchOptions?: { dispatcher?: unknown };
   }): OpenAI {
     return new OpenAI({
       apiKey,
       baseURL,
       defaultHeaders,
-      httpAgent,
       defaultQuery,
+      ...(fetchImpl ? { fetch: fetchImpl } : {}),
+      ...(fetchOptions ? { fetchOptions } : {}),
     });
   }
 

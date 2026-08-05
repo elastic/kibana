@@ -54,10 +54,14 @@ describe('Bedrock with proxy config', () => {
     // @ts-ignore configProvider is private, but we need it to access the agent
     const config = await bedrockClient.config.requestHandler.configProvider;
     // Since DEFAULT_BEDROCK_URL is https, httpsAgent will be set, see: https://github.com/elastic/kibana/pull/224130#discussion_r2152632806
+    // @ts-expect-error proxy is not on the base https.Agent type
     expect(config.httpsAgent.proxy.host).toBe(`${PROXY_HOST}:99`);
+    // @ts-expect-error proxy is not on the base https.Agent type
     expect(config.httpsAgent.proxy.hostname).toBe(PROXY_HOST);
+    // @ts-expect-error proxy is not on the base https.Agent type
     expect(config.httpsAgent.proxy.port).toBe('99');
-    expect(config.httpAgent.proxy).toBeUndefined();
+    // httpAgent is lazily loaded via httpAgentProvider; undefined until first non-SSL request
+    expect(config.httpAgent?.proxy).toBeUndefined();
   });
 
   it('verifies that the Bedrock client is initialized with the custom proxy HTTPS agent', async () => {
@@ -89,9 +93,13 @@ describe('Bedrock with proxy config', () => {
     expect(bedrockClient.config.requestHandler).toBeDefined();
     // @ts-ignore configProvider is private, but we need it to access the agent
     const config = await bedrockClient.config.requestHandler.configProvider;
+    // @ts-expect-error proxy is not on the base https.Agent type
     expect(config.httpsAgent.proxy.host).toBe(`${PROXY_HOST}:99`);
+    // @ts-expect-error proxy is not on the base https.Agent type
     expect(config.httpsAgent.proxy.hostname).toBe(PROXY_HOST);
+    // @ts-expect-error proxy is not on the base https.Agent type
     expect(config.httpsAgent.proxy.port).toBe('99');
-    expect(config.httpAgent.proxy).not.toBeDefined();
+    // httpAgent is lazily loaded via httpAgentProvider; undefined until first non-SSL request
+    expect(config.httpAgent?.proxy).not.toBeDefined();
   });
 });
