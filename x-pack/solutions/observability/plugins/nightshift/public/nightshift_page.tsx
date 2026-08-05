@@ -45,7 +45,7 @@ export function NightshiftPage(): React.ReactElement | null {
     [
       {
         href: basePath.prepend(NIGHTSHIFT_APP_ROUTE),
-        text: i18n.translate('xpack.observability.nightshift.breadcrumbs.linkText', {
+        text: i18n.translate('xpack.nightshift.breadcrumbs.linkText', {
           defaultMessage: 'Nightshift',
         }),
         deepLinkId: NIGHTSHIFT_APP_ID,

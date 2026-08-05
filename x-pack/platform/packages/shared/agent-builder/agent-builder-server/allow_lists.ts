@@ -127,7 +127,6 @@ export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
   `${internalNamespaces.platformSignificantEvents}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
-  `${internalNamespaces.platformSignificantEvents}.discovery-judge-type`,
 ] as const;
 
 export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];
@@ -279,8 +278,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'cases',
 
   // Platform – Alerting v2
-  'rule',
-  'action_policy',
+  'platform.alerting.rule',
+  'platform.alerting.action_policy',
 
   // Security Solution
   'security.alert',

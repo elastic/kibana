@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { DiscoveryJudgeEvaluator } from '../../types';
+import type { DiscoveryEvaluator } from '../../types';
 import { summarizeEsqlGrounding } from '../../utils/tool_usage';
 
 /**
- * CODE evaluator: every `open` event must carry a `confirmed: true` signal and the judge must
+ * CODE evaluator: every `open` event must carry a `confirmed: true` signal and the agent must
  * have run `execute_esql` this cycle. Score = valid open / open; null when none open.
  */
-export const confirmedEvidencesEvaluator: DiscoveryJudgeEvaluator = {
+export const confirmedEvidencesEvaluator: DiscoveryEvaluator = {
   name: 'confirmed_evidences',
   kind: 'CODE',
   evaluate: ({ output }) => {
@@ -29,8 +29,7 @@ export const confirmedEvidencesEvaluator: DiscoveryJudgeEvaluator = {
     }
 
     const esqlCallCount = summarizeEsqlGrounding(steps ?? []).noOfToolCalls;
-    // Require at least one execute_esql call per open event. A single call shared
-    // across all promotions cannot guarantee that each event was individually re-verified.
+    // Require at least one execute_esql call per open event from Step 1 grounding.
     const sufficientEsqlCoverage = esqlCallCount >= openEvents.length;
 
     let satisfied = 0;
@@ -44,7 +43,7 @@ export const confirmedEvidencesEvaluator: DiscoveryJudgeEvaluator = {
         satisfied++;
       } else if (!sufficientEsqlCoverage) {
         issues.push(
-          `[${i}] judge ran ${esqlCallCount} execute_esql call(s) for ${openEvents.length} open event(s) — insufficient per-event coverage`
+          `[${i}] agent ran ${esqlCallCount} execute_esql call(s) for ${openEvents.length} open event(s) — insufficient per-event coverage`
         );
       } else {
         issues.push(`[${i}] open with no confirmed:true signal`);
@@ -57,7 +56,7 @@ export const confirmedEvidencesEvaluator: DiscoveryJudgeEvaluator = {
       explanation:
         issues.length > 0
           ? `${issues.join('; ')} (score=${score.toFixed(2)})`
-          : `All ${openEvents.length} open event(s) backed by confirmed, freshly-verified signals`,
+          : `All ${openEvents.length} open event(s) backed by confirmed, grounding-verified signals`,
     });
   },
 };
