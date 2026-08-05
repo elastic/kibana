@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { useForm, FormProvider, type UseFormReturn } from 'react-hook-form';
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createTestQueryClient, createMockServices } from '../../../test_utils';
@@ -16,10 +16,17 @@ import { createInitialState } from '../use_compose_discover_state';
 import type { ComposeDiscoverState } from '../types';
 import type { FormValues, RuleQuery } from '../../../form/types';
 import { AlertConditionStep } from './alert_condition_step';
-import { ComposeDiscoverTimeFieldContextProvider } from '../compose_discover_time_field_context';
+import { QueryFieldRules } from './query_field_rules';
 
 jest.mock('@kbn/esql-utils', () => ({
   getEsqlColumns: jest.fn(async () => []),
+}));
+
+jest.mock('../use_compose_discover_time_field', () => ({
+  useComposeDiscoverTimeField: () => ({
+    timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
+    isTimeFieldResolved: true,
+  }),
 }));
 
 const BASE_QUERY = 'FROM logs-*';
@@ -46,7 +53,9 @@ const BASE_COMPOSE_VALUES: FormValues = {
 
 const createComposeFormWrapper = (
   formValueOverrides: Partial<FormValues> = {},
-  services: RuleFormServices = createMockServices()
+  services: RuleFormServices = createMockServices(),
+  formRef?: { current: UseFormReturn<FormValues> | null },
+  queryCommitted = true
 ) => {
   const queryClient = createTestQueryClient();
   const defaultValues: FormValues = {
@@ -55,20 +64,17 @@ const createComposeFormWrapper = (
   };
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => {
-    const form = useForm<FormValues>({ defaultValues });
+    const form = useForm<FormValues>({ defaultValues, mode: 'onBlur' });
+    if (formRef) {
+      formRef.current = form;
+    }
     return (
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <FormProvider {...form}>
             <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
-              <ComposeDiscoverTimeFieldContextProvider
-                value={{
-                  timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
-                  isTimeFieldResolved: true,
-                }}
-              >
-                {children}
-              </ComposeDiscoverTimeFieldContextProvider>
+              <QueryFieldRules queryCommitted={queryCommitted} />
+              {children}
             </RuleFormProvider>
           </FormProvider>
         </QueryClientProvider>
@@ -94,6 +100,7 @@ const renderStep = (
   });
   const dispatch = jest.fn();
   const services = createMockServices();
+  const formRef: { current: UseFormReturn<FormValues> | null } = { current: null };
 
   render(
     <AlertConditionStep
@@ -102,10 +109,17 @@ const renderStep = (
       services={services}
       isEditing={isEditing}
     />,
-    { wrapper: createComposeFormWrapper(formValueOverrides, services) }
+    {
+      wrapper: createComposeFormWrapper(
+        formValueOverrides,
+        services,
+        formRef,
+        state.queryCommitted
+      ),
+    }
   );
 
-  return { dispatch, state };
+  return { dispatch, state, formRef };
 };
 
 const STANDALONE_QUERY: RuleQuery = {
@@ -156,16 +170,14 @@ describe('AlertConditionStep', () => {
       expect(screen.getByTestId('esqlSummaryOpenEditor')).toBeInTheDocument();
     });
 
-    it('shows split-failed callout when base query is empty', () => {
+    it('shows split-failed state (no callout) when base query is empty', () => {
       renderStep(
         { queryCommitted: true },
         { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY_EMPTY_BASE } }
       );
 
       expect(screen.getByTestId('esqlQuerySummarySection-split_failed')).toBeInTheDocument();
-      expect(
-        screen.getByText(/Couldn't automatically separate base query from alert condition/)
-      ).toBeInTheDocument();
+      expect(screen.getByText('Review your query or separate it manually')).toBeInTheDocument();
     });
 
     it('shows the no-alert-condition callout when base is present but alert condition is empty', () => {
@@ -350,6 +362,67 @@ describe('AlertConditionStep', () => {
         expect(comboBox).toBeInTheDocument();
       });
       expect(comboBox.querySelectorAll('[data-test-subj="euiComboBoxPill"]')).toHaveLength(0);
+    });
+  });
+
+  describe('query field validation', () => {
+    it('passes trigger for a composed alert with base but no breach segment (conditionless rule)', async () => {
+      const { formRef } = renderStep(
+        { queryCommitted: true },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: {
+              format: 'composed',
+              base: 'FROM logs-*',
+              breach: { segment: '' },
+            },
+          },
+        }
+      );
+
+      let valid = false;
+      await act(async () => {
+        valid = await formRef.current!.trigger('query');
+      });
+
+      expect(valid).toBe(true);
+      expect(screen.queryByTestId('composeDiscoverQueryFieldError')).not.toBeInTheDocument();
+    });
+
+    it('passes trigger for a valid composed alert query', async () => {
+      const { formRef } = renderStep(
+        { queryCommitted: true },
+        { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
+      );
+
+      let valid = false;
+      await act(async () => {
+        valid = await formRef.current!.trigger('query');
+      });
+
+      expect(valid).toBe(true);
+      expect(screen.queryByTestId('composeDiscoverQueryFieldError')).not.toBeInTheDocument();
+    });
+
+    it('passes trigger for a standalone alert query without a WHERE clause (conditionless rule)', async () => {
+      const { formRef } = renderStep(
+        { queryCommitted: true },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+          },
+        }
+      );
+
+      let valid = false;
+      await act(async () => {
+        valid = await formRef.current!.trigger('query');
+      });
+
+      expect(valid).toBe(true);
+      expect(screen.queryByTestId('composeDiscoverQueryFieldError')).not.toBeInTheDocument();
     });
   });
 });

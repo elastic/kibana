@@ -7,6 +7,7 @@ xpack.cloud.serverless.product_tier: complete
 xpack.infra.enabled: true
 xpack.slo.enabled: true
 xpack.uptime.enabled: true
+xpack.significantEvents.enabled: true
 
 xpack.features.overrides:
   infrastructure.name: 'Infrastructure'
@@ -27,6 +28,8 @@ xpack.features.overrides:
   agentBuilder.category: 'observability'
   ### Agent Builder SML should match Agent Builder for role management (avoid orphan Kibana category).
   agentBuilderSml.category: 'observability'
+  ### Context Engine should match Agent Builder for role management (avoid orphan Kibana category).
+  contextEngine.category: 'observability'
   
 # Elastic Managed LLMs
 xpack.actions.preconfigured:

@@ -11,6 +11,7 @@ import CONTINUOUS_ONBOARDING_YAML from './continuous_onboarding.yaml';
 import FEATURES_IDENTIFICATION_YAML from './features_identification.yaml';
 import ONBOARDING_YAML from './onboarding.yaml';
 import QUERIES_GENERATION_YAML from './queries_generation.yaml';
+import SYNC_YAML from './sync.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
 
 export const SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID =
@@ -20,6 +21,7 @@ export const SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID =
 export const SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID = 'system-streams-ki-onboarding';
 export const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID =
   'system-streams-ki-continuous-onboarding';
+export const SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID = 'system-streams-ki-sync';
 
 // lifecycle: 'static' — definition is fixed in code, not user-editable.
 // versionStrategy: 'auto' — version bumps are handled automatically on install.
@@ -42,7 +44,7 @@ const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_MANAGEMENT = {
 
 export const SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
-  pluginId: 'significant_events',
+  pluginId: 'significantEvents',
   version: 2,
   billable: false,
   yaml: FEATURES_IDENTIFICATION_YAML,
@@ -51,7 +53,7 @@ export const SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
-  pluginId: 'significant_events',
+  pluginId: 'significantEvents',
   version: 2,
   billable: false,
   yaml: QUERIES_GENERATION_YAML,
@@ -60,7 +62,7 @@ export const SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-  pluginId: 'significant_events',
+  pluginId: 'significantEvents',
   version: 4,
   billable: false,
   yaml: ONBOARDING_YAML,
@@ -69,9 +71,21 @@ export const SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  pluginId: 'significant_events',
+  pluginId: 'significantEvents',
   version: 2,
   billable: false,
   yaml: CONTINUOUS_ONBOARDING_YAML,
+  management: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition;
+
+// The sync (groundedness) sweep workflow is installed disabled and enabled on
+// demand by SyncWorkflowService, so it uses the same restorable management as
+// continuous onboarding to preserve the enabled/disabled choice across upgrades.
+export const SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW = {
+  id: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+  pluginId: 'significantEvents',
+  version: 1,
+  billable: false,
+  yaml: SYNC_YAML,
   management: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;

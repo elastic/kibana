@@ -6,6 +6,7 @@
  */
 
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { disableNewFlyout } from '../../../../tasks/api_calls/kibana_advanced_settings';
 import { closeFlyout } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import {
   createNewCaseFromExpandableFlyout,
@@ -95,6 +96,7 @@ describe(
     const rule = { ...getNewRule(), investigation_fields: { field_names: ['host.os.name'] } };
 
     beforeEach(() => {
+      disableNewFlyout();
       deleteAlertsAndRules();
       login();
       createRule(rule);

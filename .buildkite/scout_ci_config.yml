@@ -3,6 +3,7 @@ plugins:
   enabled:
     - advanced_settings
     - agent_builder
+    - agent_builder_dashboards
     - alerting
     - alerting_v2
     - apm
@@ -14,6 +15,7 @@ plugins:
     - console
     - contentManagementExamples
     - content_management
+    - context_engine
     - cross_cluster_replication
     - custom_branding
     - dashboard
@@ -26,8 +28,8 @@ plugins:
     - dev_tools
     - discover
     - discover_enhanced
-    - embeddable_alerts_table
     - discoveries
+    - embeddable_alerts_table
     - entity_store
     - error_boundary_example
     - event_annotation_listing
@@ -55,6 +57,7 @@ plugins:
     - ml
     - monitoring
     - navigation
+    - nightshift
     - observability
     - observability_onboarding
     - osquery
@@ -68,9 +71,11 @@ plugins:
     - searchprofiler
     - security
     - security_solution
+    - security_solution_serverless
     - serverless_observability
     - share
     - significant_events
+    - significant_events_app
     - slo
     - snapshot_restore
     - spaces
@@ -84,7 +89,9 @@ plugins:
     - unified_search
     - upgrade_assistant
     - uptime
+    - usage_collection
     - ux
+    - vis_types/timeseries
     - watcher
     - workflows_extensions
     - workflows_management
@@ -111,3 +118,4 @@ excluded_configs:
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/playwright.config.ts
   - x-pack/solutions/security/plugins/entity_store/test/scout_cps_local/api/playwright.config.ts
+  - x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/playwright.config.ts

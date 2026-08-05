@@ -7,21 +7,21 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { i18n } from '@kbn/i18n';
 import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
-  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_BUCKET_INTERVAL_MINUTES,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_LOOKBACK_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2,
 } from '@kbn/management-settings-ids';
 import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import {
@@ -30,18 +30,23 @@ import {
   validateSignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
 import type { SignificantEventsPluginStartDependencies } from './types';
-import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
+import { isObservabilityDeployment } from './routes/utils/assert_significant_events_access';
+import { SIGNIFICANT_EVENTS_TIERED_FEATURE } from '../common';
 import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
+  DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
+  DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
   DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
   DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
-  DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
   DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
   MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
+  MAX_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
   MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
   MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
+  MIN_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
+  MIN_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
 } from '../common/constants';
@@ -71,10 +76,16 @@ const sigEventsTuningConfigSchema = schema.object(
 export function registerFeatureFlags(
   core: CoreSetup<SignificantEventsPluginStartDependencies>,
   logger: Logger,
-  { isAlertingV2PluginAvailable }: { isAlertingV2PluginAvailable: boolean }
+  cloud?: CloudSetup
 ) {
+  // The pricing tier below is a no-op in project types that leave tiers disabled, so it cannot
+  // keep these Observability settings out on its own.
+  if (!isObservabilityDeployment({ cloud })) {
+    return;
+  }
+
   core.pricing
-    .isFeatureAvailable(STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id)
+    .isFeatureAvailable(SIGNIFICANT_EVENTS_TIERED_FEATURE.id)
     .then((isSignificantEventsAvailable) => {
       if (isSignificantEventsAvailable) {
         core.uiSettings.register({
@@ -112,7 +123,7 @@ export function registerFeatureFlags(
               'xpack.significantEvents.scheduledSigEventsDiscoveryEnabledDescription',
               {
                 defaultMessage:
-                  'When enabled, Significant Events detection, discovery, and triage run automatically in this Kibana space.',
+                  'When enabled, Significant Events detection and discovery run automatically in this Kibana space.',
               }
             ),
             type: 'boolean',
@@ -141,6 +152,58 @@ export function registerFeatureFlags(
               ),
               type: 'number',
               schema: schema.number({ min: MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES }),
+              solutionViews: ['classic', 'oblt'],
+              technicalPreview: true,
+              readonly: true,
+              readonlyMode: 'ui',
+            },
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_BUCKET_INTERVAL_MINUTES]:
+            {
+              category: ['observability'],
+              name: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionBucketIntervalMinutesName',
+                {
+                  defaultMessage:
+                    'Scheduled Significant Events detection bucket interval (minutes)',
+                }
+              ) as string,
+              value: DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
+              description: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionBucketIntervalMinutesDescription',
+                {
+                  defaultMessage:
+                    'Outer date-histogram bucket width for the critical analysis profile in scheduled Significant Events change-point detection. Must be at least 1 minute (MATCH rules emit closed-minute points). Default-severity rules keep a fixed 5-minute profile.',
+                }
+              ),
+              type: 'number',
+              schema: schema.number({
+                min: MIN_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
+                max: MAX_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
+              }),
+              solutionViews: ['classic', 'oblt'],
+              technicalPreview: true,
+              readonly: true,
+              readonlyMode: 'ui',
+            },
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_LOOKBACK_MINUTES]:
+            {
+              category: ['observability'],
+              name: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionLookbackMinutesName',
+                {
+                  defaultMessage: 'Scheduled Significant Events detection lookback (minutes)',
+                }
+              ) as string,
+              value: DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
+              description: i18n.translate(
+                'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionLookbackMinutesDescription',
+                {
+                  defaultMessage:
+                    'Critical analysis lookback (minutes) for scheduled Significant Events change-point detection. Must be a multiple of the detection bucket interval yielding between 22 and 1000 buckets. Default-severity rules keep a fixed 125-minute profile.',
+                }
+              ),
+              type: 'number',
+              schema: schema.number({ min: MIN_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES }),
               solutionViews: ['classic', 'oblt'],
               technicalPreview: true,
               readonly: true,
@@ -182,7 +245,7 @@ export function registerFeatureFlags(
               'xpack.significantEvents.scheduledSigEventsDiscoveryReviewIntervalMinutesDescription',
               {
                 defaultMessage:
-                  'How often scheduled Significant Events discovery and triage review runs in this Kibana space.',
+                  'How often scheduled Significant Events discovery review runs in this Kibana space.',
               }
             ),
             type: 'number',
@@ -218,32 +281,6 @@ export function registerFeatureFlags(
             readonly: true,
             readonlyMode: 'ui',
           },
-          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: {
-            category: ['observability'],
-            name: i18n.translate(
-              'xpack.significantEvents.scheduledSigEventsDiscoveryTriageBatchSizeName',
-              {
-                defaultMessage: 'Scheduled Significant Events triage batch size',
-              }
-            ) as string,
-            value: DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
-            description: i18n.translate(
-              'xpack.significantEvents.scheduledSigEventsDiscoveryTriageBatchSizeDescription',
-              {
-                defaultMessage:
-                  'Maximum discoveries sent to each scheduled triage pass in this Kibana space.',
-              }
-            ),
-            type: 'number',
-            schema: schema.number({
-              min: MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
-              max: MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
-            }),
-            solutionViews: ['classic', 'oblt'],
-            technicalPreview: true,
-            readonly: true,
-            readonlyMode: 'ui',
-          },
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: {
             category: ['observability'],
             name: i18n.translate(
@@ -257,7 +294,7 @@ export function registerFeatureFlags(
               'xpack.significantEvents.scheduledSigEventsDiscoveryMaxReviewPassesDescription',
               {
                 defaultMessage:
-                  'Maximum discovery and triage pass pairs to run during one scheduled review execution in this Kibana space.',
+                  'Maximum discovery passes to run during one scheduled review execution in this Kibana space.',
               }
             ),
             type: 'number',
@@ -271,44 +308,6 @@ export function registerFeatureFlags(
             readonlyMode: 'ui',
           },
         });
-
-        if (isAlertingV2PluginAvailable) {
-          core.uiSettings.register({
-            [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2]: {
-              category: ['observability'],
-              name: i18n.translate(
-                'xpack.significantEvents.significantEventsAlertingV2SettingsName',
-                {
-                  defaultMessage: 'Streams significant events — Alerting v2',
-                }
-              ) as string,
-              value: false,
-              description: i18n.translate(
-                'xpack.significantEvents.significantEventsAlertingV2SettingsDescription',
-                {
-                  defaultMessage:
-                    'Back significant event queries with Alerting v2 (kind: signal) instead of the custom streams.rules.esql rule type. ' +
-                    'Requires the alertingVTwo plugin and the write-alerting-v2-rules privilege. ' +
-                    'SigEvents rules are stored in the default Kibana space regardless of the current space. ' +
-                    'When disabled, rules are created via Alerting v1 (default). ' +
-                    'Turning this ON does not migrate existing v1-backed queries — promote or change queries to create v2 rules. ' +
-                    'Reads and writes both require the plugin; flag-on without alertingVTwo keeps v1 rules and v1 alert indices. ' +
-                    'Under v2, the discovery histogram buckets on rule evaluation time, not source log time. ' +
-                    'Switching this flag causes user-visible data gaps: the discovery view reads from a single index (.alerts-streams.* for v1 or .rule-events for v2) and does not union both, so events generated by the previous engine become invisible until the flag is restored. ' +
-                    'Cleanup of orphaned rules on the previous engine relies on a write operation against a SignificantEvent query (promote, update, delete) — this triggers dual cleanup which removes the legacy rule. ' +
-                    'If alertingVTwo is uninstalled while v2 rules exist, in-product cleanup becomes a no-op; to clean up, reinstall the plugin and trigger a write on each affected query, or delete the rules directly via the alerting v2 bulk_delete API.',
-                }
-              ),
-              type: 'boolean',
-              schema: schema.boolean(),
-              requiresPageReload: false,
-              solutionViews: ['classic', 'oblt'],
-              technicalPreview: true,
-              readonly: true,
-              readonlyMode: 'ui',
-            },
-          });
-        }
 
         core.uiSettings.registerGlobal({
           [OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED]: {
@@ -349,29 +348,6 @@ export function registerFeatureFlags(
             ),
             type: 'number',
             schema: schema.number({ min: 0 }),
-            scope: 'global',
-            solutionViews: ['classic', 'oblt'],
-            readonly: true,
-            readonlyMode: 'ui',
-          },
-          [OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS]: {
-            category: ['observability'],
-            name: i18n.translate(
-              'xpack.significantEvents.continuousKiExtractionExcludedStreamPatternsName',
-              {
-                defaultMessage: 'Continuous KI extraction excluded streams',
-              }
-            ),
-            value: '',
-            description: i18n.translate(
-              'xpack.significantEvents.continuousKiExtractionExcludedStreamPatternsDescription',
-              {
-                defaultMessage:
-                  'Comma-separated list of stream names or glob patterns (e.g. logs.debug.*) to exclude from automatic knowledge indicator extraction.',
-              }
-            ),
-            type: 'string',
-            schema: schema.string(),
             scope: 'global',
             solutionViews: ['classic', 'oblt'],
             readonly: true,

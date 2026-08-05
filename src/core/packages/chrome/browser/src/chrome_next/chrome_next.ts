@@ -20,7 +20,10 @@ export type AppHeaderBack = string | AppHeaderBackTarget;
 /** @public */
 export interface AppHeaderBackTarget {
   href: string;
-  /** Click handler, called alongside href navigation when provided. */
+  /**
+   * Optional handler for behavior that differs from `href` navigation.
+   * Do not use it to navigate to `href`; Kibana handles same-origin links as SPA navigation.
+   */
   onClick?: MouseEventHandler;
   /** Destination name for accessibility (e.g. "Back to {label}"). */
   label?: string;
@@ -35,7 +38,10 @@ export interface AppHeaderBadge {
   onClick?: () => void;
   onClickAriaLabel?: string;
   'data-test-subj'?: string;
-  /** @deprecated Used for compatibility with existing breadcrumb badge custom renderers. */
+  /**
+   * @deprecated Escape hatch for badges that cannot be represented with structured props.
+   * Prefer structured badge props for consistent behavior and styling.
+   */
   renderCustomBadge?: (props: { badgeText: string }) => ReactElement;
   /** Popover menu items for badge context menus. When provided, the badge becomes a dropdown trigger. */
   items?: AppHeaderBadgeItem[];
@@ -216,16 +222,54 @@ export type AppHeaderTitle = string | AppHeaderEditableTitle;
 export type AppHeaderSpacing = 'standard' | 'compact' | 'flush' | 'bleed' | 'largeBleed';
 
 /** @public */
-export interface AppHeaderConfig {
+export type AppHeaderFavoriteStatus = 'unfavorited' | 'favorited' | 'adding' | 'removing';
+
+/**
+ * Favorite action for the app-header title-actions area.
+ *
+ * @public
+ */
+export interface AppHeaderFavoriteAction {
+  status: AppHeaderFavoriteStatus;
+  onToggle: () => void;
+  isDisabled?: boolean;
+}
+
+/**
+ * Plain-text page description. Use the object form to add a URL rendered with a fixed
+ * "Learn more" label.
+ *
+ * @public
+ */
+export type AppHeaderDescription =
+  | string
+  | {
+      text: string;
+      learnMoreUrl: string;
+    };
+
+interface AppHeaderConfigBase {
   title?: AppHeaderTitle;
   back?: AppHeaderBack;
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;
-  favorite?: ReactNode;
-  metadata?: AppHeaderMetadataItems;
+  favorite?: AppHeaderFavoriteAction;
   spacing?: AppHeaderSpacing;
 }
+
+type AppHeaderSecondaryContent =
+  | {
+      description?: AppHeaderDescription;
+      metadata?: never;
+    }
+  | {
+      description?: never;
+      metadata?: AppHeaderMetadataItems;
+    };
+
+/** @public */
+export type AppHeaderConfig = AppHeaderConfigBase & AppHeaderSecondaryContent;
 
 /**
  * Chrome Next rollout APIs.
@@ -271,6 +315,14 @@ export interface ChromeNext {
   contextSwitcher: {
     /**
      * Set the context switcher content for the Chrome-Next header.
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(content?: ReactNode): void;
+  };
+  /** Project picker content. */
+  projectPicker: {
+    /**
+     * Set the project picker content for the Chrome-Next header.
      * Pass `undefined` to remove. Global — persists across app changes.
      */
     set(content?: ReactNode): void;

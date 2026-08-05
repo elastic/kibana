@@ -7,7 +7,14 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiDescriptionList, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiDescriptionList,
+  EuiLink,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -16,6 +23,7 @@ import { AlertingEpisodeGroupingTags } from '../grouping/alerting_episode_groupi
 import { AlertEpisodeAssigneeCell } from '../assignee_cell';
 import { EMPTY_VALUE } from '../../constants';
 import { formatDateTime } from '../../utils/format_date_time';
+import { isEpisodeSnoozed } from '../../utils/is_episode_snoozed';
 import * as i18n from './translations';
 
 /**
@@ -54,7 +62,15 @@ export const AlertEpisodeOverviewList = ({
   const { euiTheme } = useEuiTheme();
   const isAcked = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
   const isResolved = groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
-  const isSnoozed = groupAction?.lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE;
+  const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozeExpiry);
+  const tags = groupAction?.tags ?? [];
+  // Caller-controlled (data.alert_url from external ingest). Restrict to absolute
+  // http(s) before putting into href — blocks javascript:/data: stored XSS.
+  const rawAlertUrl =
+    typeof groupingData.alert_url === 'string' && groupingData.alert_url.length > 0
+      ? groupingData.alert_url
+      : undefined;
+  const alertUrl = rawAlertUrl && /^https?:\/\//i.test(rawAlertUrl) ? rawAlertUrl : undefined;
 
   return (
     <EuiDescriptionList
@@ -94,6 +110,42 @@ export const AlertEpisodeOverviewList = ({
                   ),
               },
             ]),
+        ...(alertUrl
+          ? [
+              {
+                title: i18n.METADATA_LIST_SOURCE_URL_LABEL,
+                description: (
+                  <EuiLink
+                    href={alertUrl}
+                    target="_blank"
+                    external
+                    data-test-subj="alertingV2EpisodeDetailsOverviewListAlertUrl"
+                  >
+                    {i18n.METADATA_LIST_SOURCE_URL_LINK}
+                  </EuiLink>
+                ),
+              },
+            ]
+          : []),
+        ...(tags.length > 0
+          ? [
+              {
+                title: i18n.METADATA_LIST_TAGS_LABEL,
+                description: (
+                  <EuiBadgeGroup
+                    gutterSize="xs"
+                    data-test-subj="alertingV2EpisodeDetailsOverviewListTags"
+                  >
+                    {tags.map((tag) => (
+                      <EuiBadge key={tag} color="hollow">
+                        {tag}
+                      </EuiBadge>
+                    ))}
+                  </EuiBadgeGroup>
+                ),
+              },
+            ]
+          : []),
         {
           title: i18n.METADATA_LIST_TRIGGERED_LABEL,
           description: triggeredAt ? formatDateTime(triggeredAt, dateFormat) : EMPTY_VALUE,

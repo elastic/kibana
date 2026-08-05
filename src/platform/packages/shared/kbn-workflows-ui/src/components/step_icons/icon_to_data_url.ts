@@ -42,7 +42,7 @@ export function getDataUrlFromReactComponent(
     let htmlString = renderToStaticMarkup(element);
     if (htmlString.includes('<img')) {
       const srcMatch = htmlString.match(/src="([^"]+)"/);
-      if (srcMatch?.[1]?.startsWith('data:')) {
+      if (srcMatch?.[1]) {
         return srcMatch[1];
       }
       return fallbackUrl;

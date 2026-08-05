@@ -45,14 +45,14 @@ export function registerVerifyPermissionsTask(taskManager: TaskManagerSetupContr
       timeout: TASK_TIMEOUT,
       createTaskRunner: ({
         taskInstance,
-        abortController,
+        signal,
       }: {
         taskInstance: ConcreteTaskInstance;
-        abortController: AbortController;
+        signal: AbortSignal;
       }) => {
         return {
           run: async () => {
-            const { shouldReschedule } = await runPermissionVerifierTask(abortController);
+            const { shouldReschedule } = await runPermissionVerifierTask(signal);
             // If more work remains (either a gating verifier will soon expire, or
             // additional eligible connectors are waiting), ask task manager to fire
             // the task again shortly after the current verifier's TTL elapses.
@@ -120,7 +120,7 @@ export async function scheduleVerifyPermissionsTask(taskManager: TaskManagerStar
  * the 12 h cron.
  */
 async function runPermissionVerifierTask(
-  abortController: AbortController
+  signal: AbortSignal
 ): Promise<{ shouldReschedule: boolean }> {
   const logger = appContextService.getLogger().get('otel-verifier');
 
@@ -135,7 +135,7 @@ async function runPermissionVerifierTask(
   const esClient = appContextService.getInternalUserESClient();
 
   try {
-    throwIfAborted(abortController);
+    throwIfAborted(signal);
 
     // Phase 1 — Gate: only one verifier deployment at a time.
     // If a non-expired verifier policy still exists, skip this run.
@@ -163,7 +163,7 @@ async function runPermissionVerifierTask(
       }
     }
 
-    throwIfAborted(abortController);
+    throwIfAborted(signal);
 
     // Phase 2: Pre-filter package policies to build connector -> package policy IDs map
     const packagePolicyMap = await getPackagePolicyMap(soClient);
@@ -185,7 +185,7 @@ async function runPermissionVerifierTask(
     const SO_TYPE = CLOUD_CONNECTOR_SAVED_OBJECT_TYPE;
     const idFilter = connectorIds.map((id) => `${SO_TYPE}.id:"${SO_TYPE}:${id}"`).join(' or ');
 
-    throwIfAborted(abortController);
+    throwIfAborted(signal);
     const connectorResults = await soClient.find<CloudConnectorSOAttributes>({
       type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
       filter: idFilter,
@@ -197,7 +197,7 @@ async function runPermissionVerifierTask(
       `${VERIFY_PERMISSIONS_TASK} Found ${connectors.length} connectors with installed packages`
     );
 
-    throwIfAborted(abortController);
+    throwIfAborted(signal);
 
     // Phase 3: Verify exactly one eligible connector per task run (one verifier
     // deployment active at a time). If additional eligible connectors remain,
@@ -206,7 +206,7 @@ async function runPermissionVerifierTask(
     let verifiedConnectorId: string | undefined;
     let verifierPolicyCreated = false;
     for (const connector of connectors) {
-      throwIfAborted(abortController);
+      throwIfAborted(signal);
 
       if (!isConnectorEligible(connector.attributes)) {
         logger.debug(
@@ -234,7 +234,7 @@ async function runPermissionVerifierTask(
           esClient,
           connector,
           policyTemplates,
-          abortController
+          signal
         );
       } catch (error) {
         logger.error(
@@ -267,7 +267,7 @@ async function runPermissionVerifierTask(
     // verifier policy orphaned until then).
     return { shouldReschedule: hasMoreEligible || verifierPolicyCreated };
   } catch (error) {
-    if (abortController.signal.aborted) {
+    if (signal.aborted) {
       logger.info(`${VERIFY_PERMISSIONS_TASK} Task was aborted`);
       return { shouldReschedule: false };
     }
@@ -391,12 +391,12 @@ async function verifyConnector(
   esClient: ElasticsearchClient,
   connector: SavedObject<CloudConnectorSOAttributes>,
   policyTemplates: string[],
-  abortController: AbortController
+  signal: AbortSignal
 ): Promise<boolean> {
   const logger = appContextService.getLogger().get('otel-verifier');
 
   try {
-    throwIfAborted(abortController);
+    throwIfAborted(signal);
     const { cloudProvider } = connector.attributes;
     const ensureResult = await ensureInstalledPackage({
       savedObjectsClient: soClient,
@@ -409,7 +409,7 @@ async function verifyConnector(
       } (v${ensureResult.package.version})`
     );
 
-    throwIfAborted(abortController);
+    throwIfAborted(signal);
     const pkgInfo = await getPackageInfo({
       savedObjectsClient: soClient,
       pkgName: cloudProvider,
@@ -428,7 +428,7 @@ async function verifyConnector(
       `${VERIFY_PERMISSIONS_TASK} Creating verifier policy for connector ${connector.id} with templates [` +
         `${verificationInfo.policyTemplates.join(', ')}]`
     );
-    throwIfAborted(abortController);
+    throwIfAborted(signal);
     const { policyId } = await agentPolicyService.createVerifierPolicy(
       soClient,
       esClient,

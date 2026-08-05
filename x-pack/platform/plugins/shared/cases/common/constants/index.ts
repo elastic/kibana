@@ -79,6 +79,10 @@ export const CASE_REPORTERS_URL = `${CASES_URL}/reporters` as const;
 export const CASE_TAGS_URL = `${CASES_URL}/tags` as const;
 export const CASE_TEMPLATES_URL = `${CASES_URL}/templates` as const;
 export const CASE_TEMPLATE_DETAILS_URL = `${CASE_TEMPLATES_URL}/{template_id}` as const;
+// Public discovery of the `extended_fields` a caller may apply. `fields` is a static segment,
+// so — like `templates`/`reporters`/`tags` — it resolves ahead of the `{case_id}` param route.
+export const CASE_FIELDS_URL = `${CASES_URL}/fields` as const;
+export const CASE_APPLICABLE_FIELDS_URL = `${CASE_DETAILS_URL}/fields` as const;
 export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions` as const;
 export const CASE_FIND_USER_ACTIONS_URL = `${CASE_USER_ACTIONS_URL}/_find` as const;
 
@@ -197,13 +201,27 @@ export const MAX_CUSTOM_FIELD_KEY_LENGTH = 36 as const; // uuidv4 length
 export const MAX_CUSTOM_FIELD_LABEL_LENGTH = 50 as const;
 export const MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH = 160 as const;
 export const MAX_TEMPLATE_KEY_LENGTH = 36 as const; // uuidv4 length
+export const MAX_CASE_ID_LENGTH = 512 as const; // ES `_id` upper bound; connector-generated case ids are 64-char SHA-256 digests and bulk_create accepts arbitrary ids
 export const MAX_TEMPLATE_VERSION_STRING_LENGTH = 10 as const;
 export const MAX_TEMPLATE_NAME_LENGTH = 50 as const;
 export const MAX_TEMPLATE_DESCRIPTION_LENGTH = 1000 as const;
+export const MAX_TEMPLATE_DEFINITION_LENGTH = 30000 as const;
 export const MAX_TEMPLATES_LENGTH = 10 as const;
 export const MAX_TEMPLATE_TAG_LENGTH = 50 as const;
 export const MAX_TAGS_PER_TEMPLATE = 10 as const;
 export const MAX_FIELD_DEFINITIONS_PER_OWNER = 200 as const;
+/**
+ * Templates-v2 resource limits, enforced on new writes only. They bound the
+ * number of live templates per owner, fields in a template, and a single
+ * extended-field value without limiting template version history.
+ */
+export const MAX_TEMPLATES_PER_OWNER = 200 as const;
+export const MAX_FIELDS_PER_TEMPLATE = 200 as const;
+/**
+ * Backstop on the UTF-8 byte size of a single stored extended-field value.
+ * Lucene rejects keyword terms over 32,766 bytes.
+ */
+export const MAX_EXTENDED_FIELD_VALUE_BYTES = 30000 as const;
 export const MAX_FILENAME_LENGTH = 160 as const;
 export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
 export const MAX_USER_ACTION_SEARCH_LENGTH = 256 as const;
@@ -303,6 +321,13 @@ export const LOCAL_STORAGE_KEYS = {
   casesUtilityBarHideMaxLimitWarning: 'cases.utilityBar.hideMaxLimitWarning',
   caseViewSidebarOpen: 'cases.caseView.sidebarOpen',
   caseViewSidebarAccordions: 'cases.caseView.sidebarAccordions',
+  // Guided-tour / "what's new" banner state. Keys are version-scoped so a future refresh can
+  // re-trigger the banner/tour by bumping the suffix.
+  casesListBannerDismissed: 'cases.list.banner.dismissed.v1',
+  caseDetailsTourSeen: 'cases.caseView.tour.seen.v1',
+  templateEditorTourSeen: 'cases.templates.editor.tour.seen.v1',
+  templatesListInfoPanelDismissed: 'cases.templates.list.infoPanel.dismissed.v1',
+  showLegacyCustomFields: 'cases.showLegacyCustomFields',
 };
 
 /**
@@ -368,9 +393,36 @@ export const CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE =
 export const CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE =
   'case_view_attachments_sub_tab_clicked' as const;
 
+export const CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE = 'cases_list_view_mode_changed' as const;
+
+export const CASES_LIST_PAGE_VIEW_EVENT_TYPE = 'cases_list_page_view' as const;
+
+export const CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE =
+  'case_view_attachment_accordion_opened' as const;
+
+export const CASE_VIEW_ATTACH_BUTTON_CLICKED_EVENT_TYPE =
+  'case_view_attach_button_clicked' as const;
+
+export const CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE =
+  'case_view_attach_menu_item_clicked' as const;
+
+export const CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE =
+  'case_markdown_editor_plugin_clicked' as const;
+
+/**
+ * Cases list view toggle. Defined in `common` (rather than the redesign UI package) so that
+ * non-UI consumers, such as the analytics/EBT layer, can depend on it without reaching into a
+ * specific UI feature's implementation.
+ */
+export const VIEW_TOGGLE_LIST_ID = 'list' as const;
+export const VIEW_TOGGLE_TABLE_ID = 'table' as const;
+
+export type ViewToggleId = typeof VIEW_TOGGLE_LIST_ID | typeof VIEW_TOGGLE_TABLE_ID;
+
 /**
  * Exporting this to make it easier to track the usage across the codebase
  * via lsp references.
  */
 export const CASE_EXTENDED_FIELDS = 'extended_fields' as const;
 export const CASE_EXTENDED_FIELDS_LABELS = 'extended_fields_labels' as const;
+export const CASE_EXTENDED_FIELDS_CONTROLS = 'extended_fields_controls' as const;
