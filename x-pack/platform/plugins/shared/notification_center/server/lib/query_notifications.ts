@@ -15,6 +15,7 @@ import {
 import type {
   Notification,
   NotificationQueryParams,
+  NotificationQueryParamsParsed,
   NotificationQueryResult,
 } from '../../common/types';
 import { getNotificationDataStreamClient } from '../storage/notification_data_stream';
@@ -32,7 +33,7 @@ export interface NotificationQueryDeps {
   logger: Logger;
 }
 
-const buildFilters = (params: NotificationQueryParams): QueryDslQueryContainer[] => {
+const buildFilters = (params: NotificationQueryParamsParsed): QueryDslQueryContainer[] => {
   const { namespace, type, severity, from, to } = params;
   const filters: QueryDslQueryContainer[] = [severityTTLQuery('visible')];
   if (namespace) {

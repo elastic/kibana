@@ -130,7 +130,12 @@ export const notificationQueryParamsSchema = z
   .object({
     namespace: z.string().min(1).max(64).optional(),
     type: z.string().min(1).max(64).optional(),
-    severity: z.array(z.enum(SEVERITIES)).max(SEVERITIES.length).optional(),
+    // A single query-string value (`?severity=error`) arrives as a string, repeated values as
+    // an array; accept either and normalize to an array so callers don't have to.
+    severity: z
+      .union([z.enum(SEVERITIES), z.array(z.enum(SEVERITIES)).max(SEVERITIES.length)])
+      .transform((value) => (Array.isArray(value) ? value : [value]))
+      .optional(),
     from: z.iso.datetime().optional(),
     to: z.iso.datetime().optional(),
   })

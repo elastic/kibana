@@ -23,6 +23,14 @@ export {
   SEVERITIES,
 } from './notification_schema';
 
+export {
+  NOTIFICATION_CENTER_API_BASE,
+  GET_NOTIFICATIONS_PATH,
+  MARK_READ_PATH,
+  MARK_ALL_READ_PATH,
+  NOTIFICATION_CENTER_API_VERSION,
+} from './routes';
+
 export { NOTIFICATION_REGISTRY } from './notification_registry';
 export {
   NOTIFICATION_NAMESPACES,
