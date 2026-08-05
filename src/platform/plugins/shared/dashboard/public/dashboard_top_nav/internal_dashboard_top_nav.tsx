@@ -141,7 +141,6 @@ export function InternalDashboardTopNav({
   showResetChange = true,
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
-  const [isLabsShown, setIsLabsShown] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
   const chromeStyle = useChromeStyle();
@@ -389,8 +388,6 @@ export function InternalDashboardTopNav({
   );
 
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
-    isLabsShown,
-    setIsLabsShown,
     maybeRedirect,
     showResetChange,
   });

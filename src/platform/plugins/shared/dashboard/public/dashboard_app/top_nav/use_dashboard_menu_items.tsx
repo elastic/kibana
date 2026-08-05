@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import type { Dispatch, SetStateAction } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
@@ -36,13 +35,9 @@ import { ShowShareModal } from './share/show_share_modal';
 import { useShareOptions } from './share/use_share_options';
 
 export const useDashboardMenuItems = ({
-  isLabsShown,
-  setIsLabsShown,
   maybeRedirect,
   showResetChange,
 }: {
-  isLabsShown: boolean;
-  setIsLabsShown: Dispatch<SetStateAction<boolean>>;
   maybeRedirect: (result?: SaveDashboardReturn) => void;
   showResetChange?: boolean;
 }) => {
@@ -422,8 +417,6 @@ export const useDashboardMenuItems = ({
     dashboardInteractiveSave,
     showShare,
     dashboardApi,
-    setIsLabsShown,
-    isLabsShown,
     quickSaveDashboard,
     resetChanges,
     isResetting,
