@@ -41,7 +41,6 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 
 const COMMON_STATE_IGNORE_PATHS = [
   'savedObjectId', // panel-level SO reference, not part of LensAttributes
-  // 'state.filters', // remove for now
   'state.visualization.title', // removed by-value nested title
   // TODO: check missing properties striped out in transforms
   'state.datasourceStates.formBased.layers.*.indexPatternId',
