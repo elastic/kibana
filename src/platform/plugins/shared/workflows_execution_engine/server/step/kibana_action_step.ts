@@ -131,6 +131,8 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     target?: 'local'
   ): Promise<any> {
     const spaceId = this.stepExecutionRuntime.contextManager.getWorkflowSpaceId();
+    // Core's scoped self client owns redirect/TLS/dispatcher policy; workflows owners own future
+    // YAML fetcher deprecation/removal UX, so this legacy transport field is intentionally ignored.
     const { fetcher: _fetcherOptions, ...cleanParams } = params;
     let requestConfig: {
       method: string;
