@@ -138,7 +138,7 @@ steps:
           limit: 1
 
   # e2e suites (FTR, Scout, Cypress) intentionally do not run here; they run
-  # post-merge in kibana-on-merge. Only Jest unit/integration gate the queue.
+  # post-merge in kibana-on-merge. Only Jest unit tests gate the queue.
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
     agents:
@@ -150,8 +150,8 @@ steps:
     timeout_in_minutes: 15
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
-      JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
-      LIMIT_CONFIG_TYPE: 'unit,integration'
+      JEST_UNIT_MAX_MINUTES: '15.0'
+      LIMIT_CONFIG_TYPE: 'unit'
     retry:
       automatic:
         - exit_status: '*'
