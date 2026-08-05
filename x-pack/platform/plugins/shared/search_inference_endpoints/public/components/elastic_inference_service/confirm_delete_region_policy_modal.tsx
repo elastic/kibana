@@ -70,7 +70,7 @@ export const ConfirmDeleteRegionPolicyModal: React.FC<ConfirmDeleteRegionPolicyM
           <strong>
             {i18n.translate(
               'xpack.searchInferenceEndpoints.manageRegions.deleteConfirm.reconfigureNote',
-              { defaultMessage: 'A new custom policy will be required to modify your preferences.' }
+              { defaultMessage: "You'll need to set new region preferences to restrict inference again." }
             )}
           </strong>
         </p>
