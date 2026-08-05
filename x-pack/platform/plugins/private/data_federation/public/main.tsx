@@ -105,7 +105,7 @@ export const Main: FunctionComponent = () => {
     <>
       <AppHeader
         title={mainTranslations.pageTitle}
-        badges={[{ label: mainTranslations.technicalPreview }]}
+        badges={[{ label: mainTranslations.experimental }]}
         tabs={tabs}
         spacing="bleed"
         docLink={DOCS_LINK}

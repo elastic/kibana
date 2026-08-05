@@ -8,14 +8,16 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import type { IconType } from '@elastic/eui';
-import { EuiButtonEmpty, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { TOOLS_FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 
 export interface ToolsFlyoutTitleProps {
   /**
-   * Callback invoked when the title is clicked.
+   * Callback invoked when the title is clicked. When omitted the title renders as plain text
+   * (no expand icon, no button) — used in rule preview contexts where the source document
+   * cannot be re-opened.
    */
-  onTitleClick: () => void;
+  onTitleClick?: () => void;
   /**
    * Text label displayed in the title.
    */
@@ -27,29 +29,58 @@ export interface ToolsFlyoutTitleProps {
 }
 
 /**
- * Clickable title used in tools flyout headers. Renders an expand icon followed by a
- * context icon and label. Clicking opens the originating document or entity flyout.
+ * Title used in tools flyout headers. When `onTitleClick` is provided, renders a clickable
+ * button with an expand icon that opens the originating document or entity flyout. When
+ * omitted (rule preview), renders as plain text so the label and badge remain visible without
+ * creating a broken link to a transient document.
  */
 export const ToolsFlyoutTitle: FC<ToolsFlyoutTitleProps> = memo(
   ({ onTitleClick, label, iconType }) => {
     const { euiTheme } = useEuiTheme();
 
-    return (
-      <EuiButtonEmpty
-        onClick={onTitleClick}
-        iconType="expand"
-        size="xs"
-        flush="left"
-        data-test-subj={TOOLS_FLYOUT_HEADER_TITLE_TEST_ID}
-      >
+    const inner = (
+      <span css={{ alignItems: 'center', display: 'flex', maxWidth: '100%', minWidth: 0 }}>
         <EuiIcon
           type={iconType}
           size="m"
           aria-hidden={true}
-          css={{ marginRight: euiTheme.size.xs }}
+          css={{ flexShrink: 0, marginRight: euiTheme.size.xs }}
         />
-        {label}
-      </EuiButtonEmpty>
+        <span
+          css={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {label}
+        </span>
+      </span>
+    );
+
+    return (
+      <EuiToolTip content={label}>
+        {onTitleClick ? (
+          <EuiButtonEmpty
+            onClick={onTitleClick}
+            iconType="expand"
+            size="xs"
+            flush="left"
+            css={{ maxWidth: '100%', minWidth: 0 }}
+            data-test-subj={TOOLS_FLYOUT_HEADER_TITLE_TEST_ID}
+          >
+            {inner}
+          </EuiButtonEmpty>
+        ) : (
+          <EuiText
+            size="xs"
+            css={{ maxWidth: '100%', minWidth: 0 }}
+            data-test-subj={TOOLS_FLYOUT_HEADER_TITLE_TEST_ID}
+          >
+            {inner}
+          </EuiText>
+        )}
+      </EuiToolTip>
     );
   }
 );
