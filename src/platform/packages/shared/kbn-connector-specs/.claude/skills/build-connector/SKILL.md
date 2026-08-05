@@ -200,6 +200,15 @@ Mark task 6 as `completed`.
 
 Mark task 7 as `in_progress`.
 
+**Before exercising any action that creates, updates, or deletes data**: if the connector exposes such
+actions, use `AskUserQuestion` to confirm the environment/instance being tested against is safe to
+mutate (e.g. a sandbox or personal test account, not a shared or production instance with data the user
+cares about). Only send prompts that would trigger create/update/delete actions once the user confirms
+it's safe — at that point you're free to create, edit, and delete test data as needed to validate those
+actions. If the user says it isn't safe, restrict testing to read-only actions for the rest of this
+skill (Tasks 7-11) and record in the Task 12 validation table which mutating actions were skipped for
+that reason, distinct from "blocked by missing test data/credentials".
+
 Invoke the `chat-with-agent` skill to test the agent. Use the agent ID created in Task 6. The default prompt should be:
 
 > Summarize the data available to you through your tools.
@@ -320,6 +329,11 @@ Args: <agent-id>
 Use a more specific prompt this time, something like:
 > Search for recent items and give me a detailed summary of what you find.
 
+**Mutating actions**: honor whatever the user answered in Task 7 — don't re-ask if they already said it's
+safe (or not safe) to mutate the test environment. If Task 7 never reached the mutation question because
+its prompt didn't happen to trigger a create/update/delete action, and this final prompt will, ask now
+before proceeding.
+
 **If any action has optional modifier params** (`scope`, filters, `all_X` flags, an expiry timestamp)
 beyond its required fields, make sure this test (or an earlier one) actually causes the agent to set at
 least one of them to a non-default value, not just the required-fields-only happy path. A query-param-vs-
@@ -353,8 +367,9 @@ Read `create-connector/reference/pr-validation-table.md` for the full format and
   testing along the way), describe the concrete scenario tested and mark `✅ Pass` (noting any bug that
   was found and fixed as part of getting it to pass).
 - For actions not exercised — deliberately skipped (e.g. destructive/admin-only), blocked by missing
-  test data/credentials, or because live testing (Tasks 4-11) was deferred entirely for this connector —
-  mark `⚠️ Not validated — needs manual verification` rather than leaving the row out.
+  test data/credentials, skipped because the environment wasn't confirmed safe to mutate (see Task 7),
+  or because live testing (Tasks 4-11) was deferred entirely for this connector — mark
+  `⚠️ Not validated — needs manual verification` rather than leaving the row out.
 - For any action that failed and remains unresolved, mark `❌ Fail` with a short description.
 
 Keep this table's markdown handy (in the task output or scratch notes) — it must be included verbatim

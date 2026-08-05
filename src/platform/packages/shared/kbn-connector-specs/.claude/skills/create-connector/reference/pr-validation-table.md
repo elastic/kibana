@@ -39,7 +39,8 @@ as a manual verification checklist.">
   same class of bug.
 - **If an action could not be exercised** — live testing was deferred for this connector, credentials for
   a destructive/admin-only action weren't available, the scenario requires state that's hard to set up
-  (e.g. a paid tier feature) — mark it `⚠️ Not validated — needs manual verification` and say briefly why.
+  (e.g. a paid tier feature), or the user didn't confirm the test environment was safe to mutate (see
+  `build-connector` Task 7) — mark it `⚠️ Not validated — needs manual verification` and say briefly why.
   Never mark something `✅ Pass` without having actually observed it work.
 - **If an action failed and the failure is unresolved**, mark it `❌ Fail`, describe what broke, and link
   to a follow-up issue or note if it's a known limitation rather than silently dropping the row.
