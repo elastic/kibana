@@ -13,8 +13,12 @@ tasks:
       - '--config'
       - '@files(jest-config)'
     deps:
-      - '~:source'
-      - '~:source-upstream'
+      # Moon 2.3+ defaults output-less deps to cacheStrategy: ignored; keep hash so
+      # local/upstream source changes invalidate the jest cache.
+      - target: '~:source'
+        cacheStrategy: hash
+      - target: '~:source-upstream'
+        cacheStrategy: hash
     inputs:
       - '@group(src)'
     options:

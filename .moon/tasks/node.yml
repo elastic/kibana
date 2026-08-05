@@ -25,7 +25,10 @@ tasks:
     inputs:
       - '@group(src)'
     deps:
-      - '^:source-upstream'
+      # Moon 2.3+ defaults output-less deps to cacheStrategy: ignored; keep hash so
+      # transitive upstream source changes invalidate dependents (e.g. jest).
+      - target: '^:source-upstream'
+        cacheStrategy: hash
     options:
       internal: true
       runFromWorkspaceRoot: true
