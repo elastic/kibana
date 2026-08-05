@@ -12,7 +12,3 @@ import { Redirect } from 'react-router-dom';
 import { SECTION_SLUG } from './constants';
 
 export const RedirectToTransformManagement: FC = () => <Redirect to={`/${SECTION_SLUG.HOME}`} />;
-
-export const RedirectToCreateTransform: FC<{ savedObjectId: string }> = ({ savedObjectId }) => (
-  <Redirect push to={`/${SECTION_SLUG.CREATE_TRANSFORM}/${savedObjectId}`} />
-);
