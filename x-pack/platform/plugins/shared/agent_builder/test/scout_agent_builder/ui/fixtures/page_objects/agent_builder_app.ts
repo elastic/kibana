@@ -790,16 +790,6 @@ export class AgentBuilderApp {
     await this.page.testSubj.locator('mcpClientNameInput').waitFor({ state: 'visible' });
   }
 
-  async getMcpClientName(): Promise<string> {
-    return this.page.testSubj.locator('mcpClientNameInput').inputValue();
-  }
-
-  async getMcpClientRedirectUris(type: 'local' | 'remote' = 'local'): Promise<string[]> {
-    const prefix = type === 'remote' ? 'mcpClientRemoteUri-' : 'mcpClientLocalUri-';
-    const inputs = await this.page.locator(`[data-test-subj^="${prefix}"]`).all();
-    return Promise.all(inputs.map((input) => input.inputValue()));
-  }
-
   async submitMcpClientUpdate(): Promise<void> {
     await Promise.all([
       this.page.waitForResponse(

@@ -177,8 +177,10 @@ test.describe.skip(
       await pageObjects.agentBuilder.waitForMcpClientRow(client.id);
       await pageObjects.agentBuilder.openMcpClientEdit(client.id);
 
-      expect(await pageObjects.agentBuilder.getMcpClientName()).toBe(clientName);
-      expect(await pageObjects.agentBuilder.getMcpClientRedirectUris()).toStrictEqual(redirectUris);
+      await expect(page.testSubj.locator('mcpClientNameInput')).toHaveValue(clientName);
+      await expect(page.testSubj.locator('mcpClientLocalUri-0')).toHaveValue(redirectUris[0]);
+      await expect(page.testSubj.locator('mcpClientLocalUri-1')).toHaveValue(redirectUris[1]);
+      await expect(page.testSubj.locator('mcpClientLocalUri-2')).toHaveCount(0);
       await expect(page.testSubj.locator('mcpClientConfidentialCheckbox')).toHaveCount(0);
       await expect(page.testSubj.locator('mcpClientUpdateButton')).toBeDisabled();
 
@@ -199,6 +201,7 @@ test.describe.skip(
 
     test('prefills the remote redirect type from a stored HTTPS URI', async ({
       apiClient,
+      page,
       pageObjects,
     }) => {
       const clientName = uniqueClientName('scout-edit-remote');
@@ -214,9 +217,10 @@ test.describe.skip(
       await pageObjects.agentBuilder.waitForMcpClientRow(client.id);
       await pageObjects.agentBuilder.openMcpClientEdit(client.id);
 
-      expect(await pageObjects.agentBuilder.getMcpClientRedirectUris('remote')).toStrictEqual([
-        'https://example.com/callback',
-      ]);
+      await expect(page.testSubj.locator('mcpClientRemoteUri-0')).toHaveValue(
+        'https://example.com/callback'
+      );
+      await expect(page.testSubj.locator('mcpClientRemoteUri-1')).toHaveCount(0);
     });
 
     test('does not offer edit for a revoked client', async ({ apiClient, page, pageObjects }) => {
