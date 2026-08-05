@@ -54,18 +54,13 @@ export const createCaseFromTemplateStepDefinition = (
         : {};
 
       // v2 path (`cases-template` saved objects). When the templates feature is enabled, prefer a
-      // real template SO. The step seeds only the wire-required `title` / `description` from the
-      // template's create-form defaults (its `name` and `description`) — everything else is left to
-      // `cases.create`'s server-side expansion, which fills severity / category / assignees / tags /
-      // connector / extended_fields (caller-wins) and pins the resolved template version. The step
-      // no longer builds any of those client-side.
+      // real template SO. The step seeds only the wire-required fields from the template's
+      // create-form defaults — everything else (severity / category / assignees / tags / connector /
+      // extended_fields) is left to `cases.create`'s server-side expansion (caller-wins).
       if (isTemplatesEnabled) {
-        // NOTE: unlike `cases.create`'s own template expansion (which reads the template via the
-        // unsecured `templatesService` — creating a case only requires createCase authorization for
-        // `owner`, not template-read), this step goes through the authorized `casesClient.templates`
-        // sub-client. Running this step therefore additionally requires the `getTemplate` privilege
-        // for the template's owner. This divergence is intentional for now (documented on the step
-        // itself) rather than silently reusing the unsecured read.
+        // Unlike `cases.create`'s own (unsecured) template expansion, this step reads the template
+        // via the authorized `casesClient.templates` sub-client, so it additionally requires the
+        // `getTemplate` privilege for the template's owner.
         const templateSO = await casesClient.templates.getTemplate(case_template_id);
 
         if (templateSO) {
@@ -89,23 +84,32 @@ export const createCaseFromTemplateStepDefinition = (
             seededDefaults.description = parsed.definition.description;
           }
 
+          // `title` is wire-required (non-empty). Unlike the other case defaults, expansion never
+          // fills it in, so a template with no default `name` needs a caller-supplied overwrite.
+          if (!seededDefaults.title && !normalizedOverwrites.title) {
+            throw new Error(
+              `Case template "${case_template_id}" has no default title; provide "overwrites.title"`
+            );
+          }
+
           // Build a MINIMAL create payload: only the wire-required fields (title / description /
           // tags / connector / settings / owner) plus the pinned template reference. We must NOT
           // materialize severity / assignees / category / settings.extractObservables here, because
           // `cases.create`'s expansion only applies a template default when the field is
           // `=== undefined`. Seeding those (as getInitialCaseValue does) would silently suppress the
-          // template's own severity / assignees / extractObservables / category defaults. Leaving
-          // them absent lets expansion apply them (caller overwrites still win when present).
+          // template's own severity / assignees / extractObservables / category defaults.
           const createPayload = {
             owner,
             title: '',
             description: '',
             // An empty tags array reads as "caller sent none", so expansion applies the template's
-            // tags. A `.none` connector and a syncAlerts-only settings object likewise leave the
-            // template connector / extractObservables defaults free to apply.
+            // tags. A `.none` connector leaves the template connector default free to apply.
             tags: [],
             connector: getNoneConnector(),
-            settings: { syncAlerts: true },
+            // Unlike the other defaults, expansion always treats `syncAlerts` as caller-supplied
+            // (see `applyTemplateDefaultsToCreateRequest`), so it must be seeded from the template
+            // here or a `syncAlerts: false` template default would be silently dropped.
+            settings: { syncAlerts: parsed.definition.settings?.syncAlerts ?? true },
             ...seededDefaults,
             // Caller overwrites win over the template's seeded title / description and the
             // wire-required scaffolding above.

@@ -23,6 +23,10 @@ export const InputSchema = CasesStepCaseIdVersionSchema.extend({
    * canonical storage format; multi-value controls take a JSON-encoded array string. Merged into
    * the case's existing `extended_fields` — unlisted keys are left untouched. No `owner` input:
    * the write authorizes against the case's real owner.
+   *
+   * An empty string value is a valid, explicit "clear this field" — `validateExtendedFields`
+   * treats `''` as empty and only rejects it when the field is required. It is intentionally not
+   * bounded with `.min(1)`.
    */
   fields: z.record(z.string().min(1), z.string()),
 });

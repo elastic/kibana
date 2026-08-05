@@ -45,7 +45,7 @@ export const CREATE_CASE_FROM_TEMPLATE_STEP_DOCUMENTATION_DETAILS = i18n.transla
   'xpack.cases.workflowSteps.createCaseFromTemplate.documentation.details',
   {
     defaultMessage:
-      'This step resolves a case template — from the case templates feature when enabled, otherwise from the per-space case configuration — and creates a new case. You can optionally specify overwrite fields to customize the created case. When the case templates feature is enabled, the calling user additionally needs the "getTemplate" privilege, unlike creating a case from a template through the Cases API directly.',
+      'This step resolves a case template — from the case templates feature when enabled, otherwise from the per-space case configuration — and creates a new case. You can optionally specify overwrite fields to customize the created case. When the case templates feature is enabled, the calling user additionally needs the "getTemplate" privilege, unlike creating a case from a template through the Cases API directly. The resolved template must have a default title, or you must provide "overwrites.title".',
   }
 );
 

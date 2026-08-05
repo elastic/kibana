@@ -121,9 +121,9 @@ export const manageCasesTool = (
   const unassignStepDef = unassignCaseStepDefinition(getCasesClientFn);
   const addTagsStepDef = addTagsStepDefinition(getCasesClientFn);
   const setCustomFieldStepDef = setCustomFieldStepDefinition(getCasesClientFn);
-  const setExtendedFieldsStepDef = isTemplatesEnabled
-    ? setExtendedFieldsStepDefinition(getCasesClientFn)
-    : undefined;
+  // Always constructed (cheap, no side effects): whether `set_extended_fields` is actually
+  // reachable is gated by `isTemplatesEnabled` in the schema (`buildManageCasesSchema`), not here.
+  const setExtendedFieldsStepDef = setExtendedFieldsStepDefinition(getCasesClientFn);
 
   const modesDescription = isTemplatesEnabled
     ? '`create`, `create_from_template`, `update`, `update_bulk` (≥2 cases), `delete`, `assign`, `unassign`, `add_tags`, `set_custom_field`, `set_extended_fields`'
@@ -170,14 +170,11 @@ export const manageCasesTool = (
             );
           case 'set_custom_field':
             return invokeStepHandler(setCustomFieldStepDef, { case_id, ...rest }, toolContext);
-          case EXTENDED_FIELDS_MODE: {
-            if (!setExtendedFieldsStepDef) {
-              throw new Error(
-                'set_extended_fields is unavailable because xpack.cases.templates.enabled is false'
-              );
-            }
+          case EXTENDED_FIELDS_MODE:
+            // Reaching this case requires the `manageCasesSchema` to have accepted `mode:
+            // 'set_extended_fields'`, which only happens when `isTemplatesEnabled` is true (see
+            // `buildManageCasesSchema`) — so `setExtendedFieldsStepDef` is always usable here.
             return invokeStepHandler(setExtendedFieldsStepDef, { case_id, ...rest }, toolContext);
-          }
           default: {
             const _exhaustive: never = mode;
             throw new Error(`Unknown manage_cases mode: ${_exhaustive}`);
