@@ -409,7 +409,7 @@ describe('appToResult', () => {
     expect(appToResult(appLink, 42).title).toEqual('Sub1');
   });
 
-  it('uses only the leaf title for nested Stack Management deep links', () => {
+  it('keeps management section titles for nested deep links by default', () => {
     const app = createApp({ id: 'management' });
     const appLink: AppLink = {
       id: 'management-application_connections',
@@ -419,6 +419,21 @@ describe('appToResult', () => {
       keywords: [],
     };
 
-    expect(appToResult(appLink, 42).title).toEqual('Application connections');
+    expect(appToResult(appLink, 42).title).toEqual('Security / Application connections');
+  });
+
+  it('uses only the leaf title for nested Stack Management deep links when omitting section titles', () => {
+    const app = createApp({ id: 'management' });
+    const appLink: AppLink = {
+      id: 'management-application_connections',
+      app,
+      path: '/security/application_connections',
+      subLinkTitles: ['Security', 'Application connections'],
+      keywords: [],
+    };
+
+    expect(appToResult(appLink, 42, { omitManagementSectionTitles: true }).title).toEqual(
+      'Application connections'
+    );
   });
 });

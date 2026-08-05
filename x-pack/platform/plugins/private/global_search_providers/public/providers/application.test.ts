@@ -53,6 +53,8 @@ const expectResult = expectApp;
 
 describe('applicationResultProvider', () => {
   let application: ReturnType<typeof applicationServiceMock.createStartContract>;
+  let getChromeStyle: jest.Mock<'classic' | 'project', []>;
+  let getChromeStylePromise: Promise<() => 'classic' | 'project'>;
 
   const defaultOption: GlobalSearchProviderFindOptions = {
     preference: 'pref',
@@ -62,6 +64,8 @@ describe('applicationResultProvider', () => {
 
   beforeEach(() => {
     application = applicationServiceMock.createStartContract();
+    getChromeStyle = jest.fn().mockReturnValue('classic');
+    getChromeStylePromise = Promise.resolve(getChromeStyle);
     getAppResultsMock.mockReturnValue([]);
   });
 
@@ -70,7 +74,10 @@ describe('applicationResultProvider', () => {
   });
 
   it('has the correct id', () => {
-    const provider = createApplicationResultProvider(Promise.resolve(application));
+    const provider = createApplicationResultProvider(
+      Promise.resolve(application),
+      getChromeStylePromise
+    );
     expect(provider.id).toBe('application');
   });
 
@@ -83,16 +90,34 @@ describe('applicationResultProvider', () => {
           createApp({ id: 'app3', title: 'App 3' }),
         ])
       );
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(
+        Promise.resolve(application),
+        getChromeStylePromise
+      );
 
       await provider.find({ term: 'term' }, defaultOption).toPromise();
 
       expect(getAppResultsMock).toHaveBeenCalledTimes(1);
-      expect(getAppResultsMock).toHaveBeenCalledWith('term', [
-        expectApp('app1'),
-        expectApp('app2'),
-        expectApp('app3'),
-      ]);
+      expect(getAppResultsMock).toHaveBeenCalledWith(
+        'term',
+        [expectApp('app1'), expectApp('app2'), expectApp('app3')],
+        { omitManagementSectionTitles: false }
+      );
+    });
+
+    it('omits management section titles when chrome style is project', async () => {
+      getChromeStyle.mockReturnValue('project');
+      application.applications$ = of(createAppMap([createApp({ id: 'app1', title: 'App 1' })]));
+      const provider = createApplicationResultProvider(
+        Promise.resolve(application),
+        getChromeStylePromise
+      );
+
+      await provider.find({ term: 'term' }, defaultOption).toPromise();
+
+      expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')], {
+        omitManagementSectionTitles: true,
+      });
     });
 
     it('calls `getAppResults` when filtering by type with `application` included', async () => {
@@ -102,17 +127,21 @@ describe('applicationResultProvider', () => {
           createApp({ id: 'app2', title: 'App 2' }),
         ])
       );
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(
+        Promise.resolve(application),
+        getChromeStylePromise
+      );
 
       await provider
         .find({ term: 'term', types: ['dashboard', 'application'] }, defaultOption)
         .toPromise();
 
       expect(getAppResultsMock).toHaveBeenCalledTimes(1);
-      expect(getAppResultsMock).toHaveBeenCalledWith('term', [
-        expectApp('app1'),
-        expectApp('app2'),
-      ]);
+      expect(getAppResultsMock).toHaveBeenCalledWith(
+        'term',
+        [expectApp('app1'), expectApp('app2')],
+        { omitManagementSectionTitles: false }
+      );
     });
 
     it('does not call `getAppResults` and return no results when filtering by type with `application` not included', async () => {
@@ -123,7 +152,10 @@ describe('applicationResultProvider', () => {
           createApp({ id: 'app3', title: 'App 3' }),
         ])
       );
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(
+        Promise.resolve(application),
+        getChromeStylePromise
+      );
 
       const results = await provider
         .find({ term: 'term', types: ['dashboard', 'map'] }, defaultOption)
@@ -141,7 +173,10 @@ describe('applicationResultProvider', () => {
           createApp({ id: 'app3', title: 'App 3' }),
         ])
       );
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(
+        Promise.resolve(application),
+        getChromeStylePromise
+      );
 
       const results = await provider
         .find({ term: 'term', tags: ['some-tag-id'] }, defaultOption)
@@ -158,10 +193,15 @@ describe('applicationResultProvider', () => {
           createApp({ id: 'disabled', title: 'disabled', status: AppStatus.inaccessible }),
         ])
       );
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(
+        Promise.resolve(application),
+        getChromeStylePromise
+      );
       await provider.find({ term: 'term' }, defaultOption).toPromise();
 
-      expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')]);
+      expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')], {
+        omitManagementSectionTitles: false,
+      });
     });
 
     it('does not ignore apps with non-visible navlink', async () => {
@@ -176,14 +216,17 @@ describe('applicationResultProvider', () => {
           createApp({ id: 'hidden', title: 'hidden', visibleIn: [] }),
         ])
       );
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(
+        Promise.resolve(application),
+        getChromeStylePromise
+      );
       await provider.find({ term: 'term' }, defaultOption).toPromise();
 
-      expect(getAppResultsMock).toHaveBeenCalledWith('term', [
-        expectApp('app1'),
-        expectApp('disabled'),
-        expectApp('hidden'),
-      ]);
+      expect(getAppResultsMock).toHaveBeenCalledWith(
+        'term',
+        [expectApp('app1'), expectApp('disabled'), expectApp('hidden')],
+        { omitManagementSectionTitles: false }
+      );
     });
 
     it('ignores chromeless apps', async () => {
@@ -194,10 +237,15 @@ describe('applicationResultProvider', () => {
         ])
       );
 
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(
+        Promise.resolve(application),
+        getChromeStylePromise
+      );
       await provider.find({ term: 'term' }, defaultOption).toPromise();
 
-      expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')]);
+      expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')], {
+        omitManagementSectionTitles: false,
+      });
     });
 
     it('sorts the results returned by `getAppResults`', async () => {
@@ -208,7 +256,10 @@ describe('applicationResultProvider', () => {
         createResult({ id: 'r75', score: 75 }),
       ]);
 
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(
+        Promise.resolve(application),
+        getChromeStylePromise
+      );
       const results = await provider.find({ term: 'term' }, defaultOption).toPromise();
 
       expect(results).toEqual([
@@ -227,7 +278,10 @@ describe('applicationResultProvider', () => {
         createResult({ id: 'r75', score: 75 }),
       ]);
 
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(
+        Promise.resolve(application),
+        getChromeStylePromise
+      );
 
       const options = {
         ...defaultOption,
@@ -249,8 +303,11 @@ describe('applicationResultProvider', () => {
         const applicationPromise = hot('a', {
           a: application,
         }) as unknown as Promise<ApplicationStart>;
+        const chromeStylePromise = hot('a', {
+          a: () => 'classic' as const,
+        }) as unknown as Promise<() => 'classic' | 'project'>;
 
-        const provider = createApplicationResultProvider(applicationPromise);
+        const provider = createApplicationResultProvider(applicationPromise, chromeStylePromise);
 
         const options = {
           ...defaultOption,
@@ -274,8 +331,11 @@ describe('applicationResultProvider', () => {
         const applicationPromise = hot('a', {
           a: application,
         }) as unknown as Promise<ApplicationStart>;
+        const chromeStylePromise = hot('a', {
+          a: () => 'classic' as const,
+        }) as unknown as Promise<() => 'classic' | 'project'>;
 
-        const provider = createApplicationResultProvider(applicationPromise);
+        const provider = createApplicationResultProvider(applicationPromise, chromeStylePromise);
 
         const options = {
           ...defaultOption,
@@ -297,7 +357,10 @@ describe('applicationResultProvider', () => {
           createApp({ id: 'app2', title: 'App 2' }),
         ])
       );
-      const provider = createApplicationResultProvider(Promise.resolve(application));
+      const provider = createApplicationResultProvider(
+        Promise.resolve(application),
+        getChromeStylePromise
+      );
 
       expect(await provider.getSearchableTypes()).toEqual(['application']);
     });

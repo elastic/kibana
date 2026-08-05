@@ -20,9 +20,14 @@ export interface AppLink {
   euiIconType?: string;
 }
 
+export interface GetAppResultsOptions {
+  omitManagementSectionTitles?: boolean;
+}
+
 export const getAppResults = (
   term: string,
-  apps: PublicAppInfo[]
+  apps: PublicAppInfo[],
+  options: GetAppResultsOptions = {}
 ): GlobalSearchProviderResult[] => {
   return (
     apps
@@ -47,7 +52,7 @@ export const getAppResults = (
         score: scoreApp(term, appLink),
       }))
       .filter(({ score }) => score > 0)
-      .map(({ appLink, score }) => appToResult(appLink, score))
+      .map(({ appLink, score }) => appToResult(appLink, score, options))
   );
 };
 
@@ -94,11 +99,17 @@ const scoreAppByKeywords = (term: string, keywords: string[]): number => {
   return Math.max(...scores);
 };
 
-export const appToResult = (appLink: AppLink, score: number): GlobalSearchProviderResult => {
+export const appToResult = (
+  appLink: AppLink,
+  score: number,
+  { omitManagementSectionTitles = false }: GetAppResultsOptions = {}
+): GlobalSearchProviderResult => {
   const titleParts =
-    // Management: leaf app title only — section names (e.g. "Security") don't match nav IA
+    // Stack Management app should not include the app title in the concatenated link label
     appLink.app.id === 'management' && appLink.subLinkTitles.length > 0
-      ? [appLink.subLinkTitles[appLink.subLinkTitles.length - 1]]
+      ? omitManagementSectionTitles
+        ? [appLink.subLinkTitles[appLink.subLinkTitles.length - 1]]
+        : appLink.subLinkTitles
       : [appLink.app.title, ...appLink.subLinkTitles];
 
   return {
