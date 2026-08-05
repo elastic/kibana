@@ -11,6 +11,8 @@ import React from 'react';
 import { createEvent, fireEvent, render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
+import { esql } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import { getColumns } from './get_columns';
 import type { ErrorsByTraceId } from '@kbn/apm-types';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
@@ -246,6 +248,42 @@ describe('getColumns', () => {
       const { getByTestId } = render(<>{ErrorRender?.(null, mockUnprocessedOtelErrorItem)}</>);
 
       expect(getByTestId('error-culprit')).toHaveTextContent('N/A');
+    });
+  });
+
+  describe('where clause', () => {
+    const renderWhereClause = (item: ErrorsByTraceId['traceErrors'][0]) => {
+      const columns = getColumns({ traceId, docId, source: 'apm' }) as Array<
+        EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>
+      >;
+
+      const ErrorRender = columns[0].render;
+      render(<>{ErrorRender?.(null, item)}</>);
+
+      const { whereClause } = (useDiscoverLinkAndEsqlQuery as jest.Mock).mock.calls[0][0] as {
+        whereClause: ESQLAstExpression;
+      };
+
+      return esql.from('apm-errors-*').where`${whereClause}`.print('pipe-multiline');
+    };
+
+    it('filters by error.id when the item has one', () => {
+      expect(renderWhereClause(mockErrorItem)).toBe(
+        `FROM apm-errors-*
+  | WHERE trace.id == "trace-123" AND span.id == "span-456" AND processor.event == "error" AND error.id == "error-789"`
+      );
+    });
+
+    it('omits the error.id predicate when the item has no id', () => {
+      const itemWithoutErrorId = {
+        ...mockErrorItem,
+        error: { ...mockErrorItem.error, id: undefined },
+      } as ErrorsByTraceId['traceErrors'][0];
+
+      expect(renderWhereClause(itemWithoutErrorId)).toBe(
+        `FROM apm-errors-*
+  | WHERE trace.id == "trace-123" AND span.id == "span-456" AND processor.event == "error"`
+      );
     });
   });
 });
