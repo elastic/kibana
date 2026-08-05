@@ -10,7 +10,8 @@ import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
 import type { ThunkAction } from 'redux-thunk-v2';
-import type { Action as ReduxAction } from 'redux-v4';
+import type { Action as ReduxAction, Store } from 'redux-v4';
+import type { ThunkDispatch } from 'redux-thunk-v2';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 import type { BreadcrumbService } from '../breadcrumbs';
 
@@ -61,3 +62,9 @@ export type AppThunkAction<R = void> = ThunkAction<
   ThunkServices,
   ReduxAction
 >;
+
+export type AppDispatch = ThunkDispatch<LicenseManagementState, ThunkServices, ReduxAction>;
+
+export type AppStore = Omit<Store<LicenseManagementState, ReduxAction>, 'dispatch'> & {
+  dispatch: AppDispatch;
+};
