@@ -26,6 +26,7 @@ import type {
   SIGNIFICANT_EVENTS_APP_ID,
   INGEST_HUB_APP_ID,
   ONBOARDING_APP_ID,
+  NIGHTSHIFT_APP_ID,
 } from './constants';
 
 type LogsApp = typeof LOGS_APP_ID;
@@ -46,6 +47,7 @@ type StreamsApp = typeof STREAMS_APP_ID;
 type SignificantEventsApp = typeof SIGNIFICANT_EVENTS_APP_ID;
 type IngestHubApp = typeof INGEST_HUB_APP_ID;
 type OnboardingApp = typeof ONBOARDING_APP_ID;
+type NightshiftApp = typeof NIGHTSHIFT_APP_ID;
 
 export type AppId =
   | LogsApp
@@ -65,7 +67,8 @@ export type AppId =
   | StreamsApp
   | SignificantEventsApp
   | IngestHubApp
-  | OnboardingApp;
+  | OnboardingApp
+  | NightshiftApp;
 
 export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
 
@@ -101,16 +104,7 @@ export type UptimeLinkId = 'Certificates';
 
 export type ProfilingLinkId = 'stacktraces' | 'flamegraphs' | 'functions';
 
-export const significantEventsDeepLinkIds = [
-  'significantEventsDiscovery',
-  'significantEventsKnowledgeIndicators',
-  'significantEventsEvents',
-  'significantEventsRules',
-] as const;
-
-export type SigEventsLinkId = (typeof significantEventsDeepLinkIds)[number];
-
-export type StreamsLinkId = 'overview' | SigEventsLinkId;
+export type StreamsLinkId = 'overview';
 
 export type SignificantEventsLinkId = 'knowledge_indicators' | 'events' | 'rules';
 
