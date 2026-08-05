@@ -103,24 +103,6 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/lint_with_oxlint.sh
-    label: 'Linting (with oxlint)'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n4-standard-4
-      diskType: hyperdisk-balanced
-      preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 105
-    key: linting_with_oxlint
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
   - command: .buildkite/scripts/steps/typecheck/check_types.sh
     label: 'Check Types'
     agents:
@@ -139,40 +121,6 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
-    label: 'Check OAS Snapshot'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2d-highmem-4
-      preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
-      diskSizeGb: 105
-    key: check_oas_snapshot
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - command: .buildkite/scripts/steps/report_package_metrics.sh
-    label: Report Package Metrics
-    key: report_package_metrics
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      diskSizeGb: 105
-    timeout_in_minutes: 15
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-        - exit_status: '*'
-          limit: 1
-
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
@@ -184,7 +132,6 @@ steps:
     timeout_in_minutes: 10
     depends_on:
       - build
-      - report_package_metrics
     retry:
       automatic:
         - exit_status: '*'
