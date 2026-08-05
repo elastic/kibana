@@ -36,6 +36,10 @@ jest.mock('../connectors_cache', () => ({
       type: 'security.setAttackStatus',
       hasConnectorId: undefined,
     },
+    {
+      type: 'custom.typed',
+      hasConnectorId: undefined,
+    },
   ]),
 }));
 
@@ -70,6 +74,13 @@ jest.mock('../get_required_params_for_connector', () => ({
       return [
         { name: 'ids', example: [''] },
         { name: 'status', example: 'closed' },
+      ];
+    }
+    if (connectorType === 'custom.typed') {
+      // What the real getRequiredParamsForConnector derives for `z.number()` / `z.boolean()` fields.
+      return [
+        { name: 'count', example: 0 },
+        { name: 'enabled', example: false },
       ];
     }
     if (connectorType === 'cases.addAttachments') {
@@ -203,6 +214,17 @@ describe('generateConnectorSnippet', () => {
         withStepsSection: false,
       });
       expect(result).toContain('body: "{}"');
+    });
+  });
+
+  describe('falsy param placeholders', () => {
+    it('should keep 0 and false placeholders instead of falling back to an empty string', () => {
+      const result = generateConnectorSnippet('custom.typed', {
+        full: true,
+        withStepsSection: false,
+      });
+      expect(result).toContain('count: 0');
+      expect(result).toContain('enabled: false');
     });
   });
 
