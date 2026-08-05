@@ -100,6 +100,7 @@ toc:
           - file: connectors-kibana/github-action-type.md
           - file: connectors-kibana/gmail-action-type.md
           - file: connectors-kibana/google-calendar-action-type.md
+          - file: connectors-kibana/google-cloud-monitoring-action-type.md
           - file: connectors-kibana/google-cloud-storage-action-type.md
           - file: connectors-kibana/google-drive-action-type.md
           - file: connectors-kibana/grafana-action-type.md
@@ -116,10 +117,11 @@ toc:
           - file: connectors-kibana/notion-action-type.md
           - file: connectors-kibana/one-drive-action-type.md
           - file: connectors-kibana/one-password-action-type.md
+          - file: connectors-kibana/opensearch-aws-opensearch-service-action-type.md
           - file: connectors-kibana/outlook-action-type.md
           - file: connectors-kibana/pagerduty-mcp-action-type.md
-          - file: connectors-kibana/prometheus-alertmanager-action-type.md
           - file: connectors-kibana/posthog-action-type.md
+          - file: connectors-kibana/prometheus-action-type.md
           - file: connectors-kibana/rootly-action-type.md
           - file: connectors-kibana/salesforce-action-type.md
           - file: connectors-kibana/sentry-action-type.md
