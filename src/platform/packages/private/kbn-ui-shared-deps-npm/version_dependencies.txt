@@ -28,7 +28,7 @@
 @elastic/charts@71.9.0
 @elastic/datemath@5.0.3
 @elastic/emotion-sheet@1.4.1
-@elastic/esql-definitions@4.15.0
+@elastic/esql-definitions@4.17.0
 @elastic/esql-grammar@4.16.0
 @elastic/esql-promql-grammar@4.16.0
 @elastic/esql-types@4.16.0
@@ -925,7 +925,7 @@ wildcard@2.0.1
 wrap-ansi@7.0.0
 wrappy@1.0.2
 ws@7.5.11
-ws@8.21.0
+ws@8.21.1
 wsl-utils@0.1.0
 xtend@4.0.2
 y18n@5.0.8

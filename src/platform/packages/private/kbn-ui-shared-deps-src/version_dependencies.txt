@@ -528,7 +528,7 @@ websocket-extensions@0.1.4
 which@2.0.2
 wildcard@2.0.1
 ws@7.5.11
-ws@8.21.0
+ws@8.21.1
 wsl-utils@0.1.0
 yallist@3.1.1
 yaml@2.8.3
