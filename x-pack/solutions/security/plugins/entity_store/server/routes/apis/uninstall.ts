@@ -54,7 +54,6 @@ export function registerUninstall(router: EntityStorePluginRouter) {
         const {
           logger,
           assetManagerClient: assetManager,
-          entityMaintainersClient,
         } = await ctx.entityStore;
         const { entityTypes } = req.body;
         logger.debug(`uninstalling entities: [${entityTypes.join(', ')}]`);
