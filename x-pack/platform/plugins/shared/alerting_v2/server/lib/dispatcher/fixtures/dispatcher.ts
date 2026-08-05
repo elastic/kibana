@@ -9,7 +9,7 @@ import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertEpisode, AlertEpisodeSuppression, LastNotifiedRecord } from '../types';
 
 export const createDispatchableAlertEventsResponse = (
-  alertEpisodes: Array<AlertEpisode & { data_json?: string | null }>
+  alertEpisodes: AlertEpisode[]
 ): EsqlQueryResponse => {
   return {
     columns: [
@@ -20,7 +20,6 @@ export const createDispatchableAlertEventsResponse = (
       { name: 'group_hash', type: 'keyword' },
       { name: 'episode_id', type: 'keyword' },
       { name: 'episode_status', type: 'keyword' },
-      { name: 'data_json', type: 'keyword' },
       { name: 'severity', type: 'keyword' },
     ],
     values: alertEpisodes.map((alertEpisode) => [
@@ -31,7 +30,6 @@ export const createDispatchableAlertEventsResponse = (
       alertEpisode.group_hash,
       alertEpisode.episode_id,
       alertEpisode.episode_status,
-      alertEpisode.data_json ?? null,
       alertEpisode.severity ?? null,
     ]),
   };
@@ -63,6 +61,21 @@ export const createAlertEpisodeSuppressionsResponse = (
       suppression.source,
       suppression.space_id,
     ]),
+  };
+};
+
+export interface EpisodeDataRow {
+  episode_id: string;
+  data_json: string | null;
+}
+
+export const createEpisodeDataResponse = (rows: EpisodeDataRow[]): EsqlQueryResponse => {
+  return {
+    columns: [
+      { name: 'episode_id', type: 'keyword' },
+      { name: 'data_json', type: 'keyword' },
+    ],
+    values: rows.map((row) => [row.episode_id, row.data_json]),
   };
 };
 

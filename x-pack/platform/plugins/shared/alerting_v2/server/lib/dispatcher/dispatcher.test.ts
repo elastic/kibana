@@ -32,6 +32,7 @@ import { DispatcherPipeline, type DispatcherPipelineContract } from './execution
 import {
   createAlertEpisodeSuppressionsResponse,
   createDispatchableAlertEventsResponse,
+  createEpisodeDataResponse,
   createLastNotifiedTimestampsResponse,
 } from './fixtures/dispatcher';
 import { getDispatchableAlertEventsQuery } from './queries';
@@ -39,6 +40,7 @@ import {
   FetchEpisodesStep,
   FetchSuppressionsStep,
   ApplySuppressionStep,
+  HydrateEpisodeDataStep,
   FetchRulesStep,
   ApplyMaintenanceWindowStep,
   FetchPoliciesStep,
@@ -120,6 +122,7 @@ function buildDispatcherService(deps: {
     new FetchEpisodesStep(deps.queryService),
     new FetchSuppressionsStep(deps.queryService),
     new ApplySuppressionStep(),
+    new HydrateEpisodeDataStep(deps.queryService, loggerService),
     new FetchRulesStep(deps.rulesSoService),
     new ApplyMaintenanceWindowStep(deps.maintenanceWindowService),
     new FetchPoliciesStep(deps.npSoService),
@@ -225,6 +228,12 @@ describe('DispatcherService', () => {
       queryEsClient.esql.query
         .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
         .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(
+          createEpisodeDataResponse([
+            { episode_id: 'episode-1', data_json: null },
+            { episode_id: 'episode-2', data_json: null },
+          ])
+        )
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
       storageEsClient.bulk.mockResolvedValue({
@@ -244,7 +253,7 @@ describe('DispatcherService', () => {
         .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
         .toISOString();
 
-      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(3);
+      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(4);
       expect(queryEsClient.esql.query).toHaveBeenCalledWith(
         {
           query: getDispatchableAlertEventsQuery().query,
@@ -345,6 +354,9 @@ describe('DispatcherService', () => {
       queryEsClient.esql.query
         .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
         .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(
+          createEpisodeDataResponse([{ episode_id: 'episode-2', data_json: null }])
+        )
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
       storageEsClient.bulk.mockResolvedValue({
@@ -586,6 +598,7 @@ describe('DispatcherService', () => {
       queryEsClient.esql.query
         .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
         .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(createEpisodeDataResponse([]))
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
       storageEsClient.bulk.mockResolvedValue({
@@ -600,7 +613,7 @@ describe('DispatcherService', () => {
       });
 
       expect(result.startedAt).toBeInstanceOf(Date);
-      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(3);
+      expect(queryEsClient.esql.query).toHaveBeenCalledTimes(4);
 
       const [{ operations }] = storageEsClient.bulk.mock.calls[0];
 
@@ -744,6 +757,9 @@ describe('DispatcherService', () => {
           ])
         )
         .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(
+          createEpisodeDataResponse([{ episode_id: 'pd-ep-1', data_json: null }])
+        )
         .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
 
       storageEsClient.bulk.mockResolvedValue({
