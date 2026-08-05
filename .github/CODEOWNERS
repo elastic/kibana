@@ -1247,6 +1247,7 @@ x-pack/platform/plugins/shared/logs_shared @elastic/obs-signals-logs-team
 x-pack/platform/plugins/shared/maintenance_windows @elastic/response-ops
 x-pack/platform/plugins/shared/maps @elastic/kibana-presentation
 x-pack/platform/plugins/shared/ml @elastic/ml-ui
+x-pack/platform/plugins/shared/ml/evals @elastic/ml-ui
 x-pack/platform/plugins/shared/notification_center @elastic/search-kibana
 x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
 x-pack/platform/plugins/shared/observability_ai_assistant @elastic/nightshift-context-and-research-team

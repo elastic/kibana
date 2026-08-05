@@ -345,6 +345,22 @@ evaluate('the model should answer truthfully', async ({ inferenceClient, executo
 });
 ```
 
+### Tagging datasets
+
+Datasets can declare `tags` and a `maturity` level, which the dataset list in Kibana filters on. Declaring them alongside the examples keeps them current on every run:
+
+```ts
+const dataset = {
+  name: 'my-dataset',
+  description: 'my-description',
+  tags: ['agent-builder', 'esql'],
+  maturity: 'golden', // 'raw' | 'cleaned' | 'golden'
+  examples: [{ input: { content: 'Hi' }, output: { content: 'Hey' } }],
+};
+```
+
+Tags are lowercased and deduplicated when stored, so `ESQL` and `esql` are the same tag. Each tag must start with a letter or number and may otherwise contain letters, numbers and `: . _ -`; a tag with a space or comma in it fails the upsert with a 400, so keep them slug-like (`team:obs-ai`, `esql`). Leaving either field out preserves what the dataset already has, so a suite that doesn't declare them will not wipe tags curated in the UI.
+
 ### Typing datasets
 
 ```ts
