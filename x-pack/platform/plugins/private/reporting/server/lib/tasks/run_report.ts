@@ -45,7 +45,7 @@ import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isNumber } from 'lodash';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import type { ReportTaskParams, ReportingTask } from '.';
-import { ReportingTaskStatus, TIME_BETWEEN_ATTEMPTS } from '.';
+import { FORCE_TIMEOUT_GRACE_PERIOD, ReportingTaskStatus, TIME_BETWEEN_ATTEMPTS } from '.';
 import type { ReportingCore } from '../..';
 import type { EventTracker } from '../../usage';
 import type { SavedReport } from '../store';
@@ -444,11 +444,33 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
       useInternalUser: task.useInternalUser,
     });
 
+    // Hard timeout fallback: the cooperative timer above only cancels the token, so a runTask that
+    // ignores it would hang this run forever. Force-fail a grace period after the cancel.
+    let forceTimerId: ReturnType<typeof setTimeout> | undefined;
+    const forceTimeoutPromise = new Promise<never>((_, reject) => {
+      forceTimerId = setTimeout(() => {
+        errorLogger(
+          this.logger,
+          `Report ${task.id} did not honor the cancellation token within the grace period; force-failing the run.`
+        );
+        reject(new QueueTimeoutError());
+      }, this.queueTimeout + FORCE_TIMEOUT_GRACE_PERIOD);
+    });
+
     try {
-      const result = await runTaskPromise;
+      const result = await Promise.race([runTaskPromise, forceTimeoutPromise]);
       return { result, timedOut: jobTimedOut };
+    } catch (err) {
+      // Surface the timeout even when runTask rejects on cancel instead of resolving with partial data like CSV does.
+      if (jobTimedOut) {
+        throw new QueueTimeoutError();
+      }
+      throw err;
     } finally {
       clearTimeout(timerId);
+      clearTimeout(forceTimerId);
+      // If the force timeout won the race, runTask may still reject later; catch to prevent unhandled rejection.
+      runTaskPromise.catch(() => {});
     }
   }
 
@@ -588,6 +610,9 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               report,
               operation: async (rep: SavedReport) => {
                 cancellationToken = new CancellationToken();
+                // Reset per attempt so a later attempt that rejects before performJob returns
+                // can't read a prior attempt's result when classifying the failure.
+                output = undefined;
                 // keep track of the number of times we try within the task
                 atmpts = isNumber(atmpts) ? atmpts + 1 : undefined;
 

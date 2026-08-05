@@ -965,6 +965,80 @@ describe('Run Scheduled Report Task', () => {
       expect(error).toBeInstanceOf(QueueTimeoutError);
       expect(getErrorSource(error!)).not.toEqual(TaskErrorSource.USER);
     });
+
+    it('force-fails a run whose runTask never honors the cancellation token', async () => {
+      jest.useFakeTimers();
+      configType = createMockConfigSchema({ capture: { maxAttempts: 1 }, queue: { timeout: 1 } });
+      mockReporting = await createMockReportingCore(configType);
+      mockStream = createStreamMock();
+
+      // Never resolves, and ignores the cancellation token entirely.
+      const hangingRunTaskFn = jest
+        .fn()
+        .mockImplementation(() => new Promise<TaskRunResult>(() => {}));
+      mockReporting.getExportTypesRegistry().register({
+        id: 'test3',
+        name: 'Test3',
+        setup: jest.fn(),
+        start: jest.fn(),
+        createJob: () => new Promise(() => {}),
+        runTask: hangingRunTaskFn,
+        shouldNotifyUsage: () => true,
+        getFeatureUsageName: () => 'Reporting: test3 scheduled export',
+        notifyUsage: jest.fn(),
+        jobContentEncoding: 'base64',
+        jobType: 'test3',
+        validLicenses: [],
+      } as unknown as ExportType);
+
+      const store = await mockReporting.getStore();
+      const thisSavedReport = new SavedReport({ ...savedReportData, jobtype: 'test3' });
+      store.addReport = jest.fn().mockImplementation(async () => thisSavedReport);
+      store.setReportFailed = jest.fn(() =>
+        Promise.resolve({
+          _id: 'test',
+          jobtype: 'test3',
+          status: 'processing',
+        } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
+      );
+      store.setReportError = jest.fn();
+
+      const task = new RunScheduledReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      const mockTaskManager = taskManagerMock.createStart();
+      await task.init(mockTaskManager, emailNotificationService);
+
+      const taskDef = task.getTaskDefinition();
+      const taskRunner = taskDef.createTaskRunner({
+        taskInstance: {
+          id: 'report-so-id',
+          runAt: new Date('2023-10-01T00:00:00Z'),
+          params: {
+            id: 'report-so-id',
+            jobtype: 'test3',
+            schedule: { rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' } },
+          },
+        },
+        fakeRequest: fakeRawRequest,
+      } as unknown as RunContext);
+
+      let error: Error | undefined;
+      const runPromise = taskRunner.run().catch((err) => {
+        error = err;
+      });
+      // Advance past the internal queue timeout, the hard-timeout grace period, and all retry delays.
+      for (let i = 0; i < 10; i++) {
+        await jest.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);
+      }
+      await runPromise;
+      jest.useRealTimers();
+
+      expect(hangingRunTaskFn).toHaveBeenCalled();
+      expect(error).toBeInstanceOf(QueueTimeoutError);
+    });
   });
   // Regression test for https://github.com/elastic/kibana/issues/255230: after an attempt advances
   // the doc's seq_no, the retry must refresh the OCC values instead of reusing the stale ones.

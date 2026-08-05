@@ -734,15 +734,26 @@ describe('Run Single Report Task', () => {
     // Runs the task with a runTask implementation that resolves (with the given result) only
     // once the internal queue timeout cancels it - mirroring how the CSV searchsource path
     // returns partial data on timeout. Returns the error the task run rejected with.
-    const runTimedOutTask = async (result: Partial<TaskRunResult>): Promise<Error | undefined> => {
+    const runTimedOutTask = async (
+      result: Partial<TaskRunResult>,
+      { rejectOnCancel = false }: { rejectOnCancel?: boolean } = {}
+    ): Promise<Error | undefined> => {
       // A 1ms queue timeout ensures the internal timer cancels the run promptly.
       configType = createMockConfigSchema({ queue: { timeout: 1 } });
       mockReporting = await createMockReportingCore(configType);
 
       const runTaskFn = jest.fn().mockImplementation(
         ({ cancellationToken }: { cancellationToken: CancellationToken }) =>
-          new Promise<TaskRunResult>((resolve) => {
-            cancellationToken.on(() => resolve(result as TaskRunResult));
+          new Promise<TaskRunResult>((resolve, reject) => {
+            cancellationToken.on(() => {
+              if (rejectOnCancel) {
+                // Mirror takeUntil-based export types (PDF/PNG): the stream completes empty on
+                // cancel, so lastValueFrom rejects rather than resolving with partial data.
+                reject(new Error('no elements in sequence'));
+              } else {
+                resolve(result as TaskRunResult);
+              }
+            });
           })
       );
       mockReporting.getExportTypesRegistry().register({
@@ -825,6 +836,15 @@ describe('Run Single Report Task', () => {
 
     it('does not classify a timed-out run as a user error when user_error is falsy', async () => {
       const error = await runTimedOutTask({ content_type: 'text/csv', warnings: [] });
+      expect(error).toBeInstanceOf(QueueTimeoutError);
+      expect(getErrorSource(error!)).not.toEqual(TaskErrorSource.USER);
+    });
+
+    it('classifies a timed-out run as a QueueTimeoutError even when runTask rejects on cancel', async () => {
+      const error = await runTimedOutTask(
+        { content_type: 'application/pdf', warnings: [] },
+        { rejectOnCancel: true }
+      );
       expect(error).toBeInstanceOf(QueueTimeoutError);
       expect(getErrorSource(error!)).not.toEqual(TaskErrorSource.USER);
     });
