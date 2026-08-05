@@ -3,6 +3,7 @@
 browserslist
 lightningcss
 tar-fs
+@xterm/xterm
 ajv-draft-04
 ajv-formats
 @moonrepo/cli
