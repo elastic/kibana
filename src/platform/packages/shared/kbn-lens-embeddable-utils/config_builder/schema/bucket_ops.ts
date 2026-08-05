@@ -231,12 +231,15 @@ export const bucketTermsOperationSchema = schema.object(
     includes: schema.maybe(
       schema.object({
         // A terms field is either string- or number-typed, so values are homogeneous.
-        values: schema.oneOf([
-          schema.arrayOf(schema.string(), { maxSize: 100 }),
-          schema.arrayOf(schema.number(), { maxSize: 100 }),
-        ], {
-          meta: { description: 'Values to include.' },
-        }),
+        values: schema.oneOf(
+          [
+            schema.arrayOf(schema.string(), { maxSize: 100 }),
+            schema.arrayOf(schema.number(), { maxSize: 100 }),
+          ],
+          {
+            meta: { description: 'Values to include.' },
+          }
+        ),
         as_regex: schema.maybe(
           schema.boolean({
             meta: {
@@ -251,12 +254,15 @@ export const bucketTermsOperationSchema = schema.object(
      */
     excludes: schema.maybe(
       schema.object({
-        values: schema.oneOf([
-          schema.arrayOf(schema.string(), { maxSize: 100 }),
-          schema.arrayOf(schema.number(), { maxSize: 100 }),
-        ], {
-          meta: { description: 'Values to exclude.' },
-        }),
+        values: schema.oneOf(
+          [
+            schema.arrayOf(schema.string(), { maxSize: 100 }),
+            schema.arrayOf(schema.number(), { maxSize: 100 }),
+          ],
+          {
+            meta: { description: 'Values to exclude.' },
+          }
+        ),
         as_regex: schema.maybe(
           schema.boolean({
             meta: {
