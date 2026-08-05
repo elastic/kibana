@@ -144,6 +144,5 @@ export const clickAction = (propertySelector: string, rowIndex: number, actionSe
     ($el) => $el.is(':visible')
   );
 
-  // while { force: true } shouldn't really be used, here it allows us to get rid of flakiness on things that need an mouse hover
-  cy.get(actionSelector).first().click({ force: true });
+  cy.get(actionSelector).first().click();
 };
