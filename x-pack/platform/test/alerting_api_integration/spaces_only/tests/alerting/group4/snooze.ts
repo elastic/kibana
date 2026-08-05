@@ -185,6 +185,85 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         const actionCountAfterSnooze = await getExecuteActionEventCount(createdRule.id);
         expect(actionCountAfterSnooze).to.be.greaterThan(actionCountBeforeSnooze);
       });
+
+      it('should resume actions automatically after snooze schedule expires', async () => {
+        const { body: createdConnector, status: connStatus } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'MY Connector',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
+          });
+        expect(connStatus).to.be(200);
+        objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
+
+        const { body: createdRule, status: ruleStatus } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              name: 'should resume actions after snooze expires',
+              rule_type_id: 'test.patternFiring',
+              schedule: { interval: '24h' },
+              throttle: null,
+              notify_when: 'onActiveAlert',
+              params: {
+                pattern: { instance: arrayOfTrues(100) },
+              },
+              actions: [
+                {
+                  id: createdConnector.id,
+                  group: 'default',
+                  params: {},
+                },
+              ],
+            })
+          );
+        expect(ruleStatus).to.be(200);
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+        await waitForExecutions(createdRule.id, 1);
+        await retry.try(async () => {
+          await getEventLog({
+            getService,
+            spaceId: Spaces.space1.id,
+            type: 'alert',
+            id: createdRule.id,
+            provider: 'alerting',
+            actions: new Map([['execute-action', { gte: 1 }]]),
+          });
+        });
+        const actionCountBeforeSnooze = await getExecuteActionEventCount(createdRule.id);
+        expect(actionCountBeforeSnooze).to.be.greaterThan(0);
+
+        await alertUtils
+          .getSnoozeRequest(createdRule.id)
+          .send({
+            schedule: {
+              custom: {
+                duration: '10s',
+                start: new Date().toISOString(),
+                recurring: { occurrences: 1 },
+              },
+            },
+          })
+          .expect(200);
+
+        await runSoon({ id: createdRule.id, supertest, retry });
+        await waitForExecutions(createdRule.id, 2);
+        const actionCountDuringSnooze = await getExecuteActionEventCount(createdRule.id);
+        expect(actionCountDuringSnooze).to.eql(actionCountBeforeSnooze);
+
+        await retry.tryForTime(30_000, async () => {
+          await runSoon({ id: createdRule.id, supertest, retry });
+          await waitForExecutions(createdRule.id, 3);
+
+          const actionCountAfterExpiry = await getExecuteActionEventCount(createdRule.id);
+          expect(actionCountAfterExpiry).to.be.greaterThan(actionCountBeforeSnooze);
+        });
+      });
     });
 
     describe('prevent more than 5 schedules from being added to a rule', function () {
