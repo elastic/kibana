@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 
@@ -17,7 +18,6 @@ import {
   bulkCreateWithInferenceFallback,
   countRawBulkInferenceErrors,
   errorCauseMentionsInference,
-  isRetryableInferenceRejection,
 } from './bulk_with_inference_fallback';
 
 const createLogger = (): Logger =>
@@ -47,8 +47,6 @@ const inferenceErrorResponse = (): BulkResponse => ({
   ],
 });
 
-const timeoutError = (): Error =>
-  Object.assign(new Error('Request timed out'), { name: 'TimeoutError' });
 
 const otherErrorResponse = (): BulkResponse => ({
   errors: true,
@@ -79,24 +77,6 @@ describe('errorCauseMentionsInference', () => {
     expect(errorCauseMentionsInference({ type: 'mapper_parsing_exception', reason: 'bad' })).toBe(
       false
     );
-  });
-});
-
-describe('isRetryableInferenceRejection', () => {
-  it('matches a transport TimeoutError by name', () => {
-    expect(isRetryableInferenceRejection(timeoutError())).toBe(true);
-  });
-
-  it('matches a rejection whose message mentions inference', () => {
-    expect(isRetryableInferenceRejection(new Error('inference endpoint not ready'))).toBe(true);
-  });
-
-  it('does not match an unrelated rejection', () => {
-    expect(isRetryableInferenceRejection(new Error('mapping conflict'))).toBe(false);
-  });
-
-  it('does not match a non-Error value', () => {
-    expect(isRetryableInferenceRejection('boom')).toBe(false);
   });
 });
 
@@ -182,7 +162,7 @@ describe('bulkCreateWithInferenceFallback', () => {
   it('retries a thrown TimeoutError and returns when a later attempt succeeds', async () => {
     const attempt = jest
       .fn()
-      .mockRejectedValueOnce(timeoutError())
+      .mockRejectedValueOnce(new errors.TimeoutError('Request timed out', {} as any))
       .mockResolvedValueOnce(okResponse());
 
     const response = await bulkCreateWithInferenceFallback(createLogger(), attempt);
@@ -195,9 +175,9 @@ describe('bulkCreateWithInferenceFallback', () => {
   it('falls back to writing without embedding when every attempt throws a TimeoutError', async () => {
     const attempt = jest
       .fn()
-      .mockRejectedValueOnce(timeoutError())
-      .mockRejectedValueOnce(timeoutError())
-      .mockRejectedValueOnce(timeoutError())
+      .mockRejectedValueOnce(new errors.TimeoutError('Request timed out', {} as any))
+      .mockRejectedValueOnce(new errors.TimeoutError('Request timed out', {} as any))
+      .mockRejectedValueOnce(new errors.TimeoutError('Request timed out', {} as any))
       .mockResolvedValueOnce(okResponse());
 
     const response = await bulkCreateWithInferenceFallback(createLogger(), attempt);
