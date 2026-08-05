@@ -2423,7 +2423,7 @@ groups:
         description: |
           Enables Elastic Workflows and related experiences.
         note: |
-          :applies_to: stack: preview 9.3
+          :applies_to: stack: preview =9.3
           In this version, the default is `false`.
         datatype: bool
         default: true
