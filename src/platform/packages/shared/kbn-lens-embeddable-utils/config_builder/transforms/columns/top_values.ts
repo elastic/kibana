@@ -294,6 +294,9 @@ export function fromTermsLensStateToAPI(
       ? {
           excludes: {
             as_regex: column.params.excludeIsRegex,
+            // Preserve the value type verbatim: numeric fields store numbers and the runtime terms
+            // agg drops stringified numbers at render (`migrateIncludeExcludeFormat` filters with
+            // `Number.isFinite`), so coercing to strings would silently lose the exclude filter.
             values: column.params.exclude ?? [],
           },
         }
