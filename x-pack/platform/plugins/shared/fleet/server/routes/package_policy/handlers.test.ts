@@ -404,6 +404,48 @@ describe('When calling package policy', () => {
       });
     });
 
+    describe('when the caller is limited to a set of packages', () => {
+      it('should reject an update that retargets the policy to a package outside the caller scope', async () => {
+        (await context.fleet).limitedToPackages = ['endpoint'];
+        const request = getUpdateKibanaRequest({
+          package: { name: 'osquery_manager', title: 'Osquery Manager', version: '1.6.0' },
+        } as any);
+
+        await routeHandler(context, request, response);
+
+        expect(response.forbidden).toHaveBeenCalledWith({
+          body: { message: `Update for package name osquery_manager is not authorized.` },
+        });
+        expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should reject an update when the existing package is outside the caller scope', async () => {
+        (await context.fleet).limitedToPackages = ['osquery_manager'];
+        const request = getUpdateKibanaRequest({
+          package: { name: 'osquery_manager', title: 'Osquery Manager', version: '1.6.0' },
+        } as any);
+
+        await routeHandler(context, request, response);
+
+        expect(response.forbidden).toHaveBeenCalledWith({
+          body: { message: `Update for package name endpoint is not authorized.` },
+        });
+        expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should allow an update that keeps the policy within the caller scope', async () => {
+        (await context.fleet).limitedToPackages = ['endpoint'];
+        const request = getUpdateKibanaRequest({
+          package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.6.0' },
+        } as any);
+
+        await routeHandler(context, request, response);
+
+        expect(response.forbidden).not.toHaveBeenCalled();
+        expect(packagePolicyServiceMock.update).toHaveBeenCalled();
+      });
+    });
+
     it('should update var_group_selections when provided', async () => {
       const newData = {
         var_group_selections: { auth_method: 'oauth' },
