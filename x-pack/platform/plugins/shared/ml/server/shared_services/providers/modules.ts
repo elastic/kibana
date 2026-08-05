@@ -126,7 +126,8 @@ export function getModulesProvider(
                 payload.jobOverrides,
                 payload.datafeedOverrides,
                 payload.estimateModelMemory,
-                payload.applyToAllSpaces
+                payload.applyToAllSpaces,
+                payload.projectRouting
               );
             });
         },
