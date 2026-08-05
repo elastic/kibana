@@ -233,7 +233,7 @@ export const ConnectorCommand: GenerateCommand = {
             newLines.push(...pendingBlankLines);
             pendingBlankLines = [];
             const match = line.match(/\[([^\]]+)\]/);
-            if (match && match[1] > displayName) {
+            if (match && match[1].toLowerCase() > displayName.toLowerCase()) {
               newLines.push(newEntry, line);
               inserted = true;
             } else {
@@ -309,7 +309,7 @@ export const ConnectorCommand: GenerateCommand = {
             lastChildIdx = j;
             if (insertAt === -1) {
               const existingSlug = trimmed.match(/connectors-kibana\/([^/]+)-action-type\.md/)?.[1];
-              if (existingSlug && existingSlug > kebabName) {
+              if (existingSlug && existingSlug.toLowerCase() > kebabName.toLowerCase()) {
                 insertAt = j;
               }
             }
