@@ -174,7 +174,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
 
     if (apiKeyCreatedByUser) {
       const apiKeyResult = getApiKeyFromRequest(request);
-      if (apiKeyResult && isUiamCredential(apiKeyResult.api_key)) {
+      if (apiKeyResult?.api_key && isUiamCredential(apiKeyResult.api_key)) {
         taskInstances.forEach((task) => {
           uiamKeyByTaskIdMap.set(task.id!, {
             apiKey: apiKeyResult.api_key,

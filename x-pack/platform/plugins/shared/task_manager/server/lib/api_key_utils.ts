@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { AuthenticatedUser, SecurityServiceStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
+import { isUiamCredential } from '@kbn/core-security-server';
 import { truncate } from 'lodash';
 import type { TaskInstance, TaskUserScope } from '../task';
 import type { GrantApiKeysOpts } from '../api_key_strategy/api_key_strategy';
@@ -51,11 +53,31 @@ export const requestHasApiKey = (security: SecurityServiceStart, request: Kibana
 export const getApiKeyFromRequest = (request: KibanaRequest) => {
   const credentials = getCredentialsFromRequest(request);
   if (credentials) {
-    const apiKey = Buffer.from(credentials, 'base64').toString().split(':');
+    // A raw UIAM credential (`essu_...`) means the request was authenticated with a
+    // user-created organization-level API key. Unlike framework-granted UIAM keys
+    // (encoded as `base64(id:key)`), it carries no key id, so it cannot be persisted
+    // on the task for execution and invalidation bookkeeping.
+    if (isUiamCredential(credentials)) {
+      throw Boom.badRequest(
+        'Cannot schedule a user-scoped task using an organization-level API key. ' +
+          'Organization-level API keys are not supported for task scheduling; ' +
+          'use a project-scoped Elasticsearch API key instead.'
+      );
+    }
+
+    const [id, apiKey] = Buffer.from(credentials, 'base64').toString().split(':');
+
+    // Fail loudly on any malformed credential — persisting a partial value would
+    // schedule a task that can never authenticate at run time.
+    if (!id || !apiKey) {
+      throw Boom.badRequest(
+        'Failed to parse API key credentials from the request authorization header.'
+      );
+    }
 
     return {
-      id: apiKey[0],
-      api_key: apiKey[1],
+      id,
+      api_key: apiKey,
     };
   }
   return null;

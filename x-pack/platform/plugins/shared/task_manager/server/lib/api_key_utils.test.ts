@@ -55,6 +55,48 @@ describe('api_key_utils', () => {
       const result = getApiKeyFromRequest(request);
       expect(result).toBeNull();
     });
+
+    test('should throw a 400 when the request carries a raw organization-level UIAM API key', () => {
+      // Organization-level keys are presented as the raw `essu_` secret, not `base64(id:key)`
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          authorization: `ApiKey essu_raw_org_level_key`,
+        },
+      });
+
+      let thrownError;
+      try {
+        getApiKeyFromRequest(request);
+      } catch (e) {
+        thrownError = e;
+      }
+      expect(thrownError.isBoom).toBe(true);
+      expect(thrownError.output.statusCode).toBe(400);
+      expect(thrownError.message).toMatchInlineSnapshot(
+        `"Cannot schedule a user-scoped task using an organization-level API key. Organization-level API keys are not supported for task scheduling; use a project-scoped Elasticsearch API key instead."`
+      );
+    });
+
+    test('should throw a 400 instead of returning a partial result when the credential is malformed', () => {
+      // decodes to a string without an `id:key` separator
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          authorization: `ApiKey ${Buffer.from('no-separator-here').toString('base64')}`,
+        },
+      });
+
+      let thrownError;
+      try {
+        getApiKeyFromRequest(request);
+      } catch (e) {
+        thrownError = e;
+      }
+      expect(thrownError.isBoom).toBe(true);
+      expect(thrownError.output.statusCode).toBe(400);
+      expect(thrownError.message).toMatchInlineSnapshot(
+        `"Failed to parse API key credentials from the request authorization header."`
+      );
+    });
   });
 
   describe('createApiKey', () => {

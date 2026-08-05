@@ -321,6 +321,37 @@ describe('EsAndUiamApiKeyStrategy', () => {
       );
     });
 
+    test('does not throw when getApiKeyFromRequest returns a result without api_key (undefined-safe UIAM check)', async () => {
+      const { strategy, coreStart } = createStrategy();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey essu_raw-org-level-key' },
+      });
+
+      const esKeyMap = new Map();
+      esKeyMap.set('task-1', {
+        apiKey: Buffer.from('esId:esSecret').toString('base64'),
+        apiKeyId: 'esId',
+      });
+      createApiKeyMock.mockResolvedValueOnce(esKeyMap);
+      hasApiKeyMock.mockReturnValue(true);
+      // A malformed credential parse result: id present, api_key undefined. Previously this
+      // crashed grantUiamApiKeys with `TypeError: Cannot read properties of undefined
+      // (reading 'startsWith')`.
+      getApiKeyFromRequestMock.mockReturnValue({
+        id: 'garbage',
+        api_key: undefined as unknown as string,
+      });
+      (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+        username: 'testuser',
+      });
+
+      const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
+      const result = await strategy.grantApiKeys(tasks, request, coreStart.security);
+
+      const fields = result.get('task-1');
+      expect(fields?.uiamApiKey).toBeUndefined();
+    });
+
     test('grants both ES and UIAM keys when request has UIAM credential', async () => {
       const { strategy, coreStart, mockUiam } = createStrategy();
       const request = httpServerMock.createKibanaRequest({
