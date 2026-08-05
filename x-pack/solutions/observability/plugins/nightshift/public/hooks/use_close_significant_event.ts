@@ -22,19 +22,13 @@ interface CloseSignificantEventResponse {
   status: SignificantEventStatus;
 }
 
-const CLOSE_SUCCESS_TOAST_TITLE = i18n.translate(
-  'xpack.observability.nightshift.closeEvent.successToastTitle',
-  {
-    defaultMessage: 'Significant event closed',
-  }
-);
+const CLOSE_SUCCESS_TOAST_TITLE = i18n.translate('xpack.nightshift.closeEvent.successToastTitle', {
+  defaultMessage: 'Significant event closed',
+});
 
-const CLOSE_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.observability.nightshift.closeEvent.errorToastTitle',
-  {
-    defaultMessage: 'Failed to close significant event',
-  }
-);
+const CLOSE_ERROR_TOAST_TITLE = i18n.translate('xpack.nightshift.closeEvent.errorToastTitle', {
+  defaultMessage: 'Failed to close significant event',
+});
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
