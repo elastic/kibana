@@ -33,7 +33,11 @@ let storedConnectorId: string | undefined = readStoredConnectorId();
 
 const writeStoredConnectorId = (connectorId: string): void => {
   storedConnectorId = connectorId;
-  localStorage.setItem(storageKeys.lastUsedConnector, JSON.stringify(connectorId));
+  try {
+    localStorage.setItem(storageKeys.lastUsedConnector, JSON.stringify(connectorId));
+  } catch {
+    // ignore persistence failures (private mode / quota); in-memory value and listeners still update
+  }
   connectorIdListeners.forEach((l) => l(connectorId));
 };
 
