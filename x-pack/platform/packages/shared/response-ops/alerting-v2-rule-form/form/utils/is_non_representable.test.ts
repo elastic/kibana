@@ -57,22 +57,70 @@ describe('isNonRepresentableRule', () => {
     ).toBe(false);
   });
 
-  it('returns true for alert + standalone format', () => {
+  it('returns false for alert + standalone with only breach.query (conditionless rule)', () => {
     expect(
       isNonRepresentableRule(
         createMockRule({
           query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
         })
       )
+    ).toBe(false);
+  });
+
+  it('returns true for alert + standalone with a recovery block', () => {
+    expect(
+      isNonRepresentableRule(
+        createMockRule({
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-*' },
+            recovery: { query: 'FROM logs-* | WHERE count < 1' },
+          },
+        })
+      )
     ).toBe(true);
   });
 
-  it('returns true for recovery_strategy: no_breach', () => {
-    expect(isNonRepresentableRule(createMockRule({ recovery_strategy: 'no_breach' }))).toBe(true);
+  it('returns true for alert + standalone with a no_data block', () => {
+    expect(
+      isNonRepresentableRule(
+        createMockRule({
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-*' },
+            no_data: { query: 'FROM logs-* | STATS count = count()' },
+          },
+        })
+      )
+    ).toBe(true);
   });
 
-  it('returns true for recovery_strategy: none', () => {
-    expect(isNonRepresentableRule(createMockRule({ recovery_strategy: 'none' }))).toBe(true);
+  it('returns false for recovery_strategy: no_breach', () => {
+    expect(isNonRepresentableRule(createMockRule({ recovery_strategy: 'no_breach' }))).toBe(false);
+  });
+
+  it('returns false for recovery_strategy: none', () => {
+    expect(isNonRepresentableRule(createMockRule({ recovery_strategy: 'none' }))).toBe(false);
+  });
+
+  it('returns false when recovery_strategy is null or undefined', () => {
+    expect(
+      isNonRepresentableRule({
+        ...createMockRule(),
+        recovery_strategy: null,
+      } as unknown as RuleResponse)
+    ).toBe(false);
+    expect(isNonRepresentableRule(createMockRule({ recovery_strategy: undefined }))).toBe(false);
+  });
+
+  it('returns true for an unknown recovery_strategy value', () => {
+    expect(
+      isNonRepresentableRule(
+        createMockRule({
+          recovery_strategy: 'future_strategy' as RuleResponse['recovery_strategy'],
+        })
+      )
+    ).toBe(true);
   });
 
   it('returns true for no_data_strategy: emit (not supported by form dropdown)', () => {

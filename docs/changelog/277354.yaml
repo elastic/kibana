@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/277354
+issues:
+- https://github.com/elastic/kibana/issues/193779
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-16
+title: Fix missing additional context for flat dotted fields in threshold rules
+description: Flat dotted keys in source data are now included in alert context for threshold rules.

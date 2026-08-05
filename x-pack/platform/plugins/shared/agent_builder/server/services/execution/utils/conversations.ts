@@ -11,7 +11,7 @@ import { of, forkJoin, switchMap } from 'rxjs';
 import type {
   Conversation,
   ConversationAccessControl,
-  ConversationSource,
+  ConversationOrigin,
   RoundCompleteEvent,
   ConversationAction,
 } from '@kbn/agent-builder-common';
@@ -28,7 +28,7 @@ export const createConversation$ = ({
   title$,
   roundCompletedEvents$,
 }: {
-  conversation: Pick<Conversation, 'id' | 'agent_id' | 'access_control' | 'source'>;
+  conversation: Pick<Conversation, 'id' | 'agent_id' | 'access_control' | 'origin'>;
   conversationClient: ConversationClient;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
@@ -43,7 +43,7 @@ export const createConversation$ = ({
         title,
         agent_id: conversation.agent_id,
         access_control: conversation.access_control,
-        source: conversation.source,
+        origin: conversation.origin,
         state: roundCompletedEvent.data.conversation_state,
         status: roundCompletedEvent.data.round.status,
         read: false,
@@ -68,46 +68,41 @@ export const createConversation$ = ({
 export const updateConversation$ = ({
   conversationClient,
   conversation,
-  title$,
   roundCompletedEvents$,
   action,
 }: {
   conversation: Conversation;
-  title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
   conversationClient: ConversationClient;
   action?: ConversationAction;
 }) => {
-  return forkJoin({
-    title: title$,
-    roundCompletedEvent: roundCompletedEvents$,
-  }).pipe(
-    switchMap(({ title, roundCompletedEvent }) => {
+  return roundCompletedEvents$.pipe(
+    switchMap((roundCompletedEvent) => {
       const { round, resumed = false, conversation_state } = roundCompletedEvent.data;
-      // Replace last round when resumed (HITL flow), regenerate action is requested
-      const shouldReplaceLastRound = resumed || action === 'regenerate';
-      const updatedRound = shouldReplaceLastRound
-        ? [...conversation.rounds.slice(0, -1), round]
-        : [...conversation.rounds, round];
 
-      // Only set workspace_id if it's new (once set it should not change).
-      const newWorkspaceId =
-        roundCompletedEvent.data.workspace_id && !conversation.workspace_id
-          ? roundCompletedEvent.data.workspace_id
+      // A resumed round keeps the pending round's id, so it is matched by id.
+      // Regenerate mints a new id, so it has to name the round it supersedes —
+      // an identity rather than stale data, so the snapshot is safe to read here.
+      const replacesRoundId =
+        action === 'regenerate' && !resumed
+          ? conversation.rounds[conversation.rounds.length - 1]?.id
           : undefined;
 
-      return conversationClient.update(
+      return conversationClient.upsertRound(
         {
           id: conversation.id,
-          title,
-          rounds: updatedRound,
+          round,
+          replacesRoundId,
           state: conversation_state,
-          status: round.status,
-          read: false,
-          ...(roundCompletedEvent.data.attachments !== undefined
-            ? { attachments: roundCompletedEvent.data.attachments }
+          ...(roundCompletedEvent.data.attachments
+            ? {
+                attachments: {
+                  snapshot: conversation.attachments ?? [],
+                  produced: roundCompletedEvent.data.attachments,
+                },
+              }
             : {}),
-          ...(newWorkspaceId ? { workspace_id: newWorkspaceId } : {}),
+          workspaceId: roundCompletedEvent.data.workspace_id,
         },
         { access: 'converse' }
       );
@@ -118,27 +113,14 @@ export const updateConversation$ = ({
   );
 };
 
-/**
- * Check if a conversation exists
- */
-export const conversationExists = async ({
-  conversationId,
-  conversationClient,
-}: {
-  conversationId: string;
-  conversationClient: ConversationClient;
-}): Promise<boolean> => {
-  return conversationClient.exists(conversationId);
-};
-
 export type ConversationOperation = 'CREATE' | 'UPDATE';
 
 export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
 
 /**
  * Resolves the conversation to update, or returns a placeholder for one to create.
- * conversationId takes precedence over source. When no conversationId is provided,
- * source is used to find an existing conversation before creating a new placeholder.
+ * conversationId takes precedence over origin. When no conversationId is provided,
+ * origin is used to find an existing conversation before creating a new placeholder.
  * autoCreateConversationWithId only applies when conversationId is provided: missing
  * conversations are created with that ID when enabled, and rejected by get() otherwise.
  * Note: Validation and manipulation for regenerate is handled in runDefaultAgentMode.
@@ -149,18 +131,18 @@ export const getConversation = async ({
   autoCreateConversationWithId = false,
   conversationClient,
   accessControl,
-  source,
+  origin,
 }: {
   agentId: string;
   conversationId: string | undefined;
   autoCreateConversationWithId?: boolean;
   conversationClient: ConversationClient;
   accessControl?: ConversationAccessControl;
-  source?: ConversationSource;
+  origin?: ConversationOrigin;
 }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
-    const conversation = source ? await conversationClient.getBySource(source) : undefined;
+    const conversation = origin ? await conversationClient.getByOrigin(origin) : undefined;
 
     if (conversation) {
       return {
@@ -170,7 +152,7 @@ export const getConversation = async ({
     }
 
     return {
-      ...placeholderConversation({ agentId, accessControl, source }),
+      ...placeholderConversation({ agentId, accessControl, origin }),
       operation: 'CREATE',
     };
   }
@@ -184,7 +166,8 @@ export const getConversation = async ({
   }
 
   // Case 3: Conversation ID specified and autoCreate is true - check if exists
-  const exists = await conversationExists({ conversationId, conversationClient });
+  const exists = await conversationClient.exists(conversationId);
+
   if (exists) {
     return {
       ...(await conversationClient.get(conversationId)),
@@ -192,7 +175,7 @@ export const getConversation = async ({
     };
   } else {
     return {
-      ...placeholderConversation({ conversationId, agentId, accessControl, source }),
+      ...placeholderConversation({ conversationId, agentId, accessControl, origin }),
       operation: 'CREATE',
     };
   }
@@ -202,12 +185,12 @@ export const placeholderConversation = ({
   agentId,
   conversationId,
   accessControl,
-  source,
+  origin,
 }: {
   agentId: string;
   conversationId?: string;
   accessControl?: ConversationAccessControl;
-  source?: ConversationSource;
+  origin?: ConversationOrigin;
 }): Conversation => {
   return {
     id: conversationId ?? uuidv4(),
@@ -215,7 +198,7 @@ export const placeholderConversation = ({
     agent_id: agentId,
     access_control: accessControl ?? getDefaultConversationAccessControl(),
     rounds: [],
-    ...(source ? { source } : {}),
+    ...(origin ? { origin } : {}),
     updated_at: new Date().toISOString(),
     created_at: new Date().toISOString(),
     user: {

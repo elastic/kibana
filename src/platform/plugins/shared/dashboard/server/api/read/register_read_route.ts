@@ -8,14 +8,14 @@
  */
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { schema } from '@kbn/config-schema';
+import { logRequest } from '@kbn/as-code-utils';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { z } from '@kbn/zod';
 import { once } from 'lodash';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
-import { logRequest } from '../log_request';
 import { read } from './read';
 import { getReadResponseBodySchema } from './schemas';
 import { getUseGASchemas } from '../get_use_ga_schemas';
@@ -50,13 +50,13 @@ export function registerReadRoute(
       },
       validate: () => ({
         request: {
-          params: schema.object({
-            id: schema.string({
-              meta: {
+          params: z
+            .object({
+              id: z.string().meta({
                 description: 'The dashboard ID, as returned by the create or search endpoints.',
-              },
-            }),
-          }),
+              }),
+            })
+            .strict(),
         },
         response: {
           200: {
@@ -79,7 +79,7 @@ export function registerReadRoute(
       }),
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
           const { core } = await ctx.resolve(['core']);
           const useGASchemas = await getUseGASchemas(core);

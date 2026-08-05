@@ -11,11 +11,25 @@ import {
   TEMPLATE_DEFINITION_EMPTY,
   INVALID_YAML_NON_OBJECT,
   INVALID_YAML_DEFINITION,
+  TEMPLATE_MISSING_REQUIRED_KEYS,
 } from '../translations';
+import { REQUIRED_TEMPLATE_ROOT_KEYS } from '../constants';
+import { normalizeTemplateCaseDefaultsForValidation } from './normalize_template_case_defaults';
 
 export type TemplateDefinitionValidationResult =
   | { success: true }
   | { success: false; message: string };
+
+/**
+ * Editor-only completeness check: the YAML must always contain the case-default keys plus the
+ * `fields` block (the shared REQUIRED_TEMPLATE_ROOT_KEYS), so the YAML stays a complete
+ * representation of the render panel's YAML-backed sections. Removing any of them surfaces here as
+ * an error. This is intentionally NOT enforced by the runtime schema, which stays lenient for
+ * back-compat. `settings`/`connector` are excluded — they are panel-owned and must never gate the
+ * preview (see REQUIRED_TEMPLATE_ROOT_KEYS).
+ */
+export const getMissingRequiredKeys = (definition: Record<string, unknown>): string[] =>
+  REQUIRED_TEMPLATE_ROOT_KEYS.filter((key) => !(key in definition));
 
 export const validateTemplateDefinitionYaml = (
   definition: string
@@ -31,9 +45,15 @@ export const validateTemplateDefinitionYaml = (
       return { success: false, message: INVALID_YAML_NON_OBJECT };
     }
 
-    const result = ParsedTemplateDefinitionSchema.safeParse(parsedDefinition);
+    const normalizedDefinition = normalizeTemplateCaseDefaultsForValidation(parsedDefinition);
+    const result = ParsedTemplateDefinitionSchema.safeParse(normalizedDefinition);
     if (!result.success) {
       return { success: false, message: result.error.message };
+    }
+
+    const missingKeys = getMissingRequiredKeys(normalizedDefinition as Record<string, unknown>);
+    if (missingKeys.length > 0) {
+      return { success: false, message: TEMPLATE_MISSING_REQUIRED_KEYS(missingKeys) };
     }
 
     return { success: true };

@@ -9,6 +9,7 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -21,8 +22,13 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useOverviewDisplayOptions } from './use_overview_display_options';
+import {
+  INCLUDE_HEARTBEAT_MONITORS_DEFAULT,
+  useIncludeHeartbeatMonitors,
+} from './use_include_heartbeat_monitors';
 
 /**
  * Compact, popover-based "display options" surface for the overview list.
@@ -33,14 +39,24 @@ import { useOverviewDisplayOptions } from './use_overview_display_options';
  */
 export const DisplayOptionsPopover: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
 
   const { options, setOption } = useOverviewDisplayOptions();
+  const { checked: includeHeartbeatMonitors, setChecked: setIncludeHeartbeatMonitors } =
+    useIncludeHeartbeatMonitors();
 
   const onToggleAbsoluteTimestamps = useCallback(
     (e: EuiSwitchEvent) => {
       setOption('absoluteTimestamps', e.target.checked);
     },
     [setOption]
+  );
+
+  const onToggleIncludeHeartbeatMonitors = useCallback(
+    (e: EuiSwitchEvent) => {
+      setIncludeHeartbeatMonitors(e.target.checked);
+    },
+    [setIncludeHeartbeatMonitors]
   );
 
   const button = (
@@ -51,6 +67,7 @@ export const DisplayOptionsPopover: React.FC = () => {
         aria-label={ARIA_LABEL}
         onClick={() => setIsOpen((prev) => !prev)}
         display={isOpen ? 'fill' : 'base'}
+        size="s"
         color="text"
       />
     </EuiToolTip>
@@ -59,14 +76,17 @@ export const DisplayOptionsPopover: React.FC = () => {
   return (
     <EuiPopover
       id="syntheticsOverviewDisplayOptions"
+      aria-labelledby={popoverTitleId}
       button={button}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
       anchorPosition="downRight"
       panelPaddingSize="m"
     >
-      <EuiPopoverTitle paddingSize="s">{POPOVER_TITLE}</EuiPopoverTitle>
-      <div css={{ minWidth: 280 }}>
+      <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
+        {POPOVER_TITLE}
+      </EuiPopoverTitle>
+      <div css={{ minWidth: 280, maxWidth: 320 }}>
         <EuiTitle size="xxxs">
           <h4>{DISPLAY_HEADING}</h4>
         </EuiTitle>
@@ -85,6 +105,27 @@ export const DisplayOptionsPopover: React.FC = () => {
 
         <EuiHorizontalRule margin="m" />
 
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              compressed
+              data-test-subj="syntheticsShowHeartbeatMonitorsToggle"
+              checked={includeHeartbeatMonitors}
+              onChange={onToggleIncludeHeartbeatMonitors}
+              label={<EuiText size="xs">{SHOW_HEARTBEAT_MONITORS_LABEL}</EuiText>}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="accent">{NEW_BADGE_LABEL}</EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="xs" />
+        <EuiText size="xs" color="subdued">
+          {SHOW_HEARTBEAT_MONITORS_HINT}
+        </EuiText>
+
+        <EuiHorizontalRule margin="m" />
+
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
@@ -92,6 +133,7 @@ export const DisplayOptionsPopover: React.FC = () => {
               data-test-subj="syntheticsDisplayOptionsResetButton"
               onClick={() => {
                 setOption('absoluteTimestamps', false);
+                setIncludeHeartbeatMonitors(INCLUDE_HEARTBEAT_MONITORS_DEFAULT);
               }}
             >
               {RESET_LABEL}
@@ -126,6 +168,23 @@ const ABSOLUTE_TIMESTAMPS_HINT = i18n.translate(
     defaultMessage: 'Show full date and time instead of relative values like "5m ago".',
   }
 );
+
+const SHOW_HEARTBEAT_MONITORS_LABEL = i18n.translate(
+  'xpack.synthetics.overview.displayOptions.showHeartbeatMonitorsLabel',
+  { defaultMessage: 'Show autodiscovered monitors' }
+);
+
+const SHOW_HEARTBEAT_MONITORS_HINT = i18n.translate(
+  'xpack.synthetics.overview.displayOptions.showHeartbeatMonitorsHint',
+  {
+    defaultMessage:
+      'Include read-only Heartbeat and Elastic Agent monitors (e.g. Kubernetes/Docker autodiscovery) that have no saved configuration in this app.',
+  }
+);
+
+const NEW_BADGE_LABEL = i18n.translate('xpack.synthetics.overview.displayOptions.newBadgeLabel', {
+  defaultMessage: 'New',
+});
 
 const RESET_LABEL = i18n.translate('xpack.synthetics.overview.displayOptions.resetLabel', {
   defaultMessage: 'Reset to defaults',

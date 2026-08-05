@@ -92,10 +92,6 @@ export const SEVERITY = i18n.translate('xpack.cases.caseTable.severity', {
   defaultMessage: 'Severity',
 });
 
-export const EXTENDED_FIELDS = i18n.translate('xpack.cases.caseTable.extendedFields', {
-  defaultMessage: 'Extended fields',
-});
-
 export const INCIDENT_MANAGEMENT_SYSTEM = i18n.translate('xpack.cases.caseTable.incidentSystem', {
   defaultMessage: 'Incident management system',
 });
@@ -124,6 +120,13 @@ export const ALREADY_ATTACHED = i18n.translate('xpack.cases.caseTable.alreadyAtt
   description:
     'In this context, "Added" is letting the user know that all of their selected alerts were previously added to the case in question, and the "Add to case" button is disabled',
 });
+
+export const ALREADY_ATTACHED_TOOLTIP = i18n.translate(
+  'xpack.cases.caseTable.alreadyAttachedTooltip',
+  {
+    defaultMessage: 'This item is already added to this case',
+  }
+);
 
 export const REQUIRES_UPDATE = i18n.translate('xpack.cases.caseTable.requiresUpdate', {
   defaultMessage: ' requires update',
@@ -242,6 +245,13 @@ export const DRAG_HANDLE = i18n.translate('xpack.cases.allCasesView.columnSelect
   defaultMessage: 'Drag Handle',
 });
 
+export const COLUMN_SELECTION_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.cases.allCasesView.columnSelectionPopoverAriaLabel',
+  {
+    defaultMessage: 'Column visibility options',
+  }
+);
+
 export const EMPTY_FILTER_MESSAGE = i18n.translate(
   'xpack.cases.tableFilters.useFilters.emptyMessage',
   {
@@ -254,6 +264,13 @@ export const OPTIONS = (totalCount: number) =>
     defaultMessage: '{totalCount, plural, one {# option} other {# options}}',
     values: { totalCount },
   });
+
+export const FILTER_OPTIONS_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.cases.tableFilters.useFilters.filterOptionsPopoverAriaLabel',
+  {
+    defaultMessage: 'Filter options',
+  }
+);
 
 export const MORE_FILTERS_LABEL = i18n.translate('xpack.cases.tableFilters.moreFiltersLabel', {
   defaultMessage: 'More',
@@ -342,3 +359,7 @@ export const CLOSE_CASE_MODAL_REASON_OTHER = i18n.translate(
     defaultMessage: 'Other',
   }
 );
+
+export const TABLE_CAPTION = i18n.translate('xpack.cases.caseTable.tableCaption', {
+  defaultMessage: 'Cases',
+});

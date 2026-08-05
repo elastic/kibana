@@ -15,11 +15,17 @@ import * as i18n from './translations';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock/test_providers';
-import { useCreateAttackDiscoverySchedule } from '../logic/use_create_schedule';
+import { useScheduleApi } from '../logic/use_schedule_api';
 
 jest.mock('@kbn/inference-connectors');
-jest.mock('../logic/use_create_schedule');
+jest.mock('../logic/use_schedule_api');
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../data_view_manager/hooks/use_data_view', () => ({
+  useDataView: jest.fn().mockReturnValue({
+    dataView: undefined,
+    status: 'ready',
+  }),
+}));
 jest.mock('react-router-dom', () => ({
   matchPath: jest.fn(),
   useLocation: jest.fn().mockReturnValue({
@@ -40,10 +46,19 @@ const mockConnectors: unknown[] = [
 ];
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseScheduleApi = useScheduleApi as jest.MockedFunction<typeof useScheduleApi>;
+
+const setMockCreateSchedule = ({ mutateAsync }: { mutateAsync: jest.Mock }) => {
+  mockUseScheduleApi.mockReturnValue({
+    isWorkflowsEnabled: false,
+    useCreateSchedule: () =>
+      ({ isLoading: false, mutateAsync } as unknown as ReturnType<
+        ReturnType<typeof useScheduleApi>['useCreateSchedule']
+      >),
+  } as unknown as ReturnType<typeof useScheduleApi>);
+};
 
 const defaultProps = {
-  connectorId: undefined,
-  onConnectorIdSelected: jest.fn(),
   onClose: jest.fn(),
 };
 
@@ -57,13 +72,15 @@ const renderComponent = async () => {
   });
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/220116
-describe.skip('CreateFlyout', () => {
+describe('CreateFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
     mockUseKibana.mockReturnValue({
       services: {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockResolvedValue(false),
+        },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
         },
@@ -85,10 +102,7 @@ describe.skip('CreateFlyout', () => {
       isLoading: false,
       data: mockConnectors,
     });
-    (useCreateAttackDiscoverySchedule as jest.Mock).mockReturnValue({
-      isLoading: false,
-      mutateAsync: jest.fn(),
-    });
+    setMockCreateSchedule({ mutateAsync: jest.fn() });
   });
 
   it('should render the flyout title', async () => {
@@ -165,10 +179,7 @@ describe.skip('CreateFlyout', () => {
       data: [],
     });
     const mutateAsync = jest.fn();
-    (useCreateAttackDiscoverySchedule as jest.Mock).mockReturnValue({
-      isLoading: false,
-      mutateAsync,
-    });
+    setMockCreateSchedule({ mutateAsync });
     await act(async () => {
       render(
         <TestProviders>

@@ -16,6 +16,7 @@ import type {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AppHeaderBadge, AppHeaderBadgeItem } from '../types';
+import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 /**
  * Recursively builds flat EuiContextMenu panels from nested badge menu items.
@@ -75,6 +76,7 @@ export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
   }
 
   const hasItems = 'items' in badge && badge.items !== undefined;
+  const isClickable = hasItems || badge.onClick !== undefined;
 
   const badgeOnClickAriaLabel =
     badge?.onClickAriaLabel ??
@@ -91,12 +93,15 @@ export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
     badge?.onClick?.();
   };
 
+  const interactionProps = isClickable
+    ? { onClick: handleBadgeClick, onClickAriaLabel: badgeOnClickAriaLabel }
+    : {};
+
   const badgeComponent = (
     <EuiBadge
-      onClick={handleBadgeClick}
-      onClickAriaLabel={badgeOnClickAriaLabel}
+      {...interactionProps}
       color={badge?.color ?? 'hollow'}
-      data-test-subj={badge?.['data-test-subj']}
+      data-test-subj={badge?.['data-test-subj'] ?? APP_HEADER_TEST_SUBJECTS.badge}
       css={badgeStyle}
       iconType={hasItems ? 'arrowDown' : undefined}
       iconSide={hasItems ? 'right' : undefined}

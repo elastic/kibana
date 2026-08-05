@@ -9,6 +9,10 @@
 
 import { MAX_MINUTES, RETRIES, PREVENT_SELECTIVE_TESTS_LABEL } from './const';
 import { collectEnvFromLabels, getRequiredEnv } from '#pipeline-utils';
+import {
+  ftrTestChannel,
+  ftrTestChannels,
+} from '#pipeline-utils/ci-stats/pick_test_group_run_order/test_channels';
 
 const VALID_SOLUTIONS = ['observability', 'search', 'security', 'workplaceai', 'vectordb'];
 const VALID_LIMIT_CONFIG_TYPES = ['unit', 'integration', 'functional'];
@@ -52,6 +56,9 @@ export function loadRunOrderConfig() {
     limitConfigType: parseLimitConfigType(),
     limitSolutions: parseLimitSolutions(),
     ftrConfigPatterns: parseCsvEnv('FTR_CONFIG_PATTERNS'),
+    ftrTestChannels: new Set(
+      parseCsvEnv('FTR_TEST_CHANNELS')?.map(ftrTestChannel.fromString) || ftrTestChannels.default
+    ),
 
     functionalMinimumIsolationMin: parseOptionalFloatEnv('FUNCTIONAL_MINIMUM_ISOLATION_MIN'),
 

@@ -17,7 +17,9 @@ import {
   ChatCompletionEventType,
   isChatCompletionChunkEvent,
   MessageRole,
+  InferenceConnectorType,
 } from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { openAIAdapter } from './openai_adapter';
@@ -83,9 +85,19 @@ describe('openAIAdapter', () => {
   };
 
   const logger = loggerMock.create();
+  const connector: InferenceConnector = {
+    type: InferenceConnectorType.OpenAI,
+    name: 'OpenAI connector',
+    connectorId: 'test-connector-id',
+    config: {},
+    capabilities: {},
+    isInferenceEndpoint: false,
+    isPreconfigured: false,
+  };
 
   beforeEach(() => {
     executorMock.invoke.mockReset();
+    executorMock.getConnector.mockReset().mockReturnValue(connector);
     isNativeFunctionCallingSupportedMock.mockReset().mockReturnValue(true);
 
     executorMock.invoke.mockImplementation(async () => {
@@ -106,6 +118,10 @@ describe('openAIAdapter', () => {
     const params = executorMock.invoke.mock.calls[0][0].subActionParams as Record<string, any>;
 
     return { stream: params.stream, body: JSON.parse(params.body) };
+  }
+
+  function getSubActionParams() {
+    return executorMock.invoke.mock.calls[0][0].subActionParams as Record<string, unknown>;
   }
 
   describe('when creating the request', () => {
@@ -149,6 +165,45 @@ describe('openAIAdapter', () => {
           role: 'user',
         },
       ]);
+    });
+
+    it('passes maxContentLength for buffered requests', () => {
+      openAIAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: false,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(getSubActionParams()).toEqual(
+        expect.objectContaining({
+          stream: false,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+      );
+    });
+
+    it('passes maxContentLength for streaming requests', () => {
+      // Streaming responses are still subject to the connector's axios `maxContentLength`
+      // (enforced while the response stream is consumed), so the override must be forwarded
+      // for streaming requests too — otherwise large streamed completions fail at the 1MB default.
+      openAIAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: true,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(getSubActionParams()).toEqual(
+        expect.objectContaining({
+          stream: true,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+      );
     });
 
     it('correctly formats messages with content parts', () => {

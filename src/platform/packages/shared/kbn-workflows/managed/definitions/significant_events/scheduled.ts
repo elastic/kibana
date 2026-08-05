@@ -19,13 +19,15 @@ export const SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID =
 export interface SignificantEventsScheduledDetectionWorkflowTemplateValues
   extends ManagedWorkflowTemplateValues {
   detectionIntervalMinutes: number;
+  detectionBucketIntervalMinutes: number;
+  detectionLookbackMinutes: number;
+  targetCoverageMinutes: number;
 }
 
 export interface SignificantEventsScheduledReviewWorkflowTemplateValues
   extends ManagedWorkflowTemplateValues {
   reviewIntervalMinutes: number;
   discoveryBatchSize: number;
-  triageBatchSize: number;
   maxReviewPasses: number;
 }
 
@@ -34,9 +36,6 @@ const SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT = {
   versionStrategy: 'auto',
   enablement: 'restorable',
 } as const;
-
-const getDetectionLookbackMinutes = (detectionIntervalMinutes: number) =>
-  Math.max(30, detectionIntervalMinutes);
 
 // yamlTemplate values are substituted into the static yaml files above via
 // exact-token replacement, since values (e.g. batch sizes) are needed at
@@ -50,28 +49,37 @@ const renderTemplate = (template: string, values: Record<string, string | number
 
 export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  pluginId: 'significant_events',
-  version: 2,
+  pluginId: 'significantEvents',
+  version: 3,
   billable: false,
-  yamlTemplate: ({ detectionIntervalMinutes }) =>
+  // The change_point agg needs >= 22 buckets, so detectionLookbackMinutes must be an exact
+  // multiple of detectionBucketIntervalMinutes with a quotient in [22, 1000] — the scheduled
+  // discovery settings route validates the pair before installing.
+  yamlTemplate: ({
+    detectionIntervalMinutes,
+    detectionBucketIntervalMinutes,
+    detectionLookbackMinutes,
+    targetCoverageMinutes,
+  }) =>
     renderTemplate(SCHEDULED_DETECTION_YAML, {
       __DETECTION_INTERVAL_MINUTES__: detectionIntervalMinutes,
-      __DETECTION_LOOKBACK_MINUTES__: getDetectionLookbackMinutes(detectionIntervalMinutes),
+      __DETECTION_BUCKET_INTERVAL_MINUTES__: detectionBucketIntervalMinutes,
+      __DETECTION_LOOKBACK_MINUTES__: detectionLookbackMinutes,
+      __TARGET_COVERAGE_MINUTES__: targetCoverageMinutes,
     }),
   management: SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<SignificantEventsScheduledDetectionWorkflowTemplateValues>;
 
 export const SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-  pluginId: 'significant_events',
-  version: 2,
+  pluginId: 'significantEvents',
+  version: 4,
   billable: false,
-  yamlTemplate: ({ reviewIntervalMinutes, discoveryBatchSize, triageBatchSize, maxReviewPasses }) =>
+  yamlTemplate: ({ reviewIntervalMinutes, discoveryBatchSize, maxReviewPasses }) =>
     renderTemplate(SCHEDULED_REVIEW_YAML, {
       __REVIEW_INTERVAL_MINUTES__: reviewIntervalMinutes,
       __MAX_REVIEW_PASSES__: maxReviewPasses,
       __DISCOVERY_BATCH_SIZE__: discoveryBatchSize,
-      __TRIAGE_BATCH_SIZE__: triageBatchSize,
     }),
   management: SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<SignificantEventsScheduledReviewWorkflowTemplateValues>;

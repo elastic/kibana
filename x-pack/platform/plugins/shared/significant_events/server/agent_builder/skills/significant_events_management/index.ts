@@ -10,19 +10,23 @@ import {
   SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID,
   SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID,
   SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID,
+  SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID,
 } from '../../tools/register_tools';
 import description from './description.text';
 import content from './skill.md.text';
 
-export const sigEventsManagementSkill = defineSkillType({
-  id: 'significant-events-management',
+export const SIGNIFICANT_EVENTS_MANAGEMENT_SKILL_ID = 'significant-events-management' as const;
+
+export const significantEventsManagementSkill = defineSkillType({
+  id: SIGNIFICANT_EVENTS_MANAGEMENT_SKILL_ID,
   name: 'significant-events-management',
   basePath: 'skills/platform/streams',
   description,
   content,
   getRegistryTools: () => [
-    SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID,
     SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID,
     SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID,
+    SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID,
+    SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID,
   ],
 });

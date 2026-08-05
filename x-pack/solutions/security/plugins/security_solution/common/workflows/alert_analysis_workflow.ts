@@ -26,6 +26,17 @@ export const ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE =
 export const ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE =
   '/internal/security_solution/alert_analysis_workflow/rules/_update' as const;
 
+// Allowed shape for the workflow tag prefix. The value is interpolated verbatim into Liquid
+// expression strings in the workflow YAML (the dedup gate and tag replacement), so it is
+// constrained to a safe tag-namespace charset: characters like `"`, `{{`, or `|` would produce a
+// malformed expression that silently breaks matching at run time. The leading lookahead also
+// requires at least one letter or number, so a prefix can't be only punctuation (e.g. `.` or `_`),
+// which would make for a meaningless tag namespace.
+export const TAG_PREFIX_MAX_LENGTH = 256;
+export const TAG_PREFIX_PATTERN = /^(?=.*[a-zA-Z0-9])[a-zA-Z0-9._-]+$/;
+export const TAG_PREFIX_VALIDATION_MESSAGE =
+  'Tag prefix may only contain letters, numbers, dots, dashes, and underscores, and must include at least one letter or number';
+
 export const AlertAnalysisWorkflowSettings = z.object({
   autoCloseEnabled: z.boolean(),
   autoCloseConfidenceScoreMinThreshold: z.number().min(0).max(1),
@@ -34,28 +45,38 @@ export const AlertAnalysisWorkflowSettings = z.object({
   // platform default agent) so the workflow step always has a real agent to invoke. Max length
   // matches Agent Builder's `agentIdMaxLength`.
   agentId: z.string().min(1).max(64),
-  // Prefix for the workflow tags written to (and matched on) each analyzed alert. Non-empty so the
-  // dedup gate and tag replacement always have a real namespace to match against.
-  tagPrefix: z.string().min(1).max(256),
+  tagPrefix: z
+    .string()
+    .max(TAG_PREFIX_MAX_LENGTH)
+    .regex(TAG_PREFIX_PATTERN, TAG_PREFIX_VALIDATION_MESSAGE),
 });
 
 export type AlertAnalysisWorkflowSettings = z.infer<typeof AlertAnalysisWorkflowSettings>;
 
-export const AlertAnalysisWorkflowSettingsRequestBody = AlertAnalysisWorkflowSettings.refine(
-  ({ autoCloseConfidenceScoreMinThreshold, autoCloseConfidenceScoreMaxThreshold }) =>
-    autoCloseConfidenceScoreMinThreshold < autoCloseConfidenceScoreMaxThreshold,
-  {
-    message: 'Minimum confidence score must be lower than maximum confidence score',
-    path: ['autoCloseConfidenceScoreMaxThreshold'],
-  }
-);
+// Shared min<max threshold check, applied via `.refine()` by every settings schema (a refined
+// schema can't be `.extend()`-ed, so the server route reuses this predicate rather than the schema).
+export const isThresholdRangeValid = ({
+  autoCloseConfidenceScoreMinThreshold,
+  autoCloseConfidenceScoreMaxThreshold,
+}: Pick<
+  AlertAnalysisWorkflowSettings,
+  'autoCloseConfidenceScoreMinThreshold' | 'autoCloseConfidenceScoreMaxThreshold'
+>): boolean => autoCloseConfidenceScoreMinThreshold < autoCloseConfidenceScoreMaxThreshold;
 
-export type AlertAnalysisWorkflowSettingsRequestBody = z.infer<
-  typeof AlertAnalysisWorkflowSettingsRequestBody
->;
+export const THRESHOLD_RANGE_REFINEMENT: { message: string; path: string[] } = {
+  message: 'Minimum confidence score must be lower than maximum confidence score',
+  path: ['autoCloseConfidenceScoreMaxThreshold'],
+};
+
+// Narrows the rule list (and the counts/selection derived from it) to rules that already run the
+// workflow, rules that don't, or all matching rules. Lets the user do a reverse bulk action (e.g.
+// filter to `attached` then detach) without hand-picking rows out of a large mixed list.
+export const RULE_ATTACHMENT_FILTERS = ['all', 'attached', 'not_attached'] as const;
+export type RuleAttachmentFilter = (typeof RULE_ATTACHMENT_FILTERS)[number];
 
 export const AlertAnalysisWorkflowRuleAttachmentListRequestQuery = z.object({
   search: z.string().max(1000).optional().default(''),
+  attachment_filter: z.enum(RULE_ATTACHMENT_FILTERS).optional().default('all'),
   page: z.coerce.number().int().min(1).optional().default(1),
   per_page: z.coerce.number().int().min(1).max(100).optional().default(20),
 });
@@ -66,6 +87,7 @@ export type AlertAnalysisWorkflowRuleAttachmentListRequestQuery = z.infer<
 
 export const AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery = z.object({
   search: z.string().max(1000).optional().default(''),
+  attachment_filter: z.enum(RULE_ATTACHMENT_FILTERS).optional().default('all'),
 });
 
 export type AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery = z.infer<
@@ -95,6 +117,7 @@ export type AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody = z.infer<
 
 export interface RuleAttachmentQuery {
   search: string;
+  attachmentFilter: RuleAttachmentFilter;
 }
 
 export interface AlertAnalysisWorkflowRuleAttachmentService {

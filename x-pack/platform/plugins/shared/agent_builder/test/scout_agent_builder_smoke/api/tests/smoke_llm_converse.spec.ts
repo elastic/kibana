@@ -24,7 +24,11 @@ const EIS_CCM_API_KEY_ENV = 'KIBANA_EIS_CCM_API_KEY';
 
 const eisCcmKeyMissingReason = `${EIS_CCM_API_KEY_ENV} not set. For local dev: export ${EIS_CCM_API_KEY_ENV}="$(vault read -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"`;
 
-const EXCLUDED_STATIC_CONNECTOR_IDS = new Set<string>(['bedrock-claude-sonnet-3-7']);
+const EXCLUDED_STATIC_CONNECTOR_IDS = new Set<string>([
+  'bedrock-claude-sonnet-3-7',
+  // TODO: re-enable once the AWS accessKey in the ai-infra-ci-connectors vault entry is rotated. Currently returns 403
+  'bedrock-claude-sonnet-4-5',
+]);
 
 const safeGetAvailableConnectors = (): AvailableConnectorWithId[] => {
   try {

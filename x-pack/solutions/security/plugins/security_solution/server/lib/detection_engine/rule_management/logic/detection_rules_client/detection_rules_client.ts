@@ -8,6 +8,7 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { AnalyticsServiceSetup, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ILicense } from '@kbn/licensing-types';
@@ -64,6 +65,7 @@ import {
 interface DetectionRulesClientParams {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
+  userProfile: UserProfileServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
   mlAuthz: MlAuthz;
   rulesAuthz: DetectionRulesAuthz;
@@ -76,6 +78,7 @@ interface DetectionRulesClientParams {
 export const createDetectionRulesClient = ({
   actionsClient,
   rulesClient,
+  userProfile,
   mlAuthz,
   rulesAuthz,
   savedObjectsClient,
@@ -268,7 +271,7 @@ export const createDetectionRulesClient = ({
 
     async getHistoryForRule(args: GetHistoryForRuleArgs) {
       return withSecuritySpan('DetectionRulesClient.getHistoryForRule', async () => {
-        return getHistoryForRule({ rulesClient, ...args });
+        return getHistoryForRule({ rulesClient, userProfileService: userProfile, logger, ...args });
       });
     },
 

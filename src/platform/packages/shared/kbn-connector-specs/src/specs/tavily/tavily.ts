@@ -41,6 +41,7 @@ export const TavilyConnector: ConnectorSpec = {
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
+    docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/tavily-action-type`,
   },
 
   auth: {

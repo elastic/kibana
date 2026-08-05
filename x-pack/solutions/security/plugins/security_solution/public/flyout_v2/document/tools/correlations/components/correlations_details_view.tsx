@@ -22,6 +22,7 @@ import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { RelatedAttacks } from './related_attacks';
+import { isRulePreviewDocument } from '../../../../shared/utils/is_rule_preview_document';
 
 export interface CorrelationsDetailsViewProps {
   /**
@@ -33,21 +34,16 @@ export interface CorrelationsDetailsViewProps {
    */
   scopeId: string;
   /**
-   * Whether the document is being displayed in a rule preview
-   */
-  isRulePreview: boolean;
-  /**
    * Callback to open an alert preview when clicking the preview button in the correlations table
    */
-  onShowAlert: (id: string, indexName: string) => void;
+  onShowAlert: (id: string, indexName: string, title?: string) => void;
   /**
    * Callback to open an attack preview when clicking the expand button in the related attacks table.
    * When not provided, the expand button column is hidden.
-   * // TODO make required once we have an attack flyout in the new flyout system
    */
-  onShowAttack?: (id: string, indexName: string) => void;
+  onShowAttack?: (id: string, indexName: string, title?: string) => void;
   /**
-   * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of OpenFlyoutLink (new flyout system)
+   * Whether to render rule links as PreviewLink instead of OpenFlyoutLink
    */
   useLegacyExpandableFlyout: boolean;
 }
@@ -60,11 +56,11 @@ export const CorrelationsDetailsView = memo(
   ({
     hit,
     scopeId,
-    isRulePreview,
     onShowAlert,
     onShowAttack,
     useLegacyExpandableFlyout,
   }: CorrelationsDetailsViewProps) => {
+    const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
     const eventId = hit.raw._id ?? '';
     const ecsData = useMemo<Ecs>(
       () => ({
@@ -77,7 +73,6 @@ export const CorrelationsDetailsView = memo(
 
     const { show: showAlertsByAncestry, ancestryDocumentId } = useShowRelatedAlertsByAncestry({
       hit,
-      isRulePreview,
     });
     const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
       hit,

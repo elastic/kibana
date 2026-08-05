@@ -16,6 +16,7 @@ import {
   deleteWatchlistTool,
   entityRiskScoreTool,
   getEntityTool,
+  getEntityGraphTool,
   listWatchlistsTool,
   removeEntitiesFromWatchlistTool,
   searchEntitiesTool,
@@ -37,6 +38,8 @@ import type {
   SecuritySolutionPluginCoreSetupDependencies,
   SetupPlugins,
 } from '../../plugin_contract';
+import type { ProductFeaturesService } from '../../lib/product_features_service';
+import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 
 /**
  * Registers all security agent builder tools with the agentBuilder plugin.
@@ -50,6 +53,7 @@ export const registerTools = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
   experimentalFeatures: ExperimentalFeatures,
+  productFeaturesService: ProductFeaturesService,
   ml: SetupPlugins['ml'],
   rulePreviewDeps: RunRulePreviewDeps,
   isServerless: boolean = false,
@@ -62,6 +66,9 @@ export const registerTools = (
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(alertsTool(core, logger));
   agentBuilder.tools.register(getEntityTool(core, logger, ml, experimentalFeatures));
+  agentBuilder.tools.register(
+    getEntityGraphTool(core, logger, experimentalFeatures, productFeaturesService)
+  );
   agentBuilder.tools.register(addEntitiesToWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(createWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(
@@ -93,5 +100,7 @@ export const registerTools = (
     agentBuilder.tools.register(pciFieldMapperTool(core, logger));
   }
 
-  registerSiemReadinessTools(agentBuilder, core, logger, isServerless);
+  if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {
+    registerSiemReadinessTools(agentBuilder, core, logger, isServerless);
+  }
 };

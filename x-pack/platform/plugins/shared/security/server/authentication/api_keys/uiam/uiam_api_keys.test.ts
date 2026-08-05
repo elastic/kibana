@@ -44,6 +44,7 @@ describe('UiamAPIKeys', () => {
     mockUiam = {
       getAuthenticationHeaders: jest.fn(),
       getClientAuthentication: jest.fn(),
+      getInternalCallerAttestationHeaders: jest.fn(),
       refreshSessionTokens: jest.fn(),
       invalidateSessionTokens: jest.fn(),
       grantApiKey: jest.fn(),
@@ -54,9 +55,12 @@ describe('UiamAPIKeys', () => {
       listOAuthClients: jest.fn(),
       updateOAuthClient: jest.fn(),
       revokeOAuthClient: jest.fn(),
+      deleteOAuthClient: jest.fn(),
       listOAuthConnections: jest.fn(),
       updateOAuthConnection: jest.fn(),
       revokeOAuthConnection: jest.fn(),
+      deleteOAuthConnection: jest.fn(),
+      resolveUsers: jest.fn(),
     };
 
     uiamApiKeys = new UiamAPIKeys({

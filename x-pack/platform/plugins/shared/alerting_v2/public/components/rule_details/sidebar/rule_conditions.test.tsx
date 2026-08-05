@@ -28,7 +28,7 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Signal Rule' },
+  metadata: { name: 'Test Signal Rule', version: 1 },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: {
@@ -45,7 +45,7 @@ const alertRule: RuleApiResponse = {
   ...baseRule,
   id: 'rule-2',
   kind: 'alert',
-  metadata: { name: 'Test Alert Rule' },
+  metadata: { name: 'Test Alert Rule', version: 1 },
   recovery_strategy: 'query',
   query: {
     format: 'standalone',
@@ -139,7 +139,7 @@ describe('RuleConditions', () => {
     );
   });
 
-  it('renders Default recovery with a dash for the condition row when recovery_strategy is absent', () => {
+  it('renders a dash for recovery and the condition row when recovery_strategy is absent', () => {
     renderConditions({
       ...alertRule,
       recovery_strategy: undefined,
@@ -148,7 +148,20 @@ describe('RuleConditions', () => {
         breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
       },
     });
-    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('Default');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('-');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).toHaveTextContent('-');
+  });
+
+  it('renders No recovery with a dash for the condition row when recovery_strategy is none', () => {
+    renderConditions({
+      ...alertRule,
+      recovery_strategy: 'none',
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+      },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsRecovery')).toHaveTextContent('No recovery');
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryCondition')).toHaveTextContent('-');
   });
 
@@ -282,6 +295,25 @@ describe('RuleConditions', () => {
       expect(screen.getByTestId('alertingV2RuleDetailsSchedule')).toHaveTextContent('Every 5m');
       expect(screen.getByTestId('alertingV2RuleDetailsLookback')).toHaveTextContent('10m');
       expect(screen.getByTestId('alertingV2RuleDetailsMode')).toHaveTextContent('Alert');
+    });
+  });
+
+  describe('description', () => {
+    it('renders description text before the ES|QL heading when it exists', () => {
+      const ruleWithDesc = {
+        ...baseRule,
+        metadata: { ...baseRule.metadata, name: 'Test Signal Rule', description: 'My rule desc' },
+      };
+      renderConditions(ruleWithDesc);
+      const desc = screen.getByTestId('ruleConditionsDescription');
+      expect(desc).toHaveTextContent('My rule desc');
+      const query = screen.getByTestId('alertingV2RuleDetailsBaseQuery');
+      expect(desc.compareDocumentPosition(query)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    it('does not render description when it is absent', () => {
+      renderConditions(baseRule);
+      expect(screen.queryByTestId('ruleConditionsDescription')).not.toBeInTheDocument();
     });
   });
 

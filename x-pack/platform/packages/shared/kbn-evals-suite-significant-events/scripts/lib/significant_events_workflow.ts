@@ -11,13 +11,14 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { Discovery, Feature } from '@kbn/significant-events-schema';
+import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import {
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
 import { withTempSuperuser } from './user_utils';
@@ -37,7 +38,6 @@ import {
   FEATURES_TEMP_INDEX_PATTERN,
   DISCOVERIES_TEMP_INDEX_PATTERN,
   DETECTIONS_TEMP_INDEX_PATTERN,
-  DISCOVERIES_DATA_STREAM,
   DETECTIONS_DATA_STREAM,
   EVENTS_DATA_STREAM,
   KNOWLEDGE_INDICATORS_TEMP_INDEX_PATTERN,
@@ -74,22 +74,24 @@ export async function enableSignificantEvents(
   log: ToolingLog
 ): Promise<void> {
   log.info('Enabling significant events...');
-  const { status, data } = await kibanaRequest(
-    config,
-    'POST',
-    '/api/kibana/settings/observability:streamsEnableSignificantEvents',
-    { value: true }
-  );
+  const { status, data } = await kibanaRequest(config, 'PUT', '/internal/core/_settings', {
+    'feature_flags.overrides': {
+      [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
+    },
+  });
 
   if (status >= 200 && status < 300) {
     log.info('Significant events enabled');
     return;
   }
 
-  // If the setting is overridden in kibana.yml, skip and return
-  const message = (data as Record<string, unknown>)?.message;
-  if (status === 400 && typeof message === 'string' && message.includes('overridden')) {
-    log.info('Significant events setting is overridden in kibana.yml — skipping');
+  // The dynamic config override route is only registered when coreApp.allowDynamicConfigOverrides is
+  // enabled. When it isn't (e.g. a cloud deployment), the availability flag has to come from
+  // kibana.yml instead, so treat a missing route as already-handled and skip.
+  if (status === 404) {
+    log.info(
+      'Dynamic config overrides are disabled — set the significant events availability flag via kibana.yml; skipping'
+    );
     return;
   }
 
@@ -297,17 +299,17 @@ export async function persistDiscoveriesForSnapshot(
   log: ToolingLog,
   snapshotName: string
 ): Promise<{ index: string; count: number }> {
-  const discoveries = await fetchAllPaginated<Discovery>(
+  const discoveries = await fetchAllPaginated<SignificantEvent>(
     config,
-    '/internal/significant_events/discoveries',
-    'discoveries'
+    '/internal/significant_events/events?status=pending',
+    'events'
   );
   return persistDocsForSnapshot(
     esClient,
     log,
     getSnapshotDiscoveriesIndex(snapshotName),
     discoveries as unknown as Array<Record<string, unknown>>,
-    'discovery_id',
+    'event_uuid',
     'discovery(s)'
   );
 }
@@ -318,7 +320,6 @@ export async function cleanupExtractedData(esClient: Client, log: ToolingLog): P
   const dataStreamTargets = [
     'logs*',
     KNOWLEDGE_INDICATORS_DATA_STREAM,
-    DISCOVERIES_DATA_STREAM,
     DETECTIONS_DATA_STREAM,
     EVENTS_DATA_STREAM,
   ];

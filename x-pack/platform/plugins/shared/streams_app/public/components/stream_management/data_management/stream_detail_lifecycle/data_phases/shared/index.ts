@@ -14,8 +14,6 @@ export { useDataPhasesFlyoutStyles } from './use_data_phases_flyout_styles';
 export { useBlurCommitDraft } from './use_blur_commit_draft';
 export { syncSelectedPhase } from './sync_selected_phase';
 export type { SyncSelectedPhaseResult } from './sync_selected_phase';
-export { getTimingBoundHelpText, getIntervalBoundHelpText } from './get_bound_help_text';
-export type { HelpTextBound, BoundNeighbor } from './get_bound_help_text';
 export { PhaseTabsRow } from './phase_tabs_row';
 export type { PhaseTabsRowProps } from './phase_tabs_row';
 

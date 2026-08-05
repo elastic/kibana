@@ -10,12 +10,15 @@ import { MissingDependencyError } from '../../lib/errors/missing_dependency_erro
 import {
   assertSignificantEventsAccess,
   getSignificantEventsAvailability,
+  isSignificantEventsAvailable,
 } from './assert_significant_events_access';
 
 interface ContextOverrides {
+  featureFlagAvailable?: boolean;
+  /** The serverless project type. Omit for a classic deployment, which has none. */
+  projectType?: string;
   tierAvailable?: boolean;
   hasEnterpriseLicense?: boolean;
-  uiSettingEnabled?: boolean;
   workflowsExtensionsPlugin?: boolean;
   workflowsManagementPlugin?: boolean;
   inferencePlugin?: boolean;
@@ -24,9 +27,10 @@ interface ContextOverrides {
 
 const buildArgs = (overrides: ContextOverrides = {}) => {
   const {
+    featureFlagAvailable = true,
+    projectType,
     tierAvailable = true,
     hasEnterpriseLicense = true,
-    uiSettingEnabled = true,
     workflowsExtensionsPlugin = true,
     workflowsManagementPlugin = true,
     inferencePlugin = true,
@@ -35,8 +39,10 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
 
   const server = {
     core: {
+      featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(featureFlagAvailable) },
       pricing: { isFeatureAvailable: jest.fn().mockReturnValue(tierAvailable) },
     },
+    cloud: projectType && { isServerlessEnabled: true, serverless: { projectType } },
     workflowsExtensions: workflowsExtensionsPlugin ? {} : undefined,
     workflowsManagement: workflowsManagementPlugin ? {} : undefined,
     searchInferenceEndpoints: inferencePlugin ? {} : undefined,
@@ -49,18 +55,47 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
       .mockResolvedValue({ hasAtLeast: jest.fn().mockReturnValue(hasEnterpriseLicense) }),
   };
 
-  const uiSettingsClient = { get: jest.fn().mockResolvedValue(uiSettingEnabled) };
-
   return {
     server,
     licensing,
-    uiSettingsClient,
   } as unknown as Parameters<typeof assertSignificantEventsAccess>[0];
 };
 
 describe('assertSignificantEventsAccess', () => {
   it('resolves when all requirements are met', async () => {
     await expect(assertSignificantEventsAccess(buildArgs())).resolves.toBeUndefined();
+  });
+
+  it('throws a FeatureNotEnabledError (403) when the feature flag is disabled', async () => {
+    await expect(
+      assertSignificantEventsAccess(buildArgs({ featureFlagAvailable: false }))
+    ).rejects.toBeInstanceOf(FeatureNotEnabledError);
+  });
+
+  it('fails closed (denies access) when the feature flag read rejects', async () => {
+    const args = buildArgs();
+    const { getBooleanValue } = (
+      args as unknown as {
+        server: { core: { featureFlags: { getBooleanValue: jest.Mock } } };
+      }
+    ).server.core.featureFlags;
+    getBooleanValue.mockRejectedValue(new Error('feature flag provider unavailable'));
+
+    await expect(assertSignificantEventsAccess(args)).rejects.toThrow(
+      'feature flag provider unavailable'
+    );
+  });
+
+  it('throws a FeatureNotEnabledError (403) in a non-Observability serverless project', async () => {
+    await expect(
+      assertSignificantEventsAccess(buildArgs({ projectType: 'security' }))
+    ).rejects.toBeInstanceOf(FeatureNotEnabledError);
+  });
+
+  it('resolves in an Observability serverless project', async () => {
+    await expect(
+      assertSignificantEventsAccess(buildArgs({ projectType: 'observability' }))
+    ).resolves.toBeUndefined();
   });
 
   it('throws a FeatureNotEnabledError (403) when the pricing tier is unavailable', async () => {
@@ -72,12 +107,6 @@ describe('assertSignificantEventsAccess', () => {
   it('throws a FeatureNotEnabledError (403) when the license is insufficient', async () => {
     await expect(
       assertSignificantEventsAccess(buildArgs({ hasEnterpriseLicense: false }))
-    ).rejects.toBeInstanceOf(FeatureNotEnabledError);
-  });
-
-  it('throws a FeatureNotEnabledError (403) when the UI setting is disabled', async () => {
-    await expect(
-      assertSignificantEventsAccess(buildArgs({ uiSettingEnabled: false }))
     ).rejects.toBeInstanceOf(FeatureNotEnabledError);
   });
 
@@ -119,11 +148,43 @@ describe('getSignificantEventsAvailability', () => {
     ).resolves.toEqual({ available: false, reason: 'searchInferenceEndpoints' });
   });
 
+  it('returns the feature_flag reason when the flag is off', async () => {
+    await expect(
+      getSignificantEventsAvailability(buildArgs({ featureFlagAvailable: false }))
+    ).resolves.toEqual({ available: false, reason: 'feature_flag' });
+  });
+
+  it('returns feature_flag first as the outermost gate (before pricing_tier)', async () => {
+    await expect(
+      getSignificantEventsAvailability(
+        buildArgs({ featureFlagAvailable: false, tierAvailable: false })
+      )
+    ).resolves.toEqual({ available: false, reason: 'feature_flag' });
+  });
+
   it('returns the first unmet reason in registry order (tier before license)', async () => {
     await expect(
       getSignificantEventsAvailability(
         buildArgs({ tierAvailable: false, hasEnterpriseLicense: false })
       )
     ).resolves.toEqual({ available: false, reason: 'pricing_tier' });
+  });
+
+  it('returns project_type before pricing_tier, which cannot express it on its own', async () => {
+    await expect(
+      getSignificantEventsAvailability(buildArgs({ projectType: 'search', tierAvailable: false }))
+    ).resolves.toEqual({ available: false, reason: 'project_type' });
+  });
+});
+
+describe('isSignificantEventsAvailable', () => {
+  it('is true when every requirement is met', async () => {
+    await expect(isSignificantEventsAvailable(buildArgs())).resolves.toBe(true);
+  });
+
+  it('is false when a requirement is unmet', async () => {
+    await expect(
+      isSignificantEventsAvailable(buildArgs({ projectType: 'security' }))
+    ).resolves.toBe(false);
   });
 });

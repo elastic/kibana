@@ -6,7 +6,7 @@
  */
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
-import { internalToPublicDefinition, resolveSkill } from './utils';
+import { internalToPublicDefinition, internalToPublicSummary, resolveSkill } from './utils';
 
 describe('internalToPublicDefinition', () => {
   const createMockInternalSkill = (
@@ -112,6 +112,20 @@ describe('internalToPublicDefinition', () => {
     expect(result).not.toHaveProperty('basePath');
     expect(result).not.toHaveProperty('getInlineTools');
     expect(result).not.toHaveProperty('getRegistryTools');
+  });
+
+  it('maps excludeFromElasticCapabilities to the public field', async () => {
+    const skill = createMockInternalSkill({ excludeFromElasticCapabilities: true });
+    const result = await internalToPublicDefinition(skill);
+
+    expect(result.exclude_from_elastic_capabilities).toBe(true);
+  });
+
+  it('maps excludeFromElasticCapabilities in the public summary', async () => {
+    const skill = createMockInternalSkill({ excludeFromElasticCapabilities: true });
+    const result = await internalToPublicSummary(skill);
+
+    expect(result.exclude_from_elastic_capabilities).toBe(true);
   });
 });
 

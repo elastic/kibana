@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { captureBodyRt } from './capture_body_rt';
-import { isRight } from 'fp-ts/Either';
+import { expectParseError, expectParseSuccess } from '@kbn/zod-helpers/v4';
+import { captureBodySchema } from './capture_body_rt';
 
-describe('captureBodyRt', () => {
+describe('captureBodySchema', () => {
   describe('it should not accept', () => {
     [undefined, null, '', 0, 'foo', true, false].map((input) => {
       it(`${JSON.stringify(input)}`, () => {
-        expect(isRight(captureBodyRt.decode(input))).toBe(false);
+        expectParseError(captureBodySchema.safeParse(input));
       });
     });
   });
@@ -20,7 +20,7 @@ describe('captureBodyRt', () => {
   describe('it should accept', () => {
     ['off', 'errors', 'transactions', 'all'].map((input) => {
       it(`${JSON.stringify(input)}`, () => {
-        expect(isRight(captureBodyRt.decode(input))).toBe(true);
+        expectParseSuccess(captureBodySchema.safeParse(input));
       });
     });
   });

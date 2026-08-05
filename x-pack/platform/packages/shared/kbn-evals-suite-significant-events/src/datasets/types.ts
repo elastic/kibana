@@ -7,7 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EvaluationCriterionStructured } from '@kbn/evals';
-import type { Detection, Discovery } from '@kbn/significant-events-schema';
+import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../data_generators/replay';
 import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction';
 
@@ -94,38 +94,22 @@ export interface DiscoveryScenario {
     scenario_id: string;
     stream_name: string;
     detections: Array<Partial<Detection>>;
-    continuation_candidates?: Array<Discovery>;
   };
   /** Ordered ground-truth continuation chains by `rule_name`, keyed by continuation path label. */
   continuationChains?: Record<string, string[]>;
   output: {
     criteria: SamplingCriterion[];
     expected_min_evidence_count?: number;
-    /** Human-readable summary of expected output for quick orientation (e.g. `discoveries=[cascade, benign-auth]`). */
+    /** Human-readable summary of expected output for quick orientation. */
     expected_ground_truth?: string;
+    /** Expected confirmed rule UUIDs keyed by event ID. */
+    expected_confirmed_rule_uuids?: Record<string, string[]>;
     /**
-     * The discoveries the analyst is expected to produce — same shape as the judge's
-     * `input.discoveries` (detections + evidences + cause_kis). This is the canonical ground
-     * truth: the grouping check derives its expected groups from these `detections[].rule_name`s,
-     * and the same discoveries feed the judge scenario's input so the two stages stay consistent.
+     * The significant events the agent is expected to generate — signals + causal_features +
+     * blast_radius + status. The grouping check derives its expected groups from these events'
+     * `signals[].metadata.rule_uuid`s.
      */
-    expected_discoveries: Array<Partial<Discovery>>;
-  };
-  metadata: Record<string, unknown> & ScenarioMetadata;
-  snapshot_source?: SnapshotSourceOverride;
-}
-
-export interface DiscoveryJudgeScenario {
-  id?: string;
-  input: {
-    scenario_id: string;
-    discoveries: Array<Partial<Discovery>>;
-  };
-  output: {
-    criteria: SamplingCriterion[];
-    /** Human-readable summary of expected outcome for each discovery, e.g. `slug=promoted (reason); slug=demoted (reason)`. Used by the status-correctness evaluator. */
-    expected_ground_truth: string;
-    expect_assessment_note?: boolean;
+    expected_significant_events: Array<Partial<SignificantEvent>>;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
   snapshot_source?: SnapshotSourceOverride;
@@ -140,5 +124,4 @@ export interface DatasetConfig {
   kiFeatureExclusion: KIFeatureExclusionScenario[];
   kiFeatureDeduplication: KIFeatureDeduplicationScenario[];
   discovery: DiscoveryScenario[];
-  discoveryJudge: DiscoveryJudgeScenario[];
 }

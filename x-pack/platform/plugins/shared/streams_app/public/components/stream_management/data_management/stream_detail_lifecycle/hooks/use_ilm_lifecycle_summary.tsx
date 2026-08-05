@@ -448,6 +448,17 @@ export const useIlmLifecycleSummary = ({
   const handleFlyoutSave = async (nextPhases: IlmPolicyPhases) => {
     if (!isIlm) return;
 
+    // Applying with no configuration changes must not prompt the "save as new policy"
+    // confirmation modal — just close the flyout. `editFlyoutCanonicalInitialPhases` is the
+    // form round-tripped baseline, so it is directly comparable to the flyout's `onSave` output.
+    if (
+      uiState.editFlyoutCanonicalInitialPhases &&
+      isEqual(nextPhases, uiState.editFlyoutCanonicalInitialPhases)
+    ) {
+      closeEditFlyout();
+      return;
+    }
+
     try {
       await fetchPolicies();
       if (!currentPolicy.current) {

@@ -17,14 +17,8 @@ apiTest.describe(
   'Onboarding bulk status API',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    apiTest.beforeAll(async ({ apiServices }) => {
-      await apiServices.streams.enable();
-      await apiServices.significantEventsTest.enableSignificantEvents();
-    });
-
-    apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.significantEventsTest.disableSignificantEvents();
-    });
+    // Streams + availability are owned by global.setup.ts / global.teardown.ts for the whole run.
+    // Per-test enable/disable below is intentional for the 403 denial path only.
 
     apiTest(
       'returns not_started for every requested stream that has never been onboarded',

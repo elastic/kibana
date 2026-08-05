@@ -16,7 +16,6 @@ import { buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils
 import { extractTextFromMessage } from '../utils/extract_text_from_message';
 import { generateVisualizationEsql } from '../shared/generate_visualization_esql';
 import { normalizeVegaSpec } from './normalize_spec';
-import { validateVegaSpec } from './vega_validator';
 import { createAuthorVegaSpecPrompt, vegaEsqlAdditionalInstructions } from './prompts';
 import { buildReferenceExamplesBlock } from './reference_examples';
 import {
@@ -60,14 +59,43 @@ const RENDERABLE_VIEW_KEYS = [
 const hasRenderableView = (spec: Record<string, unknown>): boolean =>
   RENDERABLE_VIEW_KEYS.some((key) => key in spec);
 
-const parseSpecFromResponse = (responseText: string): Record<string, unknown> => {
+/** Parse the model response into its authoring note, optional title, and Vega-Lite spec. */
+const parseAuthoringResponse = (
+  responseText: string
+): { spec: Record<string, unknown>; title?: string; authoringNote?: string } => {
   const jsonMatches = Array.from(responseText.matchAll(INLINE_JSON_REGEX));
   const jsonText = jsonMatches.length > 0 ? jsonMatches[0][1].trim() : responseText.trim();
   const parsed = JSON.parse(jsonText);
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
     throw new Error('Response is not a valid JSON object');
   }
-  return parsed as Record<string, unknown>;
+
+  const record = parsed as Record<string, unknown>;
+  const { authoring_note: rawAuthoringNote, ...specWithoutNote } = record;
+  const authoringNote = typeof rawAuthoringNote === 'string' ? rawAuthoringNote.trim() : '';
+  const nestedSpec = record.spec;
+  const isEnvelope =
+    nestedSpec !== null &&
+    typeof nestedSpec === 'object' &&
+    !Array.isArray(nestedSpec) &&
+    !hasRenderableView(record);
+
+  if (isEnvelope) {
+    const title = typeof record.title === 'string' ? record.title.trim() || undefined : undefined;
+    return {
+      spec: nestedSpec as Record<string, unknown>,
+      ...(title ? { title } : {}),
+      ...(authoringNote ? { authoringNote } : {}),
+    };
+  }
+
+  if (!hasRenderableView(record)) {
+    throw new Error(
+      'Response must be { "title"?: string, "authoring_note"?: string, "spec": <Vega-Lite> } or a Vega-Lite object with a mark/composite view'
+    );
+  }
+
+  return { spec: specWithoutNote, ...(authoringNote ? { authoringNote } : {}) };
 };
 
 const VegaStateAnnotation = Annotation.Root({
@@ -89,6 +117,8 @@ const VegaStateAnnotation = Annotation.Root({
   }),
   // outputs
   spec: Annotation<string | null>(),
+  title: Annotation<string | null>(),
+  authoringNote: Annotation<string | null>(),
   error: Annotation<string | null>(),
 });
 
@@ -219,8 +249,7 @@ export const createVegaGraph = async (
     const attempt = state.currentAttempt + 1;
     logger.debug(`Authoring Vega-Lite spec (attempt ${attempt}/${MAX_RETRY_ATTEMPTS})`);
 
-    // Feed back authoring and structural-check failures so the next attempt can
-    // fix them, not just malformed JSON.
+    // Feed back authoring and structural-check failures so the next attempt can fix them.
     const previousContext = state.actions
       .filter((action) => isAuthorSpecAction(action) || isValidateSpecAction(action))
       .map((action) => {
@@ -229,12 +258,17 @@ export const createVegaGraph = async (
             ? undefined
             : `Authoring attempt ${action.attempt} failed: ${action.error}`;
         }
-        return action.success
-          ? undefined
-          : `Validation attempt ${action.attempt} failed: ${action.error}`;
+        if (!action.success) {
+          return `Validation attempt ${action.attempt} failed: ${action.error}`;
+        }
+        return undefined;
       })
       .filter(Boolean)
       .join('\n');
+
+    const additionalContext = previousContext
+      ? `Previous attempts:\n${previousContext}\n\nPlease fix the errors above and return a single valid JSON object matching the response schema ("title", "authoring_note", and "spec").`
+      : undefined;
 
     const prompt = createAuthorVegaSpecPrompt({
       nlQuery: state.nlQuery,
@@ -243,16 +277,16 @@ export const createVegaGraph = async (
       existingSpec: state.existingSpec,
       chartType: state.chartType,
       referenceExamples: state.referenceExamples,
-      additionalContext: previousContext
-        ? `Previous attempts:\n${previousContext}\n\nReturn a single valid JSON object that fixes the issues above.`
-        : undefined,
+      additionalContext,
     });
 
     let action: AuthorSpecAction;
     try {
       const response = await defaultModel.chatModel.invoke(prompt);
-      const spec = parseSpecFromResponse(extractTextFromMessage(response));
-      action = { type: 'author_spec', success: true, spec, attempt };
+      const { spec, title, authoringNote } = parseAuthoringResponse(
+        extractTextFromMessage(response)
+      );
+      action = { type: 'author_spec', success: true, spec, title, authoringNote, attempt };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       logger.warn(
@@ -261,7 +295,10 @@ export const createVegaGraph = async (
       action = { type: 'author_spec', success: false, attempt, error: message };
     }
 
-    return { currentAttempt: attempt, actions: [action] };
+    return {
+      currentAttempt: attempt,
+      actions: [action],
+    };
   };
 
   // Structurally check the authored spec (it must declare a renderable view),
@@ -290,26 +327,13 @@ export const createVegaGraph = async (
         columns: state.columns,
       });
 
-      // Compile (Vega-Lite -> Vega) and headless-render the normalized spec to
-      // catch compile/render errors a structural check cannot. A render error
-      // fails validation so authoring retries with the message as feedback;
-      // infra failures/timeouts fail open (no error) so they never block.
-      const { error: renderError, warnings } = await validateVegaSpec({
-        spec: normalized,
-        logger,
-      });
-      if (renderError) {
-        throw new Error(renderError);
-      }
-      if (warnings.length > 0) {
-        logger.debug(`Vega spec validated with warnings: ${warnings.join('; ')}`);
-      }
-
       action = {
         type: 'validate_spec',
         success: true,
         // Pretty-print so the stored/displayed spec stays human-readable.
         spec: JSON.stringify(normalized, null, 2),
+        title: lastAuthor.title,
+        authoringNote: lastAuthor.authoringNote,
         attempt,
       };
     } catch (error) {
@@ -322,15 +346,23 @@ export const createVegaGraph = async (
   };
 
   const finalizeNode = async (state: VegaState) => {
-    // Use the most recent spec that passed the structural check + normalization.
-    const lastRendered = [...state.actions]
+    // Specs that passed the structural check + normalization, most recent first.
+    const rendered = [...state.actions]
       .reverse()
-      .find((action) => isValidateSpecAction(action) && action.success && !!action.spec) as
-      | ValidateSpecAction
-      | undefined;
+      .filter(
+        (action): action is ValidateSpecAction =>
+          isValidateSpecAction(action) && action.success && !!action.spec
+      );
 
-    if (lastRendered?.spec) {
-      return { spec: lastRendered.spec, error: null };
+    const chosen = rendered[0];
+
+    if (chosen?.spec) {
+      return {
+        spec: chosen.spec,
+        title: chosen.title ?? null,
+        authoringNote: chosen.authoringNote ?? null,
+        error: null,
+      };
     }
 
     // Surface an ES|QL resolution failure (an unexecutable query that was never
@@ -339,6 +371,8 @@ export const createVegaGraph = async (
     if (lastGenerate && !lastGenerate.success) {
       return {
         spec: null,
+        title: null,
+        authoringNote: null,
         error: `Could not resolve a valid ES|QL query for the visualization: ${
           lastGenerate.error ?? 'Unknown error'
         }`,
@@ -348,6 +382,8 @@ export const createVegaGraph = async (
     const lastValidate = [...state.actions].reverse().find(isValidateSpecAction);
     return {
       spec: null,
+      title: null,
+      authoringNote: null,
       error: lastValidate?.error ?? 'Failed to author a valid Vega specification',
     };
   };
@@ -360,17 +396,14 @@ export const createVegaGraph = async (
       logger.warn('ES|QL resolution failed; finalizing without authoring a Vega spec');
       return FINALIZE_NODE;
     }
-    return SELECT_EXAMPLES_NODE;
+    return AUTHOR_SPEC_NODE;
   };
 
   const shouldRetryRouter = (state: VegaState): string => {
     const lastValidate = [...state.actions].reverse().find(isValidateSpecAction);
 
-    // Retry authoring when the spec failed the structural check or normalization,
-    // bounded by the attempt budget.
-    const needsRepair = !lastValidate?.success;
-
-    if (!needsRepair) {
+    // Retry authoring when the spec failed the structural check, bounded by the budget.
+    if (lastValidate?.success) {
       return FINALIZE_NODE;
     }
 
@@ -389,11 +422,11 @@ export const createVegaGraph = async (
     .addNode(VALIDATE_SPEC_NODE, validateSpecNode)
     .addNode(FINALIZE_NODE, finalizeNode)
     .addEdge('__start__', GENERATE_ESQL_NODE)
+    .addEdge('__start__', SELECT_EXAMPLES_NODE)
     .addConditionalEdges(GENERATE_ESQL_NODE, afterGenerateEsqlRouter, {
-      [SELECT_EXAMPLES_NODE]: SELECT_EXAMPLES_NODE,
+      [AUTHOR_SPEC_NODE]: AUTHOR_SPEC_NODE,
       [FINALIZE_NODE]: FINALIZE_NODE,
     })
-    .addEdge(SELECT_EXAMPLES_NODE, AUTHOR_SPEC_NODE)
     .addEdge(AUTHOR_SPEC_NODE, VALIDATE_SPEC_NODE)
     .addConditionalEdges(VALIDATE_SPEC_NODE, shouldRetryRouter, {
       [AUTHOR_SPEC_NODE]: AUTHOR_SPEC_NODE,

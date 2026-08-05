@@ -7,7 +7,7 @@
 
 import { encode } from '@kbn/rison';
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import type { PanelViewAndParameters, ResolverUIState } from '../../types';
 import { panelViewAndParameters as panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID } from '../panel_view_and_parameters';
 import { parameterName } from '../parameter_name';

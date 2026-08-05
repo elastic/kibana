@@ -922,6 +922,49 @@ describe('QueryBarTopRowTopRow', () => {
       });
     });
   });
+
+  describe('auto-refresh-only mode (new picker)', () => {
+    const renderAutoRefreshOnly = (onRefreshChange: jest.Mock) =>
+      render(
+        wrapQueryBarTopRowInContext({
+          isDirty: false,
+          timeHistory: mockTimeHistory,
+          showDatePicker: false,
+          showAutoRefreshOnly: true,
+          isRefreshPaused: true,
+          refreshInterval: 5000,
+          onRefreshChange,
+        })
+      );
+
+    beforeEach(() => {
+      useNewDateRangePickerFlag = true;
+    });
+
+    it('renders the picker readOnly with an operable play/pause button even when refresh starts paused', async () => {
+      renderAutoRefreshOnly(jest.fn());
+
+      await waitFor(() => {
+        // Time filter is off: hidden marker present, control inert.
+        expect(screen.getByTestId('kbnQueryBar-datePicker-disabled')).toBeInTheDocument();
+        expect(screen.getByTestId('dateRangePickerControlButton')).toBeDisabled();
+        // Auto-refresh stays operable despite the paused-on-load state.
+        expect(screen.getByTestId('dateRangePickerAutoRefreshButton')).toBeEnabled();
+      });
+    });
+
+    it('starts the refresh timer when the play button is clicked', async () => {
+      const onRefreshChange = jest.fn();
+      renderAutoRefreshOnly(onRefreshChange);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('dateRangePickerAutoRefreshButton')).toBeEnabled();
+      });
+      await userEvent.click(screen.getByTestId('dateRangePickerAutoRefreshButton'));
+
+      expect(onRefreshChange).toHaveBeenCalledWith({ isPaused: false, refreshInterval: 5000 });
+    });
+  });
 });
 
 describe('SharingMetaFields', () => {

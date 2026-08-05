@@ -60,7 +60,7 @@ apiTest.describe(
       readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
       readerHeaders = { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader };
 
-      await apiServices.alertingV2.alertActions.cleanUp();
+      await apiServices.alertingV2.alertActionsEvents.cleanUp();
       await apiServices.alertingV2.ruleEvents.cleanUp();
       await apiServices.alertingV2.rules.cleanUp();
       await apiServices.alertingV2.actionPolicies.cleanUp();
@@ -73,7 +73,7 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.alertActions.cleanUp();
+      await apiServices.alertingV2.alertActionsEvents.cleanUp();
       await apiServices.alertingV2.ruleEvents.cleanUp();
       await apiServices.alertingV2.rules.cleanUp();
       await apiServices.alertingV2.actionPolicies.cleanUp();
@@ -106,11 +106,11 @@ apiTest.describe(
           buildSeedEvent(RULE_ID_DELETED),
         ]);
 
-        await apiServices.alertingV2.alertActions.waitForAtLeast(1, {
+        await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(1, {
           ruleId: RULE_ID_KEPT,
           actionTypes: ['fire'],
         });
-        await apiServices.alertingV2.alertActions.waitForAtLeast(1, {
+        await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(1, {
           ruleId: RULE_ID_DELETED,
           actionTypes: ['fire'],
         });
@@ -118,7 +118,7 @@ apiTest.describe(
         await apiServices.alertingV2.rules.delete(RULE_ID_DELETED);
 
         const seenBothIds = async (): Promise<boolean> => {
-          const response = await apiClient.get(getListExecutionHistoryUrl({ perPage: 100 }), {
+          const response = await apiClient.get(getListExecutionHistoryUrl({ per_page: 100 }), {
             headers: readerHeaders,
           });
           const ids = new Set(
@@ -133,7 +133,7 @@ apiTest.describe(
           .poll(seenBothIds, { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] })
           .toBe(true);
 
-        const response = await apiClient.get(getListExecutionHistoryUrl({ perPage: 100 }), {
+        const response = await apiClient.get(getListExecutionHistoryUrl({ per_page: 100 }), {
           headers: readerHeaders,
         });
         expect(response).toHaveStatusCode(200);

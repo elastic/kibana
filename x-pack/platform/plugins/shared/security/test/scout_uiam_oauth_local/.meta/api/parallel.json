@@ -1,9 +1,27 @@
 {
-  "sha1": "3e5900783a2147584431a8d739077a4a2468dc5e",
+  "sha1": "774165739bf554ab6df8ecf24cef7fa860e3f6e0",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
-      "id": "f6d065371af5227-8e2fb993048f286",
-      "title": "[NON-MKI] UIAM OAuth client CRUD via Kibana proxy creates, reads, lists, patches (incl. redirect_uris), and revokes a client",
+      "id": "861db30738bf803-bafc6760325a526",
+      "title": "[NON-MKI] MCP OAuth authorization_code flow via SDK StreamableHTTPClientTransport should complete full MCP handshake via SAML-backed authorization_code flow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_client_credentials_mcp.spec.ts",
+        "line": 37,
+        "column": 12
+      }
+    },
+    {
+      "id": "f6d065371af5227-6880a7ca3362288",
+      "title": "[NON-MKI] UIAM OAuth client CRUD via Kibana proxy creates, reads, lists, patches (incl. redirect_uris), and deletes a client",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
@@ -11,7 +29,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_clients_crud.spec.ts",
-        "line": 53,
+        "line": 44,
         "column": 12
       }
     },
@@ -25,7 +43,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_clients_crud.spec.ts",
-        "line": 139,
+        "line": 144,
         "column": 12
       }
     },

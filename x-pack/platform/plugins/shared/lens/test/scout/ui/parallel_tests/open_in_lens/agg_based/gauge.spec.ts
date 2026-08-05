@@ -12,39 +12,23 @@ import {
   testData,
   canConvertToLensByTitle,
   convertToLensByTitle,
-  enableElasticChartDebug,
-  getChartDebugData,
-  getImportedDashboardId,
+  createOpenInLensSuiteSetup,
 } from '../../../fixtures';
 
-spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.stateful.classic }, () => {
-  let gaugeDashboardId: string;
-
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    const imported = await scoutSpace.savedObjects.load(
-      testData.KBN_ARCHIVES.OPEN_IN_LENS_AGG_BASED.GAUGE
-    );
-    gaugeDashboardId = getImportedDashboardId(imported, testData.OPEN_IN_LENS_DASHBOARDS.GAUGE);
-
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
-    await scoutSpace.uiSettings.set({
-      'dateFormat:tz': 'UTC',
-      'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
-    });
+spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deploymentAgnostic }, () => {
+  const openInLensSuite = createOpenInLensSuiteSetup({
+    archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.GAUGE,
+    dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.GAUGE,
+    enableChartDebug: true,
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, context, pageObjects }) => {
-    await enableElasticChartDebug(context);
-    await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.openDashboardWithIdInEditMode(gaugeDashboardId);
-  });
+  spaceTest.beforeAll(openInLensSuite.beforeAll);
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.beforeEach(openInLensSuite.beforeEach);
 
-  spaceTest('should convert to Lens', async ({ page, pageObjects }) => {
+  spaceTest.afterAll(openInLensSuite.afterAll);
+
+  spaceTest('should convert to Lens', async ({ pageObjects }) => {
     const { dashboard, lens } = pageObjects;
 
     await convertToLensByTitle({ dashboard }, 'Gauge - Basic');
@@ -55,13 +39,13 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.stateful
     const dimensions = await lens.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Count');
 
-    const { bullet } = await getChartDebugData(page, 'gaugeChart');
+    const { bullet } = await lens.getCurrentChartDebugState('gaugeChart');
     const debugData = bullet?.rows[0][0];
     expect(debugData?.title).toBe('Count');
-    expect(Math.round(debugData?.value ?? 0)).toBe(14005);
+    expect(Math.round(debugData?.value ?? 0)).toBe(14004);
   });
 
-  spaceTest('should convert aggregation with params', async ({ page, pageObjects }) => {
+  spaceTest('should convert aggregation with params', async ({ pageObjects }) => {
     const { dashboard, lens } = pageObjects;
 
     await convertToLensByTitle({ dashboard }, 'Gauge - Agg with params');
@@ -74,7 +58,7 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.stateful
     await expect(dimensions[1]).toHaveText('Static value: 0');
     await expect(dimensions[2]).toHaveText('Static value: 100');
 
-    const { bullet } = await getChartDebugData(page, 'gaugeChart');
+    const { bullet } = await lens.getCurrentChartDebugState('gaugeChart');
     const debugData = bullet?.rows[0][0];
     expect(debugData?.subtype).toBe(BulletSubtype.twoThirdsCircle);
     expect(debugData?.title).toBe('Average machine.ram');
@@ -92,7 +76,7 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.stateful
     }
   );
 
-  spaceTest('should convert color ranges', async ({ page, pageObjects }) => {
+  spaceTest('should convert color ranges', async ({ pageObjects }) => {
     const { dashboard, lens } = pageObjects;
 
     await convertToLensByTitle({ dashboard }, 'Gauge - Color ranges');
@@ -105,7 +89,7 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.stateful
     await expect(dimensions[1]).toHaveText('Static value: 0');
     await expect(dimensions[2]).toHaveText('Static value: 15000000000');
 
-    const { bullet } = await getChartDebugData(page, 'gaugeChart');
+    const { bullet } = await lens.getCurrentChartDebugState('gaugeChart');
     const debugData = bullet?.rows[0][0];
     expect(debugData?.subtype).toBe(BulletSubtype.twoThirdsCircle);
     expect(debugData?.title).toBe('Average machine.ram');
@@ -113,7 +97,7 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.stateful
     expect(debugData?.domain).toStrictEqual([0, 15000000000]);
 
     await dimensions[0].click();
-    await lens.openPalettePanel();
+    await lens.openPalettePanelFlyout();
     const colorStops = await lens.getPaletteColorStops();
     expect(colorStops).toStrictEqual([
       { stop: '0', color: 'rgba(0, 104, 55, 1)' },

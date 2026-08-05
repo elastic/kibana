@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useContext, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { EventStats } from '../../../common/endpoint/types';
 import { useColors } from './use_colors';
 import { useLinkProps } from './use_link_props';

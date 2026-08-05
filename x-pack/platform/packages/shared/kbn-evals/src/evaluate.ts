@@ -6,6 +6,7 @@
  */
 
 import { hostname as osHostname } from 'os';
+import { execFileSync } from 'child_process';
 import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inference-common';
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
@@ -43,20 +44,7 @@ import type {
   EvaluationSpecificWorkerFixtures,
   Example,
 } from './types';
-
-function isElasticCloudEsUrl(esUrl: string): boolean {
-  try {
-    const withProtocol = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(esUrl) ? esUrl : `https://${esUrl}`;
-    const hostname = new URL(withProtocol).hostname.replace(/\.$/, '').toLowerCase();
-    return (
-      hostname === 'elastic-cloud.com' ||
-      hostname.endsWith('.elastic-cloud.com') ||
-      hostname.endsWith('elastic.cloud')
-    );
-  } catch {
-    return false;
-  }
-}
+import { isElasticCloudEsUrl } from './utils/es_url';
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -304,6 +292,13 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const evaluatorModel = buildModelFromConnector(evaluationConnector);
       const suiteId = process.env.EVAL_SUITE_ID;
       const buildkiteMetadata = getBuildkiteCiMetadataFromEnv();
+      // Optional space assignment for offline runs. Comma-separated so a run can
+      // target several spaces; omitted means the target Kibana's default space.
+      const spaceIds = process.env.EVAL_SPACE_ID
+        ? process.env.EVAL_SPACE_ID.split(',')
+            .map((id) => id.trim())
+            .filter(Boolean)
+        : undefined;
 
       const executionId = buildExecutionId({
         baseExecutionId: process.env.TEST_RUN_ID,
@@ -325,6 +320,8 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           await evalsClient.upsertDataset({
             name: dataset.name,
             description: dataset.description,
+            tags: dataset.tags,
+            maturity: dataset.maturity,
             examples: dataset.examples.map(toDatasetRouteExample),
           });
         },
@@ -343,6 +340,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
               suiteId,
               executionId,
               buildkiteMetadata,
+              spaceIds,
               source: { kind: 'event', event },
               log,
             });
@@ -379,6 +377,31 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             taskModelId: model.id,
             suiteId,
           });
+        }
+      }
+
+      // Publish the full composite execution ID to Buildkite metadata so the
+      // post-comparison step can retrieve it without querying the experiments API.
+      // Per-connector key (kbn-evals:execution-id:<suite>:<connector>) is the primary
+      // path for multi-model fanout builds; the per-suite key is a fallback for single
+      // runs where EVAL_PROJECT is not set.
+      if (executionId && suiteId && process.env.BUILDKITE_BUILD_ID) {
+        const connectorId = process.env.EVAL_PROJECT;
+        try {
+          if (connectorId) {
+            execFileSync(
+              'buildkite-agent',
+              ['meta-data', 'set', `kbn-evals:execution-id:${suiteId}:${connectorId}`, executionId],
+              { stdio: 'ignore' }
+            );
+          }
+          execFileSync(
+            'buildkite-agent',
+            ['meta-data', 'set', `kbn-evals:execution-id:${suiteId}`, executionId],
+            { stdio: 'ignore' }
+          );
+        } catch {
+          // Not running inside Buildkite; skip silently.
         }
       }
     },

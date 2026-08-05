@@ -9,23 +9,23 @@
 
 import { once } from 'lodash';
 
+import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG } from '@kbn/as-code-shared-schemas';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { logRequest } from '@kbn/as-code-utils';
+import { z, ZodError, prettifyError } from '@kbn/zod';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { schema, ValidationError } from '@kbn/config-schema';
-import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG } from '@kbn/as-code-shared-schemas';
 
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
-import { logRequest } from '../log_request';
 import {
   legacySearchRequestParamsSchema,
   legacySearchResponseBodySchema,
-  searchRequestParamsSchema,
   searchResponseBodySchema,
 } from './schemas';
 import { search } from './search';
-import { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export function registerSearchRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -57,14 +57,14 @@ export function registerSearchRoute(
       },
       validate: {
         request: {
-          query: schema.oneOf([searchRequestParamsSchema, legacySearchRequestParamsSchema]),
+          query: asCodeSearchRequestSchema,
         },
         response: {
           400: {
             description: 'bad request',
           },
           200: {
-            body: () => schema.oneOf([searchResponseBodySchema, legacySearchResponseBodySchema]),
+            body: () => z.union([searchResponseBodySchema, legacySearchResponseBodySchema]),
             description: 'success',
           },
           403: {
@@ -77,7 +77,7 @@ export function registerSearchRoute(
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
           const {
             core: { featureFlags },
@@ -89,8 +89,8 @@ export function registerSearchRoute(
             true
           );
           const searchParams = useAsCodeSearchSchemas
-            ? searchRequestParamsSchema.validate(req.query)
-            : legacySearchRequestParamsSchema.validate(req.query);
+            ? asCodeSearchRequestSchema.parse(req.query)
+            : legacySearchRequestParamsSchema.parse(req.query);
 
           const result = await search(
             ctx,
@@ -101,9 +101,10 @@ export function registerSearchRoute(
 
           return res.ok({ body: result });
         } catch (e) {
-          if (e instanceof ValidationError) {
-            logRequest(logger, req, 'warn', e.message);
-            return res.badRequest({ body: { message: e.message } });
+          if (e instanceof ZodError) {
+            const message = prettifyError(e);
+            logRequest(logger, req, 'warn', message);
+            return res.badRequest({ body: { message } });
           }
 
           if (e.isBoom && e.output.statusCode === 403) {

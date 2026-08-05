@@ -8,7 +8,7 @@
  */
 
 import { getMeta } from '@kbn/as-code-shared-schemas';
-import { tagsToFindOptions } from '@kbn/content-management-utils';
+import { findWithTagFilter } from '@kbn/as-code-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
 
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
@@ -30,31 +30,33 @@ export async function search(
   useAsCodeSearchSchemas: boolean
 ): Promise<DashboardSearchResponseBody | LegacyDashboardSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
-  const normalizeToArray = (value?: string | string[]) => {
-    if (value === undefined) return undefined;
-    return Array.isArray(value) ? value : [value];
-  };
 
-  const includedTags = normalizeToArray(searchParams.tags);
-  const excludedTags = normalizeToArray(searchParams.excluded_tags);
+  // Plain listings get a deterministic newest-first order; search requests keep relevance.
+  const sortOptions = searchParams.query
+    ? {}
+    : { sortField: 'updated_at', sortOrder: 'desc' as const };
 
-  const soResponse = await core.savedObjects.client.find<DashboardSavedObjectAttributes>({
-    type: DASHBOARD_SAVED_OBJECT_TYPE,
-    searchFields: ['title^3', 'description'],
-    fields: [
-      'description',
-      'title',
-      // required fields to load timeRange
-      'timeFrom',
-      'timeTo',
-      'timeRestore',
-    ],
-    search: searchParams.query,
-    perPage: searchParams.per_page,
-    page: searchParams.page,
-    defaultSearchOperator: 'AND',
-    ...tagsToFindOptions({ included: includedTags, excluded: excludedTags }),
-  });
+  const soResponse = await findWithTagFilter<DashboardSavedObjectAttributes>(
+    core.savedObjects.client,
+    {
+      type: DASHBOARD_SAVED_OBJECT_TYPE,
+      searchFields: ['title^3', 'description'],
+      fields: [
+        'description',
+        'title',
+        // required fields to load timeRange
+        'timeFrom',
+        'timeTo',
+        'timeRestore',
+      ],
+      search: searchParams.query,
+      perPage: searchParams.per_page,
+      page: searchParams.page,
+      defaultSearchOperator: 'AND',
+      ...sortOptions,
+    },
+    searchParams
+  );
 
   const useGASchemas = await getUseGASchemas(core);
 

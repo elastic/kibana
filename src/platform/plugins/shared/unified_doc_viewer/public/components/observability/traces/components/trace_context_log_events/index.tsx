@@ -59,6 +59,7 @@ export function TraceContextLogEvents({
   const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
     indexPattern: indexes.logs,
     whereClause: createTraceContextWhereClause({ traceId, spanId, transactionId }),
+    unmappedFieldsPolicy: 'NULLIFY',
   });
 
   const openInDiscoverSectionAction = useOpenInDiscoverSectionAction({

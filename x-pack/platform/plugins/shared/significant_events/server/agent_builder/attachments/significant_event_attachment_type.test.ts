@@ -6,12 +6,11 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { KibanaRequest } from '@kbn/core/server';
 import {
   hashContent,
   type VersionedAttachmentWithOrigin,
 } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../routes/types';
@@ -22,32 +21,23 @@ import {
 
 const event: SignificantEvent = {
   '@timestamp': '2026-01-01T00:00:00.000Z',
-  created_at: '2026-01-01T00:00:00.000Z',
-  event_id: 'event-1',
-  discovery_id: 'discovery-1',
-  discovery_slug: 'payment-outage',
-  status: 'promoted',
+  event_uuid: 'event-1',
+  event_id: 'payment-outage',
+  status: 'open',
   workflow_execution_id: 'workflow-1',
-  rule_names: ['Payment errors'],
   stream_names: ['logs.payment'],
   title: 'Payment outage',
+  symptom_hypothesis: 'Payment gateway timeout.',
   summary: 'Payments are failing.',
-  root_cause: 'Payment gateway timeout.',
-  criticality: 90,
+  severity: '60-high',
   confidence: 0.8,
-  recommendations: ['Restart gateway client'],
 };
-
-const createContext = (): AttachmentResolveContext => ({
-  request: {} as KibanaRequest,
-  spaceId: 'default',
-});
 
 const createGetScopedClients = (
   events: SignificantEvent[]
 ): jest.MockedFunction<GetScopedClients> => {
   const getEventClient = jest.fn(() => ({
-    findByDiscoverySlug: jest.fn().mockResolvedValue({ hits: events }),
+    findByEventId: jest.fn().mockResolvedValue({ hits: events }),
   }));
 
   return jest.fn().mockResolvedValue({
@@ -60,7 +50,7 @@ const createVersionedAttachment = (
 ): VersionedAttachmentWithOrigin<typeof SIGNIFICANT_EVENT_ATTACHMENT_TYPE, SignificantEvent> => ({
   id: 'attachment-1',
   type: SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
-  origin: data.discovery_slug,
+  origin: data.event_id,
   current_version: 1,
   versions: [
     {
@@ -88,26 +78,31 @@ describe('createSignificantEventAttachmentType', () => {
     ).resolves.toEqual(expect.objectContaining({ valid: false }));
   });
 
-  it('resolves the latest event by discovery slug', async () => {
-    const updatedEvent = { ...event, event_id: 'event-2', status: 'acknowledged' as const };
+  it('resolves the latest event by event_id', async () => {
+    const updatedEvent = { ...event, event_uuid: 'event-2', status: 'closed' as const };
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([event, updatedEvent]),
     });
 
-    await expect(type.resolve?.('payment-outage', createContext())).resolves.toEqual(updatedEvent);
+    await expect(
+      type.resolve?.('payment-outage', agentBuilderMocks.attachments.createResolveContextMock())
+    ).resolves.toEqual(updatedEvent);
   });
 
   it('reports stale when the latest event differs from the stored snapshot', async () => {
-    const updatedEvent = { ...event, event_id: 'event-2', status: 'acknowledged' as const };
+    const updatedEvent = { ...event, event_uuid: 'event-2', status: 'closed' as const };
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([updatedEvent]),
     });
 
-    await expect(type.isStale?.(createVersionedAttachment(event), createContext())).resolves.toBe(
-      true
-    );
+    await expect(
+      type.isStale?.(
+        createVersionedAttachment(event),
+        agentBuilderMocks.attachments.createResolveContextMock()
+      )
+    ).resolves.toBe(true);
   });
 
   it('reports stale when the latest event timestamp differs from the stored snapshot', async () => {
@@ -117,9 +112,12 @@ describe('createSignificantEventAttachmentType', () => {
       getScopedClients: createGetScopedClients([updatedEvent]),
     });
 
-    await expect(type.isStale?.(createVersionedAttachment(event), createContext())).resolves.toBe(
-      true
-    );
+    await expect(
+      type.isStale?.(
+        createVersionedAttachment(event),
+        agentBuilderMocks.attachments.createResolveContextMock()
+      )
+    ).resolves.toBe(true);
   });
 
   it('does not report stale when event identity and timestamp match', async () => {
@@ -129,9 +127,12 @@ describe('createSignificantEventAttachmentType', () => {
       getScopedClients: createGetScopedClients([updatedEvent]),
     });
 
-    await expect(type.isStale?.(createVersionedAttachment(event), createContext())).resolves.toBe(
-      false
-    );
+    await expect(
+      type.isStale?.(
+        createVersionedAttachment(event),
+        agentBuilderMocks.attachments.createResolveContextMock()
+      )
+    ).resolves.toBe(false);
   });
 
   it('formats useful LLM text and exposes attachment metadata', async () => {

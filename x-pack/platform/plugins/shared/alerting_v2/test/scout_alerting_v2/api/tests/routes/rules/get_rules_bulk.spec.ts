@@ -123,6 +123,7 @@ apiTest.describe('Bulk get rules API', { tag: '@local-stateful-classic' }, () =>
       });
 
       expect(response).toHaveStatusCode(404);
+      expect(response.body.code).toBe('NOT_FOUND');
     }
   );
 
@@ -135,6 +136,7 @@ apiTest.describe('Bulk get rules API', { tag: '@local-stateful-classic' }, () =>
       });
 
       expect(response).toHaveStatusCode(404);
+      expect(response.body.code).toBe('NOT_FOUND');
     }
   );
 
@@ -144,6 +146,7 @@ apiTest.describe('Bulk get rules API', { tag: '@local-stateful-classic' }, () =>
       body: { ids: [] },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: should reject more than MAX_BULK_ITEMS ids', async ({ apiClient }) => {
@@ -153,6 +156,7 @@ apiTest.describe('Bulk get rules API', { tag: '@local-stateful-classic' }, () =>
       body: { ids },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: should reject ids longer than ID_MAX_LENGTH', async ({ apiClient }) => {
@@ -162,6 +166,7 @@ apiTest.describe('Bulk get rules API', { tag: '@local-stateful-classic' }, () =>
       body: { ids: [tooLongId] },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: should reject an empty body', async ({ apiClient }) => {
@@ -170,6 +175,7 @@ apiTest.describe('Bulk get rules API', { tag: '@local-stateful-classic' }, () =>
       body: {},
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -183,6 +189,7 @@ apiTest.describe('Bulk get rules API', { tag: '@local-stateful-classic' }, () =>
         body: { ids: [rule.id], foo: 'bar' },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
