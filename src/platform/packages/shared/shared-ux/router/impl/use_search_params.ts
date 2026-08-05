@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
 /**
@@ -71,7 +71,8 @@ export const useSearchParams = (
   defaultInit?: URLSearchParamsInit
 ): [URLSearchParams, SetURLSearchParams] => {
   const defaultSearchParamsRef = useRef(createSearchParams(defaultInit));
-  const hasSetSearchParamsRef = useRef(false);
+  // State (not a ref) so clearing defaults re-renders even when search is unchanged.
+  const [hasSetSearchParams, setHasSetSearchParams] = useState(false);
   const history = useHistory();
   const location = useLocation();
 
@@ -79,9 +80,9 @@ export const useSearchParams = (
     () =>
       getSearchParamsForLocation(
         location.search,
-        hasSetSearchParamsRef.current ? null : defaultSearchParamsRef.current
+        hasSetSearchParams ? null : defaultSearchParamsRef.current
       ),
-    [location.search]
+    [hasSetSearchParams, location.search]
   );
 
   const setSearchParams = useCallback<SetURLSearchParams>(
@@ -89,7 +90,7 @@ export const useSearchParams = (
       const newSearchParams = createSearchParams(
         typeof nextInit === 'function' ? nextInit(searchParams) : nextInit
       );
-      hasSetSearchParamsRef.current = true;
+      setHasSetSearchParams(true);
 
       const nextLocation = {
         search: newSearchParams.toString(),
