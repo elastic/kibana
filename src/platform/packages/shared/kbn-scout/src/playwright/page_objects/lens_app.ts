@@ -17,23 +17,27 @@ const WAIT_FOR_FUNCTION_TIMEOUT_MS = 10_000;
 
 export class LensApp {
   readonly lensApp;
-  readonly chartSwitchPopover;
-  readonly chartSwitchList;
   readonly saveAndReturnButton;
   readonly saveButton;
   readonly saveModal;
   readonly savedObjectTitleInput;
   readonly confirmSaveButton;
-  /** Needed by the Lens plugin's `openDimensionEditor` as well as `closeDimensionEditor` here. */
-  readonly closeDimensionEditorButton;
+  /**
+   * Needed by the Lens plugin's `openDimensionEditor` / `secondaryFlyoutBackButton` alias
+   * as well as `closeDimensionEditor` here.
+   */
+  protected readonly closeDimensionEditorButton;
+  readonly applyFlyoutButton;
+  readonly cancelFlyoutButton;
+  protected readonly codeEditor: KibanaCodeEditorWrapper;
+
+  private readonly chartSwitchPopover;
+  private readonly chartSwitchList;
   /**
    * Formula Monaco textarea — Lens has no data-test-subj on the editor input.
    * Note: `lnsFormulaWidget` is the overflow/suggest portal on `document.body`, not the editor.
    */
-  readonly formulaEditorTextarea;
-  readonly applyFlyoutButton;
-  readonly cancelFlyoutButton;
-  protected readonly codeEditor: KibanaCodeEditorWrapper;
+  private readonly formulaEditorTextarea;
 
   constructor(protected readonly page: ScoutPage) {
     this.lensApp = this.page.testSubj.locator('lnsApp');
@@ -79,7 +83,7 @@ export class LensApp {
     await this.chartSwitchList.waitFor({ state: 'hidden' });
   }
 
-  async openChartSwitchPopover() {
+  private async openChartSwitchPopover() {
     await this.chartSwitchPopover.click();
     await this.chartSwitchList.waitFor({ state: 'visible' });
   }
@@ -214,7 +218,7 @@ export class LensApp {
     }
   }
 
-  async openDimensionSelector(dimension: string) {
+  private async openDimensionSelector(dimension: string) {
     await this.page.testSubj.locator(dimension).click();
     await this.closeDimensionEditorButton.waitFor({ state: 'visible' });
   }
@@ -240,7 +244,7 @@ export class LensApp {
     );
   }
 
-  async selectField(field: string) {
+  private async selectField(field: string) {
     await this.page.components.comboBox('indexPattern-dimension-field').setSelectedOptions([field]);
   }
 
@@ -265,7 +269,7 @@ export class LensApp {
   /**
    * Focuses the formula Monaco textarea (avoid `{ force: true }` — suggest portals intercept clicks).
    */
-  async focusFormulaEditor() {
+  private async focusFormulaEditor() {
     await this.formulaEditorTextarea.waitFor({ state: 'attached' });
     await this.formulaEditorTextarea.evaluate((el) => {
       (el as HTMLTextAreaElement).focus();
@@ -276,7 +280,7 @@ export class LensApp {
    * Lens formula uses the last registered Monaco model (not always index 0).
    * Needed by the Lens plugin's `getFormulaText` as well as `typeInFormula` here.
    */
-  async getFormulaModelIndex(): Promise<number> {
+  protected async getFormulaModelIndex(): Promise<number> {
     return this.page.evaluate(() => {
       const monacoEnv = (
         window as unknown as {
@@ -334,7 +338,7 @@ export class LensApp {
       .waitFor({ state: 'hidden' });
   }
 
-  async setPalette(paletteId: string, isLegacy: boolean) {
+  private async setPalette(paletteId: string, isLegacy: boolean) {
     await this.openPalettePanelFlyout();
 
     const paletteModeToggle = this.page.testSubj.locator('lns_colorMappingOrLegacyPalette_switch');
@@ -366,12 +370,12 @@ export class LensApp {
    * Maps a caller-facing field id to its internal field-list `data-attr-field`/test-subj suffix.
    * Needed by the Lens plugin's other drag-and-drop helpers as well as `dragFieldToWorkspace` here.
    */
-  getFieldAttrName(field: string): string {
+  protected getFieldAttrName(field: string): string {
     // The document-count field is stored internally as `___records___`; callers pass `records`.
     return field === 'records' ? '___records___' : field;
   }
 
-  getFieldListPanelFieldLocator(field: string) {
+  protected getFieldListPanelFieldLocator(field: string) {
     const attrField = this.getFieldAttrName(field);
     if (field === 'records') {
       // The document-count field always has type `document`, so the field-grouping hook
@@ -405,7 +409,7 @@ export class LensApp {
     }
   }
 
-  async waitForLensDragDropToFinish() {
+  protected async waitForLensDragDropToFinish() {
     // Lens DnD active-group class has no data-test-subj; matches FTR html5DragAndDrop settle wait.
     await this.page.locator('.domDragDrop-isActiveGroup').waitFor({ state: 'hidden' });
   }
@@ -424,7 +428,7 @@ export class LensApp {
    *
    * Needed by the Lens plugin's other drag-and-drop helpers as well as `dragFieldToWorkspace` here.
    */
-  async html5DragAndDrop(from: string, to: string) {
+  protected async html5DragAndDrop(from: string, to: string) {
     await this.page.evaluate(
       async ([fromChain, toChain]) => {
         interface Transfer {

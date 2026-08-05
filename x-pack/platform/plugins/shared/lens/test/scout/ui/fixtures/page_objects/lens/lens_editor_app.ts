@@ -1560,7 +1560,6 @@ export class LensEditorApp extends LensApp {
   /** Same control as `closeDimensionEditorButton` — kept under this name for flyout-back call sites. */
   readonly secondaryFlyoutBackButton = this.closeDimensionEditorButton;
   readonly inlineEditor = this.page.getByTestId('customizeLens');
-  readonly editInLensButton = this.page.getByTestId('navigateToLensEditorLink');
   readonly discardChangesModal = this.page.testSubj.locator('lnsApp_discardChangesModalOrigin');
   readonly autoApplyToggle = this.page.testSubj.locator('lnsToggleAutoApply');
 
