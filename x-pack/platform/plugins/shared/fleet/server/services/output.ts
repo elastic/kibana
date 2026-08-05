@@ -70,6 +70,7 @@ import {
   kafkaCompressionType,
   kafkaAuthType,
   kafkaAcknowledgeReliabilityLevel,
+  otlpProtocol,
   RESERVED_CONFIG_YML_KEYS,
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
@@ -1308,6 +1309,50 @@ class OutputService {
       if (isOtlpOutput(updateSoData)) {
         // clear beats-only fields when switching to OTLP
         removeBeatsFields(updateSoData as Nullable<BeatsSoBaseAttributes>);
+      }
+    }
+
+    // When otlp_exporter is included in an update and the protocol changes, ES's partial-update
+    // deep-merges the stored object, so fields exclusive to the old protocol survive unless
+    // explicitly set to null here. null is written into the doc (unlike undefined, which is omitted
+    // from the payload and leaves the old value intact).
+    const isOtlpProtocolChange =
+      isOtlpOutput(updateSoData) &&
+      isOtlpOutput(originalOutput) &&
+      updateSoData.otlp_exporter?.protocol !== undefined &&
+      updateSoData.otlp_exporter.protocol !== originalOutput.otlp_exporter.protocol;
+
+    if (isOtlpProtocolChange) {
+      const exporterUpdate = (updateSoData as OutputSoOtlpAttributes).otlp_exporter;
+      if (exporterUpdate.protocol === otlpProtocol.Grpc) {
+        // Switching to gRPC — null out HTTP-exclusive fields left over in the stored SO
+        Object.assign(exporterUpdate, {
+          encoding: null,
+          traces_endpoint: null,
+          metrics_endpoint: null,
+          logs_endpoint: null,
+          profiles_endpoint: null,
+          proxy_url: null,
+          max_idle_conns: null,
+          max_idle_conns_per_host: null,
+          max_conns_per_host: null,
+          idle_conn_timeout: null,
+          disable_keep_alives: null,
+          http2_read_idle_timeout: null,
+          http2_ping_timeout: null,
+          force_attempt_http2: null,
+          compression_params: null,
+          cookies: null,
+        });
+      } else {
+        // Switching to HTTP — null out gRPC-exclusive fields left over in the stored SO
+        Object.assign(exporterUpdate, {
+          balancer_name: null,
+          keepalive: null,
+          wait_for_ready: null,
+          user_agent: null,
+          authority: null,
+        });
       }
     }
 

@@ -3138,6 +3138,96 @@ describe('Output Service', () => {
       mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
     });
 
+    it('Should null gRPC-exclusive fields when switching an OTLP output from gRPC to HTTP', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        managedOtlpOutput: true,
+      } as any);
+      mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+
+      await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+        otlp_exporter: {
+          endpoint: 'https://otel.example.com:4318',
+          protocol: 'http/protobuf',
+        },
+      });
+
+      expect(soClient.update).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          otlp_exporter: expect.objectContaining({
+            protocol: 'http/protobuf',
+            balancer_name: null,
+            keepalive: null,
+            wait_for_ready: null,
+            user_agent: null,
+            authority: null,
+          }),
+        })
+      );
+
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
+    });
+
+    it('Should null HTTP-exclusive fields when switching an OTLP output from HTTP to gRPC', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        managedOtlpOutput: true,
+      } as any);
+      // Override the stored output to be an HTTP exporter for this one call
+      esoClientMock.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        mockOutputSO('existing-otlp-output', {
+          type: 'otlp',
+          is_default: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4318',
+            protocol: 'http/protobuf',
+            traces_endpoint: 'https://otel.example.com:4318/v1/traces',
+            encoding: 'proto',
+          },
+        })
+      );
+      mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+
+      await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+        otlp_exporter: {
+          endpoint: 'https://otel.example.com:4317',
+          protocol: 'grpc',
+        },
+      });
+
+      expect(soClient.update).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          otlp_exporter: expect.objectContaining({
+            protocol: 'grpc',
+            encoding: null,
+            traces_endpoint: null,
+            metrics_endpoint: null,
+            logs_endpoint: null,
+            profiles_endpoint: null,
+            proxy_url: null,
+            max_idle_conns: null,
+            max_idle_conns_per_host: null,
+            max_conns_per_host: null,
+            idle_conn_timeout: null,
+            disable_keep_alives: null,
+            http2_read_idle_timeout: null,
+            http2_ping_timeout: null,
+            force_attempt_http2: null,
+            compression_params: null,
+            cookies: null,
+          }),
+        })
+      );
+
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
+    });
+
     it('Should write tls key_pem as plaintext on OTLP update when secret storage is disabled', async () => {
       const soClient = getMockedSoClient({});
       mockedAppContextService.getExperimentalFeatures.mockReturnValue({
