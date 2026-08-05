@@ -50,6 +50,11 @@ export const createMemoryToolsOptions = ({
  * Discovery agents are registered as agent types from plugin setup (see
  * `registerSignificantEventsDiscoveryAgentTypes`) and installed as editable profiles via
  * `installDiscoveryAgents`.
+ *
+ * Code Intelligence KI extraction is driven by the externally-installed Sourcerer
+ * agent (`sourcerer setup`), so this plugin registers no code-research agent/tools/
+ * skills of its own; the extraction workflow targets that agent and gates on its
+ * presence.
  */
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,

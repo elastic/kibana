@@ -53,6 +53,8 @@ import { useBlocksNewActivity } from '../../../hooks/use_significant_events_main
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../../pages/significant_events/components/queries_table/translations';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
+import { getKnowledgeIndicatorSource } from '../utils/get_knowledge_indicator_source';
+import { KnowledgeIndicatorSourceBadge } from '../knowledge_indicator_source_badge';
 import { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';
 import { KnowledgeIndicatorQueryDetailsContent } from './knowledge_indicator_query_details_content';
 
@@ -374,6 +376,13 @@ export function KnowledgeIndicatorDetailsFlyout({
                 </EuiBadge>
               </FlyoutMetadataCard>
             </EuiFlexItem>
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={SOURCE_LABEL}>
+                <KnowledgeIndicatorSourceBadge
+                  source={getKnowledgeIndicatorSource(knowledgeIndicator)}
+                />
+              </FlyoutMetadataCard>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
 
@@ -442,6 +451,13 @@ const STREAM_LABEL = i18n.translate(
   'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.streamLabel',
   {
     defaultMessage: 'Stream',
+  }
+);
+
+const SOURCE_LABEL = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.sourceLabel',
+  {
+    defaultMessage: 'Source',
   }
 );
 

@@ -9,6 +9,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
   type ManagedWorkflowId,
   type TemplatedManagedWorkflowId,
 } from '@kbn/workflows/managed';
@@ -17,12 +18,14 @@ import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/type
 import { installMemoryWorkflows } from '../../../memory_and_investigation/lib/memory/install_managed_workflows';
 import { GLOBAL_CORE_WORKFLOW_IDS } from '../../maintenance/managed_workflow_targets';
 
-// Groupings come from `managed_workflow_targets.ts` so install and pause stay in sync.
-// These are all non-templated workflows, so they install without template `values`.
-const WORKFLOWS_TO_INSTALL: Array<{
+interface WorkflowInstall {
   workflowId: Exclude<ManagedWorkflowId, TemplatedManagedWorkflowId>;
   spaceId: string;
-}> = [
+}
+
+// Groupings come from `managed_workflow_targets.ts` so install and pause stay in sync.
+// These are all non-templated workflows, so they install without template `values`.
+const BASE_WORKFLOWS_TO_INSTALL: WorkflowInstall[] = [
   ...GLOBAL_CORE_WORKFLOW_IDS.map((workflowId) => ({
     workflowId,
     spaceId: GLOBAL_WORKFLOW_SPACE_ID,
@@ -42,15 +45,34 @@ const WORKFLOWS_TO_INSTALL: Array<{
   },
 ];
 
+// Code Intelligence (Stage 1) extraction. Installed globally like the other core
+// KI workflows whenever the code-KI extraction feature flag is on. The workflow's
+// `ai.agent` steps target the persisted code-intelligence agent (Sourcerer), whose
+// presence can only be checked with a request-scoped registry; that guard lives in
+// the `_run` route (request time), not here. The reconciler prunes owner workflows
+// not in the installed set, so excluding it when the flag is off also removes a
+// previously-installed copy.
+const CODE_EXTRACTION_WORKFLOW: WorkflowInstall = {
+  workflowId: SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
+  spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+};
+
 export const installWorkflows = async ({
   client,
+  includeCodeExtraction,
 }: {
   client: PluginScopedManagedWorkflowsApi;
+  /** Install the code-intelligence extraction workflow (agent must be present). */
+  includeCodeExtraction: boolean;
 }): Promise<void> => {
+  const workflowsToInstall = includeCodeExtraction
+    ? [...BASE_WORKFLOWS_TO_INSTALL, CODE_EXTRACTION_WORKFLOW]
+    : BASE_WORKFLOWS_TO_INSTALL;
+
   // Install every workflow independently and report all failures at once. A fail-fast Promise.all
   // would hide the other failed ids, so the caller could not tell which workflows still need a retry.
   const installs: Array<{ id: string; run: Promise<void> }> = [
-    ...WORKFLOWS_TO_INSTALL.map(({ workflowId, spaceId }) => ({
+    ...workflowsToInstall.map(({ workflowId, spaceId }) => ({
       id: workflowId,
       run: client.install(workflowId, { spaceId }),
     })),

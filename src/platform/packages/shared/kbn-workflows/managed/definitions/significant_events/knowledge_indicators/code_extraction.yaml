@@ -1,0 +1,121 @@
+# Sourcerer-driven KI (Knowledge Indicator) extraction proof of concept.
+#
+# Fully deterministic + LLM-classify pipeline (no agentic passes):
+#  1. _discover_services greps the indexed corpus for deploy markers/manifests to
+#     find candidate service roots, then one batched classify call judges which
+#     are real services and collapses env/region duplicates.
+#  2. The workflow fans out one request per service to _identify_service, which
+#     greps that service's production logging call sites and classifies them.
+#
+# Both stages read the Sourcerer index (`sourcerer-v1-*`) server-side; the corpus
+# is populated out of band by `sourcerer setup` + indexing. The plugin gates
+# install/enable on the sourcerer agent's presence as a proxy for "Sourcerer is
+# set up" (the agent itself is no longer called by this workflow; re-pointing the
+# gate at the index is a follow-up).
+#
+# It runs manually and on a schedule; the fingerprint noop guard keeps unchanged
+# runs cheap.
+
+version: '1'
+name: 'Code KI Extraction'
+enabled: true
+description: 'This workflow is used by the system and should not be modified.'
+tags:
+  - observability
+  - streams
+  - significant-events
+  - knowledge-indicators
+  - code-extraction
+settings:
+  timeout: '60m'
+  concurrency:
+    key: significant-events-code-ki-extraction
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: '1h'
+  - type: manual
+    inputs:
+      - name: agentConnectorId
+        type: string
+        default: '.openai-gpt-5.2-chat_completion'
+        required: false
+        description: 'Connector ID for the code-intelligence (Sourcerer) agent.'
+steps:
+  - name: discover_services
+    type: kibana.request
+    with:
+      method: POST
+      path: '/internal/streams/code_intelligence/_discover_services'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body: {}
+    on-failure:
+      continue: false
+
+  - name: has_services
+    type: if
+    condition: '${{ steps.discover_services.error == null and steps.discover_services.output.services != null }}'
+    steps:
+      # Intentionally serial for the POC so the per-service workload is observable
+      # without concurrency-induced bursts.
+      - name: process_services
+        type: foreach
+        foreach: '${{ steps.discover_services.output.services }}'
+        max-concurrency: 1
+        iteration-on-failure:
+          continue: true
+        steps:
+          - name: identify_service
+            type: kibana.request
+            with:
+              method: POST
+              path: '/internal/streams/code_intelligence/_identify_service'
+              headers:
+                x-elastic-internal-origin: 'kibana'
+              body:
+                repository: '{{ foreach.item.repository }}'
+                gitSha: '{{ foreach.item.gitSha }}'
+                repositoryLanguages: '${{ foreach.item.repositoryLanguages }}'
+                iacSignals: '${{ foreach.item.iacSignals }}'
+                hasOtel: '${{ foreach.item.hasOtel }}'
+                service:
+                  name: '{{ foreach.item.name }}'
+                  serviceRoot: '{{ foreach.item.serviceRoot }}'
+                  language: '{{ foreach.item.language }}'
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: '5s'
+                strategy: exponential
+
+      - name: process_otel_services
+        type: foreach
+        foreach: '${{ steps.discover_services.output.services | where: "hasOtel", true }}'
+        max-concurrency: 1
+        iteration-on-failure:
+          continue: true
+        steps:
+          - name: identify_otel_signals
+            type: kibana.request
+            with:
+              method: POST
+              path: '/internal/streams/code_intelligence/_identify_otel_signals'
+              headers:
+                x-elastic-internal-origin: 'kibana'
+                elastic-api-version: '1'
+              body:
+                repository: '{{ foreach.item.repository }}'
+                gitSha: '{{ foreach.item.gitSha }}'
+                serviceRoot: '{{ foreach.item.serviceRoot }}'
+                name: '{{ foreach.item.name }}'
+                language: '{{ foreach.item.language }}'
+                hasOtel: '${{ foreach.item.hasOtel }}'
+                signalCounts: '${{ foreach.item.signalCounts }}'
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: '5s'
+                strategy: exponential

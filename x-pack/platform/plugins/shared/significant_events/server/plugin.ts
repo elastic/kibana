@@ -80,6 +80,7 @@ import { createSignificantEventsAvailability } from './agent_builder/tools/signi
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_flags';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
+import { isCodeKiExtractionEnabled } from './lib/knowledge_indicators/code_intelligence/is_code_ki_extraction_enabled';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
@@ -408,6 +409,13 @@ export class SignificantEventsPlugin
         getClient: () =>
           workflowsExtensions.initManagedWorkflowsClient(SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER),
         isAvailable,
+        // Code Intelligence extraction installs whenever its feature flag is on. The
+        // code-intelligence agent (Sourcerer) is persisted and only readable through a
+        // request-scoped Agent Builder registry, so agent presence cannot be checked
+        // here (install runs with no user request). It is enforced at request time in
+        // the `_run` route instead — the same runtime, request-scoped degrade the SCS
+        // grounding path uses.
+        isCodeExtractionAvailable: async () => isCodeKiExtractionEnabled(core.featureFlags),
         logger: this.logger,
       });
     }

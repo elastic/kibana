@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import CODE_EXTRACTION_YAML from './code_extraction.yaml';
 import CONTINUOUS_ONBOARDING_YAML from './continuous_onboarding.yaml';
 import FEATURES_IDENTIFICATION_YAML from './features_identification.yaml';
 import ONBOARDING_YAML from './onboarding.yaml';
@@ -22,6 +23,8 @@ export const SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID = 'system-streams-ki-o
 export const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID =
   'system-streams-ki-continuous-onboarding';
 export const SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID = 'system-streams-ki-sync';
+export const SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID =
+  'system-streams-ki-code-extraction';
 
 // lifecycle: 'static' — definition is fixed in code, not user-editable.
 // versionStrategy: 'auto' — version bumps are handled automatically on install.
@@ -88,4 +91,13 @@ export const SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW = {
   billable: false,
   yaml: SYNC_YAML,
   management: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition;
+
+export const SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW = {
+  id: SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
+  pluginId: 'significant_events',
+  version: 9,
+  billable: false,
+  yaml: CODE_EXTRACTION_YAML,
+  management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;

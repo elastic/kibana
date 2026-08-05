@@ -1,0 +1,111 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export {
+  CODE_FEATURE_SUBTYPE_LANGUAGE,
+  CODE_FEATURE_SUBTYPE_REPO_TYPE,
+  CODE_FEATURE_SUBTYPE_SERVICE_NAME,
+  CODE_INTELLIGENCE_AGENT_ID,
+} from './constants';
+export { isCodeIntelligenceAgentAvailable } from './is_agent_available';
+export { classifyRepository } from './classify_repository';
+export { reconcileCodeFeatures } from './reconcile_code_features';
+export {
+  readCodeChangeState,
+  buildCodeChangeMeta,
+  isUnchanged,
+  type CodeChangeState,
+} from './code_change_state';
+export {
+  identifyCodeFeaturesForService,
+  type IdentifyCodeForServiceOptions,
+  type IdentifyCodeForServiceResult,
+  type RepositoryServiceResult,
+} from './identify_code_features';
+export {
+  linkServiceEntities,
+  resolveIngestingStreams,
+  resolveLogBearingStreams,
+  resolveSignalStreams,
+  type SignalStreams,
+  type ServiceCodeMetadata,
+  type StreamSamplingSource,
+  type LogStreamBinding,
+} from './link_ingesting_streams';
+export { extractLogSignatures, staticPrefixOf } from './extract_log_signatures';
+export { extractOtelSignals } from './extract_otel_signals';
+export {
+  generateOtelQueries,
+  type OtelQueryCandidate,
+  type OtelQueryTier,
+  type GenerateOtelQueriesResult,
+} from './generate_otel_queries';
+export { classifyOtelSignals } from './classify_otel_signals';
+export {
+  discoverLoggingSites,
+  fetchLineWindows,
+  codeGrep,
+  splitRepository,
+  type GrepLine,
+  type CodeGrepOptions,
+  type DiscoverLoggingSitesOptions,
+} from './discover_logging_sites';
+export { classifyLoggingSites, type ClassifyLoggingSitesOptions } from './classify_logging_sites';
+export {
+  listIndexedRepos,
+  discoverCandidateRoots,
+  buildLanguageHistogram,
+  type DiscoverCandidateRootsOptions,
+  type DiscoverCandidateRootsResult,
+} from './discover_services';
+export { classifyServices, type ClassifyServicesOptions } from './classify_services';
+export {
+  detectOtelInstrumentation,
+  EMPTY_OTEL_SIGNAL_COUNTS,
+  type DetectOtelInstrumentationOptions,
+} from './detect_otel_instrumentation';
+export {
+  generatePredictiveQueries,
+  buildPredictiveEsql,
+  isValidEsqlSyntax,
+} from './generate_predictive_queries';
+export {
+  identifyCodeQueries,
+  type IdentifyCodeQueriesOptions,
+  type IdentifyCodeQueriesResult,
+  type IdentifyCodeQueriesStatus,
+} from './identify_code_queries';
+export {
+  reconcileCodeAndLogQueries,
+  buildQueryReconcilePlan,
+  toReconcileOperations,
+  computeClusters,
+  pickCanonical,
+  type QueryMerge,
+  type QueryReconcilePlan,
+  type ReconcileQueriesResult,
+} from './reconcile_query_kis';
+export type {
+  CodeEvidenceCitation,
+  RepoClassification,
+  RepoType,
+  LanguageCount,
+  LoggingChunk,
+  LoggingCandidate,
+  LoggingCandidateVia,
+  LogSignature,
+  IacSignal,
+  IacKind,
+  IndexedRepoRef,
+  ServiceCandidateRoot,
+  DiscoveredService,
+  OtelDetection,
+  OtelSignalCounts,
+  OtelSignal,
+  OtelSignalKind,
+  OtelValueHint,
+} from './types';

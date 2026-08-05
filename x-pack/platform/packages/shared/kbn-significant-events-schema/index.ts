@@ -68,6 +68,14 @@ export {
 
 export { FeatureAccumulator } from './src/feature_accumulator';
 
+export {
+  type KnowledgeIndicatorSource,
+  knowledgeIndicatorSourceSchema,
+  knowledgeIndicatorSourceArraySchema,
+  deriveKnowledgeIndicatorSource,
+  CODE_EVIDENCE_PREFIX,
+} from './src/source';
+
 export type { IterationResult } from './src/api/features';
 
 export { tokenCountSchema, iterationResultSchema } from './src/api/features';
@@ -136,6 +144,8 @@ export {
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_OTEL_SIGNALS_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID,

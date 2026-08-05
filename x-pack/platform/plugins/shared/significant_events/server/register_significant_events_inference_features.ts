@@ -14,6 +14,8 @@ import {
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_OTEL_SIGNALS_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
@@ -48,6 +50,18 @@ const INVESTIGATION_RECOMMENDED_MODELS = [
 const MEMORY_RECOMMENDED_MODELS = [
   '.anthropic-claude-4.5-haiku-chat_completion',
   '.openai-gpt-5.4-mini-chat_completion',
+];
+
+// Code-intelligence classification is bounded, tool-less, temperature-0 judging
+// of grep-discovered candidates (keep/drop, severity, service grouping). A
+// bake-off (OTel demo, 273 candidates) showed the cheapest tier matches strong
+// models on this task: 100% idiom fidelity across all of them. Default to the
+// cheapest capable model; this is ~12x cheaper than the KI-extraction tier and
+// keeps a continuously-scheduled extraction affordable.
+const CODE_INTELLIGENCE_RECOMMENDED_MODELS = [
+  '.google-gemini-3.1-flash-lite-chat_completion',
+  '.anthropic-claude-4.5-haiku-chat_completion',
+  defaultInferenceEndpoints.OPENAI_GPT_OSS_120B,
 ];
 
 /**
@@ -129,6 +143,36 @@ export function registerSignificantEventsInferenceFeatures(
         }
       ),
       recommendedEndpoints: KI_QUERY_GENERATION_RECOMMENDED_MODELS,
+      ignoreGlobalDefault: true,
+    },
+    {
+      featureId: SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
+      featureName: i18n.translate('xpack.significantEvents.inferenceFeature.codeIntelligenceName', {
+        defaultMessage: 'Code Intelligence classification',
+      }),
+      featureDescription: i18n.translate(
+        'xpack.significantEvents.inferenceFeature.codeIntelligenceDescription',
+        {
+          defaultMessage:
+            'Model used to classify grep-discovered code candidates (logging call sites and deployable services). A low-stakes, high-volume task — a fast, cheap model is recommended.',
+        }
+      ),
+      recommendedEndpoints: CODE_INTELLIGENCE_RECOMMENDED_MODELS,
+      ignoreGlobalDefault: true,
+    },
+    {
+      featureId: SIGNIFICANT_EVENTS_OTEL_SIGNALS_INFERENCE_FEATURE_ID,
+      featureName: i18n.translate('xpack.significantEvents.inferenceFeature.otelSignalsName', {
+        defaultMessage: 'OTel signal classification',
+      }),
+      featureDescription: i18n.translate(
+        'xpack.significantEvents.inferenceFeature.otelSignalsDescription',
+        {
+          defaultMessage:
+            'Model used for naming, severity, and deduplication of deterministically extracted OTel signals.',
+        }
+      ),
+      recommendedEndpoints: CODE_INTELLIGENCE_RECOMMENDED_MODELS,
       ignoreGlobalDefault: true,
     },
     {

@@ -34,3 +34,12 @@ export const SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG =
  * integrations (e.g. the Elastic Slack App) can be connected via the Relay service.
  */
 export const STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG = 'streams.significantEventsAppsEnabled';
+
+/**
+ * Enables the scheduled, code-driven Stage 1 KI extraction workflow. When on,
+ * the continuous code KI extraction managed workflow is installed and runs on a
+ * schedule, deriving code Feature KIs (repo type, language, service name) from
+ * streams linked to a Semantic Code Search indexed repository.
+ */
+export const SIGNIFICANT_EVENTS_CODE_KI_EXTRACTION_ENABLED_FLAG =
+  'streams.significantEventsCodeKiExtractionEnabled';

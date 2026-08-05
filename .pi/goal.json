@@ -1,0 +1,4 @@
+{
+  "state": "active",
+  "text": "Ship the OTel-gated typed-query job for significant-events code intelligence on this worktree (sig-events-github-mcp-poc), per the spec at projects/kibana/specs/otel-signal-typed-queries.md. Strategy: \"all in on OTel\" — logger-idiom/template queries stay as the non-OTel fallback (25% recall); typed OTel queries are the primary generator (88% named-idiom recall, spec tiers ~100%). Guardrails: all numbers measured, never estimated; reconcile guard (esqlStructuralSignature, 885726130f15) must not regress; exception-tier queries target LOG streams not traces; fixtures at projects/kibana/otel-extraction-fixtures/ gate ship-readiness. Track follow-up: simianhacker/simian-harness#46 becomes the post-ship validation corpus, then fixtures fold into a @kbn/evals eval."
+}

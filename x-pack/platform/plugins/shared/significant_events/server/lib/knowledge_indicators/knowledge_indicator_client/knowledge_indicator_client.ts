@@ -224,6 +224,7 @@ export class KnowledgeIndicatorClient {
       queryTypes?: string[];
       queryIds?: string[];
       ruleIds?: string[];
+      minScore?: number;
     },
     searchMode?: SearchMode
   ): Promise<QueryLink[]> {
