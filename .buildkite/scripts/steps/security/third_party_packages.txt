@@ -49,3 +49,4 @@ patch-package
 @opentelemetry/exporter-logs-otlp-proto
 @opentelemetry/resources
 agent-base
+@swc/helpers
