@@ -23,7 +23,7 @@ import type {
 } from './breadcrumb';
 import type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeStyle, ChromeUserBanner } from './types';
 import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
-import type { SolutionId } from './project_navigation';
+import type { DeepLinkNavPath, SolutionId } from './project_navigation';
 import type { SidebarStart, SidebarSetup } from './sidebar';
 
 /**
@@ -329,11 +329,11 @@ export interface ChromeStart {
   getActiveSolutionNavId(): SolutionId | null;
 
   /**
-   * In project chrome, ancestor titles for each deep link id present in the active
-   * navigation tree (including the leaf). Emits `null` when project navigation is
-   * not initialized (classic chrome, or before `initNavigation`).
+   * In project chrome, nav-tree metadata (titles, section icon, panel category)
+   * for each deep link id in the active navigation tree. Emits `null` when
+   * project navigation is not initialized (classic chrome, or before `initNavigation`).
    */
-  getDeepLinkNavPaths$(): Observable<ReadonlyMap<string, readonly string[]> | null>;
+  getDeepLinkNavPaths$(): Observable<ReadonlyMap<string, DeepLinkNavPath> | null>;
 
   /**
    * Used only by the rendering service and KibanaRenderingContextProvider to wrap the rendering tree in the Chrome context providers

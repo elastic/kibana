@@ -1050,10 +1050,9 @@ describe('getDeepLinkNavPaths$()', () => {
     );
 
     const paths = await lastValueFrom(projectNavigation.getDeepLinkNavPaths$().pipe(take(1)));
-    expect(paths?.get('management:application_connections')).toEqual([
-      'Admin and Settings',
-      'Access',
-      'MANAGEMENT:APPLICATION_CONNECTIONS',
-    ]);
+    expect(paths?.get('management:application_connections')).toEqual({
+      titles: ['Admin and Settings', 'Access', 'MANAGEMENT:APPLICATION_CONNECTIONS'],
+      order: 0,
+    });
   });
 });

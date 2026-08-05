@@ -401,6 +401,7 @@ describe('appToResult', () => {
     const appLink: AppLink = {
       id: 'management-sub',
       app,
+      deepLinkId: 'sub',
       path: '/sub1',
       subLinkTitles: ['Sub1'],
       keywords: [],
@@ -414,6 +415,7 @@ describe('appToResult', () => {
     const appLink: AppLink = {
       id: 'management-application_connections',
       app,
+      deepLinkId: 'application_connections',
       path: '/security/application_connections',
       subLinkTitles: ['Security', 'Application connections'],
       keywords: [],
@@ -430,14 +432,18 @@ describe('appToResult', () => {
     const appLink: AppLink = {
       id: 'management-application_connections',
       app,
+      deepLinkId: 'application_connections',
       path: '/security/application_connections',
       subLinkTitles: ['Security', 'Application connections'],
       keywords: [],
     };
-    const deepLinkNavPaths = new Map<string, readonly string[]>([
+    const deepLinkNavPaths = new Map([
       [
         'management:application_connections',
-        ['Admin and Settings', 'Access', 'Application connections'],
+        {
+          titles: ['Admin and Settings', 'Access', 'Application connections'] as const,
+        order: 0,
+        },
       ],
     ]);
 
@@ -446,11 +452,176 @@ describe('appToResult', () => {
     ).toEqual('Admin and Settings / Access / Application connections');
   });
 
-  it('falls back to the leaf title in project chrome when the deep link is missing from the nav tree', () => {
+  it('uses nav-tree titles for non-management deep links in project chrome', () => {
+    const app = createApp({ id: 'discover', title: 'Discover' });
+    const appLink: AppLink = {
+      id: 'discover-search',
+      app,
+      deepLinkId: 'search',
+      path: '/search',
+      subLinkTitles: ['Search'],
+      keywords: [],
+    };
+    const deepLinkNavPaths = new Map([
+      ['discover:search', { titles: ['Analytics', 'Discover'] as const, order: 0 }],
+    ]);
+
+    expect(appToResult(appLink, 42, { chromeStyle: 'project', deepLinkNavPaths }).title).toEqual(
+      'Analytics / Discover'
+    );
+    expect(appToResult(appLink, 42).title).toEqual('Discover / Search');
+  });
+
+  it('uses nav-tree titles for top-level app links in project chrome', () => {
+    const app = createApp({ id: 'maps', title: 'Maps' });
+    const appLink: AppLink = {
+      id: 'maps',
+      app,
+      path: '/app/maps',
+      subLinkTitles: [],
+      keywords: [],
+    };
+    const deepLinkNavPaths = new Map([['maps', { titles: ['Other tools', 'Maps'] as const, order: 0 }]]);
+
+    expect(appToResult(appLink, 42, { chromeStyle: 'project', deepLinkNavPaths }).title).toEqual(
+      'Other tools / Maps'
+    );
+    expect(appToResult(appLink, 42).title).toEqual('Maps');
+  });
+
+  it('uses nav-tree icon and omits panel category when it repeats the title root', () => {
+    const app = createApp({
+      id: 'ux',
+      title: 'User Experience',
+      euiIconType: 'logoObservability',
+      category: DEFAULT_APP_CATEGORIES.observability,
+    });
+    const appLink: AppLink = {
+      id: 'ux',
+      app,
+      path: '/app/ux',
+      subLinkTitles: [],
+      keywords: [],
+    };
+    const deepLinkNavPaths = new Map([
+      [
+        'ux',
+        { titles: ['Applications', 'User experience'] as const, order: 0, icon: 'spaces',
+          categoryLabel: 'Applications',
+        },
+      ],
+    ]);
+
+    expect(appToResult(appLink, 42, { chromeStyle: 'project', deepLinkNavPaths })).toEqual(
+      expect.objectContaining({
+        title: 'Applications / User experience',
+        icon: 'spaces',
+        meta: {
+          categoryId: null,
+          categoryLabel: null,
+        },
+      })
+    );
+  });
+
+  it('keeps panel category when it differs from the title root', () => {
+    const app = createApp({
+      id: 'fleet',
+      title: 'Fleet',
+      euiIconType: 'logoObservability',
+      category: DEFAULT_APP_CATEGORIES.observability,
+    });
+    const appLink: AppLink = {
+      id: 'fleet',
+      app,
+      path: '/app/fleet',
+      subLinkTitles: [],
+      keywords: [],
+    };
+    const deepLinkNavPaths = new Map([
+      [
+        'fleet',
+        { titles: ['Ingest and integrations', 'Fleet'] as const, order: 0, icon: 'database',
+          categoryLabel: 'Data management',
+        },
+      ],
+    ]);
+
+    expect(appToResult(appLink, 42, { chromeStyle: 'project', deepLinkNavPaths })).toEqual(
+      expect.objectContaining({
+        title: 'Ingest and integrations / Fleet',
+        icon: 'database',
+        meta: {
+          categoryId: null,
+          categoryLabel: 'Data management',
+        },
+      })
+    );
+  });
+
+  it('keeps registration icon but omits registration category for nav hits', () => {
+    const app = createApp({
+      id: 'maps',
+      title: 'Maps',
+      euiIconType: 'logoMaps',
+      category: DEFAULT_APP_CATEGORIES.kibana,
+    });
+    const appLink: AppLink = {
+      id: 'maps',
+      app,
+      path: '/app/maps',
+      subLinkTitles: [],
+      keywords: [],
+    };
+    const deepLinkNavPaths = new Map([['maps', { titles: ['Other tools', 'Maps'] as const, order: 0 }]]);
+
+    expect(appToResult(appLink, 42, { chromeStyle: 'project', deepLinkNavPaths })).toEqual(
+      expect.objectContaining({
+        icon: 'logoMaps',
+        meta: {
+          categoryId: null,
+          categoryLabel: null,
+        },
+      })
+    );
+  });
+
+  it('omits registration category for top-level nav apps in project chrome', () => {
+    const app = createApp({
+      id: 'discover',
+      title: 'Discover',
+      euiIconType: 'productDiscover',
+      category: DEFAULT_APP_CATEGORIES.kibana,
+    });
+    const appLink: AppLink = {
+      id: 'discover',
+      app,
+      path: '/app/discover',
+      subLinkTitles: [],
+      keywords: [],
+    };
+    const deepLinkNavPaths = new Map([
+      ['discover', { titles: ['Discover'] as const, order: 0, icon: 'productDiscover' }],
+    ]);
+
+    expect(appToResult(appLink, 42, { chromeStyle: 'project', deepLinkNavPaths })).toEqual(
+      expect.objectContaining({
+        title: 'Discover',
+        icon: 'productDiscover',
+        meta: {
+          categoryId: null,
+          categoryLabel: null,
+        },
+      })
+    );
+  });
+
+  it('falls back to the leaf title for management in project chrome when nav is unavailable', () => {
     const app = createApp({ id: 'management' });
     const appLink: AppLink = {
       id: 'management-application_connections',
       app,
+      deepLinkId: 'application_connections',
       path: '/security/application_connections',
       subLinkTitles: ['Security', 'Application connections'],
       keywords: [],
@@ -459,8 +630,168 @@ describe('appToResult', () => {
     expect(
       appToResult(appLink, 42, { chromeStyle: 'project', deepLinkNavPaths: null }).title
     ).toEqual('Application connections');
+  });
+});
+
+describe('getAppResults project nav scoping', () => {
+  it('excludes apps that are not in the nav tree', () => {
+    const apps = [
+      createApp({
+        id: 'significant_events',
+        title: 'Significant Events',
+        category: DEFAULT_APP_CATEGORIES.management,
+      }),
+      createApp({ id: 'discover', title: 'Discover' }),
+    ];
+    const deepLinkNavPaths = new Map([
+      ['discover', { titles: ['Discover'] as const, order: 0, icon: 'productDiscover' }],
+    ]);
+
+    const results = getAppResults('e', apps, {
+      chromeStyle: 'project',
+      deepLinkNavPaths,
+    });
+
+    expect(results.map(({ id }) => id)).toEqual(['discover']);
+  });
+
+  it('includes deep links that are in the nav tree', () => {
+    const apps = [
+      createApp({
+        id: 'management',
+        title: 'Stack Management',
+        deepLinks: [
+          {
+            id: 'application_connections',
+            title: 'Application connections',
+            path: '/security/application_connections',
+            deepLinks: [],
+            keywords: [],
+            visibleIn: ['globalSearch'],
+          },
+        ],
+      }),
+    ];
+    const deepLinkNavPaths = new Map([
+      [
+        'management:application_connections',
+        {
+          titles: ['Admin and Settings', 'Access', 'Application connections'] as const,
+        order: 0,
+        },
+      ],
+    ]);
+
+    const results = getAppResults('application', apps, {
+      chromeStyle: 'project',
+      deepLinkNavPaths,
+    });
+
+    expect(results).toEqual([
+      expect.objectContaining({
+        id: 'management-application_connections',
+        title: 'Admin and Settings / Access / Application connections',
+      }),
+    ]);
+  });
+
+  it('does not apply nav scoping when deepLinkNavPaths is null', () => {
+    const apps = [createApp({ id: 'orphan', title: 'Orphan App' })];
+
+    const results = getAppResults('orphan', apps, {
+      chromeStyle: 'project',
+      deepLinkNavPaths: null,
+    });
+
+    expect(results).toEqual([
+      expect.objectContaining({ id: 'orphan', title: 'Orphan App' }),
+    ]);
+  });
+});
+
+describe('scoreApp with project nav titles', () => {
+  const managementApp = createApp({ id: 'management', title: 'Stack Management' });
+  const managementLink: AppLink = {
+    id: 'management-application_connections',
+    app: managementApp,
+    deepLinkId: 'application_connections',
+    path: '/security/application_connections',
+    subLinkTitles: ['Security', 'Application connections'],
+    keywords: [],
+  };
+  const discoverApp = createApp({ id: 'discover', title: 'Discover' });
+  const discoverLink: AppLink = {
+    id: 'discover-search',
+    app: discoverApp,
+    deepLinkId: 'search',
+    path: '/search',
+    subLinkTitles: ['Search'],
+    keywords: [],
+  };
+  const deepLinkNavPaths = new Map([
+    [
+      'management:application_connections',
+      {
+        titles: ['Admin and Settings', 'Access', 'Application connections'] as const,
+      order: 0,
+      },
+    ],
+    ['discover:search', { titles: ['Analytics', 'Discover'] as const, order: 0 }],
+  ]);
+  const projectOptions = { chromeStyle: 'project' as const, deepLinkNavPaths };
+
+  it('matches nav-tree ancestor titles for management in project chrome', () => {
+    expect(scoreApp('access', managementLink, projectOptions)).toBe(75);
+    expect(scoreApp('admin and settings', managementLink, projectOptions)).toBe(90);
+  });
+
+  it('still matches registration section titles for management in project chrome', () => {
+    expect(scoreApp('security', managementLink, projectOptions)).toBe(75);
+  });
+
+  it('matches nav-tree ancestor titles for non-management apps in project chrome', () => {
+    expect(scoreApp('analytics', discoverLink, projectOptions)).toBe(90);
+  });
+
+  it('matches nav-tree ancestor titles for top-level apps in project chrome', () => {
+    const mapsApp = createApp({ id: 'maps', title: 'Maps' });
+    const mapsLink: AppLink = {
+      id: 'maps',
+      app: mapsApp,
+      path: '/app/maps',
+      subLinkTitles: [],
+      keywords: [],
+    };
+    const mapsPaths = new Map([['maps', { titles: ['Other tools', 'Maps'] as const, order: 0 }]]);
+
     expect(
-      appToResult(appLink, 42, { chromeStyle: 'project', deepLinkNavPaths: new Map() }).title
-    ).toEqual('Application connections');
+      scoreApp('other tools', mapsLink, { chromeStyle: 'project', deepLinkNavPaths: mapsPaths })
+    ).toBe(90);
+  });
+
+  it('ranks empty search by nav order in project chrome', () => {
+    const first = createApp({ id: 'discover', title: 'Discover' });
+    const second = createApp({ id: 'dashboards', title: 'Dashboards' });
+    const firstLink: AppLink = {
+      id: 'discover',
+      app: first,
+      path: '/app/discover',
+      subLinkTitles: [],
+      keywords: [],
+    };
+    const secondLink: AppLink = {
+      id: 'dashboards',
+      app: second,
+      path: '/app/dashboards',
+      subLinkTitles: [],
+      keywords: [],
+    };
+    const paths = new Map([
+      ['discover', { titles: ['Discover'] as const, order: 0 }],
+      ['dashboards', { titles: ['Dashboards'] as const, order: 1 }],
+    ]);
+    const options = { chromeStyle: 'project' as const, deepLinkNavPaths: paths };
+
+    expect(scoreApp('', firstLink, options)).toBeGreaterThan(scoreApp('', secondLink, options));
   });
 });

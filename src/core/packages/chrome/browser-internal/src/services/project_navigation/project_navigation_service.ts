@@ -14,6 +14,7 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
   ChromeNavLink,
   CloudURLs,
+  DeepLinkNavPath,
   NavigationCustomization,
   NavigationTreeDefinition,
   CloudLinks,
@@ -229,7 +230,7 @@ export class ProjectNavigationService {
       },
       getActiveSolutionNavId$: () => activeSolutionNavId$,
       getActiveSolutionNavId: () => currentNavSource$.getValue()?.id ?? null,
-      getDeepLinkNavPaths$: (): Observable<ReadonlyMap<string, readonly string[]> | null> =>
+      getDeepLinkNavPaths$: (): Observable<ReadonlyMap<string, DeepLinkNavPath> | null> =>
         parsedNavigation$.pipe(
           map((parsed) => parsed?.deepLinkNavPaths ?? null),
           distinctUntilChanged(),

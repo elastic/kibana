@@ -6,7 +6,7 @@
  */
 
 import type { PublicAppInfo, PublicAppDeepLinkInfo, AppCategory } from '@kbn/core/public';
-import type { ChromeStyle } from '@kbn/core-chrome-browser';
+import type { ChromeStyle, DeepLinkNavPath } from '@kbn/core-chrome-browser';
 import { distance } from 'fastest-levenshtein';
 import type { GlobalSearchProviderResult } from '@kbn/global-search-plugin/public';
 
@@ -19,11 +19,12 @@ export interface AppLink {
   keywords: string[];
   category?: AppCategory;
   euiIconType?: string;
+  deepLinkId?: string;
 }
 
 export interface GetAppResultsOptions {
   chromeStyle?: ChromeStyle;
-  deepLinkNavPaths?: ReadonlyMap<string, readonly string[]> | null;
+  deepLinkNavPaths?: ReadonlyMap<string, DeepLinkNavPath> | null;
 }
 
 export const getAppResults = (
@@ -51,17 +52,47 @@ export const getAppResults = (
       )
       .map((appLink) => ({
         appLink,
-        score: scoreApp(term, appLink),
+        score: scoreApp(term, appLink, options),
       }))
-      .filter(({ score }) => score > 0)
+      .filter(({ appLink, score }) => {
+        if (score <= 0) {
+          return false;
+        }
+        // Project chrome: only apps present in the active nav tree.
+        if (options.chromeStyle === 'project' && options.deepLinkNavPaths != null) {
+          return getNavPath(appLink, options) !== undefined;
+        }
+        return true;
+      })
       .map(({ appLink, score }) => appToResult(appLink, score, options))
   );
 };
 
-export const scoreApp = (term: string, appLink: AppLink): number => {
+/** Base used so earlier nav items outrank later ones on empty search. */
+const NAV_ORDER_SCORE_BASE = 1_000_000;
+
+export const scoreApp = (
+  term: string,
+  appLink: AppLink,
+  options: GetAppResultsOptions = {}
+): number => {
   term = term.toLowerCase();
-  const title = [appLink.app.title, ...appLink.subLinkTitles].join(' ').toLowerCase();
-  const appScoreByTerms = scoreAppByTerms(term, title);
+
+  // Empty search: every title matches `startsWith('')`. Prefer sidenav order.
+  if (term.length === 0) {
+    const navPath = getNavPath(appLink, options);
+    if (navPath) {
+      return Math.max(1, NAV_ORDER_SCORE_BASE - navPath.order);
+    }
+    return 90;
+  }
+
+  const registrationTitle = [appLink.app.title, ...appLink.subLinkTitles].join(' ').toLowerCase();
+  const displayTitle = getDisplayTitleParts(appLink, options).join(' ').toLowerCase();
+  const appScoreByTerms = Math.max(
+    scoreAppByTerms(term, registrationTitle),
+    scoreAppByTerms(term, displayTitle)
+  );
 
   const keywords = [
     ...appLink.app.keywords.map((keyword) => keyword.toLowerCase()),
@@ -101,21 +132,65 @@ const scoreAppByKeywords = (term: string, keywords: string[]): number => {
   return Math.max(...scores);
 };
 
-const getManagementTitleParts = (
+const getNavPath = (
   appLink: AppLink,
   { chromeStyle = 'classic', deepLinkNavPaths = null }: GetAppResultsOptions
-): string[] => {
-  if (chromeStyle !== 'project') {
+): DeepLinkNavPath | undefined => {
+  if (chromeStyle !== 'project' || !deepLinkNavPaths) {
+    return undefined;
+  }
+  const key = appLink.deepLinkId
+    ? `${appLink.app.id}:${appLink.deepLinkId}`
+    : appLink.app.id;
+  const navPath = deepLinkNavPaths.get(key);
+  return navPath && navPath.titles.length > 0 ? navPath : undefined;
+};
+
+const getDisplayTitleParts = (appLink: AppLink, options: GetAppResultsOptions): string[] => {
+  const navPath = getNavPath(appLink, options);
+  if (navPath) {
+    return [...navPath.titles];
+  }
+
+  // Project chrome without a nav hit: leaf-only title (no classic hierarchy).
+  if (options.chromeStyle === 'project') {
+    if (appLink.subLinkTitles.length > 0) {
+      return [appLink.subLinkTitles[appLink.subLinkTitles.length - 1]];
+    }
+    return [appLink.app.title];
+  }
+
+  if (appLink.app.id === 'management' && appLink.subLinkTitles.length > 0) {
     return appLink.subLinkTitles;
   }
 
-  const leafDeepLinkId = appLink.id.slice(appLink.app.id.length + 1);
-  const navTitles = deepLinkNavPaths?.get(`${appLink.app.id}:${leafDeepLinkId}`);
-  if (navTitles && navTitles.length > 0) {
-    return [...navTitles];
+  return [appLink.app.title, ...appLink.subLinkTitles];
+};
+
+const getCategoryMeta = (
+  appLink: AppLink,
+  navPath: DeepLinkNavPath | undefined,
+  options: GetAppResultsOptions
+): { categoryId: string | null; categoryLabel: string | null } => {
+  if (navPath) {
+    // Never use registration AppCategory for nav hits. Panel category only when it
+    // isn't already the title root.
+    const categoryLabel =
+      navPath.categoryLabel && navPath.titles[0] !== navPath.categoryLabel
+        ? navPath.categoryLabel
+        : null;
+    return { categoryId: null, categoryLabel };
   }
 
-  return [appLink.subLinkTitles[appLink.subLinkTitles.length - 1]];
+  // Soft orphans in project chrome: searchable, but no classic taxonomy label.
+  if (options.chromeStyle === 'project') {
+    return { categoryId: null, categoryLabel: null };
+  }
+
+  return {
+    categoryId: appLink.category?.id ?? appLink.app.category?.id ?? null,
+    categoryLabel: appLink.category?.label ?? appLink.app.category?.label ?? null,
+  };
 };
 
 export const appToResult = (
@@ -123,23 +198,15 @@ export const appToResult = (
   score: number,
   options: GetAppResultsOptions = {}
 ): GlobalSearchProviderResult => {
-  const titleParts =
-    // Stack Management app should not include the app title in the concatenated link label
-    appLink.app.id === 'management' && appLink.subLinkTitles.length > 0
-      ? getManagementTitleParts(appLink, options)
-      : [appLink.app.title, ...appLink.subLinkTitles];
+  const navPath = getNavPath(appLink, options);
 
   return {
     id: appLink.id,
-    // Concatenate title using slashes
-    title: titleParts.join(' / '),
+    title: getDisplayTitleParts(appLink, options).join(' / '),
     type: 'application',
-    icon: appLink.euiIconType ?? appLink.app.euiIconType,
+    icon: navPath?.icon ?? appLink.euiIconType ?? appLink.app.euiIconType,
     url: appLink.path,
-    meta: {
-      categoryId: appLink.category?.id ?? appLink.app.category?.id ?? null,
-      categoryLabel: appLink.category?.label ?? appLink.app.category?.label ?? null,
-    },
+    meta: getCategoryMeta(appLink, navPath, options),
     score,
   };
 };
@@ -167,6 +234,7 @@ const flattenDeepLinks = (app: PublicAppInfo, deepLink?: PublicAppDeepLinkInfo):
           {
             ...deepLink,
             id: `${app.id}-${deepLink.id}`,
+            deepLinkId: deepLink.id,
             app,
             path: `${app.appRoute}${deepLink.path}`,
             subLinkTitles: [deepLink.title],

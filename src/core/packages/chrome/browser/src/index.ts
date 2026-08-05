@@ -57,6 +57,7 @@ export type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeUserBanner, ChromeStyle
 
 export type {
   ChromeProjectNavigationNode,
+  DeepLinkNavPath,
   RootNodePanelOpenerDefinition,
   PanelOpenerChildDefinition,
   StandardNodeDefinition,

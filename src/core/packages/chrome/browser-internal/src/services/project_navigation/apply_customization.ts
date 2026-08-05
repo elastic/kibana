@@ -11,6 +11,7 @@ import type {
   CloudLinks,
   ChromeNavLink,
   ChromeProjectNavigationNode,
+  DeepLinkNavPath,
   NavigationCustomization,
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
@@ -39,8 +40,8 @@ export interface ParsedNavigation {
    * regular customizable item.
    */
   renderableNodes: ChromeProjectNavigationNode[];
-  /** deepLink id → ancestor titles (including leaf), for Global Search labels. */
-  deepLinkNavPaths: ReadonlyMap<string, readonly string[]>;
+  /** deepLink id → nav-tree metadata for Global Search (titles, icon, panel category). */
+  deepLinkNavPaths: ReadonlyMap<string, DeepLinkNavPath>;
 }
 
 /**

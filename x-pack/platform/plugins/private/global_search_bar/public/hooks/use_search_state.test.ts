@@ -153,7 +153,7 @@ describe('useSearchState', () => {
     expect(globalSearch.find).toHaveBeenCalledTimes(1); // no additional search calls
   });
 
-  it('correctly filters and sorts results by title when the search value is empty', async () => {
+  it('correctly filters and sorts results by score then title when the search value is empty', async () => {
     const { globalSearch, navigateToUrl, reportEvent } = makeDeps();
 
     globalSearch.find.mockReturnValueOnce(

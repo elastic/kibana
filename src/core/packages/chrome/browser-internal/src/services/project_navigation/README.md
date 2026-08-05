@@ -72,9 +72,9 @@ This is the most common function of the service. It determines the currently act
   1.  **Custom Logic (`getIsActive`)**: A node can define its own function for complex activation logic.
   2.  **Longest URL Match**: As a fallback, the utility finds the most specific link by matching the longest URL prefix.
 
-#### Deep-link title paths
+#### Deep-link nav paths
 
-`getDeepLinkNavPaths$()` (also on public `ChromeStart`) emits a map of deep-link id → ancestor titles from the parsed tree. Global Search uses this so project-chrome results follow sidenav IA instead of Stack Management section names. Emits `null` until navigation is initialized.
+`getDeepLinkNavPaths$()` (also on public `ChromeStart`) emits a map of deep-link id → `{ titles, order, icon?, categoryLabel? }` from the parsed tree. Global Search uses this so project-chrome results follow sidenav IA for labels, empty-search ranking (`order`), section icons (nearest string `icon`), and panel categories (nearest `panelOpener` title). Emits `null` until navigation is initialized.
 
 #### Breadcrumbs Generation
 

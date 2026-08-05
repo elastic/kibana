@@ -26,8 +26,17 @@ const sortByTitle = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
   return 0;
 };
 
+const sortByScoreThenTitle = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
+  const byScore = sortByScore(a, b);
+  if (byScore !== 0) {
+    return byScore;
+  }
+  return sortByTitle(a, b);
+};
+
 /* @internal */
 export const sort = {
   byScore: sortByScore,
   byTitle: sortByTitle,
+  byScoreThenTitle: sortByScoreThenTitle,
 };

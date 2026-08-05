@@ -108,8 +108,11 @@ describe('applicationResultProvider', () => {
     });
 
     it('passes project chrome style and deep link nav paths to `getAppResults`', async () => {
-      const deepLinkNavPaths = new Map<string, readonly string[]>([
-        ['management:application_connections', ['Admin and Settings', 'Access']],
+      const deepLinkNavPaths = new Map([
+        [
+          'management:application_connections',
+          { titles: ['Admin and Settings', 'Access'] as const, order: 0 },
+        ],
       ]);
       chrome.getChromeStyle.mockReturnValue('project');
       chrome.getDeepLinkNavPaths$.mockReturnValue(of(deepLinkNavPaths));
