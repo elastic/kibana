@@ -159,7 +159,7 @@ export function OverviewPage() {
     },
     customMetrics: {
       key1: 'hasAnyData',
-      value1: hasAnyData ? 0 : 1,
+      value1: hasAnyData ? 1 : 0,
     },
   });
 
