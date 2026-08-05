@@ -173,7 +173,7 @@ describe('Fleet preconfigured outputs', () => {
 
       it('should boot without errors and store the Kafka output with proxy_id cleared', async () => {
         const outputs = await kbnServer.coreStart.savedObjects
-          .getUnsafeInternalClient()
+          .createInternalRepository()
           .find<OutputSOAttributes>({
             type: 'ingest-outputs',
             perPage: 10000,
@@ -198,7 +198,7 @@ describe('Fleet preconfigured outputs', () => {
         await startServers(kafkaOutputConfig);
 
         const outputs = await kbnServer.coreStart.savedObjects
-          .getUnsafeInternalClient()
+          .createInternalRepository()
           .find<OutputSOAttributes>({
             type: 'ingest-outputs',
             perPage: 10000,
