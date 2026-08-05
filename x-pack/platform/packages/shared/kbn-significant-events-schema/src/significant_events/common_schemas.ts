@@ -163,15 +163,21 @@ const signalBaseSchema = z.object({
     ),
 });
 
-const detectionSignalSchema = signalBaseSchema.extend({
-  type: z.literal('detection'),
-  metadata: detectionSchema.omit({
+const detectionSignalMetadataSchema = detectionSchema
+  .omit({
     '@timestamp': true,
     alert_index: true,
     workflow_execution_id: true,
     processed: true,
     stream_name: true,
-  }),
+  })
+  .describe(
+    'Immutable detection identity and alert metadata. Copy the complete metadata object verbatim from the matching input detection; do not reconstruct or alter its fields.'
+  );
+
+const detectionSignalSchema = signalBaseSchema.extend({
+  type: z.literal('detection'),
+  metadata: detectionSignalMetadataSchema,
 });
 
 /** Extensible discriminated union of signal sources accepted from agents. */
