@@ -8,14 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: [
-    '<rootDir>/x-pack/solutions/observability/plugins/nightshift/public',
-    '<rootDir>/x-pack/solutions/observability/plugins/nightshift/common',
-  ],
-  coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/observability/plugins/nightshift',
-  coverageReporters: ['html'],
-  collectCoverageFrom: [
-    '<rootDir>/x-pack/solutions/observability/plugins/nightshift/{common,public}/**/*.{ts,tsx}',
-  ],
+  roots: ['<rootDir>/x-pack/solutions/observability/plugins/nightshift'],
 };
