@@ -158,7 +158,7 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
       ({ deltaBytes }) => deltaBytes
     ),
   });
-  const inconclusive = validPairs.length < MIN_VALID_WARM_START_MEMORY_PAIRS;
+  const inconclusive = postForcedGcHeapRule.pairCount < MIN_VALID_WARM_START_MEMORY_PAIRS;
   const regression =
     !inconclusive &&
     (postForcedGcHeapRule.lowerConfidenceBoundBytes ?? Number.NEGATIVE_INFINITY) >
@@ -166,7 +166,7 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
   const outcome = inconclusive ? 'inconclusive' : regression ? 'regression' : 'observed';
 
   const report: WarmStartMemoryRegressionReport = {
-    version: 1,
+    version: 2,
     outcome,
     context: getWarmStartMemoryRegressionReportContextFromEnv(),
     protocol: {
@@ -208,9 +208,11 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
 
   if (inconclusive) {
     log.warning(
-      `Warm-start memory comparison inconclusive: ${validPairs.length}/${
+      `Warm-start memory comparison inconclusive: ${postForcedGcHeapRule.pairCount}/${
         comparisonRun?.pairs ?? 0
-      } valid pairs after ${pairedBenchmark?.attemptedPairs ?? 0} attempts. Report: ${reportPath}`
+      } valid post-forced-GC pairs after ${
+        pairedBenchmark?.attemptedPairs ?? 0
+      } attempts. Report: ${reportPath}`
     );
     return;
   }

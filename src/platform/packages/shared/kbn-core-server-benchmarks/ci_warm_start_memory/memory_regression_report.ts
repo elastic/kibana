@@ -31,7 +31,7 @@ export interface WarmStartMemoryRegressionReportContext {
 }
 
 export interface WarmStartMemoryRegressionReport {
-  readonly version: 1;
+  readonly version: 2;
   readonly outcome: 'observed' | 'inconclusive' | 'regression';
   readonly context?: WarmStartMemoryRegressionReportContext;
   readonly protocol: {

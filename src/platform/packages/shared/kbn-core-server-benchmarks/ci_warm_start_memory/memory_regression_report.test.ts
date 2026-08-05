@@ -26,17 +26,15 @@ import {
 } from './memory_regression_report';
 
 const report: WarmStartMemoryRegressionReport = {
-  version: 1,
+  version: 2,
   outcome: 'inconclusive',
-  enforcement: 'observe',
   protocol: {
     monitorIntervalMs: 250,
     postReadySettlingMs: 30_000,
     tailSampleCount: 8,
     forcedGcTimeoutMs: 30_000,
     confidence: 0.99,
-    observationThresholdBytes: 5 * 1024 * 1024,
-    blockingThresholdBytes: 20 * 1024 * 1024,
+    thresholdBytes: 5 * 1024 * 1024,
   },
   comparison: {
     seed: 'test',
@@ -47,8 +45,8 @@ const report: WarmStartMemoryRegressionReport = {
   },
   starts: [{ attempt: 0, side: 'baseline', status: 'failed' }],
   pairs: [],
-  tailHeapUsed: { pairCount: 0, wouldTrigger: false },
-  postForcedGcHeapUsed: { pairCount: 0, wouldTrigger: false },
+  tailHeapUsed: { pairCount: 0 },
+  postForcedGcHeapUsed: { pairCount: 0 },
   diagnostics: {},
 };
 
