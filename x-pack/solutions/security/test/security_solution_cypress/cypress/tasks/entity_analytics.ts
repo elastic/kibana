@@ -64,7 +64,9 @@ const ENTITY_STORE_ENTITIES_URL = '/api/security/entity_store/entities*';
 const entityStoreDsl = (entityIndex: string) =>
   JSON.stringify({
     index: [entityIndex],
-    body: { query: { bool: { filter: [{ exists: { field: 'entity.risk.calculated_score_norm' } }] } } },
+    body: {
+      query: { bool: { filter: [{ exists: { field: 'entity.risk.calculated_score_norm' } }] } },
+    },
   });
 
 /**
@@ -86,15 +88,39 @@ export const mockEntityStoreRiskScores = () => {
     const hostRecord = {
       '@timestamp': '2025-01-01T00:00:00.000Z',
       'host.name': 'mock-host',
-      entity: { name: 'mock-host', type: 'node', risk: { calculated_score_norm: 70, calculated_level: 'High' } },
-      host: { name: 'mock-host', risk: { calculated_score_norm: 70, calculated_level: 'High', rule_risks: [], multipliers: [] } },
+      entity: {
+        name: 'mock-host',
+        type: 'node',
+        risk: { calculated_score_norm: 70, calculated_level: 'High' },
+      },
+      host: {
+        name: 'mock-host',
+        risk: {
+          calculated_score_norm: 70,
+          calculated_level: 'High',
+          rule_risks: [],
+          multipliers: [],
+        },
+      },
     };
 
     const userRecord = {
       '@timestamp': '2025-01-01T00:00:00.000Z',
       'user.name': 'mock-user',
-      entity: { name: 'mock-user', type: 'node', risk: { calculated_score_norm: 60, calculated_level: 'Medium' } },
-      user: { name: 'mock-user', risk: { calculated_score_norm: 60, calculated_level: 'Medium', rule_risks: [], multipliers: [] } },
+      entity: {
+        name: 'mock-user',
+        type: 'node',
+        risk: { calculated_score_norm: 60, calculated_level: 'Medium' },
+      },
+      user: {
+        name: 'mock-user',
+        risk: {
+          calculated_score_norm: 60,
+          calculated_level: 'Medium',
+          rule_risks: [],
+          multipliers: [],
+        },
+      },
     };
 
     const records = isHost ? [hostRecord] : isUser ? [userRecord] : [];
