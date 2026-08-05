@@ -483,10 +483,9 @@ export function ComposeDiscoverFlyout({
     () =>
       getTimeFieldResolutionQuery(
         uiState.childOpen ? sandboxQuery : watchedQuery,
-        isAlert,
         uiState.queryCommitted || uiState.childOpen
       ),
-    [uiState.childOpen, uiState.queryCommitted, sandboxQuery, watchedQuery, isAlert]
+    [uiState.childOpen, uiState.queryCommitted, sandboxQuery, watchedQuery]
   );
 
   const handleResolvedTimeFieldChange = useCallback(

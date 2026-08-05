@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import type { RuleQuery } from '../../../form/types';
 
 const QUERY_REQUIRED_ERROR = i18n.translate(
@@ -24,7 +23,6 @@ const QUERY_REQUIRED_ERROR = i18n.translate(
  */
 export const validateCommittedQuery = (
   query: RuleQuery,
-  _kind: RuleKind,
   queryCommitted: boolean
 ): true | string => {
   if (!queryCommitted) {
@@ -38,8 +36,5 @@ export const validateCommittedQuery = (
 };
 
 /** Shared boolean gate for footer submit / step helpers. */
-export const isCommittedQueryValid = (
-  query: RuleQuery,
-  kind: RuleKind,
-  queryCommitted: boolean
-): boolean => validateCommittedQuery(query, kind, queryCommitted) === true;
+export const isCommittedQueryValid = (query: RuleQuery, queryCommitted: boolean): boolean =>
+  validateCommittedQuery(query, queryCommitted) === true;

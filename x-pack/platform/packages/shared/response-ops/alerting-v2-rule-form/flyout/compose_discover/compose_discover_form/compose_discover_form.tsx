@@ -214,7 +214,6 @@ export const ComposeDiscoverForm = ({
             value={isAlert ? 'alert' : 'signal'}
             onChange={onKindChange}
             disabled={(!builderType && !state.queryCommitted) || isEditing || state.childOpen}
-            compressed
             data-test-subj="composeDiscoverModeSelect"
           />
           {isAlert && (

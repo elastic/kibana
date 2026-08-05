@@ -277,6 +277,17 @@ describe('ComposeDiscoverFooter', () => {
       expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
     });
 
+    it('disables Next for an empty standalone signal in edit mode', () => {
+      renderFooter({
+        stateOverrides: { queryCommitted: true, mode: 'edit' },
+        formValues: {
+          kind: 'signal',
+          query: { format: 'standalone', breach: { query: '' } },
+        },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
+    });
+
     it('enables Next for a composed alert with base but no breach segment (conditionless rule)', () => {
       renderFooter({
         stateOverrides: { queryCommitted: true, mode: 'edit' },

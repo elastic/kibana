@@ -20,35 +20,22 @@ const standaloneQuery: RuleQuery = {
 };
 
 describe('getTimeFieldResolutionQuery', () => {
-  it('returns the base query in alert mode when committed', () => {
-    expect(getTimeFieldResolutionQuery(composedQuery, true, true)).toBe(composedQuery.base);
+  it('returns the base query for a committed composed query', () => {
+    expect(getTimeFieldResolutionQuery(composedQuery, true)).toBe(composedQuery.base);
   });
 
-  it('returns the breach query for standalone signal rules when committed', () => {
-    expect(getTimeFieldResolutionQuery(standaloneQuery, false, true)).toBe(
-      standaloneQuery.breach.query
-    );
-  });
-
-  it('returns the composed base for signal rules during authoring when committed', () => {
-    expect(getTimeFieldResolutionQuery(composedQuery, false, true)).toBe(composedQuery.base);
-  });
-
-  it('returns the breach query for standalone alert rules when committed', () => {
-    expect(getTimeFieldResolutionQuery(standaloneQuery, true, true)).toBe(
-      standaloneQuery.breach.query
-    );
+  it('returns the breach query for a committed standalone query', () => {
+    expect(getTimeFieldResolutionQuery(standaloneQuery, true)).toBe(standaloneQuery.breach.query);
   });
 
   it('returns empty when the query is not committed', () => {
-    expect(getTimeFieldResolutionQuery(composedQuery, true, false)).toBe('');
+    expect(getTimeFieldResolutionQuery(composedQuery, false)).toBe('');
   });
 
   it('returns empty when the candidate query has no FROM clause', () => {
     expect(
       getTimeFieldResolutionQuery(
         { format: 'composed', base: '', breach: { segment: '| WHERE count > 1' } },
-        true,
         true
       )
     ).toBe('');

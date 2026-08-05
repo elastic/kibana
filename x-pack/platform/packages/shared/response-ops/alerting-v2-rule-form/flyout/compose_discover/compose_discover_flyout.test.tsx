@@ -481,7 +481,7 @@ describe('ComposeDiscoverFlyout', () => {
       expect(getLatestFormProps().state.step).toBe(1);
     });
 
-    it('stays on alert condition step when validateStep fails', async () => {
+    it('stays on alert condition step when the committed query is invalid', () => {
       renderFlyout({
         mode: 'edit',
         ruleId: 'rule-1',
@@ -500,10 +500,7 @@ describe('ComposeDiscoverFlyout', () => {
         },
       });
 
-      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
-
-      await clickComposeDiscoverNext();
-
+      expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
       expect(getLatestFormProps().state.step).toBe(0);
     });
   });

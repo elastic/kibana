@@ -22,7 +22,6 @@ interface ModeSelectProps {
   value: RuleKind;
   onChange: (kind: RuleKind) => void;
   disabled?: boolean;
-  compressed?: boolean;
   'data-test-subj'?: string;
 }
 

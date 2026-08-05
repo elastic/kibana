@@ -80,7 +80,6 @@ export const ComposeDiscoverFooter = ({
   onFinalSubmit,
   onYamlSave,
 }: ComposeDiscoverFooterProps): React.ReactElement => {
-  const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const watchedQuery = useWatch<FormValues, 'query'>({ name: 'query' });
   const watchedTimeField = useWatch<FormValues, 'timeField'>({ name: 'timeField' });
 
@@ -98,8 +97,7 @@ export const ComposeDiscoverFooter = ({
   const invalidCommittedQuery =
     isConditionStep &&
     !isBuilderStep &&
-    isAlert &&
-    !isCommittedQueryValid(watchedQuery, 'alert', uiState.queryCommitted);
+    !isCommittedQueryValid(watchedQuery, uiState.queryCommitted);
 
   const nextDisabled =
     (!isBuilderMode && uiState.childOpen) ||
@@ -118,8 +116,7 @@ export const ComposeDiscoverFooter = ({
   };
 
   const submitDisabled =
-    hasValidationErrors ||
-    !isCommittedQueryValid(watchedQuery, isAlert ? 'alert' : 'signal', uiState.queryCommitted);
+    hasValidationErrors || !isCommittedQueryValid(watchedQuery, uiState.queryCommitted);
   const submitLabel = isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL;
 
   if (uiState.yamlMode) {

@@ -16,11 +16,7 @@ const FROM_QUERY_PATTERN = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i;
  * composed queries can exist during authoring for either mode. Empty when the
  * query is not committed or has no FROM.
  */
-export function getTimeFieldResolutionQuery(
-  query: RuleQuery,
-  _isAlert: boolean,
-  queryCommitted: boolean
-): string {
+export function getTimeFieldResolutionQuery(query: RuleQuery, queryCommitted: boolean): string {
   const baseQuery = query.format === 'composed' ? query.base : '';
   const fullQuery = query.format === 'standalone' ? query.breach.query : '';
   const candidate = baseQuery || fullQuery;
