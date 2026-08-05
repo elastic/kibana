@@ -147,8 +147,10 @@ export async function ensureWorkflowStorageReady(storage: WorkflowStorage): Prom
       created_at: now,
       updated_at: now,
     },
-    refresh: false,
+    // wait_for so the adapter's search-first delete can find the doc. refresh:
+    // false leaves a phantom warmup workflow in the default-space list.
+    refresh: 'wait_for',
   });
 
-  await client.delete({ id: warmupId, refresh: false });
+  await client.delete({ id: warmupId, refresh: 'wait_for' });
 }
