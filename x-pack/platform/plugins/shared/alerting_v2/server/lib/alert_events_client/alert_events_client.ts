@@ -87,12 +87,15 @@ export class AlertEventsClient {
    * Shared by POST /api/alerting/v2/alerts and POST /api/alerting/v2/alerts/:source.
    * Callers must pass a normalized payload with `source` already set.
    */
-  public async ingestAlertEvent(event: CreateAlertEventData): Promise<CreateAlertEventResponse> {
+  public async ingestAlertEvent(
+    event: CreateAlertEventData,
+    { abortSignal }: { abortSignal?: AbortSignal } = {}
+  ): Promise<CreateAlertEventResponse> {
     const { source } = event;
     const groupHash = getGroupHash(event, this.spaceId);
 
     const episodeStatus = event.alert_status ?? alertEpisodeStatus.active;
-    const episodeId = await this.resolveEpisodeId(groupHash, episodeStatus);
+    const episodeId = await this.resolveEpisodeId(groupHash, episodeStatus, abortSignal);
 
     const atTimestamp = event.timestamp ?? new Date().toISOString();
 
@@ -149,7 +152,11 @@ export class AlertEventsClient {
     };
   }
 
-  private async resolveEpisodeId(groupHash: string, nextStatus: string): Promise<string> {
+  private async resolveEpisodeId(
+    groupHash: string,
+    nextStatus: string,
+    abortSignal?: AbortSignal
+  ): Promise<string> {
     const rows = await this.queryService.executeQueryRows<{
       last_episode_id: string;
       last_episode_status: string;
@@ -161,6 +168,7 @@ export class AlertEventsClient {
             BY group_hash
           | KEEP last_episode_id, last_episode_status
           | LIMIT 1`,
+      abortSignal,
     });
 
     if (rows.length === 0 || !rows[0].last_episode_id) {

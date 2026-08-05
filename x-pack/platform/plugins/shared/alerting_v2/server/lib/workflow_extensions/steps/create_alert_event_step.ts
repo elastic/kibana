@@ -40,7 +40,9 @@ export function getCreateAlertEventStepDefinition(getLogger: () => Logger) {
       );
 
       try {
-        const result = await alertEventsClient.ingestAlertEvent(context.input);
+        const result = await alertEventsClient.ingestAlertEvent(context.input, {
+          abortSignal: context.abortSignal,
+        });
         return { output: result };
       } catch (error) {
         throw new ExecutionError({
