@@ -101,6 +101,21 @@ class IacProviderServiceImpl implements IacProviderService {
       throw new IacProviderConfigError(`invalid TLS configuration: ${error.message}`);
     }
 
+    const url = `${iacProviderConfig.api.url}${RENDER_ENDPOINT}`;
+    const headers = {
+      'Content-type': 'application/json',
+      ...(traceId ? { 'X-Request-ID': traceId } : {}),
+      'x-elastic-internal-origin': 'Kibana',
+    };
+    logger.debug(
+      `[IaC Provider] Render request config ${this.createRequestConfigDebug(
+        url,
+        headers,
+        request,
+        iacProviderConfig
+      )}`
+    );
+
     const startTime = Date.now();
     const abortController = new AbortController();
     // The timeout must cover reading the body too, not just the response
@@ -108,13 +123,9 @@ class IacProviderServiceImpl implements IacProviderService {
     // request handler indefinitely.
     const timeout = setTimeout(() => abortController.abort(), RENDER_TIMEOUT_MS);
     try {
-      const response = await undiciFetch(`${iacProviderConfig.api.url}${RENDER_ENDPOINT}`, {
+      const response = await undiciFetch(url, {
         method: 'POST',
-        headers: {
-          'Content-type': 'application/json',
-          ...(traceId ? { 'X-Request-ID': traceId } : {}),
-          'x-elastic-internal-origin': 'Kibana',
-        },
+        headers,
         body: JSON.stringify(request),
         signal: abortController.signal,
         dispatcher,
@@ -128,6 +139,10 @@ class IacProviderServiceImpl implements IacProviderService {
       const rendered = (await response.json()) as IacProviderRenderResponse;
       logger.info(
         `[IaC Provider] Render succeeded for provider ${request.provider} in ${latencyMs}ms`
+      );
+      // artifactUrl embeds signing credentials — only the expiry is loggable.
+      logger.debug(
+        `[IaC Provider] Render response: status ${response.status}, artifact expires at ${rendered.expiresAt} [Request Id: ${traceId}]`
       );
       return rendered;
     } catch (error) {
@@ -168,6 +183,35 @@ class IacProviderServiceImpl implements IacProviderService {
       status,
       codes
     );
+  }
+
+  /**
+   * Serializes the outbound request for debug logging, mirroring the
+   * Agentless API service's createRequestConfigDebug. The request body is
+   * safe to log in full; TLS material is reduced to a REDACTED presence
+   * marker so the log shows which pieces are configured without leaking
+   * paths or key material.
+   */
+  private createRequestConfigDebug(
+    url: string,
+    headers: Record<string, string>,
+    request: IacProviderRenderRequest,
+    iacProviderConfig: IacProviderConfig | undefined
+  ) {
+    const tls = iacProviderConfig?.api?.tls;
+    return JSON.stringify({
+      url,
+      method: 'POST',
+      headers,
+      timeoutMs: RENDER_TIMEOUT_MS,
+      body: request,
+      tls: {
+        certificate: tls?.certificate ? 'REDACTED' : undefined,
+        key: tls?.key ? 'REDACTED' : undefined,
+        ca: tls?.ca ? 'REDACTED' : undefined,
+        rejectUnauthorized: true,
+      },
+    });
   }
 
   private createDispatcher(iacProviderConfig: IacProviderConfig | undefined) {

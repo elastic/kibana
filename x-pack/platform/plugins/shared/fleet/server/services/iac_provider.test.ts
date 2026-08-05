@@ -162,6 +162,32 @@ describe('IacProviderService', () => {
     });
   });
 
+  it('logs the request config at debug with TLS material redacted', async () => {
+    mockConfig();
+    const logger = mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
+    );
+
+    await iacProviderService.renderTemplate(RENDER_REQUEST);
+
+    const debugLogged = logger.debug.mock.calls.flat().map(String).join(' ');
+    // The full outbound request is visible: URL, body, timeout…
+    expect(debugLogged).toContain('https://iac-provider.example/api/v1/render');
+    expect(debugLogged).toContain('cloud_security_posture');
+    expect(debugLogged).toContain('"timeoutMs":30000');
+    // …but TLS entries only report presence, never their configured values.
+    expect(debugLogged).toContain('"certificate":"REDACTED"');
+    expect(debugLogged).toContain('"key":"REDACTED"');
+    expect(debugLogged).toContain('"ca":"REDACTED"');
+    expect(debugLogged).not.toContain('/path/tls.crt');
+    expect(debugLogged).not.toContain('/path/tls.key');
+    expect(debugLogged).not.toContain('/path/ca.crt');
+    // The response side logs the expiry, never the artifact (also covered by
+    // the artifactUrl sweep below).
+    expect(debugLogged).toContain('artifact expires at 2026-07-28T12:00:00Z');
+  });
+
   it('never logs the artifactUrl', async () => {
     mockConfig();
     const logger = mockLogger();
