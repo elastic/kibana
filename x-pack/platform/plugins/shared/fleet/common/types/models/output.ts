@@ -97,6 +97,7 @@ interface OtlpExporterTlsConfig {
   cert_pem?: string;
   key_pem?: string;
   include_system_ca_certs_pool?: boolean;
+  include_insecure_cipher_suites?: boolean;
   min_version?: string;
   max_version?: string;
   reload_interval?: string;
@@ -126,14 +127,14 @@ interface OtlpExporterSendingQueueConfig {
 interface OtlpExporterRetryConfig {
   enabled?: boolean;
   initial_interval?: string;
+  randomization_factor?: number;
+  multiplier?: number;
   max_interval?: string;
   max_elapsed_time?: string;
-  multiplier?: number;
 }
 
 interface OtlpExporterBaseConfig {
   endpoint: string;
-  api_key?: string;
   headers?: Record<string, string>;
   timeout?: string;
   tls?: OtlpExporterTlsConfig;
@@ -152,6 +153,9 @@ export interface OtlpGrpcExporterConfig extends OtlpExporterBaseConfig {
   };
   read_buffer_size?: number;
   write_buffer_size?: number;
+  wait_for_ready?: boolean;
+  user_agent?: string;
+  authority?: string;
 }
 
 export interface OtlpHttpExporterConfig extends OtlpExporterBaseConfig {
@@ -164,19 +168,28 @@ export interface OtlpHttpExporterConfig extends OtlpExporterBaseConfig {
   profiles_endpoint?: string;
   read_buffer_size?: number;
   write_buffer_size?: number;
+  proxy_url?: string;
+  max_idle_conns?: number;
+  max_idle_conns_per_host?: number;
+  max_conns_per_host?: number;
+  idle_conn_timeout?: string;
+  disable_keep_alives?: boolean;
+  http2_read_idle_timeout?: string;
+  http2_ping_timeout?: string;
+  force_attempt_http2?: boolean;
+  compression_params?: { level?: number };
+  cookies?: { enabled?: boolean };
 }
 
 export type OtlpExporterConfig = OtlpGrpcExporterConfig | OtlpHttpExporterConfig;
 
 export interface NewOtlpOutput extends NewBaseOutput {
   type: OutputType['Otlp'];
-  api_key?: string | null;
   otlp_exporter: OtlpExporterConfig;
   secrets?: OtlpOutputSecrets;
 }
 
 interface OtlpOutputSecrets {
-  api_key?: SOSecret;
   otlp_exporter?: {
     tls?: {
       key_pem?: SOSecret;
@@ -201,6 +214,22 @@ export type UpdateOutput =
   | Partial<NewLogstashOutput>
   | Partial<KafkaOutput>
   | Partial<NewOtlpOutput>;
+
+/** UpdateOutput where `type` is guaranteed present — use when the original output's type has already been merged in. */
+export type UpdateTypedOutput =
+  | (Partial<NewElasticsearchOutput> & Pick<NewElasticsearchOutput, 'type'>)
+  | (Partial<NewRemoteElasticsearchOutput> & Pick<NewRemoteElasticsearchOutput, 'type'>)
+  | (Partial<NewLogstashOutput> & Pick<NewLogstashOutput, 'type'>)
+  | (Partial<KafkaOutput> & Pick<KafkaOutput, 'type'>)
+  | (Partial<NewOtlpOutput> & Pick<NewOtlpOutput, 'type'>);
+
+export type EsOutput = (NewElasticsearchOutput | NewRemoteElasticsearchOutput) & {
+  id: string;
+};
+
+export type BeatsOutput = NewBeatsOutput & {
+  id: string;
+};
 
 export type Output = NewOutput & {
   id: string;

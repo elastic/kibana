@@ -167,10 +167,7 @@ const ElasticSearchUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Elasticsearch)),
   hosts: schema.maybe(
-    schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
-      minSize: 1,
-      maxSize: MAX_HOSTS,
-    })
+    schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1, maxSize: MAX_HOSTS })
   ),
   preset: schema.maybe(PresetSchema),
   write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
@@ -355,18 +352,24 @@ const KafkaUpdateSchema = {
  * OTLP schemas
  */
 
+// Validated against otelcol v0.155.0:
+//   gRPC: exporter/otlpexporter/config.go + go.opentelemetry.io/collector/config/configgrpc
+//   HTTP: exporter/otlphttpexporter/config.go + go.opentelemetry.io/collector/config/confighttp
+// Deliberate exclusions: auth/middlewares (extension refs), ca_file/cert_file/key_file (inline PEM
+// only), tls.tpm (hardware credential, revisit on demand), sending_queue.storage (agent-managed).
 const OtlpExporterTlsSchema = schema.object({
   insecure: schema.maybe(schema.boolean()),
   insecure_skip_verify: schema.maybe(schema.boolean()),
-  ca_pem: schema.maybe(schema.string()),
-  cert_pem: schema.maybe(schema.string()),
-  key_pem: schema.maybe(schema.string()),
+  ca_pem: schema.maybe(schema.string({ maxLength: 65536 })),
+  cert_pem: schema.maybe(schema.string({ maxLength: 65536 })),
+  key_pem: schema.maybe(schema.string({ maxLength: 65536 })),
   include_system_ca_certs_pool: schema.maybe(schema.boolean()),
-  min_version: schema.maybe(schema.string()),
-  max_version: schema.maybe(schema.string()),
-  reload_interval: schema.maybe(schema.string()),
-  server_name_override: schema.maybe(schema.string()),
-  cipher_suites: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  include_insecure_cipher_suites: schema.maybe(schema.boolean()),
+  min_version: schema.maybe(schema.string({ maxLength: 10 })),
+  max_version: schema.maybe(schema.string({ maxLength: 10 })),
+  reload_interval: schema.maybe(schema.string({ maxLength: 64 })),
+  server_name_override: schema.maybe(schema.string({ maxLength: 256 })),
+  cipher_suites: schema.maybe(schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 })),
   curve_preferences: schema.maybe(
     schema.arrayOf(
       schema.oneOf([
@@ -391,13 +394,15 @@ const OtlpExporterSendingQueueSchema = schema.object({
   block_on_overflow: schema.maybe(schema.boolean()),
   batch: schema.maybe(
     schema.object({
-      flush_timeout: schema.maybe(schema.string()),
+      flush_timeout: schema.maybe(schema.string({ maxLength: 64 })),
       min_size: schema.maybe(schema.number()),
       max_size: schema.maybe(schema.number()),
       sizer: schema.maybe(schema.oneOf([schema.literal('items'), schema.literal('bytes')])),
       partition: schema.maybe(
         schema.object({
-          metadata_keys: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+          metadata_keys: schema.maybe(
+            schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 })
+          ),
         })
       ),
     })
@@ -406,17 +411,19 @@ const OtlpExporterSendingQueueSchema = schema.object({
 
 const OtlpExporterRetrySchema = schema.object({
   enabled: schema.maybe(schema.boolean()),
-  initial_interval: schema.maybe(schema.string()),
-  max_interval: schema.maybe(schema.string()),
-  max_elapsed_time: schema.maybe(schema.string()),
+  initial_interval: schema.maybe(schema.string({ maxLength: 64 })),
+  randomization_factor: schema.maybe(schema.number()),
   multiplier: schema.maybe(schema.number()),
+  max_interval: schema.maybe(schema.string({ maxLength: 64 })),
+  max_elapsed_time: schema.maybe(schema.string({ maxLength: 64 })),
 });
 
 const OtlpExporterBaseSchema = {
-  endpoint: schema.string(),
-  api_key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  headers: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-  timeout: schema.maybe(schema.string()),
+  endpoint: schema.string({ maxLength: 2048 }),
+  headers: schema.maybe(
+    schema.recordOf(schema.string({ maxLength: 256 }), schema.string({ maxLength: 1000 }))
+  ),
+  timeout: schema.maybe(schema.string({ maxLength: 64 })),
   tls: schema.maybe(OtlpExporterTlsSchema),
   sending_queue: schema.maybe(OtlpExporterSendingQueueSchema),
   retry_on_failure: schema.maybe(OtlpExporterRetrySchema),
@@ -433,16 +440,19 @@ const OtlpGrpcExporterSchema = schema.object({
       schema.literal(otlpCompressionType.None),
     ])
   ),
-  balancer_name: schema.maybe(schema.string()),
+  balancer_name: schema.maybe(schema.string({ maxLength: 256 })),
   keepalive: schema.maybe(
     schema.object({
-      time: schema.maybe(schema.string()),
-      timeout: schema.maybe(schema.string()),
+      time: schema.maybe(schema.string({ maxLength: 64 })),
+      timeout: schema.maybe(schema.string({ maxLength: 64 })),
       permit_without_stream: schema.maybe(schema.boolean()),
     })
   ),
   read_buffer_size: schema.maybe(schema.number()),
   write_buffer_size: schema.maybe(schema.number()),
+  wait_for_ready: schema.maybe(schema.boolean()),
+  user_agent: schema.maybe(schema.string({ maxLength: 256 })),
+  authority: schema.maybe(schema.string({ maxLength: 256 })),
 });
 
 const OtlpHttpExporterSchema = schema.object({
@@ -455,12 +465,23 @@ const OtlpHttpExporterSchema = schema.object({
     ])
   ),
   encoding: schema.maybe(schema.oneOf([schema.literal('proto'), schema.literal('json')])),
-  traces_endpoint: schema.maybe(schema.string()),
-  metrics_endpoint: schema.maybe(schema.string()),
-  logs_endpoint: schema.maybe(schema.string()),
-  profiles_endpoint: schema.maybe(schema.string()),
+  traces_endpoint: schema.maybe(schema.string({ maxLength: 2048 })),
+  metrics_endpoint: schema.maybe(schema.string({ maxLength: 2048 })),
+  logs_endpoint: schema.maybe(schema.string({ maxLength: 2048 })),
+  profiles_endpoint: schema.maybe(schema.string({ maxLength: 2048 })),
   read_buffer_size: schema.maybe(schema.number()),
   write_buffer_size: schema.maybe(schema.number()),
+  proxy_url: schema.maybe(schema.string({ maxLength: 2048 })),
+  max_idle_conns: schema.maybe(schema.number()),
+  max_idle_conns_per_host: schema.maybe(schema.number()),
+  max_conns_per_host: schema.maybe(schema.number()),
+  idle_conn_timeout: schema.maybe(schema.string({ maxLength: 64 })),
+  disable_keep_alives: schema.maybe(schema.boolean()),
+  http2_read_idle_timeout: schema.maybe(schema.string({ maxLength: 64 })),
+  http2_ping_timeout: schema.maybe(schema.string({ maxLength: 64 })),
+  force_attempt_http2: schema.maybe(schema.boolean()),
+  compression_params: schema.maybe(schema.object({ level: schema.maybe(schema.number()) })),
+  cookies: schema.maybe(schema.object({ enabled: schema.maybe(schema.boolean()) })),
 });
 
 const OtlpExporterSchema = schema.discriminatedUnion('protocol', [
@@ -470,7 +491,6 @@ const OtlpExporterSchema = schema.discriminatedUnion('protocol', [
 
 const OtlpSecretsSchema = schema.maybe(
   schema.object({
-    api_key: schema.maybe(secretRefSchema),
     otlp_exporter: schema.maybe(
       schema.object({
         tls: schema.maybe(
@@ -486,7 +506,6 @@ const OtlpSecretsSchema = schema.maybe(
 export const OtlpSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Otlp),
-  api_key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   otlp_exporter: OtlpExporterSchema,
   secrets: OtlpSecretsSchema,
 };
@@ -494,7 +513,6 @@ export const OtlpSchema = {
 export const OtlpUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Otlp)),
-  api_key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   otlp_exporter: schema.maybe(OtlpExporterSchema),
   secrets: OtlpSecretsSchema,
 };

@@ -285,10 +285,8 @@ export interface OutputSoKafkaAttributes extends BeatsSoBaseAttributes {
 
 export interface OutputSoOtlpAttributes extends OutputSoBaseAttributes {
   type: OutputType['Otlp'];
-  api_key?: string | null;
   otlp_exporter: OtlpExporterConfig;
   secrets?: {
-    api_key?: { id: string };
     otlp_exporter?: {
       tls?: {
         key_pem?: { id: string };

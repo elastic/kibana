@@ -790,7 +790,6 @@ export const getSavedObjectTypes = (
             type: 'keyword',
             index: false,
           },
-          api_key: { type: 'keyword', index: false },
           otlp_exporter: {
             type: 'object',
             dynamic: false,
