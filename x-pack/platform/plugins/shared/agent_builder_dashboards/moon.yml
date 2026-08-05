@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/test-jest-helpers'
   - '@kbn/presentation-publishing'
+  - '@kbn/react-kibana-context-render'
   - '@kbn/scout'
   - '@kbn/ui-actions-plugin'
   - '@kbn/ftr-llm-proxy'
