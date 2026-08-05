@@ -9,6 +9,7 @@ import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server
 import {
   ruleSavedObjectAttributesSchemaV1,
   ruleSavedObjectAttributesSchemaV2,
+  ruleSavedObjectAttributesSchemaV3,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 
@@ -41,9 +42,27 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '3': {
+    // Adds the server-managed `metadata.version` attribute. It is not indexed (we never
+    // search/sort/aggregate on it), so there is no mappings change. Pre-v3 rules
+    // are backfilled to `1` so every rule has a valid baseline counter; the next
+    // mutation increments from there.
+    changes: [
+      {
+        type: 'data_backfill',
+        backfillFn: (doc) => ({
+          attributes: { metadata: { ...doc.attributes.metadata, version: 1 } },
+        }),
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV2.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV2,
+    },
+  },
+  '4': {
     // Replace `artifacts[].value: string` with a structured `artifacts[].data`
     // record, removing `value` from the document. This is knowingly not
-    // rollback-safe: model version 2's schema requires `value`, so a rolled-back
+    // rollback-safe: model version 3's schema requires `value`, so a rolled-back
     // node cannot read a rule that has artifacts.
     changes: [
       {
@@ -52,8 +71,8 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
       },
     ],
     schemas: {
-      forwardCompatibility: ruleSavedObjectAttributesSchemaV2.extends({}, { unknowns: 'ignore' }),
-      create: ruleSavedObjectAttributesSchemaV2,
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV3,
     },
   },
 };

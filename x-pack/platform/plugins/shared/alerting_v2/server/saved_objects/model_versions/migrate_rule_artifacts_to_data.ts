@@ -9,7 +9,7 @@ import type { SavedObjectModelUnsafeTransformFn } from '@kbn/core-saved-objects-
 import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type {
   RuleSavedObjectAttributes,
-  RuleSavedObjectAttributesV1,
+  RuleSavedObjectAttributesV2,
 } from '../schemas/rule_saved_object_attributes';
 
 /**
@@ -26,10 +26,10 @@ const DATA_KEY_BY_ARTIFACT_TYPE: Readonly<Record<string, string>> = {
 /**
  * Replaces the legacy `artifacts[].value` with the structured `artifacts[].data`.
  *
- * Dropping `value` on purpose even if it breaks rolling back to model version 2.
+ * Dropping `value` on purpose even if it breaks rolling back to model version 3.
  */
 export const migrateRuleArtifactsToData: SavedObjectModelUnsafeTransformFn<
-  RuleSavedObjectAttributesV1,
+  RuleSavedObjectAttributesV2,
   RuleSavedObjectAttributes
 > = (document) => {
   const { artifacts, ...rest } = document.attributes;

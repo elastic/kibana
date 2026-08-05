@@ -86,7 +86,7 @@ export const statsStructureValidationEvaluator: KIQueryGenerationEvaluator = {
         issueLines.length > 0
           ? `STATS structure issues: ${issueLines.join(' | ')}`
           : `All ${statsQueries.length} STATS queries pass structural validation`,
-      details: {
+      metadata: {
         totalStatsQueries: statsQueries.length,
         perQuery: perQueryDetails,
       },

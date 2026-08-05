@@ -8,8 +8,8 @@
 import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../common/saved_object_types';
 import {
-  ruleSavedObjectAttributesSchemaV1,
   ruleSavedObjectAttributesSchemaV2,
+  ruleSavedObjectAttributesSchemaV3,
 } from '../schemas/rule_saved_object_attributes';
 import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 
@@ -106,21 +106,21 @@ describe('migrateRuleArtifactsToData', () => {
     expect(artifacts?.[0]).not.toHaveProperty('value');
   });
 
-  it('produces attributes that satisfy the model version 3 schema', () => {
+  it('produces attributes that satisfy the model version 4 schema', () => {
     const attributes = migrate([{ id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, value: 'steps' }]);
 
-    expect(() => ruleSavedObjectAttributesSchemaV2.validate(attributes)).not.toThrow();
+    expect(() => ruleSavedObjectAttributesSchemaV3.validate(attributes)).not.toThrow();
   });
 
   /**
-   * Documents the accepted trade-off of dropping `value`: model version 2 is no
+   * Documents the accepted trade-off of dropping `value`: model version 3 is no
    * longer able to read a migrated rule that has artifacts. Its
    * forwardCompatibility schema ignores the unknown `data` and then fails on the
    * `value` its artifact schema still requires. A rule without artifacts is
    * unaffected.
    */
-  describe('rollback to model version 2 (knowingly unsupported)', () => {
-    const modelVersion2Schema = ruleSavedObjectAttributesSchemaV1.extends(
+  describe('rollback to model version 3 (knowingly unsupported)', () => {
+    const modelVersion3Schema = ruleSavedObjectAttributesSchemaV2.extends(
       {},
       { unknowns: 'ignore' }
     );
@@ -130,13 +130,13 @@ describe('migrateRuleArtifactsToData', () => {
         { id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, value: 'steps' },
       ]);
 
-      expect(() => modelVersion2Schema.validate(attributes)).toThrow(
+      expect(() => modelVersion3Schema.validate(attributes)).toThrow(
         /\[artifacts\.0\.value\]: expected value of type \[string\]/
       );
     });
 
     it('can still read a migrated rule that has no artifacts', () => {
-      expect(() => modelVersion2Schema.validate(migrate())).not.toThrow();
+      expect(() => modelVersion3Schema.validate(migrate())).not.toThrow();
     });
   });
 

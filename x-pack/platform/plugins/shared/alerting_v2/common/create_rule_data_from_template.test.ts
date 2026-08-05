@@ -31,7 +31,9 @@ const exampleTemplateAttributes = {
     {
       id: 'kubernetes_otel-pod-crashloopbackoff-v2-runbook',
       type: 'runbook',
-      value: '## Pod CrashLoopBackOff\n\n### Triage Steps\n1. Identify the affected pod(s).',
+      data: {
+        content: '## Pod CrashLoopBackOff\n\n### Triage Steps\n1. Identify the affected pod(s).',
+      },
     },
   ],
   query: {

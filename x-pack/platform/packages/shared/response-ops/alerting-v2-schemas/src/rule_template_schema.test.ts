@@ -29,7 +29,9 @@ const exampleTemplateAttributes = {
     {
       id: 'kubernetes_otel-pod-crashloopbackoff-v2-runbook',
       type: 'runbook',
-      value: '## Pod CrashLoopBackOff\n\n### Triage Steps\n1. Identify the affected pod(s).',
+      data: {
+        content: '## Pod CrashLoopBackOff\n\n### Triage Steps\n1. Identify the affected pod(s).',
+      },
     },
   ],
   query: {
@@ -151,9 +153,18 @@ describe('rule template create-rule schema coupling', () => {
           "additionalProperties": false,
           "properties": Object {
             "artifacts": Object {
+              "description": "Artifacts attached to the rule, each shaped as \`{ id, type, data }\`. \`data\` carries type-specific fields: a \`runbook\` artifact requires \`data.content\` holding markdown, and a \`dashboard\` artifact requires \`data.dashboardId\` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in \`data\`.",
               "items": Object {
                 "additionalProperties": false,
                 "properties": Object {
+                  "data": Object {
+                    "additionalProperties": Object {},
+                    "description": "Structured artifact data.",
+                    "propertyNames": Object {
+                      "type": "string",
+                    },
+                    "type": "object",
+                  },
                   "id": Object {
                     "description": "Artifact identifier.",
                     "maxLength": 256,
@@ -166,17 +177,11 @@ describe('rule template create-rule schema coupling', () => {
                     "minLength": 1,
                     "type": "string",
                   },
-                  "value": Object {
-                    "description": "Artifact value.",
-                    "maxLength": 50000,
-                    "minLength": 1,
-                    "type": "string",
-                  },
                 },
                 "required": Array [
                   "id",
                   "type",
-                  "value",
+                  "data",
                 ],
                 "type": "object",
               },
