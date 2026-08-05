@@ -36688,7 +36688,6 @@
     "xpack.observability.breadcrumbs.annotationsLinkText": "Annotations",
     "xpack.observability.breadcrumbs.createLinkText": "Créer",
     "xpack.observability.breadcrumbs.editLinkText": "Modifier",
-    "xpack.observability.breadcrumbs.nightshiftLinkText": "Service de nuit",
     "xpack.observability.breadcrumbs.overviewLinkText": "Aperçu",
     "xpack.observability.breadcrumbs.rulesLinkText": "Règles",
     "xpack.observability.cases.alert.displayName": "Alertes",
