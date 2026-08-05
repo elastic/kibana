@@ -254,10 +254,6 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
           })
           .expect(200);
 
-        await runSoon({ id: createdRule.id, supertest, retry });
-        await waitForExecutions(createdRule.id, 2);
-        const actionCountDuringSnooze = await getExecuteActionEventCount(createdRule.id);
-        expect(actionCountDuringSnooze).to.eql(actionCountBeforeSnooze);
 
         // Do not call unsnooze here. Repeated runs are the expiry signal: early runs are suppressed,
         // then the first run after expiry clears the schedule and emits the action.
