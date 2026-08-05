@@ -29,7 +29,13 @@ const createToastsMock = () => ({
   addDanger: jest.fn(),
 });
 
-const createServicesMock = ({ dataSources, dataSets }: { dataSources: DataSourceName[]; dataSets: DataSetWithName[] }) => ({
+const createServicesMock = ({
+  dataSources,
+  dataSets,
+}: {
+  dataSources: DataSourceName[];
+  dataSets: DataSetWithName[];
+}) => ({
   dataSourcesClient: {
     get: jest.fn().mockResolvedValue(dataSources),
   },
