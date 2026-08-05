@@ -69,7 +69,7 @@ describe('registerBundleRoutes', () => {
 
   beforeEach(() => {
     kbnUseRspackBeforeEach = process.env.KBN_USE_RSPACK;
-    delete process.env.KBN_USE_RSPACK;
+    process.env.KBN_USE_RSPACK = 'false';
 
     router = httpServiceMock.createRouter();
     const basePath = httpServiceMock.createBasePath('/server-base-path') as unknown as BasePath;
@@ -156,12 +156,12 @@ describe('registerBundleRoutes', () => {
   });
 
   describe('rspack mode', () => {
-    describe('when KBN_USE_RSPACK is enabled', () => {
+    describe('when KBN_USE_RSPACK is unset', () => {
       let kbnUseRspackPrevious: string | undefined;
 
       beforeEach(() => {
         kbnUseRspackPrevious = process.env.KBN_USE_RSPACK;
-        process.env.KBN_USE_RSPACK = 'true';
+        delete process.env.KBN_USE_RSPACK;
       });
 
       afterEach(() => {
@@ -241,10 +241,10 @@ describe('registerBundleRoutes', () => {
       });
     });
 
-    it('when KBN_USE_RSPACK is unset, registers legacy core and per-plugin bundle routes', () => {
+    it('when KBN_USE_RSPACK is false, registers legacy core and per-plugin bundle routes', () => {
       const previous = process.env.KBN_USE_RSPACK;
       try {
-        delete process.env.KBN_USE_RSPACK;
+        process.env.KBN_USE_RSPACK = 'false';
 
         registerBundleRoutes({
           router,

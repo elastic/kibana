@@ -66,7 +66,7 @@ describe('bootstrapRenderer', () => {
 
   beforeEach(() => {
     kbnUseRspackBeforeEach = process.env.KBN_USE_RSPACK;
-    delete process.env.KBN_USE_RSPACK;
+    process.env.KBN_USE_RSPACK = 'false';
 
     themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
     auth = httpServiceMock.createAuth();
@@ -477,9 +477,9 @@ describe('bootstrapRenderer', () => {
     });
   });
 
-  describe('when KBN_USE_RSPACK is enabled', () => {
+  describe('when KBN_USE_RSPACK is unset', () => {
     beforeEach(() => {
-      process.env.KBN_USE_RSPACK = 'true';
+      delete process.env.KBN_USE_RSPACK;
       getRspackDependencyPathsMock.mockReturnValue(['rspack-dep-a', 'rspack-dep-b']);
       auth.get.mockReturnValue({
         status: 'unauthenticated' as AuthStatus,

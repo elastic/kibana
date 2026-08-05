@@ -55,8 +55,7 @@ interface RendererResult {
  * Check if RSPack mode is enabled via environment variable
  */
 export function isRspackModeEnabled(): boolean {
-  const v = process.env.KBN_USE_RSPACK;
-  return v === 'true' || v === '1';
+  return process.env.KBN_USE_RSPACK !== 'false';
 }
 
 export const bootstrapRendererFactory: BootstrapRendererFactory = ({
