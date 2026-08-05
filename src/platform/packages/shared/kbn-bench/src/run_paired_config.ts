@@ -36,10 +36,20 @@ const REQUIRED_METRICS = ['tailHeapUsed', 'tailRss', 'rssMax'] as const;
 type Side = 'baseline' | 'target';
 type PairOrder = 'baseline-target' | 'target-baseline';
 
+// Matches Java's String.hashCode multiplier; this is only a stable,
+// non-cryptographic conversion of the caller-provided seed string to an integer.
+// Reference: https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html#hashCode()
+const SEED_HASH_MULTIPLIER = 31;
+
+// Parameters for a Lehmer pseudo-random number generator.
+// Reference: https://en.wikipedia.org/wiki/Lehmer_random_number_generator#Parameters_in_common_use
+const LEHMER_MODULUS = 2_147_483_647;
+const LEHMER_MULTIPLIER = 48_271;
+
 const toSeed = (seed: string): number => {
   let value = 0;
   for (const char of seed) {
-    value = (value * 31 + char.charCodeAt(0)) % 2147483647;
+    value = (value * SEED_HASH_MULTIPLIER + char.charCodeAt(0)) % LEHMER_MODULUS;
   }
   return value || 1;
 };
@@ -47,8 +57,8 @@ const toSeed = (seed: string): number => {
 const createPrng = (seed: string): (() => number) => {
   let state = toSeed(seed);
   return () => {
-    state = (state * 48271) % 2147483647;
-    return state / 2147483647;
+    state = (state * LEHMER_MULTIPLIER) % LEHMER_MODULUS;
+    return state / LEHMER_MODULUS;
   };
 };
 
@@ -64,6 +74,8 @@ export const createPairedOrder = ({
   );
   const random = createPrng(seed);
 
+  // Fisher-Yates shuffle using the seeded PRNG above.
+  // Reference: https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
   for (let index = order.length - 1; index > 0; index--) {
     const swapIndex = Math.floor(random() * (index + 1));
     [order[index], order[swapIndex]] = [order[swapIndex], order[index]];
