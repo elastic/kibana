@@ -106,7 +106,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'enables alias resolution, links related user candidate by priority target, then preserves link when disabled',
+      'enables alias resolution, links related user candidate to the seed target, then preserves link when disabled',
       async ({ apiClient, esClient }) => {
         const seedId = 'user:seed@example.com@entra_id';
         const adId = 'user:T03KX1Z@active_directory';
@@ -140,7 +140,8 @@ apiTest.describe(
             await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
               sync: true,
             });
-            await waitForResolution(esClient, seedId, adId);
+            // Seed (asserting IDP) is always the resolution target.
+            await waitForResolution(esClient, adId, seedId);
           }
         );
 
@@ -167,7 +168,7 @@ apiTest.describe(
               }
             );
             expect(group.statusCode).toBe(200);
-            expect(group.body.target.entity.id).toBe(adId);
+            expect(group.body.target.entity.id).toBe(seedId);
             expect(group.body.group_size).toBe(2);
           }
         );
@@ -195,6 +196,8 @@ apiTest.describe(
             await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
               sync: true,
             });
+            // Candidate would carry resolved_to if the disabled rule still linked.
+            await assertNotResolved(esClient, disabledAdId);
             await assertNotResolved(esClient, disabledSeedId);
           }
         );
@@ -234,60 +237,58 @@ apiTest.describe(
       }
     );
 
-    apiTest(
-      'cascades candidate aliases to the priority target',
-      async ({ apiClient, esClient }) => {
-        const seedId = 'user:cascade@example.com@entra_id';
-        const adId = 'user:CASCADE_AD@active_directory';
-        const oktaId = 'user:cascade-okta@okta';
-        const oktaAliasId = 'user:cascade-okta-alias@okta';
+    apiTest('cascades candidate aliases to the seed target', async ({ apiClient, esClient }) => {
+      const seedId = 'user:cascade@example.com@entra_id';
+      const adId = 'user:CASCADE_AD@active_directory';
+      const oktaId = 'user:cascade-okta@okta';
+      const oktaAliasId = 'user:cascade-okta-alias@okta';
 
-        await seedUserEntity(esClient, {
-          entityId: seedId,
-          namespace: 'entra_id',
-          email: 'cascade@example.com',
-          userName: 'cascade@example.com',
-        });
-        await seedUserEntity(esClient, {
-          entityId: adId,
-          namespace: 'active_directory',
-          email: 'cascade-ad@example.com',
-          userName: 'CASCADE_AD',
-        });
-        await seedUserEntity(esClient, {
-          entityId: oktaId,
-          namespace: 'okta',
-          email: 'cascade-okta@example.com',
-          userName: 'cascade-okta-login',
-        });
-        await seedUserEntity(esClient, {
-          entityId: oktaAliasId,
-          namespace: 'okta',
-          email: 'cascade-okta-alias@example.com',
-          userName: 'cascade-okta-alias',
-        });
+      await seedUserEntity(esClient, {
+        entityId: seedId,
+        namespace: 'entra_id',
+        email: 'cascade@example.com',
+        userName: 'cascade@example.com',
+      });
+      await seedUserEntity(esClient, {
+        entityId: adId,
+        namespace: 'active_directory',
+        email: 'cascade-ad@example.com',
+        userName: 'CASCADE_AD',
+      });
+      await seedUserEntity(esClient, {
+        entityId: oktaId,
+        namespace: 'okta',
+        email: 'cascade-okta@example.com',
+        userName: 'cascade-okta-login',
+      });
+      await seedUserEntity(esClient, {
+        entityId: oktaAliasId,
+        namespace: 'okta',
+        email: 'cascade-okta-alias@example.com',
+        userName: 'cascade-okta-alias',
+      });
 
-        const preLink = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
-          headers: defaultHeaders,
-          responseType: 'json',
-          body: { target_id: oktaId, entity_ids: [oktaAliasId] },
-        });
-        expect(preLink.statusCode).toBe(200);
+      const preLink = await apiClient.post(ENTITY_STORE_ROUTES.public.RESOLUTION_LINK, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { target_id: oktaId, entity_ids: [oktaAliasId] },
+      });
+      expect(preLink.statusCode).toBe(200);
 
-        await seedEntityAnalyticsSource(esClient, {
-          email: 'cascade@example.com',
-          relatedUsers: ['CASCADE_AD', 'cascade-okta-login'],
-        });
+      await seedEntityAnalyticsSource(esClient, {
+        email: 'cascade@example.com',
+        relatedUsers: ['CASCADE_AD', 'cascade-okta-login'],
+      });
 
-        await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
-          sync: true,
-        });
+      await triggerMaintainerRun(apiClient, internalHeaders, 'automated-resolution', {
+        sync: true,
+      });
 
-        await waitForResolution(esClient, seedId, adId);
-        await waitForResolution(esClient, oktaId, adId);
-        await waitForResolution(esClient, oktaAliasId, adId);
-      }
-    );
+      // Seed is the cascade target; AD and the pre-linked Okta group retarget onto it.
+      await waitForResolution(esClient, adId, seedId);
+      await waitForResolution(esClient, oktaId, seedId);
+      await waitForResolution(esClient, oktaAliasId, seedId);
+    });
   }
 );
 
