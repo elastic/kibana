@@ -66,14 +66,18 @@ export const createInitialState = ({
 /**
  * Returns the tabs to show in the Sandbox for the current step.
  *
- * Query-authoring tabs (base/alert) are kind-agnostic — split is a property of
- * the query text, not of alert vs signal. Recovery tabs remain alert-only
- * because signal rules have no recovery step (`getStepIds(false)`).
+ * Query-authoring tabs (base/alert) are kind-agnostic in create/clone — split is
+ * a property of the query text. In edit mode kind is immutable, so signal stays
+ * on a single editor (schema requires standalone; Mode cannot flip to alert).
+ * Recovery tabs remain alert-only because signal rules have no recovery step
+ * (`getStepIds(false)`).
  *
- * create/edit/clone + alertCondition + manualSplitEnabled → ['base', 'alert']
- * create/edit/clone + alertCondition                      → undefined (unified editor; heuristic on Apply)
- * alert + recoveryCondition + custom                      → ['recovery']
- * everything else                                         → undefined (single editor)
+ * create/clone + alertCondition + manualSplitEnabled → ['base', 'alert']
+ * edit + alert + alertCondition + manualSplitEnabled → ['base', 'alert']
+ * edit + signal + alertCondition                     → undefined (unified only)
+ * create/edit/clone + alertCondition                 → undefined (unified; heuristic on Apply)
+ * alert + recoveryCondition + custom                 → ['recovery']
+ * everything else                                    → undefined (single editor)
  */
 export function getSandboxTabs(
   isAlert: boolean,
@@ -82,6 +86,10 @@ export function getSandboxTabs(
   const stepId = getStepIds(isAlert)[state.step];
 
   if (stepId === 'alertCondition') {
+    // Kind is locked on edit; signal cannot keep a composed split.
+    if (state.mode === 'edit' && !isAlert) {
+      return undefined;
+    }
     const usesUnifiedEditorByDefault =
       state.mode === 'create' || state.mode === 'edit' || state.mode === 'clone';
     if (usesUnifiedEditorByDefault) {

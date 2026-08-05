@@ -607,15 +607,18 @@ export function ComposeDiscoverFlyout({
     (kind: 'signal' | 'alert') => {
       if (kind === 'alert') {
         /*
-         * Attempt the same heuristic split as unified Apply so signal→alert can
-         * restore a composed base/condition without opening the sandbox. When
-         * the heuristic cannot isolate a condition, the query stays standalone
-         * (every returned row is a breach). Remap no-data only when invalid for
-         * the resulting shape.
+         * Default: same heuristic as unified Apply so signal→alert can restore a
+         * composed base/condition. When the user is already in manual split with a
+         * composed query, keep their tabs verbatim (do not re-split).
          */
         const currentQuery = methods.getValues('query');
-        const split = splitResultToRuleQuery(getBreachQuery(currentQuery)).query;
-        const alertQuery = resolveUnifiedAlertApplyQuery(currentQuery, split);
+        const keepManualComposed = uiState.manualSplitEnabled && currentQuery.format === 'composed';
+        const alertQuery = keepManualComposed
+          ? currentQuery
+          : resolveUnifiedAlertApplyQuery(
+              currentQuery,
+              splitResultToRuleQuery(getBreachQuery(currentQuery)).query
+            );
         setSandboxQuery(alertQuery);
         methods.setValue('query', alertQuery, { shouldDirty: true });
         const currentNoData = methods.getValues('noDataStrategy');
@@ -643,7 +646,7 @@ export function ComposeDiscoverFlyout({
       methods.setValue('kind', 'signal', { shouldDirty: true });
       dispatch({ type: 'KIND_CHANGE', kind: 'signal' });
     },
-    [methods, dispatch]
+    [methods, dispatch, uiState.manualSplitEnabled]
   );
 
   useEffect(() => {
@@ -845,11 +848,15 @@ export function ComposeDiscoverFlyout({
       queryToCommit = { format: 'standalone', breach: { query: queryToCommit.base } };
     }
     /*
-     * Signal rules must persist as standalone (schema). Split remains available during
-     * authoring, but Apply collapses any composed result into one query block.
+     * Signal + composed: schema requires standalone. In create/clone, manual-split
+     * Apply promotes to alert (via handleKindChange, which keeps the composed tabs
+     * when manualSplitEnabled). Edit locks kind, so never promote there — collapse
+     * instead. Unified Apply always collapses for signal.
      */
+    const shouldPromoteSignalToAlert =
+      !isAlert && !isEditing && queryToCommit.format === 'composed' && uiState.manualSplitEnabled;
     let collapsedForSignal = false;
-    if (!isAlert && queryToCommit.format === 'composed') {
+    if (!isAlert && queryToCommit.format === 'composed' && !shouldPromoteSignalToAlert) {
       queryToCommit = {
         format: 'standalone',
         breach: { query: getBreachQuery(queryToCommit) },
@@ -859,7 +866,9 @@ export function ComposeDiscoverFlyout({
     setSandboxQuery(queryToCommit);
 
     methods.setValue('query', queryToCommit, { shouldDirty: true });
-    if (isAlert && queryToCommit.format === 'standalone') {
+    if (shouldPromoteSignalToAlert) {
+      handleKindChange('alert');
+    } else if (isAlert && queryToCommit.format === 'standalone') {
       const currentNoData = methods.getValues('noDataStrategy');
       const resolvedNoData = resolveNoDataStrategyForQuery(currentNoData, 'standalone');
       if (resolvedNoData !== currentNoData) {
@@ -894,10 +903,12 @@ export function ComposeDiscoverFlyout({
     uiState.manualSplitEnabled,
     uiState.recoveryType,
     isAlert,
+    isEditing,
     isBuilderMode,
     methods,
     dispatch,
     cancelYamlParse,
+    handleKindChange,
   ]);
 
   const handleSubmit = methods.handleSubmit((values) => {
@@ -1055,31 +1066,40 @@ export function ComposeDiscoverFlyout({
   ]);
 
   const isAlertConditionStep = currentStep?.id === 'alertCondition';
+  /*
+   * Manual split (gear + helper copy) is available whenever kind can still become
+   * alert after Apply. Edit locks kind, so signal edit stays unified-only.
+   */
+  const canUseManualSplit =
+    !isBuilderMode &&
+    !uiState.yamlMode &&
+    supportsUnifiedEditorToggle &&
+    isAlertConditionStep &&
+    !(isEditing && !isAlert);
 
   /*
-   * Help text shown above the editor in the create/edit alert flow.
+   * Help text shown above the editor when manual split is available.
    * - Unified (default): describes the automatic split on Apply.
    * - Manual split: explains that automatic splitting is disabled and tabs are separate.
    * Alert Condition step only — not shown on recovery or later steps.
    */
-  const sandboxHelpText =
-    !isBuilderMode && !uiState.yamlMode && supportsUnifiedEditorToggle && isAlertConditionStep ? (
-      uiState.manualSplitEnabled ? (
-        <EuiText size="s" color="subdued" data-test-subj="querySandboxManualSplitHelper">
-          <FormattedMessage
-            id="xpack.alertingV2.composeDiscover.querySandbox.manualSplitHelperText"
-            defaultMessage="Define the base query and alert condition separately. Automatic query splitting is disabled in this mode."
-          />
-        </EuiText>
-      ) : (
-        <EuiText size="s" color="subdued" data-test-subj="querySandboxUnifiedHelper">
-          <FormattedMessage
-            id="xpack.alertingV2.composeDiscover.querySandbox.unifiedHelperText"
-            defaultMessage="We'll automatically identify the base query and alert condition when you apply changes."
-          />
-        </EuiText>
-      )
-    ) : undefined;
+  const sandboxHelpText = canUseManualSplit ? (
+    uiState.manualSplitEnabled ? (
+      <EuiText size="s" color="subdued" data-test-subj="querySandboxManualSplitHelper">
+        <FormattedMessage
+          id="xpack.alertingV2.composeDiscover.querySandbox.manualSplitHelperText"
+          defaultMessage="Define the base query and alert condition separately. Automatic query splitting is disabled in this mode."
+        />
+      </EuiText>
+    ) : (
+      <EuiText size="s" color="subdued" data-test-subj="querySandboxUnifiedHelper">
+        <FormattedMessage
+          id="xpack.alertingV2.composeDiscover.querySandbox.unifiedHelperText"
+          defaultMessage="We'll automatically identify the base query and alert condition when you apply changes."
+        />
+      </EuiText>
+    )
+  ) : undefined;
 
   const handleSandboxTabChange = useCallback(
     (tab: QueryTab) => {
@@ -1128,15 +1148,11 @@ export function ComposeDiscoverFlyout({
 
   /*
    * Settings (gear) menu rendered in the sandbox flyout header.
-   * Alert Condition step only — not on recovery editing.
+   * Alert Condition step only — not on recovery editing. Hidden for edit+signal
+   * (kind immutable; composed split cannot be persisted).
    */
   const sandboxHeaderActions = useMemo(() => {
-    if (
-      isBuilderMode ||
-      uiState.yamlMode ||
-      !supportsUnifiedEditorToggle ||
-      currentStep?.id !== 'alertCondition'
-    ) {
+    if (!canUseManualSplit) {
       return undefined;
     }
     return (
@@ -1147,11 +1163,8 @@ export function ComposeDiscoverFlyout({
       />
     );
   }, [
-    isBuilderMode,
-    uiState.yamlMode,
-    supportsUnifiedEditorToggle,
+    canUseManualSplit,
     uiState.manualSplitEnabled,
-    currentStep?.id,
     handleEnableManualSplit,
     handleDisableManualSplit,
   ]);

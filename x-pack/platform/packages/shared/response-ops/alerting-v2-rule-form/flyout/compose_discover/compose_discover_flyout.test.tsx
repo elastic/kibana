@@ -86,6 +86,7 @@ jest.mock('./compose_discover_form', () => {
       readRecoveryStrategy = () => getValues('recoveryStrategy');
       readNoDataStrategy = () => getValues('noDataStrategy');
       readTimeField = () => getValues('timeField');
+      readKind = () => getValues('kind');
       return (
         <div data-test-subj="composeDiscoverFormMock">
           {/* Keep query rules mounted so validateStep → trigger(['query']) can fail. */}
@@ -127,6 +128,7 @@ let readCommittedQuery: (() => RuleQuery) | undefined;
 let readRecoveryStrategy: (() => FormValues['recoveryStrategy']) | undefined;
 let readNoDataStrategy: (() => FormValues['noDataStrategy']) | undefined;
 let readTimeField: (() => FormValues['timeField']) | undefined;
+let readKind: (() => FormValues['kind']) | undefined;
 
 jest.mock('./query_sandbox_flyout', () => ({
   QuerySandboxFlyout: (props: SandboxFlyoutMockProps) => {
@@ -319,6 +321,7 @@ describe('ComposeDiscoverFlyout', () => {
     readRecoveryStrategy = undefined;
     readNoDataStrategy = undefined;
     readTimeField = undefined;
+    readKind = undefined;
     mockParseYamlToFormValues = (yaml) => ({
       values: yaml ? defaultYamlFormValues : null,
       error: null,
@@ -1029,6 +1032,67 @@ describe('ComposeDiscoverFlyout', () => {
       expect(readCommittedQuery?.()).toEqual(manualSplitQuery);
     });
 
+    it('promotes signal to alert and keeps composed tabs when manual split is applied', () => {
+      renderFlyout({ mode: 'create' });
+      act(() => {
+        getLatestFormProps().onKindChange('signal');
+      });
+      expect(readKind?.()).toBe('signal');
+
+      openSandbox();
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      clickSplitBaseAndAlert();
+
+      const manualSplitQuery: RuleQuery = {
+        format: 'composed',
+        base: 'FROM custom-base',
+        breach: { segment: '| WHERE custom > 1' },
+      };
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(manualSplitQuery);
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      expect(readKind?.()).toBe('alert');
+      expect(readCommittedQuery?.()).toEqual(manualSplitQuery);
+      expect(readRecoveryStrategy?.()).toBe('no_breach');
+    });
+
+    it('collapses composed to standalone on signal unified Apply (no manual split)', () => {
+      renderFlyout({ mode: 'create' });
+      act(() => {
+        getLatestFormProps().onKindChange('signal');
+      });
+
+      openSandbox();
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      expect(readKind?.()).toBe('signal');
+      // Unified Apply may produce composed via heuristic, then signal collapses it.
+      const committed = readCommittedQuery?.();
+      expect(committed?.format).toBe('standalone');
+      if (committed?.format !== 'standalone') {
+        throw new Error('expected standalone after signal unified Apply');
+      }
+      expect(committed.breach.query).toContain('FROM logs-*');
+      expect(committed.breach.query).toContain('WHERE count > 100');
+    });
+
     it('falls back to conditionless standalone when manual split is applied with an empty alert condition', () => {
       renderFlyout({ mode: 'create' });
       openSandbox();
@@ -1058,6 +1122,38 @@ describe('ComposeDiscoverFlyout', () => {
         breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
       });
       expect(readNoDataStrategy?.()).toBe('none');
+    });
+
+    it('keeps signal kind when manual split Apply falls back to conditionless standalone', () => {
+      renderFlyout({ mode: 'create' });
+      act(() => {
+        getLatestFormProps().onKindChange('signal');
+      });
+
+      openSandbox();
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
+        });
+      });
+      clickSplitBaseAndAlert();
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'composed',
+          base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+          breach: { segment: '' },
+        });
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      expect(readKind?.()).toBe('signal');
+      expect(readCommittedQuery?.()).toEqual({
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
+      });
     });
 
     it('preserves custom recovery when applying manual split edits', () => {
@@ -1271,6 +1367,39 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.getByTestId('querySandboxUnifiedHelper')).toBeInTheDocument();
       openSandboxSettings();
       expect(screen.getByTestId('querySandboxSplitBaseAndAlert')).toBeInTheDocument();
+    });
+
+    it('hides split controls when editing a signal rule', () => {
+      renderFlyout({
+        mode: 'edit',
+        rule: {
+          id: 'rule-1',
+          kind: 'signal',
+          enabled: true,
+          metadata: { name: 'Edit signal', version: 1, owner: 'test', tags: [] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: {
+            format: 'standalone',
+            breach: {
+              query:
+                'FROM kibana_sample_data_flights | WHERE Cancelled | STATS c = COUNT(*) BY Carrier | WHERE c > 3',
+            },
+          },
+          createdBy: 'test',
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedBy: 'test',
+          updatedAt: '2026-01-01T00:00:00Z',
+        },
+      });
+
+      act(() => {
+        getLatestFormProps().dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 0, isAlert: false });
+      });
+
+      expect(screen.queryByTestId('querySandboxSettingsButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('querySandboxUnifiedHelper')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('querySandboxSplitBaseAndAlert')).not.toBeInTheDocument();
     });
 
     it('resets manual split when the sandbox is closed without Apply', () => {
@@ -1599,6 +1728,40 @@ describe('ComposeDiscoverFlyout', () => {
 
       expect(readNoDataStrategy?.()).toBe('recover');
       expect(readCommittedQuery?.()).toMatchObject({ format: 'standalone' });
+    });
+
+    it('keeps a manual composed query when switching to alert without re-splitting', () => {
+      renderFlyout({ mode: 'create' });
+      openSandbox();
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | WHERE count > 100' },
+        });
+      });
+      clickSplitBaseAndAlert();
+
+      const manualSplitQuery: RuleQuery = {
+        format: 'composed',
+        base: 'FROM custom-base',
+        breach: { segment: '| WHERE custom > 1' },
+      };
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.(manualSplitQuery);
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
+      expect(readCommittedQuery?.()).toEqual(manualSplitQuery);
+
+      // Re-enter the alert branch while manual split + composed are still set.
+      act(() => {
+        getLatestFormProps().onKindChange('alert');
+      });
+
+      expect(readKind?.()).toBe('alert');
+      expect(readCommittedQuery?.()).toEqual(manualSplitQuery);
     });
 
     it('re-splits a merged query when switching back to alert and keeps a valid noDataStrategy', () => {

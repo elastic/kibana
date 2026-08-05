@@ -278,9 +278,14 @@ describe('getSandboxTabs', () => {
     expect(getSandboxTabs(false, state)).toBeUndefined();
   });
 
-  it('returns [base, alert] for signal on alertCondition when manual split is enabled', () => {
+  it('returns [base, alert] for signal on alertCondition when manual split is enabled (create)', () => {
     const state = createState({ step: 0, mode: 'create', manualSplitEnabled: true });
     expect(getSandboxTabs(false, state)).toEqual(['base', 'alert']);
+  });
+
+  it('returns undefined for signal on alertCondition in edit even when manual split is enabled', () => {
+    const state = createState({ step: 0, mode: 'edit', manualSplitEnabled: true });
+    expect(getSandboxTabs(false, state)).toBeUndefined();
   });
 
   it('returns undefined on alertCondition step in create mode (single unified editor)', () => {
