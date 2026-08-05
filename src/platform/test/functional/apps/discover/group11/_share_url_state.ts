@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT — add to src/platform/test/functional/apps/discover/group11/_share_url_state.ts
+ */
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
