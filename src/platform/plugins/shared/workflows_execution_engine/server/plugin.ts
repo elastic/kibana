@@ -865,6 +865,8 @@ export class WorkflowsExecutionEnginePlugin
                     workflowsExecutionEngine,
                     meteringService: this.meteringService,
                     internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                    workflowExecutionRepository,
+                    stepExecutionRepository,
                   });
                 } catch (error) {
                   await markScheduledExecutionFailedAfterTaskError({
