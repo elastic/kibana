@@ -83,7 +83,7 @@ export const getTimelinesTableColumns = ({
     ...getExtendedColumns(showExtendedColumns),
     ...getIconHeaderColumns({ timelineType }),
     ...(timelineType !== TimelineTypeEnum.template ? [getSuperTimelineQueryTypeColumn()] : []),
-    ...(actionTimelineToShow.length
+    ...(actionTimelineToShow.some((a) => a !== 'selectable')
       ? getActionsColumns({
           onCreateRule,
           onCreateRuleFromEql,
