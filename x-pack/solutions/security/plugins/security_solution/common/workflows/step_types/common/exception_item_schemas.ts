@@ -79,10 +79,10 @@ const OPERAND_KEY_BY_OPERATOR: Record<
  */
 export const exceptionEntrySchema = z
   .object({
-    field: z.string().min(1),
+    field: z.string().min(1).max(1024),
     operator: exceptionEntryOperatorSchema,
-    value: z.string().min(1).optional(),
-    values: z.array(z.string().min(1)).min(1).optional(),
+    value: z.string().min(1).max(1024).optional(),
+    values: z.array(z.string().min(1).max(1024)).min(1).optional(),
     list: z
       .object({
         id: z.string().min(1),
