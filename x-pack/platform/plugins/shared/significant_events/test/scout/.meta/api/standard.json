@@ -1,5 +1,5 @@
 {
-  "sha1": "746690973c40791cd33a78571d11c7eacc1baf78",
+  "sha1": "6e995fce5faed9a8d2f5fc012aa32947d3d23740",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -153,6 +153,50 @@
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
         "line": 54,
         "column": 30
+      }
+    },
+    {
+      "id": "21848310afc801a-e01fb638ca0f6e9",
+      "title": "Significant Events plugin hard-disable (Logs Essentials) public significant events API returns 404 when the plugin is unloaded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/plugin_availability.spec.ts",
+        "line": 24,
+        "column": 17
+      }
+    },
+    {
+      "id": "21848310afc801a-5c3eced8e270bba",
+      "title": "Significant Events plugin hard-disable (Logs Essentials) availability API returns 404 when the plugin is unloaded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/plugin_availability.spec.ts",
+        "line": 34,
+        "column": 20
+      }
+    },
+    {
+      "id": "21848310afc801a-5f6e05f92b17cee",
+      "title": "Significant Events plugin loaded (Complete / classic) availability API is registered when the plugin is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/plugin_availability.spec.ts",
+        "line": 48,
+        "column": 48
       }
     },
     {
