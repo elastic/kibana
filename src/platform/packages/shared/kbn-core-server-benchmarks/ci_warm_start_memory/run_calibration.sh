@@ -212,8 +212,7 @@ download_side_artifact() {
       cd "${stage_dir}"
       bk artifacts download "${artifact_id}" \
         --build "${build_number}" \
-        --pipeline "${PIPELINE_SLUG}" \
-        --quiet
+        --pipeline "${PIPELINE_SLUG}"
     )
     mv "${stage_dir}/${ARTIFACT_FILENAME}" "${artifact_path}"
   else

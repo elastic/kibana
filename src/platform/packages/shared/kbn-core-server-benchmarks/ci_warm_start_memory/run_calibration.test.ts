@@ -58,6 +58,17 @@ describe('run_calibration.sh metadata', () => {
     }
   });
 
+  it('keeps the bk artifact fallback compatible with older bk versions', () => {
+    const script = readFileSync(RUN_CALIBRATION_SH, 'utf8');
+    const fallbackStart = script.indexOf('  elif command -v bk');
+    const fallbackEnd = script.indexOf('  else', fallbackStart);
+    const fallback = script.slice(fallbackStart, fallbackEnd);
+
+    expect(fallback).toContain('bk artifacts download "${artifact_id}"');
+    expect(fallback).toContain('--pipeline "${PIPELINE_SLUG}"');
+    expect(fallback).not.toContain('--quiet');
+  });
+
   it.each([
     ['ab', 1, 'regression', 0, 'preserving artifacts'],
     ['aa', 0, 'observed', 0, ''],
