@@ -19,13 +19,9 @@ export const HOST_SCHEMA = z
     'Host identifier — an IPv4 or IPv6 address (e.g., "8.8.8.8" or "2001:4860:4860::8888")'
   );
 
-const DOMAIN_HOSTNAME_SCHEMA = z
-  .string()
-  .min(1)
-  .max(253)
-  .regex(/^[a-zA-Z0-9.-]+$/, {
-    message: 'Must be a hostname or domain (letters, numbers, dots, and hyphens only)',
-  });
+const DOMAIN_HOSTNAME_SCHEMA = z.string().max(253).regex(z.regexes.domain, {
+  message: 'Must be a hostname or domain (e.g., "example.com")',
+});
 
 export const HOSTNAME_SCHEMA = z
   .union([z.ipv4(), z.ipv6(), DOMAIN_HOSTNAME_SCHEMA])

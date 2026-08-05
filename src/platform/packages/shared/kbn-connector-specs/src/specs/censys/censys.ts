@@ -138,7 +138,7 @@ export const CensysConnector: ConnectorSpec = {
     description: i18n.translate('connectorSpecs.censys.metadata.description', {
       defaultMessage: 'Get IP, domain and certificate data from the Censys Platform.',
     }),
-    minimumLicense: 'gold',
+    minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
@@ -147,7 +147,16 @@ export const CensysConnector: ConnectorSpec = {
       {
         type: 'bearer',
         defaults: {},
-        overrides: { meta: { token: { label: 'API Token', placeholder: 'censys_...' } } },
+        overrides: {
+          meta: {
+            token: {
+              label: i18n.translate('connectorSpecs.censys.auth.bearer.token.label', {
+                defaultMessage: 'API Token',
+              }),
+              placeholder: 'censys_...',
+            },
+          },
+        },
       },
     ],
   },
@@ -159,7 +168,9 @@ export const CensysConnector: ConnectorSpec = {
         .uuid({ message: 'Organization ID must be a valid UUID' })
         .describe('Censys organization ID')
         .meta({
-          label: 'Organization ID',
+          label: i18n.translate('connectorSpecs.censys.config.organizationId.label', {
+            defaultMessage: 'Organization ID',
+          }),
           widget: 'text',
           placeholder: '',
         }),
