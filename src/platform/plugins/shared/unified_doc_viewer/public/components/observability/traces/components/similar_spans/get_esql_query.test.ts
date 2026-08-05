@@ -8,11 +8,15 @@
  */
 
 import { esql } from '@elastic/esql';
+import { appendWhereCommand } from '../../../../../utils/esql_expressions';
 import { getEsqlQuery } from './get_esql_query';
 
 const render = (condition: ReturnType<typeof getEsqlQuery>): string => {
   const query = esql.from('index');
-  return (condition ? query.where`${condition}` : query).print('pipe-multiline');
+  if (condition) {
+    appendWhereCommand(query, condition);
+  }
+  return query.print('pipe-multiline');
 };
 
 describe('getEsqlQuery', () => {
@@ -57,6 +61,21 @@ describe('getEsqlQuery', () => {
     );
 
     expect(result).toEqual(esql.from('index').print('pipe-multiline'));
+  });
+
+  it('preserves backslashes in span names without double-escaping', () => {
+    const result = render(
+      getEsqlQuery({
+        serviceName: 'orders-service',
+        spanName: 'C:\\temp\\new.cs',
+        transactionName: undefined,
+        transactionType: undefined,
+      })
+    );
+
+    expect(result).toEqual(
+      'FROM index\n  | WHERE service.name == "orders-service" AND span.name == "C:\\\\temp\\\\new.cs"'
+    );
   });
 
   it('returns empty query if everything is undefined', () => {

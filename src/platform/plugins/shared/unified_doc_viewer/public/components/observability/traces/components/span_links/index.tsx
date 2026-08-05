@@ -20,7 +20,6 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
-import { esql } from '@elastic/esql';
 import {
   OTEL_LINKS_SPAN_ID,
   OTEL_LINKS_TRACE_ID,
@@ -34,7 +33,13 @@ import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import { ContentFrameworkSection } from '../../../../content_framework/lazy_content_framework_section';
-import { esqlColumn } from '../../../../../utils/esql_column';
+import {
+  esqlAnd,
+  esqlFunction,
+  esqlIn,
+  esqlOr,
+  esqlString,
+} from '../../../../../utils/esql_expressions';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getColumns } from './get_columns';
 import { useFetchSpanLinks } from './use_fetch_span_links';
@@ -231,7 +236,10 @@ export function getIncomingSpanLinksESQL(traceId: string, docId: string): ESQLAs
   const otelQuery = `${OTEL_LINKS_TRACE_ID}:${traceId} AND ${OTEL_LINKS_SPAN_ID}:${docId}`;
   const spanLinksQuery = `${SPAN_LINKS_TRACE_ID}:${traceId} AND ${SPAN_LINKS_SPAN_ID}:${docId}`;
 
-  return esql.exp`QSTR(${esql.str(otelQuery)}) OR QSTR(${esql.str(spanLinksQuery)})`;
+  return esqlOr([
+    esqlFunction('QSTR', [esqlString(otelQuery)]),
+    esqlFunction('QSTR', [esqlString(spanLinksQuery)]),
+  ]);
 }
 
 export function getOutgoingSpanLinksESQL(
@@ -250,10 +258,5 @@ export function getOutgoingSpanLinksESQL(
     spanIds.push(spanId);
   });
 
-  const traceIdLiterals = traceIds.map((id) => esql.str(id));
-  const spanIdLiterals = spanIds.map((id) => esql.str(id));
-
-  return esql.exp`${esqlColumn(TRACE_ID_FIELD)} IN (${traceIdLiterals}) AND ${esqlColumn(
-    SPAN_ID_FIELD
-  )} IN (${spanIdLiterals})`;
+  return esqlAnd([esqlIn(TRACE_ID_FIELD, traceIds), esqlIn(SPAN_ID_FIELD, spanIds)]);
 }

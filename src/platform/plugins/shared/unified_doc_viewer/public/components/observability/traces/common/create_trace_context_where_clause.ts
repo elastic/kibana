@@ -6,11 +6,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Builder, esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import { SPAN_ID_FIELD, TRACE_ID_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
 import { PROCESSOR_EVENT, ERROR_LOG_LEVEL, OTEL_EVENT_NAME } from '@kbn/apm-types';
-import { esqlColumn } from '../../../../utils/esql_column';
+import {
+  esqlAnd,
+  esqlEquals,
+  esqlFunction,
+  esqlOr,
+  esqlString,
+} from '../../../../utils/esql_expressions';
 
 const createBaseTraceContextFilters = ({
   traceId,
@@ -21,27 +26,19 @@ const createBaseTraceContextFilters = ({
   spanId?: string;
   transactionId?: string;
 }): ESQLAstExpression => {
-  const traceFilter = esql.exp`${esqlColumn(TRACE_ID_FIELD)} == ${esql.str(traceId)}`;
+  const traceFilter = esqlEquals(TRACE_ID_FIELD, traceId);
 
   if (transactionId && spanId) {
-    return Builder.expression.func.binary('and', [
+    return esqlAnd([
       traceFilter,
-      esql.exp`${esqlColumn(TRANSACTION_ID_FIELD)} == ${esql.str(transactionId)} OR ${esqlColumn(
-        SPAN_ID_FIELD
-      )} == ${esql.str(spanId)}`,
+      esqlOr([esqlEquals(TRANSACTION_ID_FIELD, transactionId), esqlEquals(SPAN_ID_FIELD, spanId)]),
     ]);
   }
   if (transactionId) {
-    return Builder.expression.func.binary('and', [
-      traceFilter,
-      esql.exp`${esqlColumn(TRANSACTION_ID_FIELD)} == ${esql.str(transactionId)}`,
-    ]);
+    return esqlAnd([traceFilter, esqlEquals(TRANSACTION_ID_FIELD, transactionId)]);
   }
   if (spanId) {
-    return Builder.expression.func.binary('and', [
-      traceFilter,
-      esql.exp`${esqlColumn(SPAN_ID_FIELD)} == ${esql.str(spanId)}`,
-    ]);
+    return esqlAnd([traceFilter, esqlEquals(SPAN_ID_FIELD, spanId)]);
   }
 
   return traceFilter;
@@ -75,7 +72,7 @@ export const createTraceContextWhereClauseForErrors = ({
     `${OTEL_EVENT_NAME}: "error" `,
   ];
 
-  const kqlFilter = esql.exp`KQL(${esql.str(conditions.join(' OR '))})`;
+  const kqlFilter = esqlFunction('KQL', [esqlString(conditions.join(' OR '))]);
 
-  return Builder.expression.func.binary('and', [traceContext, kqlFilter]);
+  return esqlAnd([traceContext, kqlFilter]);
 };

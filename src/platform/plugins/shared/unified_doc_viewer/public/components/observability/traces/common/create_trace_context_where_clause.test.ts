@@ -9,13 +9,17 @@
 
 import { esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
+import { appendWhereCommand } from '../../../../utils/esql_expressions';
 import {
   createTraceContextWhereClause,
   createTraceContextWhereClauseForErrors,
 } from './create_trace_context_where_clause';
 
-const render = (condition: ESQLAstExpression): string =>
-  esql.from('foo-*').where`${condition}`.print('pipe-multiline');
+const render = (condition: ESQLAstExpression): string => {
+  const query = esql.from('foo-*');
+  appendWhereCommand(query, condition);
+  return query.print('pipe-multiline');
+};
 
 describe('createTraceContextWhereClause', () => {
   it('returns a where AST node with only traceId', () => {
@@ -47,6 +51,11 @@ describe('createTraceContextWhereClause', () => {
     expect(result).toEqual(
       'FROM foo-*\n  | WHERE trace.id == "abc123" AND (transaction.id == "txn789" OR span.id == "span456")'
     );
+  });
+
+  it('preserves backslash-then-letter sequences in ids without double-escaping', () => {
+    const result = render(createTraceContextWhereClause({ traceId: 'a\\nb', spanId: 'c\\td' }));
+    expect(result).toEqual('FROM foo-*\n  | WHERE trace.id == "a\\\\nb" AND span.id == "c\\\\td"');
   });
 });
 

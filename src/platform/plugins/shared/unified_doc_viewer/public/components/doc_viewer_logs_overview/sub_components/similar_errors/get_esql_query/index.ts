@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Builder, esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import { fieldConstants } from '@kbn/discover-utils';
 import { esqlColumn } from '../../../../../utils/esql_column';
+import {
+  esqlAnd,
+  esqlEquals,
+  esqlFunction,
+  esqlString,
+} from '../../../../../utils/esql_expressions';
 
 interface ErrorField {
   fieldName: string;
@@ -37,35 +42,33 @@ export function getEsqlQuery({
   }
 
   const conditions: ESQLAstExpression[] = [
-    esql.exp`${esqlColumn(fieldConstants.SERVICE_NAME_FIELD)} == ${esql.str(serviceName)}`,
+    esqlEquals(fieldConstants.SERVICE_NAME_FIELD, serviceName),
   ];
 
   if (culprit) {
-    conditions.push(
-      esql.exp`${esqlColumn(fieldConstants.ERROR_CULPRIT_FIELD)} == ${esql.str(culprit)}`
-    );
+    conditions.push(esqlEquals(fieldConstants.ERROR_CULPRIT_FIELD, culprit));
   }
 
   if (message?.value !== undefined && message?.fieldName) {
     const messageValue = String(message.value);
-    const messageColumn = esqlColumn(message.fieldName);
     conditions.push(
       needsNormalization(messageValue)
-        ? esql.exp`MATCH_PHRASE(${messageColumn}, ${esql.str(messageValue)})`
-        : esql.exp`${messageColumn} == ${esql.str(messageValue)}`
+        ? esqlFunction('MATCH_PHRASE', [esqlColumn(message.fieldName), esqlString(messageValue)])
+        : esqlEquals(message.fieldName, messageValue)
     );
   }
 
   if (type?.value !== undefined && type?.fieldName) {
-    const typeColumn = esqlColumn(type.fieldName);
     if (Array.isArray(type.value)) {
       conditions.push(
-        ...type.value.map((val) => esql.exp`MATCH(${typeColumn}, ${esql.str(String(val))})`)
+        ...type.value.map((val) =>
+          esqlFunction('MATCH', [esqlColumn(type.fieldName), esqlString(String(val))])
+        )
       );
     } else {
-      conditions.push(esql.exp`${typeColumn} == ${esql.str(type.value)}`);
+      conditions.push(esqlEquals(type.fieldName, type.value));
     }
   }
 
-  return conditions.reduce((left, right) => Builder.expression.func.binary('and', [left, right]));
+  return esqlAnd(conditions);
 }

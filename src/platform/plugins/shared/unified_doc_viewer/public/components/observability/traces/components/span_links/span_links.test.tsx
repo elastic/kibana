@@ -18,6 +18,7 @@ import {
   SPAN_LINKS_TRACE_ID,
   SPAN_LINKS_SPAN_ID,
 } from '@kbn/discover-utils';
+import { appendWhereCommand } from '../../../../../utils/esql_expressions';
 
 // Mock dependencies
 jest.mock('../../../../../hooks/use_data_sources', () => ({
@@ -178,8 +179,14 @@ describe('SpanLinks', () => {
   });
 });
 
-const renderClause = (condition: ESQLAstExpression | undefined): string | undefined =>
-  condition ? esql.from('apm-traces-*').where`${condition}`.print('pipe-multiline') : undefined;
+const renderClause = (condition: ESQLAstExpression | undefined): string | undefined => {
+  if (!condition) {
+    return undefined;
+  }
+  const query = esql.from('apm-traces-*');
+  appendWhereCommand(query, condition);
+  return query.print('pipe-multiline');
+};
 
 describe('getOutgoingSpanLinksESQL', () => {
   it('builds an IN query for multiple links', () => {
@@ -203,6 +210,14 @@ describe('getOutgoingSpanLinksESQL', () => {
 
   it('returns no clause when there are no links', () => {
     expect(getOutgoingSpanLinksESQL([])).toBeUndefined();
+  });
+
+  it('preserves backslash-then-letter sequences inside IN lists', () => {
+    const spanLinks = [{ traceId: 'trace\\n1', spanId: 'span\\t1' }];
+
+    expect(renderClause(getOutgoingSpanLinksESQL(spanLinks))).toEqual(
+      'FROM apm-traces-*\n  | WHERE (trace.id IN ("trace\\\\n1")) AND (span.id IN ("span\\\\t1"))'
+    );
   });
 });
 

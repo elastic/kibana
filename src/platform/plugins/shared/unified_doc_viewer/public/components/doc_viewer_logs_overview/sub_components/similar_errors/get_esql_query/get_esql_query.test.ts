@@ -9,11 +9,15 @@
 
 import { esql } from '@elastic/esql';
 import { fieldConstants } from '@kbn/discover-utils';
+import { appendWhereCommand } from '../../../../../utils/esql_expressions';
 import { getEsqlQuery } from '.';
 
 const renderQuery = (condition: ReturnType<typeof getEsqlQuery>): string => {
   const query = esql.from('index');
-  return (condition ? query.where`${condition}` : query).print('pipe-multiline');
+  if (condition) {
+    appendWhereCommand(query, condition);
+  }
+  return query.print('pipe-multiline');
 };
 
 describe('getEsqlQuery', () => {
@@ -182,6 +186,47 @@ describe('getEsqlQuery', () => {
     expect(result).toEqual(
       `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH(exception.type, "SingleError")`
     );
+  });
+
+  describe('backslash handling (parser round-trip regression)', () => {
+    it('preserves backslashes in Windows-style culprit paths without double-escaping', () => {
+      const result = renderQuery(
+        getEsqlQuery({
+          serviceName: 'payment-service',
+          culprit: 'handlers\\windows\\run.cs',
+        })
+      );
+
+      expect(result).toEqual(
+        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND ${fieldConstants.ERROR_CULPRIT_FIELD} == "handlers\\\\windows\\\\run.cs"`
+      );
+    });
+
+    it('preserves a backslash-then-letter sequence in a single == type value', () => {
+      const result = renderQuery(
+        getEsqlQuery({
+          serviceName: 'payment-service',
+          type: { fieldName: 'exception.type', value: 'System\\nRuntime' },
+        })
+      );
+
+      expect(result).toEqual(
+        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND exception.type == "System\\\\nRuntime"`
+      );
+    });
+
+    it('preserves backslashes in MATCH conditions for array type values', () => {
+      const result = renderQuery(
+        getEsqlQuery({
+          serviceName: 'payment-service',
+          type: { fieldName: 'exception.type', value: ['C:\\temp\\run.cs', 'a\\tb'] },
+        })
+      );
+
+      expect(result).toEqual(
+        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH(exception.type, "C:\\\\temp\\\\run.cs") AND MATCH(exception.type, "a\\\\tb")`
+      );
+    });
   });
 
   describe('message normalization and escaping', () => {

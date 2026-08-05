@@ -10,6 +10,7 @@
 import type { SpanLinkDetails } from '@kbn/apm-types';
 import { esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
+import { appendWhereCommand } from '../../../../../../utils/esql_expressions';
 
 import {
   createServiceNameWhereClause,
@@ -19,8 +20,11 @@ import {
 
 const indexPattern = 'apm-traces-*';
 
-const render = (condition: ESQLAstExpression): string =>
-  esql.from(indexPattern).where`${condition}`.print('pipe-multiline');
+const render = (condition: ESQLAstExpression): string => {
+  const query = esql.from(indexPattern);
+  appendWhereCommand(query, condition);
+  return query.print('pipe-multiline');
+};
 
 describe('span links where clauses', () => {
   describe('createSpanNameWhereClause', () => {
@@ -83,6 +87,18 @@ describe('span links where clauses', () => {
 
       expect(render(createTraceIdWhereClause(item))).toEqual(
         'FROM apm-traces-*\n  | WHERE trace.id == "trace456"'
+      );
+    });
+
+    it('preserves backslash-then-letter sequences without double-escaping', () => {
+      const item = {
+        spanId: 'span123',
+        traceId: 'trace\\n456',
+        details: undefined,
+      } as unknown as SpanLinkDetails;
+
+      expect(render(createTraceIdWhereClause(item))).toEqual(
+        'FROM apm-traces-*\n  | WHERE trace.id == "trace\\\\n456"'
       );
     });
   });

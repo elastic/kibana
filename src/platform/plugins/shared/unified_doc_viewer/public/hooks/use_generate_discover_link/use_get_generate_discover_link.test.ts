@@ -9,6 +9,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { Builder, esql } from '@elastic/esql';
+import { esqlEquals } from '../../utils/esql_expressions';
 import { useGetGenerateDiscoverLink } from '.';
 
 jest.mock('../../plugin', () => ({
@@ -132,5 +133,18 @@ describe('useGetGenerateDiscoverLink', () => {
 
     expect(esqlQuery).toBe(`SET unmapped_fields = "NULLIFY"; FROM logs-*
   | WHERE service.name == "payment" AND error.culprit == "charge"`);
+  });
+
+  it('preserves backslashes in the Discover href query without double-escaping', () => {
+    const { result } = renderHook(() => useGetGenerateDiscoverLink({ indexPattern: 'logs-*' }));
+    const mockGetRedirectUrl = jest.fn(() => DISCOVER_URL);
+    mockDiscoverLocator.getRedirectUrl = mockGetRedirectUrl;
+
+    result.current.generateDiscoverLink(esqlEquals('error.culprit', 'handlers\\windows\\run.cs'));
+
+    const esqlQuery = (mockGetRedirectUrl.mock.calls[0] as any)?.[0]?.query?.esql;
+
+    expect(esqlQuery).toBe(`FROM logs-*
+  | WHERE error.culprit == "handlers\\\\windows\\\\run.cs"`);
   });
 });

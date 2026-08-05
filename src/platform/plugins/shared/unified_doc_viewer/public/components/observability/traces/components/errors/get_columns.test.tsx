@@ -13,6 +13,7 @@ import '@testing-library/jest-dom';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
+import { appendWhereCommand } from '../../../../../utils/esql_expressions';
 import { getColumns } from './get_columns';
 import type { ErrorsByTraceId } from '@kbn/apm-types';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
@@ -252,8 +253,11 @@ describe('getColumns', () => {
   });
 
   describe('where clause', () => {
-    const renderWhereClause = (item: ErrorsByTraceId['traceErrors'][0]) => {
-      const columns = getColumns({ traceId, docId, source: 'apm' }) as Array<
+    const renderWhereClause = (
+      item: ErrorsByTraceId['traceErrors'][0],
+      source: ErrorsByTraceId['source'] = 'apm'
+    ) => {
+      const columns = getColumns({ traceId, docId, source }) as Array<
         EuiTableFieldDataColumnType<ErrorsByTraceId['traceErrors'][0]>
       >;
 
@@ -264,7 +268,9 @@ describe('getColumns', () => {
         whereClause: ESQLAstExpression;
       };
 
-      return esql.from('apm-errors-*').where`${whereClause}`.print('pipe-multiline');
+      const query = esql.from('apm-errors-*');
+      appendWhereCommand(query, whereClause);
+      return query.print('pipe-multiline');
     };
 
     it('filters by error.id when the item has one', () => {
@@ -283,6 +289,18 @@ describe('getColumns', () => {
       expect(renderWhereClause(itemWithoutErrorId)).toBe(
         `FROM apm-errors-*
   | WHERE trace.id == "trace-123" AND span.id == "span-456" AND processor.event == "error"`
+      );
+    });
+
+    it('preserves backslashes in the unprocessed OTel exception message without double-escaping', () => {
+      const otelItem = {
+        eventName: 'exception',
+        error: { exception: { message: 'failed at C:\\next\\run.cs' } },
+      } as unknown as ErrorsByTraceId['traceErrors'][0];
+
+      expect(renderWhereClause(otelItem, 'unprocessedOtel')).toBe(
+        `FROM apm-errors-*
+  | WHERE trace.id == "trace-123" AND span.id == "span-456" AND event.name == "exception" AND exception.message == "failed at C:\\\\next\\\\run.cs"`
       );
     });
   });

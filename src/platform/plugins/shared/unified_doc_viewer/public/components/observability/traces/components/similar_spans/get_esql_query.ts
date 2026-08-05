@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { esql } from '@elastic/esql';
 import { SERVICE_NAME, SPAN_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '@kbn/apm-types';
 import type { ESQLAstExpression } from '@elastic/esql/types';
-import { esqlColumn } from '../../../../../utils/esql_column';
+import { esqlAnd, esqlEquals } from '../../../../../utils/esql_expressions';
 import type { SimilarSpansProps } from '.';
 
 export function getEsqlQuery({
@@ -38,9 +37,7 @@ function getSimilarSpansESQL({
   serviceName: string;
   spanName: string;
 }): ESQLAstExpression {
-  return esql.exp`${esqlColumn(SERVICE_NAME)} == ${esql.str(serviceName)} AND ${esqlColumn(
-    SPAN_NAME
-  )} == ${esql.str(spanName)}`;
+  return esqlAnd([esqlEquals(SERVICE_NAME, serviceName), esqlEquals(SPAN_NAME, spanName)]);
 }
 
 function getSimilarTransactionsESQL({
@@ -52,9 +49,9 @@ function getSimilarTransactionsESQL({
   transactionName: string;
   transactionType: string;
 }): ESQLAstExpression {
-  return esql.exp`${esqlColumn(SERVICE_NAME)} == ${esql.str(serviceName)} AND ${esqlColumn(
-    TRANSACTION_NAME
-  )} == ${esql.str(transactionName)} AND ${esqlColumn(TRANSACTION_TYPE)} == ${esql.str(
-    transactionType
-  )}`;
+  return esqlAnd([
+    esqlEquals(SERVICE_NAME, serviceName),
+    esqlEquals(TRANSACTION_NAME, transactionName),
+    esqlEquals(TRANSACTION_TYPE, transactionType),
+  ]);
 }
