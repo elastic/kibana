@@ -15,15 +15,7 @@ import { CaseViewTimelines } from './case_view_timelines';
 import { useGetTimelinesByIds } from './use_get_timelines_by_ids';
 import { useEditTimelineBatchActions } from '../../../timelines/components/open_timeline/edit_timeline_batch_actions';
 import { TimelinesTable } from '../../../timelines/components/open_timeline/timelines_table';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { TestProviders } from '../../../common/mock';
-
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(() => true),
-}));
-
-const mockedUseIsExperimentalFeatureEnabled =
-  useIsExperimentalFeatureEnabled as jest.MockedFunction<typeof useIsExperimentalFeatureEnabled>;
 
 jest.mock('./use_get_timelines_by_ids');
 jest.mock('../../../timelines/components/open_timeline/helpers', () => ({
@@ -145,48 +137,6 @@ describe('CaseViewTimelines', () => {
     expect(args.search).toBeUndefined();
   });
 
-  describe('Super Timeline — feature flag disabled', () => {
-    const caseDataWithTimelines = buildCaseData([
-      { type: SECURITY_TIMELINE_ATTACHMENT_TYPE, attachmentId: 'tl-1' },
-      { type: SECURITY_TIMELINE_ATTACHMENT_TYPE, attachmentId: 'tl-2' },
-    ]);
-
-    beforeEach(() => {
-      mockedUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-    });
-
-    afterEach(() => {
-      mockedUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-    });
-
-    it('passes empty actionTimelineToShow when flag is off', () => {
-      render(
-        <TestProviders>
-          <CaseViewTimelines caseData={caseDataWithTimelines} />
-        </TestProviders>
-      );
-
-      const props = mockedTimelinesTable.mock.calls.at(-1)[0];
-      expect(props.actionTimelineToShow).toEqual([]);
-    });
-
-    it('never shows the batch actions button when flag is off', () => {
-      render(
-        <TestProviders>
-          <CaseViewTimelines caseData={caseDataWithTimelines} />
-        </TestProviders>
-      );
-
-      // Simulate a selection being reported by the table mock
-      const { onSelectionChange } = mockedTimelinesTable.mock.calls.at(-1)[0];
-      act(() => onSelectionChange([{ savedObjectId: 'tl-1' }, { savedObjectId: 'tl-2' }]));
-
-      expect(
-        screen.queryByTestId('case-view-timelines-batch-actions-button')
-      ).not.toBeInTheDocument();
-    });
-  });
-
   describe('Super Timeline — selection and batch actions', () => {
     const caseDataWithTimelines = buildCaseData([
       { type: SECURITY_TIMELINE_ATTACHMENT_TYPE, attachmentId: 'tl-1' },
@@ -202,6 +152,7 @@ describe('CaseViewTimelines', () => {
 
       const props = mockedTimelinesTable.mock.calls.at(-1)[0];
       expect(props.actionTimelineToShow).toContain('selectable');
+      expect(props.actionTimelineToShow).not.toContain('export');
     });
 
     it('wires useEditTimelineBatchActions with TimelineTypeEnum.default', () => {
