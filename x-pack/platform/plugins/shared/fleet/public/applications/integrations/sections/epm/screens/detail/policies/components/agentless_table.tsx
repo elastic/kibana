@@ -20,7 +20,20 @@ import type {
 } from '../../../../../../types';
 import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../../../../../../../../common/constants';
 import type { usePagination } from '../../../../../../hooks';
-import { useLink, sendGetAgents, useAuthz, useStartServices } from '../../../../../../hooks';
+import {
+  useLink,
+  sendGetAgents,
+  useAuthz,
+  useStartServices,
+  useBulkGetAgentlessPolicyThroughput,
+  useDiscoverLocator,
+} from '../../../../../../hooks';
+import {
+  getAgentlessThroughputIndexPatterns,
+  buildPolicyBaseIdsWithFallbackKuery,
+} from '../../../../../../../../../common/services';
+import { removeVersionSuffixFromPolicyId } from '../../../../../../../../../common/services/version_specific_policies_utils';
+import { isAgentlessPoliciesUIEnabled } from '../../../../../../services';
 import {
   Loading,
   PackagePolicyActionsMenu,
@@ -61,16 +74,72 @@ export const AgentlessPackagePoliciesTable = ({
   const [agentsByPolicyId, setAgentsByPolicyId] = useState<Record<string, Agent>>({});
   const canReadAgents = authz.fleet.readAgents;
 
-  // Kuery for all agents enrolled into the agent policies associated with the package policies
-  // We use the first agent policy as agentless package policies have a 1:1 relationship with agent policies
-  // Maximum # of agent policies is 50, based on the max page size in UI
+  // Collect ids for non-connector policies only; connectors don't ingest via agents
+  const throughputPolicyIds = useMemo(
+    () =>
+      packagePolicies
+        .filter(({ packagePolicy }) => !isConnectorPolicy(packagePolicy))
+        .map(({ packagePolicy }) => packagePolicy.id),
+    [packagePolicies]
+  );
+  const { data: throughputData, isLoading: isThroughputLoading } =
+    useBulkGetAgentlessPolicyThroughput(throughputPolicyIds);
+  const throughputByPolicyId = useMemo(
+    () =>
+      (throughputData?.items ?? []).reduce<Record<string, AgentlessPolicyThroughput>>(
+        (acc, item) => {
+          acc[item.policyId] = item;
+          return acc;
+        },
+        {}
+      ),
+    [throughputData]
+  );
+
+  const hasNonConnectorPolicies = useMemo(
+    () => packagePolicies.some(({ packagePolicy }) => !isConnectorPolicy(packagePolicy)),
+    [packagePolicies]
+  );
+
+  const discoverLocator = useDiscoverLocator();
+  const getThroughputDiscoverParams = useCallback(
+    (packagePolicy: InMemoryPackagePolicy) => {
+      const indexPatterns = getAgentlessThroughputIndexPatterns(packagePolicy);
+      if (!discoverLocator || indexPatterns.length === 0) return undefined;
+      const title = indexPatterns.join(',');
+      const params = {
+        dataViewSpec: {
+          id: `fleet-agentless-throughput-${packagePolicy.id}`,
+          name: title,
+          title,
+          timeFieldName: 'event.ingested',
+        },
+        timeRange: { from: 'now-24h', to: 'now' },
+        query: { language: 'kuery', query: `agent.name: *${packagePolicy.id}*` },
+      };
+      return {
+        href: discoverLocator.getRedirectUrl(params),
+        navigate: () => discoverLocator.navigate(params),
+      };
+    },
+    [discoverLocator]
+  );
+
+  // Kuery for all agents enrolled into the agent policies associated with the package policies.
+  // We use the first agent policy as agentless package policies have a 1:1 relationship with agent policies.
+  // Maximum # of agent policies is 50, based on the max page size in UI.
+  // Uses policy_base_id (with policy_id fallback) so that agents on version-specific variants
+  // of these policies are included.
   const agentsKuery = useMemo(() => {
-    return packagePolicies
-      .reduce((policyIds, { agentPolicies }) => {
-        return [...policyIds, ...(agentPolicies[0] ? [agentPolicies[0]?.id] : [])];
-      }, [] as string[])
-      .map((policyId) => `${AGENTS_PREFIX}.policy_id: "${policyId}"`)
-      .join(' or ');
+    const policyIds = packagePolicies.reduce<string[]>(
+      (ids, { agentPolicies: aps }) => (aps[0] ? [...ids, aps[0].id] : ids),
+      []
+    );
+    return buildPolicyBaseIdsWithFallbackKuery(
+      policyIds,
+      `${AGENTS_PREFIX}.policy_base_id`,
+      `${AGENTS_PREFIX}.policy_id`
+    );
   }, [packagePolicies]);
 
   // Fetch agents using above kuery, if the user has access to read agents
@@ -85,7 +154,9 @@ export const AgentlessPackagePoliciesTable = ({
       setAgentsByPolicyId(
         (agentsData?.items || []).reduce((acc, agent) => {
           if (agent.policy_id) {
-            acc[agent.policy_id] = agent;
+            // Key by the base policy id so the lookup at `agentsByPolicyId[agentPolicy.id]`
+            // resolves correctly for agents on version-specific variants.
+            acc[removeVersionSuffixFromPolicyId(agent.policy_id)] = agent;
           }
           return acc;
         }, {} as Record<string, Agent>)

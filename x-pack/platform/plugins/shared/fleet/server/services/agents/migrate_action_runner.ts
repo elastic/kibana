@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { isAgentMigrationSupported, MINIMUM_MIGRATE_AGENT_VERSION } from '../../../common/services';
+import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 import { FleetError } from '../../errors';
 
 import type { Agent } from '../../types';
@@ -52,7 +53,11 @@ export async function partitionAgentsForMigration(
   agents.forEach((agent: Agent) => {
     if (
       agent.policy_id &&
-      protectedAgentPolicies.map((policy) => policy.id).includes(agent.policy_id)
+      protectedAgentPolicies
+        .map((policy) => policy.id)
+        // Strip the version suffix: agent policies are keyed by base id; an agent on a variant
+        // (`my-policy#9.2`) must still be blocked if `my-policy` is protected.
+        .includes(removeVersionSuffixFromPolicyId(agent.policy_id))
     ) {
       errors[agent.id] = new FleetError(
         `Agent ${agent.id} cannot be migrated because it is protected.`
