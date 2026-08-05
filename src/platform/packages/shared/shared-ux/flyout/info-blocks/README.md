@@ -17,20 +17,20 @@ import { InfoBlocks } from '@kbn/shared-ux-flyout-info-blocks';
 
 ## Behavior
 
-- Designed for small sets, typically up to 6 blocks.
-- Responsive column collapse (3 → 2 → 1): blocks lay out in up to 3 columns; when a block would fall below 140px wide, the column count steps down so blocks never shrink past that width (they wrap to more rows).
-- Leading spacer: set `hasLeadingSpacer` to fill the rest of the first row (no content) after the first block, so the next block leads a fresh row. It adapts to the live column count — at 2 columns it fills the 1 remaining cell, at 3 columns the 2 remaining cells. The block before the spacer keeps its inline-end divider, and the horizontal row divider stays continuous across the whole container.
-- Plain text values (and titles) truncate to a single line with an ellipsis, so a long string never overflows its column. Node values (badges, links, images) manage their own layout — see the "Resource" story for a truncating link with a trailing copy action.
-- `compressed` tightens spacing; it is intended to be driven by the flyout header's collapse state. In compressed mode, `hasLeadingSpacer` is ignored and custom value sizes are suppressed so the layout stays dense.
+- Designed for small sets, typically up to 8 blocks.
+- Responsive column collapse: blocks lay out in up to `maxColumns` columns (default 3); when a block would fall below 140 px wide, the column count steps down so blocks never shrink past that width (they wrap to more rows).
+- `maxColumns` can be `2`, `3`, `4`, or `'auto'`. `'auto'` picks the widest column count (3 or 4) that leaves at most one empty cell in the last row, based on how many items there are.
+- Plain text values (and titles) truncate to a single line with an ellipsis, so a long string never overflows its column. Node values (badges, links, images) manage their own layout.
+- Each `InfoBlockItem` accepts an optional `size` (EUI font-scale key, e.g. `'xl'`) to enlarge a single value, and an optional `color` (EUI text color token, e.g. `'danger'`) to tint it.
 
 ```tsx
 import { InfoBlocks } from '@kbn/shared-ux-flyout-info-blocks';
 
 <InfoBlocks
-  hasLeadingSpacer
+  maxColumns="auto"
   items={[
-    { title: 'Risk score', value: '90', size: 'xl' },
-    { title: 'Vendor', value: 'Elastic' },
+    { title: 'Risk score', value: '90', size: 'xl', color: 'danger' },
+    { title: 'Owner', value: 'Platform' },
   ]}
 />
 ```
