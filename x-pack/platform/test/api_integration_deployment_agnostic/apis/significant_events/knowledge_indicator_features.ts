@@ -66,7 +66,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await disableStreams(apiClient);
     });
 
-    describe('Exclude and restore', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/282939
+    describe.skip('Exclude and restore', () => {
       it('creates a feature and lists it', async () => {
         const { id, uuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
         expect(id).to.be.a('string');
