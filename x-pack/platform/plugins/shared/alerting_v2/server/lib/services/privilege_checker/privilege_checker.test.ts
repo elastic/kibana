@@ -278,8 +278,7 @@ describe('PrivilegeChecker', () => {
       const checker = new PrivilegeChecker(testRequest.request, spaceId, testSecurity);
       await checker.canRead('rules');
 
-      const atSpace =
-        testSecurity.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpace;
+      const atSpace = testSecurity.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpace;
       expect(atSpace).toHaveBeenCalledWith(spaceId, expect.any(Object));
     });
   });
