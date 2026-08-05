@@ -191,7 +191,7 @@ describe('registerTracingExporter', () => {
     expect(MockedEvalSpanProcessor).toHaveBeenCalledWith([
       { baggageKey: 'execution.id.baggage.key' },
       { baggageKey: 'experiment.id.baggage.key' },
-      { baggageKey: 'agent_builder.space_id', attributeKey: DATA_STREAM_NAMESPACE_ATTR },
+      { baggageKey: 'agent_builder.traces_namespace', attributeKey: DATA_STREAM_NAMESPACE_ATTR },
     ]);
     const [providerOpts] = jest.mocked(initInferenceTracerProvider).mock.calls[0];
     expect(providerOpts.processors).toHaveLength(3);

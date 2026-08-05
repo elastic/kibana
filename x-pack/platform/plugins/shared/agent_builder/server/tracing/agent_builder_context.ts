@@ -9,21 +9,32 @@ import type { api } from '@elastic/opentelemetry-node/sdk';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { context as otelContext, propagation } from '@opentelemetry/api';
 import { isInferenceSpan, CONVERSATION_ID_BAGGAGE_KEY } from '@kbn/inference-tracing';
+import { buildAgentBuilderTracesNamespace } from '../../common/traces';
 
 export const AGENT_BUILDER_OWNER_BAGGAGE_KEY = 'kibana.agent_builder';
 export const AGENT_BUILDER_OWNER_BAGGAGE_VALUE = '1';
 export const SPACE_ID_BAGGAGE_KEY = 'agent_builder.space_id';
+/**
+ * W3C baggage key carrying the per-agent trace data-stream namespace (`<spaceId>` or
+ * `<spaceId>.<agentId>`). Set by {@link withAgentBuilderContext} on the root span's context so
+ * every descendant span — not just the ones carrying `gen_ai.agent.id` — routes to the same
+ * agent's stream. Mapped onto {@link DATA_STREAM_NAMESPACE_ATTR} by the tracing span processor.
+ */
+export const TRACES_NAMESPACE_BAGGAGE_KEY = 'agent_builder.traces_namespace';
 export const DATA_STREAM_NAMESPACE_ATTR = 'data_stream.namespace';
 
 /**
  * Executes a function within a context that has the Agent Builder ownership baggage set,
- * along with an optional space ID for data stream routing.
+ * along with an optional space ID (and agent ID) for data stream routing.
  * All descendant inference spans created inside this context will be tagged as Agent Builder spans,
  * allowing the AgentBuilderSpanProcessor to filter them from other inference consumers.
+ *
+ * When `spaceId` is provided, the traces-namespace baggage is always set — falling back to the
+ * space id alone when `agentId` is unresolved, so routing never broadens beyond the space.
  */
 export const withAgentBuilderContext = <T>(
   fn: () => T,
-  options?: { spaceId?: string; conversationId?: string }
+  options?: { spaceId?: string; agentId?: string; conversationId?: string }
 ): T => {
   const ctx = otelContext.active();
   let baggage = propagation.getBaggage(ctx) ?? propagation.createBaggage();
@@ -32,6 +43,12 @@ export const withAgentBuilderContext = <T>(
   });
   if (options?.spaceId) {
     baggage = baggage.setEntry(SPACE_ID_BAGGAGE_KEY, { value: options.spaceId });
+    baggage = baggage.setEntry(TRACES_NAMESPACE_BAGGAGE_KEY, {
+      value: buildAgentBuilderTracesNamespace({
+        spaceId: options.spaceId,
+        agentId: options.agentId,
+      }),
+    });
   }
   if (options?.conversationId) {
     baggage = baggage.setEntry(CONVERSATION_ID_BAGGAGE_KEY, { value: options.conversationId });

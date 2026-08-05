@@ -55,14 +55,20 @@ Do **not** use this skill when:
 
 ## Data Source
 
-Agent Builder ships all OTel data — span telemetry **and** captured message content — to a single
-per-space traces index: \`traces-agent_builder.otel-<space-id>\`.
+Agent Builder ships all OTel data — span telemetry **and** captured message content — to a
+**dedicated data stream per agent**: \`traces-agent_builder.otel-<space-id>.<agent-id>\`. There is
+no single shared per-space index anymore; every agent in a space has its own stream.
 
 Always use \`${AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID}\` for trace questions. It resolves the
-current space's index automatically. Do not use a \`traces-agent_builder.otel-*\` wildcard, which
-would mix in other spaces' data.
+current space's index **pattern** automatically — \`traces-agent_builder.otel-<space-id>.*\`, which
+already covers every agent's stream in the space. Never broaden it further to a
+\`traces-agent_builder.otel-*\` wildcard, which would mix in other spaces' data, and never narrow it
+to a single agent's concrete index — filter with \`attributes.gen_ai.agent.id\` instead.
 
-If you need to run ES|QL manually, use the exact index returned by the inline tool.
+To break results down **per agent**, group or filter by \`attributes.gen_ai.agent.id\` — never by
+index name.
+
+If you need to run ES|QL manually, use the exact index pattern returned by the inline tool.
 
 Always constrain the time range with \`@timestamp\` to the window the user asked about (default to
 the last 24 hours when they do not specify one).
@@ -101,7 +107,8 @@ Span names follow the OTel \`{operation} {identifier}\` convention:
 - \`attributes.gen_ai.usage.input_tokens\` / \`attributes.gen_ai.usage.output_tokens\` — wrap in \`TO_LONG(...)\` before aggregating.
 - \`attributes.gen_ai.request.model\` — model name.
 - \`attributes.gen_ai.provider.name\` — provider name.
-- \`attributes.gen_ai.agent.id\` — agent id (hashed for custom agents in exported traces).
+- \`attributes.gen_ai.agent.id\` — agent id (hashed for custom agents in exported traces). Also the
+  field each agent's data stream is routed on — use it to break results down per agent.
 - \`attributes.gen_ai.conversation.id\` — conversation id (hashed unless \`agentBuilder:tracing:includeRealIds\` is on).
 - \`attributes.elastic.conversation.title\` — conversation title on the conversation-turn (\`CHAIN\`) span only; omitted unless \`agentBuilder:tracing:includeRealNames\` is on.
 - \`duration\` — span duration in **nanoseconds**; divide by \`1000000000.0\` for seconds.

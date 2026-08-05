@@ -13,6 +13,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { SavedObjectsClient, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { buildAgentBuilderTracesNamespacePattern } from '@kbn/agent-builder-plugin/common/traces';
 import {
   AGENT_BUILDER_OVERVIEW_DASHBOARD_ID,
   AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER,
@@ -51,7 +52,7 @@ async function installAgentBuilderOverviewDashboard(
   const dashboard = JSON.parse(
     JSON.stringify(sourceOverviewDashboard).replaceAll(
       AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER,
-      spaceId
+      buildAgentBuilderTracesNamespacePattern(spaceId)
     )
   ) as DashboardSavedObjectAsset;
   dashboard.id = overviewDashboardId(spaceId);

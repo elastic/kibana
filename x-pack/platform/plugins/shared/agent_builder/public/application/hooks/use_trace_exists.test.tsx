@@ -63,7 +63,7 @@ describe('useTraceExists', () => {
     expect(mockSearch).toHaveBeenCalledWith(
       expect.objectContaining({
         params: expect.objectContaining({
-          index: 'traces-agent_builder.otel-test-space',
+          index: 'traces-agent_builder.otel-test-space.*',
           body: expect.objectContaining({
             query: { term: { trace_id: 'trace-123' } },
           }),
@@ -119,7 +119,7 @@ describe('useTraceExists', () => {
     queryClient.clear();
   });
 
-  it('uses space-scoped index pattern', async () => {
+  it('uses the per-space wildcard index pattern covering every agent stream', async () => {
     mockSpaceId = 'marketing';
     mockSearch.mockReturnValue(searchResponse(0));
     const { queryClient, Wrapper } = createWrapper();
@@ -131,7 +131,7 @@ describe('useTraceExists', () => {
     expect(mockSearch).toHaveBeenCalledWith(
       expect.objectContaining({
         params: expect.objectContaining({
-          index: 'traces-agent_builder.otel-marketing',
+          index: 'traces-agent_builder.otel-marketing.*',
         }),
       })
     );

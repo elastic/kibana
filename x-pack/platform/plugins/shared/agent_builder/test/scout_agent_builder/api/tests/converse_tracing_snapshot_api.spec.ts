@@ -22,13 +22,23 @@ import {
   mockFinalAnswer,
 } from '../../../scout_agent_builder_shared/lib/proxy_scenario/calls';
 import type { ChatResponse } from '../../../../common/http_api/chat';
-import { buildAgentBuilderTracesIndexPattern } from '../../../../common/traces';
+import {
+  buildAgentBuilderTracesIndexName,
+  buildAgentBuilderTracesIndexPattern,
+} from '../../../../common/traces';
 import { deleteAllConversationsFromEs } from '../../../scout_agent_builder_shared/lib/conversations_es';
 import { apiTest } from '../fixtures';
 import { API_AGENT_BUILDER } from '../fixtures/constants';
 import { postConverse } from '../fixtures/converse_http';
 
+const TEST_AGENT_ID = 'test_agent';
+/** Wildcard covering every agent's stream in the "default" space — used for cleanup/polling. */
 const TRACE_INDEX = buildAgentBuilderTracesIndexPattern('default');
+/** The concrete per-agent stream every span of this test's conversation must route to. */
+const AGENT_TRACE_INDEX_NAME = buildAgentBuilderTracesIndexName({
+  spaceId: 'default',
+  agentId: TEST_AGENT_ID,
+});
 
 /** Top-level _source keys to drop entirely (environment-specific or volatile) */
 const DROPPED_TOP_LEVEL_KEYS = new Set([
@@ -156,7 +166,7 @@ apiTest.describe(
       // Create a custom agent
       await kbnClient.request({
         method: 'DELETE',
-        path: `${API_AGENT_BUILDER}/agents/test_agent`,
+        path: `${API_AGENT_BUILDER}/agents/${TEST_AGENT_ID}`,
         headers: AGENT_BUILDER_PUBLIC_API_HEADERS,
         ignoreErrors: [404],
       });
@@ -165,8 +175,8 @@ apiTest.describe(
         path: `${API_AGENT_BUILDER}/agents`,
         headers: AGENT_BUILDER_PUBLIC_API_HEADERS,
         body: {
-          id: 'test_agent',
-          name: 'test_agent',
+          id: TEST_AGENT_ID,
+          name: TEST_AGENT_ID,
           description: 'Agent for tracing snapshot test',
           labels: [],
           configuration: {
@@ -184,7 +194,7 @@ apiTest.describe(
       await deleteConnectorById(kbnClient, connectorId);
       await kbnClient.request({
         method: 'DELETE',
-        path: `${API_AGENT_BUILDER}/agents/test_agent`,
+        path: `${API_AGENT_BUILDER}/agents/${TEST_AGENT_ID}`,
         headers: AGENT_BUILDER_PUBLIC_API_HEADERS,
         ignoreErrors: [404],
       });
@@ -200,7 +210,7 @@ apiTest.describe(
       'trace documents match snapshot after conversation with tool call',
       async ({ apiClient, esClient }) => {
         const EXPECTED_SPAN_COUNT = 7;
-        let hits: Array<{ _source?: unknown }> = [];
+        let hits: Array<{ _source?: unknown; _index?: string }> = [];
 
         // Mock the conversation and tool call
         mockTitleGeneration(llmProxy, 'Test Conversation');
@@ -215,7 +225,7 @@ apiTest.describe(
         const res = await postConverse(
           apiClient,
           adminCredentials.apiKeyHeader,
-          { input: 'List all indices', connector_id: connectorId, agent_id: 'test_agent' },
+          { input: 'List all indices', connector_id: connectorId, agent_id: TEST_AGENT_ID },
           'local'
         );
         expect(res).toHaveStatusCode(200);
@@ -244,6 +254,13 @@ apiTest.describe(
             { timeout: 30_000, intervals: [500, 1000, 2000] }
           )
           .toBe(EXPECTED_SPAN_COUNT);
+
+        // Hard requirement: every span of the conversation round — not only the ones carrying
+        // `gen_ai.agent.id` — must route to the agent's own per-agent data stream, never a bare
+        // per-space stream.
+        for (const hit of hits) {
+          expect(hit._index).toContain(AGENT_TRACE_INDEX_NAME);
+        }
 
         const spans = hits
           .map((hit, i) => ({ span: sanitizeSpan(hit._source as Record<string, unknown>), i }))
