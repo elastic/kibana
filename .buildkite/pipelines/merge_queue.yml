@@ -1,4 +1,3 @@
-# no-op: validate merge-queue pipeline
 env:
   GITHUB_COMMIT_STATUS_ENABLED: 'true'
   GITHUB_COMMIT_STATUS_CONTEXT: 'buildkite/merge-queue'
