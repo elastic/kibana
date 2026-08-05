@@ -221,7 +221,7 @@ describe('API_ENDPOINTS', () => {
               managedOtlpServiceUrl: 'https://otlp.example.com:443',
             })
           )
-        ).toBe('https://otlp.example.com:443/api/v1/write');
+        ).toBe('https://otlp.example.com:443/inputs/prw/_default_/api/v1/write');
       });
 
       it('uses the ES-native URL when not Serverless and the managed OTLP PRW endpoint is disabled', () => {
@@ -248,7 +248,7 @@ describe('API_ENDPOINTS', () => {
               elasticsearchUrl: 'https://es.example.com',
             })
           )
-        ).toBe('https://otlp.example.com:443/api/v1/write');
+        ).toBe('https://otlp.example.com:443/inputs/prw/_default_/api/v1/write');
       });
 
       it('falls back to the ES-native URL when the managed OTLP PRW endpoint is enabled but the managed OTLP URL is missing', () => {

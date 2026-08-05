@@ -65,7 +65,7 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
     }) => {
       // Serverless or ECH with mOTLP PRW endpoint enabled
       if (managedOtlpServiceUrl && (isServerless || managedOtlpPrwEndpointEnabled)) {
-        return `${trimTrailingSlashes(managedOtlpServiceUrl)}/api/v1/write`;
+        return `${trimTrailingSlashes(managedOtlpServiceUrl)}/inputs/prw/_default_/api/v1/write`;
       }
       // ECH with mOTLP PRW endpoint disabled or on-prem
       if (elasticsearchUrl) {

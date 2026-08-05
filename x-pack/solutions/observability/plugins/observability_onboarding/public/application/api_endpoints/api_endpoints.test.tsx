@@ -261,7 +261,7 @@ describe('ApiEndpoints', () => {
           id: ApiEndpointId.Prometheus,
           label: 'Prometheus',
           logo: 'prometheus',
-          url: 'https://otlp.example.com:443/api/v1/write',
+          url: 'https://otlp.example.com:443/inputs/prw/_default_/api/v1/write',
           usesManagedInput: true,
           additionalEndpoints: [],
         },
