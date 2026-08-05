@@ -23,6 +23,9 @@ import { getLatestEntitiesIndexName } from '../../common/domain/entity_index';
 import type { EntityStoreCoreSetup } from '../types';
 
 jest.mock('./factories');
+jest.mock('./should_delete_orphaned_task', () => ({
+  shouldDeleteOrphanedEntityStoreTask: jest.fn().mockResolvedValue(false),
+}));
 // wrapTaskRun adds a tracing span around the run callback; here it just invokes it.
 jest.mock('../telemetry/traces', () => ({
   wrapTaskRun: jest.fn(({ run }: { run: () => Promise<unknown> }) => run()),
@@ -169,7 +172,19 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     const taskManager = {
       registerTaskDefinitions: jest.fn(),
     } as unknown as TaskManagerSetupContract;
-    const core = { analytics: { reportEvent } } as unknown as EntityStoreCoreSetup;
+    const core = {
+      analytics: { reportEvent },
+      getStartServices: jest.fn().mockResolvedValue([
+        {
+          savedObjects: {
+            createInternalRepository: jest.fn().mockReturnValue({
+              find: jest.fn().mockResolvedValue({ saved_objects: [{ id: 'engine' }], total: 1 }),
+            }),
+          },
+        },
+        {},
+      ]),
+    } as unknown as EntityStoreCoreSetup;
 
     registerStatusReportTask({ taskManager, logger, core });
 

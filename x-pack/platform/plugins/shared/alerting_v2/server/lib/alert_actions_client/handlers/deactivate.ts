@@ -14,6 +14,7 @@ import {
   buildRuleEventDocument,
 } from '../../../resources/datastreams/alert_events';
 import { ALERTING_V2_ERROR_CODES } from '../../errors/error_codes';
+import { getCannotDeactivateEpisodeMessage } from '../../errors/alert_error_messages';
 import type { ActionHandler } from '../handler';
 import type { AlertEventRecord } from '../types';
 
@@ -38,18 +39,15 @@ const assertEpisodeIsDeactivatable = (alertEvent: AlertEventRecord): void => {
     return;
   }
 
-  throw Boom.badRequest(
-    `Cannot deactivate episode [${alertEvent.episode_id}]. It is already inactive`,
-    {
-      code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
-      details: {
-        group_hash: alertEvent.group_hash,
-        episode_id: alertEvent.episode_id,
-        episode_status: status,
-        action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
-      },
-    }
-  );
+  throw Boom.badRequest(getCannotDeactivateEpisodeMessage(alertEvent.episode_id), {
+    code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
+    details: {
+      group_hash: alertEvent.group_hash,
+      episode_id: alertEvent.episode_id,
+      episode_status: status,
+      action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+    },
+  });
 };
 
 /**
@@ -68,7 +66,10 @@ export const deactivateHandler: ActionHandler<DeactivateAlertActionBody> = {
 
     const ruleEvent = buildRuleEventDocument({
       '@timestamp': new Date().toISOString(),
-      rule: { id: alertEvent.rule_id, version: alertEvent.rule_version ?? 1 },
+      rule:
+        alertEvent.rule_id != null
+          ? { id: alertEvent.rule_id, version: alertEvent.rule_version ?? 1 }
+          : undefined,
       group_hash: alertEvent.group_hash,
       data: alertEvent.data_json,
       status: alertEventStatus.recovered,

@@ -12,6 +12,7 @@ import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   buildTaskAttemptsExhaustedMessage,
+  markScheduledExecutionFailedAfterTaskError,
   resolveExhaustedWorkflowRunTask,
   resolveInterruptedWorkflowResumeTask,
   resolveInterruptedWorkflowRunTask,
@@ -122,7 +123,7 @@ describe('resolveInterruptedWorkflowRunTask', () => {
         taskAttempts: 1,
         logger,
       })
-    ).resolves.toBe('run_workflow');
+    ).resolves.toEqual({ action: 'run_workflow' });
     expect(workflowExecutionsDataClient.getByIds).not.toHaveBeenCalled();
   });
 
@@ -143,7 +144,16 @@ describe('resolveInterruptedWorkflowRunTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('task_complete');
+    ).resolves.toEqual(
+      expect.objectContaining({
+        action: 'task_complete',
+        reason: 'interrupted',
+        execution: expect.objectContaining({
+          id: 'x',
+          status: ExecutionStatus.FAILED,
+        }),
+      })
+    );
 
     expectFailedWorkflowUpdate(workflowExecutionsDataClient, 'x', {
       type: TASK_RECOVERY_ERROR_TYPE,
@@ -164,7 +174,7 @@ describe('resolveInterruptedWorkflowRunTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('run_workflow');
+    ).resolves.toEqual({ action: 'run_workflow' });
 
     expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
     expect(warnSpy).toHaveBeenCalledWith(
@@ -190,7 +200,13 @@ describe('resolveInterruptedWorkflowRunTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('task_complete');
+    ).resolves.toEqual(
+      expect.objectContaining({
+        action: 'task_complete',
+        reason: 'noop',
+        execution: expect.objectContaining({ status: ExecutionStatus.FAILED }),
+      })
+    );
 
     expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
   });
@@ -213,7 +229,13 @@ describe('resolveInterruptedWorkflowRunTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('task_complete');
+    ).resolves.toEqual(
+      expect.objectContaining({
+        action: 'task_complete',
+        reason: 'noop',
+        execution: expect.objectContaining({ status: ExecutionStatus.WAITING_FOR_INPUT }),
+      })
+    );
 
     expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('waiting_for_input'));
@@ -237,7 +259,12 @@ describe('resolveInterruptedWorkflowRunTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('task_complete');
+    ).resolves.toEqual(
+      expect.objectContaining({
+        action: 'task_complete',
+        reason: 'interrupted',
+      })
+    );
 
     expect(workflowExecutionsDataClient.bulk).toHaveBeenCalled();
   });
@@ -264,7 +291,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
         taskAttempts: 1,
         logger,
       })
-    ).resolves.toBe('resume_workflow');
+    ).resolves.toEqual({ action: 'resume_workflow' });
     expect(workflowExecutionsDataClient.getByIds).not.toHaveBeenCalled();
   });
 
@@ -285,7 +312,14 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('task_complete');
+    ).resolves.toEqual({
+      action: 'task_complete',
+      reason: 'interrupted',
+      execution: expect.objectContaining({
+        id: 'x',
+        status: ExecutionStatus.FAILED,
+      }),
+    });
 
     expectFailedWorkflowUpdate(workflowExecutionsDataClient, 'x', {
       type: TASK_RECOVERY_ERROR_TYPE,
@@ -306,7 +340,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('resume_workflow');
+    ).resolves.toEqual({ action: 'resume_workflow' });
 
     expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
     expect(warnSpy).toHaveBeenCalledWith(
@@ -332,7 +366,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('resume_workflow');
+    ).resolves.toEqual({ action: 'resume_workflow' });
 
     expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
   });
@@ -354,7 +388,14 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('task_complete');
+    ).resolves.toEqual({
+      action: 'task_complete',
+      reason: 'noop',
+      execution: expect.objectContaining({
+        id: 'x',
+        status: ExecutionStatus.COMPLETED,
+      }),
+    });
 
     expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
   });
@@ -376,7 +417,14 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('task_complete');
+    ).resolves.toEqual({
+      action: 'task_complete',
+      reason: 'noop',
+      execution: expect.objectContaining({
+        id: 'x',
+        status: ExecutionStatus.FAILED,
+      }),
+    });
 
     expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
   });
@@ -524,6 +572,134 @@ describe('resolveExhaustedWorkflowRunTask', () => {
 
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('Failed to mark workflow execution run-1 as FAILED')
+    );
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('update rejected'));
+  });
+});
+
+describe('markScheduledExecutionFailedAfterTaskError', () => {
+  let workflowExecutionsDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
+  let repository: WorkflowExecutionRepository;
+  let stepExecutionRepository: StepExecutionRepository;
+  const logger = loggingSystemMock.create().get();
+
+  beforeEach(() => {
+    workflowExecutionsDataClient = createMockWorkflowDataClient();
+    const stepExecutionsDataClient = createMockStepDataClient();
+    repository = new WorkflowExecutionRepository(workflowExecutionsDataClient);
+    stepExecutionRepository = new StepExecutionRepository(stepExecutionsDataClient);
+    jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
+    jest.spyOn(logger, 'warn').mockImplementation(() => {});
+    jest.spyOn(logger, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('marks a non-terminal execution FAILED with refresh wait_for', async () => {
+    workflowExecutionsDataClient.getByIds.mockResolvedValue(
+      createMockGetExecutionsByIdsResponse([
+        {
+          id: 'sched-1',
+          spaceId: 'default',
+          workflowId: 'w',
+          status: ExecutionStatus.PENDING,
+        } as EsWorkflowExecution,
+      ])
+    );
+
+    await markScheduledExecutionFailedAfterTaskError({
+      workflowExecutionRepository: repository,
+      stepExecutionRepository,
+      workflowRunId: 'sched-1',
+      spaceId: 'default',
+      logger,
+    });
+
+    expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: [
+          expect.objectContaining({
+            operation: 'update',
+            document: expect.objectContaining({
+              id: 'sched-1',
+              status: ExecutionStatus.FAILED,
+              error: {
+                type: TASK_RECOVERY_ERROR_TYPE,
+                message: taskRecoveryMessages.scheduledRunFailedAfterCreate,
+              },
+            }),
+          }),
+        ],
+        refresh: 'wait_for',
+      })
+    );
+    expect(stepExecutionRepository.markNonTerminalStepsFailed).toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Marked workflow execution sched-1 FAILED after scheduled task error')
+    );
+  });
+
+  it('leaves already-terminal and waiting_for_input executions untouched', async () => {
+    for (const status of [ExecutionStatus.SKIPPED, ExecutionStatus.WAITING_FOR_INPUT]) {
+      workflowExecutionsDataClient.getByIds.mockResolvedValue(
+        createMockGetExecutionsByIdsResponse([
+          {
+            id: 'sched-1',
+            spaceId: 'default',
+            workflowId: 'w',
+            status,
+          } as EsWorkflowExecution,
+        ])
+      );
+
+      await markScheduledExecutionFailedAfterTaskError({
+        workflowExecutionRepository: repository,
+        stepExecutionRepository,
+        workflowRunId: 'sched-1',
+        spaceId: 'default',
+        logger,
+      });
+
+      expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
+      expect(stepExecutionRepository.markNonTerminalStepsFailed).not.toHaveBeenCalled();
+      jest.clearAllMocks();
+      jest.spyOn(logger, 'warn').mockImplementation(() => {});
+      jest.spyOn(logger, 'error').mockImplementation(() => {});
+      jest
+        .spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed')
+        .mockResolvedValue(undefined);
+    }
+  });
+
+  it('swallows mark-failed errors and logs without throwing', async () => {
+    workflowExecutionsDataClient.getByIds.mockResolvedValue(
+      createMockGetExecutionsByIdsResponse([
+        {
+          id: 'sched-1',
+          spaceId: 'default',
+          workflowId: 'w',
+          status: ExecutionStatus.PENDING,
+        } as EsWorkflowExecution,
+      ])
+    );
+    workflowExecutionsDataClient.bulk.mockRejectedValueOnce(new Error('update rejected'));
+
+    await expect(
+      markScheduledExecutionFailedAfterTaskError({
+        workflowExecutionRepository: repository,
+        stepExecutionRepository,
+        workflowRunId: 'sched-1',
+        spaceId: 'default',
+        logger,
+      })
+    ).resolves.toBeUndefined();
+
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Failed to mark scheduled workflow execution sched-1 as FAILED after task error'
+      )
     );
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('update rejected'));
   });

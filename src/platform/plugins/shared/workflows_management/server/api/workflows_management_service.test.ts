@@ -15,10 +15,12 @@
  *   - services/workflow_crud_service.test.ts
  *   - services/workflow_execution_query_service.test.ts
  *   - api/lib/*.test.ts and task_defs/*.test.ts (library-function specs)
+ *   - lib/wait_for_managed_workflow_install_readiness.test.ts
  *
- * The facade owns exactly two concerns:
+ * The facade owns exactly three concerns:
  *   1. initPromise sequencing — every public method awaits init before delegating.
  *   2. error propagation from sub-services.
+ *   3. managed install readiness gate — skip install/ready/orphan cleanup when not ready.
  */
 
 import type { CoreSetup, CoreStart, ElasticsearchClient } from '@kbn/core/server';
@@ -27,6 +29,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 
 import { WorkflowsService } from './workflows_management_service';
+import { waitForManagedWorkflowInstallReadiness } from '../lib/wait_for_managed_workflow_install_readiness';
+import { ManagedWorkflowsService } from '../services/managed_workflows_service';
 import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
 import { WorkflowCrudService } from '../services/workflow_crud_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
@@ -35,10 +39,18 @@ import { WorkflowValidationService } from '../services/workflow_validation_servi
 import type { WorkflowsServerPluginSetupDeps, WorkflowsServerPluginStartDeps } from '../types';
 
 jest.mock('../services/workflow_change_history_service');
+jest.mock('../lib/wait_for_managed_workflow_install_readiness', () => ({
+  waitForManagedWorkflowInstallReadiness: jest.fn(),
+}));
 
 const MockedWorkflowChangeHistoryService = WorkflowChangeHistoryService as jest.MockedClass<
   typeof WorkflowChangeHistoryService
 >;
+
+const mockedWaitForManagedWorkflowInstallReadiness =
+  waitForManagedWorkflowInstallReadiness as jest.MockedFunction<
+    typeof waitForManagedWorkflowInstallReadiness
+  >;
 
 type PrototypeSpies = Record<string, jest.SpyInstance>;
 
@@ -105,6 +117,9 @@ const makeCoreSetup = (
 ): CoreSetup<WorkflowsServerPluginStartDeps> =>
   ({
     getStartServices: startServices,
+    status: {
+      core$: { subscribe: jest.fn() },
+    },
   } as unknown as CoreSetup<WorkflowsServerPluginStartDeps>);
 
 const makePluginsSetup = (): WorkflowsServerPluginSetupDeps =>
@@ -115,6 +130,7 @@ describe('WorkflowsService (facade)', () => {
   let searchSpies: PrototypeSpies;
   let executionQuerySpies: PrototypeSpies;
   let validationSpies: PrototypeSpies;
+  let managedSpies: PrototypeSpies;
 
   const buildService = async (): Promise<WorkflowsService> => {
     const coreStart = makeCoreStart(makeEsClient());
@@ -139,6 +155,7 @@ describe('WorkflowsService (facade)', () => {
           isInitialized: jest.fn().mockReturnValue(true),
         } as unknown as WorkflowChangeHistoryService)
     );
+    mockedWaitForManagedWorkflowInstallReadiness.mockResolvedValue({ ready: true });
     crudSpies = spyPrototype(WorkflowCrudService, [
       'getWorkflow',
       'getWorkflowDocumentSource',
@@ -171,6 +188,12 @@ describe('WorkflowsService (facade)', () => {
       'getAvailableConnectors',
       'validateWorkflow',
       'getWorkflowZodSchema',
+    ]);
+    managedSpies = spyPrototype(ManagedWorkflowsService, [
+      'installManagedWorkflow',
+      'pluginReady',
+      'cleanupUnregisteredOrphans',
+      'markInstallIncomplete',
     ]);
   });
 
@@ -400,6 +423,58 @@ describe('WorkflowsService (facade)', () => {
       (crudSpies.getWorkflow as jest.SpyInstance).mockRejectedValueOnce(boom);
 
       await expect(service.getWorkflow('wf-1', 'default')).rejects.toBe(boom);
+    });
+  });
+
+  describe('managed install readiness gate', () => {
+    it('skips install, ready, and orphan cleanup when the gate is not ready', async () => {
+      mockedWaitForManagedWorkflowInstallReadiness.mockResolvedValue({
+        ready: false,
+        reason: 'stopping',
+      });
+      const service = await buildService();
+
+      await service.installManagedWorkflow('wf.managed' as any, { spaceId: 'default' }, 'owner');
+      await service.pluginReady('owner');
+      await service.cleanupUnregisteredOrphans(['owner']);
+
+      expect(managedSpies.installManagedWorkflow).not.toHaveBeenCalled();
+      expect(managedSpies.markInstallIncomplete).toHaveBeenCalledWith('owner');
+      expect(managedSpies.pluginReady).not.toHaveBeenCalled();
+      expect(managedSpies.cleanupUnregisteredOrphans).not.toHaveBeenCalled();
+      expect(mockedWaitForManagedWorkflowInstallReadiness).toHaveBeenCalled();
+    });
+
+    it('marks install incomplete when install is gated out so ready reconcile stays safe', async () => {
+      mockedWaitForManagedWorkflowInstallReadiness
+        .mockResolvedValueOnce({ ready: false, reason: 'stopping' })
+        .mockResolvedValueOnce({ ready: true });
+      const service = await buildService();
+
+      await service.installManagedWorkflow('wf.managed' as any, { spaceId: 'default' }, 'owner');
+      await service.pluginReady('owner');
+
+      expect(managedSpies.installManagedWorkflow).not.toHaveBeenCalled();
+      expect(managedSpies.markInstallIncomplete).toHaveBeenCalledWith('owner');
+      expect(managedSpies.pluginReady).toHaveBeenCalledWith('owner');
+    });
+
+    it('delegates install, ready, and orphan cleanup when the gate is ready', async () => {
+      mockedWaitForManagedWorkflowInstallReadiness.mockResolvedValue({ ready: true });
+      const service = await buildService();
+
+      await service.installManagedWorkflow('wf.managed' as any, { spaceId: 'default' }, 'owner');
+      await service.pluginReady('owner');
+      await service.cleanupUnregisteredOrphans(['owner']);
+
+      expect(managedSpies.installManagedWorkflow).toHaveBeenCalledWith(
+        'wf.managed',
+        { spaceId: 'default' },
+        'owner'
+      );
+      expect(managedSpies.markInstallIncomplete).not.toHaveBeenCalled();
+      expect(managedSpies.pluginReady).toHaveBeenCalledWith('owner');
+      expect(managedSpies.cleanupUnregisteredOrphans).toHaveBeenCalledWith(['owner']);
     });
   });
 

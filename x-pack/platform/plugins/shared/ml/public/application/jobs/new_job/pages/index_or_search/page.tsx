@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { isEsqlSavedSearch, type DiscoverSessionFinderAttributes } from '@kbn/discover-utils';
-import { MlAppHeader } from '../../../../components/ml_app_header';
+import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../components/ml_app_header';
 import { CreateDataViewButton } from '../../../../components/create_data_view_button';
 import {
   useMlKibana,
@@ -33,6 +33,7 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
   const { contentManagement, uiSettings } = useMlKibana().services;
   const mlLocator = useMlManagementLocator();
   const navigateToPath = useNavigateToPath();
+  const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
 
   const onObjectSelection = async (id: string, type: string, name?: string) => {
     const urlPath = window.location.pathname;
@@ -59,6 +60,7 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
           title={i18n.translate('xpack.ml.newJob.wizard.selectDataViewOrSavedSearch', {
             defaultMessage: 'Select data view or saved Discover session',
           })}
+          back={anomalyDetectionJobsBack}
         />
         <EuiPanel hasShadow={false} hasBorder>
           <SavedObjectFinder
