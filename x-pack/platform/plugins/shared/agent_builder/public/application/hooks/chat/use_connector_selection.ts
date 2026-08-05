@@ -18,8 +18,12 @@ import { storageKeys } from '../../storage_keys';
 const readStoredConnectorId = (): string | undefined => {
   const raw = localStorage.getItem(storageKeys.lastUsedConnector);
   if (!raw) return undefined;
-  const parsed: unknown = JSON.parse(raw);
-  return typeof parsed === 'string' ? parsed : undefined;
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return typeof parsed === 'string' ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
 };
 
 const connectorId$ = new BehaviorSubject<string | undefined>(readStoredConnectorId());
