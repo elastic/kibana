@@ -31,7 +31,8 @@ import {
 
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
-import type { RegistryDataStream } from '../../../../types';
+import type { PackageInfo, RegistryDataStream } from '../../../../types';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
 import {
@@ -45,6 +46,9 @@ import {
   getTemplate,
   getTemplatePriority,
   generateTemplateIndexPattern,
+  generateNamespaceTemplateIndexPattern,
+  generateESIndexPatterns,
+  isOtelDataStream,
   updateCurrentWriteIndices,
 } from './template';
 
@@ -2050,6 +2054,169 @@ describe('EPM template', () => {
       );
 
       expect(templateIndexPattern).toEqual(`metrics-package.dataset.otel-*`);
+    });
+  });
+
+  describe('generateNamespaceTemplateIndexPattern', () => {
+    it('pins the namespace segment exactly for a normal data stream', () => {
+      const dataStream = {
+        type: 'logs',
+        dataset: 'nginx.access',
+        path: 'access',
+      } as RegistryDataStream;
+
+      expect(generateNamespaceTemplateIndexPattern(dataStream, 'production')).toEqual(
+        'logs-nginx.access-production'
+      );
+    });
+
+    it('pins the namespace segment exactly for a dataset_is_prefix data stream', () => {
+      const dataStream = {
+        type: 'metrics',
+        dataset: 'test',
+        path: 'test',
+        dataset_is_prefix: true,
+      } as RegistryDataStream;
+
+      expect(generateNamespaceTemplateIndexPattern(dataStream, 'production')).toEqual(
+        'metrics-test.*-production'
+      );
+    });
+
+    it('includes the .otel suffix before the namespace segment', () => {
+      const dataStream = {
+        type: 'metrics',
+        dataset: 'supabase.metrics',
+        path: 'metrics',
+      } as RegistryDataStream;
+
+      expect(generateNamespaceTemplateIndexPattern(dataStream, 'production', true)).toEqual(
+        'metrics-supabase.metrics.otel-production'
+      );
+    });
+  });
+
+  describe('isOtelDataStream', () => {
+    const otelDataStream = {
+      type: 'metrics',
+      dataset: 'supabase.metrics',
+      path: 'metrics',
+      streams: [{ input: 'otelcol' }],
+    } as RegistryDataStream;
+    const packageInfo = {
+      policy_templates: [{ name: 'supabase', inputs: [{ type: 'otelcol' }] }],
+    } as PackageInfo;
+
+    it('is true when the data stream uses the OTel input and the feature flag is enabled', () => {
+      appContextService.start(
+        createAppContextStartContractMock({}, undefined, undefined, {
+          enableOtelIntegrations: true,
+        } as ExperimentalFeatures)
+      );
+
+      expect(isOtelDataStream(otelDataStream, packageInfo)).toBe(true);
+    });
+
+    it('is false when the feature flag is disabled, even if the data stream uses the OTel input', () => {
+      appContextService.start(
+        createAppContextStartContractMock({}, undefined, undefined, {
+          enableOtelIntegrations: false,
+        } as ExperimentalFeatures)
+      );
+
+      expect(isOtelDataStream(otelDataStream, packageInfo)).toBe(false);
+    });
+
+    it('is false when the feature flag is enabled but the data stream does not use the OTel input', () => {
+      appContextService.start(
+        createAppContextStartContractMock({}, undefined, undefined, {
+          enableOtelIntegrations: true,
+        } as ExperimentalFeatures)
+      );
+      const nonOtelDataStream = {
+        ...otelDataStream,
+        streams: [{ input: 'logfile' }],
+      } as RegistryDataStream;
+
+      expect(isOtelDataStream(nonOtelDataStream, packageInfo)).toBe(false);
+    });
+  });
+
+  describe('generateESIndexPatterns', () => {
+    const regularDataStream = {
+      type: 'logs',
+      dataset: 'nginx.access',
+      title: 'Nginx access logs',
+      release: 'ga',
+      package: 'nginx',
+      path: 'access',
+      ingest_pipeline: 'default',
+      streams: [{ input: 'logfile' }],
+    } as RegistryDataStream;
+
+    const otelDataStream = {
+      type: 'metrics',
+      dataset: 'supabase.metrics',
+      title: 'Supabase OTel metrics',
+      release: 'ga',
+      package: 'supabase',
+      path: 'metrics',
+      ingest_pipeline: 'default',
+      streams: [{ input: 'otelcol' }],
+    } as RegistryDataStream;
+
+    const packageInfo = {
+      policy_templates: [{ name: 'supabase', inputs: [{ type: 'otelcol' }] }],
+    } as PackageInfo;
+
+    beforeEach(() => {
+      appContextService.start(
+        createAppContextStartContractMock({}, undefined, undefined, {
+          enableOtelIntegrations: true,
+        } as ExperimentalFeatures)
+      );
+    });
+
+    it('appends the .otel suffix only for data streams on the OTel input', () => {
+      expect(generateESIndexPatterns([regularDataStream, otelDataStream], packageInfo)).toEqual({
+        access: 'logs-nginx.access-*',
+        metrics: 'metrics-supabase.metrics.otel-*',
+      });
+    });
+
+    it('resolves an input referenced by name', () => {
+      const namedInputDataStream = {
+        ...otelDataStream,
+        streams: [{ input: 'otel_metrics' }],
+      } as RegistryDataStream;
+
+      expect(
+        generateESIndexPatterns([namedInputDataStream], {
+          policy_templates: [
+            { name: 'supabase', inputs: [{ type: 'otelcol', name: 'otel_metrics' }] },
+          ],
+        } as PackageInfo)
+      ).toEqual({
+        metrics: 'metrics-supabase.metrics.otel-*',
+      });
+    });
+
+    it('leaves patterns unsuffixed when no package context is given', () => {
+      expect(generateESIndexPatterns([otelDataStream])).toEqual({
+        metrics: 'metrics-supabase.metrics-*',
+      });
+    });
+
+    it('leaves patterns unsuffixed when OTel integrations are disabled', () => {
+      appContextService.start(
+        createAppContextStartContractMock({}, undefined, undefined, {
+          enableOtelIntegrations: false,
+        } as ExperimentalFeatures)
+      );
+
+      expect(generateESIndexPatterns([otelDataStream], packageInfo)).toEqual({
+        metrics: 'metrics-supabase.metrics-*',
+      });
     });
   });
 
