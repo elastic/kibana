@@ -750,7 +750,7 @@ export class AgentBuilderApp {
     await this.page.testSubj.fill('mcpClientNameInput', name);
   }
 
-  async selectMcpClientLogo(label: string = 'Claude') {
+  async selectMcpClientLogo(label: string) {
     const combo = this.page.testSubj.locator('mcpClientLogoSelect');
     await combo.click();
     const option = this.page.getByRole('option', { name: label });
