@@ -483,6 +483,11 @@ export class StreamsApp {
   }
 
   async clickEditRoutingRule(streamName: string) {
+    // The routing list renders asynchronously from a definition fetch that can be slow on Cloud,
+    // so wait for the rule row before clicking its edit button rather than racing the default timeout.
+    await expect(this.page.getByTestId(`routingRule-${streamName}`)).toBeVisible({
+      timeout: 30_000,
+    });
     await this.page.getByTestId(`routingRuleEditButton-${streamName}`).click();
   }
 
