@@ -462,4 +462,66 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
       expectSequences(allEntries, [1, expectedDeleteSequence]);
     }
   );
+
+  apiTest(
+    'HTTP list + detail: returns lean rows with server-side diffs and full snapshots on detail',
+    async ({ apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'change-history-http-list' },
+          schedule: { every: '1d' },
+        })
+      );
+
+      await apiServices.alertingV2.ruleChangesHistory.waitForAtLeast(1, {
+        ruleId: created.id,
+        action: RuleChangesHistoryAction.ruleCreate,
+      });
+
+      const updated = await apiServices.alertingV2.rules.upsert(
+        created.id,
+        buildCreateRuleData({
+          metadata: { name: 'change-history-http-updated' },
+          schedule: { every: '1d' },
+        })
+      );
+
+      await apiServices.alertingV2.ruleChangesHistory.waitForAtLeast(1, {
+        ruleId: created.id,
+        action: RuleChangesHistoryAction.ruleUpdate,
+      });
+
+      const list = await apiServices.alertingV2.rules.listChangeHistory(created.id, {
+        page: 1,
+        per_page: 20,
+      });
+
+      expect(list.total).toBeGreaterThanOrEqual(2);
+      expect(list.items.length).toBeGreaterThanOrEqual(2);
+      expect(list.items[0]).toMatchObject({
+        action: RuleChangesHistoryAction.ruleUpdate,
+        isCurrent: true,
+        metadata: { version: updated.metadata.version },
+      });
+      expect(list.items[0]).not.toHaveProperty('snapshot');
+      expect(list.items[0].changes?.count).toBeGreaterThan(0);
+      expect(list.items[0].changes?.summary).toStrictEqual(
+        expect.objectContaining({
+          metadata: expect.objectContaining({ name: 'change-history-http-list' }),
+        })
+      );
+
+      const detail = await apiServices.alertingV2.rules.getChangeHistoryEvent(
+        created.id,
+        list.items[0].id
+      );
+
+      expect(detail.id).toBe(list.items[0].id);
+      expect(detail.snapshot).toMatchObject({
+        id: created.id,
+        metadata: expect.objectContaining({ name: 'change-history-http-updated' }),
+      });
+      expect(detail.isCurrent).toBe(true);
+    }
+  );
 });

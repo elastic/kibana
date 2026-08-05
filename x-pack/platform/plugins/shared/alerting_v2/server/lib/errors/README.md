@@ -67,6 +67,8 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | `RULE_ALREADY_RUNNING`              | 409    | `runRuleNow` targeted a rule whose executor task is already running                                                                 | `{ rule_id }`                              |
 | `RULE_RUN_CONFLICT`                 | 409    | `runRuleNow` raced another writer updating the executor task; retry                                                                 | `{ rule_id }`                              |
 | `RULE_RUN_ERROR`                    | 500    | `runRuleNow` failed for an unexpected reason (e.g. executor task missing)                                                           | `{ rule_id }`                              |
+| `RULE_CHANGE_NOT_FOUND`             | 404    | `getRuleChange` cannot find a change-history event by id for the given rule                                                         | `{ rule_id, event_id }`                    |
+| `RULE_CHANGE_HISTORY_UNAVAILABLE`   | 503    | The change-history data stream is not initialized (or change history is disabled)                                                   | _(none)_                                   |
 
 ### Action policies (`server/lib/action_policy_client/`)
 

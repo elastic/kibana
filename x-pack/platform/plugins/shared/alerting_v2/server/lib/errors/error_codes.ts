@@ -70,6 +70,13 @@ export const ALERTING_V2_ERROR_CODES = {
    * that are not already-running or conflict.
    */
   RULE_RUN_ERROR: 'RULE_RUN_ERROR',
+  /** A rule change-history event with the given identifier does not exist. */
+  RULE_CHANGE_NOT_FOUND: 'RULE_CHANGE_NOT_FOUND',
+  /**
+   * The rule change-history data stream is not initialized (or change history
+   * is disabled), so history cannot be read.
+   */
+  RULE_CHANGE_HISTORY_UNAVAILABLE: 'RULE_CHANGE_HISTORY_UNAVAILABLE',
 
   // ────────────────────── Action policies ────────────────────
   /** An action policy with the given identifier does not exist. */

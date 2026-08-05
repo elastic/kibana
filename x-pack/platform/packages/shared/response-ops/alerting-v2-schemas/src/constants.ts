@@ -95,3 +95,14 @@ export const EXECUTION_HISTORY_MAX_RESULT_WINDOW = 10_000;
  * filter.
  */
 export const EXECUTION_HISTORY_MAX_RULE_ID_FILTER = 50;
+
+/** Maximum number of rule change-history events returned per page. */
+export const RULE_CHANGE_HISTORY_MAX_PER_PAGE = 100;
+
+/** Default number of rule change-history events returned per page when `per_page` is omitted. */
+export const RULE_CHANGE_HISTORY_DEFAULT_PER_PAGE = 20;
+
+/**
+ * Maximum number of rule change-history events that can be paged through.
+ */
+export const RULE_CHANGE_HISTORY_MAX_RESULT_WINDOW = 10_000;
