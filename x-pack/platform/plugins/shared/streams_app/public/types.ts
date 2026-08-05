@@ -35,6 +35,8 @@ import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { SignificantEventsPublicPluginStart } from '@kbn/significant-events-plugin/public';
+import type { SignificantEventsAppPublicStart } from '@kbn/significant-events-app-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 export interface ConfigSchema {}
@@ -78,6 +80,8 @@ export interface StreamsAppStartDependencies {
   console: ConsolePluginStart;
   evals?: EvalsPublicStart;
   agentBuilder?: AgentBuilderPluginStart;
+  significantEvents?: SignificantEventsPublicPluginStart;
+  significantEventsApp?: SignificantEventsAppPublicStart;
 }
 
 export interface StreamsAppPublicSetup {}
