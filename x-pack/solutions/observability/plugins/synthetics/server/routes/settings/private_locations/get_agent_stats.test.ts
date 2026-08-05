@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { LocationAgentStats } from '../../../../common/types';
 import { getPrivateLocationAgentStats } from './get_agent_stats';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 
@@ -78,7 +79,13 @@ const makeContext = ({
   return { routeContext, search };
 };
 
-const run = (routeContext: any) => getPrivateLocationAgentStats().handler(routeContext);
+const run = async (routeContext: any): Promise<LocationAgentStats[]> => {
+  const result = await getPrivateLocationAgentStats().handler(routeContext);
+  if (!Array.isArray(result)) {
+    throw new Error('Expected LocationAgentStats[] from handler');
+  }
+  return result;
+};
 
 describe('getPrivateLocationAgentStats route', () => {
   beforeEach(() => {
