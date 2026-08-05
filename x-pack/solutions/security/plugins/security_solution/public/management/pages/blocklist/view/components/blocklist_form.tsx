@@ -32,14 +32,7 @@ import {
 import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts/use_can_assign_artifact_per_policy';
 import { FormattedError } from '../../../../components/formatted_error';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
-import {
-  CONDITION_FIELD_DESCRIPTION,
-  CONDITION_FIELD_TITLE,
-  DETAILS_HEADER,
-  NAME_LABEL,
-  POLICY_SELECT_DESCRIPTION,
-  ERRORS,
-} from '../../translations';
+import { DETAILS_HEADER, NAME_LABEL, POLICY_SELECT_DESCRIPTION, ERRORS } from '../../translations';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import { isValidHash } from '../../../../../../common/endpoint/service/artifacts/validations';
@@ -76,17 +69,6 @@ interface ItemValidation {
 
 function createValidationMessage(message: string): React.ReactNode {
   return <div>{message}</div>;
-}
-
-function getDropdownDisplay(field: BlocklistConditionEntryField): React.ReactNode {
-  return (
-    <>
-      {CONDITION_FIELD_TITLE[field]}
-      <EuiText size="xs" color="subdued">
-        {CONDITION_FIELD_DESCRIPTION[field]}
-      </EuiText>
-    </>
-  );
 }
 
 function isValid(itemValidation: ItemValidation): boolean {
