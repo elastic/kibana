@@ -21,6 +21,7 @@ export interface HostOptions {
   protocol: 'http' | 'https';
   hostname: string;
   port?: number;
+  pathname?: string;
   username: string;
   password: string;
 }
@@ -74,6 +75,7 @@ export class SamlSessionManager {
       protocol: options.hostOptions.protocol,
       hostname: options.hostOptions.hostname,
       port: options.hostOptions.port,
+      pathname: options.hostOptions.pathname,
     };
     this.kbnHost = Url.format(hostOptionsWithoutAuth);
     this.kbnUsername = options.hostOptions.username;

@@ -135,6 +135,7 @@ export class Config {
           protocol: this.get('servers.kibana.protocol'),
           hostname: this.get('servers.kibana.hostname'),
           port: this.get('servers.kibana.port'),
+          pathname: this.get('servers.kibana.pathname'),
         }),
         elasticsearch: Url.format({
           protocol: this.get('servers.elasticsearch.protocol'),

@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Parsed URL pieces for test server endpoints.
- * Duplicated from @kbn/test `UrlParts` so Scout typings do not import @kbn/test.
- */
-export interface UrlParts {
-  protocol?: string;
-  hostname?: string;
-  port?: number;
-  pathname?: string;
-  auth?: string;
-  username?: string;
-  password?: string;
-}
+import { createPlaywrightConfig } from '@kbn/scout';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

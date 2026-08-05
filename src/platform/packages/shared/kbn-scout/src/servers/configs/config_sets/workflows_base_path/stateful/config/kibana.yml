@@ -1,0 +1,3 @@
+server.basePath: /workflow-repro
+server.publicBaseUrl: http://localhost:5620/workflow-repro
+server.rewriteBasePath: true
