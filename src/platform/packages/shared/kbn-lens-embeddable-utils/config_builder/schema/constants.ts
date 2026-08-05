@@ -8,10 +8,7 @@
  */
 
 // @TODO: move it to shared type/values package
-export const LENS_HISTOGRAM_GRANULARITY_DEFAULT_NUMERIC_VALUE = 5;
 export const LENS_HISTOGRAM_GRANULARITY_MIN = 1;
-/** Max target bar count for histogram `granularity` — aligns with default `histogram:maxBars`. */
-export const LENS_HISTOGRAM_GRANULARITY_MAX = 1000;
 export const LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE = 'auto';
 export const LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT = true;
 
