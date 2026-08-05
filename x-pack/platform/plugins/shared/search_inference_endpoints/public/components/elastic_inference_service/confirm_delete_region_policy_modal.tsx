@@ -38,7 +38,7 @@ export const ConfirmDeleteRegionPolicyModal: React.FC<ConfirmDeleteRegionPolicyM
       aria-labelledby={modalTitleId}
       titleProps={{ id: modalTitleId }}
       title={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.deleteConfirm.title', {
-        defaultMessage: 'Reset to default policy',
+        defaultMessage: 'Reset region preferences to default?',
       })}
       onCancel={onCancel}
       onConfirm={onConfirm}
