@@ -216,6 +216,12 @@ export function MemoryTab() {
                 )}
                 <EuiFlexItem grow={false}>
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.significantEventsApp.memory.workflowActionsButton',
+                      {
+                        defaultMessage: 'Workflow actions',
+                      }
+                    )}
                     button={
                       <EuiToolTip
                         content={i18n.translate(
