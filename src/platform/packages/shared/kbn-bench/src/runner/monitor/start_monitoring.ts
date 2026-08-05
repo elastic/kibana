@@ -102,8 +102,8 @@ const forcedGcResultSchema = z.object({
     .record(z.string(), z.unknown())
     .refine((value) => Object.keys(value).length > 0, { message: 'must not be empty' }),
   postForcedGcHeapSpaceStatistics: z
-    .record(z.string(), z.unknown())
-    .refine((value) => Object.keys(value).length > 0, { message: 'must not be empty' }),
+    .array(z.record(z.string(), z.unknown()))
+    .min(1, { message: 'must not be empty' }),
 });
 
 const validateForcedGcResult = (result: ForcedGcHeapStats, request: ForcedGcRequest): string[] => {
