@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { useDataViewManagerSelector as useSelector } from '@kbn/data-view-manager';
-import { signalIndexNameSelector } from '@kbn/data-view-manager';
+import {
+  useDataViewManagerSelector as useSelector,
+  signalIndexNameSelector,
+} from '@kbn/data-view-manager';
 
 export const useSignalIndexName = () => useSelector(signalIndexNameSelector);

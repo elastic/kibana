@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { useDataViewManagerSelector as useSelector } from '@kbn/data-view-manager';
-import { signalIndexOutdatedSelector } from '@kbn/data-view-manager';
+import {
+  useDataViewManagerSelector as useSelector,
+  signalIndexOutdatedSelector,
+} from '@kbn/data-view-manager';
 
 /**
  * Returns whether the signal index mapping is outdated.

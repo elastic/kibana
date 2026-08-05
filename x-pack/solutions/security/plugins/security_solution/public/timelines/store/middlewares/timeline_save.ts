@@ -21,7 +21,11 @@ import {
 } from '@kbn/es-query';
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { PageScope, scopedDataViewSelector, dataViewManagerStore } from '../../../data_view_manager';
+import {
+  PageScope,
+  scopedDataViewSelector,
+  dataViewManagerStore,
+} from '../../../data_view_manager';
 import {
   endTimelineSaving,
   saveTimeline,

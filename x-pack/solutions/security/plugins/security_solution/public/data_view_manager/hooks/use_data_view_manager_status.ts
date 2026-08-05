@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { useDataViewManagerSelector as useSelector } from '@kbn/data-view-manager';
-import { sharedStatusSelector } from '@kbn/data-view-manager';
+import {
+  useDataViewManagerSelector as useSelector,
+  sharedStatusSelector,
+} from '@kbn/data-view-manager';
 
 /**
  * Returns the shared initialization status of the data view manager

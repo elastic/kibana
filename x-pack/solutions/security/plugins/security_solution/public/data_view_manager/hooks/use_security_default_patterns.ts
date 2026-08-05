@@ -6,8 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import { useDataViewManagerSelector as useSelector } from '@kbn/data-view-manager';
-import { sharedStateSelector } from '@kbn/data-view-manager';
+import {
+  useDataViewManagerSelector as useSelector,
+  sharedStateSelector,
+} from '@kbn/data-view-manager';
 
 interface UseSecurityDefaultPatternsResult {
   /**

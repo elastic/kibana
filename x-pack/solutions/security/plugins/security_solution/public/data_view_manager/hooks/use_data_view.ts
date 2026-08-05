@@ -8,11 +8,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { type FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
-import { useKibana } from '../../common/lib/kibana';
-import { PageScope } from '@kbn/data-view-manager';
-import { scopedDataViewSelector } from '@kbn/data-view-manager';
-import { useDataViewManagerSelector as useSelector } from '@kbn/data-view-manager';
+import {
+  PageScope,
+  scopedDataViewSelector,
+  useDataViewManagerSelector as useSelector,
+} from '@kbn/data-view-manager';
 import type { SharedDataViewSelectionState } from '@kbn/data-view-manager';
+import { useKibana } from '../../common/lib/kibana';
 
 const INITIAL_DV = new DataView({
   fieldFormats: {} as FieldFormatsStartCommon,

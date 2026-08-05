@@ -7,8 +7,10 @@
 
 import { type DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useMemo } from 'react';
-import { useDataViewManagerSelector as useSelector } from '@kbn/data-view-manager';
-import { sharedStateSelector } from '@kbn/data-view-manager';
+import {
+  useDataViewManagerSelector as useSelector,
+  sharedStateSelector,
+} from '@kbn/data-view-manager';
 
 /**
  * Returns a list of saved data views

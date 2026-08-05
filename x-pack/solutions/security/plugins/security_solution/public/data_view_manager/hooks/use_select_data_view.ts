@@ -6,9 +6,11 @@
  */
 
 import { useCallback } from 'react';
-import { useDataViewManagerDispatch as useDispatch } from '@kbn/data-view-manager';
+import {
+  useDataViewManagerDispatch as useDispatch,
+  selectDataViewAsync,
+} from '@kbn/data-view-manager';
 import type { PageScope } from '@kbn/data-view-manager';
-import { selectDataViewAsync } from '@kbn/data-view-manager';
 
 interface UseSelectDataViewParams {
   /**
