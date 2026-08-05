@@ -137,9 +137,11 @@ export class DataGrid {
    * multi-attribute selector when you need to count or compare cells across multiple grid instances.
    */
   getCellsAtVisibleRowIndex(columnId: string, visibleRowIndex: number): Locator {
-    return this.page.testSubj.locator('euiDataGridBody').locator(
-      `[data-test-subj="dataGridRowCell"][data-gridcell-column-id="${columnId}"][data-gridcell-visible-row-index="${visibleRowIndex}"]`
-    );
+    return this.page.testSubj
+      .locator('euiDataGridBody')
+      .locator(
+        `[data-test-subj="dataGridRowCell"][data-gridcell-column-id="${columnId}"][data-gridcell-visible-row-index="${visibleRowIndex}"]`
+      );
   }
 
   /**
