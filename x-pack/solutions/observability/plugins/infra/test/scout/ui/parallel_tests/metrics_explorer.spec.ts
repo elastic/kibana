@@ -81,7 +81,9 @@ test.describe('Metrics Explorer', { tag: tags.stateful.classic }, () => {
 
     await metricsExplorerPage.goto();
 
-    await expect(page).toHaveTitle(/Metrics Explorer - Infrastructure - Observability - Elastic/);
+    await expect(page).toHaveTitle(
+      /Metrics Explorer - Infrastructure inventory - Observability - Elastic/
+    );
     await expect(metricsExplorerPage.selectedMetricPills).toHaveCount(DEFAULT_METRICS.length);
   });
 
