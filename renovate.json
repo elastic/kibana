@@ -2166,9 +2166,9 @@
     {
       "groupName": "seedrandom",
       "matchDepNames": ["seedrandom", "@types/seedrandom"],
-      "reviewers": ["team:integration-experience"],
+      "reviewers": ["team:cloud-services"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Integration-Experience"],
+      "addLabels": ["Team:Security-Cloud Services"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2548,6 +2548,15 @@
     {
       "groupName": "react-day-picker",
       "matchDepNames": ["react-day-picker"],
+      "reviewers": ["team:eui-team"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:EUI"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "eui-illustrations",
+      "matchDepNames": ["@elastic/eui-illustrations"],
       "reviewers": ["team:eui-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:EUI"],

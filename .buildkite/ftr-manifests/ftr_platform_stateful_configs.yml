@@ -89,7 +89,6 @@ enabled:
   - src/platform/test/functional/apps/discover/group4/config.ts
   - src/platform/test/functional/apps/discover/group6/config.ts
   - src/platform/test/functional/apps/discover/group11/config.ts
-  - src/platform/test/functional/apps/discover/group7/config.ts
   - src/platform/test/functional/apps/discover/group9/config.ts
   - src/platform/test/functional/apps/discover/group10/config.ts
   - src/platform/test/functional/apps/discover/context_awareness/config.ts
@@ -104,7 +103,6 @@ enabled:
   - src/platform/test/functional/apps/visualize/group2/config.ts
   - src/platform/test/functional/apps/visualize/group3/config.ts
   - src/platform/test/functional/apps/visualize/group4/config.ts
-  - src/platform/test/functional/apps/visualize/group5/config.ts
   - src/platform/test/functional/apps/visualize/group6/config.ts
   - src/platform/test/functional/apps/visualize/group7/config.ts
   - src/platform/test/functional/apps/visualize/group8/config.ts

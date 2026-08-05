@@ -2243,10 +2243,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@71.9.0":
-  version "71.9.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-71.9.0.tgz#ed3d4f3d1b63bc6fdb0459c2dc3b63f080ad7eff"
-  integrity sha512-iDl6lvA4Y3kvWXIpkP1R93+hgL2ffFBy6pExpENbDjOitauQ0Tt49/8G6SiTAbbSgDQwI/uoKWOYboWisISdbA==
+"@elastic/charts@72.0.1":
+  version "72.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-72.0.1.tgz#4c528c901b349b4720a379f56b5fbed5d1443614"
+  integrity sha512-+MZ0HvY4iop5T0eATek98PG8AQLL5S20SOp3k8cOkwGBFD83F6ctdXJCgDNgM93NOPHQSq3v4i/vvtKoLDP+NQ==
   dependencies:
     "@popperjs/core" "^2.11.8"
     "@reduxjs/toolkit" "1.9.7"
@@ -2348,7 +2348,7 @@
     cssstyle "^4.2.1"
     micromatch "^4.0.8"
 
-"@elastic/esql-definitions@^4.14.0", "@elastic/esql-definitions@^4.16.0":
+"@elastic/esql-definitions@^4.14.0", "@elastic/esql-definitions@^4.17.0":
   version "4.17.0"
   resolved "https://registry.yarnpkg.com/@elastic/esql-definitions/-/esql-definitions-4.17.0.tgz#f29eeee3f67524e5c91c2c5d752f78e97b54644f"
   integrity sha512-nwZk0oOz70cWezq5dXJQLCo3/ut5Da76lqB5xQwzV3pF2sEUtcUGm11UmsD5ZVipLp9IKSn+gzdU4LTZfi1sLA==
@@ -2386,6 +2386,11 @@
     antlr4 "4.13.2"
     tree-dump "1.1.0"
     tslib "2.8.1"
+
+"@elastic/eui-illustrations@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-illustrations/-/eui-illustrations-1.0.1.tgz#a4bd17393daaa708cadafc1e9fa325f99c869b4a"
+  integrity sha512-kEKd1o9mtAPFeJRz/H9Loa7tF9X4HFlKtyA2dC5YVyqoESPHz7d3h4P8RxYioe/RUhZpkvHY8pIAkIeSbJJ42Q==
 
 "@elastic/eui-test-helpers@1.2.0":
   version "1.2.0"
@@ -2479,12 +2484,12 @@
   resolved "https://registry.yarnpkg.com/@elastic/micro-jq/-/micro-jq-1.9.0.tgz#a0adec77326c8e4aa948000c9c883afea1708e35"
   integrity sha512-r5Lfs8Y1bcVfzPGze2H1LohgpP5NyneIxFmcJ2V00/CCSUtG3o+bw9IS3xaZ3dC1ewgXa3YRweEPYG8fG2LiBg==
 
-"@elastic/monaco-esql@4.16.0":
-  version "4.16.0"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-4.16.0.tgz#13d529b450dac3f6e85fcc08216634aeabee140f"
-  integrity sha512-jPzbGnTbYJGiiBKouuYw/2xu8nhvONGvrZeo2ZvrDEeHIwSCIVpJ6WGKGKTx9SVlXOK8SbFSt7TTtT+Qn5FlHg==
+"@elastic/monaco-esql@4.17.0":
+  version "4.17.0"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-4.17.0.tgz#4a5f922e2883e5f4e6af5ddc658ec3b3faef1296"
+  integrity sha512-s3iNBIMJJz8NOah8ATZBjohTnd6sWXQfQ1h0RPnKFlHKxHPqfDDUSPb+66uSmVLsDrY4ARY90lbGx6cDs8/kfw==
   dependencies:
-    "@elastic/esql-definitions" "^4.16.0"
+    "@elastic/esql-definitions" "^4.17.0"
 
 "@elastic/node-crypto@1.2.3", "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -4769,6 +4774,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-v2-common-queries@link:x-pack/platform/packages/shared/response-ops/alerting-v2-common-queries":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerting-v2-constants@link:x-pack/platform/packages/shared/response-ops/alerting-v2-constants":
   version "0.0.0"
   uid ""
@@ -4930,6 +4939,10 @@
   uid ""
 
 "@kbn/as-code-data-views-transforms@link:src/platform/packages/shared/as-code/data-views-transforms":
+  version "0.0.0"
+  uid ""
+
+"@kbn/as-code-export-flyout-component@link:src/platform/packages/shared/as-code/export-flyout-component":
   version "0.0.0"
   uid ""
 
@@ -8241,7 +8254,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/nightshift@link:x-pack/solutions/observability/packages/kbn-nightshift":
+"@kbn/nightshift-plugin@link:x-pack/solutions/observability/plugins/nightshift":
   version "0.0.0"
   uid ""
 
@@ -34800,7 +34813,7 @@ utils-merge@1.0.1:
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
   integrity sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=
 
-uuid@11.1.1, uuid@^11.1.0, uuid@^9.0.0:
+uuid@11.1.1, uuid@^11.1.0:
   version "11.1.1"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-11.1.1.tgz#f6d81d2e1c65d00762e5e29b16c5d2d995e208ad"
   integrity sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==
@@ -34824,6 +34837,11 @@ uuid@^8.3.2:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
+
+uuid@^9.0.0:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.1.tgz#e188d4c8853cc722220392c424cd637f32293f30"
+  integrity sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==
 
 v8-compile-cache@^2.3.0:
   version "2.3.0"
