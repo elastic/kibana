@@ -24,12 +24,6 @@ import type { SecurityLicenseFeatures } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { ConfigType } from '../config';
 
-/**
- * End-to-end coverage of the read-only filesystem path: the audit log destination is probed when
- * logging is configured, the audit logger is turned off when it cannot be written, and the plugin
- * reports a degraded status.
- */
-
 const allowAuditLogging = { allowAuditLogging: true } as SecurityLicenseFeatures;
 
 const auditConfig = (appender: ConfigType['audit']['appender']): ConfigType['audit'] =>
@@ -128,13 +122,11 @@ describeUnlessRoot('AuditService on a read-only filesystem', () => {
     });
   };
 
-  /** The status the service reported through `status.set`. */
   const reportedStatus = async (): Promise<ServiceStatus> => {
     expect(status.set).toHaveBeenCalledTimes(1);
     return firstValueFrom(status.set.mock.calls[0][0]);
   };
 
-  /** The config `logging.configure` was last given. */
   const lastLoggingConfig = async (): Promise<LoggerContextConfigInput> => {
     const config$ = logging.configure.mock.calls.at(-1)![0];
     return (await firstValueFrom(config$)) as LoggerContextConfigInput;
@@ -229,7 +221,6 @@ describeUnlessRoot('AuditService on a read-only filesystem', () => {
 
     expect((await lastLoggingConfig()).loggers![0].level).toEqual('off');
 
-    // The reconfiguration trigger: `allowAuditLogging` flipping. By then the mount is writable.
     chmodSync(logDir, 0o755);
     features$.next({ allowAuditLogging: false } as SecurityLicenseFeatures);
     features$.next(allowAuditLogging);

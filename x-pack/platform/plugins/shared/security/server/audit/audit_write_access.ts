@@ -16,11 +16,10 @@ import { combineLatest, map } from 'rxjs';
 import type { AppenderConfigType, ServiceStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 
-const READ_ONLY_FILESYSTEM_ERROR_CODES = new Set(['EROFS', 'EACCES', 'EPERM']);
-
 export interface AuditLogWriteAccess {
   granted: boolean;
   path: string;
+  /** The `NodeJS.ErrnoException` code when access was denied, e.g. `EROFS`, `EACCES`, `ENOSPC`. */
   code?: string;
   reason?: string;
   checkedAt: string;
@@ -40,10 +39,6 @@ export const probeAuditLogWriteAccess = (path: string): AuditLogWriteAccess => {
 
     return { granted: true, path, checkedAt };
   } catch (error) {
-    if (!READ_ONLY_FILESYSTEM_ERROR_CODES.has(error.code)) {
-      return { granted: true, path, checkedAt };
-    }
-
     return {
       granted: false,
       path,

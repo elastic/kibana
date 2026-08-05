@@ -148,16 +148,24 @@ describeUnlessRoot('probeAuditLogWriteAccess', () => {
   });
 
   describe('when the failure is not a read-only filesystem error', () => {
-    it('reports writable so the failure surfaces as it always has', () => {
-      // A directory where a file is expected: opening it throws EISDIR, which this probe is not
-      // designed to handle and must not silently disable audit logging for.
+    it('still denies access, since any failure crashes the appender the same way', () => {
+      // A directory where a file is expected: opening it throws EISDIR. The appender would die on
+      // it exactly as it does on EROFS, so the errno must not decide whether we protect Kibana.
       const asDirectory = join(testDir, 'audit.log');
       mkdirSync(asDirectory);
 
       const result = probeAuditLogWriteAccess(asDirectory);
 
-      expect(result.granted).toBe(true);
-      expect(result.code).toBeUndefined();
+      expect(result.granted).toBe(false);
+      expect(result.code).toEqual('EISDIR');
+    });
+
+    it('denies access when the path is unusable for a non-errno reason', () => {
+      // A NUL byte makes Node reject the path before any syscall, with no `code`.
+      const result = probeAuditLogWriteAccess(join(testDir, 'audit\0.log'));
+
+      expect(result.granted).toBe(false);
+      expect(result.reason).toEqual(expect.any(String));
     });
   });
 });
