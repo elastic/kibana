@@ -6,33 +6,39 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 const DOWN_CHIPS = [
-  i18n.translate('xpack.agentBuilder.feedback.chip.notAccurate', {
-    defaultMessage: 'Not accurate',
+  i18n.translate('xpack.agentBuilder.feedback.chip.inaccurate', {
+    defaultMessage: 'Inaccurate',
   }),
-  i18n.translate('xpack.agentBuilder.feedback.chip.tooLong', { defaultMessage: 'Too long' }),
-  i18n.translate('xpack.agentBuilder.feedback.chip.tooShort', { defaultMessage: 'Too short' }),
-  i18n.translate('xpack.agentBuilder.feedback.chip.unhelpful', { defaultMessage: 'Unhelpful' }),
-  i18n.translate('xpack.agentBuilder.feedback.chip.offTopic', { defaultMessage: 'Off topic' }),
+  i18n.translate('xpack.agentBuilder.feedback.chip.incomplete', {
+    defaultMessage: 'Incomplete',
+  }),
+  i18n.translate('xpack.agentBuilder.feedback.chip.didntFollowInstructions', {
+    defaultMessage: "Didn't follow instructions",
+  }),
   i18n.translate('xpack.agentBuilder.feedback.chip.other', { defaultMessage: 'Other' }),
 ];
 
 const UP_CHIPS = [
   i18n.translate('xpack.agentBuilder.feedback.chip.accurate', { defaultMessage: 'Accurate' }),
-  i18n.translate('xpack.agentBuilder.feedback.chip.wellFormatted', {
-    defaultMessage: 'Well formatted',
-  }),
-  i18n.translate('xpack.agentBuilder.feedback.chip.clearExplanation', {
-    defaultMessage: 'Clear explanation',
-  }),
-  i18n.translate('xpack.agentBuilder.feedback.chip.goodExamples', {
-    defaultMessage: 'Good examples',
+  i18n.translate('xpack.agentBuilder.feedback.chip.useful', { defaultMessage: 'Useful' }),
+  i18n.translate('xpack.agentBuilder.feedback.chip.wellExplained', {
+    defaultMessage: 'Well-explained',
   }),
 ];
+
+const CHIP_PROMPT: Record<'up' | 'down', string> = {
+  down: i18n.translate('xpack.agentBuilder.feedback.chipPrompt.down', {
+    defaultMessage: 'What went wrong?',
+  }),
+  up: i18n.translate('xpack.agentBuilder.feedback.chipPrompt.up', {
+    defaultMessage: 'What worked well?',
+  }),
+};
 
 interface ChipRowProps {
   vote: 'up' | 'down';
@@ -45,35 +51,44 @@ export const ChipRow: React.FC<ChipRowProps> = ({ vote, selected, onToggle }) =>
   const chips = vote === 'down' ? DOWN_CHIPS : UP_CHIPS;
 
   return (
-    <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-      {chips.map((chip) => {
-        const isSelected = selected.includes(chip);
-        return (
-          <EuiFlexItem key={chip} grow={false}>
-            <button
-              type="button"
-              onClick={() => onToggle(chip)}
-              css={css`
-                padding: 2px 10px;
-                border-radius: ${euiTheme.border.radius.medium};
-                border: 1px solid
-                  ${isSelected ? euiTheme.colors.primary : euiTheme.border.color};
-                background: ${isSelected ? euiTheme.colors.lightestShade : 'transparent'};
-                color: ${isSelected ? euiTheme.colors.primary : euiTheme.colors.text};
-                cursor: pointer;
-                font-size: ${euiTheme.font.scale.xs}${euiTheme.font.defaultUnits};
-                line-height: 20px;
-                transition: border-color 0.15s ease, background 0.15s ease;
-                &:hover {
-                  border-color: ${euiTheme.colors.primary};
-                }
-              `}
-            >
-              {chip}
-            </button>
-          </EuiFlexItem>
-        );
-      })}
+    <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color="subdued">
+          <strong>{CHIP_PROMPT[vote]}</strong>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+          {chips.map((chip) => {
+            const isSelected = selected.includes(chip);
+            return (
+              <EuiFlexItem key={chip} grow={false}>
+                <button
+                  type="button"
+                  onClick={() => onToggle(chip)}
+                  css={css`
+                    padding: 2px 10px;
+                    border-radius: ${euiTheme.border.radius.medium};
+                    border: 1px solid
+                      ${isSelected ? euiTheme.colors.primary : euiTheme.border.color};
+                    background: ${isSelected ? euiTheme.colors.lightestShade : 'transparent'};
+                    color: ${isSelected ? euiTheme.colors.primary : euiTheme.colors.text};
+                    cursor: pointer;
+                    font-size: ${euiTheme.font.scale.xs}${euiTheme.font.defaultUnits};
+                    line-height: 20px;
+                    transition: border-color 0.15s ease, background 0.15s ease;
+                    &:hover {
+                      border-color: ${euiTheme.colors.primary};
+                    }
+                  `}
+                >
+                  {chip}
+                </button>
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

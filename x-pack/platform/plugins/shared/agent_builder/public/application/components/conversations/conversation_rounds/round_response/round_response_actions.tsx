@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useMemo } from 'react';
@@ -37,6 +44,12 @@ const labels = {
   regenerate: i18n.translate('xpack.agentBuilder.roundResponseActions.regenerate', {
     defaultMessage: 'Regenerate response',
   }),
+  submit: i18n.translate('xpack.agentBuilder.roundResponseActions.feedbackSubmit', {
+    defaultMessage: 'Submit',
+  }),
+  cancel: i18n.translate('xpack.agentBuilder.roundResponseActions.feedbackCancel', {
+    defaultMessage: 'Cancel',
+  }),
 };
 
 const ADD_TO_DATASET_METADATA_SOURCE = 'agent_builder';
@@ -63,15 +76,17 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   const {
     vote,
     chips,
+    comment,
     commentOpen,
     inviteVisible,
     submitted,
     isSubmitting,
     setVote,
     toggleChip,
+    setComment,
     openComment,
-    closeComment,
     dismissInvite,
+    cancel,
     submit,
   } = useFeedback(rawRound?.id ?? '');
 
@@ -115,9 +130,9 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
 
   const showTraceButton = isTracingEnabled && Boolean(traceId);
   const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction !== null;
-  const showFeedback = isExperimentalEnabled && Boolean(rawRound);
+  const showFeedback = Boolean(rawRound);
 
-  const showChips = vote !== null && !submitted && (vote === 'down' || commentOpen);
+  const showDetailForm = vote !== null && !submitted && (vote === 'down' || commentOpen);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
@@ -230,15 +245,39 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
         </EuiFlexItem>
       )}
 
-      {showFeedback && showChips && (
+      {showFeedback && showDetailForm && (
         <EuiFlexItem grow={false}>
-          <ChipRow vote={vote!} selected={chips} onToggle={toggleChip} />
-        </EuiFlexItem>
-      )}
+          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <ChipRow vote={vote!} selected={chips} onToggle={toggleChip} />
+            </EuiFlexItem>
 
-      {showFeedback && vote !== null && commentOpen && !submitted && (
-        <EuiFlexItem grow={false}>
-          <CommentBox onSubmit={submit} onCancel={closeComment} isSubmitting={isSubmitting} />
+            <EuiFlexItem grow={false}>
+              <CommentBox value={comment} onChange={setComment} />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty size="s" onClick={cancel} isDisabled={isSubmitting}>
+                    {labels.cancel}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="s"
+                    fill
+                    isLoading={isSubmitting}
+                    isDisabled={isSubmitting}
+                    onClick={submit}
+                    data-test-subj="roundFeedbackSubmitButton"
+                  >
+                    {labels.submit}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
