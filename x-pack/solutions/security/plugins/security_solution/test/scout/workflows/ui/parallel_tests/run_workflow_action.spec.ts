@@ -28,7 +28,7 @@ spaceTest.describe('Run workflow alert action', { tag: [...tags.stateful.classic
 
     // Wait for the rule to produce an alert before opening the browser. Without this,
     // navigation races task-manager first-run scheduling and the alerts table never loads.
-    await apiServices.detectionAlerts.waitForAlerts(ruleName, 1, 60_000);
+    await apiServices.detectionAlerts.waitForAlerts(ruleName, 1, 90_000);
 
     // Use a custom role that includes workflowsManagement privileges (canExecuteWorkflow)
     // in addition to the security index privileges needed to view alerts
