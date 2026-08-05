@@ -14,13 +14,13 @@ import {
   EuiDescriptionListDescription,
   EuiCodeBlock,
   EuiTitle,
-  EuiCallOut,
   EuiSpacer,
   EuiLink,
   EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { formatDlmLifecycleSummary } from '../../../lib/data_streams';
 import { getFailedDataLifecycleSummary } from '../../../lib/failed_data_lifecycle_summary';
@@ -64,7 +64,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({
       {/* Callout when component template is not in use */}
       {!templateIsInUse && (
         <>
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
             title={
               <FormattedMessage
@@ -72,45 +72,45 @@ export const TabSummary: React.FunctionComponent<Props> = ({
                 defaultMessage="This component template is not in use by any index templates."
               />
             }
-            iconType="pin"
             data-test-subj="notInUseCallout"
             size="s"
-          >
-            {showCallToAction && (
-              <p>
-                <FormattedMessage
-                  id="xpack.idxMgmt.componentTemplateDetails.summaryTab.notInUseDescription"
-                  defaultMessage="{createLink} an index template or {editLink} an existing one."
-                  values={{
-                    createLink: (
-                      <EuiLink
-                        href={getUrlForApp('management', {
-                          path: '/data/index_management/create_template',
-                        })}
-                      >
-                        <FormattedMessage
-                          id="xpack.idxMgmt.componentTemplateDetails.summaryTab.createTemplateLink"
-                          defaultMessage="Create"
-                        />
-                      </EuiLink>
-                    ),
-                    editLink: (
-                      <EuiLink
-                        href={getUrlForApp('management', {
-                          path: '/data/index_management/templates',
-                        })}
-                      >
-                        <FormattedMessage
-                          id="xpack.idxMgmt.componentTemplateDetails.summaryTab.updateTemplateLink"
-                          defaultMessage="update"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            )}
-          </EuiCallOut>
+            text={
+              showCallToAction ? (
+                <p>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.componentTemplateDetails.summaryTab.notInUseDescription"
+                    defaultMessage="{createLink} an index template or {editLink} an existing one."
+                    values={{
+                      createLink: (
+                        <EuiLink
+                          href={getUrlForApp('management', {
+                            path: '/data/index_management/create_template',
+                          })}
+                        >
+                          <FormattedMessage
+                            id="xpack.idxMgmt.componentTemplateDetails.summaryTab.createTemplateLink"
+                            defaultMessage="Create"
+                          />
+                        </EuiLink>
+                      ),
+                      editLink: (
+                        <EuiLink
+                          href={getUrlForApp('management', {
+                            path: '/data/index_management/templates',
+                          })}
+                        >
+                          <FormattedMessage
+                            id="xpack.idxMgmt.componentTemplateDetails.summaryTab.updateTemplateLink"
+                            defaultMessage="update"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              ) : undefined
+            }
+          />
           <EuiSpacer />
         </>
       )}

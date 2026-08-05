@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 const i18nTexts = {
   title: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.cloudDataTierCallout.title', {
@@ -33,13 +33,21 @@ interface Props {
  */
 export const CloudDataTierCallout: FunctionComponent<Props> = ({ linkToCloudDeployment }) => {
   return (
-    <EuiCallOut title={i18nTexts.title} data-test-subj="cloudDataTierCallout">
-      {i18nTexts.body}{' '}
-      {Boolean(linkToCloudDeployment) && (
-        <EuiLink href={linkToCloudDeployment} external>
-          {i18nTexts.linkText}
-        </EuiLink>
-      )}
-    </EuiCallOut>
+    <KbnInfoCallout
+      title={i18nTexts.title}
+      data-test-subj="cloudDataTierCallout"
+      text={i18nTexts.body}
+      actionProps={
+        linkToCloudDeployment
+          ? {
+              primary: {
+                href: linkToCloudDeployment,
+                target: '_blank',
+                children: i18nTexts.linkText,
+              },
+            }
+          : undefined
+      }
+    />
   );
 };

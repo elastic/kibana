@@ -8,7 +8,6 @@
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -21,6 +20,7 @@ import {
   EuiSpacer,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { SlmPolicy } from '../../../../../../../common/types';
@@ -61,11 +61,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
     <Fragment>
       {isManagedPolicy ? (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount={false}
             size="s"
-            color="warning"
-            iconType="info"
             title={
               <FormattedMessage
                 id="xpack.snapshotRestore.policyDetails.managedPolicyWarningTitle"

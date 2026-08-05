@@ -10,7 +10,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCard,
   EuiConfirmModal,
   EuiFlexGroup,
@@ -23,6 +22,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   RELAY_APP_CONNECTION_STATUS,
   type RelayAppConnectionStatus,
@@ -220,7 +220,7 @@ function SlackCardFooter({
     <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
       {error && (
         <EuiFlexItem grow={false}>
-          <EuiCallOut announceOnMount size="s" color="danger" title={error} />
+          <KbnDangerCallout announceOnMount size="s" title={error} />
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>

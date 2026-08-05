@@ -9,7 +9,8 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiCallOut, EuiTextColor, EuiSwitch, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiTextColor, EuiSwitch, EuiText } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { useKibana } from '../../../../../../shared_imports';
 
@@ -98,15 +99,13 @@ export const HotPhase: FunctionComponent = () => {
           <div aria-live="polite" role="region">
             {showEmptyRolloverFieldsError && (
               <>
-                <EuiCallOut
+                <KbnDangerCallout
                   announceOnMount={false}
                   size="s"
                   title={i18nTexts.editPolicy.errors.rollOverConfigurationCallout.title}
                   data-test-subj="rolloverSettingsRequired"
-                  color="danger"
-                >
-                  <div>{i18nTexts.editPolicy.errors.rollOverConfigurationCallout.body}</div>
-                </EuiCallOut>
+                  text={<div>{i18nTexts.editPolicy.errors.rollOverConfigurationCallout.body}</div>}
+                />
                 <EuiSpacer size="s" />
               </>
             )}

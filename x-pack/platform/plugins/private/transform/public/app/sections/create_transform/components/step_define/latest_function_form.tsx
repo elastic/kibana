@@ -9,7 +9,8 @@ import React, { type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonIcon, EuiCallOut, EuiComboBox, EuiCopy, EuiFormRow } from '@elastic/eui';
+import { EuiButtonIcon, EuiComboBox, EuiCopy, EuiFormRow } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { DropDownLabel } from '@kbn/ml-field-stats-flyout';
 import { OptionListWithFieldStats, useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
 import type { LatestFunctionService } from './hooks/use_latest_function_config';
@@ -100,7 +101,15 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
             />
           )}
           {latestFunctionService.sortFieldOptions.length === 0 && (
-            <EuiCallOut announceOnMount={false} color="danger" iconType="warning" size="m">
+            <KbnDangerCallout
+              announceOnMount={false}
+              title={i18n.translate(
+                'xpack.transform.stepDefineForm.sortFieldOptionsEmptyErrorTitle',
+                {
+                  defaultMessage: 'No date fields available for sorting',
+                }
+              )}
+            >
               <p>
                 <FormattedMessage
                   id="xpack.transform.stepDefineForm.sortFieldOptionsEmptyError"
@@ -121,7 +130,7 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
                   )}
                 </EuiCopy>
               </p>
-            </EuiCallOut>
+            </KbnDangerCallout>
           )}
         </>
       </EuiFormRow>

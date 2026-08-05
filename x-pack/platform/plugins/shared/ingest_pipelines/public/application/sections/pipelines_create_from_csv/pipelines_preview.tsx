@@ -14,12 +14,11 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiCopy,
-  EuiCallOut,
-  EuiText,
   EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { XJsonLang } from '@kbn/monaco';
+import { KbnSuccessCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 import { CodeEditorField } from '@kbn/code-editor';
@@ -63,21 +62,18 @@ export const PipelinesPreview: FC<Props> = ({
     <EuiFlexGroup>
       <EuiFlexItem>
         {!hasError && (
-          <EuiCallOut
+          <KbnSuccessCallout
             announceOnMount
             title="Processor definitions generated"
-            color="success"
-            iconType="check"
-          >
-            <EuiText>
+            text={
               <p>
                 <FormattedMessage
                   id="xpack.ingestPipelines.createFromCsv.preview.jsonMapSuccessful"
                   defaultMessage="You can save or edit the JSON before generating the pipeline."
                 />
               </p>
-            </EuiText>
-          </EuiCallOut>
+            }
+          />
         )}
 
         <EuiSpacer size="m" />

@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { RequestError } from '../../../../../types';
 
 interface Props {
@@ -13,24 +14,24 @@ interface Props {
 }
 export const SaveError: React.FC<Props> = ({ saveError }) => {
   const { message, cause } = saveError;
+  const text = cause && cause.length === 1 ? cause[0] : '';
+
   const renderErrorBody = () => {
     if (!cause || !Array.isArray(cause)) return null;
-    return cause.length === 1 ? (
-      <p>{cause[0]}</p>
-    ) : (
+    return cause.length > 1 ? (
       <ul>
         {cause.map((causeValue, index) => (
           <li key={index}>{causeValue}</li>
         ))}
       </ul>
-    );
+    ) : null;
   };
 
   return (
     <>
-      <EuiCallOut title={message} color="danger" iconType="error" data-test-subj="saveErrorBanner">
+      <KbnDangerCallout title={message} text={text} data-test-subj="saveErrorBanner">
         {renderErrorBody()}
-      </EuiCallOut>
+      </KbnDangerCallout>
       <EuiSpacer />
     </>
   );

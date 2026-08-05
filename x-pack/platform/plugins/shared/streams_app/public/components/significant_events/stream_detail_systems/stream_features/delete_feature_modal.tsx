@@ -9,7 +9,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -21,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { upperFirst } from 'lodash';
 import type { Feature } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
@@ -89,7 +89,7 @@ export function DeleteFeatureModal({
           })}
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiCallOut announceOnMount color="warning" iconType="warning" title={WARNING_MESSAGE} />
+        <KbnWarningCallout announceOnMount title={WARNING_MESSAGE} />
         <EuiSpacer size="m" />
         <EuiBasicTable
           css={css`

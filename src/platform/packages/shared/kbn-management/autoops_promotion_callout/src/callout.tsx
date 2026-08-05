@@ -9,14 +9,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiCallOutProps } from '@elastic/eui';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { KbnInfoCallout, type KbnInfoCalloutProps } from '@kbn/ui-callout';
 
 export interface AutoOpsPromotionCalloutProps {
   cloudConnectUrl?: string;
   onConnectClick?: (e: React.MouseEvent) => void;
   hasCloudConnectPermission?: boolean;
-  overrideCalloutProps?: Partial<Omit<EuiCallOutProps, 'children' | 'title' | 'onDismiss'>>;
+  overrideCalloutProps?: Partial<Omit<KbnInfoCalloutProps, 'children' | 'title' | 'onDismiss'>>;
 }
 
 export const AUTOOPS_CALLOUT_DISMISSED_KEY = 'kibana.autoOpsPromotionCallout.dismissed';
@@ -60,38 +60,37 @@ export const AutoOpsPromotionCallout = ({
         };
 
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       title={
         <FormattedMessage
           id="management.autoOpsPromotionCallout.title"
           defaultMessage="New! Connect this cluster to AutoOps"
         />
       }
-      color="primary"
-      iconType="info"
       data-test-subj="autoOpsPromotionCallout"
       onDismiss={handleDismiss}
+      text={
+        <p>
+          <FormattedMessage
+            id="management.autoOpsPromotionCallout.description"
+            defaultMessage="Unlock advanced monitoring of ECE, ECK, and self-managed clusters with AutoOps, now available for free across all license types. Set it up today using {cloudConnectLink}."
+            values={{
+              cloudConnectLink: (
+                <EuiLink
+                  {...cloudConnectLinkProps}
+                  data-test-subj="autoOpsPromotionCalloutCloudConnectLink"
+                >
+                  <FormattedMessage
+                    id="management.autoOpsPromotionCallout.cloudConnectLink"
+                    defaultMessage="Cloud Connect"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      }
       {...overrideCalloutProps}
-    >
-      <p>
-        <FormattedMessage
-          id="management.autoOpsPromotionCallout.description"
-          defaultMessage="Unlock advanced monitoring of ECE, ECK, and self-managed clusters with AutoOps, now available for free across all license types. Set it up today using {cloudConnectLink}."
-          values={{
-            cloudConnectLink: (
-              <EuiLink
-                {...cloudConnectLinkProps}
-                data-test-subj="autoOpsPromotionCalloutCloudConnectLink"
-              >
-                <FormattedMessage
-                  id="management.autoOpsPromotionCallout.cloudConnectLink"
-                  defaultMessage="Cloud Connect"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </p>
-    </EuiCallOut>
+    />
   );
 };

@@ -9,33 +9,38 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiCallOutProps } from '@elastic/eui';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnWarningCallout, type KbnWarningCalloutProps } from '@kbn/ui-callout';
 
-export interface DeleteManagedAssetsCalloutProps extends EuiCallOutProps {
+export interface DeleteManagedAssetsCalloutProps extends Omit<KbnWarningCalloutProps, 'title'> {
   assetName: string;
   overrideBody?: string;
+  title?: KbnWarningCalloutProps['title'];
 }
 
 export const DeleteManagedAssetsCallout = ({
   assetName,
   overrideBody,
+  title,
   ...overrideCalloutProps
 }: DeleteManagedAssetsCalloutProps) => {
+  const defaultTitle = i18n.translate('management.deleteManagedAssetsCallout.title', {
+    defaultMessage: 'Managed {assetName} will be re-created',
+    values: { assetName },
+  });
   return (
-    <EuiCallOut
-      color="warning"
-      iconType="warning"
+    <KbnWarningCallout
       data-test-subj="deleteManagedAssetsCallout"
+      title={title ?? defaultTitle}
+      text={
+        <p>
+          {overrideBody ??
+            i18n.translate('management.deleteManagedAssetsCallout.body', {
+              defaultMessage: `Elasticsearch automatically re-creates any missing managed {assetName}. If you delete managed {assetName}, the deletion appears as successful, but the {assetName} are immediately re-created and reappear.`,
+              values: { assetName },
+            })}
+        </p>
+      }
       {...overrideCalloutProps}
-    >
-      <p>
-        {overrideBody ??
-          i18n.translate('management.deleteManagedAssetsCallout.body', {
-            defaultMessage: `Elasticsearch automatically re-creates any missing managed {assetName}. If you delete managed {assetName}, the deletion appears as successful, but the {assetName} are immediately re-created and reappear.`,
-            values: { assetName },
-          })}
-      </p>
-    </EuiCallOut>
+    />
   );
 };

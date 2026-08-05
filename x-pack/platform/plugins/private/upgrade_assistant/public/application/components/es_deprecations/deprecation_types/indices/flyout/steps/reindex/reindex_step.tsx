@@ -10,7 +10,6 @@ import React, { Fragment } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -19,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -103,7 +103,7 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
         {hasRequiredPrivileges === false && (
           <Fragment>
             <EuiSpacer />
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount={false}
               title={
                 <FormattedMessage
@@ -111,8 +111,6 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
                   defaultMessage="You do not have sufficient privileges to reindex this index"
                 />
               }
-              color="danger"
-              iconType="warning"
             />
           </Fragment>
         )}

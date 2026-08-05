@@ -17,7 +17,6 @@ import React, {
 
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiModal,
   EuiPageTemplate,
   EuiSkeletonText,
@@ -28,6 +27,7 @@ import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   usePageUrlState,
@@ -93,7 +93,7 @@ const ErrorMessageCallout: FC<{
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiCallOut
+      <KbnDangerCallout
         size="s"
         title={
           <>
@@ -103,8 +103,6 @@ const ErrorMessageCallout: FC<{
             )}
           </>
         }
-        color="danger"
-        iconType="error"
       />
     </>
   );
@@ -205,9 +203,7 @@ export const TransformManagement: FC = () => {
         );
     return (
       <>
-        <EuiCallOut
-          iconType="warning"
-          color="warning"
+        <KbnWarningCallout
           data-test-subj="transformPageReauthorizeCallout"
           title={`${insufficientPermissionsMsg} ${actionMsg}`}
         />
@@ -376,23 +372,23 @@ export const TransformManagement: FC = () => {
             {isCpsEnabled && !isCpsUnsupportedCalloutDismissed && (
               <>
                 <EuiSpacer size="m" />
-                <EuiCallOut
+                <KbnInfoCallout
                   title={i18n.translate('xpack.transform.cpsUnsupportedCallout.title', {
                     defaultMessage: 'Cross-project search for transforms coming soon',
                   })}
-                  iconType="info"
                   onDismiss={onDismissCpsUnsupportedCallout}
                   dismissButtonProps={{ 'data-test-subj': 'transformCpsUnsupportedCalloutDismiss' }}
                   data-test-subj="transformCpsUnsupportedCallout"
                   announceOnMount
-                >
-                  <p>
-                    <FormattedMessage
-                      id="xpack.transform.cpsUnsupportedCallout.description"
-                      defaultMessage="While we're working on this feature, all transform search scope will be limited to the current project."
-                    />
-                  </p>
-                </EuiCallOut>
+                  text={
+                    <p>
+                      <FormattedMessage
+                        id="xpack.transform.cpsUnsupportedCallout.description"
+                        defaultMessage="While we're working on this feature, all transform search scope will be limited to the current project."
+                      />
+                    </p>
+                  }
+                />
                 <EuiSpacer size="m" />
               </>
             )}
