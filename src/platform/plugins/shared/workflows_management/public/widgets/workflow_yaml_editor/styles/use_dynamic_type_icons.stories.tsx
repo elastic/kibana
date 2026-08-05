@@ -11,7 +11,7 @@ import { EuiText } from '@elastic/eui';
 import type { Decorator } from '@storybook/react';
 import React from 'react';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
-import type { CoreStart } from '@kbn/core/public';
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
@@ -30,102 +30,61 @@ interface MockConnectorsResponse {
   };
 }
 
+// Connectors whose icons ship in @kbn/connector-specs, so the story resolves the real
+// ones. A representative slice rather than all 58 — the point is that resolution works.
+const SPEC_CONNECTOR_TYPES: MockConnectorTypeInfo[] = [
+  { actionTypeId: '.github', displayName: 'GitHub' },
+  { actionTypeId: '.datadog', displayName: 'Datadog' },
+  { actionTypeId: '.jenkins', displayName: 'Jenkins' },
+  { actionTypeId: '.sentry', displayName: 'Sentry' },
+  { actionTypeId: '.workday', displayName: 'Workday' },
+  { actionTypeId: '.kubernetes', displayName: 'Kubernetes' },
+  { actionTypeId: '.posthog', displayName: 'PostHog' },
+  { actionTypeId: '.new_relic', displayName: 'New Relic' },
+  { actionTypeId: '.zendesk', displayName: 'Zendesk' },
+  { actionTypeId: '.google_drive', displayName: 'Google Drive' },
+  { actionTypeId: '.microsoft-teams', displayName: 'Microsoft Teams' },
+  { actionTypeId: '.jira-cloud', displayName: 'Jira Cloud' },
+];
+
+// Legacy connectors whose icons live in stack_connectors. That plugin can't be reached
+// from a story, so these land on the plugs fallback here but render fine in Kibana.
+const STACK_CONNECTOR_TYPES: MockConnectorTypeInfo[] = [
+  { actionTypeId: '.slack', displayName: 'Slack' },
+  { actionTypeId: '.slack_api', displayName: 'Slack API' },
+  { actionTypeId: '.email', displayName: 'Email' },
+  { actionTypeId: '.inference', displayName: 'Inference' },
+  { actionTypeId: '.gen-ai', displayName: 'Gen AI' },
+  { actionTypeId: '.bedrock', displayName: 'Bedrock' },
+  { actionTypeId: '.gemini', displayName: 'Gemini' },
+  { actionTypeId: '.servicenow', displayName: 'Service Now' },
+  { actionTypeId: '.jira', displayName: 'Jira' },
+  { actionTypeId: '.torq', displayName: 'Torq' },
+  { actionTypeId: '.opsgenie', displayName: 'Opsgenie' },
+  { actionTypeId: '.swimlane', displayName: 'Swimlane' },
+];
+
+const CONNECTOR_TYPES = [...SPEC_CONNECTOR_TYPES, ...STACK_CONNECTOR_TYPES];
+
 const mockConnectorsResponse: MockConnectorsResponse = {
-  connectorTypes: {
-    slack: {
-      actionTypeId: '.slack',
-      displayName: 'Slack',
-    },
-    genAi: {
-      actionTypeId: '.gen-ai',
-      displayName: 'Gen AI',
-    },
-    bedrock: {
-      actionTypeId: '.bedrock',
-      displayName: 'Bedrock',
-    },
-    gemini: {
-      actionTypeId: '.gemini',
-      displayName: 'Gemini',
-    },
-    serviceNow: {
-      actionTypeId: '.servicenow',
-      displayName: 'Service Now',
-    },
-    serviceNowSir: {
-      actionTypeId: '.servicenow-sir',
-      displayName: 'Service Now SecOps',
-    },
-    serviceNowItom: {
-      actionTypeId: '.servicenow-itom',
-      displayName: 'Service Now ITOM',
-    },
-    jira: {
-      actionTypeId: '.jira',
-      displayName: 'Jira',
-    },
-    teams: {
-      actionTypeId: '.teams',
-      displayName: 'Teams',
-    },
-    torq: {
-      actionTypeId: '.torq',
-      displayName: 'Torq',
-    },
-    opsgenie: {
-      actionTypeId: '.opsgenie',
-      displayName: 'Opsgenie',
-    },
-    jiraServiceManagement: {
-      actionTypeId: '.jira-service-management',
-      displayName: 'Jira Service Management',
-    },
-    tines: {
-      actionTypeId: '.tines',
-      displayName: 'Tines',
-    },
-    xmatters: {
-      actionTypeId: '.xmatters',
-      displayName: 'Xmatters',
-    },
-    swimlane: {
-      actionTypeId: '.swimlane',
-      displayName: 'Swimlane',
-    },
-    email: {
-      actionTypeId: '.email',
-      displayName: 'Email',
-    },
-    inference: {
-      actionTypeId: '.inference',
-      displayName: 'Inference',
-    },
-    slackApi: {
-      actionTypeId: '.slack_api',
-      displayName: 'Slack API',
-    },
-  },
+  connectorTypes: Object.fromEntries(CONNECTOR_TYPES.map((c) => [c.actionTypeId, c])),
 };
 
-// Real connector logos (gemini, bedrock, jira, etc.) are lazy React components registered by
-// stack_connectors. We use a placeholder iconClass here to avoid cross-plugin dependencies.
-// Connectors with HardcodedIcons entries (slack, email, inference) still show the correct icon.
+// stack_connectors is what populates this registry in Kibana, and it isn't reachable
+// from a story. `ConnectorIconsMap` carries the same lazy icon components, so seeding
+// from it renders the real logos rather than a wall of identical plugs.
 const createPopulatedActionTypeRegistry = () => {
   const registry = new TypeRegistry<ActionTypeModel>();
-  for (const connector of Object.values(mockConnectorsResponse.connectorTypes)) {
+  for (const { actionTypeId } of CONNECTOR_TYPES) {
     registry.register({
-      id: connector.actionTypeId,
-      iconClass: 'plugs',
-      selectMessage: '',
-      actionConnectorFields: null,
-      actionParamsFields: null as unknown as ActionTypeModel['actionParamsFields'],
-      validateParams: async () => ({ errors: {} }),
+      id: actionTypeId,
+      iconClass: ConnectorIconsMap.get(actionTypeId) ?? 'plugs',
     } as unknown as ActionTypeModel);
   }
   return registry;
 };
 
-const decorator: Decorator = (story: Function) => {
+const decorator: Decorator = (story) => {
   return (
     <I18nProvider>
       <KibanaContextProvider
@@ -151,7 +110,7 @@ const decorator: Decorator = (story: Function) => {
               getStepDefinition: () => undefined,
               getAllStepDefinitions: () => [],
             },
-          } as unknown as CoreStart
+          } as unknown as Parameters<typeof KibanaContextProvider>[0]['services']
         }
       >
         {story()}
@@ -167,25 +126,33 @@ export default {
 
 const allTypes = [
   ...predefinedStepTypes,
-  ...Object.values(mockConnectorsResponse.connectorTypes).map((connector) => ({
-    actionTypeId: connector.actionTypeId.slice(1),
-    displayName: connector.displayName,
+  ...CONNECTOR_TYPES.map(({ actionTypeId, displayName }) => ({
+    actionTypeId: actionTypeId.slice(1),
+    displayName,
   })),
 ];
 
 const hasHardcodedIcon = (actionTypeId: string): boolean =>
-  actionTypeId in HardcodedIcons ||
-  `.${actionTypeId}` in HardcodedIcons ||
-  actionTypeId === 'elasticsearch' ||
-  actionTypeId === 'kibana';
+  actionTypeId in HardcodedIcons || `.${actionTypeId}` in HardcodedIcons;
 
 const withHardcodedIcons = allTypes.filter((t) => hasHardcodedIcon(t.actionTypeId));
-const withFallbackIcons = allTypes.filter((t) => !hasHardcodedIcon(t.actionTypeId));
+const withSpecIcons = allTypes.filter(
+  (t) => !hasHardcodedIcon(t.actionTypeId) && ConnectorIconsMap.has(`.${t.actionTypeId}`)
+);
+const withFallbackIcons = allTypes.filter(
+  (t) => !hasHardcodedIcon(t.actionTypeId) && !ConnectorIconsMap.has(`.${t.actionTypeId}`)
+);
 
 const SectionHeading = ({ children, first }: { children: string; first?: boolean }) => (
   <EuiText size="xs" color="subdued" style={{ margin: first ? '0 0 4px' : '16px 0 4px' }}>
     <strong>{children}</strong>
   </EuiText>
+);
+
+const TypeChip = ({ actionTypeId }: { actionTypeId: string }) => (
+  <span className={`type-inline-highlight type-${actionTypeId.replaceAll('.', '-')}`}>
+    {actionTypeId}
+  </span>
 );
 
 const DynamicTypeIconsDemo = () => {
@@ -199,23 +166,17 @@ const DynamicTypeIconsDemo = () => {
       >
         <SectionHeading first>{'Hardcoded icons (bundled SVGs)'}</SectionHeading>
         {withHardcodedIcons.map((t) => (
-          <span
-            key={t.actionTypeId}
-            className={`type-inline-highlight type-${t.actionTypeId.replaceAll('.', '-')}`}
-          >
-            {t.actionTypeId}
-          </span>
+          <TypeChip key={t.actionTypeId} actionTypeId={t.actionTypeId} />
+        ))}
+        <SectionHeading>{'Connector spec icons (@kbn/connector-specs)'}</SectionHeading>
+        {withSpecIcons.map((t) => (
+          <TypeChip key={t.actionTypeId} actionTypeId={t.actionTypeId} />
         ))}
         <SectionHeading>
-          {'Connector icons (lazy-loaded from stack_connectors in full Kibana)'}
+          {'Stack connector icons (plugs here, real icons in Kibana)'}
         </SectionHeading>
         {withFallbackIcons.map((t) => (
-          <span
-            key={t.actionTypeId}
-            className={`type-inline-highlight type-${t.actionTypeId.replaceAll('.', '-')}`}
-          >
-            {t.actionTypeId}
-          </span>
+          <TypeChip key={t.actionTypeId} actionTypeId={t.actionTypeId} />
         ))}
       </div>
     </div>
