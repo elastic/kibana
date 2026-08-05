@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/profiling-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
+  defaultOwner: '@elastic/obs-signals-logs-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/profiling-plugin'
   description: Moon project for @kbn/profiling-plugin
   channel: ''
-  owner: '@elastic/obs-presentation-team'
+  owner: '@elastic/obs-signals-logs-team'
   sourceRoot: x-pack/solutions/observability/plugins/profiling
 dependsOn:
   - '@kbn/core'
