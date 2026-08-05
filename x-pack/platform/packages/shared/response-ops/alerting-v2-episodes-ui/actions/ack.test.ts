@@ -9,8 +9,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { createAckAction } from './ack';
 import * as bulk from './bulk_create_alert_actions';
-import type { AlertEpisode } from '../queries/episodes_query';
-
+import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
 const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
   '@timestamp': '2026-04-23T00:00:00Z',
   'episode.id': 'e1',
@@ -64,7 +63,7 @@ describe('createAckAction', () => {
 
   it('execute: POSTs per-episode ACK items with distinct episode_ids, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 2, total: 2 });
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 2, errors: [] });
     const onSuccess = jest.fn();
     await createAckAction(deps).execute({
       episodes: [

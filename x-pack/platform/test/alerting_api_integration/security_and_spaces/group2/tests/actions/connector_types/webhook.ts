@@ -336,7 +336,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         });
       });
 
-      const executeEvent = events[1];
+      const executeEvent = events.find((e) => e?.event?.action === 'execute');
       expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(19);
     });
 

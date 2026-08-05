@@ -19,10 +19,12 @@ import type { DisposableAppender, Layout, LogLevel, LogRecord } from '@kbn/loggi
 import {
   ROOT_CONTEXT,
   TraceFlags,
+  metrics,
   trace,
   type Context,
   type Attributes,
   type AttributeValue,
+  type MeterProvider,
 } from '@opentelemetry/api';
 import type { AnyValueMap } from '@opentelemetry/api-logs';
 import { SeverityNumber, type Logger } from '@opentelemetry/api-logs';
@@ -41,6 +43,65 @@ import {
 } from './otel_tls';
 
 const DISPOSE_TIMEOUT_MS = 5_000;
+
+const isPromiseLike = (value: unknown): value is PromiseLike<unknown> =>
+  typeof value === 'object' &&
+  value !== null &&
+  typeof (value as { then?: unknown }).then === 'function';
+
+/** The value half of a raw resource-attribute entry: an AttributeValue, or a promise of one. */
+type ResolvedResourceValue = ReturnType<resources.Resource['getRawAttributes']>[number][1];
+
+/**
+ * Captures the requested resource-attribute values from the resolved attribute map so they can be
+ * re-emitted as per-record log attributes. Async-detected values (e.g. host.id from getMachineId) are
+ * skipped — per-record attributes must be resolved at emit time. Returns an empty object when nothing
+ * is requested/found.
+ */
+const capturePromotedResourceAttributes = (
+  resolved: ReadonlyMap<string, unknown>,
+  keys?: string[]
+): Attributes => {
+  const promoted: Attributes = {};
+  for (const key of keys ?? []) {
+    const value = resolved.get(key);
+    if (value != null && !isPromiseLike(value)) {
+      promoted[key] = value as AttributeValue;
+    }
+  }
+  return promoted;
+};
+
+/**
+ * A `fieldAdditions` template parsed once at construction so `append()` doesn't re-parse the regex on
+ * every record (audit logging is a hot path). `segments` are the literal/placeholder parts in order;
+ * `refs` are the referenced attribute keys, for the presence/scalar check.
+ */
+interface CompiledFieldAddition {
+  key: string;
+  refs: string[];
+  segments: Array<{ literal: string } | { ref: string }>;
+}
+
+/**
+ * Parses each `fieldAdditions` template into literal segments + placeholder refs. Splitting on the
+ * `{ref}` capturing group yields alternating literals (even indices) and refs (odd indices).
+ */
+const compileFieldAdditions = (
+  fieldAdditions?: Record<string, string>
+): CompiledFieldAddition[] | undefined => {
+  if (!fieldAdditions) {
+    return undefined;
+  }
+  return Object.entries(fieldAdditions).map(([key, template]) => {
+    const tokens = template.split(/\{([^}]+)\}/);
+    const segments = tokens.map((token, index) =>
+      index % 2 === 0 ? { literal: token } : { ref: token }
+    );
+    const refs = tokens.filter((_, index) => index % 2 === 1);
+    return { key, refs, segments };
+  });
+};
 
 /**
  * Maps a Kibana log level to the corresponding OTel SeverityNumber.
@@ -125,10 +186,15 @@ const toAttributes = (
   fieldRenames?: Record<string, string | string[]>,
   fieldDrops?: string[],
   fieldDefaults?: Record<string, string | string[]>,
-  fieldUppercase?: string[]
+  fieldUppercase?: string[],
+  compiledAdditions?: CompiledFieldAddition[],
+  promotedAttributes?: Attributes
 ): Attributes => {
   const attrs: Attributes = {
     'log.logger': record.context,
+    // Resource attributes promoted to per-record attributes (captured once at construction). Seeded
+    // first so the field transforms below apply to them like any other attribute.
+    ...promotedAttributes,
   };
 
   if (record.transactionId) {
@@ -188,6 +254,28 @@ const toAttributes = (
     }
   }
 
+  // Derived attributes: build a value from a template referencing other flattened attributes.
+  // Runs after renames (so templates can reference renamed keys) and before drops (so a template
+  // may reference source fields that are then dropped, e.g. url.original from url.scheme/domain/path).
+  if (compiledAdditions) {
+    for (const { key, refs, segments } of compiledAdditions) {
+      // Templates may only reference scalar fields. Skip when any referenced field is missing,
+      // nullish, empty, or an array/object — so events that don't carry the source fields (e.g.
+      // non-http events for url.original) don't get a degenerate value, and array-valued attributes
+      // (e.g. source.ip, event.type) aren't silently comma-joined into the template.
+      const allUsable = refs.every((ref) => {
+        const value = attrs[ref];
+        return value != null && value !== '' && typeof value !== 'object';
+      });
+      if (!allUsable) {
+        continue;
+      }
+      attrs[key] = segments
+        .map((segment) => ('literal' in segment ? segment.literal : String(attrs[segment.ref])))
+        .join('');
+    }
+  }
+
   if (fieldDrops) {
     for (const key of fieldDrops) {
       delete attrs[key];
@@ -236,6 +324,12 @@ export class OtelAppender implements DisposableAppender {
     layout: schema.maybe(Layouts.configSchema),
     // Optional: user-provided attributes override the service attributes derived from APM config.
     attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    // Allowlist of resource-attribute keys to include (default ['*'] = keep all).
+    includeResources: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+    // Resource-attribute keys to also emit as per-record log attributes.
+    promoteResourceAttributes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+    // Template-based derived attributes: target key -> template with {field} placeholders.
+    fieldAdditions: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     fieldRenames: schema.maybe(
       schema.recordOf(
         schema.string(),
@@ -300,33 +394,75 @@ export class OtelAppender implements DisposableAppender {
   private readonly fieldDrops?: string[];
   private readonly fieldDefaults?: Record<string, string | string[]>;
   private readonly fieldUppercase?: string[];
+  private readonly compiledAdditions?: CompiledFieldAddition[];
+  private readonly promotedAttributes: Attributes;
 
   constructor(config: OtelAppenderConfig) {
-    const exporter = createExporter(config);
+    const meterProvider = metrics.getMeterProvider();
+    const exporter = createExporter(config, meterProvider);
     // Layer the resource from three sources (each overriding the previous):
     //   1. Auto-detected: host, OS, process, env-var OTel attributes
     //   2. Derived: service.name / service.version / deployment.environment from the
     //      APM config singleton (mirrors how initTelemetry builds trace resources)
     //   3. User overrides: explicit attributes from kibana.yml (optional)
+    //
+    // The fully-resolved resource above is then shaped by two config knobs:
+    //   - includeResources: allowlist of keys to keep (default ['*'] = keep all).
+    //   - fieldDrops: denylist, applied to the resource only when includeResources includes '*'
+    //     (its default).
+    // An explicit allowlist fully governs the resource — a key it names is kept even if fieldDrops
+    // also lists it, because fieldDrops is primarily a per-record denylist (a field can be dropped
+    // from per-record attributes yet kept in the resource, e.g. audit logs' service.type).
+    const includeResources = config.includeResources ?? ['*'];
+    const includeAll = includeResources.includes('*');
     const baseResource = buildOtelResources().merge(
       resources.resourceFromAttributes(config.attributes ?? {})
     );
-    // When fieldDrops is configured, rebuild the resource excluding the specified keys
-    // so they are absent from resource.attributes in the OTLP export (not just from
-    // per-record log attributes). getRawAttributes() is used — not resource.attributes —
-    // because it preserves async-resolving entries (e.g. host.id from getMachineId).
-    // resourceFromAttributes() correctly accepts MaybePromise values and the SDK awaits
-    // them at export time, so the rebuilt resource retains all async-detected attributes.
-    const resource = config.fieldDrops?.length
-      ? resources.resourceFromAttributes(
-          Object.fromEntries(
-            baseResource.getRawAttributes().filter(([key]) => !config.fieldDrops!.includes(key))
-          )
-        )
-      : baseResource;
+
+    // The default appender (keep everything, no drops) uses the merged resource directly. Only when
+    // we have to reshape it — filter the resource or promote attributes onto records — do we resolve
+    // the attributes ourselves.
+    const needsFilter = !includeAll || Boolean(config.fieldDrops?.length);
+    const needsPromotion = Boolean(config.promoteResourceAttributes?.length);
+    let resource: resources.Resource = baseResource;
+    let promoted: Attributes = {};
+
+    if (needsFilter || needsPromotion) {
+      // Resolve attribute precedence explicitly instead of trusting the order merge() concatenates
+      // raw entries in: config.attributes (kibana.yml / audit injection) are authoritative for the
+      // keys they set, so seed them first; the remaining detected keys then resolve first-wins,
+      // matching the SDK's public `.attributes` getter (`attrs[k] ??= v`). This keeps the override
+      // precedence correct even if the SDK ever changes merge()'s internal ordering. Reading raw
+      // entries preserves async values (e.g. host.id) for the SDK to await at export time.
+      const resolved = new Map<string, ResolvedResourceValue>(
+        Object.entries(config.attributes ?? {})
+      );
+      for (const [key, value] of baseResource.getRawAttributes()) {
+        if (!resolved.has(key)) {
+          resolved.set(key, value);
+        }
+      }
+
+      // Promotion captures from the resolved map BEFORE the allowlist below narrows it, so a key can
+      // be emitted per-record (e.g. project.id) even when it's dropped from the resource.
+      if (needsPromotion) {
+        promoted = capturePromotedResourceAttributes(resolved, config.promoteResourceAttributes);
+      }
+
+      if (needsFilter) {
+        // Explicit allowlist governs alone; otherwise (['*']) fall back to the fieldDrops denylist.
+        const keepAttribute = (key: string) =>
+          includeAll ? !config.fieldDrops?.includes(key) : includeResources.includes(key);
+        const kept = [...resolved].filter(([key]) => keepAttribute(key));
+        resource = resources.resourceFromAttributes(Object.fromEntries(kept));
+      }
+    }
+    this.promotedAttributes = promoted;
+
     this.loggerProvider = new LoggerProvider({
-      processors: [new BatchLogRecordProcessor(exporter)],
+      processors: [new BatchLogRecordProcessor({ exporter, selfObsMeterProvider: meterProvider })],
       resource,
+      meterProvider,
     });
     // The scope name 'kibana' identifies this instrumentation library.
     // Individual logger contexts are passed as the 'log.logger' attribute.
@@ -341,6 +477,7 @@ export class OtelAppender implements DisposableAppender {
     this.fieldDrops = config.fieldDrops;
     this.fieldDefaults = config.fieldDefaults;
     this.fieldUppercase = config.fieldUppercase;
+    this.compiledAdditions = compileFieldAdditions(config.fieldAdditions);
   }
 
   public append(record: LogRecord): void {
@@ -368,7 +505,9 @@ export class OtelAppender implements DisposableAppender {
         this.fieldRenames,
         this.fieldDrops,
         this.fieldDefaults,
-        this.fieldUppercase
+        this.fieldUppercase,
+        this.compiledAdditions,
+        this.promotedAttributes
       ),
     });
   }
@@ -395,7 +534,8 @@ const omitDeepNilValues = (obj: Ecs) => {
 };
 
 const createExporter = (
-  config: OtelAppenderConfig
+  config: OtelAppenderConfig,
+  selfObsMeterProvider: MeterProvider
 ): OTLPLogExporterHTTP | OTLPLogExporterGRPC | OTLPLogExporterPROTO => {
   const tls = resolveTlsMaterial(config.ssl);
 
@@ -407,6 +547,7 @@ const createExporter = (
       return new OTLPLogExporter({
         url: config.url,
         headers: config.headers ?? {},
+        selfObsMeterProvider,
         ...(tls ? { httpAgentOptions: buildHttpsAgentTlsOptions(tls) } : {}),
       });
     }
@@ -417,6 +558,7 @@ const createExporter = (
       return new OTLPLogExporter({
         url: config.url,
         headers: config.headers ?? {},
+        selfObsMeterProvider,
         ...(tls ? { httpAgentOptions: buildHttpsAgentTlsOptions(tls) } : {}),
       });
     }
@@ -434,6 +576,7 @@ const createExporter = (
       return new OTLPLogExporter({
         url: config.url,
         metadata,
+        selfObsMeterProvider,
         ...(tls
           ? {
               // Using createFromSecureContext instead of createSsl because createSsl does not support allowPartialTrustChain.

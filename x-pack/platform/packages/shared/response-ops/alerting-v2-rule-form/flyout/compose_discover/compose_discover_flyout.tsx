@@ -47,6 +47,7 @@ import {
 } from './compose_mappers';
 import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { QuerySandboxFlyout } from './query_sandbox_flyout';
+import { SandboxSettingsMenu } from './sandbox_settings_menu';
 import { isAlertTabDisabled } from './compose_discover_tabs';
 import {
   RULE_BUILDER_REGISTRY,
@@ -463,11 +464,16 @@ export function ComposeDiscoverFlyout({
   const [dateRange, setDateRange] = useState({ dateStart: 'now-15m', dateEnd: 'now' });
 
   const watchedTimeField = useWatch({ control: methods.control, name: 'timeField' });
+  /*
+   * One-way RHF -> sandbox draft push. `sandboxTimeField` must stay out of the deps:
+   * with it, the effect re-fires on its own output and reverts the user's in-progress
+   * sandbox selection back to the committed form value (#281806).
+   */
   useEffect(() => {
-    if (watchedTimeField && watchedTimeField !== sandboxTimeField) {
+    if (watchedTimeField) {
       setSandboxTimeField(watchedTimeField);
     }
-  }, [watchedTimeField, sandboxTimeField]);
+  }, [watchedTimeField]);
 
   const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
   const watchedQuery = useWatch({ control: methods.control, name: 'query' });
@@ -496,6 +502,7 @@ export function ComposeDiscoverFlyout({
     onTimeFieldChange: handleResolvedTimeFieldChange,
     http: baseServices.http,
     dataViews: baseServices.dataViews,
+    search: baseServices.data.search.search,
   });
 
   /*
@@ -607,7 +614,11 @@ export function ComposeDiscoverFlyout({
         const alertQuery = splitResultToRuleQuery(full).query;
         setSandboxQuery(alertQuery);
         methods.setValue('query', alertQuery, { shouldDirty: true });
-        methods.setValue('noDataStrategy', 'last_known_status', { shouldDirty: true });
+        methods.setValue(
+          'noDataStrategy',
+          alertQuery.format === 'standalone' ? 'none' : 'last_known_status',
+          { shouldDirty: true }
+        );
         methods.setValue('recoveryStrategy', 'no_breach', { shouldDirty: true });
       } else {
         // Assemble from committed query — discards any unapplied sandbox edits cleanly.
@@ -823,10 +834,21 @@ export function ComposeDiscoverFlyout({
     if (shouldRunHeuristicSplit) {
       const split = splitResultToRuleQuery(getBreachQuery(sandboxQuery)).query;
       queryToCommit = resolveUnifiedAlertApplyQuery(sandboxQuery, split);
+    } else if (queryToCommit.format === 'composed' && !queryToCommit.breach.segment.trim()) {
+      // Manual split with an empty alert condition: fall back to conditionless standalone.
+      // The schema rejects composed+empty-segment at save; standalone with no WHERE is valid.
+      queryToCommit = { format: 'standalone', breach: { query: queryToCommit.base } };
     }
     setSandboxQuery(queryToCommit);
 
     methods.setValue('query', queryToCommit, { shouldDirty: true });
+    if (isAlert && queryToCommit.format === 'standalone') {
+      methods.setValue('noDataStrategy', 'none', { shouldDirty: true });
+      if (uiState.recoveryType === 'custom') {
+        dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: 'default', isBuilderMode });
+        methods.setValue('recoveryStrategy', 'no_breach', { shouldDirty: true });
+      }
+    }
     methods.setValue('timeField', sandboxTimeField, { shouldDirty: true });
     if (uiState.yamlMode) {
       cancelYamlParse();
@@ -846,7 +868,9 @@ export function ComposeDiscoverFlyout({
     currentStep?.id,
     uiState.yamlMode,
     uiState.manualSplitEnabled,
+    uiState.recoveryType,
     isAlert,
+    isBuilderMode,
     methods,
     dispatch,
     cancelYamlParse,
@@ -1072,20 +1096,6 @@ export function ComposeDiscoverFlyout({
     dispatch({ type: 'DISABLE_MANUAL_SPLIT' });
   }, [sandboxQuery, dispatch]);
 
-  /*
-   * Triggered by the split-failed CTA on the form step (sandbox is closed).
-   * Opens the sandbox in manual split mode. When the heuristic cannot isolate a
-   * base, the full pipeline is placed in the base tab for the user to carve out
-   * the alert condition manually.
-   */
-  const handleManualSplitFromForm = useCallback(() => {
-    const committedQuery = methods.getValues('query');
-    setSandboxQuery(enterManualSplitQuery(committedQuery));
-    manualSplitUncommittedRef.current = true;
-    dispatch({ type: 'ENABLE_MANUAL_SPLIT' });
-    dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: uiState.step, isAlert });
-  }, [methods, dispatch, uiState.step, isAlert]);
-
   const handleSandboxClose = useCallback(() => {
     if (manualSplitUncommittedRef.current) {
       // Clear manual split before syncing so the next render sees manualSplitEnabled: false.
@@ -1097,7 +1107,7 @@ export function ComposeDiscoverFlyout({
   }, [syncSandbox, dispatch]);
 
   /*
-   * Split / Merge header buttons passed into the sandbox via headerActions.
+   * Settings (gear) menu rendered in the sandbox flyout header.
    * Alert Condition step only — not on recovery editing.
    */
   const sandboxHeaderActions = useMemo(() => {
@@ -1110,49 +1120,12 @@ export function ComposeDiscoverFlyout({
     ) {
       return undefined;
     }
-    if (uiState.manualSplitEnabled) {
-      return (
-        <EuiToolTip
-          content={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.mergeTooltip', {
-            defaultMessage:
-              'Combine the base query and alert condition in one editor. When you apply, we automatically split them again.',
-          })}
-        >
-          <EuiButton
-            size="s"
-            color="text"
-            iconType="querySelector"
-            onClick={handleDisableManualSplit}
-            data-test-subj="querySandboxUseSingleEditor"
-          >
-            {i18n.translate(
-              'xpack.alertingV2.composeDiscover.querySandbox.useSingleEditorButtonLabel',
-              { defaultMessage: 'Use single editor' }
-            )}
-          </EuiButton>
-        </EuiToolTip>
-      );
-    }
     return (
-      <EuiToolTip
-        content={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.splitTooltip', {
-          defaultMessage:
-            'Open separate editors for the base query and alert condition. Automatic splitting is disabled in this mode.',
-        })}
-      >
-        <EuiButton
-          size="s"
-          color="text"
-          iconType="inputOutput"
-          onClick={handleEnableManualSplit}
-          data-test-subj="querySandboxSplitBaseAndAlert"
-        >
-          {i18n.translate(
-            'xpack.alertingV2.composeDiscover.querySandbox.splitBaseAndAlertButtonLabel',
-            { defaultMessage: 'Split base and alert' }
-          )}
-        </EuiButton>
-      </EuiToolTip>
+      <SandboxSettingsMenu
+        manualSplitEnabled={uiState.manualSplitEnabled}
+        onEnableManualSplit={handleEnableManualSplit}
+        onDisableManualSplit={handleDisableManualSplit}
+      />
     );
   }, [
     isBuilderMode,
@@ -1287,9 +1260,6 @@ export function ComposeDiscoverFlyout({
                       isEditing={isEditing}
                       ruleId={ruleId}
                       builderType={builderType}
-                      onManualSplit={
-                        supportsUnifiedEditorToggle ? handleManualSplitFromForm : undefined
-                      }
                     />
                   </BuilderStateProvider>
                 </>

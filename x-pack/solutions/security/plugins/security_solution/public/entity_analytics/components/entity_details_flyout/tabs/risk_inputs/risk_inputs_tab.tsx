@@ -13,8 +13,6 @@ import {
   EuiButtonGroup,
   EuiButtonIcon,
   EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInMemoryTable,
   EuiSpacer,
   EuiTitle,
@@ -60,12 +58,12 @@ import { buildEntityNameFilter } from '../../../../../../common/search_strategy'
 import { AssetCriticalityBadge } from '../../../asset_criticality';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
 import { ActionColumn } from '../../components/action_column';
-import { AiAssistantButton } from '../../../ai_assistant_button/ai_assistant_button';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useResolutionGroup } from '../../../entity_resolution/hooks/use_resolution_group';
 import { getEntityId, getEntityField, getEntityName } from '../../../entity_resolution/helpers';
 import { useStableExpandableFlyoutState } from '../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state';
+import { useMissingRiskEnginePrivileges } from '../../../../hooks/use_missing_risk_engine_privileges';
+import { RiskEnginePrivilegesCallOut } from '../../../risk_engine_privileges_callout';
 
 export interface RiskInputsTabProps<T extends EntityType> {
   entityType: T;
@@ -146,6 +144,7 @@ export const RiskInputsTab = <T extends EntityType>({
   );
 
   const { data: watchlists } = useGetWatchlists();
+  const privileges = useMissingRiskEnginePrivileges({ readonly: true });
 
   const entityFilterQuery = useMemo(
     () =>
@@ -227,6 +226,10 @@ export const RiskInputsTab = <T extends EntityType>({
     });
     return map;
   }, [watchlists]);
+
+  if (!privileges.isLoading && !privileges.hasAllRequiredPrivileges) {
+    return <RiskEnginePrivilegesCallOut privileges={privileges} />;
+  }
 
   if (riskScoreError) {
     return (
@@ -324,9 +327,6 @@ const RiskInputsTabContent = <T extends EntityType>({
   const [historyRange, setHistoryRange] = useState(DEFAULT_HISTORY_RANGE);
   const [selectedTimestamp, setSelectedTimestamp] = useState<string | undefined>(undefined);
   const isRiskScoreHistoryEnabled = useIsExperimentalFeatureEnabled('riskScoreHistoryEnabled');
-  const isAssistantToolDisabled = useIsExperimentalFeatureEnabled('riskScoreAssistantToolDisabled');
-  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
-  const showAiAssistantButton = !isAssistantToolDisabled || isAgentBuilderEnabled;
 
   const defaultView =
     !loadingRiskScore && !entityRiskScore && hasResolutionScore
@@ -671,20 +671,6 @@ const RiskInputsTabContent = <T extends EntityType>({
       />
       <EuiSpacer size="m" />
       {riskInputsAlertSection}
-      {showAiAssistantButton && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <AiAssistantButton
-                entityType={entityType}
-                entityName={entityName}
-                telemetryPathway="entity_risk_contribution"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
     </>
   );
 };

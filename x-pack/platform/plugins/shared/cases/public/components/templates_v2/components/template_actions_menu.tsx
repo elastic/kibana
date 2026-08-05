@@ -20,6 +20,11 @@ import {
   hasTemplateParseErrors,
   insertTemplateField,
 } from '../utils/template_field_actions';
+import {
+  applyRootFieldBlock,
+  getRootFieldControl,
+  replaceRootField,
+} from '../utils/root_field_actions';
 import { getConditionalLogicActions, getValidationActions } from '../utils/field_action_catalog';
 import type { FieldRuleAction } from '../utils/field_action_catalog';
 import { FieldLibraryMenuPanel } from './field_library_menu_panel';
@@ -29,8 +34,17 @@ interface TemplateActionsMenuProps {
   editor: monaco.editor.IStandaloneCodeEditor | null;
   value: string;
   onChange: (value: string) => void;
-  /** Owner used to scope the field-library list. */
+  /** Owner used to scope the field-library list. Unused in `fieldDefinition` mode. */
   owner?: string;
+  /**
+   * Which document shape the menu is editing:
+   *  - `template` (default) — the root holds a `fields:` sequence; all four sections are offered and
+   *    Validation/Conditional target the field under the cursor.
+   *  - `fieldDefinition` — the root IS a single inline field (the field library's definition shape);
+   *    only New field (relabeled "Change field type" once a field exists, since picking a type
+   *    replaces the whole definition) and Validation are offered, both targeting the root field.
+   */
+  mode?: 'template' | 'fieldDefinition';
 }
 
 // The field controls offered by "New field", derived from the same snippet catalog the editor's
@@ -98,15 +112,23 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
   value,
   onChange,
   owner,
+  mode = 'template',
 }) => {
   const { euiTheme } = useEuiTheme();
   const toasts = useToasts();
   const [isOpen, setIsOpen] = useState(false);
-  const [cursorField, setCursorField] = useState<{ control: string; name?: string } | null>(null);
+  // The field the rule sections act on: the field under the cursor (template mode) or the document
+  // root (fieldDefinition mode), snapshotted when the menu opens.
+  const [targetField, setTargetField] = useState<{ control: string; name?: string } | null>(null);
   // Snapshotted when the menu opens: a buffer with YAML errors can't be re-serialized, so every
   // mutating branch is disabled with a hint rather than silently failing on click.
   const [bufferHasErrors, setBufferHasErrors] = useState(false);
   const cursorLineRef = useRef<number | undefined>(undefined);
+
+  // Test-subj prefix per mode, so a future page/test rendering both editors never has colliding
+  // selectors and the template tour's `templateActionsMenuButton` anchor stays byte-stable.
+  const testSubjPrefix =
+    mode === 'fieldDefinition' ? 'fieldDefinitionActionsMenu' : 'templateActionsMenu';
 
   // Keep the latest YAML + change handler in refs so the Monaco keyboard command (registered once)
   // always reads the current buffer rather than a stale closure.
@@ -124,9 +146,14 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
     const line = editor?.getPosition()?.lineNumber;
     cursorLineRef.current = line;
     setBufferHasErrors(hasTemplateParseErrors(valueRef.current));
-    setCursorField(getFieldControlAtLine(valueRef.current, line));
+    // A definition document has exactly one field (the root), so the cursor position is irrelevant.
+    setTargetField(
+      mode === 'fieldDefinition'
+        ? getRootFieldControl(valueRef.current)
+        : getFieldControlAtLine(valueRef.current, line)
+    );
     setIsOpen(true);
-  }, [editor]);
+  }, [editor, mode]);
 
   // Cmd/Ctrl+K opens the menu from within the editor. Registered as a Monaco editor action (scoped to
   // the editor and disposed with it) rather than the shared `useKeyboardShortcut` hook: that hook
@@ -148,6 +175,18 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
 
   const insertField = useCallback(
     (fieldObject: Record<string, unknown>, displayName: string) => {
+      // In fieldDefinition mode the document root IS the field, so picking a type swaps the whole
+      // definition (create and change-type are the same operation) — there is no "already exists".
+      if (mode === 'fieldDefinition') {
+        const rootResult = replaceRootField(valueRef.current, fieldObject);
+        if (rootResult.status === 'applied') {
+          onChangeRef.current(rootResult.yaml);
+        } else {
+          toasts.addWarning(i18n.ACTIONS_MENU_INVALID_YAML);
+        }
+        closeAndFocusEditor();
+        return;
+      }
       const result = insertTemplateField(valueRef.current, fieldObject, cursorLineRef.current);
       if (result.changed) {
         onChangeRef.current(result.yaml);
@@ -158,7 +197,7 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
       }
       closeAndFocusEditor();
     },
-    [closeAndFocusEditor, toasts]
+    [closeAndFocusEditor, toasts, mode]
   );
 
   const linkLibraryField = useCallback(
@@ -168,13 +207,16 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
 
   const applyRule = useCallback(
     (action: FieldRuleAction) => {
-      const result = applyFieldBlock(
-        valueRef.current,
-        cursorLineRef.current,
-        action.blockKey,
-        action.ruleKey,
-        action.value
-      );
+      const result =
+        mode === 'fieldDefinition'
+          ? applyRootFieldBlock(valueRef.current, action.blockKey, action.ruleKey, action.value)
+          : applyFieldBlock(
+              valueRef.current,
+              cursorLineRef.current,
+              action.blockKey,
+              action.ruleKey,
+              action.value
+            );
       if (result.status === 'applied') {
         onChangeRef.current(result.yaml);
       } else if (result.status === 'invalid') {
@@ -182,23 +224,41 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
       } else if (result.status === 'exists') {
         toasts.addWarning(i18n.ACTIONS_MENU_RULE_EXISTS(action.label));
       } else {
-        toasts.addWarning(i18n.ACTIONS_MENU_NO_FIELD_AT_CURSOR);
+        toasts.addWarning(
+          mode === 'fieldDefinition'
+            ? i18n.ACTIONS_MENU_NO_FIELD_YET
+            : i18n.ACTIONS_MENU_NO_FIELD_AT_CURSOR
+        );
       }
       closeAndFocusEditor();
     },
-    [closeAndFocusEditor, toasts]
+    [closeAndFocusEditor, toasts, mode]
   );
 
   const panels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
-    const hasFieldAtCursor = cursorField != null;
-    const validationActions = hasFieldAtCursor ? getValidationActions(cursorField.control) : [];
-    const conditionalActions = hasFieldAtCursor ? getConditionalLogicActions() : [];
+    const isFieldDefinition = mode === 'fieldDefinition';
+    const hasTargetField = targetField != null;
+    const validationActions = hasTargetField ? getValidationActions(targetField.control) : [];
+    const conditionalActions = hasTargetField ? getConditionalLogicActions() : [];
     // A field can only be added/edited when the buffer is re-serializable.
     const insertDisabledHint = bufferHasErrors ? i18n.ACTIONS_MENU_FIX_YAML_FIRST : undefined;
-    // Validation / Conditional need both a valid buffer and a field under the cursor.
+    // Validation / Conditional need a valid buffer and a target field — the field under the cursor,
+    // or (fieldDefinition mode, where cursor position is meaningless) the root field itself.
     const ruleDisabledHint = bufferHasErrors
       ? i18n.ACTIONS_MENU_FIX_YAML_FIRST
+      : isFieldDefinition
+      ? i18n.ACTIONS_MENU_NO_FIELD_YET
       : i18n.ACTIONS_MENU_SELECT_A_FIELD;
+    // In fieldDefinition mode picking a type replaces the whole (single-field) document, so once a
+    // field exists the section reads "Change field type" instead of "New field".
+    const newFieldTitle =
+      isFieldDefinition && hasTargetField
+        ? i18n.ACTION_CHANGE_FIELD_TYPE_TITLE
+        : i18n.ACTION_NEW_FIELD_TITLE;
+    const newFieldDesc =
+      isFieldDefinition && hasTargetField
+        ? i18n.ACTION_CHANGE_FIELD_TYPE_DESC
+        : i18n.ACTION_NEW_FIELD_DESC;
 
     return [
       {
@@ -208,64 +268,74 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
           {
             name: (
               <MenuItemLabel
-                title={i18n.ACTION_NEW_FIELD_TITLE}
-                description={
-                  bufferHasErrors ? i18n.ACTIONS_MENU_FIX_YAML_FIRST : i18n.ACTION_NEW_FIELD_DESC
-                }
+                title={newFieldTitle}
+                description={bufferHasErrors ? i18n.ACTIONS_MENU_FIX_YAML_FIRST : newFieldDesc}
               />
             ),
             panel: PANEL_IDS.newField,
             disabled: bufferHasErrors,
             toolTipContent: insertDisabledHint,
-            'data-test-subj': 'templateActionsMenu-newField',
+            'data-test-subj': `${testSubjPrefix}-newField`,
           },
-          {
-            name: (
-              <MenuItemLabel
-                title={i18n.ACTION_FIELD_LIBRARY_TITLE}
-                description={
-                  bufferHasErrors
-                    ? i18n.ACTIONS_MENU_FIX_YAML_FIRST
-                    : i18n.ACTION_FIELD_LIBRARY_DESC
-                }
-              />
-            ),
-            panel: PANEL_IDS.fieldLibrary,
-            disabled: bufferHasErrors,
-            toolTipContent: insertDisabledHint,
-            'data-test-subj': 'templateActionsMenu-fieldLibrary',
-          },
+          // A definition cannot reference another definition (no `$ref` at the field-library root),
+          // so the Field library section only exists for templates.
+          ...(isFieldDefinition
+            ? []
+            : [
+                {
+                  name: (
+                    <MenuItemLabel
+                      title={i18n.ACTION_FIELD_LIBRARY_TITLE}
+                      description={
+                        bufferHasErrors
+                          ? i18n.ACTIONS_MENU_FIX_YAML_FIRST
+                          : i18n.ACTION_FIELD_LIBRARY_DESC
+                      }
+                    />
+                  ),
+                  panel: PANEL_IDS.fieldLibrary,
+                  disabled: bufferHasErrors,
+                  toolTipContent: insertDisabledHint,
+                  'data-test-subj': `${testSubjPrefix}-fieldLibrary`,
+                },
+              ]),
           {
             // When disabled, the reason replaces the description so it is both visible AND part of
             // the item's accessible name (a hover-only tooltip is unreachable by keyboard/SR users).
             name: (
               <MenuItemLabel
                 title={i18n.ACTION_VALIDATION_TITLE}
-                description={hasFieldAtCursor ? i18n.ACTION_VALIDATION_DESC : ruleDisabledHint}
+                description={hasTargetField ? i18n.ACTION_VALIDATION_DESC : ruleDisabledHint}
               />
             ),
             panel: PANEL_IDS.validation,
-            disabled: !hasFieldAtCursor,
-            toolTipContent: hasFieldAtCursor ? undefined : ruleDisabledHint,
-            'data-test-subj': 'templateActionsMenu-validation',
+            disabled: !hasTargetField,
+            toolTipContent: hasTargetField ? undefined : ruleDisabledHint,
+            'data-test-subj': `${testSubjPrefix}-validation`,
           },
-          {
-            name: (
-              <MenuItemLabel
-                title={i18n.ACTION_CONDITIONAL_TITLE}
-                description={hasFieldAtCursor ? i18n.ACTION_CONDITIONAL_DESC : ruleDisabledHint}
-              />
-            ),
-            panel: PANEL_IDS.conditional,
-            disabled: !hasFieldAtCursor,
-            toolTipContent: hasFieldAtCursor ? undefined : ruleDisabledHint,
-            'data-test-subj': 'templateActionsMenu-conditional',
-          },
+          // Conditional rules reference sibling fields, which only exist once the field is placed in
+          // a template — so the section is omitted for a standalone definition.
+          ...(isFieldDefinition
+            ? []
+            : [
+                {
+                  name: (
+                    <MenuItemLabel
+                      title={i18n.ACTION_CONDITIONAL_TITLE}
+                      description={hasTargetField ? i18n.ACTION_CONDITIONAL_DESC : ruleDisabledHint}
+                    />
+                  ),
+                  panel: PANEL_IDS.conditional,
+                  disabled: !hasTargetField,
+                  toolTipContent: hasTargetField ? undefined : ruleDisabledHint,
+                  'data-test-subj': `${testSubjPrefix}-conditional`,
+                },
+              ]),
         ],
       },
       {
         id: PANEL_IDS.newField,
-        title: i18n.ACTION_NEW_FIELD_TITLE,
+        title: newFieldTitle,
         items: NEW_FIELD_ITEMS.map((item) => ({
           name: <MenuItemLabel title={item.label} description={item.description} />,
           onClick: () => {
@@ -274,43 +344,61 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
               insertField(scaffold, item.label);
             }
           },
-          'data-test-subj': `templateActionsMenu-newField-${item.control}`,
+          'data-test-subj': `${testSubjPrefix}-newField-${item.control}`,
         })),
       },
-      {
-        id: PANEL_IDS.fieldLibrary,
-        title: i18n.ACTION_FIELD_LIBRARY_TITLE,
-        // Rendered lazily (the whole menu only mounts while open), so the library query does not run
-        // until the author opens the Actions menu.
-        content: (
-          <FieldLibraryMenuPanel
-            owner={owner}
-            existingYaml={value}
-            onSelect={linkLibraryField}
-            width={PANEL_WIDTH}
-          />
-        ),
-      },
+      ...(isFieldDefinition
+        ? []
+        : [
+            {
+              id: PANEL_IDS.fieldLibrary,
+              title: i18n.ACTION_FIELD_LIBRARY_TITLE,
+              // Rendered lazily (the whole menu only mounts while open), so the library query does
+              // not run until the author opens the Actions menu.
+              content: (
+                <FieldLibraryMenuPanel
+                  owner={owner}
+                  existingYaml={value}
+                  onSelect={linkLibraryField}
+                  width={PANEL_WIDTH}
+                />
+              ),
+            },
+          ]),
       {
         id: PANEL_IDS.validation,
         title: i18n.ACTION_VALIDATION_TITLE,
         items: validationActions.map((action) => ({
           name: action.label,
           onClick: () => applyRule(action),
-          'data-test-subj': `templateActionsMenu-validation-${action.id}`,
+          'data-test-subj': `${testSubjPrefix}-validation-${action.id}`,
         })),
       },
-      {
-        id: PANEL_IDS.conditional,
-        title: i18n.ACTION_CONDITIONAL_TITLE,
-        items: conditionalActions.map((action) => ({
-          name: action.label,
-          onClick: () => applyRule(action),
-          'data-test-subj': `templateActionsMenu-conditional-${action.id}`,
-        })),
-      },
+      ...(isFieldDefinition
+        ? []
+        : [
+            {
+              id: PANEL_IDS.conditional,
+              title: i18n.ACTION_CONDITIONAL_TITLE,
+              items: conditionalActions.map((action) => ({
+                name: action.label,
+                onClick: () => applyRule(action),
+                'data-test-subj': `${testSubjPrefix}-conditional-${action.id}`,
+              })),
+            },
+          ]),
     ];
-  }, [cursorField, bufferHasErrors, owner, value, linkLibraryField, insertField, applyRule]);
+  }, [
+    mode,
+    testSubjPrefix,
+    targetField,
+    bufferHasErrors,
+    owner,
+    value,
+    linkLibraryField,
+    insertField,
+    applyRule,
+  ]);
 
   return (
     <div
@@ -337,7 +425,7 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
             iconSide="left"
             onClick={() => (isOpen ? setIsOpen(false) : openMenu())}
             aria-label={`${i18n.ACTIONS_MENU_ARIA} (${SHORTCUT_HINT})`}
-            data-test-subj="templateActionsMenuButton"
+            data-test-subj={`${testSubjPrefix}Button`}
             css={css({
               backgroundColor: euiTheme.colors.backgroundBasePlain,
               border: `1px solid ${euiTheme.colors.borderBasePlain}`,
@@ -361,7 +449,7 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
           <EuiContextMenu
             initialPanelId={PANEL_IDS.root}
             panels={panels}
-            data-test-subj="templateActionsMenuPanels"
+            data-test-subj={`${testSubjPrefix}Panels`}
             // Cap the height so long panels (e.g. the 10 field types) scroll instead of running past
             // the viewport; the shared width stops the panels resize-jumping as you drill in.
             css={css({ width: PANEL_WIDTH, maxHeight: '60vh', overflowY: 'auto' })}

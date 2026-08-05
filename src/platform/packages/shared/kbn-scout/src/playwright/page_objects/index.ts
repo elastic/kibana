@@ -10,6 +10,7 @@
 import type { ScoutPage } from '..';
 import type { ScoutLogger } from '../../common';
 import type { ScoutTestConfig } from '../../types';
+import { Chrome } from './chrome';
 import { CollapsibleNav } from './collapsible_nav';
 import { DashboardApp } from './dashboard_app';
 import { DataGrid } from './data_grid';
@@ -27,6 +28,7 @@ import { ListingTable } from './listing_table';
 import { LoginPage } from './login_page';
 import { HomePage } from './home_page';
 import { OverlaysPage } from './overlays';
+import { SavedObjectSaveModal } from './saved_object_save_modal';
 import { VisualizeApp } from './visualize_app';
 import { UnifiedTabs } from './unified_tabs';
 import {
@@ -70,12 +72,14 @@ export interface PageObjects {
   maps: MapsPage;
   queryBar: QueryBar;
   renderable: RenderablePage;
+  chrome: Chrome;
   collapsibleNav: CollapsibleNav;
   toasts: Toasts;
   lens: LensApp;
   login: LoginPage;
   overlays: OverlaysPage;
   visualize: VisualizeApp;
+  saveModal: SavedObjectSaveModal;
   unifiedTabs: UnifiedTabs;
 }
 
@@ -98,12 +102,14 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     maps: createLazyPageObject(MapsPage, fixtures.page),
     queryBar: createLazyPageObject(QueryBar, fixtures.page),
     renderable: createLazyPageObject(RenderablePage, fixtures.page),
+    chrome: createLazyPageObject(Chrome, fixtures.page),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
     toasts: createLazyPageObject(Toasts, fixtures.page),
     lens: createLazyPageObject(LensApp, fixtures.page),
     login: createLazyPageObject(LoginPage, fixtures.page, fixtures.kbnUrl),
     overlays: createLazyPageObject(OverlaysPage, fixtures.page),
     visualize: createLazyPageObject(VisualizeApp, fixtures.page),
+    saveModal: createLazyPageObject(SavedObjectSaveModal, fixtures.page),
     unifiedTabs: createLazyPageObject(UnifiedTabs, fixtures.page),
   };
 }
