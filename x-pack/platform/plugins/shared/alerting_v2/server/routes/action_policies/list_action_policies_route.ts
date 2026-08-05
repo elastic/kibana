@@ -19,8 +19,10 @@ import { ActionPolicyClient } from '../../lib/action_policy_client';
 import type { FindActionPoliciesArgs } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { listActionPoliciesOasExamples } from './list_action_policies_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 
 export const toFindActionPoliciesArgs = ({
@@ -57,6 +59,7 @@ export class ListActionPoliciesRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'List action policies',
     description: 'Get a paginated list of action policies with optional filtering and sorting.',
+    oasOperationObject: listActionPoliciesOasExamples,
   } as const;
   static schemas = {
     request: {
@@ -69,7 +72,7 @@ export class ListActionPoliciesRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates invalid query parameters.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };
