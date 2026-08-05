@@ -52,7 +52,9 @@ describe('useConnectorSelection', () => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
     localStorage.clear();
-    _resetConnectorSelectionStore();
+    act(() => {
+      _resetConnectorSelectionStore();
+    });
   });
 
   describe('selectedConnector', () => {

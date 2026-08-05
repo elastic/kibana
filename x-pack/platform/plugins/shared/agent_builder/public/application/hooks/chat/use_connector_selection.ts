@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { EMPTY } from 'rxjs';
+import { useCallback, useMemo } from 'react';
+import { BehaviorSubject, EMPTY } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
@@ -15,35 +15,26 @@ import {
 import { useKibana } from '../use_kibana';
 import { storageKeys } from '../../storage_keys';
 
-type ConnectorIdListener = (connectorId: string | undefined) => void;
-const connectorIdListeners = new Set<ConnectorIdListener>();
-
 const readStoredConnectorId = (): string | undefined => {
-  try {
-    const raw = localStorage.getItem(storageKeys.lastUsedConnector);
-    if (!raw) return undefined;
-    const parsed: unknown = JSON.parse(raw);
-    return typeof parsed === 'string' ? parsed : undefined;
-  } catch {
-    return undefined;
-  }
+  const raw = localStorage.getItem(storageKeys.lastUsedConnector);
+  if (!raw) return undefined;
+  const parsed: unknown = JSON.parse(raw);
+  return typeof parsed === 'string' ? parsed : undefined;
 };
 
-let storedConnectorId: string | undefined = readStoredConnectorId();
+const connectorId$ = new BehaviorSubject<string | undefined>(readStoredConnectorId());
 
 const writeStoredConnectorId = (connectorId: string): void => {
-  storedConnectorId = connectorId;
   try {
     localStorage.setItem(storageKeys.lastUsedConnector, JSON.stringify(connectorId));
   } catch {
-    // ignore persistence failures (private mode / quota); in-memory value and listeners still update
+    // quota exceeded — keep the in-memory value, drop persistence
   }
-  connectorIdListeners.forEach((l) => l(connectorId));
+  connectorId$.next(connectorId);
 };
 
 export const _resetConnectorSelectionStore = (): void => {
-  storedConnectorId = readStoredConnectorId();
-  connectorIdListeners.clear();
+  connectorId$.next(readStoredConnectorId());
 };
 
 export interface UseConnectorSelectionResult {
@@ -58,14 +49,7 @@ export function useConnectorSelection(): UseConnectorSelectionResult {
     services: { settings },
   } = useKibana();
 
-  const [selectedConnector, setSelectedConnector] = useState<string | undefined>(storedConnectorId);
-
-  useEffect(() => {
-    connectorIdListeners.add(setSelectedConnector);
-    return () => {
-      connectorIdListeners.delete(setSelectedConnector);
-    };
-  }, []);
+  const selectedConnector = useObservable(connectorId$, connectorId$.getValue());
 
   const defaultConnector$ = useMemo(
     () => settings?.client.get$<string | undefined>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR) ?? EMPTY,
