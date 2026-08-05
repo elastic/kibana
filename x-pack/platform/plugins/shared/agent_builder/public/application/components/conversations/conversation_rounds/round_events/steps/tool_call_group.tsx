@@ -12,14 +12,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { isErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolCallStep as ToolCallStepData } from '@kbn/agent-builder-common/chat/conversation';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { StepLayout } from '../step_layout';
 import { ToolCallStep } from './tool_call_step';
 
 interface ToolCallGroupProps {
   steps: ToolCallStepData[];
+  conversationAttachments?: VersionedAttachment[];
 }
 
-export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps }) => {
+export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps, conversationAttachments }) => {
   const { euiTheme } = useEuiTheme();
   const [isExpanded, setIsExpanded] = useState(false);
   const onToggle = () => setIsExpanded((v) => !v);
@@ -62,7 +64,7 @@ export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps }) => {
             <EuiFlexGroup direction="column" gutterSize="s">
               {steps.map((step) => (
                 <EuiFlexItem grow={false} key={step.tool_call_id}>
-                  <ToolCallStep step={step} />
+                  <ToolCallStep step={step} conversationAttachments={conversationAttachments} />
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>

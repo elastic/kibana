@@ -6,15 +6,21 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { ConversationRound } from '@kbn/agent-builder-common';
+import type { ChatAgentEvent, ConversationRound, ToolResult } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { AttachmentType, imageAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
 import type {
   BrowserToolCallPromptDefinition,
   PromptStorageState,
 } from '@kbn/agent-builder-common/agents/prompts';
 import { AgentPromptType, isBrowserToolCallPrompt } from '@kbn/agent-builder-common/agents/prompts';
-import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
+import {
+  sanitizeToolId,
+  createToolCallEvent,
+  createToolResultEvent,
+} from '@kbn/agent-builder-genai-utils/langchain';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { getToolResultId } from '@kbn/agent-builder-server';
 import { toolCallAction, executeToolAction } from '../actions';
 import type { ResearchAgentAction } from '../actions';
 import { BROWSER_TOOL_PREFIX } from '../constants';
@@ -38,15 +44,21 @@ const MAX_ATTACHMENT_KEY_LENGTH = 256;
  * Results of `result_type: 'image'` tools are not handed to the model verbatim: the image is
  * persisted as a hidden `image` attachment and the tool result is substituted with
  * `{ image_attachment_id, ...other fields }`, so base64 never enters the model context.
+ *
+ * Each materialized pair is also emitted as toolCall/toolResult events so the run shows up
+ * in the transcript as a persisted step (browser tool calls emit no tool-call step of their
+ * own during the interrupted round).
  */
 export const pendingBrowserToolPromptsToActions = async ({
   round,
   promptState,
   attachmentStateManager,
+  eventEmitter,
 }: {
   round: ConversationRound | ProcessedConversationRound;
   promptState: PromptStorageState;
   attachmentStateManager: AttachmentStateManager;
+  eventEmitter: (event: ChatAgentEvent) => void;
 }): Promise<{ actions: ResearchAgentAction[]; consumedPromptIds: string[] }> => {
   const actions: ResearchAgentAction[] = [];
   const consumedPromptIds: string[] = [];
@@ -77,10 +89,50 @@ export const pendingBrowserToolPromptsToActions = async ({
     actions.push(toolCallAction({ toolCalls: [{ toolName, toolCallId, args: prompt.params }] }));
     actions.push(executeToolAction({ toolResults: [{ toolCallId, content }] }));
 
+    eventEmitter(createToolCallEvent({ toolId: toolName, toolCallId, params: prompt.params }));
+    eventEmitter(
+      createToolResultEvent({ toolCallId, toolId: toolName, results: [contentToResult(content)] })
+    );
+
     consumedPromptIds.push(prompt.id);
   }
 
   return { actions, consumedPromptIds };
+};
+
+/**
+ * Convert the (JSON-encoded) tool result content into a `ToolResult` for the transcript step.
+ * `{ error }` contents become error results so the step renders as failed.
+ */
+const contentToResult = (content: string): ToolResult => {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(content);
+  } catch {
+    parsed = content;
+  }
+
+  if (
+    typeof parsed === 'object' &&
+    parsed !== null &&
+    'error' in parsed &&
+    typeof (parsed as { error: unknown }).error === 'string'
+  ) {
+    return {
+      type: ToolResultType.error,
+      tool_result_id: getToolResultId(),
+      data: { message: (parsed as { error: string }).error },
+    };
+  }
+
+  return {
+    type: ToolResultType.other,
+    tool_result_id: getToolResultId(),
+    data:
+      typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)
+        ? (parsed as Record<string, unknown>)
+        : { value: parsed },
+  };
 };
 
 /**

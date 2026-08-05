@@ -38,7 +38,12 @@ export const buildPendingRoundActions = async ({
     eventEmitter,
   });
   const { actions: browserToolActions, consumedPromptIds: consumedBrowserToolPromptIds } =
-    await pendingBrowserToolPromptsToActions({ round, promptState, attachmentStateManager });
+    await pendingBrowserToolPromptsToActions({
+      round,
+      promptState,
+      attachmentStateManager,
+      eventEmitter,
+    });
   return {
     actions: [...stepActions, ...askActions, ...browserToolActions],
     consumedPromptIds: [...consumedPromptIds, ...consumedBrowserToolPromptIds],

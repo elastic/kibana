@@ -56,9 +56,11 @@ const createMockAttachmentStateManager = () => {
 
 describe('pendingBrowserToolPromptsToActions', () => {
   let attachmentStateManager: jest.Mocked<AttachmentStateManager>;
+  let eventEmitter: jest.Mock;
 
   beforeEach(() => {
     attachmentStateManager = createMockAttachmentStateManager();
+    eventEmitter = jest.fn();
   });
 
   it('emits a toolCall + executeTool action pair carrying the result the browser reported', async () => {
@@ -76,6 +78,7 @@ describe('pendingBrowserToolPromptsToActions', () => {
       round,
       promptState,
       attachmentStateManager,
+      eventEmitter,
     });
 
     expect(result.actions).toHaveLength(2);
@@ -106,6 +109,7 @@ describe('pendingBrowserToolPromptsToActions', () => {
       round,
       promptState,
       attachmentStateManager,
+      eventEmitter,
     });
 
     const [, executeToolAction] = result.actions as any[];
@@ -127,6 +131,7 @@ describe('pendingBrowserToolPromptsToActions', () => {
       round,
       promptState,
       attachmentStateManager,
+      eventEmitter,
     });
 
     expect(result.actions).toHaveLength(4);
@@ -151,6 +156,7 @@ describe('pendingBrowserToolPromptsToActions', () => {
       round,
       promptState: { responses: {} },
       attachmentStateManager,
+      eventEmitter,
     });
 
     expect(result.actions).toEqual([]);
@@ -162,6 +168,7 @@ describe('pendingBrowserToolPromptsToActions', () => {
       round: makeRound(),
       promptState: { responses: {} },
       attachmentStateManager,
+      eventEmitter,
     });
 
     expect(result.actions).toEqual([]);
@@ -175,8 +182,99 @@ describe('pendingBrowserToolPromptsToActions', () => {
         round,
         promptState: { responses: {} },
         attachmentStateManager,
+        eventEmitter,
       })
     ).rejects.toThrow(/No browser_tool_call response found in prompt state for prompt_id p1/);
+  });
+
+  describe('transcript step events', () => {
+    it('emits toolCall + toolResult events so the run is persisted as a step', async () => {
+      const round = makeRound(browserToolPrompt('p1'));
+      const promptState: PromptStorageState = {
+        responses: {
+          p1: {
+            type: AgentPromptType.browser_tool_call,
+            response: { result: '{"from":"now-15m","to":"now"}' },
+          },
+        },
+      };
+
+      await pendingBrowserToolPromptsToActions({
+        round,
+        promptState,
+        attachmentStateManager,
+        eventEmitter,
+      });
+
+      expect(eventEmitter).toHaveBeenCalledTimes(2);
+      const [toolCallEvent, toolResultEvent] = eventEmitter.mock.calls.map(([event]) => event);
+      expect(toolCallEvent.type).toBe('tool_call');
+      expect(toolCallEvent.data.tool_id).toBe('browser_get_time_range');
+      expect(toolCallEvent.data.params).toEqual({ verbose: true });
+      expect(toolResultEvent.type).toBe('tool_result');
+      expect(toolResultEvent.data.tool_call_id).toBe(toolCallEvent.data.tool_call_id);
+      expect(toolResultEvent.data.results).toEqual([
+        expect.objectContaining({ type: 'other', data: { from: 'now-15m', to: 'now' } }),
+      ]);
+    });
+
+    it('emits an error result when the browser reported an error', async () => {
+      const round = makeRound(browserToolPrompt('p1'));
+      const promptState: PromptStorageState = {
+        responses: {
+          p1: {
+            type: AgentPromptType.browser_tool_call,
+            response: { error: 'Timed out after 30000ms.' },
+          },
+        },
+      };
+
+      await pendingBrowserToolPromptsToActions({
+        round,
+        promptState,
+        attachmentStateManager,
+        eventEmitter,
+      });
+
+      const toolResultEvent = eventEmitter.mock.calls[1][0];
+      expect(toolResultEvent.data.results).toEqual([
+        expect.objectContaining({ type: 'error', data: { message: 'Timed out after 30000ms.' } }),
+      ]);
+    });
+
+    it('emits the substituted attachment reference for image results, not the base64 payload', async () => {
+      const round = makeRound(browserToolPrompt('p1', 'capture_screenshot', 'image'));
+      const promptState: PromptStorageState = {
+        responses: {
+          p1: {
+            type: AgentPromptType.browser_tool_call,
+            response: {
+              result: JSON.stringify({
+                content: BLUE_PIXEL_PNG,
+                mime_type: 'image/png',
+                image_attachment_key: 'screenshot:dash-1',
+              }),
+            },
+          },
+        },
+      };
+
+      await pendingBrowserToolPromptsToActions({
+        round,
+        promptState,
+        attachmentStateManager,
+        eventEmitter,
+      });
+
+      const toolResultEvent = eventEmitter.mock.calls[1][0];
+      expect(toolResultEvent.data.results).toEqual([
+        expect.objectContaining({
+          type: 'other',
+          data: { image_attachment_id: 'screenshot:dash-1' },
+        }),
+      ]);
+      expect(JSON.stringify(toolResultEvent)).not.toContain('base64');
+    });
   });
 
   describe('image results', () => {
@@ -201,6 +299,7 @@ describe('pendingBrowserToolPromptsToActions', () => {
         round,
         promptState: imagePromptState(imageResult()),
         attachmentStateManager,
+        eventEmitter,
       });
 
       expect(attachmentStateManager.add).toHaveBeenCalledWith({
@@ -224,6 +323,7 @@ describe('pendingBrowserToolPromptsToActions', () => {
         round,
         promptState: imagePromptState(imageResult({ panel_count: 4 })),
         attachmentStateManager,
+        eventEmitter,
       });
 
       const [, executeToolAction] = result.actions as any[];
@@ -240,6 +340,7 @@ describe('pendingBrowserToolPromptsToActions', () => {
         round,
         promptState: imagePromptState(imageResult({ image_attachment_key: 'screenshot:dash-1' })),
         attachmentStateManager,
+        eventEmitter,
       });
 
       expect(attachmentStateManager.add).toHaveBeenCalledWith(
@@ -262,6 +363,7 @@ describe('pendingBrowserToolPromptsToActions', () => {
         round,
         promptState: imagePromptState(imageResult({ image_attachment_key: 'screenshot:dash-1' })),
         attachmentStateManager,
+        eventEmitter,
       });
 
       expect(attachmentStateManager.add).not.toHaveBeenCalled();
@@ -285,6 +387,7 @@ describe('pendingBrowserToolPromptsToActions', () => {
         round,
         promptState: imagePromptState(imageResult({ image_attachment_key: 'screenshot:dash-1' })),
         attachmentStateManager,
+        eventEmitter,
       });
 
       expect(attachmentStateManager.add).not.toHaveBeenCalled();
@@ -302,6 +405,7 @@ describe('pendingBrowserToolPromptsToActions', () => {
         round,
         promptState: imagePromptState('not json'),
         attachmentStateManager,
+        eventEmitter,
       });
 
       expect(attachmentStateManager.add).not.toHaveBeenCalled();
@@ -320,6 +424,7 @@ describe('pendingBrowserToolPromptsToActions', () => {
           JSON.stringify({ content: 'https://not-a-data-url', mime_type: 'image/png' })
         ),
         attachmentStateManager,
+        eventEmitter,
       });
 
       expect(attachmentStateManager.add).not.toHaveBeenCalled();
@@ -337,6 +442,7 @@ describe('pendingBrowserToolPromptsToActions', () => {
         round,
         promptState: imagePromptState(imageResult()),
         attachmentStateManager,
+        eventEmitter,
       });
 
       const [, executeToolAction] = result.actions as any[];
@@ -353,6 +459,7 @@ describe('pendingBrowserToolPromptsToActions', () => {
         round,
         promptState: imagePromptState(raw),
         attachmentStateManager,
+        eventEmitter,
       });
 
       expect(attachmentStateManager.add).not.toHaveBeenCalled();
