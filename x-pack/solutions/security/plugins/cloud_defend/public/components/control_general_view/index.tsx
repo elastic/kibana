@@ -99,6 +99,7 @@ const AddButton = ({ type, onSelectType, selectors, responses }: AddSelectorButt
 
   return (
     <EuiPopover
+      aria-label={isSelector ? i18n.addSelector : i18n.addResponse}
       id={`btnAdd${type}`}
       display="block"
       button={
