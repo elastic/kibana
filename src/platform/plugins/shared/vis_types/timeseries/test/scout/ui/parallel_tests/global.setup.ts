@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { globalSetupHook } from '@kbn/scout';
+import { testData } from '../fixtures';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
-
-  return {
-    ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
-  };
-}
+globalSetupHook('Setup environment for TSVB tests', async ({ esArchiver }) => {
+  await Promise.all([
+    esArchiver.loadIfNeeded(testData.ES_ARCHIVE_PATHS.LOGSTASH),
+    esArchiver.loadIfNeeded(testData.ES_ARCHIVE_PATHS.LONG_WINDOW_LOGSTASH),
+  ]);
+});
