@@ -149,7 +149,7 @@ test.describe(
     });
 
     test('footer-panel children navigate to the expected pages', async ({ pageObjects, page }) => {
-      const nav = pageObjects.observabilityNavigation;
+      const { observabilityNavigation: nav, chrome } = pageObjects;
 
       await test.step('data_management → Integrations', async () => {
         await nav.navItemInFooterById('data_management').click();
@@ -176,7 +176,7 @@ test.describe(
           .sidePanel('data_management')
           .locator('[data-test-subj~="nav-item-deepLinkId-fleet"]')
           .click();
-        await expect(nav.pageTitle()).toContainText('Fleet', {
+        await expect(chrome.pageTitle).toContainText('Fleet', {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -191,7 +191,7 @@ test.describe(
           .sidePanel('admin_and_settings')
           .locator('[data-test-subj~="nav-item-id-management:tags"]')
           .click();
-        await expect(nav.pageTitle()).toContainText('Tags', {
+        await expect(chrome.pageTitle).toContainText('Tags', {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -206,7 +206,7 @@ test.describe(
           .sidePanel('admin_and_settings')
           .locator('[data-test-subj~="nav-item-id-management:maintenanceWindows"]')
           .click();
-        await expect(nav.pageTitle()).toContainText('Maintenance Windows', {
+        await expect(chrome.pageTitle).toContainText('Maintenance Windows', {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -225,7 +225,7 @@ test.describe(
       pageObjects,
       page,
     }) => {
-      const nav = pageObjects.observabilityNavigation;
+      const { observabilityNavigation: nav, chrome } = pageObjects;
 
       const expectNoReload = await nav.createNoPageReloadCheck();
 
@@ -249,13 +249,13 @@ test.describe(
           .sidePanel('admin_and_settings')
           .locator('[data-test-subj~="nav-item-id-management:tags"]')
           .click();
-        await expect(nav.pageTitle()).toContainText('Tags', {
+        await expect(chrome.pageTitle).toContainText('Tags', {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
 
       await test.step('Logo returns to observability landing', async () => {
-        await nav.clickLogo();
+        await chrome.clickLogo();
         await nav.waitForLoad();
         await expect(nav.navItemInPrimaryByDeepLinkId('discover')).toBeVisible({
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,

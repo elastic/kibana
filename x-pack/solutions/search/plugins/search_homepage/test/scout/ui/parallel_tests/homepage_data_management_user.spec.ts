@@ -48,20 +48,15 @@ spaceTest.describe(
       }
     );
 
-    spaceTest('should only see Home and Data Management in primary sidenav', async ({ page }) => {
-      // The solution "home" node always renders as a primary sidenav item, so a
-      // limited-permission user sees it alongside Data Management.
-      const primaryNav = page.testSubj.locator('kbnChromeNav-primaryNavigation');
-      const navItems = primaryNav.locator('[data-test-subj*="nav-item-id-"]');
-      await expect(navItems).toHaveCount(2);
+    spaceTest('should only see expected primary sidenav items', async ({ pageObjects }) => {
+      const { chrome } = pageObjects;
+      const isChromeNext = await chrome.isNextChrome();
 
-      const homeLink = primaryNav.locator('[data-test-subj~="nav-item-id-searchHomepage"]');
-      await expect(homeLink).toBeVisible();
-
-      const dataManagementLink = primaryNav.locator(
-        '[data-test-subj~="nav-item-id-data_management"]'
-      );
-      await expect(dataManagementLink).toBeVisible();
+      await expect(chrome.primaryNavigationItems).toHaveCount(Number(isChromeNext) + 1);
+      await expect(chrome.navItemInPrimaryById('data_management')).toBeVisible();
+      await expect(chrome.navItemInPrimaryById('searchHomepage')).toBeVisible({
+        visible: isChromeNext,
+      });
     });
   }
 );

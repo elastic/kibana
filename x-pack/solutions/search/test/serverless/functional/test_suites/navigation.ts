@@ -121,6 +121,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'management:index_management',
       });
+      await testSubjects.existOrFail('indexTable');
 
       await solutionNavigation.sidenav.clickLink({
         deepLinkId: 'searchQueryRules',

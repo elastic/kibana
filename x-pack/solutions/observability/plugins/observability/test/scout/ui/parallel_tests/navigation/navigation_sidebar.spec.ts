@@ -120,7 +120,7 @@ test.describe(
     });
 
     test('in-panel deep links navigate to the expected pages', async ({ pageObjects }) => {
-      const nav = pageObjects.observabilityNavigation;
+      const { observabilityNavigation: nav, chrome } = pageObjects;
 
       await test.step('Infrastructure → Inventory', async () => {
         await nav.openMoreMenu();
@@ -131,7 +131,7 @@ test.describe(
           .nestedPanel('metrics')
           .locator('[data-test-subj~="nav-item-deepLinkId-metrics:inventory"]')
           .click();
-        await expect(nav.pageTitle()).toContainText('Infrastructure inventory');
+        await expect(chrome.pageTitle).toContainText('Infrastructure inventory');
       });
 
       await test.step('Infrastructure → Hosts', async () => {
@@ -143,7 +143,7 @@ test.describe(
           .nestedPanel('metrics')
           .locator('[data-test-subj~="nav-item-deepLinkId-metrics:hosts"]')
           .click();
-        await expect(nav.pageTitle()).toContainText('Hosts');
+        await expect(chrome.pageTitle).toContainText('Hosts');
       });
 
       await test.step('Machine Learning → ML overview', async () => {
@@ -203,7 +203,7 @@ test.describe(
     test('navigates between apps without a full page reload (SPA) and restores via logo', async ({
       pageObjects,
     }) => {
-      const nav = pageObjects.observabilityNavigation;
+      const { observabilityNavigation: nav, chrome } = pageObjects;
 
       const expectNoReload = await nav.createNoPageReloadCheck();
 
@@ -222,11 +222,11 @@ test.describe(
           .nestedPanel('metrics')
           .locator('[data-test-subj~="nav-item-deepLinkId-metrics:hosts"]')
           .click();
-        await expect(nav.pageTitle()).toContainText('Hosts');
+        await expect(chrome.pageTitle).toContainText('Hosts');
       });
 
       await test.step('Logo returns to observability landing', async () => {
-        await nav.clickLogo();
+        await chrome.clickLogo();
         await nav.waitForLoad();
         await expect(nav.navItemInPrimaryByDeepLinkId('discover')).toBeVisible();
       });

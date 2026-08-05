@@ -50,8 +50,8 @@ test.describe('chrome navigation mechanics', { tag: tags.stateful.classic }, () 
     await browserAuth.loginAsViewer();
     await page.goto(kbnUrl.app('discover', { space: SPACE.id }));
 
-    await expect(pageObjects.navigation.getSidenav()).toBeVisible();
-    await expect(page.testSubj.locator('kbnChromeNav-primaryNavigation')).toBeVisible();
+    await expect(pageObjects.chrome.layoutNavigation).toBeVisible();
+    await expect(pageObjects.chrome.primaryNavigation).toBeVisible();
   });
 
   test('navigation updates the URL and the logo navigates home', async ({
@@ -67,7 +67,7 @@ test.describe('chrome navigation mechanics', { tag: tags.stateful.classic }, () 
     await expect(page).toHaveURL(/\/app\/dashboards/);
 
     const dashboardsUrl = page.url();
-    await pageObjects.navigation.clickLogo();
+    await pageObjects.chrome.clickLogo();
     await expect(page).not.toHaveURL(dashboardsUrl);
   });
 });

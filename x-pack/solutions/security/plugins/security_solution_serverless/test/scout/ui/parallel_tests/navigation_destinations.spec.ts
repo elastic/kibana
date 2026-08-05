@@ -15,7 +15,7 @@ spaceTest.describe(
     spaceTest(
       'navigation via search, sidebar cases link, cases app, and legacy management landing page',
       async ({ page, pageObjects, browserAuth, scoutSpace }) => {
-        const { serverlessProjectChromePage, collapsibleNav } = pageObjects;
+        const { serverlessProjectChromePage, collapsibleNav, chrome } = pageObjects;
 
         await browserAuth.loginAsPrivilegedUser();
         await serverlessProjectChromePage.navigateToSecuritySolutionHomeForChromeNav();
@@ -23,11 +23,9 @@ spaceTest.describe(
         await spaceTest.step('navigate using search', async () => {
           // spaceTest runs each test in its own space, so app URLs (including the
           // one on the search result) are space-prefixed rather than root-relative.
-          await serverlessProjectChromePage.openNavSearch();
-          await serverlessProjectChromePage.searchNav('security dashboards');
-          await serverlessProjectChromePage
-            .getNavSearchOptionByUrl(`/s/${scoutSpace.id}/app/security/dashboards`)
-            .click();
+          await chrome.openSearch();
+          await chrome.search('security dashboards');
+          await chrome.getSearchOptionByUrl(`/s/${scoutSpace.id}/app/security/dashboards`).click();
 
           await page.waitForURL(/app\/security\/dashboards/);
           expect(page.url()).toContain('app/security/dashboards');
@@ -67,7 +65,7 @@ spaceTest.describe(
     );
 
     spaceTest('navigates to maintenance windows', async ({ browserAuth, pageObjects }) => {
-      const { serverlessProjectChromePage, collapsibleNav } = pageObjects;
+      const { serverlessProjectChromePage, collapsibleNav, chrome } = pageObjects;
 
       // Admin is the only role that has "maintenanceWindow" feature privilege.
       await browserAuth.loginAsAdmin();
@@ -75,7 +73,7 @@ spaceTest.describe(
 
       await collapsibleNav.clickItem('stack_management');
       await collapsibleNav.clickItem('management:maintenanceWindows', { lowercase: false });
-      await expect(serverlessProjectChromePage.pageTitle).toHaveText('Maintenance Windows');
+      await expect(chrome.pageTitle).toHaveText('Maintenance Windows');
     });
   }
 );

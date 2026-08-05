@@ -120,6 +120,7 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'management:index_management',
       });
+      await testSubjects.existOrFail('indexTable');
 
       await solutionNavigation.sidenav.clickLink({
         deepLinkId: 'searchQueryRules',

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -12,6 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spaces = getService('spaces');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
+  const globalNav = getService('globalNav');
 
   describe('security solution', () => {
     let cleanUp: () => Promise<unknown>;
@@ -51,6 +53,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.clickLink({ navId: 'securityGroup:investigations' });
         await solutionNavigation.sidenav.clickLink({ navId: 'timelines' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'timelines' });
+        expect(await globalNav.getPageTitle()).to.be('Timelines');
 
         // navigate back to the home page using header logo
         await solutionNavigation.clickLogo();

@@ -5,12 +5,50 @@
  * 2.0.
  */
 
-import type { ScoutPage, Locator } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import type { Locator, ScoutPage } from '@kbn/scout';
 
 export class PageNavigation {
   readonly allBreadcrumbs: Locator;
 
-  constructor(page: ScoutPage) {
+  constructor(private readonly page: ScoutPage) {
     this.allBreadcrumbs = page.testSubj.locator('~breadcrumb');
+  }
+
+  async expectClassicBreadcrumbTexts(expectedTexts: string[]): Promise<void> {
+    await expect(this.allBreadcrumbs).toHaveText(expectedTexts);
+  }
+
+  async expectServerlessClassicBreadcrumbTexts(expectedTexts: string[]): Promise<void> {
+    const allTexts = await this.allBreadcrumbs.allTextContents();
+    expect(allTexts.slice(1)).toStrictEqual(expectedTexts);
+  }
+
+  async expectPageUrlContains(pathFragment: string): Promise<void> {
+    await expect(this.page).toHaveURL(
+      new RegExp(pathFragment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    );
+  }
+
+  async expectInferencePage(options: {
+    pageHeader: Locator;
+    urlPath: string;
+    classicBreadcrumbs: string[];
+    isNextChrome: boolean;
+    isServerless?: boolean;
+  }): Promise<void> {
+    await expect(options.pageHeader).toBeVisible();
+    await this.expectPageUrlContains(options.urlPath);
+
+    if (options.isNextChrome) {
+      return;
+    }
+
+    if (options.isServerless) {
+      await this.expectServerlessClassicBreadcrumbTexts(options.classicBreadcrumbs);
+      return;
+    }
+
+    await this.expectClassicBreadcrumbTexts(options.classicBreadcrumbs);
   }
 }

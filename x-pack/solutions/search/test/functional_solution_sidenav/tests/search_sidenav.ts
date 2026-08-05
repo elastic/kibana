@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -43,6 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'discover',
         });
+        expect(await browser.getCurrentUrl()).to.contain('/app/discover');
 
         // navigate to a different section
         await solutionNavigation.sidenav.clickLink({

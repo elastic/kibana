@@ -8,5 +8,21 @@
 export const BREADCRUMBS = {
   stateful: {
     classic: ['Stack Management'],
+    searchSolution: ['Stack Management', 'Model Management'],
+  },
+  serverless: {
+    search: ['Model Management'],
+  },
+} as const;
+
+export const INFERENCE_PAGES = {
+  eisModels: {
+    urlPath: 'management/modelManagement/elastic_inference_service',
+  },
+  externalInference: {
+    urlPath: 'management/modelManagement/inference_endpoints',
+  },
+  featureSettings: {
+    urlPath: 'management/modelManagement/model_settings',
   },
 } as const;

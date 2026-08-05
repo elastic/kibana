@@ -22,7 +22,6 @@ export class ObservabilityNavigation {
   public readonly primaryNav: Locator;
   public readonly footerNav: Locator;
   public readonly morePopover: Locator;
-  public readonly logo: Locator;
   public readonly moreMenuTrigger: Locator;
 
   constructor(private readonly page: ScoutPage) {
@@ -30,7 +29,6 @@ export class ObservabilityNavigation {
     this.primaryNav = this.page.testSubj.locator('kbnChromeNav-primaryNavigation');
     this.footerNav = this.page.testSubj.locator('kbnChromeNav-footer');
     this.morePopover = this.page.testSubj.locator('side-nav-popover-More');
-    this.logo = this.page.testSubj.locator('nav-header-logo');
     this.moreMenuTrigger = this.page.testSubj.locator('kbnChromeNav-moreMenuTrigger');
   }
 
@@ -124,14 +122,6 @@ export class ObservabilityNavigation {
     );
   }
 
-  // Chrome Next shows the page title in the app header; unmigrated pages still use EuiPageHeader's h1.
-  // `.or()` keeps callers layout-agnostic without a runtime gate.
-  pageTitle(): Locator {
-    return this.page.testSubj
-      .locator('appHeaderTitle')
-      .or(this.page.locator('.euiPageHeader h1.euiTitle'));
-  }
-
   sidePanel(id: string): Locator {
     return this.page.testSubj.locator(`~kbnChromeNav-sidePanel_${id}`);
   }
@@ -142,14 +132,6 @@ export class ObservabilityNavigation {
 
   anyPanel(id: string): Locator {
     return this.sidePanel(id).or(this.nestedPanel(id));
-  }
-
-  /** By `breadcrumb-deepLinkId-*` test-subj or visible text. */
-  breadcrumb(by: { deepLinkId: string } | { text: string }): Locator {
-    if ('deepLinkId' in by) {
-      return this.breadcrumbs.locator(`[data-test-subj~="breadcrumb-deepLinkId-${by.deepLinkId}"]`);
-    }
-    return this.breadcrumbs.locator('[data-test-subj~="breadcrumb"]', { hasText: by.text });
   }
 
   /**
@@ -180,10 +162,6 @@ export class ObservabilityNavigation {
     }
     await this.moreMenuTrigger.click();
     await this.morePopover.waitFor({ state: 'visible' });
-  }
-
-  async clickLogo() {
-    await this.logo.click();
   }
 
   /** Returns a function that is false after a full page reload (spec asserts). */

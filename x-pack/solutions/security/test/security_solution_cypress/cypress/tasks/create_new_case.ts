@@ -44,8 +44,6 @@ import { CASES_URL } from '../urls/navigation';
 import { visit } from './navigation';
 
 export const backToCases = () => {
-  // Some case view layouts don't render an app header back button; when it is absent, navigate to
-  // the cases list directly.
   cy.get('body').then(($body) => {
     if ($body.find(BACK_TO_CASES_BTN).length > 0) {
       cy.get(BACK_TO_CASES_BTN).click();
