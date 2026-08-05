@@ -73,16 +73,19 @@ export const useManageRegionsState = (onClose: () => void) => {
   const activeSelectionIsDirty =
     activeTab === 'regions' ? regionTab.regionSelection.isDirty : geoSelection.isDirty;
   const hasExistingPolicy = syncedFromInitial && !isNewPolicy;
-  const pendingDelete = syncedFromInitial && !useCustomPolicy && hasExistingPolicy;
-  const isDirty = useCustomPolicy
-    ? syncedFromInitial && (isNewPolicy || activeSelectionIsDirty)
-    : pendingDelete;
-  const noSelections =
-    activeTab === 'geo'
-      ? geoSelection.totalSelected === 0
-      : regionTab.regionSelection.totalSelected === 0;
-  const isSaveDisabled =
-    isSaving || isDeleting || isLoading || !isDirty || (useCustomPolicy && noSelections);
+  const pendingDelete = hasExistingPolicy && !useCustomPolicy;
+
+  const hasUnsavedSelectionChanges = isNewPolicy || activeSelectionIsDirty;
+  const hasCustomPolicyEdits = syncedFromInitial && hasUnsavedSelectionChanges;
+  const isDirty = useCustomPolicy ? hasCustomPolicyEdits : pendingDelete;
+
+  const hasNoGeosSelected = geoSelection.totalSelected === 0;
+  const hasNoRegionsSelected = regionTab.regionSelection.totalSelected === 0;
+  const hasEmptySelection = activeTab === 'geo' ? hasNoGeosSelected : hasNoRegionsSelected;
+
+  const isBusy = isSaving || isDeleting || isLoading;
+  const requiresSelection = useCustomPolicy && hasEmptySelection;
+  const isSaveDisabled = isBusy || !isDirty || requiresSelection;
 
   // --- Confirmation flow handlers ---
   const handleRequestSave = useCallback(() => {
