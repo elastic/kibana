@@ -177,11 +177,10 @@ describe('AgentLogsUI', () => {
   });
 
   it('should not render Open in Discover button while logSources is loading', () => {
-    mockStartServices();
-    // Override to never resolve so logSources.value stays undefined
-    mockLogSources.services.logSourcesService.getFlattenedLogSources.mockReturnValue(
-      new Promise(() => {})
+    mockLogSources.services.logSourcesService.getFlattenedLogSources.mockImplementationOnce(
+      () => new Promise(() => {})
     );
+    mockStartServices();
     const result = renderComponent();
     expect(result.queryByTestId('viewInLogsBtn')).not.toBeInTheDocument();
   });
