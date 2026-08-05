@@ -63,6 +63,7 @@ export { MondayCom } from './specs/monday_com/monday_com';
 export { NewRelic } from './specs/new_relic/new_relic';
 export { NotionConnector } from './specs/notion/notion';
 export { OneDrive } from './specs/one_drive/one_drive';
+export { OpensearchAwsOpensearchService } from './specs/opensearch_aws_opensearch_service/opensearch_aws_opensearch_service';
 export { Outlook } from './specs/outlook/outlook';
 export { PagerdutyConnector } from './specs/pagerduty/pagerduty';
 export { PostHog } from './specs/posthog/posthog';
