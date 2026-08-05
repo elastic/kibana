@@ -150,6 +150,7 @@ steps:
     timeout_in_minutes: 15
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
+      JEST_UNIT_MAX_MINUTES: '15.0'
       LIMIT_CONFIG_TYPE: 'unit'
     retry:
       automatic:
