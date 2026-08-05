@@ -12,9 +12,9 @@ import { EuiIcon, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eu
 import { css } from '@emotion/react';
 import React, { Suspense, useMemo } from 'react';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
+import { getMaskableIconUrl } from './get_maskable_icon_url';
 import { getStepIconType } from './get_step_icon_type';
 import { HardcodedIcons } from './hardcoded_icons';
-import { isMaskableIcon } from './is_maskable_icon';
 import { resolveRegisteredStepIcon } from './resolve_registered_step_icon';
 import { useWorkflowsUiServices } from '../../context';
 
@@ -82,14 +82,15 @@ export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, ...rest 
   );
 
   const label = title ?? type;
+  const maskUrl = getMaskableIconUrl(iconType);
 
-  const icon = isMaskableIcon(iconType) ? (
+  const icon = maskUrl ? (
     <span
       css={css`
         display: inline-block;
         width: 16px;
         height: 16px;
-        mask-image: url('${iconType}');
+        mask-image: url('${maskUrl}');
         mask-size: contain;
         mask-repeat: no-repeat;
         mask-position: center;
