@@ -334,11 +334,13 @@ Both `WeatherDashboard` and `Prediction` reference `DataSource`. Therefore, both
 
 Normalize our domain objects by only holding a reference to `DataSource` in `WeatherDashboard` and `Prediction` domain objects.
 
-:::{dropdown} Solution
-1. We will add a way to uniquely identify a `DataSource`
-2. `DataSource` is currently specified in both `WeatherDashboard` and `Prediction`, therefore both will need to be updated as well.
+<details>
+  <summary>Solution</summary>
+  <hr />
+  1. We will add a way to uniquely identify a `DataSource`
+  2. `DataSource` is currently specified in both `WeatherDashboard` and `Prediction`, therefore both will need to be updated as well.
 
-Let's start by updating our folder structure to introduce the new versions.
+  Let's start by updating our folder structure to introduce the new versions.
 
 ```
 common
@@ -355,7 +357,7 @@ common
    v2.ts
 ```
 
-Now, let's add our new types:
+  Now, let's add our new types :
 
 ```ts
 // common/data_source/v3.ts
@@ -402,7 +404,7 @@ export interface PredictionInput {
 // ...followed by all other HTTP related interfaces
 ```
 
-Next let's update `latest.ts` and `index.ts`:
+  Next let's update `latest.ts` and `index.ts`:
 
 ```ts
 // latest.ts
@@ -424,14 +426,14 @@ export * as weatherDashboardV3 from './weather_dashboard/v3';
 export * as dataSourceV3 from './data_source/v3';
 ```
 
-Refactoring interfaces in this way creates a much larger maintenance burden because:
+  Refactoring interfaces in this way creates a much larger maintenance burden because:
 
-1. application code must now translate between the denormalized and normalized versions of these interfaces
-2. code must remember to support both old and new naming conventions
+  1. application code must now translate between the denormalized and normalized versions of these interfaces
+  2. code must remember to support both old and new naming conventions
 
-...for as long as these APIs are in use. We will not cover deprecation strategies in this tutorial (incoming). Sufficed to
-say: _take care when designing public APIs_.
-:::
+  ...for as long as these APIs are in use. We will not cover deprecation strategies in this tutorial (incoming). Sufficed to
+  say: _take care when designing public APIs_.
+</details>
 
 ## Additional resources
 

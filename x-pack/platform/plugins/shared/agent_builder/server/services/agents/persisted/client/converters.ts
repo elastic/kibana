@@ -15,7 +15,7 @@ import type { AgentAccessControl, UserIdAndName } from '@kbn/agent-builder-commo
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentConfigurationProperties, AgentProperties } from './storage';
 import type { PersistedAgentDefinition } from '../types';
-import { isAgentOwner, normalizeAccessControl } from '../../access_control';
+import { normalizeAccessControl } from '../../access_control';
 
 export type Document = Pick<GetResponse<AgentProperties>, '_id' | '_source'>;
 
@@ -106,13 +106,11 @@ export const updateRequestToEs = ({
   currentProps,
   update,
   updateDate,
-  user,
 }: {
   agentId: string;
   currentProps: AgentProperties;
   update: AgentUpdateRequest;
   updateDate: Date;
-  user?: UserIdAndName;
 }): AgentProperties => {
   const currentConfig = currentProps.configuration ?? currentProps.config;
   const { configuration, access_control, ...restUpdate } = update;
@@ -140,18 +138,6 @@ export const updateRequestToEs = ({
     },
     updated_at: updateDate.toISOString(),
   };
-
-  if (
-    currentProps.created_by_id === undefined &&
-    currentProps.created_by_name !== undefined &&
-    user?.id &&
-    isAgentOwner({
-      owner: { username: currentProps.created_by_name },
-      currentUser: user,
-    })
-  ) {
-    updated.created_by_id = user.id;
-  }
 
   return updated;
 };

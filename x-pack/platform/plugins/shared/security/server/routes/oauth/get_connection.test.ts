@@ -29,8 +29,6 @@ describe('Get OAuth Connection route', () => {
     });
   }
 
-  const PROJECT_ID = 'test-project-id';
-
   let routeHandler: RequestHandler<any, any, any, any>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   let oauthMock: jest.Mocked<UiamOAuthType>;
@@ -39,7 +37,6 @@ describe('Get OAuth Connection route', () => {
     oauthMock = authc.oauth as jest.Mocked<UiamOAuthType>;
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authc);
-    mockRouteDefinitionParams.serverlessProjectId = PROJECT_ID;
 
     defineGetOAuthConnectionRoute(mockRouteDefinitionParams);
 
@@ -80,12 +77,7 @@ describe('Get OAuth Connection route', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual(mockConnection);
-    expect(oauthMock.listConnections).toHaveBeenCalledWith(
-      expect.anything(),
-      'client-1',
-      'conn-1',
-      PROJECT_ID
-    );
+    expect(oauthMock.listConnections).toHaveBeenCalledWith(expect.anything(), 'client-1', 'conn-1');
   });
 
   it('returns 404 when connection is not found', async () => {

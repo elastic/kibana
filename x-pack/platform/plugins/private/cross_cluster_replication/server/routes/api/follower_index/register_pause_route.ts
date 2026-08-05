@@ -17,7 +17,7 @@ export const registerPauseRoute = ({
   license,
   lib: { handleEsError },
 }: RouteDependencies) => {
-  const paramsSchema = schema.object({ id: schema.string({ maxLength: 1000 }) });
+  const paramsSchema = schema.object({ id: schema.string() });
 
   router.put(
     {

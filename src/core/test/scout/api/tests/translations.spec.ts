@@ -9,10 +9,8 @@
 
 import { expect } from '@kbn/scout/api';
 import { apiTest, tags } from '@kbn/scout';
-import type { RoleApiCredentials, ScoutTestConfig } from '@kbn/scout';
+import type { RoleApiCredentials } from '@kbn/scout';
 import { INTERNAL_HEADERS } from '../fixtures';
-
-const isDistributable = (config: ScoutTestConfig) => Boolean(process.env.CI) || config.isCloud;
 
 apiTest.describe('translations', { tag: tags.deploymentAgnostic }, () => {
   let credentials: RoleApiCredentials;
@@ -21,7 +19,7 @@ apiTest.describe('translations', { tag: tags.deploymentAgnostic }, () => {
     credentials = await requestAuth.getApiKey('viewer');
   });
 
-  apiTest('returns the translations with the correct headers', async ({ apiClient, config }) => {
+  apiTest('returns the translations with the correct headers', async ({ apiClient }) => {
     const response = await apiClient.get('/translations/en.json', {
       headers: {
         ...INTERNAL_HEADERS,
@@ -34,10 +32,9 @@ apiTest.describe('translations', { tag: tags.deploymentAgnostic }, () => {
     expect(response).toHaveHeaders({ 'content-type': 'application/json; charset=utf-8' });
 
     // Distributable builds serve pre-built translations with immutable caching and no etag.
-    // Local dev servers return `must-revalidate` + etag instead. CI covers on-merge runs against
-    // a built Kibana; `config.isCloud` covers deployed cloud projects, where CI is not set.
-    // TODO: Replace this with a Scout config flag (e.g. isDistributable) when available.
-    if (isDistributable(config)) {
+    // Local dev servers return `must-revalidate` + etag instead, so we gate on CI.
+    // TODO: Replace `process.env.CI` with a Scout config flag (e.g. isDistributable) when available.
+    if (process.env.CI) {
       expect(response).toHaveHeaders({
         'cache-control': 'public, max-age=31536000, immutable',
       });
@@ -47,7 +44,7 @@ apiTest.describe('translations', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest(
     'serves a non-default locale file with the locale field intact',
-    async ({ apiClient, config }) => {
+    async ({ apiClient }) => {
       const response = await apiClient.get('/translations/fr-FR.json', {
         headers: {
           ...INTERNAL_HEADERS,
@@ -59,7 +56,7 @@ apiTest.describe('translations', { tag: tags.deploymentAgnostic }, () => {
       expect(response.body.locale).toBe('fr-FR');
       expect(response).toHaveHeaders({ 'content-type': 'application/json; charset=utf-8' });
 
-      if (isDistributable(config)) {
+      if (process.env.CI) {
         expect(response).toHaveHeaders({
           'cache-control': 'public, max-age=31536000, immutable',
         });

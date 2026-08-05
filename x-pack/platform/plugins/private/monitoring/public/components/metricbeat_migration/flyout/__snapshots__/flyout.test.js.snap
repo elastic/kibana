@@ -121,7 +121,6 @@ exports[`Flyout apm part two should show instructions to disable internal collec
         },
         Object {
           "children": <EuiCallOut
-            announceOnMount={true}
             color="warning"
             size="s"
             title="Data is still coming from self monitoring"
@@ -311,7 +310,6 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
         },
         Object {
           "children": <EuiCallOut
-            announceOnMount={true}
             color="warning"
             size="s"
             title="No monitoring data detected, but we’ll continue checking."
@@ -452,7 +450,6 @@ exports[`Flyout beats part two should show instructions to disable internal coll
         },
         Object {
           "children": <EuiCallOut
-            announceOnMount={true}
             color="warning"
             size="s"
             title="Data is still coming from self monitoring"
@@ -678,7 +675,6 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
         },
         Object {
           "children": <EuiCallOut
-            announceOnMount={true}
             color="warning"
             size="s"
             title="No monitoring data detected, but we’ll continue checking."
@@ -808,7 +804,6 @@ exports[`Flyout elasticsearch part two should show instructions to disable inter
         },
         Object {
           "children": <EuiCallOut
-            announceOnMount={true}
             color="warning"
             size="s"
             title="Data is still coming from self monitoring"
@@ -1006,7 +1001,6 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
         },
         Object {
           "children": <EuiCallOut
-            announceOnMount={true}
             color="warning"
             size="s"
             title="No monitoring data detected, but we’ll continue checking."
@@ -1151,7 +1145,6 @@ exports[`Flyout kibana part two should show instructions to disable internal col
         },
         Object {
           "children": <EuiCallOut
-            announceOnMount={true}
             color="warning"
             size="s"
             title="Data is still coming from self monitoring"
@@ -1341,7 +1334,6 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
         },
         Object {
           "children": <EuiCallOut
-            announceOnMount={true}
             color="warning"
             size="s"
             title="No monitoring data detected, but we’ll continue checking."
@@ -1476,7 +1468,6 @@ exports[`Flyout logstash part two should show instructions to disable internal c
         },
         Object {
           "children": <EuiCallOut
-            announceOnMount={true}
             color="warning"
             size="s"
             title="Data is still coming from self monitoring"
@@ -1664,7 +1655,6 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
         },
         Object {
           "children": <EuiCallOut
-            announceOnMount={true}
             color="warning"
             size="s"
             title="No monitoring data detected, but we’ll continue checking."
@@ -1681,7 +1671,6 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
 exports[`Flyout should render a consistent completion state for all products 1`] = `
 Object {
   "children": <EuiCallOut
-    announceOnMount={true}
     color="success"
     size="s"
     title="Congratulations!"
@@ -1749,7 +1738,6 @@ exports[`Flyout should render the beat type for beats for the disabling internal
         },
         Object {
           "children": <EuiCallOut
-            announceOnMount={true}
             color="warning"
             size="s"
             title="Data is still coming from self monitoring"
@@ -1975,7 +1963,6 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
         },
         Object {
           "children": <EuiCallOut
-            announceOnMount={true}
             color="warning"
             size="s"
             title="No monitoring data detected, but we’ll continue checking."
@@ -2046,7 +2033,6 @@ exports[`Flyout should show a restart warning for restarting the primary Kibana 
                 size="s"
               />
               <EuiCallOut
-                announceOnMount={true}
                 color="warning"
                 iconType="question"
                 title="This step requires you to restart the Kibana server"
@@ -2066,7 +2052,6 @@ exports[`Flyout should show a restart warning for restarting the primary Kibana 
         },
         Object {
           "children": <EuiCallOut
-            announceOnMount={true}
             color="warning"
             size="s"
             title="Data is still coming from self monitoring"

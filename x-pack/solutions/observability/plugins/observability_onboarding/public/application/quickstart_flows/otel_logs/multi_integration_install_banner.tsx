@@ -33,7 +33,6 @@ export function MultiIntegrationInstallBanner() {
     return (
       <EuiFlexItem>
         <EuiCallOut
-          announceOnMount
           title={i18n.translate('xpack.observability_onboarding.otelLogs.status.failed', {
             defaultMessage: 'Integration installation failed',
           })}

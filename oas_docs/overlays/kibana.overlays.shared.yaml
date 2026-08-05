@@ -172,11 +172,6 @@ actions:
       description: >
         Elastic Package Manager (EPM) APIs enable you to manage packages and integrations, including installing, updating, and uninstalling packages, managing custom integrations, and handling package assets.
       x-displayName: 'Elastic Package Manager (EPM)'
-  - target: '$.tags[?(@.name=="significant_events")]'
-    description: Change tag description and displayName
-    update:
-      # description: 
-      x-displayName: 'Significant Events'
 # Add some spaces API examples
   - target: "$.paths['/api/spaces/space']['post']"
     description: 'Add example to create space API'

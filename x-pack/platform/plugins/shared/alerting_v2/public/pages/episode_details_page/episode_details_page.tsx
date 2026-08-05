@@ -42,7 +42,6 @@ import { AlertEpisodeTimelineHeatmapsSection } from '@kbn/alerting-v2-episodes-u
 import { AlertEpisodesRelatedSection } from '@kbn/alerting-v2-episodes-ui/components/details/related_section';
 import { AlertEpisodeMetadataSection } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_section';
 import { AlertEpisodeRunbookSection } from '@kbn/alerting-v2-episodes-ui/components/details/runbook_section';
-import { parseEpisodeDataJson } from '@kbn/alerting-v2-episodes-ui/utils/episode_grouping_data';
 import { css } from '@emotion/react';
 import { useHistory, useParams } from 'react-router-dom';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -127,13 +126,10 @@ export function EpisodeDetailsPage() {
 
   const showRuleDependentUi = isRuleLoaded(ruleState);
 
-  const episodeData = parseEpisodeDataJson(episode?.episode_data);
-  const episodeDataRuleName =
-    typeof episodeData.rule_name === 'string' ? episodeData.rule_name : undefined;
   const episodeBreadcrumbTitle =
     showRuleDependentUi && ruleState.rule.metadata.name
       ? ruleState.rule.metadata.name
-      : episodeDataRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
+      : i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
 

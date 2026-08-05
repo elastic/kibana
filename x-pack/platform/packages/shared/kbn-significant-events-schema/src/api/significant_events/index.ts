@@ -21,6 +21,18 @@ import {
 import type { ChangePointType } from '../../significant_events/detections';
 import type { SignificantEvent } from '../../significant_events/events';
 
+/**
+ * SignificantEvents Get Response
+ */
+type ChangePointsType =
+  | 'dip'
+  | 'distribution_change'
+  | 'non_stationary'
+  | 'spike'
+  | 'stationary'
+  | 'step_change'
+  | 'trend_change';
+
 type ChangePointsValue = Partial<{
   p_value: number;
   r_value: number;
@@ -39,7 +51,7 @@ type QueryWithOccurrences = StreamQuery & {
   stream_name: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {
-    type: Partial<Record<ChangePointType, ChangePointsValue>>;
+    type: Partial<Record<ChangePointsType, ChangePointsValue>>;
   };
   rule_backed: boolean;
 };

@@ -84,7 +84,7 @@ export async function update(
 
   // Create path
   if (isNewDocument) {
-    asCodeIdSchema.parse(id);
+    asCodeIdSchema.validate(id);
 
     const body = await create(
       requestCtx,

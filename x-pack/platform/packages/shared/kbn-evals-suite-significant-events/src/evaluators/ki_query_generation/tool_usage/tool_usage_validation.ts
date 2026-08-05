@@ -66,7 +66,7 @@ export const createToolUsageEvaluator = (): Evaluator => ({
         issues.length > 0
           ? issues.join('; ')
           : `All tool calls succeeded (get_stream_features: ${toolUsage.get_stream_features.calls}, add_queries: ${toolUsage.add_queries.calls})`,
-      metadata: {
+      details: {
         get_stream_features: toolUsage.get_stream_features,
         add_queries: toolUsage.add_queries,
       },

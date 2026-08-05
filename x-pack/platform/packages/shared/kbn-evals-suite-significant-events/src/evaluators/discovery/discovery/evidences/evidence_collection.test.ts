@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignificantEvent, Detection, SignalEntry } from '@kbn/significant-events-schema';
+import type { Discovery, Detection, SignalEntry } from '@kbn/significant-events-schema';
 import { evidenceCollectionEvaluator } from './evidence_collection';
 
 const detection = (ruleUuid: string): Omit<Detection, 'processed'> => ({
@@ -40,13 +40,13 @@ const detectionSignal = (
   },
 });
 
-const evaluate = (events: Partial<SignificantEvent>[], ruleUuids: string[]) =>
+const evaluate = (discoveries: Partial<Discovery>[], ruleUuids: string[]) =>
   evidenceCollectionEvaluator.evaluate({
     input: {
       detections: ruleUuids.map(detection),
     },
     output: {
-      significantEvents: events as SignificantEvent[],
+      discoveries: discoveries as Discovery[],
       steps: [],
     },
     expected: {} as never,
@@ -59,24 +59,24 @@ describe('evidenceCollectionEvaluator', () => {
   });
 
   it('scores 1 when every input rule has collected ES|QL evidence', async () => {
-    const events: Partial<SignificantEvent>[] = [
+    const discoveries: Partial<Discovery>[] = [
       {
         signals: [detectionSignal('r1'), detectionSignal('r2')],
       },
     ];
-    const result = await evaluate(events, ['r1', 'r2']);
+    const result = await evaluate(discoveries, ['r1', 'r2']);
 
     expect(result.score).toBe(1);
     expect(result.explanation).toContain('2 input rule(s)');
   });
 
   it('gives partial credit when an input rule is omitted', async () => {
-    const events: Partial<SignificantEvent>[] = [
+    const discoveries: Partial<Discovery>[] = [
       {
         signals: [detectionSignal('r1')],
       },
     ];
-    const result = await evaluate(events, ['r1', 'r2']);
+    const result = await evaluate(discoveries, ['r1', 'r2']);
 
     expect(result.score).toBe(0.5);
     expect(result.explanation).toContain('missing signal for input rule "r2"');
@@ -92,11 +92,11 @@ describe('evidenceCollectionEvaluator', () => {
     }
   );
 
-  it('rejects duplicate signals', async () => {
+  it('rejects duplicate and unexpected signals', async () => {
     const result = await evaluate(
       [
         {
-          signals: [detectionSignal('r1'), detectionSignal('r1')],
+          signals: [detectionSignal('r1'), detectionSignal('r1'), detectionSignal('unexpected')],
         },
       ],
       ['r1']
@@ -104,12 +104,6 @@ describe('evidenceCollectionEvaluator', () => {
 
     expect(result.score).toBe(0);
     expect(result.explanation).toContain('duplicate signals for input rule "r1"');
-  });
-
-  it('rejects detection signals whose UUID is not in the input batch', async () => {
-    const result = await evaluate([{ signals: [detectionSignal('unexpected')] }], ['r1']);
-
-    expect(result).toMatchObject({ score: 0, label: 'unexpected-rule-uuid' });
-    expect(result.explanation).toContain('"unexpected"');
+    expect(result.explanation).toContain('unexpected signal for rule "unexpected"');
   });
 });

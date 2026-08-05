@@ -56,7 +56,6 @@ describe('Transform Generator', () => {
       syncDelay: new Duration(10, DurationUnit.Minute),
       frequency: new Duration(2, DurationUnit.Minute),
       preventInitialBackfill: true,
-      preventCrossProjectSearch: false,
     };
 
     it('builds the transform settings', async () => {

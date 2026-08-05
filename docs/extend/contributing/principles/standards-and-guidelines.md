@@ -1,6 +1,6 @@
 ---
 navigation_title: "Standards and guidelines"
-description: "Coding standards and guidelines that apply across the Kibana codebase"
+description: "Remaining standards and guidelines pending follow-up work"
 ---
 
 # Standards and guidelines

@@ -42,12 +42,17 @@ exports[`FeatureProperties should render 1`] = `
 `;
 
 exports[`FeatureProperties should show error message if unable to load tooltip content 1`] = `
-<KbnDangerCallout
+<EuiCallOut
   announceOnMount={true}
+  color="danger"
+  iconType="warning"
   size="s"
-  text="Simulated load properties error"
   title="Unable to load tooltip content"
-/>
+>
+  <p>
+    Simulated load properties error
+  </p>
+</EuiCallOut>
 `;
 
 exports[`FeatureProperties should show filter button for filterable properties 1`] = `

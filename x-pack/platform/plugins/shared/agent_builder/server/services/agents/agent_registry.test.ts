@@ -158,23 +158,6 @@ describe('AgentRegistry', () => {
 
       expect(resolved.id).toBe('managed-builtin');
     });
-
-    it('excludes unavailable persisted agents from getIds', async () => {
-      const available = createMockedInternalAgent({ id: 'available-agent', readonly: false });
-      const unavailable = createMockedInternalAgent({
-        id: 'unavailable-agent',
-        readonly: false,
-        isAvailable: jest.fn(async () => ({
-          status: 'unavailable' as const,
-          reason: 'feature off',
-        })) as any,
-      });
-      const registry = createRegistry({
-        persistedAgents: [available, unavailable],
-      });
-
-      await expect(registry.getIds()).resolves.toEqual(['available-agent']);
-    });
   });
 
   describe('create', () => {

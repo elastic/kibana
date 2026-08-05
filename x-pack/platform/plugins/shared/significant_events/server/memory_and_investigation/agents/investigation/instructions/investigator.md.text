@@ -62,34 +62,7 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
 
    Report progress: the final hypotheses list (none left `investigating`) and `gaps_found`.
 
-6. **Reassess the significant event.** Only when the kickoff "Additional context" contains a
-   significant event (`event_uuid`). Its `severity`, `summary`, and `status` are the triage
-   verdict, formed before this investigation ran. Compare what you actually confirmed against each,
-   and propose changes via the `significant_event_updates` array — one entry per field that should
-   change, each identified by its `field` (`severity`, `summary`, or `status`):
-
-   - **severity** — compare the confirmed scope (whether the affected operation still completes,
-     confirmation status) against the tier definitions on the field's `to` output; it can move up
-     or down across the full range.
-   - **summary** — rewrite it when the investigation shows the triage summary is wrong, incomplete,
-     or over/understates impact.
-   - **status** — set `to: "dismissed"` when the findings establish a false alarm or something no
-     longer relevant, `to: "closed"` when recovery is confirmed, `to: "open"` to re-open a
-     previously closed/dismissed event on new evidence.
-
-   For each entry set `from` to the corresponding value from "Additional context" (the triage
-   verdict you are revising) and `to` to the proposed new value; `reason` is one or two sentences
-   tying the change to the deciding findings; `evidence` lists 1–10 entries, each with a
-   `description` of the observation and, when it came from a query you ran, the exact `esql_query`
-   verbatim. Include an entry only when that field should change — omit fields that are already
-   right, and omit the whole array when nothing should change. The changes are applied
-   automatically after the investigation, so only propose what the listed evidence can defend.
-
-   Report progress: the full state, now including any proposed `significant_event_updates` (or
-   without the array when the triage verdict stands). Skip this step entirely — and never emit
-   `significant_event_updates` — when there is no significant-event context.
-
-7. **Recommend next steps.** Based on the confirmed root cause and its mechanism, write `conclusion`
+6. **Recommend next steps.** Based on the confirmed root cause and its mechanism, write `conclusion`
    as markdown with a **Conclusion** section and a **Next Steps** section — see <results_format> for
    the exact structure and examples.
 
@@ -192,8 +165,7 @@ not end the investigation. Keep working after calling it.
   `status` (`investigating`, `dismissed`, or `confirmed`), plus a `reason` once it's `dismissed` or
   `confirmed` — a single sentence carrying the deciding observation. Pack ids, counts, and dates
   into that one sentence (and into `candidate`) instead of adding more sentences.
-- `conclusion` / `gaps_found` / `significant_event_updates`: leave unset until steps 5–7 populate
-  them.
+- `conclusion` / `gaps_found`: leave unset until steps 5 and 6 populate them.
 
 **Example — after step 1 (memories loaded, nothing else done yet):**
 
@@ -256,7 +228,7 @@ not end the investigation. Keep working after calling it.
 }
 ```
 
-**Example — after step 7 (final; this is also the shape of your final structured output):**
+**Example — after step 6 (final; this is also the shape of your final structured output):**
 
 ```json
 {
@@ -284,20 +256,6 @@ not end the investigation. Keep working after calling it.
   "conclusion": "## Conclusion\nThe 14:02 deploy reduced the connection pool's max size, and checkout-service exhausted the smaller pool under normal load.\n\n## Next Steps\n- Revert the pool-size config change, or raise it back above the previous value:\n  ```yaml\n  connection_pool:\n    max_size: 100\n  ```\n- Add an alert on connection pool utilization exceeding 80% to catch this earlier.",
   "gaps_found": [
     "No profiling data available for the checkout-service process during the incident window."
-  ],
-  "significant_event_updates": [
-    {
-      "field": "severity",
-      "from": "60-high",
-      "to": "80-critical",
-      "reason": "Checkout is fully blocked for every user who reaches it, not intermittently degraded as triaged.",
-      "evidence": [
-        {
-          "description": "Zero successful checkout completions and a 100% error rate on the checkout path during the incident window.",
-          "esql_query": "FROM traces | WHERE service.name == \"checkout-service\" AND @timestamp >= \"2026-07-28T14:00:00Z\" | STATS total = COUNT(*), failures = COUNT(*) WHERE event.outcome == \"failure\""
-        }
-      ]
-    }
   ]
 }
 ```
@@ -369,12 +327,5 @@ been reporting via `investigation_progress_report`:
 - **gaps_found**: Actionable knowledge gaps discovered during the investigation — data sources
   that were missing or inaccessible and would have helped diagnose the issue (e.g. "No traces
   available for the cart service"), not incident-specific facts (e.g. "the pod crashed").
-- **significant_event_updates**: Optional — only when investigating a significant event whose
-  context included `severity`/`summary`/`status`, and only for the fields your findings show are
-  wrong (see step 6 in <workflow>). An array with one entry per changed field, each carrying its
-  `field`, `from` (the triage value), `to` (the proposed value), a `reason` tied to the deciding
-  findings, and a non-empty `evidence` list. The changes are applied automatically, so include an
-  entry only when the listed evidence can defend it, and omit the array when the triage verdict
-  stands.
 
 </output_format>

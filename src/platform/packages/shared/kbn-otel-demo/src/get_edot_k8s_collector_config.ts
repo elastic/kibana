@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { stringify } from 'yaml';
+import yaml from 'js-yaml';
 import { getEdotCollectorConfig } from '@kbn/edot-collector';
 
 /**
@@ -345,5 +345,5 @@ export function getEdotK8sCollectorConfig({
     exporters: ['elasticsearch', 'debug'],
   };
 
-  return stringify(base);
+  return yaml.dump(base);
 }

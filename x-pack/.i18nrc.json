@@ -93,7 +93,7 @@
     ],
     "xpack.monitoring": ["platform/plugins/private/monitoring"],
     "xpack.observability": "solutions/observability/plugins/observability",
-    "xpack.nightshift": "solutions/observability/plugins/nightshift",
+    "xpack.nightshift": "solutions/observability/packages/kbn-nightshift",
     "xpack.observabilityAgentBuilder": "solutions/observability/plugins/observability_agent_builder",
     "xpack.observabilityAiAssistant": [
       "platform/plugins/shared/observability_ai_assistant",
@@ -146,7 +146,6 @@
     "xpack.sharedComponents": "platform/packages/shared/kbn-shared-components",
     "xpack.changeHistoryUi": "platform/packages/shared/kbn-change-history-ui",
     "xpack.significantEvents": ["platform/plugins/shared/significant_events"],
-    "xpack.significantEventsApp": ["platform/plugins/shared/significant_events_app"],
     "xpack.streams": ["platform/plugins/shared/streams_app"],
     "xpack.slo": "solutions/observability/plugins/slo",
     "xpack.snapshotRestore": "platform/plugins/private/snapshot_restore",

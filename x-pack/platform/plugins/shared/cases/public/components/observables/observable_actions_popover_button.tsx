@@ -99,7 +99,6 @@ export const ObservableActionsPopoverButton: React.FC<{
   return (
     <>
       <EuiPopover
-        aria-label={i18n.OBSERVABLE_ACTIONS}
         id={`cases-observables-popover-${observable.id}`}
         key={`cases-observables-popover-${observable.id}`}
         data-test-subj={`cases-observables-popover-${observable.id}`}

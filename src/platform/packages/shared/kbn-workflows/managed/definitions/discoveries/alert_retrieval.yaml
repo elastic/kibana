@@ -5,8 +5,8 @@ description: |
   This is the DEFAULT alert retrieval workflow - for custom alert retrieval, create your own workflow.
 enabled: true
 tags:
-  - attack-discovery
-  - security
+  - Attack discovery
+  - Security
   - attackDiscovery:default_alert_retrieval
 
 triggers:

@@ -202,40 +202,4 @@ describe('ExecutionHistorySearchBar — rule filter combobox', () => {
       );
     });
   });
-
-  describe('when showRuleFilter is false', () => {
-    it('hides the rule filter combobox but keeps search and outcome filter', () => {
-      render(
-        <I18nProvider>
-          <ExecutionHistorySearchBar
-            onSearchChange={jest.fn()}
-            outcome="all"
-            onOutcomeChange={jest.fn()}
-            showRuleFilter={false}
-          />
-        </I18nProvider>
-      );
-
-      expect(screen.queryByTestId('executionHistoryRuleFilter')).not.toBeInTheDocument();
-      expect(screen.getByTestId('executionHistorySearchBar')).toBeInTheDocument();
-      expect(screen.getByTestId('executionHistoryOutcomeFilter')).toBeInTheDocument();
-    });
-
-    it('disables the rules fetch even when the user can read rules', () => {
-      render(
-        <I18nProvider>
-          <ExecutionHistorySearchBar
-            onSearchChange={jest.fn()}
-            outcome="all"
-            onOutcomeChange={jest.fn()}
-            showRuleFilter={false}
-          />
-        </I18nProvider>
-      );
-
-      expect(mockUseFetchRules).toHaveBeenLastCalledWith(
-        expect.objectContaining({ enabled: false })
-      );
-    });
-  });
 });

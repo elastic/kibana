@@ -8,10 +8,7 @@
 import * as i18n from './translations';
 import { ALERTS, EVENTS } from '../../common/translations';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { useCasesConfig } from '../../common/lib/kibana';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
-import { getExtendedFieldColumnKey } from './extended_field_columns';
-import { useGlobalInlineFields } from './hooks/use_global_inline_fields';
 
 export type CasesColumnsConfiguration = Record<
   string,
@@ -27,13 +24,9 @@ export const useCasesColumnsConfiguration = (
   isSelectorView?: boolean
 ): CasesColumnsConfiguration => {
   const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
-  const { templatesEnabled } = useCasesConfig();
   const {
     data: { customFields },
   } = useGetCaseConfiguration();
-  // With templates v2, columns come from global field definitions (extended fields), not the
-  // legacy customFields config — this surfaces new global fields and reads live migrated values.
-  const { globalInlineFields } = useGlobalInlineFields({ enabled: templatesEnabled });
 
   const canDisplayDefault = true;
 
@@ -118,27 +111,15 @@ export const useCasesColumnsConfiguration = (
     },
   };
 
-  if (templatesEnabled) {
-    globalInlineFields.forEach((field) => {
-      const key = getExtendedFieldColumnKey(field);
-      result[key] = {
-        field: key,
-        name: field.label ?? field.name,
-        canDisplay: canDisplayDefault && !isSelectorView,
-        isCheckedDefault: false,
-      };
-    });
-  } else {
-    // we need to extend the configuration with the customFields
-    customFields.forEach(({ key, label }) => {
-      result[key] = {
-        field: key,
-        name: label,
-        canDisplay: canDisplayDefault && !isSelectorView,
-        isCheckedDefault: false,
-      };
-    });
-  }
+  // we need to extend the configuration with the customFields
+  customFields.forEach(({ key, label }) => {
+    result[key] = {
+      field: key,
+      name: label,
+      canDisplay: canDisplayDefault && !isSelectorView,
+      isCheckedDefault: false,
+    };
+  });
 
   return result;
 };

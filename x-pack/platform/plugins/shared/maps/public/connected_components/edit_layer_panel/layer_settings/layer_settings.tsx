@@ -9,6 +9,7 @@ import type { ChangeEvent } from 'react';
 import React, { Fragment } from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
+  EuiCallOut,
   EuiText,
   EuiTitle,
   EuiPanel,
@@ -22,7 +23,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
-import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { Attribution } from '../../../../common/descriptor_types';
 import { AUTOSELECT_EMS_LOCALE, NO_EMS_LOCALE, MAX_ZOOM } from '../../../../common/constants';
 import { AlphaSlider } from '../../../components/alpha_slider';
@@ -243,11 +243,12 @@ export function LayerSettings(props: Props) {
   const renderLayerGroupInstructions = () => {
     return isLayerGroup(props.layer) ? (
       <>
-        <KbnInfoCallout
+        <EuiCallOut
           announceOnMount
           title={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerGroupCalloutTitle', {
             defaultMessage: 'Drag layers in and out of the group',
           })}
+          iconType="layers"
         >
           <EuiText>
             <ul>
@@ -269,7 +270,7 @@ export function LayerSettings(props: Props) {
               </li>
             </ul>
           </EuiText>
-        </KbnInfoCallout>
+        </EuiCallOut>
         <EuiSpacer size="m" />
       </>
     ) : null;

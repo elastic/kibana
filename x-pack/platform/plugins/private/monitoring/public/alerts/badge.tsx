@@ -108,7 +108,6 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
 
   return (
     <EuiPopover
-      aria-label={PANEL_TITLE}
       id="monitoringAlertMenu"
       button={button}
       isOpen={showPopover === true}

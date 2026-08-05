@@ -19,6 +19,8 @@ import type {
   StreamsProcessingSavedProps,
   StreamsRetentionChangedProps,
   StreamsSchemaUpdatedProps,
+  StreamsSignificantEventsCreatedProps,
+  StreamsSignificantEventsSuggestionsGeneratedEventProps,
   WiredStreamsStatusChangedProps,
   StreamsFeatureIdentificationSavedProps,
   StreamsFeatureIdentificationDeletedProps,
@@ -289,6 +291,80 @@ const streamsSchemaUpdatedSchema: RootSchema<StreamsSchemaUpdatedProps> = {
   },
 };
 
+const streamsSignificantEventsSuggestionsGeneratedSchema: RootSchema<StreamsSignificantEventsSuggestionsGeneratedEventProps> =
+  {
+    duration_ms: {
+      type: 'long',
+      _meta: {
+        description:
+          'The time (in milliseconds) it took to generate significant events suggestions',
+      },
+    },
+    input_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of input tokens used for the generation request',
+      },
+    },
+    output_tokens_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of output tokens used for the generation request',
+      },
+    },
+    count: {
+      type: 'long',
+      _meta: {
+        description: 'The number of significant event queries generated',
+      },
+    },
+    features_selected: {
+      type: 'long',
+      _meta: {
+        description: 'The number of features selected for generation',
+      },
+    },
+    features_total: {
+      type: 'long',
+      _meta: {
+        description: 'The number of total features available for generation',
+      },
+    },
+    stream_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the stream: wired or classic',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+  };
+
+const streamsSignificantEventsCreatedSchema: RootSchema<StreamsSignificantEventsCreatedProps> = {
+  count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of significant events created',
+    },
+  },
+  stream_type: {
+    type: 'keyword',
+    _meta: {
+      description: 'The type of the stream: wired or classic',
+    },
+  },
+  stream_name: {
+    type: 'keyword',
+    _meta: {
+      description: 'The name of the Stream',
+    },
+  },
+};
+
 const streamsFeatureIdentificationSavedSchema: RootSchema<StreamsFeatureIdentificationSavedProps> =
   {
     count: {
@@ -424,6 +500,8 @@ export {
   streamsProcessingSavedSchema,
   streamsChildStreamCreatedSchema,
   streamsSchemaUpdatedSchema,
+  streamsSignificantEventsSuggestionsGeneratedSchema,
+  streamsSignificantEventsCreatedSchema,
   wiredStreamsStatusChangedSchema,
   streamsFeatureIdentificationSavedSchema,
   streamsFeatureIdentificationDeletedSchema,

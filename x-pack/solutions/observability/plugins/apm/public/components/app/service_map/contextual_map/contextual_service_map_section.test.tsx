@@ -14,8 +14,6 @@ import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import type { ContextualServiceMapSectionProps } from './contextual_service_map_section';
 import { ContextualServiceMapSection } from './contextual_service_map_section';
-import { APM_EBT_ACTIONS } from '../../ebt_constants';
-import { SERVICE_MAP_EBT_ELEMENTS } from '../ebt_constants';
 
 jest.mock('../../../../embeddable/service_map/service_map_embeddable', () => ({
   ServiceMapEmbeddable: () => <div data-test-subj="mockServiceMapEmbeddable" />,
@@ -78,18 +76,6 @@ describe('ContextualServiceMapSection', () => {
     expect(screen.getByTestId('apmContextualServiceMapExploreInServiceMap')).toBeInTheDocument();
     expect(screen.getByTestId('contextualServiceMapControls')).toBeInTheDocument();
     expect(screen.getByTestId('mockServiceMapEmbeddable')).toBeInTheDocument();
-  });
-
-  it('instruments the Explore in Service map link with EBT click attributes', () => {
-    renderSection();
-
-    const exploreLink = screen.getByTestId('apmContextualServiceMapExploreInServiceMap');
-    expect(exploreLink).toHaveAttribute('data-ebt-action', APM_EBT_ACTIONS.EXPLORE_SERVICE_MAP);
-    expect(exploreLink).toHaveAttribute(
-      'data-ebt-element',
-      SERVICE_MAP_EBT_ELEMENTS.SECTION_HEADER_LINK
-    );
-    expect(exploreLink).not.toHaveAttribute('data-ebt-detail');
   });
 
   it('passes filterPills through to the Explore in Service map URL', () => {

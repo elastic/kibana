@@ -36,7 +36,6 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/css-utils'
   - '@kbn/field-formats-common'
-  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

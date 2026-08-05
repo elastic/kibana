@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleQuery } from '../../../form/types';
 import { QueryBlock, QuerySummary } from '../query_summary';
-import { splitResultToRuleQuery } from '../use_heuristic_split';
 
 /**
  * Read-only summary of the applied ES|QL query on step 1. The heuristic split
@@ -30,11 +29,6 @@ export type EsqlSummaryState =
 /**
  * Derives the summary state from the committed query. Callout priority is
  * encoded by the branch order: empty → split failed → no alert condition.
- *
- * For standalone queries the outcome is derived by running the same heuristic
- * split on the breach query text. A standalone rule whose query already contains
- * a filtering condition returns 'success' so that no false "No alert condition"
- * callout appears (e.g. a rule like `FROM ... | WHERE c > 3` stored as standalone).
  */
 export const getEsqlSummaryState = (
   queryCommitted: boolean,
@@ -42,8 +36,9 @@ export const getEsqlSummaryState = (
 ): EsqlSummaryState => {
   if (!queryCommitted) return 'before_apply';
 
+  // A standalone alert query has no separate alert condition — every row is a breach.
   if (query.format === 'standalone') {
-    return splitResultToRuleQuery(query.breach.query).outcome;
+    return query.breach.query.trim().length > 0 ? 'no_alert_condition' : 'empty';
   }
 
   const hasBase = query.base.trim().length > 0;
@@ -102,6 +97,32 @@ const EmptyCallout: React.FC = () => (
   </EuiCallOut>
 );
 
+interface SplitFailedCalloutProps {
+  onManualSplit?: () => void;
+}
+
+const SplitFailedCallout: React.FC<SplitFailedCalloutProps> = ({ onManualSplit }) => (
+  <EuiCallOut
+    announceOnMount={false}
+    size="s"
+    color="primary"
+    iconType="info"
+    data-test-subj="esqlSummarySplitFailedCallout"
+    title={i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.splitFailedCalloutTitle', {
+      defaultMessage: "Couldn't automatically separate base query from alert condition.",
+    })}
+  >
+    {onManualSplit && (
+      <EuiButton size="s" onClick={onManualSplit} data-test-subj="esqlSummarySeparateManually">
+        {i18n.translate(
+          'xpack.alertingV2.composeDiscover.esqlSummary.separateManuallyButtonLabel',
+          { defaultMessage: 'Separate base and alert' }
+        )}
+      </EuiButton>
+    )}
+  </EuiCallOut>
+);
+
 const NoAlertConditionCallout: React.FC = () => (
   <EuiCallOut
     announceOnMount={false}
@@ -121,8 +142,12 @@ const NoAlertConditionCallout: React.FC = () => (
   </EuiCallOut>
 );
 
-const getSummaryCallout = (state: EsqlSummaryState): React.ReactElement | null => {
+const getSummaryCallout = (
+  state: EsqlSummaryState,
+  onManualSplit?: () => void
+): React.ReactElement | null => {
   if (state === 'empty') return <EmptyCallout />;
+  if (state === 'split_failed') return <SplitFailedCallout onManualSplit={onManualSplit} />;
   if (state === 'no_alert_condition') return <NoAlertConditionCallout />;
   return null;
 };
@@ -133,34 +158,23 @@ interface EsqlQuerySummarySectionProps {
   /** Disables the edit CTA while the sandbox is already open. */
   isEditorOpen: boolean;
   onOpenEditor: () => void;
+  /** When provided, shown as a CTA inside the split-failed callout. */
+  onManualSplit?: () => void;
 }
-
-const QUERY_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.esqlSummary.queryLabel', {
-  defaultMessage: 'Query',
-});
-
-const BASE_QUERY_LABEL = (
-  <FormattedMessage
-    id="xpack.alertingV2.composeDiscover.esqlSummary.baseQueryLabel"
-    defaultMessage="Base query"
-  />
-);
-
-const ALERT_CONDITION_LABEL = (
-  <FormattedMessage
-    id="xpack.alertingV2.composeDiscover.esqlSummary.alertConditionLabel"
-    defaultMessage="Alert condition"
-  />
-);
 
 export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = ({
   query,
   queryCommitted,
   isEditorOpen,
   onOpenEditor,
+  onManualSplit,
 }) => {
   const state = getEsqlSummaryState(queryCommitted, query);
+  // Once a query is committed, the read-only Base query / Alert condition blocks are
+  // always shown (empty ones render "Not defined"); only the pre-Apply state hides them.
   const showBlocks = state !== 'before_apply';
+  const baseQuery = query.format === 'composed' ? query.base : query.breach.query;
+  const alertBlock = query.format === 'composed' ? query.breach.segment : '';
 
   const isEditCta = state !== 'before_apply' && state !== 'empty';
   const ctaLabel = isEditCta
@@ -178,23 +192,33 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
       </EuiText>
       <EuiSpacer size="s" />
 
-      {getSummaryCallout(state)}
+      {getSummaryCallout(state, onManualSplit)}
       {state !== 'success' && state !== 'before_apply' && <EuiSpacer size="m" />}
 
       {showBlocks ? (
-        query.format === 'standalone' ? (
-          <QueryBlock label={QUERY_LABEL} query={query.breach.query} emptyMessage={NOT_DEFINED} />
-        ) : (
-          <>
-            <QueryBlock label={BASE_QUERY_LABEL} query={query.base} emptyMessage={NOT_DEFINED} />
-            <EuiSpacer size="m" />
-            <QueryBlock
-              label={ALERT_CONDITION_LABEL}
-              query={query.breach.segment}
-              emptyMessage={NOT_DEFINED}
-            />
-          </>
-        )
+        <>
+          <QueryBlock
+            label={
+              <FormattedMessage
+                id="xpack.alertingV2.composeDiscover.esqlSummary.baseQueryLabel"
+                defaultMessage="Base query"
+              />
+            }
+            query={baseQuery}
+            emptyMessage={NOT_DEFINED}
+          />
+          <EuiSpacer size="m" />
+          <QueryBlock
+            label={
+              <FormattedMessage
+                id="xpack.alertingV2.composeDiscover.esqlSummary.alertConditionLabel"
+                defaultMessage="Alert condition"
+              />
+            }
+            query={alertBlock}
+            emptyMessage={NOT_DEFINED}
+          />
+        </>
       ) : (
         <QuerySummary query="" emptyMessage={NOT_DEFINED} />
       )}

@@ -8,10 +8,7 @@
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import {
   CASE_ATTACH_EVENTS_EVENT_TYPE,
-  CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE,
   CASE_PAGE_VIEW_EVENT_TYPE,
-  CASE_VIEW_ATTACH_BUTTON_CLICKED_EVENT_TYPE,
-  CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE,
   CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE,
   CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE,
   CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE,
@@ -105,68 +102,6 @@ export const registerAnalytics = ({
         type: 'keyword',
         _meta: {
           description: 'Which attachments type the opened accordion renders',
-          optional: false,
-        },
-      },
-    },
-  });
-
-  analyticsService.registerEventType({
-    eventType: CASE_VIEW_ATTACH_BUTTON_CLICKED_EVENT_TYPE,
-    schema: {
-      owner: {
-        type: 'keyword',
-        _meta: {
-          description: 'The solution ID (owner) in which the attach button was clicked',
-          optional: false,
-        },
-      },
-      attach_location: {
-        type: 'keyword',
-        _meta: {
-          description:
-            'Where the attach button was clicked, either "activity" or "attachments" tab',
-          optional: false,
-        },
-      },
-    },
-  });
-
-  analyticsService.registerEventType({
-    eventType: CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE,
-    schema: {
-      owner: {
-        type: 'keyword',
-        _meta: {
-          description: 'The solution ID (owner) in which the attach menu item was clicked',
-          optional: false,
-        },
-      },
-      attachment_type: {
-        type: 'keyword',
-        _meta: {
-          description:
-            'The attach menu option selected, either "file", "timeline" or "saved_object"',
-          optional: false,
-        },
-      },
-    },
-  });
-
-  analyticsService.registerEventType({
-    eventType: CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE,
-    schema: {
-      owner: {
-        type: 'keyword',
-        _meta: {
-          description: 'The solution ID (owner) in which the markdown editor plugin was clicked',
-          optional: false,
-        },
-      },
-      plugin_type: {
-        type: 'keyword',
-        _meta: {
-          description: 'The markdown editor plugin clicked, either "lens" or "timeline"',
           optional: false,
         },
       },

@@ -288,9 +288,7 @@ function convertCustomFilter(
     ...baseProperties,
     type: ASCODE_FILTER_TYPE.DSL,
     dsl: convertToRawDSL(filter),
-    // Emit `field` only for a genuine field name (set via `meta.field`), not `meta.key`,
-    // which for custom/DSL filters is the "query" wrapper key artifact, not a field.
-    ...(meta?.field ? { field: meta.field } : {}),
+    ...(meta?.field || meta?.key ? { field: meta.field || meta.key } : {}),
     // Only preserve params for non-combined filters (combined filters use params differently)
     ...(meta?.params && meta?.type !== 'combined' ? { params: meta.params } : {}),
   };

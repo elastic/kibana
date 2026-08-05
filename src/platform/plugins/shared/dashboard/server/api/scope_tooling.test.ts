@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 import { stripUnmappedKeys } from './scope_tooling';
 import type { DashboardState } from './types';
 
@@ -29,7 +29,7 @@ describe('stripUnmappedKeys', () => {
     mockGetTransforms.mockImplementation((type: string) => {
       if (type === 'typeWithSchema' || type === 'pinnedTypeWithSchema') {
         return {
-          schema: z.any(),
+          schema: schema.any(),
         };
       }
     });
@@ -126,8 +126,8 @@ describe('stripUnmappedKeys', () => {
   it('should not drop mapped panel types', () => {
     mockGetTransforms.mockImplementation(() => {
       return {
-        schema: z.object({
-          foo: z.string(),
+        schema: schema.object({
+          foo: schema.string(),
         }),
       };
     });
@@ -214,7 +214,7 @@ describe('stripUnmappedKeys', () => {
   it('should drop unmapped panel types when throwOnUnmappedPanel throws', () => {
     mockGetTransforms.mockImplementation(() => {
       return {
-        schema: z.any(),
+        schema: schema.any(),
         throwOnUnmappedPanel: () => {
           throw new Error('Unmapped panel type');
         },

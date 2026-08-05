@@ -8,19 +8,12 @@
 import { useCallback, useMemo } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import produce from 'immer-v9';
-import { i18n } from '@kbn/i18n';
 import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
 
 import { queryKeys } from '../query_keys';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useNavigation } from './use_navigation';
-import { useToasts } from './use_toasts';
 import { appPaths } from '../utils/app_paths';
-
-const pinnedUpdateErrorTitle = i18n.translate(
-  'xpack.agentBuilder.conversations.pinnedUpdateError',
-  { defaultMessage: 'Failed to update pin status' }
-);
 
 interface UseConversationListMutationsParams {
   routeConversationId: string | undefined;
@@ -34,7 +27,6 @@ export const useConversationListMutations = ({
   const queryClient = useQueryClient();
   const { conversationsService } = useAgentBuilderServices();
   const { navigateToAgentBuilderUrl } = useNavigation();
-  const { addErrorToast } = useToasts();
 
   const deleteConversation = useCallback(
     async (conversationId: string) => {
@@ -74,14 +66,6 @@ export const useConversationListMutations = ({
 
   const listQueryKey = useMemo(() => queryKeys.conversations.byAgent(agentId), [agentId]);
 
-  const rollbackConversationCaches = useCallback(
-    (conversationId: string) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.byId(conversationId) });
-      queryClient.invalidateQueries({ queryKey: listQueryKey });
-    },
-    [queryClient, listQueryKey]
-  );
-
   const updateReadStatus = useCallback(
     (conversationId: string, read: boolean) => {
       queryClient.setQueryData<Conversation>(
@@ -105,10 +89,11 @@ export const useConversationListMutations = ({
       });
 
       conversationsService.updateReadStatus({ conversationId, read }).catch(() => {
-        rollbackConversationCaches(conversationId);
+        queryClient.invalidateQueries({ queryKey: queryKeys.conversations.byId(conversationId) });
+        queryClient.invalidateQueries({ queryKey: listQueryKey });
       });
     },
-    [conversationsService, queryClient, listQueryKey, rollbackConversationCaches]
+    [conversationsService, queryClient, listQueryKey]
   );
 
   const markAsRead = useCallback(
@@ -121,59 +106,8 @@ export const useConversationListMutations = ({
     [updateReadStatus]
   );
 
-  const updatePinnedStatus = useCallback(
-    (conversationId: string, pinned: boolean) => {
-      const now = new Date().toISOString();
-
-      queryClient.setQueryData<Conversation>(
-        queryKeys.conversations.byId(conversationId),
-        (current) => {
-          if (!current) return current;
-          return produce(current, (draft) => {
-            draft.pinned = pinned;
-            draft.updated_at = now;
-          });
-        }
-      );
-
-      queryClient.setQueryData<ConversationWithoutRounds[]>(listQueryKey, (current) => {
-        if (!current) return current;
-        return produce(current, (draft) => {
-          const conv = draft.find((c) => c.id === conversationId);
-          if (conv) {
-            conv.pinned = pinned;
-            conv.updated_at = now;
-          }
-        });
-      });
-
-      conversationsService.updatePinnedStatus({ conversationId, pinned }).catch(() => {
-        rollbackConversationCaches(conversationId);
-        addErrorToast({ title: pinnedUpdateErrorTitle });
-      });
-    },
-    [conversationsService, queryClient, listQueryKey, rollbackConversationCaches, addErrorToast]
-  );
-
-  const markAsPinned = useCallback(
-    (conversationId: string) => updatePinnedStatus(conversationId, true),
-    [updatePinnedStatus]
-  );
-
-  const markAsUnpinned = useCallback(
-    (conversationId: string) => updatePinnedStatus(conversationId, false),
-    [updatePinnedStatus]
-  );
-
   return useMemo(
-    () => ({
-      deleteConversation,
-      renameConversation,
-      markAsRead,
-      markAsUnread,
-      markAsPinned,
-      markAsUnpinned,
-    }),
-    [deleteConversation, renameConversation, markAsRead, markAsUnread, markAsPinned, markAsUnpinned]
+    () => ({ deleteConversation, renameConversation, markAsRead, markAsUnread }),
+    [deleteConversation, renameConversation, markAsRead, markAsUnread]
   );
 };

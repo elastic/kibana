@@ -36,8 +36,9 @@ import { resolveVersionId } from './resolve_version_id';
  * here (instead of on the config schema as a `defaultValue`) so the
  * `registryUrl` / `bundlePath` mutual-exclusion validator can distinguish "user
  * set this" from "schema defaulted it".
+ * TODO: pointing to staging as a temporary/experimental measure, change to https://workflows.elastic.co/library/v1 when the feature is enabled in production.
  */
-const DEFAULT_LIBRARY_REGISTRY_URL = 'https://workflows.elastic.co/library/v1';
+const DEFAULT_LIBRARY_REGISTRY_URL = 'https://workflows-staging.elastic.co/library/v1';
 const DEFAULT_RETRY_OPTIONS = { retries: 3, factor: 2, minTimeout: 200 };
 /**
  * Per-request timeout (ms) applied to each individual attempt. Bounds a single

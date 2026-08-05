@@ -32,15 +32,10 @@ interface GetCurrentProfileAttributes extends BasicAttributes {
   fakeRequestProfileResolution?: boolean;
 }
 
-interface OAuthTokenExchangeAttributes extends BasicAttributes {
-  errorType?: string;
-}
-
 export type SecurityTelemetryAttributes = Partial<BasicAttributes> &
   Partial<PrivilegeRegistrationAttributes> &
   Partial<UserAuthenticationAttributes> &
-  Partial<GetCurrentProfileAttributes> &
-  Partial<OAuthTokenExchangeAttributes>;
+  Partial<GetCurrentProfileAttributes>;
 
 class SecurityTelemetry {
   private readonly meter = metrics.getMeter('kibana.security');
@@ -169,7 +164,6 @@ class SecurityTelemetry {
       profileActivationRequired,
       apiKeyRetrievalRequired,
       fakeRequestProfileResolution,
-      errorType,
       ...rest
     } = attributes;
 
@@ -187,7 +181,6 @@ class SecurityTelemetry {
       ...(fakeRequestProfileResolution
         ? { 'profile.get_current.fake_request_profile_resolution': fakeRequestProfileResolution }
         : {}),
-      ...(errorType ? { 'oauth.error.type': errorType } : {}),
       ...rest,
     };
 
@@ -238,12 +231,8 @@ class SecurityTelemetry {
     this.getCurrentProfileIdCounter.add(1, transformedAttributes);
   };
 
-  recordOAuthTokenExchangeAttempt = (
-    duration: number,
-    attributes: OAuthTokenExchangeAttributes
-  ) => {
-    const transformedAttributes =
-      this.transformAttributes<OAuthTokenExchangeAttributes>(attributes);
+  recordOAuthTokenExchangeAttempt = (duration: number, attributes: BasicAttributes) => {
+    const transformedAttributes = this.transformAttributes<BasicAttributes>(attributes);
     this.oauthTokenExchangeAttempts.add(1, transformedAttributes);
     this.oauthTokenExchangeDuration.record(duration, transformedAttributes);
   };

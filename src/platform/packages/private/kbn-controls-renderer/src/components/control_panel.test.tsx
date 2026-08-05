@@ -8,20 +8,18 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import { OPTIONS_LIST_CONTROL, DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
+import {
+  registerEmbeddablePublicDefinition,
+  type EmbeddablePublicDefinition,
+} from '@kbn/embeddable-plugin/public/react_embeddable_system';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 
 import type { ControlsRendererParentApi } from '../types';
 import { ControlPanel } from './control_panel';
-
-// Stub the async embeddable renderer: the width/grow assertions read classes that
-// `ControlPanel` renders synchronously from props, independent of the renderer.
-jest.mock('@kbn/embeddable-plugin/public', () => ({
-  EmbeddableRenderer: () => null,
-}));
 
 const mockServices = {
   services: {
@@ -50,13 +48,39 @@ const parentApi = {
   registerChildApi: jest.fn(),
 } as unknown as ControlsRendererParentApi;
 
-describe('render', () => {
+const mockOptionsListFactory: EmbeddablePublicDefinition<{ type: typeof OPTIONS_LIST_CONTROL }> = {
+  type: OPTIONS_LIST_CONTROL,
+  buildEmbeddable: async ({ initialState, finalizeApi }) => {
+    const api = finalizeApi({
+      parentApi,
+      serializeState: () => ({
+        type: OPTIONS_LIST_CONTROL,
+      }),
+      anyStateChange$: of(),
+      applySerializedState: () => undefined,
+    });
+    return {
+      Component: () => <div data-test-subj="optionsListControl">Options list control</div>,
+      api,
+    };
+  },
+};
+
+// Failing: See https://github.com/elastic/kibana/issues/273761
+describe.skip('render', () => {
+  beforeAll(() => {
+    registerEmbeddablePublicDefinition(
+      'options_list_control',
+      jest.fn().mockResolvedValue(mockOptionsListFactory)
+    );
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('control width', () => {
-    test('should use default medium class + default no flex grow', () => {
+    test('should use default medium class + default no flex grow', async () => {
       const controlPanel = render(
         <ControlPanel
           control={{
@@ -69,12 +93,14 @@ describe('render', () => {
           setControlPanelRef={jest.fn()}
         />
       );
-      const controlFrame = controlPanel.getByTestId('control-frame');
-      expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--medium');
-      expect(controlFrame.getAttribute('class')).toContain('euiFlexItem-growZero');
+      await waitFor(() => {
+        const controlFrame = controlPanel.getByTestId('control-frame');
+        expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--medium');
+        expect(controlFrame.getAttribute('class')).toContain('euiFlexItem-growZero');
+      });
     });
 
-    test('should use small class + flex grow', () => {
+    test('should use small class + flex grow', async () => {
       const controlPanel = render(
         <ControlPanel
           control={{
@@ -88,9 +114,11 @@ describe('render', () => {
           setControlPanelRef={jest.fn()}
         />
       );
-      const controlFrame = controlPanel.getByTestId('control-frame');
-      expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--small');
-      expect(controlFrame.getAttribute('class')).toContain('euiFlexItem-grow');
+      await waitFor(() => {
+        const controlFrame = controlPanel.getByTestId('control-frame');
+        expect(controlFrame.getAttribute('class')).toContain('controlFrameWrapper--small');
+        expect(controlFrame.getAttribute('class')).toContain('euiFlexItem-grow');
+      });
     });
   });
 });

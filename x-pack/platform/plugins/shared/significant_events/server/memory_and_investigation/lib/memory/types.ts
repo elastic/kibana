@@ -141,6 +141,7 @@ export interface MemoryService {
   getByName(params: { name: string }): Promise<MemoryEntry | undefined>;
   update(params: UpdateMemoryParams): Promise<MemoryEntry>;
   delete(params: { id: string; user: string }): Promise<void>;
+  rename(params: { id: string; newName: string; user: string }): Promise<MemoryEntry>;
 
   // Categories
   addCategory(params: { id: string; category: string; user: string }): Promise<MemoryEntry>;

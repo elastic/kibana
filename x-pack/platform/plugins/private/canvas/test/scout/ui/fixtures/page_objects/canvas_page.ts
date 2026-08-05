@@ -237,15 +237,20 @@ export class CanvasPage {
 
   /**
    * Add a new Lens panel by opening the editor menu and clicking the Lens add-panel action,
-   * which launches the Lens editor.
+   * which launches the Lens editor. The action's display name varies by build — "Lens" in
+   * source, "Visualization" in distributables (see `lensVisTypeAlias.title`) — so match either.
    */
   async addNewLensPanel() {
-    await this.addNewPanel('Create visualization');
+    await this.page.testSubj.locator('canvasEditorMenuButton').click();
+    const lensAction = this.page.testSubj
+      .locator('create-action-Lens')
+      .or(this.page.testSubj.locator('create-action-Visualization'));
+    await lensAction.click();
   }
 
   /**
    * Add a new panel of the given type via the canvas editor menu.
-   * @param actionName e.g. 'Create visualization', 'Maps', 'Vega'
+   * @param actionName e.g. 'Visualization', 'Maps', 'Vega'
    */
   async addNewPanel(actionName: string) {
     await this.page.testSubj.locator('canvasEditorMenuButton').click();

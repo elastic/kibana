@@ -7,6 +7,7 @@
 
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import type { Exception } from '../objects/exception';
+import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../screens/breadcrumbs';
 import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 import { RULE_STATUS } from '../screens/create_new_rule';
 import {
@@ -178,6 +179,10 @@ export const waitForTheRuleToBeExecuted = () => {
       .invoke('text')
       .then((ruleStatus) => ruleStatus === 'succeeded');
   });
+};
+
+export const goBackToRulesTable = () => {
+  cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
 };
 
 export const getDetails = (title: string | RegExp) =>

@@ -23,7 +23,7 @@ export const useFetchQueryRulesetExist = (
     queryKey: [QUERY_RULES_QUERY_RULESET_EXISTS_KEY, rulesetId],
     queryFn: async () => {
       const { exists } = await http.get<{ exists: boolean }>(
-        `/internal/search_query_rules/ruleset/${encodeURIComponent(rulesetId)}/exists`
+        `/internal/search_query_rules/ruleset/${rulesetId}/exists`
       );
       if (!exists && onNoConflict) {
         onNoConflict();

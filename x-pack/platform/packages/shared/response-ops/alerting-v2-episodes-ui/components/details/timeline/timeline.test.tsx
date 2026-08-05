@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
+import type { EpisodeActionHistoryEntry } from '../../../queries/episode_actions_history_query';
 import type { ActionEntry, StateChangeEntry, TimelineEntry } from './entries';
 import { AlertEpisodeTimeline } from './timeline';
 

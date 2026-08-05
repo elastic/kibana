@@ -22,7 +22,7 @@ import { useContentListState } from './use_content_list_state';
  *   const { items, isLoading, isFetching, error, hasNoItems, hasNoResults, refetch } = useContentListItems();
  *
  *   if (isLoading) return <EuiLoadingSpinner />;
- *   if (error) return <ErrorCallout color="danger" title={error.message} />;
+ *   if (error) return <EuiCallOut color="danger">{error.message}</EuiCallOut>;
  *
  *   return (
  *     <ul>

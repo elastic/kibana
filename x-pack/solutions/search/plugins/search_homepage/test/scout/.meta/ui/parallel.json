@@ -1,9 +1,5 @@
 {
-  "sha1": "ff6b41e8d8893740d98e31db8b2426694fc0fee4",
-  "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
-  ],
+  "sha1": "a130c2014eea409a4fce18c4450d7bb04060eaac",
   "tests": [
     {
       "id": "926362ac9e9161a-ce96c191932cf3e",
@@ -15,8 +11,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin_serverless.spec.ts",
-        "line": 15,
-        "column": 16
+        "line": 21,
+        "column": 7
       }
     },
     {
@@ -31,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 19,
-        "column": 16
+        "line": 24,
+        "column": 9
       }
     },
     {
@@ -47,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 24,
-        "column": 10
+        "line": 29,
+        "column": 9
       }
     },
     {
@@ -63,8 +59,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 29,
-        "column": 60
+        "line": 39,
+        "column": 9
       }
     },
     {
@@ -79,8 +75,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 42,
-        "column": 22
+        "line": 56,
+        "column": 9
       }
     },
     {
@@ -95,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 57,
-        "column": 13
+        "line": 81,
+        "column": 9
       }
     },
     {
@@ -111,8 +107,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 63,
-        "column": 25
+        "line": 89,
+        "column": 9
       }
     },
     {
@@ -127,8 +123,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 75,
-        "column": 10
+        "line": 105,
+        "column": 9
       }
     },
     {
@@ -143,8 +139,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 110,
-        "column": 24
+        "line": 144,
+        "column": 9
       }
     },
     {
@@ -159,8 +155,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 117,
-        "column": 23
+        "line": 150,
+        "column": 9
       }
     },
     {
@@ -175,7 +171,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 124,
+        "line": 156,
         "column": 9
       }
     },
@@ -191,8 +187,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 130,
-        "column": 30
+        "line": 165,
+        "column": 9
       }
     },
     {
@@ -207,8 +203,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 138,
-        "column": 58
+        "line": 182,
+        "column": 9
       }
     },
     {
@@ -223,8 +219,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 144,
-        "column": 82
+        "line": 192,
+        "column": 9
       }
     },
     {
@@ -237,8 +233,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_data_management_user.spec.ts",
-        "line": 21,
-        "column": 84
+        "line": 31,
+        "column": 14
       }
     },
     {
@@ -251,8 +247,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_data_management_user.spec.ts",
-        "line": 34,
-        "column": 33
+        "line": 51,
+        "column": 14
       }
     },
     {
@@ -265,8 +261,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer_serverless.spec.ts",
-        "line": 15,
-        "column": 16
+        "line": 21,
+        "column": 7
       }
     },
     {
@@ -281,8 +277,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 19,
-        "column": 16
+        "line": 24,
+        "column": 9
       }
     },
     {
@@ -297,8 +293,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 24,
-        "column": 75
+        "line": 32,
+        "column": 9
       }
     },
     {
@@ -313,8 +309,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 59,
-        "column": 32
+        "line": 66,
+        "column": 9
       }
     },
     {
@@ -329,8 +325,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 62,
-        "column": 26
+        "line": 75,
+        "column": 9
       }
     },
     {
@@ -345,8 +341,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 68,
-        "column": 7
+        "line": 81,
+        "column": 9
       }
     },
     {
@@ -361,8 +357,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 75,
-        "column": 10
+        "line": 87,
+        "column": 9
       }
     },
     {
@@ -377,8 +373,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 88,
-        "column": 24
+        "line": 112,
+        "column": 9
       }
     },
     {
@@ -393,8 +389,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 94,
-        "column": 24
+        "line": 120,
+        "column": 9
       }
     },
     {
@@ -409,8 +405,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 101,
-        "column": 25
+        "line": 136,
+        "column": 9
       }
     },
     {
@@ -425,8 +421,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 111,
-        "column": 13
+        "line": 153,
+        "column": 9
       }
     },
     {
@@ -441,8 +437,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 125,
-        "column": 24
+        "line": 163,
+        "column": 9
       }
     }
   ]

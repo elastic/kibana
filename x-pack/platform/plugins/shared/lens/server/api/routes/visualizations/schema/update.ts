@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 import { lensApiConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils';
 
 import { lensResponseItemSchema } from './common';
 
-export const lensUpdateRequestParamsSchema = z
-  .object({
-    id: z.string().meta({
-      description: 'The visualization identifier, as returned by the create or search endpoints.',
+export const lensUpdateRequestParamsSchema = schema.object(
+  {
+    id: schema.string({
+      meta: {
+        description: 'The visualization identifier, as returned by the create or search endpoints.',
+      },
     }),
-  })
-  .strict();
+  },
+  { unknowns: 'forbid' }
+);
 
 export const lensUpdateRequestBodySchema = lensApiConfigSchemaNoESQL;
 

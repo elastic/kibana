@@ -194,11 +194,11 @@ export class TOCEntry extends Component<Props, State> {
   _renderQuickActions() {
     const quickActions = [
       <EuiToolTip
-        key="toggleVisiblity"
         content={getVisibilityToggleLabel(this.props.layer.isVisible())}
         disableScreenReaderOutput
       >
         <EuiButtonIcon
+          key="toggleVisiblity"
           iconType={getVisibilityToggleIcon(this.props.layer.isVisible())}
           aria-label={getVisibilityToggleLabel(this.props.layer.isVisible())}
           onClick={this._toggleVisible}
@@ -208,8 +208,9 @@ export class TOCEntry extends Component<Props, State> {
 
     if (this.state.supportsFitToBounds) {
       quickActions.push(
-        <EuiToolTip key="fitToBounds" content={FIT_TO_DATA_LABEL} disableScreenReaderOutput>
+        <EuiToolTip content={FIT_TO_DATA_LABEL} disableScreenReaderOutput>
           <EuiButtonIcon
+            key="fitToBounds"
             iconType="maximize"
             aria-label={FIT_TO_DATA_LABEL}
             onClick={this._fitToBounds}
@@ -220,7 +221,7 @@ export class TOCEntry extends Component<Props, State> {
 
     if (!this.props.isReadOnly) {
       quickActions.push(
-        <EuiToolTip key="settings" content={EDIT_LAYER_SETTINGS_LABEL} disableScreenReaderOutput>
+        <EuiToolTip content={EDIT_LAYER_SETTINGS_LABEL} disableScreenReaderOutput>
           <EuiButtonIcon
             key="settings"
             isDisabled={this.props.isEditButtonDisabled}
@@ -232,13 +233,13 @@ export class TOCEntry extends Component<Props, State> {
       );
       quickActions.push(
         <EuiToolTip
-          key="reorder"
           content={i18n.translate('xpack.maps.layerControl.tocEntry.grabButtonTitle', {
             defaultMessage: 'Reorder layer',
           })}
           disableScreenReaderOutput
         >
           <EuiButtonIcon
+            key="reorder"
             iconType="dragVertical"
             aria-label={i18n.translate('xpack.maps.layerControl.tocEntry.grabButtonAriaLabel', {
               defaultMessage: 'Reorder layer',

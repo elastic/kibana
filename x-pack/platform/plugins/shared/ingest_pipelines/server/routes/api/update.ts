@@ -14,7 +14,7 @@ import { pipelineSchema } from './shared';
 const bodySchema = schema.object(pipelineSchema);
 
 const paramsSchema = schema.object({
-  name: schema.string({ maxLength: 1000 }),
+  name: schema.string(),
 });
 
 export const registerUpdateRoute = ({

@@ -66,7 +66,6 @@ export interface InjectedMetadata {
     packageInfo: PackageInfo;
     airgapped: boolean;
     isCoreRenderingInReactConcurrentMode: boolean;
-    exposeNavDependencies?: boolean;
   };
   featureFlags?: {
     overrides: Record<string, unknown>;

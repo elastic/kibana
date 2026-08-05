@@ -21,7 +21,6 @@ dependsOn:
   - '@kbn/developer-examples-plugin'
   - '@kbn/expressions-plugin'
   - '@kbn/i18n'
-  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

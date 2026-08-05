@@ -7,7 +7,6 @@ paths:
   /api/risk_score/history:
     get:
       x-labels: [ess, serverless]
-      x-state: Added in 9.5.0
       x-codegen-enabled: true
       operationId: GetRiskScoreHistory
       summary: Get risk score history for an entity

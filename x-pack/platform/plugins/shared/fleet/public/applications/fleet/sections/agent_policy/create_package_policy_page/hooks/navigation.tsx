@@ -88,6 +88,7 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
       }
       const isAgentless = savedPolicyResult.type === 'agentless';
       const policyIds = isAgentless ? [] : savedPolicyResult.policy.policy_ids;
+      const hasNoAgentPolicies = policyIds.length === 0;
       let onSaveNavigateTo: Parameters<ApplicationStart['navigateToApp']>;
       let onSaveQueryParams: CreatePackagePolicyRouteState['onSaveQueryParams'];
 
@@ -95,8 +96,8 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
         onSaveNavigateTo = routeState.onSaveNavigateTo;
         onSaveQueryParams = routeState?.onSaveQueryParams;
       } else {
-        // If agentless or came from integrations (no policyId in URL), navigate to the integration's policies table
-        if (isAgentless || !queryParamsPolicyId) {
+        // If agentless or no agent policies, navigate to the integration's policies table
+        if ((isAgentless || hasNoAgentPolicies) && !queryParamsPolicyId) {
           onSaveNavigateTo = [
             INTEGRATIONS_PLUGIN_ID,
             {

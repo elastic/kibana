@@ -24,22 +24,22 @@ export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const onToggle = () => setIsExpanded((v) => !v);
 
-  const allRan = steps.every((s) => s.results.length > 0);
+  const allResponded = steps.every((s) => s.results.length > 0);
   const hasError = steps.some((s) => s.results.some(isErrorResult));
 
   const label = (
     <EuiText size="s" color={hasError ? 'danger' : 'inherit'}>
       <p role="status">
-        {allRan ? (
+        {allResponded ? (
           <FormattedMessage
-            id="xpack.agentBuilder.roundEvents.toolCallGroup.ran"
-            defaultMessage="{count, plural, one {# tool ran.} other {# tools ran.}}"
+            id="xpack.agentBuilder.roundEvents.toolCallGroup.responded"
+            defaultMessage="{count, plural, one {# tool responded} other {# tools responded}}"
             values={{ count: steps.length }}
           />
         ) : (
           <FormattedMessage
-            id="xpack.agentBuilder.roundEvents.toolCallGroup.running"
-            defaultMessage="{count, plural, one {# tool running…} other {# tools running…}}"
+            id="xpack.agentBuilder.roundEvents.toolCallGroup.calling"
+            defaultMessage="{count, plural, one {Calling # tool} other {Calling # tools}}"
             values={{ count: steps.length }}
           />
         )}

@@ -15,7 +15,6 @@
     "@kbn/data-views-plugin",
     "@kbn/i18n-react",
     "@kbn/react-kibana-mount",
-    "@kbn/ui-callout",
   ],
   "exclude": [
     "target/**/*"

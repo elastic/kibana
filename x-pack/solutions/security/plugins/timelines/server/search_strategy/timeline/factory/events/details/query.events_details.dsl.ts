@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExpandWildcards, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { JsonObject } from '@kbn/utility-types';
 import type { RunTimeMappings } from '../../../../../../common/api/search_strategy/model/runtime_mappings';
 
@@ -14,13 +14,11 @@ export const buildTimelineDetailsQuery = ({
   id,
   indexName,
   runtimeMappings,
-  includeHiddenIndices = false,
 }: {
   authFilter?: JsonObject;
   id: string;
   indexName: string;
   runtimeMappings: RunTimeMappings;
-  includeHiddenIndices?: boolean;
 }) => {
   const basicFilter = {
     terms: {
@@ -44,11 +42,6 @@ export const buildTimelineDetailsQuery = ({
     allow_no_indices: true,
     index: indexName,
     ignore_unavailable: true,
-    // Only the client-side fallback retry sets `includeHiddenIndices`. It broadens the index name
-    // with a `*` prefix to resolve documents whose backing index was relocated to a searchable-
-    // snapshot tier and remounted as a hidden `restored-`/`partial-` index, and needs hidden indices
-    // included in wildcard expansion to match them.
-    ...(includeHiddenIndices ? { expand_wildcards: ['open', 'hidden'] as ExpandWildcards } : {}),
     query,
     fields: [
       { field: '*', include_unmapped: true },

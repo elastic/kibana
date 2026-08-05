@@ -44,7 +44,7 @@ const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_MANAGEMENT = {
 
 export const SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
-  pluginId: 'significantEvents',
+  pluginId: 'significant_events',
   version: 2,
   billable: false,
   yaml: FEATURES_IDENTIFICATION_YAML,
@@ -53,7 +53,7 @@ export const SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
-  pluginId: 'significantEvents',
+  pluginId: 'significant_events',
   version: 2,
   billable: false,
   yaml: QUERIES_GENERATION_YAML,
@@ -62,7 +62,7 @@ export const SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-  pluginId: 'significantEvents',
+  pluginId: 'significant_events',
   version: 4,
   billable: false,
   yaml: ONBOARDING_YAML,
@@ -71,7 +71,7 @@ export const SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  pluginId: 'significantEvents',
+  pluginId: 'significant_events',
   version: 2,
   billable: false,
   yaml: CONTINUOUS_ONBOARDING_YAML,
@@ -83,7 +83,7 @@ export const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW = {
 // continuous onboarding to preserve the enabled/disabled choice across upgrades.
 export const SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-  pluginId: 'significantEvents',
+  pluginId: 'significant_events',
   version: 1,
   billable: false,
   yaml: SYNC_YAML,

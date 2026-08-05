@@ -9,11 +9,12 @@ import { useMemo } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useInfiniteQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { rowsFromEsql, type EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
 import {
   buildEpisodeActionsHistoryQuery,
   DEFAULT_ACTIONS_HISTORY_PAGE_SIZE,
+  type EpisodeActionHistoryEntry,
 } from '../queries/episode_actions_history_query';
+import { esqlResponseToObjectRows } from '../utils/esql_response_to_rows';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { queryKeys } from '../query_keys';
 import { useSpaceId } from './use_space_id';
@@ -43,19 +44,18 @@ export const useFetchEpisodeActionsHistoryQuery = ({
   const query = useInfiniteQuery({
     queryKey: [...queryKeys.actionsHistory(spaceId, episodeId ?? '', groupHash ?? ''), pageSize],
     queryFn: async ({ signal, pageParam }: { signal?: AbortSignal; pageParam?: string }) => {
-      const esqlQuery = buildEpisodeActionsHistoryQuery(spaceId, episodeId!, groupHash!, {
-        before: pageParam,
-        limit: pageSize,
-      });
       const raw = await runEsqlAsyncSearch({
         data,
         params: {
-          query: esqlQuery.print('basic'),
+          query: buildEpisodeActionsHistoryQuery(spaceId, episodeId!, groupHash!, {
+            before: pageParam,
+            limit: pageSize,
+          }).print('basic'),
           time_zone: 'UTC',
         },
         abortSignal: signal,
       });
-      return rowsFromEsql(esqlQuery, raw);
+      return esqlResponseToObjectRows<EpisodeActionHistoryEntry>(raw);
     },
     getNextPageParam: (lastPage: EpisodeActionHistoryEntry[]) =>
       lastPage.length === pageSize ? lastPage[lastPage.length - 1]['@timestamp'] : undefined,

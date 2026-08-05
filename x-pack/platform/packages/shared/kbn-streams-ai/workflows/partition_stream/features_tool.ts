@@ -7,12 +7,22 @@
 
 import {
   createGetFeatureQueryFromToolArgs,
+  createGetFeatureTypesFromToolArgs,
   createGetStreamFeaturesTool,
   resolveFeatureTypeFilters,
   toFeatureForLlmContext,
+  type GetStreamFeaturesInput,
+  type GetStreamFeaturesQuery,
+  type LlmFeature,
 } from '../../src/features/tool';
 
 export const PARTITION_FEATURE_TOOL_TYPES = ['entity'] as const;
+
+export type PartitionFeatureToolType = (typeof PARTITION_FEATURE_TOOL_TYPES)[number];
+
+export const getFeatureTypesFromToolArgs = createGetFeatureTypesFromToolArgs(
+  PARTITION_FEATURE_TOOL_TYPES
+);
 
 export const getFeatureQueryFromToolArgs = createGetFeatureQueryFromToolArgs(
   PARTITION_FEATURE_TOOL_TYPES
@@ -23,3 +33,4 @@ export const partitionStreamFeaturesTool = createGetStreamFeaturesTool(
 );
 
 export { resolveFeatureTypeFilters, toFeatureForLlmContext };
+export type { GetStreamFeaturesInput, GetStreamFeaturesQuery, LlmFeature };

@@ -89,7 +89,6 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
   return (
     <EuiFlexGroup responsive>
       <EuiPopover
-        aria-label={ariaLabel}
         button={
           emptyButton ? (
             <EuiButtonEmpty
