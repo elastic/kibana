@@ -1138,35 +1138,48 @@ describe('WorkflowExecutionRepository', () => {
   });
 
   describe('tryCasPromoteQueuedWorkflowExecutionToPending', () => {
-    it('uses refresh wait_for so search-based slot counts observe pending before the next drain iteration', async () => {
-      workflowExecutionsDataClient.search.mockResolvedValue(
-        asSearchResponse({
-          hits: {
-            hits: [{ _source: { id: 'exec-1', status: ExecutionStatus.QUEUED } }],
-            total: { value: 1, relation: 'eq' },
-          },
-        })
-      );
-      workflowExecutionsDataClient.bulk.mockResolvedValue(
-        asBulkResponse({ errors: false, items: [{ id: 'exec-1' }] })
-      );
+    it('returns true when the atomic CAS flips queued → pending', async () => {
+      workflowExecutionsDataClient.scriptUpdate.mockResolvedValue({ result: 'updated' });
 
-      await repository.tryCasPromoteQueuedWorkflowExecutionToPending({
+      const result = await repository.tryCasPromoteQueuedWorkflowExecutionToPending({
         workflowExecutionId: 'exec-1',
         spaceId: 'default',
       });
 
-      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith(
+      expect(result).toBe(true);
+      expect(workflowExecutionsDataClient.scriptUpdate).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: 'exec-1',
           refresh: 'wait_for',
-          items: [
-            {
-              operation: 'upsert',
-              document: { id: 'exec-1', status: ExecutionStatus.PENDING },
-            },
-          ],
+          params: expect.objectContaining({
+            queuedStatus: ExecutionStatus.QUEUED,
+            pendingStatus: ExecutionStatus.PENDING,
+            spaceId: 'default',
+          }),
         })
       );
+    });
+
+    it('returns false when the execution is no longer queued (noop)', async () => {
+      workflowExecutionsDataClient.scriptUpdate.mockResolvedValue({ result: 'noop' });
+
+      const result = await repository.tryCasPromoteQueuedWorkflowExecutionToPending({
+        workflowExecutionId: 'exec-1',
+        spaceId: 'default',
+      });
+
+      expect(result).toBe(false);
+    });
+
+    it('returns false when the execution document is not found', async () => {
+      workflowExecutionsDataClient.scriptUpdate.mockResolvedValue({ result: 'not_found' });
+
+      const result = await repository.tryCasPromoteQueuedWorkflowExecutionToPending({
+        workflowExecutionId: 'exec-missing',
+        spaceId: 'default',
+      });
+
+      expect(result).toBe(false);
     });
   });
 });

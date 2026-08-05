@@ -78,8 +78,12 @@ export const getExecutionsByIds = async <TExecution extends { id: string }>({
     }
   }
 
+  const foundIds = new Set(items.map((item) => item.document.id));
+
   return {
     items,
-    missing: response.docs.filter((doc) => !('found' in doc && doc.found)).map((doc) => doc._id),
+    missing: response.docs
+      .filter((doc) => !('found' in doc && doc.found) && !foundIds.has(doc._id))
+      .map((doc) => doc._id),
   };
 };

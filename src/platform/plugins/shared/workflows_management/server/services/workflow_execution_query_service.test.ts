@@ -1331,33 +1331,25 @@ describe('WorkflowExecutionQueryService', () => {
     };
 
     it('issues a scripted partial update guarded on spaceId with refresh: wait_for', async () => {
-      (mockEsClient.update as jest.Mock).mockResolvedValueOnce({ result: 'updated' });
+      mockStepDataClient.scriptUpdate.mockResolvedValueOnce({ result: 'updated' });
 
       const ok = await service.markStepAsResponded('step-exec-1', audit, 'default');
 
       expect(ok).toBe(true);
-      const args = (mockEsClient.update as jest.Mock).mock.calls[0][0] as {
-        index: string;
-        id: string;
-        refresh: string;
-        retry_on_conflict: number;
-        script: { source: string; lang: string; params: Record<string, unknown> };
-      };
-      expect(args.index).toBe(WORKFLOWS_STEP_EXECUTIONS_INDEX);
+      const args = mockStepDataClient.scriptUpdate.mock.calls[0][0];
       expect(args.id).toBe('step-exec-1');
       expect(args.refresh).toBe('wait_for');
-      expect(args.retry_on_conflict).toBeGreaterThan(0);
-      expect(args.script.lang).toBe('painless');
-      expect(args.script.source).toContain('ctx._source.spaceId != params.spaceId');
-      expect(args.script.source).toContain('ctx._source.finishedAt != null');
-      expect(args.script.source).toContain('params.settledStatuses.contains(ctx._source.status)');
-      expect(args.script.source).toContain('ctx._source.hitl.respondedAt != null');
-      expect(args.script.source).toContain('ctx._source.hitl.respondedBy = params.respondedBy');
-      expect(args.script.source).toContain('ctx._source.hitl.respondedAt = params.respondedAt');
-      expect(args.script.source).toContain('ctx._source.hitl.channel = params.channel');
-      expect(args.script.source).toContain('ctx._source.input.remove(params.tokenHashField)');
-      expect(args.script.source).toContain('ctx._source.input.remove(params.tokenExpiresAtField)');
-      expect(args.script.params).toEqual({
+      expect(args.retryOnConflict).toBeGreaterThan(0);
+      expect(args.script).toContain('ctx._source.spaceId != params.spaceId');
+      expect(args.script).toContain('ctx._source.finishedAt != null');
+      expect(args.script).toContain('params.settledStatuses.contains(ctx._source.status)');
+      expect(args.script).toContain('ctx._source.hitl.respondedAt != null');
+      expect(args.script).toContain('ctx._source.hitl.respondedBy = params.respondedBy');
+      expect(args.script).toContain('ctx._source.hitl.respondedAt = params.respondedAt');
+      expect(args.script).toContain('ctx._source.hitl.channel = params.channel');
+      expect(args.script).toContain('ctx._source.input.remove(params.tokenHashField)');
+      expect(args.script).toContain('ctx._source.input.remove(params.tokenExpiresAtField)');
+      expect(args.params).toEqual({
         spaceId: 'default',
         ...audit,
         settledStatuses: expect.arrayContaining([
@@ -1376,23 +1368,17 @@ describe('WorkflowExecutionQueryService', () => {
       // A noop means either the space guard failed or another responder
       // already set hitl.respondedAt. The provider treats both as a conflict
       // and does not schedule a second resume.
-      (mockEsClient.update as jest.Mock).mockResolvedValueOnce({ result: 'noop' });
+      mockStepDataClient.scriptUpdate.mockResolvedValueOnce({ result: 'noop' });
 
       const ok = await service.markStepAsResponded('step-exec-1', audit, 'default');
 
       expect(ok).toBe(false);
     });
 
-    it('returns false (not throws) when the step doc is gone', async () => {
-      (mockEsClient.update as jest.Mock).mockRejectedValueOnce(
-        new errors.ResponseError({
-          statusCode: 404,
-          body: { error: { type: 'document_missing_exception' } },
-          headers: {},
-          meta: {} as any,
-          warnings: [],
-        })
-      );
+    it('returns false when the step doc is gone (not_found result)', async () => {
+      // The data client converts 404 errors to { result: 'not_found' } so this
+      // surfaces as a normal response, not a thrown error.
+      mockStepDataClient.scriptUpdate.mockResolvedValueOnce({ result: 'not_found' });
 
       const ok = await service.markStepAsResponded('step-exec-gone', audit, 'default');
 
@@ -1400,7 +1386,7 @@ describe('WorkflowExecutionQueryService', () => {
     });
 
     it('logs and rethrows on any other ES failure so the caller can decide', async () => {
-      (mockEsClient.update as jest.Mock).mockRejectedValueOnce(new Error('boom'));
+      mockStepDataClient.scriptUpdate.mockRejectedValueOnce(new Error('boom'));
 
       await expect(service.markStepAsResponded('step-exec-1', audit, 'default')).rejects.toThrow(
         'boom'

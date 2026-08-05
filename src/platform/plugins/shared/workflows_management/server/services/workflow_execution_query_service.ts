@@ -829,16 +829,9 @@ export class WorkflowExecutionQueryService {
         },
         refresh: 'wait_for',
       });
-      return response.result !== 'noop';
+      // not_found means the doc was concurrently deleted; treat as a lost claim.
+      return response.result === 'updated';
     } catch (error) {
-      if (
-        error?.statusCode === 404 ||
-        error?.meta?.body?.result === 'not_found' ||
-        error?.body?.result === 'not_found'
-      ) {
-        // Treat concurrent deletion or termination as a lost claim.
-        return false;
-      }
       this.deps.logger.error(
         `Failed to mark step execution ${stepExecutionId} as responded: ${error}`
       );
