@@ -2562,6 +2562,7 @@
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
+    {
       "groupName": "eui-illustrations",
       "matchDepNames": ["@elastic/eui-illustrations"],
       "reviewers": ["team:eui-team"],
