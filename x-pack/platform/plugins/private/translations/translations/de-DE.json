@@ -49754,8 +49754,6 @@
     "xpack.securitySolution.siemReadiness.visibility.retention.title": "Aufbewahrung",
     "xpack.securitySolution.some_page.flyoutCreateSubmitSuccess": "„{name}“ wurde hinzugefügt.",
     "xpack.securitySolution.source.destination.packetsLabel": "Pkte",
-    "xpack.securitySolution.sourcerer.error.title": "Fehler beim Aktualisieren der Security-Datenansicht",
-    "xpack.securitySolution.sourcerer.error.toastMessage": "Aktualisieren Sie die Seite",
     "xpack.securitySolution.stepDefineRule.lastDay": "Letzter Tag",
     "xpack.securitySolution.stepDefineRule.lastHour": "Letzte Stunde",
     "xpack.securitySolution.stepDefineRule.lastMonth": "Vergangener Monat",
