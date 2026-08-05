@@ -43,11 +43,7 @@ export function lazyImmutableGCableObject<T extends object>(factory: () => T): T
     return fresh;
   };
 
-  // self is assigned below; captured in the get trap closure so the alias
-  // step can identify which proxy key to look up in ctx.seen.
-  let self: T;
-
-  self = new Proxy({} as T, {
+  const self: T = new Proxy({} as T, {
     get(_target, prop) {
       const real = materialize() as unknown as Record<PropertyKey, unknown>;
       const value = real[prop];
