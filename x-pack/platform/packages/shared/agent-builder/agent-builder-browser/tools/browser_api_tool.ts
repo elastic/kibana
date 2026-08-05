@@ -9,6 +9,15 @@ import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import { z, type ZodType } from '@kbn/zod/v4';
 
 /**
+ * Context handed to a browser API tool handler alongside the validated parameters.
+ * Populated by the conversation UI running the tool.
+ */
+export interface BrowserApiToolHandlerContext {
+  /** Id of the conversation the tool call belongs to. Undefined for unsaved conversations. */
+  conversationId?: string;
+}
+
+/**
  * Definition of a browser API tool that can be provided by consumers
  * and executed in the browser when requested by the LLM.
  */
@@ -38,13 +47,14 @@ export interface BrowserApiToolDefinition<TParams = unknown> {
 
   /**
    * Handler function that executes when the tool is called.
-   * This function runs in the browser and receives validated parameters.
+   * This function runs in the browser and receives validated parameters, plus a
+   * context object describing where the call is running (e.g. the conversation id).
    * May return a promise.
    *
    * The returned value is only sent back to the LLM when `returnsResult` is true;
    * otherwise it is discarded (one-way communication).
    */
-  handler: (params: TParams) => unknown;
+  handler: (params: TParams, context: BrowserApiToolHandlerContext) => unknown;
 
   /**
    * Opt in to two-way communication.

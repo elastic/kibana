@@ -15,6 +15,7 @@ import type {
   AgentBuilderDashboardsPluginPublicStartDependencies,
 } from './types';
 import { registerDashboardAttachmentUiDefinition } from './attachment_types';
+import { createCaptureDashboardScreenshotTool } from './browser_tools';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -52,6 +53,8 @@ export class AgentBuilderDashboardsPlugin
       data: plugins.data,
       dashboardPlugin: plugins.dashboard,
     });
+
+    plugins.agentBuilder.browserTools.register(createCaptureDashboardScreenshotTool({ core }));
 
     if (core.application.capabilities.agentBuilder?.show === true) {
       plugins.uiActions.registerActionAsync(OPEN_DASHBOARD_CHAT_ACTION_ID, async () => {

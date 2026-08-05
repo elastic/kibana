@@ -42,7 +42,7 @@ describe('BrowserToolCallPrompt', () => {
     );
 
     await waitFor(() => expect(onComplete).toHaveBeenCalled());
-    expect(handler).toHaveBeenCalledWith({ verbose: true });
+    expect(handler).toHaveBeenCalledWith({ verbose: true }, {});
     expect(onComplete).toHaveBeenCalledWith({ result: '{"from":"now-15m","to":"now"}' });
   });
 

@@ -186,6 +186,8 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     isAwaitingPrompt,
   ]);
 
+  const browserToolHandlerContext = useMemo(() => ({ conversationId }), [conversationId]);
+
   const roundContainerStyles = css`
     ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : 'flex-grow: 0;'};
   `;
@@ -289,6 +291,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
                   key={prompt.id}
                   prompt={prompt}
                   tool={browserApiTools?.find((tool) => tool.id === prompt.tool_id)}
+                  handlerContext={browserToolHandlerContext}
                   onComplete={(toolResponse) => handlePromptResponse(prompt.id, toolResponse)}
                 />
               );

@@ -6,7 +6,10 @@
  */
 
 import { useEffect, useRef } from 'react';
-import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
+import type {
+  BrowserApiToolDefinition,
+  BrowserApiToolHandlerContext,
+} from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type {
   BrowserToolCallPrompt as BrowserToolCallPromptRequest,
   BrowserToolCallPromptResponse,
@@ -30,6 +33,8 @@ export interface BrowserToolCallPromptProps {
   prompt: BrowserToolCallPromptRequest;
   /** Undefined when the page no longer registers the tool the agent called. */
   tool?: BrowserApiToolDefinition<any>;
+  /** Context handed to the tool handler (e.g. the conversation the call belongs to). */
+  handlerContext?: BrowserApiToolHandlerContext;
   onComplete: (response: BrowserToolCallPromptResponse) => void;
 }
 
@@ -37,7 +42,12 @@ export interface BrowserToolCallPromptProps {
  * Runs a two-way browser API tool the agent called, and reports the outcome back so the round
  * can resume. Renders nothing: the agent is waiting on the browser, not on the user.
  */
-export const BrowserToolCallPrompt = ({ prompt, tool, onComplete }: BrowserToolCallPromptProps) => {
+export const BrowserToolCallPrompt = ({
+  prompt,
+  tool,
+  handlerContext,
+  onComplete,
+}: BrowserToolCallPromptProps) => {
   // The handler may have side effects, so it must run exactly once per prompt - regardless of
   // how often this component re-renders.
   const hasRun = useRef(false);
@@ -64,7 +74,7 @@ export const BrowserToolCallPrompt = ({ prompt, tool, onComplete }: BrowserToolC
 
       try {
         const result = await Promise.race([
-          Promise.resolve(tool.handler(tool.schema.parse(prompt.params))),
+          Promise.resolve(tool.handler(tool.schema.parse(prompt.params), handlerContext ?? {})),
           timeout,
         ]);
 
@@ -87,7 +97,7 @@ export const BrowserToolCallPrompt = ({ prompt, tool, onComplete }: BrowserToolC
     };
 
     void execute().then(onComplete);
-  }, [prompt, tool, onComplete]);
+  }, [prompt, tool, handlerContext, onComplete]);
 
   return null;
 };
