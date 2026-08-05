@@ -7,10 +7,8 @@
 
 import { StoreActionsStep } from './store_actions_step';
 import { createMockStorageServiceContract } from '../../services/storage_service/storage_service.mock';
-import {
-  ALERT_ACTIONS_DATA_STREAM,
-  type AlertAction,
-} from '../../../resources/datastreams/alert_actions';
+import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import type { AlertAction } from '../../../resources/datastreams/alert_actions';
 import {
   createDispatcherPipelineState,
   createAlertEpisode,
@@ -609,21 +607,19 @@ describe('StoreActionsStep', () => {
   });
 
   describe('space_id resolution', () => {
-    it('uses the space_id from the rules map for each episode', async () => {
+    it('uses the space_id from the episode directly', async () => {
       const mockService = createMockStorageServiceContract();
       const step = new StoreActionsStep(mockService);
 
       const episode = createAlertEpisode({
         rule_id: 'rule-in-custom-space',
+        space_id: 'custom',
         group_hash: 'hash-1',
         last_event_timestamp: '2026-01-22T07:00:00.000Z',
       });
 
       const state = createDispatcherPipelineState({
         suppressed: [{ ...episode, reason: 'suppressed' }],
-        rules: new Map([
-          ['rule-in-custom-space', createRule({ id: 'rule-in-custom-space', spaceId: 'custom' })],
-        ]),
       });
 
       await step.execute(state);
@@ -632,19 +628,19 @@ describe('StoreActionsStep', () => {
       expect(callArgs.docs[0].space_id).toBe('custom');
     });
 
-    it('defaults space_id to "default" when rule is not found in the rules map', async () => {
+    it('uses the default space_id from the episode when it is "default"', async () => {
       const mockService = createMockStorageServiceContract();
       const step = new StoreActionsStep(mockService);
 
       const episode = createAlertEpisode({
-        rule_id: 'unknown-rule',
+        rule_id: 'rule-1',
+        space_id: 'default',
         group_hash: 'hash-1',
         last_event_timestamp: '2026-01-22T07:00:00.000Z',
       });
 
       const state = createDispatcherPipelineState({
         suppressed: [{ ...episode, reason: 'suppressed' }],
-        rules: createRules('other-rule'),
       });
 
       await step.execute(state);
@@ -653,7 +649,7 @@ describe('StoreActionsStep', () => {
       expect(callArgs.docs[0].space_id).toBe('default');
     });
 
-    it('defaults space_id to "default" when rules map is undefined', async () => {
+    it('uses the default space_id from the episode when rules map is undefined', async () => {
       const mockService = createMockStorageServiceContract();
       const step = new StoreActionsStep(mockService);
 
@@ -673,18 +669,20 @@ describe('StoreActionsStep', () => {
       expect(callArgs.docs[0].space_id).toBe('default');
     });
 
-    it('resolves different space_id for episodes from rules in different spaces', async () => {
+    it('resolves different space_id for episodes in different spaces', async () => {
       const mockService = createMockStorageServiceContract();
       const step = new StoreActionsStep(mockService);
 
       const episode1 = createAlertEpisode({
         rule_id: 'rule-space-a',
+        space_id: 'space-a',
         group_hash: 'hash-1',
         last_event_timestamp: '2026-01-22T07:00:00.000Z',
       });
 
       const episode2 = createAlertEpisode({
         rule_id: 'rule-space-b',
+        space_id: 'space-b',
         group_hash: 'hash-2',
         last_event_timestamp: '2026-01-22T07:05:00.000Z',
       });
@@ -694,10 +692,6 @@ describe('StoreActionsStep', () => {
           { ...episode1, reason: 'suppressed' },
           { ...episode2, reason: 'suppressed' },
         ],
-        rules: new Map([
-          ['rule-space-a', createRule({ id: 'rule-space-a', spaceId: 'space-a' })],
-          ['rule-space-b', createRule({ id: 'rule-space-b', spaceId: 'space-b' })],
-        ]),
       });
 
       await step.execute(state);
@@ -705,6 +699,90 @@ describe('StoreActionsStep', () => {
       const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
       expect(callArgs.docs[0].space_id).toBe('space-a');
       expect(callArgs.docs[1].space_id).toBe('space-b');
+    });
+  });
+
+  describe('external alerts (source-based, no rule_id)', () => {
+    it('records external episode fire action with vendor source and null rule_id', async () => {
+      const mockService = createMockStorageServiceContract();
+      const step = new StoreActionsStep(mockService);
+
+      const externalEpisode = createAlertEpisode({
+        rule_id: null,
+        source: 'pagerduty',
+        space_id: 'space-a',
+        group_hash: 'pd-group-hash',
+        last_event_timestamp: '2026-01-22T07:00:00.000Z',
+      });
+
+      const group = createActionGroup({
+        id: 'group-pd',
+        policyId: 'policy-1',
+        episodes: [externalEpisode],
+      });
+
+      const state = createDispatcherPipelineState({
+        dispatch: [group],
+      });
+
+      const result = await step.execute(state);
+
+      expect(result).toEqual({ type: 'continue' });
+      const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
+
+      const fireDoc = callArgs.docs.find((d: Record<string, unknown>) => d.action_type === 'fire');
+      expect(fireDoc).toEqual(
+        expect.objectContaining({
+          action_type: 'fire',
+          source: 'pagerduty',
+          rule_id: null,
+          group_hash: 'pd-group-hash',
+          space_id: 'space-a',
+          actor: 'system',
+        })
+      );
+    });
+
+    it('records external episode notified action with vendor source and null rule_id', async () => {
+      const mockService = createMockStorageServiceContract();
+      const step = new StoreActionsStep(mockService);
+
+      const externalEpisode = createAlertEpisode({
+        rule_id: null,
+        source: 'pagerduty',
+        space_id: 'space-a',
+        group_hash: 'pd-group-hash',
+        last_event_timestamp: '2026-01-22T07:00:00.000Z',
+      });
+
+      const group = createActionGroup({
+        id: 'group-pd',
+        policyId: 'policy-1',
+        episodes: [externalEpisode],
+      });
+
+      const state = createDispatcherPipelineState({
+        dispatch: [group],
+      });
+
+      const result = await step.execute(state);
+
+      expect(result).toEqual({ type: 'continue' });
+      const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
+
+      const notifiedDoc = callArgs.docs.find(
+        (d: Record<string, unknown>) => d.action_type === 'notified'
+      );
+      expect(notifiedDoc).toEqual(
+        expect.objectContaining({
+          action_type: 'notified',
+          source: 'pagerduty',
+          rule_id: null,
+          group_hash: 'pd-group-hash',
+          space_id: 'space-a',
+          actor: 'system',
+        })
+      );
     });
   });
 });

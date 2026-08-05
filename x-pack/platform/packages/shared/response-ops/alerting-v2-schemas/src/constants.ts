@@ -61,6 +61,15 @@ export const MAX_NAME_LENGTH = 256;
 /** Maximum length for human-readable description fields (rule description, action policy description). */
 export const MAX_DESCRIPTION_LENGTH = 1024;
 
+/** Maximum length for an external alert `fingerprint` / series key. */
+export const MAX_FINGERPRINT_LENGTH = 1024;
+
+/** Maximum number of fields named in `fingerprint_fields` on external alert ingest. */
+export const MAX_FINGERPRINT_FIELDS = 10;
+
+/** Maximum number of keys in the open `data` bag on external alert ingest. */
+export const MAX_ALERT_EVENT_DATA_KEYS = 100;
+
 /** Maximum number of destinations per action policy. */
 export const ACTION_POLICY_MAX_DESTINATIONS = 10;
 
@@ -69,3 +78,20 @@ export const ACTION_POLICY_MAX_DESTINATIONS = 10;
  * and `PUT /{id}`.
  */
 export const VERSION_MAX_LENGTH = 256;
+
+/** Maximum number of execution-history events returned per page (rule + action policy streams). */
+export const EXECUTION_HISTORY_MAX_PER_PAGE = 100;
+
+/** Default number of execution-history events returned per page when `perPage` is omitted. */
+export const EXECUTION_HISTORY_DEFAULT_PER_PAGE = 20;
+
+/**
+ * Maximum number of events that can be paged through.
+ */
+export const EXECUTION_HISTORY_MAX_RESULT_WINDOW = 10_000;
+
+/**
+ * Maximum number of rule ids accepted by the execution-history rule-id
+ * filter.
+ */
+export const EXECUTION_HISTORY_MAX_RULE_ID_FILTER = 50;

@@ -18,21 +18,8 @@ import {
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
 } from '../../significant_events/constants';
-import type { Discovery } from '../../significant_events/discoveries';
 import type { ChangePointType } from '../../significant_events/detections';
 import type { SignificantEvent } from '../../significant_events/events';
-
-/**
- * SignificantEvents Get Response
- */
-type ChangePointsType =
-  | 'dip'
-  | 'distribution_change'
-  | 'non_stationary'
-  | 'spike'
-  | 'stationary'
-  | 'step_change'
-  | 'trend_change';
 
 type ChangePointsValue = Partial<{
   p_value: number;
@@ -47,10 +34,12 @@ interface SignificantEventOccurrence {
 }
 
 type QueryWithOccurrences = StreamQuery & {
+  /** Alerting rule UUID (`QueryLink.rule_id`); optional during rolling upgrades. */
+  rule_uuid?: string;
   stream_name: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {
-    type: Partial<Record<ChangePointsType, ChangePointsValue>>;
+    type: Partial<Record<ChangePointType, ChangePointsValue>>;
   };
   rule_backed: boolean;
 };
@@ -90,7 +79,6 @@ interface LifecycleDetection {
 
 interface EventLifecycleResponse {
   detections: LifecycleDetection[];
-  discoveries: Discovery[];
   events: SignificantEvent[];
 }
 

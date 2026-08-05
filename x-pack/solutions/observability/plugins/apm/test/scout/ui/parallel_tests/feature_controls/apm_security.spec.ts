@@ -31,50 +31,50 @@ const noApmPrivileges: KibanaRole = {
   kibana: [{ base: [], feature: { dashboard: ['all'] }, spaces: ['*'] }],
 };
 
-test.describe('APM feature controls - security', { tag: tags.stateful.classic }, () => {
-  test('with global apm all privileges shows the Applications nav link and can navigate to APM', async ({
-    browserAuth,
-    pageObjects: { featureControlsPage },
-  }) => {
-    await browserAuth.loginWithCustomRole(globalApmAll);
-    await featureControlsPage.gotoApm();
-    await featureControlsPage.waitForApmToLoad();
-    await expect(featureControlsPage.apmMainContainer).toBeVisible();
-  });
+test.describe(
+  'APM feature controls - security',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test('with global apm all privileges shows the Applications nav link and can navigate to APM', async ({
+      browserAuth,
+      pageObjects: { featureControlsPage },
+    }) => {
+      await browserAuth.loginWithCustomRole(globalApmAll);
+      await featureControlsPage.gotoApm();
+      await featureControlsPage.waitForApmToLoad();
+      await expect(featureControlsPage.apmMainContainer).toBeVisible();
+    });
 
-  test('with global apm all privileges does not show the read-only badge', async ({
-    browserAuth,
-    pageObjects: { featureControlsPage },
-  }) => {
-    await browserAuth.loginWithCustomRole(globalApmAll);
-    await featureControlsPage.gotoApm();
-    await featureControlsPage.waitForApmToLoad();
-    await expect(featureControlsPage.readOnlyBadge).toBeHidden();
-  });
+    test('with global apm all privileges does not show the read-only badge', async ({
+      browserAuth,
+      pageObjects: { featureControlsPage, chrome },
+    }) => {
+      await browserAuth.loginWithCustomRole(globalApmAll);
+      await featureControlsPage.gotoApm();
+      await featureControlsPage.waitForApmToLoad();
+      await expect(chrome.badgeWithLabel('Read only')).toBeHidden();
+    });
 
-  test('with global apm read-only privileges can navigate to APM and shows the read-only badge', async ({
-    browserAuth,
-    pageObjects: { featureControlsPage },
-  }) => {
-    await browserAuth.loginWithCustomRole(globalApmRead);
-    await featureControlsPage.gotoApm();
-    await featureControlsPage.waitForApmToLoad();
-    await expect(featureControlsPage.readOnlyBadge).toBeVisible({ timeout: EXTENDED_TIMEOUT });
-    await expect(featureControlsPage.readOnlyBadge).toHaveAttribute(
-      'data-test-badge-label',
-      'Read only'
-    );
-  });
+    test('with global apm read-only privileges can navigate to APM and shows the read-only badge', async ({
+      browserAuth,
+      pageObjects: { featureControlsPage, chrome },
+    }) => {
+      await browserAuth.loginWithCustomRole(globalApmRead);
+      await featureControlsPage.gotoApm();
+      await featureControlsPage.waitForApmToLoad();
+      await expect(chrome.badgeWithLabel('Read only')).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+    });
 
-  test('with no apm privileges renders the no-permission page', async ({
-    browserAuth,
-    page,
-    pageObjects: { featureControlsPage },
-  }) => {
-    await browserAuth.loginWithCustomRole(noApmPrivileges);
-    await featureControlsPage.gotoApm();
-    await expect(
-      page.getByText('You do not have permission to access the requested page')
-    ).toBeVisible({ timeout: EXTENDED_TIMEOUT });
-  });
-});
+    test('with no apm privileges renders the no-permission page', async ({
+      browserAuth,
+      page,
+      pageObjects: { featureControlsPage },
+    }) => {
+      await browserAuth.loginWithCustomRole(noApmPrivileges);
+      await featureControlsPage.gotoApm();
+      await expect(
+        page.getByText('You do not have permission to access the requested page')
+      ).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+    });
+  }
+);
