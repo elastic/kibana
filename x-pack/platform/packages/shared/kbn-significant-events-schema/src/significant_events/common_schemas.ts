@@ -15,6 +15,10 @@ import {
   NO_RAW_SENSITIVE_VALUES_RULE,
   MAX_ARRAY_LENGTH,
   MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  SUMMARY_ROLE_RULE,
+  SYMPTOM_HYPOTHESIS_ROLE_RULE,
 } from './constants';
 import { detectionSchema } from './detections';
 
@@ -245,28 +249,30 @@ export const significantEventBaseSchema = z.object({
   // hypothesis of the observed failure. helps agents to understand and group signals that share the same symptom class.
   symptom_hypothesis: z
     .string()
-    .max(MAX_TEXT_LENGTH)
+    .max(MAX_SYMPTOM_HYPOTHESIS_LENGTH)
     .optional()
     .describe(
       dedent`
-        Provisional, evidence-grounded technical explanation of the observed signals. In one sentence, start with the deepest root cause first, often present in causal_features, then describe how it propagates downstream through blast_radius and finally the impacted flows, clients or users. 
+        Provisional, evidence-grounded technical mechanism for this incident. Max ${MAX_SYMPTOM_HYPOTHESIS_LENGTH} chars.
+        In one sentence, name the deepest supported failing component or dependency, its concrete failure signature or mechanism, and how it propagates to the affected operation.
 
+        ${SYMPTOM_HYPOTHESIS_ROLE_RULE}
+        Do not restate the title or summary. Do not use generic terms such as "backend unavailability" or "dependency failure" when the evidence identifies a component, resource, endpoint, protocol, or error signature.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
         `
     ),
   summary: z
     .string()
-    .max(MAX_TEXT_LENGTH)
+    .max(MAX_SUMMARY_LENGTH)
     .describe(
       dedent`
-        Objective, self-contained account of the problem and potential impact. Lead with the affected operation and observed condition, not the investigation process. Include:
-          (1) the problem and current state;
-          (2) the affected flow and whether user impact is confirmed, possible, or not established;
-          (3) magnitude, onset, and current or recovery state when known.
+        Objective, self-contained account of the observed state and potential impact. Max ${MAX_SUMMARY_LENGTH} chars.
+        Lead with the normalized observed error signature and the affected component or dependency path, then state the affected operation and whether impact is confirmed, possible, or not established. Include onset, magnitude, and current or recovery state only when known.
 
+        ${SUMMARY_ROLE_RULE}
         Possible impact may come from matched query KI descriptions or resolved dependency paths, but must be conditional and scoped.
-          
-        Evidence limitations may qualify the conclusion, but do not narrate queries, detections, or analysis steps. Do not include actions, urgency language, or unsupported impact claims.
+
+        Do not repeat the title or symptom_hypothesis narrative. Reuse the canonical error signature when needed to identify the observed state. Evidence limitations may qualify the conclusion, but do not narrate queries, detections, or analysis steps. Do not include actions, urgency language, detection artifacts (p_value or severity_score), memory-page presence, or unsupported impact claims.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
       `
     ),

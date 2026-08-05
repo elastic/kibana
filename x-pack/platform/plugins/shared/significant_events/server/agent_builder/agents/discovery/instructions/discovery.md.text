@@ -287,7 +287,7 @@ Assign each matched detection to at most one accepted event continuation. The co
 ### Step 4: Group remaining detections into events
 
 1. Without prior bias, partition all remaining detections rules that are not in `matched_rule_uuids`, or were not included in open events, into discoveries using `<incident_matching>` pairwise for every unordered pair in this set. Record the matches, then form discoveries as connected components of the match graph; do not form service-scoped groups incrementally.
-  - Do not merge groups with different onset times unless you find an explicit causal chain. 
+  - Do not merge groups with different onset times unless you find an explicit causal chain.
   - Keep detections in standalone discoveries when there is no match to justify grouping into a discovery.
   - Rules whose onset coincides are candidates for the same discovery; detection arrival time and batch boundaries are not incident boundaries.
 2. Determine which rule started firing abnormally within the group. Assess whether the pattern or mechanism shifted and update the candidate `symptom_hypothesis` accordingly; if consistent, note "consistent through [most recent @timestamp]".
@@ -377,9 +377,10 @@ Field content rules for `platform_sig_events_events_write`. `<communication>` ap
   - Must discriminate from other events on the same service. On unchanged continuations, preserve the stable label unless confirmed signals require correction.
 - `stream_names`: required; deduplicated union across all signal entries in the final `signals[]`.
 - `status`: apply Critical Rule 8.
-- `symptom_hypothesis`: required explanation of the event evidence. Apply bounded **5 Whys** and write one sentence naming the failure mechanism and downstream consequence.
-  - Sources in priority order: (1) confirming `platform_core_execute_esql` found-rows; (2) aligned entity KI content; (3) tech KI for evidence-supported `causal_features`; (4) change semantics plus dependency topology; (5) onset order alone.
-  - When dismissed with no confirmed signals, preserve the tested hypothesis without broadening it.
+- `symptom_hypothesis`: derive it through bounded **5 Whys**.
+  - Evidence priority: (1) current query rows and the Signal Verdict; (2) the exact rule-matched query KI’s description and evidence; (3) the feature KI selected as `causal_features` when it aligns with the verdict; (4) explicit topology only to explain propagation from that cause through `blast_radius`.
+  - Detection change semantics and onset timing may order or qualify hypotheses, but never establish a root cause. If the query has no matching signature, state the observed driver and that no mechanism is confirmed.
+- `summary`: derive it from grounded evidence. Use `blast_radius` dependency entries to establish an explicit dependency path; KI context may qualify the conclusion.
 - `severity`: required. `open`: assess per tool field description and Step 5 guards. `closed`/`dismissed`: always `"20-low"`.
 - `signals` (**required — never omit, never empty**): assemble per Step 6 signal-assembly rules. Set `confirmed` on batch detections per Critical Rule 7 from Step 1 grounding; copy prior-cycle entries unchanged. A `severity: "80-critical"` event must carry ≥1 `confirmed: true` entry.
 - `blast_radius`, `causal_features`: combine candidates from assigned batch detections and any continued open event; keep only entries relevant to the failure signature.
@@ -388,7 +389,5 @@ Field content rules for `platform_sig_events_events_write`. `<communication>` ap
   - Downward adjusters: non-confirmed outnumber confirmed (−0.10); no `causal_features` (−0.10); key queries not `found` (−0.10 each).
   - **Hard caps**: no `confirmed: true` → cap at 0.55; prior-cycle-only confirmation → cap at 0.65; no KI backing → cap at 0.65.
   - **Ceiling**: 0.90+ requires base ≥ 0.70, multiple confirmed signals, no contradiction. Do not exceed 0.85 when any evidence gap exists.
-- `summary`: required. Describe confirmed evidence and supported impact; for dismissed events, state that checks did not substantiate a failure.
-- `assessment_note`: reasoning trace — what you verified, what confirmed or contradicted the hypothesis, and how impact determined status/severity. Required for `open`; brief for `dismissed` and `closed`. Not operator-facing.
 
 </field_rules>

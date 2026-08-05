@@ -7,6 +7,14 @@
 
 import type { EvaluationCriterion, Evaluator, Example, TaskOutput } from '@kbn/evals';
 import {
+  MAX_ASSESSMENT_NOTE_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  NO_RAW_SENSITIVE_VALUES_RULE,
+  SUMMARY_ROLE_RULE,
+  SYMPTOM_HYPOTHESIS_ROLE_RULE,
+} from '@kbn/significant-events-schema';
+import {
   createScenarioCriteriaLlmEvaluator,
   type CreateScenarioCriteriaLlmEvaluatorOptions,
 } from '../../scenario_criteria/evaluators';
@@ -33,6 +41,29 @@ const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
   ...EVIDENCE_DESCRIPTION_SHARED_CRITERIA,
 ];
 
+const NARRATIVE_FIELDS_CRITERIA: EvaluationCriterion[] = [
+  {
+    id: 'narrative_fields_bounded_and_safe',
+    text: `symptom_hypothesis is at most ${MAX_SYMPTOM_HYPOTHESIS_LENGTH} characters, summary is at most ${MAX_SUMMARY_LENGTH} characters, and assessment_note is at most ${MAX_ASSESSMENT_NOTE_LENGTH} characters. ${NO_RAW_SENSITIVE_VALUES_RULE}`,
+    score: 1,
+  },
+  {
+    id: 'symptom_hypothesis_mechanism',
+    text: `symptom_hypothesis is the evidence-supported technical mechanism for the incident. ${SYMPTOM_HYPOTHESIS_ROLE_RULE}`,
+    score: 1,
+  },
+  {
+    id: 'summary_observed_state',
+    text: `Summary leads with the normalized observed error signature and affected component or dependency path, then describes the affected operation and scoped impact. ${SUMMARY_ROLE_RULE} It does not narrate queries, detections, analysis steps, p_value, severity_score, or memory-page presence.`,
+    score: 1,
+  },
+  {
+    id: 'assessment_note_reasoning_only',
+    text: 'assessment_note is concise operator-facing lifecycle detail that explains the assessment decision, ambiguity, or caveat. It does not repeat the observed condition, error signature, impact, signal descriptions, or detection artifacts.',
+    score: 1,
+  },
+];
+
 /** LLM evaluator: grades whether each signal's `description` follows the expected verification account structure. */
 export const createEvidenceDescriptionEvaluator = <
   TExample extends Example,
@@ -46,5 +77,20 @@ export const createEvidenceDescriptionEvaluator = <
     name: 'evidence_description_quality',
     criteriaFn,
     criteria,
+    transformOutput,
+  });
+
+/** LLM evaluator: grades the distinctness, safety, and operator usefulness of event narrative fields. */
+export const createNarrativeFieldsEvaluator = <
+  TExample extends Example,
+  TOutput extends TaskOutput
+>({
+  criteriaFn,
+  transformOutput,
+}: CreateScenarioCriteriaLlmEvaluatorOptions<TExample, TOutput>): Evaluator<TExample, TOutput> =>
+  createScenarioCriteriaLlmEvaluator<TExample, TOutput>({
+    name: 'narrative_fields_quality',
+    criteriaFn,
+    criteria: NARRATIVE_FIELDS_CRITERIA,
     transformOutput,
   });
