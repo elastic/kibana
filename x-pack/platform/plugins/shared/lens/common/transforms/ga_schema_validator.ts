@@ -43,7 +43,7 @@ export const findInvalidDurationFormat = (
   if (obj.type === 'duration') {
     const activeSchema = useGASchemas ? durationFormatSchema : legacyDurationFormatSchema;
     try {
-      activeSchema.parse(obj);
+      activeSchema.validate(obj);
     } catch (e) {
       const location = path || 'format';
       const hint = useGASchemas

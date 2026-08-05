@@ -8,7 +8,6 @@
 import { tags } from '@kbn/scout';
 
 export const SEARCH_PROFILER_API_TAGS = [
-  ...tags.stateful.classic,
   ...tags.serverless.search,
   ...tags.serverless.observability.complete,
   ...tags.serverless.security.complete,

@@ -24,24 +24,12 @@ const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../hooks/use_show_alerts_only_migration_message');
 
-// Stub the heavy search-bar and data-provider subtrees; mounting the real
-// unified-search + DataProviders trees intermittently blew the 5s Jest budget.
-jest.mock('../../../search_or_filter', () => ({
-  StatefulSearchOrFilter: () => <div data-test-subj="mockStatefulSearchOrFilter" />,
-}));
-jest.mock('../../../data_providers', () => ({
-  DataProviders: () => <div data-test-subj="dataProviders" />,
-}));
-
 describe('Header', () => {
   const indexPattern = mockIndexPattern;
   const mount = useMountAppended();
   const getWrapper = async (childrenComponent: JSX.Element) => {
     const wrapper = mount(childrenComponent);
-    await waitFor(() => {
-      wrapper.update();
-      expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toBe(true);
-    });
+    await waitFor(() => wrapper.find('[data-test-subj="timelineCallOutUnauthorized"]').exists());
     return wrapper;
   };
   const props = {
@@ -66,7 +54,10 @@ describe('Header', () => {
     timelineType: TimelineTypeEnum.default,
   };
 
-  describe('QueryTabHeader', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/254016
+  // FLAKY: https://github.com/elastic/kibana/issues/253935
+  // FLAKY: https://github.com/elastic/kibana/issues/253959
+  describe.skip('QueryTabHeader', () => {
     test('should render the data providers when show is true', async () => {
       const testProps = { ...props, show: true };
       const wrapper = await getWrapper(

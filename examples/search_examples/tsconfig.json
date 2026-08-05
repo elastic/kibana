@@ -36,6 +36,5 @@
     "@kbn/search-response-warnings",
     "@kbn/react-kibana-context-render",
     "@kbn/css-utils",
-    "@kbn/ui-callout",
   ]
 }

@@ -7,8 +7,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { KbnInfoCallout } from '@kbn/ui-callout';
 
 const strings = {
   getPanelDescription: () =>
@@ -24,7 +24,9 @@ const strings = {
 
 export const NoDatasource = () => (
   <div className="canvasDataSource__section">
-    <KbnInfoCallout title={strings.getPanelTitle()} text={strings.getPanelDescription()} />
+    <EuiCallOut title={strings.getPanelTitle()} iconType="info">
+      <p>{strings.getPanelDescription()}</p>
+    </EuiCallOut>
   </div>
 );
 

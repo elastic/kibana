@@ -138,72 +138,70 @@ export function registerCRUDGet(router: EntityStorePluginRouter) {
           oasOperationObject: () => path.join(__dirname, '../examples/entities_list.yaml'),
         },
       },
-      wrapMiddlewares<never, z.infer<typeof querySchema>, never>(
-        async (ctx, req, res): Promise<IKibanaResponse> => {
-          const { logger, crudClient } = await ctx.entityStore;
+      wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
+        const { logger, crudClient } = await ctx.entityStore;
 
-          logger.debug('CRUD Get (list entities) api called');
+        logger.debug('CRUD Get (list entities) api called');
 
-          try {
-            if (isPageModeQuery(req.query)) {
-              const listParams: ListEntitiesParams = {
-                entityTypes: req.query.entity_types ?? [],
-                filterQuery: req.query.filterQuery,
-                page: req.query.page ?? 1,
-                perPage: req.query.per_page ?? 10,
-                sortField: req.query.sort_field ?? '@timestamp',
-                sortOrder: req.query.sort_order ?? 'desc',
-              };
-
-              const result = await crudClient.listEntities(listParams);
-              return res.ok({
-                body: {
-                  records: result.entities,
-                  total: result.total ?? 0,
-                  page: result.page ?? 1,
-                  per_page: result.per_page ?? 10,
-                  inspect: result.inspect,
-                },
-              });
-            }
-
-            let filter;
-            try {
-              filter = req.query.filter
-                ? toElasticsearchQuery(fromKueryExpression(req.query.filter))
-                : undefined;
-            } catch (error) {
-              return res.badRequest({ body: `Invalid filter: ${error.message}` });
-            }
-
+        try {
+          if (isPageModeQuery(req.query)) {
             const listParams: ListEntitiesParams = {
-              filter,
-              size: req.query.size,
-              searchAfter: parseJsonParam<Array<string | number>>(
-                req.query.searchAfter,
-                'searchAfter'
-              ),
-              source: req.query.source,
-              fields: req.query.fields,
+              entityTypes: req.query.entity_types ?? [],
+              filterQuery: req.query.filterQuery,
+              page: req.query.page ?? 1,
+              perPage: req.query.per_page ?? 10,
+              sortField: req.query.sort_field ?? '@timestamp',
+              sortOrder: req.query.sort_order ?? 'desc',
             };
 
-            const { entities, nextSearchAfter, fields } = await crudClient.listEntities(listParams);
+            const result = await crudClient.listEntities(listParams);
             return res.ok({
-              body: { entities, nextSearchAfter, ...(fields ? { fields } : {}) },
+              body: {
+                records: result.entities,
+                total: result.total ?? 0,
+                page: result.page ?? 1,
+                per_page: result.per_page ?? 10,
+                inspect: result.inspect,
+              },
             });
-          } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            if (message.startsWith('Invalid filterQuery')) {
-              return res.badRequest({ body: { message } });
-            }
-            if (error instanceof BadCRUDRequestError) {
-              return res.badRequest({ body: error });
-            }
-
-            logger.error(error);
-            throw error;
           }
+
+          let filter;
+          try {
+            filter = req.query.filter
+              ? toElasticsearchQuery(fromKueryExpression(req.query.filter))
+              : undefined;
+          } catch (error) {
+            return res.badRequest({ body: `Invalid filter: ${error.message}` });
+          }
+
+          const listParams: ListEntitiesParams = {
+            filter,
+            size: req.query.size,
+            searchAfter: parseJsonParam<Array<string | number>>(
+              req.query.searchAfter,
+              'searchAfter'
+            ),
+            source: req.query.source,
+            fields: req.query.fields,
+          };
+
+          const { entities, nextSearchAfter, fields } = await crudClient.listEntities(listParams);
+          return res.ok({
+            body: { entities, nextSearchAfter, ...(fields ? { fields } : {}) },
+          });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          if (message.startsWith('Invalid filterQuery')) {
+            return res.badRequest({ body: { message } });
+          }
+          if (error instanceof BadCRUDRequestError) {
+            return res.badRequest({ body: error });
+          }
+
+          logger.error(error);
+          throw error;
         }
-      )
+      })
     );
 }

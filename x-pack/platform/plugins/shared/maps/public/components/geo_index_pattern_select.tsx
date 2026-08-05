@@ -7,12 +7,11 @@
 
 import React, { useMemo, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isNestedField } from '@kbn/data-views-plugin/common';
 import type { DataView } from '@kbn/data-plugin/common';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import {
   getIndexPatternSelectComponent,
   getIndexPatternService,
@@ -70,10 +69,11 @@ export function GeoIndexPatternSelect(props: Props) {
 
     return (
       <>
-        <KbnWarningCallout
+        <EuiCallOut
           title={i18n.translate('xpack.maps.noIndexPattern.messageTitle', {
             defaultMessage: `Couldn't find any data views`,
           })}
+          color="warning"
         >
           <p>
             <FormattedMessage
@@ -99,7 +99,7 @@ export function GeoIndexPatternSelect(props: Props) {
               />
             </EuiLink>
           </p>
-        </KbnWarningCallout>
+        </EuiCallOut>
         <EuiSpacer size="s" />
       </>
     );

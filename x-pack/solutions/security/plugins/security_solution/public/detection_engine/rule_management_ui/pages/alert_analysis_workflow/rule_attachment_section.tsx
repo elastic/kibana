@@ -572,12 +572,6 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                 {canEditRules && selectedRulesCount > 0 && (
                   <EuiFlexItem grow={false}>
                     <EuiPopover
-                      aria-label={i18n.translate(
-                        'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentBulkActionsAriaLabel',
-                        {
-                          defaultMessage: 'Bulk actions for selected rules',
-                        }
-                      )}
                       data-test-subj="alertAnalysisWorkflowRuleAttachmentBulkActionsPopover"
                       isOpen={isBulkActionsPopoverOpen}
                       closePopover={closeBulkActionsPopover}

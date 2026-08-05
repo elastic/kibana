@@ -265,7 +265,7 @@ const deleteQueryRoute = createServerRoute({
 
     await kiClient.deleteQuery(definition, queryId);
 
-    logger.get('significantEvents').debug(`Deleting query ${queryId} for stream ${streamName}`);
+    logger.get('significant_events').debug(`Deleting query ${queryId} for stream ${streamName}`);
 
     return {
       acknowledged: true,
@@ -405,7 +405,7 @@ const bulkQueriesRoute = createServerRoute({
     await kiClient.syncQueries(definition, nextQueries, { currentLinks });
 
     logger
-      .get('significantEvents')
+      .get('significant_events')
       .debug(
         `Performing bulk significant events operation with ${operations.length} operations for stream ${streamName}`
       );

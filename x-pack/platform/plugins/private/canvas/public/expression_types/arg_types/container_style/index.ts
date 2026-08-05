@@ -7,8 +7,8 @@
 
 import type { ComponentType } from 'react';
 import { withHandlers } from 'react-recompose';
+import { set } from 'object-path-immutable';
 import { get } from 'lodash';
-import { set } from '../../../../common/lib/object_path_immutable';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
 import type { Arguments as SimpleArguments } from './simple_template';
 import { SimpleTemplate } from './simple_template';

@@ -13,6 +13,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,7 +30,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { cpsService, savedObjectsTaggingService } from '../../services/kibana_services';
@@ -96,14 +96,18 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
     }
 
     return (
-      <KbnWarningCallout
+      <EuiCallOut
         title={
           <FormattedMessage
             id="dashboard.embeddableApi.showSettings.flyout.form.duplicateTitleLabel"
             defaultMessage="This dashboard already exists"
           />
         }
-        text={
+        color="warning"
+        data-test-subj="duplicateTitleWarningMessage"
+        id={DUPLICATE_TITLE_CALLOUT_ID}
+      >
+        <p>
           <FormattedMessage
             id="dashboard.embeddableApi.showSettings.flyout.form.duplicateTitleDescription"
             defaultMessage="Saving ''{title}'' creates a duplicate title."
@@ -111,10 +115,8 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
               title: localSettings.title,
             }}
           />
-        }
-        data-test-subj="duplicateTitleWarningMessage"
-        id={DUPLICATE_TITLE_CALLOUT_ID}
-      />
+        </p>
+      </EuiCallOut>
     );
   };
 

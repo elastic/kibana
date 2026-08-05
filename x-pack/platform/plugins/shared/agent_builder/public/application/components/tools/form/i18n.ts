@@ -172,39 +172,6 @@ export const i18nMessages = {
           }
         ),
       },
-      confirmation: {
-        label: i18n.translate(
-          'xpack.agentBuilder.tools.newTool.configuration.form.confirmation.label',
-          {
-            defaultMessage: 'Require user confirmation',
-          }
-        ),
-        helpText: i18n.translate(
-          'xpack.agentBuilder.tools.newTool.configuration.form.confirmation.helpText',
-          {
-            defaultMessage:
-              'Sets the policy for when the agent should require user confirmation before executing the tool.',
-          }
-        ),
-        neverOption: i18n.translate(
-          'xpack.agentBuilder.tools.newTool.configuration.form.confirmation.neverOptionLabel',
-          {
-            defaultMessage: 'Never',
-          }
-        ),
-        onceOption: i18n.translate(
-          'xpack.agentBuilder.tools.newTool.configuration.form.confirmation.onceOptionLabel',
-          {
-            defaultMessage: 'Once',
-          }
-        ),
-        alwaysOption: i18n.translate(
-          'xpack.agentBuilder.tools.newTool.configuration.form.confirmation.alwaysOptionLabel',
-          {
-            defaultMessage: 'Always',
-          }
-        ),
-      },
       indexSearch: {
         patternLabel: i18n.translate(
           'xpack.agentBuilder.tools.newTool.configuration.form.indexSearch.patternLabel',

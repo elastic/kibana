@@ -14,6 +14,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -39,7 +40,6 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { asyncForEach } from '@kbn/std';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { triggers } from '@kbn/ui-actions-plugin/public';
 import { CONTROL_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
@@ -398,11 +398,14 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                   label={DataControlEditorStrings.manageControl.dataSource.getDataViewTitle()}
                 >
                   {dataViewListError ? (
-                    <KbnDangerCallout
+                    <EuiCallOut
                       announceOnMount
+                      color="danger"
+                      iconType="error"
                       title={DataControlEditorStrings.manageControl.dataSource.getDataViewListErrorTitle()}
-                      text={dataViewListError.message}
-                    />
+                    >
+                      <p>{dataViewListError.message}</p>
+                    </EuiCallOut>
                   ) : (
                     <DataViewPicker
                       dataViews={dataViewListItems}
@@ -423,11 +426,14 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
               )}
               <EuiFormRow label={DataControlEditorStrings.manageControl.dataSource.getFieldTitle()}>
                 {fieldListError ? (
-                  <KbnDangerCallout
+                  <EuiCallOut
                     announceOnMount
+                    color="danger"
+                    iconType="error"
                     title={DataControlEditorStrings.manageControl.dataSource.getFieldListErrorTitle()}
-                    text={fieldListError.message}
-                  />
+                  >
+                    <p>{fieldListError.message}</p>
+                  </EuiCallOut>
                 ) : (
                   <FieldPicker
                     filterPredicate={(field: DataViewField) => {

@@ -12,6 +12,7 @@ import {
   htmlIdGenerator,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -33,7 +34,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import type { SaveResult } from './show_saved_object_save_modal';
 
@@ -391,7 +391,7 @@ class SavedObjectSaveModalComponent<T = void> extends React.Component<
     return (
       <>
         <div ref={this.warning} tabIndex={-1}>
-          <KbnWarningCallout
+          <EuiCallOut
             title={
               <FormattedMessage
                 id="savedObjects.saveModal.duplicateTitleLabel"
@@ -399,7 +399,11 @@ class SavedObjectSaveModalComponent<T = void> extends React.Component<
                 values={{ objectType: this.props.objectType }}
               />
             }
-            text={
+            color="warning"
+            data-test-subj="titleDuplicateWarnMsg"
+            id={duplicateWarningId}
+          >
+            <p>
               <FormattedMessage
                 id="savedObjects.saveModal.duplicateTitleDescription"
                 defaultMessage="Saving ''{title}'' creates a duplicate title."
@@ -407,10 +411,8 @@ class SavedObjectSaveModalComponent<T = void> extends React.Component<
                   title: this.state.title,
                 }}
               />
-            }
-            data-test-subj="titleDuplicateWarnMsg"
-            id={duplicateWarningId}
-          />
+            </p>
+          </EuiCallOut>
         </div>
         <EuiSpacer />
       </>

@@ -9,8 +9,8 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import { Redirect } from 'react-router-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -34,9 +34,8 @@ export function NotFoundRoute() {
     bannerId = core.overlays.banners.replace(
       bannerId,
       toMountPoint(
-        <KbnWarningCallout
-          title={bannerMessage}
-          text={
+        <EuiCallOut color="warning" iconType="info" title={bannerMessage}>
+          <p data-test-subj="invalidRouteMessage">
             <FormattedMessage
               id="discover.noMatchRoute.bannerText"
               defaultMessage="Discover application doesn't recognize this route: {route}"
@@ -44,9 +43,8 @@ export function NotFoundRoute() {
                 route: history.location.state.referrer,
               }}
             />
-          }
-          data-test-subj="invalidRouteBanner"
-        />,
+          </p>
+        </EuiCallOut>,
         core
       )
     );

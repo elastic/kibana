@@ -18,16 +18,10 @@ import { useTimelineContext } from '../../timeline_context/use_timeline_context'
 import { useCasesConfig, KibanaServices } from '../../../common/lib/kibana';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
-import type { AttachLocation } from '../../../analytics/use_attach_button_ebt';
-import {
-  useAttachButtonClickedEBT,
-  useAttachMenuItemClickedEBT,
-} from '../../../analytics/use_attach_button_ebt';
 import * as i18n from './translations';
 
 export interface CaseViewAttachButtonProps {
   caseData: CaseUI;
-  attachLocation: AttachLocation;
   fill?: boolean;
 }
 
@@ -35,7 +29,6 @@ type ActiveModal = 'file' | 'timeline' | 'savedObject' | null;
 
 const CaseViewAttachButtonComponent: React.FC<CaseViewAttachButtonProps> = ({
   caseData,
-  attachLocation,
   fill = false,
 }) => {
   const { permissions, owner } = useCasesContext();
@@ -48,29 +41,19 @@ const CaseViewAttachButtonComponent: React.FC<CaseViewAttachButtonProps> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
 
-  const trackAttachButtonClicked = useAttachButtonClickedEBT();
-  const trackAttachMenuItemClicked = useAttachMenuItemClickedEBT();
-
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const togglePopover = useCallback(() => {
-    if (!isPopoverOpen) {
-      trackAttachButtonClicked(attachLocation);
-    }
-    setIsPopoverOpen((open) => !open);
-  }, [isPopoverOpen, attachLocation, trackAttachButtonClicked]);
+  const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
   const closeModal = useCallback(() => setActiveModal(null), []);
 
   const openFile = useCallback(() => {
-    trackAttachMenuItemClicked('file');
     closePopover();
     setActiveModal('file');
-  }, [closePopover, trackAttachMenuItemClicked]);
+  }, [closePopover]);
 
   const openTimeline = useCallback(() => {
-    trackAttachMenuItemClicked('timeline');
     closePopover();
     setActiveModal('timeline');
-  }, [closePopover, trackAttachMenuItemClicked]);
+  }, [closePopover]);
 
   // Gated by feature flag AND presence of the timeline integration
   const showTimeline = attachmentsEnabled && Boolean(SelectTimelineModal);
@@ -97,10 +80,9 @@ const CaseViewAttachButtonComponent: React.FC<CaseViewAttachButtonProps> = ({
   );
 
   const openSavedObject = useCallback(() => {
-    trackAttachMenuItemClicked('saved_object');
     closePopover();
     setActiveModal('savedObject');
-  }, [closePopover, trackAttachMenuItemClicked]);
+  }, [closePopover]);
 
   const existingFiles = useMemo(
     () => getFilesFromComments(caseData.comments, caseData.owner),

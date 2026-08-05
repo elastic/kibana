@@ -21,6 +21,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 
 import type { AppDependencies } from '../app_dependencies';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -100,6 +101,7 @@ const appDependencies: AppDependencies = {
   savedObjectsManagement: {} as jest.Mocked<SavedObjectsManagementPluginStart>,
   settings: settingsServiceMock.createStartContract(),
   savedSearch: savedSearchPluginMock.createStartContract(),
+  contentManagement: contentManagementMock.createStartContract(),
   fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
 };
 

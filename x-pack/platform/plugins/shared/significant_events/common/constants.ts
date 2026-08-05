@@ -7,15 +7,20 @@
 
 import type { PricingProductFeature } from '@kbn/core-pricing-common';
 
-/**
- * Base route of the Significant Events application. Used by the UI plugin's
- * `appRoute` registration and by server tools that return Kibana deep links.
- */
-export const SIGNIFICANT_EVENTS_APP_ROUTE = '/app/significant_events';
+export const ASSET_VERSION = 1;
+
+export const ATTACHMENT_SUGGESTIONS_LIMIT = 50;
+
+export const STREAMS_PRODUCER = 'streams';
 
 export const STREAMS_API_PRIVILEGES = {
   read: 'read_stream',
   manage: 'manage_stream',
+} as const;
+
+export const STREAMS_UI_PRIVILEGES = {
+  manage: 'manage',
+  show: 'show',
 } as const;
 
 /**
@@ -67,7 +72,7 @@ export const POLL_DELAY_SECONDS = 30;
  * Significant Events scheduled discovery workflow.
  *
  * Detection runs at the alert-window cadence. Review runs more frequently and
- * performs a bounded number of discovery passes so it can drain small
+ * performs a bounded number of discovery + triage passes so it can drain small
  * backlogs without creating an unbounded scheduled run.
  */
 export const DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES = 10;
@@ -101,6 +106,7 @@ export const DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES = 40;
 export const MIN_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES =
   MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS * MIN_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES;
 export const DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE = 3;
+export const DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE = 5;
 export const DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES = 3;
 export const MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE = 1;
 export const MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE = 50;

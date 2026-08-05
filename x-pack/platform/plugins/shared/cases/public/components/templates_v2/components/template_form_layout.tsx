@@ -334,9 +334,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   );
   const isYamlDefinitionValid = yamlValidationResult.success;
 
-  // Both the YAML definition and Configuration metadata must be valid before the primary action is
-  // enabled. The menu tooltip identifies the exact place to fix when either (or both) is invalid.
-  const hasYamlValidationErrors = useMemo(() => !isYamlDefinitionValid, [isYamlDefinitionValid]);
+  // Only the YAML's structural validity gates the Save button. Template-details validity (e.g. the
+  // required name) is checked at submit time against the freshest metadata (see handleSave), so the
+  // button stays responsive while the debounced metadata fields settle rather than flickering
+  // disabled after every keystroke.
+  const hasValidationErrors = useMemo(() => !isYamlDefinitionValid, [isYamlDefinitionValid]);
 
   // Freshest YAML, updated synchronously on every edit so Save and each subsequent edit build on the
   // latest value even while the debounced persistence hook (and the render-panel forms) lag behind.
@@ -540,8 +542,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     () =>
       getTemplateFormMenu({
         hasChanges,
-        hasYamlValidationErrors,
-        metadataErrors,
+        hasValidationErrors,
         isEdit,
         isLoading,
         isSaving,
@@ -556,8 +557,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       handleResetClick,
       handleSave,
       hasChanges,
-      hasYamlValidationErrors,
-      metadataErrors,
+      hasValidationErrors,
       isEdit,
       isEnabled,
       isLoading,
@@ -630,7 +630,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             metadataErrors={metadataErrors}
             onMetadataChange={handleMetadataChange}
             formResetKey={formResetKey}
-            fieldsHaveErrors={hasYamlValidationErrors}
+            fieldsHaveErrors={hasValidationErrors}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

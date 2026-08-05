@@ -13,7 +13,7 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 import React, { useCallback, useMemo } from 'react';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from '../types';
 import { PresentationPanelTitle } from './presentation_panel_title';
-import { useBadges } from './use_badges';
+import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
 
 export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPanelApi> = {
   api: ApiType;
@@ -23,7 +23,10 @@ export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPane
   panelTitle?: string;
   panelDescription?: string;
   setDragHandle: (id: string, ref: HTMLDivElement | null) => void;
-} & Pick<PresentationPanelProps, 'showBadges' | 'getActions' | 'titleHighlight'>;
+} & Pick<
+  PresentationPanelProps,
+  'showBadges' | 'getActions' | 'showNotifications' | 'titleHighlight'
+>;
 
 export const PresentationPanelHeader = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
@@ -37,11 +40,17 @@ export const PresentationPanelHeader = <
   panelDescription,
   setDragHandle,
   showBadges = true,
+  showNotifications = true,
   titleHighlight,
 }: PresentationPanelHeaderProps<ApiType>) => {
   const { euiTheme } = useEuiTheme();
 
-  const badges = useBadges<ApiType>(showBadges, api, getActions);
+  const { notificationElements, badgeElements } = usePresentationPanelHeaderActions<ApiType>(
+    showNotifications,
+    showBadges,
+    api,
+    getActions
+  );
 
   const memoizedSetDragHandle = useCallback(
     // memoize the ref callback so that we don't call `setDragHandle` on every render
@@ -79,7 +88,8 @@ export const PresentationPanelHeader = <
     };
   }, [euiTheme.size, euiTheme.colors]);
 
-  const showPanelBar = (!hideTitle && panelTitle) || badges.length > 0;
+  const showPanelBar =
+    (!hideTitle && panelTitle) || badgeElements.length > 0 || notificationElements.length > 0;
 
   if (!showPanelBar) return null;
 
@@ -104,8 +114,9 @@ export const PresentationPanelHeader = <
           panelDescription={panelDescription}
           titleHighlight={titleHighlight}
         />
-        {showBadges && badges}
+        {showBadges && badgeElements}
       </div>
+      {showNotifications && notificationElements}
     </figcaption>
   );
 };

@@ -15,7 +15,7 @@ export const SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID =
 
 export const SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
-  pluginId: 'significantEvents',
+  pluginId: 'significant_events',
   version: 4,
   billable: false,
   yaml: GAP_DETECTION_YAML,

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { KbnDangerCallout } from '@kbn/ui-callout';
+import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStateSelector } from '../../state_utils';
 import type { PreviewState } from './types';
@@ -27,13 +27,16 @@ export const FieldPreviewError = () => {
   }
 
   return (
-    <KbnDangerCallout
+    <EuiCallOut
       title={i18n.translate('indexPatternFieldEditor.fieldPreview.errorCallout.title', {
         defaultMessage: 'Error fetching document',
       })}
-      text={fetchDocError.error.message ?? fetchDocError.error.reason}
+      color="danger"
+      iconType="error"
       role="alert"
       data-test-subj="fetchDocError"
-    />
+    >
+      <p data-test-subj="title">{fetchDocError.error.message ?? fetchDocError.error.reason}</p>
+    </EuiCallOut>
   );
 };

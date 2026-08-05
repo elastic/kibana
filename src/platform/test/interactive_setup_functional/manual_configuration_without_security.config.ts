@@ -21,9 +21,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     '../interactive_setup_api_integration/plugins/test_endpoints'
   );
 
-  const dataPath = getDataPath();
-  await fs.mkdir(dataPath, { recursive: true });
-  const tempKibanaYamlFile = join(dataPath, `interactive_setup_kibana_${Date.now()}.yml`);
+  const tempKibanaYamlFile = join(getDataPath(), `interactive_setup_kibana_${Date.now()}.yml`);
   await fs.writeFile(tempKibanaYamlFile, '');
 
   return {

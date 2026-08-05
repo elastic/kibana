@@ -8,11 +8,17 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSuperDatePicker } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiSuperDatePicker,
+} from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { KbnInfoCallout } from '@kbn/ui-callout';
 import { getPageApi } from '../page_api';
 import { AddButton } from './add_button';
 import { TopNav } from './top_nav';
@@ -38,37 +44,32 @@ export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActio
 
   return (
     <div>
-      <KbnInfoCallout
-        title="Presentation Container interfaces"
-        text={
-          <>
-            <p>
-              At times, you will need to render many embeddables and allow users to add and remove
-              embeddables. Use the <strong>PresentationContainer</strong> and{' '}
-              <strong>CanAddNewPanel</strong> interfaces for this functionallity.
-            </p>
-            <p>
-              New embeddable state is provided to the page by calling{' '}
-              <strong>pageApi.addNewPanel</strong>. The page provides new embeddable state to the
-              embeddable with <strong>pageApi.getSerializedStateForChild</strong>.
-            </p>
-            <p>
-              This example uses session storage to persist saved state and unsaved changes while a
-              production implementation may choose to persist state elsewhere.
-            </p>
-          </>
-        }
-        actionProps={{
-          primary: {
-            children: 'Reset',
-            onClick: () => {
+      <EuiCallOut title="Presentation Container interfaces">
+        <p>
+          At times, you will need to render many embeddables and allow users to add and remove
+          embeddables. Use the <strong>PresentationContainer</strong> and{' '}
+          <strong>CanAddNewPanel</strong> interfaces for this functionallity.
+        </p>
+        <p>
+          New embeddable state is provided to the page by calling{' '}
+          <strong>pageApi.addNewPanel</strong>. The page provides new embeddable state to the
+          embeddable with <strong>pageApi.getSerializedStateForChild</strong>.
+        </p>
+        <p>
+          This example uses session storage to persist saved state and unsaved changes while a
+          production implementation may choose to persist state elsewhere.
+          <EuiButtonEmpty
+            color={'warning'}
+            onClick={() => {
               lastSavedStateSessionStorage.clear();
               unsavedChangesSessionStorage.clear();
               window.location.reload();
-            },
-          },
-        }}
-      />
+            }}
+          >
+            Reset
+          </EuiButtonEmpty>
+        </p>
+      </EuiCallOut>
 
       <EuiSpacer size="m" />
 

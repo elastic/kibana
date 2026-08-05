@@ -8,8 +8,7 @@
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  // Failing: See https://github.com/elastic/kibana/issues/280842
-  describe.skip('Serverless Common UI - Examples', function () {
+  describe('Serverless Common UI - Examples', function () {
     this.tags(['skipMKI', 'esGate']);
 
     loadTestFile(require.resolve('./data_view_field_editor_example'));

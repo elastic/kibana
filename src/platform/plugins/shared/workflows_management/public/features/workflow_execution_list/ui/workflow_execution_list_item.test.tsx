@@ -9,7 +9,6 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionListItem } from './workflow_execution_list_item';
 
@@ -21,23 +20,12 @@ jest.mock('../../../shared/ui/use_formatted_date', () => ({
   useGetFormattedDateTime: () => (date: Date) => date.toISOString(),
 }));
 
-const executedByProfile: UserProfileWithAvatar = {
-  uid: 'u_tal',
-  enabled: true,
-  user: {
-    username: 'tal',
-    full_name: 'Tal Borenstein',
-    email: 'tal.borenstein@elastic.co',
-  },
-  data: {},
-};
-
 const defaultProps = {
   status: ExecutionStatus.COMPLETED,
   isTestRun: false,
   startedAt: new Date('2026-01-01T00:00:00Z'),
   duration: 1000,
-  executedByProfile,
+  executedBy: 'tal',
   triggeredBy: 'manual',
 };
 
@@ -46,44 +34,27 @@ describe('WorkflowExecutionListItem', () => {
     it('should not render executor when showExecutor is false (default)', () => {
       render(<WorkflowExecutionListItem {...defaultProps} />);
 
-      expect(screen.queryByText('Tal Borenstein')).not.toBeInTheDocument();
+      expect(screen.queryByText('tal')).not.toBeInTheDocument();
     });
 
     it('should not render executor when showExecutor is explicitly false', () => {
       render(<WorkflowExecutionListItem {...defaultProps} showExecutor={false} />);
 
-      expect(screen.queryByText('Tal Borenstein')).not.toBeInTheDocument();
+      expect(screen.queryByText('tal')).not.toBeInTheDocument();
     });
 
-    it('should render executor when showExecutor is true and the profile is resolved', () => {
+    it('should render executor when showExecutor is true', () => {
       render(<WorkflowExecutionListItem {...defaultProps} showExecutor={true} />);
 
-      expect(screen.getByText('Tal Borenstein')).toBeInTheDocument();
+      expect(screen.getByText('tal')).toBeInTheDocument();
     });
 
-    it('should render unresolved executor labels when provided', () => {
+    it('should not render executor when showExecutor is true but executedBy is undefined', () => {
       render(
-        <WorkflowExecutionListItem
-          {...defaultProps}
-          executedByLabel="elastic"
-          executedByProfile={undefined}
-          showExecutor={true}
-        />
+        <WorkflowExecutionListItem {...defaultProps} executedBy={undefined} showExecutor={true} />
       );
 
-      expect(screen.getByText('elastic')).toBeInTheDocument();
-    });
-
-    it('should not render unresolved executor values without a label', () => {
-      render(
-        <WorkflowExecutionListItem
-          {...defaultProps}
-          executedByProfile={undefined}
-          showExecutor={true}
-        />
-      );
-
-      expect(screen.queryByText('Tal Borenstein')).not.toBeInTheDocument();
+      expect(screen.queryByText('tal')).not.toBeInTheDocument();
     });
   });
 });

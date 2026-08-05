@@ -198,35 +198,6 @@ export const ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE: KibanaRole = {
   ],
 };
 
-/**
- * Everything the action policy form page needs to complete a create/edit
- * round-trip in the browser. Each extra privilege is one the form actually
- * exercises:
- *
- * - `alerting_v2_rules: ['read']` — the create and upsert routes require
- *   `rules.read` on top of `actionPolicies.write`.
- * - `alerting_v2_alerts: ['read']` — the matcher input fetches data-field
- *   suggestions from `GET /suggestions/rule_event_fields`.
- * - `workflowsManagement: ['read']` — destinations are workflow references, so
- *   the `destinationsInput` combo box lists workflows via the workflows plugin.
- */
-export const ALERTING_V2_ACTION_POLICY_FORM_ROLE: KibanaRole = {
-  elasticsearch: WRITER_ES_PRIVILEGES,
-  kibana: [
-    {
-      base: [],
-      feature: {
-        alerting_v2_action_policies: ['all'],
-        alerting_v2_rules: ['read'],
-        alerting_v2_alerts: ['read'],
-        workflowsManagement: ['read'],
-        discover: ['all'],
-      },
-      spaces: ['*'],
-    },
-  ],
-};
-
 export const ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE: KibanaRole = {
   elasticsearch: WRITER_ES_PRIVILEGES,
   kibana: [

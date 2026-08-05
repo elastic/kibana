@@ -58,11 +58,6 @@ export {
   type AskUserQuestionStepData,
   createAskUserQuestionStep,
   isAskUserQuestionStep,
-  type RelevantSkill,
-  type RelevantSkillsStep,
-  type RelevantSkillsStepData,
-  createRelevantSkillsStep,
-  isRelevantSkillsStep,
 } from './conversation';
 export {
   ChatEventType,

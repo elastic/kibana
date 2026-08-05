@@ -12,9 +12,6 @@ import type {
 } from './plugin';
 import { SignificantEventsPublicPlugin } from './plugin';
 
-export type { SignificantEventsRepositoryClient } from './api';
-export type { SignificantEventsPublicPluginSetup, SignificantEventsPublicPluginStart };
-
 export const plugin: PluginInitializer<
   SignificantEventsPublicPluginSetup,
   SignificantEventsPublicPluginStart

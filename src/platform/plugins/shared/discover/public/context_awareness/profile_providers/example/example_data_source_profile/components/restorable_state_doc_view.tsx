@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { createRestorableStateProvider } from '@kbn/restorable-state';
-import { KbnInfoCallout } from '@kbn/ui-callout';
 
 const RestorableStateDocViewBase: React.FC<{
   clickCount: number;
@@ -26,18 +25,13 @@ const RestorableStateDocViewBase: React.FC<{
       css={{ padding: euiTheme.size.m }}
     >
       <EuiFlexItem grow={false}>
-        <KbnInfoCallout
-          title="DocView restorable state"
-          text={
-            <p>
-              By wrapping your custom <code>DocView</code> with <code>withRestorableState</code> and
-              using <code>useRestorableState</code>, you can easily add restorable state to your
-              component. State is coupled to the specific tab and will be restored when navigating
-              away and back to the tab as long as you don&apos;t close the flyout or change the
-              displayed document.
-            </p>
-          }
-        />
+        <EuiCallOut title="DocView restorable state" color="primary" iconType="info">
+          By wrapping your custom <code>DocView</code> with <code>withRestorableState</code> and
+          using <code>useRestorableState</code>, you can easily add restorable state to your
+          component. State is coupled to the specific tab and will be restored when navigating away
+          and back to the tab as long as you don&apos;t close the flyout or change the displayed
+          document.
+        </EuiCallOut>
       </EuiFlexItem>
       <EuiFlexGroup gutterSize="s" direction="column">
         <EuiFlexItem grow={false}>

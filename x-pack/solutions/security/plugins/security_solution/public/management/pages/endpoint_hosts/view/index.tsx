@@ -33,7 +33,6 @@ import type {
   AgentPolicyDetailsDeployAgentAction,
   CreatePackagePolicyRouteState,
 } from '@kbn/fleet-plugin/public';
-import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { isPolicyOutOfDate } from '../utils';
 import { useGetAgentStatus } from '../../../hooks/agents/use_get_agent_status';
 import { TransformFailedCallout } from './components/transform_failed_callout';
@@ -422,10 +421,10 @@ export const EndpointList = () => {
   );
 
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
-    INTEGRATIONS_PLUGIN_ID,
+    'fleet',
     {
-      path: `/detail/${
-        endpointPackageVersion ? `endpoint-${endpointPackageVersion}` : 'endpoint'
+      path: `/integrations/${
+        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}` : ''
       }/add-integration`,
       state: stateHandleCreatePolicyClick,
     }

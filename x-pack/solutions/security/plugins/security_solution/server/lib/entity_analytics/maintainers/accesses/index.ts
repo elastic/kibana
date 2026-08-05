@@ -44,7 +44,6 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
       crudClient,
       entityMetadataClient,
       integrations: ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS,
-      maintainerName: 'accesses_frequently_and_infrequently',
       signal,
       telemetryCollector: collector,
     });

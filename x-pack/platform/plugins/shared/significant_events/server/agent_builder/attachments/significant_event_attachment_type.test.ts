@@ -22,6 +22,7 @@ import {
 const event: SignificantEvent = {
   '@timestamp': '2026-01-01T00:00:00.000Z',
   event_uuid: 'event-1',
+  discovery_id: 'discovery-1',
   event_id: 'payment-outage',
   status: 'open',
   workflow_execution_id: 'workflow-1',

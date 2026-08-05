@@ -13,7 +13,7 @@ import { transformOut } from './transform_out';
 describe('single metric viewer embeddable transforms', () => {
   describe('schema', () => {
     it('accepts a minimal state and defaults selected_detector_index to 0', () => {
-      const state = singleMetricViewerEmbeddableStateSchema.parse({
+      const state = singleMetricViewerEmbeddableStateSchema.validate({
         job_ids: ['job-1'],
       });
 
@@ -24,7 +24,7 @@ describe('single metric viewer embeddable transforms', () => {
     });
 
     it('accepts a fully populated state', () => {
-      const state = singleMetricViewerEmbeddableStateSchema.parse({
+      const state = singleMetricViewerEmbeddableStateSchema.validate({
         job_ids: ['job-1'],
         selected_detector_index: 2,
         selected_entities: { airline: 'AAL' },
@@ -47,7 +47,7 @@ describe('single metric viewer embeddable transforms', () => {
 
     it('rejects an empty job_ids array', () => {
       expect(() =>
-        singleMetricViewerEmbeddableStateSchema.parse({
+        singleMetricViewerEmbeddableStateSchema.validate({
           job_ids: [],
         })
       ).toThrow();
@@ -55,7 +55,7 @@ describe('single metric viewer embeddable transforms', () => {
 
     it('rejects multiple job_ids', () => {
       expect(() =>
-        singleMetricViewerEmbeddableStateSchema.parse({
+        singleMetricViewerEmbeddableStateSchema.validate({
           job_ids: ['job-1', 'job-2'],
         })
       ).toThrow();
@@ -63,7 +63,7 @@ describe('single metric viewer embeddable transforms', () => {
 
     it('rejects a negative selected_detector_index', () => {
       expect(() =>
-        singleMetricViewerEmbeddableStateSchema.parse({
+        singleMetricViewerEmbeddableStateSchema.validate({
           job_ids: ['job-1'],
           selected_detector_index: -1,
         })

@@ -13,7 +13,6 @@ import {
   EuiPopover,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
@@ -109,9 +108,6 @@ export const TakeAction = ({ kqlQuery, isDisabled, additionalItems }: TakeAction
 
   return (
     <EuiPopover
-      aria-label={i18n.translate('xpack.securitySolution.flyout.takeActionAriaLabel', {
-        defaultMessage: 'Take action',
-      })}
       id={smallContextMenuPopoverId}
       button={button}
       isOpen={isPopoverOpen}

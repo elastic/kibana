@@ -6,7 +6,6 @@
  */
 
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import moment from 'moment';
 import { test as baseTest } from '@kbn/scout';
 import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 
@@ -25,21 +24,6 @@ export const ROLLED_UP_MEDIAN_WARNING =
 
 export const TSDB_SCENARIO_DOCUMENT_COUNT = 100;
 
-export interface TsdbScenarioContext {
-  page: ScoutTestFixtures['page'];
-  pageObjects: ScoutTestFixtures['pageObjects'];
-  tsdbScenario: TsdbScenario;
-}
-
-export const sumFirstNValues = (count: number, bars: Array<{ y: number }> | undefined): number =>
-  (bars ?? []).slice(0, count).reduce((sum, bar) => sum + bar.y, 0);
-
-const PICKER_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
-
-/** Offsets a time string by the given milliseconds and returns a picker-formatted string. */
-export const offsetPickerTime = (time: string, milliseconds: number): string =>
-  moment.utc(time).add(milliseconds, 'milliseconds').format(PICKER_FORMAT);
-
 export interface DownsampleTSDBIndexOptions {
   isStream: boolean;
   interval?: string;
@@ -55,8 +39,8 @@ export interface TsdbScenarioIndex {
 }
 
 export interface TsdbScenarioTimeRange {
-  beforeRollover: string;
-  afterRollover: string;
+  beforeUpgrade: string;
+  afterUpgrade: string;
   picker: {
     from: string;
     to: string;
@@ -69,7 +53,7 @@ interface CleanupHandle {
 
 interface TsdbScenarioSetup extends CleanupHandle {
   dataViewTitle: string;
-  expectedDocumentCountBeforeRollover: number;
+  expectedDocumentCountBeforeUpgrade: number;
 }
 
 export interface TsdbHelper {
@@ -81,14 +65,10 @@ export interface TsdbHelper {
     stream: string,
     timeRange: TsdbScenarioTimeRange
   ) => Promise<CleanupHandle>;
-  createDowngradedStream: (
-    stream: string,
-    timeRange: TsdbScenarioTimeRange
-  ) => Promise<CleanupHandle>;
   setupScenario: (
     initialIndex: string,
     indexes: TsdbScenarioIndex[],
-    beforeRollover: string
+    beforeUpgrade: string
   ) => Promise<TsdbScenarioSetup>;
 }
 
@@ -97,7 +77,7 @@ export interface TsdbScenario {
     initialIndex: string,
     indexes: TsdbScenarioIndex[],
     timeRange: TsdbScenarioTimeRange
-  ) => Promise<{ expectedDocumentCountBeforeRollover: number }>;
+  ) => Promise<{ dataViewTitle: string; expectedDocumentCountBeforeUpgrade: number }>;
 }
 
 interface LensUiTestFixtures extends ScoutTestFixtures {
@@ -140,8 +120,8 @@ const retryDownsample = async (downsample: () => Promise<void>): Promise<void> =
 };
 
 export const createTsdbScenarioTimeRange = (now = Date.now()): TsdbScenarioTimeRange => ({
-  beforeRollover: new Date(now - 60 * 60 * 1000).toISOString(),
-  afterRollover: new Date(now).toISOString(),
+  beforeUpgrade: new Date(now - 60 * 60 * 1000).toISOString(),
+  afterUpgrade: new Date(now).toISOString(),
   picker: {
     from: new Date(now - 60 * 60 * 1000).toISOString(),
     to: new Date(now + 2 * 60 * 60 * 1000).toISOString(),
@@ -165,24 +145,18 @@ const runCleanupActions = async (
   }
 };
 
-const getTsdbMapping = ({
-  removeTSDBFields = false,
-  includeTimeSeriesMetadata = true,
-}: {
-  removeTSDBFields?: boolean;
-  includeTimeSeriesMetadata?: boolean;
-} = {}): Record<string, MappingProperty> => ({
+const getTsdbMapping = (removeTSDBFields = false): Record<string, MappingProperty> => ({
   '@timestamp': { type: 'date' },
   request: {
     type: 'keyword',
-    ...(includeTimeSeriesMetadata ? { time_series_dimension: true } : {}),
+    time_series_dimension: true,
   },
   ...(removeTSDBFields
     ? {}
     : {
         bytes_counter: {
           type: 'long',
-          ...(includeTimeSeriesMetadata ? { time_series_metric: 'counter' as const } : {}),
+          time_series_metric: 'counter',
         },
       }),
 });
@@ -212,8 +186,7 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
 
       const putDataStreamTemplate = async (
         stream: string,
-        mode: 'tsdb' | undefined,
-        { includeTimeSeriesMetadata = true }: { includeTimeSeriesMetadata?: boolean } = {}
+        mode: 'tsdb' | undefined
       ): Promise<void> => {
         await esClient.cluster.putComponentTemplate({
           name: `${stream}_mapping`,
@@ -227,7 +200,7 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
                 }
               : {}),
             mappings: {
-              properties: getTsdbMapping({ includeTimeSeriesMetadata }),
+              properties: getTsdbMapping(),
             },
           },
         });
@@ -327,34 +300,12 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
         try {
           log.info(`Creating regular data stream "${stream}"`);
           await createDataStream(stream, undefined);
-          await createDocs(stream, timeRange.beforeRollover, { isStream: true });
+          await createDocs(stream, timeRange.beforeUpgrade, { isStream: true });
 
           log.info(`Upgrading data stream "${stream}" to TSDB`);
           await putDataStreamTemplate(stream, 'tsdb');
           await esClient.indices.rollover({ alias: stream });
-          await createDocs(stream, timeRange.afterRollover, { isStream: true });
-
-          return { cleanup };
-        } catch (error) {
-          await cleanup();
-          throw error;
-        }
-      };
-
-      const createDowngradedStream: TsdbHelper['createDowngradedStream'] = async (
-        stream,
-        timeRange
-      ) => {
-        const cleanup = async () => deleteDataStream(stream);
-        try {
-          log.info(`Creating TSDB data stream "${stream}"`);
-          await createDataStream(stream, 'tsdb');
-          await createDocs(stream, timeRange.beforeRollover, { isStream: true });
-
-          log.info(`Downgrading data stream "${stream}" to a regular data stream`);
-          await putDataStreamTemplate(stream, undefined, { includeTimeSeriesMetadata: false });
-          await esClient.indices.rollover({ alias: stream });
-          await createDocs(stream, timeRange.afterRollover, { isStream: true });
+          await createDocs(stream, timeRange.afterUpgrade, { isStream: true });
 
           return { cleanup };
         } catch (error) {
@@ -366,7 +317,7 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
       const setupScenario: TsdbHelper['setupScenario'] = async (
         initialIndex,
         indexes,
-        beforeRollover
+        beforeUpgrade
       ) => {
         const cleanupActions: Array<() => Promise<void>> = [];
         let downsampledTargetIndex = '';
@@ -382,7 +333,7 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
             if (mode === 'tsdb') {
               cleanupActions.push(async () => deleteDataStream(index));
               await createDataStream(index, 'tsdb');
-              await createDocs(index, beforeRollover, { isStream: true, removeTSDBFields });
+              await createDocs(index, beforeUpgrade, { isStream: true, removeTSDBFields });
             } else {
               cleanupActions.push(async () => {
                 await esClient.indices.delete({ index }, { ignore: [404] });
@@ -390,10 +341,10 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
               await esClient.indices.create({
                 index,
                 mappings: {
-                  properties: getTsdbMapping({ removeTSDBFields }),
+                  properties: getTsdbMapping(removeTSDBFields),
                 },
               });
-              await createDocs(index, beforeRollover, { isStream: false, removeTSDBFields });
+              await createDocs(index, beforeUpgrade, { isStream: false, removeTSDBFields });
             }
 
             if (downsample) {
@@ -414,7 +365,7 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
             }`,
             // Lens count aggregation treats the downsample target as the stream's rolled-up data;
             // it does not add another logical source contribution for that target.
-            expectedDocumentCountBeforeRollover: indexes.length * TSDB_SCENARIO_DOCUMENT_COUNT,
+            expectedDocumentCountBeforeUpgrade: indexes.length * TSDB_SCENARIO_DOCUMENT_COUNT,
             cleanup,
           };
         } catch (error) {
@@ -423,12 +374,7 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
         }
       };
 
-      await use({
-        downsampleTSDBIndex,
-        createUpgradedStream,
-        createDowngradedStream,
-        setupScenario,
-      });
+      await use({ downsampleTSDBIndex, createUpgradedStream, setupScenario });
     },
     { scope: 'worker' },
   ],
@@ -440,7 +386,7 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
       const scenario = await tsdbHelper.setupScenario(
         initialIndex,
         indexes,
-        timeRange.beforeRollover
+        timeRange.beforeUpgrade
       );
       try {
         const { data: dataView } = await apiServices.dataViews.create({
@@ -455,7 +401,8 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
           'timepicker:timeDefaults': JSON.stringify(timeRange.picker),
         });
         return {
-          expectedDocumentCountBeforeRollover: scenario.expectedDocumentCountBeforeRollover,
+          dataViewTitle: scenario.dataViewTitle,
+          expectedDocumentCountBeforeUpgrade: scenario.expectedDocumentCountBeforeUpgrade,
         };
       } catch (error) {
         await scenario.cleanup();

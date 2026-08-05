@@ -42,6 +42,20 @@ test.describe(
       const serviceIconsRequests = countRequests(serviceIconsPattern);
       const apmPoliciesRequests = countRequests(apmPoliciesPattern);
 
+      // Set the response waiters up before navigating so an early response can't
+      // be missed; awaiting them lets the counters settle before we assert.
+      const sharedResourceResponses = Promise.all([
+        page.waitForResponse((response) => hasDataPattern.test(response.url()), {
+          timeout: EXTENDED_TIMEOUT,
+        }),
+        page.waitForResponse((response) => serviceIconsPattern.test(response.url()), {
+          timeout: EXTENDED_TIMEOUT,
+        }),
+        page.waitForResponse((response) => apmPoliciesPattern.test(response.url()), {
+          timeout: EXTENDED_TIMEOUT,
+        }),
+      ]);
+
       await navigationPage.gotoServiceOverview(testData.SERVICE_OPBEANS_JAVA, {
         comparisonEnabled: 'true',
         environment: ENVIRONMENT_ALL,
@@ -56,10 +70,13 @@ test.describe(
         });
       });
 
-      // Waiting for the tabs to render signals the main template has mounted and
-      // issued the three shared-resource requests. The counters increment on send,
-      // so we can't await their responses: has_apm_policies is aborted once
-      // has_data reports hasData:true, and would never resolve.
+      await test.step('shared resources loaded once', async () => {
+        await sharedResourceResponses;
+        expect(hasDataRequests()).toBe(1);
+        expect(serviceIconsRequests()).toBe(1);
+        expect(apmPoliciesRequests()).toBe(1);
+      });
+
       await test.step('wait for other tabs to load', async () => {
         await expect(page.getByTestId('transactionsTab')).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
@@ -67,12 +84,6 @@ test.describe(
         await expect(page.getByTestId('dependenciesTab')).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
-      });
-
-      await test.step('shared resources loaded once', async () => {
-        expect(hasDataRequests()).toBe(1);
-        expect(serviceIconsRequests()).toBe(1);
-        expect(apmPoliciesRequests()).toBe(1);
       });
 
       await test.step('navigate to the errors tab', async () => {

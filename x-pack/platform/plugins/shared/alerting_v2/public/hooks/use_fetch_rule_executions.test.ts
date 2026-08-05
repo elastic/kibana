@@ -10,7 +10,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
-import { toListRuleExecutionsRequest, useFetchRuleExecutions } from './use_fetch_rule_executions';
+import { useFetchRuleExecutions } from './use_fetch_rule_executions';
 
 jest.mock('@kbn/core-di-browser');
 
@@ -27,20 +27,20 @@ const createWrapper = () => {
 };
 
 describe('useFetchRuleExecutions', () => {
-  const mockListRuleExecutions = jest.fn();
+  const mockGetRuleExecutions = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseService.mockImplementation((service: unknown) => {
       if (service === ExecutionHistoryApi) {
-        return { listRuleExecutions: mockListRuleExecutions } as any;
+        return { getRuleExecutions: mockGetRuleExecutions } as any;
       }
       return undefined as any;
     });
   });
 
-  it('calls listRuleExecutions with the provided params', async () => {
-    mockListRuleExecutions.mockResolvedValue({
+  it('calls getRuleExecutions with the provided params', async () => {
+    mockGetRuleExecutions.mockResolvedValue({
       items: [],
       total: 0,
       page: 2,
@@ -52,9 +52,9 @@ describe('useFetchRuleExecutions', () => {
     });
 
     await waitFor(() => {
-      expect(mockListRuleExecutions).toHaveBeenCalledWith({
+      expect(mockGetRuleExecutions).toHaveBeenCalledWith({
         page: 2,
-        per_page: 50,
+        perPage: 50,
         outcome: ['failure'],
       });
     });
@@ -67,7 +67,7 @@ describe('useFetchRuleExecutions', () => {
       page: 1,
       perPage: 10,
     };
-    mockListRuleExecutions.mockResolvedValue(fakeResponse);
+    mockGetRuleExecutions.mockResolvedValue(fakeResponse);
 
     const { result } = renderHook(() => useFetchRuleExecutions({ page: 1, perPage: 10 }), {
       wrapper: createWrapper(),
@@ -79,7 +79,7 @@ describe('useFetchRuleExecutions', () => {
 
   it('exposes isError and the error when the API rejects', async () => {
     const error = new Error('boom');
-    mockListRuleExecutions.mockRejectedValue(error);
+    mockGetRuleExecutions.mockRejectedValue(error);
 
     const { result } = renderHook(() => useFetchRuleExecutions({ page: 1, perPage: 10 }), {
       wrapper: createWrapper(),
@@ -87,31 +87,5 @@ describe('useFetchRuleExecutions', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current.error).toBe(error);
-  });
-});
-
-describe('toListRuleExecutionsRequest', () => {
-  it('maps camelCase view state to the snake_case request and translates the sort value', () => {
-    expect(
-      toListRuleExecutionsRequest({
-        page: 2,
-        perPage: 50,
-        ruleIds: ['rule-1'],
-        outcome: ['failure'],
-        from: '2026-01-01T00:00:00.000Z',
-        to: '2026-01-02T00:00:00.000Z',
-        sort: 'startedAt',
-        sortOrder: 'asc',
-      })
-    ).toEqual({
-      page: 2,
-      per_page: 50,
-      rule_ids: ['rule-1'],
-      outcome: ['failure'],
-      from: '2026-01-01T00:00:00.000Z',
-      to: '2026-01-02T00:00:00.000Z',
-      sort: 'started_at',
-      sort_order: 'asc',
-    });
   });
 });

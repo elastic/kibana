@@ -18,6 +18,7 @@ import {
   EuiLink,
   EuiSkeletonRectangle,
   EuiSkeletonTitle,
+  EuiCallOut,
   type UseEuiTheme,
   useIsWithinBreakpoints,
   useEuiTheme,
@@ -27,7 +28,6 @@ import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import type { DataView, DataViewSpec } from '../shared_imports';
 import { Form, useForm, useFormData, useKibana, UseField } from '../shared_imports';
@@ -336,12 +336,14 @@ const IndexPatternEditorFlyoutContentComponent = ({
             </EuiLink>
           )}
           {isManaged && (
-            <KbnInfoCallout
+            <EuiCallOut
               announceOnMount={false}
               title={i18n.translate('indexPatternEditor.managedDataViewCalloutMessage', {
                 defaultMessage:
                   "You can't edit managed data views. Instead, you can duplicate the data view and make changes to your newly created copy.",
               })}
+              color="primary"
+              iconType="info"
               size="s"
               css={{ marginTop: euiTheme.base }}
             />

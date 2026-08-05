@@ -8,15 +8,20 @@
  */
 
 import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
 import { getFieldValue } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { KbnInfoCallout } from '@kbn/ui-callout';
 
 export const CustomDocViewerFooter: React.FC<DocViewRenderProps> = ({ hit }) => {
   const message = getFieldValue(hit, 'message')?.toString();
 
   return (
-    <KbnInfoCallout title="Example custom footer" data-test-subj="exampleCustomDocViewerFooter">
+    <EuiCallOut
+      title="Example custom footer"
+      color="primary"
+      iconType="info"
+      data-test-subj="exampleCustomDocViewerFooter"
+    >
       <p>
         This is a custom footer rendered via the <code>renderFooter</code> extension point.
       </p>
@@ -26,6 +31,6 @@ export const CustomDocViewerFooter: React.FC<DocViewRenderProps> = ({ hit }) => 
           {message.length > 100 && '...'}
         </p>
       )}
-    </KbnInfoCallout>
+    </EuiCallOut>
   );
 };

@@ -107,8 +107,8 @@ export const registerGetDatasetRoute = ({
             context: 'Get evaluation dataset',
           });
           if (tooLarge) return tooLarge;
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          logger.error(`Failed to get evaluation dataset: ${errorMessage}`);
+
+          logger.error(`Failed to get evaluation dataset: ${error}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to get evaluation dataset' },

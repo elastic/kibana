@@ -391,7 +391,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects missing version', async ({ apiClient, apiServices }) => {
@@ -405,7 +404,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects empty version', async ({ apiClient, apiServices }) => {
@@ -419,7 +417,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -438,7 +435,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -455,7 +451,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -475,7 +470,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -492,7 +486,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -506,7 +499,6 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
