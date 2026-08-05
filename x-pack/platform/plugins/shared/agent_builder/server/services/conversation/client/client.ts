@@ -25,7 +25,9 @@ import {
   buildReadAccessFilter,
   getConversationPermissions,
   hasConversationConverseAccess,
+  hasConversationDeleteAccess,
   hasConversationOwnerAccess,
+  hasConversationRenameAccess,
   type ConversationAccess,
 } from '../access_control';
 import type {
@@ -242,7 +244,7 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async delete(conversationId: string): Promise<boolean> {
-    await this.getDocumentWithAccess({ conversationId, access: 'owner' });
+    await this.getDocumentWithAccess({ conversationId, access: 'delete' });
 
     try {
       const { result } = await this.storage.getClient().delete({ id: conversationId });
@@ -337,6 +339,14 @@ class ConversationClientImpl implements ConversationClient {
 
       case 'owner':
         allowed = hasConversationOwnerAccess({ conversation, user: this.user });
+        break;
+
+      case 'rename':
+        allowed = hasConversationRenameAccess({ conversation, user: this.user });
+        break;
+
+      case 'delete':
+        allowed = hasConversationDeleteAccess({ conversation, user: this.user });
         break;
     }
 

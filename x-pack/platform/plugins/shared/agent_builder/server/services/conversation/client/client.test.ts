@@ -467,6 +467,45 @@ describe('ConversationClient', () => {
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
+    it('allows the owner to rename with rename access', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      const result = await client.update(
+        { id: 'conversation-1', title: 'Renamed' },
+        { access: 'rename' }
+      );
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'conversation-1',
+          document: expect.objectContaining({ title: 'Renamed' }),
+        })
+      );
+      expect(result.title).toBe('Renamed');
+    });
+
+    it('denies rename access to a public non-owner conversation', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              userId: 'other-user-id',
+              username: 'other-user',
+              accessMode: ConversationAccessControlMode.Public,
+            }),
+          ],
+        },
+      });
+
+      await expect(
+        client.update({ id: 'conversation-1', title: 'Renamed' }, { access: 'rename' })
+      ).rejects.toThrow('Conversation conversation-1 not found');
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
     it('allows public non-owner conversations to be marked read with converse access', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: {
@@ -655,9 +694,9 @@ describe('ConversationClient', () => {
       const { permissions } = await client.get('conversation-1');
 
       expect(permissions.rename).toBe(false);
-      await expect(client.update({ id: 'conversation-1', title: 'renamed' })).rejects.toThrow(
-        'Conversation conversation-1 not found'
-      );
+      await expect(
+        client.update({ id: 'conversation-1', title: 'renamed' }, { access: 'rename' })
+      ).rejects.toThrow('Conversation conversation-1 not found');
     });
   });
 });

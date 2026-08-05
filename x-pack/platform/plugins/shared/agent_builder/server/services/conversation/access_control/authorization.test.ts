@@ -8,6 +8,7 @@
 import { ConversationAccessControlMode, type UserIdAndName } from '@kbn/agent-builder-common';
 import type { ConversationProperties } from '../client/storage';
 import {
+  getConversationPermissions,
   hasConversationConverseAccess,
   hasConversationOwnerAccess,
   isConversationOwner,
@@ -73,6 +74,57 @@ describe('conversation access control', () => {
 
     it('treats missing access_control as private for non-owners', () => {
       expect(hasConversationConverseAccess({ conversation: conversation(), user })).toBe(false);
+    });
+  });
+
+  describe('getConversationPermissions', () => {
+    it('grants rename and delete to the owner matched by profile id', () => {
+      expect(
+        getConversationPermissions({
+          conversation: conversation({ user_id: user.id, user_name: 'old-alice' }),
+          user,
+        })
+      ).toEqual({ rename: true, delete: true });
+    });
+
+    it('grants rename and delete to the owner of a legacy conversation without a profile id', () => {
+      expect(
+        getConversationPermissions({
+          conversation: conversation({ user_id: undefined, user_name: user.username }),
+          user,
+        })
+      ).toEqual({ rename: true, delete: true });
+    });
+
+    it('denies rename and delete to a participant of a public conversation', () => {
+      expect(
+        getConversationPermissions({
+          conversation: conversation({
+            access_control: { access_mode: ConversationAccessControlMode.Public },
+          }),
+          user,
+        })
+      ).toEqual({ rename: false, delete: false });
+    });
+
+    it('denies rename and delete on a public conversation owned by a service account', () => {
+      expect(
+        getConversationPermissions({
+          conversation: conversation({
+            user_id: 'relay-service-account-profile-id',
+            user_name: 'relay-service-account',
+            access_control: { access_mode: ConversationAccessControlMode.Public },
+          }),
+          user,
+        })
+      ).toEqual({ rename: false, delete: false });
+    });
+
+    it('denies rename and delete to a non-owner of a private conversation', () => {
+      expect(getConversationPermissions({ conversation: conversation(), user })).toEqual({
+        rename: false,
+        delete: false,
+      });
     });
   });
 });

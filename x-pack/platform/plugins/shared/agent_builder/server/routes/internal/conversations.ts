@@ -46,10 +46,10 @@ export function registerInternalConversationRoutes({
       const { title } = request.body;
 
       const client = await conversationsService.getScopedClient({ request });
-      const updatedConversation = await client.update({
-        id: conversationId,
-        title,
-      });
+      const updatedConversation = await client.update(
+        { id: conversationId, title },
+        { access: 'rename' }
+      );
 
       return response.ok<RenameConversationResponse>({
         body: {
