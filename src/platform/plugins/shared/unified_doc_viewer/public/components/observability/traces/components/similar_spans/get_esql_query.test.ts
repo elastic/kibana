@@ -27,7 +27,7 @@ describe('getEsqlQuery', () => {
     );
 
     expect(result).toEqual(
-      'FROM index\n  | WHERE `service.name` == "orders-service" AND `transaction.name` == "GET /api/orders" AND `transaction.type` == "request"'
+      'FROM index\n  | WHERE service.name == "orders-service" AND transaction.name == "GET /api/orders" AND transaction.type == "request"'
     );
   });
 
@@ -42,7 +42,7 @@ describe('getEsqlQuery', () => {
     );
 
     expect(result).toEqual(
-      'FROM index\n  | WHERE `service.name` == "orders-service" AND `span.name` == "span-1"'
+      'FROM index\n  | WHERE service.name == "orders-service" AND span.name == "span-1"'
     );
   });
 

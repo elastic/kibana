@@ -10,7 +10,7 @@ import { esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import { castArray } from 'lodash';
 import { getUnifiedDocViewerServices } from '../../plugin';
-import { withUnmappedFields, type UnmappedFieldsPolicy } from '../esql_unmapped_fields';
+import { withUnmappedFields, type UnmappedFieldsPolicy } from '../../utils/esql_unmapped_fields';
 
 export type GenerateDiscoverLink = (whereClause?: ESQLAstExpression) => string | undefined;
 

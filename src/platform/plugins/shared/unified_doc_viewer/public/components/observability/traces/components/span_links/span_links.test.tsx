@@ -189,7 +189,7 @@ describe('getOutgoingSpanLinksESQL', () => {
     ];
 
     expect(renderClause(getOutgoingSpanLinksESQL(spanLinks))).toEqual(
-      'FROM apm-traces-*\n  | WHERE (`trace.id` IN ("trace1", "trace2")) AND (`span.id` IN ("span1", "span2"))'
+      'FROM apm-traces-*\n  | WHERE (trace.id IN ("trace1", "trace2")) AND (span.id IN ("span1", "span2"))'
     );
   });
 
@@ -197,7 +197,7 @@ describe('getOutgoingSpanLinksESQL', () => {
     const spanLinks = [{ traceId: 'traceX', spanId: 'spanX' }];
 
     expect(renderClause(getOutgoingSpanLinksESQL(spanLinks))).toEqual(
-      'FROM apm-traces-*\n  | WHERE (`trace.id` IN ("traceX")) AND (`span.id` IN ("spanX"))'
+      'FROM apm-traces-*\n  | WHERE (trace.id IN ("traceX")) AND (span.id IN ("spanX"))'
     );
   });
 });

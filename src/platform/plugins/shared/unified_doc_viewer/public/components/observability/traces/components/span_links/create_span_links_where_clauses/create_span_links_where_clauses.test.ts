@@ -32,7 +32,7 @@ describe('span links where clauses', () => {
       } as unknown as SpanLinkDetails;
 
       expect(render(createSpanNameWhereClause(item))).toEqual(
-        'FROM apm-traces-*\n  | WHERE `transaction.id` == "transaction999"'
+        'FROM apm-traces-*\n  | WHERE transaction.id == "transaction999"'
       );
     });
 
@@ -44,7 +44,7 @@ describe('span links where clauses', () => {
       } as unknown as SpanLinkDetails;
 
       expect(render(createSpanNameWhereClause(item))).toEqual(
-        'FROM apm-traces-*\n  | WHERE `span.id` == "span123"'
+        'FROM apm-traces-*\n  | WHERE span.id == "span123"'
       );
     });
   });
@@ -68,7 +68,7 @@ describe('span links where clauses', () => {
       } as unknown as SpanLinkDetails;
 
       expect(render(createServiceNameWhereClause(item)!)).toEqual(
-        'FROM apm-traces-*\n  | WHERE `service.name` == "myService"'
+        'FROM apm-traces-*\n  | WHERE service.name == "myService"'
       );
     });
   });
@@ -82,7 +82,7 @@ describe('span links where clauses', () => {
       } as unknown as SpanLinkDetails;
 
       expect(render(createTraceIdWhereClause(item))).toEqual(
-        'FROM apm-traces-*\n  | WHERE `trace.id` == "trace456"'
+        'FROM apm-traces-*\n  | WHERE trace.id == "trace456"'
       );
     });
   });

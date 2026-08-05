@@ -24,7 +24,8 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { ContentFrameworkChart } from '../../../../content_framework/chart';
-import { withUnmappedFields } from '../../../../../hooks/esql_unmapped_fields';
+import { esqlColumn } from '../../../../../utils/esql_column';
+import { withUnmappedFields } from '../../../../../utils/esql_unmapped_fields';
 
 const chartTitle = i18n.translate(
   'unifiedDocViewer.docViewerLogsOverview.subComponents.similarErrors.occurrences.title',
@@ -118,7 +119,7 @@ export function SimilarErrorsOccurrencesChart({
       return undefined;
     }
 
-    const timestamp = esql.col(fieldConstants.TIMESTAMP_FIELD);
+    const timestamp = esqlColumn(fieldConstants.TIMESTAMP_FIELD);
     const query = esql.from(indexes.logs);
     withUnmappedFields(query);
     query.where`${baseEsqlQuery}`;

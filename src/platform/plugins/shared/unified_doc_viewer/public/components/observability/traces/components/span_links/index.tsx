@@ -34,6 +34,7 @@ import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import { ContentFrameworkSection } from '../../../../content_framework/lazy_content_framework_section';
+import { esqlColumn } from '../../../../../utils/esql_column';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getColumns } from './get_columns';
 import { useFetchSpanLinks } from './use_fetch_span_links';
@@ -245,7 +246,7 @@ export function getOutgoingSpanLinksESQL(spanLinks: SpanLinkDetails[]): ESQLAstE
   const traceIdLiterals = traceIds.map((id) => esql.str(id));
   const spanIdLiterals = spanIds.map((id) => esql.str(id));
 
-  return esql.exp`${esql.col(TRACE_ID_FIELD)} IN (${traceIdLiterals}) AND ${esql.col(
+  return esql.exp`${esqlColumn(TRACE_ID_FIELD)} IN (${traceIdLiterals}) AND ${esqlColumn(
     SPAN_ID_FIELD
   )} IN (${spanIdLiterals})`;
 }

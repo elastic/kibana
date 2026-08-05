@@ -84,8 +84,8 @@ describe('useGetGenerateDiscoverLink', () => {
 
     const url = result.current.generateDiscoverLink(
       Builder.expression.func.binary('and', [
-        esql.exp`${esql.col('trace.id')} == ${esql.str('abc123')}`,
-        esql.exp`${esql.col('exception.message')} == ${esql.str('Test error')}`,
+        esql.exp`${esql.col(['trace', 'id'])} == ${esql.str('abc123')}`,
+        esql.exp`${esql.col(['exception', 'message'])} == ${esql.str('Test error')}`,
       ])
     );
 
@@ -93,7 +93,7 @@ describe('useGetGenerateDiscoverLink', () => {
     const esqlQuery = (mockGetRedirectUrl.mock.calls[0] as any)?.[0]?.query?.esql;
 
     expect(esqlQuery).toBe(`FROM traces-*
-  | WHERE \`trace.id\` == "abc123" AND \`exception.message\` == "Test error"`);
+  | WHERE trace.id == "abc123" AND exception.message == "Test error"`);
   });
 
   it('prepends the SET unmapped_fields directive to the Discover URL query when unmappedFieldsPolicy is provided', () => {
@@ -104,14 +104,14 @@ describe('useGetGenerateDiscoverLink', () => {
     mockDiscoverLocator.getRedirectUrl = mockGetRedirectUrl;
 
     const url = result.current.generateDiscoverLink(
-      esql.exp`${esql.col('trace.id')} == ${esql.str('abc123')}`
+      esql.exp`${esql.col(['trace', 'id'])} == ${esql.str('abc123')}`
     );
 
     expect(url).toBe(DISCOVER_URL);
     const esqlQuery = (mockGetRedirectUrl.mock.calls[0] as any)?.[0]?.query?.esql;
 
     expect(esqlQuery).toBe(`SET unmapped_fields = "NULLIFY"; FROM traces-*
-  | WHERE \`trace.id\` == "abc123"`);
+  | WHERE trace.id == "abc123"`);
   });
 
   it('nullifies unmapped error.* columns in the Discover href (#281060)', () => {
@@ -122,14 +122,15 @@ describe('useGetGenerateDiscoverLink', () => {
     mockDiscoverLocator.getRedirectUrl = mockGetRedirectUrl;
 
     result.current.generateDiscoverLink(
-      esql.exp`${esql.col('service.name')} == ${esql.str('payment')} AND ${esql.col(
-        'error.culprit'
-      )} == ${esql.str('charge')}`
+      esql.exp`${esql.col(['service', 'name'])} == ${esql.str('payment')} AND ${esql.col([
+        'error',
+        'culprit',
+      ])} == ${esql.str('charge')}`
     );
 
     const esqlQuery = (mockGetRedirectUrl.mock.calls[0] as any)?.[0]?.query?.esql;
 
     expect(esqlQuery).toBe(`SET unmapped_fields = "NULLIFY"; FROM logs-*
-  | WHERE \`service.name\` == "payment" AND \`error.culprit\` == "charge"`);
+  | WHERE service.name == "payment" AND error.culprit == "charge"`);
   });
 });

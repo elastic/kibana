@@ -10,6 +10,7 @@ import { Builder, esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import { SPAN_ID_FIELD, TRACE_ID_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
 import { PROCESSOR_EVENT, ERROR_LOG_LEVEL, OTEL_EVENT_NAME } from '@kbn/apm-types';
+import { esqlColumn } from '../../../../utils/esql_column';
 
 const createBaseTraceContextFilters = ({
   traceId,
@@ -20,12 +21,12 @@ const createBaseTraceContextFilters = ({
   spanId?: string;
   transactionId?: string;
 }): ESQLAstExpression => {
-  const traceFilter = esql.exp`${esql.col(TRACE_ID_FIELD)} == ${esql.str(traceId)}`;
+  const traceFilter = esql.exp`${esqlColumn(TRACE_ID_FIELD)} == ${esql.str(traceId)}`;
 
   if (transactionId && spanId) {
     return Builder.expression.func.binary('and', [
       traceFilter,
-      esql.exp`${esql.col(TRANSACTION_ID_FIELD)} == ${esql.str(transactionId)} OR ${esql.col(
+      esql.exp`${esqlColumn(TRANSACTION_ID_FIELD)} == ${esql.str(transactionId)} OR ${esqlColumn(
         SPAN_ID_FIELD
       )} == ${esql.str(spanId)}`,
     ]);
@@ -33,13 +34,13 @@ const createBaseTraceContextFilters = ({
   if (transactionId) {
     return Builder.expression.func.binary('and', [
       traceFilter,
-      esql.exp`${esql.col(TRANSACTION_ID_FIELD)} == ${esql.str(transactionId)}`,
+      esql.exp`${esqlColumn(TRANSACTION_ID_FIELD)} == ${esql.str(transactionId)}`,
     ]);
   }
   if (spanId) {
     return Builder.expression.func.binary('and', [
       traceFilter,
-      esql.exp`${esql.col(SPAN_ID_FIELD)} == ${esql.str(spanId)}`,
+      esql.exp`${esqlColumn(SPAN_ID_FIELD)} == ${esql.str(spanId)}`,
     ]);
   }
 

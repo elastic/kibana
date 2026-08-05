@@ -10,6 +10,7 @@
 import { Builder, esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import { fieldConstants } from '@kbn/discover-utils';
+import { esqlColumn } from '../../../../../utils/esql_column';
 
 interface ErrorField {
   fieldName: string;
@@ -36,18 +37,18 @@ export function getEsqlQuery({
   }
 
   const conditions: ESQLAstExpression[] = [
-    esql.exp`${esql.col(fieldConstants.SERVICE_NAME_FIELD)} == ${esql.str(serviceName)}`,
+    esql.exp`${esqlColumn(fieldConstants.SERVICE_NAME_FIELD)} == ${esql.str(serviceName)}`,
   ];
 
   if (culprit) {
     conditions.push(
-      esql.exp`${esql.col(fieldConstants.ERROR_CULPRIT_FIELD)} == ${esql.str(culprit)}`
+      esql.exp`${esqlColumn(fieldConstants.ERROR_CULPRIT_FIELD)} == ${esql.str(culprit)}`
     );
   }
 
   if (message?.value !== undefined && message?.fieldName) {
     const messageValue = String(message.value);
-    const messageColumn = esql.col(message.fieldName);
+    const messageColumn = esqlColumn(message.fieldName);
     conditions.push(
       needsNormalization(messageValue)
         ? esql.exp`MATCH_PHRASE(${messageColumn}, ${esql.str(messageValue)})`
@@ -56,7 +57,7 @@ export function getEsqlQuery({
   }
 
   if (type?.value !== undefined && type?.fieldName) {
-    const typeColumn = esql.col(type.fieldName);
+    const typeColumn = esqlColumn(type.fieldName);
     if (Array.isArray(type.value)) {
       type.value.forEach((val) => {
         conditions.push(esql.exp`MATCH(${typeColumn}, ${esql.str(String(val))})`);

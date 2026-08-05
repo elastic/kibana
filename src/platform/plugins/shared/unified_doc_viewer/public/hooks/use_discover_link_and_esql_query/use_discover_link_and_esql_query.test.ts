@@ -55,7 +55,7 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
     mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
 
     const indexPattern = 'traces-*';
-    const whereClause = esql.exp`${esql.col('trace.id')} == ${esql.str('abc123')}`;
+    const whereClause = esql.exp`${esql.col(['trace', 'id'])} == ${esql.str('abc123')}`;
 
     const { result } = renderHook(() => useDiscoverLinkAndEsqlQuery({ indexPattern, whereClause }));
 
@@ -71,7 +71,7 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
     mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
 
     const indexPattern = 'logs-*';
-    const whereClause = esql.exp`${esql.col('trace.id')} == ${esql.str('abc123')}`;
+    const whereClause = esql.exp`${esql.col(['trace', 'id'])} == ${esql.str('abc123')}`;
 
     const { result } = renderHook(() =>
       useDiscoverLinkAndEsqlQuery({ indexPattern, whereClause, unmappedFieldsPolicy: 'NULLIFY' })
@@ -88,16 +88,16 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
     mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
 
     const indexPattern = 'logs-*';
-    const whereClause = esql.exp`${esql.col('service.name')} == ${esql.str(
+    const whereClause = esql.exp`${esql.col(['service', 'name'])} == ${esql.str(
       'payment'
-    )} AND ${esql.col('error.culprit')} == ${esql.str('charge')}`;
+    )} AND ${esql.col(['error', 'culprit'])} == ${esql.str('charge')}`;
 
     const { result } = renderHook(() =>
       useDiscoverLinkAndEsqlQuery({ indexPattern, whereClause, unmappedFieldsPolicy: 'NULLIFY' })
     );
 
     expect(result.current.esqlQueryString).toBe(
-      'SET unmapped_fields = "NULLIFY"; FROM logs-*\n  | WHERE `service.name` == "payment" AND `error.culprit` == "charge"'
+      'SET unmapped_fields = "NULLIFY"; FROM logs-*\n  | WHERE service.name == "payment" AND error.culprit == "charge"'
     );
   });
 });

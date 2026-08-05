@@ -10,6 +10,7 @@
 import { esql } from '@elastic/esql';
 import { SERVICE_NAME, SPAN_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '@kbn/apm-types';
 import type { ESQLAstExpression } from '@elastic/esql/types';
+import { esqlColumn } from '../../../../../utils/esql_column';
 import type { SimilarSpansProps } from '.';
 
 export function getEsqlQuery({
@@ -37,7 +38,7 @@ function getSimilarSpansESQL({
   serviceName: string;
   spanName: string;
 }): ESQLAstExpression {
-  return esql.exp`${esql.col(SERVICE_NAME)} == ${esql.str(serviceName)} AND ${esql.col(
+  return esql.exp`${esqlColumn(SERVICE_NAME)} == ${esql.str(serviceName)} AND ${esqlColumn(
     SPAN_NAME
   )} == ${esql.str(spanName)}`;
 }
@@ -51,9 +52,9 @@ function getSimilarTransactionsESQL({
   transactionName: string;
   transactionType: string;
 }): ESQLAstExpression {
-  return esql.exp`${esql.col(SERVICE_NAME)} == ${esql.str(serviceName)} AND ${esql.col(
+  return esql.exp`${esqlColumn(SERVICE_NAME)} == ${esql.str(serviceName)} AND ${esqlColumn(
     TRANSACTION_NAME
-  )} == ${esql.str(transactionName)} AND ${esql.col(TRANSACTION_TYPE)} == ${esql.str(
+  )} == ${esql.str(transactionName)} AND ${esqlColumn(TRANSACTION_TYPE)} == ${esql.str(
     transactionType
   )}`;
 }

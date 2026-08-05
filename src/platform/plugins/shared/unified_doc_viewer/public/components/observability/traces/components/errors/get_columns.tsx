@@ -24,6 +24,7 @@ import {
 } from '@kbn/apm-types';
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import type { ESQLAstExpression } from '@elastic/esql/types';
+import { esqlColumn } from '../../../../../utils/esql_column';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { NOT_AVAILABLE_LABEL } from '../../common/constants';
 import { TRACES_DOC_VIEWER_EBT_ELEMENTS, TRACES_DOC_VIEWER_EBT_DETAILS } from '../../ebt_constants';
@@ -46,26 +47,28 @@ function createWhereClause({
   source: ErrorsByTraceId['source'];
   item: ErrorsByTraceId['traceErrors'][0];
 }): ESQLAstExpression {
-  const conditions: ESQLAstExpression[] = [esql.exp`${esql.col(TRACE_ID)} == ${esql.str(traceId)}`];
+  const conditions: ESQLAstExpression[] = [
+    esql.exp`${esqlColumn(TRACE_ID)} == ${esql.str(traceId)}`,
+  ];
 
   if (docId) {
-    conditions.push(esql.exp`${esql.col(SPAN_ID)} == ${esql.str(docId)}`);
+    conditions.push(esql.exp`${esqlColumn(SPAN_ID)} == ${esql.str(docId)}`);
   }
 
   if (source === 'apm') {
-    conditions.push(esql.exp`${esql.col(PROCESSOR_EVENT)} == ${esql.str('error')}`);
+    conditions.push(esql.exp`${esqlColumn(PROCESSOR_EVENT)} == ${esql.str('error')}`);
     if (item.error.id) {
-      conditions.push(esql.exp`${esql.col(ERROR_ID)} == ${esql.str(item.error.id)}`);
+      conditions.push(esql.exp`${esqlColumn(ERROR_ID)} == ${esql.str(item.error.id)}`);
     }
   }
 
   if (source === 'unprocessedOtel') {
     if (item?.eventName) {
-      conditions.push(esql.exp`${esql.col(EVENT_NAME)} == ${esql.str(item.eventName)}`);
+      conditions.push(esql.exp`${esqlColumn(EVENT_NAME)} == ${esql.str(item.eventName)}`);
     }
     if (item?.error?.exception?.message) {
       conditions.push(
-        esql.exp`${esql.col(EXCEPTION_MESSAGE)} == ${esql.str(item.error.exception.message)}`
+        esql.exp`${esqlColumn(EXCEPTION_MESSAGE)} == ${esql.str(item.error.exception.message)}`
       );
     }
   }

@@ -97,7 +97,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
   });
 
   it('constructs ESQL query with stats and sort', async () => {
-    const baseQuery = esql.exp`${esql.col('service.name')} == ${esql.str('test-service')}`;
+    const baseQuery = esql.exp`${esql.col(['service', 'name'])} == ${esql.str('test-service')}`;
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
 
     await waitFor(() => {
@@ -117,14 +117,14 @@ describe('SimilarErrorsOccurrencesChart', () => {
   });
 
   it('shows loading state initially', () => {
-    const baseQuery = esql.exp`${esql.col('service.name')} == ${esql.str('test-service')}`;
+    const baseQuery = esql.exp`${esql.col(['service', 'name'])} == ${esql.str('test-service')}`;
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
 
     expect(screen.getByTestId('similarErrorsOccurrencesChartLoading')).toBeInTheDocument();
   });
 
   it('renders chart when attributes are built successfully', async () => {
-    const baseQuery = esql.exp`${esql.col('service.name')} == ${esql.str('test-service')}`;
+    const baseQuery = esql.exp`${esql.col(['service', 'name'])} == ${esql.str('test-service')}`;
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
 
     await waitFor(() => {
@@ -136,7 +136,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
 
   it('shows error message when build fails', async () => {
     mockBuild.mockRejectedValueOnce(new Error('Build failed'));
-    const baseQuery = esql.exp`${esql.col('service.name')} == ${esql.str('test-service')}`;
+    const baseQuery = esql.exp`${esql.col(['service', 'name'])} == ${esql.str('test-service')}`;
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
 
     await waitFor(() => {
@@ -159,7 +159,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
       indexes: { logs: undefined, apm: {} } as any,
       profileId: 'test-profile',
     });
-    const baseQuery = esql.exp`${esql.col('service.name')} == ${esql.str('test-service')}`;
+    const baseQuery = esql.exp`${esql.col(['service', 'name'])} == ${esql.str('test-service')}`;
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
 
     await waitFor(() => {
@@ -170,7 +170,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
   });
 
   it('adds annotation layer when currentDocumentTimestamp is provided', async () => {
-    const baseQuery = esql.exp`${esql.col('service.name')} == ${esql.str('test-service')}`;
+    const baseQuery = esql.exp`${esql.col(['service', 'name'])} == ${esql.str('test-service')}`;
     const timestamp = '2024-01-15T10:30:00Z';
     render(
       <SimilarErrorsOccurrencesChart
@@ -193,7 +193,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
   });
 
   it('passes time_range in serialized state so Lens can resolve ?_tstart/?_tend', async () => {
-    const baseQuery = esql.exp`${esql.col('service.name')} == ${esql.str('test-service')}`;
+    const baseQuery = esql.exp`${esql.col(['service', 'name'])} == ${esql.str('test-service')}`;
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
 
     await waitFor(() => {
@@ -206,7 +206,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
   });
 
   it('does not add annotation layer when currentDocumentTimestamp is not provided', async () => {
-    const baseQuery = esql.exp`${esql.col('service.name')} == ${esql.str('test-service')}`;
+    const baseQuery = esql.exp`${esql.col(['service', 'name'])} == ${esql.str('test-service')}`;
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);
 
     await waitFor(() => {

@@ -11,7 +11,7 @@ import { esql } from '@elastic/esql';
 import { fieldConstants } from '@kbn/discover-utils';
 import { getEsqlQuery } from '.';
 
-const col = (name: string) => `\`${name}\``;
+const col = (name: string) => name;
 
 const renderQuery = (condition: ReturnType<typeof getEsqlQuery>): string => {
   const query = esql.from('index');

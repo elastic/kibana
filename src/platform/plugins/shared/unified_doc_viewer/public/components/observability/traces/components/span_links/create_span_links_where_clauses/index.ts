@@ -16,23 +16,24 @@ import {
   TRANSACTION_ID_FIELD,
 } from '@kbn/discover-utils';
 import type { ESQLAstExpression } from '@elastic/esql/types';
+import { esqlColumn } from '../../../../../../utils/esql_column';
 
 export function createSpanNameWhereClause(item: SpanLinkDetails): ESQLAstExpression {
   const transactionId = item.details?.transactionId;
   if (transactionId) {
-    return esql.exp`${esql.col(TRANSACTION_ID_FIELD)} == ${esql.str(transactionId)}`;
+    return esql.exp`${esqlColumn(TRANSACTION_ID_FIELD)} == ${esql.str(transactionId)}`;
   }
 
-  return esql.exp`${esql.col(SPAN_ID_FIELD)} == ${esql.str(item.spanId)}`;
+  return esql.exp`${esqlColumn(SPAN_ID_FIELD)} == ${esql.str(item.spanId)}`;
 }
 
 export function createServiceNameWhereClause(item: SpanLinkDetails): ESQLAstExpression | undefined {
   const serviceName = item.details?.serviceName;
   if (!serviceName) return undefined;
 
-  return esql.exp`${esql.col(SERVICE_NAME_FIELD)} == ${esql.str(serviceName)}`;
+  return esql.exp`${esqlColumn(SERVICE_NAME_FIELD)} == ${esql.str(serviceName)}`;
 }
 
 export function createTraceIdWhereClause(item: SpanLinkDetails): ESQLAstExpression {
-  return esql.exp`${esql.col(TRACE_ID_FIELD)} == ${esql.str(item.traceId)}`;
+  return esql.exp`${esqlColumn(TRACE_ID_FIELD)} == ${esql.str(item.traceId)}`;
 }
