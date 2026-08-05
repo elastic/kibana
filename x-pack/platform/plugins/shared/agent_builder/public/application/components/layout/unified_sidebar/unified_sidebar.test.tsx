@@ -64,17 +64,6 @@ jest.mock('../../../context/streaming/streaming_context', () => ({
   }),
 }));
 
-jest.mock('../../../hooks/use_conversation_list_mutations', () => ({
-  useConversationListMutations: () => ({
-    deleteConversation: jest.fn(),
-    renameConversation: jest.fn(),
-    markAsRead: jest.fn(),
-    markAsUnread: jest.fn(),
-    markAsPinned: jest.fn(),
-    markAsUnpinned: jest.fn(),
-  }),
-}));
-
 import { UnifiedSidebar } from './unified_sidebar';
 
 const renderSidebar = (path: string) =>

@@ -40,7 +40,6 @@ import {
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
   TrustedDeviceValidator,
-  CustomYaraSignaturesValidator,
 } from '../validators';
 import { buildSpaceDataFilter } from '../utils';
 
@@ -130,15 +129,6 @@ export const getExceptionsPreImportHandler = (
     if (BlocklistValidator.isBlocklist({ listId: importedListId })) {
       const blocklistValidator = new BlocklistValidator(endpointAppContext, request);
       await blocklistValidator.validatePreImport(data);
-    }
-
-    // Validate YARA signatures
-    if (CustomYaraSignaturesValidator.isCustomYaraSignature({ listId: importedListId })) {
-      const customYaraSignaturesValidator = new CustomYaraSignaturesValidator(
-        endpointAppContext,
-        request
-      );
-      await customYaraSignaturesValidator.validatePreImport(data);
     }
 
     // validate endpoint exceptions

@@ -21,6 +21,7 @@ import {
   getOwningTeamsForPath,
   type CodeOwnersEntry,
 } from '@kbn/code-owners';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import path from 'node:path';
 import {
@@ -29,6 +30,7 @@ import {
   ScoutTestTarget,
 } from '@kbn/scout-info';
 import {
+  computeTestID,
   excapeHtmlCharacters,
   generateTestRunId,
   getKibanaModuleData,
@@ -40,7 +42,6 @@ import {
 import type { TestFailure } from '../../report';
 import { ScoutFailureReport } from '../../report';
 import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
-import { getTestIdentity } from '../test_identity';
 import { ScoutFailureTracker } from './failure_tracking';
 
 /**
@@ -55,8 +56,6 @@ export class ScoutFailedTestReporter implements Reporter {
   private readonly testTarget: string;
   private failureTracker?: ScoutFailureTracker;
   private kibanaModule: TestFailure['kibanaModule'];
-  /** Root suite captured in `onBegin`; walked in `onEnd` to identify tests that ended up flaky. */
-  private suite?: Suite;
 
   constructor(private readonly reporterOptions: ScoutPlaywrightReporterOptions = {}) {
     this.log = new ToolingLog({
@@ -95,8 +94,6 @@ export class ScoutFailedTestReporter implements Reporter {
   }
 
   onBegin(config: FullConfig, suite: Suite) {
-    this.suite = suite;
-
     // Get plugin or package metadata from kibana.jsonc
     if (config.configFile) {
       const metadata = getKibanaModuleData(config.configFile);
@@ -127,7 +124,10 @@ export class ScoutFailedTestReporter implements Reporter {
       return;
     }
 
-    const { id, filePath } = getTestIdentity(test);
+    // We don't include the first three elements in the title path (root suite, project, test file path)
+    // for full test titles in Scout, especially not when calculating test IDs
+    const fullTestTitle = test.titlePath().slice(3).join(' ');
+    const testFilePath = path.relative(REPO_ROOT, test.location.file);
 
     const consoleErrorsAttachment = result.attachments.find(
       (a) => a.name === BROWSER_CONSOLE_ERRORS_ATTACHMENT
@@ -135,13 +135,13 @@ export class ScoutFailedTestReporter implements Reporter {
     const consoleErrors = consoleErrorsAttachment?.body?.toString('utf-8');
 
     const testFailure: TestFailure = {
-      id,
+      id: computeTestID(testFilePath, fullTestTitle),
       suite: test.parent.title,
       title: test.title,
       target: this.testTarget,
       command: this.command,
       location: stripFilePath(test.location.file),
-      owner: this.getFileOwners(filePath),
+      owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
       kibanaModule: this.kibanaModule,
       duration: result.duration,
       error: this.formatTestError(result),
@@ -154,8 +154,6 @@ export class ScoutFailedTestReporter implements Reporter {
           path: attachment.path,
           contentType: attachment.contentType,
         })),
-      // Zero-based attempt index; 0 is the first run, 1 the first retry.
-      attempt: result.retry,
     };
 
     this.report.logEvent(testFailure);
@@ -165,21 +163,11 @@ export class ScoutFailedTestReporter implements Reporter {
   }
 
   onEnd(result: FullResult) {
-    // A test's outcome is only knowable once every attempt has run, so flaky tests are excluded
-    // here rather than in onTestEnd. Their failing attempt still stays in the report artifact
-    // above (useful debugging material); only the GitHub-issue tracker excludes them, since it
-    // shouldn't open issues for tests that ultimately passed.
-    const flakyTestIds = new Set(
-      (this.suite?.allTests() ?? [])
-        .filter((test) => test.outcome() === 'flaky')
-        .map((test) => getTestIdentity(test).id)
-    );
-
     // Save & conclude the report
     try {
       this.report.save(this.reportRootPath);
       // Save failure tracking file for GitHub issue integration
-      this.failureTracker?.save({ excludeTestIds: flakyTestIds });
+      this.failureTracker?.save();
     } finally {
       this.report.conclude();
     }

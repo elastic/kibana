@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-/**
- * Migration recommendation: Cover with unit tests. This is show/hide behavior for the background search flyout, which probably doesn't need a browser.
- */
-
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

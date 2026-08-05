@@ -13,8 +13,8 @@ import type { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
 
 export const reindexSchema = schema.object({
-  indexName: schema.string({ maxLength: 1000 }),
-  newIndexName: schema.string({ maxLength: 1000 }),
+  indexName: schema.string(),
+  newIndexName: schema.string(),
   reindexOptions: schema.maybe(
     schema.object({
       enqueue: schema.maybe(schema.boolean()),
@@ -94,7 +94,7 @@ export function registerReindexIndicesRoutes({ router, getReindexService }: Rout
       },
       validate: {
         params: schema.object({
-          indexName: schema.string({ maxLength: 1000 }),
+          indexName: schema.string(),
         }),
       },
     },
@@ -135,7 +135,7 @@ export function registerReindexIndicesRoutes({ router, getReindexService }: Rout
       },
       validate: {
         params: schema.object({
-          indexName: schema.string({ maxLength: 1000 }),
+          indexName: schema.string(),
         }),
       },
     },

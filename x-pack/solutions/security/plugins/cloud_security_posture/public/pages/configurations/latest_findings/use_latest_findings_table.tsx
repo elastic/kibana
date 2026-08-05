@@ -17,21 +17,6 @@ import { useLatestFindings } from './use_latest_findings';
 
 const columnsLocalStorageKey = 'cloudPosture:latestFindings:columns';
 
-/**
- * Returns the active result.evaluation filter value when a non-negated, enabled
- * phrase filter is present. Used to contextualize the findings table title for a11y.
- */
-export const getActiveEvaluation = (filters: Filter[]): Evaluation | undefined => {
-  const evaluationFilter = filters.find(
-    (f) => f.meta?.key === 'result.evaluation' && !f.meta?.negate && !f.meta?.disabled
-  );
-  const query = (evaluationFilter?.meta?.params as { query?: string } | undefined)?.query;
-  if (query === 'passed' || query === 'failed') {
-    return query;
-  }
-  return undefined;
-};
-
 export const useLatestFindingsTable = ({
   getDefaultQuery,
   nonPersistedFilters,
@@ -73,7 +58,6 @@ export const useLatestFindingsTable = ({
   const passed = data?.pages[0].count.passed || 0;
   const failed = data?.pages[0].count.failed || 0;
   const total = data?.pages[0].total || 0;
-  const activeEvaluation = getActiveEvaluation(filters);
 
   const onDistributionBarClick = (evaluation: Evaluation) => {
     setUrlQuery({
@@ -99,7 +83,6 @@ export const useLatestFindingsTable = ({
     passed,
     failed,
     total,
-    activeEvaluation,
     canShowDistributionBar,
     onDistributionBarClick,
   };

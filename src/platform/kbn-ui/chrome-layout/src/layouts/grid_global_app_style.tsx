@@ -15,6 +15,7 @@ import {
   APP_MAIN_SCROLL_CONTAINER_ID,
   layoutVar,
 } from '@kbn/ui-chrome-layout-constants';
+import { CommonGlobalAppStyles } from './global_app_styles';
 import type { ChromeStyle } from '../layout.types';
 
 export const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
@@ -198,13 +199,16 @@ export const GridLayoutGlobalStyles = ({
   const isProjectStyle = chromeStyle === 'project';
 
   return (
-    <Global
-      styles={[
-        globalLayoutStyles(euiTheme),
-        globalTempHackStyles(euiTheme.euiTheme, chromeStyle),
-        // Only apply the decorative background for project mode
-        isProjectStyle && projectModeBackgroundStyles(euiTheme),
-      ]}
-    />
+    <>
+      <Global
+        styles={[
+          globalLayoutStyles(euiTheme),
+          globalTempHackStyles(euiTheme.euiTheme, chromeStyle),
+          // Only apply the decorative background for project mode
+          isProjectStyle && projectModeBackgroundStyles(euiTheme),
+        ]}
+      />
+      <CommonGlobalAppStyles />
+    </>
   );
 };

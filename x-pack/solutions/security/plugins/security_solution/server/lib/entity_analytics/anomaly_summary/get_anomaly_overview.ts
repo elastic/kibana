@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { Entity, EntityType } from '@kbn/entity-store/common';
+import type { EntityType } from '@kbn/entity-store/common';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { compact } from 'lodash';
@@ -43,7 +43,6 @@ interface OverviewAggs {
 interface GetEntityAnomalyOverviewParams {
   entityId: string;
   entityType: EntityType;
-  entityRecord: Entity;
   fromMs?: number;
   toMs?: number;
   scoreRanges?: AnomalyScoreRange[];
@@ -81,7 +80,6 @@ interface AnomalyOverview {
 export const getEntityAnomalyOverview = async ({
   entityId,
   entityType,
-  entityRecord,
   fromMs,
   toMs,
   scoreRanges,
@@ -127,14 +125,6 @@ export const getEntityAnomalyOverview = async ({
 
   if (threatTactics && threatTactics.length > 0 && resolvedJobIds.length === 0) return empty;
 
-  const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(entityType, entityRecord);
-  if (!entityFilter) {
-    logger.warn(
-      `Cannot build entity filter for "${entityId}" (type: ${entityType}): entity record lacks identity fields`
-    );
-    return empty;
-  }
-
   let aggs: OverviewAggs | undefined;
   let rawHits: RawAnomalyRecord[] = [];
   let totalAnomaliesCount = 0;
@@ -144,6 +134,9 @@ export const getEntityAnomalyOverview = async ({
       {
         size: NUM_RECENT_ANOMALIES,
         track_total_hits: true,
+        runtime_mappings: {
+          entity_id: euid.painless.getEuidRuntimeMapping(entityType),
+        },
         query: {
           bool: {
             filter: [
@@ -151,7 +144,7 @@ export const getEntityAnomalyOverview = async ({
               { term: { is_interim: false } },
               buildScoreRangeFilter(scoreRanges),
               { range: { timestamp: { gte: effectiveFromMs, lte: effectiveToMs } } },
-              entityFilter,
+              { term: { entity_id: entityId } },
               ...(resolvedJobIds.length > 0 ? [{ terms: { job_id: resolvedJobIds } }] : []),
             ],
           },

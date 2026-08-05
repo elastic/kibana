@@ -82,26 +82,6 @@ export interface ObservabilityCreateSLOFeature {
   }) => React.ReactNode;
 }
 
-export interface ObservabilityServiceFlyoutFeatureRenderDeps {
-  service: { name: string; agentName?: string };
-  filters: { environment: string; rangeFrom: string; rangeTo: string };
-  source: string;
-  onClose: () => void;
-  flyoutHistoryKey?: symbol;
-  contextActions?: {
-    openInNewDiscoverTab?: (params: {
-      esqlQuery: string;
-      timeRange: TimeRange;
-      tabLabel: string;
-    }) => void;
-  };
-}
-
-export interface ObservabilityServiceFlyoutFeature {
-  id: 'observability-service-flyout';
-  renderServiceFlyout: (deps: ObservabilityServiceFlyoutFeatureRenderDeps) => React.ReactNode;
-}
-
 export interface ObservabilityLogsFetchDocumentByIdFeature {
   id: 'observability-logs-fetch-document-by-id';
   fetchLogDocumentById: (
@@ -320,7 +300,6 @@ export type DiscoverFeature =
   | ObservabilityLogsAIAssistantFeature
   | ObservabilityLogsAIInsightFeature
   | ObservabilityCreateSLOFeature
-  | ObservabilityServiceFlyoutFeature
   | ObservabilityLogEventsFeature
   | ObservabilityTracesFeature
   | ObservabilityLogsFetchDocumentByIdFeature

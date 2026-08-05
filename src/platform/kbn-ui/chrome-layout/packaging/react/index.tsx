@@ -24,6 +24,7 @@ import {
   GridLayoutGlobalStyles,
   type GridLayoutGlobalStylesProps,
 } from '../../src/layouts/grid_global_app_style';
+import { CommonGlobalAppStyles } from '../../src/layouts/global_app_styles';
 import { LayoutDebugOverlay } from '../../src/debug/layout_debug_overlay';
 
 // React import is needed for JSX transform.
@@ -35,7 +36,7 @@ export type { ChromeLayoutProps, ChromeStyle, GridLayoutGlobalStylesProps };
 export type ChromeLayoutConfig = LayoutConfig;
 export type ChromeLayoutConfigProviderProps = LayoutConfigProviderProps;
 
-export { ChromeLayout, GridLayoutGlobalStyles, LayoutDebugOverlay };
+export { ChromeLayout, GridLayoutGlobalStyles, CommonGlobalAppStyles, LayoutDebugOverlay };
 
 export const ChromeLayoutConfigProvider = LayoutConfigProvider;
 

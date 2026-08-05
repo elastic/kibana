@@ -24,7 +24,7 @@ describe('SourceRow', () => {
       <SourceRow
         label="FROM logs-* | LIMIT 10"
         typeLabel="ES|QL"
-        icon={<span />}
+        iconType="editorCodeBlock"
         data-test-subj="testSourceRow"
       >
         <code>FROM logs-* | LIMIT 10</code>
@@ -40,7 +40,7 @@ describe('SourceRow', () => {
       <SourceRow
         label="Drive"
         typeLabel="Connector"
-        icon={<span />}
+        iconType="plugs"
         data-test-subj="testSourceRow"
       />
     );
@@ -50,7 +50,9 @@ describe('SourceRow', () => {
   });
 
   it('does not render a remove button unless onRemove is provided', () => {
-    renderWithProviders(<SourceRow label="FROM logs-*" typeLabel="ES|QL" icon={<span />} />);
+    renderWithProviders(
+      <SourceRow label="FROM logs-*" typeLabel="ES|QL" iconType="editorCodeBlock" />
+    );
 
     expect(screen.queryByTestId('contextRemoveSourceButton')).not.toBeInTheDocument();
   });
@@ -58,7 +60,12 @@ describe('SourceRow', () => {
   it('calls onRemove when the remove button is clicked', () => {
     const onRemove = jest.fn();
     renderWithProviders(
-      <SourceRow label="FROM logs-*" typeLabel="ES|QL" icon={<span />} onRemove={onRemove} />
+      <SourceRow
+        label="FROM logs-*"
+        typeLabel="ES|QL"
+        iconType="editorCodeBlock"
+        onRemove={onRemove}
+      />
     );
 
     fireEvent.click(screen.getByTestId('contextRemoveSourceButton'));

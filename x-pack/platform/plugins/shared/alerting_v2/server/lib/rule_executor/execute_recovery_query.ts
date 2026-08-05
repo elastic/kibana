@@ -71,7 +71,7 @@ export const executeRecoveryQuery = async ({
 
     return buildQueryRecoveryAlertEvents({
       ruleId: rule.id,
-      ruleVersion: rule.metadata.version,
+      ruleVersion: 1,
       spaceId: input.spaceId,
       ruleAttributes: rule,
       activeGroupHashes,

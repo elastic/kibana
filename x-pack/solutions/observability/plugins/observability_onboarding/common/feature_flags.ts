@@ -10,4 +10,3 @@ export const IS_MANAGED_OTLP_GA = 'observability.managedOtlpGa';
 export const IS_ADD_DATA_PAGE_V2_ENABLED = 'observability.addDataPageV2Enabled';
 export const IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED =
   'observability.managedOtlpPrwEndpointEnabled';
-export const IS_VENDOR_ENDPOINTS_ENABLED = 'observability.vendorEndpointsEnabled';

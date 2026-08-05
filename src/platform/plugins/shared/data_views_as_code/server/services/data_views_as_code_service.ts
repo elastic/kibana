@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod';
 import type { AsCodeSavedDataView } from '@kbn/as-code-data-views-schema';
 import {
   fromStoredDataViewToAsCodeSavedSchema,
-  isCompositeRuntimeField,
   toStoredDataView,
 } from '@kbn/as-code-data-views-transforms';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
@@ -20,44 +18,16 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE, type DataViewLazy } from '@kbn/data-views-
 import type { DataViewsService } from '@kbn/data-views-plugin/server';
 import { omit } from 'lodash';
 import { getMeta } from '@kbn/as-code-shared-schemas';
-import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { badRequest } from '@hapi/boom';
+import type { TypeOf } from '@kbn/config-schema';
 import type { asCodePaginatedResponseSchema } from '../rest_routes/schema';
 
 export class DataViewsAsCodeService {
   private dataViewsService: DataViewsService;
   private savedObjectsClient: SavedObjectsClientContract;
-  private fieldFormats: FieldFormatsRegistry;
 
-  constructor(
-    dataViewsService: DataViewsService,
-    savedObjectsClient: SavedObjectsClientContract,
-    fieldFormats: FieldFormatsRegistry
-  ) {
+  constructor(dataViewsService: DataViewsService, savedObjectsClient: SavedObjectsClientContract) {
     this.dataViewsService = dataViewsService;
     this.savedObjectsClient = savedObjectsClient;
-    this.fieldFormats = fieldFormats;
-  }
-
-  private validateFieldFormatTypes(spec: AsCodeSavedDataView) {
-    const invalidFormatTypes = [];
-
-    const allFieldSettings = Object.values(spec.field_settings || {});
-    const fieldFormatTypes = allFieldSettings.flatMap((fieldSettings) => {
-      if (isCompositeRuntimeField(fieldSettings)) {
-        return Object.values(fieldSettings.fields).map((field) => field.format?.type);
-      }
-      return fieldSettings.format?.type;
-    });
-
-    for (const fieldFormatType of fieldFormatTypes) {
-      if (!fieldFormatType) continue;
-      if (!this.fieldFormats.has(fieldFormatType)) invalidFormatTypes.push(fieldFormatType);
-    }
-
-    if (invalidFormatTypes.length > 0) {
-      throw badRequest(`Invalid field format types: ${invalidFormatTypes.join(', ')}`);
-    }
   }
 
   private async mapDataView(dataView: DataViewLazy) {
@@ -84,8 +54,6 @@ export class DataViewsAsCodeService {
   }
 
   public async create(spec: AsCodeSavedDataView) {
-    this.validateFieldFormatTypes(spec);
-
     const dataViewSpec = toStoredDataView(spec);
 
     const result = await this.dataViewsService.createAndSaveDataViewLazy(dataViewSpec);
@@ -98,8 +66,6 @@ export class DataViewsAsCodeService {
   }
 
   public async upsert(id: string, spec: Omit<AsCodeSavedDataView, 'id'>) {
-    this.validateFieldFormatTypes(spec);
-
     const existingDataView = await this.getDataViewLazy(id);
 
     if (!!existingDataView) {
@@ -155,7 +121,7 @@ export class DataViewsAsCodeService {
     page?: number;
     perPage?: number;
     search?: string;
-  }): Promise<z.output<typeof asCodePaginatedResponseSchema>> {
+  }): Promise<TypeOf<typeof asCodePaginatedResponseSchema>> {
     const result = await this.savedObjectsClient.find<DataViewAttributes>({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
       page,

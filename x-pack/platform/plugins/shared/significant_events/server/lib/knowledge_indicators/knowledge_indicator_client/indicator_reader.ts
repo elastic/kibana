@@ -12,7 +12,6 @@ import { isStoredFeatureKnowledgeIndicator, isStoredQueryKnowledgeIndicator } fr
 import {
   combineWhere,
   inPredicate,
-  notInPredicate,
   IS_NOT_DELETED,
   IS_NOT_EXCLUDED,
   IS_NOT_EXPIRED,
@@ -57,7 +56,6 @@ export class IndicatorReader {
     streams: string | string[],
     options: {
       type?: string[];
-      excludedType?: string[];
       id?: string[];
       featureIds?: string[];
       minConfidence?: number;
@@ -80,9 +78,6 @@ export class IndicatorReader {
     const featureTypesFilter = options.type?.length
       ? inPredicate(FEATURE_TYPE, options.type)
       : undefined;
-    const excludedFeatureTypesFilter = options.excludedType?.length
-      ? notInPredicate(FEATURE_TYPE, options.excludedType)
-      : undefined;
     const featureIdsFilter = options.featureIds?.length
       ? inPredicate(FEATURE_SLUG, options.featureIds)
       : undefined;
@@ -98,7 +93,6 @@ export class IndicatorReader {
       options.includeExcluded ? undefined : IS_NOT_EXCLUDED,
       options.includeExpired ? undefined : IS_NOT_EXPIRED,
       featureTypesFilter,
-      excludedFeatureTypesFilter,
       featureIdsFilter,
       minConfidenceFilter
     );

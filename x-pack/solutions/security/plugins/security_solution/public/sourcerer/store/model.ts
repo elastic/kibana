@@ -23,6 +23,11 @@ export interface SourcererScope {
   selectedDataViewId: string | null;
   /** selected patterns within the data view */
   selectedPatterns: string[];
+  /** if has length,
+   * id === PageScope.timeline
+   * selectedDataViewId === null OR defaultDataView.id
+   * saved timeline has pattern that is not in the default */
+  missingPatterns: string[];
 }
 
 export type SourcererScopeById = Record<PageScope, SourcererScope>;
@@ -130,6 +135,7 @@ export const initSourcererScope: Omit<SourcererScope, 'id'> = {
   loading: false,
   selectedDataViewId: null,
   selectedPatterns: [],
+  missingPatterns: [],
 };
 
 export const initDataView: SourcererDataView & { id: string; error?: unknown } = {

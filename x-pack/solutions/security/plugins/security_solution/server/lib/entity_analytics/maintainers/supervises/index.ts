@@ -51,7 +51,6 @@ export const supervisesMaintainer: RegisterEntityMaintainerConfig = {
       crudClient,
       entityMetadataClient,
       integrations: buildSupervisesConfigs(lastProcessedTimestamp),
-      maintainerName: 'supervises',
       signal,
       telemetryCollector: collector,
     });

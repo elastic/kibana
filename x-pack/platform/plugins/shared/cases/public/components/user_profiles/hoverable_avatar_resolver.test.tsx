@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { CaseUser } from '../../containers/types';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
@@ -61,12 +60,10 @@ describe('HoverableAvatarResolver', () => {
 
     render(<HoverableAvatarResolver user={user} userProfiles={userProfilesMap} />);
 
-    await userEvent.hover(screen.getByText('DR'));
+    fireEvent.mouseOver(screen.getByText('DR'));
 
-    await waitFor(() => {
-      expect(screen.getByRole('tooltip')).toHaveTextContent(
-        'Damaged Raccoon (damaged_raccoon@elastic.co)'
-      );
-    });
+    await screen.findByTestId('user-profile-tooltip');
+
+    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
   });
 });

@@ -22,7 +22,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const globalNav = getService('globalNav');
   const PageObjects = getPageObjects([
     'common',
     'svlCommonPage',
@@ -32,6 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'context',
     'dashboard',
     'unifiedFieldList',
+    'svlCommonNavigation',
   ]);
   const security = getService('security');
   const dataViews = getService('dataViews');
@@ -40,14 +40,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardAddPanel.addSavedSearch(name);
     await PageObjects.header.waitUntilLoadingHasFinished();
     await PageObjects.dashboard.waitForRenderComplete();
-  };
-
-  const goBackToDiscover = async () => {
-    const backControl = (await globalNav.isNextProjectChrome())
-      ? 'appHeaderBack'
-      : '~breadcrumb-deepLinkId-discover';
-    await testSubjects.click(backControl);
-    await PageObjects.discover.waitUntilTabIsLoaded();
   };
 
   describe('adhoc data views', function () {
@@ -93,7 +85,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [, surrDocs] = await dataGrid.getRowActions();
       await surrDocs.click();
       await PageObjects.context.waitUntilContextLoadingHasFinished();
-      await goBackToDiscover();
+      // TODO: Clicking breadcrumbs works differently in Serverless
+      await PageObjects.svlCommonNavigation.breadcrumbs.clickBreadcrumb({ deepLinkId: 'discover' });
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await dataViews.getSelectedName()).to.be('logstash*');
 
@@ -103,7 +97,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await singleView.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await goBackToDiscover();
+      // TODO: Clicking breadcrumbs works differently in Serverless
+      await PageObjects.svlCommonNavigation.breadcrumbs.clickBreadcrumb({ deepLinkId: 'discover' });
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await dataViews.getSelectedName()).to.be('logstash*');
     });
@@ -243,10 +239,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
-      // navigate back to discover to open the saved search
-      await goBackToDiscover();
+      // open saved search
+      // TODO: Clicking breadcrumbs works differently in Serverless
+      await PageObjects.svlCommonNavigation.breadcrumbs.clickBreadcrumb({ deepLinkId: 'discover' });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
+      // TODO: Getting breadcrumbs works differently in Serverless
+      const savedSearch = await PageObjects.svlCommonNavigation.breadcrumbs.getBreadcrumb({
+        deepLinkId: 'discover',
+      });
+      const savedSearchName = await savedSearch?.getVisibleText();
+      // TODO: This functionality is broken in Serverless: https://github.com/elastic/kibana/issues/163488
+      expect(savedSearchName).to.be.equal('Discover');
       await PageObjects.discover.loadSavedSearch('logst*-ss-_bytes-runtimefield');
 
       // test the header now

@@ -295,7 +295,6 @@ describe('Synthetics Availability Transform Generator', () => {
           frequency: twoMinute(),
           syncDelay: twoMinute(),
           preventInitialBackfill: true,
-          preventCrossProjectSearch: false,
         },
       });
 

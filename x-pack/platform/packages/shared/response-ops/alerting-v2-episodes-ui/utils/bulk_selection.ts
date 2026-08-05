@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
+import type { AlertEpisode } from '../queries/episodes_query';
+
 export const getEpisodesFromDocIds = (
   selectedDocIds: string[],
   episodesData: AlertEpisode[]

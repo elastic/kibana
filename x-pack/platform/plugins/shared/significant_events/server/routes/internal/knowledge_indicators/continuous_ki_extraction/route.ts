@@ -26,7 +26,7 @@ const putContinuousKiExtractionSettingsBodySchema = z.object({
   }),
 });
 
-const putContinuousKIExtractionSettingsRoute = createServerRoute({
+export const putContinuousKIExtractionSettingsRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/_knowledge_indicators/continuous_ki_extraction/settings',
   options: {
     access: 'internal',

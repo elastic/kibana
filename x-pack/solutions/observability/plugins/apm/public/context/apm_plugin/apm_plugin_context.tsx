@@ -18,7 +18,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
-import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
@@ -45,7 +45,7 @@ export interface ApmPluginContextValue {
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   agentBuilder?: AgentBuilderPluginStart;
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
-  share: SharePublicStart;
+  share: SharePluginSetup;
   kibanaEnvironment: KibanaEnvContext;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;

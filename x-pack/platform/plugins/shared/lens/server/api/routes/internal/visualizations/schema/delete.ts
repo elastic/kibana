@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 
-export const lensDeleteRequestParamsSchema = z
-  .object({
-    id: z.string().meta({
-      description: 'The saved object id of a Lens visualization.',
+export const lensDeleteRequestParamsSchema = schema.object(
+  {
+    id: schema.string({
+      meta: {
+        description: 'The saved object id of a Lens visualization.',
+      },
     }),
-  })
-  .strict();
+  },
+  { unknowns: 'forbid' }
+);

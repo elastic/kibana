@@ -17,7 +17,7 @@ project:
   owner: '@elastic/kibana-data-discovery'
   sourceRoot: src/platform/packages/shared/kbn-data-service-server
 dependsOn:
-  - '@kbn/zod'
+  - '@kbn/config-schema'
 tags:
   - shared-server
   - package

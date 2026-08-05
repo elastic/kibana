@@ -22,13 +22,6 @@ export const significantEventStatusSchema = z.enum(SIGNIFICANT_EVENT_STATUS_OPTI
 export type SignificantEventStatus = z.infer<typeof significantEventStatusSchema>;
 
 /**
- * Statuses that represent an unresolved / ongoing event. Deduplication uses this set to find a
- * prior event for the same issue so successive write cycles dedup against it. "closed" and
- * "dismissed" are excluded — a recovered or dismissed issue that recurs should open a fresh event.
- */
-export const SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS = ['open'] as const;
-
-/**
  * One investigation run attached to this significant event.
  * `workflow_execution_id` is the investigation workflow execution id, used to fetch the full
  * investigation state (hypotheses, conclusion, etc.) from the corresponding workflow execution —
@@ -54,6 +47,11 @@ export type SignificantEventInvestigation = z.infer<typeof significantEventInves
 export const significantEventSchema = significantEventBaseSchema.extend({
   '@timestamp': z.iso.datetime({ offset: true }),
   event_uuid: z.string().max(MAX_ID_LENGTH).describe('Unique ID of an event.'),
+  discovery_id: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .optional()
+    .describe('ID of the discovery document this event was derived from.'),
   previous_event_uuid: z
     .string()
     .max(MAX_ID_LENGTH)

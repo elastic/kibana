@@ -12,7 +12,6 @@ import type * as TaskEither from 'fp-ts/TaskEither';
 import type { estypes } from '@elastic/elasticsearch';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/logging';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
@@ -48,15 +47,6 @@ export interface BulkOverwriteTransformedDocumentsParams {
    * active shards. Defaults to DEFAULT_TIMEOUT (300s).
    */
   timeout?: string;
-  /**
-   * When true, call `_cluster/allocation/explain` on unavailable-shard failures
-   * and include the decider reason in the returned error message. Callers
-   * should gate this on retry count to avoid hitting the cluster API on every
-   * retry of a long-running failure.
-   */
-  fetchAllocationExplain?: boolean;
-  /** Optional logger — used to surface explain-call errors during development. */
-  logger?: Logger;
 }
 
 /**
@@ -71,8 +61,6 @@ export const bulkOverwriteTransformedDocuments =
     refresh = false,
     useAliasToPreventAutoCreate = false,
     timeout = DEFAULT_TIMEOUT,
-    fetchAllocationExplain = false,
-    logger,
   }: BulkOverwriteTransformedDocumentsParams): TaskEither.TaskEither<
     | RetryableEsClientError
     | TargetIndexHadWriteBlock
@@ -81,10 +69,9 @@ export const bulkOverwriteTransformedDocuments =
     | UnavailableShardsException,
     'bulk_index_succeeded'
   > =>
-  async () => {
-    let res: Awaited<ReturnType<typeof client.bulk>>;
-    try {
-      res = await client.bulk({
+  () => {
+    return client
+      .bulk({
         // Because we only add aliases in the MARK_VERSION_INDEX_READY step we
         // can't bulkIndex to an alias with require_alias=true. This means if
         // users tamper during this operation (delete indices or restore a
@@ -100,110 +87,44 @@ export const bulkOverwriteTransformedDocuments =
         filter_path: ['items.*.error'],
         // we need to unwrap the existing BulkIndexOperationTuple's
         operations: operations.flat(),
-      });
-    } catch (error) {
-      if (error instanceof esErrors.ResponseError && error.statusCode === 413) {
-        return Either.left({ type: 'request_entity_too_large_exception' as const });
-      }
-      if (error instanceof esErrors.ElasticsearchClientError) {
-        return catchRetryableEsClientErrors(error);
-      }
-      throw error;
-    }
+      })
+      .then((res) => {
+        // Filter out version_conflict_engine_exception since these just mean
+        // that another instance already updated these documents
+        const errors: estypes.ErrorCause[] = (res.items ?? [])
+          .filter((item) => item.index?.error)
+          .map((item) => item.index!.error!)
+          .filter(({ type }) => type !== 'version_conflict_engine_exception');
 
-    // Filter out version_conflict_engine_exception since these just mean
-    // that another instance already updated these documents
-    const errors: estypes.ErrorCause[] = (res.items ?? [])
-      .filter((item) => item.index?.error)
-      .map((item) => item.index!.error!)
-      .filter(({ type }) => type !== 'version_conflict_engine_exception');
-
-    if (errors.length === 0) {
-      return Either.right('bulk_index_succeeded' as const);
-    }
-
-    if (errors.every(isWriteBlockException)) {
-      return Either.left({ type: 'target_index_had_write_block' as const });
-    }
-
-    if (errors.every(isIndexNotFoundException)) {
-      return Either.left({ type: 'index_not_found_exception' as const, index });
-    }
-
-    if (errors.every(isUnavailableShardsException)) {
-      let allocationReason = '';
-      if (fetchAllocationExplain) {
-        try {
-          const explain = await explainShardAllocation(client, index);
-          allocationReason = formatAllocationExplanation(explain);
-        } catch (explainError) {
-          logger?.debug(
-            `[${index}] Failed to fetch allocation explain: ${
-              explainError instanceof Error ? explainError.message : String(explainError)
-            }`
-          );
-        }
-      }
-      return Either.left({
-        type: 'unavailable_shards_exception' as const,
-        message: allocationReason
-          ? `[${index}] Not enough active copies to meet shard count of [ALL]. Shard allocation explain: ${allocationReason}`
-          : `[${index}] Not enough active copies to meet shard count of [ALL]`,
-      });
-    }
-
-    throw new Error(JSON.stringify(errors));
-  };
-
-const explainShardAllocation = async (
-  client: ElasticsearchClient,
-  index: string
-): Promise<estypes.ClusterAllocationExplainResponse> => {
-  try {
-    return await client.cluster.allocationExplain(
-      { index, shard: 0, primary: false, master_timeout: '30s' },
-      { maxRetries: 0 }
-    );
-  } catch (error) {
-    if (error instanceof esErrors.ResponseError && error.statusCode === 400) {
-      return await client.cluster.allocationExplain(
-        { index, shard: 0, primary: true, master_timeout: '30s' },
-        { maxRetries: 0 }
-      );
-    }
-    throw error;
-  }
-};
-
-const formatAllocationExplanation = (explain: estypes.ClusterAllocationExplainResponse): string => {
-  const parts: string[] = [];
-
-  if (explain.allocate_explanation) {
-    parts.push(explain.allocate_explanation);
-  }
-
-  if (explain.node_allocation_decisions) {
-    const seen = new Set<string>();
-    const blockingReasons: string[] = [];
-
-    for (const node of explain.node_allocation_decisions) {
-      for (const decider of node.deciders ?? []) {
-        if (decider.decision === 'NO' || decider.decision === 'THROTTLE') {
-          const key = `${decider.decider}: ${decider.explanation}`;
-          if (!seen.has(key)) {
-            seen.add(key);
-            blockingReasons.push(
-              `[${decider.decider}] ${decider.decision}: ${decider.explanation}`
-            );
+        if (errors.length === 0) {
+          return Either.right('bulk_index_succeeded' as const);
+        } else {
+          if (errors.every(isWriteBlockException)) {
+            return Either.left({
+              type: 'target_index_had_write_block' as const,
+            });
           }
+          if (errors.every(isIndexNotFoundException)) {
+            return Either.left({
+              type: 'index_not_found_exception' as const,
+              index,
+            });
+          }
+          if (errors.every(isUnavailableShardsException)) {
+            return Either.left({
+              type: 'unavailable_shards_exception' as const,
+              message: `[${index}] Not enough active copies to meet shard count of [ALL]`,
+            });
+          }
+          throw new Error(JSON.stringify(errors));
         }
-      }
-    }
-
-    if (blockingReasons.length > 0) {
-      parts.push(`blocking deciders: ${blockingReasons.join('; ')}`);
-    }
-  }
-
-  return parts.join('. ');
-};
+      })
+      .catch((error) => {
+        if (error instanceof esErrors.ResponseError && error.statusCode === 413) {
+          return Either.left({ type: 'request_entity_too_large_exception' as const });
+        } else {
+          throw error;
+        }
+      })
+      .catch(catchRetryableEsClientErrors);
+  };

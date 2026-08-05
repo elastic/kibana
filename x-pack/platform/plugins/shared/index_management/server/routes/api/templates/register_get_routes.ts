@@ -72,7 +72,7 @@ export function registerGetAllRoute({ router, config, lib: { handleEsError } }: 
 }
 
 const paramsSchema = schema.object({
-  name: schema.string({ maxLength: 1000 }),
+  name: schema.string(),
 });
 
 // Require the template format version (V1 or V2) to be provided as Query param

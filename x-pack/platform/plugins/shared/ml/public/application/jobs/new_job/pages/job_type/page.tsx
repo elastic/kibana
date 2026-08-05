@@ -35,7 +35,7 @@ import {
   useCreateAndNavigateToMlLink,
   useMlLink,
 } from '../../../../contexts/kibana/use_create_url';
-import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../components/ml_app_header';
+import { MlAppHeader } from '../../../../components/ml_app_header';
 import { CPSUnsupportedWarning } from '../../../../components/cps_unsupported_warning';
 
 export const Page: FC = () => {
@@ -63,7 +63,6 @@ export const Page: FC = () => {
 
   const navigateToPath = useNavigateToPath();
   const mlManagementLocator = useMlManagementLocator();
-  const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
 
   const navigateToManagementPath = async (path: string) => {
     if (!mlManagementLocator) return;
@@ -292,7 +291,6 @@ export const Page: FC = () => {
           defaultMessage: 'Create a job from the {pageTitleLabel}',
           values: { pageTitleLabel },
         })}
-        back={anomalyDetectionJobsBack}
       />
 
       <CPSUnsupportedWarning />

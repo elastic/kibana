@@ -49,7 +49,7 @@
     "@kbn/dot-text",
     "@kbn/yarn-lock-validator",
     "@kbn/sort-package-json",
-    "@kbn/swc-register",
+    "@kbn/babel-register",
     "@kbn/rspack-optimizer",
     "@kbn/dev-validation-runner"
   ]

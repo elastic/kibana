@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTextColor } from '@elastic/eui';
 
 import type { AppHeaderMenu } from '@kbn/app-header';
-import { MlAppHeader, useAnomalyDetectionSettingsBack } from '../../../components/ml_app_header';
+import { MlAppHeader } from '../../../components/ml_app_header';
 import { useMlKibana } from '../../../contexts/kibana/kibana_context';
 
 interface Props {
@@ -33,7 +33,6 @@ export const CalendarsListHeader: FC<Props> = ({ totalCount, refreshCalendars, i
     },
   } = useMlKibana();
   const docsUrl = links.ml.calendars;
-  const settingsBack = useAnomalyDetectionSettingsBack();
 
   const menu = useMemo<AppHeaderMenu>(
     () => ({
@@ -66,7 +65,6 @@ export const CalendarsListHeader: FC<Props> = ({ totalCount, refreshCalendars, i
               })
         }
         menu={menu}
-        back={settingsBack}
       />
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
         <EuiFlexItem grow={false}>

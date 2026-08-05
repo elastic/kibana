@@ -6,8 +6,7 @@
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
   "kbn_references": [
-    "@kbn/zod",
+    "@kbn/config-schema",
     "@kbn/data-views-plugin",
-    "@kbn/zod-helpers",
   ]
 }

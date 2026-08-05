@@ -21,7 +21,7 @@ Terraform can work with any API, but some APIs are easier to deal with than othe
 
 #### Example
 
-The [Index Lifecycle Management API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-put-lifecycle) (`PUT /_ilm/policy/{policy}`) declaratively defines the desired lifecycle state rather than imperatively executing phase transitions:
+The [Index Lifecycle Management API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-put-lifecycle) (PUT /\_ilm/policy/\{policy\}) declaratively defines the desired lifecycle state rather than imperatively executing phase transitions:
 
 ```
 PUT _ilm/policy/my_ilm_policy
@@ -80,13 +80,12 @@ resource "elasticstack_elasticsearch_index_lifecycle" "my_ilm" {
 
 #### API imposed challenges
 
-API design decisions can create real challenges for Terraform resource implementation. The Elasticsearch [Index Settings API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-settings) (`PUT /{index}/_settings`) treats static settings (which require index recreation) and dynamic settings (which can be updated in place) identically. This creates a complex situation forcing the implementation to handle all settings together because the API doesn't offer a way to distinguish them upfront.
+API design decisions can create real challenges for Terraform resource implementation. The Elasticsearch [Index Settings API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-settings) (\`PUT /\{index\}/\_settings\`) treats static settings (which require index recreation) and dynamic settings (which can be updated in place) identically. This creates a complex situation forcing the implementation to handle all settings together because the API doesn't offer a way to distinguish them upfront.
 
-```json
+```bash
 {
   "error": {
     "reason": "Can't update non dynamic settings [[index.codec, index.number_of_shards]] for open indices"
-  }
 }
 ```
 
@@ -211,7 +210,7 @@ Resource developers often fall back to the API layer for validation checks, that
 
 ### Return errors early—and all at once
 
-If your API can validate inputs upfront and return all the errors in one go, do it! Terraform handles it and shows them in a helpful way:
+If your API can validate inputs upfront and return all the errors in one go, do it\! Terraform handles it and shows them in a helpful way:
 
 ```typescript
 // PUT /api/alerting/rule/{id}
@@ -255,7 +254,7 @@ Terraform needs complete information to track resource state effectively. If you
 
 Many Kibana APIs have extensive configuration options. Requiring users to specify every single value would create verbose, unwieldy configurations. We need to keep in mind that changing a default may cause Terraform to get out-of-sync and so view changes to defaults as a breaking change until we can update our provider.
 
-Testing the Kibana Terraform resources against different provider and Kibana versions shows the following:
+[Our tests](https://github.com/elastic/kibana-team/issues/2001) show the following facts:
 
 * Defining a resource attribute as `Optional: true, Default: <default value>` (_recommended_) provides a more consistent behavior to the user (it identifies external changes, and ensures a consistent default value fixed by their Terraform Provider's version), but can restrict the Terraform provider's version support matrix: if Kibana changes the default value, Terraform won't know about the change until the Terraform resource configuration gets updated. Keep in mind that our Terraform provider doesn't follow the Stack release cycle, so we can't guarantee that the default value will be the same as the one in the Stack. Also, the opposite can occur: a more recent version of the Terraform provider may have a default value that is not supported by an older version of Kibana. However, there is an easy workaround: the user can define a valid value if this occurs.
 * Resource attributes defined as `Optional: true, Computed: true`: Terraform won't detect changes unless explicitly defined by the Terraform user. This means we can change the defaults, choose not to return it, and UI users can manually change that attribute without Terraform noticing the change if no explicit value is provided by the user in their terraform definition.
@@ -318,7 +317,7 @@ Including and separating them makes it easier for the TF provider to specificall
 
 ### Ignore the robustness principle: don’t normalize output
 
-The robustness principle says to accept input in various formats but return output in a consistent format, for example converting strings to lowercase, ordering elements in a list or changing whitespace in `json` strings.
+The robustness principle says to accept input in various formats but return output in a consistent format, for example converting strings to lowercase, ordering elements in a list or changing whitespace in \`json\` strings.
 
 For Terraform, don’t do this.
 
@@ -356,8 +355,8 @@ Returns 200
   "imageUrl": "",
   "initials": "ts",
   "solution": "es",
-  "description": "A fresh space for testing visualisations",
-  "disabledFeatures": ["ingestManager", "enterpriseSearch"]
+  "description": "A fresh space for testing visualisati*ons",
+  "disabledFeatures": [ingestManager", "enterpriseSearch"]
 }
 ```
 

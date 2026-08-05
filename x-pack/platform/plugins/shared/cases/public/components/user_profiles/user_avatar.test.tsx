@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
 
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { CaseUserAvatar } from './user_avatar';
@@ -37,17 +36,5 @@ describe('CaseUserAvatar', () => {
     renderWithTestingProviders(<CaseUserAvatar size="s" userInfo={userInfo} />);
 
     expect(screen.getByText('S')).toBeInTheDocument();
-  });
-
-  it('renders the built-in tooltip when hovering', async () => {
-    renderWithTestingProviders(<CaseUserAvatar size="m" userInfo={userProfiles[0]} />);
-
-    await userEvent.hover(screen.getByText('DR'));
-
-    await waitFor(() => {
-      expect(screen.getByRole('tooltip')).toHaveTextContent(
-        'Damaged Raccoon (damaged_raccoon@elastic.co)'
-      );
-    });
   });
 });

@@ -7,40 +7,30 @@ Cleanup is not gated on knowledge-file approval or commit success.
 
 ## Step 3a — Merge findings
 
-Merging, deduplicating, and rendering `report.md` is deterministic bookkeeping — it is now done by two scripts instead of by hand, so the same findings always produce the same report regardless of who (or which model) runs Phase 3. The Markdown findings files remain the human-auditable source of truth; the scripts only read them.
-
-**Parse** every `findings-flow-<N>.md` into a JSONL sidecar:
+Enumerate which findings files exist:
 ```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/parse-findings.py \
-  --session-dir "$SESSION_DIR"
+ls "$SESSION_DIR"/findings-flow-*.md 2>/dev/null | sort -V
 ```
-This writes `$SESSION_DIR/findings.jsonl`. It groups duplicate findings across flows by a **structured signature** (level + checklist step number + normalized title + normalized evidence facts — see the script's docstring), not by `type` + the first 100 characters of `current_behavior`: that key both under- and over-matched in practice (the same bug reworded across flows failed to collide; two unrelated findings sharing an opening phrase collided). Exits non-zero with a clear message if a block is missing `Level` or `Current behavior` — a finding is never silently dropped.
+Read each file in that list. Before writing the report, **deduplicate across flows**:
+- Group findings by the combination of `type` + first 100 characters of `current_behavior`.
+- For groups with identical entries from 2+ different flows, keep one entry and append: `"Also seen in flows: <N>, <M>"` to the Evidence section.
+- Only the deduplicated set appears in the Level 1/2/3 sections of the report — duplicates inflate severity and obscure the real scope.
 
-**Render** `$SESSION_DIR/report.md` from that sidecar and `config.json`. Judgment calls the script cannot infer from data alone — see the next two paragraphs — accumulate in a single, reused `$SESSION_DIR/overrides.json` file across every render in this phase; create it (even empty, `{}`) before this first render so the flag below always has something to point at:
-```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/render-report.py \
-  --session-dir "$SESSION_DIR" \
-  --overrides "$SESSION_DIR/overrides.json" \
-  --token-usage-line "<see Token usage below>" \
-  --payload-bytes-line "<see Structured session metrics below>" \
-  --artifact-bytes-line "<see Structured session metrics below>"
+Then write `$SESSION_DIR/report.md` using the template:
 ```
-This produces the full report skeleton from `templates/report-format.md`: header metadata, the Timing & Cost table, Summary counts, and Level 1/2/3 findings in full finding format. A finding that occurred in 2+ flows keeps the **union** of every occurrence's Evidence bullets (not just the first occurrence's — no Markdown evidence is dropped) plus a trailing `Also seen in flows: <every flow number>` line. It prints a one-line JSON summary (`level1_count`, `total_duration_human`, `all_flows_completed_or_timed_out`, …) — use it to build the Step 3c chat headline without re-parsing `report.md`.
+x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/templates/report-format.md
+```
 
-**Per-flow status** for a flow with a findings file defaults to `completed`, even if it ran over its per-flow budget (that only sets the `Over?` flag) — a flow can run long and still attempt every checklist step. A flow with no findings file defaults to `not started`. Anything else the script cannot infer from data alone — `blocked`, `cap reached`, a genuine `timed out` where steps really were skipped, or a more specific `not started` reason from `config.json → skipped_setup` / `deferred_flows` — pass explicitly, either as a `<!-- status: ... | reason: ... -->` marker in the findings file (see `templates/finding-format.md`) or by adding to `overrides.json`'s `flow_status` key (`{"<flow_number>": {"status": "...", "reason": "..."}}`) before this render. A **reason is required** for every entry either way — it's rendered directly in the Status cell (`blocked — <reason>`), never silently collected and discarded. A browser session actually dropped mid-flow (per `phases/2-flow-core.md`'s `skipped: session lost` convention) is detected automatically from that literal phrase and needs no override — but an explicit marker or override for the same flow always takes priority over that detection.
+### Populate Timing & Cost
 
-**Skipped checklist steps** (the "Skipped" table) and **deferred investigations** (the "Recommended Follow-up" table, from `config.json → deferred_flows`) also aren't inferable from data alone for the former — add them to the same `overrides.json`'s `skipped_steps` key: `[{"flow": "<name>", "checklist_step": "<N — description>", "reason": "..."}]`.
-
-### Populate Timing & Cost — token usage and payload bytes
-
-These three lines are pre-formatted and passed straight through to `render-report.py` via `--token-usage-line` / `--payload-bytes-line` / `--artifact-bytes-line` above (each defaults to its own "not available" text if omitted).
+**Per-flow rows:** read the `<!-- flow: <name> | started: <ISO> | ended: <ISO> | duration: <Xm Ys> -->` header from each `findings-flow-<N>.md`. Use `started` and `duration` directly for `Started` and `Duration`. Derive `Status` from these sources — no findings file for the flow → `not started`; flow is in `config.json → skipped_setup` or `deferred_flows` → the reason recorded there; findings file contains `session lost` markers → `session lost`; `duration` exceeds `config.json → flows[N].timeout_minutes` → `timed out`; otherwise → `completed`. Compute `Over?` by comparing `duration` against `config.json → flows[N].timeout_minutes`. The `Total session` row duration = report-written time − `session_started_at` from `config.json`.
 
 **Token usage:** run the token script and capture its output:
 ```bash
 python3 x-pack/solutions/security/plugins/security_solution/.agents/scripts/session-token-usage.py
 ```
-- If the script exits 0 and prints a line (e.g. `input=… output=… cache_create=… cache_read=… total=…`), reformat it into the token-usage line — replace `_` with `-` and `key=N` with `key N`, separated by `·`, and wrap the final `total N` in `**…**`. Example: `input=270 output=156097 … total=11512028` → `**Token usage:** input 270 · output 156097 · … · **total 11512028**`.
-- If the script exits non-zero or prints nothing, use `**Token usage:** not available` — this is expected on non-Claude-Code harnesses (Cursor, Codex, etc.) or when the transcript is unavailable.
+- If the script exits 0 and prints a line (e.g. `input=… output=… cache_create=… cache_read=… total=…`), reformat it into the token-usage line — replace `_` with `-` and `key=N` with `key N`, separated by `·`, and wrap the final `total N` in `**…**`. Example: `input=270 output=156097 … total=11512028` → `input 270 · output 156097 · … · **total 11512028**`.
+- If the script exits non-zero or prints nothing, write `**Token usage:** not available` — this is expected on non-Claude-Code harnesses (Cursor, Codex, etc.) or when the transcript is unavailable.
 
 **Structured session metrics:** after `$SESSION_DIR` is known, run the opt-in JSON mode:
 ```bash
@@ -53,8 +43,8 @@ python3 x-pack/solutions/security/plugins/security_solution/.agents/scripts/sess
 ```
 - The manifest is optional. It may identify orchestrator/worker transcripts, allowlisted artifacts, and sanitized payload counters. Never add arbitrary request or response bodies to it.
 - Read `tokens.aggregate` as model token counts, `payload_bytes` as browser/tool byte counts, and `artifacts.by_kind` as file counts and bytes. These are separate units; never add byte values to token values or estimate one from the other.
-- Use `**Browser/tool payload bytes:** not available` when `payload_bytes.status` is `not_available`; otherwise render `tool_input`, `tool_output`, and `browser_events` as bytes.
-- Use `**Session artifact bytes:** not available` when `artifacts.status` is `not_available`; otherwise render each reported artifact kind's file count and byte total.
+- Write `**Browser/tool payload bytes:** not available` when `payload_bytes.status` is `not_available`; otherwise render `tool_input`, `tool_output`, and `browser_events` as bytes.
+- Write `**Session artifact bytes:** not available` when `artifacts.status` is `not_available`; otherwise render each reported artifact kind's file count and byte total.
 - Metrics are bookkeeping only. They must not suppress, merge, reclassify, downgrade, or otherwise alter findings or evidence.
 
 ---
@@ -78,17 +68,15 @@ Level 1 findings are never suppressed — a confirmed bug is always reported.
 
 Populate the **Recommended Follow-up** section from `config.json → deferred_flows`. If the list is empty, write: "_No deferred flows — session covered everything identified._"
 
-Once you've decided which findings match, apply the outcome by adding a `suppressions` key (`[{"title": "<exact finding title from report.md>", "reason": "<citation, exactly as decided above>"}]`) to the **same** `$SESSION_DIR/overrides.json` file Step 3a created — edit it in place, keeping any `flow_status` / `skipped_steps` keys already there — then re-run `render-report.py` with the same `--overrides "$SESSION_DIR/overrides.json"` flag, instead of hand-editing the tables. A fresh overrides file containing only `suppressions` would silently reset any flow-status/skipped-step decisions from Step 3a's render. This moves the row into "Known / Suppressed" and recomputes the Summary counts deterministically. The script itself refuses (non-zero exit) to suppress a title if any finding sharing that exact title is Level 1, enforcing the invariant above in code, not just in this prose — if that happens, give the findings distinct titles rather than retrying with a different suppression list.
-
 ---
 
 ## Step 3c — Present report
 
 The full report always lives at `$SESSION_DIR/report.md` (written in full in Step 3a). **In chat, present a condensed summary, not the raw file** — pasting every finding's full evidence block (screenshots, console/network lines, video paths) into chat buries the signal the user needs to act on, especially for multi-flow sessions.
 
-Open the chat response with a single bold headline — this is the first thing the user sees. Build it from `render-report.py`'s one-line JSON summary (printed by the last invocation in Step 3a — re-run it if Step 3b's `--overrides` changed the counts) rather than re-reading `report.md`:
+Open the chat response with a single bold headline — this is the first thing the user sees:
 
-- If `all_flows_completed_or_timed_out` is `true`:
+- If all flows have status `completed` or `timed out` (none are `not started`, `cap reached`, `session lost`, or `blocked`):
   ```
   **Session complete · <N> confirmed bugs (L1) · <Xh Ym> · <resolved session_dir>/report.md**
   ```
@@ -98,8 +86,8 @@ Open the chat response with a single bold headline — this is the first thing t
   ```
 
 Where:
-- `<N>` — the summary's `level1_count` (write `0 confirmed bugs (L1)` when 0, never omit it)
-- `<Xh Ym>` — the summary's `total_duration_human` (already omits the hours component under 60 minutes, e.g. `25m`, not `0h 25m`)
+- `<N>` — Level 1 count from the Summary section (write `0 confirmed bugs (L1)` when N=0, never omit it)
+- `<Xh Ym>` — Total session duration from the `Total session` row of the Timing & Cost table; omit the hours component when under 60 minutes (e.g. `25m`, not `0h 25m`)
 - `<resolved session_dir>` — the `session_dir` value from `config.json` (the actual path, never the literal `$SESSION_DIR`)
 
 **Chat summary — in this order:**

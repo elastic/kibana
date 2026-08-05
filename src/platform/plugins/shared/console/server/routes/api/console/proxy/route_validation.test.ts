@@ -20,21 +20,8 @@ describe('Proxy route validation', () => {
       it('mixed case http verbs', () => {
         expect(query.validate({ method: 'hEaD', path: 'test' }));
       });
-      it('host value', () => {
-        expect(query.validate({ method: 'GET', path: 'test', host: 'https://localhost:9200' }));
-      });
     });
     describe('throws for', () => {
-      it('overlong path value', () => {
-        expect(() => {
-          query.validate({ method: 'GET', path: 'a'.repeat(4097) });
-        }).toThrow('maximum length of [4096]');
-      });
-      it('overlong host value', () => {
-        expect(() => {
-          query.validate({ method: 'GET', path: 'test', host: 'a'.repeat(4097) });
-        }).toThrow('maximum length of [4096]');
-      });
       it('empty query method value', () => {
         expect(() => {
           query.validate({ method: '', path: 'test' });

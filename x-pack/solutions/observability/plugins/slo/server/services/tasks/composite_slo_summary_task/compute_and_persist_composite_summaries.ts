@@ -447,12 +447,7 @@ function decodeStoredSLO(
     groupBy: stored.groupBy ?? ALL_VALUE,
     version: stored.version ?? 1,
     settings: merge(
-      {
-        preventInitialBackfill: false,
-        preventCrossProjectSearch: false,
-        syncDelay: '1m',
-        frequency: '1m',
-      },
+      { preventInitialBackfill: false, syncDelay: '1m', frequency: '1m' },
       stored.settings
     ),
     createdBy: stored.createdBy ?? so.created_by,

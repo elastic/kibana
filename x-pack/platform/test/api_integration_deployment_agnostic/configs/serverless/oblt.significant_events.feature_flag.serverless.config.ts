@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/streams-plugin/common';
 import { createServerlessFeatureFlagTestConfig } from '../../default_configs/feature_flag.serverless.config.base';
 import { services } from '../../services';
 

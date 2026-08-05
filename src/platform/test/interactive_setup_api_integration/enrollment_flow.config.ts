@@ -18,9 +18,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('./manual_configuration_flow.config.ts')
   );
 
-  const dataPath = getDataPath();
-  await fs.mkdir(dataPath, { recursive: true });
-  const tempKibanaYamlFile = join(dataPath, `interactive_setup_kibana_${Date.now()}.yml`);
+  const tempKibanaYamlFile = join(getDataPath(), `interactive_setup_kibana_${Date.now()}.yml`);
   await fs.writeFile(tempKibanaYamlFile, '');
 
   const caPath = resolve(__dirname, './fixtures/elasticsearch.p12');

@@ -18,11 +18,7 @@ import {
   selectTab,
 } from '.';
 import { discardFlyoutsOnTabChange } from './internal_state';
-import {
-  buildDataViewMock,
-  dataViewMock,
-  deepMockedFields,
-} from '@kbn/discover-utils/src/__mocks__';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { mockControlState } from '../../../../__mocks__/esql_controls';
 import { selectDataSourceProfileId } from './runtime_state';
@@ -51,38 +47,6 @@ describe('InternalStateStore', () => {
     expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value).toBe(
       dataViewMock
     );
-  });
-
-  it('should clear expandedDoc when setDataView is called with a different data view id', async () => {
-    const { store } = await setup();
-    const tabId = store.getState().tabs.unsafeCurrentId;
-    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
-
-    store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
-    store.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: mockDoc }));
-    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
-
-    const differentDataView = buildDataViewMock({
-      id: 'different-data-view-id',
-      fields: deepMockedFields,
-    });
-    store.dispatch(internalStateActions.setDataView({ tabId, dataView: differentDataView }));
-
-    expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
-  });
-
-  it('should not clear expandedDoc when setDataView is called with the same data view id', async () => {
-    const { store } = await setup();
-    const tabId = store.getState().tabs.unsafeCurrentId;
-    const mockDoc = buildDataTableRecord({ _index: 'test', _id: 'doc1' }, dataViewMock);
-
-    store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
-    store.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: mockDoc }));
-    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
-
-    store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
-
-    expect(selectTab(store.getState(), tabId).expandedDoc).toBe(mockDoc);
   });
 
   it('should append a new tab to the tabs list', async () => {

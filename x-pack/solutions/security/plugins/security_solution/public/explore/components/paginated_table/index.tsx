@@ -320,7 +320,6 @@ const PaginatedTableComponent: FC<SiemTables> = ({
                     itemsPerRow.length > 0 &&
                     totalCount >= itemsPerRow[0].numberOfRow && (
                       <EuiPopover
-                        aria-label={i18n.ROWS}
                         id="customizablePagination"
                         data-test-subj="loadingMoreSizeRowPopover"
                         button={button}

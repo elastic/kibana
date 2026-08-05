@@ -12,6 +12,10 @@ export const ASSET_VERSION = 1;
 export const ATTACHMENT_SUGGESTIONS_LIMIT = 50;
 
 export const STREAMS_FEATURE_ID = 'streams';
+export const STREAMS_CONSUMER = 'streams';
+export const STREAMS_PRODUCER = 'streams';
+
+export const STREAMS_RULE_REGISTRATION_CONTEXT = 'streams';
 
 export const STREAMS_API_PRIVILEGES = {
   read: 'read_stream',

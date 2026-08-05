@@ -163,7 +163,6 @@ describe('APM Transaction Error Rate Transform Generator', () => {
         frequency: oneMinute(),
         syncDelay: twoMinute(),
         preventInitialBackfill: true,
-        preventCrossProjectSearch: false,
       },
     });
 

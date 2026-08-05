@@ -129,7 +129,7 @@ export const AzureBlob: ConnectorSpec = {
     }),
     isTechnicalPreview: true,
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {

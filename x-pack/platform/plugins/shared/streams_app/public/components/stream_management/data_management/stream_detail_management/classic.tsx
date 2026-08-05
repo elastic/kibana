@@ -27,6 +27,7 @@ import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
 import { ClassicStreamPartitioning } from '../stream_detail_routing/classic_stream_partitioning';
 import { buildLifecycleTabActions } from './lifecycle_tab_label_with_actions';
+import { StreamDetailCanvas } from '../stream_detail_canvas';
 import {
   ImportLifecycleFlyoutProvider,
   useImportLifecycleFlyoutContext,
@@ -41,6 +42,7 @@ const classicStreamManagementSubTabs = [
   'schemaEditor',
   'schema',
   'attachments',
+  'canvas',
 ] as const;
 
 type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[number];
@@ -94,7 +96,8 @@ function ClassicStreamDetailManagementContent({
   const importLifecycleFlyout = useImportLifecycleFlyoutContext();
 
   const {
-    features: { queryStreams },
+    features: { canvas, queryStreams, significantEvents },
+    isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
 
   const isProcessingEnabled = !definition.replicated;
@@ -220,9 +223,43 @@ function ClassicStreamDetailManagementContent({
     }),
   };
 
+  if (canvas.enabled) {
+    tabs.canvas = {
+      content: <StreamDetailCanvas definition={definition} />,
+      label: i18n.translate('xpack.streams.streamDetailView.canvasTab', {
+        defaultMessage: 'Canvas',
+      }),
+    };
+  }
+
   if (tab === 'partitioning' && !queryStreams.enabled) {
     return (
       <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'lifecycle' } }} />
+    );
+  }
+
+  if (tab === 'canvas' && !canvas.enabled) {
+    return (
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
+    );
+  }
+
+  if (tab === 'significantEvents') {
+    if (isPrivilegesLoading) {
+      return null;
+    }
+
+    if (significantEvents?.available) {
+      return (
+        <RedirectTo
+          path="/_discovery/{tab}"
+          params={{ path: { tab: 'knowledge_indicators' }, query: { stream: key } }}
+        />
+      );
+    }
+
+    return (
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />
     );
   }
 

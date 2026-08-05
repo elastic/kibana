@@ -108,7 +108,6 @@ export function AggSelect(props: AggSelectUiProps) {
   return (
     <div data-test-subj="aggSelector">
       <EuiComboBox
-        data-test-subj="aggSelectorComboBox"
         isClearable={false}
         placeholder={i18n.translate('visTypeTimeseries.aggSelect.selectAggPlaceholder', {
           defaultMessage: 'Select aggregation',

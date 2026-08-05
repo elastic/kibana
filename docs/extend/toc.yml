@@ -59,6 +59,7 @@ toc:
           - file: anatomy-of-a-plugin.md
           - file: scoped-services.md
           - file: routing-navigation-and-url.md
+          - file: api-documentation.md
       - folder: security
         children:
           - file: overview.md

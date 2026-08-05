@@ -20,16 +20,16 @@ import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory'
 const bodyValidation = schema.object({
   skipUnavailable: schema.boolean(),
   mode: schema.oneOf([schema.literal(PROXY_MODE), schema.literal(SNIFF_MODE)]),
-  seeds: schema.nullable(schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 })),
+  seeds: schema.nullable(schema.arrayOf(schema.string(), { maxSize: 1000 })),
   nodeConnections: schema.nullable(schema.number()),
-  proxyAddress: schema.nullable(schema.string({ maxLength: 1000 })),
+  proxyAddress: schema.nullable(schema.string()),
   proxySocketConnections: schema.nullable(schema.number()),
-  serverName: schema.nullable(schema.string({ maxLength: 1000 })),
+  serverName: schema.nullable(schema.string()),
   hasDeprecatedProxySetting: schema.maybe(schema.boolean()),
 });
 
 const paramsValidation = schema.object({
-  name: schema.string({ maxLength: 1000 }),
+  name: schema.string(),
 });
 
 type RouteParams = TypeOf<typeof paramsValidation>;

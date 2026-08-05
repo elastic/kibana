@@ -287,27 +287,6 @@ export default createPlaywrightEvalsConfig({ testDir: __dirname });
 
 This auto-discovers connectors and creates one Playwright project per model so the same test file runs against each.
 
-#### `workers` — parallelising spec files
-
-By default Playwright runs all spec files in the suite serially (`workers: 1`). If your spec files are independent you can run several in parallel:
-
-```ts
-export default createPlaywrightEvalsConfig({
-  testDir: __dirname,
-  workers: 3, // run up to 3 spec files simultaneously
-});
-```
-
-Allowed values are `1` (default), `2`, or `3`.
-
-**Before raising `workers`, verify that every spec file in the suite is isolation-safe:**
-
-hints:
-
-1. **Do two specs write to the same named index / data stream / saved-object namespace?** If yes, their cleanup windows can overlap and corrupt each other's data.
-2. **Do any tests assert hard-coded expected values that depend on the index being empty of other fixtures?** If yes, a concurrently seeding spec will invalidate those assertions.
-3. **Is `beforeAll` cleanup scoped to this run's resources only?** Cleanup via document IDs returned from the current `beforeAll` is safe; `deleteByQuery` on a shared alias without a run-specific filter is not.
-
 ### Writing evaluation tests
 
 ```ts

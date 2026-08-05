@@ -45,6 +45,7 @@ interface Props {
   isEditing: boolean;
   ruleId?: string;
   builderType?: string;
+  onManualSplit?: () => void;
 }
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -59,6 +60,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         dispatch={props.dispatch}
         services={props.services}
         isEditing={props.isEditing}
+        onManualSplit={props.onManualSplit}
       />
     ),
     fields: ['query'],
@@ -165,12 +167,11 @@ export const ComposeDiscoverForm = ({
   isEditing,
   ruleId,
   builderType,
+  onManualSplit,
 }: Props) => {
   const { setValue } = useFormContext<FormValues>();
   const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const noDataStrategy = useWatch<FormValues, 'noDataStrategy'>({ name: 'noDataStrategy' });
-  const query = useWatch<FormValues, 'query'>({ name: 'query' });
-  const isQueryStandalone = query.format === 'standalone';
   const { steps, renderCustomRecovery } = useMemo(
     () => getSteps(isAlert, builderType),
     [isAlert, builderType]
@@ -186,6 +187,7 @@ export const ComposeDiscoverForm = ({
     isEditing,
     ruleId,
     renderCustomRecovery,
+    onManualSplit,
   });
 
   return (
@@ -222,11 +224,6 @@ export const ComposeDiscoverForm = ({
               <NoDataStrategySelect
                 value={noDataStrategy ?? 'none'}
                 onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
-                disabled={isQueryStandalone}
-                disabledReason={i18n.translate(
-                  'xpack.alertingV2.composeDiscover.alertCondition.noDataDisabledReason',
-                  { defaultMessage: 'An alert condition is required to act on no data.' }
-                )}
                 compressed
                 data-test-subj="composeDiscoverNoDataStrategy"
               />

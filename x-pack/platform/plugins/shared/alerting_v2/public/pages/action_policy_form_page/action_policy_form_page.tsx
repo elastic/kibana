@@ -214,11 +214,7 @@ const ActionPolicyFormPageContent = ({
   const isLoading = isCreating || isUpdating || isCreatingWorkflows;
 
   return (
-    <EuiPageTemplate.Section
-      paddingSize="none"
-      restrictWidth={true}
-      data-test-subj="actionPolicyFormPage"
-    >
+    <EuiPageTemplate.Section paddingSize="none" restrictWidth={true}>
       <EuiFlexGroup justifyContent="flexStart">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

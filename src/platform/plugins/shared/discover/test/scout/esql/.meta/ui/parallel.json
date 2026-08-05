@@ -1,5 +1,5 @@
 {
-  "sha1": "ce396b3f0d1b880d67901bd6757cd919441d7b72",
+  "sha1": "bcc09f1b72a3e23d441f66a1c11a37aa3e49cd31",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -12,8 +12,8 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
+        "line": 12,
+        "column": 19
       }
     },
     {
@@ -23,8 +23,8 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/global.setup.ts",
-        "line": 7,
-        "column": 1
+        "line": 12,
+        "column": 16
       }
     },
     {
@@ -36,8 +36,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_columns_query_changes.spec.ts",
-        "line": 33,
-        "column": 66
+        "line": 43,
+        "column": 14
       }
     },
     {
@@ -49,8 +49,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_columns_query_changes.spec.ts",
-        "line": 60,
-        "column": 13
+        "line": 66,
+        "column": 14
       }
     },
     {
@@ -62,8 +62,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_columns_query_changes.spec.ts",
-        "line": 77,
-        "column": 11
+        "line": 91,
+        "column": 14
       }
     },
     {
@@ -75,8 +75,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_columns.spec.ts",
-        "line": 32,
-        "column": 66
+        "line": 42,
+        "column": 14
       }
     },
     {
@@ -88,8 +88,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_columns.spec.ts",
-        "line": 38,
-        "column": 58
+        "line": 50,
+        "column": 14
       }
     },
     {
@@ -101,8 +101,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_columns.spec.ts",
-        "line": 51,
-        "column": 6
+        "line": 62,
+        "column": 14
       }
     },
     {
@@ -114,8 +114,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_columns.spec.ts",
-        "line": 64,
-        "column": 15
+        "line": 67,
+        "column": 14
       }
     },
     {
@@ -127,8 +127,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_columns.spec.ts",
-        "line": 71,
-        "column": 81
+        "line": 72,
+        "column": 14
       }
     },
     {
@@ -140,73 +140,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_formatting.spec.ts",
-        "line": 42,
-        "column": 48
-      }
-    },
-    {
-      "id": "4f449e26036003c-dc50bc41d50cb1e",
-      "title": "Discover ES|QL lookup-join index editor - closed index shows a closed-index warning instead of the create/edit actions",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/lookup_index_editor_closed_index.spec.ts",
-        "line": 38,
-        "column": 7
-      }
-    },
-    {
-      "id": "49bf6df2832845d-645b302498a8158",
-      "title": "Discover ES|QL lookup-join index editor - editing an existing index edits an existing lookup index",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/lookup_index_editor_existing_index.spec.ts",
-        "line": 67,
-        "column": 30
-      }
-    },
-    {
-      "id": "1086b4dfad73838-a73ce2e676cd86e",
-      "title": "Discover ES|QL lookup-join index editor - file upload creates a lookup index by uploading a file",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/lookup_index_editor_file_upload.spec.ts",
-        "line": 45,
-        "column": 29
-      }
-    },
-    {
-      "id": "2dc6c591f18fbb5-a82d9eb39458365",
-      "title": "Discover ES|QL lookup-join index editor - manual creation creates a lookup index by manually adding fields and rows",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/lookup_index_editor_manual_creation.spec.ts",
-        "line": 40,
-        "column": 42
-      }
-    },
-    {
-      "id": "223a875559f3655-c9a2a406eaeda78",
-      "title": "Discover ES|QL lookup-join index editor - save without closing saves lookup index content without closing the flyout",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/lookup_index_editor_save_without_close.spec.ts",
-        "line": 35,
-        "column": 42
+        "line": 52,
+        "column": 14
       }
     }
   ]

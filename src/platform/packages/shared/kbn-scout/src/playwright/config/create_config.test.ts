@@ -37,27 +37,9 @@ describe('createPlaywrightConfig', () => {
   const mockedScoutFailedTestsReporter = scoutFailedTestsReporter as jest.Mock;
   const mockedScoutFailureSummaryReporter = scoutFailureSummaryReporter as jest.Mock;
 
-  const originalCI = process.env.CI;
-  const originalRetries = process.env.SCOUT_TEST_RETRIES;
-
   beforeEach(() => {
     jest.clearAllMocks();
     delete process.env.TEST_RUN_ID;
-    delete process.env.CI;
-    delete process.env.SCOUT_TEST_RETRIES;
-  });
-
-  afterAll(() => {
-    if (originalCI === undefined) {
-      delete process.env.CI;
-    } else {
-      process.env.CI = originalCI;
-    }
-    if (originalRetries === undefined) {
-      delete process.env.SCOUT_TEST_RETRIES;
-    } else {
-      process.env.SCOUT_TEST_RETRIES = originalRetries;
-    }
   });
 
   it('should return a valid default Playwright configuration', () => {
@@ -83,7 +65,7 @@ describe('createPlaywrightConfig', () => {
       navigationTimeout: 20000,
       screenshot: 'only-on-failure',
       testIdAttribute: 'data-test-subj',
-      trace: 'off',
+      trace: 'on-first-retry',
       timezoneId: 'GMT',
       ignoreHTTPSErrors: true,
     });
@@ -200,46 +182,6 @@ describe('createPlaywrightConfig', () => {
       expect(teardown!.testMatch).toEqual(/global.teardown\.ts/);
       expect(teardown!.timeout).toBe(defaultGlobalHookTimeout);
     }
-  });
-
-  describe('retries', () => {
-    it('is 0 locally (CI unset)', () => {
-      const config = createPlaywrightConfig({ testDir: './my_tests' });
-      expect(config.retries).toBe(0);
-    });
-
-    it('is 1 on CI', () => {
-      process.env.CI = 'true';
-      const config = createPlaywrightConfig({ testDir: './my_tests' });
-      expect(config.retries).toBe(1);
-    });
-
-    it('SCOUT_TEST_RETRIES=0 overrides CI=true — the flaky-runner guard', () => {
-      process.env.CI = 'true';
-      process.env.SCOUT_TEST_RETRIES = '0';
-      const config = createPlaywrightConfig({ testDir: './my_tests' });
-      expect(config.retries).toBe(0);
-    });
-
-    it('SCOUT_TEST_RETRIES overrides the local default too', () => {
-      process.env.SCOUT_TEST_RETRIES = '2';
-      const config = createPlaywrightConfig({ testDir: './my_tests' });
-      expect(config.retries).toBe(2);
-    });
-
-    it('throws on a non-numeric override', () => {
-      process.env.SCOUT_TEST_RETRIES = 'not-a-number';
-      expect(() => createPlaywrightConfig({ testDir: './my_tests' })).toThrow(
-        /SCOUT_TEST_RETRIES must be a non-negative integer/
-      );
-    });
-
-    it('throws on a negative override', () => {
-      process.env.SCOUT_TEST_RETRIES = '-1';
-      expect(() => createPlaywrightConfig({ testDir: './my_tests' })).toThrow(
-        /SCOUT_TEST_RETRIES must be a non-negative integer/
-      );
-    });
   });
 
   it('should generate and cache runId in process.env.TEST_RUN_ID', () => {

@@ -7,31 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 
-export const filterSchema = z
-  .object({
-    language: z
-      .union([z.literal('kql'), z.literal('lucene')])
-      .default('kql')
-      .meta({
+export const filterSchema = schema.object(
+  {
+    language: schema.oneOf([schema.literal('kql'), schema.literal('lucene')], {
+      defaultValue: 'kql',
+      meta: {
         description:
           'Query language: `kql` (Kibana Query Language) or `lucene`. Defaults to `kql`.',
-      }),
-    expression: z.string().meta({
-      description: 'A query expression in KQL or Lucene syntax',
+      },
     }),
-  })
-  .strict()
-  .meta({
-    id: 'filterSimple',
-    title: 'Filter',
-    description:
-      'A KQL or Lucene query that filters panel data. Applied on top of any dashboard-level filters.',
-  });
+    expression: schema.string({
+      meta: {
+        description: 'A query expression in KQL or Lucene syntax',
+      },
+    }),
+  },
+  {
+    meta: {
+      id: 'filterSimple',
+      title: 'Filter',
+      description:
+        'A KQL or Lucene query that filters panel data. Applied on top of any dashboard-level filters.',
+    },
+  }
+);
 
-export const filterWithLabelSchema = z
-  .object({
+export const filterWithLabelSchema = schema.object(
+  {
     /**
      * Filter query
      */
@@ -39,15 +43,21 @@ export const filterWithLabelSchema = z
     /**
      * Label for the filter
      */
-    label: z.string().optional().meta({
-      description: 'Label for the filter',
-    }),
-  })
-  .strict()
-  .meta({
-    id: 'filterWithLabel',
-    title: 'Filter with Label',
-    description: 'A KQL or Lucene filter with an optional display label.',
-  });
+    label: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'Label for the filter',
+        },
+      })
+    ),
+  },
+  {
+    meta: {
+      id: 'filterWithLabel',
+      title: 'Filter with Label',
+      description: 'A KQL or Lucene filter with an optional display label.',
+    },
+  }
+);
 
-export type LensApiFilterType = z.output<typeof filterSchema>;
+export type LensApiFilterType = typeof filterSchema.type;

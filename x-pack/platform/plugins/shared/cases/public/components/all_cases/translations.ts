@@ -245,13 +245,6 @@ export const DRAG_HANDLE = i18n.translate('xpack.cases.allCasesView.columnSelect
   defaultMessage: 'Drag Handle',
 });
 
-export const COLUMN_SELECTION_POPOVER_ARIA_LABEL = i18n.translate(
-  'xpack.cases.allCasesView.columnSelectionPopoverAriaLabel',
-  {
-    defaultMessage: 'Column visibility options',
-  }
-);
-
 export const EMPTY_FILTER_MESSAGE = i18n.translate(
   'xpack.cases.tableFilters.useFilters.emptyMessage',
   {
@@ -264,13 +257,6 @@ export const OPTIONS = (totalCount: number) =>
     defaultMessage: '{totalCount, plural, one {# option} other {# options}}',
     values: { totalCount },
   });
-
-export const FILTER_OPTIONS_POPOVER_ARIA_LABEL = i18n.translate(
-  'xpack.cases.tableFilters.useFilters.filterOptionsPopoverAriaLabel',
-  {
-    defaultMessage: 'Filter options',
-  }
-);
 
 export const MORE_FILTERS_LABEL = i18n.translate('xpack.cases.tableFilters.moreFiltersLabel', {
   defaultMessage: 'More',

@@ -54,7 +54,6 @@ import {
   isUserQuestionAnsweredEvent,
   isAskUserQuestionStep,
   createAskUserQuestionStep,
-  createRelevantSkillsStep,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationInternalState,
@@ -70,7 +69,6 @@ import { getCurrentTraceId } from '../../../../tracing';
 import type { ConvertedEvents } from '../convert_graph_events';
 import { isFinalStateEvent } from '../events';
 import type { CompactedConversation } from './conversation_compactor';
-import type { RelevantSkillSelection } from './relevant_skills/select_relevant_skills';
 import { formatAttachmentsMetadata } from './attachment_presentation';
 
 type SourceEvents = ConvertedEvents;
@@ -105,7 +103,6 @@ export const addRoundCompleteEvent = ({
   compactionResult,
   roundId: providedRoundId,
   initialTodos,
-  relevantSkillsSelection,
   getWorkspaceId,
 }: {
   pendingRound: ConversationRound | undefined;
@@ -133,8 +130,6 @@ export const addRoundCompleteEvent = ({
   roundId?: string;
   /** Todo list at round start; used as fallback when the agent never called todoWrite this round */
   initialTodos?: TodoItem[];
-  /** Skills selected as relevant this round; persisted as a `relevant_skills` step (fresh rounds only) */
-  relevantSkillsSelection?: RelevantSkillSelection;
   /** Returns the workspace_id used in this round, if any */
   getWorkspaceId?: () => string | undefined;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
@@ -171,7 +166,6 @@ export const addRoundCompleteEvent = ({
                 configurationOverrides,
                 compactionResult,
                 initialTodos,
-                relevantSkillsSelection,
               });
 
           round.state = buildRoundState({ round, events, stateManager });
@@ -350,7 +344,6 @@ const createRound = ({
   configurationOverrides,
   compactionResult,
   initialTodos,
-  relevantSkillsSelection,
 }: {
   roundId?: string;
   events: SourceEvents[];
@@ -364,7 +357,6 @@ const createRound = ({
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
   initialTodos?: TodoItem[];
-  relevantSkillsSelection?: RelevantSkillSelection;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent);
   const toolProgressions = events.filter(isToolProgressEvent);
@@ -442,14 +434,6 @@ const createRound = ({
       summarized_round_count: compactionResult.summary.summarized_round_count,
     };
     steps.push(compactionStep);
-  }
-
-  // Relevant-skills step is placed before the event-derived steps so, on replay, its notification
-  // renders right after the round's user input and before the round's tool calls.
-  if (relevantSkillsSelection && relevantSkillsSelection.skills.length > 0) {
-    steps.push(
-      createRelevantSkillsStep({ skills: relevantSkillsSelection.skills, source: 'implicit' })
-    );
   }
 
   steps.push(...stepEvents.flatMap(eventToStep));

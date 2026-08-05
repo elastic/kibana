@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { IlmExplainLifecycleResponse } from '@elastic/elasticsearch/lib/api/types';
-
 import { addBasePath } from '../../../services';
 import type { RouteDependencies } from '../../../types';
 
@@ -29,10 +27,7 @@ export const registerExplainRoute = ({
     license.guardApiRoute(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
-        const body = await client.asCurrentUser.transport.request<IlmExplainLifecycleResponse>({
-          method: 'GET',
-          path: '/_all/_ilm/explain?expand_wildcards=all',
-        });
+        const body = await client.asCurrentUser.ilm.explainLifecycle({ index: '_all' });
         return response.ok({ body });
       } catch (error) {
         return handleEsError({ error, response });
