@@ -87,7 +87,9 @@ export const attachTimeline = (newCase: TestCase) => {
         }
       });
     },
-    { interval: 500, timeout: 12000 }
+    // The timeline is created via the API right before this and can take a while to show up in
+    // the selector's search on slower environments (serverless MKI).
+    { interval: 500, timeout: 30000 }
   );
   cy.get(TIMELINE).first().click();
 };
