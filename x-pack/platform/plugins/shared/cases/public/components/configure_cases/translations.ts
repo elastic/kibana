@@ -214,3 +214,65 @@ export const SHOW_ALL_TEMPLATES = i18n.translate(
     defaultMessage: 'Show all templates',
   }
 );
+
+export const LEGACY_CUSTOM_FIELDS_AND_TEMPLATES_TITLE = i18n.translate(
+  'xpack.cases.configureCases.legacyCustomFieldsAndTemplatesTitle',
+  {
+    defaultMessage: 'Legacy custom fields and templates',
+  }
+);
+
+export const SHOW_LEGACY_CUSTOM_FIELDS_AND_TEMPLATES = i18n.translate(
+  'xpack.cases.configureCases.showLegacyCustomFieldsAndTemplates',
+  {
+    defaultMessage: 'Show deprecated custom fields and templates',
+  }
+);
+
+export const SHOW_LEGACY_CUSTOM_FIELDS_SWITCH_DISABLED_HELP = i18n.translate(
+  'xpack.cases.configureCases.showLegacyCustomFieldsSwitchDisabledHelp',
+  {
+    defaultMessage:
+      'Required custom fields without a default value must stay visible so cases can still be created. Add a default or make them optional to disable this.',
+  }
+);
+
+export const VIEW_NEW_CUSTOM_FIELDS = i18n.translate(
+  'xpack.cases.configureCases.viewNewCustomFields',
+  {
+    defaultMessage: 'fields library',
+  }
+);
+
+export const VIEW_NEW_TEMPLATES = i18n.translate('xpack.cases.configureCases.viewNewTemplates', {
+  defaultMessage: 'new templates experience',
+});
+
+export const LEGACY_CUSTOM_FIELDS_LIST_TITLE = i18n.translate(
+  'xpack.cases.configureCases.legacyCustomFieldsListTitle',
+  {
+    defaultMessage: 'Custom fields',
+  }
+);
+
+export const LEGACY_TEMPLATES_LIST_TITLE = i18n.translate(
+  'xpack.cases.configureCases.legacyTemplatesListTitle',
+  {
+    defaultMessage: 'Templates',
+  }
+);
+
+export const ADD_LEGACY_CUSTOM_FIELD = i18n.translate(
+  'xpack.cases.configureCases.addLegacyCustomField',
+  {
+    defaultMessage: 'Add legacy field',
+  }
+);
+
+export const ADD_LEGACY_TEMPLATE = i18n.translate('xpack.cases.configureCases.addLegacyTemplate', {
+  defaultMessage: 'Add legacy template',
+});
+
+export const DEPRECATED_BADGE = i18n.translate('xpack.cases.configureCases.deprecatedBadge', {
+  defaultMessage: 'Deprecated',
+});

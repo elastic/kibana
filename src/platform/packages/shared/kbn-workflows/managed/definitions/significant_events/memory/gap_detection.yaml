@@ -1,21 +1,21 @@
 version: "1"
 
-name: Gap Detection
+name: Significant Events Gap Detection
 description: >
-  Audits the sigevents memory knowledge base against 11 required knowledge
+  Audits the significant events memory knowledge base against 11 required knowledge
   dimensions and writes a structured "_gaps/overview" memory page listing
   what is unknown, ambiguous, or missing. Runs on a weekly schedule.
 enabled: false
 settings:
   timeout: "30m"
   concurrency:
-    key: "streams-gap-detection"
+    key: "significant-events-memory-gap-detection"
     strategy: drop
     max: 1
 tags:
   - observability
   - streams
-  - sigevents
+  - significant-events
   - memory
   - gap-detection
 
@@ -27,9 +27,11 @@ triggers:
 steps:
   - name: detect_gaps
     type: ai.agent
-    # Keep in sync with @kbn/significant-events-schema inference_feature_ids.ts
-    # (SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID).
+    # connector-id-by-feature: shared memory connector (SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID).
+    # plugin-id: step-specific cost attribution; aggregate-by: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID.
     connector-id-by-feature: "significant_events_memory"
+    plugin-id: "significant_events_memory_gap_detection"
+    aggregate-by: "significant_events"
     create-conversation: true
     with:
       timeout: 1800s

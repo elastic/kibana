@@ -141,6 +141,7 @@ export const HomePage = () => {
               isLoading={isCredentialsLoading}
               showLabel={false}
               isCompact
+              telemetryPage="homePage"
             />
           </EuiFlexItem>
         </EuiFlexGroup>

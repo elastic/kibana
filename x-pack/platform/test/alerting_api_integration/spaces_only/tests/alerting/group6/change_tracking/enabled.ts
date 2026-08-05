@@ -8,6 +8,10 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
+const CHANGE_HISTORY_ES_OPTIONS = {
+  headers: { 'x-elastic-product-origin': 'kibana' },
+};
+
 export default function changeTrackingEnabledTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
@@ -15,7 +19,10 @@ export default function changeTrackingEnabledTest({ getService }: FtrProviderCon
   describe('change tracking service - enabled', () => {
     it('should create the change history data stream when ruleChangeTracking is enabled', async () => {
       await retry.tryForTime(30_000, async () => {
-        const response = await es.indices.getDataStream({ name: '.kibana_change_history' });
+        const response = await es.indices.getDataStream(
+          { name: '.kibana_change_history' },
+          CHANGE_HISTORY_ES_OPTIONS
+        );
         expect(response.data_streams.length).to.be.greaterThan(0);
       });
     });

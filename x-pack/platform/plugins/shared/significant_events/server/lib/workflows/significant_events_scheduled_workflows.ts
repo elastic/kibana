@@ -24,6 +24,9 @@ const SCHEDULED_WORKFLOW_IDS = [
 
 export interface SignificantEventsScheduledWorkflowsConfig {
   detectionIntervalMinutes: number;
+  detectionBucketIntervalMinutes: number;
+  detectionLookbackMinutes: number;
+  targetCoverageMinutes: number;
   reviewIntervalMinutes: number;
   discoveryBatchSize: number;
   triageBatchSize: number;
@@ -133,6 +136,9 @@ export const createSignificantEventsScheduledWorkflowsService = ({
         workflowIdSuffix: spaceId,
         values: {
           detectionIntervalMinutes: config.detectionIntervalMinutes,
+          detectionBucketIntervalMinutes: config.detectionBucketIntervalMinutes,
+          detectionLookbackMinutes: config.detectionLookbackMinutes,
+          targetCoverageMinutes: config.targetCoverageMinutes,
         },
       }),
       client.install(SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {

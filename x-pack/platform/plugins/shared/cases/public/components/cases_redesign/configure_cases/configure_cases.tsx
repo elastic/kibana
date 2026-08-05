@@ -20,7 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { useKibana } from '../../../common/lib/kibana';
+import { useCasesConfig, useKibana } from '../../../common/lib/kibana';
 import { CasesPageBody } from '../../app/cases_page_body';
 import { Connectors } from '../../configure_cases/connectors';
 import * as configureCasesI18n from '../../configure_cases/translations';
@@ -32,6 +32,7 @@ import { ObservableTypes } from '../../observable_types';
 import { AutomaticClosureSwitch } from './automatic_closure_switch';
 import { SettingsSection } from './settings_section';
 import { ConfigureCasesAppHeader } from './configure_cases_app_header';
+import { OldCustomFieldsAndTemplatesSection } from './old_custom_fields_and_templates_section';
 import * as observableTypesI18n from '../../observable_types/translations';
 
 const contentWrapperCss = css`
@@ -48,6 +49,8 @@ const getFormWrapperCss = (euiTheme: EuiThemeComputed) => css`
   }
 `;
 
+type LegacyFlyoutType = 'customField' | 'template';
+
 // This component intentionally mirrors the connector/closure/observable-types logic in
 // `../../configure_cases` (the legacy settings page) via the shared `useConfigureCasesController`
 // hook. Both pages are kept as separate presentational implementations while behind the
@@ -58,15 +61,21 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
   const { euiTheme } = useEuiTheme();
   const { permissions } = useCasesContext();
   const { docLinks } = useKibana().services;
+  const { templatesEnabled } = useCasesConfig();
 
   const {
     hasMinimumLicensePermissions,
     hasMinimumLicensePermissionsForObservables,
     isObservablesFeatureEnabled,
+    configurationId,
+    configurationVersion,
     closureType,
     connector,
     mappings,
+    customFields,
+    templates,
     observableTypes,
+    isPersistingConfiguration,
     isLoadingCaseConfiguration,
     isLoadingConnectors,
     connectors,
@@ -74,8 +83,9 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     isLoadingAny,
     connectorIsValid,
     updateConnectorDisabled,
+    flyOutVisibility,
     setFlyOutVisibility,
-    isPersistingConfiguration,
+    persistCaseConfigure,
     onClickUpdateConnector,
     onAddNewConnector,
     onChangeConnector,
@@ -85,7 +95,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     onEditObservableType,
     onDeleteObservableType,
     AddOrEditObservableTypeFlyout,
-  } = useConfigureCasesController();
+  } = useConfigureCasesController<LegacyFlyoutType>();
 
   const showObservableTypesSection =
     hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled;
@@ -189,6 +199,22 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                       handleEditObservableType={onEditObservableType}
                     />
                   </SettingsSection>
+                )}
+
+                {templatesEnabled && (
+                  <OldCustomFieldsAndTemplatesSection
+                    configurationId={configurationId}
+                    configurationVersion={configurationVersion}
+                    closureType={closureType}
+                    connector={connector}
+                    customFields={customFields}
+                    templates={templates}
+                    connectors={connectors ?? []}
+                    isLoadingCaseConfiguration={isLoadingCaseConfiguration}
+                    persistCaseConfigure={persistCaseConfigure}
+                    flyOutVisibility={flyOutVisibility}
+                    setFlyOutVisibility={setFlyOutVisibility}
+                  />
                 )}
               </EuiPanel>
             </div>

@@ -485,6 +485,37 @@ apiTest.describe(
           }
         );
 
+        await apiTest.step(
+          'public conversation rounds are attributed to the Kibana user who sent them',
+          async () => {
+            expect(publicConversation.author?.username).toBe(alice.username);
+            expect(privateConversation.author).toBeUndefined();
+
+            const getPublicResponse = await apiClient.get(
+              `${accessControlApiBase}/conversations/${encodeURIComponent(
+                publicConversation.conversation_id
+              )}`,
+              { headers: headersFor(alice), responseType: 'json' }
+            );
+            expect(getPublicResponse).toHaveStatusCode(200);
+            const conversation = getPublicResponse.body as Conversation;
+            expect(conversation.rounds).toHaveLength(2);
+            expect(conversation.rounds[0].author?.username).toBe(alice.username);
+            expect(conversation.rounds[0].author?.id).toBeDefined();
+            expect(conversation.rounds[1].author?.username).toBe(bob.username);
+            expect(conversation.rounds[1].author?.id).toBeDefined();
+
+            const getPrivateResponse = await apiClient.get(
+              `${accessControlApiBase}/conversations/${encodeURIComponent(
+                privateConversation.conversation_id
+              )}`,
+              { headers: headersFor(alice), responseType: 'json' }
+            );
+            expect(getPrivateResponse).toHaveStatusCode(200);
+            expect((getPrivateResponse.body as Conversation).rounds[0].author).toBeUndefined();
+          }
+        );
+
         await apiTest.step('Bob can mark a public conversation read', async () => {
           const markReadResponse = await markConversationReadAs(
             apiClient,

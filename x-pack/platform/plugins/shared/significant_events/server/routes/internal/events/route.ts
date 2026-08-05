@@ -9,9 +9,11 @@ import {
   significantEventSchema,
   significantEventInvestigationSchema,
   significantEventStatusSchema,
+  CHANGE_POINT_TYPES,
+  severitySchema,
+  type ChangePointType,
   type Detection,
   type SignificantEvent,
-  type Discovery,
   type LifecycleDetection,
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
@@ -28,27 +30,42 @@ import { assertSignificantEventsAccess } from '../../utils/assert_significant_ev
 const toArray = <T extends string>(val: T | T[] | undefined): T[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
 
-// Detections carry `change_point_type`; processed-marker docs do not.
-const isLifecycleDetection = (hit: Detection): boolean => hit.change_point_type != null;
+const hasChangePointType = (hit: Detection): boolean => hit.change_point_type != null;
 
-const collectEmbeddedDetections = (discoveries: Discovery[]) => {
+const parseChangePointType = (value: string | undefined): ChangePointType | undefined => {
+  if (!value) {
+    return undefined;
+  }
+  return CHANGE_POINT_TYPES.includes(value as ChangePointType)
+    ? (value as ChangePointType)
+    : undefined;
+};
+
+const collectEmbeddedDetections = (events: SignificantEvent[]) => {
   const seen = new Set<string>();
   const result: Array<Omit<LifecycleDetection, '@timestamp'>> = [];
 
-  for (const discovery of discoveries) {
-    for (const signal of discovery.signals ?? []) {
+  for (const event of events) {
+    for (const signal of event.signals ?? []) {
       if (signal.type !== 'detection') continue;
       const { detection_id, rule_name, change_point_type } = signal.metadata;
       const streamName = signal.stream_name;
-      if (!detection_id || seen.has(detection_id)) continue;
+      const parsedChangePointType = parseChangePointType(change_point_type);
+      if (
+        !detection_id ||
+        !rule_name ||
+        !streamName ||
+        !parsedChangePointType ||
+        seen.has(detection_id)
+      ) {
+        continue;
+      }
       seen.add(detection_id);
-      // The embedded discovery detection types `change_point_type` as a free-form string
-      // (agent output); narrow to the schema enum for the lifecycle response.
       result.push({
         detection_id,
         rule_name,
         stream_name: streamName,
-        change_point_type: change_point_type as LifecycleDetection['change_point_type'],
+        change_point_type: parsedChangePointType,
       });
     }
   }
@@ -79,6 +96,7 @@ const eventsSearchRoute = createServerRoute({
         .optional(),
       stream: z.union([z.string().max(255), z.array(z.string().max(255)).max(50)]).optional(),
       search: z.string().max(500).optional(),
+      severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),
     }),
   }),
   handler: async ({
@@ -91,12 +109,13 @@ const eventsSearchRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const { status, stream, search, ...rest } = params.query;
+    const { status, stream, search, severity, ...rest } = params.query;
 
     return getEventClient().findLatestByCurrentStatePaginated({
       ...rest,
       status: toArray(status),
       stream: toArray(stream),
+      severity: toArray(severity),
       search: search || undefined,
     });
   },
@@ -198,12 +217,12 @@ const eventsLifecycleRoute = createServerRoute({
       getDiscoveryClient().findByEventId(eventId),
     ]);
 
-    const embedded = collectEmbeddedDetections(discoveries);
+    const embedded = collectEmbeddedDetections(events);
     const { hits: allDetectionHits } = await getDetectionClient().findByIds(
-      embedded.map((e) => e.detection_id).filter(Boolean)
+      embedded.map((e) => e.detection_id)
     );
     const hitsByDetectionId = new Map(
-      allDetectionHits.filter(isLifecycleDetection).map((h) => [h.detection_id, h])
+      allDetectionHits.filter(hasChangePointType).map((h) => [h.detection_id, h])
     );
 
     const detections: LifecycleDetection[] = embedded.flatMap(
@@ -213,12 +232,18 @@ const eventsLifecycleRoute = createServerRoute({
           return [];
         }
 
+        const hitChangePointType = parseChangePointType(hit.change_point_type);
+        if (!hitChangePointType) {
+          return [];
+        }
+
         return [
           {
             detection_id,
             rule_name: hit.rule_name ?? rule_name,
+            rule_uuid: hit.rule_uuid,
             stream_name: hit.stream_name ?? stream_name,
-            change_point_type: change_point_type ?? hit.change_point_type,
+            change_point_type: hitChangePointType,
             '@timestamp': hit['@timestamp'],
           },
         ];

@@ -80,9 +80,11 @@ interface SignificantEventsQueriesGenerationResult {
 
 interface LifecycleDetection {
   detection_id: string;
-  rule_name?: string;
-  stream_name?: string;
-  change_point_type?: ChangePointType;
+  rule_name: string;
+  /** Alerting rule that produced the detection; used to match event evidence. */
+  rule_uuid?: string;
+  stream_name: string;
+  change_point_type: ChangePointType;
   '@timestamp': string;
 }
 

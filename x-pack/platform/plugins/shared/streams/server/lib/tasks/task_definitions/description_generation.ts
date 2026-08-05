@@ -65,7 +65,7 @@ export function createStreamsDescriptionGenerationTask(taskContext: TaskContext)
                   inferenceClient: inferenceClient.bindTo({ connectorId }),
                   start,
                   end,
-                  signal: runContext.abortController.signal,
+                  signal: runContext.signal,
                   logger: taskContext.logger.get('stream_description'),
                   systemPrompt: descriptionPromptOverride,
                 });

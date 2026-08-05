@@ -65,9 +65,6 @@
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/utils",
     "@kbn/core",
-    "@kbn/entities-schema",
-    "@kbn/data-forge",
-    "@kbn/entityManager-plugin",
     "@kbn/ml-is-populated-object",
     "@kbn/ml-anomaly-utils",
     "@kbn/ml-server-schemas",
@@ -179,5 +176,6 @@
     "@kbn/core-user-profile-common",
     "@kbn/synthtrace-client",
     "@kbn/significant-events-plugin",
+    "@kbn/alerting-v2-schemas",
   ]
 }

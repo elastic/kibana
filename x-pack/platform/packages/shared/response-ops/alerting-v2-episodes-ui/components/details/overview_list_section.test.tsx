@@ -178,6 +178,116 @@ describe('AlertEpisodeOverviewListSection', () => {
     );
   });
 
+  it('still renders the overview list but hides the grouping row when the rule is forbidden (403)', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: 'episode.status', type: 'keyword' },
+        { name: 'rule.id', type: 'keyword' },
+        { name: 'group_hash', type: 'keyword' },
+      ],
+      values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', 'gh-1']],
+    });
+    mockHttp.get.mockRejectedValueOnce({
+      response: { status: 403 },
+      body: { code: 'FORBIDDEN', error: 'Forbidden', message: 'Forbidden' },
+    });
+    fetchEpisodeActionsMock.mockResolvedValue([]);
+    fetchGroupActionsMock.mockResolvedValue([]);
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewListSection
+          episodeId="ep-1"
+          groupHash="gh-1"
+          services={mockServices}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    expect(await screen.findByTestId('alertingV2EpisodeDetailsOverviewList')).toBeInTheDocument();
+    expect(screen.queryByText('Grouping')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('alertingV2EpisodeOverviewListSectionError')
+    ).not.toBeInTheDocument();
+  });
+
+  it('still renders the overview list but hides the grouping row when the rule is not found (404)', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: 'episode.status', type: 'keyword' },
+        { name: 'rule.id', type: 'keyword' },
+        { name: 'group_hash', type: 'keyword' },
+      ],
+      values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', 'gh-1']],
+    });
+    mockHttp.get.mockRejectedValueOnce({
+      response: { status: 404 },
+      body: { code: 'RULE_NOT_FOUND', error: 'Not Found', message: 'Not Found' },
+    });
+    fetchEpisodeActionsMock.mockResolvedValue([]);
+    fetchGroupActionsMock.mockResolvedValue([]);
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewListSection
+          episodeId="ep-1"
+          groupHash="gh-1"
+          services={mockServices}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    expect(await screen.findByTestId('alertingV2EpisodeDetailsOverviewList')).toBeInTheDocument();
+    expect(screen.queryByText('Grouping')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('alertingV2EpisodeOverviewListSectionError')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows an inline grouping error but keeps the list when the rule fails for a non-403/404 reason', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: 'episode.status', type: 'keyword' },
+        { name: 'rule.id', type: 'keyword' },
+        { name: 'group_hash', type: 'keyword' },
+      ],
+      values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', 'gh-1']],
+    });
+    mockHttp.get.mockRejectedValueOnce({
+      response: { status: 500 },
+      body: { code: 'INTERNAL', error: 'Internal Server Error', message: 'boom' },
+    });
+    fetchEpisodeActionsMock.mockResolvedValue([]);
+    fetchGroupActionsMock.mockResolvedValue([]);
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewListSection
+          episodeId="ep-1"
+          groupHash="gh-1"
+          services={mockServices}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    expect(await screen.findByTestId('alertingV2EpisodeDetailsOverviewList')).toBeInTheDocument();
+    // Grouping row is present but shows an inline error instead of tags.
+    expect(screen.getByText('Grouping')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('alertingV2EpisodeDetailsOverviewListGroupingError')
+    ).toBeInTheDocument();
+    // The section as a whole does not error out.
+    expect(
+      screen.queryByTestId('alertingV2EpisodeOverviewListSectionError')
+    ).not.toBeInTheDocument();
+  });
+
   it('renders the error state when group actions fail to load', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: [

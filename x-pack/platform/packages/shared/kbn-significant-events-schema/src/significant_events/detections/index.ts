@@ -69,6 +69,12 @@ export const detectionSchema = z.object({
     .describe(
       'Statistical p_value of the change point detection. Lower values indicate stronger signal.'
     ),
+  severity_score: z
+    .number()
+    .min(0)
+    .max(100)
+    .optional()
+    .describe('Rule-configured severity score used to prioritize discovery work.'),
   alert_index: z.string().max(MAX_ID_LENGTH).optional(),
   workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
   // Derived at read time from processed-marker membership; never stored.

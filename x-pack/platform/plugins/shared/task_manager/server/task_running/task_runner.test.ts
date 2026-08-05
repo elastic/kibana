@@ -3808,6 +3808,60 @@ describe('TaskManagerRunner', () => {
       });
     });
 
+    test('handles a version conflict gracefully when an expired recurring task is reclaimed while running and schedule is greater than timeout', async () => {
+      const id = _.random(1, 20).toString();
+      const onTaskEvent = jest.fn();
+      const { runner, store, logger } = await readyToRunStageSetup({
+        onTaskEvent,
+        instance: {
+          id,
+          startedAt: moment().subtract(5, 'm').toDate(),
+          schedule: { interval: '30s' },
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            timeout: '15s',
+            createTaskRunner: () => ({
+              async run() {
+                const promise = new Promise((r) => setTimeout(r, 20000));
+                jest.advanceTimersByTime(20000);
+                await promise;
+              },
+            }),
+          },
+        },
+      });
+
+      // another Kibana reclaimed and updated the task
+      store.partialUpdate.mockRejectedValueOnce({
+        type: 'task',
+        id,
+        status: 409,
+        error: {
+          type: 'version_conflict_engine_exception',
+          reason: `[task:${id}]: version conflict, required seqNo [1], primary term [1]. current document has seqNo [64000] and primary term [1]`,
+        },
+      });
+
+      const promise = runner.run();
+      await Promise.resolve();
+      await runner.cancel();
+      await promise;
+
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+
+      const frameworkErrorLogs = logger.error.mock.calls.filter(([, meta]) =>
+        ((meta as { tags?: string[] })?.tags ?? []).includes('task-run-failed')
+      );
+      expect(frameworkErrorLogs).toEqual([]);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Skipping the update of expired/cancelled task bar:${id} because it was reclaimed by another Kibana while running.`,
+        { tags: [id, 'bar'] }
+      );
+    });
+
     test('Prints debug logs on task start/end', async () => {
       const { runner, logger } = await readyToRunStageSetup({
         definitions: {

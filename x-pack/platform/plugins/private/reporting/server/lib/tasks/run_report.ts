@@ -38,7 +38,7 @@ import {
 
 import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isNumber } from 'lodash';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import type { ReportTaskParams, ReportingTask } from '.';
@@ -360,7 +360,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     }
     const rawRequest: FakeRawRequest = {
       headers,
-      spaceId: spaceId ? asSpaceId(spaceId) : undefined,
+      spaceId: spaceId ? brandSpaceId(spaceId) : undefined,
     };
     return kibanaRequestFactory(rawRequest);
   }

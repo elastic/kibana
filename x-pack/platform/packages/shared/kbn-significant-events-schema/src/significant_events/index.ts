@@ -19,6 +19,7 @@ export {
   causalFeatureSchema,
   signalEntrySchema,
   severitySchema,
+  SEVERITY_OPTIONS,
   getSeverityLabel,
   type BlastRadiusEntry,
   type CausalFeature,

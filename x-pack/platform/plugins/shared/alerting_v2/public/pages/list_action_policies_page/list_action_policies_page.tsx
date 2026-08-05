@@ -33,7 +33,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
-import { ExperimentalBadge } from '../../components/experimental_badge';
+import { experimentalBadge } from '../../components/experimental_badge';
 import { ActionPolicyDestinationsSummary } from '../../components/action_policy/action_policy_destinations_summary';
 import { PopoverItems } from '../../components/popover_items';
 import { ActionPolicySnoozePopover } from '../../components/action_policy/action_policy_snooze_popover';
@@ -469,8 +469,8 @@ export const ListActionPoliciesPage = () => {
       <AppHeader
         sticky={false}
         title={ACTION_POLICIES_LIST_PAGE_TITLE}
-        titleAppend={<ExperimentalBadge />}
-        padding={{ bleed: 'm' }}
+        badges={[experimentalBadge]}
+        spacing="bleed"
         menu={actionPoliciesMenu}
       />
       <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>

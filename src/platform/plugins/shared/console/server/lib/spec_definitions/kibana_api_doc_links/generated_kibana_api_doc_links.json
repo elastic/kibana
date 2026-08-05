@@ -1592,6 +1592,9 @@
   "/s/{spaceId}/api/observability/slos/_bulk_purge_rollup": {
     "post": "deleteRollupDataOp"
   },
+  "/s/{spaceId}/api/observability/slos/_bulk_snapshot": {
+    "post": "bulkSnapshotOp"
+  },
   "/s/{spaceId}/api/observability/slos/_delete_instances": {
     "post": "deleteSloInstancesOp"
   },
@@ -1602,6 +1605,9 @@
   },
   "/s/{spaceId}/api/observability/slos/{sloId}/_reset": {
     "post": "resetSloOp"
+  },
+  "/s/{spaceId}/api/observability/slos/{sloId}/_snapshot": {
+    "get": "getSnapshotOp"
   },
   "/s/{spaceId}/api/observability/slos/{sloId}/disable": {
     "post": "disableSloOp"

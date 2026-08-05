@@ -4,215 +4,275 @@ This directory contains a **fast, lightweight** data generator for Elastic Secur
 
 It generates:
 
-- **Realistic raw endpoint events** and **endpoint alerts** by replaying + scaling vendored “attack episodes”
-- **Full-fidelity Security detection alerts** by running the **Detection Engine Rule Preview** API and copying preview alerts into the real alerts index
-- **Optional synthetic Attack Discoveries (no LLM)** built from the generated Security alerts, time-aligned to the requested date range (enable with `--attacks`)
-  - Generated via **Kibana APIs** (Elastic Assistant dev-only route), not by directly bulk-indexing raw alert documents
+- **Realistic raw endpoint events** and **endpoint alerts** by replaying + scaling vendored attack episodes
+- **Technology Watch pack events** (Okta, AWS IAM, Kubernetes, GitHub) with matching custom hunts
+- **Full-fidelity Security detection alerts** with **honest attribution** (every alert comes from a rule whose query matched)
+- **Optional synthetic Attack Discoveries (no LLM)** built from generated Security alerts (enable with `--attacks`)
 
-## What’s “realistic” about it?
+## Honest alert attribution
 
-Instead of inventing ECS docs from scratch, this generator **starts from real episode NDJSON** (captured telemetry) and then:
+Previously, the generator previewed an Insights-style rule once and copied those alerts onto ~15 prebuilt rules by overwriting only `rule_id` / `name` / `uuid`. Severity, MITRE, description, query, and reason stayed from the Insights rule (Frankenstein alerts).
 
-- **Time-shifts** events into the requested `--start-date` → `--end-date` window
-- **Clones** episodes to reach `-n/--events` while rewriting common identity fields (host/user/agent/process IDs) to avoid collisions
-- **Concentrates risk** on a small subset of “risky” hosts/users (by default) while still producing background noise across the remaining hosts/users
-- **Interleaves alert timestamps** across rules (when copying preview alerts) so alerts don’t appear in big rule-by-rule blocks in the UI
+**Now:**
 
-Episode fixtures live here:
+- Episode endpoint alerts → preview/install **Endpoint Security** (`rule_id` `9a1a2dae-0b5f-4c3d-8305-a268d404c306`) with indices overridden to generator endpoint-alert indices. If that prebuilt rule is missing (common on minimal local installs), the generator creates a stand-in that reuses the same `rule_id` / description so alerts look authentic.
+- Pack events → custom MITRE-tagged hunts whose queries match the seeded docs
+- Copy path keeps the producing rule’s name / severity / MITRE / reason; it namespaces ids, sets `kibana.alert.rule.producer` to `siem`, attaches the installed rule uuid, and time-shifts `@timestamp` into `[start, end]`
+- Ownership tags (`data-generator`, `pack:<id>`, and `data-generator-fp` for false positives) support `--clean` and FP evals; do not conflate with `elastic-security-sample-data`
+- Index names avoid `logs-generator` / `insights.epN` tokens (packs use `logs-<dataset>.<date>`; episodes use opaque namespace tokens)
 
-- `x-pack/solutions/security/plugins/security_solution/scripts/data/episodes/attacks/`
-- `x-pack/solutions/security/plugins/security_solution/scripts/data/episodes/noise/` (false positives / benign-but-suspicious)
+## Alert modes (`--alert-mode`)
+
+| Mode | Behavior |
+| --- | --- |
+| `preview` (default) | Index docs → Rule Preview → copy honest alerts into `.alerts-security.alerts-<space>`. Alert `@timestamp` is jittered into `[start, end]`. |
+| `live` | Index docs → install **and enable** rules. Detection engine creates alerts on schedule. Alert `@timestamp` is run time. Use `--rule-from` for lookback. Opt out of enabling with `--leave-rules-disabled`. |
+| `none` | Index events only (no hunt install/enable, no preview minting, no Attack Discoveries/Cases). |
+
+## Technology Watch Packs (`--packs`)
+
+Four curated Tier C (`authored`) packs under `scripts/data/packs/<id>/`. Event stories and hunt ideas are a sanitized, re-implemented port from [elastic/security-data-generator-app](https://github.com/elastic/security-data-generator-app) (not a verbatim copy).
+
+| Pack id | Integration / dataset |
+| --- | --- |
+| `okta` | `okta` / `okta.system` |
+| `aws-iam` | `aws` / `aws.cloudtrail` |
+| `kubernetes` | `kubernetes` / `kubernetes.audit` |
+| `github-actions` | `github` / `github.audit` |
+
+Each pack has `events.ndjson`, matching `hunts.ts`, and `provenance.json`.
+
+**Not included in this MVP:** FortiGate and Exchange (no scenarios in that app to port yet). Revisit when they exist.
+
+Packs land in **concrete indices** (`logs-<dataset>.<YYYY.MM.DD>`, e.g. `logs-okta.system.2026.07.13`), not Fleet data streams. Names use dots (not a second hyphen) so creates do not match the `logs-*-*` data-stream-only template.
+
+Light fidelity check: docs index cleanly, pack hunts fire in preview (logged; noisy on unexpected 0), provenance says `authored` + pinned integration/version.
+
+## False positives (`--fp-count` 0–3)
+
+When a hunt defines `falsePositives`, the generator indexes up to N benign **source events per hunt** (not per pack) that still trip that hunt’s query. Alerts come from preview|live matching afterward.
+
+**Required tags:** FP events get `data-generator` + `pack:<id>` + `data-generator-fp`. Preview-copy promotes `data-generator-fp` onto `kibana.alert.rule.tags` when the source event carries it. Hunt **rules** are never tagged `data-generator-fp` (that would mark every alert from the hunt as FP).
+
+Episode noise fixtures (`noise1` / `noise2`) also receive `data-generator-fp`.
+
+Optional `data_generator.ground_truth` is **not** written in this MVP (tags are enough; avoid inventing a second truth signal).
+
+## Ownership for `--clean`
+
+| Artifact | Cleanup key |
+| --- | --- |
+| Episode / pack indices | Concrete index names (current + legacy `logs-generator.*` / `insights.ep*`) |
+| Pack hunt rules | Deterministic uuidv5 `rule_id`s (plus legacy `data-generator-pack-*`) and tags `data-generator` / `pack:<id>` |
+| Detection alerts | Pack `rule_id`s, `kibana.alert.rule.tags` (`data-generator` / `data-generator-fp`), and `kibana.alert.ancestors.index` matching episode/pack indices (never delete by the real Endpoint Security `rule_id` alone) |
+| Cases | Description fingerprint (plus legacy tagged cases) |
+| Attack Discoveries | Synthetic connector name (assistant API may still tag discoveries; that path is separate) |
+
+Do not conflate with unrelated `elastic-security-sample-data` installers.
+
+Vendored fixtures still use documentation identities (`@corp.example`, `192.0.2.x`) on purpose. Those are sanitized content, not generator ownership markers.
+
+## Entity catalog + graph enrichment
+
+`lib/entities.ts` provides curated HOSTS/USERS with asset criticality. Episode scaling and packs apply:
+
+- ECS `related.*`
+- auto `host.target` / `user.target` (user+host → `host.target`; user-only → `user.target`; host-only → skip)
+- existing `*.entity.relationships.*` on ported events are preserved
 
 ## Provenance & sanitization (vendored artifacts)
 
-The episode fixture files under `scripts/data/episodes/**` are **vendored artifacts** intended to make Security development/testing **fast and deterministic** without requiring external downloads.
+Episode fixtures under `scripts/data/episodes/**` and pack content under `scripts/data/packs/**` are **vendored / authored** artifacts:
 
-- **Stability**: these fixtures are expected to **rarely (if ever) change**.
-  - **Do not update casually**. Any change to these files can invalidate assumptions in demos, docs, and debugging workflows.
-- **Sanitization**: fixtures should contain **no sensitive or customer-identifying data**.
-  - Hostnames/users/IDs in the source telemetry should be **synthetic or anonymized**.
-  - When in doubt, treat fixture updates as a security review item and get confirmation that the data is safe to redistribute in-repo.
+- Synthetic identities (`@corp.example`, `192.0.2.x`)
+- Do not update casually
+- Pack provenance records `upstreamCommit` + `upstreamScenarioId` pointing at [elastic/security-data-generator-app](https://github.com/elastic/security-data-generator-app) (SHA only, no verbatim copy)
 
-## How alerts are generated (“true Security detection alerts”)
+## Requirements
 
-This script uses the **Rule Preview** API:
-
-- `POST /api/detection_engine/rules/preview` (API version `2023-10-31`)
-
-Preview writes alerts into:
-
-- `.preview.alerts-security.alerts-<spaceId>`
-
-The generator then copies those canonical alert docs into:
-
-- `.alerts-security.alerts-<spaceId>`
-
-This produces alerts that look/behave like real detections (full `kibana.alert.*` schema).
-
-### Alert attribution + timestamp interleaving
-
-The generator runs rule preview and then rewrites `kibana.alert.rule.*` so alerts are attributed to **real installed+enabled rules** (a set of 15 prebuilt rules, unique by title).
-
-To avoid alerts appearing in large grouped blocks per rule (a common artifact of batch generation), the generator also applies a deterministic per-alert timestamp “jitter” (within your requested time window) while copying preview alerts into `.alerts-security.alerts-<spaceId>`.
-
-## Requirements / Prereqs
-
-- **Kibana + Elasticsearch running**
-- **Dependencies installed** in the repo (e.g. `yarn kbn bootstrap`)
-- **Security Solution detections initialized** (recommended)
-  - The script will initialize detections by calling `POST /api/detection_engine/index`.
-  - If `.alerts-security.alerts-<spaceId>` does not exist yet, the script will **still index raw events/endpoint alerts**, but will **skip generating/copying Security alerts** and log a warning.
-- **Privileges** (only required for alerts / attacks / cases)
-  - **Raw indexing only** (always attempted): write privileges for the concrete indices created by this script (see “What the script does” below)
-  - **Security alerts**: call Detection Engine APIs + read `.preview.alerts-security.alerts-*` + write to `.alerts-security.alerts-*`
-  - **Attack Discoveries / Cases**: access to the Elastic Assistant data generator routes + Cases APIs
+- Kibana + Elasticsearch running (local base path often `/kbn`)
+- `yarn kbn bootstrap`
+- Security detections initialized (`POST /api/detection_engine/index` is attempted by the script)
+- Privileges for Detection Engine + write to generator indices / alerts
 
 ## Usage
 
-From Kibana repo root:
+From the `security_solution` package:
 
 ```bash
-node x-pack/solutions/security/plugins/security_solution/scripts/data/generate_cli.js \
-  -n 100 -h 5 -u 5 \
-  --start-date 1d --end-date now
+yarn data:generate -n 100 -h 5 -u 5 --start-date 1d --end-date now \
+  --packs okta,aws-iam,kubernetes,github-actions
 ```
 
-To also generate synthetic Attack Discoveries (and optionally cases):
-
-```bash
-node x-pack/solutions/security/plugins/security_solution/scripts/data/generate_cli.js \
-  -n 100 -h 5 -u 5 \
-  --start-date 1d --end-date now \
-  --attacks
-```
+Or from the Kibana repo root:
 
 ```bash
 node x-pack/solutions/security/plugins/security_solution/scripts/data/generate_cli.js \
   -n 100 -h 5 -u 5 \
   --start-date 1d --end-date now \
-  --cases
+  --packs okta,aws-iam \
+  --fp-count 1
 ```
+
+Live mode (install + enable for engine alerts):
+
+```bash
+yarn data:generate --alert-mode live --rule-from now-7d --packs okta
+```
+
+Events only (no alerts / hunts):
+
+```bash
+yarn data:generate --alert-mode none -n 50 --packs okta
+```
+
+Local smoke (preview path):
+
+```bash
+yarn data:generate --clean -n 50 --episodes ep1 \
+  --packs okta,aws-iam,kubernetes,github-actions \
+  --kibanaUrl http://127.0.0.1:5601/kbn \
+  --alert-mode preview
+```
+
+Then confirm in Alerts UI that `kibana.alert.rule.name` / severity / MITRE / reason match the producing rule, and that ownership tags (`data-generator`, `pack:<id>`) are present for cleanup.
+
+## Threat intel RSS (mustard demo)
+
+`--threat-intel` seeds **one enabled RSS source per selected pack** into `.kibana-threat-intel-sources`, plus a digest subscription in `.kibana-threat-intel-subscriptions`. Each feed is a `data:application/rss+xml,...` URL whose article text embeds that pack’s observables so mustard `source_ingestion` + `nl_extraction_behavioral` can extract IOCs and hunt into the pack indices.
+
+Observable contract in `lib/threat_intel_fixtures.ts` (`PACK_TI_SCENARIOS`):
+
+- **`joinIocs`** (`ip` / `email` / `user`): environment join keys. Must appear in RSS (canonical + optional defanged IP) **and** on pack docs after `ensureEcsSourceIp` + `enrichDocForGraph`, in the ECS fields mustard hunt searches (`source.ip` / `related.ip` / `user.*` / `related.user`, …).
+- **`narrative`**: MITRE ids, event.actions, ARNs, short nicknames. RSS flavor / hunt-rule pairing only — not required on pack ECS. Example: kubernetes keeps short `compromised-sa` in narrative; the join user is the full `system:serviceaccount:default:compromised-sa`.
+
+This is independent of the episode entity catalog (`lib/entities.ts`). Packs are mostly hostless SaaS/cloud audit; Entity Graph for packs is user ↔ IP via `related.*`.
+
+Fixture ids/names stay eval-neutral (`ti-rss-<pack>`, subscription `threat-intel-digest`). They do **not** use `data-generator` branding in document fields.
+
+Environment telemetry is the Technology Watch packs (`logs-okta.system.*`, `logs-aws.cloudtrail.*`, `logs-kubernetes.audit.*`, `logs-github.audit.*`). This path does **not** write `logs-aws.local` or merge with the mustard branch. Generate here, then run mustard Kibana against the same Elasticsearch.
+
+`--threat-intel` with no `--packs` selects all four packs. Use `--alert-mode preview` so pack hunts mint Detection Engine alerts (needed for non-zero Env. hits via `hit_provenance_backfill`).
+
+```bash
+# On generate-cli-data-quality (this branch)
+yarn data:generate --clean -n 50 --episodes ep1 \
+  --threat-intel \
+  --alert-mode preview \
+  --kibanaUrl http://127.0.0.1:5601/kbn
+```
+
+### Mustard demo script (pipeline + Tier 1 / Tier 2 hunts)
+
+Prereqs on mustard ([PR 275243](https://github.com/elastic/kibana/pull/275243) / Phase A from [PR 269002](https://github.com/elastic/kibana/pull/269002)): GenAI connector configured, Agent Builder on the Threat Intelligence skill, and in `config/kibana.dev.yml`:
+
+```yaml
+xpack.securitySolution.enableExperimental:
+  - threatIntelligenceSkillEnabled
+  - iocIndicatorSyncEnabled
+```
+
+Restart Kibana after flag changes (`iocIndicatorSyncEnabled` syncs extracted IOCs into threat indicators so Indicator Match / provenance can score Env. hits).
+
+**A. Seed + pipeline (workflows)**
+
+1. Generate once with the command above (packs + TI RSS + preview alerts).
+2. Run `threat-intel.source_ingestion` → pending reports from the four `ti-rss-*` sources.
+3. Run `threat-intel.nl_extraction_behavioral` → IOCs, behaviors, categories, regions on those reports.
+4. Run `threat-intel.digest_delivery` → seeded `threat-intel-digest` subscription produces a digest row.
+5. Run `threat-intel.hit_provenance_backfill` → updates `provenance.environment_hits*` from **Detection Engine alerts** (Indicator Match / technique overlap), not from raw pack `logs-*`. Expect non-zero Env. hits after preview alerts + indicator sync.
+
+**B. Tier 1 / Tier 2 hunts (Agent Builder tools from PR 269002)**
+
+These are **not** covered by the digest or provenance workflows. They are skill tools:
+
+| Tool | Tier | What it demos |
+| --- | --- | --- |
+| `threat_intel.hunt_for_threat` | Tier 1 | Atomic IOC / technique lookup across pack indices + `affected_assets` |
+| `threat_intel.hunt_behavior` | Tier 2 | LLM → MITRE-validated behaviors + `proposed_esql_rule` / finding cards |
+| `threat_intel.hunt_orchestrated` | Tier 1→2 | One call: environment hits, then behavioral rules grounded on those hits (`tier2_when: on_hits` default) |
+
+After step 3 (extraction), in Agent Builder use topic prompts that force the hunt tools (avoid “give me a digest”, which steers to `search_reports` / digest paths):
+
+6. **Tier 1 only** (expect pack-index hits + users, rarely hosts):
+   - *Are we affected by the Okta identity takeover report? Run a forward hunt on its IOCs and list affected users and indices.*
+   - Same for AWS IAM / Kubernetes / GitHub supply-chain reports.
+   - Expect tool `threat_intel.hunt_for_threat`, status `environment_hits_found`, hits under `logs-okta.*` / `logs-aws.*` / `logs-kubernetes.*` / `logs-github.*`.
+
+7. **Tier 2 only** (expect behaviors + proposed ES\|QL, no env search):
+   - *From the Kubernetes service-account escalation report, extract durable ATT&CK behaviors and propose detection rules we should deploy.*
+   - Expect `threat_intel.hunt_behavior`, finding cards / `proposed_esql_rule`. Needs GenAI.
+
+8. **Orchestrated Tier 1→2** (main “semantic hunt” beat):
+   - *For the AWS IAM privilege-escalation report: hunt our environment for its IOCs, then propose durable behavioral rules informed by what you found. Prioritize what to hunt first.*
+   - Expect `threat_intel.hunt_orchestrated` (prefer over manually chaining 6+7). With default `tier2_when: on_hits`, Tier 2 runs only if Tier 1 matched. Check `tier1.status`, `affected_assets`, Tier 2 behaviors, and any `tier2_skipped_reason` (`no_environment_hits` / `no_inference`).
+
+9. **Digest / prioritization** (your original closer, after hunts):
+   - *Give me a short threat-intel digest for the last 7 days. What should we prioritize hunting first?*
+   - This can use digest/search/synthesize paths; it may **not** call hunt tools. Run 6–8 first if the goal is to show Tier 1/2.
+
+**API fallback** (same bodies as tools): `POST /kbn/api/threat_intelligence/hunt_for_threat`, `.../hunt_behavior`, `.../hunt_orchestrated` with `{ "report_id": "<id>" }` (and optional `tier2_when` on orchestrated).
 
 ## CLI arguments
 
 ### Data scale + time range
 
 - `-n`, `--events`: Number of **source events** to generate (default: `100`)
-- `-h`, `--hosts`: Number of hosts to distribute activity across (default: `5`)
-- `-u`, `--users`: Number of users to distribute activity across (default: `5`)
-- `--clean`: Delete previously generated data created by this script before generating new data (default: `false`)
-  - Removes:
-    - the episode indices created by this script for the selected `--episodes` (across the requested date range)
-      - `${indexPrefix}.events.*.<YYYY.MM.DD>`, `${indexPrefix}.alerts.*.<YYYY.MM.DD>`, `insights-alerts-*-<YYYY.MM.DD>`
-    - generated Security alerts in `.alerts-security.alerts-<spaceId>`
-      - prefers deleting alerts tagged `data-generator`
-      - falls back to deleting alerts matching the resolved prebuilt rule UUIDs / `rule_id`s (for older generator runs)
-      - note: Security alert deletion is not time-filtered (to avoid leaving generator-owned docs behind due to timestamp jitter)
-    - Attack Discoveries created by this script (Synthetic (no-LLM)) from:
-      - `.alerts-security.attack.discovery.alerts-<spaceId>` (current)
-      - `.adhoc.alerts-security.attack.discovery.alerts-<spaceId>` (legacy; best-effort cleanup)
-    - Cases created by this script (tagged `data-generator`, plus a narrow legacy fallback)
-  - Notes:
-    - **Does not delete** preview indices. Some dev setups won’t automatically recreate preview indices once deleted.
-    - Before previewing, the generator clears existing preview documents (to avoid 409 conflicts) without deleting the preview index.
-    - If preview indices are missing, the generator will **recreate them** by cloning mappings from the real Security alerts backing index (requires detections to be initialized).
-- `--start-date`: Date math start (default: `1d`)
-  - Accepts `now-1d` style date math, and a shorthand like `1d` (treated as `now-1d`)
-- `--end-date`: Date math end (default: `now`)
+- `-h`, `--hosts` / `-u`, `--users`: Entity pool sizes (default: `5`)
+- `--start-date` / `--end-date`: Date math window (default: `1d` → `now`)
+- `--seed`: Deterministic scaling
+- `--clean`: Delete generator-owned episode indices, pack indices (selected `--packs`, or all packs if omitted), matching alerts, pack custom rules, discoveries, cases, and generator TI RSS sources/subscription. With `--alert-mode none`, hunts are deleted and not reinstalled.
 
-### Episode selection
+### Episodes + packs
 
-- `--episodes`: Comma-separated list of episode IDs (default: `ep1-ep8,noise1,noise2`)
-  - Examples:
-    - `--episodes ep1,ep2,ep3`
-    - `--episodes 1,2,3` (numbers auto-expand to `epN`)
+- `--episodes`: Default `ep1-ep8,noise1,noise2`
+- `--packs`: Comma-separated pack ids (`okta`, `aws-iam`, `kubernetes`, `github-actions`)
+- `--fp-count`: `0`–`3` (default `0`); max FP event templates indexed **per hunt** that defines them
 
-### Rules
+### Alerts
 
-- `--indexPrefix`: Prefix for the endpoint event/alert indices created by this script (default: `logs-endpoint`)
-  - If your cluster has templates/data streams that conflict with creating concrete indices under `logs-endpoint.*`, set this to something else (e.g. `security-solution-data-gen`).
-  - **Serverless / API key note**: avoid prefixes that match `logs-*-*` (for example `logs-endpoint-generator`), because Elasticsearch can reject creating concrete indices that match data-stream-only templates. Prefer something like `logs-endpoint_generator`, or keep the default `logs-endpoint`.
+- `--alert-mode`: `preview` (default) | `live` | `none`
+- `--leave-rules-disabled`: With `live` only, install hunts but leave them disabled
+- `--rule-from`: Lookback for installed pack rules (default `now-30d`)
+- `--max-preview-invocations`: Cap preview invocations (default `12`)
+- `--indexPrefix`: Endpoint index prefix (default `logs-endpoint`; avoid `logs-*-*` patterns in serverless)
 
-### Reproducibility
+### Optional extras
 
-- `--seed`: Optional seed string used to make cloning/host-user assignment deterministic
+- `--threat-intel`: Per-pack RSS sources + digest subscription for mustard TI workflows (defaults `--packs` to all four when omitted)
+- `--attacks`: Synthetic Attack Discoveries
+- `--cases`: Cases from ~50% of discoveries (implies `--attacks`)
+- `--no-validate-fixtures`: Disable fixture validation
 
-### Performance / speed
+### Connection
 
-Rule preview can be the slowest step for large time ranges (e.g. `--start-date 60d`) because it runs multiple executor invocations per rule.
-
-- `--max-preview-invocations`: Caps rule preview invocations per rule (lower is faster). Default: `12`
-- `--skip-alerts`: Skip rule preview + copying alerts entirely (raw event/endpoint alert indexing only)
-- `--skip-alerts` also skips Attack Discoveries / Cases (because they depend on Security alerts)
-- `--skip-ruleset-preview`: Skip previews of the selected prebuilt rules (baseline attribution only; faster)
-- `--attacks`: Generate synthetic Attack Discoveries (**opt-in**)
-- `--cases`: Create Kibana cases from **~50%** of generated Attack Discoveries (**implies `--attacks`**)
-  - Creates a case per selected discovery and attaches:
-    - a markdown summary comment
-    - all discovery alert IDs as alert attachments (from `.alerts-security.alerts-<spaceId>`)
-  - The case title is set to the generated Attack Discovery title.
-  - Backdates **Created on** (`created_at`) to a deterministic time within **0–12 hours after** the discovery timestamp.
-    - `updated_at` is intentionally not modified, so **Updated on** reflects real runtime activity (attachments, edits, etc.).
-
-### Kibana/Elasticsearch connection
-
-- `--kibanaUrl` (default: `http://127.0.0.1:5601`)
-- `--elasticsearchUrl` (default: `http://127.0.0.1:9200`)
-- `--username` (default: `elastic`)
-- `--password` (default: `changeme`)
-- `--apiKey`: Elasticsearch API key (base64, with or without `ApiKey ` prefix). When provided, the script uses API key auth for both Kibana + Elasticsearch.
-  - You can also set `ES_API_KEY` (or `ELASTIC_API_KEY`) instead of passing `--apiKey`.
-- `--spaceId` (optional; defaults to `default`)
+- `--kibanaUrl` (default `http://127.0.0.1:5601`)
+- `--elasticsearchUrl` (default `http://127.0.0.1:9200`)
+- `--username` / `--password` or `--apiKey` / `ES_API_KEY`
+- `--spaceId` (default `default`)
 
 ## What the script does (high level)
 
-1. **Connects to Kibana + Elasticsearch** and logs basic connectivity details.
-2. **Installs prebuilt rules** if missing (non-blocking)
-   - On a fresh Kibana (0 prebuilt rules installed), it installs **15 prebuilt Elastic rules** (unique by title) to keep the demo environment consistent and avoid confusing duplicate titles.
-   - If prebuilt rules are already installed, it does not uninstall or expand the install set.
-3. Loads vendored episode fixtures from `episodes/attacks/` and `episodes/noise/` (supports `.ndjson` and `.ndjson.gz`)
-4. **Scales** episodes (time-shift + clone + rewrite IDs)
-5. Indexes into concrete indices (UTC-day suffix `YYYY.MM.DD`):
-   - endpoint events:
-     - `epN` episodes: `${indexPrefix}.events.insights.epN.<YYYY.MM.DD>`
-     - other episode ids: `${indexPrefix}.events.<episode>.<YYYY.MM.DD>`
-   - endpoint alerts:
-     - `epN` episodes: `${indexPrefix}.alerts.insights.epN.<YYYY.MM.DD>`
-     - other episode ids: `${indexPrefix}.alerts.<episode>.<YYYY.MM.DD>`
-   - a copy of endpoint alerts into `insights-alerts-<episode>-<YYYY.MM.DD>` (for the Insights-style baseline)
-6. **Initializes detections** (so `.alerts-security.alerts-<spaceId>` exists)
-7. Ensures the selected prebuilt rules are **enabled**
-8. Ensures the preview alerts index exists and **clears existing preview documents** (without deleting the index)
-9. If `--skip-alerts` is set, stops after raw indexing.
-10. If `.alerts-security.alerts-<spaceId>` doesn’t exist yet, stops after raw indexing (with a warning).
-11. Runs Rule Preview and copies preview alerts into `.alerts-security.alerts-<spaceId>`:
+1. Connect to Kibana + ES
+2. Best-effort install prebuilt rules (non-blocking)
+3. Optional `--clean`
+4. Scale + index episode events/alerts into concrete indices
+5. Index selected packs (+ install custom MITRE hunts unless `alert-mode=none`)
+6. Optional `--threat-intel`: seed per-pack RSS sources + digest subscription
+7. Initialize detections / ensure preview index (skipped for `none`)
+8. **preview:** honest Rule Preview per producing rule → copy  
+   **live:** enable rules for the detection engine (unless `--leave-rules-disabled`)  
+   **none:** stop after indexing (+ TI seed if requested)
+9. Optional Attack Discoveries / Cases (not for `none`, or live + `--leave-rules-disabled`)
 
-- Baseline: runs a single Insights-style preview once, then **copies/attributes** the resulting preview alerts across the selected prebuilt rules
-- Optional: previews each selected prebuilt rule directly (skippable with `--skip-ruleset-preview`)
-- While copying, alert IDs are namespaced per target rule and `kibana.alert.rule.*` is rewritten so alerts are attributed to **real installed+enabled rules**
-- Alert timestamps are deterministically jittered within the requested time range so alerts interleave across rules in time-sorted views
+## Out of scope (this PR)
 
-12. Optionally (with `--attacks`, or `--cases`) creates **synthetic Attack Discoveries (no LLM)** from generated Security alerts
-
-- Discoveries are created via Kibana (dev-only) API:
-  - `POST /internal/elastic_assistant/data_generator/attack_discoveries/_create`
-- Under the hood, Kibana persists them using the **Alerting framework** into:
-  - `.alerts-security.attack.discovery.alerts-<spaceId>`
-- The generator ensures generated discoveries are **backdated** so `@timestamp` / `kibana.alert.start` fall within the requested `--start-date` → `--end-date` range.
-- Discoveries focus on a small set of “risky” host/user pairs (top alert volume), not every entity
-
-13. Optionally (with `--cases`) creates cases from ~50% of generated Attack Discoveries (tagged `data-generator`)
+Automated pack sync, Fleet data-stream install, `--alert-density`, rule synthesizer, FortiGate/Exchange packs, Tier 0/A/B upgrades, Discover saved-search install, mustard branch merge, TI eval fixtures (`--threat-intel-evals`), Fleet/real public RSS URLs, `refresh_pack_schema`.
 
 ## Troubleshooting
 
-- **“Cannot find module @babel/…”**:
-  - Your `node_modules` are incomplete/out of date. Run `yarn kbn bootstrap`.
-- **Prebuilt rule install fails**:
-  - This usually means Kibana can’t reach EPR or Fleet isn’t ready. Install prebuilt rules manually in the Security app and re-run.
-- **Security alerts destination missing (`.alerts-security.alerts-<spaceId>`)**:
-  - Open the Security app once and initialize detections, or run detections initialization via the API, then re-run. Raw data indexing should still succeed even if alerts are skipped.
-- **Elasticsearch rejects index creation with data stream template errors**:
-  - Use a different `--indexPrefix` that does not match data-stream-only templates (avoid `logs-*-*` patterns like `logs-endpoint-generator`).
-- **No alerts created / no matches**:
-  - Ensure your rule’s index patterns match the indices being populated and that the time range overlaps.
-  - The baseline Insights-style preview depends on the `insights-alerts-*` indices (the generator writes these for you).
+- **Bootstrap / babel errors**: run `yarn kbn bootstrap`
+- **0 pack hunt alerts**: check concrete index name vs rule `index`, and that hunt queries match seeded `event.action` vocabulary; logs print per-rule counts
+- **Endpoint Security missing**: install Elastic prebuilt rules, then re-run
+- **Data-stream template rejects index create**: change `--indexPrefix` (avoid `logs-*-*`)
+- **Alerts destination missing**: open Security once / init detections, then re-run

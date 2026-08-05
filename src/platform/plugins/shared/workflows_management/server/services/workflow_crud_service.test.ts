@@ -11,6 +11,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { CoreStart } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { EsWorkflow } from '@kbn/workflows';
 
 import type { WorkflowCrudDeps } from './types';
 import { WorkflowCrudService } from './workflow_crud_service';
@@ -717,6 +718,83 @@ describe('WorkflowCrudService', () => {
       // 1 initial attempt + bounded retries — must NOT be unbounded.
       expect(client.index.mock.calls.length).toBeGreaterThan(1);
       expect(client.index.mock.calls.length).toBeLessThan(20);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // findExistingWorkflowIds
+  //
+  // These tests verify the semantics that make the import-preflight dryRun
+  // useful: the lookup must be index-wide (no space filter) and must include
+  // soft-deleted tombstones, exactly mirroring the write-path checkExistingIds.
+  // ---------------------------------------------------------------------------
+  describe('findExistingWorkflowIds', () => {
+    it('returns an empty array when no IDs are provided', async () => {
+      const { deps, client } = makeDeps();
+      const service = new WorkflowCrudService(deps);
+      const result = await service.findExistingWorkflowIds([]);
+      expect(result).toEqual([]);
+      expect(client.search).not.toHaveBeenCalled();
+    });
+
+    it('returns only the subset of IDs that exist', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValueOnce({
+        hits: { hits: [{ _id: 'a' }] },
+      });
+      const service = new WorkflowCrudService(deps);
+      const result = await service.findExistingWorkflowIds(['a', 'b', 'c']);
+      expect(result).toEqual(['a']);
+    });
+
+    it('uses an index-wide ids query (no space filter) so cross-space collisions are detected', async () => {
+      // Regression: the old preflight used getWorkflowsSourceByIds which adds a
+      // spaceId filter — a document owned by another space was invisible and the
+      // conflict was silently missed. findExistingWorkflowIds must use a plain ids
+      // query with no bool/must clause so cross-space documents are matched.
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValueOnce({
+        hits: {
+          hits: [{ _id: 'cross-space-id', _source: makeSource({ spaceId: 'space-other' }) }],
+        },
+      });
+      const service = new WorkflowCrudService(deps);
+      const result = await service.findExistingWorkflowIds(['cross-space-id']);
+      expect(result).toContain('cross-space-id');
+
+      const searchArgs = client.search.mock.calls[0][0];
+      expect(searchArgs.query).toEqual({ ids: { values: ['cross-space-id'] } });
+      // Must NOT have a bool.must clause that would scope the query to a space.
+      expect(searchArgs.query.bool).toBeUndefined();
+    });
+
+    it('returns soft-deleted tombstone IDs so import-preflight detects resurrection conflicts', async () => {
+      // Regression: the old preflight called mgetWorkflows which excluded docs
+      // with deleted_at set. A tombstoned workflow ID therefore appeared free,
+      // and the import then failed with an opaque write conflict.
+      // findExistingWorkflowIds uses a plain ids query that matches deleted docs.
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _id: 'tombstoned-id',
+              _source: makeSource({
+                spaceId: 'default',
+                deleted_at: '2024-01-01T00:00:00.000Z' as unknown as null,
+              }),
+            },
+          ],
+        },
+      });
+      const service = new WorkflowCrudService(deps);
+      const result = await service.findExistingWorkflowIds(['tombstoned-id', 'new-id']);
+      expect(result).toContain('tombstoned-id');
+      expect(result).not.toContain('new-id');
+
+      // The search must NOT include a must_not deleted_at clause.
+      const searchArgs = client.search.mock.calls[0][0];
+      expect(searchArgs.query).toEqual({ ids: { values: ['tombstoned-id', 'new-id'] } });
     });
   });
 
@@ -2147,6 +2225,56 @@ describe('WorkflowCrudService', () => {
       );
 
       jest.restoreAllMocks();
+    });
+
+    it('field-only enabled toggle syncs definition.enabled in the persisted document', async () => {
+      // Validates the fix for elastic/security-team#18145:
+      // when enabled is toggled without a YAML edit, definition.enabled must
+      // be kept in sync with the top-level enabled column so that export/import
+      // round-trips preserve the correct enabled state.
+      const existingDefinition = {
+        name: 'Test Workflow',
+        enabled: false,
+        version: '1' as const,
+        triggers: [],
+        steps: [],
+      };
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: makeSource({
+                enabled: false,
+                definition: existingDefinition,
+                yaml: 'name: Test Workflow',
+              }),
+              _seq_no: 1,
+              _primary_term: 1,
+            },
+          ],
+        },
+      });
+      client.index.mockResolvedValue({ result: 'updated', _seq_no: 2, _primary_term: 1 });
+
+      const service = new WorkflowCrudService(deps);
+      // Field-only update: no yaml key, just enabled: true
+      await service.updateWorkflow(
+        'wf-1',
+        { enabled: true } satisfies Partial<EsWorkflow>,
+        'default',
+        request
+      );
+
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            enabled: true,
+            definition: expect.objectContaining({ enabled: true }),
+          }),
+        })
+      );
     });
 
     it('re-applies field updates against fresh existingSource on each OCC retry', async () => {

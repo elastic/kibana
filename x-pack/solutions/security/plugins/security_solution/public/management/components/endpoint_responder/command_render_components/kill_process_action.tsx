@@ -22,12 +22,12 @@ export const KillProcessActionResult = memo<
     const parameters = parsedKillOrSuspendParameter(command.args.args);
 
     return endpointId
-      ? {
+      ? ({
           agent_type: agentType,
           endpoint_ids: [endpointId],
           comment: command.args.args?.comment?.[0],
           parameters,
-        }
+        } as KillProcessRequestBody)
       : undefined;
   }, [command.args.args, command.commandDefinition?.meta]);
 

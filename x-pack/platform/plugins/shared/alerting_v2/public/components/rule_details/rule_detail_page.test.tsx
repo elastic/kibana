@@ -24,10 +24,20 @@ jest.mock('react-router-dom', () => ({
   useHistory: () => ({ push: mockHistoryPush }),
 }));
 
+let mockCanWriteRules = true;
+
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'http') {
       return { basePath: { prepend: (p: string) => p } };
+    }
+    if (typeof token === 'function') {
+      // UserCapabilities service token
+      return {
+        canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
+        canRead: () => true,
+        can: () => mockCanWriteRules,
+      };
     }
     return {};
   },
@@ -61,6 +71,11 @@ jest.mock('../../hooks/use_compose_discover_flyout', () => ({
   }),
 }));
 
+const mockUseRuleAuditMetadata = jest.fn();
+jest.mock('../../hooks/use_rule_audit_metadata', () => ({
+  useRuleAuditMetadata: () => mockUseRuleAuditMetadata(),
+}));
+
 const mockAppHeaderRender = jest.fn();
 jest.mock('@kbn/app-header', () => {
   const actual = jest.requireActual('@kbn/app-header');
@@ -89,7 +104,6 @@ jest.mock('./sidebar/rule_sidebar', () => ({
   RuleSidebar: () => (
     <div>
       <div data-test-subj="ruleConditionsSection">conditions</div>
-      <div data-test-subj="ruleMetadataSection">metadata</div>
     </div>
   ),
 }));
@@ -136,6 +150,13 @@ describe('RuleDetailPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsToggling = false;
+    mockUseRuleAuditMetadata.mockReturnValue({
+      createdByDisplay: 'Alice Example',
+      createdAtFormatted: 'Mar 1, 2026',
+      updatedByDisplay: 'Bob Example',
+      updatedAtFormatted: 'Mar 4, 2026',
+    });
+    mockCanWriteRules = true;
   });
 
   it('wires breadcrumbs with the rule name', () => {
@@ -145,27 +166,40 @@ describe('RuleDetailPage', () => {
     });
   });
 
-  it('renders the app header title and description in the body', async () => {
+  it('renders the app header title and sidebar sections', async () => {
     renderPage(baseRule);
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
       'Test Signal Rule'
     );
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).toBeInTheDocument();
-    expect(screen.getByTestId('ruleDescription')).toHaveTextContent('Test rule description');
     expect(screen.queryByTestId('ruleTags')).not.toBeInTheDocument();
     expect(screen.getByTestId('ruleConditionsSection')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleMetadataSection')).toBeInTheDocument();
     expect(await screen.findByTestId('ruleDetailsEnabledSwitch')).toBeInTheDocument();
   });
 
-  it('omits the header metadata row when the rule has no description', () => {
-    renderPage({
-      ...baseRule,
-      metadata: { ...baseRule.metadata, description: undefined },
-    });
+  it('renders header metadata with resolved created-by and updated-by info', () => {
+    renderPage(baseRule);
+    const metadataSection = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.metadata);
+    expect(metadataSection).toBeInTheDocument();
+    expect(screen.getByTestId('ruleDetailsCreatedByMetadata')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleDetailsUpdatedByMetadata')).toBeInTheDocument();
+    expect(metadataSection).toHaveTextContent('Alice Example');
+    expect(metadataSection).toHaveTextContent('Mar 1, 2026');
+    expect(metadataSection).toHaveTextContent('Bob Example');
+    expect(metadataSection).toHaveTextContent('Mar 4, 2026');
+  });
 
-    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).not.toBeInTheDocument();
-    expect(screen.queryByTestId('ruleDescription')).not.toBeInTheDocument();
+  it('handles missing audit values gracefully', () => {
+    mockUseRuleAuditMetadata.mockReturnValue({
+      createdByDisplay: '-',
+      createdAtFormatted: '-',
+      updatedByDisplay: '-',
+      updatedAtFormatted: '-',
+    });
+    renderPage(baseRule);
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).toBeInTheDocument();
+    expect(screen.getByTestId('ruleDetailsCreatedByMetadata')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleDetailsUpdatedByMetadata')).toBeInTheDocument();
   });
 
   it('renders a back link to the rules list', () => {
@@ -276,6 +310,27 @@ describe('RuleDetailPage', () => {
     fireEvent.click(await screen.findByTestId('ruleDetailsDeleteButton'));
     fireEvent.click(screen.getByText('Cancel'));
     expect(screen.queryByTestId('deleteRuleConfirmationModal')).not.toBeInTheDocument();
+  });
+
+  describe('when the user only has read privilege', () => {
+    beforeEach(() => {
+      mockCanWriteRules = false;
+    });
+
+    it('hides the edit button, enabled switch, and overflow write actions', async () => {
+      renderPage(baseRule);
+
+      expect(screen.queryByTestId('openEditRuleFlyoutButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsEnabledSwitch')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsCloneButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsDeleteButton')).not.toBeInTheDocument();
+    });
+
+    it('still shows the read-only enabled status badge', () => {
+      renderPage(baseRule);
+
+      expect(screen.getByTestId('enabledBadge')).toHaveTextContent('Enabled');
+    });
   });
 
   it('does not re-render the header badges when the delete modal opens and closes', async () => {

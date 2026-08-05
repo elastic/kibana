@@ -8,7 +8,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { EuiComboBoxWrapper, KibanaCodeEditorWrapper } from '@kbn/scout';
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../fixtures/common';
 
@@ -34,9 +34,9 @@ const createEsqlControl = async (
   await page.testSubj.locator('create_esql_control_flyout').waitFor({ state: 'visible' });
 
   if (values) {
-    const valuesComboBox = new EuiComboBoxWrapper(page, 'esqlValuesOptions');
+    const valuesComboBox = page.components.comboBox('esqlValuesOptions');
     for (const value of values) {
-      await valuesComboBox.setCustomMultiOption(value, { useFill: true });
+      await valuesComboBox.setCustomSelectedOptions([value]);
     }
   }
 
@@ -138,7 +138,6 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
 
       await discover.clickNewSearch();
       await discover.loadSavedSearch(savedSession);
-      await discover.waitUntilTabIsLoaded();
       await expect(dashboard.getControlsGroupLocator()).toBeVisible();
       await expect(dashboard.getControlFramesLocator()).toHaveCount(1);
 
@@ -149,7 +148,6 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
 
       await expect(discover.unsavedChangesIndicator()).toBeVisible();
       await discover.revertUnsavedChanges();
-      await discover.waitUntilTabIsLoaded();
       await expect(discover.unsavedChangesIndicator()).toBeHidden();
     }
   );
@@ -168,7 +166,6 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
 
       await discover.clickNewSearch();
       await discover.loadSavedSearch(savedSession);
-      await discover.waitUntilTabIsLoaded();
       await expect(dashboard.getControlsGroupLocator()).toBeVisible();
 
       await discover.saveVisualizationToNewDashboard(savedChart);
@@ -204,7 +201,6 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
       await discover.waitUntilTabIsLoaded();
       await discover.clickNewSearch();
       await discover.loadSavedSearch(savedSession);
-      await discover.waitUntilTabIsLoaded();
 
       await expect(dashboard.getControlsGroupLocator()).toBeHidden();
       await expect(dashboard.getControlFramesLocator()).toHaveCount(0);

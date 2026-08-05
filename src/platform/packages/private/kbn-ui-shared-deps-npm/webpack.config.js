@@ -78,6 +78,10 @@ module.exports = (_, argv) => {
         'redux',
         'react-redux',
         'immer',
+        'redux-toolkit-v1',
+        'redux-v4',
+        'react-redux-v7',
+        'reselect-v4',
         '@tanstack/react-query',
         '@tanstack/react-query-devtools',
         'classnames',
@@ -186,6 +190,30 @@ module.exports = (_, argv) => {
     cache: false,
 
     plugins: [
+      // Ensure @elastic/charts resolves its own nested copies of redux-related deps
+      // (RTK v1 / immer v9) instead of the root versions (RTK v2 / immer v10).
+      // RTK v1 calls immer's enableES5() which was removed in immer v10.
+      new webpack.NormalModuleReplacementPlugin(
+        /^(immer|@reduxjs\/toolkit|redux|react-redux|reselect)$/,
+        (resource) => {
+          if (resource.context && /node_modules[\\/]@elastic[\\/]charts/.test(resource.context)) {
+            const nested = Path.resolve(
+              REPO_ROOT,
+              'node_modules',
+              '@elastic',
+              'charts',
+              'node_modules',
+              resource.request
+            );
+            try {
+              require.resolve(nested);
+              resource.request = nested;
+            } catch (e) {
+              // nested copy doesn't exist, fall through to default resolution
+            }
+          }
+        }
+      ),
       new NodeLibsBrowserPlugin(),
       new CleanWebpackPlugin({
         protectWebpackAssets: false,

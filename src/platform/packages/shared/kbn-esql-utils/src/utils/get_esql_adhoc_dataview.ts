@@ -9,7 +9,12 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { HttpStart } from '@kbn/core/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import { type ESQLSourceResult, SOURCES_AUTOCOMPLETE_ROUTE } from '@kbn/esql-types';
+import {
+  type EsqlDatasetsResult,
+  type ESQLSourceResult,
+  DATASETS_ROUTE,
+  SOURCES_AUTOCOMPLETE_ROUTE,
+} from '@kbn/esql-types';
 import { getIndexPatternFromESQLQuery } from './get_index_pattern_from_query';
 import { getESQLTimeFieldFromQuery } from './get_esql_time_field_from_query';
 
@@ -105,31 +110,37 @@ export async function getESQLAdHocDataview({
 }
 
 /**
- * Gets an initial index for a default ES|QL query by querying both local and remote (CCS) indices.
+ * Gets an initial index for a default ES|QL query by querying local indices, remote (CCS)
+ * indices, and FDS datasets in parallel.
  * Could be used during onboarding when data views to get a better index are not yet available.
  * Can be used in combination with {@link getESQLAdHocDataview} to create a dataview for the index.
  *
- * Prefers a local `logs*` pattern if any local index starts with "logs",
- * otherwise returns the first available non-hidden index (local or remote).
+ * Priority: local `logs*` > first local index > first remote index > first FDS dataset.
+ * Returns null if nothing is found.
  */
 export async function getIndexForESQLQuery(deps: { http: HttpStart }): Promise<string | null> {
-  const fetchIndices = async (scope: 'local' | 'all' | 'remote') => {
+  const fetchIndices = async (scope: 'local' | 'remote') => {
     const response = await deps.http.get(`${SOURCES_AUTOCOMPLETE_ROUTE}${scope}`).catch(() => []);
     return (response as ESQLSourceResult[]).filter((source) => !source.hidden);
   };
 
-  let indices = await fetchIndices('local');
-  // only if no local indices are found, try to fetch remote indices
-  if (indices.length === 0) {
-    indices = await fetchIndices('remote');
-  }
+  const fetchDatasets = () =>
+    deps.http
+      .get<EsqlDatasetsResult>(DATASETS_ROUTE)
+      .then((res) => res.datasets)
+      .catch((): EsqlDatasetsResult['datasets'] => []);
 
-  if (indices.length === 0) return null;
-
-  const hasLocalLogs = indices.some(
+  // Phase 1: fetch local indices first. If a usable local index is found,
+  // return immediately without waiting for remote or FDS datasets.
+  const local = await fetchIndices('local');
+  const hasLocalLogs = local.some(
     (source) => !source.name.includes(':') && source.name.startsWith('logs')
   );
   if (hasLocalLogs) return 'logs*';
+  if (local.length > 0) return local[0].name;
 
-  return indices[0].name;
+  // Phase 2: no local indices — fan out to remote and FDS datasets in parallel.
+  const [remote, datasets] = await Promise.all([fetchIndices('remote'), fetchDatasets()]);
+  if (remote.length > 0) return remote[0].name;
+  return datasets[0]?.name ?? null;
 }

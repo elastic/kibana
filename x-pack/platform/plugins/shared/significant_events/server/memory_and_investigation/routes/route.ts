@@ -470,7 +470,7 @@ const createWorkflowTriggerRoute = (
         spaceId,
         {},
         request,
-        'sigevents-memory-ui'
+        'significant-events-memory-ui'
       );
 
       logger.info(`Triggered managed workflow "${managedWorkflowId}", executionId=${executionId}`);
@@ -509,7 +509,7 @@ const synthesizeMemoryRoute = createServerRoute({
       spaces: server.spaces,
       request,
       logger,
-      triggeredBy: 'sigevents-memory-ui',
+      triggeredBy: 'significant-events-memory-ui',
     });
 
     if (!executionId) {

@@ -19,6 +19,7 @@ import type {
 import type { SyntheticsEsClient } from '../lib';
 import { getRemoteMonitorInfo } from '../lib/remote_result_utils';
 import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
+import { getHeartbeatLocationsPostFilter } from '../../common/lib';
 import { SUMMARY_FILTER } from '../../common/constants/client_defaults';
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -58,6 +59,8 @@ export async function queryPings<F>(
   } = params;
   const size = sizeParam ?? DEFAULT_PAGE_SIZE;
 
+  const locationsPostFilter = getHeartbeatLocationsPostFilter((locations ?? []) as string[]);
+
   const searchBody = {
     index: getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices),
     size,
@@ -74,9 +77,7 @@ export async function queryPings<F>(
       },
     },
     sort: [{ '@timestamp': { order: (sort ?? 'desc') as 'asc' | 'desc' } }],
-    ...((locations ?? []).length > 0
-      ? { post_filter: { terms: { 'observer.geo.name': locations as unknown as string[] } } }
-      : {}),
+    ...(locationsPostFilter ? { post_filter: locationsPostFilter } : {}),
     _source: true,
     fields: [] as QueryFields,
   };

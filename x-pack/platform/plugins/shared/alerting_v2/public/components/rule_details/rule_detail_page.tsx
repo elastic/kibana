@@ -18,10 +18,13 @@ import type { AppHeaderBadge, AppHeaderMenu, AppHeaderMetadataItems } from '@kbn
 import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
+import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { UserCapabilities } from '../../services/user_capabilities';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useRuleAuditMetadata } from '../../hooks/use_rule_audit_metadata';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
@@ -129,6 +132,8 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name });
   const { euiTheme } = useEuiTheme();
 
+  const canWrite = useService(UserCapabilities).canWrite('rules');
+
   const smallMediaQuery = useEuiMaxBreakpoint('s');
   const largeMediaQuery = useEuiMinBreakpoint('m');
 
@@ -169,7 +174,38 @@ export const RuleDetailPage: React.FunctionComponent = () => {
     openCloneFlyout(rule);
   }, [openCloneFlyout, rule]);
 
+  const { createdByDisplay, createdAtFormatted, updatedByDisplay, updatedAtFormatted } =
+    useRuleAuditMetadata(rule);
+
   const badges = React.useMemo(() => getRuleDetailBadges(rule), [rule]);
+
+  const headerMetadata = React.useMemo<AppHeaderMetadataItems>(
+    () => [
+      {
+        type: 'text',
+        label: i18n.translate('xpack.alertingV2.ruleDetails.header.createdBy', {
+          defaultMessage: 'Created by',
+        }),
+        value: i18n.translate('xpack.alertingV2.ruleDetails.header.createdByValue', {
+          defaultMessage: '{user} on {date}',
+          values: { user: createdByDisplay, date: createdAtFormatted },
+        }),
+        'data-test-subj': 'ruleDetailsCreatedByMetadata',
+      },
+      {
+        type: 'text',
+        label: i18n.translate('xpack.alertingV2.ruleDetails.header.updatedBy', {
+          defaultMessage: 'Last updated by',
+        }),
+        value: i18n.translate('xpack.alertingV2.ruleDetails.header.updatedByValue', {
+          defaultMessage: '{user} on {date}',
+          values: { user: updatedByDisplay, date: updatedAtFormatted },
+        }),
+        'data-test-subj': 'ruleDetailsUpdatedByMetadata',
+      },
+    ],
+    [createdByDisplay, createdAtFormatted, updatedByDisplay, updatedAtFormatted]
+  );
 
   const menu = React.useMemo(
     () =>
@@ -183,20 +219,6 @@ export const RuleDetailPage: React.FunctionComponent = () => {
       }),
     [rule, onEdit, handleToggleEnabled, isToggling, onClone, showDeleteConfirmationModal]
   );
-
-  // AppHeaderMetadata bolds `label` (it's meant to be the key of a label/value pair) and renders
-  // `value` at a lighter weight, so the description is passed as `value` with an empty `label`
-  // to get the lighter weight without touching the shared app-header component.
-  const metadata = rule.metadata?.description
-    ? ([
-        {
-          type: 'text',
-          label: '',
-          value: rule.metadata.description,
-          'data-test-subj': 'ruleDescription',
-        },
-      ] as AppHeaderMetadataItems)
-    : undefined;
 
   return (
     <KibanaPageTemplate
@@ -220,10 +242,10 @@ export const RuleDetailPage: React.FunctionComponent = () => {
           }),
         }}
         badges={badges}
-        menu={menu}
-        padding="none"
+        metadata={headerMetadata}
+        menu={canWrite ? menu : undefined}
+        spacing="flush"
         sticky={false}
-        metadata={metadata}
       />
       <KibanaPageTemplate.Section
         paddingSize="none"
@@ -231,6 +253,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         restrictWidth={false}
         css={css`
           min-height: 0;
+          margin-block-start: ${euiTheme.border.width.thin};
         `}
         contentProps={{
           css: css`

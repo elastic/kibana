@@ -216,6 +216,8 @@ describe('discover session API transforms', () => {
               visContext: {
                 suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
                 requestData: {
+                  dataViewId: '6972ccae5b7ff51c24c1129b58e8dc6d56649983d2bb717806063e2da57e0c20',
+                  timeField: '@timestamp',
                   breakdownField: 'transaction.id',
                 },
                 attributes: (discoverSessionApiData.tabs[1] as DiscoverSessionApiData['tabs'][1])
@@ -277,6 +279,164 @@ describe('discover session API transforms', () => {
         type: 'index-pattern',
         id: 'logs-data-view',
       });
+    });
+  });
+
+  describe('visContext requestData extraction', () => {
+    const [classicTab, esqlTab] = apiData.tabs;
+
+    const buildEsqlVisContext = ({
+      layers,
+      adHocDataViews,
+      suggestionType = UnifiedHistogramSuggestionType.histogramForESQL,
+    }: {
+      layers: Record<string, Record<string, unknown>>;
+      adHocDataViews?: Record<string, Record<string, unknown>>;
+      suggestionType?: NonNullable<
+        DiscoverSessionApiData['tabs'][number]['vis_context']
+      >['suggestion_type'];
+    }) => ({
+      suggestion_type: suggestionType,
+      attributes: {
+        visualizationType: 'lnsXY',
+        state: {
+          datasourceStates: { textBased: { layers } },
+          ...(adHocDataViews && { adHocDataViews }),
+        },
+      },
+    });
+
+    const getStoredVisContext = (tab: DiscoverSessionApiData['tabs'][number]) =>
+      transformDiscoverSessionIn({ ...apiData, tabs: [tab] }).attributes.tabs[0].attributes
+        .visContext;
+
+    it('extracts the fingerprint from the chart blob for ES|QL tabs', () => {
+      const layers = { 'layer-1': { index: 'esql-dv' } };
+      const adHocDataViews = { 'esql-dv': { type: 'esql', timeFieldName: '@timestamp' } };
+
+      const histogramVisContext = buildEsqlVisContext({ layers, adHocDataViews });
+      expect(
+        getStoredVisContext({
+          ...esqlTab,
+          breakdown_field: 'host.name',
+          vis_context: histogramVisContext,
+        })
+      ).toEqual({
+        suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
+        requestData: {
+          dataViewId: 'esql-dv',
+          timeField: '@timestamp',
+          breakdownField: 'host.name',
+        },
+        attributes: histogramVisContext.attributes,
+      });
+
+      const lensVisContext = buildEsqlVisContext({
+        layers,
+        adHocDataViews,
+        suggestionType: UnifiedHistogramSuggestionType.lensSuggestion,
+      });
+      expect(getStoredVisContext({ ...esqlTab, vis_context: lensVisContext })).toEqual({
+        suggestionType: UnifiedHistogramSuggestionType.lensSuggestion,
+        requestData: {
+          dataViewId: 'esql-dv',
+          timeField: '@timestamp',
+        },
+        attributes: lensVisContext.attributes,
+      });
+    });
+
+    it('preserves a dormant ES|QL fingerprint on classic tabs without inheriting timeInterval', () => {
+      const visContext = buildEsqlVisContext({
+        layers: { 'layer-1': { index: 'esql-dv' } },
+        adHocDataViews: { 'esql-dv': { type: 'esql', timeFieldName: '@timestamp' } },
+      });
+
+      expect(getStoredVisContext({ ...classicTab, vis_context: visContext })).toEqual({
+        suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
+        requestData: {
+          dataViewId: 'esql-dv',
+          timeField: '@timestamp',
+          breakdownField: 'host.name',
+        },
+        attributes: visContext.attributes,
+      });
+    });
+
+    it('selects the data view through the layer linkage and falls back on ambiguity', () => {
+      const ambiguous = buildEsqlVisContext({
+        layers: { 'layer-1': { index: 'esql-dv-a' }, 'layer-2': { index: 'esql-dv-b' } },
+        adHocDataViews: {
+          'esql-dv-a': { type: 'esql', timeFieldName: '@timestamp' },
+          'esql-dv-b': { type: 'esql', timeFieldName: '@timestamp' },
+        },
+      });
+
+      expect(
+        getStoredVisContext({ ...esqlTab, breakdown_field: 'host.name', vis_context: ambiguous })
+      ).toEqual(expect.objectContaining({ requestData: { breakdownField: 'host.name' } }));
+
+      const sameDataView = buildEsqlVisContext({
+        layers: { 'layer-1': { index: 'esql-dv' }, 'layer-2': { index: 'esql-dv' } },
+        adHocDataViews: {
+          'unused-esql-dv': { type: 'esql', timeFieldName: 'event.ingested' },
+          'esql-dv': { type: 'esql', timeFieldName: '@timestamp' },
+        },
+      });
+
+      expect(getStoredVisContext({ ...esqlTab, vis_context: sameDataView })).toEqual(
+        expect.objectContaining({
+          requestData: { dataViewId: 'esql-dv', timeField: '@timestamp' },
+        })
+      );
+    });
+
+    it('extracts the fingerprint without a time field and omits an empty breakdown field', () => {
+      const visContext = buildEsqlVisContext({
+        layers: { 'layer-1': { index: 'esql-dv' } },
+        adHocDataViews: { 'esql-dv': { type: 'esql' } },
+      });
+
+      expect(
+        getStoredVisContext({ ...esqlTab, breakdown_field: '', vis_context: visContext })
+      ).toEqual(expect.objectContaining({ requestData: { dataViewId: 'esql-dv' } }));
+    });
+
+    it('falls back when the blob is not a recognizable ES|QL chart', () => {
+      const unrecognizable = {
+        suggestion_type: UnifiedHistogramSuggestionType.histogramForESQL as const,
+        attributes: { visualizationType: 'lnsXY', state: { foo: 'bar' } },
+      };
+
+      expect(
+        getStoredVisContext({
+          ...esqlTab,
+          breakdown_field: 'host.name',
+          vis_context: unrecognizable,
+        })
+      ).toEqual(expect.objectContaining({ requestData: { breakdownField: 'host.name' } }));
+
+      const wrongDataViewType = buildEsqlVisContext({
+        layers: { 'layer-1': { index: 'a-persisted-dv' } },
+        adHocDataViews: { 'a-persisted-dv': { type: 'index-pattern' } },
+      });
+
+      expect(
+        getStoredVisContext({
+          ...esqlTab,
+          breakdown_field: '',
+          vis_context: wrongDataViewType,
+        })
+      ).toEqual(expect.objectContaining({ requestData: {} }));
+    });
+
+    it('keeps behavior unchanged without a vis_context', () => {
+      expect(getStoredVisContext(esqlTab)).toBeUndefined();
+
+      const classicTabWithoutVisContext = { ...classicTab };
+      delete classicTabWithoutVisContext.vis_context;
+
+      expect(getStoredVisContext(classicTabWithoutVisContext)).toBeUndefined();
     });
   });
 

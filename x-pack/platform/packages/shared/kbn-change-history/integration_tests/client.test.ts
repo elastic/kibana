@@ -19,6 +19,7 @@ import { sha256, REDACTED } from '../src/utils';
 const KIBANA_SPACE = 'default';
 const TEST_MODULE = 'test-module';
 const TEST_DATASET = 'test-dataset';
+const ES_CLIENT_OPTIONS = { headers: { 'x-elastic-product-origin': 'kibana' } };
 
 const defaultLogOpts = {
   action: 'rule_create',
@@ -30,6 +31,7 @@ const defaultLogOpts = {
 
 describe('ChangeHistoryClient', () => {
   let esServer: EsTestCluster;
+  let esClient: Client;
   const logger = loggingSystemMock.createLogger();
 
   const defaultCostructorOpts = {
@@ -40,9 +42,8 @@ describe('ChangeHistoryClient', () => {
   };
 
   const cleanup = async () => {
-    const client = esServer.getClient();
-    await client.indices.deleteDataStream({ name: DATA_STREAM_NAME }).catch(() => {});
-    await client.indices.deleteIndexTemplate({ name: DATA_STREAM_NAME }).catch(() => {});
+    await esClient.indices.deleteDataStream({ name: DATA_STREAM_NAME }).catch(() => {});
+    await esClient.indices.deleteIndexTemplate({ name: DATA_STREAM_NAME }).catch(() => {});
   };
 
   beforeAll(async () => {
@@ -52,6 +53,7 @@ describe('ChangeHistoryClient', () => {
       log: new ToolingLog({ writeTo: process.stdout, level: 'debug' }),
     });
     await esServer.start();
+    esClient = esServer.getClient().child(ES_CLIENT_OPTIONS);
   });
 
   afterAll(async () => {
@@ -66,7 +68,7 @@ describe('ChangeHistoryClient', () => {
   describe('initialize', () => {
     const getEsDataStreams = async (name: string) => {
       try {
-        const res = await esServer.getClient().indices.getDataStream({ name });
+        const res = await esClient.indices.getDataStream({ name });
         return res?.data_streams?.map((s) => s.name) ?? [];
       } catch (error) {
         if (
@@ -85,7 +87,7 @@ describe('ChangeHistoryClient', () => {
 
       expect(await getEsDataStreams(DATA_STREAM_NAME)).toHaveLength(0);
 
-      await client.initialize(esServer.getClient());
+      await client.initialize(esClient);
       expect(client.isInitialized()).toBe(true);
 
       expect(await getEsDataStreams(DATA_STREAM_NAME)).toEqual([DATA_STREAM_NAME]);
@@ -96,7 +98,6 @@ describe('ChangeHistoryClient', () => {
     });
 
     it('enrolls the data stream in DSL lifecycle without ILM or data_retention', async () => {
-      const esClient = esServer.getClient();
       const client = new ChangeHistoryClient(defaultCostructorOpts);
       await client.initialize(esClient);
 
@@ -139,10 +140,8 @@ describe('ChangeHistoryClient', () => {
 
   describe('log and getHistory', () => {
     let client: ChangeHistoryClient;
-    let esClient: Client;
 
     beforeEach(async () => {
-      esClient = esServer.getClient();
       client = new ChangeHistoryClient(defaultCostructorOpts);
       await client.initialize(esClient);
     });
@@ -195,7 +194,7 @@ describe('ChangeHistoryClient', () => {
 
     beforeEach(async () => {
       client = new ChangeHistoryClient(defaultCostructorOpts);
-      await client.initialize(esServer.getClient());
+      await client.initialize(esClient);
     });
 
     it('should log multiple changes and return them via getHistory with correct count and ordering', async () => {
@@ -320,7 +319,7 @@ describe('ChangeHistoryClient', () => {
 
     beforeEach(async () => {
       client = new ChangeHistoryClient(defaultCostructorOpts);
-      await client.initialize(esServer.getClient());
+      await client.initialize(esClient);
     });
 
     it('should hash and redact sensitive fields and list paths in object.fields', async () => {

@@ -5,61 +5,33 @@
  * 2.0.
  */
 
-export const STREAMS_RULE_CONSUMER = 'streams' as const;
-export const STREAMS_ESQL_RULE_TYPE_ID = 'streams.rules.esql' as const;
 export const STREAMS_RULE_STREAM_TAG_PREFIX = 'sigevents:stream:' as const;
 
 export const toStreamTag = (streamName: string): string =>
   `${STREAMS_RULE_STREAM_TAG_PREFIX}${streamName}`;
 
 /**
- * Narrow interface that decouples QueryClient from the concrete alerting framework.
- *
- * Two implementations ship today:
- * - RulesAdapterV1 — wraps the @kbn/alerting-plugin RulesClient (default path)
- * - RulesAdapterV2 — wraps @kbn/alerting-v2-plugin RulesClientApi (flag ON path)
+ * Narrow interface that decouples QueryClient from the Alerting v2 client.
  */
 export interface IRulesManagementClient {
   /** Idempotent create: implementations should handle 409 by updating in place. */
-  createRule(id: string, body: CreateRuleBody): Promise<void>;
+  createRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void>;
 
   /** Non-breaking patch: implementations should handle 404 by creating instead. */
-  updateRule(id: string, body: UpdateRuleBody): Promise<void>;
+  updateRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void>;
 
-  /** Best-effort bulk delete: implementations should swallow 404/400 for missing rules. */
+  /** Best-effort bulk delete: missing rules (404) are ignored; other failures are reported. */
   bulkDeleteRules(ids: string[]): Promise<void>;
 
   findOwnedRuleIds(streamName: string): Promise<string[]>;
 }
 
-/** Rule creation payload, v1-shaped. V2 adapters translate internally. */
-export interface CreateRuleBody {
+/** Engine-independent Significant Events definition translated to Alerting v2 by the adapter. */
+export interface SignificantEventsRuleDefinition {
   name: string;
-  consumer: string;
-  alertTypeId: string;
-  /** SigEvents rules never have actions — typed as never[] to enforce at compile time. */
-  actions: never[];
-  params: {
-    timestampField: string;
-    query: string;
-  };
-  enabled: boolean;
-  tags: string[];
-  schedule: {
-    interval: string;
-  };
-}
-
-/** Rule update payload, v1-shaped. V2 adapters translate internally. */
-export interface UpdateRuleBody {
-  name: string;
-  /** SigEvents rules never have actions — typed as never[] to enforce at compile time. */
-  actions: never[];
-  params: {
-    timestampField: string;
-    query: string;
-  };
-  tags: string[];
+  streamName: string;
+  timestampField: string;
+  esqlQuery: string;
   schedule: {
     interval: string;
   };

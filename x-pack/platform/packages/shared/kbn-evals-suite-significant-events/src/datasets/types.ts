@@ -122,7 +122,7 @@ export interface DiscoveryJudgeScenario {
   };
   output: {
     criteria: SamplingCriterion[];
-    /** Human-readable summary of expected outcome for each discovery, e.g. `slug=promoted (reason); slug=demoted (reason)`. Used by the status-correctness evaluator. */
+    /** Human-readable summary of the expected status for each event ID, e.g. `event_id=open (reason); event_id=dismissed (reason)`. */
     expected_ground_truth: string;
     expect_assessment_note?: boolean;
   };

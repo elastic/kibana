@@ -8,10 +8,10 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import { RelayRequestError } from '@kbn/actions-plugin/server';
 import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
 import { SlackAppService } from './service';
 import { SlackAppUnavailableError } from './errors';
-import { RelayRequestError } from './relay_error';
 import { RELAY_APP_CONNECTION_SO_ID, RELAY_APP_CONNECTION_SO_TYPE } from './saved_object';
 
 const request = {} as unknown as KibanaRequest;
@@ -24,7 +24,7 @@ const unbind = jest.fn();
 interface HarnessOptions {
   /** `streams.significantEventsAppsEnabled` feature flag value. Defaults to enabled. */
   featureFlagEnabled?: boolean;
-  /** Whether `server.relayClient` (built at plugin start from `relayService` config) exists. */
+  /** Whether `server.relayClient` (provided by the Actions plugin) exists. */
   hasRelayClient?: boolean;
 }
 
@@ -56,7 +56,7 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
 
   const server = {
     logger,
-    config: { relayService: { url: 'https://relay.test' } },
+    config: {},
     agentBuilder: {},
     kibanaVersion: '9.2.0',
     relayClient: hasRelayClient ? { startInstall, fetchClaim, unbind } : undefined,

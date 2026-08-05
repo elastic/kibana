@@ -323,6 +323,10 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowsByIds(ids, spaceId);
   }
 
+  public async findExistingWorkflowIds(ids: string[]): Promise<string[]> {
+    return this.workflowsService.findExistingWorkflowIds(ids);
+  }
+
   public async getWorkflowsSourceByIds(
     ids: string[],
     spaceId: string,

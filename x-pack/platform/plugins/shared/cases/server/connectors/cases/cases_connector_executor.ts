@@ -55,7 +55,11 @@ import {
   GROUPED_BY_TITLE,
 } from './translations';
 import { toStringArray } from '../../../common/utils/attachments/string_utils';
-import { buildExtendedFieldsFromTemplate, resolveV2Template } from './v2_template_utils';
+import {
+  buildExtendedFieldsFromTemplate,
+  resolveV2Template,
+  resolveV2TemplateForLegacyKey,
+} from './v2_template_utils';
 import type { ParsedTemplateDefinition } from './v2_template_utils';
 
 interface CasesConnectorExecutorParams {
@@ -750,7 +754,10 @@ export class CasesConnectorExecutor {
     const { customFieldsConfigurationMap, templatesConfigurationMap } =
       await this.getCustomFieldsAndTemplatesConfiguration();
 
-    const { v2Template, extendedFields } = await this.resolveV2TemplateWithFields(params);
+    const { v2Template, extendedFields, templateRef } = await this.resolveV2TemplateWithFields(
+      params,
+      templatesConfigurationMap.get(params.owner)
+    );
 
     for (const error of nonFoundErrors) {
       if (groupedAlertsWithCaseId.has(error.caseId)) {
@@ -763,7 +770,8 @@ export class CasesConnectorExecutor {
             customFieldsConfigurationMap.get(params.owner),
             templatesConfigurationMap.get(params.owner),
             v2Template ?? undefined,
-            extendedFields
+            extendedFields,
+            templateRef
           )
         );
       }
@@ -808,7 +816,8 @@ export class CasesConnectorExecutor {
     groupingData: GroupedAlertsWithCaseId,
     v2Template: ParsedTemplateDefinition,
     customFieldsConfigurations?: CustomFieldsConfiguration,
-    extendedFields?: Record<string, string>
+    extendedFields?: Record<string, string>,
+    templateRef?: { id: string; version: number }
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
@@ -834,10 +843,10 @@ export class CasesConnectorExecutor {
       customFields: builtCustomFields,
     };
 
-    if (params.templateId && params.templateVersion) {
+    if (templateRef) {
       baseRequest.template = {
-        id: params.templateId,
-        version: Number(params.templateVersion),
+        id: templateRef.id,
+        version: templateRef.version,
       };
     }
 
@@ -862,7 +871,8 @@ export class CasesConnectorExecutor {
     customFieldsConfigurations?: CustomFieldsConfiguration,
     templatesConfigurations?: TemplatesConfiguration,
     v2Template?: ParsedTemplateDefinition,
-    extendedFields?: Record<string, string>
+    extendedFields?: Record<string, string>,
+    templateRef?: { id: string; version: number }
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
@@ -873,7 +883,8 @@ export class CasesConnectorExecutor {
         groupingData,
         v2Template,
         customFieldsConfigurations,
-        extendedFields
+        extendedFields,
+        templateRef
       );
     }
 
@@ -1178,8 +1189,14 @@ export class CasesConnectorExecutor {
       templatesConfigurationMap: templatesConfigurationMapForReopened,
     } = await this.getCustomFieldsAndTemplatesConfiguration();
 
-    const { v2Template: v2TemplateForReopened, extendedFields: extendedFieldsForReopened } =
-      await this.resolveV2TemplateWithFields(params);
+    const {
+      v2Template: v2TemplateForReopened,
+      extendedFields: extendedFieldsForReopened,
+      templateRef: templateRefForReopened,
+    } = await this.resolveV2TemplateWithFields(
+      params,
+      templatesConfigurationMapForReopened.get(params.owner)
+    );
 
     const bulkCreateReq = Array.from(groupedAlertsWithCaseId.values()).map((record) =>
       this.getCreateCaseRequest(
@@ -1188,7 +1205,8 @@ export class CasesConnectorExecutor {
         customFieldsConfigurationMapForReopened.get(params.owner),
         templatesConfigurationMapForReopened.get(params.owner),
         v2TemplateForReopened ?? undefined,
-        extendedFieldsForReopened
+        extendedFieldsForReopened,
+        templateRefForReopened
       )
     );
 
@@ -1392,27 +1410,77 @@ export class CasesConnectorExecutor {
     return { tags: ['cases-connector', `rule:${params.rule.id}`, ...tags], labels };
   }
 
-  private async resolveV2TemplateWithFields(params: CasesConnectorRunParams): Promise<{
+  private async resolveV2TemplateWithFields(
+    params: CasesConnectorRunParams,
+    templatesForOwner?: TemplatesConfiguration
+  ): Promise<{
     v2Template: ParsedTemplateDefinition | null;
     extendedFields: Record<string, string> | undefined;
+    templateRef: { id: string; version: number } | undefined;
   }> {
-    if (!this.isTemplatesEnabled || !params.templateVersion || !params.templateId) {
-      return { v2Template: null, extendedFields: undefined };
+    if (!this.isTemplatesEnabled || !params.templateId) {
+      return { v2Template: null, extendedFields: undefined, templateRef: undefined };
     }
 
-    const v2Template = await resolveV2Template(
+    // A rule authored in the v2 UI stores the v2 templateId and its version — resolve it directly.
+    if (params.templateVersion) {
+      const v2Template = await resolveV2Template(
+        this.casesClient,
+        params.templateId,
+        params.templateVersion,
+        params.owner,
+        this.logger
+      );
+
+      if (!v2Template) {
+        return { v2Template: null, extendedFields: undefined, templateRef: undefined };
+      }
+
+      const extendedFields = await buildExtendedFieldsFromTemplate(
+        this.casesClient,
+        v2Template,
+        params.owner
+      );
+
+      return {
+        v2Template,
+        extendedFields,
+        templateRef: { id: params.templateId, version: Number(params.templateVersion) },
+      };
+    }
+
+    // A rule authored before the v2 migration stores the legacy (v1) template key with no version.
+    // Bridge it to the migrated v2 template so newly created cases get `extended_fields` and a v2
+    // template reference. The migration records the originating key as `legacyKey`, so this resolves
+    // by key (name is a fallback for pre-`legacyKey` migrations). When the key cannot be bridged
+    // (the migration has not run) we return null and the caller falls back to the legacy path.
+    const legacyName = templatesForOwner?.find(
+      (template) => template.key === params.templateId
+    )?.name;
+
+    const resolved = await resolveV2TemplateForLegacyKey(
       this.casesClient,
       params.templateId,
-      params.templateVersion,
+      legacyName,
       params.owner,
       this.logger
     );
 
-    const extendedFields = v2Template
-      ? await buildExtendedFieldsFromTemplate(this.casesClient, v2Template, params.owner)
-      : undefined;
+    if (!resolved) {
+      return { v2Template: null, extendedFields: undefined, templateRef: undefined };
+    }
 
-    return { v2Template, extendedFields };
+    const extendedFields = await buildExtendedFieldsFromTemplate(
+      this.casesClient,
+      resolved.definition,
+      params.owner
+    );
+
+    return {
+      v2Template: resolved.definition,
+      extendedFields,
+      templateRef: { id: resolved.templateId, version: resolved.templateVersion },
+    };
   }
 
   private async getCustomFieldsAndTemplatesConfiguration(): Promise<{

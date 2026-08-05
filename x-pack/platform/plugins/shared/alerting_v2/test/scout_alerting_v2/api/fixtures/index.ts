@@ -139,7 +139,6 @@ export {
   getCountNewExecutionHistoryEventsUrl,
   getRuleExecutionsUrl,
 } from '../../common/urls';
-export { expectNoBulkTruncationMetadata } from '../../common/assertions';
 export {
   ACTION_POLICY_PER_PAGE_MAX,
   ACTION_POLICY_SEARCH_MAX_LENGTH,

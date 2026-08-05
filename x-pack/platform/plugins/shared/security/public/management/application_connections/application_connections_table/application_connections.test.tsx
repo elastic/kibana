@@ -964,4 +964,197 @@ describe('ApplicationConnections', () => {
     expect(within(flyout).getByText('client-a')).toBeInTheDocument();
     expect(within(flyout).getByText(mcpServerUrl)).toBeInTheDocument();
   });
+
+  it('renders a connection on a non-owned client (absent from the clients list) as its own row', async () => {
+    setupHttpResponses(coreStart, {
+      clients: { clients: [] },
+      connections: {
+        connections: [
+          {
+            id: 'conn-1',
+            client_id: 'non-owned-client',
+            client_name: 'Other user app',
+            name: 'Laptop session',
+            resource: 'cluster:elastic',
+          },
+        ],
+      },
+    });
+
+    const { findByText, findByTestId } = renderPage(coreStart);
+
+    expect(await findByText('Other user app')).toBeInTheDocument();
+    expect(
+      await findByTestId('applicationConnectionsListRow-non-owned-client')
+    ).toBeInTheDocument();
+    expect(await findByTestId('applicationConnectionsCount-non-owned-client')).toHaveTextContent(
+      '1'
+    );
+  });
+
+  it('falls back to the client id when a non-owned client has no client_name', async () => {
+    setupHttpResponses(coreStart, {
+      clients: { clients: [] },
+      connections: {
+        connections: [
+          {
+            id: 'conn-1',
+            client_id: 'non-owned-client',
+            name: 'Laptop session',
+            resource: 'cluster:elastic',
+          },
+        ],
+      },
+    });
+
+    const { findByText } = renderPage(coreStart);
+
+    expect(await findByText('non-owned-client')).toBeInTheDocument();
+  });
+
+  it('renders a non-owned client connection in the list view', async () => {
+    setupHttpResponses(coreStart, {
+      clients: { clients: [] },
+      connections: {
+        connections: [
+          {
+            id: 'conn-1',
+            client_id: 'non-owned-client',
+            client_name: 'Other user app',
+            name: 'Laptop session',
+            resource: 'cluster:elastic',
+            creation: '2026-04-10T10:00:00.000Z',
+          },
+        ],
+      },
+    });
+
+    const { findByText, findByTestId, getByTestId } = renderPage(coreStart);
+
+    await findByText('Other user app');
+    fireEvent.click(getByTestId('applicationConnectionsViewModeList'));
+
+    const listView = await findByTestId('applicationConnectionsListView');
+    expect(await findByTestId('applicationConnectionsListViewRow-conn-1')).toBeInTheDocument();
+    expect(within(listView).getByText('Other user app')).toBeInTheDocument();
+  });
+
+  it('renames a non-owned client connection inline and PATCHes the update endpoint', async () => {
+    setupHttpResponses(coreStart, {
+      clients: { clients: [] },
+      connections: {
+        connections: [
+          {
+            id: 'conn-1',
+            client_id: 'non-owned-client',
+            client_name: 'Other user app',
+            name: 'Laptop session',
+            resource: 'cluster:elastic',
+          },
+        ],
+      },
+    });
+    coreStart.http.patch.mockResolvedValue({
+      id: 'conn-1',
+      client_id: 'non-owned-client',
+      client_name: 'Other user app',
+      name: 'Renamed session',
+      resource: 'cluster:elastic',
+    });
+
+    const { findByText, findByTestId, getByTestId } = renderPage(coreStart);
+
+    await findByText('Other user app');
+    fireEvent.click(getByTestId('expandRow-non-owned-client'));
+    await findByText('Laptop session');
+
+    const inlineEdit = getByTestId('inlineEditConnectionName-conn-1');
+    fireEvent.click(within(inlineEdit).getByTestId('euiInlineReadModeButton'));
+
+    const input = await findByTestId('inlineEditConnectionNameInput-conn-1');
+    fireEvent.change(input, { target: { value: 'Renamed session' } });
+    fireEvent.click(getByTestId('inlineEditConnectionNameSave-conn-1'));
+
+    await waitFor(() => {
+      expect(coreStart.http.patch).toHaveBeenCalledWith(
+        '/internal/security/oauth/clients/non-owned-client/connections/conn-1',
+        { body: JSON.stringify({ name: 'Renamed session' }) }
+      );
+    });
+  });
+
+  it('revokes a non-owned client connection via the bulk-revoke API', async () => {
+    setupHttpResponses(coreStart, {
+      clients: { clients: [] },
+      connections: {
+        connections: [
+          {
+            id: 'conn-1',
+            client_id: 'non-owned-client',
+            client_name: 'Other user app',
+            name: 'Laptop session',
+            resource: 'cluster:elastic',
+          },
+        ],
+      },
+    });
+    coreStart.http.post.mockResolvedValue({
+      results: [{ client_id: 'non-owned-client', connection_id: 'conn-1', status: 'revoked' }],
+    });
+
+    const { findByText, findByTestId, getByTestId } = renderPage(coreStart);
+
+    await findByText('Other user app');
+    fireEvent.click(getByTestId('expandRow-non-owned-client'));
+
+    const revokeLink = await findByTestId('revokeConnection-conn-1');
+    fireEvent.click(revokeLink);
+
+    const modal = await findByTestId('applicationConnectionsRevokeModal');
+    fireEvent.click(within(modal).getByTestId('applicationConnectionsRevokeConfirmButton'));
+
+    await waitFor(() => {
+      expect(coreStart.http.post).toHaveBeenCalledWith(
+        '/internal/security/oauth/connections/_bulk_revoke',
+        {
+          body: JSON.stringify({
+            connections: [{ client_id: 'non-owned-client', connection_id: 'conn-1' }],
+            reason: undefined,
+          }),
+        }
+      );
+    });
+  });
+
+  it('opens the client details flyout for a non-owned client', async () => {
+    const mcpServerUrl = 'https://cluster.example.com/api/agent_builder/mcp';
+    setupHttpResponses(coreStart, {
+      clients: { clients: [] },
+      connections: {
+        connections: [
+          {
+            id: 'conn-1',
+            client_id: 'non-owned-client',
+            client_name: 'Other user app',
+            name: 'Laptop session',
+            resource: mcpServerUrl,
+          },
+        ],
+      },
+    });
+
+    const { findByText, findByTestId, getByTestId } = renderPage(coreStart);
+
+    await findByText('Other user app');
+    fireEvent.click(getByTestId('applicationConnectionsViewModeList'));
+
+    const listView = await findByTestId('applicationConnectionsListView');
+    const link = await within(listView).findByTestId('viewClientDetailsLink-non-owned-client');
+    fireEvent.click(link);
+
+    const flyout = await findByTestId('mcpClientDetailsFlyout');
+    expect(within(flyout).getByText('Other user app')).toBeInTheDocument();
+    expect(within(flyout).getByText('non-owned-client')).toBeInTheDocument();
+    expect(within(flyout).getByText(mcpServerUrl)).toBeInTheDocument();
+  });
 });

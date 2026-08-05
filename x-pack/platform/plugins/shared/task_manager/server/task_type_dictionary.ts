@@ -21,6 +21,9 @@ export const REMOVED_TYPES: string[] = [
   // deprecated in https://github.com/elastic/kibana/pull/121442
   'alerting:siem.signals',
 
+  // Significant Events Alerting v1 rule type removed in https://github.com/elastic/kibana/pull/278464
+  'alerting:streams.rules.esql',
+
   'search_sessions_monitor',
   'search_sessions_cleanup',
   'search_sessions_expire',

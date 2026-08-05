@@ -6,10 +6,13 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render as rtlRender, screen, fireEvent, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { ThreatHuntingLeadsFlyout } from './threat_hunting_leads_flyout';
 import type { HuntingLead } from './types';
+
+const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: I18nProvider });
 
 jest.mock('@kbn/react-query', () => ({
   useQuery: jest.fn(),
@@ -40,6 +43,8 @@ jest.mock('../../../../common/lib/kibana', () => ({
       },
     },
   }),
+  useDateFormat: jest.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
+  useTimeZone: jest.fn(() => 'UTC'),
 }));
 
 jest.mock('../../../../common/hooks/use_space_id', () => ({

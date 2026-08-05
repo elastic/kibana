@@ -70,6 +70,33 @@ export class FieldDefinitionsService {
     };
   }
 
+  /**
+   * Fetches `isGlobal: true` field definitions for extended-field search.
+   * When `owner` is omitted or empty, returns global defs for all owners
+   * (mirrors `getTemplateVersionsForExtendedFieldSearch` semantics).
+   */
+  async getGlobalFieldDefinitionsForSearch(params: {
+    owner?: string[];
+  }): Promise<FieldDefinition[]> {
+    const owners = params.owner?.length ? [...new Set(params.owner.filter(Boolean))] : [];
+    const ownerFilter =
+      owners.length > 0
+        ? owners
+            .map(
+              (o) => `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "${escapeKuery(o)}"`
+            )
+            .join(' OR ')
+        : undefined;
+
+    const result = await this.dependencies.unsecuredSavedObjectsClient.find<FieldDefinition>({
+      type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+      filter: ownerFilter,
+      perPage: 10000,
+    });
+
+    return result.saved_objects.map((so) => so.attributes).filter((fd) => fd.isGlobal === true);
+  }
+
   async getFieldDefinition(id: string): Promise<SavedObject<FieldDefinition>> {
     return this.dependencies.unsecuredSavedObjectsClient.get<FieldDefinition>(
       CASE_FIELD_DEFINITION_SAVED_OBJECT,

@@ -12,6 +12,8 @@ import {
   SelectBasicFieldSchema,
   TextareaFieldSchema,
   DatePickerFieldSchema,
+  ToggleFieldSchema,
+  UserPickerFieldSchema,
   CheckboxGroupFieldSchema,
   RadioGroupFieldSchema,
 } from '../../../../common/types/domain/template/fields';
@@ -28,6 +30,8 @@ const InlineFieldSchema = z.union([
   SelectBasicFieldSchema,
   TextareaFieldSchema,
   DatePickerFieldSchema,
+  ToggleFieldSchema,
+  UserPickerFieldSchema,
   CheckboxGroupFieldSchema,
   RadioGroupFieldSchema,
 ]);

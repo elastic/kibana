@@ -120,16 +120,20 @@ export type GetIsActiveFn = (params: {
   prepend: (path: string) => string;
 }) => boolean;
 
-/**
- * Base definition of navigation nodes. A node can either be a "group" or an "item".
- * Each have commmon properties and specific properties.
- */
-interface NodeDefinitionBase {
+/** Shared node fields used across navigation definition roles. */
+interface NodeDefinitionCommon<LinkId extends AppDeepLinkId, Id extends string> {
+  /** Optional id, if not passed a "link" must be provided. */
+  id?: Id;
+  /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
+  title?: string;
+  /** App id or deeplink id */
+  link?: LinkId;
+  /** Cloud link id */
+  cloudLink?: CloudLinkId;
   /**
    * Optional icon for the navigation node. Note: not all navigation depth will render the icon
    */
   icon?: IconType;
-
   /**
    * href for absolute links only. Internal links should use "link".
    */
@@ -148,17 +152,17 @@ interface NodeDefinitionBase {
    * Optional function to get the active state. This function is called whenever the location changes.
    */
   getIsActive?: GetIsActiveFn;
-
-  /**
-   * Indicate if this is a special node
-   * - home - node should be rendered as the home link
-   */
-  renderAs?: RenderAs;
-
   /**
    * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`).
    */
   badgeType?: BadgeType;
+}
+
+interface ChromeNavigationNodeCommon
+  extends Omit<NodeDefinitionCommon<AppDeepLinkId, string>, 'link' | 'cloudLink'> {
+  id: string;
+  /** Path in the tree of the node */
+  path: string;
 }
 
 /** @public */
@@ -170,20 +174,19 @@ interface NodeDefinitionBase {
  * - "path" is added to each node based on where it is located in the tree
  * - "isActive" state is set for each node if its URL matches the current location
  */
-export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
-  /** Optional id, if not passed a "link" must be provided. */
-  id: string;
-  /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
-  title?: string;
-  /** Path in the tree of the node */
-  path: string;
+export interface ChromeProjectNavigationNode extends ChromeNavigationNodeCommon {
+  /**
+   * Indicate if this is a special node
+   * - home - node should be rendered as the home link
+   */
+  renderAs?: RenderAs;
   /** App id or deeplink id */
   deepLink?: ChromeNavLink;
   /**
    * Optional children of the navigation node. Once a node has "children" defined it is
    * considered a "group" node.
    */
-  children?: ChromeProjectNavigationNode[];
+  children?: Array<ChromeProjectNavigationNode>;
   /**
    * Flag to indicate if the node is an "external" cloud link
    */
@@ -195,30 +198,63 @@ export interface ChromeSetProjectBreadcrumbsParams {
   absolute: boolean;
 }
 
+/** Standard nav node used outside panel-opener section lists. */
+export type StandardNodeDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> = NodeDefinitionCommon<LinkId, Id> & {
+  renderAs?: never;
+  children?: Array<
+    | StandardNodeDefinition<LinkId, ChildrenId, ChildrenId>
+    | (NodeDefinitionCommon<LinkId, Id> & {
+        renderAs: 'panelOpener';
+        children?: Array<StandardNodeDefinition<LinkId, ChildrenId>>;
+      })
+  >;
+};
+
+/** Allowed only under `panelOpener.children`. */
+export type PanelOpenerChildDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string
+> = StandardNodeDefinition<LinkId, Id, Id>;
+
+export type RootNodePanelOpenerDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> = NodeDefinitionCommon<LinkId, Id> & {
+  renderAs: 'panelOpener';
+  children?: Array<PanelOpenerChildDefinition<LinkId, ChildrenId>>;
+};
+
+/** Root-level node: body/footer items. */
+export type RootNodeDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> =
+  | StandardNodeDefinition<LinkId, Id, ChildrenId>
+  | (NodeDefinitionCommon<LinkId, Id> & {
+      renderAs: 'home';
+      children?: never;
+    })
+  | RootNodePanelOpenerDefinition<LinkId, Id, ChildrenId>;
+
 /**
  * @public
  *
- * A navigation node definition with its unique id, title, path in the tree and optional
+ * A root navigation node definition with its unique id, title, path in the tree and optional
  * deep link and children.
  * This definition serves to build the full ChromeProjectNavigation.navigationTree, converting
  * "link" to "deepLink" and adding the "path" property for each node.
  */
-export interface NodeDefinition<
+export type NodeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
-> extends NodeDefinitionBase {
-  /** Optional id, if not passed a "link" must be provided. */
-  id?: Id;
-  /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
-  title?: string;
-  /** App id or deeplink id */
-  link?: LinkId;
-  /** Cloud link id */
-  cloudLink?: CloudLinkId;
-  /** Optional children of the navigation node. Can not be used with `isGroupTitle` */
-  children?: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
-}
+> = RootNodeDefinition<LinkId, Id, ChildrenId>;
 
 /**
  * @public
@@ -233,11 +269,11 @@ export interface NavigationTreeDefinition<
   /**
    * Main content of the navigation.
    * */
-  body: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
+  body: Array<RootNodeDefinition<LinkId, Id, ChildrenId>>;
   /**
    * Footer content of the navigation
    * */
-  footer?: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
+  footer?: Array<RootNodeDefinition<LinkId, Id, ChildrenId>>;
 }
 
 export type SideNavigationSection = keyof NavigationTreeDefinition;

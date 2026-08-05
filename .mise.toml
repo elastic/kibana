@@ -3,3 +3,16 @@ idiomatic_version_file_enable_tools = ["node"]
 
 [tools]
 yarn = "1.22.21"
+
+[tasks.bootstrap]
+description = "Install and link Kibana dependencies"
+run = "yarn kbn bootstrap"
+
+[tasks."river:warm"]
+description = "Warm Kibana and Elasticsearch caches for a River image"
+depends = ["bootstrap"]
+run = "bash .river/warm.sh"
+
+[tasks.river-prebuild]
+description = "Prepare Kibana for a River sandbox image"
+depends = ["river:warm"]

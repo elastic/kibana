@@ -16,7 +16,7 @@ import {
   getChartDebugData,
 } from '../../../fixtures';
 
-spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deploymentAgnostic }, () => {
   const openInLensSuite = createOpenInLensSuiteSetup({
     archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.GAUGE,
     dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.GAUGE,

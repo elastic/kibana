@@ -260,6 +260,25 @@ describe('getSharingData', () => {
     `);
   });
 
+  test('getSearchSource does not throw when there is no data view (ES|QL dashboard panel)', async () => {
+    // ES|QL saved-search panels on a dashboard can have no resolved data view on the search
+    // source, so `getField('index')` is undefined. getSearchSource must not throw when mapping
+    // columns to fields (nested field roots do not apply in ES|QL mode).
+    const searchSourceMock = createSearchSourceMock({});
+    searchSourceMock.setField('query', {
+      esql: 'from logstash-* | keep cool-field-1, cool-field-2',
+    });
+    const { getSearchSource } = await getSharingData(
+      searchSourceMock,
+      { columns: ['cool-field-1', 'cool-field-2'] },
+      services
+    );
+    expect(getSearchSource({}).fields).toStrictEqual([
+      { field: 'cool-field-1', include_unmapped: true },
+      { field: 'cool-field-2', include_unmapped: true },
+    ]);
+  });
+
   test('fields conditionally do not have prepended timeField', async () => {
     services.uiSettings = {
       get: (key: string) => {

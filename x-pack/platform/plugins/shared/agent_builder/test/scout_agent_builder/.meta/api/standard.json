@@ -1,5 +1,5 @@
 {
-  "sha1": "862a2e85233a0981ef7059c06b98399e5e2b3378",
+  "sha1": "2b2966c248e49191ae462a86f114875d24087baf",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -547,7 +547,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 712,
+        "line": 743,
         "column": 12
       }
     },
@@ -1000,8 +1000,8 @@
       }
     },
     {
-      "id": "23808d62419391b-262e240da1d7249",
-      "title": "Agent Builder - converse callback API stores callback source authorship on list and get conversation responses",
+      "id": "23808d62419391b-92f5e782bc9e4c1",
+      "title": "Agent Builder - converse callback API stores callback origin authorship on list and get conversation responses",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1027,7 +1027,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 241,
+        "line": 239,
         "column": 12
       }
     },
@@ -1043,13 +1043,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 282,
+        "line": 280,
         "column": 12
       }
     },
     {
-      "id": "23808d62419391b-9c2526964eb5768",
-      "title": "Agent Builder - converse callback API continues conversation for repeated Slack source",
+      "id": "23808d62419391b-8077e4c805574b4",
+      "title": "Agent Builder - converse callback API continues conversation for repeated Slack origin",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1059,7 +1059,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
-        "line": 337,
+        "line": 335,
         "column": 12
       }
     },

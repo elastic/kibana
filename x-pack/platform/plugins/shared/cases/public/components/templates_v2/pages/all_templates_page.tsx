@@ -33,15 +33,24 @@ import { TemplatesTableEmptyPrompt } from '../components/templates_table_empty_p
 import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmation_modal';
 import { CasesAppHeader } from '../../app/cases_app_header';
 import { CasesPageBody } from '../../app/cases_page_body';
+import { GuidedTour } from '../../tour/guided_tour';
+import { TEMPLATES_TOUR_STEPS } from '../tour/tour_steps_config';
+import { TEMPLATES_TOUR_STEP_TEST_ID } from '../tour/constants';
+import { useKibana } from '../../../common/lib/kibana';
 
 export const AllTemplatesPage: React.FC = () => {
   useCasesTemplatesBreadcrumbs();
   const { owner } = useCasesContext();
+  const { docLinks } = useKibana().services;
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
   const { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate } =
     useCasesCreateTemplateNavigation();
   const { getCasesFieldLibraryUrl, navigateToCasesFieldLibrary } = useCasesFieldLibraryNavigation();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [isTourActive, setIsTourActive] = useState(false);
+
+  const startTour = useCallback(() => setIsTourActive(true), []);
+  const finishTour = useCallback(() => setIsTourActive(false), []);
 
   const openFlyout = useCallback(() => {
     setIsFlyoutOpen(true);
@@ -153,9 +162,18 @@ export const AllTemplatesPage: React.FC = () => {
         title={i18n.TEMPLATE_TITLE}
         back={templatesListBack}
         menu={templatesListMenu}
+        // Native "Documentation" item in the header overflow menu, linking to the case-templates
+        // guide via the doclinks service (kept consistent with the template editor header).
+        docLink={docLinks.links.cases.manageCaseTemplates}
+      />
+      <GuidedTour
+        steps={TEMPLATES_TOUR_STEPS}
+        isActive={isTourActive}
+        onFinish={finishTour}
+        testIdPrefix={TEMPLATES_TOUR_STEP_TEST_ID}
       />
       <CasesPageBody>
-        <TemplatesInfoPanel />
+        <TemplatesInfoPanel onStartTour={startTour} />
         <TemplatesTableFilters
           queryParams={queryParams}
           onQueryParamsChange={setQueryParams}

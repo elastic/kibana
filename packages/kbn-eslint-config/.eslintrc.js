@@ -132,6 +132,7 @@ module.exports = {
     '@kbn/eslint-plugin-telemetry',
     '@kbn/eslint-plugin-i18n',
     '@kbn/eslint-plugin-alerting-v2',
+    '@kbn/eslint-plugin-kbn-ui',
     '@elastic/eui',
     'eslint-plugin-depend',
     'prettier',
@@ -450,6 +451,11 @@ module.exports = {
     'no-prototype-builtins': 'error',
 
     /**
+     * kbn-ui rules
+     */
+    '@kbn/kbn-ui/prefer_toast_action_props': 'warn',
+
+    /**
      * EUI Team rules
      */
 
@@ -470,6 +476,7 @@ module.exports = {
     '@elastic/eui/badge-accessibility-rules': 'error',
     '@elastic/eui/consistent-is-invalid-props': 'error',
     '@elastic/eui/tooltip-no-interactive-content': 'error',
+    '@elastic/eui/require-table-caption': 'error',
   },
 
   overrides: [

@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -28,8 +28,25 @@ import type { CaseUI } from '../../../common';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useGetTemplates } from '../templates_v2/hooks/use_get_templates';
 import { useGetTemplate } from '../templates_v2/hooks/use_get_template';
+import { useTemplateNonGlobalFields } from '../templates_v2/hooks/use_template_non_global_fields';
 import { useChangeAppliedTemplate } from '../case_view/use_change_applied_template';
+import {
+  EMPTY_EXTENDED_FIELDS,
+  TemplateFieldsFormReady,
+} from '../case_view/components/template_fields_form_ready';
+import type { TemplateFieldsFormApi } from '../case_view/components/template_fields_form_ready';
 import * as i18n from '../../common/translations';
+
+// Collect non-empty form values as a snake-keyed string record for submission.
+// Empty ('') and empty-array ('[]') values are dropped so absent fields fall back
+// to server-side defaults / required checks rather than being sent as blanks.
+const collectExtendedFieldValues = (rawValues: Record<string, unknown>): Record<string, string> =>
+  Object.entries(rawValues).reduce<Record<string, string>>((acc, [key, value]) => {
+    if (value !== '' && value !== '[]') {
+      acc[key] = String(value);
+    }
+    return acc;
+  }, {});
 
 interface ApplyTemplateModalProps {
   caseData: CaseUI;
@@ -74,14 +91,38 @@ export const ApplyTemplateModal: FC<ApplyTemplateModalProps> = ({ caseData, onCl
     isSelectedTemplateInOptions ? selectedTemplateId : undefined
   );
 
+  const selectedTemplateDefinitionFields = useMemo(
+    () => selectedTemplateData?.definition?.fields ?? [],
+    [selectedTemplateData]
+  );
+
+  const { resolvedFields, isLoading: isResolvingFields } = useTemplateNonGlobalFields(
+    selectedTemplateDefinitionFields,
+    caseData.owner
+  );
+
+  const formApiRef = useRef<TemplateFieldsFormApi | null>(null);
+
   const { mutate: changeAppliedTemplate, isLoading: isApplying } = useChangeAppliedTemplate();
 
   const onChange = useCallback((selected: Array<EuiComboBoxOptionOption<string>>) => {
     setSelectedTemplateId(selected[0]?.value ?? '');
   }, []);
 
-  const onApply = useCallback(() => {
+  const onApply = useCallback(async () => {
     if (!selectedTemplateId || !selectedTemplateData) return;
+
+    const formApi = formApiRef.current;
+    if (formApi) {
+      const isValid = await formApi.trigger();
+      if (!isValid) return;
+    }
+
+    let extendedFields: Record<string, string> | undefined;
+    if (formApi) {
+      const rawValues = formApi.getValues() as Record<string, unknown>;
+      extendedFields = collectExtendedFieldValues(rawValues);
+    }
 
     changeAppliedTemplate(
       {
@@ -92,13 +133,29 @@ export const ApplyTemplateModal: FC<ApplyTemplateModalProps> = ({ caseData, onCl
           fields: selectedTemplateData.definition.fields,
           settings: selectedTemplateData.definition.settings,
         },
+        extendedFields,
       },
       { onSuccess: onClose }
     );
   }, [selectedTemplateId, selectedTemplateData, changeAppliedTemplate, caseData, onClose]);
 
   const isApplyDisabled =
-    !selectedTemplateId || isFetchingDefinition || !selectedTemplateData || isApplying;
+    !selectedTemplateId ||
+    isFetchingDefinition ||
+    !selectedTemplateData ||
+    isApplying ||
+    isResolvingFields;
+
+  const resolvedFieldsNode =
+    resolvedFields.length > 0 ? (
+      <TemplateFieldsFormReady
+        key={selectedTemplateId}
+        resolvedFields={resolvedFields}
+        extendedFields={caseData.extendedFields ?? EMPTY_EXTENDED_FIELDS}
+        applyDefaults
+        formApiRef={formApiRef}
+      />
+    ) : null;
 
   return (
     <EuiModal onClose={onClose} aria-labelledby={titleId} data-test-subj="apply-template-modal">
@@ -129,6 +186,12 @@ export const ApplyTemplateModal: FC<ApplyTemplateModalProps> = ({ caseData, onCl
           title={i18n.APPLY_TEMPLATE_MODAL_CONNECTOR_NOTICE}
           data-test-subj="apply-template-modal-connector-notice"
         />
+        {resolvedFieldsNode && (
+          <>
+            <EuiSpacer size="m" />
+            {resolvedFieldsNode}
+          </>
+        )}
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose} data-test-subj="apply-template-modal-cancel">

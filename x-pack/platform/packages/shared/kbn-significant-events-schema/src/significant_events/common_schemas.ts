@@ -171,9 +171,11 @@ const detectionSignalSchema = signalBaseSchema.extend({
 export const signalEntrySchema = z.discriminatedUnion('type', [detectionSignalSchema]);
 export type SignalEntry = z.infer<typeof signalEntrySchema>;
 
+/** Canonical severity values in descending severity order (critical → low). */
+export const SEVERITY_OPTIONS = ['80-critical', '60-high', '40-medium', '20-low'] as const;
+
 /** Canonical sortable severity used by storage, APIs, and tools. */
-export const severitySchema = z.enum(['20-low', '40-medium', '60-high', '80-critical'])
-  .describe(dedent`
+export const severitySchema = z.enum(SEVERITY_OPTIONS).describe(dedent`
     Sortable severity keyword. Higher prefixes indicate greater severity:
     "80-critical" = the most severe outage. Any ONE qualifies independently:
       - a site-wide/global outage affecting most customers;
@@ -190,16 +192,16 @@ export type Severity = z.infer<typeof severitySchema>;
 
 const SEVERITY_LABELS: Record<Severity, string> = {
   '20-low': i18n.translate('xpack.significantEvents.severity.lowLabel', {
-    defaultMessage: 'low',
+    defaultMessage: 'Low',
   }),
   '40-medium': i18n.translate('xpack.significantEvents.severity.mediumLabel', {
-    defaultMessage: 'medium',
+    defaultMessage: 'Medium',
   }),
   '60-high': i18n.translate('xpack.significantEvents.severity.highLabel', {
-    defaultMessage: 'high',
+    defaultMessage: 'High',
   }),
   '80-critical': i18n.translate('xpack.significantEvents.severity.criticalLabel', {
-    defaultMessage: 'critical',
+    defaultMessage: 'Critical',
   }),
 };
 

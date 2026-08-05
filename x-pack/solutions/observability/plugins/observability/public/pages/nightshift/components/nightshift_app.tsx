@@ -6,7 +6,8 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -22,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '@kbn/significant-events-plugin/common';
 import { BlastRadiusEntities, type BlastRadiusEntity } from './blast_radius_entities';
+import { EventFlyout } from './event_flyout';
 import { NightshiftTitle } from './nightshift_title';
 import { SignificantEventList } from './significant_event_list';
 import { SignificantEventStatuses } from './significant_event_statuses';
@@ -33,11 +35,17 @@ import {
   getNeedsActionEvents,
   getResolvedEvents,
 } from '../significant_event_status';
+import { formatChatAttachmentDescription } from '../chat_attachment_description';
+
+// Kept in the URL so a refresh or a shared link restores the open flyout.
+const SELECTED_EVENT_QUERY_PARAM = 'eventUuid';
 
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { agentBuilder, application } = useKibana().services;
   const [selectedStreamName, setSelectedStreamName] = useState<string>();
+  const history = useHistory();
+  const { search } = useLocation();
   const needsActionSectionRef = useRef<HTMLElement>(null);
   const resolvedSectionRef = useRef<HTMLElement>(null);
 
@@ -45,6 +53,18 @@ export function NightshiftApp(): React.ReactElement {
 
   const events = useMemo(() => data?.hits ?? [], [data]);
   const totalCount = data?.total;
+
+  // Derived from the freshest fetched list (not a click-time snapshot), so
+  // background refetches keep the open flyout current.
+  const selectedEventUuid = useMemo(
+    () => new URLSearchParams(search).get(SELECTED_EVENT_QUERY_PARAM) ?? undefined,
+    [search]
+  );
+  const selectedEvent = useMemo(
+    () => events.find(({ event_uuid: eventUuid }) => eventUuid === selectedEventUuid),
+    [events, selectedEventUuid]
+  );
+  const [eventNotFound, setEventNotFound] = useState(false);
 
   const showAllEventsHref = application.getUrlForApp('streams', {
     deepLinkId: 'significantEventsEvents',
@@ -64,6 +84,7 @@ export function NightshiftApp(): React.ReactElement {
             id: event.event_uuid,
             type: SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
             origin: event.event_id,
+            description: formatChatAttachmentDescription('Significant Event', event.title),
             data: event,
           },
         ],
@@ -72,6 +93,21 @@ export function NightshiftApp(): React.ReactElement {
     [agentBuilder]
   );
   const onChatClick = agentBuilder ? handleChatClick : undefined;
+
+  const handleEventClick = useCallback(
+    (event: SignificantEvent) => {
+      const params = new URLSearchParams(history.location.search);
+      params.set(SELECTED_EVENT_QUERY_PARAM, event.event_uuid);
+      history.replace({ search: params.toString() });
+    },
+    [history]
+  );
+
+  const handleFlyoutClose = useCallback(() => {
+    const params = new URLSearchParams(history.location.search);
+    params.delete(SELECTED_EVENT_QUERY_PARAM);
+    history.replace({ search: params.toString() });
+  }, [history]);
 
   // Highest-severity events first so critical items are never buried below older, lower-impact ones.
   const needsActionEvents = useMemo(
@@ -130,6 +166,35 @@ export function NightshiftApp(): React.ReactElement {
     () => filterEventsByStream(resolvedEvents, activeStreamName),
     [resolvedEvents, activeStreamName]
   );
+
+  const selectedEventVisible = useMemo(() => {
+    if (!selectedEvent) {
+      return false;
+    }
+    return (
+      filterEventsByStream(needsActionEvents, activeStreamName).some(
+        ({ event_uuid: eventUuid }) => eventUuid === selectedEvent.event_uuid
+      ) ||
+      filterEventsByStream(resolvedEvents, activeStreamName).some(
+        ({ event_uuid: eventUuid }) => eventUuid === selectedEvent.event_uuid
+      )
+    );
+  }, [activeStreamName, needsActionEvents, resolvedEvents, selectedEvent]);
+
+  useEffect(() => {
+    if (selectedEventUuid && !selectedEvent && !isLoading) {
+      setEventNotFound(true);
+      handleFlyoutClose();
+      return;
+    }
+    setEventNotFound(false);
+  }, [handleFlyoutClose, isLoading, selectedEvent, selectedEventUuid]);
+
+  useEffect(() => {
+    if (selectedEvent && activeStreamName && !selectedEventVisible) {
+      handleFlyoutClose();
+    }
+  }, [activeStreamName, handleFlyoutClose, selectedEvent, selectedEventVisible]);
 
   const scrollToSection = (sectionRef: React.RefObject<HTMLElement>) => {
     sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -242,6 +307,31 @@ export function NightshiftApp(): React.ReactElement {
             </EuiFlexItem>
           )}
 
+          {eventNotFound && (
+            <EuiFlexItem
+              css={css`
+                margin-top: ${euiTheme.size.m};
+              `}
+            >
+              <EuiCallOut
+                announceOnMount
+                color="warning"
+                iconType="warning"
+                size="s"
+                title={i18n.translate('xpack.observability.nightshift.eventNotFoundTitle', {
+                  defaultMessage: 'Significant Event not found',
+                })}
+              >
+                <EuiText size="s">
+                  {i18n.translate('xpack.observability.nightshift.eventNotFoundDescription', {
+                    defaultMessage:
+                      'The event in this link is no longer in the current results. The URL has been cleared.',
+                  })}
+                </EuiText>
+              </EuiCallOut>
+            </EuiFlexItem>
+          )}
+
           <SignificantEventStatuses
             needsActionCount={visibleNeedsActionEvents.length}
             onNeedsActionClick={() => scrollToSection(needsActionSectionRef)}
@@ -272,10 +362,12 @@ export function NightshiftApp(): React.ReactElement {
                   <SignificantEventList
                     events={visibleNeedsActionEvents}
                     onChatClick={onChatClick}
+                    onEventClick={handleEventClick}
                     sectionRef={needsActionSectionRef}
+                    selectedEventUuid={selectedEventUuid}
                     statusColor="danger"
                     title={i18n.translate('xpack.observability.nightshift.list.needsActionTitle', {
-                      defaultMessage: 'Need action',
+                      defaultMessage: 'Needs action',
                     })}
                   />
                 </EuiFlexItem>
@@ -285,7 +377,9 @@ export function NightshiftApp(): React.ReactElement {
                   <SignificantEventList
                     events={visibleResolvedEvents}
                     onChatClick={onChatClick}
+                    onEventClick={handleEventClick}
                     sectionRef={resolvedSectionRef}
+                    selectedEventUuid={selectedEventUuid}
                     statusColor="success"
                     title={i18n.translate('xpack.observability.nightshift.list.resolvedTitle', {
                       defaultMessage: 'Resolved',
@@ -296,6 +390,15 @@ export function NightshiftApp(): React.ReactElement {
             </EuiFlexGroup>
           </EuiFlexItem>
         </>
+      )}
+
+      {selectedEvent && selectedEventVisible && (
+        <EventFlyout
+          key={selectedEvent.event_uuid}
+          event={selectedEvent}
+          onClose={handleFlyoutClose}
+          onChatClick={onChatClick}
+        />
       )}
     </EuiFlexGroup>
   );

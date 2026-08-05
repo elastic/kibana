@@ -1316,6 +1316,17 @@ export class WorkflowCrudService {
   }
 
   /**
+   * Public surface of {@link checkExistingIds} for use by the import-preflight
+   * dryRun branch. Returns the subset of the given candidate IDs that already
+   * exist in the index — including soft-deleted tombstones and cross-space
+   * documents — matching the same existence semantics enforced by the write path.
+   */
+  async findExistingWorkflowIds(ids: string[]): Promise<string[]> {
+    const existing = await this.checkExistingIds(ids);
+    return [...existing];
+  }
+
+  /**
    * Checks which of the given candidate IDs already exist in the workflow index.
    * The lookup is intentionally:
    *

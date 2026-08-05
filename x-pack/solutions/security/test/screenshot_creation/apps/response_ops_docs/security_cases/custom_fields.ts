@@ -12,35 +12,49 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const screenshotDirectories = ['response_ops_docs', 'security_cases'];
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
+  const retry = getService('retry');
 
   describe('Security case settings and custom fields', function () {
     it('case settings screenshots', async () => {
+      // With the templates feature flag pinned ON for this suite, custom fields and
+      // templates are managed on the dedicated v2 templates / field-library pages
+      // rather than inline on the Case Settings page.
       await pageObjects.common.navigateToApp('security', { path: 'cases' });
       await pageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('configure-case-button');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await retry.waitFor('case-configure-title exist', async () => {
+        return await testSubjects.exists('case-configure-title');
+      });
       await commonScreenshots.takeScreenshot('cases-settings', screenshotDirectories);
-      await testSubjects.click('add-template');
+
+      // Templates list page — reachable when the templates flag is ON. Strip any
+      // query string / hash so the sub-path is appended cleanly.
+      const configureUrl = (await browser.getCurrentUrl()).split(/[?#]/)[0].replace(/\/$/, '');
+      await browser.get(`${configureUrl}/templates`);
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await retry.waitFor('templates-table exist', async () => {
+        return await testSubjects.exists('templates-table');
+      });
       await commonScreenshots.takeScreenshot(
         'cases-add-template',
         screenshotDirectories,
         1400,
         1000
       );
-      await testSubjects.click('common-flyout-cancel');
-      await testSubjects.click('add-custom-field');
+
+      // Field library page — reachable when the templates flag is ON.
+      await browser.get(`${configureUrl}/field_library`);
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await retry.waitFor('fieldDefinitionsTable exist', async () => {
+        return await testSubjects.exists('fieldDefinitionsTable');
+      });
       await commonScreenshots.takeScreenshot(
         'cases-add-custom-field',
         screenshotDirectories,
         1400,
         700
-      );
-      await testSubjects.setValue('custom-field-label-input', 'my-field');
-      await testSubjects.click('common-flyout-save');
-      await commonScreenshots.takeScreenshot(
-        'cases-custom-field-settings',
-        screenshotDirectories,
-        1400,
-        1024
       );
     });
   });

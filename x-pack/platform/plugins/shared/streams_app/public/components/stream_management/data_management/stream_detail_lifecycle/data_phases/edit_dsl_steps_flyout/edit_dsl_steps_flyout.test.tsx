@@ -927,5 +927,117 @@ describe('EditDslStepsFlyout', () => {
       expect(onSave).toHaveBeenCalledTimes(0);
       expect(getTab(1).querySelector('[data-euiicon-type="warning"]')).not.toBeNull();
     });
+
+    it('shows constraint as error (not duplicated) when after violates the previous step', async () => {
+      renderFlyout(
+        {
+          initialSteps: {
+            dsl: {
+              data_retention: '60d',
+              downsample: [
+                { after: '30d', fixed_interval: '5m' },
+                { after: '35d', fixed_interval: '10m' },
+              ],
+            },
+          } as IngestStreamLifecycleDSL,
+        },
+        { initialSelectedStepIndex: 1 }
+      );
+      await tick();
+
+      const panel = withinStep(1);
+      const afterInput = panel.getByTestId(`${DATA_TEST_SUBJ}AfterValue`) as HTMLInputElement;
+
+      // 20d < previous step (30d) → violates lower bound.
+      fireEvent.change(afterInput, { target: { value: '20' } });
+      fireEvent.blur(afterInput);
+
+      const constraintText =
+        'Must occur after the previous step (30d) and before the delete phase (60d).';
+      await waitFor(() => expect(panel.getByText(constraintText)).toBeInTheDocument());
+      // Appears exactly once: in the error slot; helpText is suppressed to avoid duplication.
+      expect(panel.queryAllByText(constraintText)).toHaveLength(1);
+    });
+
+    it('shows constraint as error (not duplicated) when after violates the exit boundary', async () => {
+      renderFlyout({
+        initialSteps: {
+          dsl: {
+            data_retention: '30d',
+            downsample: [{ after: '10d', fixed_interval: '5m' }],
+          },
+        } as IngestStreamLifecycleDSL,
+      });
+      await tick();
+
+      const panel = withinStep(0);
+      const afterInput = panel.getByTestId(`${DATA_TEST_SUBJ}AfterValue`) as HTMLInputElement;
+
+      // 40d >= data_retention (30d) → violates exit boundary.
+      fireEvent.change(afterInput, { target: { value: '40' } });
+      fireEvent.blur(afterInput);
+
+      const constraintText = 'Must occur before the delete phase (30d).';
+      await waitFor(() => expect(panel.getByText(constraintText)).toBeInTheDocument());
+      expect(panel.queryAllByText(constraintText)).toHaveLength(1);
+    });
+
+    it('shows constraint as error (not duplicated) when fixed_interval is not a multiple of the previous step', async () => {
+      renderFlyout(
+        {
+          initialSteps: {
+            dsl: {
+              data_retention: '60d',
+              downsample: [
+                { after: '10d', fixed_interval: '5m' },
+                { after: '20d', fixed_interval: '10m' },
+              ],
+            },
+          } as IngestStreamLifecycleDSL,
+        },
+        { initialSelectedStepIndex: 1 }
+      );
+      await tick();
+
+      const panel = withinStep(1);
+      const intervalInput = panel.getByTestId(
+        `${DATA_TEST_SUBJ}FixedIntervalValue`
+      ) as HTMLInputElement;
+
+      // 7m is not a multiple of the previous step's 5m.
+      fireEvent.change(intervalInput, { target: { value: '7' } });
+      fireEvent.blur(intervalInput);
+
+      const constraintText =
+        'Must be a multiple of the step 1 interval (5m) and smaller than the delete phase (60d).';
+      await waitFor(() => expect(panel.getByText(constraintText)).toBeInTheDocument());
+      expect(panel.queryAllByText(constraintText)).toHaveLength(1);
+    });
+
+    it('shows constraint as error (not duplicated) when fixed_interval reaches the exit boundary', async () => {
+      renderFlyout({
+        initialSteps: {
+          dsl: {
+            data_retention: '60d',
+            frozen_after: '40d',
+            downsample: [{ after: '5d', fixed_interval: '10d' }],
+          },
+        } as IngestStreamLifecycleDSL,
+      });
+      await tick();
+
+      const panel = withinStep(0);
+      const intervalInput = panel.getByTestId(
+        `${DATA_TEST_SUBJ}FixedIntervalValue`
+      ) as HTMLInputElement;
+
+      // 40d >= frozen boundary (40d) → violates exit boundary.
+      fireEvent.change(intervalInput, { target: { value: '40' } });
+      fireEvent.blur(intervalInput);
+
+      const constraintText = 'Must be smaller than the frozen phase (40d).';
+      await waitFor(() => expect(panel.getByText(constraintText)).toBeInTheDocument());
+      expect(panel.queryAllByText(constraintText)).toHaveLength(1);
+    });
   });
 });

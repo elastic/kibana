@@ -99,8 +99,13 @@ safe-outputs:
       - failure:ai-fixable
       - failure:fix-did-not-hold
       - failure:insufficient-data
-    max: 4
+      # fix-request label that triggers the Flaky Test Fixer workflow
+      - ai:fix-flaky
+    max: 5
     target: *issue_number
+    # Label as `kibanamachine` so the `ai:fix-flaky` labeled event triggers the
+    # Flaky Test Fixer (default GITHUB_TOKEN events don't trigger workflows).
+    github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
   # On a re-investigation (e.g. a reopened issue) the previous verdict's labels are
   # stale. Allow removing any `failure:*` label plus a lingering `ai:fix-flaky` fix
   # request so the fresh verdict can replace them (`failure:*` also clears deprecated ones).
@@ -177,6 +182,10 @@ Add exactly one classification label to the issue that matches the chosen `class
 
 Add `failure:ai-fixable` to the issue if we are confident that a fix is available (it would imply opening a PR against the codebase).
 
+### Automatic fix request
+
+When you add `failure:ai-fixable`, also add `ai:fix-flaky` to automatically request a fix — its `labeled` event triggers the Flaky Test Fixer workflow, which opens a draft fix PR. **Skip** the `ai:fix-flaky` label when a fix PR for this issue is already up (open, in draft, or in review) in the Kibana repository — you already check for one when writing the tip block below; don't request a duplicate.
+
 ### "Previous fix didn't hold" label
 
 Add `failure:fix-did-not-hold` (in addition to the classification label) when your investigation shows a **fix was already merged for this same failure and the failure came back** — regardless of who wrote it (a human contributor or an automation such as the flaky-test fixer). This label tracks fixes that regressed, so apply it only when **both** of the following hold:
@@ -197,7 +206,7 @@ When you set it, the comment's `#### Additional context` → "Open questions" bu
 
 ### Refresh stale labels on re-investigation
 
-This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, `failure:fix-did-not-hold`, `failure:insufficient-data`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification, `failure:ai-fixable` only if a fix is still available, `failure:fix-did-not-hold` only if a merged fix for this same failure still demonstrably did not hold, and `failure:insufficient-data` only if data is still the blocker, and clear a lingering `ai:fix-flaky` (the tip block below re-invites it when the failure is fixable). If the existing labels already match your verdict, leave them as they are.
+This issue may have been investigated before (for example, it was reopened after a prior verdict). Treat any pre-existing `failure:*` classification, `failure:ai-fixable`, `failure:fix-did-not-hold`, `failure:insufficient-data`, or `ai:fix-flaky` label as stale: remove the ones that no longer match your fresh verdict, keep (or add) the single correct classification, `failure:ai-fixable` only if a fix is still available, `failure:fix-did-not-hold` only if a merged fix for this same failure still demonstrably did not hold, and `failure:insufficient-data` only if data is still the blocker. Clear a lingering `ai:fix-flaky` only when your fresh verdict is **not** fixable; when it is, keep (or add) it per "Automatic fix request". If the existing labels already match your verdict, leave them as they are.
 
 ## Attribution
 
@@ -217,18 +226,18 @@ Post exactly one comment on the issue. Optimize for a reviewer who spends ~30 se
 
 Follow the format below exactly. Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value.
 
-The comment has different parts: a compact header that stays visible on the issue page (one `###` headline + one summary sentence), and a `<details>` block that hides everything else, as well as a comment to label the issue to trigger the flaky test fixer workflow (it is only posted under certain conditions, more info below).
+The comment has different parts: a compact header that stays visible on the issue page (one `###` headline + one summary sentence), and a `<details>` block that hides everything else, as well as a tip block about the automatically requested fix (it is only posted under certain conditions, more info below).
 
 **Inside the `<details>` block, every section starts with `#### Section name` on its own line** (e.g., `#### Proposed fix`, `#### Root cause & evidence`).
 
-Add the following snippet of Markdown right after (and outside) the `<details>` block only if a fix is needed and available.
+Add the following snippet of Markdown right after (and outside) the `<details>` block only if a fix is needed and available — i.e. you added `failure:ai-fixable` and requested a fix via `ai:fix-flaky` (see "Automatic fix request").
 
 ```markdown
 > [!TIP]
-> Add the `ai:fix-flaky` label and an agent will **open a fix PR** (usually within 15–20 minutes).
+> Marked "AI-fixable": fix PR incoming within ~20-30 min.
 ```
 
-If a fix PR is already up (in draft or in review) in the Kibana repository, mention the PR link in the same tip block (instead of suggesting to add the label).
+If a fix PR is already up (in draft or in review) in the Kibana repository — the case where you skipped the `ai:fix-flaky` label — mention the PR link in the tip block instead of the automatic-request sentence.
 
 ### 1. Visible header (required)
 

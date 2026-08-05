@@ -27,6 +27,9 @@ import {
 import { revertPrebuiltRule } from '../../../utils/rules/prebuilt_rules/revert_prebuilt_rule';
 
 const CHANGE_HISTORY_DATA_STREAM = '.kibana_change_history';
+const CHANGE_HISTORY_ES_OPTIONS = {
+  headers: { 'x-elastic-product-origin': 'kibana' },
+};
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -35,17 +38,23 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
 
   const refreshHistory = async () => {
-    await es.indices.refresh({ index: CHANGE_HISTORY_DATA_STREAM, ignore_unavailable: true });
+    await es.indices.refresh(
+      { index: CHANGE_HISTORY_DATA_STREAM, ignore_unavailable: true },
+      CHANGE_HISTORY_ES_OPTIONS
+    );
   };
 
   const clearHistory = async () => {
     try {
-      await es.deleteByQuery({
-        index: CHANGE_HISTORY_DATA_STREAM,
-        query: { match_all: {} },
-        conflicts: 'proceed',
-        refresh: true,
-      });
+      await es.deleteByQuery(
+        {
+          index: CHANGE_HISTORY_DATA_STREAM,
+          query: { match_all: {} },
+          conflicts: 'proceed',
+          refresh: true,
+        },
+        CHANGE_HISTORY_ES_OPTIONS
+      );
     } catch {
       // Change history index may not exist yet
     }

@@ -1,5 +1,9 @@
 {
-  "sha1": "e04116f70abb86060b8bc3ce180c33a7497dd4cb",
+  "sha1": "526a9f5392d889f388d75eaddea79359b84def13",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "c03383482b23020-26a449680c6d40d",
@@ -335,7 +339,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/links/test/scout/api/tests/search_links.spec.ts",
-        "line": 59,
+        "line": 76,
         "column": 10
       }
     },
@@ -361,7 +365,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/links/test/scout/api/tests/search_links.spec.ts",
-        "line": 75,
+        "line": 92,
         "column": 10
       }
     },
@@ -387,7 +391,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/links/test/scout/api/tests/search_links.spec.ts",
-        "line": 90,
+        "line": 107,
         "column": 10
       }
     },
@@ -413,7 +417,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/links/test/scout/api/tests/search_links.spec.ts",
-        "line": 105,
+        "line": 122,
         "column": 10
       }
     },
@@ -439,7 +443,85 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/links/test/scout/api/tests/search_links.spec.ts",
-        "line": 135,
+        "line": 152,
+        "column": 10
+      }
+    },
+    {
+      "id": "e3954839e61463d-78fe38d123ff2bd",
+      "title": "links - search should narrow results by tag_names (single name)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout/api/tests/search_links.spec.ts",
+        "line": 166,
+        "column": 10
+      }
+    },
+    {
+      "id": "e3954839e61463d-5f590621954eb7f",
+      "title": "links - search should return empty results when tag_names matches no tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout/api/tests/search_links.spec.ts",
+        "line": 178,
+        "column": 10
+      }
+    },
+    {
+      "id": "e3954839e61463d-825ce616b36d514",
+      "title": "links - search should exclude results by excluded_tag_names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/links/test/scout/api/tests/search_links.spec.ts",
+        "line": 189,
         "column": 10
       }
     },

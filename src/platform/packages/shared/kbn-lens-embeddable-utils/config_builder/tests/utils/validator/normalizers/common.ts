@@ -655,8 +655,8 @@ export function getPaletteNormalizer<T extends LensAttributes>(
         const rangeMax = getRangeValue(palette.params.rangeMax);
 
         if (palette.name !== 'custom') {
-          // Continuity has no meaning for a distributed palette and is always set to 'none'
-          palette.params.continuity = 'none';
+          // A distributed palette always opens both bounds so out-of-range values stay colored
+          palette.params.continuity = 'all';
 
           // The transform canonicalizes the legacy `complimentary` spelling to the GA palette id
           // (`complementary`), matching runtime. Canonicalize the original side too so the

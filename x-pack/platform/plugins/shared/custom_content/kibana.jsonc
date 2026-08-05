@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/custom-content-plugin",
+  "owner": ["@elastic/kibana-visualizations", "@elastic/kibana-presentation"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Custom content embeddable for dashboards",
+  "plugin": {
+    "id": "customContent",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "embeddable",
+      "inference"
+    ]
+  }
+}

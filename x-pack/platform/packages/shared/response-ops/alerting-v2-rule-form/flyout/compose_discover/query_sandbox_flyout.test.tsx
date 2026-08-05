@@ -121,13 +121,13 @@ const renderSandbox = (overrides: Partial<QuerySandboxFlyoutProps> = {}) =>
     </QueryClientProvider>
   );
 
-describe('QuerySandboxFlyout — timefield auto-select', () => {
+describe('QuerySandboxFlyout — timefield selection', () => {
   beforeEach(() => {
     mockFieldMap = {};
     jest.clearAllMocks();
   });
 
-  it('auto-selects first date field when current timeField is not in the index', () => {
+  it('does not auto-select a field when current timeField is not in the index; offers the real fields', () => {
     const onTimeFieldChange = jest.fn();
     mockFieldMap = {
       'event.start': mockField('event.start', 'date'),
@@ -137,17 +137,28 @@ describe('QuerySandboxFlyout — timefield auto-select', () => {
 
     renderSandbox({ timeField: '@timestamp', onTimeFieldChange });
 
-    // sorted: event.end < event.start
-    expect(onTimeFieldChange).toHaveBeenCalledWith('event.end');
+    // The invalid `@timestamp` is cleared (never replaced with a real field); the
+    // user must pick from the offered options.
+    expect(onTimeFieldChange).toHaveBeenCalledWith('');
+    const select = screen.getByTestId('querySandboxTimeField');
+    expect(select).toHaveValue('');
+    expect(screen.getByRole('option', { name: 'event.end' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'event.start' })).toBeInTheDocument();
   });
 
-  it('resets to @timestamp when fieldMap is empty and current timeField differs', () => {
+  it('clears the selection and shows no options when the index has no date field', async () => {
     const onTimeFieldChange = jest.fn();
     mockFieldMap = {};
 
     renderSandbox({ timeField: 'event.start', onTimeFieldChange });
 
-    expect(onTimeFieldChange).toHaveBeenCalledWith('@timestamp');
+    // No date field to resolve to (after the API fallback settles): clear the
+    // value, don't fabricate `@timestamp`.
+    await waitFor(() => expect(onTimeFieldChange).toHaveBeenCalledWith(''));
+    const select = screen.getByTestId('querySandboxTimeField');
+    expect(select).toHaveValue('');
+    // No selectable date-field options are offered.
+    expect(screen.queryByRole('option', { name: 'event.start' })).not.toBeInTheDocument();
   });
 
   it('does not call onTimeFieldChange when current timeField exists in the index', () => {
@@ -162,16 +173,16 @@ describe('QuerySandboxFlyout — timefield auto-select', () => {
     expect(onTimeFieldChange).not.toHaveBeenCalled();
   });
 
-  it('does not reset when fieldMap is empty and timeField is already @timestamp', () => {
+  it('clears @timestamp (does not fabricate) when fieldMap is empty', async () => {
     const onTimeFieldChange = jest.fn();
     mockFieldMap = {};
 
     renderSandbox({ timeField: '@timestamp', onTimeFieldChange });
 
-    expect(onTimeFieldChange).not.toHaveBeenCalled();
+    await waitFor(() => expect(onTimeFieldChange).toHaveBeenCalledWith(''));
   });
 
-  it('auto-selects when fieldMap changes and current selection is no longer valid', () => {
+  it('clears (does not auto-select) when fieldMap changes and current selection is no longer valid', () => {
     const onTimeFieldChange = jest.fn();
     mockFieldMap = {
       'event.start': mockField('event.start', 'date'),
@@ -199,7 +210,10 @@ describe('QuerySandboxFlyout — timefield auto-select', () => {
       );
     });
 
-    expect(onTimeFieldChange).toHaveBeenCalledWith('created_at');
+    // `event.start` is no longer on the index: clear it (never force `created_at`) —
+    // the user must pick it explicitly.
+    expect(onTimeFieldChange).toHaveBeenCalledWith('');
+    expect(screen.getByRole('option', { name: 'created_at' })).toBeInTheDocument();
   });
 });
 

@@ -45,7 +45,7 @@ describe('workflowExecutionLoop', () => {
       flushEvents: jest.fn().mockResolvedValue(undefined),
       logWarn: jest.fn(),
     },
-    taskAbortController: new AbortController(),
+    signal: new AbortController().signal,
   });
 
   beforeEach(() => {
@@ -86,8 +86,9 @@ describe('workflowExecutionLoop', () => {
 
   it('updates execution state when task abort is signaled during workflow execution', async () => {
     const params = createParams();
-    const loopPromise = workflowExecutionLoop(params as any);
-    params.taskAbortController.abort();
+    const abortController = new AbortController();
+    const loopPromise = workflowExecutionLoop({ ...params, signal: abortController.signal } as any);
+    abortController.abort();
     await loopPromise;
 
     expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
@@ -100,10 +101,11 @@ describe('workflowExecutionLoop', () => {
 
   it('marks Task Manager abort as system cancellation and suppresses workflow log errors', async () => {
     const params = createParams();
+    const abortController = new AbortController();
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { flushState } = require('./persistence_loop');
-    const loopPromise = workflowExecutionLoop(params as any);
-    params.taskAbortController.abort(new WorkflowTaskManagerAbortError());
+    const loopPromise = workflowExecutionLoop({ ...params, signal: abortController.signal } as any);
+    abortController.abort(new WorkflowTaskManagerAbortError());
     await loopPromise;
 
     expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
@@ -115,12 +117,12 @@ describe('workflowExecutionLoop', () => {
       })
     );
     expect(flushState).toHaveBeenCalledWith(params, {
-      workflowLogFlushSignal: params.taskAbortController.signal,
+      workflowLogFlushSignal: params.signal,
     });
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
     expect(params.stepIoService.flush).toHaveBeenCalled();
     expect(params.workflowLogger.flushEvents).toHaveBeenCalledWith({
-      signal: params.taskAbortController.signal,
+      signal: params.signal,
     });
   });
 });

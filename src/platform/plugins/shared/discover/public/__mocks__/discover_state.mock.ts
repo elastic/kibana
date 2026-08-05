@@ -284,6 +284,7 @@ export function getDiscoverInternalStateMock({
           searchSessionManager,
           internalState,
           runtimeStateManager,
+          urlStateStorage: stateStorageContainer,
           injectCurrentTab,
           getCurrentTab,
         });
@@ -524,16 +525,18 @@ export function getDiscoverStateMock({
   );
 
   const currentTabId = internalState.getState().tabs.unsafeCurrentId;
+  const currentTab = selectTab(internalState.getState(), currentTabId);
 
   internalState.dispatch(
-    internalStateActions.resetAppState({
+    internalStateActions.initializeTabState({
       tabId: currentTabId,
-      appState: getInitialAppState({
+      initialAppState: getInitialAppState({
         initialUrlState: getCurrentUrlState(stateStorageContainer, services),
         persistedTab: persistedDiscoverSession?.tabs[0],
         dataView: finalSavedSearch?.searchSource.getField('index'),
         services,
       }),
+      initialProfileState: currentTab.profileState,
     })
   );
 
@@ -598,6 +601,7 @@ export function createDataStateContainer(
     services,
     searchSessionManager: stateContainer.searchSessionManager,
     runtimeStateManager: stateContainer.runtimeStateManager,
+    urlStateStorage: stateContainer.stateStorage,
     injectCurrentTab: stateContainer.injectCurrentTab,
     getCurrentTab: stateContainer.getCurrentTab,
   });

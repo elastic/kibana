@@ -234,7 +234,7 @@ const BENIGN_AUTH_DISCOVERY: Partial<Discovery> = {
   summary:
     'Successful login and account-creation events increased around 14:30 UTC. All sampled events completed successfully, with no observed error signature or blocked user task.',
   severity: '20-low',
-  confidence: 0.68,
+  confidence: 0.35,
   signals: [
     {
       type: 'detection',

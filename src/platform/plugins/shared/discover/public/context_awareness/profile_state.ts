@@ -10,6 +10,13 @@
 import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
 
+export interface ProfileStateMutationOptions {
+  /**
+   * Controls how URL-backed hosts update browser history for this mutation.
+   */
+  historyMethod?: 'push' | 'replace';
+}
+
 /**
  * Host-backed profile state API exposed to profile extension point implementations.
  */
@@ -26,11 +33,11 @@ export interface ProfileStateAdapter<TState extends object> {
   /**
    * Replaces the full state value.
    */
-  setState: (state: TState) => void;
+  setState: (state: TState, options?: ProfileStateMutationOptions) => void;
   /**
    * Applies a shallow immutable update to the current state.
    */
-  updateState: (stateUpdate: Partial<TState>) => void;
+  updateState: (stateUpdate: Partial<TState>, options?: ProfileStateMutationOptions) => void;
 }
 
 /**
@@ -80,6 +87,27 @@ export interface ProfileStateDefinition<TState extends object> {
 }
 
 /**
+ * A map of profile state blobs keyed by their registered definition key.
+ */
+export type ProfileStateMap = Record<string, object | undefined>;
+
+/**
+ * Controls how registered default values are handled when filtering profile state.
+ */
+export type ProfileStateDefaultsHandling = 'none' | 'expand' | 'strip';
+
+type ProfileStateDescriptorEntry<TState extends object> = [
+  keyof TState,
+  ProfileStateDescriptor<TState>[keyof TState]
+];
+
+const getProfileStateDescriptorEntries = <TState extends object>(
+  descriptor: ProfileStateDescriptor<TState>
+): Array<ProfileStateDescriptorEntry<TState>> => {
+  return Object.entries(descriptor) as Array<ProfileStateDescriptorEntry<TState>>;
+};
+
+/**
  * Registry of profile state definitions supported by Discover.
  */
 export class ProfileStateRegistry {
@@ -119,50 +147,144 @@ export class ProfileStateRegistry {
   }
 
   /**
-   * Returns the subset of registered profile state fields matching the requested lifetime type.
+   * Filters a profile state map by field lifetime type. Unregistered state keys and entries with no
+   * matching fields are omitted from the returned map.
+   *
+   * When `defaultsHandling` is `expand`, each returned entry is merged over the registered default
+   * fields for the requested state types. When `defaultsHandling` is `strip`, default-valued fields
+   * are omitted from returned entries.
    */
   public pickStateByType({
-    profileState,
-    stateType,
-    shouldMergeDefaults = false,
+    profileStateMap,
+    stateTypes,
+    defaultsHandling = 'none',
   }: {
-    profileState: Record<string, object | undefined> | undefined;
-    stateType: ProfileStateType;
-    shouldMergeDefaults?: boolean;
-  }): Record<string, object | undefined> {
-    const filteredProfileState: Record<string, object | undefined> = {};
+    profileStateMap: ProfileStateMap | undefined;
+    stateTypes: ProfileStateType[];
+    defaultsHandling?: ProfileStateDefaultsHandling;
+  }): ProfileStateMap {
+    const filteredStateMap: ProfileStateMap = {};
 
-    if (!profileState) {
-      return filteredProfileState;
+    if (!profileStateMap) {
+      return filteredStateMap;
     }
 
-    for (const [rawKey, state] of Object.entries(profileState)) {
-      if (!state) {
+    const stateTypeSet = new Set(stateTypes);
+
+    for (const [stateKey, profileState] of Object.entries(profileStateMap)) {
+      const filteredState = this.filterFieldsByType({
+        profileState,
+        stateKey,
+        stateTypes: stateTypeSet,
+        defaultsHandling,
+      });
+
+      if (filteredState) {
+        filteredStateMap[stateKey] = filteredState;
+      }
+    }
+
+    return filteredStateMap;
+  }
+
+  /**
+   * Merges registered profile state maps in argument order. Later maps override earlier fields for
+   * the same registered state key. Unregistered state keys and fields are omitted.
+   */
+  public mergeState(
+    ...profileStateMaps: Array<ProfileStateMap | null | undefined>
+  ): ProfileStateMap {
+    const mergedStateMap: Record<string, Record<string, unknown>> = {};
+
+    for (const profileStateMap of profileStateMaps) {
+      if (!profileStateMap) {
         continue;
       }
 
-      const definition = this.stateDefinitions.get(rawKey);
+      for (const [stateKey, profileState] of Object.entries(profileStateMap)) {
+        const definition = this.stateDefinitions.get(stateKey);
 
-      if (!definition) {
-        continue;
-      }
+        if (!definition || !profileState) {
+          continue;
+        }
 
-      const filteredState: Record<string, unknown> = {};
+        const mergedProfileState = mergedStateMap[stateKey] ?? {};
 
-      for (const [field, value] of Object.entries(state)) {
-        if (definition.descriptor[field]?.type === stateType) {
-          filteredState[field] = value;
+        for (const [field, value] of Object.entries(profileState)) {
+          if (definition.descriptor[field]?.type) {
+            mergedProfileState[field] = value;
+          }
+        }
+
+        if (Object.keys(mergedProfileState).length > 0) {
+          mergedStateMap[stateKey] = mergedProfileState;
         }
       }
+    }
 
-      if (Object.keys(filteredState).length > 0) {
-        filteredProfileState[rawKey] = shouldMergeDefaults
-          ? { ...definition.defaultState, ...filteredState }
-          : filteredState;
+    return mergedStateMap;
+  }
+
+  /**
+   * Filters one profile state object by field lifetime type using the registered definition for
+   * `stateKey`.
+   *
+   * Returns `undefined` when the state key is not registered, the state is missing, or no fields
+   * match the requested type. When `defaultsHandling` is `expand`, the matching fields are merged
+   * over the registered default fields for the requested state types. When `defaultsHandling` is
+   * `strip`, fields equal to the registered defaults are omitted.
+   */
+  public filterFieldsByType<TState extends object>({
+    profileState,
+    stateKey,
+    stateTypes,
+    defaultsHandling = 'none',
+  }: {
+    profileState: Partial<TState> | undefined;
+    stateKey: ProfileStateDefinition<TState>['key'];
+    stateTypes: ProfileStateType[] | Set<ProfileStateType>;
+    defaultsHandling?: ProfileStateDefaultsHandling;
+  }): Partial<TState> | undefined {
+    const definition = this.stateDefinitions.get(stateKey) as
+      | ProfileStateDefinition<TState>
+      | undefined;
+
+    if (!definition || !profileState) {
+      return undefined;
+    }
+
+    const stateTypeSet = stateTypes instanceof Set ? stateTypes : new Set(stateTypes);
+    const filteredState: Partial<TState> = {};
+
+    let shouldReturnFilteredState = false;
+
+    for (const [field, descriptor] of getProfileStateDescriptorEntries(definition.descriptor)) {
+      if (!stateTypeSet.has(descriptor.type)) {
+        continue;
+      }
+
+      const profileStateHasField = Object.hasOwn(profileState, field);
+
+      // Expand fills requested defaults but only returns when at least one requested field is
+      // explicit; none preserves explicit fields; strip preserves explicit non-default fields.
+      if (defaultsHandling === 'expand') {
+        if (profileStateHasField) {
+          shouldReturnFilteredState = true;
+          filteredState[field] = profileState[field];
+        } else {
+          filteredState[field] = definition.defaultState[field];
+        }
+      } else if (
+        profileStateHasField &&
+        (defaultsHandling === 'none' ||
+          !isEqual(profileState[field], definition.defaultState[field]))
+      ) {
+        shouldReturnFilteredState = true;
+        filteredState[field] = profileState[field];
       }
     }
 
-    return filteredProfileState;
+    return shouldReturnFilteredState ? filteredState : undefined;
   }
 }
 

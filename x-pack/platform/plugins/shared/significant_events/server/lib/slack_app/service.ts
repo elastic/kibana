@@ -8,7 +8,7 @@
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import type { RelayClientContract } from '@kbn/significant-events-schema';
+import { RelayRequestError, type RelayClientContract } from '@kbn/actions-plugin/server';
 import type {
   SlackAppConnectResponse,
   SlackAppDisconnectResponse,
@@ -21,7 +21,6 @@ import {
   RELAY_APP_CONNECTION_SO_TYPE,
   type RelayAppConnectionAttributes,
 } from './saved_object';
-import { RelayRequestError } from './relay_error';
 import { SlackAppUnavailableError } from './errors';
 import { getKibanaUrl } from './get_kibana_url';
 
@@ -33,7 +32,7 @@ export class SlackAppService {
   }
 
   /**
-   * feature flag on + `relayService` configured (the injected singleton client exists) +
+   * feature flag on + `xpack.actions.relay` configured (the injected singleton client exists) +
    * agentBuilder available on this deployment.
    */
   private async getRelayClient(): Promise<RelayClientContract | undefined> {
