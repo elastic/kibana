@@ -15,25 +15,25 @@ import {
 import { wrapError, wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-interface BulkRevokeOAuthConnectionResultItem {
+interface BulkDeleteOAuthConnectionResultItem {
   client_id: string;
   connection_id: string;
-  status: 'revoked' | 'error';
+  status: 'deleted' | 'error';
   status_code?: number;
   message?: string;
 }
 
-interface BulkRevokeOAuthConnectionsResponseBody {
-  results: BulkRevokeOAuthConnectionResultItem[];
+interface BulkDeleteOAuthConnectionsResponseBody {
+  results: BulkDeleteOAuthConnectionResultItem[];
 }
 
-export function defineBulkRevokeOAuthConnectionsRoute({
+export function defineBulkDeleteOAuthConnectionsRoute({
   router,
   getAuthenticationService,
 }: RouteDefinitionParams) {
   router.post(
     {
-      path: '/internal/security/oauth/connections/_bulk_revoke',
+      path: '/internal/security/oauth/connections/_bulk_delete',
       security: {
         authz: {
           enabled: false,
@@ -56,7 +56,6 @@ export function defineBulkRevokeOAuthConnectionsRoute({
             }),
             { minSize: 1, maxSize: OAUTH_MAX_BULK_CONNECTIONS }
           ),
-          reason: schema.maybe(schema.string({ maxLength: OAUTH_MAX_STRING_FIELD_LENGTH })),
         }),
       },
       options: {
@@ -72,16 +71,16 @@ export function defineBulkRevokeOAuthConnectionsRoute({
           });
         }
 
-        const { connections, reason } = request.body;
+        const { connections } = request.body;
 
         const settled = await Promise.allSettled(
           connections.map(({ client_id: clientId, connection_id: connectionId }) =>
-            oauth.revokeConnection(request, clientId, connectionId, reason)
+            oauth.deleteConnection(request, clientId, connectionId)
           )
         );
 
         const allUnavailable = settled.every(
-          (result) => result.status === 'fulfilled' && result.value === null
+          (result) => result.status === 'fulfilled' && !result.value
         );
         if (allUnavailable) {
           return response.notFound({
@@ -91,12 +90,12 @@ export function defineBulkRevokeOAuthConnectionsRoute({
           });
         }
 
-        const results: BulkRevokeOAuthConnectionResultItem[] = settled.map(
+        const results: BulkDeleteOAuthConnectionResultItem[] = settled.map(
           (settledResult, index) => {
             const { client_id: clientId, connection_id: connectionId } = connections[index];
 
             if (settledResult.status === 'fulfilled') {
-              if (settledResult.value === null) {
+              if (!settledResult.value) {
                 return {
                   client_id: clientId,
                   connection_id: connectionId,
@@ -105,7 +104,7 @@ export function defineBulkRevokeOAuthConnectionsRoute({
                   message: 'OAuth management is not available: security features are disabled',
                 };
               }
-              return { client_id: clientId, connection_id: connectionId, status: 'revoked' };
+              return { client_id: clientId, connection_id: connectionId, status: 'deleted' };
             }
 
             const wrapped = wrapError(settledResult.reason);
@@ -119,7 +118,7 @@ export function defineBulkRevokeOAuthConnectionsRoute({
           }
         );
 
-        const body: BulkRevokeOAuthConnectionsResponseBody = { results };
+        const body: BulkDeleteOAuthConnectionsResponseBody = { results };
         return response.ok({ body });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));
