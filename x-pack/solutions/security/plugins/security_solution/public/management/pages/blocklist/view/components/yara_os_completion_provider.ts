@@ -6,9 +6,12 @@
  */
 
 import { monaco } from '@kbn/code-editor';
+import type { YaraDiagnostic } from '../../../../../../common/endpoint/libyara';
+import { validateYaraRule } from '../../../../../../common/endpoint/libyara';
 
 export const YARA_LANG_ID = 'yara';
 export const YARA_OS_VALIDATION_OWNER = 'yara-os-validation';
+export const YARA_LIBYARA_VALIDATION_OWNER = 'yara-libyara-validation';
 
 export const YARA_OS_VALUES = ['Linux', 'Windows', 'Macos'] as const;
 
@@ -35,7 +38,72 @@ export const registerYaraLanguage = (): void => {
   isYaraLanguageRegistered = true;
 };
 
-export const buildYaraOsValidationMarkers = (model: monaco.editor.ITextModel): void => {
+export const validateYaraRuleModel = async (
+  model: monaco.editor.ITextModel
+): Promise<monaco.editor.IMarkerData[]> => {
+  const text = model.getValue();
+  const results = await validateYaraRule(text);
+
+  const markers: monaco.editor.IMarkerData[] = [];
+
+  const lines = text.split('\n');
+
+  for (const error of results.errors) {
+    const { startColumn, endColumn } = getCoords(lines, error);
+
+    markers.push({
+      severity: monaco.MarkerSeverity.Error,
+      message: error.message,
+
+      startLineNumber: error.line,
+      startColumn,
+      endLineNumber: error.line,
+      endColumn,
+    });
+  }
+
+  for (const warning of results.warnings) {
+    const { startColumn, endColumn } = getCoords(lines, warning);
+
+    markers.push({
+      severity: monaco.MarkerSeverity.Warning,
+      message: warning.message,
+
+      startLineNumber: warning.line,
+      startColumn,
+      endLineNumber: warning.line,
+      endColumn,
+    });
+  }
+
+  monaco.editor.setModelMarkers(model, YARA_LIBYARA_VALIDATION_OWNER, markers);
+
+  const osMarkers = buildYaraOsValidationMarkers(model);
+
+  return [...markers, ...osMarkers];
+};
+
+const getCoords = (lines: string[], error: YaraDiagnostic) => {
+  const line = lines[error.line - 1];
+
+  let startColumn = 0;
+  let endColumn = Infinity;
+
+  const unexpectedToken = error.message.match(/unexpected '([^']+)'/)?.[1];
+  if (unexpectedToken) {
+    const tokenIndex = line.indexOf(unexpectedToken);
+    startColumn = tokenIndex + 1;
+    endColumn = startColumn + unexpectedToken.length;
+  } else {
+    startColumn = line.indexOf(line.trimStart()[0]) + 1;
+    endColumn = startColumn + line.trim().length;
+  }
+  return { startColumn, endColumn };
+};
+
+export const buildYaraOsValidationMarkers = (
+  model: monaco.editor.ITextModel
+): monaco.editor.IMarkerData[] => {
   const text = model.getValue();
   const markers: monaco.editor.IMarkerData[] = [];
 
@@ -61,6 +129,8 @@ export const buildYaraOsValidationMarkers = (model: monaco.editor.ITextModel): v
   }
 
   monaco.editor.setModelMarkers(model, YARA_OS_VALIDATION_OWNER, markers);
+
+  return markers;
 };
 
 export const getYaraOsCompletionProvider = (): monaco.languages.CompletionItemProvider => ({

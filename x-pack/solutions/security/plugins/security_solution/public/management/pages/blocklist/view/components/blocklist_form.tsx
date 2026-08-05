@@ -21,13 +21,11 @@ import { uniq } from 'lodash';
 
 import type { ListOperatorEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { v4 } from 'uuid';
-import type { monaco } from '@kbn/code-editor';
-import { CodeEditor } from '@kbn/code-editor';
+import { monaco, CodeEditor } from '@kbn/code-editor';
 import { OS_TITLES } from '../../../../common/translations';
 import {
   YARA_LANG_ID,
-  buildYaraOsValidationMarkers,
+  validateYaraRuleModel,
   getYaraOsCompletionProvider,
   registerYaraLanguage,
 } from './yara_os_completion_provider';
@@ -99,15 +97,18 @@ registerYaraLanguage();
 
 const YARA_RULE_TEMPLATE = `rule Name {
     meta:
-        os = "Linux"
+        os = "Linu"
         arch = "x86"
         scan_type = "File, Memory"
-        id = "[ID]"
+        id = "ec292e95-e04a-4ba8-ab52-4beeee9ab8f9"
     strings:
-        $a = { stringHere }
+        $a = { 02 }
+        $b = /regex/i
+        $c = { 44 }
     condition:
         all of them
 }
+
 `;
 
 // eslint-disable-next-line react/display-name
@@ -120,14 +121,15 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     const showAssignmentSection = useCanAssignArtifactPerPolicy(item, mode, hasFormChanged);
     const getTestId = useTestIdGenerator(testIdPrefix);
 
-    const firstId = useMemo(() => v4(), []);
     const [osType] = useState<OperatingSystem>(OperatingSystem.LINUX);
     const [yaraRuleName] = useState(`Name`);
-    const [yaraRule, setYaraRule] = useState(
-      YARA_RULE_TEMPLATE.replace('[ID]', firstId).replace('Name', `Name_${firstId.split('-')[0]}`)
-    );
+    const [yaraRule, setYaraRule] = useState(YARA_RULE_TEMPLATE);
     const yaraOsCompletionProvider = useMemo(() => getYaraOsCompletionProvider(), []);
+    const yaraEditorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const yaraEditorValidationDisposableRef = useRef<monaco.IDisposable | null>(null);
+
+    const [errors, setErrors] = useState<string[]>([]);
+    const [warnings, setWarnings] = useState<string[]>([]);
 
     const handleYaraEditorDidMount = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
       const model = editor.getModel();
@@ -135,11 +137,31 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         return;
       }
 
-      buildYaraOsValidationMarkers(model);
+      yaraEditorRef.current = editor;
+
+      const handleValidation = async () => {
+        const markers = await validateYaraRuleModel(model);
+
+        setErrors(
+          markers
+            .filter((marker) => marker.severity === monaco.MarkerSeverity.Error)
+            .map((marker) => `[line ${marker.startLineNumber}] ${marker.message}`)
+        );
+        setWarnings(
+          markers
+            .filter((marker) => marker.severity === monaco.MarkerSeverity.Warning)
+            .map((marker) => `[line ${marker.startLineNumber}] ${marker.message}`)
+        );
+      };
+
+      handleValidation();
+
       yaraEditorValidationDisposableRef.current?.dispose();
-      yaraEditorValidationDisposableRef.current = editor.onDidChangeModelContent(() => {
-        buildYaraOsValidationMarkers(model);
-      });
+      yaraEditorValidationDisposableRef.current = editor.onDidChangeModelContent(handleValidation);
+    }, []);
+
+    const handleEditorChange = useCallback((value: string) => {
+      setYaraRule(value);
     }, []);
 
     const handleYaraEditorWillUnmount = useCallback(() => {
@@ -294,7 +316,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
           <CodeEditor
             languageId={YARA_LANG_ID}
             value={yaraRule}
-            onChange={(value) => setYaraRule(value)}
+            onChange={handleEditorChange}
             suggestionProvider={yaraOsCompletionProvider}
             editorDidMount={handleYaraEditorDidMount}
             editorWillUnmount={handleYaraEditorWillUnmount}
@@ -308,6 +330,29 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
             }}
           />
         </EuiFormRow>
+
+        {errors.length > 0 && (
+          <EuiFormRow label="Errors" fullWidth>
+            <EuiText color="danger" size="s">
+              <ul>
+                {errors.map((error) => (
+                  <li key={error}>{error}</li>
+                ))}
+              </ul>
+            </EuiText>
+          </EuiFormRow>
+        )}
+        {warnings.length > 0 && (
+          <EuiFormRow label="Warnings" fullWidth>
+            <EuiText color="warning" size="s">
+              <ul>
+                {warnings.map((warning) => (
+                  <li key={warning}>{warning}</li>
+                ))}
+              </ul>
+            </EuiText>
+          </EuiFormRow>
+        )}
         <EuiHorizontalRule />
 
         <EuiSpacer size="m" />
