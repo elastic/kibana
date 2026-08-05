@@ -48,7 +48,7 @@ export const createAlertEventStepCommonDefinition: CommonStepDefinition<
       `## Ingest an alert with a fingerprint
 \`\`\`yaml
 - name: create_external_alert
-  type: alerting_v2.create_alert
+  type: alerting.create_alert
   with:
     source: "datadog"
     fingerprint: "{{ inputs.payload.monitor_id }}"
