@@ -6,6 +6,8 @@
  */
 
 export { MappingsEditor } from './mappings_editor';
+export { MappedFieldsEditor } from './mapped_fields_editor';
+export { MappedFieldsEditorWithContext } from './mapped_fields_editor_with_context';
 
 // We export both the button & the load mappings provider
 // to give flexibility to the consumer

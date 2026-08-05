@@ -25,6 +25,7 @@ import type {
   IndexMappingProps,
   IndexSettingProps,
   IndexTemplateFlyoutProps,
+  MappedFieldsEditorProps,
 } from '@kbn/index-management-shared-types';
 import type {
   IndexManagementLocator,
@@ -46,6 +47,7 @@ import { IndexManagementLocatorDefinition } from './locator';
 import { ComponentTemplateFlyout } from './application/components/component_templates/component_templates_flyout_embeddable';
 import { DataStreamFlyout } from './application/sections/home/data_stream_list/data_stream_detail_panel/data_stream_flyout_embeddable';
 import { IndexTemplateFlyout } from './application/sections/home/template_list/template_details/index_template_flyout_embeddable';
+import { MappedFieldsEditorWithContext } from './application/components/mappings_editor/mapped_fields_editor_with_context';
 import { indexDataEnricher, type IndexDataEnricher } from './services';
 import { indexStatsEnricher } from './index_stats_enricher';
 
@@ -320,6 +322,16 @@ export class IndexMgmtUIPlugin
         return (props: DatastreamFlyoutProps) => {
           return React.createElement(DataStreamFlyout, {
             ...this.buildComponentDependencies(coreStart, plugins, deps),
+            ...props,
+          });
+        };
+      },
+      getMappedFieldsEditorComponent: (deps: { history: ScopedHistory<unknown> }) => {
+        return (props: MappedFieldsEditorProps) => {
+          const { core, dependencies } = this.buildComponentDependencies(coreStart, plugins, deps);
+          return React.createElement(MappedFieldsEditorWithContext, {
+            core,
+            dependencies,
             ...props,
           });
         };

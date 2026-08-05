@@ -9,6 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
 import { Router } from '@kbn/shared-ux-router';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
@@ -24,6 +25,7 @@ export const mountManagementSection = (
   {
     cloudInfo,
     isCloudEnabled = false,
+    indexManagement,
     featureFlags: {
       enableFederatedIdentityAuth: enableFederatedIdentityAuthConfig = false,
       enableGoogleCloudStorageDataSourceType = false,
@@ -32,6 +34,7 @@ export const mountManagementSection = (
   }: {
     cloudInfo?: FederatedIdentityClusterInfo;
     isCloudEnabled?: boolean;
+    indexManagement: IndexManagementPluginStart;
     featureFlags?: FederatedDataFeatureFlags;
   }
 ) => {
@@ -40,6 +43,8 @@ export const mountManagementSection = (
     dataSourcesClient: new DataSourcesClient(coreStart.http),
     datasetsClient: new DatasetsClient(coreStart.http),
     toasts: coreStart.notifications.toasts,
+    indexManagement,
+    scopedHistory: history,
     cloudInfo,
     featureFlags: {
       enableFederatedIdentityAuth,

@@ -17,7 +17,8 @@
     ],
     "requiredPlugins": [
       "management",
-      "features"
+      "features",
+      "indexManagement"
     ],
     "optionalPlugins": [
       "cloud"

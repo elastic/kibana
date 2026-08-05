@@ -240,4 +240,52 @@ export const datasetWizardStrings = {
     i18n.translate('xpack.dataFederation.datasetWizard.accordionComingSoon', {
       defaultMessage: 'Coming soon',
     }),
+
+  schemaMappingsTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingsTitle', {
+      defaultMessage: 'Schema mappings (optional)',
+    }),
+
+  schemaMappingsDescription: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingsDescription', {
+      defaultMessage: 'Optional definition of how documents should be indexed',
+    }),
+
+  schemaMappingModeLegend: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingModeLegend', {
+      defaultMessage: 'Schema mapping mode',
+    }),
+
+  schemaMappingModeAutomatic: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingModeAutomatic', {
+      defaultMessage: 'Automatic',
+    }),
+
+  schemaMappingModeAwsGlueTable: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingModeAwsGlueTable', {
+      defaultMessage: 'AWS Glue table',
+    }),
+
+  schemaMappingModeManual: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingModeManual', {
+      defaultMessage: 'Manual',
+    }),
+
+  schemaMappingAutomaticDescription: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingAutomaticDescription', {
+      defaultMessage:
+        'Elastic will sample the file and infer column names and types automatically. Parquet files carry embedded schema and are inferred with highest fidelity. For NDJSON and CSV, a best-effort type inference is applied.',
+    }),
+
+  schemaMappingAwsGlueTableDescription: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingAwsGlueTableDescription', {
+      defaultMessage:
+        'Use an AWS Glue table schema to define column names and types. This option will be available in a follow-up step.',
+    }),
+
+  schemaMappingManualDescription: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingManualDescription', {
+      defaultMessage:
+        'Manually define column names and types for your dataset. This option will be available in a follow-up step.',
+    }),
 };

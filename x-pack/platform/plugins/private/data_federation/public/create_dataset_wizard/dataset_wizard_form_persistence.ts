@@ -23,6 +23,9 @@ const isRecordOfStrings = (value: unknown, keys: readonly string[]): value is Re
   return keys.every((key) => typeof record[key] === 'string');
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+
 export const isDatasetWizardFormValues = (value: unknown): value is DatasetWizardFormValues => {
   if (!value || typeof value !== 'object') {
     return false;
@@ -32,6 +35,26 @@ export const isDatasetWizardFormValues = (value: unknown): value is DatasetWizar
   const candidate = value as DatasetWizardFormValues;
 
   if (typeof candidate.region !== 'string') {
+    return false;
+  }
+
+  if (
+    candidate.schema_mapping_mode !== 'automatic' &&
+    candidate.schema_mapping_mode !== 'aws_glue_table' &&
+    candidate.schema_mapping_mode !== 'manual'
+  ) {
+    return false;
+  }
+
+  if (!isRecord(candidate.manual_mappings)) {
+    return false;
+  }
+
+  if (
+    !Object.values(candidate.manual_mappings).every(
+      (mappingValue) => mappingValue !== null && typeof mappingValue === 'object'
+    )
+  ) {
     return false;
   }
 

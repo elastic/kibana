@@ -50,6 +50,7 @@ import {
 import { LogisticsStep } from './steps/logistics_step';
 import { AdditionalSettingsStep } from './steps/additional_settings_step';
 import { PlaceholderStep } from './steps/placeholder_step';
+import { SchemaMappingsStep } from './steps/schema_mappings_step';
 
 export interface DatasetWizardProps {
   isEditMode: boolean;
@@ -342,7 +343,11 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
         );
       case SCHEMA_MAPPINGS_STEP:
         return (
-          <PlaceholderStep stepTitle={datasetWizardStrings.stepSchemaMappings()} />
+          <SchemaMappingsStep
+            control={control}
+            dataSources={dataSources}
+            dataSource={watchedDataSource ?? ''}
+          />
         );
       case REVIEW_STEP:
         return <PlaceholderStep stepTitle={datasetWizardStrings.stepReview()} />;

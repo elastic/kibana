@@ -12,17 +12,29 @@ import {
   emptyDatasetFlyoutFormValues,
 } from '../create_dataset_flyout/dataset_flyout_initial_values';
 
+export const SCHEMA_MAPPING_MODES = ['automatic', 'aws_glue_table', 'manual'] as const;
+
+export type SchemaMappingMode = (typeof SCHEMA_MAPPING_MODES)[number];
+
 export interface DatasetWizardFormValues extends CreateDatasetFormValues {
   /** Prototype-only field; not persisted to the API yet. */
   region: string;
+  /** Prototype-only field; not persisted to the API yet. */
+  schema_mapping_mode: SchemaMappingMode;
+  /** Prototype-only field; not persisted to the API yet. */
+  manual_mappings: Record<string, object>;
 }
 
 export const emptyDatasetWizardFormValues = (): DatasetWizardFormValues => ({
   ...emptyDatasetFlyoutFormValues(),
   region: '',
+  schema_mapping_mode: 'automatic',
+  manual_mappings: {},
 });
 
 export const dataSetToWizardFormValues = (data: DataSetWithName): DatasetWizardFormValues => ({
   ...dataSetToFlyoutFormValues(data),
   region: '',
+  schema_mapping_mode: 'automatic',
+  manual_mappings: {},
 });

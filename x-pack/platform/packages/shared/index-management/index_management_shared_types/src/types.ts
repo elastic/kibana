@@ -124,6 +124,9 @@ export interface IndexManagementPluginStart {
   getDatastreamFlyoutComponent: (deps: {
     history: ScopedHistory<unknown>;
   }) => React.FC<DatastreamFlyoutProps>;
+  getMappedFieldsEditorComponent: (deps: {
+    history: ScopedHistory<unknown>;
+  }) => React.FC<MappedFieldsEditorProps>;
 }
 
 export interface Index extends IndexAttributes {
@@ -174,6 +177,15 @@ export interface DatastreamFlyoutProps {
 export interface IndexMappingProps {
   index?: Index;
   showAboutMappings?: boolean;
+}
+
+export interface MappedFieldsEditorProps {
+  value?: Record<string, unknown>;
+  onChange: (update: {
+    getData: () => Record<string, unknown> | undefined;
+    validate: () => Promise<boolean>;
+    isValid?: boolean;
+  }) => void;
 }
 export interface IndexSettingProps {
   indexName: string;

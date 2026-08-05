@@ -22,6 +22,12 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
       dataSourcesClient: {
         add: jest.fn(),
       },
+      indexManagement: {
+        getMappedFieldsEditorComponent: () => () => null,
+      },
+      scopedHistory: {
+        createSubHistory: jest.fn(),
+      },
     },
   }),
 }));
