@@ -98,6 +98,23 @@ describe('migrateRuleArtifactsToData', () => {
     expect(artifacts).toEqual([{ id: 'host-1', type: 'host', data: { value: '' } }]);
   });
 
+  /**
+   * Pre-release builds shipped this transform as model version 3, which is also
+   * the version stamped on rules that still hold `value`. Rules written by those
+   * builds therefore reach model version 4 already migrated.
+   */
+  it('leaves an artifact that already holds data untouched', () => {
+    const { artifacts } = migrate([
+      { id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '# Runbook' } },
+      { id: 'dashboard-1', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-123' },
+    ]);
+
+    expect(artifacts).toEqual([
+      { id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '# Runbook' } },
+      { id: 'dashboard-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-123' } },
+    ]);
+  });
+
   it('removes the legacy value from the document', () => {
     const { artifacts } = migrate([
       { id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, value: 'steps' },

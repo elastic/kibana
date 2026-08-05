@@ -24,12 +24,25 @@ const DATA_KEY_BY_ARTIFACT_TYPE: Readonly<Record<string, string>> = {
 };
 
 /**
+ * Attributes as this transform finds them on disk. Pre-release builds shipped
+ * this change as model version 3 — the same version that stamps rules still
+ * holding `value` — so a rule written by one of those builds arrives already
+ * migrated. Reading `value` off it would throw and make the rule unloadable.
+ */
+type MigratableRuleSavedObjectAttributes = Omit<RuleSavedObjectAttributesV2, 'artifacts'> & {
+  artifacts?: Array<
+    | NonNullable<RuleSavedObjectAttributesV2['artifacts']>[number]
+    | NonNullable<RuleSavedObjectAttributes['artifacts']>[number]
+  >;
+};
+
+/**
  * Replaces the legacy `artifacts[].value` with the structured `artifacts[].data`.
  *
  * Dropping `value` on purpose even if it breaks rolling back to model version 3.
  */
 export const migrateRuleArtifactsToData: SavedObjectModelUnsafeTransformFn<
-  RuleSavedObjectAttributesV2,
+  MigratableRuleSavedObjectAttributes,
   RuleSavedObjectAttributes
 > = (document) => {
   const { artifacts, ...rest } = document.attributes;
@@ -37,7 +50,12 @@ export const migrateRuleArtifactsToData: SavedObjectModelUnsafeTransformFn<
   const attributes: RuleSavedObjectAttributes = artifacts
     ? {
         ...rest,
-        artifacts: artifacts.flatMap(({ id, type, value }) => {
+        artifacts: artifacts.flatMap((artifact) => {
+          if (!('value' in artifact)) {
+            return [artifact];
+          }
+
+          const { id, type, value } = artifact;
           const dataKey = DATA_KEY_BY_ARTIFACT_TYPE[type];
 
           // The legacy saved object schema allowed a blank `value`, but the API
