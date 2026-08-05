@@ -96,9 +96,9 @@ const scoreAppByKeywords = (term: string, keywords: string[]): number => {
 
 export const appToResult = (appLink: AppLink, score: number): GlobalSearchProviderResult => {
   const titleParts =
-    // Stack Management app should not include the app title in the concatenated link label
+    // Management: leaf app title only — section names (e.g. "Security") don't match nav IA
     appLink.app.id === 'management' && appLink.subLinkTitles.length > 0
-      ? appLink.subLinkTitles
+      ? [appLink.subLinkTitles[appLink.subLinkTitles.length - 1]]
       : [appLink.app.title, ...appLink.subLinkTitles];
 
   return {

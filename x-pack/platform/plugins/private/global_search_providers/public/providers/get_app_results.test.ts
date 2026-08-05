@@ -408,4 +408,17 @@ describe('appToResult', () => {
 
     expect(appToResult(appLink, 42).title).toEqual('Sub1');
   });
+
+  it('uses only the leaf title for nested Stack Management deep links', () => {
+    const app = createApp({ id: 'management' });
+    const appLink: AppLink = {
+      id: 'management-application_connections',
+      app,
+      path: '/security/application_connections',
+      subLinkTitles: ['Security', 'Application connections'],
+      keywords: [],
+    };
+
+    expect(appToResult(appLink, 42).title).toEqual('Application connections');
+  });
 });
