@@ -95,7 +95,7 @@ describe('buildProcessTree()', () => {
   it('should give every node an (initially empty) children map', () => {
     const tree = buildProcessTree(descendants);
 
-    expect(tree[567] ?? tree[456].children[567].children[5671].children[56711]).toEqual(
+    expect(tree[456].children[567].children[5671].children[56711]).toEqual(
       expect.objectContaining({ children: {} })
     );
     expect(tree[654].children).toEqual({});
