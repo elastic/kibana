@@ -33,8 +33,6 @@ dependsOn:
   - '@kbn/core-rendering-browser'
   - '@kbn/core-user-profile-browser'
   - '@kbn/core-user-profile-browser-mocks'
-  - '@kbn/core-security-browser'
-  - '@kbn/core-security-browser-mocks'
   - '@kbn/core-execution-context-browser-mocks'
   - '@kbn/core-execution-context-browser'
   - '@kbn/react-kibana-context-render'
@@ -45,6 +43,8 @@ dependsOn:
   - '@kbn/global-redirect-app-links'
   - '@kbn/core-base-browser-internal'
   - '@kbn/core-base-browser-mocks'
+  - '@kbn/core-security-browser'
+  - '@kbn/core-security-browser-mocks'
 tags:
   - shared-browser
   - package
