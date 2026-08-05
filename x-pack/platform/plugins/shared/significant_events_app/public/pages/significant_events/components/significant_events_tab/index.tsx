@@ -152,8 +152,8 @@ const EMPTY_MESSAGE = i18n.translate('xpack.significantEventsApp.significantEven
 export const significantEventTableColumns: Array<EuiBasicTableColumn<SignificantEventResponse>> = [
   {
     field: 'created_at',
-    name: i18n.translate('xpack.significantEventsApp.significantEventsTab.timestampColumn', {
-      defaultMessage: 'Timestamp',
+    name: i18n.translate('xpack.significantEventsApp.significantEventsTab.createdAtColumn', {
+      defaultMessage: 'Created at',
     }),
     width: '200px',
     render: (timestamp: string) => formatTimestamp(timestamp),

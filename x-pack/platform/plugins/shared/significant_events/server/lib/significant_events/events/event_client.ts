@@ -230,27 +230,29 @@ export class EventClient {
       // post-latest so stale versions cannot make a closed episode appear open.
       const searchWhere = this.buildWhere({ search: options.search });
       if (searchWhere) {
-        query.where`${searchWhere}`;
+        query = query.where`${searchWhere}`;
       }
 
-      pickLatestPerGroup(query, FIELD_EVENT_ID);
+      query = pickLatestPerGroup(query, FIELD_EVENT_ID);
 
       if (options.status?.length) {
-        query.where`${esql.col('status')} IN (${options.status.map((status) => esql.str(status))})`;
+        query = query.where`${esql.col('status')} IN (${options.status.map((status) =>
+          esql.str(status)
+        )})`;
       }
       if (options.severity?.length) {
-        query.where`${esql.col('severity')} IN (${options.severity.map((severity) =>
+        query = query.where`${esql.col('severity')} IN (${options.severity.map((severity) =>
           esql.str(severity)
         )})`;
       }
       if (candidateWhere) {
-        query.where`${candidateWhere}`;
+        query = query.where`${candidateWhere}`;
       }
       if (eventIdWhere) {
-        query.where`${eventIdWhere}`;
+        query = query.where`${eventIdWhere}`;
       }
       if (topologyWhere) {
-        query.where`${topologyWhere}`;
+        query = query.where`${topologyWhere}`;
       }
 
       return query;
@@ -294,7 +296,7 @@ export class EventClient {
   async findLatestActive(
     options: CommonSearchOptions & { streamNames?: string[]; ruleUuids?: string[] }
   ): Promise<{ hits: SignificantEvent[] }> {
-    const query = applyTimeRange({
+    let query = applyTimeRange({
       query: fromIndexForSpace({
         index: EVENTS_DATA_STREAM,
         space: this.clients.space,
@@ -304,10 +306,10 @@ export class EventClient {
       to: options.to,
     });
 
-    pickLatestPerGroup(query, FIELD_EVENT_ID);
+    query = pickLatestPerGroup(query, FIELD_EVENT_ID);
 
-    query.where`${esql.col('status')} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((s) =>
-      esql.str(s)
+    query = query.where`${esql.col('status')} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map(
+      (s) => esql.str(s)
     )})`;
 
     const candidateWhere = continuationCandidateFilter({
@@ -315,7 +317,7 @@ export class EventClient {
       ruleUuids: options.ruleUuids,
     });
     if (candidateWhere) {
-      query.where`${candidateWhere}`;
+      query = query.where`${candidateWhere}`;
     }
 
     const hits = await executeEsqlQuery<SignificantEvent>({

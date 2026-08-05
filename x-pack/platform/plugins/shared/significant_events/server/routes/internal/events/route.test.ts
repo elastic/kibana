@@ -121,9 +121,11 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
       server: {},
     } as never);
 
+    // created_at is normalized to UTC ISO (matches the format ESQL MIN(@timestamp) emits)
+    const expectedCreatedAt = new Date(firstVersion['@timestamp']).toISOString();
     expect(response.events).toEqual([
-      { ...firstVersion, created_at: firstVersion['@timestamp'] },
-      { ...latestVersion, created_at: firstVersion['@timestamp'] },
+      { ...firstVersion, created_at: expectedCreatedAt },
+      { ...latestVersion, created_at: expectedCreatedAt },
     ]);
   });
 });
