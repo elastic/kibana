@@ -34,9 +34,7 @@ export async function ensureClonedRepo(
   if (!gitDirExists) {
     const referenceDir = await getGitCommonDir(repoRoot);
 
-    log.info(
-      `Cloning base repo from ${repoRoot} to ${baseCloneDir} (reference ${referenceDir})`
-    );
+    log.info(`Cloning base repo from ${repoRoot} to ${baseCloneDir} (reference ${referenceDir})`);
 
     await exec('git', ['clone', '--reference', referenceDir, repoRoot, baseCloneDir], {
       log,
