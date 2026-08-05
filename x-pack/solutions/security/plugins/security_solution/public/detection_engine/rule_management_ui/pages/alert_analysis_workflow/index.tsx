@@ -73,7 +73,6 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
     http,
     toasts: notifications.toasts,
     featureId: 'agent_builder',
-    settings,
   });
   const aiConnectors = useMemo(
     () => loadedAiConnectors?.filter((connector) => !connector.isMissingSecrets) ?? [],
