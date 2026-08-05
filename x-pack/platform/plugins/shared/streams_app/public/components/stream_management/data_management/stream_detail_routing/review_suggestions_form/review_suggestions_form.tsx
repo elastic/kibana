@@ -159,7 +159,6 @@ export function ReviewSuggestionsForm({
         {isEditingOrReorderingStreams ? (
           <>
             <EuiCallOut
-              announceOnMount
               size="s"
               color="primary"
               iconType="info"

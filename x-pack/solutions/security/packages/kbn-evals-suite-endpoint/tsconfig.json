@@ -18,6 +18,7 @@
     "@kbn/scout",
     "@kbn/agent-builder-common",
     "@kbn/tooling-log",
+    "@kbn/core",
     "@kbn/test",
     "@kbn/security-solution-plugin"
   ]

@@ -6,11 +6,7 @@
  */
 
 import type { IBasePath } from '@kbn/core/server';
-import {
-  getTLSCertAlertId,
-  getTLSAlertContext,
-  setTLSRecoveredAlertsContext,
-} from './message_utils';
+import { getTLSCertAlertId, setTLSRecoveredAlertsContext } from './message_utils';
 import type { TLSLatestPing } from './tls_rule_executor';
 
 describe('getTLSCertAlertId', () => {
@@ -32,65 +28,6 @@ describe('getTLSCertAlertId', () => {
 
   it('returns undefined when neither a fingerprint nor a common name is available', () => {
     expect(getTLSCertAlertId({})).toBeUndefined();
-  });
-});
-
-describe('getTLSAlertContext', () => {
-  const basePath = {
-    publicBaseUrl: 'https://localhost:5601',
-  } as IBasePath;
-
-  const summary = {
-    summary: 'Certificate expires soon',
-    status: 'expiring',
-    sha256: 'cert-1-sha256',
-    commonName: 'cert-1',
-    issuer: 'test-issuer',
-    monitorName: 'test-monitor',
-    monitorId: '12345',
-    serviceName: 'test-service',
-    monitorType: 'HTTP',
-    locationId: 'us-east',
-    locationName: 'US East',
-    monitorUrl: 'https://example.com',
-    configId: '12345',
-    monitorTags: [],
-    lastErrorMessage: undefined,
-    lastErrorStack: undefined,
-    labels: {},
-    reason: 'Certificate expires soon',
-    hostName: 'host-1',
-    checkedAt: '2026-01-01T00:00:00.000Z',
-  };
-
-  it('sets alertDetailsUrl and viewInAppUrl alongside alert summary fields', async () => {
-    await expect(
-      getTLSAlertContext({
-        basePath,
-        spaceId: 'default',
-        summary,
-        alertUuid: 'alert-id',
-      })
-    ).resolves.toEqual({
-      alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
-      viewInAppUrl:
-        'https://localhost:5601/app/synthetics/certificates?search=cert-1&issuers=%5B%22test-issuer%22%5D',
-      ...summary,
-    });
-  });
-
-  it('includes the space id in viewInAppUrl for non-default spaces', async () => {
-    await expect(
-      getTLSAlertContext({
-        basePath,
-        spaceId: 'team-a',
-        summary,
-        alertUuid: 'alert-id',
-      })
-    ).resolves.toMatchObject({
-      viewInAppUrl:
-        'https://localhost:5601/s/team-a/app/synthetics/certificates?search=cert-1&issuers=%5B%22test-issuer%22%5D',
-    });
   });
 });
 
@@ -161,8 +98,6 @@ describe('setTLSRecoveredAlertsContext', () => {
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       context: {
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
-        viewInAppUrl:
-          'https://localhost:5601/app/synthetics/certificates?search=cert-1&issuers=%5B%22test-issuer%22%5D',
         commonName: 'cert-1',
         configId: '12345',
         issuer: 'test-issuer',
@@ -226,8 +161,6 @@ describe('setTLSRecoveredAlertsContext', () => {
     expect(alertsClientMock.setAlertData).toBeCalledWith({
       context: {
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
-        viewInAppUrl:
-          'https://localhost:5601/app/synthetics/certificates?search=cert-1&issuers=%5B%22test-issuer%22%5D',
         commonName: 'cert-1',
         configId: '12345',
         issuer: 'test-issuer',
@@ -277,8 +210,6 @@ describe('setTLSRecoveredAlertsContext', () => {
       id: 'alert-id',
       context: expect.objectContaining({
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
-        viewInAppUrl:
-          'https://localhost:5601/app/synthetics/certificates?search=browser-cert-cn&issuers=%5B%22test-issuer%22%5D',
         commonName: 'browser-cert-cn',
         previousStatus: 'Certificate browser-cert-cn test-summary',
         newStatus: expect.stringContaining('browser-cert-cn'),

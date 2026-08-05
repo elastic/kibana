@@ -53,12 +53,13 @@ describe('TemplateMetadataForm', () => {
     expect(screen.getByText('Template name is required.')).toBeInTheDocument();
   });
 
-  it('propagates a name edit immediately so the save action can update', () => {
+  it('propagates a name edit (debounced, flushed on blur)', () => {
     const onChange = jest.fn();
     renderWithTestingProviders(<TemplateMetadataForm {...defaultProps} onChange={onChange} />);
 
     const input = screen.getByTestId('templateMetadataNameInput');
     fireEvent.change(input, { target: { value: 'Renamed template' } });
+    fireEvent.blur(input);
 
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ name: 'Renamed template' }));
   });

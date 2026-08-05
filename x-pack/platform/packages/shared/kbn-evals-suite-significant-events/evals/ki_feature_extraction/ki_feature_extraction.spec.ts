@@ -13,11 +13,7 @@ import {
 } from '@kbn/significant-events-plugin/server';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
-import {
-  getCurrentTraceId,
-  createChatCallsEvaluator,
-  createSpanLatencyEvaluator,
-} from '@kbn/evals';
+import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import {
   createEvalSignificantEventSearchTool,
@@ -189,7 +185,7 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                   throw new Error(`No pre-collected data for scenario "${input.scenario_id}"`);
                 }
 
-                const { features, tokensUsed } = await identifyFeatures({
+                const { features } = await identifyFeatures({
                   streamName: MANAGED_STREAM_NAME,
                   sampleDocuments: heavy.sampleDocuments,
                   systemPrompt: `${featuresPrompt}\n${memoryTools.promptSnippet}\n${eventSearchTool.promptSnippet}`,
@@ -207,7 +203,6 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                   features,
                   traceId: getCurrentTraceId(),
                   sample_documents: heavy.sampleDocuments,
-                  tokens_used: tokensUsed,
                 };
               },
             },
@@ -218,7 +213,6 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
               evaluators.traceBasedEvaluators.inputTokens,
               evaluators.traceBasedEvaluators.outputTokens,
               evaluators.traceBasedEvaluators.cachedTokens,
-              createChatCallsEvaluator({ traceEsClient, log }),
               createSpanLatencyEvaluator({ traceEsClient, log, operationName: 'chat' }),
             ]
           );

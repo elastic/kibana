@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import parse from 'joi-to-json';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { chartTypeRegistry } from './chart_type_registry';
 
@@ -17,7 +17,6 @@ import { chartTypeRegistry } from './chart_type_registry';
 const USEFUL_DESCRIPTION_RE =
   /(\d|default|e\.g\.|i\.e\.|example|must|between|minimum|maximum|at least|at most|up to|pixels|millisecond|factor|typical|legacy|truncat)/i;
 
-// TODO validate this logic works with Zod json output
 const trimSchemaDescriptions = (node: unknown): unknown => {
   if (Array.isArray(node)) {
     return node.map(trimSchemaDescriptions);
@@ -43,7 +42,7 @@ const trimSchemaDescriptions = (node: unknown): unknown => {
 const jsonSchemas = Object.fromEntries(
   Object.entries(chartTypeRegistry).map(([chartType, { schema }]) => [
     chartType,
-    trimSchemaDescriptions(z.toJSONSchema(schema)),
+    trimSchemaDescriptions(parse(schema.getSchema())) as object,
   ])
 ) as Record<SupportedChartType, object>;
 

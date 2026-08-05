@@ -27,12 +27,13 @@ node scripts/scout start-server --arch serverless --domain security_complete
 
 ```bash
 node scripts/playwright test \
-  --config src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel.playwright.config.ts \
+  src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/ \
+  --config src/platform/plugins/shared/discover/test/scout/ui/parallel.playwright.config.ts \
   --project local --trace on
 ```
 
 To check stability before merging, trigger the flaky test runner from a PR comment:
 
 ```
-/flaky scoutConfig:src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel.playwright.config.ts:30
+/flaky scoutConfig:src/platform/plugins/shared/discover/test/scout/ui/parallel.playwright.config.ts:30
 ```

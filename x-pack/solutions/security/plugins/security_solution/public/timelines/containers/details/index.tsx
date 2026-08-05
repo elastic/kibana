@@ -120,13 +120,7 @@ export const useTimelineEventsDetails = ({
       const retryWithFallback = () => {
         attemptedFallbackRef.current = true;
         searchSubscription$.current.unsubscribe();
-        // `includeHiddenIndices` is set only here so the server broadens wildcard expansion to hidden
-        // indices for the fallback lookup only, leaving the primary request unchanged.
-        timelineDetailsSearch({
-          ...request,
-          indexName: fallbackIndex as string,
-          includeHiddenIndices: true,
-        });
+        timelineDetailsSearch({ ...request, indexName: fallbackIndex as string });
       };
 
       const asyncSearch = async () => {

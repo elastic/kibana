@@ -48,7 +48,7 @@ export const InternalCoreStart = createServiceIdentifierFactory('core', 'start')
 
 /** @internal */
 export function createSetupModule<
-  TPluginInitializerContext extends InternalPluginInitializerContext,
+  TPluginInitializerContext extends object,
   TCoreSetupContext extends object,
   TPluginsSetup extends object
 >(

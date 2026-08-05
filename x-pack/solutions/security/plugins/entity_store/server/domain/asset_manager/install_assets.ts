@@ -27,7 +27,6 @@ import {
   getUpdatesEntityDefinitionComponentTemplate,
 } from './component_templates';
 import { getHistorySnapshotIndexTemplateConfig } from './history_snapshot_index_template';
-import { getHistorySnapshotIndexPattern } from './history_snapshot_index';
 import { getUpdatesEntityIndexTemplateConfig } from './updates_index_template';
 import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
 import { installLatestIndexIngestPipeline } from './latest_index_ingest_pipeline';
@@ -186,11 +185,6 @@ async function uninstallIndicesAndDataStreams(
       logger.debug(`deleted entity index`);
     })(),
     (async () => {
-      // Resolve wildcards to concrete names first: ES rejects wildcard deletes when
-      // `action.destructive_requires_name=true` (default in Kibana test clusters).
-      await deleteHistorySnapshotIndices(esClient, namespace, logger);
-    })(),
-    (async () => {
       await deleteDataStream(esClient, getUpdatesEntitiesDataStreamName(namespace));
       logger.debug(`deleted entity updates data stream`);
     })(),
@@ -199,22 +193,4 @@ async function uninstallIndicesAndDataStreams(
       logger.debug(`deleted entity metadata data stream`);
     })(),
   ]);
-}
-
-async function deleteHistorySnapshotIndices(
-  esClient: ElasticsearchClient,
-  namespace: string,
-  logger: Logger
-): Promise<void> {
-  const pattern = getHistorySnapshotIndexPattern(namespace);
-  const resolved = await esClient.indices.resolveIndex({ name: pattern });
-
-  const historyIndices = resolved.indices.map((index) => index.name);
-  if (historyIndices.length === 0) {
-    logger.debug(`no history snapshot indices to delete for pattern ${pattern}`);
-    return;
-  }
-
-  await Promise.all(historyIndices.map((index) => deleteIndex(esClient, index)));
-  logger.debug(`deleted entity history snapshot indices: ${historyIndices.join(', ')}`);
 }

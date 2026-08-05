@@ -178,7 +178,7 @@ export const CaseViewAttachments = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <CaseViewAttachButton caseData={caseData} attachLocation="attachments" fill />
+            <CaseViewAttachButton caseData={caseData} fill />
           </EuiFlexItem>
           {detailsRedesignEnabled && (
             <EuiFlexItem grow={false}>

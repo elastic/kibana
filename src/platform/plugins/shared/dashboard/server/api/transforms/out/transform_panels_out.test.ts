@@ -16,7 +16,6 @@ beforeAll(() => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('../../../kibana_services').embeddableService = {
     getTransforms: mockGetTransforms,
-    getAllEmbeddableSchemas: jest.fn().mockReturnValue({}),
   };
 });
 
@@ -107,7 +106,7 @@ describe('transformPanelsOut', () => {
           title: 'markdown',
           transformOut: jest.fn().mockImplementation((val) => val), // just pass the value through
           schema: {
-            parse: jest.fn().mockImplementation((val) => val),
+            validate: jest.fn().mockImplementation((val) => val),
           },
         };
       }
@@ -115,7 +114,7 @@ describe('transformPanelsOut', () => {
         return {
           title: 'invalid',
           schema: {
-            parse: jest.fn().mockImplementation(() => {
+            validate: jest.fn().mockImplementation(() => {
               throw new Error('Boo!');
             }),
           },
@@ -196,7 +195,7 @@ describe('transformPanelsOut', () => {
       },
     ];
     const panelsOut = transformPanelsOut(panelsJSON, sections, [], false);
-    getDashboardStateSchema(true).parse({ title: 'My dashboard', panels: panelsOut.panels });
+    getDashboardStateSchema(true).validate({ title: 'My dashboard', panels: panelsOut.panels });
     expect(panelsOut).toMatchInlineSnapshot(`
       Object {
         "panels": Array [

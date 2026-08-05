@@ -9,14 +9,11 @@
 
 import { from, type QueryOperator } from '@kbn/esql-composer';
 import { useGetGenerateDiscoverLink } from '../use_generate_discover_link';
-import { withUnmappedFields, type UnmappedFieldsPolicy } from './esql_unmapped_fields';
-
-export { withUnmappedFields, type UnmappedFieldsPolicy } from './esql_unmapped_fields';
 
 export interface UseDiscoverLinkAndEsqlQueryParams {
   indexPattern?: string;
   whereClause?: QueryOperator;
-  unmappedFieldsPolicy?: UnmappedFieldsPolicy;
+  unmappedFieldsPolicy?: 'NULLIFY' | 'LOAD';
 }
 
 export function useDiscoverLinkAndEsqlQuery({
@@ -33,10 +30,10 @@ export function useDiscoverLinkAndEsqlQuery({
     return { discoverUrl: undefined, esqlQueryString: undefined };
   }
 
-  const rawQuery = from(indexPattern).pipe(whereClause).toString();
-  const esqlQueryString = unmappedFieldsPolicy
-    ? withUnmappedFields(rawQuery, { policy: unmappedFieldsPolicy })
-    : rawQuery;
+  const settingsPrefix = unmappedFieldsPolicy
+    ? `SET unmapped_fields = "${unmappedFieldsPolicy}";\n`
+    : '';
+  const esqlQueryString = `${settingsPrefix}${from(indexPattern).pipe(whereClause).toString()}`;
   const discoverUrl = generateDiscoverLink(whereClause);
 
   return { discoverUrl, esqlQueryString };

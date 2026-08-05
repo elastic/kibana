@@ -57,7 +57,7 @@ export const snapshotListSchema = schema.object({
       schema.literal('state'),
     ])
   ),
-  searchValue: schema.maybe(schema.string({ maxLength: 1024 })),
+  searchValue: schema.maybe(schema.string()),
   searchMatch: schema.maybe(schema.oneOf([schema.literal('must'), schema.literal('must_not')])),
   searchOperator: schema.maybe(schema.oneOf([schema.literal('eq'), schema.literal('exact')])),
 });

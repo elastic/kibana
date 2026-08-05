@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { monitorFiltersSchema } from './common_schemas';
@@ -14,29 +15,29 @@ import { SYNTHETICS_STATS_SUPPORTED_TRIGGERS } from '../../common/embeddables/st
 /**
  * Schema for the custom state of the stats overview embeddable
  */
-export const statsOverviewCustomStateSchema = z
-  .object({
-    filters: monitorFiltersSchema.optional(),
-  })
-  .strict();
+export const statsOverviewCustomStateSchema = schema.object({
+  filters: schema.maybe(monitorFiltersSchema),
+});
 
 /**
  * Complete schema for the Synthetics Stats Overview embeddable
  */
 export function getStatsOverviewEmbeddableSchema(getDrilldownsSchema: GetDrilldownsSchemaFnType) {
-  return z
-    .object({
-      ...serializedTitlesSchema.shape,
-      ...getDrilldownsSchema(SYNTHETICS_STATS_SUPPORTED_TRIGGERS).shape,
-      ...statsOverviewCustomStateSchema.shape,
-    })
-    .strict()
-    .meta({
-      description: 'Synthetics stats overview embeddable schema',
-    });
+  return schema.allOf(
+    [
+      serializedTitlesSchema,
+      getDrilldownsSchema(SYNTHETICS_STATS_SUPPORTED_TRIGGERS),
+      statsOverviewCustomStateSchema,
+    ],
+    {
+      meta: {
+        description: 'Synthetics stats overview embeddable schema',
+      },
+    }
+  );
 }
 
-export type OverviewStatsEmbeddableState = z.output<
+export type OverviewStatsEmbeddableState = TypeOf<
   ReturnType<typeof getStatsOverviewEmbeddableSchema>
 >;
-export type OverviewStatsEmbeddableCustomState = z.output<typeof statsOverviewCustomStateSchema>;
+export type OverviewStatsEmbeddableCustomState = TypeOf<typeof statsOverviewCustomStateSchema>;

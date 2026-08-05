@@ -17,10 +17,8 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import { matchActionPoliciesForRuleOasExamples } from './match_action_policies_for_rule_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 @injectable()
 export class MatchActionPoliciesForRuleRoute extends BaseAlertingRoute {
@@ -35,7 +33,6 @@ export class MatchActionPoliciesForRuleRoute extends BaseAlertingRoute {
     summary: 'Match action policies for a rule',
     description:
       'Returns action policies that match a given rule, categorised as direct, global, or global-filtered.',
-    oasOperationObject: matchActionPoliciesForRuleOasExamples,
   } as const;
   static schemas = {
     request: {
@@ -48,7 +45,7 @@ export class MatchActionPoliciesForRuleRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+        description: 'Indicates invalid request body.',
       },
     },
   };

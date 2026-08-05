@@ -92,9 +92,9 @@ const getAnomalyDataFromApi = async ({
   const { jobMetaById } = await getSecurityJobIds(ml, soClient, request);
 
   return Promise.all(
-    entities.map(async (entityRecord) => {
-      const entityIdentifier = entityRecord?.entity?.id;
-      const entityType = entityRecord?.entity?.EngineMetadata?.Type as EntityType | undefined;
+    entities.map(async ({ entity }) => {
+      const entityIdentifier = entity?.id;
+      const entityType = entity?.EngineMetadata?.Type as EntityType | undefined;
       if (!entityIdentifier || !entityType) {
         return [];
       }
@@ -102,7 +102,6 @@ const getAnomalyDataFromApi = async ({
       const anomaliesWithBaseline = await getEntityAnomalies({
         entityId: entityIdentifier,
         entityType,
-        entityRecord,
         esClient,
         logger,
         fromMs: fromDate,

@@ -31,12 +31,12 @@ export type ExceptionListId = z.infer<typeof ExceptionListId>;
 
 For endpoint artifacts, use one of the following values:
 
-* `endpoint_list`: Elastic Endpoint exceptions list
-* `endpoint_trusted_apps`: Trusted applications list
-* `endpoint_trusted_devices`: Trusted devices list
-* `endpoint_event_filters`: Event filters list
-* `endpoint_host_isolation_exceptions`: Host isolation exceptions list
-* `endpoint_blocklists`: Blocklist
+* `endpoint_list`: [Elastic Endpoint exception list](https://www.elastic.co/docs/solutions/security/detect-and-alert/add-manage-exceptions)
+* `endpoint_trusted_apps`: [Trusted applications list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-applications)
+* `endpoint_trusted_devices`: [Trusted devices list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/trusted-devices)
+* `endpoint_event_filters`: [Event filters list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/event-filters)
+* `endpoint_host_isolation_exceptions`: [Host isolation exceptions list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/host-isolation-exceptions)
+* `endpoint_blocklists`: [Blocklists list](https://www.elastic.co/docs/solutions/security/manage-elastic-defend/blocklist)
 
   */
 export const ExceptionListHumanId = lazySchema(() =>
@@ -57,7 +57,6 @@ export const ExceptionListType = lazySchema(() =>
     'endpoint_events',
     'endpoint_host_isolation_exceptions',
     'endpoint_blocklists',
-    'endpoint_custom_yara_signatures',
   ])
 );
 export type ExceptionListType = z.infer<typeof ExceptionListType>;

@@ -73,6 +73,7 @@ export const platformSignificantEventsTools = {
   searchEvent: `${internalNamespaces.platformSignificantEvents}.event_search`,
   createEvent: `${internalNamespaces.platformSignificantEvents}.event_create`,
   updateEventStatus: `${internalNamespaces.platformSignificantEvents}.event_status_update`,
+  discoveryWrite: `${internalNamespaces.platformSignificantEvents}.discovery_write`,
   eventsWrite: `${internalNamespaces.platformSignificantEvents}.events_write`,
 
   attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
@@ -92,7 +93,6 @@ export const internalTools = {
   sleep: 'sleep',
   writeTodos: 'write_todos',
   loadSkill: 'load_skill',
-  searchRelevantSkills: 'search_relevant_skills',
   askUserQuestion: 'ask_user_question',
   readFile: 'read_file',
   listFiles: 'list_files',

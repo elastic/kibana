@@ -38,32 +38,6 @@ import type { CloudSecurityPostureStartServices } from '../types';
 
 const RULE_PAGE_PATH = '/app/security/rules/id/';
 
-/**
- * a11y: Moves focus to the given ref on mount and registers the element as a focus-trap shard
- * via focusTrapPubSub so focus can escape an open findings flyout and land on a toast.
- *
- * The double rAF waits until the flyout has applied the updated shard list from publish() before
- * attempting the focus move. On unmount, publish() is called again to clean up the shard.
- */
-const useFlyoutFocusOnMount = (ref: React.RefObject<HTMLElement | null>) => {
-  useEffect(() => {
-    let cancelled = false;
-    focusTrapPubSub.publish();
-    const raf = requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (!cancelled) {
-          ref.current?.focus();
-        }
-      });
-    });
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(raf);
-      focusTrapPubSub.publish();
-    };
-  }, [ref]);
-};
-
 export interface TakeActionProps {
   createRuleFn?: (http: HttpSetup) => Promise<RuleResponse>;
   enableBenchmarkRuleFn?: () => Promise<void>;
@@ -78,13 +52,31 @@ export interface TakeActionProps {
  * this toast button keeps the only actionable follow-up reachable for keyboard users. EUI pauses
  * the toast dismiss timer while the toast has focus, so the existing auto-dismiss UX is unchanged.
  *
- * When the findings flyout is open, EuiFocusTrap still traps focus inside the flyout. The
- * data-eui-includes-in-flyout-focus-trap attribute + useFlyoutFocusOnMount registers this element
- * as a focus-trap shard so focus can leave the flyout and land on the toast.
+ * When the findings flyout is open, EuiFocusTrap still traps focus inside the flyout (even with
+ * ownFocus={false}). Marking this toast content with data-eui-includes-in-flyout-focus-trap and
+ * publishing via focusTrapPubSub registers it as a focus-trap shard (Kibana EuiProvider default)
+ * so focus can leave the flyout and land on "View rule".
  */
 export const ViewRuleToastButton = ({ href }: { href: string }) => {
   const buttonRef = useRef<HTMLAnchorElement | null>(null);
-  useFlyoutFocusOnMount(buttonRef);
+
+  useEffect(() => {
+    let cancelled = false;
+    focusTrapPubSub.publish();
+    // Double rAF: wait until the flyout applies updated focus-trap shards from publish().
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (!cancelled) {
+          buttonRef.current?.focus();
+        }
+      });
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+      focusTrapPubSub.publish();
+    };
+  }, []);
 
   return (
     <div data-eui-includes-in-flyout-focus-trap="true">
@@ -107,45 +99,18 @@ export const ViewRuleToastButton = ({ href }: { href: string }) => {
   );
 };
 
-/**
- * a11y: The global toast list uses aria-live="polite". When the action popover closes, VoiceOver
- * can lose focus and announce the page instead of the toast. Moving focus here via
- * useFlyoutFocusOnMount ensures VoiceOver reads the error message reliably, including when
- * triggered from inside an open findings flyout.
- *
- * tabIndex={-1} keeps it out of the Tab order while still allowing programmatic focus.
- */
-export const ErrorToastText = ({ errorMessage }: { errorMessage: string }) => {
-  const regionRef = useRef<HTMLDivElement | null>(null);
-  useFlyoutFocusOnMount(regionRef);
-
-  return (
-    <div
-      ref={regionRef}
-      tabIndex={-1}
-      data-eui-includes-in-flyout-focus-trap="true"
-      data-test-subj="csp:toast-error-text"
-    >
-      {kbnI18n.translate('xpack.csp.takeAction.createRuleErrorDescription', {
-        defaultMessage: 'An error occurred while creating the detection rule: {errorMessage}.',
-        values: { errorMessage },
-      })}
-    </div>
-  );
-};
-
 export const showCreateDetectionRuleErrorToast = (
   cloudSecurityStartServices: CloudSecurityPostureStartServices,
   error: Error
 ) => {
-  const { notifications, analytics, i18n, theme } = cloudSecurityStartServices;
-  const startServices = { analytics, i18n, theme };
-
-  return notifications.toasts.addDanger({
+  return cloudSecurityStartServices.notifications.toasts.addDanger({
     title: kbnI18n.translate('xpack.csp.takeAction.createRuleErrorTitle', {
       defaultMessage: 'Unable to create detection rule',
     }),
-    text: toMountPoint(<ErrorToastText errorMessage={error.message} />, startServices),
+    text: kbnI18n.translate('xpack.csp.takeAction.createRuleErrorDescription', {
+      defaultMessage: 'An error occurred while creating the detection rule: {errorMessage}.',
+      values: { errorMessage: error.message },
+    }),
     'data-test-subj': 'csp:toast-error',
   });
 };
@@ -316,21 +281,16 @@ const CreateDetectionRule = ({
       closePopover();
     },
     onSuccess: (ruleResponse) => {
-      // Reset loading state before showing the toast so the trigger button is no longer
-      // hasAriaDisabled when ViewRuleToastButton's focusTrapPubSub sequence runs.
-      setIsLoading(false);
       showCreateDetectionRuleSuccessToast(startServices, http, ruleResponse);
       // Triggering a refetch of rules and alerts to update the UI
       queryClient.invalidateQueries([DETECTION_ENGINE_RULES_KEY]);
       queryClient.invalidateQueries([DETECTION_ENGINE_ALERTS_KEY]);
     },
     onError: (error: Error) => {
-      // Reset loading state before showing the toast so the flyout focus trap has already
-      // stabilised (no pending re-render) when ErrorToastText's focusTrapPubSub sequence runs.
-      // Previously this lived in onSettled which fired after onError, creating a race where the
-      // setIsLoading(false) re-render interrupted the double-rAF focus sequence.
-      setIsLoading(false);
       showCreateDetectionRuleErrorToast(startServices, error);
+    },
+    onSettled: () => {
+      setIsLoading(false);
     },
   });
 

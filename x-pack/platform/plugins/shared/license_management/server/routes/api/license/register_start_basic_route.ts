@@ -24,7 +24,7 @@ export function registerStartBasicRoute({
           reason: 'Relies on es client for authorization',
         },
       },
-      validate: { query: schema.object({ acknowledge: schema.string({ maxLength: 64 }) }) },
+      validate: { query: schema.object({ acknowledge: schema.string() }) },
     },
     async (ctx, req, res) => {
       const { client } = (await ctx.core).elasticsearch;

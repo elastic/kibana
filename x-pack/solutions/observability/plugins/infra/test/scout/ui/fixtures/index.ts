@@ -32,11 +32,6 @@ import { HostsPage } from './page_objects/hosts_page';
 import { getInventoryViewsApiService, type InventoryViewApiService } from './apis/inventory_views';
 import { NodeDetailsPage } from './page_objects/node_details/node_details';
 import { SavedViews } from './page_objects/saved_views';
-import { FeatureControlsPage } from './page_objects/feature_controls';
-import { NotFoundPage } from './page_objects/not_found';
-import { MetricsSettingsPage } from './page_objects/metrics_settings';
-import { MetricsExplorerPage } from './page_objects/metrics_explorer';
-import { AnomalyFlyoutPage } from './page_objects/anomaly_flyout';
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
@@ -45,11 +40,6 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
     hostsPage: HostsPage;
     nodeDetailsPage: NodeDetailsPage;
     savedViews: SavedViews;
-    featureControlsPage: FeatureControlsPage;
-    notFoundPage: NotFoundPage;
-    metricsSettingsPage: MetricsSettingsPage;
-    metricsExplorerPage: MetricsExplorerPage;
-    anomalyFlyoutPage: AnomalyFlyoutPage;
   };
 }
 
@@ -79,11 +69,6 @@ export const test = baseWithSynthtrace.extend<
       hostsPage: createLazyPageObject(HostsPage, page, kbnUrl),
       nodeDetailsPage: createLazyPageObject(NodeDetailsPage, page, kbnUrl),
       savedViews,
-      featureControlsPage: createLazyPageObject(FeatureControlsPage, page, kbnUrl),
-      notFoundPage: createLazyPageObject(NotFoundPage, page, kbnUrl),
-      metricsSettingsPage: createLazyPageObject(MetricsSettingsPage, page, kbnUrl),
-      metricsExplorerPage: createLazyPageObject(MetricsExplorerPage, page, kbnUrl),
-      anomalyFlyoutPage: createLazyPageObject(AnomalyFlyoutPage, page),
     };
 
     await use(extendedPageObjects);

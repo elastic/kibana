@@ -11,7 +11,6 @@ export const eisEndpointsMockData = [
     task_type: 'chat_completion',
     service: 'elastic',
     service_settings: { model_id: 'anthropic-claude-3.7-sonnet' },
-    task_settings: { reasoning: { effort: 'high' } },
     metadata: {
       heuristics: { properties: ['multilingual', 'multimodal'], status: 'ga' },
       display: { name: 'Anthropic Claude Sonnet 3.7', model_creator: 'Anthropic' },

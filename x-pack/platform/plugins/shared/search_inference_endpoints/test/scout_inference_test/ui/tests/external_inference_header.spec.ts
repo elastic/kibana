@@ -12,7 +12,7 @@ import { mockInferenceEndpoints, unmockInferenceEndpoints } from '../fixtures/mo
 
 test.describe(
   'External Inference - header',
-  { tag: ['@local-stateful-classic', '@local-serverless-search'] },
+  { tag: ['@local-stateful-classic', '@local-stateful-search', '@local-serverless-search'] },
   () => {
     test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
       await mockInferenceEndpoints(page, externalInferenceEndpointsMockData);

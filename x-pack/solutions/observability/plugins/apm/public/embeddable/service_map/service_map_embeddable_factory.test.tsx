@@ -90,8 +90,6 @@ describe('getServiceMapEmbeddableFactory', () => {
         setKuery: jest.fn(),
         serviceName$: new BehaviorSubject(undefined),
         setServiceName: jest.fn(),
-        highlightedServiceNames$: new BehaviorSubject(undefined),
-        setHighlightedServiceNames: jest.fn(),
         serviceGroupId$: new BehaviorSubject(undefined),
         setServiceGroupId: jest.fn(),
       },
@@ -99,7 +97,6 @@ describe('getServiceMapEmbeddableFactory', () => {
         environment: ENVIRONMENT_ALL.value,
         kuery: undefined,
         service_name: undefined,
-        highlighted_service_names: undefined,
         service_group_id: undefined,
       })),
       anyStateChange$: customStateAnyStateChange$,
@@ -108,7 +105,6 @@ describe('getServiceMapEmbeddableFactory', () => {
     mockInitializeStateApi.mockImplementation(() => ({ stateApi: true }));
     mockUseBatchedPublishingSubjects.mockReturnValue([
       ENVIRONMENT_ALL.value,
-      undefined,
       undefined,
       undefined,
       undefined,
@@ -195,7 +191,6 @@ describe('getServiceMapEmbeddableFactory', () => {
       'production',
       'service.name: api',
       'checkout',
-      undefined,
       'group-1',
     ]);
     mockUseFetchContext.mockReturnValue({ timeRange: { from: 'now-1h', to: 'now' } });
@@ -257,8 +252,6 @@ describe('getServiceMapEmbeddableFactory', () => {
         setKuery: jest.fn(),
         serviceName$: new BehaviorSubject(undefined),
         setServiceName: jest.fn(),
-        highlightedServiceNames$: new BehaviorSubject(undefined),
-        setHighlightedServiceNames: jest.fn(),
         serviceGroupId$: new BehaviorSubject(undefined),
         setServiceGroupId: jest.fn(),
       },
@@ -266,7 +259,6 @@ describe('getServiceMapEmbeddableFactory', () => {
         environment: ENVIRONMENT_ALL.value,
         kuery: undefined,
         service_name: undefined,
-        highlighted_service_names: undefined,
         service_group_id: undefined,
       })),
       anyStateChange$: customStateAnyStateChange$,
@@ -275,7 +267,6 @@ describe('getServiceMapEmbeddableFactory', () => {
     mockUseBatchedPublishingSubjects.mockReturnValue([
       ENVIRONMENT_ALL.value,
       '  host.name: app-1  ',
-      null,
       null,
       null,
     ]);
@@ -338,7 +329,6 @@ describe('getServiceMapEmbeddableFactory', () => {
   it('defaults to now-15m when initialState has undefined time range', async () => {
     mockUseBatchedPublishingSubjects.mockReturnValue([
       ENVIRONMENT_ALL.value,
-      undefined,
       undefined,
       undefined,
       undefined,
@@ -416,7 +406,6 @@ describe('getServiceMapEmbeddableFactory', () => {
     mockUseFetchContext.mockReturnValue({ timeRange: undefined });
     mockUseBatchedPublishingSubjects.mockReturnValue([
       ENVIRONMENT_ALL.value,
-      undefined,
       undefined,
       undefined,
       undefined,

@@ -62,11 +62,6 @@ import {
   DEFAULT_SERVICE_MAP_VIEW_FILTERS,
   type ServiceMapViewFilters,
 } from './apply_service_map_visibility';
-import {
-  parseMapOrientationFromAppState,
-  parseViewFiltersFromAppState,
-  readInitialAppStateFromRawUrl,
-} from './use_filter_url_sync';
 import { useServiceMapFilterState } from './use_service_map_filter_state';
 import { focusServiceMapFindInput } from './service_map_find_in_page';
 import { ServiceMapHighlightProvider } from '../../shared/service_map/service_map_search_context';
@@ -88,7 +83,7 @@ import {
 } from '../../../../common/service_map';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { ServiceFlyout } from '../../shared/service_flyout';
-import { SERVICE_FLYOUT_SOURCE_SERVICE_MAP } from '../../shared/service_flyout/constants';
+import { SERVICE_FLYOUT_SOURCES } from '../../shared/service_flyout/constants';
 import type { ServiceFlyoutOptions } from '../../shared/service_flyout/types';
 import { useServiceMapFlyoutProps } from './use_service_map_flyout_props';
 import { ServiceMapDiagnosticButton } from './service_map_diagnostic_button';
@@ -118,7 +113,7 @@ interface GraphProps {
   flyoutOptions?: ServiceFlyoutOptions;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
-  /** When set, shows a "View in Service map" button that links to the global map. */
+  /** When set, shows a "View full service map" button that links to the full map (focused map only) */
   fullMapHref?: string;
   /** When true, hides minimap, options panel, and navigation actions that don't apply in dashboard embeds. */
   isEmbedded?: boolean;
@@ -212,15 +207,9 @@ function GraphInner({
   const serviceMapId = useGeneratedHtmlId({ prefix: 'serviceMap' });
   const mapRegionRef = useRef<HTMLDivElement | null>(null);
 
-  const [internalViewFilters, setInternalViewFilters] = useState<ServiceMapViewFilters>(() => {
-    if (controlledViewFilters) {
-      return controlledViewFilters;
-    }
-    return (
-      parseViewFiltersFromAppState(readInitialAppStateFromRawUrl()) ??
-      DEFAULT_SERVICE_MAP_VIEW_FILTERS
-    );
-  });
+  const [internalViewFilters, setInternalViewFilters] = useState<ServiceMapViewFilters>(
+    controlledViewFilters ?? DEFAULT_SERVICE_MAP_VIEW_FILTERS
+  );
   const viewFilters = controlledViewFilters ?? internalViewFilters;
   // Keep a ref to the currently-effective view filters so function updaters always see the
   // latest "prev" — internalViewFilters can be stale when the host drives state via
@@ -263,12 +252,9 @@ function GraphInner({
       setPanelExpanded(true);
     }
   }, [showEmbeddedControls]);
-  const [internalOrientation, setInternalOrientation] = useState<ServiceMapOrientation>(() => {
-    if (controlledOrientation) {
-      return controlledOrientation;
-    }
-    return parseMapOrientationFromAppState(readInitialAppStateFromRawUrl()) ?? 'horizontal';
-  });
+  const [internalOrientation, setInternalOrientation] = useState<ServiceMapOrientation>(
+    controlledOrientation ?? 'horizontal'
+  );
   const mapOrientation = controlledOrientation ?? internalOrientation;
   const setMapOrientation = useCallback(
     (next: ServiceMapOrientation) => {
@@ -487,7 +473,14 @@ function GraphInner({
     setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
   }, [setNodes, setEdges, applyEdgeHighlighting]);
 
-  const flyoutSource = SERVICE_FLYOUT_SOURCE_SERVICE_MAP;
+  const flyoutSource = flyoutOptions?.source ?? SERVICE_FLYOUT_SOURCES.serviceMap;
+
+  const handleServiceFlyoutView = useCallback(
+    ({ tabId }: { tabId: string }) => {
+      telemetry.reportServiceFlyoutViewed({ tabId, source: flyoutSource });
+    },
+    [telemetry, flyoutSource]
+  );
 
   useEffect(() => {
     if (selectedNodeId && nodesAfterFilters.some((n) => n.id === selectedNodeId && n.hidden)) {
@@ -612,12 +605,9 @@ function GraphInner({
         defaultMessage: 'Enter fullscreen',
       });
 
-  const viewInServiceMapButtonLabel = i18n.translate(
-    'xpack.apm.serviceMap.viewInServiceMapButton',
-    {
-      defaultMessage: 'View in Service map',
-    }
-  );
+  const viewFullMapButtonLabel = i18n.translate('xpack.apm.serviceMap.viewFullServiceMapButton', {
+    defaultMessage: 'View full service map',
+  });
 
   const zoomInLabel = i18n.translate('xpack.apm.serviceMap.zoomInControl', {
     defaultMessage: 'Zoom In',
@@ -834,14 +824,14 @@ function GraphInner({
                       />
                     </EuiToolTip>
                     {fullMapHref && (
-                      <EuiToolTip content={viewInServiceMapButtonLabel} disableScreenReaderOutput>
+                      <EuiToolTip content={viewFullMapButtonLabel} disableScreenReaderOutput>
                         <EuiButtonIcon
                           display="empty"
                           color="text"
                           size="s"
                           iconType="apps"
                           href={fullMapHref}
-                          aria-label={viewInServiceMapButtonLabel}
+                          aria-label={viewFullMapButtonLabel}
                           data-test-subj="serviceMapViewFullMapButton"
                           css={mapToolbarControlIconCss}
                         />
@@ -948,7 +938,7 @@ function GraphInner({
               service={flyoutProps.service}
               deps={{ core, share, lens, dataViews, alerting: plugins.alerting }}
               filters={flyoutProps.filters}
-              telemetry={{ client: telemetry, source: flyoutSource }}
+              onView={handleServiceFlyoutView}
               onClose={handlePopoverClose}
             />
           )}

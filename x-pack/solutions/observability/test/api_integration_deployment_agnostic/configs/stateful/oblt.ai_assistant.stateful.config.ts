@@ -26,7 +26,6 @@ export default createStatefulTestConfig<typeof services>({
       ])}`,
       `--xpack.fleet.experimentalFeatures=${JSON.stringify({
         integrationKnowledge: false,
-        installIntegrationsKnowledge: false,
       })}`,
     ],
   },

@@ -79,6 +79,7 @@ import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import {
   ENTITY_FIELDS,
   ENTITY_GROUPING_OPTIONS,
+  DEFAULT_VISIBLE_ROWS_PER_PAGE,
   MAX_ENTITIES_TO_LOAD,
   TEST_SUBJ_DATA_GRID,
   TEST_SUBJ_GROUPING,
@@ -252,6 +253,7 @@ export const EntitiesDataTable = ({
     query,
     sort,
     enabled: !queryError,
+    pageSize: DEFAULT_VISIBLE_ROWS_PER_PAGE,
   });
 
   const rows = getRowsFromPages(rowsData?.pages);
@@ -390,7 +392,7 @@ export const EntitiesDataTable = ({
 
   const onAddFilter: AddFieldFilterHandler | undefined = useMemo(
     () =>
-      config.supportsFieldFiltering !== false && filterManager && dataView
+      filterManager && dataView
         ? (clickedField, values, operation) => {
             const newFilters = generateFilters(
               filterManager,
@@ -404,7 +406,7 @@ export const EntitiesDataTable = ({
             });
           }
         : undefined,
-    [config.supportsFieldFiltering, dataView, filterManager, filters, setUrlQuery]
+    [dataView, filterManager, filters, setUrlQuery]
   );
 
   const onResize = (colSettings: { columnId: string; width: number | undefined }) => {
@@ -642,9 +644,7 @@ export const EntitiesDataTable = ({
             columns={currentColumns}
             dataView={dataView}
             loadingState={loadingState}
-            onFilter={
-              config.supportsFieldFiltering !== false ? (onAddFilter as DocViewFilterFn) : undefined
-            }
+            onFilter={onAddFilter as DocViewFilterFn}
             onResize={onResize}
             onSetColumns={onSetColumns}
             onSort={onSort}

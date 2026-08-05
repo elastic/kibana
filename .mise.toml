@@ -2,7 +2,7 @@
 idiomatic_version_file_enable_tools = ["node"]
 
 [tools]
-yarn = "1.22.22"
+yarn = "1.22.21"
 
 [tasks.bootstrap]
 description = "Install and link Kibana dependencies"

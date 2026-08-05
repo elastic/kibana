@@ -18,6 +18,8 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
+  EuiIcon,
+  EuiPanel,
   EuiSkeletonText,
   EuiTab,
   EuiTabs,
@@ -26,20 +28,16 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
+import { i18n as i18nFn } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AiButton } from '@kbn/shared-ux-ai-components';
 import useAsync from 'react-use/lib/useAsync';
 
 import type { DashboardApi } from '../../../../dashboard_api/types';
-import { embeddableService, uiActionsService } from '../../../../services/kibana_services';
-import { onAddPanelClick, useMenuItemGroups } from '../use_menu_item_groups';
+import { embeddableService } from '../../../../services/kibana_services';
+import { useMenuItemGroups } from '../use_menu_item_groups';
 import { useFeaturedItems } from '../use_featured_items';
 import type { MenuItem, MenuItemGroup } from '../types';
 import { Groups } from './groups';
-import { FeaturedItemCard } from './featured_item_card';
-import { OPEN_DASHBOARD_CHAT_ACTION_ID } from '../../../../dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat_action';
-import { openDashboardChat } from '../../../../dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat';
 
 const TAB_NEW_ID = 'new' as const;
 const TAB_LIBRARY_ID = 'library' as const;
@@ -61,7 +59,6 @@ function NewPanelContent({
     dashboardApi,
     returnFocus,
   });
-  const hasChatAction = uiActionsService.hasAction(OPEN_DASHBOARD_CHAT_ACTION_ID);
 
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filteredGroups, setFilteredGroups] = useState<MenuItemGroup[]>([]);
@@ -122,35 +119,42 @@ function NewPanelContent({
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
                 }}
-                aria-label={i18n.translate('dashboard.editorMenu.addPanelFlyout.searchLabelText', {
-                  defaultMessage: 'Search field for panels',
-                })}
+                aria-label={i18nFn.translate(
+                  'dashboard.editorMenu.addPanelFlyout.searchLabelText',
+                  { defaultMessage: 'Search field for panels' }
+                )}
                 data-test-subj="dashboardPanelSelectionFlyout__searchInput"
               />
             </EuiFormRow>
           </EuiForm>
         </EuiFlexItem>
-        {(hasChatAction || featuredItems.length > 0) && (
+        {featuredItems.length > 0 && (
           <EuiFlexItem grow={false} css={styles.featuredPanelsWrapper}>
-            {hasChatAction && (
-              <AiButton
-                key={OPEN_DASHBOARD_CHAT_ACTION_ID}
-                fullWidth
-                size="s"
-                variant="base"
-                iconType="productAgent"
-                onClick={(event: React.MouseEvent) => {
-                  onAddPanelClick(event, dashboardApi, openDashboardChat);
-                }}
-                data-test-subj="create-action-Create with chat"
-              >
-                {i18n.translate('dashboard.addPanelFlyout.createWithChatButtonLabel', {
-                  defaultMessage: 'Create with chat',
-                })}
-              </AiButton>
-            )}
             {featuredItems.map(
-              (item) => !item.isDisabled && <FeaturedItemCard key={item.id} item={item} />
+              (item) =>
+                !item.isDisabled && (
+                  <EuiPanel
+                    hasBorder
+                    paddingSize="none"
+                    onClick={item.onClick}
+                    data-test-subj={item['data-test-subj']}
+                    className="featuredPanelItem"
+                  >
+                    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type={item.icon} size="m" aria-hidden={true} />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText size="s">
+                          <strong>{item.name}</strong>
+                        </EuiText>
+                        <EuiText size="xs" color="subdued">
+                          {item.description}
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                )
             )}
           </EuiFlexItem>
         )}
@@ -282,6 +286,10 @@ const styles = {
       display: 'flex',
       flexDirection: 'column',
       gap: euiTheme.size.s,
+      '.featuredPanelItem': {
+        cursor: 'pointer',
+        padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
+      },
     }),
   flyoutContentWrapper: css({
     minHeight: '20vh',

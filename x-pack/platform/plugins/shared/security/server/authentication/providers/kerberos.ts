@@ -158,10 +158,12 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider<P
       authentication: AuthenticationInfo;
     };
     try {
-      // @ts-expect-error SecurityGetTokenResponse types refresh_token/authentication as optional
+      // @ts-expect-error authentication.email can be optional
       tokens = await this.options.client.asInternalUser.security.getToken({
-        grant_type: '_kerberos',
-        kerberos_ticket: kerberosTicket,
+        body: {
+          grant_type: '_kerberos',
+          kerberos_ticket: kerberosTicket,
+        },
       });
     } catch (err) {
       this.logger.error(

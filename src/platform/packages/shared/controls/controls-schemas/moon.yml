@@ -18,7 +18,7 @@ project:
   sourceRoot: src/platform/packages/shared/controls/controls-schemas
 dependsOn:
   - '@kbn/controls-constants'
-  - '@kbn/zod'
+  - '@kbn/config-schema'
   - '@kbn/presentation-publishing-schemas'
 tags:
   - shared-server

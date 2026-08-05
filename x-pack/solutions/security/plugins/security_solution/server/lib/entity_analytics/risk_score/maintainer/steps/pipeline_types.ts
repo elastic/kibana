@@ -60,9 +60,7 @@ export interface ScoredEntityPage {
 /** Common summary fields returned by scorer modules. */
 export interface StepResult {
   pagesProcessed: number;
-  scoresWrittenRiskIndex: number;
-  scoresWrittenEntityStore: number;
-  scoresFailed: number;
+  scoresWritten: number;
 }
 
 /** Phase 2 scoring summary with optional skip reason. */

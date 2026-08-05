@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-require('@kbn/swc-register').install();
+require('@kbn/babel-register').install();
 require('./tasks/generate_monitors').generateMonitors();

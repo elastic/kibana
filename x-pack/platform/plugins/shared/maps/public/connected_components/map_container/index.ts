@@ -14,7 +14,7 @@ import {
   getIsFullScreen,
   getIsTimesliderOpen,
 } from '../../selectors/ui_selectors';
-import { cancelAllInFlightRequests, exitFullScreen, syncDataForAllLayers } from '../../actions';
+import { cancelAllInFlightRequests, exitFullScreen } from '../../actions';
 import {
   isMapLoading,
   getLayerList,
@@ -41,7 +41,6 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
   return {
     exitFullScreen: () => dispatch(exitFullScreen()),
     cancelAllInFlightRequests: () => dispatch(cancelAllInFlightRequests()),
-    reload: () => dispatch(syncDataForAllLayers(false)),
   };
 }
 

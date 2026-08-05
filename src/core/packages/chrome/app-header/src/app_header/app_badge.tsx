@@ -16,7 +16,6 @@ import type {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AppHeaderBadge, AppHeaderBadgeItem } from '../types';
-import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 /**
  * Recursively builds flat EuiContextMenu panels from nested badge menu items.
@@ -101,7 +100,7 @@ export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
     <EuiBadge
       {...interactionProps}
       color={badge?.color ?? 'hollow'}
-      data-test-subj={badge?.['data-test-subj'] ?? APP_HEADER_TEST_SUBJECTS.badge}
+      data-test-subj={badge?.['data-test-subj']}
       css={badgeStyle}
       iconType={hasItems ? 'arrowDown' : undefined}
       iconSide={hasItems ? 'right' : undefined}

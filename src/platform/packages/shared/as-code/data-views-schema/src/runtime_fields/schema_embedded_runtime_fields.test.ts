@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { savedRuntimeFieldSchema } from './schema_saved_runtime_fields';
 
 describe('schema_embedded_runtime_fields', () => {
@@ -19,7 +18,7 @@ describe('schema_embedded_runtime_fields', () => {
           popularity: 0,
         };
 
-        expect(savedRuntimeFieldSchema.parse(runtimeField)).toEqual(runtimeField);
+        expect(savedRuntimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
       });
 
       it('accepts popularity above the lower bound (10)', () => {
@@ -29,7 +28,7 @@ describe('schema_embedded_runtime_fields', () => {
           popularity: 10,
         };
 
-        expect(savedRuntimeFieldSchema.parse(runtimeField)).toEqual(runtimeField);
+        expect(savedRuntimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
       });
 
       it('rejects popularity below the lower bound', () => {
@@ -39,10 +38,7 @@ describe('schema_embedded_runtime_fields', () => {
           popularity: -1,
         };
 
-        expectPrettyError(savedRuntimeFieldSchema.safeParse(runtimeField)).toMatchInlineSnapshot(`
-          "✖ Too small: expected number to be >=0
-            → at popularity"
-        `);
+        expect(() => savedRuntimeFieldSchema.validate(runtimeField)).toThrow(/\[popularity\]/i);
       });
     });
 
@@ -59,7 +55,7 @@ describe('schema_embedded_runtime_fields', () => {
           },
         };
 
-        expect(savedRuntimeFieldSchema.parse(runtimeField)).toEqual(runtimeField);
+        expect(savedRuntimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
       });
 
       it('accepts popularity above the lower bound (10) on a subfield', () => {
@@ -74,7 +70,7 @@ describe('schema_embedded_runtime_fields', () => {
           },
         };
 
-        expect(savedRuntimeFieldSchema.parse(runtimeField)).toEqual(runtimeField);
+        expect(savedRuntimeFieldSchema.validate(runtimeField)).toEqual(runtimeField);
       });
 
       it('rejects popularity below the lower bound on a subfield', () => {
@@ -89,10 +85,9 @@ describe('schema_embedded_runtime_fields', () => {
           },
         };
 
-        expectPrettyError(savedRuntimeFieldSchema.safeParse(runtimeField)).toMatchInlineSnapshot(`
-          "✖ Too small: expected number to be >=0
-            → at fields.my_subfield.popularity"
-        `);
+        expect(() => savedRuntimeFieldSchema.validate(runtimeField)).toThrow(
+          /\[fields\.my_subfield\.popularity\]/i
+        );
       });
     });
   });

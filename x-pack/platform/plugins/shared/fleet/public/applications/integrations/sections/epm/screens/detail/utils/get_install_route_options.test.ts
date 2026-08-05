@@ -26,7 +26,7 @@ describe('getInstallPkgRouteOptions', () => {
     const expectedRedirectURl = '/detail/myintegration-1.0.0/policies?integration=myintegration';
 
     const expectedOptions = {
-      path: '/detail/myintegration-1.0.0/add-integration/myintegration',
+      path: '/integrations/myintegration-1.0.0/add-integration/myintegration',
       state: {
         onCancelUrl: 'currentPath',
         onCancelNavigateTo: expectedOnCancelNavigateTo,
@@ -38,7 +38,7 @@ describe('getInstallPkgRouteOptions', () => {
       },
     };
 
-    expect(getInstallPkgRouteOptions(opts)).toEqual(['integrations', expectedOptions]);
+    expect(getInstallPkgRouteOptions(opts)).toEqual(['fleet', expectedOptions]);
   });
 
   it('should redirect to fleet app on save if agentPolicyId present', () => {
@@ -52,7 +52,7 @@ describe('getInstallPkgRouteOptions', () => {
     const expectedRedirectURl = '/policies/12345';
 
     const expectedOptions = {
-      path: '/detail/myintegration-1.0.0/add-integration/myintegration?policyId=12345',
+      path: '/integrations/myintegration-1.0.0/add-integration/myintegration?policyId=12345',
       state: {
         onCancelUrl: 'currentPath',
         onCancelNavigateTo: expectedOnCancelNavigateTo,
@@ -64,7 +64,7 @@ describe('getInstallPkgRouteOptions', () => {
       },
     };
 
-    expect(getInstallPkgRouteOptions(opts)).toEqual(['integrations', expectedOptions]);
+    expect(getInstallPkgRouteOptions(opts)).toEqual(['fleet', expectedOptions]);
   });
 
   it('should not set onSaveNavigateTo for agentless integrations', () => {

@@ -9,7 +9,6 @@
 
 import * as Fs from 'fs';
 
-import minimatch from 'minimatch';
 import { getAffectedPackages, listChangedFiles } from '../../affected-packages';
 import type { BuildkiteStep } from '../../buildkite';
 import { BuildkiteClient } from '../../buildkite';
@@ -19,7 +18,7 @@ import { CiStatsClient } from '../client';
 import { buildCiStatsGroups, buildCiStatsSources } from './ci_stats_sources';
 import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const';
 import { loadRunOrderConfig } from './env_config';
-import { ftrManifest } from './ftr_manifests';
+import { getEnabledFtrConfigs } from './ftr_manifests';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs';
 import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups';
 import { shouldSkipFtrTests } from './selective_ftr';
@@ -75,25 +74,11 @@ export async function pickTestGroupRunOrder() {
   let jestIntegrationConfigs = integrationIncluded
     ? discoverJestIntegrationConfigs(config.limitSolutions)
     : [];
-
-  const ftrManifestEntriesByQueue = Map.groupBy(
-    ftrManifest.entries
-      .enabled()
-      .filter((entry) => {
-        if (config.ftrConfigPatterns === undefined) return true;
-        return config.ftrConfigPatterns.some((pattern) => minimatch(entry.path, pattern));
-      })
-      .filter((entry) => {
-        if (config.limitSolutions === undefined) return true;
-        return ['base', 'platform', ...config.limitSolutions].some(
-          (domain) => entry.domain === domain
-        );
-      })
-      .filter((entry) => entry.testChannels.intersection(config.ftrTestChannels).size > 0),
-    (entry) => entry.queue
+  const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(
+    config.ftrConfigPatterns,
+    config.limitSolutions
   );
-
-  if (!ftrConfigsIncluded) ftrManifestEntriesByQueue.clear();
+  if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
   if (selectiveTestingMergeBase && selectiveChangedFiles) {
     const directlyAffected = await getAffectedPackages(selectiveTestingMergeBase, {
@@ -116,7 +101,7 @@ export async function pickTestGroupRunOrder() {
         'info',
         'Selective testing: FTR configs skipped (excluded modules / irrelevant paths only).'
       );
-      ftrManifestEntriesByQueue.clear();
+      ftrConfigsByQueue.clear();
     }
 
     const selectiveCtx = await resolveSelectiveTestingContext(selectiveTestingMergeBase);
@@ -129,11 +114,7 @@ export async function pickTestGroupRunOrder() {
     }
   }
 
-  if (
-    !ftrManifestEntriesByQueue.size &&
-    !jestUnitConfigs.length &&
-    !jestIntegrationConfigs.length
-  ) {
+  if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
     if (config.useSelectiveTesting) {
       console.log('Selective testing: no Jest/FTR configs to run for this diff');
       bk.setAnnotation(
@@ -159,7 +140,7 @@ export async function pickTestGroupRunOrder() {
     groups: buildCiStatsGroups({
       jestUnitConfigs,
       jestIntegrationConfigs,
-      ftrManifestEntriesByQueue,
+      ftrConfigsByQueue,
       config,
     }),
   });
@@ -172,11 +153,8 @@ export async function pickTestGroupRunOrder() {
   labelJestSubgroups(unit, config.unitType);
   labelJestSubgroups(integration, config.integrationType);
 
-  const { functionalGroups, ftrRunOrder } = ftrManifestEntriesByQueue.size
-    ? collectFunctionalGroups(
-        getRunGroups(bk, types, config.functionalType),
-        ftrManifest.default.queue
-      )
+  const { functionalGroups, ftrRunOrder } = ftrConfigsByQueue.size
+    ? collectFunctionalGroups(getRunGroups(bk, types, config.functionalType), defaultQueue)
     : { functionalGroups: [], ftrRunOrder: {} };
 
   Fs.writeFileSync('jest_run_order.json', JSON.stringify({ unit, integration }, null, 2));
@@ -214,7 +192,7 @@ export async function pickTestGroupRunOrder() {
       buildFunctionalStepGroup({
         command: requireVariable(config.ftrConfigsScript, 'FTR_CONFIGS_SCRIPT'),
         functionalGroups,
-        defaultQueue: ftrManifest.default.queue,
+        defaultQueue,
         ftrExtraArgs: config.ftrExtraArgs,
         envFromLabels: config.envFromLabels,
         dependsOn: config.ftrConfigsDeps,

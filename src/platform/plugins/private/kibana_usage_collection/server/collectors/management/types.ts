@@ -113,7 +113,6 @@ export interface UsageStats {
   'data_views:cache_max_age': number;
   'discover:sampleSize': number;
   'discover:sampleRowsPerPage': number;
-  'discover:defaultEsqlQuery': string;
   defaultColumns: string[];
   'context:defaultSize': number;
   'context:tieBreakerFields': string[];

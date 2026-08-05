@@ -381,7 +381,7 @@ export function Wrapper({
         );
       })}
       <StreamsAppPageTemplate.Body
-        noPadding={tab === 'partitioning' || tab === 'processing'}
+        noPadding={tab === 'partitioning' || tab === 'processing' || tab === 'canvas'}
         paddingSize="m"
       >
         {topContent}

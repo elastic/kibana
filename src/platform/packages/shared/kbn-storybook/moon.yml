@@ -35,12 +35,9 @@ tags:
   - dev
   - group-platform
   - shared
-  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

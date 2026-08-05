@@ -12,8 +12,6 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import { LANG_IDENT_MODEL_ID } from '@kbn/ml-trained-models-utils';
-import { isNLPModelItem } from '@kbn/ml-common-types/trained_models';
 import type { MlLicense } from '../../../common/license/ml_license';
 import { getJobDetailsFromTrainedModel } from '../../saved_objects/util';
 import type { MLSavedObjectService } from '../../saved_objects';
@@ -170,64 +168,6 @@ export function getMlClient(
     }
     if (missingIds.length) {
       throw new MLModelNotFound(`No known model with id '${missingIds.join(',')}'`);
-    }
-  }
-
-  /**
-   * Validates that the supplied deployment IDs belong to the model ID in the request.
-   * Loads trained model stats for the model and checks each deployment ID against
-   * the deployments reported for that model. Wildcards are not allowed.
-   */
-  async function deploymentIdsCheck(p: MlClientParams) {
-    const deploymentIds = filterAll(getDeploymentIdsFromRequest(p));
-    if (deploymentIds.length === 0) {
-      return;
-    }
-
-    const [modelId] = filterAll(getModelIdsFromRequest(p as MlGetTrainedModelParams));
-    if (modelId === undefined || modelId === LANG_IDENT_MODEL_ID) {
-      return;
-    }
-
-    const hasWildcard = (id: string) => id.includes('*') || id.includes('?');
-    if (hasWildcard(modelId) || deploymentIds.some(hasWildcard)) {
-      throw new MLModelNotFound('Model and deployment ids must not contain wildcard characters');
-    }
-
-    const [{ trained_model_stats: modelStats }, { trained_model_configs: models }] =
-      await Promise.all([
-        mlClient.getTrainedModelsStats({
-          model_id: modelId,
-        }),
-        mlClient.getTrainedModels({
-          model_id: modelId,
-        }),
-      ]);
-
-    const [model] = models;
-
-    if (isNLPModelItem(model)) {
-      // if the model is pytorch, we need to check that the deployment ids are valid
-      const validDeploymentIds = new Set(
-        modelStats
-          .map((stats) => stats.deployment_stats?.deployment_id)
-          .filter((id): id is string => id !== undefined)
-      );
-
-      for (const id of deploymentIds) {
-        if (validDeploymentIds.has(id) === false) {
-          throw new MLModelNotFound(`No known deployment with id '${id}'`);
-        }
-      }
-    } else {
-      // Non-pytorch models should not have deployments
-      for (const stats of modelStats) {
-        if (stats.deployment_stats !== undefined) {
-          throw new MLModelNotFound(
-            `Unexpected deployment stats for non-pytorch model '${modelId}'`
-          );
-        }
-      }
     }
   }
 
@@ -619,7 +559,6 @@ export function getMlClient(
     },
     async updateTrainedModelDeployment(...p: Parameters<MlClient['updateTrainedModelDeployment']>) {
       await modelIdsCheck(p);
-      await deploymentIdsCheck(p);
 
       const { deployment_id: deploymentId, model_id: modelId, ...bodyParams } = p[0];
       // TODO use mlClient.updateTrainedModelDeployment when esClient is updated
@@ -636,7 +575,6 @@ export function getMlClient(
     },
     async stopTrainedModelDeployment(...p: Parameters<MlClient['stopTrainedModelDeployment']>) {
       await modelIdsCheck(p);
-      await deploymentIdsCheck(p);
       switchDeploymentId(p);
 
       return auditLogger.wrapTask(
@@ -647,7 +585,6 @@ export function getMlClient(
     },
     async inferTrainedModel(...p: Parameters<MlClient['inferTrainedModel']>) {
       await modelIdsCheck(p);
-      await deploymentIdsCheck(p);
       switchDeploymentId(p);
       // Temporary workaround for the incorrect inferTrainedModelDeployment function in the esclient
       if (
@@ -832,15 +769,6 @@ export function getDFAJobIdsFromRequest([params]: MlGetDFAParams): string[] {
 
 export function getModelIdsFromRequest([params]: MlGetTrainedModelParams): string[] {
   const id = params?.model_id;
-  const ids = Array.isArray(id) ? id : id?.split(',');
-  return ids || [];
-}
-
-export function getDeploymentIdsFromRequest([params]: MlClientParams): string[] {
-  const id =
-    params && 'deployment_id' in params
-      ? (params as { deployment_id?: string | string[] }).deployment_id
-      : undefined;
   const ids = Array.isArray(id) ? id : id?.split(',');
   return ids || [];
 }

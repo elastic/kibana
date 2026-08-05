@@ -1,5 +1,5 @@
 {
-  "sha1": "56247f3169ab0b11f08ee709cec7a31b23cb96f1",
+  "sha1": "469d470d4d8277dfb537e9b8b7224687a72831d1",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -15,8 +15,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 17,
-        "column": 25
+        "line": 22,
+        "column": 9
       }
     },
     {
@@ -29,8 +29,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 76,
-        "column": 19
+        "line": 66,
+        "column": 9
       }
     },
     {
@@ -43,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 157,
-        "column": 99
+        "line": 149,
+        "column": 9
       }
     },
     {
@@ -57,8 +57,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 221,
-        "column": 10
+        "line": 213,
+        "column": 9
       }
     },
     {
@@ -71,8 +71,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 226,
-        "column": 18
+        "line": 222,
+        "column": 9
       }
     },
     {
@@ -87,8 +87,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_footer.spec.ts",
-        "line": 17,
-        "column": 25
+        "line": 22,
+        "column": 9
       }
     },
     {
@@ -103,8 +103,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_footer.spec.ts",
-        "line": 38,
-        "column": 15
+        "line": 46,
+        "column": 9
       }
     },
     {
@@ -119,8 +119,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_footer.spec.ts",
-        "line": 62,
-        "column": 13
+        "line": 73,
+        "column": 9
       }
     },
     {
@@ -133,8 +133,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 17,
-        "column": 61
+        "line": 23,
+        "column": 9
       }
     },
     {
@@ -147,8 +147,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 55,
-        "column": 17
+        "line": 53,
+        "column": 9
       }
     },
     {
@@ -161,8 +161,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 106,
-        "column": 15
+        "line": 87,
+        "column": 9
       }
     },
     {
@@ -175,8 +175,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 130,
-        "column": 20
+        "line": 117,
+        "column": 9
       }
     },
     {
@@ -189,8 +189,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 137,
-        "column": 25
+        "line": 124,
+        "column": 9
       }
     }
   ]

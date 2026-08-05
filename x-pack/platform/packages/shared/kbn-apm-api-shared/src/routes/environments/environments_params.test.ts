@@ -7,7 +7,6 @@
 
 import { expectParseError, expectParseSuccess } from '@kbn/zod-helpers/v4';
 import { environmentsRoute } from './environments';
-import { unifiedEnvironmentsRoute } from './unified_environments';
 
 describe('environmentsRoute params', () => {
   it('accepts a range without serviceName', () => {
@@ -31,25 +30,5 @@ describe('environmentsRoute params', () => {
 
   it('rejects a missing required range field', () => {
     expectParseError(environmentsRoute.params!.shape.query.safeParse({ serviceName: 'x' }));
-  });
-});
-
-describe('unifiedEnvironmentsRoute params', () => {
-  it('accepts a valid path and range query', () => {
-    expectParseSuccess(
-      unifiedEnvironmentsRoute.params!.safeParse({
-        path: { serviceName: 'opbeans-java' },
-        query: { start: '2021-01-01T00:00:00.000Z', end: '2021-01-02T00:00:00.000Z' },
-      })
-    );
-  });
-
-  it('rejects a serviceName exceeding MAX_SERVICE_NAME_LENGTH', () => {
-    expectParseError(
-      unifiedEnvironmentsRoute.params!.safeParse({
-        path: { serviceName: 'a'.repeat(1025) },
-        query: { start: '2021-01-01T00:00:00.000Z', end: '2021-01-02T00:00:00.000Z' },
-      })
-    );
   });
 });

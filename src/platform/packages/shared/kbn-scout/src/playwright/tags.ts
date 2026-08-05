@@ -32,17 +32,15 @@ export const getPlaywrightTagsFor = (
 export const tags = {
   stateful: {
     classic: getPlaywrightTagsFor('stateful', 'classic'),
-
-    // `search` / `observability` / `security` are intentionally not exposed for `stateful`:
-    // CI only schedules stateful runs tagged `classic` (see `getServerRunFlagsFromTags` in
-    // `../tests_discovery/tag_utils.ts`), so other domains would be discovered but never run.
-    // Use `tags.stateful.classic` instead.
+    search: getPlaywrightTagsFor('stateful', 'search'),
+    observability: getPlaywrightTagsFor('stateful', 'observability_complete'),
+    security: getPlaywrightTagsFor('stateful', 'security_complete'),
 
     /**
-     * Tags to target all supported stateful deployment types
+     * Tags to target all stateful deployment types
      */
     get all(): string[] {
-      return [...this.classic];
+      return [...this.classic, ...this.search, ...this.observability, ...this.security];
     },
   },
   serverless: {

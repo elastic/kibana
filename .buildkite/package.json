@@ -11,7 +11,7 @@
     "@octokit/rest": "^22.0.1",
     "fallow": "2.76.0",
     "@slack/web-api": "^7.0.0",
-    "adm-zip": "^0.6.0",
+    "adm-zip": "^0.5.16",
     "axios": "^1.13.4",
     "diff": "^9.0.0",
     "globby": "^11.1.0",
@@ -41,9 +41,6 @@
   },
   "imports": {
     "#pipeline-utils": "./pipeline-utils/index.ts",
-    "#pipeline-utils/*": [
-      "./pipeline-utils/*.ts",
-      "./pipeline-utils/*/index.ts"
-    ]
+    "#pipeline-utils/*": "./pipeline-utils/*"
   }
 }

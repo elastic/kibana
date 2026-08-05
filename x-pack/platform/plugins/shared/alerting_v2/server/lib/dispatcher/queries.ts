@@ -6,8 +6,11 @@
  */
 
 import { esql, type EsqlRequest } from '@elastic/esql';
-import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import type { AlertEventType } from '../../resources/datastreams/alert_events';
+import { ALERT_ACTIONS_DATA_STREAM } from '../../resources/datastreams/alert_actions';
+import {
+  ALERT_EVENTS_DATA_STREAM,
+  type AlertEventType,
+} from '../../resources/datastreams/alert_events';
 import type { AlertEpisode, ActionGroupId } from './types';
 import { episodeSubject, SUBJECT_SEPARATOR } from './steps/utils/subject';
 

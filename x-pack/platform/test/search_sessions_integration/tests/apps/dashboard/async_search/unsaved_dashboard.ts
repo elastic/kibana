@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-/**
- * Migration recommendation: MIGRATE TO SCOUT. Important edge case.
- */
-
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 

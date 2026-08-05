@@ -160,10 +160,6 @@ describe('ApmSystem', () => {
       });
 
       it('sets a low-cardinality name on the page load transaction when closing it', async () => {
-        const locationSpy = jest.spyOn(window, 'location', 'get').mockReturnValue({
-          pathname: '/app/myapp/some/raw/path',
-        } as Location);
-
         const apmSystem = new ApmSystem({ active: true });
         const currentAppId$ = new Subject<string>();
         const mockTransaction: MockedKeys<Transaction> = {
@@ -186,41 +182,6 @@ describe('ApmSystem', () => {
         currentAppId$.next('myapp');
 
         expect(mockTransaction.name).toBe('/app/myapp');
-
-        locationSpy.mockRestore();
-      });
-
-      it('closes non-app page loads with a stable pathname-based name', async () => {
-        const locationSpy = jest.spyOn(window, 'location', 'get').mockReturnValue({
-          pathname: '/login',
-        } as Location);
-
-        const apmSystem = new ApmSystem({ active: true });
-        const currentAppId$ = new Subject<string>();
-        const mockTransaction: MockedKeys<Transaction> = {
-          type: 'page-load',
-          name: '/login',
-          // @ts-expect-error 2345
-          block: jest.fn(),
-          mark: jest.fn(),
-          end: jest.fn(),
-          addLabels: jest.fn(),
-        };
-        apmMock.getCurrentTransaction.mockReturnValue(mockTransaction);
-        await apmSystem.setup();
-        await apmSystem.start({
-          application: {
-            currentAppId$,
-          } as any as InternalApplicationStart,
-          executionContext: executionContextServiceMock.createInternalStartContract(),
-        });
-
-        await new Promise<void>((resolve) => queueMicrotask(() => resolve()));
-
-        expect(mockTransaction.name).toBe('/login');
-        expect(mockTransaction.end).toHaveBeenCalledTimes(1);
-
-        locationSpy.mockRestore();
       });
     });
 

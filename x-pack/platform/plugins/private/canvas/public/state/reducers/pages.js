@@ -6,7 +6,7 @@
  */
 
 import { handleActions } from 'redux-actions';
-import { set, del, insert } from '../../../common/lib/object_path_immutable';
+import { set, del, insert } from 'object-path-immutable';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import { getId } from '../../lib/get_id';
 import { getDefaultPage } from '../defaults';

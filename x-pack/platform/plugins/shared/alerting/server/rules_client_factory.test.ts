@@ -843,68 +843,6 @@ describe('RulesClientFactory', () => {
     );
   });
 
-  test('getAuthenticationAPIKey() throws a 400 when the request is authenticated with a raw organization-level UIAM API key', async () => {
-    const factory = new RulesClientFactory();
-    factory.initialize({
-      ...rulesClientFactoryParams,
-      securityService,
-      securityPluginSetup,
-      securityPluginStart,
-      shouldGrantUiam: true,
-    });
-
-    // Organization-level keys are presented as the raw `essu_` secret, not `base64(id:key)`
-    const request = mockRouter.createKibanaRequest({
-      headers: {
-        authorization: `ApiKey essu_raw_org_level_key`,
-      },
-    });
-
-    await factory.create(request, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
-
-    let thrownError;
-    try {
-      constructorCall.getAuthenticationAPIKey('test');
-    } catch (e) {
-      thrownError = e;
-    }
-    expect(thrownError.isBoom).toBe(true);
-    expect(thrownError.output.statusCode).toBe(400);
-    expect(thrownError.message).toMatchInlineSnapshot(
-      `"Cannot use an organization-level API key to create or enable rule \\"test\\". Organization-level API keys are not supported for rule operations; use a project-scoped Elasticsearch API key instead."`
-    );
-  });
-
-  test('getAuthenticationAPIKey() returns uiamResult for a framework-granted UIAM API key encoded as base64(id:key)', async () => {
-    const factory = new RulesClientFactory();
-    factory.initialize({
-      ...rulesClientFactoryParams,
-      securityService,
-      securityPluginSetup,
-      securityPluginStart,
-      shouldGrantUiam: true,
-    });
-
-    const request = mockRouter.createKibanaRequest({
-      headers: {
-        authorization: `ApiKey ${Buffer.from('uiam-key-id:essu_granted_key').toString('base64')}`,
-      },
-    });
-
-    await factory.create(request, savedObjectsService);
-    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
-
-    expect(constructorCall.getAuthenticationAPIKey('test')).toEqual({
-      apiKeysEnabled: true,
-      uiamResult: {
-        name: 'uiam-test',
-        id: 'uiam-key-id',
-        api_key: 'essu_granted_key',
-      },
-    });
-  });
-
   test('cloneAPIKey is always defined on the context', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({

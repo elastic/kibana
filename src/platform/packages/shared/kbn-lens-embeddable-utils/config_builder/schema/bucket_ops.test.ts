@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import {
   bucketDateHistogramOperationSchema,
   bucketTermsOperationSchema,
@@ -33,21 +32,18 @@ describe('Bucket Operation Schemas', () => {
         suggested_interval: 'auto',
         include_empty_rows: true,
         use_original_time_range: true,
-        drop_partial_intervals: false,
       };
 
-      const validated = bucketDateHistogramOperationSchema.parse(input);
+      const validated = bucketDateHistogramOperationSchema.validate(input);
       expect(validated).toEqual(input);
     });
 
     it('requires operation and field', () => {
-      const result = bucketDateHistogramOperationSchema.safeParse({
-        operation: 'date_histogram',
-      });
-      expectPrettyError(result).toMatchInlineSnapshot(`
-        "✖ Invalid input: expected string, received undefined
-          → at field"
-      `);
+      expect(() =>
+        bucketDateHistogramOperationSchema.validate({
+          operation: 'date_histogram',
+        })
+      ).toThrow(/\[field\]: expected value of type/);
     });
   });
 
@@ -57,7 +53,7 @@ describe('Bucket Operation Schemas', () => {
         operation: 'terms',
         fields: ['category'],
       };
-      const validated = bucketTermsOperationSchema.parse(input);
+      const validated = bucketTermsOperationSchema.validate(input);
       expect(validated).toEqual({ ...input, limit: LENS_TERMS_LIMIT_DEFAULT });
     });
 
@@ -84,7 +80,7 @@ describe('Bucket Operation Schemas', () => {
         },
       };
 
-      const validated = bucketTermsOperationSchema.parse(input);
+      const validated = bucketTermsOperationSchema.validate(input);
       expect(validated).toEqual(input);
     });
 
@@ -117,7 +113,7 @@ describe('Bucket Operation Schemas', () => {
           rank_by: rankBy,
         };
 
-        const validated = bucketTermsOperationSchema.parse(input);
+        const validated = bucketTermsOperationSchema.validate(input);
         expect(validated.rank_by).toEqual(rankBy);
       });
     });
@@ -135,7 +131,7 @@ describe('Bucket Operation Schemas', () => {
         },
       };
 
-      const validated = bucketTermsOperationSchema.parse(input);
+      const validated = bucketTermsOperationSchema.validate(input);
       expect(validated.rank_by).toEqual(input.rank_by);
     });
 
@@ -151,7 +147,7 @@ describe('Bucket Operation Schemas', () => {
         },
       };
 
-      const validated = bucketTermsOperationSchema.parse(input);
+      const validated = bucketTermsOperationSchema.validate(input);
       expect(validated.rank_by).toEqual({
         ...input.rank_by,
         percentile: LENS_PERCENTILE_DEFAULT_VALUE,
@@ -171,7 +167,7 @@ describe('Bucket Operation Schemas', () => {
         },
       };
 
-      const validated = bucketTermsOperationSchema.parse(input);
+      const validated = bucketTermsOperationSchema.validate(input);
       expect(validated.rank_by).toEqual(input.rank_by);
     });
 
@@ -187,7 +183,7 @@ describe('Bucket Operation Schemas', () => {
         },
       };
 
-      const validated = bucketTermsOperationSchema.parse(input);
+      const validated = bucketTermsOperationSchema.validate(input);
       expect(validated.rank_by).toEqual({
         ...input.rank_by,
         rank: LENS_PERCENTILE_RANK_DEFAULT_VALUE,
@@ -205,7 +201,7 @@ describe('Bucket Operation Schemas', () => {
         },
       };
 
-      const validated = bucketTermsOperationSchema.parse(input);
+      const validated = bucketTermsOperationSchema.validate(input);
       expect(validated.rank_by).toEqual(input.rank_by);
     });
 
@@ -221,7 +217,7 @@ describe('Bucket Operation Schemas', () => {
         },
       };
 
-      const validated = bucketTermsOperationSchema.parse(input);
+      const validated = bucketTermsOperationSchema.validate(input);
       expect(validated.rank_by).toEqual(input.rank_by);
     });
 
@@ -244,7 +240,7 @@ describe('Bucket Operation Schemas', () => {
             direction: 'desc',
           },
         };
-        expect(() => bucketTermsOperationSchema.parse(input)).toThrow();
+        expect(() => bucketTermsOperationSchema.validate(input)).toThrow();
       });
     });
   });
@@ -264,7 +260,7 @@ describe('Bucket Operation Schemas', () => {
         ],
       };
 
-      const validated = bucketFiltersOperationSchema.parse(input);
+      const validated = bucketFiltersOperationSchema.validate(input);
       expect(validated).toEqual(input);
     });
   });
@@ -276,7 +272,7 @@ describe('Bucket Operation Schemas', () => {
         field: 'price',
       };
 
-      const validated = bucketHistogramOperationSchema.parse(input);
+      const validated = bucketHistogramOperationSchema.validate(input);
       expect(validated).toEqual({
         ...input,
         granularity: LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
@@ -285,25 +281,21 @@ describe('Bucket Operation Schemas', () => {
     });
 
     it('enforces granularity limits', () => {
-      const result1 = bucketHistogramOperationSchema.safeParse({
-        operation: 'histogram',
-        field: 'price',
-        granularity: 0,
-      });
-      expectPrettyError(result1).toMatchInlineSnapshot(`
-        "✖ Too small: expected number to be >=1
-          → at granularity"
-      `);
+      expect(() =>
+        bucketHistogramOperationSchema.validate({
+          operation: 'histogram',
+          field: 'price',
+          granularity: 0,
+        })
+      ).toThrow();
 
-      const result2 = bucketHistogramOperationSchema.safeParse({
-        operation: 'histogram',
-        field: 'price',
-        granularity: 8,
-      });
-      expectPrettyError(result2).toMatchInlineSnapshot(`
-        "✖ Too big: expected number to be <=7
-          → at granularity"
-      `);
+      expect(() =>
+        bucketHistogramOperationSchema.validate({
+          operation: 'histogram',
+          field: 'price',
+          granularity: 8,
+        })
+      ).toThrow();
     });
   });
 
@@ -319,7 +311,7 @@ describe('Bucket Operation Schemas', () => {
         ],
       };
 
-      const validated = bucketRangesOperationSchema.parse(input);
+      const validated = bucketRangesOperationSchema.validate(input);
       expect(validated).toEqual(input);
     });
   });
@@ -333,7 +325,6 @@ describe('Bucket Operation Schemas', () => {
           suggested_interval: 'auto',
           include_empty_rows: true,
           use_original_time_range: true,
-          drop_partial_intervals: false,
         },
         {
           operation: 'terms',
@@ -363,17 +354,18 @@ describe('Bucket Operation Schemas', () => {
       ];
 
       operations.forEach((op) => {
-        const validated = bucketOperationDefinitionSchema.parse(op);
+        const validated = bucketOperationDefinitionSchema.validate(op);
         expect(validated).toEqual(op);
       });
     });
 
     it('rejects invalid operation types', () => {
-      const result = bucketOperationDefinitionSchema.safeParse({
-        operation: 'invalid_operation',
-        field: 'test',
-      });
-      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      expect(() =>
+        bucketOperationDefinitionSchema.validate({
+          operation: 'invalid_operation',
+          field: 'test',
+        })
+      ).toThrow();
     });
   });
 });

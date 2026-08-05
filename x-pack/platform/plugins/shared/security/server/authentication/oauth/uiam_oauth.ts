@@ -142,8 +142,7 @@ export class UiamOAuth implements UiamOAuthType {
   async listConnections(
     request: KibanaRequest,
     clientId?: string,
-    connectionId?: string,
-    projectId?: string
+    connectionId?: string
   ): Promise<{ connections: UiamOAuthConnectionResponse[] } | null> {
     if (!this.license.isEnabled()) {
       this.logger.debug(
@@ -156,12 +155,7 @@ export class UiamOAuth implements UiamOAuthType {
     this.logger.debug('Attempting to list OAuth connections');
 
     try {
-      const result = await this.uiam.listOAuthConnections(
-        accessToken,
-        clientId,
-        connectionId,
-        projectId
-      );
+      const result = await this.uiam.listOAuthConnections(accessToken, clientId, connectionId);
       this.logger.debug('OAuth connections listed successfully');
       return result;
     } catch (e) {

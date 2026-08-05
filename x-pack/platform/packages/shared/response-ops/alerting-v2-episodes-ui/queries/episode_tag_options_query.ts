@@ -6,7 +6,8 @@
  */
 
 import { esql } from '@elastic/esql';
-import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { ALERT_ACTIONS_DATA_STREAM } from '../constants';
+
 export interface EpisodeTagOptionRow {
   tags: string;
 }

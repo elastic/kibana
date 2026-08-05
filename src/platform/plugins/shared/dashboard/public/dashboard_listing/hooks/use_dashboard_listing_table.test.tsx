@@ -9,7 +9,6 @@
 
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { renderHook, act } from '@testing-library/react';
-import { PAGINATION_MAX_SIZE } from '@kbn/as-code-shared-schemas';
 import { coreServices } from '../../services/kibana_services';
 import { dashboardClient, findService } from '../../dashboard_client';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
@@ -53,7 +52,6 @@ jest.mock('../../dashboard_client', () => ({
   },
   findService: {
     findById: jest.fn(),
-    search: jest.fn().mockResolvedValue({ data: [], meta: { total: 0, page: 1, per_page: 20 } }),
   },
   checkForDuplicateDashboardTitle: jest.fn(),
 }));
@@ -71,7 +69,6 @@ describe('useDashboardListingTable', () => {
     dashboardBackupService.clearState = clearStateMock;
     coreServices.uiSettings.get = getUiSettingsMock;
     coreServices.notifications.toasts.addError = jest.fn();
-    coreServices.userProfile.getCurrent = jest.fn().mockResolvedValue({ uid: 'test-user' });
   });
 
   test('should return the correct initial hasInitialFetchReturned state', () => {
@@ -322,41 +319,6 @@ describe('useDashboardListingTable', () => {
     );
 
     expect(result.current.tableListViewTableProps.editItem).toBeUndefined();
-  });
-
-  describe('findItems per_page clamping', () => {
-    test('passes listingLimit directly when it is below PAGINATION_MAX_SIZE', async () => {
-      // default mock returns 20 for savedObjects:listingLimit
-      const { result } = renderHook(() =>
-        useDashboardListingTable({ getDashboardUrl, goToDashboard })
-      );
-
-      await act(async () => {
-        await result.current.tableListViewTableProps.findItems('');
-      });
-
-      expect(findService.search).toHaveBeenCalledWith(expect.objectContaining({ per_page: 20 }));
-    });
-
-    test('clamps per_page to PAGINATION_MAX_SIZE when listingLimit exceeds it', async () => {
-      coreServices.uiSettings.get = jest.fn().mockImplementation((key) => {
-        if (key === 'savedObjects:listingLimit') return PAGINATION_MAX_SIZE + 9000;
-        if (key === 'savedObjects:perPage') return 5;
-        return null;
-      });
-
-      const { result } = renderHook(() =>
-        useDashboardListingTable({ getDashboardUrl, goToDashboard })
-      );
-
-      await act(async () => {
-        await result.current.tableListViewTableProps.findItems('');
-      });
-
-      expect(findService.search).toHaveBeenCalledWith(
-        expect.objectContaining({ per_page: PAGINATION_MAX_SIZE })
-      );
-    });
   });
 
   describe('rowItemActions', () => {

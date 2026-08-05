@@ -5,21 +5,28 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 
-import { lensCMGetResultSchema } from '../../../../../content_management/zod';
-import { lensItemMetaSchema, lensResponseItemSchema } from './common';
+import { lensCMGetResultSchema } from '../../../../../content_management';
+import { lensResponseItemSchema } from './common';
 
-export const lensGetRequestParamsSchema = z
-  .object({
-    id: z.string().meta({
-      description: 'The saved object id of a Lens visualization.',
+export const lensGetRequestParamsSchema = schema.object(
+  {
+    id: schema.string({
+      meta: {
+        description: 'The saved object id of a Lens visualization.',
+      },
     }),
-  })
-  .strict();
+  },
+  { unknowns: 'forbid' }
+);
 
-export const lensGetResponseBodySchema = lensResponseItemSchema
-  .extend({
-    meta: lensItemMetaSchema.extend(lensCMGetResultSchema.shape.meta.shape).strict(),
-  })
-  .strict();
+export const lensGetResponseBodySchema = lensResponseItemSchema.extends({
+  meta: schema.object(
+    {
+      ...lensCMGetResultSchema.getPropSchemas().meta.getPropSchemas(), // include CM meta data
+      ...lensResponseItemSchema.getPropSchemas().meta.getPropSchemas(),
+    },
+    { unknowns: 'forbid' }
+  ),
+});
