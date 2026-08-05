@@ -46,6 +46,7 @@ env:
 
 imports:
   - .github/workflows/buildkite-cli-setup.md
+  - .github/workflows/shared/app-dex-agents-otel.md
 
 engine:
   id: claude
@@ -55,7 +56,6 @@ engine:
   env:
     ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
     ANTHROPIC_BASE_URL: https://openrouter.ai/api
-    ENABLE_PROMPT_CACHING_1H: '1'
     ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-4.8[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
     ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
