@@ -212,7 +212,7 @@ describe('EventClient', () => {
       );
     });
 
-    it('excludes pending events when no status filter is provided', async () => {
+    it('applies no status filter when no status is provided', async () => {
       const { client, query } = createSearchClient({
         hits: [],
         total: 0,
@@ -223,13 +223,10 @@ describe('EventClient', () => {
       const dataQuery = query.mock.calls
         .map((call) => (call[0] as { query: string }).query)
         .find((q) => !q.includes('STATS total'));
-      expect(dataQuery).toContain('status != "pending"');
-      expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
-        dataQuery!.indexOf('status !=')
-      );
+      expect(dataQuery).not.toContain('status');
     });
 
-    it('does not exclude pending when filtering by explicit event ids without status', async () => {
+    it('filters by explicit event ids without a status filter', async () => {
       const { client, query } = createSearchClient({
         hits: [],
         total: 0,
@@ -241,12 +238,11 @@ describe('EventClient', () => {
         .map((call) => (call[0] as { query: string }).query)
         .find((q) => !q.includes('STATS total'));
       expect(dataQuery).toContain('event_id IN ("checkout-failure")');
-      expect(dataQuery).not.toContain('status != "pending"');
     });
   });
 
   describe('findLatestActive', () => {
-    it('filters to pending and open statuses after latest-per-event reduction', async () => {
+    it('filters to open status after latest-per-event reduction', async () => {
       const { client, query } = createSearchClient({
         hits: [],
         total: 0,
@@ -261,7 +257,7 @@ describe('EventClient', () => {
       const dataQuery = query.mock.calls
         .map((call) => (call[0] as { query: string }).query)
         .find((q) => !q.includes('STATS total'));
-      expect(dataQuery).toContain('status IN ("pending", "open")');
+      expect(dataQuery).toContain('status IN ("open")');
       expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
         dataQuery!.indexOf('status IN')
       );

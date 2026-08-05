@@ -1,5 +1,5 @@
 {
-  "sha1": "4a68bfade4be31382f185e565812712a3e61db3d",
+  "sha1": "b2f60de567fdccc69c507c1d89b4229831a813ed",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -1270,6 +1270,22 @@
       }
     },
     {
+      "id": "459bbf6dc44299c-f03e132b75a9c25",
+      "title": "Agent Builder — relevant-skills stays off without a fast model API does not run skill selection or break converse when no fast model is configured",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_relevant_skills_api.spec.ts",
+        "line": 46,
+        "column": 38
+      }
+    },
+    {
       "id": "8848135e0a52b50-f35e0e11e25fd7b",
       "title": "Agent Builder — converse simple & multi-round API [local] simple conversation persists title and response",
       "expectedStatus": "passed",
@@ -1443,6 +1459,22 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tracing_snapshot_api.spec.ts",
         "line": 205,
         "column": 9
+      }
+    },
+    {
+      "id": "0a5eb34711418ba-d87979bf64300be",
+      "title": "MCP connector — tools with outputSchema listTools succeeds when server advertises tools with outputSchema",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/mcp_connector_output_schema_api.spec.ts",
+        "line": 34,
+        "column": 47
       }
     },
     {
