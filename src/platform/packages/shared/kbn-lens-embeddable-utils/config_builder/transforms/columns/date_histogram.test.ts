@@ -56,7 +56,7 @@ describe('Date Histogram Transforms', () => {
       };
 
       const input: LensApiDateHistogramOperation =
-        bucketDateHistogramOperationSchema.parse(partialInput);
+        bucketDateHistogramOperationSchema.validate(partialInput);
 
       const result = fromDateHistogramLensApiToLensState(input);
 

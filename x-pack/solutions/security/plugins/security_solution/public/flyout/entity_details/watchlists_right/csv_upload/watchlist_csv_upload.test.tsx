@@ -198,7 +198,7 @@ describe('WatchlistCsvUpload', () => {
       fireEvent.click(getByTestId('watchlist-csv-upload-button'));
 
       await waitFor(() => {
-        expect(getByText(/2 rows added to the watchlist/)).toBeInTheDocument();
+        expect(getByText(/2 entities added to the watchlist/)).toBeInTheDocument();
       });
     });
 

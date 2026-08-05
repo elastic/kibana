@@ -50,7 +50,7 @@ export const FingerprintCol: React.FC<Props> = ({ cert }) => {
   if (!cert?.sha1 && !cert?.sha256) {
     return (
       <EuiToolTip content={FINGERPRINT_NOT_AVAILABLE_TOOLTIP}>
-        <EuiText tabIndex={0} size="s" color="subdued" data-test-subj="certFingerprintNotAvailable">
+        <EuiText size="s" color="subdued" data-test-subj="certFingerprintNotAvailable">
           {FINGERPRINT_NOT_AVAILABLE}
         </EuiText>
       </EuiToolTip>

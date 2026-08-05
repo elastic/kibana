@@ -30,7 +30,7 @@ export const usePutSynonymsSet = (
   return useMutation(
     async ({ synonymsSetId, forceWrite }: MutationArgs) => {
       return await http.put<SynonymsPutSynonymResponse>(
-        `/internal/search_synonyms/synonyms/${encodeURIComponent(synonymsSetId)}`,
+        `/internal/search_synonyms/synonyms/${synonymsSetId}`,
         {
           query: { forceWrite },
         }

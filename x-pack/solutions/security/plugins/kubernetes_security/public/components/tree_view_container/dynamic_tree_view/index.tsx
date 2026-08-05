@@ -314,7 +314,7 @@ const DynamicTreeViewItem = ({
       icon={<TreeViewIcon {...tree[depth].iconProps} />}
       label={
         <EuiToolTip anchorClassName="eui-textTruncate" content={`${clusterLevel}: ${aggData.key}`}>
-          <span tabIndex={0}>{aggData.key_as_string || aggData.key}</span>
+          <span>{aggData.key_as_string || aggData.key}</span>
         </EuiToolTip>
       }
       buttonRef={(el: HTMLButtonElement) => (buttonRef.current[aggData.key] = el)}

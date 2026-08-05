@@ -27,7 +27,7 @@ export const config: PluginConfigDescriptor<PluginConfig> = {
   },
 };
 
-const pluginModule = new ContainerModule((options) => {
+export const module = new ContainerModule((options) => {
   bindOnSetup(options);
   bindAgentBuilder(options);
   bindOnStart(options);
@@ -40,12 +40,8 @@ const pluginModule = new ContainerModule((options) => {
   bindTasks(options);
 });
 
-export { pluginModule as module };
-
 export type { PluginConfig as AlertingV2Config } from './config';
 export type { AlertingServerStart, RulesClientApi, ActionPolicyClientApi } from './types';
-export type { FindRulesArgs } from './lib/rules_client';
-export type { FindActionPoliciesArgs } from './lib/action_policy_client';
 
 /**
  * Public catalog of machine-readable error codes emitted by alerting v2 HTTP

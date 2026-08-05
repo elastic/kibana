@@ -18,7 +18,7 @@ import {
   fromStoredSearchEmbeddableByRef,
   fromStoredSearchEmbeddableByValue,
   fromStoredGrid,
-  fromStoredRowHeight,
+  fromStoredHeight,
   toDiscoverSessionPanelOverrides,
   fromStoredSort,
   fromStoredTab,
@@ -294,6 +294,8 @@ describe('search embeddable transform utils', () => {
             sort: [{ name: '@timestamp', direction: 'desc' }],
             column_order: ['message'],
             view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+            density: DataGridDensity.COMPACT,
+            header_row_height: 3,
             data_source: {
               type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
               ref_id: 'c7d7a1f5-19da-4ba9-af15-5919e8cd2528',
@@ -305,15 +307,6 @@ describe('search embeddable transform utils', () => {
       const result = fromStoredSearchEmbeddableByValue(storedState);
 
       expect(result).toEqual(expected);
-      const { state: roundTripped } = toStoredSearchEmbeddableByValue(result);
-      const [roundTrippedTab] = roundTripped.attributes.tabs ?? [];
-
-      if (!roundTrippedTab) {
-        throw new Error('Expected a round-tripped tab');
-      }
-
-      expect(roundTrippedTab.attributes.density).toBeUndefined();
-      expect(roundTrippedTab.attributes.headerRowHeight).toBeUndefined();
     });
   });
 
@@ -941,14 +934,18 @@ describe('search embeddable transform utils', () => {
     });
   });
 
-  describe('fromStoredRowHeight', () => {
+  describe('fromStoredHeight', () => {
     it('returns numeric height as-is', () => {
-      expect(fromStoredRowHeight(3)).toBe(3);
-      expect(fromStoredRowHeight(5)).toBe(5);
+      expect(fromStoredHeight(3)).toBe(3);
+      expect(fromStoredHeight(5)).toBe(5);
     });
 
     it('returns "auto" when height is -1', () => {
-      expect(fromStoredRowHeight(-1)).toBe('auto');
+      expect(fromStoredHeight(-1)).toBe('auto');
+    });
+
+    it('defaults to 3 when height is undefined', () => {
+      expect(fromStoredHeight(undefined as unknown as number)).toBe(3);
     });
   });
 

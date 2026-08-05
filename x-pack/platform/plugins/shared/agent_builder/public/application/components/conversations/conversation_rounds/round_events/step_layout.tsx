@@ -19,7 +19,6 @@ interface StepLayoutProps {
   label: ReactNode;
   onClick?: () => void;
   isExpanded?: boolean;
-  isExpandable?: boolean;
   expansion?: ReactNode;
   ebtAction?: ConversationAction;
 }
@@ -28,7 +27,6 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
   label,
   onClick,
   isExpanded = false,
-  isExpandable = true,
   expansion,
   ebtAction,
 }) => {
@@ -81,11 +79,11 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
           : {})}
       >
         <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-        {isClickable && isExpandable && (
+        {isClickable && (
           <EuiFlexItem grow={false}>
             <EuiIcon
-              type={isExpanded ? 'arrowUp' : 'arrowDown'}
-              color={euiTheme.colors.textDisabled}
+              type={isExpanded ? 'arrowDown' : 'arrowRight'}
+              color="subdued"
               size="s"
               aria-hidden={true}
             />

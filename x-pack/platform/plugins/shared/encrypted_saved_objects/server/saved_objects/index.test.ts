@@ -9,7 +9,6 @@ import type {
   ISavedObjectsRepository,
   ISavedObjectTypeRegistry,
   SavedObject,
-  SavedObjectsFindResult,
 } from '@kbn/core/server';
 import {
   coreMock,
@@ -254,12 +253,11 @@ describe('#setupSavedObjects', () => {
     });
 
     it('does not call decryptAttributes and includes type error if Saved Object type is not registered', async () => {
-      const mockSavedObject: SavedObjectsFindResult = {
+      const mockSavedObject: SavedObject = {
         id: 'some-id',
         type: 'not-known-type',
         attributes: { attrOne: 'one', attrSecret: '*secret*' },
         references: [],
-        score: 0,
         error: errorContent(createUnsupportedEncryptedTypeError('not-known-type')),
       };
       mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockReturnValue({

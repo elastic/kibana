@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  SavedObjectsErrorHelpers,
-  isSavedObjectErrorResult,
-  type CoreStart,
-} from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, type CoreStart } from '@kbn/core/server';
 import { resolveEffectivePolicy, type FieldRule } from '@kbn/anonymization-common';
 import type { Logger } from '@kbn/logging';
 import type { ProfilesRepository } from './repository';
@@ -53,9 +49,7 @@ export const createAnonymizationPolicyService = ({
       const result = await namespaceScopedClient.resolve<{
         title?: string;
       }>('index-pattern', dataViewId);
-      const title = isSavedObjectErrorResult(result.saved_object)
-        ? undefined
-        : result.saved_object.attributes?.title;
+      const title = result.saved_object?.attributes?.title;
       if (!title || typeof title !== 'string') {
         return [];
       }

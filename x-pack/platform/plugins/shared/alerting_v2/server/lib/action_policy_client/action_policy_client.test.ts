@@ -7,7 +7,7 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   type ActionPolicySavedObjectAttributes,
@@ -25,7 +25,6 @@ import type { UserService } from '../services/user_service/user_service';
 import { createUserService } from '../services/user_service/user_service.mock';
 import type { LoggerService } from '../services/logger_service/logger_service';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
-import { ALERTING_V2_LOG_CODES } from '../errors/error_codes';
 import { ActionPolicyClient } from './action_policy_client';
 
 jest.mock('@kbn/eval-kql', () => ({
@@ -43,7 +42,6 @@ describe('ActionPolicyClient', () => {
   let userProfileService: jest.Mocked<UserProfileServiceStart>;
   let apiKeyService: jest.Mocked<ApiKeyServiceContract>;
   let loggerService: LoggerService;
-  let mockLogger: jest.Mocked<Logger>;
   let mockEncryptedSavedObjects: ReturnType<typeof createMockEncryptedSavedObjects>;
   let mockEsoClient: ReturnType<ReturnType<typeof createMockEncryptedSavedObjects>['getClient']>;
 
@@ -65,7 +63,7 @@ describe('ActionPolicyClient', () => {
     });
     ({ userService, userProfileService } = createUserService());
     apiKeyService = createMockApiKeyService();
-    ({ loggerService, mockLogger } = createLoggerService());
+    ({ loggerService } = createLoggerService());
     mockEncryptedSavedObjects = createMockEncryptedSavedObjects((id) => {
       if (id === 'policy-id-update-1') return { apiKey: 'old-api-key', createdByUser: false };
       if (id === 'policy-id-update-key-1') return { apiKey: 'old-api-key', createdByUser: false };
@@ -2323,36 +2321,35 @@ describe('ActionPolicyClient', () => {
       ]);
     });
 
-    /**
-     * Wires the PIT finder to return a decrypted auth block per id so the
-     * bulk-delete path has keys to queue for invalidation.
-     */
-    const mockDecryptedAuthFor = (
-      policies: Array<{ id: string; apiKey: string; createdByUser?: boolean }>
-    ) => {
+    it('invalidates API keys for successfully bulk-deleted policies', async () => {
       const esoClient = mockEncryptedSavedObjects.getClient();
       (esoClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce(
         {
           async *find() {
             yield {
-              saved_objects: policies.map(({ id, apiKey, createdByUser = false }) => ({
-                id,
-                type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-                attributes: { auth: { apiKey, createdByUser, owner: 'test-user' } },
-                references: [],
-              })),
+              saved_objects: [
+                {
+                  id: 'policy-del-1',
+                  type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    auth: { apiKey: 'key-1', createdByUser: false, owner: 'test-user' },
+                  },
+                  references: [],
+                },
+                {
+                  id: 'policy-del-2',
+                  type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    auth: { apiKey: 'key-2', createdByUser: false, owner: 'test-user' },
+                  },
+                  references: [],
+                },
+              ],
             };
           },
           close: jest.fn(),
         }
       );
-    };
-
-    it('invalidates API keys for bulk-deleted policies in a single batched call', async () => {
-      mockDecryptedAuthFor([
-        { id: 'policy-del-1', apiKey: 'key-1' },
-        { id: 'policy-del-2', apiKey: 'key-2' },
-      ]);
       mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
         statuses: [
           { id: 'policy-del-1', type: ACTION_POLICY_SAVED_OBJECT_TYPE, success: true },
@@ -2365,131 +2362,32 @@ describe('ActionPolicyClient', () => {
       });
 
       expect(res).toEqual({ affected_count: 2, errors: [] });
-      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledTimes(1);
-      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['key-1', 'key-2']);
-    });
-
-    it('queues API keys for invalidation before deleting the saved objects', async () => {
-      mockDecryptedAuthFor([{ id: 'policy-del-order', apiKey: 'key-order' }]);
-      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
-        statuses: [
-          { id: 'policy-del-order', type: ACTION_POLICY_SAVED_OBJECT_TYPE, success: true },
-        ],
-      });
-
-      await client.bulkDeleteActionPolicies({ ids: ['policy-del-order'] });
-
-      const invalidationOrder =
-        apiKeyService.markApiKeysForInvalidation.mock.invocationCallOrder[0];
-      const deleteOrder = mockSavedObjectsClient.bulkDelete.mock.invocationCallOrder[0];
-      expect(invalidationOrder).toBeLessThan(deleteOrder);
-    });
-
-    it('leaves a policy in place when its API key cannot be queued for invalidation', async () => {
-      mockDecryptedAuthFor([
-        { id: 'policy-del-ok', apiKey: 'key-ok' },
-        { id: 'policy-del-stuck', apiKey: 'key-stuck' },
-      ]);
-      apiKeyService.markApiKeysForInvalidation.mockResolvedValueOnce([
-        { success: true },
-        { success: false, message: 'index is read-only' },
-      ]);
-      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
-        statuses: [{ id: 'policy-del-ok', type: ACTION_POLICY_SAVED_OBJECT_TYPE, success: true }],
-      });
-
-      const res = await client.bulkDeleteActionPolicies({
-        ids: ['policy-del-ok', 'policy-del-stuck'],
-      });
-
-      // The blocked policy never reaches the delete phase, so its still-valid
-      // API key keeps a saved object referencing it.
-      expect(mockSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
-        { type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-del-ok' },
-      ]);
-      expect(res.affected_count).toBe(1);
-      expect(res.errors).toEqual([
-        {
-          id: 'policy-del-stuck',
-          error: {
-            code: 'API_KEY_INVALIDATION_FAILED',
-            message:
-              'Action policy with id "policy-del-stuck" was not deleted because its API key could not be queued for invalidation: index is read-only',
-          },
-        },
-      ]);
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Skipped deleting action policy(ies) [policy-del-stuck]'),
-        expect.objectContaining({
-          error: expect.objectContaining({
-            code: ALERTING_V2_LOG_CODES.ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION,
-          }),
-        })
-      );
-    });
-
-    it('skips the delete round-trip entirely when every invalidation fails', async () => {
-      mockDecryptedAuthFor([{ id: 'policy-del-stuck', apiKey: 'key-stuck' }]);
-      apiKeyService.markApiKeysForInvalidation.mockResolvedValueOnce([
-        { success: false, message: 'index is read-only' },
-      ]);
-
-      const res = await client.bulkDeleteActionPolicies({ ids: ['policy-del-stuck'] });
-
-      expect(mockSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
-      expect(res.affected_count).toBe(0);
-      expect(res.errors).toHaveLength(1);
-    });
-
-    it('logs divergence when keys were queued but the delete failed', async () => {
-      mockDecryptedAuthFor([{ id: 'policy-del-diverged', apiKey: 'key-diverged' }]);
-      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
-        statuses: [
-          {
-            id: 'policy-del-diverged',
-            type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-            success: false,
-            error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
-          },
-        ],
-      });
-
-      const res = await client.bulkDeleteActionPolicies({ ids: ['policy-del-diverged'] });
-
-      expect(res.affected_count).toBe(0);
-      expect(res.errors).toEqual([
-        {
-          id: 'policy-del-diverged',
-          error: { code: 'ACTION_POLICY_VERSION_CONFLICT', message: 'version conflict' },
-        },
-      ]);
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'Queued API key(s) for action policy(ies) [policy-del-diverged] for invalidation but failed to delete them'
-        ),
-        expect.objectContaining({
-          error: expect.objectContaining({
-            code: ALERTING_V2_LOG_CODES.ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED,
-          }),
-        })
-      );
-    });
-
-    it('does not log divergence when the delete succeeds', async () => {
-      mockDecryptedAuthFor([{ id: 'policy-del-clean', apiKey: 'key-clean' }]);
-      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
-        statuses: [
-          { id: 'policy-del-clean', type: ACTION_POLICY_SAVED_OBJECT_TYPE, success: true },
-        ],
-      });
-
-      await client.bulkDeleteActionPolicies({ ids: ['policy-del-clean'] });
-
-      expect(mockLogger.error).not.toHaveBeenCalled();
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledTimes(2);
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['key-1']);
+      expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['key-2']);
     });
 
     it('skips API key invalidation for bulk-deleted policies with createdByUser: true', async () => {
-      mockDecryptedAuthFor([{ id: 'policy-del-user', apiKey: 'user-key', createdByUser: true }]);
+      const esoClient = mockEncryptedSavedObjects.getClient();
+      (esoClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock).mockResolvedValueOnce(
+        {
+          async *find() {
+            yield {
+              saved_objects: [
+                {
+                  id: 'policy-del-user',
+                  type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    auth: { apiKey: 'user-key', createdByUser: true, owner: 'test-user' },
+                  },
+                  references: [],
+                },
+              ],
+            };
+          },
+          close: jest.fn(),
+        }
+      );
       mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
         statuses: [{ id: 'policy-del-user', type: ACTION_POLICY_SAVED_OBJECT_TYPE, success: true }],
       });
@@ -2715,84 +2613,6 @@ describe('ActionPolicyClient', () => {
         'policy-id-del-1'
       );
       expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['some-key']);
-      expect(apiKeyService.markApiKeysForInvalidation.mock.invocationCallOrder[0]).toBeLessThan(
-        mockSavedObjectsClient.delete.mock.invocationCallOrder[0]
-      );
-    });
-
-    it('does not delete the policy when its API key cannot be queued for invalidation', async () => {
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
-        id: 'policy-id-del-1',
-        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-        references: [],
-        version: 'WzEsMV0=',
-        attributes: {
-          name: 'policy-to-delete',
-          description: '',
-          destinations: [],
-          auth: { apiKey: 'some-key', owner: 'test-user', createdByUser: false },
-          createdBy: 'elastic_profile_uid',
-          createdAt: '2025-01-01T00:00:00.000Z',
-          updatedBy: 'elastic_profile_uid',
-          updatedAt: '2025-01-01T00:00:00.000Z',
-        },
-      });
-      apiKeyService.markApiKeysForInvalidation.mockResolvedValueOnce([
-        { success: false, message: 'index is read-only' },
-      ]);
-
-      await expect(client.deleteActionPolicy({ id: 'policy-id-del-1' })).rejects.toMatchObject({
-        output: { statusCode: 500 },
-        data: {
-          code: 'API_KEY_INVALIDATION_FAILED',
-          details: { action_policy_id: 'policy-id-del-1' },
-        },
-      });
-
-      expect(mockSavedObjectsClient.delete).not.toHaveBeenCalled();
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Skipped deleting action policy(ies) [policy-id-del-1]'),
-        expect.objectContaining({
-          error: expect.objectContaining({
-            code: ALERTING_V2_LOG_CODES.ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION,
-          }),
-        })
-      );
-    });
-
-    it('logs divergence when the key was queued but the delete failed', async () => {
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
-        id: 'policy-id-del-1',
-        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-        references: [],
-        version: 'WzEsMV0=',
-        attributes: {
-          name: 'policy-to-delete',
-          description: '',
-          destinations: [],
-          auth: { apiKey: 'some-key', owner: 'test-user', createdByUser: false },
-          createdBy: 'elastic_profile_uid',
-          createdAt: '2025-01-01T00:00:00.000Z',
-          updatedBy: 'elastic_profile_uid',
-          updatedAt: '2025-01-01T00:00:00.000Z',
-        },
-      });
-      mockSavedObjectsClient.delete.mockRejectedValueOnce(new Error('delete failed'));
-
-      await expect(client.deleteActionPolicy({ id: 'policy-id-del-1' })).rejects.toThrow(
-        'delete failed'
-      );
-
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'Queued API key(s) for action policy(ies) [policy-id-del-1] for invalidation but failed to delete them'
-        ),
-        expect.objectContaining({
-          error: expect.objectContaining({
-            code: ALERTING_V2_LOG_CODES.ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED,
-          }),
-        })
-      );
     });
 
     it('throws 404 when action policy is not found', async () => {
@@ -3071,7 +2891,7 @@ describe('ActionPolicyClient', () => {
       expect(result.total).toBe(0);
     });
 
-    it('returns global APs for policies with no matcher, along with the space-scoped total', async () => {
+    it('returns global APs for policies with no matcher, along with the space-wide total', async () => {
       jest.spyOn(rulesSavedObjectService, 'get').mockResolvedValueOnce({
         id: 'rule-1',
         attributes: ruleAttributes as never,

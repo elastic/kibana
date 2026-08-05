@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const ml = getService('ml');
   const selectedField = '@message';
-  const totalDocCount = 14004;
+  const totalDocCount = 14005;
   const cases = getService('cases');
 
   async function retrySwitchTab(tabIndex: number, seconds: number) {

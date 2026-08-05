@@ -138,9 +138,7 @@ export const ArgumentFileSelector = memo<
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false} className="eui-textTruncate" onClick={handleOpenPopover}>
               <EuiToolTip content={selectedFileTitleTooltip}>
-                <div className="eui-textTruncate" tabIndex={0}>
-                  {selectedFileDisplayText}
-                </div>
+                <div className="eui-textTruncate">{selectedFileDisplayText}</div>
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

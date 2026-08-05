@@ -21,7 +21,6 @@ import {
   SavedObjectsErrorHelpers,
   errorContent,
   type SavedObject,
-  type SavedObjectErrorResult,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
@@ -34,7 +33,6 @@ import {
   type SavedObjectsBulkUpdateObject,
   type SavedObjectsBulkUpdateOptions,
   type SavedObjectsBulkUpdateResponse,
-  type SavedObjectsUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import {
@@ -390,11 +388,9 @@ export const performBulkUpdate = async <T>(
     : undefined;
 
   const result = {
-    saved_objects: expectedBulkUpdateResults.map<
-      SavedObjectsUpdateResponse<T> | SavedObjectErrorResult
-    >((expectedResult) => {
+    saved_objects: expectedBulkUpdateResults.map((expectedResult) => {
       if (isLeft(expectedResult)) {
-        return expectedResult.value as SavedObjectErrorResult;
+        return expectedResult.value as any;
       }
 
       const { type, id, documentToSave, esRequestIndex, rawMigratedUpdatedDoc } =
@@ -409,14 +405,7 @@ export const performBulkUpdate = async <T>(
 
       const { _seq_no: seqNo, _primary_term: primaryTerm } = rawResponse;
 
-      const {
-        [type]: attributes,
-        references,
-        updated_at,
-        updated_by,
-      } = documentToSave as {
-        [key: string]: Partial<T>;
-      } & Pick<SavedObjectsUpdateResponse<T>, 'references' | 'updated_at' | 'updated_by'>;
+      const { [type]: attributes, references, updated_at, updated_by } = documentToSave;
 
       const {
         originId,

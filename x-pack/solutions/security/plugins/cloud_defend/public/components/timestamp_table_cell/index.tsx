@@ -18,7 +18,7 @@ export const TimestampTableCell = ({ timestamp }: { timestamp: MomentInput }) =>
 
   return (
     <EuiToolTip position="top" content={formatted}>
-      <span tabIndex={0}>{moment(timestamp).fromNow()}</span>
+      <span>{moment(timestamp).fromNow()}</span>
     </EuiToolTip>
   );
 };

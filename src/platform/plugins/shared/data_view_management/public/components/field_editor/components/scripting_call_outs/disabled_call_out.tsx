@@ -9,15 +9,14 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 
 export const ScriptingDisabledCallOut = ({ isVisible = false }) => {
   return isVisible ? (
     <Fragment>
-      <KbnDangerCallout
+      <EuiCallOut
         announceOnMount={false}
         title={
           <FormattedMessage
@@ -26,14 +25,17 @@ export const ScriptingDisabledCallOut = ({ isVisible = false }) => {
             description="Showing the status that scripting is disabled in Elasticsearch. Not an update message, that it JUST got disabled."
           />
         }
-        text={
+        color="danger"
+        iconType="warning"
+      >
+        <p>
           <FormattedMessage
             id="indexPatternManagement.disabledCallOutLabel"
             defaultMessage="All inline scripting has been disabled in Elasticsearch. You must enable inline scripting for at least one
             language in order to use scripted fields in Kibana."
           />
-        }
-      />
+        </p>
+      </EuiCallOut>
       <EuiSpacer size="m" />
     </Fragment>
   ) : null;

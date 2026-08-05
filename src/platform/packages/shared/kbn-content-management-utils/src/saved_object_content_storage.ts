@@ -22,7 +22,6 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import { pick } from 'lodash';
 import type {
@@ -195,10 +194,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
     partial: true
   ): Types['PartialItem'];
   protected savedObjectToItem(
-    savedObject:
-      | SavedObject<Types['Attributes']>
-      | PartialSavedObject<Types['Attributes']>
-      | SavedObjectsFindResult<Types['Attributes']>
+    savedObject: SavedObject<Types['Attributes']> | PartialSavedObject<Types['Attributes']>
   ): SOWithMetadata | SOWithMetadataPartial {
     const {
       id,
@@ -209,6 +205,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       created_by: createdBy,
       attributes,
       references,
+      error,
       namespaces,
       version,
       managed,
@@ -224,6 +221,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       createdBy,
       attributes: pick(attributes, this.allowedSavedObjectAttributes),
       references,
+      error,
       namespaces,
       version,
     };
@@ -246,10 +244,6 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       alias_target_id: aliasTargetId,
       outcome,
     } = await soClient.resolve<Types['Attributes']>(this.savedObjectType, id);
-
-    if (isSavedObjectErrorResult(savedObject)) {
-      throw Boom.notFound(savedObject.error.message);
-    }
 
     const response: Types['GetOut'] = {
       item: this.savedObjectToItem(savedObject),

@@ -83,7 +83,6 @@ const renderPanel = (props: Partial<PanelProps> = {}) => {
             isLoading={false}
             aiIndex={aiIndex}
             onSaved={onSaved}
-            isManaged={false}
             {...props}
             {...overrides}
           />
@@ -135,49 +134,35 @@ describe('AutomationsPanel', () => {
     renderPanel();
 
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
-    expect(screen.getByText('Create an automation to get started.')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexAutomationRow')).not.toBeInTheDocument();
   });
 
-  it('shows read-only empty body copy for managed AI indexes', () => {
-    renderPanel({ isManaged: true });
+  it('shows the create control instead of the empty prompt when editing with no automations', () => {
+    mockUseAutomationsEditor.mockReturnValue(editorResult({ isEditing: true }));
 
-    expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
-    expect(
-      screen.getByText('No automations are configured for this AI index.')
-    ).toBeInTheDocument();
-    expect(screen.queryByText('Create an automation to get started.')).not.toBeInTheDocument();
-  });
-
-  it('does not render the edit button while loading', () => {
-    renderPanel({ isLoading: true });
-
-    expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
-  });
-
-  it('shows the create control when not editing', () => {
     renderPanel();
 
+    expect(screen.queryByTestId('contextAiIndexAutomationsEmpty')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextCreateAutomationButton')).toBeInTheDocument();
   });
 
   it('opens the created workflow in the Workflows app', async () => {
     const createAndAttach = jest.fn().mockResolvedValue('wf-created');
-    mockUseAutomationsEditor.mockReturnValue(editorResult({ createAndAttach }));
+    mockUseAutomationsEditor.mockReturnValue(editorResult({ isEditing: true, createAndAttach }));
 
     const { services } = renderPanel();
     fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
 
     await waitFor(() => {
       expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
-        path: '/wf-created?returnApp=context_engine&returnPath=%2Fai_index%2Fmy-ai-index',
+        path: '/wf-created',
       });
     });
   });
 
   it('stays on the page when the automation could not be created', async () => {
     const createAndAttach = jest.fn().mockResolvedValue(undefined);
-    mockUseAutomationsEditor.mockReturnValue(editorResult({ createAndAttach }));
+    mockUseAutomationsEditor.mockReturnValue(editorResult({ isEditing: true, createAndAttach }));
 
     const { services } = renderPanel();
     fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
@@ -222,14 +207,12 @@ describe('AutomationsPanel', () => {
     const { rerender } = renderPanel();
 
     expect(screen.getByTestId('contextEditAutomationsButton')).toBeInTheDocument();
-    expect(screen.getByTestId('contextCreateAutomationButton')).toBeInTheDocument();
     expect(screen.queryByTestId('contextSaveAutomationsButton')).not.toBeInTheDocument();
 
     mockUseAutomationsEditor.mockReturnValue(editorResult({ isEditing: true }));
     rerender();
 
     expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextCreateAutomationButton')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextSaveAutomationsButton')).toBeInTheDocument();
     expect(screen.getByTestId('contextCancelEditingAutomationsButton')).toBeInTheDocument();
   });
@@ -242,18 +225,6 @@ describe('AutomationsPanel', () => {
     rerender({ aiIndex });
 
     expect(screen.getByTestId('contextEditAutomationsButton')).toBeEnabled();
-  });
-
-  it('hides the Edit button for managed AI indexes', () => {
-    renderPanel({ isManaged: true });
-
-    expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
-  });
-
-  it('shows the Edit button for non-managed AI indexes when not editing', () => {
-    renderPanel({ isManaged: false });
-
-    expect(screen.getByTestId('contextEditAutomationsButton')).toBeInTheDocument();
   });
 
   it('delegates the header actions to the editor', () => {
@@ -285,6 +256,7 @@ describe('AutomationsPanel', () => {
     );
     mockUseAutomationsEditor.mockReturnValue(
       editorResult({
+        isEditing: true,
         automations,
         workflowIds: automations.map(({ value }) => value),
       })

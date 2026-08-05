@@ -85,8 +85,7 @@
     "@kbn/core-http-browser",
     "@kbn/scout",
     "@kbn/rison",
-    "@kbn/as-code-shared-schemas",
-    "@kbn/ui-callout"
+    "@kbn/as-code-shared-schemas"
   ],
   "exclude": ["target/**/*"]
 }

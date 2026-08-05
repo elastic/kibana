@@ -13,7 +13,6 @@ import type {
   SavedObjectsFindOptions,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';
 import type { StorageContext } from '@kbn/content-management-plugin/server';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
 import { SOContentStorage, tagsToFindOptions } from '@kbn/content-management-utils';
@@ -117,10 +116,6 @@ export class LensStorage extends SOContentStorage<LensCrud> {
       alias_target_id: aliasTargetId,
       outcome,
     } = await soClient.resolve<LensAttributes>(LENS_CONTENT_TYPE, id);
-
-    if (isSavedObjectErrorResult(savedObject)) {
-      throw Boom.internal(`Invalid response. ${savedObject.error.message}`);
-    }
 
     const response: LensGetOut = {
       item: this.savedObjectToItem(savedObject),

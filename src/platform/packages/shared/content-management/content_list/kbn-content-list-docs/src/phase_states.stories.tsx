@@ -9,7 +9,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import {
   ContentList,
   ContentListProvider,
@@ -22,7 +22,6 @@ import {
   type FindItemsParams,
   type FindItemsResult,
 } from '@kbn/content-list';
-import { KbnInfoCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 import { DashboardListingEmptyPromptMock, DashboardListingStoryFrame } from './stories_helpers';
 
 const meta: Meta = {
@@ -100,8 +99,9 @@ const createFindItems = (state: PhaseStoryState) => {
 const PhaseLabel = () => {
   const phase = useContentListPhase();
   return (
-    <KbnInfoCallout
+    <EuiCallOut
       size="s"
+      color="primary"
       title={`Current phase: ${phase}`}
       data-test-subj="content-list-phase-story-current-phase"
     />
@@ -165,9 +165,10 @@ const StateStory = ({
         >
           <ContentListToolbar />
           {customSection && (
-            <KbnSuccessCallout
+            <EuiCallOut
               announceOnMount={false}
               size="s"
+              color="success"
               title="Custom interspersed section"
               data-test-subj="content-list-phase-story-custom-section"
             />

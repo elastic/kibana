@@ -44,7 +44,7 @@ export interface BulkSnoozeActionPoliciesParams {
 
 export type FindActionPoliciesSortField = 'name' | 'createdAt' | 'updatedAt';
 
-export interface FindActionPoliciesArgs {
+export interface FindActionPoliciesParams {
   page?: number;
   perPage?: number;
   search?: string;

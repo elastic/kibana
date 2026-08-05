@@ -4,8 +4,7 @@
   "owner": [
     "@elastic/obs-signals-traces-team",
     "@elastic/streams-ui",
-    "@elastic/obs-signals-metrics-team",
-    "@elastic/obs-signals-logs-team",
+    "@elastic/obs-exploration-team"
   ],
   "group": "platform",
   "visibility": "shared",

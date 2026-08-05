@@ -206,6 +206,7 @@ export const getExceptionListItemSavedObject = (
   return {
     attributes: getExceptionListSoSchemaMock(attributesOverrides),
     coreMigrationVersion: undefined,
+    error: undefined,
     id: ID,
     migrationVersion: undefined,
     namespaces: undefined,

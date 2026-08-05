@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import { ApiEndpointId } from '../../../common/api_endpoints';
-import {
-  API_ENDPOINTS,
-  getPopoverVendorEndpoints,
-  getVendorEndpointsForTab,
-  type ApiEndpointContext,
-} from './endpoints_config';
+import { API_ENDPOINTS, type ApiEndpointContext } from './endpoints_config';
 
 const getEndpoint = (id: string) => {
   const endpoint = API_ENDPOINTS.find((definition) => definition.id === id);
@@ -27,7 +21,6 @@ const createContext = (overrides: Partial<ApiEndpointContext> = {}): ApiEndpoint
   isManagedOtlpServiceAvailable: false,
   isServerless: false,
   managedOtlpPrwEndpointEnabled: false,
-  vendorEndpointsEnabled: true,
   ...overrides,
 });
 
@@ -281,112 +274,95 @@ describe('API_ENDPOINTS', () => {
       });
     });
   });
-});
 
-describe('vendor endpoints', () => {
-  const managedContext = createContext({
-    isManagedOtlpServiceAvailable: true,
-    managedOtlpServiceUrl: 'https://otlp.example.com:443',
-  });
+  describe('getAdditionalEndpoints', () => {
+    const getAdditionalEndpoints = (context: ApiEndpointContext) =>
+      getEndpoint('opentelemetry').getAdditionalEndpoints?.(context) ?? [];
 
-  describe('getPopoverVendorEndpoints', () => {
-    it('resolves Supabase and Vercel when the managed OTLP service is available', () => {
-      const endpoints = getPopoverVendorEndpoints(managedContext);
-
-      expect(endpoints).toEqual([
+    it('returns the Supabase and Vercel endpoints when the managed service is available', () => {
+      expect(
+        getAdditionalEndpoints(
+          createContext({
+            isManagedOtlpServiceAvailable: true,
+            managedOtlpServiceUrl: 'https://otlp.example.com:443',
+          })
+        )
+      ).toEqual([
         {
-          id: ApiEndpointId.Supabase,
-          cardTitle: 'Supabase',
-          fieldLabel: 'Supabase logs endpoint',
-          logo: 'supabase',
+          id: 'supabase',
+          label: 'Supabase logs endpoint',
           url: 'https://otlp.example.com:443/supabase/v1/logs',
         },
         {
-          id: ApiEndpointId.Vercel,
-          cardTitle: 'Vercel',
-          fieldLabel: 'Vercel endpoint',
-          logo: 'vercel_black',
-          darkLogo: 'vercel_white',
+          id: 'vercel',
+          label: 'Vercel endpoint',
           url: 'https://otlp.example.com:443/vercel',
         },
       ]);
     });
 
-    it('returns an empty list when the managed OTLP service is unavailable', () => {
-      expect(
-        getPopoverVendorEndpoints(
-          createContext({ managedOtlpServiceUrl: 'https://otlp.example.com:443' })
-        )
-      ).toEqual([]);
-    });
-
-    it('returns an empty list when the managed URL is missing or blank', () => {
-      expect(
-        getPopoverVendorEndpoints(createContext({ isManagedOtlpServiceAvailable: true }))
-      ).toEqual([]);
-      expect(
-        getPopoverVendorEndpoints(
-          createContext({ isManagedOtlpServiceAvailable: true, managedOtlpServiceUrl: '   ' })
-        )
-      ).toEqual([]);
-    });
-
-    it('trims trailing slashes from the managed URL', () => {
-      const endpoints = getPopoverVendorEndpoints(
+    it('trims trailing slashes from the managed OTLP URL', () => {
+      const urls = getAdditionalEndpoints(
         createContext({
           isManagedOtlpServiceAvailable: true,
           managedOtlpServiceUrl: 'https://otlp.example.com:443//',
         })
-      );
+      ).map((endpoint) => endpoint.url);
 
-      expect(endpoints[0].url).toBe('https://otlp.example.com:443/supabase/v1/logs');
+      expect(urls).toEqual([
+        'https://otlp.example.com:443/supabase/v1/logs',
+        'https://otlp.example.com:443/vercel',
+      ]);
     });
 
-    it('returns an empty list when the vendor endpoints flag is disabled', () => {
+    it('returns no endpoints when the managed service is unavailable', () => {
       expect(
-        getPopoverVendorEndpoints(
+        getAdditionalEndpoints(
           createContext({
-            isManagedOtlpServiceAvailable: true,
+            isManagedOtlpServiceAvailable: false,
             managedOtlpServiceUrl: 'https://otlp.example.com:443',
-            vendorEndpointsEnabled: false,
           })
         )
       ).toEqual([]);
     });
-  });
 
-  describe('getVendorEndpointsForTab', () => {
-    it('places Supabase but not Vercel on the OpenTelemetry tab', () => {
-      const endpoints = getVendorEndpointsForTab(ApiEndpointId.OpenTelemetry, managedContext);
-
-      expect(endpoints.map((endpoint) => endpoint.id)).toEqual([ApiEndpointId.Supabase]);
-    });
-
-    it('places nothing on the Prometheus and Elasticsearch tabs', () => {
-      expect(getVendorEndpointsForTab(ApiEndpointId.Prometheus, managedContext)).toEqual([]);
-      expect(getVendorEndpointsForTab(ApiEndpointId.Elasticsearch, managedContext)).toEqual([]);
-    });
-
-    it('places nothing when the managed OTLP service is unavailable', () => {
+    it('returns no endpoints when the managed OTLP URL is missing', () => {
       expect(
-        getVendorEndpointsForTab(
-          ApiEndpointId.OpenTelemetry,
-          createContext({ managedOtlpServiceUrl: 'https://otlp.example.com:443' })
-        )
-      ).toEqual([]);
-    });
-
-    it('returns an empty list when the vendor endpoints flag is disabled', () => {
-      expect(
-        getVendorEndpointsForTab(
-          ApiEndpointId.OpenTelemetry,
+        getAdditionalEndpoints(
           createContext({
             isManagedOtlpServiceAvailable: true,
-            managedOtlpServiceUrl: 'https://otlp.example.com:443',
-            vendorEndpointsEnabled: false,
+            managedOtlpServiceUrl: undefined,
           })
         )
       ).toEqual([]);
+    });
+
+    it('returns no endpoints when the managed OTLP URL is blank', () => {
+      expect(
+        getAdditionalEndpoints(
+          createContext({
+            isManagedOtlpServiceAvailable: true,
+            managedOtlpServiceUrl: '   ',
+          })
+        )
+      ).toEqual([]);
+    });
+
+    it('returns the vendor endpoints on Serverless', () => {
+      expect(
+        getAdditionalEndpoints(
+          createContext({
+            isServerless: true,
+            isManagedOtlpServiceAvailable: true,
+            managedOtlpServiceUrl: 'https://otlp.example.com:443',
+          })
+        )
+      ).toHaveLength(2);
+    });
+
+    it('defines no additional endpoints for Prometheus and Elasticsearch', () => {
+      expect(getEndpoint('prometheus').getAdditionalEndpoints).toBeUndefined();
+      expect(getEndpoint('elasticsearch').getAdditionalEndpoints).toBeUndefined();
     });
   });
 });

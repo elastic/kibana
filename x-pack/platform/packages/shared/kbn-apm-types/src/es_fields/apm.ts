@@ -186,10 +186,6 @@ export const FAAS_DURATION = 'faas.duration';
 export const FAAS_COLDSTART_DURATION = 'faas.coldstart_duration';
 export const FAAS_BILLED_DURATION = 'faas.billed_duration';
 
-// ECS Gen AI fields — https://www.elastic.co/docs/reference/ecs/ecs-gen_ai
-export const GEN_AI_USAGE_INPUT_TOKENS = 'gen_ai.usage.input_tokens';
-export const GEN_AI_USAGE_OUTPUT_TOKENS = 'gen_ai.usage.output_tokens';
-
 // OpenTelemetry Metrics
 export const METRIC_OTEL_SYSTEM_CPU_UTILIZATION = 'system.cpu.utilization';
 export const METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION = 'system.memory.utilization';

@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import type { IconType } from '@elastic/eui';
-import { EuiButtonEmpty, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { TOOLS_FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 
 export interface ToolsFlyoutTitleProps {
@@ -35,34 +35,21 @@ export const ToolsFlyoutTitle: FC<ToolsFlyoutTitleProps> = memo(
     const { euiTheme } = useEuiTheme();
 
     return (
-      <EuiToolTip content={label}>
-        <EuiButtonEmpty
-          onClick={onTitleClick}
-          iconType="expand"
-          size="xs"
-          flush="left"
-          css={{ maxWidth: '100%', minWidth: 0 }}
-          data-test-subj={TOOLS_FLYOUT_HEADER_TITLE_TEST_ID}
-        >
-          <span css={{ alignItems: 'center', display: 'flex', maxWidth: '100%', minWidth: 0 }}>
-            <EuiIcon
-              type={iconType}
-              size="m"
-              aria-hidden={true}
-              css={{ flexShrink: 0, marginRight: euiTheme.size.xs }}
-            />
-            <span
-              css={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {label}
-            </span>
-          </span>
-        </EuiButtonEmpty>
-      </EuiToolTip>
+      <EuiButtonEmpty
+        onClick={onTitleClick}
+        iconType="expand"
+        size="xs"
+        flush="left"
+        data-test-subj={TOOLS_FLYOUT_HEADER_TITLE_TEST_ID}
+      >
+        <EuiIcon
+          type={iconType}
+          size="m"
+          aria-hidden={true}
+          css={{ marginRight: euiTheme.size.xs }}
+        />
+        {label}
+      </EuiButtonEmpty>
     );
   }
 );

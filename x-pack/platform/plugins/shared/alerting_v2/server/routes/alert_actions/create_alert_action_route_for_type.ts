@@ -12,12 +12,8 @@ import {
   type CreateAlertActionParams,
 } from '@kbn/alerting-v2-schemas';
 import { Request, type RouteDefinition } from '@kbn/core-di-server';
-import type {
-  KibanaRequest,
-  RouteConfigOptions,
-  RouteMethod,
-  RouteSecurity,
-} from '@kbn/core-http-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { inject, injectable } from 'inversify';
 import type { z } from '@kbn/zod/v4';
 import { AlertActionsClient } from '../../lib/alert_actions_client';
@@ -25,18 +21,15 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_ALERT_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 interface CreateAlertActionRouteForTypeOptions<
   TAction extends CreateAlertActionBody['action_type']
 > {
   actionType: TAction;
   pathSuffix: string;
-  summary: string;
   bodySchema: z.ZodType<
     Omit<Extract<CreateAlertActionBody, { action_type: TAction }>, 'action_type'>
   >;
-  oasOperationObject?: RouteConfigOptions<RouteMethod>['oasOperationObject'];
 }
 
 export const createAlertActionRouteForType = <
@@ -44,9 +37,7 @@ export const createAlertActionRouteForType = <
 >({
   actionType,
   pathSuffix,
-  summary,
   bodySchema,
-  oasOperationObject,
 }: CreateAlertActionRouteForTypeOptions<TAction>): RouteDefinition<
   CreateAlertActionParams,
   unknown,
@@ -65,14 +56,13 @@ export const createAlertActionRouteForType = <
       },
     };
     static routeOptions = {
-      summary,
+      summary: `Create an alert ${pathSuffix} action`,
       description: 'Create an action for a specific alert group.',
-      oasOperationObject,
-    } as const;
-    static schemas = {
+    };
+    static validate = {
       request: {
-        params: createAlertActionParamsSchema,
-        body: bodySchema,
+        params: buildRouteValidationWithZod(createAlertActionParamsSchema),
+        body: buildRouteValidationWithZod(bodySchema),
       },
       response: {
         204: {
@@ -80,14 +70,14 @@ export const createAlertActionRouteForType = <
         },
         400: {
           body: () => errorResponseSchema,
-          description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+          description: 'Indicates an invalid schema or parameters.',
         },
         404: {
           body: () => errorResponseSchema,
           description: 'Indicates the alert event was not found.',
         },
       },
-    };
+    } as const;
 
     protected readonly routeName = `create alert ${pathSuffix} action`;
 
@@ -113,10 +103,5 @@ export const createAlertActionRouteForType = <
     }
   }
 
-  return CreateTypedAlertActionRoute as RouteDefinition<
-    CreateAlertActionParams,
-    unknown,
-    ActionBody,
-    'post'
-  >;
+  return CreateTypedAlertActionRoute;
 };

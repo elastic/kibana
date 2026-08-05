@@ -402,6 +402,7 @@ export class TaskManagerPlugin
       adHocTaskCounter: this.adHocTaskCounter,
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       logger: this.logger,
+      requestTimeouts: this.config.request_timeouts,
       security,
       canEncryptSavedObjects: this.canEncryptSavedObjects,
       getIsSecurityEnabled: this.licenseSubscriber?.getIsSecurityEnabled,

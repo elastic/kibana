@@ -13,7 +13,6 @@ We're going to create a new connector spec for **$0**. The connector will enable
 ## Reference Materials
 
 - **[reference/connector-patterns.md](reference/connector-patterns.md)** — Directory structure, file templates, and registration patterns
-- **[reference/pr-validation-table.md](reference/pr-validation-table.md)** — Format for the `## Validated` action-by-action table required in every connector PR description
 
 ## Step 1: Determine the Connector Strategy
 
@@ -24,23 +23,6 @@ Check if $0 has an official hosted MCP server. If so, creating an MCP-native con
 **No MCP server available?** → Read [reference/custom-connector-setup.md](reference/custom-connector-setup.md) and follow its steps.
 
 Follow only the steps for the chosen path. Do not mix them.
-
-### Research the vendor API before writing schemas or handlers
-
-For a custom (non-MCP) connector, do this before Step 2. For each action you plan to implement, find the
-vendor's real API docs and verify — don't assume: update semantics (partial vs. full-replace), how array
-query params are encoded, whether optional modifier params (`scope`, filters, flags) on `POST`/`PATCH`
-actions belong in the query string or the JSON body, the auth scope each action actually needs, and
-whether the service has regional/self-hosted domain variants. See "Research the Vendor API Before Writing
-Any Code" in
-[reference/custom-connector-setup.md](reference/custom-connector-setup.md) for the full checklist. Bugs
-found late (during manual testing or review) that trace back to skipping this step are expensive to fix
-one action at a time — verifying up front is cheaper.
-
-**If the vendor API is GraphQL**, docs examples and general familiarity are not enough to get input type
-names and field selections right — verify every hardcoded type/field name against the real schema via
-introspection before writing the handler. See "Verify GraphQL Schemas via Introspection" in
-[reference/custom-connector-setup.md](reference/custom-connector-setup.md).
 
 ## Step 2: Create the Connector Spec
 
@@ -55,31 +37,7 @@ Follow the patterns in [reference/connector-patterns.md](reference/connector-pat
 
 Register in `src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts` and `connector_icons_map.ts`.
 
-### `supportedFeatureIds` on a brand-new connector: two-step release
-
-A new connector type must reach Production-NonCanary before it can declare user-facing features.
-Serverless rollouts and rollbacks leave nodes on different Kibana versions for a while, and a user action
-referencing a connector type that a node does not have breaks on that node. So the first PR ships
-`supportedFeatureIds: ['agentBuilder']`.
-
-Do not put `'workflows'` or any other user-facing feature ID in the first PR. Those are added in a
-follow-up PR once the connector is registered in every Production-NonCanary version.
-
-Mention the required follow-up PR in the first PR's description so it is not forgotten.
-
-**MCP connectors**: Use [reference/mcp-connector-setup.md](reference/mcp-connector-setup.md) as the direct starting template for the spec — it has concrete, copy-ready examples with the correct `lazySchema`, `callToolJson`/`callToolContent`, and test-mock patterns already in place. Do not reverse-engineer from existing connectors.
-
-**Type every handler explicitly.** Annotate each action's `input` parameter with its `z.infer`-derived
-type from `types.ts` (`handler: async (ctx, input: SearchInput) => { ... }`). Without the annotation it
-silently resolves to `any` — nothing fails to compile, but the handler gets zero type checking against
-its own Zod schema. Do this for every action as you write it, not as a later cleanup pass; with a dozen
-or more actions in one file it's easy to leave some untyped if you defer it.
-
-**Keep `test.enabled: true`.** The scaffold generates `test: { enabled: true, handler: ... }` — don't
-drop `enabled` when you flesh out the handler body.
-
-Replace the placeholder icon with a proper brand icon. Do NOT generate an icon, use the official brand icon or tell the
-user you could not find one. Search for existing SVG/PNG files in:
+Replace the placeholder icon with a proper brand icon. Search for existing SVG/PNG files in:
 - `src/platform/packages/shared/kbn-connector-specs/src/specs/*/icon/`
 - `x-pack/platform/plugins/shared/stack_connectors/public/connector_types/{connector}/`
 
@@ -132,52 +90,7 @@ Add tests following the existing examples:
 
 1. **Connector spec tests** — See `google_drive/google_drive.test.ts` or `slack/slack.test.ts` for the pattern.
 
-You do not need to execute the tests — just create the files. You should, however, run
-`node scripts/eslint <path>` on every file you create or edit (including test files) before moving on.
-This is fast, requires no running Kibana/Elasticsearch, and catches mechanical rule violations — e.g. a
-forbidden non-null assertion (`@typescript-eslint/no-non-null-assertion`) in a test file's
-`Connector.action!.handler` — that a code-reading self-review or an AI PR reviewer can miss, and that
-otherwise only surface once CI's lint step fails the build.
-
-Unit tests that mock `ctx.client`/`ctx.request` yourself cannot catch bugs where the mock encodes the same
-wrong assumption as the handler (e.g. asserting on the axios default array-param serialization when the
-vendor actually needs a different form, or asserting that an optional modifier param is sent as a query
-param when the vendor actually expects it in the body). For any handler you flagged during vendor API
-research as having non-obvious update, serialization, or query-string-vs-body semantics, add a test that
-asserts on the *exact* request shape sent (URL, method, body, and params/paramsSerializer) against what the
-docs say the vendor expects — not just that the handler resolves without throwing.
-
-### Self-review before handing off
-
-Before treating the connector as done, re-read the whole diff once, end to end, specifically hunting for:
-
-- Handlers still typed with implicit `any` (missing the `input: XInput` annotation)
-- `test.enabled` missing or set to `false`
-- Leftover schemas/constants from earlier iterations that are no longer referenced anywhere
-- Repeated calls to the same helper (e.g. building a base URL twice) that should be a single local variable
-- `z.record(z.string(), ...)` or `z.array(z.record(...))` keys without a `.max()` bound
-- Update-action inputs where every field is optional — should they `.refine()` to require at least one?
-- ID/GUID-like fields that flow into a query or filter string without a format constraint (regex) — an
-  unconstrained value here is an injection risk
-- A user-supplied or config-derived value (ID, slug, org name) interpolated into a URL path segment
-  without `encodeURIComponent()` — search the whole file for `` `${baseUrl} `` and check every `${...}`
-  after it
-- Auth scopes mentioned inconsistently across the three places a user might see them: the auth field's
-  `helpText`, the docs page's "Authentication" summary line, and the docs page's "Get API credentials"
-  setup steps. Grep for the scope names across all three files/sections and confirm every action's
-  required scope appears in all of them, not just one
-- Naming/casing inconsistencies vs. sibling connectors (e.g. `webpackChunkName` casing)
-- Doc wording that could misread "required" as applying only to the last-listed parameter
-- `POST`/`PATCH` actions with optional modifier params (`scope`, filters, flags) — confirm against the
-  vendor's docs whether each one belongs in the query string or the JSON body, checked per action against
-  the docs rather than assumed from a similar-looking sibling action in the same file
-- For GraphQL-backed connectors: every input type name and response field selection in a hardcoded
-  query/mutation string has been checked against the real schema via introspection, not just written from
-  a docs example or general knowledge — see "Verify GraphQL Schemas via Introspection" in
-  [reference/custom-connector-setup.md](reference/custom-connector-setup.md)
-
-This mirrors what the `review-connector` skill checks — running it yourself first means real review
-cycles catch new problems instead of re-flagging things you could have caught alone.
+You do not need to execute the tests — just create the files.
 
 ## Step 5: Write Documentation
 
@@ -207,28 +120,10 @@ This step requires documentation skills from https://github.com/elastic/elastic-
 
 ### Update navigation and listings
 
-1. Add an entry in `docs/reference/toc.yml` under the `data-context-sources-connectors.md` section (the
-   scaffold generator does this automatically) — **not** the `elastic-connectors.md` section, which is
-   reserved for the small, fixed set of Kibana-native connectors (Cases, Index, ServerLog, Obs AI Assistant).
-2. Add a row in `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md`
-   (the generator inserts a placeholder row here too — replace its `TODO` description), ordered
-   alphabetically within the correct category (most connectors belong in "Third-party search"; check for
-   a better-fitting category like "Threat intelligence" or "Identity management" first).
+1. Add an entry in `docs/reference/toc.yml` under the connectors section.
+2. Add a row in `docs/reference/connectors-kibana/_snippets/elastic-connectors-list.md`.
 
 Once you are done developing the connector spec, tests, and documentation, let the user review your work before next steps.
-
-### If this connector's PR hasn't been opened yet
-
-Whenever this connector's PR is opened — whether by `build-connector`'s Task 12, a later session, or a
-human — its description must include a `## Validated` section: a table listing every action the spec
-exposes and whether it's been observed working. If you ran this skill standalone (not via
-`build-connector`) and no live testing happened yet, still note this requirement to the user so the table
-doesn't get skipped when the PR is written. See
-[reference/pr-validation-table.md](reference/pr-validation-table.md) for the exact format.
-
-The PR must also carry the `release_note:feature` and `Feature:Actions/ConnectorTypes` labels. If you open
-the PR yourself, add them with `gh pr create --label "release_note:feature" --label "Feature:Actions/ConnectorTypes" ...`
-(or `gh pr edit <number> --add-label ...` afterward). If a human opens the PR, remind them to add both.
 
 ## Important Notes
 

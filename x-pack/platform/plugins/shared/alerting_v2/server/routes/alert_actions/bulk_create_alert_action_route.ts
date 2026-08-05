@@ -19,8 +19,6 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_ALERT_API_PATH } from '../constants';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import { bulkCreateAlertActionOasExamples } from './bulk_create_alert_action_oas_example';
-import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 @injectable()
 export class BulkCreateAlertActionRoute extends BaseAlertingRoute {
@@ -34,7 +32,6 @@ export class BulkCreateAlertActionRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Bulk create alert actions',
     description: 'Create actions for multiple alert groups in a single request.',
-    oasOperationObject: bulkCreateAlertActionOasExamples,
   } as const;
   static schemas = {
     request: {
@@ -48,7 +45,7 @@ export class BulkCreateAlertActionRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+        description: 'Indicates an invalid schema or parameters.',
       },
     },
   };

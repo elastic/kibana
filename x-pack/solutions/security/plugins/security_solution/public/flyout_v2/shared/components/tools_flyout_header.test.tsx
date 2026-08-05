@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { fireEvent, render, renderHook, waitFor } from '@testing-library/react';
-import { useEuiTheme } from '@elastic/eui';
+import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ToolsFlyoutHeader } from './tools_flyout_header';
-import { TOOLS_FLYOUT_HEADER_TEST_ID, TOOLS_FLYOUT_HEADER_TIMESTAMP_TEST_ID } from './test_ids';
+import { TOOLS_FLYOUT_HEADER_TEST_ID } from './test_ids';
 
 jest.mock('./tools_flyout_title', () => ({
   ToolsFlyoutTitle: ({ label }: { label: string }) => (
@@ -42,19 +41,6 @@ describe('<ToolsFlyoutHeader />', () => {
     expect(getByText('Session view')).toBeInTheDocument();
   });
 
-  it('keeps both sides on the same row without breaking the tool title', () => {
-    const { getByTestId, getByText } = renderHeader(sourceProps);
-    const { result } = renderHook(() => useEuiTheme());
-
-    expect(getByTestId(TOOLS_FLYOUT_HEADER_TEST_ID)).toHaveStyle({ flexWrap: 'nowrap' });
-    expect(getByText('Correlations').closest('.euiTitle')).toHaveStyle({
-      whiteSpace: 'nowrap',
-    });
-    expect(getByTestId('mockToolsFlyoutTitle').parentElement).toHaveStyle({
-      minWidth: `${result.current.euiTheme.base * 8}px`,
-    });
-  });
-
   it('renders ToolsFlyoutTitle when onTitleClick, label and iconType are provided', () => {
     const { getByTestId } = renderHeader(sourceProps);
     expect(getByTestId('mockToolsFlyoutTitle')).toBeInTheDocument();
@@ -74,25 +60,11 @@ describe('<ToolsFlyoutHeader />', () => {
     expect(getByTestId('mockBadge')).toBeInTheDocument();
   });
 
-  it('truncates the timestamp and shows its full value in a tooltip', async () => {
+  it('renders timestamp when provided', () => {
     const { getByTestId } = renderHeader({
       ...sourceProps,
-      timestamp: <div>{'Jul 28, 2026 @ 16:45:55.413'}</div>,
+      timestamp: <div data-test-subj="mockTimestamp" />,
     });
-
-    const timestamp = getByTestId(TOOLS_FLYOUT_HEADER_TIMESTAMP_TEST_ID);
-    expect(timestamp).toHaveStyle({
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-    });
-    expect(timestamp).toHaveAttribute('tabindex', '0');
-
-    fireEvent.mouseOver(timestamp);
-    await waitFor(() => {
-      expect(document.querySelector('[role="tooltip"]')).toHaveTextContent(
-        'Jul 28, 2026 @ 16:45:55.413'
-      );
-    });
+    expect(getByTestId('mockTimestamp')).toBeInTheDocument();
   });
 });

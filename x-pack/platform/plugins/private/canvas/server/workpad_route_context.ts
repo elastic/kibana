@@ -11,7 +11,6 @@ import type {
   SavedObject,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
 import {
   AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
   AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
@@ -117,10 +116,6 @@ export const createWorkpadRouteContext: () => IContextProvider<
         },
         resolve: async (id: string) => {
           const resolved = await soClient.resolve<WorkpadAttributes>(CANVAS_TYPE, id);
-
-          if (isSavedObjectErrorResult(resolved.saved_object)) {
-            throw new Error(resolved.saved_object.error.message);
-          }
 
           // embeddables transform out
           resolved.saved_object.attributes = transformWorkpadOut(

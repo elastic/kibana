@@ -67,11 +67,4 @@ describe('alertingV2NotificationGroup builtin workflow input definition', () => 
     const typeEpisodeFields = Object.keys(_episodeKeyGuard).sort();
     expect(schemaEpisodeFields).toEqual(typeEpisodeFields);
   });
-
-  it('allows null rule_id on episode items (AlertEpisode.rule_id is RuleId | null)', () => {
-    const episodeItems = schema.properties?.episodes?.items as {
-      properties?: Record<string, { type?: string | string[] }>;
-    };
-    expect(episodeItems?.properties?.rule_id?.type).toEqual(['string', 'null']);
-  });
 });

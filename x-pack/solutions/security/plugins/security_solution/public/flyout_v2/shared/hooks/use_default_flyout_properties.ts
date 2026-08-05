@@ -30,19 +30,11 @@ export const useDefaultDocumentFlyoutProperties = (): OverlaySystemFlyoutOpenOpt
 };
 
 /**
- * Hook that returns the properties used when opening a tools flyout, to ensure consistency.
+ * Hook that returns the main properties used when opening a tools flyout, to ensure consistency.
  */
-export const useDefaultToolsFlyoutProperties = (): OverlaySystemFlyoutOpenOptions => {
-  const { euiTheme } = useEuiTheme();
-
-  return useMemo(
-    () => ({
-      minWidth: euiTheme.base * 24,
-      ownFocus: false,
-      paddingSize: 'm',
-      resizable: true,
-      size: 'm',
-    }),
-    [euiTheme.base]
-  );
+export const defaultToolsFlyoutProperties: OverlaySystemFlyoutOpenOptions = {
+  ownFocus: false,
+  paddingSize: 'm',
+  resizable: true,
+  size: 'm',
 };

@@ -15,7 +15,6 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { bulkDeleteActionPoliciesOasExamples } from './bulk_delete_action_policies_oas_example';
 
 @injectable()
 export class BulkDeleteActionPoliciesRoute extends BaseAlertingRoute {
@@ -28,7 +27,6 @@ export class BulkDeleteActionPoliciesRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     summary: 'Delete action policies in bulk by ID',
-    oasOperationObject: bulkDeleteActionPoliciesOasExamples,
   } as const;
   static schemas = {
     request: {

@@ -19,7 +19,6 @@ export {
   isVarRequiredByVarGroup,
   isVarInSelectedVarGroupOption,
   getSelectedOption,
-  getHiddenVarGroupOptionsForPolicyTemplate,
   isInputCompatibleWithVarGroupSelections,
   isInputVisibleForVarGroupSelections,
 } from './var_group_helpers';

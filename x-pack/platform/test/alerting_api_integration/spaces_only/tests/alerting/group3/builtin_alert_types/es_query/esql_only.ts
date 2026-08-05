@@ -224,95 +224,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       }
     });
 
-    it('runs correctly: threshold on grouped hit with inline stats...by', async () => {
-      // INLINE STATS preserves all input columns and appends the aggregate, so the grouping
-      // must still be derived from the BY fields.
-
-      // Run 1:
-      // 1 - write source documents
-      // 2 - create the rule - it runs one time on creation
-      // 3 - wait for output doc to be written, indicating rule is done running
-      await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
-      const ruleId = await createESQLRule(
-        supertest,
-        objectRemover,
-        connectorId,
-        { name: 'always fire', groupBy: 'row' },
-        'from kibana-alerting-test-data | inline stats c = count(date) by group | where c > 0'
-      );
-
-      const docs = await waitForDocs(3);
-      const titlePattern = /rule 'always fire' matched query for group group-\d/;
-      const messagePattern =
-        /Document count is 5 in the last 1h for group-\d. Alert when greater than 0./;
-      const conditionPattern = /Query matched documents for group "group-\d"/;
-      const groupPattern = /{"group":"group-\d"}/;
-
-      for (let i = 0; i < docs.length; i++) {
-        const doc = docs[i];
-        const { hits, grouping } = doc._source;
-        const { name, title, message } = doc._source.params;
-        expect(name).to.be('always fire');
-        expect(title).to.match(titlePattern);
-        expect(message).to.match(messagePattern);
-        expect(hits).not.to.be.empty();
-        expect(grouping).to.match(groupPattern);
-      }
-
-      const aadDocs = await getAADDocsForRule(ruleId, 3, ALERT_INSTANCE_ID);
-
-      for (let i = 0; i < aadDocs.body.hits.hits.length; i++) {
-        const alertDoc = aadDocs.body.hits.hits[i]._source;
-        expect(alertDoc[ALERT_INSTANCE_ID]).to.be(`group-${i}`);
-        expect(alertDoc['kibana.alert.grouping']).to.eql({ group: `group-${i}` });
-        expect(alertDoc['kibana.alert.title']).to.match(titlePattern);
-        expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
-        expect(alertDoc['kibana.alert.evaluation.conditions']).to.match(conditionPattern);
-        expect(alertDoc['kibana.alert.evaluation.threshold']).to.eql(0);
-        const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
-        expect(value).to.be(5);
-        expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
-      }
-    });
-
-    it('runs correctly: grouped hit with stats...by where a leading group field is null', async () => {
-      // Run 1:
-      // 1 - write source documents
-      // 2 - create the rule - it runs one time on creation
-      // 3 - wait for output doc to be written, indicating rule is done running
-      await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
-      const ruleId = await createESQLRule(
-        supertest,
-        objectRemover,
-        connectorId,
-        { name: 'always fire', groupBy: 'row' },
-        'from kibana-alerting-test-data | eval provider = case(group != "group-0", "elastic", null) | stats c = count(date) by provider, group | where c > 0'
-      );
-
-      await waitForDocs(3);
-
-      const aadDocs = await getAADDocsForRule(ruleId, 3, ALERT_INSTANCE_ID);
-
-      const groupingByInstanceId: Record<string, unknown> = {};
-      for (const hit of aadDocs.body.hits.hits) {
-        const alertDoc = hit._source;
-        groupingByInstanceId[alertDoc[ALERT_INSTANCE_ID]] = alertDoc['kibana.alert.grouping'];
-      }
-
-      // group-0's provider is null: it is dropped from the compact instance id, and the single
-      // surviving value must be attributed to `group`, not shifted onto `provider`.
-      expect(groupingByInstanceId['group-0']).to.eql({ group: 'group-0' });
-      // groups with a non-null provider keep both fields, correctly paired by name.
-      expect(groupingByInstanceId['elastic,group-1']).to.eql({
-        provider: 'elastic',
-        group: 'group-1',
-      });
-      expect(groupingByInstanceId['elastic,group-2']).to.eql({
-        provider: 'elastic',
-        group: 'group-2',
-      });
-    });
-
     it('runs correctly: threshold on grouped hit with METADATA _id', async () => {
       // this test runs the rule once, injecting data before the first run
       // the rule should fire each time, triggering an index action each time
@@ -368,9 +279,10 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly: threshold on grouped hit with all columns', async () => {
-      // This test is sensitive to the fields in the index; it groups by every mapped
-      // column. `tags` is mapped but never written, so it comes back as a null column
-      // here.
+      // This test is sensitive to the fields in the index; when adding new fields,
+      // you should drop them here, as it has a limit of 10 or so for grouping,
+      // or otherwise change the grouping values that result.
+      const columnsToDrop = ['tags'];
 
       // this test runs the rule once, injecting data before the first run
       // the rule should fire each time, triggering an index action each time
@@ -379,13 +291,13 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       // 1 - write source documents
       // 2 - create the rule - it runs one time on creation
       // 3 - wait for output doc to be written, indicating rule is done running
-      await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, getEndDate());
       const ruleId = await createESQLRule(
         supertest,
         objectRemover,
         connectorId,
         { name: 'always fire', groupBy: 'row' },
-        'from kibana-alerting-test-data'
+        `from kibana-alerting-test-data | drop ${columnsToDrop}`
       );
 
       const docs = await waitForDocs(3);
@@ -414,9 +326,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(grouping.source).not.to.be(undefined);
         expect(grouping.testedValue).to.be.ok();
         expect(grouping.testedValueFloat).to.be.ok();
-        // `tags` is null on every row, so the null field is dropped from the grouping
-        // rather than shifting the remaining fields onto the wrong names.
-        expect(grouping.tags).to.be(undefined);
       }
 
       const aadDocs = await getAADDocsForRule(ruleId, 3);

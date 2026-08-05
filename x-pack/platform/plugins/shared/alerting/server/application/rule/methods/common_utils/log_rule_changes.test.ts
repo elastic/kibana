@@ -6,7 +6,6 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { SavedObjectErrorResult } from '@kbn/core-saved-objects-common';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { RawRule } from '../../../../types';
@@ -521,9 +520,11 @@ const buildRuleSO = (
   ...overrides,
 });
 
-const buildErroredRuleSO = (id: string): SavedObjectErrorResult => ({
+const buildErroredRuleSO = (id: string): SavedObject<RawRule> => ({
   id,
   type: RULE_SAVED_OBJECT_TYPE,
+  attributes: { alertTypeId: '123' } as RawRule,
+  references: [],
   error: { error: 'Conflict', message: 'version_conflict_engine_exception', statusCode: 409 },
 });
 

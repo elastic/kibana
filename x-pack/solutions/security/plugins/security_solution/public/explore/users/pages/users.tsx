@@ -101,7 +101,7 @@ const UsersComponent = () => {
   }, [severitySelection, tabName, globalFilters]);
 
   const { dataView, status } = useDataView(PageScope.explore);
-  const selectedPatterns = useSelectedPatterns(dataView);
+  const selectedPatterns = useSelectedPatterns(PageScope.explore);
   const indicesExist = dataView.hasMatchedIndices();
 
   const [globalFiltersQuery, kqlError] = useMemo(

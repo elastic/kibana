@@ -77,7 +77,6 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -89,6 +88,7 @@ import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
   ALERTS_PATH,
   CASES_PATH,
+  NIGHTSHIFT_PATH,
   OBSERVABILITY_BASE_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
@@ -143,7 +143,6 @@ export interface ObservabilityPublicPluginsSetup {
   presentationUtil?: PresentationUtilPluginStart;
   streams?: StreamsPluginSetup;
   cases?: CasesPublicSetup;
-  globalSearch?: GlobalSearchPluginSetup;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -221,6 +220,16 @@ export class Plugin
       path: ALERTS_PATH,
       visibleIn: ['projectSideNav'],
       keywords: ['alerts', 'rules'],
+    },
+    {
+      id: 'nightshift',
+      title: i18n.translate('xpack.observability.nightshiftLinkTitle', {
+        defaultMessage: 'Nightshift',
+      }),
+      order: 8002,
+      path: NIGHTSHIFT_PATH,
+      visibleIn: [],
+      keywords: ['nightshift', 'significant events'],
     },
   ];
 
@@ -537,6 +546,7 @@ export class Plugin
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
     const config = this.initContext.config.get();
+
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,
       deepLinks: this.deepLinks,
@@ -549,6 +559,19 @@ export class Plugin
         createDefinition(coreStart, pluginsStart)
       );
     });
+
+    const agentBuilder = pluginsStart.agentBuilder;
+    if (agentBuilder) {
+      void import('./pages/nightshift/agent_builder/significant_event_attachments')
+        .then(({ registerNightshiftAgentBuilderAttachments }) => {
+          registerNightshiftAgentBuilderAttachments({ agentBuilder });
+        })
+        .catch((error) => {
+          this.initContext.logger
+            .get('nightshiftAgentBuilderAttachments')
+            .error(`Failed to register agent builder attachments: ${error}`);
+        });
+    }
 
     return {
       config,

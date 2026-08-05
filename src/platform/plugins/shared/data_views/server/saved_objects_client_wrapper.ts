@@ -8,7 +8,6 @@
  */
 
 import type { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type {
   DataViewAttributes,
   PersistenceAPI,
@@ -37,9 +36,6 @@ export class SavedObjectsClientWrapper implements PersistenceAPI {
     if (response.outcome === 'conflict') {
       throw new DataViewSavedObjectConflictError(id);
     }
-    if (isSavedObjectErrorResult(response.saved_object)) {
-      throw new Error(response.saved_object.error.message);
-    }
     return response.saved_object;
   }
 
@@ -47,9 +43,6 @@ export class SavedObjectsClientWrapper implements PersistenceAPI {
     const response = await this.savedObjectClient.resolve<T>('search', id);
     if (response.outcome === 'conflict') {
       throw new DataViewSavedObjectConflictError(id);
-    }
-    if (isSavedObjectErrorResult(response.saved_object)) {
-      throw new Error(response.saved_object.error.message);
     }
     return response.saved_object;
   }

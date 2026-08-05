@@ -111,10 +111,7 @@ spaceTest.describe(
 
         await spaceTest.step('reload the page', async () => {
           await page.reload();
-          // The grid only mounts once the post-reload metrics fetch resolves, and a cold
-          // Discover re-init plus that fetch regularly exceeds the default 10s on serverless CI
-          // (matching `waitForDiscoverPage`'s own 30s allowance for the same reason).
-          await expect(pageObjects.metricsExperience.grid).toBeVisible({ timeout: 30_000 });
+          await expect(pageObjects.metricsExperience.grid).toBeVisible();
         });
 
         await spaceTest.step('reopen and verify the selection persisted', async () => {
@@ -179,10 +176,7 @@ spaceTest.describe(
 
         await spaceTest.step('reload the page and verify the settings persisted', async () => {
           await page.reload();
-          // The grid only mounts once the post-reload metrics fetch resolves, and a cold
-          // Discover re-init plus that fetch regularly exceeds the default 10s on serverless CI
-          // (matching `waitForDiscoverPage`'s own 30s allowance for the same reason).
-          await expect(metricsExperience.grid).toBeVisible({ timeout: 30_000 });
+          await expect(metricsExperience.grid).toBeVisible();
 
           await gridSettings.open();
           await expect(gridSettings.counterSelect).toContainText('Maximum');

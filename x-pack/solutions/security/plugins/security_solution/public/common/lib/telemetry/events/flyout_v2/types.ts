@@ -250,7 +250,6 @@ export const FLYOUT_ACTION = {
   ISOLATE_HOST: 'isolate_host',
   RUN_WORKFLOW: 'run_workflow',
   RESPOND: 'respond',
-  RUN_OSQUERY: 'run_osquery',
   ADD_NOTE: 'add_note',
   INVESTIGATE_IN_TIMELINE: 'investigate_in_timeline',
   EXPLORE: 'explore',

@@ -22,7 +22,7 @@ export function registerUpdateSettingsRoute({ router, current }: RouteDependenci
       },
       validate: {
         params: schema.object({
-          indexName: schema.string({ maxLength: 1000 }),
+          indexName: schema.string(),
         }),
         body: schema.object({
           settings: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),

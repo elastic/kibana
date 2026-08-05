@@ -58,7 +58,7 @@ const OverviewComponent = () => {
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
 
   const { dataView, status } = useDataView();
-  const selectedPatterns = useSelectedPatterns(dataView);
+  const selectedPatterns = useSelectedPatterns();
   const indicesExist = !!dataView.matchedIndices?.length;
 
   // Keep-list: patterns from the data view with alert-backing indices stripped

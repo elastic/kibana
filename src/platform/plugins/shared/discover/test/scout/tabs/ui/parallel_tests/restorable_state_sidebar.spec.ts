@@ -72,7 +72,7 @@ spaceTest.describe(
 
     spaceTest('restores sidebar field filters per tab', async ({ pageObjects }) => {
       const { discover, unifiedFieldList, unifiedTabs } = pageObjects;
-      const initialCount = 49;
+      const initialCount = 48;
 
       await unifiedFieldList.expectAvailableFieldCount(initialCount);
 
@@ -80,17 +80,17 @@ spaceTest.describe(
       await discover.waitUntilTabIsLoaded();
       await unifiedFieldList.expectAvailableFieldCount(initialCount);
       await unifiedFieldList.searchField('i');
-      await unifiedFieldList.expectAvailableFieldCount(29);
+      await unifiedFieldList.expectAvailableFieldCount(28);
 
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
       await unifiedFieldList.expectAvailableFieldCount(initialCount);
       await unifiedFieldList.searchField('e');
-      await unifiedFieldList.expectAvailableFieldCount(43);
+      await unifiedFieldList.expectAvailableFieldCount(42);
       await unifiedFieldList.openFieldTypeFilter();
       await unifiedFieldList.selectFieldTypeFilter('number');
       await unifiedFieldList.closeFieldTypeFilter();
-      await unifiedFieldList.expectAvailableFieldCount(5);
+      await unifiedFieldList.expectAvailableFieldCount(4);
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
@@ -98,11 +98,11 @@ spaceTest.describe(
 
       await unifiedTabs.selectTab(1);
       await discover.waitUntilTabIsLoaded();
-      await unifiedFieldList.expectAvailableFieldCount(29);
+      await unifiedFieldList.expectAvailableFieldCount(28);
 
       await unifiedTabs.selectTab(2);
       await discover.waitUntilTabIsLoaded();
-      await unifiedFieldList.expectAvailableFieldCount(5);
+      await unifiedFieldList.expectAvailableFieldCount(4);
 
       await unifiedFieldList.clearFieldSearch();
       await unifiedFieldList.clearFieldTypeFilters();

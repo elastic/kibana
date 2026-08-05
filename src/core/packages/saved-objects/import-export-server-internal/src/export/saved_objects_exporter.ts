@@ -140,13 +140,13 @@ export class SavedObjectsExporter implements ISavedObjectsExporter {
 
   private async fetchByObjects({ objects, namespace }: SavedObjectsExportByObjectOptions) {
     const bulkGetResult = await this.#savedObjectsClient.bulkGet(objects, { namespace });
-    const erroredObjects = bulkGetResult.saved_objects.filter(isSavedObjectErrorResult);
+    const erroredObjects = bulkGetResult.saved_objects.filter((obj) =>
+      isSavedObjectErrorResult(obj)
+    );
     if (erroredObjects.length) {
       throw SavedObjectsExportError.objectFetchError(erroredObjects);
     }
-    return bulkGetResult.saved_objects.filter(
-      (obj): obj is SavedObject => !isSavedObjectErrorResult(obj)
-    );
+    return bulkGetResult.saved_objects;
   }
 
   private async fetchByTypes({

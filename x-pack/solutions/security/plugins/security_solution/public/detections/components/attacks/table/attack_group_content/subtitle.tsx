@@ -190,7 +190,7 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
             data-test-subj="attack-subtitle-summary"
           >
             <EuiToolTip content={summaryPlainText} display="block" anchorClassName="eui-fullWidth">
-              <div css={truncatedSummaryCss} tabIndex={0}>
+              <div css={truncatedSummaryCss}>
                 <AttackDiscoveryMarkdownFormatter
                   scopeId={TableId.alertsOnAttacksPage}
                   disableActions={showAnonymized}

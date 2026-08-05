@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { map } from 'fp-ts/Either';
 import { getGrantedRightsEsqlSource } from '../../../queries/granted_rights_esql_query';
 import type { EsqlQueryOrInvalidFields } from '../../../queries/helpers';
 
 export const getGrantedRightsEsqlCount = (
   namespace: string,
-  indexPattern: string,
-  fields: DataViewFieldMap
+  sourcerDataView: DataViewSpec
 ): EsqlQueryOrInvalidFields => {
+  const indexPattern = sourcerDataView?.title ?? '';
+  const fields = sourcerDataView?.fields ?? {};
   const esqlSource = getGrantedRightsEsqlSource(namespace, indexPattern, fields);
 
   return map<string, string>((src) => `${src} | STATS count = COUNT(*)`)(esqlSource);

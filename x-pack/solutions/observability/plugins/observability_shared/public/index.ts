@@ -114,9 +114,3 @@ export { type ControlPanels, useControlPanels } from './hooks/use_control_panels
 export { useKibanaQuerySettings } from './hooks/use_kibana_query_settings';
 
 export { ExternalResourceLinks } from './components/external_resource_links';
-
-export {
-  NightshiftMarkIcon,
-  NightshiftNavigationIcon,
-} from './components/nightshift_navigation_icon/nightshift_navigation_icon';
-export type { NightshiftMarkIconProps } from './components/nightshift_navigation_icon/nightshift_navigation_icon';

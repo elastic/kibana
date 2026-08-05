@@ -8,7 +8,7 @@
 import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
-import { parse } from 'yaml';
+import * as yaml from 'js-yaml';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { DEFAULTS } from '../constants';
 import type { CliOptions } from '../types';
@@ -30,7 +30,7 @@ function readKibanaDevConfig(): {
   if (!configPath) return {};
 
   try {
-    const loaded = (parse(fs.readFileSync(configPath, 'utf8')) || {}) as any;
+    const loaded = (yaml.load(fs.readFileSync(configPath, 'utf8')) || {}) as any;
     const out: any = {};
 
     // server.host / server.port or flat keys like 'server.host'

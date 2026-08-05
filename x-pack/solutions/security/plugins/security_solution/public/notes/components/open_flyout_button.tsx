@@ -19,7 +19,6 @@ import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shar
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export const OPEN_FLYOUT_BUTTON = i18n.translate(
   'xpack.securitySolution.notes.openFlyoutButtonLabel',
@@ -49,8 +48,7 @@ export interface OpenFlyoutButtonIconProps {
  */
 export const OpenFlyoutButtonIcon = memo(
   ({ eventId, timelineId, iconType }: OpenFlyoutButtonIconProps) => {
-    const { dataView } = useDataView(PageScope.timeline);
-    const selectedPatterns = useSelectedPatterns(dataView);
+    const selectedPatterns = useSelectedPatterns(PageScope.timeline);
 
     const { telemetry } = useKibana().services;
     const { openFlyout } = useExpandableFlyoutApi();

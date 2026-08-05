@@ -48,7 +48,7 @@ export const DocCountCell = ({
     if (metadataCount !== undefined) {
       return (
         <EuiToolTip content={docCountClosedIndexTooltip}>
-          <span tabIndex={0} style={{ cursor: 'default' }}>
+          <span style={{ cursor: 'default' }}>
             {Number(metadataCount).toLocaleString()}&nbsp;
             <EuiIcon type="info" size="s" color="subdued" aria-label={docCountClosedIndexTooltip} />
           </span>
@@ -67,7 +67,7 @@ export const DocCountCell = ({
     if (metadataCount !== undefined) {
       return (
         <EuiToolTip content={docCountApproximateTooltip}>
-          <span tabIndex={0} style={{ cursor: 'default' }}>
+          <span style={{ cursor: 'default' }}>
             {Number(metadataCount).toLocaleString()}&nbsp;
             <EuiIcon type="info" size="s" color="subdued" aria-label={docCountApproximateTooltip} />
           </span>

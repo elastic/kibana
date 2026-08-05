@@ -108,9 +108,6 @@ describe('useSerialPolling', () => {
     await act(async () => {
       resolvePoll?.();
       await Promise.resolve();
-    });
-
-    await act(async () => {
       jest.advanceTimersByTime(100);
       await Promise.resolve();
     });

@@ -167,9 +167,9 @@ const fetchReferences = async ({
 }): Promise<FetchReferencesResult> => {
   const { saved_objects: savedObjects } = await client.bulkGet(references, { namespace });
   return {
-    objects: savedObjects.filter((obj): obj is SavedObject => !isSavedObjectErrorResult(obj)),
+    objects: savedObjects.filter((obj) => !isSavedObjectErrorResult(obj)),
     missingRefs: savedObjects
-      .filter(isSavedObjectErrorResult)
+      .filter((obj) => isSavedObjectErrorResult(obj))
       .map((obj) => ({ type: obj.type, id: obj.id })),
   };
 };

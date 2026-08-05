@@ -6,14 +6,7 @@
  */
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import {
-  DURATION,
-  GEN_AI_USAGE_INPUT_TOKENS,
-  GEN_AI_USAGE_OUTPUT_TOKENS,
-  KIND,
-  SPAN_ID,
-  TRANSACTION_ID,
-} from '../../../common/es_fields/apm';
+import { DURATION, KIND, SPAN_ID, TRANSACTION_ID } from '../../../common/es_fields/apm';
 import { getUnifiedTraceItemsPaginated } from './get_unified_trace_items_page';
 
 // Use a small page size so tests don't need thousands of hits
@@ -240,18 +233,6 @@ describe('getUnifiedTraceItemsPaginated', () => {
       const callArgs = (mockApmEventClient.search as jest.Mock).mock.calls[0][1];
       expect(callArgs.fields).not.toContain(DURATION);
       expect(callArgs.fields).not.toContain(KIND);
-    });
-
-    it('includes GenAI token fields when ecsOnly=true', async () => {
-      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
-        makeSearchResponse([makeHit('span-1')], 1)
-      );
-
-      await getUnifiedTraceItemsPaginated({ ...defaultParams, ecsOnly: true });
-
-      const callArgs = (mockApmEventClient.search as jest.Mock).mock.calls[0][1];
-      expect(callArgs.fields).toContain(GEN_AI_USAGE_INPUT_TOKENS);
-      expect(callArgs.fields).toContain(GEN_AI_USAGE_OUTPUT_TOKENS);
     });
 
     it('includes OTel fields when ecsOnly=false', async () => {

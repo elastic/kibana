@@ -10,7 +10,6 @@ import { EuiCallOut, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/e
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import { SERVICE_NAME } from '@kbn/apm-types';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
@@ -35,6 +34,7 @@ import {
   CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS,
   CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES,
 } from '../../components/app/service_map/contextual_map/constants';
+import { SERVICE_FLYOUT_SOURCES } from '../../components/shared/service_flyout/constants';
 import type { ServiceFlyoutOptions } from '../../components/shared/service_flyout/types';
 import { ServiceMapSloFlyoutProvider } from '../../components/shared/service_map/service_map_slo_flyout_context';
 import { LicensePrompt } from '../../components/shared/license_prompt';
@@ -54,11 +54,6 @@ export interface ServiceMapEmbeddableProps {
   environment?: Environment;
   kuery?: string;
   serviceName?: string;
-  /**
-   * Multi-service context highlight from panel state (`highlighted_service_names`).
-   * When unset, falls back to highlighting `serviceName` alone.
-   */
-  highlightedServiceNames?: string[];
   serviceGroupId?: string;
   core: CoreStart;
   onBlockingError?: (error: Error | undefined) => void;
@@ -156,7 +151,6 @@ export function ServiceMapEmbeddable({
   environment = ENVIRONMENT_ALL.value,
   kuery = '',
   serviceName,
-  highlightedServiceNames: highlightedServiceNamesProp,
   serviceGroupId,
   core,
   onBlockingError,
@@ -333,12 +327,18 @@ export function ServiceMapEmbeddable({
     };
   }, [viewFilters, badgesStatus]);
 
-  const highlightedServiceNames = useMemo(() => {
-    if (highlightedServiceNamesProp && highlightedServiceNamesProp.length > 0) {
-      return highlightedServiceNamesProp;
-    }
-    return serviceName ? [serviceName] : undefined;
-  }, [highlightedServiceNamesProp, serviceName]);
+  const flyoutOptionsForGraph = useMemo<ServiceFlyoutOptions>(
+    () => ({
+      source: SERVICE_FLYOUT_SOURCES.dashboardEmbeddable,
+      ...flyoutOptions,
+    }),
+    [flyoutOptions]
+  );
+
+  const highlightedServiceNames = useMemo(
+    () => (serviceName ? [serviceName] : undefined),
+    [serviceName]
+  );
 
   const badgeDependentFiltersActive =
     (viewFilters?.alertStatusFilter?.length ?? 0) > 0 ||
@@ -431,16 +431,9 @@ export function ServiceMapEmbeddable({
     rangeFrom,
     rangeTo,
     environment,
-    kuery,
     serviceName,
     serviceGroupId,
     filterPills,
-    viewFilters,
-    mapOrientation,
-    controlSelections:
-      highlightedServiceNamesProp && highlightedServiceNamesProp.length > 0
-        ? { [SERVICE_NAME]: highlightedServiceNamesProp }
-        : undefined,
   });
 
   const isLoading = status === FETCH_STATUS.LOADING || badgesStatus === FETCH_STATUS.LOADING;
@@ -496,7 +489,7 @@ export function ServiceMapEmbeddable({
             alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
             clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
             showContextControls={!hideContextControls}
-            flyoutOptions={flyoutOptions}
+            flyoutOptions={flyoutOptionsForGraph}
           />
         ) : (
           <ServiceMapGraph
@@ -520,7 +513,7 @@ export function ServiceMapEmbeddable({
             onMapOrientationChange={onMapOrientationChange}
             viewFilters={viewFiltersForGraph}
             onViewFiltersChange={onViewFiltersChange}
-            flyoutOptions={flyoutOptions}
+            flyoutOptions={flyoutOptionsForGraph}
           />
         )}
       </div>

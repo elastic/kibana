@@ -20,7 +20,7 @@ describe('common utils', () => {
     });
 
     it('returns false if the SO is not an error', () => {
-      expect(isSOError({ id: '1', type: 'a' })).toBe(false);
+      expect(isSOError({})).toBe(false);
     });
 
     it('returns false when the error property is undefined', () => {

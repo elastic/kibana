@@ -11,7 +11,8 @@ import {
   normalizeEpisodeEventDataPayload,
   resolveEpisodeEventData,
 } from './resolve_episode_event_data';
-import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
+import type { EpisodeEventRow } from '../queries/episode_events_query';
+
 describe('normalizeEpisodeEventDataPayload', () => {
   it('returns null for missing or empty payloads', () => {
     expect(normalizeEpisodeEventDataPayload(null)).toBeNull();

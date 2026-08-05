@@ -69,7 +69,7 @@ export const CommandBadgeText: React.FC<CommandBadgeTextProps> = ({ text }) => {
         const fullBadgeText = `${sequence}${segment.data.label}`;
         return (
           <EuiToolTip key={index} content={fullBadgeText} disableScreenReaderOutput>
-            <span css={[badgeStyle, commandBadgeWrapperCss]} tabIndex={0}>
+            <span css={[badgeStyle, commandBadgeWrapperCss]}>
               <span css={commandBadgeInnerCss}>{fullBadgeText}</span>
             </span>
           </EuiToolTip>

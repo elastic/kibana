@@ -12,7 +12,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { errors, type Client } from '@elastic/elasticsearch';
-import type { FindRulesRequest } from '@kbn/alerting-v2-schemas';
+import type { FindRulesParams } from '@kbn/alerting-v2-schemas';
 import type { TryWithRetriesOptions } from '@kbn/ftr-common-functional-services';
 import moment from 'moment';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
@@ -931,11 +931,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         .set(samlAuth.getInternalRequestHeader());
     },
 
-    async searchRulesV2(
-      roleAuthc: RoleCredentials,
-      query: FindRulesRequest = {},
-      spaceId?: string
-    ) {
+    async searchRulesV2(roleAuthc: RoleCredentials, query: FindRulesParams = {}, spaceId?: string) {
       return supertestWithoutAuth
         .get(`${spaceId ? '/s/' + spaceId : ''}/api/alerting/v2/rules`)
         .query(query)

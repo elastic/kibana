@@ -6,7 +6,7 @@
  */
 
 import type { Subscription } from 'rxjs';
-import type { Logger, SavedObjectErrorResult, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import type { Logger, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-types';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
@@ -65,9 +65,7 @@ export class PolicyWatcher {
 
     log.info('Checking agent policies for compliance with the current license.');
 
-    const updatedAgentPolicies: Array<
-      SavedObjectsUpdateResponse<AgentPolicySOAttributes> | SavedObjectErrorResult
-    > = [];
+    const updatedAgentPolicies: Array<SavedObjectsUpdateResponse<AgentPolicySOAttributes>> = [];
 
     try {
       for await (const agentPolicyPageResults of agentPolicyFetcher) {

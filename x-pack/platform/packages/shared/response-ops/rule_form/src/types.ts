@@ -93,6 +93,7 @@ export interface RuleFormState<
   selectedRuleType: RuleTypeWithDescription;
   selectedRuleTypeModel: RuleTypeModel<Params>;
   multiConsumerSelection?: RuleCreationValidConsumer | null;
+  showMustacheAutocompleteSwitch?: boolean;
   metadata?: MetaData;
   minimumScheduleInterval?: MinimumScheduleInterval;
   canShowConsumerSelection?: boolean;

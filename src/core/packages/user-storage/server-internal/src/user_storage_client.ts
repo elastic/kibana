@@ -9,7 +9,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers, isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { UserStorageDefinition, IUserStorageClient } from '@kbn/core-user-storage-common';
 import { USER_STORAGE_SO_TYPE, USER_STORAGE_GLOBAL_SO_TYPE } from './saved_objects';
 
@@ -106,8 +106,8 @@ export class UserStorageClient implements IUserStorageClient {
         objectsToFetch
       );
       for (const doc of docs) {
-        // bulkGet surfaces a missing SO via an error result rather than throwing.
-        if (isSavedObjectErrorResult(doc)) continue;
+        // bulkGet surfaces a missing SO via `doc.error` rather than throwing.
+        if (doc.error) continue;
         if (doc.type === USER_STORAGE_SO_TYPE) {
           spaceData = doc.attributes.data;
         } else if (doc.type === USER_STORAGE_GLOBAL_SO_TYPE) {

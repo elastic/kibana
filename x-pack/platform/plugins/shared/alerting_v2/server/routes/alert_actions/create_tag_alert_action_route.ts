@@ -9,13 +9,10 @@ import {
   ALERT_EPISODE_ACTION_TYPE,
   createTagAlertActionBodySchema,
 } from '@kbn/alerting-v2-schemas';
-import { createTagAlertActionOasExamples } from './create_tag_alert_action_oas_example';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
 
 export const CreateTagAlertActionRoute = createAlertActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
   pathSuffix: '_tag',
-  summary: 'Add tags to an alert',
   bodySchema: createTagAlertActionBodySchema,
-  oasOperationObject: createTagAlertActionOasExamples,
 });

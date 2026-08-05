@@ -45,11 +45,8 @@ dependsOn:
   - '@kbn/as-code-shared-transforms'
   - '@kbn/data-views-plugin'
   - '@kbn/test-jest-helpers'
+  - '@kbn/esql-utils'
   - '@kbn/presentation-publishing'
-  - '@kbn/scout'
-  - '@kbn/ui-actions-plugin'
-  - '@kbn/ftr-llm-proxy'
-  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
@@ -61,7 +58,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

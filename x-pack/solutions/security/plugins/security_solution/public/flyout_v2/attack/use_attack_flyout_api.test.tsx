@@ -38,7 +38,7 @@ jest.mock('../shared/components/flyout_provider', () => ({
 }));
 jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
   useDefaultDocumentFlyoutProperties: jest.fn(() => ({ size: 's' })),
-  useDefaultToolsFlyoutProperties: jest.fn(() => ({ minWidth: 384, size: 'm' })),
+  defaultToolsFlyoutProperties: { size: 'm' },
 }));
 
 const mockWriteOnOpen = jest.fn();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Detection, SignificantEvent, SignalEntry } from '@kbn/significant-events-schema';
+import type { Discovery, Detection, SignalEntry } from '@kbn/significant-events-schema';
 import { evidenceCollectionEvaluator } from './evidence_collection';
 
 const detection = (ruleUuid: string): Omit<Detection, 'processed'> => ({
@@ -40,13 +40,13 @@ const detectionSignal = (
   },
 });
 
-const evaluate = (discoveries: Partial<SignificantEvent>[], ruleUuids: string[]) =>
+const evaluate = (discoveries: Partial<Discovery>[], ruleUuids: string[]) =>
   evidenceCollectionEvaluator.evaluate({
     input: {
       detections: ruleUuids.map(detection),
     },
     output: {
-      discoveries: discoveries as SignificantEvent[],
+      discoveries: discoveries as Discovery[],
       steps: [],
     },
     expected: {} as never,
@@ -59,7 +59,7 @@ describe('evidenceCollectionEvaluator', () => {
   });
 
   it('scores 1 when every input rule has collected ES|QL evidence', async () => {
-    const discoveries: Partial<SignificantEvent>[] = [
+    const discoveries: Partial<Discovery>[] = [
       {
         signals: [detectionSignal('r1'), detectionSignal('r2')],
       },
@@ -71,7 +71,7 @@ describe('evidenceCollectionEvaluator', () => {
   });
 
   it('gives partial credit when an input rule is omitted', async () => {
-    const discoveries: Partial<SignificantEvent>[] = [
+    const discoveries: Partial<Discovery>[] = [
       {
         signals: [detectionSignal('r1')],
       },

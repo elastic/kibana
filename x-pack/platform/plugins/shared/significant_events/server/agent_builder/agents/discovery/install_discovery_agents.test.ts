@@ -18,13 +18,11 @@ import { installDiscoveryAgents } from './install_discovery_agents';
 describe('installDiscoveryAgents', () => {
   it('ensures system-owned persisted typed agents in the requested space', async () => {
     const agentBuilder = agentBuilderMocks.createStart();
-    const availability = { cacheMode: 'space' as const, handler: jest.fn() };
 
-    await installDiscoveryAgents({ agentBuilder, spaceId: 'space-1', availability });
+    await installDiscoveryAgents({ agentBuilder, spaceId: 'space-1' });
 
     expect(agentBuilder.agents.ensure).toHaveBeenCalledWith({
       spaceId: 'space-1',
-      availability,
       agent: {
         id: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
         type: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_TYPE_ID,
@@ -42,7 +40,6 @@ describe('installDiscoveryAgents', () => {
     });
     expect(agentBuilder.agents.ensure).toHaveBeenCalledWith({
       spaceId: 'space-1',
-      availability,
       agent: {
         id: SIGNIFICANT_EVENTS_JUDGE_AGENT_ID,
         type: SIGNIFICANT_EVENTS_JUDGE_AGENT_TYPE_ID,

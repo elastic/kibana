@@ -191,7 +191,6 @@ export const fullBasicXY: LensAttributes = {
       legend: {
         isVisible: true,
         legendSize: 'auto',
-        legendStats: [],
         maxLines: 2,
         position: 'right',
         shouldTruncate: true,
@@ -205,6 +204,7 @@ export const fullBasicXY: LensAttributes = {
         yRight: true,
       },
       valueLabels: 'hide',
+      valuesInLegend: false,
       yLeftExtent: {
         enforce: true,
         mode: 'dataBounds',
@@ -360,7 +360,6 @@ export const multipleMetricsXY: LensAttributes = {
       ],
       legend: {
         isVisible: true,
-        legendStats: [],
         position: 'bottom',
         layout: 'list',
         shouldTruncate: true,
@@ -374,6 +373,7 @@ export const multipleMetricsXY: LensAttributes = {
         yRight: true,
       },
       valueLabels: 'hide',
+      valuesInLegend: false,
       yLeftExtent: {
         enforce: true,
         mode: 'dataBounds',

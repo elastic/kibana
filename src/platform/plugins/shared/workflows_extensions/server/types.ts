@@ -98,10 +98,7 @@ export type WorkflowsExtensionsServerPluginStart =
 
     /**
      * Initialize a plugin-scoped managed workflows client. The plugin id is bound once
-     * and reused for install/uninstall/execute/ready.
-     *
-     * `install` and `ready` are best-effort (may no-op under teardown or ES unreadiness;
-     * resolve does not guarantee persistence). See `RegisteredManagedWorkflowsLifecycleApi`.
+     * and reused for install/uninstall/execute.
      */
     initManagedWorkflowsClient(pluginId: string): Promise<PluginScopedManagedWorkflowsApi>;
 

@@ -9,7 +9,7 @@ import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '@kbn/significant-events-p
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
-import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
+import type { Detection, Discovery } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   replayIntoManagedStream,
@@ -47,6 +47,7 @@ const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
 /** Events data stream — the same index the judge writes to via events_write. */
 const SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM = '.significant_events-events';
+const SIGNIFICANT_EVENTS_DISCOVERIES_DATA_STREAM = '.significant_events-discoveries';
 
 evaluate.describe(
   'Significant Events Discovery - Discovery Agent',
@@ -262,7 +263,7 @@ evaluate.describe(
                   });
 
                   return {
-                    // Agent outputs via events_write tool calls; extract discoveries from steps.
+                    // Agent outputs via discovery_write tool calls; extract discoveries from steps.
                     discoveries: extractDiscoveriesFromToolCall(converseResult.steps),
                     // Thread the input detections through so snapshot-mode evaluators can access them.
                     inputDetections: detections,
@@ -435,7 +436,10 @@ evaluate.describe(
                     // Continuation examples must not inherit discoveries or events from a previous
                     // path. The cycles within this task still share state.
                     await Promise.all(
-                      [SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM].map((index) =>
+                      [
+                        SIGNIFICANT_EVENTS_DISCOVERIES_DATA_STREAM,
+                        SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+                      ].map((index) =>
                         esClient
                           .deleteByQuery({
                             index,
@@ -515,16 +519,16 @@ evaluate.describe(
                         const discoveries = extractDiscoveriesFromToolCall(converseResult.steps);
                         if (discoveries.some((discovery) => discovery.event_id)) {
                           await esClient.indices.refresh({
-                            index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+                            index: SIGNIFICANT_EVENTS_DISCOVERIES_DATA_STREAM,
                           });
                         }
                         const persistedDiscoveries = await Promise.all(
-                          discoveries.map(async (discovery): Promise<SignificantEvent> => {
+                          discoveries.map(async (discovery): Promise<Discovery> => {
                             if (!discovery.event_id) {
                               return discovery;
                             }
-                            const result = await esClient.search<SignificantEvent>({
-                              index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+                            const result = await esClient.search<Discovery>({
+                              index: SIGNIFICANT_EVENTS_DISCOVERIES_DATA_STREAM,
                               size: 1,
                               query: { term: { event_id: discovery.event_id } },
                               sort: [{ '@timestamp': 'desc' }],
@@ -590,7 +594,7 @@ evaluate.describe(
                           };
                           if (i === 0 && run.seedStatus !== undefined) {
                             await esClient.updateByQuery({
-                              index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+                              index: SIGNIFICANT_EVENTS_DISCOVERIES_DATA_STREAM,
                               query: { term: { event_id: discovery.event_id } },
                               script: {
                                 lang: 'painless',

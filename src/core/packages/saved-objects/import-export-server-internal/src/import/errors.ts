@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectErrorResult } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
 
 /**
  * @public
@@ -53,7 +53,7 @@ export class SavedObjectsImportError extends Error {
     );
   }
 
-  static referencesFetchError(objects: SavedObjectErrorResult[]) {
+  static referencesFetchError(objects: SavedObject[]) {
     return new SavedObjectsImportError(
       'references-fetch-error',
       'Error fetching references for imported objects',

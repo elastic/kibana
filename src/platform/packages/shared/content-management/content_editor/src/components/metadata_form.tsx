@@ -10,8 +10,14 @@
 import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
-import { KbnInfoCallout } from '@kbn/ui-callout';
+import {
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiTextArea,
+  EuiCallOut,
+} from '@elastic/eui';
 
 import { ContentEditorFlyoutWarningsCallOut } from './editor_flyout_warnings';
 import type { Field, MetadataFormState } from './use_metadata_form';
@@ -55,7 +61,7 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
       <ContentEditorFlyoutWarningsCallOut warningMessages={getWarnings()} />
       {isReadonly && (
         <>
-          <KbnInfoCallout size="s" title={readonlyReason} announceOnMount={false} />
+          <EuiCallOut size="s" title={readonlyReason} iconType="info" announceOnMount={false} />
           <EuiSpacer size="l" />
         </>
       )}

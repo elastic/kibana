@@ -8,15 +8,13 @@
 import { useMemo } from 'react';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { memoizedGetTimelineColumnHeaders } from './utils';
 
 export const useTimelineColumns = (columns: ColumnHeaderOptions[]) => {
-  const { dataView } = useDataView(PageScope.timeline);
-  const browserFields = useBrowserFields(dataView);
+  const browserFields = useBrowserFields(PageScope.timeline);
 
   const localColumns = useMemo(() => columns ?? defaultUdtHeaders, [columns]);
 

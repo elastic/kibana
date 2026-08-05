@@ -7,16 +7,15 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { getAuthenticationsEsqlCount } from './esql_query';
 import { KeyInsightsTile } from '../common/key_insights_tile';
 
-export const AuthenticationsTile: React.FC<{
-  spaceId: string;
-  indexPattern: string;
-  fields: DataViewFieldMap;
-}> = ({ spaceId, indexPattern, fields }) => {
+export const AuthenticationsTile: React.FC<{ spaceId: string; dataViewSpec: DataViewSpec }> = ({
+  spaceId,
+  dataViewSpec,
+}) => {
   return (
     <KeyInsightsTile
       title={i18n.translate('xpack.securitySolution.privmon.authentications.title', {
@@ -25,7 +24,7 @@ export const AuthenticationsTile: React.FC<{
       label={i18n.translate('xpack.securitySolution.privmon.authentications.label', {
         defaultMessage: 'Authentications',
       })}
-      getEsqlQuery={(namespace) => getAuthenticationsEsqlCount(namespace, indexPattern, fields)}
+      getEsqlQuery={(namespace) => getAuthenticationsEsqlCount(namespace, dataViewSpec)}
       id="privileged-user-monitoring-authentications"
       spaceId={spaceId}
       inspectTitle={

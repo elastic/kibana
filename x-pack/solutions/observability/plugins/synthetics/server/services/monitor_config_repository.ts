@@ -8,7 +8,6 @@
 import type {
   ISavedObjectsRepository,
   SavedObject,
-  SavedObjectErrorResult,
   SavedObjectReference,
   SavedObjectsBulkGetObject,
   SavedObjectsClientContract,
@@ -313,7 +312,7 @@ export class MonitorConfigRepository {
     }
 
     // Use bulkCreate for recreations
-    let recreateResults: Array<SavedObject<MonitorFields> | SavedObjectErrorResult> = [];
+    let recreateResults: Array<SavedObject<MonitorFields>> = [];
     if (toRecreate.length > 0) {
       const bulkCreateObjects = toRecreate.map(({ id, attributes, references }) => ({
         id,

@@ -6,7 +6,7 @@
  */
 
 import { esql } from '@elastic/esql';
-import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-episodes-ui/constants';
 
 /** A single firing-frequency histogram bucket returned by the ES|QL query. */
 export interface SignalFiringsBucketRow {

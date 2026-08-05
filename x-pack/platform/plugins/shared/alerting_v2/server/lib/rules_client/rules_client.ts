@@ -64,7 +64,7 @@ import type {
   BulkResponse,
   CreateRuleData,
   CreateRuleParams,
-  FindRulesArgs,
+  FindRulesParams,
   FindRulesResponse,
   FindRulesSortField,
   RuleResponse,
@@ -106,19 +106,6 @@ const toBulkError = (
   error: { code: bulkErrorCodeForStatus(err.statusCode), message: err.message },
 });
 
-/**
- * Builds a per-rule bulk error flagging that the rule's saved object was
- * persisted but the paired Task Manager call failed, leaving its task state
- * diverged. Surfaced alongside the affected count so clients can detect the
- * drift and (optionally) retry.
- */
-const toTaskManagerDriftError = (id: string, message: string): BulkOperationError => ({
-  id,
-  error: { code: ALERTING_V2_ERROR_CODES.TASK_MANAGER_DRIFT, message },
-});
-
-const errorMessage = (err: unknown): string => (err instanceof Error ? err.message : String(err));
-
 const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
   if (!sortField) {
     return undefined;
@@ -157,16 +144,6 @@ export class RulesClient {
 
   private getSpaceContext(): { spaceId: string } {
     return { spaceId: this.spaceId };
-  }
-
-  /**
-   * The version counter incremented on every successful mutation. Persisted on
-   * the rule SO (`version`) and used as `object.sequence` in the change history
-   * index / `rule.version` on rule events. Always advances, independently of
-   * whether change-history logging is enabled.
-   */
-  private getNextVersion(current?: number): number {
-    return (current ?? 0) + 1;
   }
 
   /**
@@ -336,7 +313,6 @@ export class RulesClient {
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
 
     const nowIso = new Date().toISOString();
-    const ruleVersion = this.getNextVersion();
 
     const ruleAttributes = transformCreateRuleBodyToRuleSoAttributes(parsed, {
       enabled: true,
@@ -344,7 +320,6 @@ export class RulesClient {
       createdAt: nowIso,
       updatedBy: userProfileUid,
       updatedAt: nowIso,
-      version: ruleVersion,
     });
 
     // A freshly created rule is always enabled, so it always counts towards the limit.
@@ -381,9 +356,7 @@ export class RulesClient {
     }
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes, version);
-    this.ruleEventPublisher.emitRuleCreated(this.request, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
-    ]);
+    this.ruleEventPublisher.emitRuleCreated(this.request, [{ id: rule.id, spaceId: this.spaceId }]);
     return rule;
   }
 
@@ -409,11 +382,9 @@ export class RulesClient {
       });
     }
 
-    const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed, {
       updatedBy: userProfileUid,
       updatedAt: nowIso,
-      version: ruleVersion,
     });
 
     await this.validateSchedule({
@@ -443,9 +414,14 @@ export class RulesClient {
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
 
-    this.ruleEventPublisher.emitRuleUpdated(this.request, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
-    ]);
+    // The update path always emits `ruleUpdated` and never distinguishes
+    // enable/disable — lifecycle transitions are owned by the dedicated
+    // enableRule/disableRule endpoints.
+    if (Object.keys(parsed).length > 0) {
+      this.ruleEventPublisher.emitRuleUpdated(this.request, [
+        { id: rule.id, spaceId: this.spaceId },
+      ]);
+    }
 
     return rule;
   }
@@ -490,27 +466,15 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
 
     // Assert the rule exists (surfaces an enriched RULE_NOT_FOUND 404) before
-    // touching the task or emitting. The attributes are captured so the deleted
-    // rule can be emitted as the change-history snapshot for the deletion.
-    const { attrs: existingAttrs } = await this.getExistingRule(id);
+    // touching the task or emitting. Only the id is needed for the event payload.
+    await this.getExistingRule(id);
 
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
     await this.taskManager.removeIfExists(taskId);
 
     await this.rulesSavedObjectService.delete({ id });
 
-    // Nothing is persisted on delete, so stamp the bumped counter onto the
-    // emitted rule so the deletion orders after the last change.
-    const rule = transformRuleSoAttributesToRuleApiResponse(id, {
-      ...existingAttrs,
-      metadata: {
-        ...existingAttrs.metadata,
-        version: this.getNextVersion(existingAttrs.metadata.version),
-      },
-    });
-    this.ruleEventPublisher.emitRuleDeleted(this.request, [
-      { ruleId: id, spaceId: this.spaceId, rule },
-    ]);
+    this.ruleEventPublisher.emitRuleDeleted(this.request, [{ id, spaceId: this.spaceId }]);
   }
 
   @withApm
@@ -567,23 +531,22 @@ export class RulesClient {
   public async enableRule({ id }: { id: string }): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
-    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
-
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
-    const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
+    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
+
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: true,
       updatedBy: userProfileUid,
       updatedAt: nowIso,
-      metadata: { ...existingAttrs.metadata, version: ruleVersion },
     };
 
     // Re-enabling an already-enabled rule is intentionally not short-circuited:
     // it re-writes the SO and re-ensures the executor task (self-heal), and still
-    // emits `ruleEnabled`.
+    // emits `ruleEnabled`. Only count new scheduled load on an actual transition —
+    // an already-enabled rule already contributes to the total.
     if (!existingAttrs.enabled) {
       await this.validateSchedule({ updatedEvery: nextAttrs.schedule.every, checkLimit: true });
     }
@@ -601,9 +564,7 @@ export class RulesClient {
     });
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
-    this.ruleEventPublisher.emitRuleEnabled(this.request, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
-    ]);
+    this.ruleEventPublisher.emitRuleEnabled(this.request, [{ id: rule.id, spaceId: this.spaceId }]);
     return rule;
   }
 
@@ -611,21 +572,19 @@ export class RulesClient {
   public async disableRule({ id }: { id: string }): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
-    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
-
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
+
+    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
 
     // Disabling an already-disabled rule is intentionally not short-circuited: it
     // re-writes the SO and removes the executor task (self-heal), and still emits
     // `ruleDisabled`.
-    const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: false,
       updatedBy: userProfileUid,
       updatedAt: nowIso,
-      metadata: { ...existingAttrs.metadata, version: ruleVersion },
     };
 
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
@@ -639,7 +598,7 @@ export class RulesClient {
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
     this.ruleEventPublisher.emitRuleDisabled(this.request, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      { id: rule.id, spaceId: this.spaceId },
     ]);
     return rule;
   }
@@ -651,7 +610,7 @@ export class RulesClient {
   }
 
   @withApm
-  public async findRules(params: FindRulesArgs = {}): Promise<FindRulesResponse> {
+  public async findRules(params: FindRulesParams = {}): Promise<FindRulesResponse> {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? DEFAULT_PER_PAGE;
     const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
@@ -699,69 +658,9 @@ export class RulesClient {
   }
 
   /**
-   * Removes the executor tasks for the given rules and records Task Manager
-   * drift for any that could not be removed: it logs at `error` level under the
-   * `TASK_MANAGER_DRIFT` code and, when an `errors` sink is provided, appends a
-   * per-rule `TASK_MANAGER_DRIFT` entry so the drift surfaces in the bulk
-   * response.
-   */
-  private async removeExecutorTasks({
-    ruleIds,
-    spaceId,
-    errors,
-  }: {
-    ruleIds: string[];
-    spaceId: string;
-    errors?: BulkOperationError[];
-  }): Promise<void> {
-    if (ruleIds.length === 0) {
-      return;
-    }
-
-    const ruleIdByTaskId = new Map(
-      ruleIds.map((ruleId) => [getRuleExecutorTaskId({ ruleId, spaceId }), ruleId] as const)
-    );
-
-    let driftedRuleIds = ruleIds;
-    let cause: unknown;
-    try {
-      const { statuses } = await this.taskManager.bulkRemove([...ruleIdByTaskId.keys()]);
-      // A missing task (404) is the desired end state and is ignored.
-      // Any other failed status means the task lingers and is reported as drift.
-      driftedRuleIds = statuses.flatMap((status) => {
-        if (status.success || status.error?.statusCode === 404) {
-          return [];
-        }
-        const ruleId = ruleIdByTaskId.get(status.id);
-        return ruleId ? [ruleId] : [];
-      });
-    } catch (e) {
-      cause = e;
-    }
-
-    if (driftedRuleIds.length === 0) {
-      return;
-    }
-
-    const message = `Failed to remove executor task(s) for rule(s) [${driftedRuleIds.join(
-      ', '
-    )}]; their tasks may still exist but the executor defense halts them${
-      cause ? `: ${errorMessage(cause)}` : ''
-    }`;
-
-    this.logger.error({
-      error: new Error(message),
-      code: ALERTING_V2_ERROR_CODES.TASK_MANAGER_DRIFT,
-    });
-
-    errors?.push(...driftedRuleIds.map((id) => toTaskManagerDriftError(id, message)));
-  }
-
-  /**
    * Executes a bulk delete against a known list of ids. Task-manager task
    * removal is best-effort; only saved-object errors surface as per-rule
-   * bulk errors. Task-removal failures do not fail the operation but are
-   * logged and surfaced per-rule as `TASK_MANAGER_DRIFT` errors.
+   * bulk errors.
    */
   private async executeBulkDelete(ids: string[]): Promise<BulkResponse> {
     const { spaceId } = this.getSpaceContext();
@@ -772,13 +671,11 @@ export class RulesClient {
       return { affected_count: 0, errors: [] };
     }
 
-    // Capture pre-delete state so the deleted rule can be emitted as the
-    // change-history snapshot per deleted rule.
-    const attrsById = new Map<string, RuleSavedObjectAttributes>();
-    for (const doc of await this.rulesSavedObjectService.bulkGetByIds(ids)) {
-      if (!('error' in doc)) {
-        attrsById.set(doc.id, doc.attributes);
-      }
+    const taskIds = ids.map((id) => getRuleExecutorTaskId({ ruleId: id, spaceId }));
+    try {
+      await this.taskManager.bulkRemove(taskIds);
+    } catch {
+      // Task removal failures are non-fatal; continue with SO deletion.
     }
 
     const deleteResults = await this.rulesSavedObjectService.bulkDelete(ids);
@@ -788,31 +685,9 @@ export class RulesClient {
         errors.push(toBulkError(result.id, result.error));
         continue;
       }
-
       affectedCount += 1;
-      const attrs = attrsById.get(result.id);
-      deletedRules.push(
-        attrs
-          ? {
-              ruleId: result.id,
-              spaceId,
-              rule: transformRuleSoAttributesToRuleApiResponse(result.id, {
-                ...attrs,
-                metadata: {
-                  ...attrs.metadata,
-                  version: this.getNextVersion(attrs.metadata.version),
-                },
-              }),
-            }
-          : { ruleId: result.id, spaceId }
-      );
+      deletedRules.push({ id: result.id, spaceId });
     }
-
-    await this.removeExecutorTasks({
-      ruleIds: deletedRules.map((rule) => rule.ruleId),
-      spaceId,
-      errors,
-    });
 
     this.ruleEventPublisher.emitRuleDeleted(this.request, deletedRules);
 
@@ -849,19 +724,20 @@ export class RulesClient {
         continue;
       }
 
-      const ruleVersion = this.getNextVersion(doc.attributes.metadata.version);
       const nextAttrs: RuleSavedObjectAttributes = {
         ...doc.attributes,
         enabled: true,
         updatedBy: userProfileUid,
         updatedAt: nowIso,
-        metadata: { ...doc.attributes.metadata, version: ruleVersion },
       };
 
       itemsToUpdate.push({ id: doc.id, attrs: nextAttrs, version: doc.version });
     }
 
     if (itemsToUpdate.length > 0) {
+      const updateResults = await this.rulesSavedObjectService.bulkUpdate(itemsToUpdate);
+
+      const enabledRules: EventRule[] = [];
       const tasksToSchedule: Array<{
         id: string;
         taskType: string;
@@ -870,50 +746,7 @@ export class RulesClient {
         state: Record<string, unknown>;
         scope: string[];
         enabled: boolean;
-      }> = itemsToUpdate.map((item) => ({
-        id: getRuleExecutorTaskId({ ruleId: item.id, spaceId }),
-        taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
-        schedule: { interval: item.attrs.schedule.every },
-        params: { ruleId: item.id, spaceId },
-        state: {},
-        scope: ['alerting'],
-        enabled: true,
-      }));
-
-      try {
-        await this.taskManager.bulkSchedule(tasksToSchedule, {
-          request: this.request as unknown as CoreKibanaRequest,
-          cloneApiKey: true,
-        });
-      } catch (e) {
-        const driftedRuleIds = itemsToUpdate.map((item) => item.id);
-        const message = `Failed to schedule executor task(s) for rule(s) [${driftedRuleIds.join(
-          ', '
-        )}]; they remain disabled: ${errorMessage(e)}`;
-
-        this.logger.error({
-          error: new Error(message),
-          code: ALERTING_V2_ERROR_CODES.TASK_MANAGER_DRIFT,
-        });
-
-        for (const id of driftedRuleIds) {
-          errors.push(toTaskManagerDriftError(id, message));
-        }
-
-        // bulkSchedule may have created some tasks before throwing on a later
-        // per-item failure; roll them back best-effort before returning.
-        await this.removeExecutorTasks({
-          ruleIds: driftedRuleIds,
-          spaceId,
-        });
-
-        return { affected_count: affectedCount, errors };
-      }
-
-      const updateResults = await this.rulesSavedObjectService.bulkUpdate(itemsToUpdate);
-
-      const enabledRules: EventRule[] = [];
-      const failedUpdateRuleIds: string[] = [];
+      }> = [];
 
       for (let i = 0; i < updateResults.length; i++) {
         const updateResult = updateResults[i];
@@ -921,19 +754,40 @@ export class RulesClient {
 
         if (!updateResult.success) {
           errors.push(toBulkError(updateResult.id, updateResult.error));
-          failedUpdateRuleIds.push(item.id);
           continue;
         }
 
         affectedCount += 1;
-        const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
-        enabledRules.push({ ruleId: rule.id, spaceId, rule });
+        enabledRules.push({ id: item.id, spaceId });
+
+        tasksToSchedule.push({
+          id: getRuleExecutorTaskId({ ruleId: item.id, spaceId }),
+          taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
+          schedule: { interval: item.attrs.schedule.every },
+          params: { ruleId: item.id, spaceId },
+          state: {},
+          scope: ['alerting'],
+          enabled: true,
+        });
       }
 
-      await this.removeExecutorTasks({
-        ruleIds: failedUpdateRuleIds,
-        spaceId,
-      });
+      if (tasksToSchedule.length > 0) {
+        try {
+          await this.taskManager.bulkSchedule(tasksToSchedule, {
+            request: this.request as unknown as CoreKibanaRequest,
+            cloneApiKey: true,
+          });
+        } catch (e) {
+          // Task scheduling failure is non-fatal for the bulk response, but the rules were
+          // already persisted as enabled. Key provisioning (clone / UIAM grant) is per task
+          // type, so a single failure drops the whole batch: those rules stay enabled with no
+          // executor task. Log so the silent drop is observable.
+          const failure = e instanceof Error ? e.message : String(e);
+          this.logger.warn({
+            message: `Failed to schedule executor tasks for ${tasksToSchedule.length} enabled rule(s); they are enabled but will not run: ${failure}`,
+          });
+        }
+      }
 
       this.ruleEventPublisher.emitRuleEnabled(this.request, enabledRules);
     }
@@ -971,19 +825,18 @@ export class RulesClient {
         continue;
       }
 
-      const ruleVersion = this.getNextVersion(doc.attributes.metadata.version);
       const nextAttrs: RuleSavedObjectAttributes = {
         ...doc.attributes,
         enabled: false,
         updatedBy: userProfileUid,
         updatedAt: nowIso,
-        metadata: { ...doc.attributes.metadata, version: ruleVersion },
       };
 
       itemsToUpdate.push({ id: doc.id, attrs: nextAttrs, version: doc.version });
     }
 
     const disabledRules: EventRule[] = [];
+    const disabledTaskIds: string[] = [];
 
     if (itemsToUpdate.length > 0) {
       const updateResults = await this.rulesSavedObjectService.bulkUpdate(itemsToUpdate);
@@ -997,17 +850,19 @@ export class RulesClient {
           continue;
         }
 
-        const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
         affectedCount += 1;
-        disabledRules.push({ ruleId: rule.id, spaceId, rule });
+        disabledRules.push({ id: item.id, spaceId });
+        disabledTaskIds.push(getRuleExecutorTaskId({ ruleId: item.id, spaceId }));
       }
     }
 
-    await this.removeExecutorTasks({
-      ruleIds: disabledRules.map((rule) => rule.ruleId),
-      spaceId,
-      errors,
-    });
+    if (disabledTaskIds.length > 0) {
+      try {
+        await this.taskManager.bulkDisable(disabledTaskIds);
+      } catch {
+        // Task disable failure is non-fatal for bulk operations.
+      }
+    }
 
     this.ruleEventPublisher.emitRuleDisabled(this.request, disabledRules);
 
@@ -1128,14 +983,12 @@ export class RulesClient {
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
-    const ruleVersion = this.getNextVersion(existingAttrs.metadata.version);
     const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(parsed, {
       enabled: existingAttrs.enabled,
       createdBy: existingAttrs.createdBy,
       createdAt: existingAttrs.createdAt,
       updatedBy: userProfileUid,
       updatedAt: nowIso,
-      version: ruleVersion,
     });
 
     await this.validateSchedule({
@@ -1157,9 +1010,7 @@ export class RulesClient {
     });
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
-    this.ruleEventPublisher.emitRuleUpdated(this.request, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
-    ]);
+    this.ruleEventPublisher.emitRuleUpdated(this.request, [{ id: rule.id, spaceId: this.spaceId }]);
     return { rule, created: false };
   }
 }

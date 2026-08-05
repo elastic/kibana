@@ -16,7 +16,6 @@ import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
 import type { ClientDetails, CallToolParams } from './types';
 import type { ServerCapabilities } from '@modelcontextprotocol/sdk/types.js';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { ZodJsonSchemaValidator } from './json_schema_validator';
 
 // Type definitions for SDK responses
 interface MockListToolsResult {
@@ -221,15 +220,10 @@ describe('McpClient', () => {
     it('creates client with correct name and version', () => {
       new McpClient(mockLogger, clientDetails);
 
-      expect(Client).toHaveBeenCalledWith(
-        {
-          name: 'test-client',
-          version: '1.0.0',
-        },
-        expect.objectContaining({
-          jsonSchemaValidator: expect.any(ZodJsonSchemaValidator),
-        })
-      );
+      expect(Client).toHaveBeenCalledWith({
+        name: 'test-client',
+        version: '1.0.0',
+      });
     });
   });
 

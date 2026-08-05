@@ -170,14 +170,16 @@ describe('AlertConditionStep', () => {
       expect(screen.getByTestId('esqlSummaryOpenEditor')).toBeInTheDocument();
     });
 
-    it('shows split-failed state (no callout) when base query is empty', () => {
+    it('shows split-failed callout when base query is empty', () => {
       renderStep(
         { queryCommitted: true },
         { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY_EMPTY_BASE } }
       );
 
       expect(screen.getByTestId('esqlQuerySummarySection-split_failed')).toBeInTheDocument();
-      expect(screen.getByText('Review your query or separate it manually')).toBeInTheDocument();
+      expect(
+        screen.getByText(/Couldn't automatically separate base query from alert condition/)
+      ).toBeInTheDocument();
     });
 
     it('shows the no-alert-condition callout when base is present but alert condition is empty', () => {
@@ -366,7 +368,7 @@ describe('AlertConditionStep', () => {
   });
 
   describe('query field validation', () => {
-    it('passes trigger for a composed alert with base but no breach segment (conditionless rule)', async () => {
+    it('surfaces an inline error when trigger fails for an incomplete alert query', async () => {
       const { formRef } = renderStep(
         { queryCommitted: true },
         {
@@ -381,13 +383,17 @@ describe('AlertConditionStep', () => {
         }
       );
 
-      let valid = false;
+      let valid = true;
       await act(async () => {
         valid = await formRef.current!.trigger('query');
       });
 
-      expect(valid).toBe(true);
-      expect(screen.queryByTestId('composeDiscoverQueryFieldError')).not.toBeInTheDocument();
+      expect(valid).toBe(false);
+      await waitFor(() => {
+        expect(screen.getByTestId('composeDiscoverQueryFieldError')).toHaveTextContent(
+          'Add an alert condition to the query before continuing'
+        );
+      });
     });
 
     it('passes trigger for a valid composed alert query', async () => {
@@ -405,7 +411,7 @@ describe('AlertConditionStep', () => {
       expect(screen.queryByTestId('composeDiscoverQueryFieldError')).not.toBeInTheDocument();
     });
 
-    it('passes trigger for a standalone alert query without a WHERE clause (conditionless rule)', async () => {
+    it('fails trigger for a standalone alert query (no separate alert condition)', async () => {
       const { formRef } = renderStep(
         { queryCommitted: true },
         {
@@ -416,13 +422,15 @@ describe('AlertConditionStep', () => {
         }
       );
 
-      let valid = false;
+      let valid = true;
       await act(async () => {
         valid = await formRef.current!.trigger('query');
       });
 
-      expect(valid).toBe(true);
-      expect(screen.queryByTestId('composeDiscoverQueryFieldError')).not.toBeInTheDocument();
+      expect(valid).toBe(false);
+      await waitFor(() => {
+        expect(screen.getByTestId('composeDiscoverQueryFieldError')).toBeInTheDocument();
+      });
     });
   });
 });

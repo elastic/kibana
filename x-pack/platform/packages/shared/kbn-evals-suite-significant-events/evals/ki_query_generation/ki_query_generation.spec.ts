@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { identifyKIQueries, QUERY_GENERATION_EXCLUDED_FEATURE_TYPES } from '@kbn/streams-ai';
+import { identifyKIQueries } from '@kbn/streams-ai';
 import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
 import {
   createMemoryDiscoveryTools,
@@ -372,15 +372,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   logger,
                   signal: new AbortController().signal,
                   systemPrompt: `${significantEventsPrompt}\n${promptSnippet}`,
-                  // Mirror production: the plugin excludes these at retrieval,
-                  // but the fixture still builds them — filter here to match.
-                  getFeatures: async () =>
-                    kis.filter(
-                      (feature) =>
-                        !(QUERY_GENERATION_EXCLUDED_FEATURE_TYPES as readonly string[]).includes(
-                          feature.type
-                        )
-                    ),
+                  getFeatures: async () => kis,
                   additionalTools: {
                     ...memoryTools.tools,
                     ...eventSearchTool.tools,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
 import type { PackageClient } from '@kbn/fleet-plugin/server';
@@ -44,7 +44,7 @@ export async function getIntegrationDashboards(
 
   // Ignore faulty dashboards
   const allValidDashboardSavedObjects = dashboardsSavedObjects.saved_objects.filter(
-    (so): so is SavedObject<{ title?: string }> => !isSavedObjectErrorResult(so)
+    (so) => !isSavedObjectErrorResult(so)
   );
 
   // Construct dashboard result

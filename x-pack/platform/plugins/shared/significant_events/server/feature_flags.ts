@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { i18n } from '@kbn/i18n';
 import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
@@ -31,8 +30,7 @@ import {
   validateSignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
 import type { SignificantEventsPluginStartDependencies } from './types';
-import { isObservabilityDeployment } from './routes/utils/assert_significant_events_access';
-import { SIGNIFICANT_EVENTS_TIERED_FEATURE } from '../common';
+import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
 import {
   DEFAULT_EXTRACTION_INTERVAL_HOURS,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
@@ -77,17 +75,10 @@ const sigEventsTuningConfigSchema = schema.object(
 
 export function registerFeatureFlags(
   core: CoreSetup<SignificantEventsPluginStartDependencies>,
-  logger: Logger,
-  cloud?: CloudSetup
+  logger: Logger
 ) {
-  // The pricing tier below is a no-op in project types that leave tiers disabled, so it cannot
-  // keep these Observability settings out on its own.
-  if (!isObservabilityDeployment({ cloud })) {
-    return;
-  }
-
   core.pricing
-    .isFeatureAvailable(SIGNIFICANT_EVENTS_TIERED_FEATURE.id)
+    .isFeatureAvailable(STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id)
     .then((isSignificantEventsAvailable) => {
       if (isSignificantEventsAvailable) {
         core.uiSettings.register({

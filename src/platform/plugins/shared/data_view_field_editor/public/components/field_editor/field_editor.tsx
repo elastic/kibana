@@ -10,8 +10,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import type { FormHook, RuntimeType, RuntimePrimitiveTypes } from '../../shared_imports';
 import {
@@ -284,9 +283,11 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, isDisable
       {(nameHasChanged || typeHasChanged) && (
         <>
           <EuiSpacer size="xs" />
-          <KbnWarningCallout
+          <EuiCallOut
             announceOnMount
+            color="warning"
             title={changeWarning}
+            iconType="warning"
             size="s"
             data-test-subj="changeWarning"
           />
@@ -295,8 +296,9 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, isDisable
       <EuiSpacer size="xl" />
       {field?.parentName && (
         <>
-          <KbnInfoCallout
+          <EuiCallOut
             announceOnMount={false}
+            iconType="info"
             title={i18n.translate('indexPatternFieldEditor.editor.form.subFieldParentInfo', {
               defaultMessage: "Field value is defined by ''{parentName}''",
               values: { parentName: field?.parentName },

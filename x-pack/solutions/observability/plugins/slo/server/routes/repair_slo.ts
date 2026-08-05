@@ -21,7 +21,7 @@ export const repairSLORoute = createSloServerRoute({
     },
   },
   params: repairParamsSchema,
-  handler: async ({ request, response, params, logger, plugins, getScopedClients, config }) => {
+  handler: async ({ request, response, params, logger, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
     const { dataViewsService, scopedClusterClient, spaceId, repository } = await getScopedClients({
@@ -29,12 +29,7 @@ export const repairSLORoute = createSloServerRoute({
       logger,
     });
 
-    const transformGenerators = createTransformGenerators(
-      spaceId,
-      dataViewsService,
-      config.isServerless,
-      config.isCpsEnabled
-    );
+    const transformGenerators = createTransformGenerators(spaceId, dataViewsService, false);
 
     const transformManager = new DefaultTransformManager(
       transformGenerators,
@@ -43,7 +38,7 @@ export const repairSLORoute = createSloServerRoute({
     );
 
     const summaryTransformManager = new DefaultSummaryTransformManager(
-      new DefaultSummaryTransformGenerator(config.isServerless, config.isCpsEnabled),
+      new DefaultSummaryTransformGenerator(),
       scopedClusterClient,
       logger
     );

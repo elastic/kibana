@@ -81,6 +81,7 @@ export interface EvaluationResult {
   label?: string | null;
   explanation?: string | null;
   reasoning?: string;
+  details?: unknown;
   metadata?: Record<string, unknown> | undefined;
 }
 

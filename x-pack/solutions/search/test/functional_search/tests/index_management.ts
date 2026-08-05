@@ -4,20 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
-
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'searchIndexDetailsPage',
     'header',
     'common',
     'indexManagement',
+    'solutionNavigation',
   ]);
   const es = getService('es');
   const searchSpace = getService('searchSpace');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
-  const browser = getService('browser');
 
   const indexName = 'index_mgmt_search_index';
   describe('Index management', function () {
@@ -81,8 +79,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.searchIndexDetailsPage.expectSearchIndexDetailsTabsExists();
           });
         });
-        it('loads the indices tab', async () => {
-          expect(await browser.getCurrentUrl()).to.contain('/indices');
+        describe('breadcrumbs', function () {
+          it('displays correct breadcrumbs on index list page', async () => {
+            await pageObjects.solutionNavigation.breadcrumbs.expectBreadcrumbTexts([
+              'Data management',
+              'Indices and data streams',
+              'Index Management',
+              'Indices',
+            ]);
+          });
         });
       });
     });

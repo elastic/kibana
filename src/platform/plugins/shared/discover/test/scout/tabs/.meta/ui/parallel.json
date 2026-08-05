@@ -1,5 +1,5 @@
 {
-  "sha1": "b5303cf62b233cf4b4176334b7e1f6d3182b1ec3",
+  "sha1": "4c0d42b3d86271fa739e712ce43699f2cf56d973",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -12,8 +12,8 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
+        "line": 12,
+        "column": 19
       }
     },
     {
@@ -23,8 +23,8 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/global.setup.ts",
-        "line": 7,
-        "column": 1
+        "line": 12,
+        "column": 16
       }
     },
     {
@@ -36,8 +36,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 66,
-        "column": 23
+        "line": 74,
+        "column": 12
       }
     },
     {
@@ -49,8 +49,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 76,
-        "column": 18
+        "line": 95,
+        "column": 12
       }
     },
     {
@@ -62,8 +62,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 101,
-        "column": 22
+        "line": 127,
+        "column": 12
       }
     },
     {
@@ -75,8 +75,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 129,
-        "column": 33
+        "line": 155,
+        "column": 12
       }
     },
     {
@@ -88,8 +88,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/controls.spec.ts",
-        "line": 147,
-        "column": 22
+        "line": 182,
+        "column": 12
       }
     },
     {
@@ -101,8 +101,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/data_view_editing.spec.ts",
-        "line": 75,
-        "column": 64
+        "line": 94,
+        "column": 14
       }
     },
     {
@@ -114,8 +114,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/data_view_editing.spec.ts",
-        "line": 92,
-        "column": 5
+        "line": 122,
+        "column": 14
       }
     },
     {
@@ -127,8 +127,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/data_view_editing.spec.ts",
-        "line": 151,
-        "column": 24
+        "line": 189,
+        "column": 14
       }
     },
     {
@@ -140,8 +140,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/data_view_editing.spec.ts",
-        "line": 75,
-        "column": 64
+        "line": 94,
+        "column": 14
       }
     },
     {
@@ -153,8 +153,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/data_view_editing.spec.ts",
-        "line": 92,
-        "column": 5
+        "line": 122,
+        "column": 14
       }
     },
     {
@@ -166,8 +166,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/data_view_editing.spec.ts",
-        "line": 151,
-        "column": 24
+        "line": 189,
+        "column": 14
       }
     },
     {
@@ -179,8 +179,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/deprecated_saved_objects_api.spec.ts",
-        "line": 21,
-        "column": 31
+        "line": 28,
+        "column": 14
       }
     },
     {
@@ -192,8 +192,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/filters.spec.ts",
-        "line": 20,
-        "column": 23
+        "line": 28,
+        "column": 12
       }
     },
     {
@@ -205,8 +205,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/filters.spec.ts",
-        "line": 33,
-        "column": 23
+        "line": 49,
+        "column": 12
       }
     },
     {
@@ -218,8 +218,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/inspector.spec.ts",
-        "line": 20,
-        "column": 23
+        "line": 28,
+        "column": 12
       }
     },
     {
@@ -231,8 +231,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/inspector.spec.ts",
-        "line": 24,
-        "column": 13
+        "line": 35,
+        "column": 12
       }
     },
     {
@@ -244,8 +244,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_search_clears_tabs.spec.ts",
-        "line": 26,
-        "column": 25
+        "line": 34,
+        "column": 14
       }
     },
     {
@@ -257,8 +257,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_tab.spec.ts",
-        "line": 23,
-        "column": 64
+        "line": 33,
+        "column": 12
       }
     },
     {
@@ -270,8 +270,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_tab.spec.ts",
-        "line": 60,
-        "column": 7
+        "line": 91,
+        "column": 12
       }
     },
     {
@@ -283,8 +283,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/new_tab.spec.ts",
-        "line": 94,
-        "column": 26
+        "line": 127,
+        "column": 12
       }
     },
     {
@@ -296,8 +296,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/no_data.spec.ts",
-        "line": 50,
-        "column": 46
+        "line": 64,
+        "column": 14
       }
     },
     {
@@ -309,8 +309,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/no_data.spec.ts",
-        "line": 58,
-        "column": 34
+        "line": 77,
+        "column": 14
       }
     },
     {
@@ -322,8 +322,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/no_data.spec.ts",
-        "line": 71,
-        "column": 22
+        "line": 99,
+        "column": 14
       }
     },
     {
@@ -335,8 +335,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/on_tab_change.spec.ts",
-        "line": 79,
-        "column": 57
+        "line": 93,
+        "column": 12
       }
     },
     {
@@ -348,8 +348,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/on_tab_change.spec.ts",
-        "line": 100,
-        "column": 22
+        "line": 144,
+        "column": 12
       }
     },
     {
@@ -361,8 +361,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/on_tab_change.spec.ts",
-        "line": 136,
-        "column": 22
+        "line": 173,
+        "column": 12
       }
     },
     {
@@ -374,8 +374,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/recently_closed_tabs.spec.ts",
-        "line": 51,
-        "column": 25
+        "line": 70,
+        "column": 14
       }
     },
     {
@@ -387,8 +387,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/recently_closed_tabs.spec.ts",
-        "line": 78,
-        "column": 22
+        "line": 96,
+        "column": 14
       }
     },
     {
@@ -400,8 +400,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/recently_closed_tabs.spec.ts",
-        "line": 108,
-        "column": 9
+        "line": 125,
+        "column": 14
       }
     },
     {
@@ -413,8 +413,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/refresh_uninitialized_tabs.spec.ts",
-        "line": 28,
-        "column": 25
+        "line": 36,
+        "column": 14
       }
     },
     {
@@ -426,8 +426,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_data_grid.spec.ts",
-        "line": 23,
-        "column": 25
+        "line": 31,
+        "column": 14
       }
     },
     {
@@ -439,8 +439,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_data_grid.spec.ts",
-        "line": 32,
-        "column": 62
+        "line": 53,
+        "column": 14
       }
     },
     {
@@ -452,8 +452,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_data_grid.spec.ts",
-        "line": 83,
-        "column": 22
+        "line": 111,
+        "column": 14
       }
     },
     {
@@ -465,8 +465,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_doc_viewer_source.spec.ts",
-        "line": 43,
-        "column": 7
+        "line": 55,
+        "column": 14
       }
     },
     {
@@ -478,8 +478,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_doc_viewer_source.spec.ts",
-        "line": 55,
-        "column": 79
+        "line": 78,
+        "column": 14
       }
     },
     {
@@ -491,8 +491,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_doc_viewer_source.spec.ts",
-        "line": 74,
-        "column": 20
+        "line": 110,
+        "column": 14
       }
     },
     {
@@ -504,8 +504,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_doc_viewer_table.spec.ts",
-        "line": 30,
-        "column": 48
+        "line": 40,
+        "column": 14
       }
     },
     {
@@ -517,8 +517,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_doc_viewer_table.spec.ts",
-        "line": 55,
-        "column": 29
+        "line": 81,
+        "column": 14
       }
     },
     {
@@ -530,8 +530,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_doc_viewer_table.spec.ts",
-        "line": 97,
-        "column": 33
+        "line": 135,
+        "column": 14
       }
     },
     {
@@ -543,8 +543,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_field_cache.spec.ts",
-        "line": 27,
-        "column": 35
+        "line": 35,
+        "column": 14
       }
     },
     {
@@ -556,8 +556,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_field_cache.spec.ts",
-        "line": 51,
-        "column": 18
+        "line": 79,
+        "column": 14
       }
     },
     {
@@ -569,8 +569,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 35,
-        "column": 59
+        "line": 49,
+        "column": 14
       }
     },
     {
@@ -582,8 +582,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 71,
-        "column": 24
+        "line": 100,
+        "column": 14
       }
     },
     {
@@ -595,8 +595,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 117,
-        "column": 22
+        "line": 151,
+        "column": 14
       }
     },
     {
@@ -608,8 +608,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 149,
-        "column": 7
+        "line": 189,
+        "column": 14
       }
     },
     {
@@ -621,8 +621,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_sidebar.spec.ts",
-        "line": 23,
-        "column": 25
+        "line": 31,
+        "column": 14
       }
     },
     {
@@ -634,8 +634,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_sidebar.spec.ts",
-        "line": 32,
-        "column": 25
+        "line": 52,
+        "column": 14
       }
     },
     {
@@ -647,8 +647,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_sidebar.spec.ts",
-        "line": 52,
-        "column": 58
+        "line": 73,
+        "column": 14
       }
     },
     {
@@ -660,8 +660,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/save_and_load_sessions.spec.ts",
-        "line": 46,
-        "column": 25
+        "line": 54,
+        "column": 14
       }
     },
     {
@@ -673,8 +673,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/save_and_load_sessions.spec.ts",
-        "line": 91,
-        "column": 11
+        "line": 95,
+        "column": 14
       }
     },
     {
@@ -686,8 +686,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/sharing.spec.ts",
-        "line": 44,
-        "column": 50
+        "line": 53,
+        "column": 12
       }
     },
     {
@@ -699,8 +699,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/sharing.spec.ts",
-        "line": 107,
-        "column": 20
+        "line": 129,
+        "column": 12
       }
     },
     {
@@ -712,8 +712,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/sharing.spec.ts",
-        "line": 184,
-        "column": 54
+        "line": 219,
+        "column": 12
       }
     },
     {
@@ -725,8 +725,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/tab_duplication.spec.ts",
-        "line": 28,
-        "column": 23
+        "line": 36,
+        "column": 12
       }
     },
     {
@@ -738,8 +738,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/tab_preview.spec.ts",
-        "line": 89,
-        "column": 23
+        "line": 98,
+        "column": 12
       }
     },
     {
@@ -751,8 +751,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/tab_preview.spec.ts",
-        "line": 91,
-        "column": 23
+        "line": 103,
+        "column": 12
       }
     },
     {
@@ -764,8 +764,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/tab_preview.spec.ts",
-        "line": 96,
-        "column": 5
+        "line": 111,
+        "column": 12
       }
     },
     {
@@ -777,8 +777,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/tabs_time_range.spec.ts",
-        "line": 81,
-        "column": 32
+        "line": 95,
+        "column": 12
       }
     },
     {
@@ -790,8 +790,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/tabs_time_range.spec.ts",
-        "line": 92,
-        "column": 29
+        "line": 117,
+        "column": 12
       }
     },
     {
@@ -803,8 +803,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/unsaved_changes.spec.ts",
-        "line": 31,
-        "column": 23
+        "line": 39,
+        "column": 12
       }
     },
     {
@@ -816,8 +816,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/unsaved_changes.spec.ts",
-        "line": 36,
-        "column": 29
+        "line": 51,
+        "column": 12
       }
     },
     {
@@ -829,8 +829,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/unsaved_changes.spec.ts",
-        "line": 71,
-        "column": 27
+        "line": 97,
+        "column": 12
       }
     },
     {
@@ -842,8 +842,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/unsaved_local_state.spec.ts",
-        "line": 54,
-        "column": 25
+        "line": 62,
+        "column": 14
       }
     }
   ]

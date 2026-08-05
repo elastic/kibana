@@ -14,12 +14,10 @@ import { ALERTS_QUERY_NAMES } from '../../detections/containers/detection_engine
 import type { SignalHit } from '../../common/utils/alerts';
 import { buildAlertsQuery, formatAlertToEcsSignal } from '../../common/utils/alerts';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, unknown>] => {
   const { hasAlertsRead } = useAlertsPrivileges();
-  const { dataView } = useDataView(PageScope.alerts);
-  const selectedPatterns = useSelectedPatterns(dataView);
+  const selectedPatterns = useSelectedPatterns(PageScope.alerts);
 
   const alertsQuery = useMemo(() => buildAlertsQuery(alertIds), [alertIds]);
 

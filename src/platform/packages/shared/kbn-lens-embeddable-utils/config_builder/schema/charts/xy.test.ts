@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod';
-import { expectPrettyError } from '@kbn/zod-helpers/v4';
+import type { TypeOf } from '@kbn/config-schema';
 import type { DataSourceTypeESQL } from '../data_source';
-import type { xyDataLayerSharedShape, XYConfig } from './xy';
+import type { xyDataLayerSharedSchema, XYConfig } from './xy';
 import { statisticsOptionsSize, statisticsSchema, xyConfigSchema } from './xy';
 import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
@@ -31,13 +30,13 @@ describe('XY', () => {
     'area_stacked',
     'bar_horizontal',
     'bar_horizontal_stacked',
-  ] satisfies z.output<typeof xyDataLayerSharedShape.type>[];
+  ] satisfies TypeOf<typeof xyDataLayerSharedSchema.type>[];
 
   const typesWithBreakdown = [
     'bar_percentage',
     'area_percentage',
     'bar_horizontal_percentage',
-  ] satisfies z.output<typeof xyDataLayerSharedShape.type>[];
+  ] satisfies TypeOf<typeof xyDataLayerSharedSchema.type>[];
   const anyType = [...universalTypes, ...typesWithBreakdown];
   describe('minimal xy charts', () => {
     it.each([
@@ -48,7 +47,7 @@ describe('XY', () => {
       'area_stacked',
       'bar_horizontal',
       'bar_horizontal_stacked',
-    ] satisfies z.output<typeof xyDataLayerSharedShape.type>[])(
+    ] satisfies TypeOf<typeof xyDataLayerSharedSchema.type>[])(
       'should pass validation for simple %s',
       (type) => {
         const input = {
@@ -64,13 +63,13 @@ describe('XY', () => {
             },
           ],
         } satisfies XYConfig;
-        expect(() => xyConfigSchema.parse(input)).not.toThrow();
+        expect(() => xyConfigSchema.validate(input)).not.toThrow();
       }
     );
 
     it.each(anyType)('should pass validation for %s with breakdown', (type) => {
       expect(() =>
-        xyConfigSchema.parse({
+        xyConfigSchema.validate({
           type: 'xy',
           title: `${type} Chart`,
           layers: [
@@ -91,7 +90,7 @@ describe('XY', () => {
       'should pass validation for a date histogram %s with breakdown with multiple terms',
       (type) => {
         expect(() =>
-          xyConfigSchema.parse({
+          xyConfigSchema.validate({
             type: 'xy',
             title: `${type} Chart`,
             layers: [
@@ -118,7 +117,7 @@ describe('XY', () => {
 
     it.each(anyType)('should pass validation in ES|QL mode as %s chart', (type) => {
       expect(() =>
-        xyConfigSchema.parse({
+        xyConfigSchema.validate({
           type: 'xy',
           title: `${type} Chart`,
           layers: [
@@ -142,7 +141,7 @@ describe('XY', () => {
 
     it.each(anyType)('should support reference lines in %s charts', (type) => {
       expect(() =>
-        xyConfigSchema.parse({
+        xyConfigSchema.validate({
           type: 'xy',
           title: `${type} Chart`,
           layers: [
@@ -187,7 +186,7 @@ describe('XY', () => {
 
     it.each(anyType)('should support annotations in %s charts', (type) => {
       expect(() =>
-        xyConfigSchema.parse({
+        xyConfigSchema.validate({
           type: 'xy',
           title: `${type} Chart`,
           layers: [
@@ -240,7 +239,7 @@ describe('XY', () => {
       'should handle multiple metric in multiple layers with %s + %s',
       (type1, type2) => {
         expect(() =>
-          xyConfigSchema.parse({
+          xyConfigSchema.validate({
             type: 'xy',
             title: `Mixed Chart`,
             layers: [
@@ -290,7 +289,7 @@ describe('XY', () => {
       'should handle multiple metric in multiple layers %s + %s with reference lines and annotations',
       (type1, type2) => {
         expect(() =>
-          xyConfigSchema.parse({
+          xyConfigSchema.validate({
             type: 'xy',
             title: `Mixed Chart`,
             layers: [
@@ -416,7 +415,7 @@ describe('XY', () => {
       'should handle multiple metric in multiple layers %s + %s with reference lines and annotations (DSL layers only)',
       (type1, type2) => {
         expect(() =>
-          xyConfigSchema.parse({
+          xyConfigSchema.validate({
             type: 'xy',
             title: `Mixed Chart`,
             layers: [
@@ -568,143 +567,162 @@ describe('XY', () => {
 
   describe('invalid xy charts', () => {
     it('should throw for no layers', () => {
-      const result = xyConfigSchema.safeParse({
-        type: 'xy',
-        title: `Faulty Chart`,
-        layers: [],
-      } satisfies XYConfig);
-      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      expect(() =>
+        xyConfigSchema.validate({
+          type: 'xy',
+          title: `Faulty Chart`,
+          layers: [],
+        } satisfies XYConfig)
+      ).toThrow();
     });
 
     it('should not let mix esql data_source with dsl operations', () => {
-      const result = xyConfigSchema.safeParse({
-        type: 'xy',
-        title: `Faulty Chart`,
-        layers: [
-          {
-            data_source: { type: 'esql', query: 'FROM company_index' },
-            type: 'bar',
-            ignore_global_filters: false,
-            sampling: 1,
-            x: {
-              operation: 'date_histogram',
-              field: 'order_date',
-              suggested_interval: 'auto',
-              use_original_time_range: true,
-              include_empty_rows: false,
+      expect(() =>
+        xyConfigSchema.validate({
+          type: 'xy',
+          title: `Faulty Chart`,
+          layers: [
+            // @ts-expect-error - mixing not allowed
+            {
+              data_source: { type: 'esql', query: 'FROM company_index' },
+              type: 'bar',
+              ignore_global_filters: false,
+              sampling: 1,
+              x: {
+                operation: 'date_histogram',
+                field: 'order_date',
+                suggested_interval: 'auto',
+                use_original_time_range: true,
+                include_empty_rows: false,
+              },
+              y: [
+                { operation: 'count', empty_as_null: false },
+                { operation: 'average', field: 'price' },
+              ],
+              breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
             },
-            y: [
-              { operation: 'count', empty_as_null: false },
-              { operation: 'average', field: 'price' },
-            ],
-
-            breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
-          },
-        ],
-      });
-      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+          ],
+        } satisfies XYConfig)
+      ).toThrow();
     });
 
     it('should not let esql annotations', () => {
-      const result = xyConfigSchema.safeParse({
-        type: 'xy',
-        title: `Faulty Chart`,
-        layers: [
-          {
-            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
-            type: 'bar',
-            ignore_global_filters: false,
-            sampling: 1,
-            x: {
-              operation: 'date_histogram',
-              field: 'order_date',
-              suggested_interval: 'auto',
-              use_original_time_range: true,
-              include_empty_rows: false,
-            },
-            y: [{ operation: 'count', empty_as_null: false }],
-          },
-          {
-            type: 'annotations',
-            ignore_global_filters: false,
-            // @ts-expect-error - mixing not allowed
-            data_source: {
-              type: 'esql',
-              query:
-                'FROM kibana_simple_logs_data | EVAL timestamp = order_date | FILTER product == "xyz" ',
-            } satisfies DataSourceTypeESQL,
-            events: [
-              {
-                type: 'point',
-                label: 'Event',
-                timestamp: '2023-01-01T00:00:00Z',
-                text: { visible: true },
-                color: {
-                  type: 'static',
-                  color: '#ff0000',
-                },
+      expect(() =>
+        xyConfigSchema.validate({
+          type: 'xy',
+          title: `Faulty Chart`,
+          layers: [
+            {
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'myDataView' },
+              type: 'bar',
+              ignore_global_filters: false,
+              sampling: 1,
+              x: {
+                operation: 'date_histogram',
+                field: 'order_date',
+                suggested_interval: 'auto',
+                use_original_time_range: true,
+                include_empty_rows: false,
               },
-            ],
-          },
-        ],
-      } satisfies XYConfig);
-      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+              y: [{ operation: 'count', empty_as_null: false }],
+            },
+            {
+              type: 'annotations',
+              ignore_global_filters: false,
+              // @ts-expect-error - mixing not allowed
+              data_source: {
+                type: 'esql',
+                query:
+                  'FROM kibana_simple_logs_data | EVAL timestamp = order_date | FILTER product == "xyz" ',
+              } satisfies DataSourceTypeESQL,
+              events: [
+                {
+                  type: 'point',
+                  label: 'Event',
+                  timestamp: '2023-01-01T00:00:00Z',
+                  text: { visible: true },
+                  color: {
+                    type: 'static',
+                    color: '#ff0000',
+                  },
+                },
+              ],
+            },
+          ],
+        } satisfies XYConfig)
+      ).toThrow();
     });
 
     it('should reject mixing ES|QL and DSL layers in one chart', () => {
-      const result = xyConfigSchema.safeParse({
-        type: 'xy',
-        title: 'Mixed mode chart',
-        layers: [
-          {
-            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyAIndex' },
-            type: 'bar',
-            ignore_global_filters: false,
-            sampling: 1,
-            x: {
-              operation: 'date_histogram',
-              field: 'order_date',
-              include_empty_rows: false,
-              suggested_interval: 'auto',
-              use_original_time_range: true,
-              drop_partial_intervals: false,
+      expect(() =>
+        xyConfigSchema.validate({
+          type: 'xy',
+          title: 'Mixed mode chart',
+          layers: [
+            {
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'companyAIndex' },
+              type: 'bar',
+              ignore_global_filters: false,
+              sampling: 1,
+              x: {
+                operation: 'date_histogram',
+                field: 'order_date',
+                include_empty_rows: false,
+                suggested_interval: 'auto',
+                use_original_time_range: true,
+                drop_partial_intervals: false,
+              },
+              y: [{ operation: 'count', empty_as_null: false }],
             },
-            y: [{ operation: 'count', empty_as_null: false }],
-          },
-          {
-            dataset: { type: 'esql', query: 'FROM company_index' },
-            type: 'line',
-            ignore_global_filters: false,
-            sampling: 1,
-            x: { operation: 'value', column: 'order_date' },
-            y: [{ operation: 'value', column: 'value' }],
-          },
-        ],
-      } as XYConfig);
-      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+            {
+              dataset: { type: 'esql', query: 'FROM company_index' },
+              type: 'line',
+              ignore_global_filters: false,
+              sampling: 1,
+              x: { operation: 'value', column: 'order_date' },
+              y: [{ operation: 'value', column: 'value' }],
+            },
+          ],
+        } as XYConfig)
+      ).toThrow();
     });
 
     it('should reject list legend layout for left positions', () => {
-      const result = xyConfigSchema.safeParse({
-        type: 'xy',
-        title: 'Invalid list legend position',
-        legend: {
-          visibility: 'visible',
-          position: 'left',
-          layout: {
-            type: 'list',
+      expect(() =>
+        xyConfigSchema.validate({
+          type: 'xy',
+          title: 'Invalid list legend position',
+          legend: {
+            visibility: 'visible',
+            position: 'left',
+            layout: {
+              type: 'list',
+            },
           },
-        },
-        layers: [minimalLayer],
-      });
-      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+          layers: [minimalLayer],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "types that failed validation:
+        - [0.legend]: types that failed validation:
+         - [legend.0.position]: types that failed validation:
+          - [legend.position.0]: expected value to equal [top]
+          - [legend.position.1]: expected value to equal [bottom]
+         - [legend.1.layout.type]: expected value to equal [grid]
+         - [legend.2.placement]: expected value to equal [inside]
+        - [1.legend]: types that failed validation:
+         - [legend.0.position]: types that failed validation:
+          - [legend.position.0]: expected value to equal [top]
+          - [legend.position.1]: expected value to equal [bottom]
+         - [legend.1.layout.type]: expected value to equal [grid]
+         - [legend.2.placement]: expected value to equal [inside]"
+      `);
     });
   });
 
   describe('legend layout schema', () => {
     it('should allow list legend layout for top/bottom', () => {
       expect(() =>
-        xyConfigSchema.parse({
+        xyConfigSchema.validate({
           type: 'xy',
           title: 'Valid list legend',
           legend: {
@@ -721,7 +739,8 @@ describe('XY', () => {
   });
 
   it('should track number of statistics options', () => {
-    const union = statisticsSchema as z.ZodUnion<readonly [z.ZodTypeAny, ...z.ZodTypeAny[]]>;
-    expect(union.options.length).toBe(statisticsOptionsSize);
+    const realStatisticsOptionsSize = (statisticsSchema.getSchema() as any)?.$_root?._types?.size;
+
+    expect(statisticsOptionsSize).toBe(realStatisticsOptionsSize);
   });
 });

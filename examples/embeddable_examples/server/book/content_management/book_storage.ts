@@ -12,7 +12,6 @@ import type { Logger } from '@kbn/logging';
 import type { ContentStorage, StorageContext } from '@kbn/content-management-plugin/server';
 import type { SearchQuery } from '@kbn/content-management-plugin/common';
 import type { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
-import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
 import { omit } from 'lodash';
 import type { BookAttributes } from '../saved_object';
@@ -102,10 +101,6 @@ export class BookStorage implements ContentStorage {
       BOOK_SAVED_OBJECT_TYPE,
       id
     );
-
-    if (isSavedObjectErrorResult(savedObject)) {
-      throw Boom.internal(`Invalid response. ${savedObject.error.message}`);
-    }
 
     let item;
 

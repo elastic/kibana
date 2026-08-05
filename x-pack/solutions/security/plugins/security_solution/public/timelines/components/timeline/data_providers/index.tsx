@@ -13,7 +13,6 @@ import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import { droppableTimelineProvidersPrefix } from '../../../../common/components/drag_and_drop/helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -104,8 +103,7 @@ const CustomTooltipDiv = styled.div`
 export const DataProviders = React.memo<Props>(({ timelineId }) => {
   const dispatch = useDispatch();
 
-  const { dataView } = useDataView(PageScope.timeline);
-  const browserFields = useBrowserFields(dataView);
+  const browserFields = useBrowserFields(PageScope.timeline);
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 

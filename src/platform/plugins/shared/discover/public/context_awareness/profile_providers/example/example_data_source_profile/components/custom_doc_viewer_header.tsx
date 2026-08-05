@@ -8,15 +8,20 @@
  */
 
 import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
 import { getFieldValue } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { KbnInfoCallout } from '@kbn/ui-callout';
 
 export const CustomDocViewerHeader: React.FC<DocViewRenderProps> = ({ hit }) => {
   const message = getFieldValue(hit, 'message')?.toString();
 
   return (
-    <KbnInfoCallout title="Example custom header" data-test-subj="exampleCustomDocViewerHeader">
+    <EuiCallOut
+      title="Example custom header"
+      color="primary"
+      iconType="info"
+      data-test-subj="exampleCustomDocViewerHeader"
+    >
       <p>
         This is a custom header rendered via the <code>renderHeader</code> extension point.
       </p>
@@ -26,6 +31,6 @@ export const CustomDocViewerHeader: React.FC<DocViewRenderProps> = ({ hit }) => 
           {message.length > 100 && '...'}
         </p>
       )}
-    </KbnInfoCallout>
+    </EuiCallOut>
   );
 };
