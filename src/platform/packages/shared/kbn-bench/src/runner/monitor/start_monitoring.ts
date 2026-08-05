@@ -101,6 +101,7 @@ const forcedGcResultSchema = z.object({
   postForcedGcHeapStatistics: z
     .record(z.string(), z.unknown())
     .refine((value) => Object.keys(value).length > 0, { message: 'must not be empty' }),
+  // init_monitoring serializes V8's heap-space array as a record keyed by space_name.
   postForcedGcHeapSpaceStatistics: z
     .record(z.string(), z.record(z.string(), z.unknown()))
     .refine((value) => Object.keys(value).length > 0, { message: 'must not be empty' }),

@@ -121,6 +121,7 @@ describe('forced-GC monitor control', () => {
     expect(results[0]).toEqual(
       expect.objectContaining({ pid, postForcedGcHeapUsed: 50, forcedGcHeapReduction: 50 })
     );
+    expect(results[0].error).toBeUndefined();
   });
 
   it('rejects a matching result that omits required probe fields', async () => {
