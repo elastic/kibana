@@ -51,6 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
 
+      await lens.waitForVisualization('xyVisChart');
       expect(await lens.isShareable()).to.eql(true);
     });
 
