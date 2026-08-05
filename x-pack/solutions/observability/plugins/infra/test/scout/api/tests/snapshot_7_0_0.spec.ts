@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type {
@@ -20,9 +21,9 @@ apiTest.describe(
     let headers: Record<string, string>;
     const { min, max } = testData.DATES['7.0.0'].hosts;
 
-    apiTest.beforeAll(async ({ samlAuth, esArchiver }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      headers = { ...testData.COMMON_HEADERS, ...cookieHeader };
+    apiTest.beforeAll(async ({ requestAuth, esArchiver }) => {
+      const adminApiKey: RoleApiCredentials = await requestAuth.getApiKey('admin');
+      headers = { ...adminApiKey.apiKeyHeader, ...testData.COMMON_HEADERS };
       await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.HOSTS_7_0_0);
     });
 

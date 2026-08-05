@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { SnapshotNodeResponse } from '../../../../common/http_api/snapshot_api';
@@ -17,9 +18,9 @@ apiTest.describe(
     let headers: Record<string, string>;
     const { min, max } = testData.DATES['6.6.0'].docker;
 
-    apiTest.beforeAll(async ({ samlAuth, esArchiver }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      headers = { ...testData.COMMON_HEADERS, ...cookieHeader };
+    apiTest.beforeAll(async ({ requestAuth, esArchiver }) => {
+      const adminApiKey: RoleApiCredentials = await requestAuth.getApiKey('admin');
+      headers = { ...adminApiKey.apiKeyHeader, ...testData.COMMON_HEADERS };
       await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.DOCKER_6_6_0);
     });
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, testData } from '../fixtures';
@@ -15,9 +16,9 @@ apiTest.describe(
   () => {
     let headers: Record<string, string>;
 
-    apiTest.beforeAll(async ({ samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      headers = { ...testData.COMMON_HEADERS, ...cookieHeader };
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      const adminApiKey: RoleApiCredentials = await requestAuth.getApiKey('admin');
+      headers = { ...adminApiKey.apiKeyHeader, ...testData.COMMON_HEADERS };
     });
 
     apiTest('should return 400 when requesting more than 20 metrics', async ({ apiClient }) => {

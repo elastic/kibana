@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { infra, timerange } from '@kbn/synthtrace-client';
@@ -40,9 +41,9 @@ apiTest.describe(
     let headers: Record<string, string>;
     let range: { from: string; to: string };
 
-    apiTest.beforeAll(async ({ samlAuth, infraSynthtraceEsClient }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      headers = { ...testData.COMMON_HEADERS, ...cookieHeader };
+    apiTest.beforeAll(async ({ requestAuth, infraSynthtraceEsClient }) => {
+      const adminApiKey: RoleApiCredentials = await requestAuth.getApiKey('admin');
+      headers = { ...adminApiKey.apiKeyHeader, ...testData.COMMON_HEADERS };
       range = testData.getRecentTimerange(10);
 
       await infraSynthtraceEsClient.clean();

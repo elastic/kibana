@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { GetInfraEntityCountResponsePayload } from '../../../../common/http_api';
@@ -26,9 +27,9 @@ apiTest.describe(
   () => {
     let headers: Record<string, string>;
 
-    apiTest.beforeAll(async ({ samlAuth, esArchiver, infraSynthtraceEsClient }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      headers = { ...testData.COMMON_HEADERS, ...cookieHeader };
+    apiTest.beforeAll(async ({ requestAuth, esArchiver, infraSynthtraceEsClient }) => {
+      const adminApiKey: RoleApiCredentials = await requestAuth.getApiKey('admin');
+      headers = { ...adminApiKey.apiKeyHeader, ...testData.COMMON_HEADERS };
 
       await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGS_AND_METRICS_8_0_0);
       await infraSynthtraceEsClient.clean();

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { InfraSaveCustomDashboardsRequestPayload } from '../../../../common/http_api/custom_dashboards_api';
@@ -22,9 +23,9 @@ apiTest.describe(
   () => {
     let headers: Record<string, string>;
 
-    apiTest.beforeAll(async ({ samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      headers = { ...testData.COMMON_HEADERS, ...cookieHeader };
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      const adminApiKey: RoleApiCredentials = await requestAuth.getApiKey('admin');
+      headers = { ...adminApiKey.apiKeyHeader, ...testData.COMMON_HEADERS };
     });
 
     apiTest.beforeEach(async ({ kbnClient }) => {
