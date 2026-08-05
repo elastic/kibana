@@ -43,7 +43,7 @@ export default meta;
 
 interface DefaultArgs {
   numberOfItems: number;
-  maxColumns: InfoBlocksMaxColumns;
+  maxColumns: InfoBlocksMaxColumns | 'auto';
 }
 
 // A truncating link with a trailing copy action.
@@ -247,14 +247,15 @@ export const Default: StoryObj<DefaultArgs> = {
       control: { type: 'range', min: 1, max: SAMPLE_ITEMS.length, step: 1 },
     },
     maxColumns: {
-      description: 'Widest column count; resize the flyout to see it step down',
+      description:
+        'Widest column count, or `auto` to derive it from the item count; resize the flyout to see it step down',
       control: { type: 'inline-radio' },
-      options: [2, 3, 4],
+      options: [2, 3, 4, 'auto'],
     },
   },
   args: {
     numberOfItems: SAMPLE_ITEMS.length,
-    maxColumns: 3,
+    maxColumns: 'auto',
   },
   render: ({ numberOfItems, maxColumns }) => (
     <FlyoutWrapper title="Info blocks gallery">

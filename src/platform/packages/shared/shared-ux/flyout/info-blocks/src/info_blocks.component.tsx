@@ -13,7 +13,7 @@ import { EuiPanel, useEuiMemoizedStyles } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { FLYOUT_MIN_CELL_WIDTH, FLYOUT_MAX_GRID_COLUMNS } from '@kbn/shared-ux-flyout-common';
 import { InfoBlock } from './info_block.component';
-import type { InfoBlocksProps } from './types';
+import type { InfoBlocksMaxColumns, InfoBlocksProps } from './types';
 
 const CONTAINER_NAME = 'infoBlocks';
 
@@ -59,12 +59,33 @@ const responsiveGrid = (maxColumns: number) => {
   `;
 };
 
+/** Caps `'auto'` picks from, widest first; two columns reads too sparse. */
+const AUTO_COLUMN_CANDIDATES = [FLYOUT_MAX_GRID_COLUMNS, 3] as const;
+
+/** Empty cells trailing the last row at a given cap. */
+const gapsFor = (itemCount: number, columns: number) => (columns - (itemCount % columns)) % columns;
+
+/**
+ * Widest cap whose last row has at most one gap, else the fullest last row, preferring the wider cap
+ * on a tie. Governs the widest state only; narrower containers still step down from it.
+ */
+export const resolveMaxColumns = (itemCount: number): InfoBlocksMaxColumns => {
+  // Sets small enough for one row get a column each, never narrower than two.
+  if (itemCount <= 2) return 2;
+  if (itemCount === 3) return 3;
+
+  const clean = AUTO_COLUMN_CANDIDATES.find((columns) => gapsFor(itemCount, columns) <= 1);
+  if (clean !== undefined) return clean;
+
+  return gapsFor(itemCount, 4) <= gapsFor(itemCount, 3) ? 4 : 3;
+};
+
 const styles = ({ euiTheme }: UseEuiTheme) => {
   const color = euiTheme.border.color;
   const thickness = euiTheme.border.width.thin;
   // Keeps dividers clear of the panel's rounded corners.
   const cornerGap = euiTheme.size.base;
-  // Container-wide, so a row separator stays continuous across a partial row; 2px covers the borders.
+  // Container-wide so a partial row's separator stays continuous; 2px allows for the panel borders.
   const rowLineWidth = `calc(100cqw - ${cornerGap} * 2 - 2px)`;
 
   return {
@@ -125,6 +146,7 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
   ...rest
 }) => {
   const memoized = useEuiMemoizedStyles(styles);
+  const columns = maxColumns === 'auto' ? resolveMaxColumns(items.length) : maxColumns;
 
   return (
     <div css={memoized.wrapper}>
@@ -132,7 +154,7 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
         paddingSize="none"
         hasShadow={false}
         hasBorder
-        css={[memoized.panel, memoized.grids[maxColumns]]}
+        css={[memoized.panel, memoized.grids[columns]]}
         data-test-subj={rest['data-test-subj'] ?? 'infoBlocks'}
       >
         {items.map((item, index) => (

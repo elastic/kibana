@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { InfoBlocks } from './info_blocks.component';
+import { InfoBlocks, resolveMaxColumns } from './info_blocks.component';
 
 describe('InfoBlocks', () => {
   it('renders each block title and node value', () => {
@@ -54,5 +54,61 @@ describe('InfoBlocks', () => {
 
     expect(screen.getByTestId('ownerBlock')).toBeInTheDocument();
   });
+});
 
+describe('resolveMaxColumns', () => {
+  it.each([
+    [15, 4],
+    [14, 3],
+    [13, 3],
+    [12, 4],
+    [11, 4],
+    [10, 4],
+    [9, 3],
+    [8, 4],
+    [7, 4],
+    [6, 3],
+    [5, 3],
+    [4, 4],
+    [3, 3],
+    [2, 2],
+    [1, 2],
+  ])('resolves %i items to %i columns', (itemCount, expected) => {
+    expect(resolveMaxColumns(itemCount)).toBe(expected);
+  });
+
+  it('fits small sets on a single row', () => {
+    for (const itemCount of [2, 3]) {
+      expect(resolveMaxColumns(itemCount)).toBe(itemCount);
+    }
+  });
+
+  it('never chooses fewer than three columns beyond the single-row sets', () => {
+    for (let itemCount = 4; itemCount <= 100; itemCount++) {
+      expect(resolveMaxColumns(itemCount)).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('leaves at most one empty cell except where three columns cannot avoid two', () => {
+    // Past the single-row sets, two gaps are unavoidable above two columns at n ≡ 1 or 10 (mod 12).
+    const unavoidable = (itemCount: number) => itemCount % 12 === 1 || itemCount % 12 === 10;
+
+    for (let itemCount = 1; itemCount <= 100; itemCount++) {
+      const columns = resolveMaxColumns(itemCount);
+      const emptyCells = (columns - (itemCount % columns)) % columns;
+      expect(emptyCells).toBeLessThanOrEqual(itemCount > 3 && unavoidable(itemCount) ? 2 : 1);
+    }
+  });
+
+  it('never picks a cap that another would beat on gaps', () => {
+    const gaps = (itemCount: number, columns: number) =>
+      (columns - (itemCount % columns)) % columns;
+
+    for (let itemCount = 4; itemCount <= 100; itemCount++) {
+      const columns = resolveMaxColumns(itemCount);
+      // A wider cap is worth one extra gap, but never more than that.
+      const alternative = columns === 4 ? 3 : 4;
+      expect(gaps(itemCount, columns)).toBeLessThanOrEqual(gaps(itemCount, alternative) + 1);
+    }
+  });
 });
