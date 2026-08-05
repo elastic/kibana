@@ -12,7 +12,7 @@ import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'fs';
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import { createFailError } from '@kbn/dev-cli-errors';
 
 export const DEFAULT_TEST_PATH_PATTERNS = [
@@ -136,7 +136,7 @@ export const validateWithScoutCiConfig = (
 ) => {
   const scoutCiConfigRelPath = path.join('.buildkite', 'scout_ci_config.yml');
   const scoutCiConfigPath = path.resolve(REPO_ROOT, scoutCiConfigRelPath);
-  const ciConfig = yaml.load(fs.readFileSync(scoutCiConfigPath, 'utf8')) as {
+  const ciConfig = parse(fs.readFileSync(scoutCiConfigPath, 'utf8')) as {
     plugins: {
       enabled?: string[];
       disabled?: string[];

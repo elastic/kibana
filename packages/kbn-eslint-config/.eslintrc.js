@@ -40,11 +40,6 @@ const exactFilePathMatcher = (relativePath) =>
  */
 const JS_YAML_LEGACY_CONSUMERS = [
   'src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts',
-  'src/platform/packages/shared/kbn-scout/src/cli/create_test_tracks.ts',
-  'src/platform/packages/shared/kbn-scout/src/servers/configs/discovery/search_configs.ts',
-  'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.test.ts',
-  'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.ts',
-  'src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/ftr_configs_manifest.ts',
   'src/platform/plugins/private/interactive_setup/server/kibana_config_writer.ts',
   'x-pack/platform/packages/shared/kbn-inference-cli/src/eis/get_eis_gateway_config.ts',
   'x-pack/platform/packages/shared/kbn-inference-cli/src/eis/get_service_configuration.ts',
