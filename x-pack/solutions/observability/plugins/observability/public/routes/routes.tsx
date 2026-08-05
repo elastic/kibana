@@ -8,7 +8,7 @@
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { AnnotationsPage } from '../pages/annotations/annotations';
-import { NightshiftPage } from '../pages/nightshift/nightshift';
+import { NightshiftRedirect } from './nightshift_redirect';
 import { DatePickerContextProvider } from '../context/date_picker_context/date_picker_context';
 import { useKibana } from '../utils/kibana_react';
 import { AlertsPage } from '../pages/alerts/alerts';
@@ -120,7 +120,7 @@ const completeRoutes: Record<RoutePath, RouteDefinition> = {
 const routes: Record<RoutePath, RouteDefinition> = {
   [NIGHTSHIFT_PATH]: {
     handler: () => {
-      return <NightshiftPage />;
+      return <NightshiftRedirect />;
     },
     params: {},
     exact: true,
