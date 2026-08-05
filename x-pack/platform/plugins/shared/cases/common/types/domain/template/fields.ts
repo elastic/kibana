@@ -256,6 +256,13 @@ export const RadioGroupFieldSchema = BaseFieldSchema.extend({
  * field" (do not inherit the library default; the field stays empty), whereas an absent
  * `metadata.default` inherits the library field's default. This is what the v1→v2 template
  * migration emits for a legacy template custom field whose value was explicitly cleared.
+ *
+ * `display` and `validation` are optional per-template overrides (e.g. `show_when`,
+ * `required_when`) — a library field has no inherent visibility/requirement rules of its own in
+ * a given template, so when present here they fully replace (not merge with) anything the
+ * library field itself declares. Without declaring these here, they would be silently stripped
+ * by Zod when a `$ref` entry authored a local `display`/`validation` block, which is what made
+ * conditional visibility appear to be broken for `$ref` fields (see `applyRefFieldOverride`).
  */
 export const RefFieldSchema = z.object({
   name: z.string().optional(),
@@ -274,6 +281,8 @@ export const RefFieldSchema = z.object({
         .optional(),
     })
     .optional(),
+  display: DisplaySchema.optional(),
+  validation: ValidationSchema.optional(),
 });
 
 export type RefField = z.infer<typeof RefFieldSchema>;

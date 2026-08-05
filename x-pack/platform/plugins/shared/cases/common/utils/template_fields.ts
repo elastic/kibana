@@ -76,6 +76,10 @@ export const getYamlDefaultAsString = (rawDefault: unknown): string => {
  *     - explicit `null`: clear the inherited default so the field stays empty (this is what the
  *       v1→v2 migration emits for a legacy template field whose value was explicitly cleared),
  *     - any other value: use it as the field's default.
+ * - `display` / `validation`, when present on the `$ref` entry, fully replace the library
+ *   field's own `display` / `validation` (e.g. a template-specific `show_when`/`required_when`)
+ *   rather than being merged with it — the library field itself has no template-scoped
+ *   visibility/requirement rules of its own.
  *
  * Shared by `resolveTemplateFields` (server / case-creation) and `useResolvedFields` (editor) so
  * both paths resolve `$ref` overrides identically.
@@ -101,6 +105,14 @@ export const applyRefFieldOverride = (
       ...resolved,
       metadata: { ...(resolved.metadata ?? {}), default: overrideDefault },
     } as InlineField;
+  }
+
+  if (refField.display !== undefined) {
+    resolved = { ...resolved, display: refField.display } as InlineField;
+  }
+
+  if (refField.validation !== undefined) {
+    resolved = { ...resolved, validation: refField.validation } as InlineField;
   }
 
   return resolved;
