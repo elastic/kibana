@@ -2,7 +2,7 @@ pageLoadAssetSize:
   actions: 20800
   advancedSettings: 6119
   agentBuilder: 51190
-  agentBuilderDashboards: 7786
+  agentBuilderDashboards: 8685
   agentBuilderPlatform: 26248
   agentBuilderSml: 2103
   agentBuilderVisualizations: 7356
@@ -33,7 +33,7 @@ pageLoadAssetSize:
   contentManagement: 8350
   contextEngine: 5837
   controls: 10300
-  core: 563984
+  core: 563693
   cps: 9209
   crossClusterReplication: 12662
   customContent: 6111
@@ -131,16 +131,17 @@ pageLoadAssetSize:
   monitoring: 28983
   navigation: 18855
   newsfeed: 11110
+  nightshift: 7911
   noDataPage: 1749
   notificationCenter: 1791
-  observability: 122800
+  observability: 116568
   observabilityAgentBuilder: 10178
   observabilityAIAssistant: 67295
   observabilityAIAssistantApp: 17100
   observabilityAiAssistantManagement: 7126
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 14161
-  observabilityShared: 75022
+  observabilityShared: 86067
   osquery: 48128
   painlessLab: 6299
   pnd: 7674
@@ -179,13 +180,13 @@ pageLoadAssetSize:
   securitySolutionServerless: 57112
   serverless: 7412
   serverlessObservability: 21263
-  serverlessSearch: 26287
+  serverlessSearch: 29112
   serverlessVectordb: 11999
-  serverlessWorkplaceAI: 4855
+  serverlessWorkplaceAI: 5347
   sessionView: 47912
   share: 64059
-  significant_events: 9425
-  significantEventsApp: 9784
+  significantEvents: 12119
+  significantEventsApp: 13163
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871

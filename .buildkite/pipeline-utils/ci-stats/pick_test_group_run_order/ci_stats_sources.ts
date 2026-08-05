@@ -9,6 +9,7 @@
 
 import { CI_STATS_DEFAULTS, PIPELINES } from './const';
 import type { RunOrderConfig } from './env_config';
+import type { FTRManifestEntry } from '#pipeline-utils/ci-stats/pick_test_group_run_order/ftr_manifests';
 
 type CiStatsSource =
   | { branch: string; jobName: string }
@@ -72,10 +73,10 @@ export function buildCiStatsSources(args: {
 export function buildCiStatsGroups(args: {
   jestUnitConfigs: string[];
   jestIntegrationConfigs: string[];
-  ftrConfigsByQueue: Map<string, string[]>;
+  ftrManifestEntriesByQueue: Map<string, FTRManifestEntry[]>;
   config: RunOrderConfig;
 }): CiStatsGroup[] {
-  const { jestUnitConfigs, jestIntegrationConfigs, ftrConfigsByQueue, config } = args;
+  const { jestUnitConfigs, jestIntegrationConfigs, ftrManifestEntriesByQueue, config } = args;
 
   return [
     {
@@ -92,14 +93,14 @@ export function buildCiStatsGroups(args: {
       tooLongMin: config.jestIntegrationTooLongMinutes,
       names: jestIntegrationConfigs,
     },
-    ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
+    ...ftrManifestEntriesByQueue.entries().map(([queue, manifestEntries]) => ({
       type: config.functionalType,
       ...CI_STATS_DEFAULTS.FUNCTIONAL,
       queue,
       maxMin: config.functionalMaxMinutes,
       tooLongMin: config.functionalTooLongMinutes,
       minimumIsolationMin: config.functionalMinimumIsolationMin,
-      names,
+      names: manifestEntries.map((entry) => entry.path),
     })),
   ];
 }

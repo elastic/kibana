@@ -13,7 +13,6 @@ import {
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { parse } from 'yaml';
 import { createSignificantEventsScheduledWorkflowsService } from './significant_events_scheduled_workflows';
@@ -104,8 +103,8 @@ describe('scheduled Significant Events managed workflows', () => {
 
     // 'dynamic'/'restorable' is what lets the reconciliation service below
     // install/enable/disable/uninstall these per space; 'static'/'enforced'
-    // (used by the always-on detection/discovery/triage workflows) would
-    // make them installed everywhere and impossible to turn off per space.
+    // (used by the always-on detection/discovery workflows) would make them
+    // installed everywhere and impossible to turn off per space.
     expect(definition?.management).toEqual({
       lifecycle: 'dynamic',
       versionStrategy: 'auto',
@@ -157,11 +156,10 @@ describe('scheduled Significant Events managed workflows', () => {
     });
   });
 
-  it('wires each review config value into its own drain-loop input, not a sibling one', () => {
+  it('wires each review config value into the discovery drain-loop input', () => {
     const parsed = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
       reviewIntervalMinutes: 20,
       discoveryBatchSize: 7,
-      triageBatchSize: 11,
       maxReviewPasses: 6,
     });
 
@@ -173,116 +171,33 @@ describe('scheduled Significant Events managed workflows', () => {
     const drainLoop = findStep(parsed.steps, 'run_review_until_drained');
     expect(drainLoop?.type).toBe('while');
     expect(drainLoop?.['max-iterations']).toBe(6);
-    // Each pass is bounded by its own timeout (discovery 20m + triage 30m worst
-    // case) rather than a single workflow-level timeout.
     expect(drainLoop?.['iteration-timeout']).toBe('50m');
-    // The loop re-runs while a child found work this pass. A child error is
-    // deliberately NOT a continue condition, so the first failing pass bails
-    // out of the loop instead of spinning until max-iterations.
-    expect(drainLoop?.condition).toBe(
-      '${{ steps.discover.output.hasWork == true or steps.triage.output.hasWork == true }}'
-    );
+    expect(drainLoop?.condition).toBe('${{ steps.discover.output.hasWork == true }}');
 
     const discover = findStep(drainLoop?.steps ?? [], 'discover');
     expect(discover?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
       inputs: { detectionBatchMax: 7 },
     });
-
-    const triage = findStep(drainLoop?.steps ?? [], 'triage');
-    expect(triage?.with).toEqual({
-      'workflow-id': SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID,
-      inputs: { discoveryBatchMax: 11 },
-    });
   });
 
-  it.each([
-    ['discovery', SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID, 'output_no_detections'],
-    ['triage', SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID, 'output_no_discoveries'],
-  ])(
-    '%s always completes no-work runs as success and reports hasWork, so the scheduled drain loop can rely on hasWork instead of run status',
-    (_label, id, noWorkStepName) => {
-      const parsed = getParsedStaticWorkflowYaml(id);
+  it('discovery always completes no-work runs as success and reports hasWork, so the scheduled drain loop can rely on hasWork instead of run status', () => {
+    const parsed = getParsedStaticWorkflowYaml(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID);
 
-      const triggerInputs = parsed.triggers[0]?.inputs ?? [];
-      expect(triggerInputs.some((input) => input.name === 'completeNoWorkAsSuccess')).toBe(false);
+    const triggerInputs = parsed.triggers[0]?.inputs ?? [];
+    expect(triggerInputs.some((input) => input.name === 'completeNoWorkAsSuccess')).toBe(false);
 
-      const noWorkStep = findStep(parsed.steps, noWorkStepName);
-      expect(noWorkStep?.type).toBe('workflow.output');
-      expect(noWorkStep?.status).not.toBe('cancelled');
-      expect(noWorkStep?.with?.hasWork).toBe(false);
+    const noWorkStep = findStep(parsed.steps, 'output_no_detections');
+    expect(noWorkStep?.type).toBe('workflow.output');
+    expect(noWorkStep?.status).not.toBe('cancelled');
+    expect(noWorkStep?.with?.hasWork).toBe(false);
 
-      // No step anywhere in this workflow should cancel the run on no-work.
-      expect(parsed.steps.some((step) => step.status === 'cancelled')).toBe(false);
+    expect(parsed.steps.some((step) => step.status === 'cancelled')).toBe(false);
 
-      const resultStep = findStep(parsed.steps, 'output_result');
-      expect(resultStep?.with).toMatchObject({
-        hasWork: true,
-        processedCount: expect.stringContaining('compute_batch_size.output.processedCount'),
-      });
-    }
-  );
-
-  it('stamps successfully written triage discoveries as handled in the workflow', () => {
-    const parsed = getParsedStaticWorkflowYaml(SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID);
-    const checkJudgeOutput = findStep(parsed.steps, 'check_judge_agent_output');
-    const stampHandled = findStep(checkJudgeOutput?.steps ?? [], 'foreach_stamp_handled');
-
-    expect(stampHandled?.type).toBe('foreach');
-    // ES|QL rows are [event_id, _source, score]
-    expect(stampHandled?.foreach).toBe(
-      '${{ steps.get_unassessed_discoveries.output.values | default: [] }}'
-    );
-
-    const checkEventWritten = findStep(stampHandled?.steps ?? [], 'check_event_written');
-    expect(checkEventWritten?.condition).toBe(
-      '${{ variables.written_event_ids contains foreach.item[0] }}'
-    );
-
-    const checkHandledExists = findStep(checkEventWritten?.steps ?? [], 'check_handled_exists');
-    expect(checkHandledExists?.with).toMatchObject({
-      method: 'POST',
-      path: '/{{ consts.DISCOVERIES_INDEX }}/_count?ignore_unavailable=true',
-      body: {
-        query: {
-          bool: {
-            filter: expect.arrayContaining([
-              { term: { event_id: '{{ foreach.item[0] }}' } },
-              { term: { kind: '{{ consts.KIND_HANDLED }}' } },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: '{{ foreach.item[1]["@timestamp"] }}',
-                  },
-                },
-              },
-            ]),
-          },
-        },
-      },
-    });
-
-    const maybeWriteHandled = findStep(
-      checkEventWritten?.steps ?? [],
-      'maybe_write_handled_marker'
-    );
-    expect(maybeWriteHandled?.condition).toBe(
-      '${{ steps.check_handled_exists.output.count == 0 }}'
-    );
-
-    const writeHandledMarker = findStep(maybeWriteHandled?.steps ?? [], 'write_handled_marker');
-    expect(writeHandledMarker?.with).toEqual({
-      method: 'POST',
-      path: '/{{ consts.DISCOVERIES_INDEX }}/_doc',
-      body: {
-        '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}',
-        kibana: {
-          space_ids: ['{{ variables.spaceId }}'],
-        },
-        kind: '{{ consts.KIND_HANDLED }}',
-        event_id: '{{ foreach.item[0] }}',
-        previous_discovery_id: '{{ foreach.item[1].discovery_id }}',
-      },
+    const resultStep = findStep(parsed.steps, 'output_result');
+    expect(resultStep?.with).toMatchObject({
+      hasWork: true,
+      processedCount: expect.stringContaining('compute_batch_size.output.processedCount'),
     });
   });
 });
@@ -309,13 +224,10 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
         targetCoverageMinutes: 30,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
-        triageBatchSize: 5,
         maxReviewPasses: 3,
       },
     });
 
-    // Installs must disambiguate the shared managed workflow id per space via
-    // workflowIdSuffix; without it a second space collides on one document.
     expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
       SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
       {
@@ -337,12 +249,10 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
         values: {
           reviewIntervalMinutes: 10,
           discoveryBatchSize: 3,
-          triageBatchSize: 5,
           maxReviewPasses: 3,
         },
       }
     );
-    // Enable must target the same per-space document id, not the bare managed id.
     expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
       `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
       { enabled: true },
@@ -379,7 +289,6 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
         targetCoverageMinutes: 30,
         reviewIntervalMinutes: 15,
         discoveryBatchSize: 10,
-        triageBatchSize: 12,
         maxReviewPasses: 4,
       },
     });
@@ -416,7 +325,6 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
         targetCoverageMinutes: 30,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
-        triageBatchSize: 5,
         maxReviewPasses: 3,
       },
     });
