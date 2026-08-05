@@ -1067,6 +1067,13 @@ paths:
                   description: Configuration settings for the agent.
                   type: object
                   properties:
+                    ai_indices:
+                      description: Array of AI indices to associate with the agent.
+                      items:
+                        description: AI indices to associate with the agent.
+                        type: string
+                      maxItems: 100
+                      type: array
                     connector_ids:
                       description: Array of connector IDs to associate with the agent.
                       items:
@@ -1577,6 +1584,13 @@ paths:
                   description: Updated configuration settings for the agent.
                   type: object
                   properties:
+                    ai_indices:
+                      description: Array of AI indices to associate with the agent.
+                      items:
+                        description: AI indices to associate with the agent.
+                        type: string
+                      maxItems: 100
+                      type: array
                     connector_ids:
                       description: Array of connector IDs to associate with the agent.
                       items:
