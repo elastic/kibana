@@ -98,7 +98,11 @@ import type {
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
 import { WorkflowSearchService } from '../services/workflow_search_service';
 import { WorkflowValidationService } from '../services/workflow_validation_service';
-import { createStorage, ensureWorkflowStorageReady, type WorkflowStorage } from '../storage/workflow_storage';
+import {
+  createStorage,
+  ensureWorkflowStorageReady,
+  type WorkflowStorage,
+} from '../storage/workflow_storage';
 import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginSetupDeps, WorkflowsServerPluginStartDeps } from '../types';
 
