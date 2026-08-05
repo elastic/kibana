@@ -14,6 +14,7 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mainTranslations } from './main_i18n';
 import { Main } from './main';
+import { DataSetWithName, DataSource } from '../common';
 
 jest.mock('./datasets_tab_content', () => ({
   DatasetsTabContent: () => <div data-test-subj="datasetsTabContent" />,
@@ -28,7 +29,7 @@ const createToastsMock = () => ({
   addDanger: jest.fn(),
 });
 
-const createServicesMock = ({ dataSources, dataSets }) => ({
+const createServicesMock = ({ dataSources, dataSets }: { dataSources: DataSource[]; dataSets: DataSetWithName[] }) => ({
   dataSourcesClient: {
     get: jest.fn().mockResolvedValue(dataSources),
   },
