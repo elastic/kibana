@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { ConfigSchema } from './config';
+
+export const config: PluginConfigDescriptor = {
+  schema: ConfigSchema,
+};
 
 export const plugin = async (ctx: PluginInitializerContext) => {
   const { SignificantEventsPlugin } = await import('./plugin');
   return new SignificantEventsPlugin(ctx);
 };
 
-export { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID } from './agent_builder/agents/discovery/judge';
 export { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from './agent_builder/agents/discovery/discovery';
 
 export { SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID } from './agent_builder/tools/tool_ids';
