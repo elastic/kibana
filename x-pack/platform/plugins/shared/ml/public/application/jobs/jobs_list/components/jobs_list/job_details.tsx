@@ -43,7 +43,7 @@ export const JobDetails: FC<Props> = ({ id, job }) => {
             <EuiToolTip
               content={i18n.translate('xpack.ml.jobsList.managedBadgeTooltip', {
                 defaultMessage:
-                  'This job is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
+                  'This job is preconfigured and managed by Elastic; other parts of the product might have dependencies on its behavior.',
               })}
             >
               <EuiBadge tabIndex={0} color="hollow" data-test-subj="mlJobListRowManagedLabel">
