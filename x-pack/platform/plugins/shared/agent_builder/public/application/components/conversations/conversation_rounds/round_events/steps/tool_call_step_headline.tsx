@@ -65,7 +65,7 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({ step
       <EuiFlexGroup
         responsive={false}
         gutterSize="xs"
-        alignItems="center"
+        alignItems="baseline"
         role="status"
         aria-label={toolCallAriaLabel}
       >
@@ -75,7 +75,7 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({ step
             {hasResults ? (
               <FormattedMessage
                 id="xpack.agentBuilder.roundEvents.steps.toolCall.ran"
-                defaultMessage="ran."
+                defaultMessage="ran"
               />
             ) : (
               <FormattedMessage

@@ -253,9 +253,9 @@ export function ChatMessageText({
 
   return (
     <>
-      <EuiText size="m" className={containerClassName}>
+      <EuiText size="s" className={containerClassName}>
         <EuiMarkdownFormat
-          textSize="m"
+          textSize="s"
           parsingPluginList={parsingPluginList}
           processingPluginList={processingPluginList}
         >

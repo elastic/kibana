@@ -63,7 +63,6 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
     width: ${isCondensed ? CONDENSED_SIDEBAR_WIDTH : SIDEBAR_WIDTH}px;
     height: 100%;
     border-radius: 0;
-    border-right: 1px solid ${euiTheme.colors.borderBaseSubdued};
     display: flex;
     flex-direction: column;
   `;

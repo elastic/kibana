@@ -33,7 +33,7 @@ export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps }) => {
         {allRan ? (
           <FormattedMessage
             id="xpack.agentBuilder.roundEvents.toolCallGroup.ran"
-            defaultMessage="{count, plural, one {# tool ran.} other {# tools ran.}}"
+            defaultMessage="{count, plural, one {# tool ran} other {# tools ran}}"
             values={{ count: steps.length }}
           />
         ) : (
@@ -47,10 +47,6 @@ export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps }) => {
     </EuiText>
   );
 
-  const expansionStyles = css`
-    padding-left: ${euiTheme.size.s};
-  `;
-
   return (
     <div data-test-subj="agentBuilderToolCallGroup">
       <StepLayout
@@ -58,15 +54,13 @@ export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps }) => {
         onClick={onToggle}
         isExpanded={isExpanded}
         expansion={
-          <div css={expansionStyles}>
-            <EuiFlexGroup direction="column" gutterSize="s">
-              {steps.map((step) => (
-                <EuiFlexItem grow={false} key={step.tool_call_id}>
-                  <ToolCallStep step={step} />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </div>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {steps.map((step) => (
+              <EuiFlexItem grow={false} key={step.tool_call_id}>
+                <ToolCallStep step={step} />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
         }
         ebtAction={AGENT_BUILDER_UI_EBT.action.conversation.EXPAND_TOOL_CALL_GROUP}
       />

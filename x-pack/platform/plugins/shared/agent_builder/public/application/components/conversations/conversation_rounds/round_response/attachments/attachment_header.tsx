@@ -60,6 +60,8 @@ interface AttachmentHeaderProps {
    * - previewing: show "Close preview" button and hide action buttons
    */
   previewBadgeState?: 'none' | 'preview_available' | 'previewing';
+  /** When true, uses canvas flyout corner radius (top-right only). */
+  isCanvas?: boolean;
 }
 
 export const COMPACT_WIDTH_THRESHOLD = 560;
@@ -73,6 +75,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   onClose,
   onClosePreview,
   previewBadgeState = 'none',
+  isCanvas = false,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -98,8 +101,11 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     display: flex;
     border-bottom: ${euiTheme.border.thin};
     border-color: ${euiTheme.colors.borderBaseSubdued};
-    border-top-left-radius: ${AB_PANEL_RADIUS}px;
-    border-top-right-radius: ${AB_PANEL_RADIUS}px;
+    border-radius: ${
+      isCanvas
+        ? `0 ${euiTheme.border.radius.small} 0 0`
+        : `${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px 0 0`
+    };
     min-height: ${HEADER_HEIGHT}px;
   `;
 

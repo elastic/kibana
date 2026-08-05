@@ -17,7 +17,7 @@ import {
 import { useConversationContext } from '../../context/conversation/conversation_context';
 
 const titleStyles = css`
-  font-weight: 400;
+  // font-weight: 400;
 `;
 
 export const NewConversationPrompt: React.FC<{}> = () => {

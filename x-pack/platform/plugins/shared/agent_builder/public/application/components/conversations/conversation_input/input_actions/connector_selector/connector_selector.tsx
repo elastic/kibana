@@ -8,7 +8,7 @@
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiButtonEmpty,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
@@ -146,7 +146,7 @@ const ConnectorListFooter: React.FC = () => {
     <EuiPopoverFooter paddingSize="s">
       <EuiFlexGroup responsive={false} justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
-          <EuiButtonEmpty
+          <EuiButton
             size="s"
             iconType="gear"
             color="text"
@@ -163,7 +163,7 @@ const ConnectorListFooter: React.FC = () => {
               id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
               defaultMessage="Manage"
             />
-          </EuiButtonEmpty>
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopoverFooter>
@@ -344,7 +344,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
-      anchorPosition="upCenter"
+      anchorPosition="upLeft"
     >
       <EuiSelectable
         id={connectorSelectId}
