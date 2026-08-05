@@ -1,18 +1,50 @@
 {
-  "sha1": "",
+  "sha1": "a7f2afd57b575dab28fd3fd678a798521d4fe38a",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
-      "id": "aca8c749b1f9679-c1aa05b35aa13cc",
-      "title": "ES|QL Data Federation",
+      "id": "2995b8f4e0acc2e-1ad0ffd65e6e036",
+      "title": "ES|QL Data Federation — data sources CRUD creates, edits, and deletes a data source",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/private/data_federation/test/scou_data_federation/ui/tests/data_federation_management.spec.ts",
-        "line": 13,
-        "column": 7
+        "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_data_sources_crud.spec.ts",
+        "line": 29,
+        "column": 9
+      }
+    },
+    {
+      "id": "01aa1437955fee0-09fc07bbe770a41",
+      "title": "ES|QL Data Federation — datasets CRUD creates, edits, and deletes a dataset",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_datasets_crud.spec.ts",
+        "line": 33,
+        "column": 15
+      }
+    },
+    {
+      "id": "58549959a45779a-c1aa05b35aa13cc",
+      "title": "ES|QL Data Federation — Stack Management loads the management app and can open the connect data source flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_management.spec.ts",
+        "line": 12,
+        "column": 14
       }
     }
   ]
