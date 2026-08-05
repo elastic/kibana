@@ -20,7 +20,8 @@ import {
 
 import { ESQL_QUERY_BAR } from '../../../../screens/create_new_rule';
 
-import { getDetails, goBackToRulesTable } from '../../../../tasks/rule_details';
+import { getDetails } from '../../../../tasks/rule_details';
+import { navigateBackToRulesManagement } from '../../../../tasks/rules_management';
 import { expectNumberOfRules } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
@@ -88,7 +89,7 @@ describe.skip(
         getDetails(RULE_TYPE_DETAILS).contains('ES|QL');
 
         // ensures newly created rule is displayed in table
-        goBackToRulesTable();
+        navigateBackToRulesManagement();
 
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
 
