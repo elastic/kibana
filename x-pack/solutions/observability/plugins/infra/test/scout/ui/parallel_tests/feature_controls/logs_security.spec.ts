@@ -50,9 +50,10 @@ test.describe('Logs feature controls - security', { tag: tags.stateful.classic }
 
     // The badge is only set once the Logs app mounts (`useReadOnlyBadge`), so it
     // has to be asserted from inside the app rather than from the home page.
+    // Use a sub-route: `/app/logs` redirects to Discover when logs explorer is
+    // accessible, which unmounts `infraLogsPage` before the assertion can run.
     await test.step('can access the Logs app without a read-only badge', async () => {
-      await featureControlsPage.gotoLogs();
-      await expect(featureControlsPage.logsApp).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+      await featureControlsPage.gotoLogsRoute('anomalies');
       await expect(featureControlsPage.readOnlyBadge).toBeHidden();
     });
   });

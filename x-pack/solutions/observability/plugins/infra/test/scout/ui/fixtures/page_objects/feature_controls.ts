@@ -39,6 +39,18 @@ export class FeatureControlsPage {
   }
 
   /**
+   * Opens a logs app sub-route that stays mounted in the legacy Logs UI. The
+   * root `/app/logs` path redirects to Discover when observability-logs-explorer
+   * is accessible, which unmounts `infraLogsPage` before assertions can run.
+   */
+  async gotoLogsRoute(path: string, spaceId?: string) {
+    await this.page.goto(
+      `${this.kbnUrl.app('logs', spaceId ? { space: spaceId } : undefined)}/${path}`
+    );
+    await this.logsApp.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  /**
    * Force the Infrastructure app's empty state. The parallel config ingests infra
    * data cluster-wide (data streams aren't space-scoped), so `kbnNoDataPage` can
    * never appear naturally; stubbing the source `hasData` check lets the security
