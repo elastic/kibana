@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useRef, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiFlyout,
@@ -16,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EndpointResponderExtensionComponentProps } from '../types';
+import { useManagedContextFlyoutZIndex } from '../../../../common/hooks/use_managed_context_flyout_z_index';
 import { ResponseActionsLog } from '../../endpoint_response_actions_list/response_actions_log';
 import { UX_MESSAGES } from '../../endpoint_response_actions_list/translations';
 
@@ -36,6 +38,13 @@ export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((p
   const responderActionLogFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'responderActionLogFlyoutTitle',
   });
+
+  // Only set when this flyout is rendered *inside* a managed flyout subtree (eg the console was
+  // opened from a new-system flyout, as in Discover). In that case EUI would otherwise pin the
+  // flyout behind the console overlay, so we slot it back above the overlay ourselves. When it
+  // renders standalone (eg the Security Solution app shell) this is `undefined` and EUI's default
+  // unmanaged-flyout stacking already puts it in the right place.
+  const managedContextZIndex = useManagedContextFlyoutZIndex(showActionLogFlyout);
 
   return (
     <>
@@ -63,6 +72,21 @@ export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((p
           // console overlay has already bumped by registering itself - so it naturally stacks above
           // the overlay (and its mask above the overlay too), in both the new and legacy flyout modes.
           session="never"
+          // When rendered inside a managed flyout (see `useManagedContextFlyoutZIndex`), EUI can't
+          // slot us into the shared sequence, so we apply the computed z-index explicitly to both
+          // the panel and its mask, keeping the mask just above the overlay and below the panel.
+          css={
+            managedContextZIndex != null
+              ? css`
+                  z-index: ${managedContextZIndex} !important;
+                `
+              : undefined
+          }
+          maskProps={
+            managedContextZIndex != null
+              ? { style: `z-index: ${managedContextZIndex - 1} !important` }
+              : undefined
+          }
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
