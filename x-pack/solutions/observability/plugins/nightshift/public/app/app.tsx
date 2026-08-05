@@ -358,12 +358,12 @@ export function NightshiftApp(): React.ReactElement {
         color="warning"
         iconType="warning"
         size="s"
-        title={i18n.translate('xpack.observability.nightshift.eventNotFoundTitle', {
+        title={i18n.translate('xpack.nightshift.eventNotFoundTitle', {
           defaultMessage: 'Significant Event not found',
         })}
       >
         <EuiText size="s">
-          {i18n.translate('xpack.observability.nightshift.eventNotFoundDescription', {
+          {i18n.translate('xpack.nightshift.eventNotFoundDescription', {
             defaultMessage:
               'The event in this link is no longer in the current results. The URL has been cleared.',
           })}
@@ -439,7 +439,7 @@ export function NightshiftApp(): React.ReactElement {
                 color="warning"
                 iconType="warning"
                 size="s"
-                title={i18n.translate('xpack.observability.nightshift.refreshWarningTitle', {
+                title={i18n.translate('xpack.nightshift.refreshWarningTitle', {
                   defaultMessage: 'Showing the last loaded results; refreshing failed.',
                 })}
               >
@@ -451,7 +451,7 @@ export function NightshiftApp(): React.ReactElement {
                   onClick={() => refetch()}
                   size="s"
                 >
-                  {i18n.translate('xpack.observability.nightshift.retryButtonText', {
+                  {i18n.translate('xpack.nightshift.retryButtonText', {
                     defaultMessage: 'Retry',
                   })}
                 </EuiButtonEmpty>
@@ -493,7 +493,7 @@ export function NightshiftApp(): React.ReactElement {
                     }
                     sectionRef={needsActionSectionRef}
                     statusColor="danger"
-                    title={i18n.translate('xpack.observability.nightshift.list.needActionTitle', {
+                    title={i18n.translate('xpack.nightshift.list.needActionTitle', {
                       defaultMessage: 'Need Action',
                     })}
                   />
@@ -511,7 +511,7 @@ export function NightshiftApp(): React.ReactElement {
                   }
                   sectionRef={resolvedSectionRef}
                   statusColor="success"
-                  title={i18n.translate('xpack.observability.nightshift.list.resolvedTitle', {
+                  title={i18n.translate('xpack.nightshift.list.resolvedTitle', {
                     defaultMessage: 'Resolved',
                   })}
                 />
@@ -570,7 +570,7 @@ function LoadingErrorCallout({ onRetry }: { onRetry: () => void }): React.ReactE
       color="danger"
       iconType="warning"
       announceOnMount
-      title={i18n.translate('xpack.observability.nightshift.loadingErrorTitle', {
+      title={i18n.translate('xpack.nightshift.loadingErrorTitle', {
         defaultMessage: 'Unable to load significant events',
       })}
       css={css`
@@ -584,7 +584,7 @@ function LoadingErrorCallout({ onRetry }: { onRetry: () => void }): React.ReactE
         onClick={onRetry}
         size="s"
       >
-        {i18n.translate('xpack.observability.nightshift.retryButtonText', {
+        {i18n.translate('xpack.nightshift.retryButtonText', {
           defaultMessage: 'Retry',
         })}
       </EuiButton>

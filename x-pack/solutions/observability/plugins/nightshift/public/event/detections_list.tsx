@@ -223,13 +223,10 @@ function DetectionCard({
                 {hiddenEntityCount > 0 && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge color="hollow">
-                      {i18n.translate(
-                        'xpack.observability.nightshift.flyout.detectionEntityOverflow',
-                        {
-                          defaultMessage: '+{count}',
-                          values: { count: hiddenEntityCount },
-                        }
-                      )}
+                      {i18n.translate('xpack.nightshift.flyout.detectionEntityOverflow', {
+                        defaultMessage: '+{count}',
+                        values: { count: hiddenEntityCount },
+                      })}
                     </EuiBadge>
                   </EuiFlexItem>
                 )}
@@ -397,7 +394,7 @@ export function DetectionsList({
     <>
       <EuiTitle size="xs">
         <h3>
-          {i18n.translate('xpack.observability.nightshift.flyout.detectionsTitle', {
+          {i18n.translate('xpack.nightshift.flyout.detectionsTitle', {
             defaultMessage: 'Detections',
           })}
         </h3>
@@ -410,7 +407,7 @@ export function DetectionsList({
           color="danger"
           iconType="warning"
           size="s"
-          title={i18n.translate('xpack.observability.nightshift.flyout.detectionsErrorTitle', {
+          title={i18n.translate('xpack.nightshift.flyout.detectionsErrorTitle', {
             defaultMessage: 'Unable to load detections',
           })}
         >
@@ -422,7 +419,7 @@ export function DetectionsList({
             onClick={() => refetch()}
             size="s"
           >
-            {i18n.translate('xpack.observability.nightshift.flyout.detectionsRetryButtonText', {
+            {i18n.translate('xpack.nightshift.flyout.detectionsRetryButtonText', {
               defaultMessage: 'Retry',
             })}
           </EuiButtonEmpty>
@@ -439,7 +436,7 @@ export function DetectionsList({
 
       {!showDetectionSkeletons && !isError && detections.length === 0 && (
         <EuiText size="s" color="subdued">
-          {i18n.translate('xpack.observability.nightshift.flyout.detectionsEmptyDescription', {
+          {i18n.translate('xpack.nightshift.flyout.detectionsEmptyDescription', {
             defaultMessage: 'No detections found for this event.',
           })}
         </EuiText>

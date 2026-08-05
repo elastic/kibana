@@ -50,14 +50,14 @@ const INLINE_BLIND_SPOT_LIMIT = 4;
 const tryNextRowActionClassName = 'nightshiftInvestigationTryNextRowAction';
 
 const recommendationChatTooltip = i18n.translate(
-  'xpack.observability.nightshift.investigation.recommendationChatTooltip',
+  'xpack.nightshift.investigation.recommendationChatTooltip',
   {
     defaultMessage: 'Ask agent about this recommendation',
   }
 );
 
 const completedStatusLabel = i18n.translate(
-  'xpack.observability.nightshift.investigation.summaryCompleteStatusLabel',
+  'xpack.nightshift.investigation.summaryCompleteStatusLabel',
   {
     defaultMessage: 'Complete',
   }
@@ -142,7 +142,7 @@ function TryNextPanel({
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
             <h4>
-              {i18n.translate('xpack.observability.nightshift.investigation.tryNextTitle', {
+              {i18n.translate('xpack.nightshift.investigation.tryNextTitle', {
                 defaultMessage: 'Try next',
               })}
             </h4>
@@ -160,7 +160,7 @@ function TryNextPanel({
                 element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATION_SUMMARY,
               })}
             >
-              {i18n.translate('xpack.observability.nightshift.investigation.moreRecommendations', {
+              {i18n.translate('xpack.nightshift.investigation.moreRecommendations', {
                 defaultMessage: 'More recommendations',
               })}
             </EuiButtonEmpty>

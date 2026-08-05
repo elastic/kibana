@@ -179,12 +179,9 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
             >
               <NightshiftMarkIcon inline size={14} />
               <span>
-                {i18n.translate(
-                  'xpack.observability.nightshift.flyout.badge.significantEventLabel',
-                  {
-                    defaultMessage: 'Significant Event',
-                  }
-                )}
+                {i18n.translate('xpack.nightshift.flyout.badge.significantEventLabel', {
+                  defaultMessage: 'Significant Event',
+                })}
               </span>
             </EuiBadge>
           </EuiFlexItem>
@@ -198,7 +195,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
                   color: ${euiTheme.colors.textDanger} !important;
                 `}
               >
-                {i18n.translate('xpack.observability.nightshift.flyout.badge.needsActionLabel', {
+                {i18n.translate('xpack.nightshift.flyout.badge.needsActionLabel', {
                   defaultMessage: 'Needs action',
                 })}
               </EuiBadge>
@@ -219,7 +216,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
 
       <EuiFlyoutBody>
         <FlyoutSectionTitle>
-          {i18n.translate('xpack.observability.nightshift.flyout.summaryTitle', {
+          {i18n.translate('xpack.nightshift.flyout.summaryTitle', {
             defaultMessage: 'Summary',
           })}
         </FlyoutSectionTitle>

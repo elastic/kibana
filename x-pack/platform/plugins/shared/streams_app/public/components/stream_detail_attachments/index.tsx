@@ -284,6 +284,10 @@ export function StreamDetailAttachments({ definition }: { definition: Streams.al
               {selectedAttachments.length > 0 && (
                 <EuiFlexItem grow={false}>
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.streams.streamDetailAttachments.selectionActionsPopoverAriaLabel',
+                      { defaultMessage: 'Selected attachments actions' }
+                    )}
                     id={selectionPopoverId}
                     button={
                       <EuiLink
