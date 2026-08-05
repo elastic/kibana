@@ -153,6 +153,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Alerting
   'rule-management',
+  'action-policy-management',
 
   // Platform – Dashboard
   'dashboard-management',
@@ -199,6 +200,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'threat-hunting',
   'find-security-rules',
   'pci-compliance',
+  'endpoint-forensic-analysis',
   'investigate-rule',
   'siem-readiness',
   'attack-discovery-alert-retrieval-builder',
@@ -277,8 +279,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'cases',
 
   // Platform – Alerting v2
-  'rule',
-  'action_policy',
+  'platform.alerting.rule',
+  'platform.alerting.action_policy',
 
   // Security Solution
   'security.alert',

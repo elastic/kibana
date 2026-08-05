@@ -70,13 +70,14 @@ backwards compatible. Renaming or removing a code is a breaking change.
 
 ### Action policies (`server/lib/action_policy_client/`)
 
-| Code                             | Status | When                                                               | `details`              |
-| -------------------------------- | ------ | ------------------------------------------------------------------ | ---------------------- |
-| `ACTION_POLICY_NOT_FOUND`        | 404    | `get` / `update` / `delete` cannot find an action policy by id     | `{ action_policy_id }` |
-| `ACTION_POLICY_ALREADY_EXISTS`   | 409    | `createActionPolicy` collides with an existing id                  | `{ action_policy_id }` |
-| `ACTION_POLICY_VERSION_CONFLICT` | 409    | An update / delete races another writer                            | `{ action_policy_id }` |
-| `INVALID_ACTION_POLICY_DATA`     | 400    | The submitted body fails the domain-level schema check             | `{ context, errors }`  |
-| `INVALID_DATE_STRING`            | 400    | A user-supplied date (e.g. `snoozed_until`) fails ISO-8601 parsing | `{ value }`            |
+| Code                             | Status         | When                                                                                                                                                                                                              | `details`              |
+| -------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `ACTION_POLICY_NOT_FOUND`        | 404            | `get` / `update` / `delete` cannot find an action policy by id                                                                                                                                                    | `{ action_policy_id }` |
+| `ACTION_POLICY_ALREADY_EXISTS`   | 409            | `createActionPolicy` collides with an existing id                                                                                                                                                                 | `{ action_policy_id }` |
+| `ACTION_POLICY_VERSION_CONFLICT` | 409            | An update / delete races another writer                                                                                                                                                                           | `{ action_policy_id }` |
+| `INVALID_ACTION_POLICY_DATA`     | 400            | The submitted body fails the domain-level schema check                                                                                                                                                            | `{ context, errors }`  |
+| `INVALID_DATE_STRING`            | 400            | A user-supplied date (e.g. `snoozed_until`) fails ISO-8601 parsing                                                                                                                                                | `{ value }`            |
+| `API_KEY_INVALIDATION_FAILED`    | 500 / 200 (per-item) | Delete-only. The policy's API key could not be queued for invalidation, so the policy was deliberately left in place — deleting it would strand a valid key with nothing referencing it. Safe to retry. The single delete returns 500; bulk delete reports it per item. | `{ action_policy_id }` (single delete) |
 
 ### Alert actions (`server/lib/alert_actions_client/`)
 
