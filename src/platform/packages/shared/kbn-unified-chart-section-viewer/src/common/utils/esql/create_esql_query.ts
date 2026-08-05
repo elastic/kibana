@@ -14,15 +14,6 @@ import { createMetricAggregation, createTimeBucketAggregation } from './create_a
 import { firstNonNullable } from '../first_null_nullable';
 import type { ParsedMetricItem } from '../../../types';
 
-/**
- * Formats a single-line ES|QL query into a multi-line format where each
- * pipe command is on its own line with `  | ` indentation. SET directives
- * from the composer stay on their own leading line.
- */
-function formatQuery(basicQuery: string): string {
-  return basicQuery.replace(/ \| /g, '\n  | ').replace(/^(SET .+?;)\s*/, '$1\n');
-}
-
 interface CreateESQLQueryParams {
   metricItem: ParsedMetricItem;
   splitAccessors?: string[];
@@ -92,5 +83,6 @@ export function createESQLQuery({
   // TODO rename instrument to match metrics_info response
   query.pipe(statsClause);
 
-  return formatQuery(query.print('basic'));
+  // Composer owns pipe formatting; avoid a local string rewriter for `|` / SET.
+  return query.print('pipe-multiline');
 }
