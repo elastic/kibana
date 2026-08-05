@@ -283,22 +283,19 @@ describe('UpdateMonitorAPI', () => {
   });
 
   describe('invalid_origin', () => {
-    it.each(['project', 'agent'])(
-      'rejects non-`enabled` patches on origin %s',
-      async (origin) => {
-        const { routeContext, mocks } = createMockRouteContext();
-        mocks.findDecryptedMonitors.mockResolvedValue([
-          mockDecryptedMonitor({ attributes: { [ConfigKey.MONITOR_SOURCE_TYPE]: origin } }),
-        ]);
+    it.each(['project', 'agent'])('rejects non-`enabled` patches on origin %s', async (origin) => {
+      const { routeContext, mocks } = createMockRouteContext();
+      mocks.findDecryptedMonitors.mockResolvedValue([
+        mockDecryptedMonitor({ attributes: { [ConfigKey.MONITOR_SOURCE_TYPE]: origin } }),
+      ]);
 
-        const api = new UpdateMonitorAPI(routeContext);
-        const result = await api.execute({ updates: updatesFor(['mon-1'], { tags: ['new-tag'] }) });
+      const api = new UpdateMonitorAPI(routeContext);
+      const result = await api.execute({ updates: updatesFor(['mon-1'], { tags: ['new-tag'] }) });
 
-        expect(result.survivors).toHaveLength(0);
-        expect(result.perIdErrors['mon-1'].code).toBe('invalid_origin');
-        expect(result.perIdErrors['mon-1'].message).toContain(origin);
-      }
-    );
+      expect(result.survivors).toHaveLength(0);
+      expect(result.perIdErrors['mon-1'].code).toBe('invalid_origin');
+      expect(result.perIdErrors['mon-1'].message).toContain(origin);
+    });
 
     it.each(['project', 'agent'])(
       'rejects `enabled` combined with another field on origin %s',
