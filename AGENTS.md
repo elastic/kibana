@@ -100,3 +100,8 @@ Follow existing patterns in the target area first; below are common defaults.
 - Make focused changes; avoid unrelated refactors.
 - Update docs and tests when behavior or usage changes.
 - Never remove, skip, or comment out tests to make them pass; fix the underlying code.
+- Default to no comment.
+- Document exported functions with one concise sentence if the function name does not obviously explain the behavior.
+- Comment non-trivial code paths only to explain why a non-obvious constraint exists.
+- Do not comment fields, test steps, helper functions, or obvious control flow. Do not restate names or code.
+- Do not include implementation history, prior decisions, or future work in comments. Put that context in issues and commit messages.
