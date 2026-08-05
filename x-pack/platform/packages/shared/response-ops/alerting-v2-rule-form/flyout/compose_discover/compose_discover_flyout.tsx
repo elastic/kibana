@@ -553,10 +553,28 @@ export function ComposeDiscoverFlyout({
     builderParsedFromDiscover,
   ]);
 
+  /*
+   * Write the sandbox query and, in the same turn, leave manual split when the
+   * next shape is standalone. Base/alert tabs only exist for composed queries —
+   * leaving the flag on strands the pipeline in breach.query (blank base tab).
+   * Synchronous (not an effect) so ENABLE_MANUAL_SPLIT cannot race: enable sets
+   * composed first, then the flag, and never hits this clear.
+   */
+  const assignSandboxQuery = useCallback(
+    (next: RuleQuery) => {
+      setSandboxQuery(next);
+      if (next.format === 'standalone' && uiState.manualSplitEnabled) {
+        dispatch({ type: 'DISABLE_MANUAL_SPLIT' });
+        manualSplitUncommittedRef.current = false;
+      }
+    },
+    [dispatch, uiState.manualSplitEnabled]
+  );
+
   const syncSandbox = useCallback(() => {
-    setSandboxQuery(methods.getValues('query'));
+    assignSandboxQuery(methods.getValues('query'));
     setSandboxTimeField(methods.getValues('timeField'));
-  }, [methods]);
+  }, [methods, assignSandboxQuery]);
 
   const applyYamlValuesToFormAndSandbox = useCallback(
     (parsed: FormValues): FormValues => {
@@ -565,11 +583,11 @@ export function ComposeDiscoverFlyout({
         notifications: methods.getValues('notifications'),
       };
       methods.reset(composed);
-      setSandboxQuery(composed.query);
+      assignSandboxQuery(composed.query);
       setSandboxTimeField(composed.timeField);
       return composed;
     },
-    [methods]
+    [methods, assignSandboxQuery]
   );
 
   /*
@@ -652,11 +670,11 @@ export function ComposeDiscoverFlyout({
   useEffect(() => {
     if (!isBuilderMode) return;
     const sub = methods.watch((values) => {
-      if (values.query) setSandboxQuery(values.query as RuleQuery);
+      if (values.query) assignSandboxQuery(values.query as RuleQuery);
       if (values.timeField) setSandboxTimeField(values.timeField);
     });
     return () => sub.unsubscribe();
-  }, [isBuilderMode, methods]);
+  }, [isBuilderMode, methods, assignSandboxQuery]);
 
   const handleRecoveryTypeChange = useCallback(
     (type: RecoveryType) => {
@@ -868,11 +886,13 @@ export function ComposeDiscoverFlyout({
      * pipeline stranded in breach.query.
      */
     const leftManualSplit = uiState.manualSplitEnabled && queryToCommit.format === 'standalone';
-    setSandboxQuery(queryToCommit);
+    assignSandboxQuery(queryToCommit);
 
     methods.setValue('query', queryToCommit, { shouldDirty: true });
     if (shouldPromoteSignalToAlert) {
       handleKindChange('alert');
+      // KIND_CHANGE clears manual split; restore it so reopen keeps base/alert tabs.
+      dispatch({ type: 'ENABLE_MANUAL_SPLIT' });
     } else if (isAlert && queryToCommit.format === 'standalone') {
       const currentNoData = methods.getValues('noDataStrategy');
       const resolvedNoData = resolveNoDataStrategyForQuery(currentNoData, 'standalone');
@@ -894,6 +914,8 @@ export function ComposeDiscoverFlyout({
     }
     dispatch({ type: 'COMMIT_QUERY' });
     manualSplitUncommittedRef.current = false;
+    // assignSandboxQuery already clears the flag for standalone; keep an explicit
+    // dispatch so Apply's leave-split intent stays obvious next to promote's ENABLE.
     if (leftManualSplit) {
       dispatch({ type: 'DISABLE_MANUAL_SPLIT' });
     }
@@ -914,6 +936,7 @@ export function ComposeDiscoverFlyout({
     dispatch,
     cancelYamlParse,
     handleKindChange,
+    assignSandboxQuery,
   ]);
 
   const handleSubmit = methods.handleSubmit((values) => {
@@ -1085,6 +1108,12 @@ export function ComposeDiscoverFlyout({
     supportsUnifiedEditorToggle &&
     isAlertConditionStep &&
     !(isEditing && !isAlert);
+  /*
+   * Chrome must match what the editor can actually show. A standalone sandbox
+   * query has no base tab slot — even if the flag is briefly stale, treat UI as
+   * unified so the helper/gear don't claim tabs that aren't there.
+   */
+  const isManualSplitUi = uiState.manualSplitEnabled && sandboxQuery.format === 'composed';
 
   /*
    * Help text shown above the editor when manual split is available.
@@ -1093,7 +1122,7 @@ export function ComposeDiscoverFlyout({
    * Alert Condition step only — not shown on recovery or later steps.
    */
   const sandboxHelpText = canUseManualSplit ? (
-    uiState.manualSplitEnabled ? (
+    isManualSplitUi ? (
       <EuiText size="s" color="subdued" data-test-subj="querySandboxManualSplitHelper">
         <FormattedMessage
           id="xpack.alertingV2.composeDiscover.querySandbox.manualSplitHelperText"
@@ -1130,6 +1159,9 @@ export function ComposeDiscoverFlyout({
    * leading-WHERE-only pipelines where the heuristic cannot isolate a base).
    */
   const handleEnableManualSplit = useCallback(() => {
+    // Composed first, then the flag — never assignSandboxQuery here: that helper
+    // clears the flag for standalone, and enable must not go through a post-render
+    // effect that could see standalone+flag mid-transition.
     setSandboxQuery(enterManualSplitQuery(sandboxQuery));
     manualSplitUncommittedRef.current = true;
     dispatch({ type: 'ENABLE_MANUAL_SPLIT' });
@@ -1166,17 +1198,12 @@ export function ComposeDiscoverFlyout({
     }
     return (
       <SandboxSettingsMenu
-        manualSplitEnabled={uiState.manualSplitEnabled}
+        manualSplitEnabled={isManualSplitUi}
         onEnableManualSplit={handleEnableManualSplit}
         onDisableManualSplit={handleDisableManualSplit}
       />
     );
-  }, [
-    canUseManualSplit,
-    uiState.manualSplitEnabled,
-    handleEnableManualSplit,
-    handleDisableManualSplit,
-  ]);
+  }, [canUseManualSplit, isManualSplitUi, handleEnableManualSplit, handleDisableManualSplit]);
 
   // Freeze the view toggle while the sandbox is open in FORM mode. In YAML mode the
   // sandbox stays open by design, so the toggle remains enabled (#623 gating table).
@@ -1325,7 +1352,7 @@ export function ComposeDiscoverFlyout({
             {uiState.childOpen && (
               <QuerySandboxFlyout
                 query={sandboxQuery}
-                onQueryChange={isBuilderMode ? undefined : setSandboxQuery}
+                onQueryChange={isBuilderMode ? undefined : assignSandboxQuery}
                 tabs={sandboxTabs}
                 timeField={sandboxTimeField}
                 onTimeFieldChange={isBuilderMode ? undefined : setSandboxTimeField}

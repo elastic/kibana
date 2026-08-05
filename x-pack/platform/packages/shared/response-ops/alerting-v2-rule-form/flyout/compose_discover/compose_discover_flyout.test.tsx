@@ -1033,7 +1033,7 @@ describe('ComposeDiscoverFlyout', () => {
       expect(readCommittedQuery?.()).toEqual(manualSplitQuery);
     });
 
-    it('promotes signal to alert and keeps composed tabs when manual split is applied', () => {
+    it('promotes signal to alert and keeps manual split after Apply', () => {
       renderFlyout({ mode: 'create' });
       act(() => {
         getLatestFormProps().onKindChange('signal');
@@ -1064,6 +1064,13 @@ describe('ComposeDiscoverFlyout', () => {
       expect(readKind?.()).toBe('alert');
       expect(readCommittedQuery?.()).toEqual(manualSplitQuery);
       expect(readRecoveryStrategy?.()).toBe('no_breach');
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
+
+      act(() => {
+        getLatestFormProps().dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 0, isAlert: true });
+      });
+      expect(sandboxFlyoutProps?.tabs).toEqual(['base', 'alert']);
+      expect(sandboxFlyoutProps?.query).toEqual(manualSplitQuery);
     });
 
     it('collapses composed to standalone on signal unified Apply (no manual split)', () => {
@@ -1123,6 +1130,7 @@ describe('ComposeDiscoverFlyout', () => {
         breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
       });
       expect(readNoDataStrategy?.()).toBe('none');
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(false);
     });
 
     it('keeps signal kind when manual split Apply falls back to conditionless standalone', () => {
@@ -1155,6 +1163,7 @@ describe('ComposeDiscoverFlyout', () => {
         format: 'standalone',
         breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
       });
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(false);
     });
 
     it('preserves custom recovery when applying manual split edits', () => {
@@ -1443,7 +1452,7 @@ describe('ComposeDiscoverFlyout', () => {
       expect(sandboxFlyoutProps?.tabs).toEqual(['base', 'alert']);
     });
 
-    it('promotes clone signal to alert when manual split is applied', () => {
+    it('promotes clone signal to alert and keeps manual split after Apply', () => {
       renderFlyout({
         mode: 'clone',
         rule: {
@@ -1487,6 +1496,12 @@ describe('ComposeDiscoverFlyout', () => {
       expect(readKind?.()).toBe('alert');
       expect(readCommittedQuery?.()).toEqual(manualSplitQuery);
       expect(readRecoveryStrategy?.()).toBe('no_breach');
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
+
+      act(() => {
+        getLatestFormProps().dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 0, isAlert: true });
+      });
+      expect(sandboxFlyoutProps?.tabs).toEqual(['base', 'alert']);
     });
 
     /*
@@ -1497,6 +1512,14 @@ describe('ComposeDiscoverFlyout', () => {
      */
     it.each([
       ['create + alert', { mode: 'create' as const }, true],
+      [
+        'create + signal',
+        {
+          mode: 'create' as const,
+          // Kind is set after mount — see test body.
+        },
+        false,
+      ],
       [
         'clone + signal',
         {
@@ -1524,6 +1547,11 @@ describe('ComposeDiscoverFlyout', () => {
       'leaves manual split and reopens the unified editor after a conditionless Apply (%s)',
       (_name, flyoutProps, isAlert) => {
         renderFlyout(flyoutProps);
+        if (!isAlert && flyoutProps.mode === 'create') {
+          act(() => {
+            getLatestFormProps().onKindChange('signal');
+          });
+        }
 
         act(() => {
           getLatestFormProps().dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 0, isAlert });
@@ -1563,7 +1591,7 @@ describe('ComposeDiscoverFlyout', () => {
       }
     );
 
-    it('shows the unified editor when a standalone query is paired with a stale manual split', () => {
+    it('clears manual split synchronously when onQueryChange writes standalone', () => {
       renderFlyout({ mode: 'create' });
       openSandbox();
 
@@ -1576,7 +1604,7 @@ describe('ComposeDiscoverFlyout', () => {
       clickSplitBaseAndAlert();
       expect(sandboxFlyoutProps?.tabs).toEqual(['base', 'alert']);
 
-      // A standalone sandbox query cannot be represented as base/alert tabs.
+      // assignSandboxQuery clears the flag in the same turn as the standalone write.
       act(() => {
         sandboxFlyoutProps?.onQueryChange?.({
           format: 'standalone',
@@ -1584,8 +1612,9 @@ describe('ComposeDiscoverFlyout', () => {
         });
       });
 
-      expect(getLatestFormProps().state.manualSplitEnabled).toBe(true);
+      expect(getLatestFormProps().state.manualSplitEnabled).toBe(false);
       expect(sandboxFlyoutProps?.tabs).toBeUndefined();
+      expect(screen.getByTestId('querySandboxUnifiedHelper')).toBeInTheDocument();
     });
 
     it('resets manual split when the sandbox is closed without Apply', () => {

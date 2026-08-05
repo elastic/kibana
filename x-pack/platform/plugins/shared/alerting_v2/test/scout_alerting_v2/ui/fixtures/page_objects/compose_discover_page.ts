@@ -148,6 +148,11 @@ export class ComposeDiscoverPage {
     await this.codeEditor.setCodeEditorValue(query, 0);
   }
 
+  /** Reads the active sandbox Monaco model (unified editor or the selected tab). */
+  async getSandboxQuery() {
+    return this.codeEditor.getCodeEditorValue(0);
+  }
+
   async clickNext() {
     await this.nextButton.click();
   }

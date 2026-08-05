@@ -759,5 +759,27 @@ test.describe(
         await expect(pageObjects.composeDiscover.sandboxTab('alert')).toBeVisible();
       });
     });
+
+    test('query step: conditionless manual split reopens the unified editor with the query', async ({
+      pageObjects,
+    }) => {
+      await test.step('split a conditionless query and Apply', async () => {
+        await pageObjects.composeDiscover.openCreateFlyout();
+        await pageObjects.composeDiscover.openSandbox();
+        await pageObjects.composeDiscover.setSandboxQuery(TEST_QUERY);
+        await pageObjects.composeDiscover.enableManualSplit();
+        await expect(pageObjects.composeDiscover.sandboxTab('base')).toBeVisible();
+        await pageObjects.composeDiscover.clickApply();
+        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
+      });
+
+      await test.step('reopen shows a single editor with the pipeline still present', async () => {
+        await pageObjects.composeDiscover.openSandbox();
+        await expect(pageObjects.composeDiscover.sandboxTab('base')).toBeHidden();
+        await expect(pageObjects.composeDiscover.sandboxTab('alert')).toBeHidden();
+        const sandboxQuery = await pageObjects.composeDiscover.getSandboxQuery();
+        expect(sandboxQuery).toContain(TEST_INDEX);
+      });
+    });
   }
 );
