@@ -7,7 +7,6 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
-import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -45,7 +44,6 @@ jest.mock('../hooks/use_data_connectors', () => ({
   useDataConnectors: () => ({
     connectors: [],
     connectorNameById: new Map(),
-    connectorActionTypeById: new Map(),
     isLoading: false,
   }),
 }));
@@ -75,9 +73,7 @@ const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) 
   return render(
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider
-          services={{ ...services, triggersActionsUi: triggersActionsUiMock.createStart() }}
-        >
+        <KibanaContextProvider services={services}>
           <QueryClientProvider client={queryClient}>
             <MemoryRouter initialEntries={[getAiIndexDetailPath(aiIndex.id)]}>
               <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexDetailPage} />
@@ -351,7 +347,8 @@ describe('AiIndexDetailPage', () => {
 
     await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
 
-    fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
+    fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
+    fireEvent.click(await screen.findByTestId('contextCreateAutomationButton'));
 
     await waitFor(() => {
       expect(mockCreateWorkflow).toHaveBeenCalledWith({
@@ -373,7 +370,7 @@ describe('AiIndexDetailPage', () => {
     });
 
     expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
-      path: '/wf-created?returnApp=context_engine&returnPath=%2Fai_index%2Fmy-ai-index',
+      path: '/wf-created',
     });
   });
 

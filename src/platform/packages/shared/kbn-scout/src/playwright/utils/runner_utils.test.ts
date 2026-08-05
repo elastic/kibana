@@ -11,7 +11,7 @@ import {
   isValidUTCDate,
   formatTime,
   getPlaywrightGrepTag,
-  withKibanaSwcRegister,
+  withKibanaBabelRegister,
 } from './runner_utils';
 import moment from 'moment';
 import { ScoutTestTarget } from '@kbn/scout-info';
@@ -76,7 +76,7 @@ describe('getPlaywrightGrepTag', () => {
   });
 });
 
-describe('withKibanaSwcRegister', () => {
+describe('withKibanaBabelRegister', () => {
   const originalNodeOptions = process.env.NODE_OPTIONS;
 
   afterEach(() => {
@@ -87,42 +87,42 @@ describe('withKibanaSwcRegister', () => {
     }
   });
 
-  it('sets NODE_OPTIONS to only the kbn swc-register --require when none is present', () => {
+  it('sets NODE_OPTIONS to only the kbn babel-register --require when none is present', () => {
     delete process.env.NODE_OPTIONS;
 
-    const result = withKibanaSwcRegister({ FOO: 'bar' });
+    const result = withKibanaBabelRegister({ FOO: 'bar' });
 
     expect(result.FOO).toBe('bar');
-    expect(result.NODE_OPTIONS).toBe('--require=@kbn/swc-register/install');
+    expect(result.NODE_OPTIONS).toBe('--require=@kbn/babel-register/install');
   });
 
-  it('appends the kbn swc-register --require to caller-provided NODE_OPTIONS', () => {
+  it('appends the kbn babel-register --require to caller-provided NODE_OPTIONS', () => {
     delete process.env.NODE_OPTIONS;
 
-    const result = withKibanaSwcRegister({
+    const result = withKibanaBabelRegister({
       NODE_OPTIONS: '--max-old-space-size=4096',
     });
 
     expect(result.NODE_OPTIONS).toBe(
-      '--max-old-space-size=4096 --require=@kbn/swc-register/install'
+      '--max-old-space-size=4096 --require=@kbn/babel-register/install'
     );
   });
 
   it('appends to process.env.NODE_OPTIONS when the input env does not set NODE_OPTIONS', () => {
     process.env.NODE_OPTIONS = '--max-old-space-size=4096';
 
-    const result = withKibanaSwcRegister({});
+    const result = withKibanaBabelRegister({});
 
     expect(result.NODE_OPTIONS).toBe(
-      '--max-old-space-size=4096 --require=@kbn/swc-register/install'
+      '--max-old-space-size=4096 --require=@kbn/babel-register/install'
     );
   });
 
   it('is idempotent when the --require is already present', () => {
     delete process.env.NODE_OPTIONS;
 
-    const existing = '--max-old-space-size=4096 --require=@kbn/swc-register/install';
-    const result = withKibanaSwcRegister({ NODE_OPTIONS: existing });
+    const existing = '--max-old-space-size=4096 --require=@kbn/babel-register/install';
+    const result = withKibanaBabelRegister({ NODE_OPTIONS: existing });
 
     expect(result.NODE_OPTIONS).toBe(existing);
   });
@@ -130,10 +130,10 @@ describe('withKibanaSwcRegister', () => {
   it('prefers the env-provided NODE_OPTIONS over process.env', () => {
     process.env.NODE_OPTIONS = '--inspect';
 
-    const result = withKibanaSwcRegister({ NODE_OPTIONS: '--max-old-space-size=4096' });
+    const result = withKibanaBabelRegister({ NODE_OPTIONS: '--max-old-space-size=4096' });
 
     expect(result.NODE_OPTIONS).toBe(
-      '--max-old-space-size=4096 --require=@kbn/swc-register/install'
+      '--max-old-space-size=4096 --require=@kbn/babel-register/install'
     );
   });
 });

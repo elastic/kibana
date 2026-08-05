@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { UserAvatar } from '@kbn/user-profile-components';
+import { UserAvatarTip as UserAvatarTipComponent } from '@kbn/user-profile-components';
 import { useUserProfile } from '../queries';
 
 export function UserAvatarTip(props: { uid: string }) {
@@ -16,7 +16,7 @@ export function UserAvatarTip(props: { uid: string }) {
 
   if (query.data) {
     return (
-      <UserAvatar
+      <UserAvatarTipComponent
         user={query.data.user}
         avatar={query.data.data.avatar}
         size={'s'}

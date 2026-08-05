@@ -44,8 +44,6 @@ Pass the Saved Object's `updated_at` field (assigned by Elasticsearch at write t
 
 - Returns change documents for the given object `type` and `id` in the specified Kibana space, sorted by `sequence` (if available), then `@timestamp`, then `event.id` as a tie-breaker. Supports pagination and custom sort/filters via `opts`.
 
-**Facet distinct field values** with `getHistoryByFields(spaceId, objectType, objectId, fields, opts?)` — terms buckets on mapped keyword fields (`user.name`, `event.action`, etc.).
-
 All persisted documents follow the same schema (see below).
 
 ### Ordering and versioning
@@ -102,7 +100,7 @@ UUID v7 values are monotonically increasing within the same millisecond. That ma
 - **`isInitialized()`** — Returns `true` if the client has been initialized (e.g. after `initialize()` has been called).
 
 - **`initialize(elasticsearchClient)`**
-  Creates/ensures the data stream and stores the internal client. Called once during plugin `start()` phase and before `log` / `logBulk` / `getHistory` / `getHistoryByFields`.
+  Creates/ensures the data stream and stores the internal client. Called once during plugin `start()` phase and before `log` / `logBulk` / `getHistory`.
 
 - **`log(change, opts)`**
   Writes one `change` document with given `opts` context (`action`, `username`, etc) in `LogChangeHistoryOptions`.
@@ -127,15 +125,6 @@ UUID v7 values are monotonically increasing within the same millisecond. That ma
   - Optional `opts: GetChangeHistoryOptions` with `additionalFilters` (array of ES query clauses), pagination options `sort`, `from`, `size` (default 100).
   - Results are sorted by `object.sequence` (if available), then `@timestamp`, and `event.id` as the tie-breaker.
 
-- **`getHistoryByFields(spaceId, objectType, objectId, fields, opts?)`**
-  - Returns `{ results }` — one `{ field, buckets, sumOtherDocCount }` entry per requested field (duplicates removed, first-seen order preserved).
-  - Aggregates **one or more fields in a single Elasticsearch search** (sibling terms aggs).
-  - Uses the same object scope as `getHistory` (`spaceId`, client `module`/`dataset`, `object.type`, `object.id`).
-  - Each `fields` entry must be a `ChangeHistoryAggregateField` (`user.name`, `user.id`, `event.action`, `event.type`). See `CHANGE_HISTORY_AGGREGATE_FIELDS`.
-  - Optional `opts.additionalFilters` — extra ES filter clauses merged into the query. **Build these server-side** from validated route params; do not pass user-controlled query DSL.
-  - Optional `opts.size` — max distinct bucket count **per field** (default `DEFAULT_FIELD_AGGREGATION_SIZE`, currently `100`).
-  - `sumOtherDocCount` mirrors Elasticsearch `sum_other_doc_count`: the **document** count in terms buckets omitted when `size` is exceeded. Use it to signal truncated facet lists (for example “showing top 100 authors”).
-  - Common uses: author facets (`user.name`), change-type facets (`event.action`), or both in one call.
 
 ### Elasticsearch mapping schema
 
@@ -234,23 +223,6 @@ console.log(
   `We have ${total} items, latest change at: \n${JSON.stringify(items[0]?.['@timestamp'])}`
 );
 ```
-
-### Field facets (authors, actions)
-
-Use `getHistoryByFields` for filter popovers (one or more fields in a single search). Build `additionalFilters` server-side from validated query params only.
-
-```ts
-const { results } = await client.getHistoryByFields(spaceId, 'workflow', workflowId, [
-  'user.name',
-  'event.action',
-]);
-const byField = Object.fromEntries(results.map((r) => [r.field, r]));
-
-const authors = byField['user.name'].buckets.map(({ key }) => key);
-const truncated = byField['user.name'].sumOtherDocCount > 0;
-```
-
-Supported fields are listed in `CHANGE_HISTORY_AGGREGATE_FIELDS` (`user.name`, `user.id`, `event.action`, `event.type`).
 
 ### Bulk changes with correlation ID
 

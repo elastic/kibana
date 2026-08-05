@@ -19,7 +19,7 @@ export const registerDeleteRoute = ({
   lib: { handleEsError },
 }: RouteDependencies) => {
   const paramsSchema = schema.object({
-    id: schema.string({ maxLength: 1000 }),
+    id: schema.string(),
   });
 
   router.delete(

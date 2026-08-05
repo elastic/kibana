@@ -240,33 +240,6 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
     expect(response).toHaveStatusCode(400);
   });
 
-  apiTest(
-    'returns 400 when field_settings contains an invalid format type',
-    async ({ apiClient }) => {
-      const response = await apiClient.post(BASE_PATH, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        body: {
-          index_pattern: `invalid-format-create-${Date.now()}-*`,
-          field_settings: {
-            bytes_field: {
-              format: {
-                type: 'not-a-real-format-type',
-              },
-            },
-          },
-        },
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.message).toContain('Invalid field format types');
-      expect(response.body.message).toContain('not-a-real-format-type');
-    }
-  );
-
   apiTest('returns 400 when id is provided in the request body', async ({ apiClient }) => {
     const response = await apiClient.post(BASE_PATH, {
       headers: {

@@ -6,11 +6,7 @@
  */
 
 import { tags } from '@kbn/scout';
-import {
-  getCurrentTraceId,
-  createChatCallsEvaluator,
-  createSpanLatencyEvaluator,
-} from '@kbn/evals';
+import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
@@ -26,12 +22,6 @@ import {
   type KIFeatureExclusionScenario,
 } from '../../src/datasets';
 import { createExcludeSemanticEvaluator } from '../../src/evaluators/ki_feature_exclusion/evaluators';
-import {
-  initialFeatureCountEvaluator,
-  followUpReturnedCountEvaluator,
-  followUpRetainedCountEvaluator,
-} from '../../src/evaluators/ki_feature_exclusion/feature_counts';
-import { createReportedTokenEvaluators } from '../../src/evaluators/reported_tokens';
 import { buildAvailableSnapshotsBySource } from '../shared';
 import { runExcludeExperiment } from './run_exclude_experiment';
 
@@ -154,14 +144,9 @@ evaluate.describe(
               },
               [
                 createExcludeSemanticEvaluator({ inferenceClient: evaluatorInferenceClient }),
-                initialFeatureCountEvaluator,
-                followUpReturnedCountEvaluator,
-                followUpRetainedCountEvaluator,
-                ...createReportedTokenEvaluators(),
                 evaluators.traceBasedEvaluators.inputTokens,
                 evaluators.traceBasedEvaluators.outputTokens,
                 evaluators.traceBasedEvaluators.cachedTokens,
-                createChatCallsEvaluator({ traceEsClient, log }),
                 createSpanLatencyEvaluator({ traceEsClient, log, operationName: 'chat' }),
               ]
             );

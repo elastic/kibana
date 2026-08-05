@@ -154,7 +154,6 @@ dependsOn:
   - '@kbn/as-code-shared-telemetry'
   - '@kbn/core-http-browser'
   - '@kbn/use-observable'
-  - '@kbn/zod'
 tags:
   - plugin
   - prod

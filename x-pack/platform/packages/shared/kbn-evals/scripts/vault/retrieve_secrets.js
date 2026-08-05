@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('@kbn/swc-register').install();
+require('@kbn/babel-register').install();
 const { retrieveConfigFromVault, getVaultPath } = require('./manage_secrets');
 const { KBN_EVALS_VAULT_TYPES } = require('../../src/cli/utils');
 const minimist = require('minimist');

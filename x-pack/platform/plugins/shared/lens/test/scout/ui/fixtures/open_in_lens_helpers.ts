@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import type { PageObjects } from '@kbn/scout';
+import type { DebugState } from '@elastic/charts';
+import type { PageObjects, ScoutPage } from '@kbn/scout';
 
 import { DATA_TEST_SUBJECTS, LOGSTASH_IN_RANGE_DATES, DATA_VIEW_ID } from './constants';
-import { getImportedDashboardId, type ImportedSavedObject } from './saved_object_helpers';
-import { enableElasticChartDebug, type ElasticChartDebugContext } from './helpers';
+import type { ImportedSavedObject } from './saved_object_helpers';
+import { getImportedDashboardId } from './saved_object_helpers';
+
+interface ElasticChartDebugContext {
+  addInitScript: (script: () => void) => Promise<{ dispose: () => Promise<void> }>;
+}
 
 interface LogstashOpenInLensSetupContext {
   savedObjects?: {
@@ -127,4 +132,32 @@ export async function canConvertToLensByTitle(
   panelTitle: string
 ): Promise<boolean> {
   return dashboard.panelHasAction(DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION, panelTitle);
+}
+
+/** Enables elastic-charts debug state for subsequent page loads in this browser context. */
+export async function enableElasticChartDebug(context: ElasticChartDebugContext): Promise<void> {
+  await context.addInitScript(() => {
+    (window as unknown as { _echDebugStateFlag?: boolean })._echDebugStateFlag = true;
+  });
+}
+
+/** Reads `@elastic/charts` debug state from a rendered chart test subject. */
+export async function getChartDebugData(
+  page: ScoutPage,
+  chartTestSubj: string
+): Promise<DebugState> {
+  const chart = page.testSubj.locator('lnsWorkspace').getByTestId(chartTestSubj);
+  await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
+    state: 'attached',
+    timeout: 30_000,
+  });
+
+  const debugJson = await chart.locator('.echChartStatus').getAttribute('data-ech-debug-state');
+  if (!debugJson) {
+    throw new Error(
+      'Elastic charts debugState not found — call enableElasticChartDebug() before navigation'
+    );
+  }
+
+  return JSON.parse(debugJson) as DebugState;
 }

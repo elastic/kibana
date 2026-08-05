@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import type { DatatableConfig } from './datatable';
@@ -41,8 +40,8 @@ describe('Datatable Schema', () => {
         ],
       };
 
-      const validated = datatableConfigSchema.parse(input);
-      expect(validated).toMatchObject({ ...defaultValues, ...input });
+      const validated = datatableConfigSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
     });
 
     it('validates metrics, rows and split_metrics_by operations', () => {
@@ -81,8 +80,8 @@ describe('Datatable Schema', () => {
         ],
       };
 
-      const validated = datatableConfigSchema.parse(input);
-      expect(validated).toMatchObject({ ...defaultValues, ...input });
+      const validated = datatableConfigSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
     });
 
     it('validates metric sorting configuration', () => {
@@ -128,8 +127,8 @@ describe('Datatable Schema', () => {
         },
       };
 
-      const validated = datatableConfigSchema.parse(input);
-      expect(validated).toMatchObject({ ...defaultValues, ...input });
+      const validated = datatableConfigSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
     });
 
     it('validates row sorting configuration', () => {
@@ -175,8 +174,8 @@ describe('Datatable Schema', () => {
         },
       };
 
-      const validated = datatableConfigSchema.parse(input);
-      expect(validated).toMatchObject({ ...defaultValues, ...input });
+      const validated = datatableConfigSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
     });
 
     it('validates pivoted metric sorting configuration', () => {
@@ -223,8 +222,8 @@ describe('Datatable Schema', () => {
         },
       };
 
-      const validated = datatableConfigSchema.parse(input);
-      expect(validated).toMatchObject({ ...defaultValues, ...input });
+      const validated = datatableConfigSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
     });
 
     it('validates pivoted metric sorting configuration with multiple split dimensions', () => {
@@ -276,8 +275,8 @@ describe('Datatable Schema', () => {
         },
       };
 
-      const validated = datatableConfigSchema.parse(input);
-      expect(validated).toMatchObject({ ...defaultValues, ...input });
+      const validated = datatableConfigSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
     });
   });
 
@@ -301,8 +300,7 @@ describe('Datatable Schema', () => {
         ],
       };
 
-      const result = datatableConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
     });
 
     it('throws on empty metrics for non-esql', () => {
@@ -320,11 +318,7 @@ describe('Datatable Schema', () => {
         ],
       };
 
-      const result = datatableConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(`
-        "✖ Too small: expected array to have >=1 items
-          → at metrics"
-      `);
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
     });
 
     it('throws on empty rows', () => {
@@ -350,11 +344,7 @@ describe('Datatable Schema', () => {
         ],
       };
 
-      const result = datatableConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(`
-        "✖ Too small: expected array to have >=1 items
-          → at rows"
-      `);
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
     });
 
     it('throws on empty split_metrics_by', () => {
@@ -373,11 +363,7 @@ describe('Datatable Schema', () => {
         split_metrics_by: [],
       };
 
-      const result = datatableConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(`
-        "✖ Too small: expected array to have >=1 items
-          → at split_metrics_by"
-      `);
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
     });
 
     it('throws when using invalid density height type', () => {
@@ -404,8 +390,7 @@ describe('Datatable Schema', () => {
         },
       };
 
-      const result = datatableConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
     });
 
     it('throws when using invalid density mode', () => {
@@ -430,8 +415,7 @@ describe('Datatable Schema', () => {
         },
       };
 
-      const result = datatableConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
     });
 
     it('throws when using invalid height type', () => {
@@ -452,8 +436,7 @@ describe('Datatable Schema', () => {
         styling: { density: { height: { header: { type: 'invalid' } } } },
       };
 
-      const result = datatableConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
     });
 
     it('throws when missing summary type', () => {
@@ -474,8 +457,7 @@ describe('Datatable Schema', () => {
         ],
       };
 
-      const result = datatableConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
     });
 
     it('throws when using term buckets operation in an esql configuration', () => {
@@ -498,8 +480,7 @@ describe('Datatable Schema', () => {
         rows: [{ operation: 'terms', fields: ['geo.dest'], limit: 10 }],
       };
 
-      const result = datatableConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
     });
 
     it('throws when esql datatable has no metrics and no rows', () => {
@@ -511,9 +492,8 @@ describe('Datatable Schema', () => {
         },
       };
 
-      const result = datatableConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(
-        `"✖ Datatable must have at least one column"`
+      expect(() => datatableConfigSchema.validate(input)).toThrow(
+        'Datatable must have at least one column'
       );
     });
 
@@ -532,11 +512,7 @@ describe('Datatable Schema', () => {
         ],
       };
 
-      const result = datatableConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(`
-        "✖ Too small: expected array to have >=1 items
-          → at metrics"
-      `);
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
     });
 
     it('throws on empty rows array for esql', () => {
@@ -554,11 +530,7 @@ describe('Datatable Schema', () => {
         rows: [],
       };
 
-      const result = datatableConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(`
-        "✖ Too small: expected array to have >=1 items
-          → at rows"
-      `);
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
     });
 
     it('throws when using invalid sorting index', () => {
@@ -604,10 +576,7 @@ describe('Datatable Schema', () => {
         },
       };
 
-      const result = datatableConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(
-        `"✖ The 'sort_by.index' (2) is out of bounds. The 'metrics' array has 2 item(s)."`
-      );
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
     });
 
     it('throws when using invalid sorting index for pivoted_metric', () => {
@@ -654,10 +623,7 @@ describe('Datatable Schema', () => {
         },
       };
 
-      const result = datatableConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(
-        `"✖ The 'sort_by.index' (2) is out of bounds. The 'metrics' array has 2 item(s)."`
-      );
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
     });
 
     it('throws when using invalid values length for pivoted_metric', () => {
@@ -709,10 +675,7 @@ describe('Datatable Schema', () => {
         },
       };
 
-      const result = datatableConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(
-        `"✖ The 'sort_by.index' (2) is out of bounds. The 'metrics' array has 2 item(s)."`
-      );
+      expect(() => datatableConfigSchema.validate(input)).toThrow();
     });
   });
 
@@ -801,8 +764,8 @@ describe('Datatable Schema', () => {
         ],
       };
 
-      const validated = datatableConfigSchema.parse(input);
-      expect(validated).toMatchObject({ ...defaultValues, ...input });
+      const validated = datatableConfigSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
     });
 
     it('validates esql configuration', () => {
@@ -889,8 +852,8 @@ describe('Datatable Schema', () => {
         ],
       };
 
-      const validated = datatableConfigSchema.parse(input);
-      expect(validated).toMatchObject({ ...defaultValues, ...input });
+      const validated = datatableConfigSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
     });
 
     it('allows no metrics when using esql', () => {
@@ -927,8 +890,8 @@ describe('Datatable Schema', () => {
         ],
       };
 
-      const validated = datatableConfigSchema.parse(input);
-      expect(validated).toMatchObject({ ...defaultValues, ...input });
+      const validated = datatableConfigSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
     });
   });
 });

@@ -24,7 +24,6 @@ import {
   EuiTextArea,
   EuiTitle,
   useEuiTheme,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
@@ -67,7 +66,6 @@ export const WatchDetailPage: React.FC = () => {
 
   const [localWatch, setLocalWatch] = useState<Watch | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const confirmModalTitleId = useGeneratedHtmlId();
   usePndDocTitle(localWatch?.name ?? i18n.PAGE_TITLE);
 
   useEffect(() => {
@@ -235,9 +233,7 @@ export const WatchDetailPage: React.FC = () => {
 
         {isDeleteConfirmOpen ? (
           <EuiConfirmModal
-            aria-labelledby={confirmModalTitleId}
             title={i18n.DELETE_CONFIRM_TITLE}
-            titleProps={{ id: confirmModalTitleId }}
             onCancel={() => setIsDeleteConfirmOpen(false)}
             onConfirm={onConfirmDelete}
             cancelButtonText={i18n.DELETE_CANCEL}

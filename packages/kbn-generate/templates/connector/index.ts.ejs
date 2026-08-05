@@ -1,4 +1,4 @@
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
 export const <%= connector.className %>: ConnectorSpec = {
@@ -9,7 +9,7 @@ export const <%= connector.className %>: ConnectorSpec = {
     minimumLicense: 'basic',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
-  schema: lazySchema(() => z.object({})),
+  schema: z.object({}),
   actions: {},
   test: {
     // enabled must be explicitly set to true, otherwise the "Test connector"

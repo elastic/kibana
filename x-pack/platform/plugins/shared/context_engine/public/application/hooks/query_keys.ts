@@ -12,6 +12,5 @@ export const contextEngineQueryKeys = {
   },
   connectors: {
     list: () => ['context_engine', 'connectors', 'list'] as const,
-    types: () => ['context_engine', 'connectors', 'types'] as const,
   },
 };

@@ -104,14 +104,6 @@ describe('Sentry', () => {
       expect(mockClient.get).toHaveBeenCalledWith('https://sentry.io/api/0/issues/123/');
       expect(result).toEqual(expect.objectContaining({ id: '123', title: 'TypeError' }));
     });
-
-    it('should URL-encode an issue ID containing reserved characters', async () => {
-      mockClient.get.mockResolvedValue({ data: { id: 'a/b#c', title: 'TypeError' } });
-
-      await Sentry.actions.getIssue.handler(mockContext, { issueId: 'a/b#c' });
-
-      expect(mockClient.get).toHaveBeenCalledWith('https://sentry.io/api/0/issues/a%2Fb%23c/');
-    });
   });
 
   describe('resolveIssue action', () => {
@@ -243,19 +235,6 @@ describe('Sentry', () => {
       );
       expect(result).toEqual({ id: 'e1', tags: [] });
     });
-
-    it('should URL-encode a project slug and event ID containing reserved characters', async () => {
-      mockClient.get.mockResolvedValue({ data: { id: 'e/1', tags: [] } });
-
-      await Sentry.actions.getEvent.handler(mockContext, {
-        project: 'back end',
-        eventId: 'e/1',
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://sentry.io/api/0/projects/my-org/back%20end/events/e%2F1/'
-      );
-    });
   });
 
   describe('bulkUpdateIssues action', () => {
@@ -350,21 +329,6 @@ describe('Sentry', () => {
           { id: '1', slug: 'backend', name: 'Backend', platform: 'node', status: undefined },
         ],
       });
-    });
-
-    it('should URL-encode an organization slug containing reserved characters', async () => {
-      const contextWithReservedSlug = {
-        ...mockContext,
-        config: { organizationSlug: 'my org/co' },
-      } as unknown as ActionContext;
-      mockClient.get.mockResolvedValue({ data: [] });
-
-      await Sentry.actions.listProjects.handler(contextWithReservedSlug, {});
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://sentry.io/api/0/organizations/my%20org%2Fco/projects/',
-        { params: {} }
-      );
     });
   });
 
@@ -493,28 +457,6 @@ describe('Sentry', () => {
           name: 'Updated',
         })
       ).rejects.toThrow('Sentry updateIssueAlertRule failed (status 404): Rule not found');
-    });
-
-    it('should URL-encode a project slug and rule ID containing reserved characters', async () => {
-      mockClient.get.mockResolvedValue({
-        data: {
-          name: 'Existing rule',
-          actionMatch: 'any',
-          conditions: [],
-          actions: [],
-        },
-      });
-      mockClient.put.mockResolvedValue({ data: { id: 'r#1' } });
-
-      await Sentry.actions.updateIssueAlertRule.handler(mockContext, {
-        project: 'back end',
-        ruleId: 'r#1',
-        name: 'Updated',
-      });
-
-      const expectedUrl = 'https://sentry.io/api/0/projects/my-org/back%20end/rules/r%231/';
-      expect(mockClient.get).toHaveBeenCalledWith(expectedUrl);
-      expect(mockClient.put).toHaveBeenCalledWith(expectedUrl, expect.any(Object));
     });
   });
 

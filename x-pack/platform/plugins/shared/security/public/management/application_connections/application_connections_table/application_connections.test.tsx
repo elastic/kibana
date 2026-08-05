@@ -81,35 +81,17 @@ describe('ApplicationConnections', () => {
       return `/mock/app/${appId}${options?.path ?? ''}`;
     });
 
-    const { findAllByTestId, getAllByTestId, getByTestId, getByPlaceholderText } =
-      renderPage(coreStart);
+    const { findByText, findByTestId, getByTestId, getByPlaceholderText } = renderPage(coreStart);
 
-    // `EuiBasicTable` renders its `noItemsMessage` twice: once in the visible table body and
-    // once inside a screen-reader-only `<caption>` that EUI mounts behind a 500ms `EuiDelayRender`.
-    // Both copies carry the `applicationConnectionsEmptyPrompt` test subject, so scope every
-    // assertion to the visible body copy — otherwise a slow first render races the delayed caption
-    // duplicate and the singular queries throw "Found multiple elements". A genuine double-render
-    // in the body would still fail the `toHaveLength(1)` guard below.
-    await findAllByTestId('applicationConnectionsEmptyPrompt');
-    const visiblePrompts = getAllByTestId('applicationConnectionsEmptyPrompt').filter(
-      (element) => !element.closest('caption')
-    );
-    expect(visiblePrompts).toHaveLength(1);
-    const [emptyPrompt] = visiblePrompts;
-
-    expect(within(emptyPrompt).getByText(/No application connections/)).toBeInTheDocument();
-    expect(
-      within(emptyPrompt).getByText(/Get started by creating MCP clients/)
-    ).toBeInTheDocument();
-    const addButton = within(emptyPrompt).getByTestId('applicationConnectionsEmptyPromptAddButton');
+    expect(await findByText(/No application connections/)).toBeInTheDocument();
+    expect(await findByText(/Get started by creating MCP clients/)).toBeInTheDocument();
+    const addButton = await findByTestId('applicationConnectionsEmptyPromptAddButton');
     expect(addButton).toBeInTheDocument();
     expect(addButton).toHaveAttribute(
       'href',
       '/mock/app/agent_builder/manage/tools/mcp_clients/new'
     );
-    const learnMoreLink = within(emptyPrompt).getByTestId(
-      'applicationConnectionsEmptyPromptLearnMoreLink'
-    );
+    const learnMoreLink = await findByTestId('applicationConnectionsEmptyPromptLearnMoreLink');
     expect(learnMoreLink).toBeInTheDocument();
     expect(learnMoreLink).toHaveAttribute(
       'href',

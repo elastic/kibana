@@ -46,35 +46,10 @@ export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'regist
   ): void;
 }
 
-/**
- * Ownership and deep-link metadata for a single registered application.
- * Used by Core's dev/test-only navigation-dependency snapshot to attribute cross-plugin
- * navigation references to the plugin that owns the target application.
- *
- * @internal
- */
-export interface RegisteredAppInfo {
-  /** The registered application id. */
-  appId: string;
-  /** Opaque id of the plugin (or Core) that registered the application. */
-  owner: PluginOpaqueId;
-  /** Ids of the application's (nested) deep links that resolve to a path. */
-  deepLinkIds: string[];
-}
-
 /** @internal */
 export interface InternalApplicationStart extends ApplicationStart {
   // Internal APIs
   getComponent(): JSX.Element | null;
-
-  /**
-   * Returns ownership and deep-link metadata for every registered application, unfiltered by
-   * capabilities. Used by Core's dev/test-only navigation-dependency snapshot (see
-   * https://github.com/elastic/kibana/issues/66682).
-   *
-   * @internal
-   */
-  getRegisteredAppsInfo(): RegisteredAppInfo[];
 
   /**
    * The potential action menu set by the currently mounted app.

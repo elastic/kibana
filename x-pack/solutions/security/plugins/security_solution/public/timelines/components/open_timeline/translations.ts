@@ -33,13 +33,6 @@ export const DELETE_SELECTED = i18n.translate(
   }
 );
 
-export const DELETE_TIMELINE_MODAL_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.open.timeline.deleteTimelineModalAriaLabel',
-  {
-    defaultMessage: 'Delete Timeline',
-  }
-);
-
 export const DELETE_TIMELINE_WARNING = i18n.translate(
   'xpack.securitySolution.open.timeline.deleteWarningLabel',
   {

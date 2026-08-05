@@ -17,8 +17,6 @@ export {
   ToolOrigin,
   type ToolDefinition,
   type ToolDefinitionWithSchema,
-  type ToolConfirmationPolicyMode,
-  type ToolConfirmationPolicy,
   platformCoreTools,
   platformCoreCasesTools,
   platformSignificantEventsTools,
@@ -251,11 +249,6 @@ export {
   isUserQuestionAnsweredEvent,
   createUserQuestionAskedEvent,
   createUserQuestionAnsweredEvent,
-  type RelevantSkill,
-  type RelevantSkillsStep,
-  type RelevantSkillsStepData,
-  createRelevantSkillsStep,
-  isRelevantSkillsStep,
   type ConversationListOptions,
 } from './chat';
 export {

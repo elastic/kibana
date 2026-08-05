@@ -6,15 +6,12 @@
  */
 
 import React from 'react';
-import { useSelector } from 'react-redux-v7';
 import { Redirect } from 'react-router-dom';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
 import { MonitorsMWsCallout } from '../common/mws_callout/monitors_mws_callout';
 import { DisabledCallout } from './management/disabled_callout';
 import { useOverviewStatus } from './hooks/use_overview_status';
-import { isExternalOverviewMonitor } from '../../state/overview_status';
-import { selectOverviewPageState } from '../../state';
 import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
 
 import { useLocations } from '../../hooks';
@@ -36,11 +33,7 @@ export const MonitorManagementPage: React.FC = () => {
 
   const { error: enablementError, isEnabled, loading: enablementLoading } = useEnablement();
 
-  const { allConfigs, settled: overviewSettled } = useOverviewStatus({
-    scopeStatusByLocation: false,
-  });
-
-  const pageState = useSelector(selectOverviewPageState);
+  useOverviewStatus({ scopeStatusByLocation: false });
 
   const monitorListProps = useMonitorList();
   const { syntheticsMonitors, loading: monitorsLoading, absoluteTotal, loaded } = monitorListProps;
@@ -48,38 +41,7 @@ export const MonitorManagementPage: React.FC = () => {
   const { loading: locationsLoading } = useLocations();
   const showEmptyState = isEnabled !== undefined && syntheticsMonitors.length === 0;
 
-  // A monitor filter is active. `allConfigs` is filtered (the active filter is forwarded to
-  // the overview-status request), so an empty result under a filter doesn't prove the
-  // deployment is empty — see the same guard in `overview_page.tsx`. The date range is
-  // excluded on purpose: it scopes status, not which monitors exist.
-  const hasActiveOverviewFilter = Boolean(
-    pageState.query ||
-      pageState.tags?.length ||
-      pageState.locations?.length ||
-      pageState.monitorTypes?.length ||
-      pageState.projects?.length ||
-      pageState.schedules?.length
-  );
-
-  // Ping-only Heartbeat / Elastic Agent (and CCS remote) monitors have no saved object,
-  // so they are absent from `absoluteTotal` but surface in the overview status
-  // `allConfigs`. Don't redirect to Getting Started when the only monitors are ping-driven.
-  //
-  // `overviewSettled` is true once the status request has completed, success OR failure.
-  // A failed request must still count as settled (the reducer never flips `loaded` on
-  // error, and `error` is transient), otherwise a truly empty deployment would be stranded
-  // on the management page whenever the status request fails.
-  //
-  // We also don't redirect while a monitor filter is active: a filter that excludes the
-  // ping-only monitors would otherwise make `allConfigs` empty and wrongly onboard away
-  // from a filtered view of a ping-only deployment.
-  const hasNoMonitors =
-    absoluteTotal === 0 &&
-    overviewSettled &&
-    !hasActiveOverviewFilter &&
-    !allConfigs.some(isExternalOverviewMonitor);
-
-  if (isEnabled && !monitorsLoading && loaded && hasNoMonitors) {
+  if (isEnabled && !monitorsLoading && absoluteTotal === 0 && loaded) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;
   }
 

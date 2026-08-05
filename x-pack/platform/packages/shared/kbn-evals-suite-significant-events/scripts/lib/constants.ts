@@ -7,8 +7,8 @@
 import type { IndicesUpdateAliasesAddAction } from '@elastic/elasticsearch/lib/api/types';
 import type { Scenario } from './types';
 import {
+  DISCOVERIES_DATA_STREAM,
   DETECTIONS_DATA_STREAM,
-  EVENTS_DATA_STREAM,
   KNOWLEDGE_INDICATORS_DATA_STREAM,
 } from '../../src/data_generators/snapshot_indices';
 
@@ -41,7 +41,10 @@ export const HEALTHY_BASELINE_SCENARIO: Scenario = { id: 'healthy-baseline' };
 
 // Streams that only exist when the user runs the full discovery workflow.
 // Capture skips them silently when absent; restore skips them when not in the snapshot.
-export const SIGEVENTS_OPTIONAL_STREAMS = [EVENTS_DATA_STREAM, DETECTIONS_DATA_STREAM] as const;
+export const SIGEVENTS_OPTIONAL_STREAMS = [
+  DISCOVERIES_DATA_STREAM,
+  DETECTIONS_DATA_STREAM,
+] as const;
 
 export const SIGNIFICANT_EVENTS_DATA_STREAMS = [
   KNOWLEDGE_INDICATORS_DATA_STREAM,

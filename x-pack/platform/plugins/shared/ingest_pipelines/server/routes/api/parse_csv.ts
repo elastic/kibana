@@ -13,20 +13,12 @@ import type { FieldCopyAction } from '../../../common/types';
 import { csvToIngestPipeline } from '../../lib';
 import type { RouteDependencies } from '../../types';
 
-// This route parses a CSV that *describes* field mappings for a pipeline (not a data file), so
-// even a very large mapping only amounts to a few MB. Cap the body well below the global
-// `server.maxPayload`-vs-file-upload ceilings: authorization here is a manual ES privilege
-// check inside the handler (`authz.enabled: false`), which runs only after the body has been
-// buffered and parsed. A tight limit prevents an authenticated-but-unprivileged caller from
-// forcing large allocations before that check runs, while staying generous for any real CSV.
-export const parseCsvMaxFileBytes = 10 * 1024 * 1024; // 10MB
-
-export const parseCsvBodySchema = schema.object({
-  file: schema.string({ maxLength: parseCsvMaxFileBytes }),
-  copyAction: schema.string({ maxLength: 64 }) as Type<FieldCopyAction>,
+const bodySchema = schema.object({
+  file: schema.string(),
+  copyAction: schema.string() as Type<FieldCopyAction>,
 });
 
-type ReqBody = TypeOf<typeof parseCsvBodySchema>;
+type ReqBody = TypeOf<typeof bodySchema>;
 
 export const registerParseCsvRoute = ({ router }: RouteDependencies): void => {
   router.post<void, void, ReqBody>(
@@ -38,13 +30,8 @@ export const registerParseCsvRoute = ({ router }: RouteDependencies): void => {
           reason: 'Manually implements ES priv check to match mgmt app',
         },
       },
-      options: {
-        body: {
-          maxBytes: parseCsvMaxFileBytes,
-        },
-      },
       validate: {
-        body: parseCsvBodySchema,
+        body: bodySchema,
       },
     },
     async (contxt, req, res) => {

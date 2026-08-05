@@ -21,6 +21,7 @@ import { defaultUdtHeaders } from '../components/timeline/body/column_headers/de
 import { timelineDefaults } from '../store/defaults';
 import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data_view';
 import { PageScope } from '../../data_view_manager/constants';
+import { sourcererActions } from '../../sourcerer/store';
 import { useSecurityDefaultPatterns } from '../../data_view_manager/hooks/use_security_default_patterns';
 
 export interface UseCreateTimelineParams {
@@ -81,6 +82,14 @@ export const useCreateTimeline = ({
         fallbackPatterns: selectedPatterns,
         scope: PageScope.timeline,
       });
+
+      dispatch(
+        sourcererActions.setSelectedDataView({
+          id: PageScope.timeline,
+          selectedDataViewId: dataViewId,
+          selectedPatterns,
+        })
+      );
 
       dispatch(
         timelineActions.createTimeline({

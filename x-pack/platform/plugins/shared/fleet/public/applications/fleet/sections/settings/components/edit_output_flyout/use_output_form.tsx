@@ -980,6 +980,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
                     },
                   }
                 : {}),
+              proxy_id: proxyIdValue,
+
               client_id: kafkaClientIdInput.value || undefined,
               version: kafkaVersionInput.value,
               ...(kafkaKeyInput.value ? { key: kafkaKeyInput.value } : {}),

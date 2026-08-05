@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import type { FieldInputProps } from './field_input';
 import { FieldInput } from './field_input';
 import type {
@@ -133,18 +133,12 @@ describe('FieldInput', () => {
     expect(input).toBeInTheDocument();
   });
 
-  it('calls the onChange prop when the value changes', async () => {
+  it('calls the onChange prop when the value changes', () => {
     const props = getDefaultProps('string');
     const { getByTestId } = render(wrap(<FieldInput {...props} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${name}`);
     fireEvent.change(input, { target: { value: 'new value' } });
-
-    await waitFor(() =>
-      expect(props.onInputChange).toHaveBeenCalledWith({
-        type: 'string',
-        unsavedValue: 'new value',
-      })
-    );
+    expect(props.onInputChange).toHaveBeenCalledWith({ type: 'string', unsavedValue: 'new value' });
   });
 
   it('disables the input when isDisabled prop is true', () => {

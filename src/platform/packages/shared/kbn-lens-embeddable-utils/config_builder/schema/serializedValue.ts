@@ -7,43 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-const rangeValueSchema = z.union([z.string(), z.number()]);
+const rangeValueSchema = schema.oneOf([schema.string(), schema.number()]);
 
-const rangeKeySchema = z
-  .object({
-    type: z.literal('range_key'),
+const rangeKeySchema = schema.object(
+  {
+    type: schema.literal('range_key'),
     from: rangeValueSchema,
     to: rangeValueSchema,
-    ranges: z
-      .array(
-        z
-          .object({
-            from: rangeValueSchema,
-            to: rangeValueSchema,
-            label: z.string(),
-          })
-          .strict()
-      )
-      .max(100),
-  })
-  .strict()
-  .meta({ id: 'range_key', title: 'Range Key' });
+    ranges: schema.arrayOf(
+      schema.object({
+        from: rangeValueSchema,
+        to: rangeValueSchema,
+        label: schema.string(),
+      }),
+      { maxSize: 100 }
+    ),
+  },
+  { meta: { id: 'range_key', title: 'Range Key' } }
+);
 
-const multiFieldKeySchema = z
-  .object({
-    type: z.literal('multi_field_key'),
-    keys: z.array(z.string()).max(100),
-  })
-  .strict()
-  .meta({ id: 'multi_field_key', title: 'Multi Field Key' });
+const multiFieldKeySchema = schema.object(
+  {
+    type: schema.literal('multi_field_key'),
+    keys: schema.arrayOf(schema.string(), { maxSize: 100 }),
+  },
+  { meta: { id: 'multi_field_key', title: 'Multi Field Key' } }
+);
 
-export const serializedValueSchema = z.union([
-  z.string(),
-  z.number(),
+export const serializedValueSchema = schema.oneOf([
+  schema.string(),
+  schema.number(),
   rangeKeySchema,
   multiFieldKeySchema,
 ]);
 
-export type SerializableValueType = z.output<typeof serializedValueSchema>;
+export type SerializableValueType = TypeOf<typeof serializedValueSchema>;

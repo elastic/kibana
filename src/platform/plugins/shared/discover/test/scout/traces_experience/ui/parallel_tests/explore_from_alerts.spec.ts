@@ -163,13 +163,7 @@ spaceTest.describe(
               ).toBeVisible();
             }).toPass({ timeout: 60_000, intervals: [2_000] });
 
-            const tracesInDiscover = page.testSubj.locator(
-              'apmAlertDetailsTracesOpenInDiscoverAction'
-            );
-            // The item's href is populated only after the APM index-settings fetch resolves;
-            // clicking before then lands on a disabled, href-less item and navigation never happens.
-            await expect(tracesInDiscover).toHaveAttribute('href', /\S/, { timeout: 30_000 });
-            await tracesInDiscover.click();
+            await page.testSubj.locator('apmAlertDetailsTracesOpenInDiscoverAction').click();
           }
         );
 

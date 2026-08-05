@@ -14,7 +14,6 @@ import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import {
   DEFAULT_COLUMNS_SETTING,
-  DEFAULT_ESQL_QUERY_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
   getChartHidden,
   getTableHidden,
@@ -146,14 +145,8 @@ function getDefaultQuery({
 
   // If the last query mode used by the user was esql, or if esql is default, return the initial esql query
   const canUseEsql = services.uiSettings.get(ENABLE_ESQL) && dataView instanceof DataView;
-
-  if (canUseEsql && (queryMode === 'esql' || isEsqlDefault)) {
-    const defaultEsqlQuery = services.uiSettings.get<string>(DEFAULT_ESQL_QUERY_SETTING)?.trim();
-    // Precedence: defaultEsqlQuery space setting > default profile setting > dataview derived query
-    return {
-      esql: defaultEsqlQuery || defaultProfileEsqlQuery?.query || getInitialESQLQuery(dataView),
-    };
-  }
+  if (canUseEsql && (queryMode === 'esql' || isEsqlDefault))
+    return { esql: defaultProfileEsqlQuery?.query ?? getInitialESQLQuery(dataView) };
 
   // Lastly, fall back to classic if we can't use anything else
   return services.data.query.queryString.getDefaultQuery();

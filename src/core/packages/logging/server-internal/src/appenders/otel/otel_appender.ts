@@ -19,12 +19,10 @@ import type { DisposableAppender, Layout, LogLevel, LogRecord } from '@kbn/loggi
 import {
   ROOT_CONTEXT,
   TraceFlags,
-  metrics,
   trace,
   type Context,
   type Attributes,
   type AttributeValue,
-  type MeterProvider,
 } from '@opentelemetry/api';
 import type { AnyValueMap } from '@opentelemetry/api-logs';
 import { SeverityNumber, type Logger } from '@opentelemetry/api-logs';
@@ -398,8 +396,7 @@ export class OtelAppender implements DisposableAppender {
   private readonly promotedAttributes: Attributes;
 
   constructor(config: OtelAppenderConfig) {
-    const meterProvider = metrics.getMeterProvider();
-    const exporter = createExporter(config, meterProvider);
+    const exporter = createExporter(config);
     // Layer the resource from three sources (each overriding the previous):
     //   1. Auto-detected: host, OS, process, env-var OTel attributes
     //   2. Derived: service.name / service.version / deployment.environment from the
@@ -460,9 +457,8 @@ export class OtelAppender implements DisposableAppender {
     this.promotedAttributes = promoted;
 
     this.loggerProvider = new LoggerProvider({
-      processors: [new BatchLogRecordProcessor({ exporter, selfObsMeterProvider: meterProvider })],
+      processors: [new BatchLogRecordProcessor({ exporter })],
       resource,
-      meterProvider,
     });
     // The scope name 'kibana' identifies this instrumentation library.
     // Individual logger contexts are passed as the 'log.logger' attribute.
@@ -534,8 +530,7 @@ const omitDeepNilValues = (obj: Ecs) => {
 };
 
 const createExporter = (
-  config: OtelAppenderConfig,
-  selfObsMeterProvider: MeterProvider
+  config: OtelAppenderConfig
 ): OTLPLogExporterHTTP | OTLPLogExporterGRPC | OTLPLogExporterPROTO => {
   const tls = resolveTlsMaterial(config.ssl);
 
@@ -547,7 +542,6 @@ const createExporter = (
       return new OTLPLogExporter({
         url: config.url,
         headers: config.headers ?? {},
-        selfObsMeterProvider,
         ...(tls ? { httpAgentOptions: buildHttpsAgentTlsOptions(tls) } : {}),
       });
     }
@@ -558,7 +552,6 @@ const createExporter = (
       return new OTLPLogExporter({
         url: config.url,
         headers: config.headers ?? {},
-        selfObsMeterProvider,
         ...(tls ? { httpAgentOptions: buildHttpsAgentTlsOptions(tls) } : {}),
       });
     }
@@ -576,7 +569,6 @@ const createExporter = (
       return new OTLPLogExporter({
         url: config.url,
         metadata,
-        selfObsMeterProvider,
         ...(tls
           ? {
               // Using createFromSecureContext instead of createSsl because createSsl does not support allowPartialTrustChain.

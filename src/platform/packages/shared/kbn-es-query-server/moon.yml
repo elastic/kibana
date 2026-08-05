@@ -17,7 +17,7 @@ project:
   owner: '@elastic/kibana-data-discovery'
   sourceRoot: src/platform/packages/shared/kbn-es-query-server
 dependsOn:
-  - '@kbn/zod'
+  - '@kbn/config-schema'
   - '@kbn/utility-types'
   - '@kbn/es-query-constants'
 tags:

@@ -40,6 +40,7 @@ import type { ExperimentalFeatures } from '../../../common/experimental_features
 import type { AnalyzerState } from '../../resolver/types';
 import { resolverMiddlewareFactory } from '../../resolver/store/middleware';
 import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory';
+import { sourcererActions } from '../../sourcerer/store';
 import { createMiddlewares } from './middlewares';
 import { addNewTimeline } from '../../timelines/store/helpers';
 import { initialNotesState } from '../../notes/store/notes.slice';
@@ -147,7 +148,18 @@ const timelineActionsWithNonserializablePayloads = [
 ];
 
 const actionSanitizer = (action: AnyAction) => {
-  if (timelineActionsWithNonserializablePayloads.includes(action.type)) {
+  if (action.type === sourcererActions.setDataView.type) {
+    return {
+      ...action,
+      payload: {
+        ...action.payload,
+        dataView: 'dataView',
+        browserFields: 'browserFields',
+        indexFields: 'indexFields',
+        fields: 'fields',
+      },
+    };
+  } else if (timelineActionsWithNonserializablePayloads.includes(action.type)) {
     const { type, payload } = action;
     if (type === timelineActions.addTimeline.type || type === timelineActions.updateTimeline.type) {
       return {

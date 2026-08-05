@@ -258,7 +258,6 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     ]);
     const experimentalFeatures: ExperimentalFeatures = {
       skills: true,
-      relevantSkills: experimentalEnabled,
       subagents: experimentalEnabled,
       todos: experimentalEnabled,
       datasets: experimentalEnabled,

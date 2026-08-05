@@ -6,8 +6,9 @@
  */
 
 import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
-import { BREADCRUMBS, INFERENCE_PAGES } from '../fixtures/constants';
+import { BREADCRUMBS } from '../fixtures/constants';
 import { eisEndpointsMockData } from '../fixtures/mock_data/eis_endpoints';
 import { externalInferenceEndpointsMockData } from '../fixtures/mock_data/external_inference_endpoints';
 import { mockInferenceEndpoints, unmockInferenceEndpoints } from '../fixtures/mocks';
@@ -29,47 +30,44 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'EIS Models Page: displays correct navigation in search solution',
+      'EIS Models Page: displays correct breadcrumbs in search solution navigation',
       async ({ page, pageObjects }) => {
         await mockInferenceEndpoints(page, eisEndpointsMockData);
         await pageObjects.eisModels.goto();
 
-        await pageObjects.navigation.expectInferencePage({
-          pageHeader: pageObjects.eisModels.pageHeader,
-          urlPath: INFERENCE_PAGES.eisModels.urlPath,
-          classicBreadcrumbs: [...BREADCRUMBS.stateful.searchSolution, 'Elastic Inference'],
-          isNextChrome: await pageObjects.chrome.isNextChrome(),
-        });
+        await expect(pageObjects.navigation.breadcrumbsContainer).toBeVisible();
+        await pageObjects.navigation.expectBreadcrumbTexts([
+          ...BREADCRUMBS.stateful.searchSolution,
+          'Elastic Inference',
+        ]);
       }
     );
 
     spaceTest(
-      'External Inference Page: displays correct navigation in search solution',
+      'External Inference Page: displays correct breadcrumbs in search solution navigation',
       async ({ page, pageObjects }) => {
         await mockInferenceEndpoints(page, externalInferenceEndpointsMockData);
         await pageObjects.externalInference.goto();
 
-        await pageObjects.navigation.expectInferencePage({
-          pageHeader: pageObjects.externalInference.pageHeader,
-          urlPath: INFERENCE_PAGES.externalInference.urlPath,
-          classicBreadcrumbs: [...BREADCRUMBS.stateful.searchSolution, 'External Inference'],
-          isNextChrome: await pageObjects.chrome.isNextChrome(),
-        });
+        await expect(pageObjects.navigation.breadcrumbsContainer).toBeVisible();
+        await pageObjects.navigation.expectBreadcrumbTexts([
+          ...BREADCRUMBS.stateful.searchSolution,
+          'External Inference',
+        ]);
       }
     );
 
     spaceTest(
-      'Feature Settings Page: displays correct navigation in search solution',
+      'Feature Settings Page: displays correct breadcrumbs in search solution navigation',
       async ({ page, pageObjects }) => {
         await mockInferenceEndpoints(page, eisEndpointsMockData);
         await pageObjects.featureSettings.goto();
 
-        await pageObjects.navigation.expectInferencePage({
-          pageHeader: pageObjects.featureSettings.pageHeader,
-          urlPath: INFERENCE_PAGES.featureSettings.urlPath,
-          classicBreadcrumbs: [...BREADCRUMBS.stateful.searchSolution, 'Feature Settings'],
-          isNextChrome: await pageObjects.chrome.isNextChrome(),
-        });
+        await expect(pageObjects.navigation.breadcrumbsContainer).toBeVisible();
+        await pageObjects.navigation.expectBreadcrumbTexts([
+          ...BREADCRUMBS.stateful.searchSolution,
+          'Feature Settings',
+        ]);
       }
     );
   }

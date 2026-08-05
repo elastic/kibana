@@ -101,11 +101,7 @@ export interface AlertsFilterTimeframe extends SavedObjectAttributes {
   };
 }
 
-// Uses a permissive `unknown` index rather than `extends SavedObjectAttributes`: `query.filters`
-// holds es-query Filter[], which is not a SavedObjectAttribute primitive (tsgo enforces
-// index-signature conformance strictly), while keeping the type indexable for SO storage.
-export interface AlertsFilter {
-  [key: string]: unknown;
+export interface AlertsFilter extends SavedObjectAttributes {
   query?: {
     kql: string;
     filters: Filter[];

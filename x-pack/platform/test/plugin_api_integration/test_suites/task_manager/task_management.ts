@@ -828,11 +828,10 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
 
-        expect(
-          response.hits?.hits?.filter((hit: any) => {
-            return hit._source.api_key_to_invalidate?.apiKeyId === result.userScope?.apiKeyId;
-          }).length
-        ).to.eql(1);
+        expect(response.hits.hits.length).to.eql(1);
+        expect((response.hits?.hits?.[0]._source as any).api_key_to_invalidate?.apiKeyId).to.eql(
+          result.userScope?.apiKeyId
+        );
       });
 
       // wait for the api_key_to_invalidate saved object to be older than the invalidation removalDelay (1s)

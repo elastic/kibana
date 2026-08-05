@@ -13,7 +13,7 @@ import { addInternalBasePath } from '..';
 import { enrichPoliciesActions } from '../../../lib/enrich_policies';
 
 const paramsSchema = schema.object({
-  name: schema.string({ maxLength: 1000 }),
+  name: schema.string(),
 });
 
 export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDependencies) {

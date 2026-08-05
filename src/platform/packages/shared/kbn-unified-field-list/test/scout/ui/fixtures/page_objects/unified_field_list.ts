@@ -89,18 +89,12 @@ export class UnifiedFieldList {
     });
   }
 
-  private async waitUntilSidebarIsVisible(): Promise<void> {
-    await this.page.testSubj
-      .locator('fieldListGroupedAvailableFields')
-      .waitFor({ state: 'visible' });
-  }
-
   async searchField(name: string): Promise<void> {
-    await this.waitUntilSidebarIsVisible();
+    await this.waitUntilSidebarHasLoaded();
     const searchInput = this.page.testSubj.locator('fieldListFiltersFieldSearch');
     await searchInput.fill(name);
     await expect(searchInput).toHaveValue(name);
-    await this.waitUntilSidebarIsVisible();
+    await this.waitUntilSidebarHasLoaded();
   }
 
   async getAvailableFieldCount(): Promise<number> {
@@ -211,16 +205,7 @@ export class UnifiedFieldList {
    * Click a field list item to open details
    */
   async clickFieldListItem(field: string): Promise<void> {
-    await this.getAvailableField(field).click();
-  }
-
-  getFieldDescription(field: string) {
-    return this.page.testSubj.locator(`fieldDescription-${field}`);
-  }
-
-  async closeFieldPopover(): Promise<void> {
-    await this.page.keyboard.press('Escape');
-    await this.page.locator('[data-popover-open="true"]').waitFor({ state: 'hidden' });
+    await this.page.testSubj.click(`field-${field}`);
   }
 
   async openFieldEditor(field: string): Promise<void> {

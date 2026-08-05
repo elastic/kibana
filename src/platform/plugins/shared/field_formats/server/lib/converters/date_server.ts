@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { memoize, noop } from 'lodash';
 import moment from 'moment-timezone';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { NULL_LABEL } from '@kbn/field-formats-common';
 import type { FieldFormatsGetConfigFn } from '../../../common';
 import { FieldFormat, FIELD_FORMAT_IDS } from '../../../common';
 import type {
@@ -39,7 +38,7 @@ export class DateFormat extends FieldFormat {
 
     this.memoizedConverter = memoize((val: string | number) => {
       if (val == null) {
-        return NULL_LABEL;
+        return '-';
       }
 
       /* On the server, importing moment returns a new instance. Unlike on

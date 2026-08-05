@@ -18,8 +18,7 @@ export abstract class TransformGenerator {
   constructor(
     protected spaceId: string,
     protected dataViewService: DataViewsService,
-    protected isServerless: boolean = false,
-    protected isCpsEnabled: boolean = false
+    protected isServerless: boolean = false
   ) {}
 
   public abstract getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest>;

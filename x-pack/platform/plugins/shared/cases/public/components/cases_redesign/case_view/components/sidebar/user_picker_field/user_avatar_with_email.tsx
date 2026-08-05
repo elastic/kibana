@@ -8,11 +8,12 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { useCaseViewNavigation } from '../../../../../../common/navigation';
 import * as caseViewI18n from '../../../../../case_view/translations';
 import * as redesignI18n from '../../../../translations';
-import { CaseUserAvatar } from '../../../../../user_profiles/user_avatar';
+import { SmallUserAvatar } from '../../../../../user_profiles/small_user_avatar';
+import { UserToolTip } from '../../../../../user_profiles/user_tooltip';
 import type { UserInfoWithAvatar } from '../../../../../user_profiles/types';
 
 export interface UserAvatarWithEmailProps {
@@ -62,20 +63,26 @@ export const UserAvatarWithEmail: React.FC<UserAvatarWithEmailProps> = ({
   );
 
   if (mailtoHref == null) {
-    return <CaseUserAvatar size="s" userInfo={userInfo} />;
+    return (
+      <UserToolTip userInfo={userInfo}>
+        <SmallUserAvatar userInfo={userInfo} />
+      </UserToolTip>
+    );
   }
 
   const clickToSendEmailLabel = redesignI18n.CLICK_TO_SEND_EMAIL(email ?? '');
 
   return (
-    <a
-      href={mailtoHref}
-      css={avatarLinkStyles}
-      data-test-subj="user-picker-field-email-avatar-link"
-      aria-label={clickToSendEmailLabel}
-    >
-      <CaseUserAvatar size="s" userInfo={userInfo} />
-    </a>
+    <EuiToolTip content={clickToSendEmailLabel} disableScreenReaderOutput display="inlineBlock">
+      <a
+        href={mailtoHref}
+        css={avatarLinkStyles}
+        data-test-subj="user-picker-field-email-avatar-link"
+        aria-label={clickToSendEmailLabel}
+      >
+        <SmallUserAvatar userInfo={userInfo} />
+      </a>
+    </EuiToolTip>
   );
 };
 

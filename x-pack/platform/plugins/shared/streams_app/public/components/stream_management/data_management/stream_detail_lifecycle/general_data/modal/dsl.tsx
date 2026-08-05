@@ -96,10 +96,6 @@ export function DslField({ initialValue, isDisabled, setLifecycle, setSaveButton
         isInvalid={invalidRetention}
         append={
           <EuiPopover
-            aria-label={i18n.translate(
-              'xpack.streams.streamDetailLifecycle.retentionUnitOptionsAriaLabel',
-              { defaultMessage: 'Retention time unit options' }
-            )}
             isOpen={showUnitMenu}
             panelPaddingSize="none"
             closePopover={closeUnitMenu}

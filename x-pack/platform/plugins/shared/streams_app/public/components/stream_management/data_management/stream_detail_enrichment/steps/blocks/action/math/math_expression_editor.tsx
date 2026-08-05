@@ -261,9 +261,6 @@ const ErrorPopover: React.FC<ErrorPopoverProps> = ({ errors }) => {
   return (
     <EuiPopover
       ownFocus={false}
-      aria-label={i18n.translate('xpack.streams.math.expressionErrorsAriaLabel', {
-        defaultMessage: 'Expression errors',
-      })}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
       button={

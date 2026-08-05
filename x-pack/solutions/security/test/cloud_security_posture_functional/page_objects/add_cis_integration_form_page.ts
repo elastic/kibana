@@ -173,8 +173,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'integrations',
-      'detail/cloud_security_posture/add-integration/cspm',
+      'fleet', // Defined in Security Solution plugin
+      'integrations/cloud_security_posture/add-integration/cspm',
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -194,8 +194,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'integrations',
-      `detail/cloud_security_posture-${packageVersion}/add-integration`,
+      'fleet',
+      `integrations/cloud_security_posture-${packageVersion}/add-integration`,
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -215,8 +215,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'integrations',
-      `detail/cloud_security_posture-${packageVersion}/add-integration/cspm`,
+      'fleet',
+      `integrations/cloud_security_posture-${packageVersion}/add-integration/cspm`,
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -233,8 +233,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'integrations',
-      'detail/cloud_security_posture/add-integration/vuln_mgmt',
+      'fleet', // Defined in Security Solution plugin
+      'integrations/cloud_security_posture/add-integration/vuln_mgmt',
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -262,8 +262,8 @@ export function AddCisIntegrationFormPageProvider({
         };
 
     await PageObjects.common.navigateToUrl(
-      'integrations',
-      'detail/cloud_security_posture/add-integration/kspm',
+      'fleet', // Defined in Security Solution plugin
+      'integrations/cloud_security_posture/add-integration/kspm',
       options
     );
     await PageObjects.header.waitUntilLoadingHasFinished();

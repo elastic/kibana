@@ -7,11 +7,6 @@
 
 import { EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
 import type { AppHeaderMenu } from '@kbn/app-header';
-import {
-  SIGNIFICANT_EVENTS_APP_ID,
-  SIGNIFICANT_EVENTS_APP_LOCATOR_ID,
-} from '@kbn/deeplinks-observability';
-import type { SignificantEventsAppLocatorParams } from '@kbn/significant-events-app-plugin/common';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
@@ -20,6 +15,7 @@ import { isEmpty } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../streams_app_page_template';
@@ -31,7 +27,6 @@ import { StreamsTreeTable } from './tree_table';
 import { LegacyLogsDeprecationCallout } from './legacy_logs_deprecation_callout';
 import { CreateQueryStreamFlyoutContent } from '../query_streams/create_query_stream_flyout';
 import { getFormattedError } from '../../util/errors';
-import { useSignificantEventsApp } from '../../hooks/use_significant_events_app';
 
 export function StreamListView() {
   const context = useKibana();
@@ -39,13 +34,13 @@ export function StreamListView() {
     dependencies: {
       start: {
         streams: { streamsRepositoryClient, getClassicStatus, getWiredStatus },
-        share,
       },
     },
     core,
   } = context;
   const streamsDocsLink = core.docLinks.links.observability.logsStreams;
   const { onPageReady } = usePerformanceContext();
+  const router = useStreamsAppRouter();
 
   const { timeState } = useTimefilter();
   const streamsListFetch = useStreamsAppFetch(
@@ -62,9 +57,8 @@ export function StreamListView() {
 
   const {
     ui: { manage: canManageStreamsKibana },
-    features: { queryStreams },
+    features: { significantEvents, queryStreams },
   } = useStreamsPrivileges();
-  const { isAvailable: isSignificantEventsAvailable } = useSignificantEventsApp();
 
   const [canManageClassicElasticsearch, setCanManageClassicElasticsearch] =
     useState<boolean>(false);
@@ -157,7 +151,7 @@ export function StreamListView() {
     { defaultMessage: 'Create classic stream' }
   );
   const significantEventsLabel = i18n.translate(
-    'xpack.streams.streamsListView.sigEventsButtonLabel',
+    'xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel',
     { defaultMessage: 'Significant Events' }
   );
   const createLabel = i18n.translate('xpack.streams.streamsListView.createButtonLabel', {
@@ -172,13 +166,10 @@ export function StreamListView() {
     { defaultMessage: 'Classic stream' }
   );
 
-  const showSignificantEvents = isSignificantEventsAvailable;
+  const showSignificantEventsDiscovery = Boolean(significantEvents?.available);
   const showQueryStreams = Boolean(queryStreams?.enabled);
   const canCreateClassicStream = canManageStreamsKibana && canManageClassicElasticsearch;
-  const significantEventsHref =
-    share.url.locators
-      .get<SignificantEventsAppLocatorParams>(SIGNIFICANT_EVENTS_APP_LOCATOR_ID)
-      ?.getRedirectUrl({}) ?? core.application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID);
+  const significantEventsDiscoveryHref = router.link('/_discovery');
 
   const menu = useMemo<AppHeaderMenu>(() => {
     const items: NonNullable<AppHeaderMenu['items']> = [
@@ -193,14 +184,14 @@ export function StreamListView() {
       },
     ];
 
-    if (showSignificantEvents) {
+    if (showSignificantEventsDiscovery) {
       items.push({
-        id: 'significantEvents',
+        id: 'significantEventsDiscovery',
         order: 2,
         label: significantEventsLabel,
         iconType: 'significantEvents',
-        href: significantEventsHref,
-        testId: 'streamsSignificantEventsButton',
+        href: significantEventsDiscoveryHref,
+        testId: 'streamsSignificantEventsDiscoveryButton',
       });
     }
 
@@ -252,8 +243,8 @@ export function StreamListView() {
     queryStreamMenuItemLabel,
     settingsLabel,
     showQueryStreams,
-    showSignificantEvents,
-    significantEventsHref,
+    showSignificantEventsDiscovery,
+    significantEventsDiscoveryHref,
     significantEventsLabel,
   ]);
 

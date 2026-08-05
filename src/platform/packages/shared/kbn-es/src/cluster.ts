@@ -398,10 +398,6 @@ export class Cluster {
       ['search.check_ccs_compatibility', 'true'],
     ]);
 
-    if (options.port) {
-      esArgs.set('http.port', String(options.port));
-    }
-
     // options.esArgs overrides the default esArg values
     const _esArgs = options.esArgs
       ? Array.isArray(options.esArgs)

@@ -8,7 +8,7 @@
  */
 
 export const WorkflowsPageName = {
-  list: 'list',
+  workflows: 'workflows',
   library: 'library',
   executions: 'executions',
 } as const;
