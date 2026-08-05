@@ -15,7 +15,7 @@ import {
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentConfigurationProperties, AgentProperties } from './storage';
 import type { PersistedAgentDefinition } from '../types';
-import { normalizeAccessControl } from '../../access_control';
+import { isAgentOwner, normalizeAccessControl } from '../../access_control';
 
 export type Document = Pick<GetResponse<AgentProperties>, '_id' | '_source'>;
 
@@ -129,7 +129,7 @@ export const updateRequestToEs = ({
     ...restCurrentProps
   } = currentProps;
 
-  return {
+  const updated: AgentProperties = {
     ...restCurrentProps,
     ...restUpdate,
     id: agentId,
@@ -143,6 +143,20 @@ export const updateRequestToEs = ({
     ...(user && { updated_by_id: user.id, updated_by_name: user.username }),
     updated_at: updateDate.toISOString(),
   };
+
+  if (
+    currentProps.created_by_id === undefined &&
+    currentProps.created_by_name !== undefined &&
+    user?.id &&
+    isAgentOwner({
+      owner: { username: currentProps.created_by_name },
+      currentUser: user,
+    })
+  ) {
+    updated.created_by_id = user.id;
+  }
+
+  return updated;
 };
 
 export const accessControlUpdateToEs = ({

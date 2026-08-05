@@ -29,7 +29,7 @@ export interface SignificantEventsAppStartDependencies {
   data: DataPublicPluginStart;
   licensing: LicensingPluginStart;
   share: SharePluginStart;
-  significant_events: SignificantEventsPublicPluginStart;
+  significantEvents: SignificantEventsPublicPluginStart;
   streams: StreamsPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
