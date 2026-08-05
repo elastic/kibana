@@ -83,7 +83,14 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
           const strictRequest = {
             factoryQueryType: request.factoryQueryType,
             sort: request.sort,
-            ccsEnabled,
+            // A fanned-out read does not also search CCS remotes, matching `routes/policy/service.ts`
+            // and `services/metadata/endpoint_metadata_service.ts`: the two topologies are not meant
+            // to be enabled together, and a `*:` remote expression alongside `project_routing` is not
+            // a shape Elasticsearch has been verified to accept. Resolved here rather than in each
+            // factory's DSL builder so both of them inherit it from the predicate that also picks the
+            // client. Both currently resolve to Endpoint indices, so `cpsRead` implies they fan out —
+            // the same assumption `cancel` below already rests on.
+            ccsEnabled: ccsEnabled && !cpsRead,
             ...(spaceId ? { spaceId } : {}),
             ...('alertIds' in request ? { alertIds: request.alertIds } : {}),
             ...('agentId' in request ? { agentId: request.agentId } : {}),

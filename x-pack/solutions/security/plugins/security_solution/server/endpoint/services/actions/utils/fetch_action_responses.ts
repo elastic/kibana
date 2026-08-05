@@ -102,13 +102,16 @@ export const fetchEndpointActionResponses = async <
   Array<LogsEndpointActionResponse<TOutputContent, TResponseMeta>>
 > => {
   const ccsEnabled = await endpointService.isCcsEnabled();
-  const readEsClient = endpointService.isCpsRead(request)
-    ? endpointService.getReadEsClient(request)
-    : esClient;
+  const cpsRead = endpointService.isCpsRead(request);
+  const readEsClient = cpsRead ? endpointService.getReadEsClient(request) : esClient;
   const searchResponse = await readEsClient
     .search<LogsEndpointActionResponse<TOutputContent, TResponseMeta>>(
       {
-        index: prefixIndexPatternsWithCcs(ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN, ccsEnabled),
+        // CCS is suppressed once this read fans out, for the reason given in the search strategy
+        index: prefixIndexPatternsWithCcs(
+          ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+          ccsEnabled && !cpsRead
+        ),
         size: ACTIONS_SEARCH_PAGE_SIZE,
         query: buildSearchQuery(actionIds, agentIds),
       },

@@ -28,7 +28,10 @@ describe('endpointSearchStrategyProvider', () => {
 
   const buildProvider = (
     authzOverrides: Partial<EndpointAuthz> = {},
-    { cpsEnabled = false }: { cpsEnabled?: boolean } = {}
+    {
+      cpsEnabled = false,
+      ccsEnabled = false,
+    }: { cpsEnabled?: boolean; ccsEnabled?: boolean } = {}
   ) => {
     const searchResponse = of({ rawResponse: { hits: { total: 0, hits: [] } } });
     const search = jest.fn().mockReturnValue(searchResponse);
@@ -39,7 +42,7 @@ describe('endpointSearchStrategyProvider', () => {
     const getEndpointAuthz = jest
       .fn()
       .mockResolvedValue(getEndpointAuthzInitialStateMock(authzOverrides));
-    const isCcsEnabled = jest.fn().mockResolvedValue(false);
+    const isCcsEnabled = jest.fn().mockResolvedValue(ccsEnabled);
     const endpointContext = {
       service: {
         getEndpointAuthz,
@@ -169,6 +172,32 @@ describe('endpointSearchStrategyProvider', () => {
       expect(search.mock.calls[0][0].params.query.bool).not.toHaveProperty('filter');
     });
 
+    it('does not add the CCS remote patterns to a query that fans out', async () => {
+      const { provider, scopedSearch } = buildProvider(
+        { canAccessEndpointActionsLogManagement: true },
+        { cpsEnabled: true, ccsEnabled: true }
+      );
+
+      await lastValueFrom(provider.search(request, options, deps));
+
+      expect(scopedSearch.mock.calls[0][0].params.index).toEqual(
+        expect.not.arrayContaining([expect.stringMatching(/^\*:/)])
+      );
+    });
+
+    it('still adds the CCS remote patterns when the flag is off', async () => {
+      const { provider, search } = buildProvider(
+        { canAccessEndpointActionsLogManagement: true },
+        { ccsEnabled: true }
+      );
+
+      await lastValueFrom(provider.search(request, options, deps));
+
+      expect(search.mock.calls[0][0].params.index).toEqual(
+        expect.arrayContaining([expect.stringMatching(/^\*:/)])
+      );
+    });
+
     it('keeps a query that reads a Fleet-owned index on the internal user', async () => {
       jest
         .spyOn(endpointFactory[ResponseActionsQueries.actions], 'buildDsl')
@@ -226,6 +255,17 @@ describe('endpointSearchStrategyProvider', () => {
           { request: deps.request }
         );
         expect(scopedSearch).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not add the CCS remote patterns to the results query either', async () => {
+        const { provider, scopedSearch } = buildProvider(
+          { canAccessEndpointActionsLogManagement: true },
+          { cpsEnabled: true, ccsEnabled: true }
+        );
+
+        await lastValueFrom(provider.search(resultsRequest, options, deps));
+
+        expect(scopedSearch.mock.calls[0][0].params.index).not.toContain('*:');
       });
 
       it('returns no results, rather than erroring, when the action is not visible in the active space', async () => {
