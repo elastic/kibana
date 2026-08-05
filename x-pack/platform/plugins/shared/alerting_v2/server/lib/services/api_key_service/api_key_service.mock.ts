@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApiKeyServiceContract } from './api_key_service';
+import type { ApiKeyInvalidationResult, ApiKeyServiceContract } from './api_key_service';
 
 export const createMockApiKeyService = (): jest.Mocked<ApiKeyServiceContract> => ({
   create: jest.fn().mockResolvedValue({
@@ -13,5 +13,10 @@ export const createMockApiKeyService = (): jest.Mocked<ApiKeyServiceContract> =>
     owner: 'test-user',
     createdByUser: false,
   }),
-  markApiKeysForInvalidation: jest.fn().mockResolvedValue(undefined),
+  // Results are index-aligned with the requested keys, so the default has to
+  // depend on the argument rather than being a fixed value.
+  markApiKeysForInvalidation: jest.fn(
+    async (apiKeys: string[]): Promise<ApiKeyInvalidationResult[]> =>
+      apiKeys.map(() => ({ success: true }))
+  ),
 });
