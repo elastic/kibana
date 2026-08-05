@@ -50,7 +50,7 @@ export const ElasticInferenceServiceModelsHeader = ({
                   'xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button',
                   { defaultMessage: 'View Cloud usage' }
                 ),
-                iconType: 'inspect' as const,
+                iconType: 'external' as const,
                 href: billingUrl,
                 target: '_blank',
                 testId:
