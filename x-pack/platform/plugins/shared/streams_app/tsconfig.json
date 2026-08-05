@@ -126,5 +126,6 @@
     "@kbn/app-header",
     "@kbn/significant-events-plugin",
     "@kbn/server-route-repository",
+    "@kbn/ui-callout"
   ]
 }

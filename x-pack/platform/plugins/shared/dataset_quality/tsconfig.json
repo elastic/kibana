@@ -74,7 +74,8 @@
     "@kbn/test-jest-helpers",
     "@kbn/streams-schema",
     "@kbn/streams-plugin",
-    "@kbn/licensing-plugin"
+    "@kbn/licensing-plugin",
+    "@kbn/ui-callout"
   ],
   "exclude": [
     "target/**/*"

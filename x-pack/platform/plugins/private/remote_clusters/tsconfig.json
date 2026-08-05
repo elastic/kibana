@@ -36,7 +36,8 @@
     "@kbn/expect",
     "@kbn/shared-ux-router",
     "@kbn/react-kibana-context-render",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/ui-callout"
   ],
   "exclude": [
     "target/**/*",
