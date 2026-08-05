@@ -636,26 +636,30 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
   if (layer.breakdown_by) {
     const columnName = getAccessorName('breakdown');
     const breakdownApiColumn = layer.breakdown_by as LensApiBucketOperations;
-    const breakdownColumn = fromBucketLensApiToLensState(breakdownApiColumn, [
-      ...newPrimaryColumns.map((col) => ({ column: col, id: getAccessorName('metric') })),
-      ...(newSecondaryColumns ?? []).map((col) => ({
-        column: col,
-        id: getAccessorName('secondary'),
-      })),
-    ]);
-    addLayerColumn(defaultLayer, columnName, breakdownColumn, true);
+
+    // A metric `rank_by.metric_index` resolves against this list, so the metric ids must match the
+    // ids of the metric columns in the layer the breakdown belongs to (main vs. trendline). Each
+    // call returns a fresh column so the two layers never share one mutable object.
+    const buildBreakdownColumn = (metricId: string, secondaryId: string) =>
+      fromBucketLensApiToLensState(breakdownApiColumn, [
+        ...newPrimaryColumns.map((column) => ({ column, id: metricId })),
+        ...(newSecondaryColumns ?? []).map((column) => ({ column, id: secondaryId })),
+      ]);
+
+    addLayerColumn(
+      defaultLayer,
+      columnName,
+      buildBreakdownColumn(getAccessorName('metric'), getAccessorName('secondary')),
+      true
+    );
 
     if (trendLineLayer) {
-      // Rebuild the breakdown for the trendline layer so a metric `rank_by` resolves to the
-      // trendline layer's own metric column ids, and the two layers never share one mutable column.
-      const trendlineBreakdownColumn = fromBucketLensApiToLensState(breakdownApiColumn, [
-        ...newPrimaryColumns.map((col) => ({ column: col, id: trendlineMetricColumnId })),
-        ...(newSecondaryColumns ?? []).map((col) => ({
-          column: col,
-          id: trendlineSecondaryColumnId,
-        })),
-      ]);
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, trendlineBreakdownColumn, true);
+      addLayerColumn(
+        trendLineLayer,
+        `${columnName}_trendline`,
+        buildBreakdownColumn(trendlineMetricColumnId, trendlineSecondaryColumnId),
+        true
+      );
     }
   }
 
