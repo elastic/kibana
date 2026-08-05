@@ -80,6 +80,12 @@ export const useOpenSuperTimeline = () => {
 
   const openSuperTimeline = useCallback(
     async (savedObjectIds: string[]) => {
+      if (!dataView?.id) {
+        // Data view not yet ready. The isLoading flag guards batch-action callers,
+        // but URL-restore paths call this directly — bail silently.
+        return;
+      }
+
       if (savedObjectIds.length > MAX_SUPER_TIMELINE_COUNT) {
         notifications.toasts.addWarning({
           title: i18nStrings.CAP_EXCEEDED_TITLE,
