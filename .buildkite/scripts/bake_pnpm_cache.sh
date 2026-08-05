@@ -44,8 +44,12 @@ export npm_config_store_dir="$STORE_DIR"
 CI=true pnpm kbn bootstrap --no-prebuilt
 
 # Stage node_modules next to the store so the image bakes the matching pair.
-rm -rf "$CACHE_DIR/node_modules"
-mv "$KIBANA_DIR/node_modules" "$CACHE_DIR/node_modules"
+# When the checkout already IS the cache dir (the image build checks Kibana out
+# into ~/.kibana), bootstrap installed it there already — nothing to move.
+if [[ "$KIBANA_DIR" != "$CACHE_DIR" ]]; then
+  rm -rf "$CACHE_DIR/node_modules"
+  mv "$KIBANA_DIR/node_modules" "$CACHE_DIR/node_modules"
+fi
 
 echo "--- pnpm cache ready"
 du -sh "$CACHE_DIR/pnpm-store" "$CACHE_DIR/node_modules" 2>/dev/null || true
