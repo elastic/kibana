@@ -47,7 +47,15 @@ export function getDataUrlFromReactComponent(
       }
       return fallbackUrl;
     }
-    if (/fill="none"/i.test(htmlString)) {
+    // A glyph whose root is `fill="none"` paints nothing as a data URL, so drop the
+    // `none`s and let everything inherit `currentColor` from the root.
+    //
+    // Skipped when the root already carries a real fill: there the children's
+    // `fill="none"` is deliberate (a stroked shape that becomes a blob if filled),
+    // and adding a second root `fill` is a fatal XML parse error in
+    // `image/svg+xml` — the browser drops the icon with no warning.
+    const rootHasPaintableFill = /<svg[^>]*\sfill="(?!none)[^"]+"/i.test(htmlString);
+    if (!rootHasPaintableFill && /fill="none"/i.test(htmlString)) {
       htmlString = htmlString
         .replaceAll(/fill="none"/gi, '')
         .replace(/<svg([^>]*?)>/, '<svg$1 fill="currentColor">');

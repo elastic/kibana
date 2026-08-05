@@ -11,6 +11,7 @@ import { EuiText } from '@elastic/eui';
 import type { Decorator } from '@storybook/react';
 import React from 'react';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
+import { connectorsSpecs } from '@kbn/connector-specs';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -30,58 +31,31 @@ interface MockConnectorsResponse {
   };
 }
 
-// Connectors whose icons ship in @kbn/connector-specs, so the story resolves the real
-// ones. A representative slice rather than all 58 — the point is that resolution works.
-const SPEC_CONNECTOR_TYPES: MockConnectorTypeInfo[] = [
-  { actionTypeId: '.github', displayName: 'GitHub' },
-  { actionTypeId: '.datadog', displayName: 'Datadog' },
-  { actionTypeId: '.jenkins', displayName: 'Jenkins' },
-  { actionTypeId: '.sentry', displayName: 'Sentry' },
-  { actionTypeId: '.workday', displayName: 'Workday' },
-  { actionTypeId: '.kubernetes', displayName: 'Kubernetes' },
-  { actionTypeId: '.posthog', displayName: 'PostHog' },
-  { actionTypeId: '.new_relic', displayName: 'New Relic' },
-  { actionTypeId: '.zendesk', displayName: 'Zendesk' },
-  { actionTypeId: '.google_drive', displayName: 'Google Drive' },
-  { actionTypeId: '.microsoft-teams', displayName: 'Microsoft Teams' },
-  { actionTypeId: '.jira-cloud', displayName: 'Jira Cloud' },
-];
+// Every connector spec, with the icon resolved exactly as `transformSpecToActionTypeModel`
+// does it in Kibana — no placeholders, so a blank chip here is a real broken icon.
+//
+// Legacy connector types (.slack, .jira, .torq, …) are absent: their icons live in
+// stack_connectors, which this plugin's type graph doesn't reference, and reaching into
+// it emits declaration files across that plugin's source tree. Showing them as plugs
+// would say nothing, so they're left out rather than faked.
+const connectorTypeRegistry = new TypeRegistry<ActionTypeModel>();
 
-// Legacy connectors whose icons live in stack_connectors. That plugin can't be reached
-// from a story, so these land on the plugs fallback here but render fine in Kibana.
-const STACK_CONNECTOR_TYPES: MockConnectorTypeInfo[] = [
-  { actionTypeId: '.slack', displayName: 'Slack' },
-  { actionTypeId: '.slack_api', displayName: 'Slack API' },
-  { actionTypeId: '.email', displayName: 'Email' },
-  { actionTypeId: '.inference', displayName: 'Inference' },
-  { actionTypeId: '.gen-ai', displayName: 'Gen AI' },
-  { actionTypeId: '.bedrock', displayName: 'Bedrock' },
-  { actionTypeId: '.gemini', displayName: 'Gemini' },
-  { actionTypeId: '.servicenow', displayName: 'Service Now' },
-  { actionTypeId: '.jira', displayName: 'Jira' },
-  { actionTypeId: '.torq', displayName: 'Torq' },
-  { actionTypeId: '.opsgenie', displayName: 'Opsgenie' },
-  { actionTypeId: '.swimlane', displayName: 'Swimlane' },
-];
+for (const { metadata } of Object.values(connectorsSpecs)) {
+  const { id, displayName, icon } = metadata;
+  connectorTypeRegistry.register({
+    id,
+    actionTypeTitle: displayName,
+    iconClass: icon ?? ConnectorIconsMap.get(id) ?? 'plugs',
+  } as unknown as ActionTypeModel);
+}
 
-const CONNECTOR_TYPES = [...SPEC_CONNECTOR_TYPES, ...STACK_CONNECTOR_TYPES];
+const CONNECTOR_TYPES: MockConnectorTypeInfo[] = connectorTypeRegistry
+  .list()
+  .map(({ id, actionTypeTitle }) => ({ actionTypeId: id, displayName: actionTypeTitle ?? id }))
+  .sort((a, b) => a.actionTypeId.localeCompare(b.actionTypeId));
 
 const mockConnectorsResponse: MockConnectorsResponse = {
   connectorTypes: Object.fromEntries(CONNECTOR_TYPES.map((c) => [c.actionTypeId, c])),
-};
-
-// stack_connectors is what populates this registry in Kibana, and it isn't reachable
-// from a story. `ConnectorIconsMap` carries the same lazy icon components, so seeding
-// from it renders the real logos rather than a wall of identical plugs.
-const createPopulatedActionTypeRegistry = () => {
-  const registry = new TypeRegistry<ActionTypeModel>();
-  for (const { actionTypeId } of CONNECTOR_TYPES) {
-    registry.register({
-      id: actionTypeId,
-      iconClass: ConnectorIconsMap.get(actionTypeId) ?? 'plugs',
-    } as unknown as ActionTypeModel);
-  }
-  return registry;
 };
 
 const decorator: Decorator = (story) => {
@@ -103,7 +77,7 @@ const decorator: Decorator = (story) => {
               get: () => {},
             },
             triggersActionsUi: {
-              actionTypeRegistry: createPopulatedActionTypeRegistry(),
+              actionTypeRegistry: connectorTypeRegistry,
               ruleTypeRegistry: new TypeRegistry(),
             },
             workflowsExtensions: {
@@ -136,12 +110,7 @@ const hasHardcodedIcon = (actionTypeId: string): boolean =>
   actionTypeId in HardcodedIcons || `.${actionTypeId}` in HardcodedIcons;
 
 const withHardcodedIcons = allTypes.filter((t) => hasHardcodedIcon(t.actionTypeId));
-const withSpecIcons = allTypes.filter(
-  (t) => !hasHardcodedIcon(t.actionTypeId) && ConnectorIconsMap.has(`.${t.actionTypeId}`)
-);
-const withFallbackIcons = allTypes.filter(
-  (t) => !hasHardcodedIcon(t.actionTypeId) && !ConnectorIconsMap.has(`.${t.actionTypeId}`)
-);
+const withConnectorIcons = allTypes.filter((t) => !hasHardcodedIcon(t.actionTypeId));
 
 const SectionHeading = ({ children, first }: { children: string; first?: boolean }) => (
   <EuiText size="xs" color="subdued" style={{ margin: first ? '0 0 4px' : '16px 0 4px' }}>
@@ -168,14 +137,10 @@ const DynamicTypeIconsDemo = () => {
         {withHardcodedIcons.map((t) => (
           <TypeChip key={t.actionTypeId} actionTypeId={t.actionTypeId} />
         ))}
-        <SectionHeading>{'Connector spec icons (@kbn/connector-specs)'}</SectionHeading>
-        {withSpecIcons.map((t) => (
-          <TypeChip key={t.actionTypeId} actionTypeId={t.actionTypeId} />
-        ))}
         <SectionHeading>
-          {'Stack connector icons (plugs here, real icons in Kibana)'}
+          {`Connector icons from the action type registry (${withConnectorIcons.length})`}
         </SectionHeading>
-        {withFallbackIcons.map((t) => (
+        {withConnectorIcons.map((t) => (
           <TypeChip key={t.actionTypeId} actionTypeId={t.actionTypeId} />
         ))}
       </div>
