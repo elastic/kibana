@@ -26,25 +26,7 @@ describe('Fleet preconfigured outputs', () => {
 
   const registryUrl = useDockerRegistry();
 
-  const startServers = async (outputs: any) => {
-    const { startES } = createTestServers({
-      adjustTimeout: (t) => jest.setTimeout(t),
-      settings: {
-        es: {
-          license: 'trial',
-        },
-        kbn: {},
-      },
-    });
-
-    if (kbnServer) {
-      await kbnServer.stop();
-    }
-    if (esServer) {
-      await esServer.stop();
-    }
-    esServer = await startES();
-
+  const startKibana = async (outputs: any) => {
     const root = createRootWithCorePlugins(
       {
         xpack: {
@@ -89,6 +71,38 @@ describe('Fleet preconfigured outputs', () => {
       stop: async () => await root.shutdown(),
     };
     await waitForFleetSetup(kbnServer.root);
+  };
+
+  const startServers = async (outputs: any) => {
+    const { startES } = createTestServers({
+      adjustTimeout: (t) => jest.setTimeout(t),
+      settings: {
+        es: {
+          license: 'trial',
+        },
+        kbn: {},
+      },
+    });
+
+    if (kbnServer) {
+      await kbnServer.stop();
+    }
+    if (esServer) {
+      await esServer.stop();
+    }
+    esServer = await startES();
+
+    await startKibana(outputs);
+  };
+
+  const restartKibana = async (outputs: any) => {
+    // Stop only Kibana, keep ES alive so saved objects from the previous boot persist.
+    // This lets the second-boot test exercise the change-detection guard in
+    // isPreconfiguredOutputDifferentFromCurrent against an already-existing saved object.
+    if (kbnServer) {
+      await kbnServer.stop();
+    }
+    await startKibana(outputs);
   };
 
   const stopServers = async () => {
@@ -157,6 +171,7 @@ describe('Fleet preconfigured outputs', () => {
           hosts: ['kafka:9092'],
           topic: 'test',
           auth_type: 'none',
+          connection_type: 'plaintext',
           proxy_id: 'non-existent-proxy',
         },
       ];
@@ -193,9 +208,10 @@ describe('Fleet preconfigured outputs', () => {
       });
 
       it('should not trigger a repeated update on a second boot', async () => {
-        // Restart Kibana with the same config — the change-detection guard should see no diff
-        // on proxy_id for Kafka and not re-update the output.
-        await startServers(kafkaOutputConfig);
+        // Restart only Kibana (ES stays up, preserving saved objects from the first boot).
+        // isPreconfiguredOutputDifferentFromCurrent will now run against the existing output,
+        // exercising the Kafka proxy_id change-detection guard added in #267281.
+        await restartKibana(kafkaOutputConfig);
 
         const outputs = await kbnServer.coreStart.savedObjects
           .getUnsafeInternalClient()
