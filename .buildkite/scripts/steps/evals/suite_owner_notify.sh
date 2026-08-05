@@ -78,9 +78,19 @@ fi
 
 echo "--- Preparing model connector for triage summary"
 if [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
-  source .buildkite/scripts/steps/evals/setup_connectors.sh || {
-    echo "WARNING: setup_connectors failed; build_suite_owner_slack_message will use vault LiteLLM fallback"
-  }
+  # setup_connectors.sh calls `exit 1` on failure (e.g. LiteLLM outage). Sourcing
+  # it directly would kill this non-critical notify step before the `||` guard can
+  # run. Isolate it in a command-substitution subshell so a hard exit dies there;
+  # on failure we fall through to the static triage summary below.
+  connectors_out="$(
+    { source .buildkite/scripts/steps/evals/setup_connectors.sh; } >&2 \
+      && printf '%s' "${KIBANA_TESTING_AI_CONNECTORS:-}"
+  )" || true
+  if [[ -n "${connectors_out}" ]]; then
+    export KIBANA_TESTING_AI_CONNECTORS="${connectors_out}"
+  else
+    echo "WARNING: setup_connectors failed (e.g. LiteLLM outage); build_suite_owner_slack_message will use its fallback"
+  fi
 else
   echo "WARNING: KBN_EVALS_CONFIG_B64 is not set; build_suite_owner_slack_message requires vault LiteLLM env vars"
 fi
