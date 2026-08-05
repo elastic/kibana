@@ -784,6 +784,70 @@ describe('parseAggregationResults', () => {
     });
   });
 
+  it('pairs values with per-bucket keyFields when present, overriding termField', () => {
+    // Simulates ES|QL row grouping where each bucket keeps a compact key (null fields
+    // dropped) plus the field names those values correspond to. Buckets can therefore have
+    // different fields even though termField lists every possible grouping field.
+    expect(
+      parseAggregationResults({
+        isCountAgg: false,
+        isGroupAgg: true,
+        esResult: {
+          took: 238,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: 643, max_score: null, hits: [] },
+          aggregations: {
+            groupAgg: {
+              doc_count_error_upper_bound: 0,
+              sum_other_doc_count: 0,
+              buckets: [
+                {
+                  key: ['1.8.0'],
+                  keyFields: ['ecs.version'],
+                  doc_count: 1,
+                  metricAgg: { value: null },
+                },
+                {
+                  key: ['400', '1.2.0'],
+                  keyFields: ['error.code', 'ecs.version'],
+                  doc_count: 1,
+                  metricAgg: { value: null },
+                },
+              ],
+            },
+          },
+        },
+        termField: ['error.code', 'ecs.version'],
+      })
+    ).toEqual({
+      results: [
+        {
+          group: '1.8.0',
+          groups: [{ field: 'ecs.version', value: '1.8.0' }],
+          groupingObject: { 'ecs.version': '1.8.0' },
+          count: 1,
+          hits: [],
+          value: null,
+          sourceFields: {},
+        },
+        {
+          group: '400,1.2.0',
+          groups: [
+            { field: 'error.code', value: '400' },
+            { field: 'ecs.version', value: '1.2.0' },
+          ],
+          groupingObject: { 'error.code': '400', 'ecs.version': '1.2.0' },
+          count: 1,
+          hits: [],
+          value: null,
+          sourceFields: {},
+        },
+      ],
+      truncated: false,
+    });
+  });
+
   it('correctly parses results for aggregate metric over top N termField with topHits', () => {
     expect(
       parseAggregationResults({
