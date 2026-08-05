@@ -1,0 +1,863 @@
+{
+  "sha1": "e3dca27ae2c500bc1abee3229b67a5a1ad4a1a4a",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "f715219e8f28dae-0f97a1fed4c0138",
+      "title": "CreateProjectMonitorsMultiSpace should create a multi space monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_multi_space.spec.ts",
+        "line": 94,
+        "column": 13
+      }
+    },
+    {
+      "id": "f715219e8f28dae-c45cf7863b37365",
+      "title": "CreateProjectMonitorsMultiSpace should fetch a multi space project monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_multi_space.spec.ts",
+        "line": 122,
+        "column": 68
+      }
+    },
+    {
+      "id": "f715219e8f28dae-e51c47a124ad7b2",
+      "title": "CreateProjectMonitorsMultiSpace should edit a legacy project monitor and it should recreate multi space monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_multi_space.spec.ts",
+        "line": 146,
+        "column": 16
+      }
+    },
+    {
+      "id": "f715219e8f28dae-011f97ccfb13929",
+      "title": "CreateProjectMonitorsMultiSpace should return 404 if a monitor references a non-existent space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_multi_space.spec.ts",
+        "line": 199,
+        "column": 25
+      }
+    },
+    {
+      "id": "f715219e8f28dae-b501887bab1e7ac",
+      "title": "CreateProjectMonitorsMultiSpace should return error if monitor does not include current spaceId in its spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_multi_space.spec.ts",
+        "line": 190,
+        "column": 27
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-d261c467baad37b",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - returns a failed monitor when creating integration fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 425,
+        "column": 25
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-5563365b003d266",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - returns a failed monitor when editing integration fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 457,
+        "column": 10
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-caaa09f0a52bac7",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - handles browser monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 502,
+        "column": 29
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-c2b797df9b14cbe",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - allows throttling false for browser monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 527,
+        "column": 28
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-ca3962ffdb97fef",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - handles http monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 558,
+        "column": 11
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-df4a88de6a91572",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - handles tcp monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 600,
+        "column": 11
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-b36c16ab1e4d9c4",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - handles icmp monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 643,
+        "column": 31
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-6bd77a201211975",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - returns a list of successfully created monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 686,
+        "column": 32
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-5264c00da20a702",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - returns a list of successfully updated monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 697,
+        "column": 6
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-9d473d9dabcd4cc",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - validates monitor type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 705,
+        "column": 18
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-1715b9b0b9cadf6",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - saves space as data stream namespace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 749,
+        "column": 10
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-1037664792e215e",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - browser - handles custom namespace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 771,
+        "column": 11
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-4c0635639aebf7d",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - lightweight - handles custom namespace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 794,
+        "column": 11
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-7913bd548b1743e",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - browser - handles custom namespace errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 817,
+        "column": 11
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-442cb815b3eb3cd",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - lightweight - handles custom namespace errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 849,
+        "column": 10
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-e432f6d8a063457",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - handles editing with spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 883,
+        "column": 21
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-07e1748fc3c925d",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - formats custom id appropriately",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 927,
+        "column": 74
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-37d4c45eb652827",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - is able to decrypt monitor when updated after hydration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 954,
+        "column": 6
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-04ac126e1d4b477",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - is able to enable and disable monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 969,
+        "column": 32
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-f9363d77f019ba7",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - cannot update project monitors with read only privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 985,
+        "column": 16
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-8cb1aaf0ecd7845",
+      "title": "AddProjectMonitorsPrivateLocations creates integration policies for project monitors with private locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 1010,
+        "column": 17
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-c9e6202a6014f80",
+      "title": "AddProjectMonitorsPrivateLocations creates integration policies for project monitors with private locations - lightweight",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 1053,
+        "column": 21
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-2d4a853e96f7974",
+      "title": "AddProjectMonitorsPrivateLocations deletes integration policies for project monitors when private location is removed from the monitor - lightweight",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 1100,
+        "column": 7
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-f6f7da9cfd335b3",
+      "title": "AddProjectMonitorsPrivateLocations deletes integration policies for project monitors when private location is removed from the monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 1139,
+        "column": 48
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-0569bfe5d38bfa2",
+      "title": "AddProjectMonitorsPrivateLocations handles updating package policies when project monitors are updated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 1195,
+        "column": 32
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-7dfd1222a24b49c",
+      "title": "AddProjectMonitorsPrivateLocations only allows 250 requests at a time",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 1246,
+        "column": 32
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-a2adcebadf62efc",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - cannot update a monitor of one type to another type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 1259,
+        "column": 17
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-5662a3710844904",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - handles alert config without adding arbitrary fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 1328,
+        "column": 75
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-0bdbf51bb964ac3",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - handles sending invalid public location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 1349,
+        "column": 21
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-ea090c83ab04eef",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - handles sending invalid private locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 1426,
+        "column": 24
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-3843cd0f988e32b",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - handles no locations specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 1484,
+        "column": 20
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-5da8f6419db7d51",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - cannot update project monitors when user does not have access to a space in multi space use case",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 1545,
+        "column": 36
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-19e78a9094f7994",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - cannot update project monitors when user does not have access to all spaces using * in spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 1555,
+        "column": 27
+      }
+    },
+    {
+      "id": "cdcabeb6ed27be3-b7bd4d13cc311b7",
+      "title": "AddProjectMonitorsPrivateLocations project monitors - user with access to all spaces can specify * in spaces and monitor is created in all spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project_private_location.spec.ts",
+        "line": 1609,
+        "column": 27
+      }
+    },
+    {
+      "id": "e0b988e124225db-1c3237f6ed9dd67",
+      "title": "CreateProjectMonitors project monitors - handles browser monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
+        "line": 116,
+        "column": 23
+      }
+    },
+    {
+      "id": "e0b988e124225db-92bca533703082b",
+      "title": "CreateProjectMonitors project monitors - handles http monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
+        "line": 201,
+        "column": 23
+      }
+    },
+    {
+      "id": "e0b988e124225db-9c1fcc4591dbf16",
+      "title": "CreateProjectMonitors project monitors - handles tcp monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
+        "line": 335,
+        "column": 11
+      }
+    },
+    {
+      "id": "e0b988e124225db-7c1f06c449f7e82",
+      "title": "CreateProjectMonitors project monitors - handles icmp monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
+        "line": 445,
+        "column": 13
+      }
+    },
+    {
+      "id": "e0b988e124225db-7200dbe1d2096ea",
+      "title": "CreateProjectMonitors project monitors - is able to decrypt monitor when updated after hydration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
+        "line": 541,
+        "column": 16
+      }
+    },
+    {
+      "id": "e0b988e124225db-634c97aea4d2d6d",
+      "title": "CreateProjectMonitors handles location formatting for both private and public locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
+        "line": 563,
+        "column": 33
+      }
+    },
+    {
+      "id": "e0b988e124225db-2a6434439be7465",
+      "title": "CreateProjectMonitors project monitors - handles sending invalid public location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
+        "line": 619,
+        "column": 29
+      }
+    },
+    {
+      "id": "e0b988e124225db-bd49c8efc03b437",
+      "title": "CreateProjectMonitors should create a legacy project monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
+        "line": 708,
+        "column": 9
+      }
+    },
+    {
+      "id": "e0b988e124225db-ea9c9f954f510d8",
+      "title": "CreateProjectMonitors should fetch a legacy project monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
+        "line": 740,
+        "column": 28
+      }
+    },
+    {
+      "id": "e0b988e124225db-8cd43e5c6f703f1",
+      "title": "CreateProjectMonitors should edit a legacy project monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
+        "line": 762,
+        "column": 16
+      }
+    },
+    {
+      "id": "e0b988e124225db-100fd3de6135b01",
+      "title": "CreateProjectMonitors should delete a legacy project monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/create_monitor_project.spec.ts",
+        "line": 730,
+        "column": 27
+      }
+    },
+    {
+      "id": "224854eb3f4d94c-4672e48d99ebb82",
+      "title": "DeleteProjectMonitors only allows 500 requests at a time",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/delete_monitor_project.spec.ts",
+        "line": 104,
+        "column": 51
+      }
+    },
+    {
+      "id": "224854eb3f4d94c-4c27b6d317afed6",
+      "title": "DeleteProjectMonitors project monitors - handles browser monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/delete_monitor_project.spec.ts",
+        "line": 124,
+        "column": 11
+      }
+    },
+    {
+      "id": "224854eb3f4d94c-5e16836c507140a",
+      "title": "DeleteProjectMonitors does not delete monitors from a different project",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/delete_monitor_project.spec.ts",
+        "line": 157,
+        "column": 20
+      }
+    },
+    {
+      "id": "224854eb3f4d94c-29eb5089b499870",
+      "title": "DeleteProjectMonitors does not delete monitors from the same project in a different space project",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/delete_monitor_project.spec.ts",
+        "line": 191,
+        "column": 15
+      }
+    },
+    {
+      "id": "224854eb3f4d94c-6d85e09c9986e85",
+      "title": "DeleteProjectMonitors deletes integration policies when project monitors are deleted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/delete_monitor_project.spec.ts",
+        "line": 244,
+        "column": 17
+      }
+    },
+    {
+      "id": "56988dd905e60b5-1e9bedc4838c72d",
+      "title": "GetProjectMonitors project monitors - fetches all monitors - browser",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/get_monitor_project.spec.ts",
+        "line": 121,
+        "column": 13
+      }
+    },
+    {
+      "id": "56988dd905e60b5-7fb536eb0417398",
+      "title": "GetProjectMonitors project monitors - fetches all monitors - http",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/get_monitor_project.spec.ts",
+        "line": 137,
+        "column": 75
+      }
+    },
+    {
+      "id": "56988dd905e60b5-7e4ab7a10e4f119",
+      "title": "GetProjectMonitors project monitors - fetches all monitors - tcp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/get_monitor_project.spec.ts",
+        "line": 156,
+        "column": 7
+      }
+    },
+    {
+      "id": "56988dd905e60b5-de118019e8d727a",
+      "title": "GetProjectMonitors project monitors - fetches all monitors - icmp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/get_monitor_project.spec.ts",
+        "line": 170,
+        "column": 15
+      }
+    },
+    {
+      "id": "56988dd905e60b5-e80863ed14e2021",
+      "title": "GetProjectMonitors project monitors - handles url ecoded project names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/get_monitor_project.spec.ts",
+        "line": 189,
+        "column": 15
+      }
+    },
+    {
+      "id": "56988dd905e60b5-860f5320289b15c",
+      "title": "GetProjectMonitors project monitors - handles per_page parameter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/project_monitors/api/tests/get_monitor_project.spec.ts",
+        "line": 209,
+        "column": 15
+      }
+    }
+  ]
+}

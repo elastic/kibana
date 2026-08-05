@@ -54,6 +54,9 @@ import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../../flyout/entity_details/shared/constants';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import {
   EntitySourceValue,
   toEntitySourceArray,
@@ -76,7 +79,6 @@ import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import {
   ENTITY_FIELDS,
   ENTITY_GROUPING_OPTIONS,
-  DEFAULT_VISIBLE_ROWS_PER_PAGE,
   MAX_ENTITIES_TO_LOAD,
   TEST_SUBJ_DATA_GRID,
   TEST_SUBJ_GROUPING,
@@ -194,7 +196,9 @@ export const EntitiesDataTable = ({
     setUrlQuery,
   } = state;
 
-  const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
+  const { closeFlyout, openFlyout } = useExpandableFlyoutApi();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openEntityFlyout } = useFlyoutApi();
   const {
     timelinePrivileges: { read: canUseTimeline },
     alertsPrivileges: {
@@ -212,25 +216,30 @@ export const EntitiesDataTable = ({
       }
 
       const { entityType, entityName, entityId } = getEntityFields(doc);
-      if (!entityType || !entityName) return;
+      if (!entityType || !entityName || !entityId) return;
 
+      const sharedParams = { entityId, contextID: tableId, scopeId: tableId };
+
+      if (enableNewFlyout) {
+        openEntityFlyout({
+          engineType: entityType,
+          entityName,
+          origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
+          ...sharedParams,
+        });
+        return;
+      }
+
+      // Generic entities have no dedicated panel in the legacy flyout.
       const panelKey = EntityPanelKeyByType[entityType];
-      const panelParam = EntityPanelParamByType[entityType];
-      if (!panelKey || !panelParam) return;
-
-      openFlyout({
-        right: {
-          id: panelKey,
-          params: {
-            [panelParam]: entityName,
-            entityId,
-            contextID: tableId,
-            scopeId: tableId,
-          },
-        },
-      });
+      const paramName = EntityPanelParamByType[entityType];
+      if (panelKey && paramName) {
+        openFlyout({
+          right: { id: panelKey, params: { [paramName]: entityName, ...sharedParams } },
+        });
+      }
     },
-    [openFlyout, closeFlyout, tableId]
+    [enableNewFlyout, openFlyout, openEntityFlyout, closeFlyout, tableId]
   );
 
   const {
@@ -243,7 +252,6 @@ export const EntitiesDataTable = ({
     query,
     sort,
     enabled: !queryError,
-    pageSize: DEFAULT_VISIBLE_ROWS_PER_PAGE,
   });
 
   const rows = getRowsFromPages(rowsData?.pages);
@@ -382,7 +390,7 @@ export const EntitiesDataTable = ({
 
   const onAddFilter: AddFieldFilterHandler | undefined = useMemo(
     () =>
-      filterManager && dataView
+      config.supportsFieldFiltering !== false && filterManager && dataView
         ? (clickedField, values, operation) => {
             const newFilters = generateFilters(
               filterManager,
@@ -396,7 +404,7 @@ export const EntitiesDataTable = ({
             });
           }
         : undefined,
-    [dataView, filterManager, filters, setUrlQuery]
+    [config.supportsFieldFiltering, dataView, filterManager, filters, setUrlQuery]
   );
 
   const onResize = (colSettings: { columnId: string; width: number | undefined }) => {
@@ -634,7 +642,9 @@ export const EntitiesDataTable = ({
             columns={currentColumns}
             dataView={dataView}
             loadingState={loadingState}
-            onFilter={onAddFilter as DocViewFilterFn}
+            onFilter={
+              config.supportsFieldFiltering !== false ? (onAddFilter as DocViewFilterFn) : undefined
+            }
             onResize={onResize}
             onSetColumns={onSetColumns}
             onSort={onSort}

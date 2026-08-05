@@ -70,6 +70,7 @@ export interface ChromeState {
   customNavLink: State<ChromeNavLink | undefined>;
   appMenu: State<AppMenuConfig | undefined>;
   contextSwitcher: State<ReactNode>;
+  projectPicker: State<ReactNode>;
   inlineAppHeader: State<boolean>;
   appHeader: State<AppHeaderConfig | undefined>;
   userMenu: State<ReactNode>;
@@ -126,6 +127,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const globalSearch = createState<GlobalSearchConfig | undefined>(undefined);
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
   const contextSwitcher = createState<ReactNode>(null);
+  const projectPicker = createState<ReactNode>(null);
   const inlineAppHeader = createState<boolean>(false);
   const appHeader = createState<AppHeaderConfig | undefined>(undefined);
   const userMenu = createState<ReactNode>(null);
@@ -171,6 +173,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
       globalMenuLinks: globalHelpMenuLinks,
     },
     contextSwitcher,
+    projectPicker,
     userMenu,
     feedbackHandler,
     newsfeedHandler,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useReducer, useMemo, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { escapeQuotes } from '@kbn/es-query';
 import type { BulkByIdsParams, BulkByQueryParams } from '../services/rules_api';
 
@@ -97,16 +97,20 @@ export const useBulkSelect = ({ totalItemCount, items, filter, search }: UseBulk
 
   const itemIds = useMemo(() => items.map((item) => item.id), [items]);
 
+  useEffect(() => {
+    dispatch({ type: ActionType.CLEAR_SELECTION });
+  }, [filter, search]);
+
   const selectedCount = useMemo(() => {
     if (!totalItemCount) {
       return 0;
     }
     if (state.isAllSelected) {
-      return totalItemCount - state.selectedIds.size;
+      // avoid negative count
+      return Math.max(0, totalItemCount - state.selectedIds.size);
     }
-    // Only IDs that are actually on the current page count
-    return itemIds.filter((id) => state.selectedIds.has(id)).length;
-  }, [state, itemIds, totalItemCount]);
+    return state.selectedIds.size;
+  }, [state, totalItemCount]);
 
   const isPageSelected = useMemo(() => {
     if (!items.length) {

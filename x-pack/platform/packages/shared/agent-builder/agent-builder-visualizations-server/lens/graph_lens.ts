@@ -34,10 +34,35 @@ import { createGenerateConfigPrompt } from './prompts';
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
 
+const parseConfigAuthoringResponse = (
+  responseText: string
+): { config: Record<string, unknown>; authoringNote?: string } => {
+  const jsonMatches = Array.from(responseText.matchAll(INLINE_JSON_REGEX));
+  const jsonText = jsonMatches.length > 0 ? jsonMatches[0][1].trim() : responseText.trim();
+  const parsed = JSON.parse(jsonText);
+
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Response is not a valid JSON object');
+  }
+
+  const { config, authoring_note: authoringNote } = parsed as {
+    config?: unknown;
+    authoring_note?: unknown;
+  };
+  if (!config || typeof config !== 'object' || Array.isArray(config)) {
+    throw new Error('Response must include a valid "config" object');
+  }
+  const normalizedNote = typeof authoringNote === 'string' ? authoringNote.trim() : '';
+  return {
+    config: config as Record<string, unknown>,
+    ...(normalizedNote ? { authoringNote: normalizedNote } : {}),
+  };
+};
+
 const validateConfigForChartType = (
   chartType: SupportedChartType,
   config: unknown
-): VisualizationConfig => chartTypeRegistry[chartType].schema.validate(config);
+): VisualizationConfig => chartTypeRegistry[chartType].schema.parse(config);
 
 export interface EsqlDataSourceCarrier {
   data_source?: { type?: string; query?: string };
@@ -93,6 +118,7 @@ const VisualizationStateAnnotation = Annotation.Root({
   }),
   // outputs
   validatedConfig: Annotation<VisualizationConfig | null>(),
+  authoringNote: Annotation<string | null>(),
   timeRange: Annotation<{ from: string; to: string } | null>(),
   error: Annotation<string | null>(),
 });
@@ -209,22 +235,7 @@ export const createVisualizationGraph = async (
       // Invoke model without schema validation
       const response = await defaultModel.chatModel.invoke(prompt);
       const responseText = extractTextFromMessage(response);
-
-      // Try to extract JSON from markdown code blocks
-      const jsonMatches = Array.from(responseText.matchAll(INLINE_JSON_REGEX));
-      let configResponse: any;
-
-      if (jsonMatches.length > 0) {
-        const jsonText = jsonMatches[0][1].trim();
-        configResponse = JSON.parse(jsonText);
-      } else {
-        configResponse = JSON.parse(responseText);
-      }
-
-      // Verify it's a valid object
-      if (!configResponse || typeof configResponse !== 'object') {
-        throw new Error('Response is not a valid JSON object');
-      }
+      const { config: configResponse, authoringNote } = parseConfigAuthoringResponse(responseText);
 
       // Pin the validated ES|QL query before config validation. ES|QL generation owns the query;
       // config generation only binds columns from it.
@@ -238,6 +249,7 @@ export const createVisualizationGraph = async (
         type: 'generate_config',
         success: true,
         config: configResponse,
+        authoringNote,
         attempt,
       };
     } catch (error) {
@@ -303,6 +315,7 @@ export const createVisualizationGraph = async (
           type: 'validate_config',
           success: true,
           config: validatedConfig,
+          authoringNote: lastGenerateAction.authoringNote,
           attempt,
         };
       }
@@ -417,6 +430,7 @@ What is the most appropriate time range for this visualization?`,
 
     return {
       validatedConfig: lastValidateAction?.success ? lastValidateAction.config : null,
+      authoringNote: lastValidateAction?.success ? lastValidateAction.authoringNote ?? null : null,
       error: lastValidateAction?.success ? null : lastValidateAction?.error || esqlError,
       esqlQuery: lastGenerateEsqlAction?.query || state.esqlQuery,
       timeRange: lastTimeRangeAction?.timeRange ?? null,

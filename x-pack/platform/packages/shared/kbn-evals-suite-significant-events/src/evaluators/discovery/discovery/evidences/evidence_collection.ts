@@ -9,11 +9,11 @@ import type { SignalEntry } from '@kbn/significant-events-schema';
 import type { DiscoveryEvaluator } from '../../types';
 
 const detectionSignalsByRuleUuid = (
-  discoveries: Parameters<DiscoveryEvaluator['evaluate']>[0]['output']['discoveries']
+  events: Parameters<DiscoveryEvaluator['evaluate']>[0]['output']['significantEvents']
 ): Map<string, SignalEntry[]> => {
   const signalsByRuleUuid = new Map<string, SignalEntry[]>();
-  for (const discovery of discoveries ?? []) {
-    for (const signal of discovery.signals ?? []) {
+  for (const event of events ?? []) {
+    for (const signal of event.signals ?? []) {
       if (signal.type !== 'detection') {
         continue;
       }
@@ -24,7 +24,7 @@ const detectionSignalsByRuleUuid = (
   return signalsByRuleUuid;
 };
 
-/** CODE evaluator: every input detection must have exactly one signal with executed ES|QL evidence. */
+/** CODE evaluator: every input detection has one signal and evidence when an exact backed query exists. */
 export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
   name: 'evidence_collection',
   kind: 'CODE',
@@ -35,7 +35,7 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
         .map(({ rule_uuid: ruleUuid }) => ruleUuid)
         .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
     );
-    const signalsByRuleUuid = detectionSignalsByRuleUuid(output.discoveries);
+    const signalsByRuleUuid = detectionSignalsByRuleUuid(output.significantEvents);
     const issues: string[] = [];
     let covered = 0;
 
@@ -63,19 +63,24 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
     const unexpectedRuleUuids = [...signalsByRuleUuid.keys()].filter(
       (ruleUuid) => !expectedRuleUuids.has(ruleUuid)
     );
-    unexpectedRuleUuids.forEach((ruleUuid) => {
-      issues.push(
-        ruleUuid ? `unexpected signal for rule "${ruleUuid}"` : 'signal missing metadata.rule_uuid'
-      );
-    });
+    if (unexpectedRuleUuids.length > 0) {
+      const unexpectedRules = unexpectedRuleUuids
+        .map((ruleUuid) => (ruleUuid ? `"${ruleUuid}"` : 'a signal without metadata.rule_uuid'))
+        .join(', ');
+      return Promise.resolve({
+        score: 0,
+        label: 'unexpected-rule-uuid',
+        explanation: `Agent output contains detection signal(s) not present in the input batch: ${unexpectedRules}`,
+      });
+    }
 
-    const score = covered / (expectedRuleUuids.size + unexpectedRuleUuids.length);
+    const score = covered / expectedRuleUuids.size;
     return Promise.resolve({
       score,
       explanation:
         issues.length > 0
           ? `${issues.join('; ')} (score=${score.toFixed(2)})`
-          : `All ${expectedRuleUuids.size} input rule(s) have collected ES|QL evidence`,
+          : `All ${expectedRuleUuids.size} input rule(s) have the required signal and evidence coverage`,
     });
   },
 };
