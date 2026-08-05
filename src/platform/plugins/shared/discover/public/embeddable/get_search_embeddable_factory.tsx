@@ -39,6 +39,7 @@ import {
 } from './utils/get_search_embeddable_comparators';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
+import { SearchEmbeddablePatternAnalysisComponent } from './components/search_embeddable_pattern_analysis_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
 import { SearchEmbeddableInlineEditHoverActions } from './components/search_embeddable_inline_edit_hover_actions';
 import { SearchEmbeddableDeletedTabPrompt } from './components/search_embeddable_deleted_tab_prompt';
@@ -52,6 +53,7 @@ import { deserializeState, serializeState } from './utils/serialization_utils';
 import { createInMemoryContextAwarenessToolkit } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
+import { isPatternAnalysisMode } from './utils/is_pattern_analysis_mode';
 import { isTabDeleted } from './utils/is_tab_deleted';
 
 export const getSearchEmbeddableFactory = ({
@@ -406,6 +408,11 @@ export const getSearchEmbeddableFactory = ({
             [savedSearch, dataView]
           );
 
+          const renderAsPatternAnalysisTable = useMemo(
+            () => isPatternAnalysisMode(savedSearch, dataView),
+            [savedSearch, dataView]
+          );
+
           if (isSelectedTabDeletedForDisplay) {
             return (
               <SearchEmbeddableDeletedTabPrompt
@@ -460,6 +467,14 @@ export const getSearchEmbeddableFactory = ({
                         isEsqlMode(savedSearch) || !enableFilters ? undefined : addFilter
                       }
                       stateManager={searchEmbeddable.stateManager}
+                    />
+                  ) : renderAsPatternAnalysisTable ? (
+                    <SearchEmbeddablePatternAnalysisComponent
+                      api={{
+                        ...api,
+                        fetchContext$,
+                      }}
+                      dataView={dataView!}
                     />
                   ) : (
                     <CellActionsProvider
