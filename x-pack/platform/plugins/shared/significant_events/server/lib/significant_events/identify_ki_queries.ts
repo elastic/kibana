@@ -9,13 +9,14 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
 import type { Streams } from '@kbn/streams-schema';
 import type { GeneratedSignificantEventQuery } from '@kbn/significant-events-schema';
-import { ensureMetadata } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/significant-events-schema';
-import { identifyKIQueries as identifyKIQueriesThroughAgent } from '@kbn/streams-ai';
+import {
+  identifyKIQueries as identifyKIQueriesThroughAgent,
+  QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
+} from '@kbn/streams-ai';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
@@ -128,7 +129,10 @@ export async function identifyKIQueries(
     signal,
     systemPrompt: combinedSystemPrompt,
     getFeatures: async (filters) => {
-      const response = await kiClient.getFeatures(definition.name, filters);
+      const response = await kiClient.getFeatures(definition.name, {
+        ...filters,
+        excludedType: [...QUERY_GENERATION_EXCLUDED_FEATURE_TYPES],
+      });
       return response.hits;
     },
     additionalTools: hasAdditionalTools ? additionalTools : undefined,
@@ -144,9 +148,7 @@ export async function identifyKIQueries(
       type: query.type,
       title: query.title,
       description: query.description,
-      esql: {
-        query: query.type === QUERY_TYPE_STATS ? query.esql : ensureMetadata(query.esql),
-      },
+      esql: { query: query.esql },
       severity_score: query.severity_score,
       evidence: query.evidence,
       replaces: query.replaces,

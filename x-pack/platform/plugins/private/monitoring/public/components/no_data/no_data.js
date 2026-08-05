@@ -95,7 +95,7 @@ export function NoData(props) {
         </EuiScreenReaderOnly>
         <EuiPageBody restrictWidth={600}>
           <EuiPageTemplate.EmptyPrompt
-            icon={<EuiIcon type="monitoringApp" size="xxl" />}
+            icon={<EuiIcon type="monitoringApp" size="xxl" aria-hidden={true} />}
             title={
               <h2>
                 <FormattedMessage
@@ -144,13 +144,13 @@ export function NoData(props) {
                 cloudConnectUrl={cloudConnectUrl}
                 onConnectClick={handleConnectClick}
                 hasCloudConnectPermission={hasCloudConnectPermission}
-                overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
+                style={{ margin: `0 ${euiTheme.size.l}` }}
               />
               <EuiSpacer size="m" />
             </>
           )}
           <EuiPageTemplate.EmptyPrompt
-            icon={<EuiIcon type="monitoringApp" size="xxl" />}
+            icon={<EuiIcon type="monitoringApp" size="xxl" aria-hidden={true} />}
             body={
               <>
                 <NoDataMessage {...props} />
@@ -198,13 +198,13 @@ export function NoData(props) {
               cloudConnectUrl={cloudConnectUrl}
               onConnectClick={handleConnectClick}
               hasCloudConnectPermission={hasCloudConnectPermission}
-              overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
+              style={{ margin: `0 ${euiTheme.size.l}` }}
             />
             <EuiSpacer size="m" />
           </>
         )}
         <EuiPageTemplate.EmptyPrompt
-          icon={<EuiIcon type="monitoringApp" size="xxl" />}
+          icon={<EuiIcon type="monitoringApp" size="xxl" aria-hidden={true} />}
           title={
             <h2>
               <FormattedMessage
