@@ -67,11 +67,18 @@ export const MonitorAssignedAgents = ({
                 </EuiText>
               )}
               {stats.agents.map((agent) => {
-                const hostHref = `${basePath}/app/fleet/agents?kuery=${encodeURIComponent(
-                  `local_metadata.host.hostname:"${agent.host}" and policy_id:"${stats.agentPolicyId}"`
-                )}`;
+                // Prefer agent id — `agent.host` is lowercased and won't match
+                // Fleet's case-sensitive `local_metadata.host.hostname` keyword.
+                const hostHref = agent.agentId
+                  ? `${basePath}/app/fleet/agents/${encodeURIComponent(agent.agentId)}`
+                  : `${basePath}/app/fleet/agents?kuery=${encodeURIComponent(
+                      `policy_id:"${stats.agentPolicyId}"`
+                    )}`;
                 return (
-                  <EuiHealth key={agent.host} color={agent.healthy ? 'success' : 'danger'}>
+                  <EuiHealth
+                    key={agent.agentId ?? agent.host}
+                    color={agent.healthy ? 'success' : 'danger'}
+                  >
                     {canReadAgents ? (
                       <EuiLink
                         data-test-subj="syntheticsAssignedAgentLink"

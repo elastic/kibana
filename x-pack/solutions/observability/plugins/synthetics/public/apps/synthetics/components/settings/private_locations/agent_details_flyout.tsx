@@ -63,9 +63,11 @@ export const AgentDetailsFlyout = ({
   const { basePath } = useSyntheticsSettingsContext();
   const { canReadAgents } = useFleetPermissions();
 
-  const fleetAgentHref = `${basePath}/app/fleet/agents?kuery=${encodeURIComponent(
-    `local_metadata.host.hostname:"${agent.host}" and policy_id:"${agentPolicyId}"`
-  )}`;
+  // Prefer agent id — `agent.host` is lowercased and won't match Fleet's
+  // case-sensitive `local_metadata.host.hostname` keyword (e.g. Windows hosts).
+  const fleetAgentHref = agent.agentId
+    ? `${basePath}/app/fleet/agents/${encodeURIComponent(agent.agentId)}`
+    : `${basePath}/app/fleet/agents?kuery=${encodeURIComponent(`policy_id:"${agentPolicyId}"`)}`;
 
   const capacityItems: EuiDescriptionListProps['listItems'] = [
     {
