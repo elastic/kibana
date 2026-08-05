@@ -374,7 +374,7 @@ export function SettingsTab() {
                           'xpack.significantEventsApp.settings.scheduledDiscoveryHelp',
                           {
                             defaultMessage:
-                              'When enabled, Significant Events detection, discovery, and triage run automatically in the current Kibana space.',
+                              'When enabled, Significant Events detection and discovery run automatically in the current Kibana space.',
                           }
                         )}
                   </EuiText>
@@ -468,7 +468,7 @@ export function SettingsTab() {
                       )}
                       helpText={i18n.translate(
                         'xpack.significantEventsApp.settings.reviewIntervalHelp',
-                        { defaultMessage: 'How often scheduled discovery and triage review runs.' }
+                        { defaultMessage: 'How often scheduled discovery review runs.' }
                       )}
                     >
                       <EuiFieldNumber
@@ -521,44 +521,13 @@ export function SettingsTab() {
                     </EuiFormRow>
                     <EuiFormRow
                       label={i18n.translate(
-                        'xpack.significantEventsApp.settings.triageBatchSizeLabel',
-                        { defaultMessage: 'Triage batch size' }
-                      )}
-                      helpText={i18n.translate(
-                        'xpack.significantEventsApp.settings.triageBatchSizeHelp',
-                        {
-                          defaultMessage: 'Maximum discoveries sent to each scheduled triage pass.',
-                        }
-                      )}
-                    >
-                      <EuiFieldNumber
-                        data-test-subj="streams-settings-scheduled-triage-batch-size"
-                        value={scheduledDiscovery.draft.triageBatchSize}
-                        onChange={(e) =>
-                          scheduledDiscovery.setDraft((prev) => ({
-                            ...prev,
-                            triageBatchSize: clampNumber(
-                              e.target.value,
-                              MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
-                              MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE
-                            ),
-                          }))
-                        }
-                        min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                        max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
-                      />
-                    </EuiFormRow>
-                    <EuiFormRow
-                      label={i18n.translate(
                         'xpack.significantEventsApp.settings.maxReviewPassesLabel',
                         { defaultMessage: 'Review passes' }
                       )}
                       helpText={i18n.translate(
                         'xpack.significantEventsApp.settings.maxReviewPassesHelp',
                         {
-                          defaultMessage:
-                            'Maximum discovery and triage pass pairs per scheduled review run.',
+                          defaultMessage: 'Maximum discovery passes per scheduled review run.',
                         }
                       )}
                     >

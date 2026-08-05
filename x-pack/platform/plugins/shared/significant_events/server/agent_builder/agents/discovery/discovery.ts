@@ -18,7 +18,7 @@ export const discoveryAgentType = {
   id: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_TYPE_ID,
   name: 'Significant Events Discovery',
   description:
-    'Triages statistical detection signals across rules, correlates related detections into incident candidates using shared infrastructure, temporal proximity, and causal plausibility, and drafts structured discovery documents with root-cause hypotheses and supporting evidence.',
+    'Correlates related detections into significant events using shared infrastructure, temporal proximity, and causal plausibility, verifies current state, and writes final event records with status, calibrated severity, and supporting evidence.',
   avatar_icon: 'logoElastic',
   baseConfiguration: {
     instructions,
