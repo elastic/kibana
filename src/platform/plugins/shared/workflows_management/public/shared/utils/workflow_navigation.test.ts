@@ -9,7 +9,6 @@
 
 import type { ApplicationStart } from '@kbn/core/public';
 import {
-  getReturnDestinationFromSearch,
   getWorkflowDetailRouteState,
   getWorkflowsListPathFromDetailRouteState,
   navigateToWorkflowsList,
@@ -61,29 +60,5 @@ describe('workflow navigation', () => {
     await navigateToWorkflowsList(application as unknown as ApplicationStart, undefined);
 
     expect(application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, undefined);
-  });
-
-  describe('return destination', () => {
-    it('parses returnApp and returnPath from the search string', () => {
-      expect(
-        getReturnDestinationFromSearch('?returnApp=context_engine&returnPath=%2Fai_index%2F1')
-      ).toEqual({
-        returnAppId: 'context_engine',
-        returnPath: '/ai_index/1',
-      });
-    });
-
-    it('parses returnApp without a returnPath', () => {
-      expect(getReturnDestinationFromSearch('?returnApp=context_engine')).toEqual({
-        returnAppId: 'context_engine',
-        returnPath: undefined,
-      });
-    });
-
-    it('returns undefined when there is no returnApp', () => {
-      expect(getReturnDestinationFromSearch('?tags=prod')).toBeUndefined();
-      expect(getReturnDestinationFromSearch('')).toBeUndefined();
-      expect(getReturnDestinationFromSearch(undefined)).toBeUndefined();
-    });
   });
 });

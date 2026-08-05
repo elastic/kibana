@@ -35,7 +35,6 @@ import {
   setHighlightedStepId,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import type { RerunWorkflowExecutionParams } from '../../../pages/executions/build_replay_inputs_from_execution_context';
 import { useChildWorkflowExecutions } from '../model/use_child_workflow_executions';
 import { useStepExecution } from '../model/use_step_execution';
 
@@ -48,10 +47,6 @@ const PSEUDO_STEP_TRIGGER = 'trigger';
 export interface WorkflowExecutionDetailProps {
   executionId: string;
   onClose: () => void;
-  onReRunExecution?: (params: RerunWorkflowExecutionParams) => Promise<void>;
-  showBackButton?: boolean;
-  selectedStepExecutionId?: string | null;
-  onSelectedStepExecutionChange?: (stepExecutionId: string | null) => void;
 }
 
 function assignSelectedStepId(
@@ -68,32 +63,18 @@ function assignSelectedStepId(
 }
 
 export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = React.memo(
-  ({
-    executionId,
-    onClose,
-    onReRunExecution,
-    showBackButton: showBackButtonOverride,
-    selectedStepExecutionId: controlledSelectedStepExecutionId,
-    onSelectedStepExecutionChange,
-  }) => {
+  ({ executionId, onClose }) => {
     const dispatch = useDispatch();
     const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
     const queryClient = useQueryClient();
 
-    const urlState = useWorkflowUrlState();
+    const { activeTab, setSelectedStepExecution, selectedStepExecutionId, shouldAutoResume } =
+      useWorkflowUrlState();
     const [sidebarWidth = DefaultSidebarWidth, setSidebarWidth] = useLocalStorage(
       WidthStorageKey,
       DefaultSidebarWidth
     );
-    const isStepSelectionControlled = onSelectedStepExecutionChange !== undefined;
-    const selectedStepExecutionId = isStepSelectionControlled
-      ? controlledSelectedStepExecutionId ?? undefined
-      : urlState.selectedStepExecutionId;
-    const setSelectedStepExecution = isStepSelectionControlled
-      ? onSelectedStepExecutionChange
-      : urlState.setSelectedStepExecution;
-    const showBackButton = showBackButtonOverride ?? urlState.activeTab === 'executions';
-    const { shouldAutoResume } = urlState;
+    const showBackButton = activeTab === 'executions';
 
     // Clear cached step I/O data when switching to a different execution
     useEffect(() => {
@@ -322,7 +303,6 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               showBackButton={showBackButton}
               error={error}
               onClose={onClose}
-              onReRunExecution={onReRunExecution}
               onStepExecutionClick={setSelectedStepExecutionId}
               selectedId={selectedStepExecutionId ?? null}
               childExecutionsMap={childExecutions}

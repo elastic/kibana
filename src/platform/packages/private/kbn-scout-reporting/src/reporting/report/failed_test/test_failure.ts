@@ -33,6 +33,4 @@ export interface TestFailure {
     path?: string;
     contentType: string;
   }>;
-  /** Zero-based attempt index; 0 is the first run, 1 the first retry. */
-  attempt?: number;
 }

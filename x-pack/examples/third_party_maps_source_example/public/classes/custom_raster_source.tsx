@@ -29,8 +29,6 @@ import type { RasterTileSource } from 'maplibre-gl';
 
 interface CustomRasterSourceDescriptor {
   type: 'CUSTOM_RASTER';
-  // Aligns with maps raster layer `sourceDescriptor` loose branch (unknown extra keys).
-  [key: string]: unknown;
 }
 
 export class CustomRasterSource implements IRasterSource {

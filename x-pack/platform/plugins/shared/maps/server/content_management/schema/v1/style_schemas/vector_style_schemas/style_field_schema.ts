@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 import { FIELD_ORIGIN } from '../../../../../../common/constants';
 
-export const styleFieldSchema = z
-  .object({
-    name: z.string(),
-    origin: z.union([z.literal(FIELD_ORIGIN.SOURCE), z.literal(FIELD_ORIGIN.JOIN)]),
-  })
-  .strict();
+export const styleFieldSchema = schema.object({
+  name: schema.string(),
+  origin: schema.oneOf([schema.literal(FIELD_ORIGIN.SOURCE), schema.literal(FIELD_ORIGIN.JOIN)]),
+});

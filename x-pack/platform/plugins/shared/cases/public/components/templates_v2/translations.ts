@@ -172,33 +172,6 @@ export const FIX_VALIDATION_ERRORS = i18n.translate('xpack.cases.templates.fixVa
   defaultMessage: 'Please fix validation errors before saving.',
 });
 
-export const FIX_FIELDS_YAML_ERRORS = i18n.translate('xpack.cases.templates.fixFieldsYamlErrors', {
-  defaultMessage: 'Please fix errors in the Fields YAML editor.',
-});
-
-export const PROVIDE_TEMPLATE_NAME_IN_CONFIGURATION = i18n.translate(
-  'xpack.cases.templates.provideTemplateNameInConfiguration',
-  { defaultMessage: 'Please provide a template name in the Configuration tab.' }
-);
-
-export const FIX_CONFIGURATION_ERRORS = i18n.translate(
-  'xpack.cases.templates.fixConfigurationErrors',
-  { defaultMessage: 'Please fix errors in the Configuration tab.' }
-);
-
-export const FIX_FIELDS_YAML_AND_TEMPLATE_NAME = i18n.translate(
-  'xpack.cases.templates.fixFieldsYamlAndTemplateName',
-  {
-    defaultMessage:
-      'Please fix errors in the Fields YAML editor and provide a template name in the Configuration tab.',
-  }
-);
-
-export const FIX_FIELDS_YAML_AND_CONFIGURATION_ERRORS = i18n.translate(
-  'xpack.cases.templates.fixFieldsYamlAndConfigurationErrors',
-  { defaultMessage: 'Please fix errors in the Fields YAML editor and Configuration tab.' }
-);
-
 export const UNSAVED_CHANGES = i18n.translate('xpack.cases.templates.unsavedChanges', {
   defaultMessage: 'Unsaved changes',
 });

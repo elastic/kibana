@@ -83,23 +83,6 @@ export interface TestWorkflowParams {
   inputs: Record<string, unknown>;
 }
 
-export interface SearchExecutionsParams {
-  kql?: string;
-  statuses?: ExecutionStatus[];
-  executionTypes?: ExecutionType[];
-  executedBy?: string[];
-  concurrencyGroupKey?: string;
-  startedAfter?: string;
-  startedBefore?: string;
-  finishedAfter?: string;
-  finishedBefore?: string;
-  sortField?: string;
-  sortOrder?: 'asc' | 'desc';
-  page?: number;
-  size?: number;
-  trackTotalHits?: boolean;
-}
-
 export interface GetWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
@@ -214,8 +197,4 @@ export interface GetLibraryHealthResponse {
   lastRefreshAt?: string;
   lastError?: { message: string; at: string };
   enabled: boolean;
-}
-
-export interface InstallTemplateResponse {
-  workflowId: string;
 }

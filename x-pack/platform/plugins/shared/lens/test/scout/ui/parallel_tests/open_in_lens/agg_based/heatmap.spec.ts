@@ -7,7 +7,12 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData, convertToLensByTitle, createOpenInLensSuiteSetup } from '../../../fixtures';
+import {
+  testData,
+  convertToLensByTitle,
+  createOpenInLensSuiteSetup,
+  getChartDebugData,
+} from '../../../fixtures';
 
 spaceTest.describe(
   'Lens open in Lens — agg-based Heatmap',
@@ -25,13 +30,13 @@ spaceTest.describe(
 
     spaceTest.afterAll(openInLensSuite.afterAll);
 
-    spaceTest('should convert to Lens', async ({ pageObjects }) => {
+    spaceTest('should convert to Lens', async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
 
       await convertToLensByTitle({ dashboard }, 'Heatmap - With X-Axis only');
       await lens.waitForVisualization('heatmapChart');
 
-      const debugState = await lens.getCurrentChartDebugState('heatmapChart');
+      const debugState = await getChartDebugData(page, 'heatmapChart');
       expect(debugState.axes?.x[0].labels).toStrictEqual([
         'win 8',
         'win xp',
@@ -63,13 +68,13 @@ spaceTest.describe(
 
     spaceTest(
       'should convert to Lens if Y-axis is defined, but X-axis is not',
-      async ({ pageObjects }) => {
+      async ({ page, pageObjects }) => {
         const { dashboard, lens } = pageObjects;
 
         await convertToLensByTitle({ dashboard }, 'Heatmap - With Y-Axis only');
         await lens.waitForVisualization('heatmapChart');
 
-        const debugState = await lens.getCurrentChartDebugState('heatmapChart');
+        const debugState = await getChartDebugData(page, 'heatmapChart');
         expect(debugState.axes?.x[0].labels).toStrictEqual(['*']);
         expect(debugState.axes?.y[0].labels).toStrictEqual([
           'win 8',
@@ -82,13 +87,13 @@ spaceTest.describe(
       }
     );
 
-    spaceTest('should respect heatmap colors number', async ({ pageObjects }) => {
+    spaceTest('should respect heatmap colors number', async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
 
       await convertToLensByTitle({ dashboard }, 'Heatmap - Color number');
       await lens.waitForVisualization('heatmapChart');
 
-      const debugState = await lens.getCurrentChartDebugState('heatmapChart');
+      const debugState = await getChartDebugData(page, 'heatmapChart');
       expect(debugState.legend?.items).toStrictEqual([
         { key: '1,322 - 1,585.667', name: '1,322 - 1,585.667', color: '#006837' },
         { key: '1,585.667 - 1,849.333', name: '1,585.667 - 1,849.333', color: '#4cb15d' },
@@ -99,13 +104,13 @@ spaceTest.describe(
       ]);
     });
 
-    spaceTest('should respect heatmap custom color ranges', async ({ pageObjects }) => {
+    spaceTest('should respect heatmap custom color ranges', async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
 
       await convertToLensByTitle({ dashboard }, 'Heatmap - Custom Color ranges');
       await lens.waitForVisualization('heatmapChart');
 
-      const debugState = await lens.getCurrentChartDebugState('heatmapChart');
+      const debugState = await getChartDebugData(page, 'heatmapChart');
       expect(debugState.legend?.items).toStrictEqual([
         {
           color: '#006837',

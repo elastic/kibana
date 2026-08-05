@@ -7,7 +7,6 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
 
@@ -150,7 +149,7 @@ describe('add to timeline', () => {
       </TestProviders>
     );
 
-    await userEvent.hover(screen.getByRole('button'));
+    fireEvent.mouseOver(screen.getByRole('button'));
 
     expect(await screen.findByText(PRESS)).toBeInTheDocument();
   });

@@ -417,10 +417,9 @@ console.log('\n── Drift gate: inject-detectors.js matches build-injector.mjs
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-// LIFECYCLE TESTS (Task 3: wiring the injector into phases/2-flow-core.md,
-// née phases/2-explore.md before the Task 5 worker-context split)
+// LIFECYCLE TESTS (Task 3: wiring the injector into phases/2-explore.md)
 //
-// These lock in the exact contract phases/2-flow-core.md's inject/detect/
+// These lock in the exact contract phases/2-explore.md's inject/detect/
 // fallback instructions depend on. If any of these fail, the phase
 // instructions describe behavior the injector no longer provides.
 // ══════════════════════════════════════════════════════════════════════════
@@ -429,7 +428,7 @@ console.log('\n── Lifecycle: missing-bridge detection (fallback trigger) ─
 
 {
   // Before injection, `typeof window.__et` must be 'undefined' — this is the
-  // exact check phases/2-flow-core.md uses to decide whether to fall back to
+  // exact check phases/2-explore.md uses to decide whether to fall back to
   // pasting the full detector script for that call.
   const dom = new JSDOM(html('dom-clean'), { runScripts: 'dangerously' });
   assert(dom.window.eval('typeof window.__et') === 'undefined',

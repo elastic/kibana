@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { PieConfigESQL, PieConfigNoESQL } from './pie';
 import { pieConfigSchema } from './pie';
@@ -36,7 +35,7 @@ describe('Pie Schema', () => {
           ],
         };
 
-        const validated = pieConfigSchema.parse(input);
+        const validated = pieConfigSchema.validate(input);
         expect(validated.type).toBe('pie');
         expect(validated.metrics).toHaveLength(1);
         expect(validated.metrics[0]).toHaveProperty('operation', 'count');
@@ -60,7 +59,7 @@ describe('Pie Schema', () => {
           ],
         };
 
-        const validated = pieConfigSchema.parse(input);
+        const validated = pieConfigSchema.validate(input);
         expect(validated.metrics).toHaveLength(1);
         expect(validated.group_by).toHaveLength(1);
       });
@@ -87,7 +86,7 @@ describe('Pie Schema', () => {
           },
         };
 
-        const validated = pieConfigSchema.parse(input);
+        const validated = pieConfigSchema.validate(input);
         expect(validated.styling?.donut_hole).toBe('m');
       });
 
@@ -130,7 +129,7 @@ describe('Pie Schema', () => {
           },
         };
 
-        const validated = pieConfigSchema.parse(input);
+        const validated = pieConfigSchema.validate(input);
         expect(validated.title).toBe('Sales Chart');
         expect(validated.legend?.nested).toBe(false);
         expect(validated.styling?.donut_hole).toBe('s');
@@ -166,7 +165,7 @@ describe('Pie Schema', () => {
           ],
         };
 
-        const validated = pieConfigSchema.parse(input);
+        const validated = pieConfigSchema.validate(input);
         expect(validated.group_by).toHaveLength(3);
       });
 
@@ -226,7 +225,7 @@ describe('Pie Schema', () => {
           ],
         };
 
-        const validated = pieConfigSchema.parse(input);
+        const validated = pieConfigSchema.validate(input);
         expect(validated.group_by?.[0].color).toHaveProperty('mode', 'categorical');
       });
 
@@ -254,7 +253,7 @@ describe('Pie Schema', () => {
           ],
         };
 
-        const validated = pieConfigSchema.parse(input);
+        const validated = pieConfigSchema.validate(input);
         expect(validated.group_by).toHaveLength(2);
         expect(validated.group_by?.[0].collapse_by).toBe('sum');
       });
@@ -265,11 +264,7 @@ describe('Pie Schema', () => {
           metrics: [],
         };
 
-        const result = pieConfigSchema.safeParse(input);
-        expectPrettyError(result).toMatchInlineSnapshot(`
-          "✖ Too small: expected array to have >=1 items
-            → at metrics"
-        `);
+        expect(() => pieConfigSchema.validate(input)).toThrow();
       });
 
       it('throws on empty group_by array', () => {
@@ -284,11 +279,7 @@ describe('Pie Schema', () => {
           group_by: [],
         };
 
-        const result = pieConfigSchema.safeParse(input);
-        expectPrettyError(result).toMatchInlineSnapshot(`
-          "✖ Too small: expected array to have >=1 items
-            → at group_by"
-        `);
+        expect(() => pieConfigSchema.validate(input)).toThrow();
       });
 
       it('throws on invalid donut hole size', () => {
@@ -313,8 +304,7 @@ describe('Pie Schema', () => {
           },
         };
 
-        const result = pieConfigSchema.safeParse(input);
-        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+        expect(() => pieConfigSchema.validate(input)).toThrow();
       });
 
       it('throws on invalid label position', () => {
@@ -341,8 +331,7 @@ describe('Pie Schema', () => {
           },
         };
 
-        const result = pieConfigSchema.safeParse(input);
-        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+        expect(() => pieConfigSchema.validate(input)).toThrow();
       });
 
       describe('Grouping Validation', () => {
@@ -365,7 +354,7 @@ describe('Pie Schema', () => {
               ],
             };
 
-            expect(() => pieConfigSchema.parse(input)).not.toThrow();
+            expect(() => pieConfigSchema.validate(input)).not.toThrow();
           });
 
           it('allows single metric with two non-collapsed breakdowns', () => {
@@ -391,7 +380,7 @@ describe('Pie Schema', () => {
               ],
             };
 
-            expect(() => pieConfigSchema.parse(input)).not.toThrow();
+            expect(() => pieConfigSchema.validate(input)).not.toThrow();
           });
 
           it('allows single metric with three non-collapsed breakdowns', () => {
@@ -422,7 +411,7 @@ describe('Pie Schema', () => {
               ],
             };
 
-            expect(() => pieConfigSchema.parse(input)).not.toThrow();
+            expect(() => pieConfigSchema.validate(input)).not.toThrow();
           });
 
           it('allows single metric with multiple collapsed and three non-collapsed breakdowns', () => {
@@ -465,7 +454,7 @@ describe('Pie Schema', () => {
               ],
             };
 
-            expect(() => pieConfigSchema.parse(input)).not.toThrow();
+            expect(() => pieConfigSchema.validate(input)).not.toThrow();
           });
 
           it('throws when single metric has more than three non-collapsed breakdowns', () => {
@@ -501,9 +490,8 @@ describe('Pie Schema', () => {
               ],
             };
 
-            const result = pieConfigSchema.safeParse(input);
-            expectPrettyError(result).toMatchInlineSnapshot(
-              `"✖ The number of non-collapsed group_by dimensions must not exceed 3"`
+            expect(() => pieConfigSchema.validate(input)).toThrow(
+              /number of non-collapsed group_by dimensions must not exceed 3/i
             );
           });
         });
@@ -525,7 +513,7 @@ describe('Pie Schema', () => {
               ],
             };
 
-            expect(() => pieConfigSchema.parse(input)).not.toThrow();
+            expect(() => pieConfigSchema.validate(input)).not.toThrow();
           });
 
           it('allows multiple metrics with single non-collapsed breakdown', () => {
@@ -551,7 +539,7 @@ describe('Pie Schema', () => {
               ],
             };
 
-            expect(() => pieConfigSchema.parse(input)).not.toThrow();
+            expect(() => pieConfigSchema.validate(input)).not.toThrow();
           });
 
           it('allows multiple metrics with two non-collapsed breakdowns', () => {
@@ -582,7 +570,7 @@ describe('Pie Schema', () => {
               ],
             };
 
-            expect(() => pieConfigSchema.parse(input)).not.toThrow();
+            expect(() => pieConfigSchema.validate(input)).not.toThrow();
           });
 
           it('allows multiple metrics with multiple collapsed and two non-collapsed breakdowns', () => {
@@ -627,7 +615,7 @@ describe('Pie Schema', () => {
               ],
             };
 
-            expect(() => pieConfigSchema.parse(input)).not.toThrow();
+            expect(() => pieConfigSchema.validate(input)).not.toThrow();
           });
 
           it('throws when multiple metrics have more than 2 non-collapsed breakdowns', () => {
@@ -663,9 +651,8 @@ describe('Pie Schema', () => {
               ],
             };
 
-            const result = pieConfigSchema.safeParse(input);
-            expectPrettyError(result).toMatchInlineSnapshot(
-              `"✖ When multiple metrics are defined, the number of non-collapsed group_by dimensions must not exceed 2"`
+            expect(() => pieConfigSchema.validate(input)).toThrow(
+              /the number of non-collapsed group_by dimensions must not exceed 2/i
             );
           });
 
@@ -712,9 +699,8 @@ describe('Pie Schema', () => {
               ],
             };
 
-            const result = pieConfigSchema.safeParse(input);
-            expectPrettyError(result).toMatchInlineSnapshot(
-              `"✖ When multiple metrics are defined, the number of non-collapsed group_by dimensions must not exceed 2"`
+            expect(() => pieConfigSchema.validate(input)).toThrow(
+              /the number of non-collapsed group_by dimensions must not exceed 2/i
             );
           });
         });
@@ -741,7 +727,7 @@ describe('Pie Schema', () => {
           ],
         };
 
-        const validated = pieConfigSchema.parse(input);
+        const validated = pieConfigSchema.validate(input);
         expect(validated.data_source.type).toBe('esql');
         expect(validated.metrics[0]).toHaveProperty('column', 'count');
       });
@@ -761,7 +747,7 @@ describe('Pie Schema', () => {
           ],
         };
 
-        const validated = pieConfigSchema.parse(input);
+        const validated = pieConfigSchema.validate(input);
         expect(validated.group_by).toHaveLength(1);
         expect(validated.group_by?.[0]).toHaveProperty('column', 'category');
       });
@@ -779,7 +765,7 @@ describe('Pie Schema', () => {
           ],
         };
 
-        const validated = pieConfigSchema.parse(input);
+        const validated = pieConfigSchema.validate(input);
         expect(validated.metrics).toHaveLength(2);
       });
 
@@ -849,7 +835,7 @@ describe('Pie Schema', () => {
           },
         };
 
-        const validated = pieConfigSchema.parse(input);
+        const validated = pieConfigSchema.validate(input);
         expect(validated.title).toBe('Sales Chart');
         expect(validated.styling?.donut_hole).toBe('l');
         expect(validated.styling?.labels?.position).toBe('outside');

@@ -8,7 +8,6 @@
 import React, { useCallback, useState } from 'react';
 import {
   EuiPanel,
-  EuiSpacer,
   logicalCSS,
   useEuiMaxBreakpoint,
   useEuiMinBreakpoint,
@@ -16,24 +15,16 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyDetailsFlyoutContainer } from '../../../components/action_policy/details_flyout/action_policy_details_flyout_container';
 import { useFetchExecutionHistory } from '../../../hooks/use_fetch_execution_history';
 import type { PolicyExecutionHistoryItem } from '../../../services/execution_history_api';
 import {
   ExecutionHistoryErrorState,
-  ExecutionHistorySearchBar,
-  FilteredEmptyState,
   PoliciesEmptyState,
   PoliciesExecutionHistoryTable,
-  type PolicyOutcomeFilter,
 } from '../../execution_history_page/components';
 
 const DEFAULT_PER_PAGE = 10;
-const DEFAULT_OUTCOME: PolicyOutcomeFilter = 'all';
-
-const toOutcomeParam = (filter: PolicyOutcomeFilter): PolicyExecutionOutcomeFilter | undefined =>
-  filter === 'all' ? undefined : [filter];
 
 interface Props {
   episodeId: string;
@@ -46,32 +37,14 @@ interface Props {
 export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props) => {
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
-  const [search, setSearch] = useState('');
-  const [outcome, setOutcome] = useState<PolicyOutcomeFilter>(DEFAULT_OUTCOME);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
-
-  const trimmedSearch = search.trim();
-  const searchParam = trimmedSearch.length > 0 ? trimmedSearch : undefined;
-  const outcomeParam = toOutcomeParam(outcome);
 
   const { data, isFetching, isError, refetch } = useFetchExecutionHistory({
     page: page + 1,
     perPage,
-    search: searchParam,
-    outcome: outcomeParam,
     episodeIds: [episodeId],
     startDate: episodeStart,
   });
-
-  const onSearchChange = useCallback((value: string) => {
-    setSearch(value);
-    setPage(0);
-  }, []);
-
-  const onOutcomeChange = useCallback((value: PolicyOutcomeFilter) => {
-    setOutcome(value);
-    setPage(0);
-  }, []);
 
   const onTableChange = useCallback(
     ({ page: tablePage }: CriteriaWithPagination<PolicyExecutionHistoryItem>) => {
@@ -85,7 +58,6 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
 
   const items = data?.items ?? [];
   const totalEvents = data?.totalEvents ?? 0;
-  const isFiltered = searchParam !== undefined || outcome !== DEFAULT_OUTCOME;
 
   return (
     <EuiPanel
@@ -108,33 +80,24 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
       {isError ? (
         <ExecutionHistoryErrorState onRetry={() => refetch()} />
       ) : (
-        <>
-          <ExecutionHistorySearchBar
-            onSearchChange={onSearchChange}
-            outcome={outcome}
-            onOutcomeChange={onOutcomeChange}
-            showRuleFilter={false}
-          />
-          <EuiSpacer size="m" />
-          <PoliciesExecutionHistoryTable
-            tableCaption={i18n.translate(
-              'xpack.alertingV2.episodeDetails.actionPolicyHistory.tableCaption',
-              {
-                defaultMessage: 'Action policy execution history for this episode',
-              }
-            )}
-            items={items}
-            loading={isFetching}
-            pageIndex={page}
-            pageSize={perPage}
-            totalItemCount={totalEvents}
-            onChange={onTableChange}
-            onPolicyClick={setPolicyToViewId}
-            noItemsMessage={isFiltered ? <FilteredEmptyState /> : <PoliciesEmptyState />}
-            showEpisodeColumns={false}
-            showRulesColumn={false}
-          />
-        </>
+        <PoliciesExecutionHistoryTable
+          tableCaption={i18n.translate(
+            'xpack.alertingV2.episodeDetails.actionPolicyHistory.tableCaption',
+            {
+              defaultMessage: 'Action policy execution history for this episode',
+            }
+          )}
+          items={items}
+          loading={isFetching}
+          pageIndex={page}
+          pageSize={perPage}
+          totalItemCount={totalEvents}
+          onChange={onTableChange}
+          onPolicyClick={setPolicyToViewId}
+          noItemsMessage={<PoliciesEmptyState />}
+          showEpisodeColumns={false}
+          showRulesColumn={false}
+        />
       )}
       {policyToViewId && (
         <ActionPolicyDetailsFlyoutContainer

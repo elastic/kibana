@@ -14,14 +14,17 @@ import type {
   AgentToolEventStatusUpdateProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   CodeAnalysisGroundingProps,
+  EndpointLatencyProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
   DetectionScanProps,
   DiscoveryTriggeredProps,
   AgentToolEventWriteProps,
+  AgentToolDiscoveryWriteProps,
 } from './types';
 import {
+  SIGNIFICANT_EVENTS_ENDPOINT_LATENCY_EVENT,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_FEATURES_IDENTIFIED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
@@ -35,10 +38,26 @@ import {
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
   SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_AGENT_TOOL_DISCOVERY_WRITE_EVENT_TYPE,
 } from './constants';
+
+const LATENCY_TRACKING_ENDPOINT_ALLOW_LIST: string[] = [];
 
 export class EbtTelemetryClient {
   constructor(private readonly analytics: AnalyticsServiceSetup) {}
+
+  public startTrackingEndpointLatency(props: Pick<EndpointLatencyProps, 'name' | 'endpoint'>) {
+    if (!LATENCY_TRACKING_ENDPOINT_ALLOW_LIST.includes(props.endpoint)) {
+      return () => {};
+    }
+    const startTime = Date.now();
+    return () => {
+      this.analytics.reportEvent(SIGNIFICANT_EVENTS_ENDPOINT_LATENCY_EVENT, {
+        ...props,
+        duration_ms: Date.now() - startTime,
+      });
+    };
+  }
 
   public trackSignificantEventsQueriesGenerated(params: KnowledgeIndicatorQueriesGeneratedProps) {
     this.analytics.reportEvent(
@@ -105,6 +124,10 @@ export class EbtTelemetryClient {
 
   public trackAgentToolEventsWrite(params: AgentToolEventWriteProps) {
     this.analytics.reportEvent(SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE, params);
+  }
+
+  public trackAgentToolDiscoveryWrite(params: AgentToolDiscoveryWriteProps) {
+    this.analytics.reportEvent(SIGNIFICANT_EVENTS_AGENT_TOOL_DISCOVERY_WRITE_EVENT_TYPE, params);
   }
 
   public trackAgentToolEventSearch(params: AgentToolEventSearchProps) {

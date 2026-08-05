@@ -24,7 +24,6 @@ import {
   EuiTextArea,
   EuiTitle,
   EuiToolTip,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { parse as parseYaml } from 'yaml';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
@@ -69,7 +68,6 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
   isSaving = false,
 }) => {
   const isEditing = !!fieldDefinition;
-  const flyoutTitleId = useGeneratedHtmlId();
 
   const [description, setDescription] = useState(fieldDefinition?.description ?? '');
   const [definition, setDefinition] = useState(fieldDefinition?.definition ?? EXAMPLE_FIELD_YAML);
@@ -138,15 +136,10 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
   }, []);
 
   return (
-    <EuiFlyout
-      onClose={onClose}
-      size="m"
-      data-test-subj="fieldDefinitionFlyout"
-      aria-labelledby={flyoutTitleId}
-    >
+    <EuiFlyout onClose={onClose} size="m" data-test-subj="fieldDefinitionFlyout">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2 id={flyoutTitleId}>
+          <h2>
             {isEditing
               ? i18n.FIELD_DEFINITION_FORM_TITLE_EDIT
               : i18n.FIELD_DEFINITION_FORM_TITLE_CREATE}

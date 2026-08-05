@@ -102,8 +102,6 @@ export interface SubAgentExecution {
 export interface ExperimentalFeatures {
   /** Whether the skills feature is enabled */
   skills: boolean;
-  /** Whether context-aware skill filtering is enabled */
-  relevantSkills: boolean;
   /** Whether the sub-agent execution feature is enabled */
   subagents: boolean;
   /** Whether the todo list tool and task-management prompt are enabled */

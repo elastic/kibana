@@ -22,16 +22,6 @@ import { fetchUniqueRuleId } from './lib/fetch_unique_rule_id';
 import { putSynonymsRule } from './lib/put_synonyms_rule';
 import { fetchSynonymsSetExists } from './lib/fetch_synonyms_set_exists';
 
-const RESOURCE_ID_REGEX = /^[a-zA-Z0-9_-]+$/;
-
-const resourceIdSchema = schema.string({
-  maxLength: 512,
-  validate: (value) =>
-    RESOURCE_ID_REGEX.test(value)
-      ? undefined
-      : 'must only contain letters, numbers, hyphens (-), and underscores (_)',
-});
-
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
   router.get(
     {
@@ -97,7 +87,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          synonymsSetId: resourceIdSchema,
+          synonymsSetId: schema.string(),
         }),
       },
     },
@@ -137,7 +127,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          synonymsSetId: resourceIdSchema,
+          synonymsSetId: schema.string(),
         }),
         query: schema.object({
           from: schema.number({ defaultValue: DEFAULT_PAGE_VALUE.from }),
@@ -194,8 +184,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          synonymsSetId: resourceIdSchema,
-          ruleId: resourceIdSchema,
+          synonymsSetId: schema.string(),
+          ruleId: schema.string(),
         }),
       },
     },
@@ -244,8 +234,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          synonymsSetId: resourceIdSchema,
-          ruleId: resourceIdSchema,
+          synonymsSetId: schema.string(),
+          ruleId: schema.string(),
         }),
       },
     },
@@ -294,7 +284,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          synonymsSetId: resourceIdSchema,
+          synonymsSetId: schema.string(),
         }),
         query: schema.object({
           forceWrite: schema.boolean({ defaultValue: false }),
@@ -359,7 +349,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          synonymsSetId: resourceIdSchema,
+          synonymsSetId: schema.string(),
         }),
       },
     },
@@ -407,8 +397,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       validate: {
         params: schema.object({
-          synonymsSetId: resourceIdSchema,
-          ruleId: resourceIdSchema,
+          synonymsSetId: schema.string(),
+          ruleId: schema.string(),
         }),
         body: schema.object({
           synonyms: schema.string({ maxLength: 4096 }),

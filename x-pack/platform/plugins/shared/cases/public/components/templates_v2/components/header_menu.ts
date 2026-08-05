@@ -6,7 +6,6 @@
  */
 
 import type { AppHeaderBadge, AppHeaderMenu } from '@kbn/app-header';
-import type { TemplateMetadataErrors } from '../utils/template_metadata';
 import * as i18n from '../translations';
 import * as fieldLibraryI18n from '../../field_library/translations';
 
@@ -56,8 +55,7 @@ export const getTemplatesListMenu = ({
 
 interface GetTemplateFormMenuArgs {
   hasChanges: boolean;
-  hasYamlValidationErrors: boolean;
-  metadataErrors: TemplateMetadataErrors;
+  hasValidationErrors: boolean;
   isEdit: boolean;
   isLoading?: boolean;
   isSaving?: boolean;
@@ -67,37 +65,6 @@ interface GetTemplateFormMenuArgs {
   onSave: () => void;
   onIsEnabledChange: (isEnabled: boolean) => void;
 }
-
-const getValidationTooltipContent = (
-  hasYamlValidationErrors: boolean,
-  metadataErrors: TemplateMetadataErrors
-): string | undefined => {
-  const hasTemplateNameError = metadataErrors.name != null;
-  const hasOtherConfigurationErrors =
-    metadataErrors.description != null || metadataErrors.tags != null;
-
-  if (hasYamlValidationErrors && hasTemplateNameError) {
-    return i18n.FIX_FIELDS_YAML_AND_TEMPLATE_NAME;
-  }
-
-  if (hasYamlValidationErrors && hasOtherConfigurationErrors) {
-    return i18n.FIX_FIELDS_YAML_AND_CONFIGURATION_ERRORS;
-  }
-
-  if (hasYamlValidationErrors) {
-    return i18n.FIX_FIELDS_YAML_ERRORS;
-  }
-
-  if (hasTemplateNameError) {
-    return i18n.PROVIDE_TEMPLATE_NAME_IN_CONFIGURATION;
-  }
-
-  if (hasOtherConfigurationErrors) {
-    return i18n.FIX_CONFIGURATION_ERRORS;
-  }
-
-  return undefined;
-};
 
 export const getTemplateFormBadges = (hasChanges: boolean): AppHeaderBadge[] =>
   hasChanges
@@ -112,8 +79,7 @@ export const getTemplateFormBadges = (hasChanges: boolean): AppHeaderBadge[] =>
 
 export const getTemplateFormMenu = ({
   hasChanges,
-  hasYamlValidationErrors,
-  metadataErrors,
+  hasValidationErrors,
   isEdit,
   isLoading,
   isSaving,
@@ -123,13 +89,10 @@ export const getTemplateFormMenu = ({
   onSave,
   onIsEnabledChange,
 }: GetTemplateFormMenuArgs): AppHeaderMenu => {
-  const validationTooltipContent = getValidationTooltipContent(
-    hasYamlValidationErrors,
-    metadataErrors
-  );
-  const saveTooltipContent = submitError ?? validationTooltipContent;
+  const saveTooltipContent =
+    submitError ?? (hasValidationErrors ? i18n.FIX_VALIDATION_ERRORS : undefined);
   const isActionDisabled = Boolean(isLoading || isSaving);
-  const isSaveDisabled = isActionDisabled || validationTooltipContent != null;
+  const isSaveDisabled = isActionDisabled || hasValidationErrors;
 
   return {
     ...(hasChanges

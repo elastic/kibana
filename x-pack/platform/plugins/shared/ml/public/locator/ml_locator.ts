@@ -8,14 +8,12 @@
 import type { LocatorDefinition, KibanaLocation } from '@kbn/share-plugin/public';
 import type {
   DataFrameAnalyticsExplorationUrlState,
-  MlCommonGlobalState,
   MlLocatorParams,
   MlLocator,
   ChangePointDetectionQueryState,
 } from '@kbn/ml-common-types/locator';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import type { TimeRange } from '@kbn/es-query';
 import { formatChangePointDetectionUrl } from './formatters/aiops';
 import {
   formatExplorerUrl,
@@ -30,26 +28,6 @@ export type { MlLocatorParams, MlLocator };
 export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
   public readonly id = ML_APP_LOCATOR;
   private validPaths = new Set(Object.values(ML_PAGES));
-
-  public readonly getTimeRange = (params: MlLocatorParams) => {
-    const pageState = params.pageState as
-      | { timeRange?: MlCommonGlobalState['time']; globalState?: MlCommonGlobalState }
-      | undefined;
-    return pageState?.timeRange ?? pageState?.globalState?.time;
-  };
-
-  public readonly setTimeRange = (params: MlLocatorParams, timeRange?: TimeRange) =>
-    ({
-      ...params,
-      ...(params.pageState
-        ? {
-            pageState: {
-              ...params.pageState,
-              timeRange,
-            },
-          }
-        : {}),
-    } as MlLocatorParams);
 
   public readonly getLocation = async (params: MlLocatorParams): Promise<KibanaLocation> => {
     let path: string = '';

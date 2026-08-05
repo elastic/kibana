@@ -6,9 +6,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV1 } from './v1';
-import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV2 } from './v2';
+import { ruleSavedObjectAttributesSchema } from './v1';
 
-export type RuleSavedObjectAttributes = TypeOf<typeof ruleSavedObjectAttributesSchemaV2>;
+export type RuleSavedObjectAttributes = TypeOf<typeof ruleSavedObjectAttributesSchema>;
 
-export { ruleSavedObjectAttributesSchemaV1, ruleSavedObjectAttributesSchemaV2 };
+export { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV1 };

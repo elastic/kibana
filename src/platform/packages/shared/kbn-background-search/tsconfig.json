@@ -10,7 +10,6 @@
   "kbn_references": [
     "@kbn/data-plugin",
     "@kbn/test-jest-helpers",
-    "@kbn/i18n-react",
-    "@kbn/ui-callout"
+    "@kbn/i18n-react"
   ]
 }

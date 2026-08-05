@@ -15,11 +15,9 @@ export default function ({ getService }: FtrProviderContext) {
   const transform = getService('transform');
 
   describe('creation_saved_search', function () {
-    let savedSearchId: string;
-
     before(async () => {
       await transform.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
-      savedSearchId = await transform.testResources.createSavedSearchFarequoteFilterIfNeeded();
+      await transform.testResources.createSavedSearchFarequoteFilterIfNeeded();
       await transform.testResources.setKibanaTimeZoneToUTC();
 
       await transform.securityUI.loginAsTransformPowerUser();
@@ -120,11 +118,18 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('loads the wizard for the source data', async () => {
-          await transform.testExecution.logTestStep(
-            'loads the transform creation wizard from the saved search deep link'
-          );
-          await transform.navigation.navigateToCreateTransform(savedSearchId, testData.type);
-          await transform.wizard.assertDefineStepActive();
+          await transform.testExecution.logTestStep('loads the home page');
+          await transform.navigation.navigateTo();
+          await transform.management.assertTransformListPageExists();
+
+          await transform.testExecution.logTestStep('displays the stats bar');
+          await transform.management.assertTransformStatsBarExists();
+
+          await transform.testExecution.logTestStep('loads the source selection modal');
+          await transform.management.startTransformCreation();
+
+          await transform.testExecution.logTestStep('selects the source data');
+          await transform.sourceSelection.selectSource(testData.source);
         });
 
         it('navigates through the wizard and sets all needed fields', async () => {
@@ -132,7 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertDefineStepActive();
 
           await transform.testExecution.logTestStep('has correct transform function selected');
-          await transform.wizard.assertSelectedTransformFunction(testData.type);
+          await transform.wizard.assertSelectedTransformFunction('pivot');
 
           await transform.testExecution.logTestStep(
             `sets the date picker to the default '15 minutes ago'`
@@ -188,6 +193,8 @@ export default function ({ getService }: FtrProviderContext) {
           }
 
           if (isLatestTransformTestData(testData)) {
+            await transform.testExecution.logTestStep('sets latest transform method');
+            await transform.wizard.selectTransformFunction('latest');
             await transform.testExecution.logTestStep('adds unique keys');
             for (const { identifier, label } of testData.uniqueKeys) {
               await transform.wizard.assertUniqueKeysInputExists();

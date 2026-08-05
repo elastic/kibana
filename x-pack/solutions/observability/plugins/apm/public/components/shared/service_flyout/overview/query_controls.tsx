@@ -14,7 +14,6 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
 } from '@elastic/eui';
-import { getEbtProps } from '@kbn/ebt-click';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
@@ -23,20 +22,17 @@ import type { Environment } from '../../../../../common/environment_rt';
 import { getTransactionType } from '../../../../context/apm_service/apm_service_context';
 import { useServiceTransactionTypesFetcher } from '../../../../context/apm_service/use_service_transaction_types_fetcher';
 import { useServiceFlyoutContext } from '../service_flyout_context';
-import { useUnifiedEnvironmentsFetcher } from '../../../../hooks/use_unified_environments_fetcher';
+import { useEnvironmentsFetcher } from '../../../../hooks/use_environments_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { TimePickerQuickRange } from '../../date_picker/typings';
 import { EnvironmentSelect } from '../../environment_select';
-import { APM_EBT_ACTIONS } from '../../../app/ebt_constants';
-import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 
 export function ServiceFlyoutQueryControls() {
   const {
     deps: { core },
     service,
-    capabilities,
     filters: {
       environment,
       rangeFrom,
@@ -48,8 +44,6 @@ export function ServiceFlyoutQueryControls() {
       setTransactionType,
     },
   } = useServiceFlyoutContext();
-
-  const showTransactionTypeFilter = capabilities.overview?.transactionTypeFilter ?? false;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -69,7 +63,7 @@ export function ServiceFlyoutQueryControls() {
     rollupInterval: preferred?.source.rollupInterval,
   });
 
-  const { environments, status: environmentsStatus } = useUnifiedEnvironmentsFetcher({
+  const { environments, status: environmentsStatus } = useEnvironmentsFetcher({
     serviceName: service.name,
     start,
     end,
@@ -125,45 +119,39 @@ export function ServiceFlyoutQueryControls() {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSpacer size="xs" />
-          <EuiFlexGrid columns={showTransactionTypeFilter ? 2 : 1} gutterSize="s">
-            {showTransactionTypeFilter && (
-              <EuiFlexItem>
-                <EuiSelect
-                  compressed
-                  fullWidth
-                  prepend={i18n.translate('xpack.apm.serviceFlyout.transactionTypeSelectLabel', {
-                    defaultMessage: 'Transaction type',
-                  })}
-                  aria-label={i18n.translate(
-                    'xpack.apm.serviceFlyout.transactionTypeSelectAriaLabel',
-                    {
-                      defaultMessage: 'Select transaction type',
-                    }
-                  )}
-                  data-test-subj="serviceFlyoutTransactionTypeSelect"
-                  {...getEbtProps({
-                    action: APM_EBT_ACTIONS.SET_TRANSACTION_TYPE,
-                    element: SERVICE_FLYOUT_EBT_ELEMENTS.QUERY_CONTROLS,
-                  })}
-                  disabled={isTransactionTypeDisabled}
-                  options={
-                    isTransactionTypeDisabled
-                      ? [
-                          {
-                            value: '',
-                            text: i18n.translate(
-                              'xpack.apm.serviceFlyout.noTransactionTypeOptionLabel',
-                              { defaultMessage: 'No transaction type available' }
-                            ),
-                          },
-                        ]
-                      : transactionTypeOptions
+          <EuiFlexGrid columns={2} gutterSize="s">
+            <EuiFlexItem>
+              <EuiSelect
+                compressed
+                fullWidth
+                prepend={i18n.translate('xpack.apm.serviceFlyout.transactionTypeSelectLabel', {
+                  defaultMessage: 'Transaction type',
+                })}
+                aria-label={i18n.translate(
+                  'xpack.apm.serviceFlyout.transactionTypeSelectAriaLabel',
+                  {
+                    defaultMessage: 'Select transaction type',
                   }
-                  value={isTransactionTypeDisabled ? '' : selectedTransactionType ?? ''}
-                  onChange={(event) => setTransactionType?.(event.currentTarget.value)}
-                />
-              </EuiFlexItem>
-            )}
+                )}
+                data-test-subj="serviceFlyoutTransactionTypeSelect"
+                disabled={isTransactionTypeDisabled}
+                options={
+                  isTransactionTypeDisabled
+                    ? [
+                        {
+                          value: '',
+                          text: i18n.translate(
+                            'xpack.apm.serviceFlyout.noTransactionTypeOptionLabel',
+                            { defaultMessage: 'No transaction type available' }
+                          ),
+                        },
+                      ]
+                    : transactionTypeOptions
+                }
+                value={isTransactionTypeDisabled ? '' : selectedTransactionType ?? ''}
+                onChange={(event) => setTransactionType?.(event.currentTarget.value)}
+              />
+            </EuiFlexItem>
             <EuiFlexItem>
               <EnvironmentSelect
                 compressed
@@ -175,7 +163,6 @@ export function ServiceFlyoutQueryControls() {
                 rangeFrom={rangeFrom ?? ''}
                 rangeTo={rangeTo ?? ''}
                 onChange={(nextEnvironment) => setEnvironment(nextEnvironment as Environment)}
-                ebt={{ element: SERVICE_FLYOUT_EBT_ELEMENTS.QUERY_CONTROLS }}
               />
             </EuiFlexItem>
           </EuiFlexGrid>

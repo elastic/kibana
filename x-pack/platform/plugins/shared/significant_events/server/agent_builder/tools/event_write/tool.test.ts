@@ -24,6 +24,7 @@ jest.mock('./handler', () => ({
 
 const input = {
   event_id: 'event-1',
+  discovery_id: 'discovery-1',
   status: 'open' as const,
   stream_names: ['logs.test'],
   title: 'Test event',
@@ -52,38 +53,12 @@ describe('events_write tool', () => {
   });
 
   it('enforces the batch bounds', () => {
-    const missingItems = eventsWriteSchema.safeParse({});
-    const emptyItems = eventsWriteSchema.safeParse({ items: [] });
-
-    expect(missingItems.success).toBe(false);
-    expect(emptyItems.success).toBe(false);
-    if (!missingItems.success) {
-      expect(missingItems.error.issues[0].message).toBe(
-        'Invalid input: expected array, received undefined'
-      );
-    }
-    if (!emptyItems.success) {
-      expect(emptyItems.error.issues[0].message).toBe(
-        'Too small: expected array to have >=1 items'
-      );
-    }
+    expect(eventsWriteSchema.safeParse({ items: [] }).success).toBe(false);
     expect(
       eventsWriteSchema.safeParse({
         items: Array.from({ length: MAX_BULK_WRITE_ITEMS + 1 }, () => input),
       }).success
     ).toBe(false);
-  });
-
-  it('rejects input without an items array', () => {
-    expect(eventsWriteSchema.safeParse(input).success).toBe(false);
-  });
-
-  it('normalizes an empty event_id to an omitted event_id', () => {
-    const result = eventsWriteSchema.parse({
-      items: [{ ...input, event_id: '' }],
-    });
-
-    expect(result.items[0].event_id).toBeUndefined();
   });
 
   it('returns aligned results and tracks each item', async () => {

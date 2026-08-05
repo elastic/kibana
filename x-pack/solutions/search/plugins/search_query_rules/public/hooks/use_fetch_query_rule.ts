@@ -27,9 +27,7 @@ export const useFetchQueryRule = (
     queryKey: [QUERY_RULES_QUERY_RULE_FETCH_KEY, ruleId],
     queryFn: async () => {
       return await http.get<SearchQueryRulesQueryRule>(
-        `/internal/search_query_rules/ruleset/${encodeURIComponent(
-          rulesetId
-        )}/rule/${encodeURIComponent(ruleId)}`
+        `/internal/search_query_rules/ruleset/${rulesetId}/rule/${ruleId}`
       );
     },
   });

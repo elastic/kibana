@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/es-query'
   - '@kbn/css-utils'
-  - '@kbn/ui-callout'
 tags:
   - shared-browser
   - package

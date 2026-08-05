@@ -10,6 +10,7 @@ import { useSignalIndex } from './use_signal_index';
 import * as api from './api';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { sourcererSelectors } from '../../../../common/store';
 import {
   signalIndexNameSelector,
   signalIndexOutdatedSelector,
@@ -28,6 +29,7 @@ describe('useSignalIndex', () => {
     jest.clearAllMocks();
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    jest.spyOn(sourcererSelectors, 'signalIndexName').mockReturnValue(null);
   });
 
   test('init', async () => {
@@ -151,6 +153,9 @@ describe('useSignalIndex', () => {
 
   test('should not make API calls when signal index already stored in sourcerer', async () => {
     const spyOnGetSignalIndex = jest.spyOn(api, 'getSignalIndex');
+    jest
+      .spyOn(sourcererSelectors, 'signalIndexName')
+      .mockReturnValue('mock-signal-index-from-sourcerer');
     jest.mocked(signalIndexOutdatedSelector).mockReturnValue(false);
     jest.mocked(signalIndexNameSelector).mockReturnValue('mock-signal-index-from-sourcerer');
 

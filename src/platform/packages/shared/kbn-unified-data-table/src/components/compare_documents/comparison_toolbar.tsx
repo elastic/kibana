@@ -8,8 +8,8 @@
  */
 
 import type { EuiDataGridCustomToolbarProps } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { ReactElement } from 'react';
 import React from 'react';
 import { internalRenderCustomToolbar } from '../custom_toolbar/render_custom_toolbar';
@@ -32,9 +32,10 @@ export const renderComparisonToolbar = ({
       gridProps: {},
       bottomSection:
         totalFields > comparisonFields.length ? (
-          <KbnInfoCallout
+          <EuiCallOut
             announceOnMount={false}
             size="s"
+            iconType="info"
             title={i18n.translate('unifiedDataTable.comparisonMaxFieldsCallout', {
               defaultMessage:
                 'Comparison is limited to {comparisonFields} of {totalFields} fields.',

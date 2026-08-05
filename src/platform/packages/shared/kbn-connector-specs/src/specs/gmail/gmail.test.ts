@@ -32,7 +32,6 @@ describe('GmailConnector', () => {
       expect(GmailConnector.metadata.id).toBe('.gmail');
       expect(GmailConnector.metadata.displayName).toBe('Gmail');
       expect(GmailConnector.metadata.supportedFeatureIds).toContain('workflows');
-      expect(GmailConnector.metadata.supportedFeatureIds).toContain('contextEngine');
     });
   });
 

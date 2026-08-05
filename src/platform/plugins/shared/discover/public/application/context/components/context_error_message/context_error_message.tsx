@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
+import { EuiCallOut, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { LoadingStatusEntry } from '../../services/context_query_state';
 import { FailureReason, LoadingStatus } from '../../services/context_query_state';
 
@@ -25,22 +25,25 @@ export function ContextErrorMessage({ status }: ContextErrorMessageProps) {
     return null;
   }
   return (
-    <KbnDangerCallout
+    <EuiCallOut
       title={
         <FormattedMessage
           id="discover.context.failedToLoadAnchorDocumentDescription"
           defaultMessage="Failed to load the anchor document"
         />
       }
-      text={
-        status.reason === FailureReason.UNKNOWN && (
+      color="danger"
+      iconType="warning"
+      data-test-subj="contextErrorMessageTitle"
+    >
+      <EuiText data-test-subj="contextErrorMessageBody">
+        {status.reason === FailureReason.UNKNOWN && (
           <FormattedMessage
             id="discover.context.reloadPageDescription.reloadOrVisitTextMessage"
             defaultMessage="Please reload or go back to the document list to select a valid anchor document."
           />
-        )
-      }
-      data-test-subj="contextErrorMessageTitle"
-    />
+        )}
+      </EuiText>
+    </EuiCallOut>
   );
 }

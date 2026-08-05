@@ -59,7 +59,6 @@ export function transformSloResponseToFormState(
     tags: values.tags,
     settings: {
       preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
-      preventCrossProjectSearch: values.settings?.preventCrossProjectSearch ?? false,
       syncDelay: values.settings?.syncDelay
         ? toMinutes(toDuration(values.settings.syncDelay))
         : SETTINGS_DEFAULT_VALUES.syncDelay,
@@ -99,7 +98,6 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
     groupBy: [values.groupBy].flat(),
     settings: {
       preventInitialBackfill: values.settings.preventInitialBackfill,
-      preventCrossProjectSearch: values.settings.preventCrossProjectSearch,
       syncDelay: `${values.settings.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
       frequency: `${values.settings.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
       syncField: values.settings.syncField,
@@ -135,7 +133,6 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
     groupBy: [values.groupBy].flat(),
     settings: {
       preventInitialBackfill: values.settings.preventInitialBackfill,
-      preventCrossProjectSearch: values.settings.preventCrossProjectSearch,
       syncDelay: `${values.settings.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
       frequency: `${values.settings.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
       syncField: values.settings.syncField,
@@ -258,9 +255,6 @@ export function transformPartialSLODataToFormState(
   if (!!values.settings) {
     if (values.settings.preventInitialBackfill) {
       state.settings.preventInitialBackfill = values.settings.preventInitialBackfill;
-    }
-    if (values.settings.preventCrossProjectSearch !== undefined) {
-      state.settings.preventCrossProjectSearch = values.settings.preventCrossProjectSearch;
     }
     if (values.settings.syncDelay) {
       state.settings.syncDelay = toMinutes(toDuration(values.settings.syncDelay));

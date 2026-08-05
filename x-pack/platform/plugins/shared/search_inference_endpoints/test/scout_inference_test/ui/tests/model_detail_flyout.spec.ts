@@ -113,10 +113,6 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
       await expect(eisModels.addEndpointCancelButton).toBeVisible();
     });
 
-    await test.step('reasoning toggle is wired into the modal for chat_completion', async () => {
-      await expect(eisModels.addEndpointReasoningToggle).toBeVisible();
-    });
-
     await test.step('cancel closes the modal', async () => {
       await eisModels.addEndpointCancelButton.click();
       await expect(eisModels.addEndpointModal).toBeHidden();

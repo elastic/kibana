@@ -6,10 +6,7 @@
  */
 
 import { entries, findLastIndex, isNil } from 'lodash';
-import type {
-  ParseAggregationResultsOpts,
-  ParsedAggregationBucket,
-} from '@kbn/triggers-actions-ui-plugin/common';
+import type { ParseAggregationResultsOpts } from '@kbn/triggers-actions-ui-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ESQLCommandOption, ESQLAstCommand } from '@elastic/esql/types';
 import { Parser, isOptionNode, isColumn, isFunctionExpression, isAssignment } from '@elastic/esql';
@@ -144,22 +141,12 @@ export const toGroupedEsqlQueryHits = async (
   const duplicateAlertIds: Set<string> = new Set<string>();
   const longAlertIds: Set<string> = new Set<string>();
   const rows: EsqlDocument[] = [];
-  const mappedAlertIds: Record<string, string[]> = {};
-  const mappedAlertIdFields: Record<string, string[]> = {};
+  const mappedAlertIds: Record<string, Array<string | null>> = {};
   const groupedHits: Record<string, EsqlHit[]> = {};
   for (let r = 0; r < table.values.length; r++) {
     const row = table.values[r];
     const document = rowToDocument(table.columns, row);
-    // Single pass keeps fields/values index-aligned (bucket keyFields/key) and narrows out nulls.
-    const filteredAlertIdFields: string[] = [];
-    const mappedAlertId: string[] = [];
-    for (const field of alertIdFields) {
-      const value = document[field];
-      if (!isNil(value)) {
-        filteredAlertIdFields.push(field);
-        mappedAlertId.push(value);
-      }
-    }
+    const mappedAlertId = alertIdFields.filter((a) => !isNil(document[a])).map((a) => document[a]);
     if (mappedAlertId.length > 0) {
       const alertId = mappedAlertId.join(',');
       const hit = {
@@ -173,7 +160,6 @@ export const toGroupedEsqlQueryHits = async (
       } else {
         groupedHits[alertId] = [hit];
         mappedAlertIds[alertId] = mappedAlertId;
-        mappedAlertIdFields[alertId] = filteredAlertIdFields;
       }
 
       if (isPreview) {
@@ -190,12 +176,11 @@ export const toGroupedEsqlQueryHits = async (
     }
   }
 
-  const aggregations: { groupAgg: { buckets: ParsedAggregationBucket[] } } = {
+  const aggregations = {
     groupAgg: {
       buckets: entries(groupedHits).map(([key, value]) => {
         return {
           key: mappedAlertIds[key],
-          keyFields: mappedAlertIdFields[key],
           doc_count: value.length,
           topHitsAgg: {
             hits: {
@@ -279,7 +264,7 @@ export const getAlertIdFields = (query: string, resultColumns: EsqlResultColumn[
 };
 
 const getLastStatsCommandIndex = (commands: ESQLAstCommand[]): number =>
-  findLastIndex(commands, (c) => c.name === 'stats' || c.name === 'inline stats');
+  findLastIndex(commands, (c) => c.name === 'stats');
 
 const getByOption = (astCommand: ESQLAstCommand): ESQLCommandOption | undefined => {
   for (const statsArg of astCommand.args) {

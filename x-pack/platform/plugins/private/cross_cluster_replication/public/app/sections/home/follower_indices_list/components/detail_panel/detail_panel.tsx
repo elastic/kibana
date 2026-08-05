@@ -171,7 +171,6 @@ const FollowerIndexDetails = ({ followerIndex, isPollingStatus }: FollowerIndexD
 
             {isPaused ? (
               <EuiCallOut
-                announceOnMount
                 size="s"
                 title={
                   <FormattedMessage

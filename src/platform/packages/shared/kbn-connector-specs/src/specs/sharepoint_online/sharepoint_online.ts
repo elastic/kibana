@@ -59,7 +59,7 @@ export const SharepointOnline: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {

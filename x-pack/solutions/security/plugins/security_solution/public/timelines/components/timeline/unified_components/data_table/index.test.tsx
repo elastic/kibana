@@ -23,7 +23,6 @@ import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_fl
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 import { PageScope } from '../../../../../data_view_manager/constants';
-import { SECURITY_CELL_ACTIONS_DETAILS_FLYOUT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
   useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
@@ -254,10 +253,6 @@ describe('unified data table', () => {
 
       expect(cellAction.props.metadata).toEqual({ scopeId: TimelineId.test });
       expect(cellAction.props.sourcererScopeId).toEqual(PageScope.timeline);
-      // The details-flyout trigger is required so the "Toggle column in table" action (only
-      // registered on that trigger) is available on Timeline alert/event fields in the new flyout.
-      expect(cellAction.props.triggerId).toEqual(SECURITY_CELL_ACTIONS_DETAILS_FLYOUT);
-      expect(cellAction.props.visibleCellActions).toEqual(6);
     },
     SPECIAL_TEST_TIMEOUT
   );

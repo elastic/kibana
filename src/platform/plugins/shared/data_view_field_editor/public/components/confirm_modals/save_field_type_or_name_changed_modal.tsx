@@ -9,6 +9,7 @@
 
 import React, { useState } from 'react';
 import {
+  EuiCallOut,
   EuiSpacer,
   EuiConfirmModal,
   EuiFieldText,
@@ -16,7 +17,6 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 
 const geti18nTexts = (fieldName: string) => ({
   cancelButtonText: i18n.translate(
@@ -79,7 +79,12 @@ export const SaveFieldTypeOrNameChangedModal: React.FC<Props> = ({
       onCancel={onCancel}
       onConfirm={onConfirm}
     >
-      <KbnWarningCallout title={i18nTexts.warningChangingFields} size="s" />
+      <EuiCallOut
+        color="warning"
+        title={i18nTexts.warningChangingFields}
+        iconType="warning"
+        size="s"
+      />
       <EuiSpacer />
       <EuiFormRow label={i18nTexts.typeConfirm}>
         <EuiFieldText

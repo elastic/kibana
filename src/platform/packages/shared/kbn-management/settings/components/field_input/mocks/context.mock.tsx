@@ -61,6 +61,6 @@ export const wrap = (
   services: FieldInputServices = createFieldInputServicesMock()
 ) => (
   <KibanaRootContextProvider {...createRootMock()}>
-    <TestWrapper services={services}>{component}</TestWrapper>
+    <TestWrapper {...services}>{component}</TestWrapper>
   </KibanaRootContextProvider>
 );

@@ -14,7 +14,6 @@ import {
 } from '@kbn/workflows-yaml';
 import { INSTALL_PLACEHOLDER } from '@kbn/workflows-library';
 import type { JsonObject } from './types';
-import { addUnionDiscriminators } from './discriminate_unions';
 
 // Re-exported so introspection/tests can strip the wrapper the weaver adds.
 export { TEMPLATE_VALUE_DEF_NAME };
@@ -30,17 +29,14 @@ const installAlternative = (): JsonObject =>
 
 /**
  * `strict` variant: the composed schema with LiquidJS tolerance woven into every
- * typed value position that would otherwise reject a bare template string, then
- * the `steps`/`triggers` unions made ajv-native-discriminator ready.
+ * typed value position that would otherwise reject a bare template string.
  */
 export const transformToStrict = (schema: JsonObject): JsonObject =>
-  addUnionDiscriminators(buildTemplateTolerantJsonSchema(schema));
+  buildTemplateTolerantJsonSchema(schema);
 
 /**
  * `template` variant: `strict` plus the `__install__.<name>` placeholder in the
  * shared template-value definition (for installable library templates).
  */
 export const transformToTemplate = (schema: JsonObject): JsonObject =>
-  addUnionDiscriminators(
-    buildTemplateTolerantJsonSchema(schema, { extraAlternatives: [installAlternative()] })
-  );
+  buildTemplateTolerantJsonSchema(schema, { extraAlternatives: [installAlternative()] });

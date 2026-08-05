@@ -206,6 +206,39 @@ const deleteEntryRoute = createServerRoute({
   },
 });
 
+const renameEntryRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/memory/entries/{id}/rename',
+  options: {
+    access: 'internal',
+    summary: 'Rename a memory page',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ id: z.string().max(MAX_ID_LENGTH) }),
+    body: z.object({ new_name: z.string().max(MAX_ID_LENGTH) }),
+  }),
+  handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
+    const { licensing, scopedClusterClient } = await getScopedClients({
+      request,
+    });
+    await assertSignificantEventsAccess({ server, licensing });
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+
+    const authUser = server.core.security.authc.getCurrentUser(request);
+    const user = authUser?.username ?? 'unknown';
+
+    return memory.rename({
+      id: params.path.id,
+      newName: params.body.new_name,
+      user,
+    });
+  },
+});
+
 const searchRoute = createServerRoute({
   endpoint: 'POST /internal/streams/memory/search',
   options: {
@@ -641,6 +674,7 @@ export const internalMemoryRoutes = {
   ...getEntryByNameRoute,
   ...updateEntryRoute,
   ...deleteEntryRoute,
+  ...renameEntryRoute,
   ...searchRoute,
   ...getCategoryTreeRoute,
   ...getHistoryRoute,

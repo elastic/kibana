@@ -10,7 +10,6 @@ import { schema } from '@kbn/config-schema';
 import { ENROLLMENT_API_KEY_MAPPINGS } from '../../constants';
 
 import { FLEET_ENROLLMENT_API_PREFIX } from '../../../common/constants';
-import { isValidEnrollmentKeyExpiration } from '../../../common/services';
 
 import { validateKuery } from '../../routes/utils/filter_utils';
 import { EnrollmentAPIKeySchema } from '../models';
@@ -84,20 +83,7 @@ export const PostEnrollmentAPIKeyRequestSchema = {
     {
       name: schema.maybe(schema.string()),
       policy_id: schema.string(),
-      expiration: schema.maybe(
-        schema.string({
-          maxLength: 20,
-          meta: {
-            description:
-              'The expiration time for the enrollment token, expressed as a duration (for example, 30d, 24h, 90m). By default, enrollment tokens never expire.',
-          },
-          validate: (value) => {
-            if (!isValidEnrollmentKeyExpiration(value)) {
-              return 'Expiration must be a valid duration (for example, 30d, 24h, 90m, 60s)';
-            }
-          },
-        })
-      ),
+      expiration: schema.maybe(schema.string()),
     },
     { meta: { id: 'new_enrollment_api_key' } }
   ),

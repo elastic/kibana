@@ -48,8 +48,9 @@ import { UnsnoozeActionPolicyRoute } from '../routes/action_policies/unsnooze_ac
 import { UpdateActionPolicyRoute } from '../routes/action_policies/update_action_policy_route';
 import { UpdateActionPolicyApiKeyRoute } from '../routes/action_policies/update_action_policy_api_key_route';
 import { DeleteActionPolicyRoute } from '../routes/action_policies/delete_action_policy_route';
-import { ListActionPolicyExecutionsRoute } from '../routes/execution_history/list_action_policy_executions_route';
-import { ListRuleExecutionsRoute } from '../routes/execution_history/list_rule_executions_route';
+import { ListExecutionHistoryRoute } from '../routes/action_policies/list_execution_history_route';
+import { CountNewExecutionHistoryEventsRoute } from '../routes/action_policies/count_new_execution_history_events_route';
+import { GetRuleExecutionsRoute } from '../routes/execution_history/get_rule_executions_route';
 import { MatcherValueSuggestionsRoute } from '../routes/suggestions/matcher_value_suggestions_route';
 import { MatcherRuleEventFieldsRoute } from '../routes/suggestions/matcher_rule_event_fields_route';
 import { ActionPolicyTagsRoute } from '../routes/suggestions/action_policy_tags_route';
@@ -57,8 +58,6 @@ import { SuggestUserProfilesRoute } from '../routes/suggestions/suggest_user_pro
 import { UpsertRuleRoute } from '../routes/rules/upsert_rule_route';
 import { UpsertActionPolicyRoute } from '../routes/action_policies/upsert_action_policy_route';
 import { MatchActionPoliciesForRuleRoute } from '../routes/action_policies/match_action_policies_for_rule_route';
-import { CreateAlertEventRoute } from '../routes/alert_events/create_alert_event_route';
-import { CreateAlertEventBySourceRoute } from '../routes/alert_events/create_alert_event_by_source_route';
 
 /**
  * TODO: https://github.com/elastic/rna-program/issues/426
@@ -109,8 +108,9 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(BulkSnoozeActionPoliciesRoute);
   bind(Route).toConstantValue(BulkUnsnoozeActionPoliciesRoute);
   bind(Route).toConstantValue(BulkUpdateApiKeyActionPoliciesRoute);
-  bind(Route).toConstantValue(ListActionPolicyExecutionsRoute);
-  bind(Route).toConstantValue(ListRuleExecutionsRoute);
+  bind(Route).toConstantValue(ListExecutionHistoryRoute);
+  bind(Route).toConstantValue(CountNewExecutionHistoryEventsRoute);
+  bind(Route).toConstantValue(GetRuleExecutionsRoute);
   bind(Route).toConstantValue(MatcherValueSuggestionsRoute);
   bind(Route).toConstantValue(MatcherRuleEventFieldsRoute);
 
@@ -121,6 +121,4 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(UpsertRuleRoute);
   bind(Route).toConstantValue(UpsertActionPolicyRoute);
   bind(Route).toConstantValue(MatchActionPoliciesForRuleRoute);
-  bind(Route).toConstantValue(CreateAlertEventRoute);
-  bind(Route).toConstantValue(CreateAlertEventBySourceRoute);
 }

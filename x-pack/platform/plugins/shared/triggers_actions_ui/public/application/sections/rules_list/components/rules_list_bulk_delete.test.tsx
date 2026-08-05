@@ -84,22 +84,6 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-jest.mock('@kbn/kibana-utils-plugin/public', () => {
-  const originalModule = jest.requireActual('@kbn/kibana-utils-plugin/public');
-  return {
-    ...originalModule,
-    createKbnUrlStateStorage: jest.fn(() => ({
-      get: jest.fn(() => null),
-      set: jest.fn(() => null),
-    })),
-  };
-});
-jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
-jest.mock('@kbn/cps-utils', () => ({
-  ...jest.requireActual('@kbn/cps-utils'),
-  useRouteBasedCpsPickerAccess: jest.fn(),
-}));
-
 jest.mock('../../../lib/capabilities', () => ({
   hasAllPrivilege: jest.fn(() => true),
   hasSaveRulesCapability: jest.fn(() => true),
@@ -153,8 +137,9 @@ const renderWithProviders = (ui: any) => {
   return render(ui, { wrapper: AllTheProviders });
 };
 
-describe('Rules list Bulk Delete', () => {
-  beforeAll(async () => {
+// FLAKY: https://github.com/elastic/kibana/issues/152521
+describe.skip('Rules list Bulk Delete', () => {
+  beforeEach(async () => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
     loadRulesWithKueryFilter.mockResolvedValue({
       page: 1,

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
-import type { VersionedRouter } from '@kbn/core-http-server';
-import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { logRequest } from '@kbn/as-code-utils';
+import { schema } from '@kbn/config-schema';
+import type { VersionedRouter } from '@kbn/core-http-server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { commonRouteConfig, PUBLIC_API_VERSION } from '../constants';
@@ -40,14 +40,14 @@ export function registerReadRoute(
       },
       validate: {
         request: {
-          params: z
-            .object({
-              id: z.string().meta({
+          params: schema.object({
+            id: schema.string({
+              meta: {
                 description:
                   'The markdown library item ID, as returned by the create or search endpoints.',
-              }),
-            })
-            .strict(),
+              },
+            }),
+          }),
         },
         response: {
           200: {

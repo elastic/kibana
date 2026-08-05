@@ -126,7 +126,7 @@ describe('TaskPollingLifecycle', () => {
       },
       worker_utilization_running_average_window: 5,
       metrics_reset_interval: 3000,
-      claim_strategy: 'mget',
+      claim_strategy: 'update_by_query',
       request_timeouts: {
         update_by_query: 1000,
       },
@@ -251,6 +251,22 @@ describe('TaskPollingLifecycle', () => {
       await delay(100);
 
       expect(resetInFlightTasksMock).toHaveBeenCalledTimes(1);
+    });
+
+    test('provides TaskClaiming with the capacity available when strategy = CLAIM_STRATEGY_UPDATE_BY_QUERY', () => {
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+
+      new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        elasticsearchAndSOAvailability$,
+        startingCapacity: 40,
+      });
+      const taskClaimingGetCapacity = (TaskClaiming as jest.Mock<TaskClaimingClass>).mock
+        .calls[0][0].getAvailableCapacity;
+
+      expect(taskClaimingGetCapacity()).toEqual(40);
+      expect(taskClaimingGetCapacity('report')).toEqual(1);
+      expect(taskClaimingGetCapacity('quickReport')).toEqual(5);
     });
 
     test('provides TaskClaiming with the capacity available when strategy = CLAIM_STRATEGY_MGET', () => {

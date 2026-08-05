@@ -85,22 +85,6 @@ export const FineTuneModelsButton: React.FC = () => (
   </EuiButtonEmpty>
 );
 
-export const fineTuneModelsActionProps = {
-  children: i18n.translate(
-    'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.fineTuneModelButton',
-    {
-      defaultMessage: 'Fine-tune performance',
-    }
-  ),
-  'data-test-subj': 'enterpriseSearchFineTuneModelsButtonFineTunePerformanceButton',
-  iconSide: 'left' as const,
-  iconType: 'wrench',
-  onClick: () =>
-    KibanaLogic.values.navigateToUrl(TRAINED_MODELS_PATH, {
-      shouldNotCreateHref: true,
-    }),
-};
-
 export const TextExpansionCallOut: React.FC<TextExpansionCallOutProps> = (props) => {
   const { dismiss, isCompact, isDismissable, show } = useTextExpansionCallOutData(props);
   const { ingestionMethod } = useValues(IndexViewLogic);

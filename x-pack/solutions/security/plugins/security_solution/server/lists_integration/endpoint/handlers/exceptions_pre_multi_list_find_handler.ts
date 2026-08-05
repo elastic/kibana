@@ -15,7 +15,6 @@ import {
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
   TrustedDeviceValidator,
-  CustomYaraSignaturesValidator,
 } from '../validators';
 import { setFindRequestFilterScopeToActiveSpace } from '../utils';
 
@@ -29,59 +28,40 @@ export const getExceptionsPreMultiListFindHandler = (
 
     let isEndpointArtifact = false;
 
-    // validate Trusted application
     if (data.listId.some((id) => TrustedAppValidator.isTrustedApp({ listId: id }))) {
+      // validate Trusted application
       isEndpointArtifact = true;
       await new TrustedAppValidator(endpointAppContextService, request).validatePreMultiListFind();
-    }
-
-    // validate Trusted Devices
-    if (data.listId.some((id) => TrustedDeviceValidator.isTrustedDevice({ listId: id }))) {
+    } else if (data.listId.some((id) => TrustedDeviceValidator.isTrustedDevice({ listId: id }))) {
+      // validate Trusted Devices
       isEndpointArtifact = true;
       await new TrustedDeviceValidator(
         endpointAppContextService,
         request
       ).validatePreMultiListFind();
-    }
-
-    // Validate Host Isolation Exceptions
-    if (
+    } else if (
       data.listId.some((listId) =>
         HostIsolationExceptionsValidator.isHostIsolationException({ listId })
       )
     ) {
+      // Validate Host Isolation Exceptions
       isEndpointArtifact = true;
       await new HostIsolationExceptionsValidator(
         endpointAppContextService,
         request
       ).validatePreMultiListFind();
-    }
-
-    // Event Filters
-    if (data.listId.some((listId) => EventFilterValidator.isEventFilter({ listId }))) {
+    } else if (data.listId.some((listId) => EventFilterValidator.isEventFilter({ listId }))) {
+      // Event Filters Exceptions
       isEndpointArtifact = true;
       await new EventFilterValidator(endpointAppContextService, request).validatePreMultiListFind();
-    }
-
-    // validate Blocklist
-    if (data.listId.some((id) => BlocklistValidator.isBlocklist({ listId: id }))) {
+    } else if (data.listId.some((id) => BlocklistValidator.isBlocklist({ listId: id }))) {
+      // validate Blocklist
       isEndpointArtifact = true;
       await new BlocklistValidator(endpointAppContextService, request).validatePreMultiListFind();
-    }
-
-    // validate Custom YARA signatures
-    if (
-      data.listId.some((id) => CustomYaraSignaturesValidator.isCustomYaraSignature({ listId: id }))
+    } else if (
+      data.listId.some((id) => EndpointExceptionsValidator.isEndpointException({ listId: id }))
     ) {
-      isEndpointArtifact = true;
-      await new CustomYaraSignaturesValidator(
-        endpointAppContextService,
-        request
-      ).validatePreMultiListFind();
-    }
-
-    // Validate Endpoint Exceptions
-    if (data.listId.some((id) => EndpointExceptionsValidator.isEndpointException({ listId: id }))) {
+      // Validate Endpoint Exceptions
       isEndpointArtifact = true;
       await new EndpointExceptionsValidator(
         endpointAppContextService,

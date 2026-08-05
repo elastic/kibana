@@ -10,7 +10,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CommonProps } from '@elastic/eui';
-import { KbnWarningCallout } from '@kbn/ui-callout';
+import { EuiButton, EuiCallOut, EuiText } from '@elastic/eui';
 
 export interface SaveButtonProps extends CommonProps {
   onSave: () => Promise<void>;
@@ -40,23 +40,30 @@ export const DraftModeCallout = ({
   saveButtonProps,
 }: DraftModeCalloutProps) => {
   return (
-    <KbnWarningCallout
+    <EuiCallOut
       announceOnMount
       data-test-subj={dataTestSubj}
+      color="warning"
+      iconType="warning"
       title={i18n.translate('share.draftModeCallout.title', {
         defaultMessage: 'You have unsaved changes',
       })}
-      text={<p>{message}</p>}
-      actionProps={
-        saveButtonProps && {
-          primary: {
-            children: saveButtonProps.label ?? saveButtonText,
-            'data-test-subj': saveButtonProps['data-test-subj'],
-            onClick: saveButtonProps.onSave,
-            isLoading: saveButtonProps.isSaving,
-          },
-        }
-      }
-    />
+    >
+      <EuiText component="p" size="s">
+        {message}
+      </EuiText>
+      {saveButtonProps && (
+        <EuiButton
+          color="warning"
+          fill
+          size="s"
+          data-test-subj={saveButtonProps['data-test-subj']}
+          onClick={saveButtonProps.onSave}
+          isLoading={saveButtonProps.isSaving}
+        >
+          {saveButtonProps.label ?? saveButtonText}
+        </EuiButton>
+      )}
+    </EuiCallOut>
   );
 };

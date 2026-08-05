@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
@@ -25,7 +33,6 @@ import {
 import React from 'react';
 import { merge } from 'rxjs';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { BookState } from '../../../server';
 import { defaultBookState } from './default_book_state';
 import { loadBook, saveBook } from './library_utils';
@@ -150,9 +157,10 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
               `}
             >
               {showLibraryCallout && (
-                <KbnWarningCallout
+                <EuiCallOut
                   announceOnMount={false}
                   size="s"
+                  color={'warning'}
                   title={
                     isByReference
                       ? i18n.translate('embeddableExamples.savedBook.libraryCallout', {
@@ -162,6 +170,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
                           defaultMessage: 'Not saved in library',
                         })
                   }
+                  iconType={isByReference ? 'folderCheck' : 'folderClosed'}
                 />
               )}
               <div

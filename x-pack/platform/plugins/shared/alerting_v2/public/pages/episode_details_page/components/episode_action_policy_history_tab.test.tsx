@@ -37,10 +37,6 @@ jest.mock('../../../hooks/use_fetch_execution_history', () => ({
   useFetchExecutionHistory: (...args: unknown[]) => mockUseFetchExecutionHistory(...args),
 }));
 
-jest.mock('../../../hooks/use_fetch_rules', () => ({
-  useFetchRules: () => ({ data: { items: [] }, isFetching: false }),
-}));
-
 jest.mock(
   '../../../components/action_policy/details_flyout/action_policy_details_flyout_container',
   () => ({
@@ -63,7 +59,7 @@ jest.mock(
 const buildItem = (
   overrides: Partial<PolicyExecutionHistoryItem> = {}
 ): PolicyExecutionHistoryItem => ({
-  dispatched_at: '2026-05-05T10:00:00.000Z',
+  '@timestamp': '2026-05-05T10:00:00.000Z',
   policy: { id: 'policy-1', name: 'My Policy' },
   rules: [{ id: 'rule-1', name: 'My Rule' }],
   totalRuleCount: 1,
@@ -115,7 +111,6 @@ describe('EpisodeActionPolicyHistoryTab', () => {
     expect(mockUseFetchExecutionHistory).toHaveBeenCalledWith({
       page: 1,
       perPage: 10,
-      outcome: undefined,
       episodeIds: [EPISODE_ID],
     });
   });
@@ -127,33 +122,9 @@ describe('EpisodeActionPolicyHistoryTab', () => {
     expect(mockUseFetchExecutionHistory).toHaveBeenCalledWith({
       page: 1,
       perPage: 10,
-      outcome: undefined,
       episodeIds: [EPISODE_ID],
       startDate: '2026-01-01T00:00:00.000Z',
     });
-  });
-
-  it('renders the search bar and outcome filter but not the rule filter', () => {
-    mockFetchResult();
-    renderTab();
-
-    expect(screen.getByTestId('executionHistorySearchBar')).toBeInTheDocument();
-    expect(screen.getByTestId('executionHistoryOutcomeFilter')).toBeInTheDocument();
-    expect(screen.queryByTestId('executionHistoryRuleFilter')).not.toBeInTheDocument();
-  });
-
-  it('refetches with the selected outcome when the outcome filter changes', async () => {
-    mockFetchResult();
-    renderTab();
-
-    await userEvent.selectOptions(
-      screen.getByTestId('executionHistoryOutcomeFilter'),
-      'dispatched'
-    );
-
-    expect(mockUseFetchExecutionHistory).toHaveBeenLastCalledWith(
-      expect.objectContaining({ outcome: ['dispatched'], episodeIds: [EPISODE_ID] })
-    );
   });
 
   it('renders rows without the Episodes, Action groups, and Rules columns', () => {

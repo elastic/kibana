@@ -269,7 +269,6 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
         `}
       >
         <EuiPopover
-          aria-label={SETTINGS_MENU_TITLE}
           button={button}
           isOpen={isPopoverOpen}
           closePopover={togglePopover}

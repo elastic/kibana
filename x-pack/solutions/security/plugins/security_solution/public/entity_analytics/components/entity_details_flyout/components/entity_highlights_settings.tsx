@@ -231,12 +231,6 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
 
   return (
     <EuiPopover
-      aria-label={i18n.translate(
-        'xpack.securitySolution.flyout.entityDetails.highlights.settingsPopoverAriaLabel',
-        {
-          defaultMessage: 'Entity highlights settings',
-        }
-      )}
       button={
         <EuiToolTip
           content={i18n.translate(
