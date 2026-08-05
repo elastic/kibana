@@ -87,7 +87,8 @@ export const inferenceEndpointAdapter = {
       })
     ).pipe(
       switchMap((stream) => eventSourceStreamIntoObservable(stream)),
-      processOpenAIStream(),
+      // Elasticsearch's Anthropic stream emits valid OpenAI-compatible chunks with `object: null`.
+      processOpenAIStream({ allowNullObjectWithChoices: true }),
       emitTokenCountEstimateIfMissing({ request }),
       useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
