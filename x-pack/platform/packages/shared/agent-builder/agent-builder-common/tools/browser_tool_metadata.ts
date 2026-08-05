@@ -37,4 +37,14 @@ export interface BrowserApiToolMetadata {
    * Generated from the tool's Zod schema.
    */
   schema: JSONSchema;
+
+  /**
+   * When true, the agent execution pauses when the tool is called and resumes once
+   * the browser reports back, with the handler's return value handed to the model as
+   * the tool result.
+   *
+   * Defaults to false: the model gets an immediate acknowledgement and the handler's
+   * return value is discarded (fire-and-forget).
+   */
+  returns_result?: boolean;
 }

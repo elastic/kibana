@@ -36,6 +36,10 @@ jest.mock('../../../hooks/use_conversation_stream', () => ({
   useConversationStream: jest.fn(),
 }));
 
+jest.mock('../../../context/conversation/conversation_context', () => ({
+  useConversationContext: () => ({}),
+}));
+
 const useConversationStreamMock = useConversationStream as jest.MockedFunction<
   typeof useConversationStream
 >;

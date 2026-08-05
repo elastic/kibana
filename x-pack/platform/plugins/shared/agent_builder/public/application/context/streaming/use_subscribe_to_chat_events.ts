@@ -103,7 +103,9 @@ export const subscribeToChatEvents = ({
       const toolId = event.data.tool_id;
       if (toolId && browserToolExecutor && browserApiTools) {
         const toolDef = browserApiTools.find((tool) => tool.id === toolId);
-        if (toolDef) {
+        // Two-way tools are driven by the `browser_tool_call` prompt instead: the round pauses
+        // and `BrowserToolCallPrompt` runs the handler, so running it here would double-execute.
+        if (toolDef && !toolDef.returnsResult) {
           const toolsMap = new Map([[toolId, toolDef]]);
           browserToolExecutor
             .executeToolCalls(

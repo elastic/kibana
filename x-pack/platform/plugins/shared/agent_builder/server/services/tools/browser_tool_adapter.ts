@@ -9,6 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { tool as toTool } from '@langchain/core/tools';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common';
+import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
+import type { ToolHandlerReturn } from '@kbn/agent-builder-server';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 
 /**
@@ -16,7 +18,23 @@ import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
  */
 export function createBrowserToolAdapter({ browserTool }: { browserTool: BrowserApiToolMetadata }) {
   return toTool(
-    async () => {
+    async (params: Record<string, unknown>) => {
+      // Two-way tools interrupt the execution: the browser runs the handler and resumes
+      // the round with its result, which is then handed to the model as the tool result.
+      // See `pendingBrowserToolPromptsToActions`.
+      if (browserTool.returns_result) {
+        const interrupt: ToolHandlerReturn = {
+          prompt: {
+            type: AgentPromptType.browser_tool_call,
+            id: uuidv4(),
+            tool_id: browserTool.id,
+            params,
+          },
+        };
+
+        return [`Waiting for the browser to run '${browserTool.id}'`, interrupt];
+      }
+
       const callId = uuidv4();
 
       const result = {

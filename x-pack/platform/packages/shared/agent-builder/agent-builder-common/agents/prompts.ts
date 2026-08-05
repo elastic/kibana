@@ -9,6 +9,7 @@ export enum AgentPromptType {
   confirmation = 'confirmation',
   authorization = 'authorization',
   ask_user_question = 'ask_user_question',
+  browser_tool_call = 'browser_tool_call',
 }
 
 export enum AgentPromptRequestSourceType {
@@ -102,6 +103,16 @@ export interface AskUserQuestionAnswer {
   skipped?: boolean;
 }
 
+// Browser tool call
+
+export interface BrowserToolCallPromptDefinition {
+  id: string;
+  /** Id of the browser API tool to run, without the `browser_` prefix. */
+  tool_id: string;
+  /** Parameters the agent called the tool with. */
+  params: Record<string, unknown>;
+}
+
 export interface ConfirmationPromptResponse {
   allow: boolean;
 }
@@ -114,10 +125,22 @@ export interface AskUserQuestionPromptResponse {
   answers: AskUserQuestionAnswer[];
 }
 
+export interface BrowserToolCallPromptResponse {
+  /**
+   * JSON-encoded value the browser tool handler returned. Handed to the model as
+   * the tool result. Encoded rather than structured so it can be length-bounded
+   * on the way in - it is client-supplied input.
+   */
+  result?: string;
+  /** Set instead of `result` when the handler threw, timed out, or the tool was not registered. */
+  error?: string;
+}
+
 export type PromptResponse =
   | ConfirmationPromptResponse
   | AuthorizationPromptResponse
-  | AskUserQuestionPromptResponse;
+  | AskUserQuestionPromptResponse
+  | BrowserToolCallPromptResponse;
 
 export const isConfirmationPromptResponse = (
   response: PromptResponse
@@ -137,6 +160,12 @@ export const isAskUserQuestionPromptResponse = (
   return 'answers' in response;
 };
 
+export const isBrowserToolCallPromptResponse = (
+  response: PromptResponse
+): response is BrowserToolCallPromptResponse => {
+  return 'result' in response || 'error' in response;
+};
+
 export interface ConfirmationPrompt extends ConfirmPromptDefinition {
   type: AgentPromptType.confirmation;
 }
@@ -149,7 +178,15 @@ export interface AskUserQuestionPrompt extends AskUserQuestionPromptDefinition {
   type: AgentPromptType.ask_user_question;
 }
 
-export type PromptRequest = ConfirmationPrompt | AuthorizationPrompt | AskUserQuestionPrompt;
+export interface BrowserToolCallPrompt extends BrowserToolCallPromptDefinition {
+  type: AgentPromptType.browser_tool_call;
+}
+
+export type PromptRequest =
+  | ConfirmationPrompt
+  | AuthorizationPrompt
+  | AskUserQuestionPrompt
+  | BrowserToolCallPrompt;
 
 export const isConfirmationPrompt = (prompt: PromptRequest): prompt is ConfirmationPrompt => {
   return prompt.type === AgentPromptType.confirmation;
@@ -161,6 +198,10 @@ export const isAuthorizationPrompt = (prompt: PromptRequest): prompt is Authoriz
 
 export const isAskUserQuestionPrompt = (prompt: PromptRequest): prompt is AskUserQuestionPrompt => {
   return prompt.type === AgentPromptType.ask_user_question;
+};
+
+export const isBrowserToolCallPrompt = (prompt: PromptRequest): prompt is BrowserToolCallPrompt => {
+  return prompt.type === AgentPromptType.browser_tool_call;
 };
 
 export interface ConfirmationPromptResponseState {
@@ -178,10 +219,16 @@ export interface AskUserQuestionPromptResponseState {
   response: AskUserQuestionPromptResponse;
 }
 
+export interface BrowserToolCallPromptResponseState {
+  type: AgentPromptType.browser_tool_call;
+  response: BrowserToolCallPromptResponse;
+}
+
 export type PromptResponseState =
   | ConfirmationPromptResponseState
   | AuthorizationPromptResponseState
-  | AskUserQuestionPromptResponseState;
+  | AskUserQuestionPromptResponseState
+  | BrowserToolCallPromptResponseState;
 
 /**
  * The internal representation of the prompt storage state for the conversation.

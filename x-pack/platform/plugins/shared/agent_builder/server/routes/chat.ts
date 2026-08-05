@@ -73,6 +73,26 @@ export const promptResponseEntrySchema = schema.oneOf([
       },
     }
   ),
+  schema.object(
+    { result: schema.string({ maxLength: 50_000 }) },
+    {
+      meta: {
+        availability: { stability: 'tech_preview' },
+        description:
+          'JSON-encoded value returned by the browser tool, answering a `browser_tool_call` prompt.',
+      },
+    }
+  ),
+  schema.object(
+    { error: schema.string({ maxLength: 2_000 }) },
+    {
+      meta: {
+        availability: { stability: 'tech_preview' },
+        description:
+          'Reason the browser tool did not produce a result, answering a `browser_tool_call` prompt.',
+      },
+    }
+  ),
 ]);
 
 export const conversePayloadSchema = schema.object({
@@ -253,6 +273,14 @@ export const conversePayloadSchema = schema.object({
         schema: schema.any({
           meta: { description: 'JSON Schema defining the tool parameters (JsonSchema7Type).' },
         }),
+        returns_result: schema.maybe(
+          schema.boolean({
+            meta: {
+              description:
+                'When true, the agent pauses on the tool call and resumes with the result the browser reports back. Defaults to false (fire-and-forget).',
+            },
+          })
+        ),
       }),
       {
         meta: {

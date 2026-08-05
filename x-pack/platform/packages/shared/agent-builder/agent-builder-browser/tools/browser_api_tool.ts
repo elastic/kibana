@@ -39,9 +39,27 @@ export interface BrowserApiToolDefinition<TParams = unknown> {
   /**
    * Handler function that executes when the tool is called.
    * This function runs in the browser and receives validated parameters.
-   * Results are NOT returned to the LLM (one-way communication).
+   * May return a promise.
+   *
+   * The returned value is only sent back to the LLM when `returnsResult` is true;
+   * otherwise it is discarded (one-way communication).
    */
-  handler: (params: TParams) => void | Promise<void>;
+  handler: (params: TParams) => unknown;
+
+  /**
+   * Opt in to two-way communication.
+   *
+   * When true, the agent execution pauses on the tool call and resumes once the handler
+   * settles, with its JSON-serialized return value handed to the model as the tool result.
+   * The value must be JSON-serializable, and stays subject to a size limit.
+   *
+   * Prefer idempotent handlers: reloading the page while a call is pending runs the handler
+   * again, since the pending call is what the reloaded page resumes from.
+   *
+   * Defaults to false, which keeps the fire-and-forget behavior: the model gets an
+   * immediate acknowledgement and does not wait for the handler.
+   */
+  returnsResult?: boolean;
 }
 
 export function toToolMetadata<TParams>(
@@ -57,5 +75,6 @@ export function toToolMetadata<TParams>(
       });
       return jsonSchema;
     })(),
+    returns_result: tool.returnsResult,
   };
 }

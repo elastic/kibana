@@ -12,6 +12,7 @@ import type { ResearchAgentAction } from '../actions';
 import type { ProcessedConversationRound } from './prepare_conversation';
 import { roundToActions } from './round_to_actions';
 import { pendingAskUserQuestionStepsToActions } from './pending_ask_user_question_steps_to_actions';
+import { pendingBrowserToolPromptsToActions } from './pending_browser_tool_prompts_to_actions';
 
 /**
  * Build the action list from the current pending round, for execution resuming (after HITL interrupts).
@@ -33,8 +34,10 @@ export const buildPendingRoundActions = ({
     promptState,
     eventEmitter,
   });
+  const { actions: browserToolActions, consumedPromptIds: consumedBrowserToolPromptIds } =
+    pendingBrowserToolPromptsToActions({ round, promptState });
   return {
-    actions: [...stepActions, ...askActions],
-    consumedPromptIds,
+    actions: [...stepActions, ...askActions, ...browserToolActions],
+    consumedPromptIds: [...consumedPromptIds, ...consumedBrowserToolPromptIds],
   };
 };
