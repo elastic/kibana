@@ -66,7 +66,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
         text: capitalize(activeTabId),
       },
     ],
-    { parent: 'none' }
+    { parent: 'app' }
   );
 
   useEffect(() => {

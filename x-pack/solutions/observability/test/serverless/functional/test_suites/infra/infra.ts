@@ -92,7 +92,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.header.waitUntilLoadingHasFinished();
 
           const documentTitle = await browser.getTitle();
-          expect(documentTitle).to.contain('Infrastructure inventory - Observability - Elastic');
+          expect(documentTitle).to.contain(
+            'Infrastructure inventory - Infrastructure - Observability - Elastic'
+          );
         });
 
         it('renders an empty data prompt for dates with no data', async () => {
@@ -121,7 +123,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.try(async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'demo-stack-redis-01 - Infrastructure inventory - Observability - Elastic'
+                'demo-stack-redis-01 - Infrastructure inventory - Infrastructure - Observability - Elastic'
               );
             });
 
@@ -137,7 +139,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.try(async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'pod-0 - Infrastructure inventory - Observability - Elastic'
+                'pod-0 - Infrastructure inventory - Infrastructure - Observability - Elastic'
               );
             });
 

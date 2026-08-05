@@ -44,7 +44,7 @@ test.describe(
     test('Render expected content', async ({ page, pageObjects: { inventoryPage } }) => {
       await test.step('set the correct browser page title', async () => {
         const title = await page.title();
-        expect(title).toBe('Infrastructure inventory - Observability - Elastic');
+        expect(title).toBe('Infrastructure inventory - Infrastructure - Observability - Elastic');
       });
 
       await test.step('display waffle map', async () => {

@@ -35,7 +35,7 @@ export const SnapshotPage = () => {
         text: inventoryTitle,
       },
     ],
-    { parent: 'none' }
+    { parent: 'app' }
   );
 
   return (

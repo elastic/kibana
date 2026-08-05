@@ -64,7 +64,7 @@ export const MetricDetailPage = () => {
         text: name,
       },
     ],
-    { parent: 'none' }
+    { parent: 'app' }
   );
 
   const [sideNav, setSideNav] = useState<NavItem[]>([]);
