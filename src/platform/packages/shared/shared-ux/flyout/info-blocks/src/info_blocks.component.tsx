@@ -18,7 +18,8 @@ import type { InfoBlocksProps } from './types';
 const CONTAINER_NAME = 'infoBlocks';
 
 const styles = ({ euiTheme }: UseEuiTheme) => {
-  const twoColumnBelow = FLYOUT_MAX_GRID_COLUMNS * FLYOUT_MIN_CELL_WIDTH; // 420
+  const threeColumnBelow = FLYOUT_MAX_GRID_COLUMNS * FLYOUT_MIN_CELL_WIDTH; // 560
+  const twoColumnBelow = 3 * FLYOUT_MIN_CELL_WIDTH; // 420
   const oneColumnBelow = 2 * FLYOUT_MIN_CELL_WIDTH; // 280
   const color = euiTheme.border.color;
   const thickness = euiTheme.border.width.thin;
@@ -65,33 +66,33 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
         display: none;
       }
 
-      /* ── 3-column state (default) ── */
-      & > :nth-child(3n)::before {
+      /* ── 4-column state (default) ── */
+      & > :nth-child(4n)::before {
         display: none;
       }
-      & > :nth-child(3n + 1)::after {
+      & > :nth-child(4n + 1)::after {
         display: block;
       }
       & > :nth-child(1)::after {
         display: none;
       }
 
-      /* ── 2-column state ── */
-      @container ${CONTAINER_NAME} (width < ${twoColumnBelow}px) {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+      /* ── 3-column state ── */
+      @container ${CONTAINER_NAME} (width < ${threeColumnBelow}px) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
 
         /* :nth-child(n) resets every cell at equal specificity; the exceptions below win on order. */
         & > :nth-child(n)::before {
           display: block;
         }
-        & > :nth-child(2n)::before {
+        & > :nth-child(3n)::before {
           display: none;
         }
 
         & > :nth-child(n)::after {
           display: none;
         }
-        & > :nth-child(2n + 1)::after {
+        & > :nth-child(3n + 1)::after {
           display: block;
         }
         & > :nth-child(1)::after {
@@ -99,17 +100,14 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
         }
       }
 
-      /* ── 1-column state ── */
-      @container ${CONTAINER_NAME} (width < ${oneColumnBelow}px) {
-        grid-template-columns: minmax(0, 1fr);
+      /* ── 2-column state ── */
+      @container ${CONTAINER_NAME} (width < ${twoColumnBelow}px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
 
         & > :nth-child(n)::before {
-          display: none;
-        }
-        & > :nth-child(n)::after {
           display: block;
         }
-        & > :nth-child(1)::after {
+        & > :nth-child(2n)::before {
           display: none;
         }
 
