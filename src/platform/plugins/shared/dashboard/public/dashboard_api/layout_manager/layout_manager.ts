@@ -186,8 +186,8 @@ export function initializeLayoutManager(
         delete currentChildState[uuid];
         childrenModified = true;
       }
-      await Promise.all(setStatePromises);
     }
+    await Promise.all(setStatePromises);
     if (childrenModified) children$.next(currentChildren);
   };
 

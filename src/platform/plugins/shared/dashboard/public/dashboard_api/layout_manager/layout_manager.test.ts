@@ -137,7 +137,7 @@ describe('layout manager', () => {
       hasUnsavedChanges$: new BehaviorSubject(false),
     } as DefaultEmbeddableApi);
 
-    layoutManager.internalApi.reset(
+    await layoutManager.internalApi.reset(
       getSampleDashboardState({
         panels: [{ ...panel1, config: { title: 'Updated title' } }],
         pinned_panels: [],
@@ -160,7 +160,7 @@ describe('layout manager', () => {
       hasUnsavedChanges$: new BehaviorSubject(false),
     } as DefaultEmbeddableApi);
 
-    layoutManager.internalApi.reset(
+    await layoutManager.internalApi.reset(
       getSampleDashboardState({
         panels: [{ ...panel1, config: { title: 'Updated title' } }],
         pinned_panels: [],

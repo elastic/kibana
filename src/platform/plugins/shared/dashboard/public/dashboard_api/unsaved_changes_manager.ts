@@ -50,7 +50,7 @@ export function initializeUnsavedChangesManager({
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
   projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
   approximationManager: ReturnType<typeof initializeApproximationManager>;
-  setState: (state: DashboardState) => void;
+  setState: (state: DashboardState) => Promise<void>;
   onSave$: PublishesOnSave['onSave$'];
 }): {
   api: {
@@ -107,7 +107,7 @@ export function initializeUnsavedChangesManager({
   return {
     api: {
       asyncResetToLastSavedState: async () => {
-        setState(lastSavedState$.value);
+        await setState(lastSavedState$.value);
       },
       hasUnsavedChanges$,
       lastSavedStateForChild$: (panelId: string) =>
