@@ -39,13 +39,18 @@ import type {
   AttachmentTotals,
   DocumentAttachmentAttributesV2,
 } from '../../../../common/types/domain';
-import { AttachmentType, DocumentAttachmentAttributesRtV2 } from '../../../../common/types/domain';
+import {
+  AttachmentType,
+  DocumentAttachmentAttributesRtV2,
+  UnifiedAttachmentAttributesRt,
+} from '../../../../common/types/domain';
 import type {
   AlertIdsAggsResult,
   BulkOptionalAttributes,
   EventIdsAggsResult,
   GetAllAlertsAttachToCaseArgs as GetAllDocumentsAttachedToCaseArgs,
   GetAttachmentArgs,
+  GetUnifiedAttachmentsByTypesArgs,
   MixSavedObjectResponse,
   ServiceContext,
 } from '../types';
@@ -323,6 +328,68 @@ export class AttachmentGetter {
     return response.saved_objects.map((so) => {
       const validatedAttributes = decodeOrThrow(DocumentAttachmentAttributesRtV2)(so.attributes);
 
+      return Object.assign(so, { attributes: validatedAttributes });
+    });
+  }
+
+  /**
+   * Retrieves unified attachments of the given `types` attached to a case.
+   * Preserves full unified `metadata` (unlike {@link getAllDocumentsAttachedToCase},
+   * whose document codec only keeps alert/event index/rule fields).
+   */
+  public async getUnifiedAttachmentsByTypes({
+    caseId,
+    types,
+    filter,
+  }: GetUnifiedAttachmentsByTypesArgs): Promise<Array<SavedObject<UnifiedAttachmentAttributes>>> {
+    if (types.length === 0) {
+      return [];
+    }
+
+    try {
+      this.context.log.debug(
+        `Attempting to GET unified attachments [${types.join(', ')}] for case id ${caseId}`
+      );
+
+      const typeFilter = buildFilter({
+        filters: types,
+        field: 'type',
+        operator: 'or',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+      });
+      const combinedFilter = combineFilters([typeFilter, filter]);
+
+      const finder =
+        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<UnifiedAttachmentAttributes>(
+          {
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+            sortField: 'created_at',
+            sortOrder: 'asc',
+            filter: combinedFilter,
+            perPage: MAX_DOCS_PER_PAGE,
+          }
+        );
+
+      let result: Array<SavedObject<UnifiedAttachmentAttributes>> = [];
+      for await (const page of finder.find()) {
+        result = result.concat(AttachmentGetter.decodeUnifiedAttachments(page));
+      }
+
+      return result;
+    } catch (error) {
+      this.context.log.error(
+        `Error on GET unified attachments [${types.join(', ')}] for case id ${caseId}: ${error}`
+      );
+      throw error;
+    }
+  }
+
+  private static decodeUnifiedAttachments(
+    response: SavedObjectsFindResponse<UnifiedAttachmentAttributes>
+  ): Array<SavedObject<UnifiedAttachmentAttributes>> {
+    return response.saved_objects.map((so) => {
+      const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(so.attributes);
       return Object.assign(so, { attributes: validatedAttributes });
     });
   }

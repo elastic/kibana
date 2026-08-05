@@ -377,6 +377,70 @@ describe('AttachmentService getter', () => {
     });
   });
 
+  describe('getUnifiedAttachmentsByTypes', () => {
+    it('returns an empty array when types is empty without querying', async () => {
+      const res = await attachmentGetter.getUnifiedAttachmentsByTypes({
+        caseId: '1',
+        types: [],
+      });
+
+      expect(res).toEqual([]);
+      expect(unsecuredSavedObjectsClient.createPointInTimeFinder).not.toHaveBeenCalled();
+    });
+
+    it('preserves entity metadata fields that the document codec would drop', async () => {
+      const soFindRes = createSOFindResponse([
+        {
+          id: 'entity-so-1',
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+          references: [],
+          score: 0,
+          attributes: {
+            type: 'security.entity',
+            attachmentId: 'user:alice@default',
+            metadata: {
+              entityName: 'alice',
+              entityType: 'user',
+              index: '.entities.*',
+            },
+            owner: 'securitySolution',
+            created_at: '2020-01-01T00:00:00.000Z',
+            created_by: {
+              username: 'elastic',
+              full_name: null,
+              email: null,
+            },
+            pushed_at: null,
+            pushed_by: null,
+            updated_at: null,
+            updated_by: null,
+          },
+        },
+      ]);
+
+      mockFinder(soFindRes);
+
+      const res = await attachmentGetter.getUnifiedAttachmentsByTypes({
+        caseId: '1',
+        types: ['security.entity'],
+      });
+
+      expect(res).toEqual([
+        expect.objectContaining({
+          attributes: expect.objectContaining({
+            type: 'security.entity',
+            attachmentId: 'user:alice@default',
+            metadata: {
+              entityName: 'alice',
+              entityType: 'user',
+              index: '.entities.*',
+            },
+          }),
+        }),
+      ]);
+    });
+  });
+
   describe('get', () => {
     it('falls back to legacy SO when unified SO returns 404', async () => {
       const attachmentGetterWithFlagOn = createAttachmentGetter(true);

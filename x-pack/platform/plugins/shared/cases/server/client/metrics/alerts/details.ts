@@ -6,13 +6,21 @@
  */
 
 import { AttachmentType } from '../../../../common';
+import { CASE_ATTACHMENT_SAVED_OBJECT } from '../../../../common/constants';
+import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 import type { SingleCaseMetricsResponse } from '../../../../common/types/api';
 import { CaseMetricsFeature } from '../../../../common/types/api';
+import { Operations } from '../../../authorization';
+import { getOwnersFilter } from '../../../authorization/utils';
 import { createCaseError } from '../../../common/error';
 
 import { SingleCaseAggregationHandler } from '../single_case_aggregation_handler';
 import type { AggregationBuilder, SingleCaseBaseHandlerCommonOptions } from '../types';
 import { AlertHosts, AlertUsers } from './aggregations';
+import {
+  collectEntityAssociatedNames,
+  mergeAlertMetricsWithEntityNames,
+} from './entity_associated';
 
 export class AlertDetails extends SingleCaseAggregationHandler {
   constructor(options: SingleCaseBaseHandlerCommonOptions) {
@@ -27,27 +35,53 @@ export class AlertDetails extends SingleCaseAggregationHandler {
 
   public async compute(): Promise<SingleCaseMetricsResponse> {
     const {
-      services: { alertsService },
+      authorization,
+      services: { alertsService, attachmentService },
       logger,
     } = this.options.clientArgs;
     const { casesClient } = this.options;
 
     try {
+      if (this.aggregationBuilders.length <= 0) {
+        return {};
+      }
+
       const alerts = await casesClient.attachments.getAllDocumentsAttachedToCase({
         caseId: this.caseId,
         attachmentTypes: [AttachmentType.alert],
       });
 
-      if (alerts.length <= 0 || this.aggregationBuilders.length <= 0) {
-        return this.formatResponse();
+      let metrics: SingleCaseMetricsResponse =
+        this.formatResponse<SingleCaseMetricsResponse>(undefined);
+
+      if (alerts.length > 0) {
+        const aggregationsResponse = await alertsService.executeAggregations({
+          aggregationBuilders: this.aggregationBuilders,
+          alerts,
+        });
+        metrics = this.formatResponse<SingleCaseMetricsResponse>(aggregationsResponse);
       }
 
-      const aggregationsResponse = await alertsService.executeAggregations({
-        aggregationBuilders: this.aggregationBuilders,
-        alerts,
+      // Entity attachments only live on cases-attachments. Use an owners filter for that
+      // SO type alone — getAttachmentAuthorizationFilter ORs in cases-comments, which
+      // Saved Objects rejects when the find `type` list is attachments-only.
+      const { authorizedOwners } = await authorization.getAuthorizationFilter(
+        Operations.getAttachmentMetrics
+      );
+      const authorizationFilter = authorizedOwners?.length
+        ? getOwnersFilter(CASE_ATTACHMENT_SAVED_OBJECT, authorizedOwners)
+        : undefined;
+
+      const entityAttachments = await attachmentService.getter.getUnifiedAttachmentsByTypes({
+        caseId: this.caseId,
+        types: [SECURITY_ENTITY_ATTACHMENT_TYPE],
+        filter: authorizationFilter,
       });
 
-      return this.formatResponse<SingleCaseMetricsResponse>(aggregationsResponse);
+      return mergeAlertMetricsWithEntityNames(
+        metrics,
+        collectEntityAssociatedNames(entityAttachments)
+      );
     } catch (error) {
       throw createCaseError({
         message: `Failed to retrieve alerts details attached case id: ${this.caseId}: ${error}`,
