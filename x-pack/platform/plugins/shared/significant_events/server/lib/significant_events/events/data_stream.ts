@@ -45,7 +45,7 @@ export const eventsMappings = {
         }),
       },
     }),
-    // Mapped so triage can gate re-investigation with a server-side `exists` filter.
+    // Mapped so discovery can gate re-investigation with a server-side `exists` filter.
     // `exists` on this object matches only when at least one sub-field has a value, so an
     // empty investigations array does not count as "investigated".
     investigations: mappings.object({
