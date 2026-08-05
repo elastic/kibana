@@ -35,7 +35,7 @@ export const useDeleteRegionPolicy = (onSuccess?: () => void) => {
       if (err.response?.status === 409) {
         services.notifications.toasts.addDanger({
           title: i18n.translate('xpack.searchInferenceEndpoints.regionPolicy.deleteConflictError', {
-            defaultMessage: 'Region policy removal blocked',
+            defaultMessage: "Can't reset region preferences",
           }),
           ...(err.body?.message ? { text: err.body.message } : {}),
         });
