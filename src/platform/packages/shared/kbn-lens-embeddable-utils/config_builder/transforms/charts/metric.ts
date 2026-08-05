@@ -630,7 +630,7 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
         drop_partial_intervals: false,
       })
     );
-    addLayerColumn(trendLineLayer, `${ACCESSOR}_trendline`, newPrimaryColumns);
+    addLayerColumn(trendLineLayer, trendlineMetricColumnId, newPrimaryColumns);
   }
 
   if (layer.breakdown_by) {
