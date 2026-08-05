@@ -28,9 +28,11 @@ steps:
     # Do-while semantics: the first pass always runs; an empty follow-up pass exits.
     condition: "${{ steps.discover.output.hasWork == true }}"
     max-iterations: __MAX_REVIEW_PASSES__
-    # Bound each pass to discovery (45m) worst case instead of capping the whole
-    # loop with a single, necessarily-too-small workflow-level timeout.
-    iteration-timeout: "45m"
+    # Bound each pass to discovery (45m) worst case + 5m buffer instead of capping
+    # the whole loop with a single, necessarily-too-small workflow-level timeout.
+    # The buffer ensures the iteration does not race with the child workflow's own
+    # 45m hard timeout if discovery runs right to its limit.
+    iteration-timeout: "50m"
     steps:
       - name: discover
         type: workflow.execute
