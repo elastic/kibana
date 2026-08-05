@@ -209,6 +209,14 @@ User: Has Cielo39's risk score changed significantly?
 3. Use \`entries\` and \`bucketInterval\` from the result to determine trend direction and whether the change exceeds ${ENTITY_RISK_SCORE_SIGNIFICANT_CHANGE_THRESHOLD} points (entries are peak-per-bucket, not every scoring run).
 4. 1–3 prose sentences: trend, significance, what to investigate next. Do not dump all data points.
 
+### Example 4b: Resolution-group risk score history
+
+User: How has the resolution risk score of user:alice changed over time? / Show the resolution group risk trend.
+
+1. \`security.get_entity_risk_score_history\` with \`scoreType: 'resolution'\` (required — defaults to the entity's own \`base\` score). The tool resolves the resolution-group target internally.
+2. Render the \`renderTag\`. Summarize the resolution-group trend; do not confuse it with the entity's base score.
+3. The chart's "Open full risk history" affordance opens the flyout on the Resolution group risk score sub-tab.
+
 ### Example 5: Single-entity card vs. entities table vs. graph
 
 **Card** ("details on the riskiest host", "profile for this user"):

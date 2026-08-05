@@ -32,6 +32,7 @@ import {
   ensureRiskScoreHistoryAttachment,
 } from './risk_score_history_attachment_utils';
 import { resolveSimpleRiskScoreHistoryInterval } from './resolve_risk_score_history_interval';
+import { resolveResolutionTargetEntityId } from '../resolution_target_ids';
 
 const DEFAULT_FROM = 'now-90d' as const;
 const DEFAULT_TO = 'now' as const;
@@ -222,7 +223,7 @@ Time range via optional \`from\`/\`to\` date-math (default last 90 days). Defaul
       telemetryTracker.recordResultCount(0);
 
       try {
-        const [, { security }] = await core.getStartServices();
+        const [, { security, entityStore }] = await core.getStartServices();
         const accessResult = await checkEntityAnalyticsAccess({ request, security });
         if (!accessResult.allowed) {
           telemetryTracker.recordFailure(accessResult.result.data.message);
@@ -265,6 +266,19 @@ Time range via optional \`from\`/\`to\` date-math (default last 90 days). Defaul
         // re-fetches via the public history route, which still uses TimeBuckets.
         const bucketInterval = resolveSimpleRiskScoreHistoryInterval({ min, max });
 
+        let historyEntityId = entityStoreId;
+        // Resolution-group history is keyed by the resolution *target*'s entity.id.
+        // Resolve that target before querying
+        if (scoreType === 'resolution') {
+          historyEntityId = await resolveResolutionTargetEntityId({
+            entityStoreId,
+            spaceId,
+            esClient: client,
+            createResolutionClient: entityStore?.createResolutionClient,
+            logger,
+          });
+        }
+
         const riskScoreDataClient = new RiskScoreDataClient({
           logger,
           kibanaVersion,
@@ -275,7 +289,7 @@ Time range via optional \`from\`/\`to\` date-math (default last 90 days). Defaul
 
         const entries = await riskScoreDataClient.getRiskScoreHistory({
           entityType: identifierType,
-          entityId: entityStoreId,
+          entityId: historyEntityId,
           range: { gte: from, lte: to },
           scoreType,
           interval: bucketInterval,

@@ -127,6 +127,7 @@ const getEntityToolDescriptor = (
         entityType,
         entityName,
         entityId,
+        ...(path.subTab ? { subTab: path.subTab } : {}),
       };
     case 'anomalies':
       return entityType === 'host' || entityType === 'user'

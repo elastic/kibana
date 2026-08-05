@@ -379,8 +379,93 @@ describe('getEntityRiskScoreHistoryTool', () => {
       );
     });
 
-    it('passes scoreType resolution through to the data client', async () => {
+    it('resolves the resolution-group target id before fetching scoreType resolution history', async () => {
       mockExecuteEsql.mockResolvedValueOnce(exactUserHit);
+
+      const mockGetResolutionGroup = jest.fn().mockResolvedValue({
+        group_size: 2,
+        target: {
+          entity: {
+            id: 'user:canonical-alice',
+            name: 'canonical-alice',
+          },
+        },
+      });
+      const mockCreateResolutionClient = jest.fn().mockReturnValue({
+        getResolutionGroup: mockGetResolutionGroup,
+      });
+
+      mockCore.getStartServices.mockResolvedValue([
+        mockCoreStart,
+        {
+          security: {
+            authz: {
+              actions: { api: { get: (priv: string) => `api:${priv}` } },
+              checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+            },
+          },
+          entityStore: {
+            createCRUDClient: jest.fn(),
+            createResolutionClient: mockCreateResolutionClient,
+          },
+          licensing: {
+            getLicense: jest.fn().mockResolvedValue({ hasAtLeast: () => true }),
+          },
+        },
+        {},
+      ]);
+
+      await runHandler({
+        entityType: 'user',
+        entityId: 'user:alice',
+        scoreType: 'resolution',
+      });
+
+      expect(mockCreateResolutionClient).toHaveBeenCalled();
+      expect(mockGetResolutionGroup).toHaveBeenCalledWith('user:alice');
+      expect(mockGetRiskScoreHistory).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityType: 'user',
+          // History is keyed by the resolution target, not the member alias.
+          entityId: 'user:canonical-alice',
+          scoreType: 'resolution',
+        })
+      );
+      // Attachment deep-link still identifies the entity the user asked about.
+      expect(mockAttachmentsAdd).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            entityStoreId: 'user:alice',
+            scoreType: 'resolution',
+          }),
+        })
+      );
+    });
+
+    it('falls back to the member entity id when resolution-group lookup fails', async () => {
+      mockExecuteEsql.mockResolvedValueOnce(exactUserHit);
+
+      mockCore.getStartServices.mockResolvedValue([
+        mockCoreStart,
+        {
+          security: {
+            authz: {
+              actions: { api: { get: (priv: string) => `api:${priv}` } },
+              checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+            },
+          },
+          entityStore: {
+            createCRUDClient: jest.fn(),
+            createResolutionClient: jest.fn().mockReturnValue({
+              getResolutionGroup: jest.fn().mockRejectedValue(new Error('not found')),
+            }),
+          },
+          licensing: {
+            getLicense: jest.fn().mockResolvedValue({ hasAtLeast: () => true }),
+          },
+        },
+        {},
+      ]);
 
       await runHandler({
         entityType: 'user',
@@ -389,7 +474,10 @@ describe('getEntityRiskScoreHistoryTool', () => {
       });
 
       expect(mockGetRiskScoreHistory).toHaveBeenCalledWith(
-        expect.objectContaining({ scoreType: 'resolution' })
+        expect.objectContaining({
+          entityId: 'user:alice',
+          scoreType: 'resolution',
+        })
       );
     });
 

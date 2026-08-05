@@ -19,7 +19,10 @@ import type { ISessionService } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { APP_UI_ID, ENABLE_NEW_FLYOUT_SETTING } from '../../../../common/constants';
-import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import {
+  EntityDetailsLeftPanelTab,
+  RiskScoreLeftPanelSubTab,
+} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   buildEntityLeftPanel,
   buildEntityRightPanel,
@@ -63,7 +66,12 @@ const buildRiskHistoryFlyout = (
   const left = buildEntityLeftPanel({
     identifier,
     scopeId: AGENT_BUILDER_RISK_HISTORY_SCOPE,
-    path: { tab: EntityDetailsLeftPanelTab.RISK_INPUTS },
+    path: {
+      tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
+      ...(data.scoreType === 'resolution'
+        ? { subTab: RiskScoreLeftPanelSubTab.RESOLUTION }
+        : { subTab: RiskScoreLeftPanelSubTab.ENTITY }),
+    },
     isRiskScoreExist: true,
   });
   if (!left) {

@@ -233,6 +233,42 @@ describe('entity_explore_navigation', () => {
         },
       ]);
     });
+
+    it('forwards the risk_inputs resolution subTab onto the entityRiskInputs descriptor', () => {
+      expect(
+        buildEntityFlyoutV2NavigationState({
+          preview: [],
+          left: {
+            id: 'user_details',
+            params: { path: { tab: 'risk_inputs', subTab: 'resolution' } },
+          },
+          right: {
+            id: 'user-panel',
+            params: {
+              userName: 'alice',
+              entityId: 'user:alice',
+              scopeId: 'agent-builder-risk-history',
+            },
+          },
+        })
+      ).toEqual([
+        {
+          kind: 'entityRiskInputs',
+          entityType: 'user',
+          entityName: 'alice',
+          entityId: 'user:alice',
+          subTab: 'resolution',
+          origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+        },
+        {
+          kind: 'user',
+          userName: 'alice',
+          entityId: 'user:alice',
+          scopeId: 'agent-builder-risk-history',
+          origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+        },
+      ]);
+    });
   });
 
   describe('navigation helpers', () => {

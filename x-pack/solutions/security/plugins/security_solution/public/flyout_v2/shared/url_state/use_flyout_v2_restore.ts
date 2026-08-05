@@ -15,6 +15,7 @@ import type { Indicator } from '../../../../common/threat_intelligence/types/ind
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import type { ManagedUserHit } from '../../../../common/search_strategy/security_solution/users/managed_details';
+import type { RiskScoreLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN, type FlyoutOrigin } from '../../../common/lib/telemetry';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
@@ -394,6 +395,7 @@ export const openDescriptorAsStart = (
           | EntityType.service,
         entityName: d.entityName,
         entityId: d.entityId,
+        ...(d.subTab ? { subTab: d.subTab as RiskScoreLeftPanelSubTab } : {}),
         ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,

@@ -364,6 +364,31 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     );
   });
 
+  it('opens entityRiskInputs with the resolution subTab when present on the descriptor', () => {
+    renderRestore(
+      buildUrl([
+        {
+          kind: 'entityRiskInputs',
+          entityType: 'user',
+          entityName: 'alice',
+          entityId: 'user:alice',
+          subTab: 'resolution',
+        },
+      ])
+    );
+    act(() => {
+      jest.runAllTimers();
+    });
+    expect(mockFlyoutApi.openEntityRiskInputs).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entityType: 'user',
+        entityName: 'alice',
+        entityId: 'user:alice',
+        subTab: 'resolution',
+      })
+    );
+  });
+
   it('restores the tool header source context by passing an onShowEntity that reopens the host', () => {
     renderRestore(
       buildUrl([{ kind: 'entityRiskInputs', entityType: 'host', entityName: 'h', entityId: 'eid' }])
