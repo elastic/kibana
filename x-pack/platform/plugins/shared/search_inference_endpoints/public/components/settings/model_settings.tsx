@@ -220,6 +220,7 @@ export const ModelSettings: React.FC = () => {
     return (
       <EuiPageTemplate.Section
         paddingSize="none"
+        alignment="center"
         data-test-subj="modelSettingsContent"
         restrictWidth={true}
       >
