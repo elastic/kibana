@@ -26,6 +26,9 @@ export const TRUSTED_PROCESS_DESCENDANTS_TAG = 'trust_process_descendants';
 /** The tag prefix that tracks the space(s) that is considered the "owner" of the artifact.  */
 export const OWNER_SPACE_ID_TAG_PREFIX = 'ownerSpaceId:';
 
+/** Exception list entry field type used to store YARA rule text */
+export const CUSTOM_YARA_SIGNATURE_FIELD_TYPE = 'custom_yara_signature';
+
 export const PROCESS_DESCENDANT_EXTRA_ENTRY: EntryMatch = Object.freeze({
   field: 'event.category',
   operator: 'included',
