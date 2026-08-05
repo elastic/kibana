@@ -49922,8 +49922,6 @@
     "xpack.securitySolution.siemReadiness.visibility.retention.title": "保留",
     "xpack.securitySolution.some_page.flyoutCreateSubmitSuccess": "已添加“{name}”。",
     "xpack.securitySolution.source.destination.packetsLabel": "pkts",
-    "xpack.securitySolution.sourcerer.error.title": "更新安全数据视图时出错",
-    "xpack.securitySolution.sourcerer.error.toastMessage": "刷新页面",
     "xpack.securitySolution.stepDefineRule.lastDay": "昨天",
     "xpack.securitySolution.stepDefineRule.lastHour": "上一小时",
     "xpack.securitySolution.stepDefineRule.lastMonth": "上个月",
