@@ -10,7 +10,7 @@ import type { UserIdAndName } from '../base/users';
 import type { AgentAccessControl } from './access_control';
 
 /**
- * Id of the default agent type
+ * ID of the default agent type
  */
 export const chatAgentTypeId = 'chat';
 
@@ -32,11 +32,11 @@ export const agentBuilderDefaultAgentId = 'elastic-ai-agent';
  */
 export interface AgentDefinition {
   /**
-   * Id of the agent
+   * ID of the agent
    */
   id: string;
   /**
-   * Id of the agent type this agent derives from.
+   * ID of the agent type this agent derives from.
    * Defaults to {@link chatAgentTypeId}, whose base is empty.
    */
   type: string;
@@ -122,6 +122,12 @@ export interface AgentConfiguration {
    * When undefined, all connectors remain visible (backward compatibility).
    */
   connector_ids?: string[];
+
+  /**
+   * Optional list of AI index IDs associated with this agent.
+   * Generated and maintained by the Context Engine.
+   * */
+  ai_indices?: string[];
 }
 
 /**
