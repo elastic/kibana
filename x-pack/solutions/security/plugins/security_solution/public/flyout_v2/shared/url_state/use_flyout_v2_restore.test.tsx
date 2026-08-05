@@ -572,7 +572,6 @@ describe('useFlyoutV2RestoreFromUrl', () => {
           documentId: 'doc-1',
           indexName: 'i',
           scopeId: 's',
-          isRulePreview: false,
         },
       ])
     );
@@ -583,7 +582,6 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       expect.objectContaining({
         hit: expect.objectContaining({ id: 'doc-1' }),
         scopeId: 's',
-        isRulePreview: false,
         onShowAlert: expect.any(Function),
       })
     );

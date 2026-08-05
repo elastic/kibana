@@ -25,7 +25,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     // suggestions migrated to Scout: src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions*.spec.ts
     loadTestFile(require.resolve('./status'));
     loadTestFile(require.resolve('./stats'));
-    loadTestFile(require.resolve('./ui_metric'));
+    // ui_metric migrated to Scout: src/platform/plugins/shared/usage_collection/test/scout/api/tests/ui_metric.spec.ts
     loadTestFile(require.resolve('./ui_counters'));
     loadTestFile(require.resolve('./telemetry'));
   });

@@ -75,10 +75,16 @@ export const registerUpsertDatasetRoute = ({
             });
           }
 
-          const { name, description, examples } = request.body;
+          const { name, description, tags, maturity, examples } = request.body;
           const evalsContext = await context.evals;
           const datasetClient = evalsContext.datasetService.getClient();
-          const upsertResult = await datasetClient.upsert(name, description, examples);
+          const upsertResult = await datasetClient.upsert({
+            name,
+            description,
+            tags,
+            maturity,
+            examples,
+          });
 
           return response.ok({
             body: upsertResult,
