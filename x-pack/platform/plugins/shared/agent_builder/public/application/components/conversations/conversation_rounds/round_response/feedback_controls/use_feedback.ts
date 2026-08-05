@@ -14,7 +14,7 @@ export interface FeedbackState {
   vote: Vote;
   chips: string[];
   comment: string;
-  commentOpen: boolean;
+  modalOpen: boolean;
   inviteVisible: boolean;
   submitted: boolean;
   isSubmitting: boolean;
@@ -24,9 +24,9 @@ export interface UseFeedbackReturn extends FeedbackState {
   setVote: (vote: 'up' | 'down') => void;
   toggleChip: (chip: string) => void;
   setComment: (value: string) => void;
-  openComment: () => void;
+  openModal: () => void;
+  closeModal: () => void;
   dismissInvite: () => void;
-  cancel: () => void;
   submit: () => Promise<void>;
 }
 
@@ -34,7 +34,7 @@ export const useFeedback = (roundId: string): UseFeedbackReturn => {
   const [vote, setVoteState] = useState<Vote>(null);
   const [chips, setChips] = useState<string[]>([]);
   const [comment, setCommentState] = useState('');
-  const [commentOpen, setCommentOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [inviteVisible, setInviteVisible] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,7 +51,7 @@ export const useFeedback = (roundId: string): UseFeedbackReturn => {
     setVoteState(null);
     setChips([]);
     setCommentState('');
-    setCommentOpen(false);
+    setModalOpen(false);
     setInviteVisible(false);
     setSubmitted(false);
   }, []);
@@ -71,11 +71,11 @@ export const useFeedback = (roundId: string): UseFeedbackReturn => {
 
       if (next === 'down') {
         setVoteState('down');
-        setCommentOpen(true);
+        setModalOpen(true);
         setInviteVisible(false);
       } else {
         setVoteState('up');
-        setCommentOpen(false);
+        setModalOpen(false);
         setInviteVisible(true);
         submitFeedback({ roundId, vote: 'up', chips: [], comment: '' });
       }
@@ -91,16 +91,16 @@ export const useFeedback = (roundId: string): UseFeedbackReturn => {
     setCommentState(value);
   }, []);
 
-  const openComment = useCallback(() => {
-    setCommentOpen(true);
+  const openModal = useCallback(() => {
+    setModalOpen(true);
     setInviteVisible(false);
   }, []);
 
-  const dismissInvite = useCallback(() => setInviteVisible(false), []);
-
-  const cancel = useCallback(() => {
+  const closeModal = useCallback(() => {
     reset();
   }, [reset]);
+
+  const dismissInvite = useCallback(() => setInviteVisible(false), []);
 
   const submit = useCallback(async () => {
     const currentVote = voteRef.current;
@@ -114,7 +114,7 @@ export const useFeedback = (roundId: string): UseFeedbackReturn => {
         comment: commentRef.current,
       });
       setSubmitted(true);
-      setCommentOpen(false);
+      setModalOpen(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -124,16 +124,16 @@ export const useFeedback = (roundId: string): UseFeedbackReturn => {
     vote,
     chips,
     comment,
-    commentOpen,
+    modalOpen,
     inviteVisible,
     submitted,
     isSubmitting,
     setVote,
     toggleChip,
     setComment,
-    openComment,
+    openModal,
+    closeModal,
     dismissInvite,
-    cancel,
     submit,
   };
 };
