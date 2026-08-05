@@ -17,7 +17,6 @@ export type StreamQueryStats = SignificantEventQueryRow;
 type SignificantEventsStatsFetchResult =
   | undefined
   | {
-      queries: SignificantEventQueryRow[];
       aggregated_occurrences: { x: number; y: number }[];
       total_occurrences: number;
     };
@@ -63,40 +62,18 @@ export const useFetchQueryOccurrenceStats = (
       }
     );
 
-    return await requestPromise.then(
-      ({ queries: queryOccurrenceSeries, aggregated_occurrences: aggregatedOccurrences }) => {
-        return {
-          queries: queryOccurrenceSeries.map((series) => {
-            const {
-              occurrences,
-              change_points,
-              rule_uuid: _ruleUuid,
-              stream_name,
-              rule_backed,
-              ...rest
-            } = series;
-            return {
-              query: rest,
-              stream_name,
-              change_points,
-              occurrences: occurrences.map((occurrence) => ({
-                x: new Date(occurrence.date).getTime(),
-                y: occurrence.count,
-              })),
-              rule_backed,
-            };
-          }),
-          aggregated_occurrences: aggregatedOccurrences.map((occurrence) => ({
-            x: new Date(occurrence.date).getTime(),
-            y: occurrence.count,
-          })),
-          total_occurrences: aggregatedOccurrences.reduce(
-            (sum, occurrence) => sum + occurrence.count,
-            0
-          ),
-        };
-      }
-    );
+    return await requestPromise.then(({ aggregated_occurrences: aggregatedOccurrences }) => {
+      return {
+        aggregated_occurrences: aggregatedOccurrences.map((occurrence) => ({
+          x: new Date(occurrence.date).getTime(),
+          y: occurrence.count,
+        })),
+        total_occurrences: aggregatedOccurrences.reduce(
+          (sum, occurrence) => sum + occurrence.count,
+          0
+        ),
+      };
+    });
   };
 
   return useQuery<SignificantEventsStatsFetchResult, Error>({

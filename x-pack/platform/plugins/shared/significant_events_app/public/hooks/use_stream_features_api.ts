@@ -16,13 +16,7 @@ interface StreamFeaturesApi {
 }
 
 export function useStreamFeaturesApi(streamName: string): StreamFeaturesApi {
-  const {
-    dependencies: {
-      start: {
-        significantEvents: { significantEventsRepositoryClient },
-      },
-    },
-  } = useKibana();
+  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;;
 
   const { signal } = useAbortController();
 

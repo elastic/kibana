@@ -31,11 +31,10 @@ import type { Streams } from '@kbn/streams-schema';
 import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { Feature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { buildFeatureDiscoverParams } from '../../../pages/significant_events/utils/discover_helpers';
-import { getKnowledgeIndicatorItemId } from '../utils/get_knowledge_indicator_item_id';
 import { getKnowledgeIndicatorTitle } from '../utils/get_knowledge_indicator_title';
 import { getConfidenceColor } from '../utils/get_confidence_color';
 import { FlyoutMetadataCard } from '../../flyout_components/flyout_metadata_card';
@@ -89,13 +88,6 @@ export function KnowledgeIndicatorDetailsFlyout({
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const streamName = getKnowledgeIndicatorStreamName(knowledgeIndicator);
-
-  // Reset transient UI (popover/delete modal) when navigating to another indicator.
-  const knowledgeIndicatorItemId = getKnowledgeIndicatorItemId(knowledgeIndicator);
-  useEffect(() => {
-    setShowDeleteModal(false);
-    setIsActionsMenuOpen(false);
-  }, [knowledgeIndicatorItemId]);
 
   const featureFilter =
     knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.filter : undefined;
