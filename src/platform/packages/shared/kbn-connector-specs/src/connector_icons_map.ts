@@ -334,4 +334,14 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconZendesk" */ './specs/zendesk/icon')),
   ],
   ['.zoom', lazy(() => import(/* webpackChunkName: "connectorIconZoom" */ './specs/zoom/icon'))],
+
+  [
+    '.opensearch_aws_opensearch_service',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconOpenSearchAwsOpenSearchService" */ './specs/opensearch_aws_opensearch_service/icon'
+        )
+    ),
+  ],
 ]);
