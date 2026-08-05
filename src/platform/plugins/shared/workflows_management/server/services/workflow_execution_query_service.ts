@@ -30,11 +30,7 @@ import type {
 import type { WorkflowExecutionQueryDeps } from './types';
 import { WORKFLOWS_INDEX } from '../../common';
 import { buildTimeRangeFilter } from '../api/lib/build_time_range_filter';
-import {
-  buildWorkflowExecutionsSearchQuery,
-  buildWorkflowExecutionsSpaceFilter,
-  emptyWorkflowExecutionsSearchResponse,
-} from '../api/lib/build_workflow_executions_search_query';
+import { buildWorkflowExecutionsSpaceFilter } from '../api/lib/build_workflow_executions_search_query';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
 import { getChildWorkflowExecutions } from '../api/lib/get_child_workflow_executions';
 import { getWorkflowExecution } from '../api/lib/get_workflow_execution';
