@@ -19,16 +19,20 @@ describe('exceptionItemBaseSchema entries', () => {
     ).toBe(false);
   });
 
-  it('accepts a lone value-list entry and multiple value-list entries', () => {
+  it('accepts a lone value-list entry', () => {
     const single = item([
       { field: 'source.ip', operator: 'is_in_list', list: { id: 'ips', type: 'ip' } },
     ]);
+
+    expect(exceptionItemBaseSchema.safeParse(single).success).toBe(true);
+  });
+
+  it('accepts multiple value-list entries', () => {
     const multiple = item([
       { field: 'source.ip', operator: 'is_in_list', list: { id: 'ips', type: 'ip' } },
       { field: 'destination.ip', operator: 'is_not_in_list', list: { id: 'ips', type: 'ip' } },
     ]);
 
-    expect(exceptionItemBaseSchema.safeParse(single).success).toBe(true);
     expect(exceptionItemBaseSchema.safeParse(multiple).success).toBe(true);
   });
 
