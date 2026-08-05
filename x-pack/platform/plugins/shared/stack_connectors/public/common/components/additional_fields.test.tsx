@@ -12,6 +12,10 @@ import { AdditionalFields } from './additional_fields';
 import userEvent from '@testing-library/user-event';
 
 describe('Credentials', () => {
+  // The first render evaluates the large `@kbn/triggers-actions-ui-plugin/public`
+  // barrel, a one-time cost that can exceed the 5s default under CI contention.
+  jest.setTimeout(30000);
+
   const onChange = jest.fn();
   const value = JSON.stringify({ foo: 'test' });
   const props = { value, errors: [], onChange, helpText: 'help text' };
