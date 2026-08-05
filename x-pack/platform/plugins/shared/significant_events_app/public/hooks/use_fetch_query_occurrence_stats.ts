@@ -5,26 +5,19 @@
  * 2.0.
  */
 
-import { calculateAuto } from '@kbn/calculate-auto';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
-import type { QueryWithOccurrences, StreamQuery } from '@kbn/significant-events-schema';
-import moment from 'moment';
+import { getQueryBucketParams } from '../util/get_query_bucket_params';
 import { useKibana } from './use_kibana';
 import { useTimefilter } from './use_timefilter';
 import { useFetchErrorToast } from './use_fetch_error_toast';
+import type { SignificantEventQueryRow } from './use_fetch_discovery_queries';
 
-export interface StreamQueryStats {
-  query: StreamQuery;
-  stream_name: string;
-  occurrences: Array<{ x: number; y: number }>;
-  change_points: QueryWithOccurrences['change_points'];
-  rule_backed: boolean;
-}
+export type StreamQueryStats = SignificantEventQueryRow;
 
 type SignificantEventsStatsFetchResult =
   | undefined
   | {
-      queries: StreamQueryStats[];
+      queries: SignificantEventQueryRow[];
       aggregated_occurrences: { x: number; y: number }[];
       total_occurrences: number;
     };
@@ -49,33 +42,22 @@ export const useFetchQueryOccurrenceStats = (
   const fetchQueryOccurrenceStats = async ({
     signal,
   }: QueryFunctionContext): Promise<SignificantEventsStatsFetchResult> => {
-    const isoFrom = new Date(timeState.start).toISOString();
-    const isoTo = new Date(timeState.end).toISOString();
-
-    const { min, max } = data.query.timefilter.timefilter.calculateBounds({
-      from: isoFrom,
-      to: isoTo,
-    });
-
-    if (!min || !max) {
+    const bucketParams = getQueryBucketParams(
+      data.query.timefilter.timefilter.calculateBounds,
+      timeState
+    );
+    if (!bucketParams) {
       return undefined;
     }
-
-    const bucketSize = calculateAuto.near(50, moment.duration(max.diff(min)));
-    if (!bucketSize) {
-      return undefined;
-    }
-
-    const intervalString = `${bucketSize.asSeconds()}s`;
 
     const requestPromise = significantEventsRepositoryClient.fetch(
       'GET /internal/streams/_query_occurrences',
       {
         params: {
           query: {
-            from: isoFrom,
-            to: isoTo,
-            bucketSize: intervalString,
+            from: bucketParams.from,
+            to: bucketParams.to,
+            bucketSize: bucketParams.bucketSize,
             query: query?.trim() ?? '',
             streamNames: name ? [name] : undefined,
           },

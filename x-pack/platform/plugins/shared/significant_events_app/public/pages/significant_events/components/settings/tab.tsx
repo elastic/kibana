@@ -143,11 +143,9 @@ export function SettingsTab() {
     enabledFromStatus: maintenanceStatus?.featureSettings?.scheduledDiscoveryEnabled,
   });
 
-  // Any dirty continuous/scheduled change is blocked while paused (server 409).
-  // Disable while status is loading too; pause tooltip copy only when actually paused.
+  // Dirty continuous/scheduled changes are blocked while paused (server 409).
   const activitySettingsDirty = scheduledDiscovery.hasChanged || continuousExtraction.hasChanged;
   const saveBlockedByPause = blocksActivity && activitySettingsDirty;
-  const showPausedSaveTooltip = blocksActivity && activitySettingsDirty;
 
   const savedConfigYaml = useMemo(() => {
     try {
@@ -914,7 +912,7 @@ export function SettingsTab() {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={showPausedSaveTooltip ? activityBlockTooltip : undefined}>
+                  <EuiToolTip content={saveBlockedByPause ? activityBlockTooltip : undefined}>
                     <EuiButton
                       data-test-subj="streams-settings-save-button"
                       color="primary"

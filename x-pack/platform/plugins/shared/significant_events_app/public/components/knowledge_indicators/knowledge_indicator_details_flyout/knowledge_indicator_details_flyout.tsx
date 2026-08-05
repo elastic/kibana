@@ -36,6 +36,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { buildFeatureDiscoverParams } from '../../../pages/significant_events/utils/discover_helpers';
 import { getKnowledgeIndicatorItemId } from '../utils/get_knowledge_indicator_item_id';
+import { getKnowledgeIndicatorTitle } from '../utils/get_knowledge_indicator_title';
 import { getConfidenceColor } from '../utils/get_confidence_color';
 import { FlyoutMetadataCard } from '../../flyout_components/flyout_metadata_card';
 import { FlyoutToolbarHeader } from '../../flyout_components/flyout_toolbar_header';
@@ -258,10 +259,7 @@ export function KnowledgeIndicatorDetailsFlyout({
     ];
   }, [activityBlockTooltip, blocksActivity, isMutating, knowledgeIndicator, promoteQuery]);
 
-  const title =
-    knowledgeIndicator.kind === 'feature'
-      ? knowledgeIndicator.feature.title ?? knowledgeIndicator.feature.id
-      : knowledgeIndicator.query.title ?? knowledgeIndicator.query.id;
+  const title = getKnowledgeIndicatorTitle(knowledgeIndicator);
 
   const hasPagination =
     pageCount !== undefined &&
