@@ -100,9 +100,11 @@ describe('JsonTreeViewer', () => {
     expect(showFewer).toBeVisible();
 
     // "Show fewer" collapses the list back to the initial cap, leaving only "Show more".
+    // Focus must stay in the pager (the clicked button unmounts).
     await userEvent.click(showFewer);
     expect(screen.queryByTestId(fewerTestId())).not.toBeInTheDocument();
     expect(screen.getByTestId(moreTestId())).toBeVisible();
+    expect(pager).toHaveFocus();
   });
 
   describe('keyboard navigation', () => {

@@ -114,10 +114,18 @@ export const PagerRowView = function PagerRowView({
   const showMore = row.hiddenCount > 0;
 
   // The primary control shows more while items remain, otherwise it collapses back ("show fewer").
-  const onPrimary = showMore ? onShowMore : onShowFewer;
   const primaryLabel = showMore
     ? showMoreLabel(row.collectionType, Math.min(CHILDREN_INCREMENT, row.hiddenCount))
     : showFewerLabel(row.collectionType);
+
+  // "Show fewer" unmounts the focused button — move focus to the pager row first so it isn't lost.
+  const clickShowFewer = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    const pager = event.currentTarget.closest<HTMLElement>('[role="treeitem"]');
+    onShowFewer();
+    pager?.focus();
+  };
+
   return (
     <div
       ref={rowRef}
@@ -135,10 +143,14 @@ export const PagerRowView = function PagerRowView({
         color="text"
         size="xs"
         iconType={showMore ? 'plus' : 'minus'}
-        onClick={(event: React.MouseEvent) => {
-          event.stopPropagation();
-          onPrimary();
-        }}
+        onClick={
+          showMore
+            ? (event: React.MouseEvent) => {
+                event.stopPropagation();
+                onShowMore();
+              }
+            : clickShowFewer
+        }
         onKeyDown={pagerButtonKeyDown}
         data-test-subj={
           showMore
@@ -153,10 +165,7 @@ export const PagerRowView = function PagerRowView({
           color="text"
           size="xs"
           iconType="minus"
-          onClick={(event: React.MouseEvent) => {
-            event.stopPropagation();
-            onShowFewer();
-          }}
+          onClick={clickShowFewer}
           onKeyDown={pagerButtonKeyDown}
           data-test-subj={`jsonTreeViewerFewer-${row.collectionId}`}
         >
