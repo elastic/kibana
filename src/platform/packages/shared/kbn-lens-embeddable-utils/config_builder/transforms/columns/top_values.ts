@@ -22,7 +22,7 @@ import type {
   TermOperationRankByCustomPercentileRankType,
   TermOperationRankByCustomPercentileType,
 } from '../../schema/bucket_ops';
-import { fromFormatAPIToLensState } from './format';
+import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
 import type { AnyLensStateColumn } from './types';
 
@@ -132,7 +132,9 @@ export function fromTermsLensApiToLensState(
       orderDirection,
       ...(rank_by?.type === 'custom' ? { orderAgg: getCustomOrderAgg(rank_by) } : {}),
       ...(format ? { format } : {}),
-      parentFormat: { id: 'terms' },
+      // Mirror runtime `getParentFormatter` (`terms/index.tsx`): multi-field terms columns render
+      // through the `multi_terms` parent formatter, single-field ones through `terms`.
+      parentFormat: { id: secondaryFields.length ? 'multi_terms' : 'terms' },
     },
   };
 }
@@ -306,5 +308,6 @@ export function fromTermsLensStateToAPI(
         }
       : {}),
     ...(column.params.orderBy ? { rank_by: getRankByConfig(column.params, columns) } : {}),
+    ...(column.params.format ? { format: fromFormatLensStateToAPI(column.params.format) } : {}),
   };
 }
