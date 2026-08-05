@@ -59,7 +59,7 @@ export const defaultReportOnlyRules: Partial<Record<CspDirectiveName, string[]>>
  * The default directives rules that are always applied
  */
 export const defaultRules: Partial<Record<CspDirectiveName, string[]>> = {
-  'script-src': [`'report-sample'`, `'self'`],
+  'script-src': [`'report-sample'`, `'self'`, `'wasm-unsafe-eval'`],
   'worker-src': [`'report-sample'`, `'self'`, `blob:`],
   'style-src': [`'report-sample'`, `'self'`, `'unsafe-inline'`],
   'object-src': [`'report-sample'`, `'none'`],
@@ -294,6 +294,7 @@ const keywordTokens = [
   'report-sample',
   'unsafe-inline',
   'unsafe-eval',
+  'wasm-unsafe-eval',
   'unsafe-hashes',
   'unsafe-allow-redirects',
 ];
