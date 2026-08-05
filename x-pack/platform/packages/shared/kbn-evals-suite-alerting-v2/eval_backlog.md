@@ -60,6 +60,11 @@ Add new ideas under "Backlog"; move them to "Implemented" once a spec covers the
 
 ## Implemented
 
+- [x] **Unprivileged user cannot compose rules** — a read-only user
+  (`alerting_v2_rules: ['read']`, no `['all']`) asks the agent to compose a
+  rule. The agent refuses and surfaces the missing privilege (`Rules: All`)
+  rather than composing the rule. See
+  `evals/rule_management/privileges.spec.ts`.
 - [x] **Action policy uses the `manual` workflow trigger type** — notification-setup flow
   asserts the generated `workflow.yaml` has `triggers: [{ type: 'manual' }]` (plus
   `rule.id` matcher and destination = workflow attachment `workflowId`). See

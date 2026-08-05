@@ -8,12 +8,29 @@
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { manageActionPolicyTool, type ManageActionPolicyToolDeps } from './manage_action_policy';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
 
-const createDeps = (): ManageActionPolicyToolDeps => ({
+const createSecurityMock = (hasAllRequested: boolean) => {
+  const atSpace = jest.fn().mockResolvedValue({ hasAllRequested });
+  const checkPrivilegesWithRequest = jest.fn().mockReturnValue({ atSpace });
+  const get = jest.fn((action: string) => `api:${action}`);
+
+  return {
+    authz: {
+      actions: { api: { get } },
+      checkPrivilegesWithRequest,
+    },
+  } as unknown as SecurityPluginStart;
+};
+
+const createDeps = (
+  security: SecurityPluginStart | undefined = createSecurityMock(true)
+): ManageActionPolicyToolDeps => ({
   getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
   getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {} }),
+  security,
 });
 
 const createContext = (): ToolHandlerContextMock => {
@@ -271,6 +288,63 @@ describe('manageActionPolicyTool', () => {
         expect.stringContaining('Error in manage_action_policy tool')
       );
       expect(ctx.logger.error).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('authorization', () => {
+    it('rejects with an error result when the user lacks Action Policies: All', async () => {
+      const deps = createDeps(createSecurityMock(false));
+      const tool = manageActionPolicyTool(deps);
+      const ctx = createContext();
+
+      const result = await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Should Fail' },
+            {
+              operation: 'set_destinations',
+              destinations: [{ type: 'workflow', id: 'wf-1' }],
+            },
+          ],
+        },
+        ctx
+      );
+
+      const { results } = result as {
+        results: Array<{
+          type: string;
+          data: { message: string; metadata?: { missingPrivileges?: string[] } };
+        }>;
+      };
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect(results[0].data.message).toContain('Action Policies: All');
+      expect(results[0].data.message).toContain('Unauthorized');
+      expect(results[0].data.metadata?.missingPrivileges).toEqual(['Action Policies: All']);
+      expect(ctx.attachments.add).not.toHaveBeenCalled();
+      expect(ctx.attachments.update).not.toHaveBeenCalled();
+    });
+
+    it('allows access when security is disabled (undefined)', async () => {
+      const deps = createDeps(undefined);
+      const tool = manageActionPolicyTool(deps);
+      const ctx = createContext();
+
+      const result = await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'No Security Policy' },
+            {
+              operation: 'set_destinations',
+              destinations: [{ type: 'workflow', id: 'wf-1' }],
+            },
+          ],
+        },
+        ctx
+      );
+
+      const { results } = result as { results: Array<{ type: string }> };
+      expect(results[0].type).toBe(ToolResultType.other);
+      expect(ctx.attachments.add).toHaveBeenCalledTimes(1);
     });
   });
 });

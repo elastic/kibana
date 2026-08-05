@@ -11,9 +11,12 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import { RULE_ATTACHMENT_TYPE, getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { getAlertingPrivilegeDisplayName } from '../../../../common/feature_privileges';
+import { hasRulesWritePrivilege } from '../../common/check_privileges';
 import {
   ruleOperationSchema,
   executeRuleOperations,
@@ -30,7 +33,13 @@ const manageRuleSchema = z.object({
   operations: z.array(ruleOperationSchema).min(1),
 });
 
-export const manageRuleTool = (): BuiltinSkillBoundedTool<typeof manageRuleSchema> => ({
+export interface ManageRuleToolDeps {
+  security: SecurityPluginStart | undefined;
+}
+
+export const manageRuleTool = ({
+  security,
+}: ManageRuleToolDeps): BuiltinSkillBoundedTool<typeof manageRuleSchema> => ({
   id: ALERTING_TOOL_IDS.manageRule,
   type: ToolType.builtin,
   description: `Create or update an alerting V2 rule in the conversation.
@@ -56,8 +65,24 @@ Use operations[] to:
   schema: manageRuleSchema,
   handler: async (
     { ruleAttachmentId: previousAttachmentId, operations },
-    { logger, attachments, esClient }
+    { logger, attachments, esClient, request, spaceId }
   ) => {
+    const privilegeDisplayName = getAlertingPrivilegeDisplayName('rules', 'all');
+    const authorized = await hasRulesWritePrivilege({ security, request, spaceId });
+    if (!authorized) {
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: `Unauthorized to compose or modify Alerting V2 rules. Missing Kibana privilege: ${privilegeDisplayName}. Ask an administrator to grant this privilege, or continue with discovery-only if you only have Rules: Read.`,
+              metadata: { missingPrivileges: [privilegeDisplayName] },
+            },
+          },
+        ],
+      };
+    }
+
     try {
       const currentAttachment = previousAttachmentId
         ? attachments.getAttachmentRecord(previousAttachmentId)

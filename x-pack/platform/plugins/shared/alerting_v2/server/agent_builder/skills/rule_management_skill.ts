@@ -13,9 +13,10 @@ import {
   RULE_MANAGEMENT_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
 import { manageRuleTool } from '../tools/manage_rule';
+import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { generateRuleSchemaDoc, generateRuleOperationsDoc } from './schema_to_skill_docs';
 
-export const createRuleManagementSkill = () =>
+export const createRuleManagementSkill = (deps: ManageRuleToolDeps) =>
   defineSkillType({
     id: RULE_MANAGEMENT_SKILL_ID,
     name: RULE_MANAGEMENT_SKILL_ID,
@@ -72,7 +73,15 @@ Only \`kind: alert\` rules produce episodes. \`kind: signal\` rules write raw si
 
 Notifications are not configured on the rule itself. Alert episodes are matched and dispatched by **action policies** (notification policies) — space-scoped saved objects that send matched episodes to workflow destinations.
 
-When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.`,
+When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.
+
+---
+
+## Privileges
+
+The \`${ALERTING_TOOL_IDS.manageRule}\` tool requires the **Rules: All** Kibana privilege. If the user lacks this privilege the tool returns an error with the missing privilege name — relay that message to the user verbatim.
+
+Users with only **Rules: Read** can still discover and inspect existing rules via \`platform.core.sml_search\` and \`platform.core.sml_attach\`, but cannot compose or modify rule attachments.`,
       },
       {
         name: 'rule-schema',
@@ -235,5 +244,5 @@ Do not offer notifications if the rule is still incomplete (missing name, query,
 If the rule's kind is \`signal\`, follow the "Notifications Require Alert Kind" guidance above before proceeding.
 
 If the user agrees (or asks for notifications directly), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill via \`filestore.read\` (path: \`skills/platform/alerting/${ACTION_POLICY_MANAGEMENT_SKILL_ID}/SKILL.md\`) and let that skill own the workflow + action policy setup. Do **not** compose action policies or notification workflows from this skill.`,
-    getInlineTools: () => [manageRuleTool()],
+    getInlineTools: () => [manageRuleTool(deps)],
   });

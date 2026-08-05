@@ -12,6 +12,7 @@ import { createActionPolicyManagementSkill } from './action_policy_management_sk
 const createDeps = (): ManageActionPolicyToolDeps => ({
   getWorkflow: jest.fn(async () => null),
   getAvailableConnectors: jest.fn(async () => ({ connectorTypes: {} })),
+  security: undefined,
 });
 
 describe('createActionPolicyManagementSkill', () => {

@@ -8,6 +8,7 @@
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { manageRuleTool } from './manage_rule';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
 
@@ -23,6 +24,19 @@ const getFieldCapsMock = (ctx: ToolHandlerContextMock) =>
 const mockResolvableTimeField = (ctx: ToolHandlerContextMock) =>
   getFieldCapsMock(ctx).mockResolvedValueOnce({ fields: { '@timestamp': { date: {} } } });
 
+const createSecurityMock = (hasAllRequested: boolean) => {
+  const atSpace = jest.fn().mockResolvedValue({ hasAllRequested });
+  const checkPrivilegesWithRequest = jest.fn().mockReturnValue({ atSpace });
+  const get = jest.fn((action: string) => `api:${action}`);
+
+  return {
+    authz: {
+      actions: { api: { get } },
+      checkPrivilegesWithRequest,
+    },
+  } as unknown as SecurityPluginStart;
+};
+
 const createContext = (): ToolHandlerContextMock => {
   const ctx = agentBuilderMocks.tools.createHandlerContext();
   ctx.attachments.add.mockResolvedValue({
@@ -37,7 +51,7 @@ const createContext = (): ToolHandlerContextMock => {
 };
 
 describe('manageRuleTool', () => {
-  const tool = manageRuleTool();
+  const tool = manageRuleTool({ security: createSecurityMock(true) });
 
   describe('handler', () => {
     it('creates a new rule attachment with valid operations', async () => {
@@ -300,6 +314,61 @@ describe('manageRuleTool', () => {
         expect.stringContaining('Error in manage_rule tool')
       );
       expect(ctx.logger.error).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('authorization', () => {
+    it('rejects with an error result when the user lacks Rules: All', async () => {
+      const unauthorizedTool = manageRuleTool({ security: createSecurityMock(false) });
+      const ctx = createContext();
+
+      const result = await unauthorizedTool.handler(
+        { operations: [{ operation: 'set_metadata', name: 'Should Fail' }] },
+        ctx
+      );
+
+      const { results } = result as {
+        results: Array<{
+          type: string;
+          data: { message: string; metadata?: { missingPrivileges?: string[] } };
+        }>;
+      };
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect(results[0].data.message).toContain('Rules: All');
+      expect(results[0].data.message).toContain('Unauthorized');
+      expect(results[0].data.metadata?.missingPrivileges).toEqual(['Rules: All']);
+      expect(ctx.attachments.add).not.toHaveBeenCalled();
+      expect(ctx.attachments.update).not.toHaveBeenCalled();
+    });
+
+    it('allows access when security is disabled (undefined)', async () => {
+      const noSecurityTool = manageRuleTool({ security: undefined });
+      const ctx = createContext();
+      getEsqlQueryMock(ctx).mockResolvedValueOnce({
+        columns: [{ name: 'host.name', type: 'keyword' }],
+        values: [],
+      });
+      mockResolvableTimeField(ctx);
+
+      const result = await noSecurityTool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'No Security Rule' },
+            {
+              operation: 'set_query',
+              query: {
+                format: 'standalone',
+                breach: { query: 'FROM metrics-* | STATS AVG(cpu) BY host.name' },
+              },
+            },
+          ],
+        },
+        ctx
+      );
+
+      const { results } = result as { results: Array<{ type: string }> };
+      expect(results[0].type).toBe(ToolResultType.other);
+      expect(ctx.attachments.add).toHaveBeenCalledTimes(1);
     });
   });
 });

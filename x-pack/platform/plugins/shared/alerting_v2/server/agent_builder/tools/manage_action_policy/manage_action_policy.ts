@@ -11,9 +11,12 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { ActionPolicyAttachmentData } from '@kbn/alerting-v2-schemas';
 import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { getAlertingPrivilegeDisplayName } from '../../../../common/feature_privileges';
+import { hasActionPoliciesWritePrivilege } from '../../common/check_privileges';
 import {
   actionPolicyOperationSchema,
   executeActionPolicyOperations,
@@ -39,11 +42,13 @@ export interface ManageActionPolicyToolDeps {
   ) => Promise<{
     connectorTypes: Record<string, { instances: Array<{ id: string; name: string }> }>;
   }>;
+  security: SecurityPluginStart | undefined;
 }
 
 export const manageActionPolicyTool = ({
   getWorkflow,
   getAvailableConnectors,
+  security,
 }: ManageActionPolicyToolDeps): BuiltinSkillBoundedTool<typeof manageActionPolicySchema> => ({
   id: ALERTING_TOOL_IDS.manageActionPolicy,
   type: ToolType.builtin,
@@ -65,6 +70,22 @@ Use operations[] to:
     { actionPolicyAttachmentId: previousAttachmentId, operations },
     { logger, attachments, spaceId, request }
   ) => {
+    const privilegeDisplayName = getAlertingPrivilegeDisplayName('actionPolicies', 'all');
+    const authorized = await hasActionPoliciesWritePrivilege({ security, request, spaceId });
+    if (!authorized) {
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: `Unauthorized to compose or modify Alerting V2 action policies. Missing Kibana privilege: ${privilegeDisplayName}. Ask an administrator to grant this privilege, or continue with discovery-only if you only have Action Policies: Read.`,
+              metadata: { missingPrivileges: [privilegeDisplayName] },
+            },
+          },
+        ],
+      };
+    }
+
     try {
       const currentAttachment = previousAttachmentId
         ? attachments.getAttachmentRecord(previousAttachmentId)
