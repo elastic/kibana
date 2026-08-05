@@ -57,7 +57,7 @@ export const getColumnDisplayName = (
 
   if (columnName === '_source') {
     return i18n.translate('unifiedDataTable.grid.documentHeader', {
-      defaultMessage: 'Summary',
+      defaultMessage: 'JSON document',
     });
   }
 

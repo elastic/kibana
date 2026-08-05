@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
-import { EuiIconTip, useEuiTheme } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ROWS_HEIGHT_OPTIONS } from '../constants';
 import ColumnHeaderTruncateContainer from './column_header_truncate_container';
@@ -44,21 +43,9 @@ export const UnifiedDataTableSummaryColumnHeader = ({
   tooltipTitle?: string;
   iconTipDataTestSubj?: string;
 }) => {
-  const { euiTheme } = useEuiTheme();
-
-  const marginStyle = useMemo(() => ({ marginLeft: euiTheme.size.xs }), [euiTheme.size.xs]);
-
   return (
     <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
       {columnDisplayName}
-      <span css={marginStyle}>
-        <EuiIconTip
-          data-test-subj={iconTipDataTestSubj}
-          type="question"
-          content={tooltipContent}
-          title={tooltipTitle}
-        />
-      </span>
     </ColumnHeaderTruncateContainer>
   );
 };
