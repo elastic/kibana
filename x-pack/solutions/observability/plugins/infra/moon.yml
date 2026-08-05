@@ -150,6 +150,7 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/scout-oblt'
   - '@kbn/scout-synthtrace'
+  - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/es-archiver'
   - '@kbn/test'
   - '@kbn/tooling-log'
