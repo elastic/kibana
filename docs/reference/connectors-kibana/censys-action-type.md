@@ -3,7 +3,7 @@ navigation_title: "Censys"
 type: reference
 description: "Use the Censys connector to enrich hosts, web properties, and certificates, submit assets for rescanning, and run CensEye threat-hunting jobs using the Censys Platform API."
 applies_to:
-  stack: preview 9.5
+  stack: preview 9.6
   serverless: preview
 ---
 
@@ -30,6 +30,8 @@ Organization ID
 ## Test connectors [censys-action-configuration]
 
 You can test connectors as you're creating or editing the connector in {{kib}}.
+
+## Connector actions [censys-connector-actions]
 
 The Censys connector has the following actions:
 
