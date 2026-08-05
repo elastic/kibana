@@ -6,7 +6,7 @@
  */
 
 import { useReducer } from 'react';
-import type { RuleKind } from '../../form/types';
+import type { RuleKind, RuleQuery } from '../../form/types';
 import type {
   StepId,
   ComposeDiscoverState,
@@ -57,7 +57,8 @@ export const createInitialState = ({
       })
     ),
     childOpen: forceYamlMode,
-    queryCommitted: mode === 'edit' || isQueryPrePopulated,
+    // Clone seeds the form from a source rule, same as edit — treat the query as committed.
+    queryCommitted: mode === 'edit' || mode === 'clone' || isQueryPrePopulated,
     yamlMode: forceYamlMode,
     manualSplitEnabled: false,
   };
@@ -72,30 +73,36 @@ export const createInitialState = ({
  * Recovery tabs remain alert-only because signal rules have no recovery step
  * (`getStepIds(false)`).
  *
+ * A standalone `queryFormat` forces the unified editor: base/alert tabs read `base`
+ * from the composed shape, so a standalone query would render a blank base tab with
+ * the pipeline stranded in `breach.query`. Omit `queryFormat` when only the default
+ * tab matters (reducer transitions) and the query shape is not at hand.
+ *
  * create/clone + alertCondition + manualSplitEnabled → ['base', 'alert']
  * edit + alert + alertCondition + manualSplitEnabled → ['base', 'alert']
  * edit + signal + alertCondition                     → undefined (unified only)
  * create/edit/clone + alertCondition                 → undefined (unified; heuristic on Apply)
+ * any + alertCondition + standalone query            → undefined (no base to show)
  * alert + recoveryCondition + custom                 → ['recovery']
  * everything else                                    → undefined (single editor)
  */
 export function getSandboxTabs(
   isAlert: boolean,
-  state: Pick<ComposeDiscoverState, 'step' | 'recoveryType' | 'mode' | 'manualSplitEnabled'>
+  state: Pick<ComposeDiscoverState, 'step' | 'recoveryType' | 'mode' | 'manualSplitEnabled'>,
+  queryFormat?: RuleQuery['format']
 ): QueryTab[] | undefined {
   const stepId = getStepIds(isAlert)[state.step];
 
   if (stepId === 'alertCondition') {
     // Kind is locked on edit; signal cannot keep a composed split.
+    // Clone keeps ModeSelect enabled, so manual split must still produce tabs.
     if (state.mode === 'edit' && !isAlert) {
       return undefined;
     }
-    const usesUnifiedEditorByDefault =
-      state.mode === 'create' || state.mode === 'edit' || state.mode === 'clone';
-    if (usesUnifiedEditorByDefault) {
-      return state.manualSplitEnabled ? ['base', 'alert'] : undefined;
+    if (queryFormat === 'standalone') {
+      return undefined;
     }
-    return ['base', 'alert'];
+    return state.manualSplitEnabled ? ['base', 'alert'] : undefined;
   }
   if (stepId === 'recoveryCondition' && state.recoveryType === 'custom') return ['recovery'];
   return undefined;

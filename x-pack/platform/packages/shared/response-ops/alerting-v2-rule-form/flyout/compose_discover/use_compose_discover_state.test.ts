@@ -48,6 +48,14 @@ describe('createInitialState', () => {
     expect(state.queryCommitted).toBe(true);
   });
 
+  it('sets queryCommitted true in clone mode (seeded from a source rule)', () => {
+    const state = createInitialState({ mode: 'clone', initialKind: 'signal' });
+
+    expect(state.mode).toBe('clone');
+    expect(state.queryCommitted).toBe(true);
+    expect(state.childOpen).toBe(false);
+  });
+
   it('sets recoveryType to default in edit mode with alert kind', () => {
     const state = createInitialState({ mode: 'edit', initialKind: 'alert' });
 
@@ -286,6 +294,22 @@ describe('getSandboxTabs', () => {
   it('returns undefined for signal on alertCondition in edit even when manual split is enabled', () => {
     const state = createState({ step: 0, mode: 'edit', manualSplitEnabled: true });
     expect(getSandboxTabs(false, state)).toBeUndefined();
+  });
+
+  it('returns [base, alert] for signal on alertCondition in clone when manual split is enabled', () => {
+    const state = createState({ step: 0, mode: 'clone', manualSplitEnabled: true });
+    expect(getSandboxTabs(false, state)).toEqual(['base', 'alert']);
+  });
+
+  it('returns undefined when manual split is enabled but the query is standalone', () => {
+    const state = createState({ step: 0, mode: 'create', manualSplitEnabled: true });
+    expect(getSandboxTabs(true, state, 'standalone')).toBeUndefined();
+    expect(getSandboxTabs(false, state, 'standalone')).toBeUndefined();
+  });
+
+  it('returns [base, alert] when manual split is enabled and the query is composed', () => {
+    const state = createState({ step: 0, mode: 'create', manualSplitEnabled: true });
+    expect(getSandboxTabs(true, state, 'composed')).toEqual(['base', 'alert']);
   });
 
   it('returns undefined on alertCondition step in create mode (single unified editor)', () => {

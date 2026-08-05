@@ -291,7 +291,7 @@ export function ComposeDiscoverFlyout({
   const isDiscoverQueryComplete = Boolean(discoverComposedQuery?.breach.segment.trim());
 
   const [uiState, rawDispatch] = useComposeDiscoverState({
-    mode: mode === 'clone' ? 'edit' : mode,
+    mode,
     initialKind,
     initialRecoveryType,
     isQueryPrePopulated: isDiscoverQueryComplete,
@@ -855,14 +855,19 @@ export function ComposeDiscoverFlyout({
      */
     const shouldPromoteSignalToAlert =
       !isAlert && !isEditing && queryToCommit.format === 'composed' && uiState.manualSplitEnabled;
-    let collapsedForSignal = false;
     if (!isAlert && queryToCommit.format === 'composed' && !shouldPromoteSignalToAlert) {
       queryToCommit = {
         format: 'standalone',
         breach: { query: getBreachQuery(queryToCommit) },
       };
-      collapsedForSignal = true;
     }
+    /*
+     * Base/alert tabs only exist for a composed query. Any Apply that commits
+     * standalone (conditionless alert tab, signal collapse) ends the split, so leave
+     * manual split too — otherwise the next open shows a blank base tab with the
+     * pipeline stranded in breach.query.
+     */
+    const leftManualSplit = uiState.manualSplitEnabled && queryToCommit.format === 'standalone';
     setSandboxQuery(queryToCommit);
 
     methods.setValue('query', queryToCommit, { shouldDirty: true });
@@ -889,7 +894,7 @@ export function ComposeDiscoverFlyout({
     }
     dispatch({ type: 'COMMIT_QUERY' });
     manualSplitUncommittedRef.current = false;
-    if (collapsedForSignal) {
+    if (leftManualSplit) {
       dispatch({ type: 'DISABLE_MANUAL_SPLIT' });
     }
     if (!uiState.yamlMode) {
@@ -1041,12 +1046,16 @@ export function ComposeDiscoverFlyout({
    */
   const sandboxTabs = useMemo<QueryTab[] | undefined>(() => {
     if (!uiState.yamlMode) {
-      return getSandboxTabs(isAlert, {
-        step: uiState.step,
-        recoveryType: uiState.recoveryType,
-        mode: uiState.mode,
-        manualSplitEnabled: uiState.manualSplitEnabled,
-      });
+      return getSandboxTabs(
+        isAlert,
+        {
+          step: uiState.step,
+          recoveryType: uiState.recoveryType,
+          mode: uiState.mode,
+          manualSplitEnabled: uiState.manualSplitEnabled,
+        },
+        sandboxQuery.format
+      );
     }
     /*
      * In YAML mode the sandbox stays open (and is forced open for non-representable
