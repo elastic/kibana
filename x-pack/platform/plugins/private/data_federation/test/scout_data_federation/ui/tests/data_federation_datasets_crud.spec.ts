@@ -84,28 +84,15 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
     });
 
     await test.step('create a dataset', async () => {
-      await expect(pageObjects.dataFederation.createDataSetButton).toBeEnabled();
-      await pageObjects.dataFederation.createDataSetButton.click();
-
-      await expect(page.testSubj.locator('createDatasetFlyout')).toBeVisible();
-
-      await page.testSubj
-        .locator('createDatasetFlyoutDataSource')
-        .selectOption({ value: createdDataSourceName });
-      await page.testSubj.locator('createDatasetFlyoutName').fill(createdDataSetName);
-      await page.testSubj.locator('createDatasetFlyoutResource').fill(initialResource);
-      await page.testSubj.locator('createDatasetFlyoutSettingsFormat').selectOption({
-        value: 'parquet',
+      await pageObjects.dataFederation.createDataSet({
+        dataSourceName: createdDataSourceName,
+        name: createdDataSetName,
+        resource: initialResource,
+        format: 'parquet',
       });
-
-      await page.testSubj.locator('createDatasetFlyoutSubmit').click();
-      await expect(page.testSubj.locator('createDatasetFlyoutSaveError')).toHaveCount(0);
-      await expect(page.testSubj.locator('createDatasetFlyout')).toBeHidden();
     });
 
-    const row = pageObjects.dataFederation.dataSetsTable.locator('tr').filter({
-      hasText: createdDataSetName,
-    });
+    const row = pageObjects.dataFederation.getDataSetRow(createdDataSetName);
 
     await test.step('dataset appears in the table', async () => {
       await expect(row).toBeVisible();
@@ -114,25 +101,15 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
     });
 
     await test.step('edit the dataset resource', async () => {
-      await row.locator('[data-test-subj="dataSetsSetsEditButton"]').click();
-      await expect(page.testSubj.locator('editDatasetFlyout')).toBeVisible();
-
-      await page.testSubj.locator('createDatasetFlyoutResource').fill(updatedResource);
-      await page.testSubj.locator('createDatasetFlyoutSubmit').click();
-
-      await expect(page.testSubj.locator('editDatasetFlyout')).toBeHidden();
+      await pageObjects.dataFederation.editDataSetResource({
+        dataSetName: createdDataSetName,
+        resource: updatedResource,
+      });
       await expect(row).toContainText(updatedResource);
     });
 
     await test.step('delete the dataset', async () => {
-      await row.locator('[data-test-subj="dataSetsSetsDeleteIconButton"]').click();
-
-      const modal = page.getByRole('alertdialog');
-      await expect(modal).toBeVisible();
-
-      await modal.locator('[data-test-subj="confirmModalConfirmButton"]').click();
-      await expect(modal).toBeHidden();
-      await expect(row).toBeHidden();
+      await pageObjects.dataFederation.deleteDataSet(createdDataSetName);
     });
   });
 });

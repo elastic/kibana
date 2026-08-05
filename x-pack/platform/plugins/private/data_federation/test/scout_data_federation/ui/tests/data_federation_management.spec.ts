@@ -34,8 +34,8 @@ test.describe('ES|QL Data Federation — Stack Management', { tag: tags.stateful
     await test.step('open connect data source flyout', async () => {
       await pageObjects.dataFederation.connectDataSourceButton.click();
       await expect(pageObjects.dataFederation.createDataSourceFlyout).toBeVisible();
-      await expect(page.testSubj.locator('createDataSourceFlyoutType')).toBeVisible();
-      await expect(page.testSubj.locator('createDataSourceFlyoutName')).toBeVisible();
+      await expect(pageObjects.dataFederation.createDataSourceFlyoutType).toBeVisible();
+      await expect(pageObjects.dataFederation.createDataSourceFlyoutName).toBeVisible();
     });
 
     await test.step('flyout has no accessibility violations', async () => {
