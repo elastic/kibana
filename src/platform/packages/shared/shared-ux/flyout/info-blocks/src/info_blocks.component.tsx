@@ -18,9 +18,8 @@ import type { InfoBlocksProps } from './types';
 const CONTAINER_NAME = 'infoBlocks';
 
 /**
- * Grid and divider rules for a state that renders `columns` per row. `:nth-child(n)` resets every
- * cell at the same specificity as the column-specific rules, so the exceptions below it win on
- * source order. At one column `1n` matches every cell, which drops all column dividers.
+ * Grid and divider rules for a `columns`-wide state. The `:nth-child(n)` resets tie on specificity
+ * with the rules that follow, so those win on source order.
  */
 const columnState = (columns: number) => `
   grid-template-columns: repeat(${columns}, minmax(0, 1fr));
@@ -43,14 +42,11 @@ const columnState = (columns: number) => `
   }
 `;
 
-/**
- * Widest state first, then a query per step down. Container queries carry equal specificity, so the
- * narrowest matching one must come last to win.
- */
+/** Widest state first; container queries tie on specificity, so the narrowest must come last. */
 const responsiveGrid = (maxColumns: number) => {
   let steps = '';
   for (let columns = maxColumns - 1; columns >= 1; columns--) {
-    // A state needs `columns * FLYOUT_MIN_CELL_WIDTH`; below that the next one down takes over.
+    // Each state needs `columns * FLYOUT_MIN_CELL_WIDTH` to fit.
     steps += `
       @container ${CONTAINER_NAME} (width < ${(columns + 1) * FLYOUT_MIN_CELL_WIDTH}px) {
         ${columnState(columns)}

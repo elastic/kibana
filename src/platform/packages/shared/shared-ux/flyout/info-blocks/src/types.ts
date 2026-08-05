@@ -10,7 +10,7 @@
 import type { ReactNode } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
 
-/** EUI font-scale keys, declared independently to avoid depending on EUI's underscore-prefixed internal. */
+/** EUI font-scale keys, mirrored so this API does not depend on an EUI internal. */
 export type InfoBlockSize = 'xxxs' | 'xxs' | 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
 
 export interface InfoBlockItem {
@@ -31,7 +31,7 @@ export type InfoBlocksMaxColumns = 2 | 3 | 4;
 export interface InfoBlocksProps {
   /** The blocks to render. Designed for small sets, typically up to 8 blocks. */
   items: readonly InfoBlockItem[];
-  /** Widest column count; narrower containers step down one column at a time toward one. */
-  maxColumns?: InfoBlocksMaxColumns;
+  /** Widest column count, stepping down as the container narrows. `'auto'` derives it from `items`. */
+  maxColumns?: InfoBlocksMaxColumns | 'auto';
   'data-test-subj'?: string;
 }

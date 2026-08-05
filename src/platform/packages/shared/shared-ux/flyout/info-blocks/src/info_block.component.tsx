@@ -26,7 +26,7 @@ const styles = {
   `,
 };
 
-/** Fixed-style title/value block used by {@link InfoBlock}. */
+/** A single title/value pair; one grid cell of an `InfoBlocks` panel. */
 export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
   title,
   value,
