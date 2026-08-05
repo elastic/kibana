@@ -162,10 +162,14 @@ export default function alertsAsDataAlertDelayGraduationTests({ getService }: Ft
   }
 
   async function runRuleSoon(ruleId: string) {
-    const runSoon = await supertestWithoutAuth
-      .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-      .set('kbn-xsrf', 'foo');
-    expect(runSoon.status).to.eql(204);
+    await retry.try(async () => {
+      // The previous run may still hold the task-manager lock, which returns a
+      // 200 ("Rule is already running"). Retry until task manager accepts the run.
+      const runSoon = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+        .set('kbn-xsrf', 'foo');
+      expect(runSoon.status).to.eql(204);
+    });
   }
 
   async function waitForExecutionCount(ruleId: string, count: number): Promise<IValidatedEvent[]> {
