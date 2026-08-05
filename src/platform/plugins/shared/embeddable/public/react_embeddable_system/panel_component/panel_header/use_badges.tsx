@@ -7,40 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiNotificationBadge, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Subscription, switchMap } from 'rxjs';
 
-import {
-  PANEL_BADGE_TRIGGER,
-  PANEL_NOTIFICATION_TRIGGER,
-} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { PANEL_BADGE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { triggers } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { uiActions } from '../../../kibana_services';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from '../types';
 
-const disabledNotifications = ['ACTION_FILTERS_NOTIFICATION'];
-
-export const usePresentationPanelHeaderActions = <
+export const useBadges = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
 >(
-  showNotifications: boolean,
   showBadges: boolean,
   api: ApiType,
   getActions: PresentationPanelProps['getActions']
 ) => {
   const [badges, setBadges] = useState<Action<EmbeddableApiContext>[]>([]);
-  const [notifications, setNotifications] = useState<Action<EmbeddableApiContext>[]>([]);
-
-  const { euiTheme } = useEuiTheme();
 
   /**
    * Get all actions once on mount of the panel. Any actions that are Frequent Compatibility
    * Change Actions need to be subscribed to so they can change over the lifetime of this panel.
    */
   useEffect(() => {
+    if (!showBadges) {
+      setBadges([]);
+      return;
+    }
+
     let canceled = false;
     const subscriptions = new Subscription();
     const getTriggerCompatibleActions = getActions ?? uiActions.getTriggerCompatibleActions;
@@ -50,18 +46,17 @@ export const usePresentationPanelHeaderActions = <
           embeddable: api,
         })) as Action<EmbeddableApiContext>[]) ?? [];
 
-      const disabledActions = (api.disabledActionIds$?.value ?? []).concat(disabledNotifications);
+      const disabledActions = api.disabledActionIds$?.value ?? [];
       nextActions = nextActions.filter((badge) => disabledActions.indexOf(badge.id) === -1);
       return nextActions;
     };
 
     const handleActionCompatibilityChange = (
-      type: 'badge' | 'notification',
       isCompatible: boolean,
       action: Action<EmbeddableApiContext>
     ) => {
       if (canceled) return;
-      (type === 'badge' ? setBadges : setNotifications)((currentActions) => {
+      setBadges((currentActions) => {
         const newActions = currentActions?.filter((current) => current.id !== action.id);
         if (isCompatible) return [...newActions, action];
         return newActions;
@@ -69,13 +64,9 @@ export const usePresentationPanelHeaderActions = <
     };
 
     (async () => {
-      const [initialBadges, initialNotifications] = await Promise.all([
-        getActionsForTrigger(PANEL_BADGE_TRIGGER),
-        getActionsForTrigger(PANEL_NOTIFICATION_TRIGGER),
-      ]);
+      const initialBadges = await getActionsForTrigger(PANEL_BADGE_TRIGGER);
       if (canceled) return;
       setBadges(initialBadges);
-      setNotifications(initialNotifications);
 
       const apiContext = { embeddable: api };
 
@@ -97,43 +88,9 @@ export const usePresentationPanelHeaderActions = <
             })
           )
           .subscribe(async (isCompatible) => {
-            handleActionCompatibilityChange(
-              'badge',
-              isCompatible,
-              badge as Action<EmbeddableApiContext>
-            );
+            handleActionCompatibilityChange(isCompatible, badge as Action<EmbeddableApiContext>);
           });
         subscriptions.add(compatibilitySubject);
-      }
-
-      // subscribe to any frequently changing notification actions
-      const frequentlyChangingNotifications =
-        await uiActions.getFrequentlyChangingActionsForTrigger(
-          PANEL_NOTIFICATION_TRIGGER,
-          apiContext
-        );
-      if (canceled) return;
-      for (const notification of frequentlyChangingNotifications) {
-        if (!disabledNotifications.includes(notification.id)) {
-          const compatibilitySubject = notification
-            .getCompatibilityChangesSubject(apiContext)
-            ?.pipe(
-              switchMap(async () => {
-                return await notification.isCompatible({
-                  ...apiContext,
-                  trigger: triggers[PANEL_NOTIFICATION_TRIGGER],
-                });
-              })
-            )
-            .subscribe(async (isCompatible) => {
-              handleActionCompatibilityChange(
-                'notification',
-                isCompatible,
-                notification as Action<EmbeddableApiContext>
-              );
-            });
-          subscriptions.add(compatibilitySubject);
-        }
       }
     })();
 
@@ -141,12 +98,9 @@ export const usePresentationPanelHeaderActions = <
       canceled = true;
       subscriptions.unsubscribe();
     };
-    // Disable exhaustive deps because this is meant to be run once on mount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [showBadges, api, getActions]);
 
-  const badgeElements = useMemo(() => {
-    if (!showBadges) return [];
+  return useMemo(() => {
     return badges?.map((badge) => {
       const tooltipText = badge.getDisplayNameTooltip?.({
         embeddable: api,
@@ -183,53 +137,5 @@ export const usePresentationPanelHeaderActions = <
         badgeElement
       );
     });
-  }, [api, badges, showBadges]);
-
-  const notificationElements = useMemo(() => {
-    if (!showNotifications) return [];
-    return notifications?.map((notification) => {
-      let notificationComponent = notification.MenuItem ? (
-        React.createElement(notification.MenuItem, {
-          key: notification.id,
-          context: {
-            embeddable: api,
-            trigger: triggers[PANEL_NOTIFICATION_TRIGGER],
-          },
-        })
-      ) : (
-        <EuiNotificationBadge
-          data-test-subj={`embeddablePanelNotification-${notification.id}`}
-          key={notification.id}
-          css={{ marginTop: euiTheme.size.xs, marginRight: euiTheme.size.xs }}
-          onClick={() =>
-            notification.execute({ embeddable: api, trigger: triggers[PANEL_NOTIFICATION_TRIGGER] })
-          }
-        >
-          {notification.getDisplayName({
-            embeddable: api,
-            trigger: triggers[PANEL_NOTIFICATION_TRIGGER],
-          })}
-        </EuiNotificationBadge>
-      );
-
-      if (notification.getDisplayNameTooltip) {
-        const tooltip = notification.getDisplayNameTooltip({
-          embeddable: api,
-          trigger: triggers[PANEL_NOTIFICATION_TRIGGER],
-        });
-
-        if (tooltip) {
-          notificationComponent = (
-            <EuiToolTip position="top" content={tooltip} key={notification.id}>
-              {notificationComponent}
-            </EuiToolTip>
-          );
-        }
-      }
-
-      return notificationComponent;
-    });
-  }, [api, euiTheme.size.xs, notifications, showNotifications]);
-
-  return { badgeElements, notificationElements };
+  }, [api, badges]);
 };
