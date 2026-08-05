@@ -3,13 +3,6 @@
   "description": "Approved API breaking changes that should be ignored by the contract checker",
   "entries": [
     {
-      "path": "/s/{spaceId}/internal/observability/slos/_definitions",
-      "method": "get",
-      "reason": "False-positive: oasdiff reports response-body-one-of-added when a property is added to a schema referenced by oneOf subschemas. Actual change is adding optional preventCrossProjectSearch to SLOs_settings — backwards-compatible.",
-      "approvedBy": "@elastic/obs-ux-management-team",
-      "oasdiffId": "response-body-one-of-added"
-    },
-    {
       "path": "/api/fleet/outputs",
       "method": "get",
       "reason": "Nullable shipper/ssl fields now use allOf+$ref with nullable:true (OAS 3.0 canonical form) instead of inline objects. Kafka connection_type/username/password became optional to match runtime behavior. Coordinated with provider team.",

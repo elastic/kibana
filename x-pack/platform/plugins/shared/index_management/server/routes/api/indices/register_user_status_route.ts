@@ -12,7 +12,7 @@ import { addBasePath } from '..';
 import { fetchUserStartPrivileges } from '../../../lib/fetch_indices_status';
 
 const paramsSchema = schema.object({
-  indexName: schema.string({ maxLength: 1000 }),
+  indexName: schema.string(),
 });
 
 export function registerUserStatusPrivilegeRoutes({

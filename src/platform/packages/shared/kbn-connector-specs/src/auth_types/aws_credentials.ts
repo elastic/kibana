@@ -11,12 +11,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
-import {
-  buildCanonicalQueryString,
-  escapeSigV4ReservedChars,
-  parseAwsHost,
-  signRequest,
-} from './aws_credential_helpers';
+import { parseAwsHost, signRequest } from './aws_credential_helpers';
 
 // ============================================================================
 // Auth Type Definition
@@ -79,30 +74,11 @@ export const AwsCredentialsAuth: AuthTypeSpec<AuthSchemaType> = {
         }
 
         const method = (config.method || 'GET').toUpperCase();
-        // `fullUrl.pathname` may already contain `%XX` escapes from the
-        // action's own `encodeURIComponent` calls, but never escapes
-        // `! ' ( ) *` (e.g. a "logs-*" index pattern) — fix those up here so
-        // the same rule applies to the path as to the query string below.
-        const path = escapeSigV4ReservedChars(fullUrl.pathname);
+        const path = fullUrl.pathname;
         const queryParams: Record<string, string> = {};
         fullUrl.searchParams.forEach((value, key) => {
           queryParams[key] = value;
         });
-
-        // `config.params` is merged into `config.url` by axios's own
-        // dispatchRequest/buildURL step, which runs *after* request
-        // interceptors — so at this point it's still a separate, unserialized
-        // object rather than part of `fullUrl.searchParams` above. Fold it in
-        // here (dropping null/undefined the same way axios's own params
-        // serializer does) so it gets included in the signature.
-        if (config.params && typeof config.params === 'object') {
-          for (const [key, value] of Object.entries(config.params as Record<string, unknown>)) {
-            if (value === undefined || value === null) {
-              continue;
-            }
-            queryParams[key] = String(value);
-          }
-        }
 
         const body =
           typeof config.data === 'string'
@@ -138,20 +114,6 @@ export const AwsCredentialsAuth: AuthTypeSpec<AuthSchemaType> = {
         for (const [key, value] of Object.entries(sigV4Headers)) {
           config.headers.set(key, value);
         }
-
-        // Bake the exact query string we just signed into `config.url` (by
-        // plain string concatenation, not the `URL.search` setter, which
-        // would re-run its own percent-encoding pass) and drop
-        // `config.params`. Axios's default params serializer un-escapes
-        // `:`, `$`, `,`, and turns spaces into `+` after encodeURIComponent —
-        // if left in place, it would send a *differently*-encoded query
-        // string than the one covered by the signature above, and AWS
-        // rejects any mismatch with a generic access-denied error.
-        const canonicalQuerystring = buildCanonicalQueryString(queryParams);
-        config.url = `${fullUrl.origin}${path}${
-          canonicalQuerystring ? `?${canonicalQuerystring}` : ''
-        }`;
-        config.params = undefined;
 
         return config;
       }

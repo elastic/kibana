@@ -11,18 +11,6 @@ import {
   NOTIFICATION_NAMESPACES,
   isRegisteredNotificationRef,
 } from './notification_registry_utils';
-import type { Severity } from './types';
-
-/**
- * Visibility window per severity tier, in days.
- * The longest TTL must stay within the data stream's 180d retention ceiling.
- */
-export const SEVERITY_TTL_DAYS: Record<Severity, number> = {
-  info: 30,
-  warning: 60,
-  error: 180,
-  critical: 180,
-};
 
 /** Severity members, exported so producers reference `SEVERITY.warning` rather than a raw string. */
 export const SEVERITY = {
@@ -39,23 +27,6 @@ export const SEVERITIES = [
   SEVERITY.error,
   SEVERITY.critical,
 ] as const;
-
-/**
- * Severities grouped by TTL window (days). Used for queries against the notifications
- * index and the cleanup task. Query will build one clause per time window.
- * e.g. 'error' and 'critical' both have a TTL of 180 days
- */
-export const SEVERITY_TTL_GROUPS: ReadonlyMap<number, Severity[]> = SEVERITIES.reduce(
-  (groups, severity) => {
-    const days = SEVERITY_TTL_DAYS[severity];
-    groups.set(days, [...(groups.get(days) ?? []), severity]);
-    return groups;
-  },
-  new Map<number, Severity[]>()
-);
-
-/** Longest severity TTL. Unknown/future tiers fall back to it so they are never hidden early. */
-export const MAX_SEVERITY_TTL_DAYS = Math.max(...Object.values(SEVERITY_TTL_DAYS));
 
 /** Call-to-action: an internal link and its display text. */
 export const ctaSchema = z
@@ -121,17 +92,3 @@ export const notificationReadSchema = notificationObject
     severity: z.enum(SEVERITIES).default('info').catch('info'),
   })
   .loose();
-
-/**
- * Read-path query params. Used primarily at the HTTP GET route boundary.
- *`queryNotifications` re-parses it for extra validation..
- */
-export const notificationQueryParamsSchema = z
-  .object({
-    namespace: z.string().min(1).max(64).optional(),
-    type: z.string().min(1).max(64).optional(),
-    severity: z.array(z.enum(SEVERITIES)).max(SEVERITIES.length).optional(),
-    from: z.iso.datetime().optional(),
-    to: z.iso.datetime().optional(),
-  })
-  .strict();

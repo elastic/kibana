@@ -12,7 +12,6 @@ import {
 import {
   INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
   INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
-  INITIALIZE_SECURITY_SOLUTION_SOCKET_TIMEOUT_MS,
 } from '@kbn/security-solution-plugin/common/api/initialization';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
@@ -51,9 +50,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await initializeSecuritySolution(supertest, [
             INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
             INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
-          ])
-            .timeout(INITIALIZE_SECURITY_SOLUTION_SOCKET_TIMEOUT_MS)
-            .expect(200);
+          ]).expect(200);
 
           const prebuiltRulesResult = body.flows[INITIALIZATION_FLOW_INIT_PREBUILT_RULES];
           const endpointResult = body.flows[INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION];

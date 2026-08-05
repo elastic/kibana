@@ -12,7 +12,7 @@ import { assertSignificantEventsAccess } from '../../utils/assert_significant_ev
 import { assertNotPaused } from '../../utils/assert_not_paused';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 
-const reconcileKnowledgeIndicatorsRoute = createServerRoute({
+export const reconcileKnowledgeIndicatorsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{streamName}/knowledge_indicators/_reconcile',
   options: {
     access: 'internal',

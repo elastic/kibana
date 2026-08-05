@@ -127,16 +127,6 @@ export class EntityCasesPage {
 
   async navigateToCase(caseId: string) {
     await this.page.gotoApp(`security/cases/${caseId}`);
-    // Cold full-page navigation lands on the `case-view-loading` spinner; wait for
-    // the case view's own loaded signal before returning so downstream tab clicks
-    // aren't racing the case fetch. `case-view-tabs` is the tab bar the cases
-    // framework renders only once the case fetch resolves, and — unlike
-    // `case-view-title` — it exists in both the legacy and redesigned case views
-    // (`xpack.cases.casesRedesign.details` defaults to true), so this readiness
-    // wait holds regardless of the redesign flag.
-    await this.page.testSubj
-      .locator('case-view-tabs')
-      .waitFor({ state: 'visible', timeout: 30000 });
   }
 
   // Case view lands on the Activity tab; the Entities accordion lives inside the

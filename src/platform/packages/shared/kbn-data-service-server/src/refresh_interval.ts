@@ -7,20 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 
-export const refreshIntervalSchema = z
-  .object({
-    pause: z.boolean().meta({
-      description: 'When `true`, auto-refresh is paused.',
+export const refreshIntervalSchema = schema.object(
+  {
+    pause: schema.boolean({
+      meta: {
+        description: 'When `true`, auto-refresh is paused.',
+      },
     }),
-    value: z.number().meta({
-      description: 'The refresh interval in milliseconds.',
+    value: schema.number({
+      meta: {
+        description: 'The refresh interval in milliseconds.',
+      },
     }),
-  })
-  .strict()
-  .meta({
-    id: 'kbn-data-service-server-refreshIntervalSchema',
-    title: 'Refresh interval',
-    description: 'Specifies the auto-refresh interval for the object.',
-  });
+  },
+  {
+    meta: {
+      id: 'kbn-data-service-server-refreshIntervalSchema',
+      title: 'Refresh interval',
+      description: 'Specifies the auto-refresh interval for the object.',
+    },
+  }
+);

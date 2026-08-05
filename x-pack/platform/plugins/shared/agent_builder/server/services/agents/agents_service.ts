@@ -14,7 +14,7 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
-import type { AgentAvailabilityConfig, AgentTypeRegistry } from '@kbn/agent-builder-server/agents';
+import type { AgentTypeRegistry } from '@kbn/agent-builder-server/agents';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { createConfigurationResolver } from './resolve_configuration';
@@ -54,8 +54,6 @@ export interface AgentsServiceStartDeps {
 export class AgentsService {
   private builtinRegistry: BuiltinAgentRegistry;
   private typeRegistry: AgentTypeRegistry;
-  /** In-memory availability for persisted agents, keyed by agent id. Filled by `ensure`. */
-  private readonly availabilityByAgentId = new Map<string, AgentAvailabilityConfig>();
 
   private setupDeps?: AgentsServiceSetupDeps;
 
@@ -114,7 +112,6 @@ export class AgentsService {
       security,
       toolsService,
       logger,
-      availabilityByAgentId: this.availabilityByAgentId,
     });
 
     const getAgentClient = async ({ request }: { request: KibanaRequest }) => {
@@ -142,7 +139,7 @@ export class AgentsService {
       });
     };
 
-    const ensure: AgentsServiceStart['ensure'] = async ({ spaceId, agent, availability }) => {
+    const ensure: AgentsServiceStart['ensure'] = async ({ spaceId, agent }) => {
       if (this.builtinRegistry.has(agent.id)) {
         throw new Error(
           `Cannot ensure persisted agent "${agent.id}": a built-in agent uses this id`
@@ -150,10 +147,6 @@ export class AgentsService {
       }
       if (agent.type !== undefined && !this.typeRegistry.has(agent.type)) {
         throw new Error(`Cannot ensure agent "${agent.id}": unknown agent type "${agent.type}"`);
-      }
-
-      if (availability) {
-        this.availabilityByAgentId.set(agent.id, availability);
       }
 
       const systemClient = createSystemClient({ space: spaceId, elasticsearch, logger });

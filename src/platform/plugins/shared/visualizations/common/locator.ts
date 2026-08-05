@@ -74,13 +74,6 @@ export type VisualizeAppLocator = LocatorPublic<VisualizeLocatorParams>;
 export class VisualizeLocatorDefinition implements LocatorDefinition<VisualizeLocatorParams> {
   id = VISUALIZE_APP_LOCATOR;
 
-  getTimeRange = (params: VisualizeLocatorParams) => params.timeRange;
-
-  setTimeRange = (params: VisualizeLocatorParams, timeRange?: TimeRange) => ({
-    ...params,
-    timeRange,
-  });
-
   public async getLocation(params: VisualizeLocatorParams) {
     const { getLocation } = await import('./locator_location');
     return getLocation(params);

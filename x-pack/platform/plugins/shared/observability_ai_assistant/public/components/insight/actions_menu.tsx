@@ -111,7 +111,6 @@ export function ActionsMenu({
 
   return (
     <EuiPopover
-      aria-label={openActionsLabel}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}

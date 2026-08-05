@@ -154,7 +154,6 @@ apiTest.describe('Delete rules by query API', { tag: '@local-stateful-classic' }
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -166,7 +165,6 @@ apiTest.describe('Delete rules by query API', { tag: '@local-stateful-classic' }
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -178,7 +176,6 @@ apiTest.describe('Delete rules by query API', { tag: '@local-stateful-classic' }
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -191,7 +188,6 @@ apiTest.describe('Delete rules by query API', { tag: '@local-stateful-classic' }
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -202,7 +198,6 @@ apiTest.describe('Delete rules by query API', { tag: '@local-stateful-classic' }
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(

@@ -6,6 +6,6 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/swc-register').install();
+require('@kbn/babel-register').install();
 
 require('./generate');

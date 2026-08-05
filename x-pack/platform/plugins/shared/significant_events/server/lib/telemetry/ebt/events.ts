@@ -14,14 +14,17 @@ import {
   SIGNIFICANT_EVENTS_CODE_ANALYSIS_GROUNDING_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_ENDPOINT_LATENCY_EVENT,
   SIGNIFICANT_EVENTS_FEATURES_IDENTIFIED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_AGENT_TOOL_DISCOVERY_WRITE_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
 } from './constants';
 import {
   agentBuilderKnowledgeIndicatorCreatedSchema,
+  agentToolDiscoveryWriteSchema,
   agentToolEventCreateSchema,
   agentToolEventInvestigationAttachSchema,
   agentToolEventSearchSchema,
@@ -31,10 +34,16 @@ import {
   codeAnalysisGroundingSchema,
   detectionScanSchema,
   discoveryTriggeredSchema,
+  endpointLatencySchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,
   knowledgeIndicatorQueriesGeneratedSchema,
   onboardingScheduledSchema,
 } from './schemas';
+
+const endpointLatencyEventType = {
+  eventType: SIGNIFICANT_EVENTS_ENDPOINT_LATENCY_EVENT,
+  schema: endpointLatencySchema,
+};
 
 const knowledgeIndicatorEventsGeneratedEventType = {
   eventType: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
@@ -96,6 +105,11 @@ const agentToolEventWriteEventType = {
   schema: agentToolEventWriteSchema,
 };
 
+const agentToolDiscoveryWriteEventType = {
+  eventType: SIGNIFICANT_EVENTS_AGENT_TOOL_DISCOVERY_WRITE_EVENT_TYPE,
+  schema: agentToolDiscoveryWriteSchema,
+};
+
 const agentToolEventSearchEventType = {
   eventType: SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
   schema: agentToolEventSearchSchema,
@@ -103,6 +117,7 @@ const agentToolEventSearchEventType = {
 
 export {
   agentBuilderKnowledgeIndicatorCreatedEventType,
+  agentToolDiscoveryWriteEventType,
   agentToolEventCreateEventType,
   agentToolEventInvestigationAttachEventType,
   agentToolEventSearchEventType,
@@ -112,6 +127,7 @@ export {
   codeAnalysisGroundingEventType,
   detectionScanEventType,
   discoveryTriggeredEventType,
+  endpointLatencyEventType,
   knowledgeIndicatorEventsGeneratedEventType,
   knowledgeIndicatorFeaturesIdentifiedEventType,
   onboardingScheduledEventType,

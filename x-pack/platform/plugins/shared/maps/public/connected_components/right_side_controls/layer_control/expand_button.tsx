@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiIcon, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface Props {
@@ -16,7 +16,6 @@ interface Props {
 }
 
 export function ExpandButton({ hasErrorsOrWarnings, isLoading, onClick }: Props) {
-  const { euiTheme } = useEuiTheme();
   // isLoading indicates at least one layer is loading.
   // Expand button should never be disabled.
   // Not using EuiButton* with iconType props because EuiButton* disables button when isLoading prop is true.
@@ -26,7 +25,6 @@ export function ExpandButton({ hasErrorsOrWarnings, isLoading, onClick }: Props)
         defaultMessage: 'Expand layers panel',
       })}
       className="mapLayerControl__openLayerTOCButton"
-      css={{ backgroundColor: `${euiTheme.colors.emptyShade} !important` }}
       color="text"
       onClick={onClick}
       data-test-subj="mapExpandLayerControlButton"

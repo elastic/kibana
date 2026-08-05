@@ -52,14 +52,7 @@ export function Tags({
         </EuiBadge>
       ))}
       {oneLine ? ' ' : <br />}
-      <EuiPopover
-        aria-label={i18n.translate('xpack.observability.component.tags.moreTagsPopoverAriaLabel', {
-          defaultMessage: 'Additional tags',
-        })}
-        button={moreTags}
-        isOpen={isMoreTagsOpen}
-        closePopover={closePopover}
-      >
+      <EuiPopover button={moreTags} isOpen={isMoreTagsOpen} closePopover={closePopover}>
         {tags.slice(size).map((tag) => (
           <EuiBadge key={tag} color={color}>
             {tag}

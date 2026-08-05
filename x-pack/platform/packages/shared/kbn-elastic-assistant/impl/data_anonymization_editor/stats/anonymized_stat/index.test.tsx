@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { EuiToolTip } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
+import { getTooltipContent } from './helpers';
 import * as i18n from './translations';
 import { AnonymizedStat } from '.';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
@@ -31,9 +33,9 @@ describe('AnonymizedStat', () => {
 
   it('shows the correct tooltip content when anonymized is 0 and isDataAnonymizable is false', async () => {
     render(
-      <TestProviders>
+      <EuiToolTip content={getTooltipContent({ anonymized: 0, isDataAnonymizable: false })}>
         <AnonymizedStat {...defaultProps} />
-      </TestProviders>
+      </EuiToolTip>
     );
 
     await userEvent.hover(screen.getByTestId('anonymizedFieldsStat'));
@@ -48,13 +50,9 @@ describe('AnonymizedStat', () => {
     const isDataAnonymizable = true;
 
     render(
-      <TestProviders>
-        <AnonymizedStat
-          {...defaultProps}
-          anonymized={anonymized}
-          isDataAnonymizable={isDataAnonymizable}
-        />
-      </TestProviders>
+      <EuiToolTip content={getTooltipContent({ anonymized, isDataAnonymizable })}>
+        <AnonymizedStat {...defaultProps} anonymized={anonymized} />
+      </EuiToolTip>
     );
 
     await userEvent.hover(screen.getByTestId('anonymizedFieldsStat'));

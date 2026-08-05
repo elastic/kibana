@@ -18,7 +18,7 @@ export interface ContinuationCycle {
   expectReuse?: boolean;
   /** Whether this cycle must perform a topology-filtered event search. */
   expectTopologyEventSearch?: boolean;
-  /** Event IDs explicitly supplied by the agent to events_write, before handler deduplication. */
+  /** Event IDs explicitly supplied by the agent to discovery_write, before handler deduplication. */
   requestedEventIds?: string[];
 
   steps?: ConverseStep[];

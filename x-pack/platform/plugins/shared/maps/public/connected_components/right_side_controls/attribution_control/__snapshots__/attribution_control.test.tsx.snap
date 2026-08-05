@@ -1,17 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AttributionControl is rendered 1`] = `
-<AttributionContainer
-  isFullScreen={true}
+<div
+  className="mapAttributionControl mapAttributionControl__fullScreen"
 >
-  <EuiLink
-    color="text"
-    href="https://coolmaps.com"
-    target="_blank"
+  <EuiText
+    size="xs"
   >
-    attribution with link
-  </EuiLink>
-  , 
-  attribution with no link
-</AttributionContainer>
+    <small>
+      <EuiLink
+        color="text"
+        href="https://coolmaps.com"
+        target="_blank"
+      >
+        attribution with link
+      </EuiLink>
+      , 
+      attribution with no link
+    </small>
+  </EuiText>
+</div>
 `;

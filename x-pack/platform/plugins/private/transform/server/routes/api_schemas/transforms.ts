@@ -155,7 +155,7 @@ export type PutTransformsLatestRequestSchema = Omit<PutTransformsRequestSchema, 
 
 export const putTransformQuerySchema = schema.object({
   createDataView: schema.boolean({ defaultValue: false }),
-  timeFieldName: schema.maybe(schema.string({ maxLength: 1000 })),
+  timeFieldName: schema.maybe(schema.string()),
   deferValidation: schema.boolean({ defaultValue: false }),
 });
 

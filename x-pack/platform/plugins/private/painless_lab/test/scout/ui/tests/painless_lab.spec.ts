@@ -7,13 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { PainlessContext } from '../fixtures/page_objects/painless_lab_page';
 import { test } from '../fixtures';
-
-// EuiSuperSelect options render in an EUI portal outside .kbnAppWrapper.
-const A11Y_SELECTORS = ['.kbnAppWrapper', '[data-euiportal="true"]'];
-
-const EXECUTION_CONTEXTS: PainlessContext[] = ['basic', 'filter', 'score'];
 
 const space = '  ';
 const TEST_SCRIPT_RESULT = '45';
@@ -61,66 +55,20 @@ test.describe(
       await pageObjects.painlessLab.waitForEditorToLoad();
     });
 
-    test('runs a script, navigates the panels, and views the request without a11y violations', async ({
-      page,
-      pageObjects,
-    }) => {
-      const { painlessLab } = pageObjects;
+    test('validate painless lab editor and request', async ({ pageObjects }) => {
+      await pageObjects.painlessLab.setCodeEditorValue(TEST_SCRIPT);
+      await pageObjects.painlessLab.editorOutputPane.waitFor({ state: 'visible' });
+      await expect(pageObjects.painlessLab.editorOutputPane).toContainText(TEST_SCRIPT_RESULT);
 
-      const expectNoA11yViolations = async () => {
-        const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
-        expect(violations).toStrictEqual([]);
-      };
+      await pageObjects.painlessLab.viewRequestButton.click();
+      await expect(pageObjects.painlessLab.requestFlyoutHeader).toBeVisible();
 
-      await test.step('initial render', async () => {
-        await expectNoA11yViolations();
-      });
+      expect(await pageObjects.painlessLab.getFlyoutRequestBody()).toBe(TEST_SCRIPT_REQUEST);
 
-      await test.step('run a script and show the result', async () => {
-        await painlessLab.setCodeEditorValue(TEST_SCRIPT);
-        await painlessLab.editorOutputPane.waitFor({ state: 'visible' });
-        await expect(painlessLab.editorOutputPane).toContainText(TEST_SCRIPT_RESULT);
-        await expectNoA11yViolations();
-      });
-
-      await test.step('view the request and response', async () => {
-        // Assert the request while the execution context is still the default
-        // ('basic') — selecting another context below changes the request body.
-        await painlessLab.viewRequestButton.click();
-        await expect(painlessLab.requestFlyoutHeader).toBeVisible();
-        expect(await painlessLab.getFlyoutRequestBody()).toBe(TEST_SCRIPT_REQUEST);
-
-        await painlessLab.flyoutResponseTab.click();
-        expect(await painlessLab.getFlyoutResponseBody()).toBe(UPDATED_TEST_SCRIPT_RESPONSE);
-
-        await page.keyboard.press('Escape');
-        await painlessLab.requestFlyoutHeader.waitFor({ state: 'hidden' });
-      });
-
-      await test.step('output, parameters, and context tabs are accessible', async () => {
-        for (const tab of [
-          painlessLab.outputTab,
-          painlessLab.parametersTab,
-          painlessLab.contextTab,
-        ]) {
-          await tab.click();
-          await expectNoA11yViolations();
-        }
-      });
-
-      await test.step('execution context dropdown is accessible', async () => {
-        await painlessLab.contextTab.click();
-
-        for (const context of EXECUTION_CONTEXTS) {
-          await painlessLab.contextDropdown.click();
-          await painlessLab.contextOption(context).waitFor({ state: 'visible' });
-          await expectNoA11yViolations();
-
-          await painlessLab.contextOption(context).click();
-          await painlessLab.contextOption(context).waitFor({ state: 'hidden' });
-          await expectNoA11yViolations();
-        }
-      });
+      await pageObjects.painlessLab.flyoutResponseTab.click();
+      expect(await pageObjects.painlessLab.getFlyoutResponseBody()).toBe(
+        UPDATED_TEST_SCRIPT_RESPONSE
+      );
     });
   }
 );

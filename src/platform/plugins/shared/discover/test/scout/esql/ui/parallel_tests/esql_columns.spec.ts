@@ -43,10 +43,7 @@ spaceTest.describe(
       'renders initial columns for non-transformational commands',
       async ({ pageObjects }) => {
         await pageObjects.discover.loadSavedSearch('nonTransformationalInitialColumns');
-        await expect(pageObjects.discover.getDocHeaderLabels()).toHaveText(
-          ['@timestamp', 'Summary'],
-          { useInnerText: true }
-        );
+        expect(await pageObjects.discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
       }
     );
 
@@ -54,41 +51,36 @@ spaceTest.describe(
       'renders custom columns for non-transformational commands',
       async ({ pageObjects }) => {
         await pageObjects.discover.loadSavedSearch('nonTransformationalCustomColumns');
-        await expect(pageObjects.discover.getDocHeaderLabels()).toHaveText(
-          ['@timestamp', 'bytes', 'extension'],
-          { useInnerText: true }
-        );
+        expect(await pageObjects.discover.getDocHeader()).toStrictEqual([
+          '@timestamp',
+          'bytes',
+          'extension',
+        ]);
       }
     );
 
     spaceTest('renders initial columns for a transformational command', async ({ pageObjects }) => {
       await pageObjects.discover.loadSavedSearch('transformationalInitialColumns');
-      await expect(pageObjects.discover.getDocHeaderLabels()).toHaveText(['ip', '@timestamp'], {
-        useInnerText: true,
-      });
+      expect(await pageObjects.discover.getDocHeader()).toStrictEqual(['ip', '@timestamp']);
     });
 
     spaceTest('renders custom columns for a transformational command', async ({ pageObjects }) => {
       await pageObjects.discover.loadSavedSearch('transformationalCustomColumns');
-      await expect(pageObjects.discover.getDocHeaderLabels()).toHaveText(['ip', 'bytes'], {
-        useInnerText: true,
-      });
+      expect(await pageObjects.discover.getDocHeader()).toStrictEqual(['ip', 'bytes']);
     });
 
     spaceTest(
       'restores columns correctly when switching between saved searches',
       async ({ pageObjects }) => {
         await pageObjects.discover.loadSavedSearch('nonTransformationalInitialColumns');
-        await expect(pageObjects.discover.getDocHeaderLabels()).toHaveText(
-          ['@timestamp', 'Summary'],
-          { useInnerText: true }
-        );
+        expect(await pageObjects.discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
 
         await pageObjects.discover.loadSavedSearch('nonTransformationalCustomColumns');
-        await expect(pageObjects.discover.getDocHeaderLabels()).toHaveText(
-          ['@timestamp', 'bytes', 'extension'],
-          { useInnerText: true }
-        );
+        expect(await pageObjects.discover.getDocHeader()).toStrictEqual([
+          '@timestamp',
+          'bytes',
+          'extension',
+        ]);
       }
     );
   }

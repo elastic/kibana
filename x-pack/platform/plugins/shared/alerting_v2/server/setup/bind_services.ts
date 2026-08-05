@@ -7,17 +7,11 @@
 
 import { once } from 'lodash';
 import type { CoreDiServiceStart } from '@kbn/core-di';
-import { OnStart, Logger, PluginSetup, PluginStart } from '@kbn/core-di';
-import {
-  CoreStart,
-  PluginInitializer,
-  Request,
-  SavedObjectsClientFactory,
-} from '@kbn/core-di-server';
+import { OnStart, PluginSetup, PluginStart } from '@kbn/core-di';
+import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import { AlertActionsClient } from '../lib/alert_actions_client';
-import { AlertEventsClient } from '../lib/alert_events_client';
 import { DirectorService } from '../lib/director/director';
 import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
 import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
@@ -33,12 +27,6 @@ import {
   ExecutionHistoryClientToken,
 } from '../lib/execution_history_client';
 import { RulesClient } from '../lib/rules_client';
-import {
-  createChangeHistoryClient,
-  RuleChangesHistoryClientToken,
-  RuleChangesHistoryService,
-  RuleChangesHistoryServiceToken,
-} from '../lib/rule_changes_history';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import {
@@ -107,7 +95,6 @@ import type { AlertingServerSetupDependencies, AlertingServerStartDependencies }
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
-  bind(AlertEventsClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
@@ -135,16 +122,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);
-
-  bind(RuleChangesHistoryClientToken)
-    .toDynamicValue(({ get }) => {
-      const logger = get(Logger).get('rule_changes_history');
-      const { version: kibanaVersion } = get(PluginInitializer('env')).packageInfo;
-      return createChangeHistoryClient({ logger, kibanaVersion });
-    })
-    .inSingletonScope();
-  bind(RuleChangesHistoryService).toSelf().inSingletonScope();
-  bind(RuleChangesHistoryServiceToken).toService(RuleChangesHistoryService);
 
   bind(UiSettingsClientToken)
     .toDynamicValue(({ get }) => {

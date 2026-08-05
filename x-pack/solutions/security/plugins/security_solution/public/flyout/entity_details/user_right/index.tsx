@@ -13,7 +13,6 @@ import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/u
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { EuiFlyoutFooter, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { useAlertTimeRange } from '../../../entity_analytics/hooks/use_alert_time_range';
 import { useAssetCriticalityPrivileges } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
@@ -99,7 +98,7 @@ export const UserPanel = memo(function UserPanel({
 
   const safeContextID = contextID ?? scopeId ?? 'user-panel';
 
-  const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
+  const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
 
   const userStoreIdentityFields = useMemo(
     () => (!entityIdProp && userName ? { 'user.name': userName } : undefined),
@@ -173,13 +172,12 @@ export const UserPanel = memo(function UserPanel({
     })
   );
 
-  const { from: alertFrom, to: alertTo } = useAlertTimeRange(scopeId);
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: documentEntityIdentifiers,
     entityType: EntityType.user,
     entityRecord: entityFromStoreResult.entityRecord,
-    to: alertTo,
-    from: alertFrom,
+    to,
+    from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}USER_NAME_RIGHT`,
   });
 

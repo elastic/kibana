@@ -48,7 +48,7 @@ describe('query_type_distribution evaluator', () => {
     });
 
     expect(result.score).toBe(1);
-    expect(result.metadata).toMatchObject({ match: 1, stats: 1 });
+    expect(result.details).toMatchObject({ match: 1, stats: 1 });
   });
 
   it('scores 0.5 when only MATCH queries present but STATS expected', async () => {

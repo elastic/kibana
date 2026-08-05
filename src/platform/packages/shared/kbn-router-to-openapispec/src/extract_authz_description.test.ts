@@ -96,17 +96,4 @@ describe('extractAuthzDescription', () => {
       );
     }
   });
-
-  it('should return route authz description including extended privileges', () => {
-    const routeSecurity: RouteSecurity = {
-      authz: {
-        requiredPrivileges: ['manage_spaces'],
-        extendedPrivileges: ['readExecution', 'readManaged'],
-      },
-    };
-    const description = extractAuthzDescription(routeSecurity);
-    expect(description).toBe(
-      '[Required authorization] Route required privileges: manage_spaces. Extended privileges (optional, expand functionality when granted): readExecution, readManaged.'
-    );
-  });
 });

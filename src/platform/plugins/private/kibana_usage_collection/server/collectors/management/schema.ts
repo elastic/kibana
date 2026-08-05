@@ -261,13 +261,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'discover:defaultEsqlQuery': {
-    type: 'keyword',
-    _meta: {
-      description:
-        'The default ES|QL query Discover opens with in ES|QL mode. Redacted as it may contain sensitive user data.',
-    },
-  },
   'discover:maxDocFieldsDisplayed': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },

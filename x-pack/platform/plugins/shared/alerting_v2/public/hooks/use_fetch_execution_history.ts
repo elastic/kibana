@@ -80,7 +80,7 @@ export const useFetchExecutionHistory = ({
       startDate,
     }),
     queryFn: () =>
-      executionHistoryApi.listActionPolicyExecutions(
+      executionHistoryApi.listExecutionHistory(
         toListExecutionHistoryRequest({
           page,
           perPage,

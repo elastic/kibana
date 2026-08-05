@@ -15,7 +15,6 @@ import {
   EuiModalFooter,
   EuiFlexGroup,
   EuiFlexItem,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { UserProfile } from '@kbn/core-user-profile-common';
 import { getCurrentConversationOwner } from '@kbn/elastic-assistant-common';
@@ -40,7 +39,6 @@ const ShareModalComponent: React.FC<Props> = ({
   selectedConversation,
   setIsModalOpen,
 }) => {
-  const modalTitleId = useGeneratedHtmlId();
   const { copyConversationUrl, updateConversationUsers } = useConversation();
 
   const { toasts } = useAssistantContext();
@@ -121,14 +119,9 @@ const ShareModalComponent: React.FC<Props> = ({
   ]);
 
   return (
-    <EuiModal
-      aria-labelledby={modalTitleId}
-      onClose={onCancelShare}
-      maxWidth={600}
-      data-test-subj="shareConversationModal"
-    >
+    <EuiModal onClose={onCancelShare} maxWidth={600} data-test-subj="shareConversationModal">
       <EuiModalHeader>
-        <EuiModalHeaderTitle className="eui-textTruncate" id={modalTitleId}>
+        <EuiModalHeaderTitle className="eui-textTruncate">
           {`${i18n.SHARE} `} <strong>{selectedConversation?.title}</strong>
         </EuiModalHeaderTitle>
       </EuiModalHeader>

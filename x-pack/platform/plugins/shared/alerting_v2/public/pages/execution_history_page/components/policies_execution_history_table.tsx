@@ -47,7 +47,7 @@ const buildColumns = ({
   canReadActionPolicies: boolean;
 }): Array<EuiBasicTableColumn<PolicyExecutionHistoryItem>> => [
   {
-    field: 'dispatched_at',
+    field: '@timestamp',
     name: i18n.COLUMN_TIMESTAMP,
     render: (value: string) => formatTimestamp(value),
   },

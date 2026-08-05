@@ -414,17 +414,11 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   }
 
   if (limitedToPackages && limitedToPackages.length) {
-    // Enforce the package scope against both the existing package policy and the
-    // package supplied in the update body. Checking only the saved package would
-    // allow a scoped caller to retarget the policy to a package outside its scope.
-    const existingPackageName = packagePolicy?.package?.name;
-    const requestedPackageName = request.body.package?.name;
-    for (const packageName of [existingPackageName, requestedPackageName]) {
-      if (packageName && !limitedToPackages.includes(packageName)) {
-        return response.forbidden({
-          body: { message: `Update for package name ${packageName} is not authorized.` },
-        });
-      }
+    const packageName = packagePolicy?.package?.name;
+    if (packageName && !limitedToPackages.includes(packageName)) {
+      return response.forbidden({
+        body: { message: `Update for package name ${packageName} is not authorized.` },
+      });
     }
   }
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { default: webpackConfig } = require('./src/webpack.config');
+const webpackConfig = require('./src/webpack.config');
 
 module.exports = {
   managerEntries: (entry = []) => {

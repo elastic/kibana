@@ -20,7 +20,6 @@ import type { State } from '../../../common/store';
 import { RowAction } from '../../../common/components/control_columns/row_action';
 import type { GetSecurityAlertsTableProp } from './types';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
-import { useAlertsContext } from './alerts_context';
 
 const onRowSelected = () => {};
 
@@ -39,7 +38,6 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
   leadingControlColumn,
 }) => {
   const license = useLicense();
-  const { alertsTableRef } = useAlertsContext();
   const defaults = useMemo(() => getAlertsDefaultModel(license), [license]);
   const selectTableById = useMemo(() => getTableByIdSelector(), []);
   const {
@@ -119,7 +117,6 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
       onRuleChange={eventContext?.onRuleChange}
       tabType={'query'}
       tableId={tableType}
-      alertsTableRef={alertsTableRef}
       width={0}
       setEventsLoading={setEventsLoading}
       setEventsDeleted={noop}

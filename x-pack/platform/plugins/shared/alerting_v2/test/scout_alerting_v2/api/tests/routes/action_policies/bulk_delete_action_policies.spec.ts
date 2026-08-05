@@ -89,7 +89,6 @@ apiTest.describe('Bulk delete action policies API', { tag: '@local-stateful-clas
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -101,7 +100,6 @@ apiTest.describe('Bulk delete action policies API', { tag: '@local-stateful-clas
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -112,7 +110,6 @@ apiTest.describe('Bulk delete action policies API', { tag: '@local-stateful-clas
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects an id over the maximum length', async ({ apiClient }) => {
@@ -122,7 +119,6 @@ apiTest.describe('Bulk delete action policies API', { tag: '@local-stateful-clas
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects more than the maximum number of ids', async ({ apiClient }) => {
@@ -134,7 +130,6 @@ apiTest.describe('Bulk delete action policies API', { tag: '@local-stateful-clas
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(

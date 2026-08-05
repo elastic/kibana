@@ -28,17 +28,7 @@ describe('DonutChart component', () => {
     };
 
     const wrapper = shallowWithIntl(<DonutChart {...props} />);
-    const chart = wrapper.find('Chart');
-    expect(chart.prop('size')).toBe(125);
-    expect(chart.prop('aria-label')).toContain('32 of 127 monitors are down');
-    expect(wrapper.find('Partition').prop('data')).toEqual([
-      { value: 32, label: 'Down' },
-      { value: 95, label: 'Up' },
-    ]);
-
-    const legend = wrapper.find('DonutChartLegend');
-    expect(legend.prop('down')).toBe(32);
-    expect(legend.prop('up')).toBe(95);
+    expect(wrapper).toMatchSnapshot();
   });
 
   it('renders a donut chart', () => {

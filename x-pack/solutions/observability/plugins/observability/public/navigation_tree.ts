@@ -16,8 +16,8 @@ import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import type { Location } from 'history';
-import { NightshiftNavigationIcon } from '@kbn/observability-shared-plugin/public';
 import type { ObservabilityPublicPluginsStart } from './plugin';
+import { NightshiftNavigationIcon } from './pages/nightshift/app/nightshift_mark_icon';
 
 const title = i18n.translate(
   'xpack.observability.obltNav.headerSolutionSwitcher.obltSolutionTitle',
@@ -65,7 +65,7 @@ function createNavTree({
       ...(significantEventsAvailable
         ? [
             {
-              link: 'nightshift' as const,
+              link: 'observability-overview:nightshift' as const,
               icon: NightshiftNavigationIcon,
             },
           ]

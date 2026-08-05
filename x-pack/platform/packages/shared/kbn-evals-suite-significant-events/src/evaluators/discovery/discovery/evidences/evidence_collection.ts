@@ -9,11 +9,11 @@ import type { SignalEntry } from '@kbn/significant-events-schema';
 import type { DiscoveryEvaluator } from '../../types';
 
 const detectionSignalsByRuleUuid = (
-  events: Parameters<DiscoveryEvaluator['evaluate']>[0]['output']['significantEvents']
+  discoveries: Parameters<DiscoveryEvaluator['evaluate']>[0]['output']['discoveries']
 ): Map<string, SignalEntry[]> => {
   const signalsByRuleUuid = new Map<string, SignalEntry[]>();
-  for (const event of events ?? []) {
-    for (const signal of event.signals ?? []) {
+  for (const discovery of discoveries ?? []) {
+    for (const signal of discovery.signals ?? []) {
       if (signal.type !== 'detection') {
         continue;
       }
@@ -35,7 +35,7 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
         .map(({ rule_uuid: ruleUuid }) => ruleUuid)
         .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
     );
-    const signalsByRuleUuid = detectionSignalsByRuleUuid(output.significantEvents);
+    const signalsByRuleUuid = detectionSignalsByRuleUuid(output.discoveries);
     const issues: string[] = [];
     let covered = 0;
 
@@ -63,18 +63,13 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
     const unexpectedRuleUuids = [...signalsByRuleUuid.keys()].filter(
       (ruleUuid) => !expectedRuleUuids.has(ruleUuid)
     );
-    if (unexpectedRuleUuids.length > 0) {
-      const unexpectedRules = unexpectedRuleUuids
-        .map((ruleUuid) => (ruleUuid ? `"${ruleUuid}"` : 'a signal without metadata.rule_uuid'))
-        .join(', ');
-      return Promise.resolve({
-        score: 0,
-        label: 'unexpected-rule-uuid',
-        explanation: `Agent output contains detection signal(s) not present in the input batch: ${unexpectedRules}`,
-      });
-    }
+    unexpectedRuleUuids.forEach((ruleUuid) => {
+      issues.push(
+        ruleUuid ? `unexpected signal for rule "${ruleUuid}"` : 'signal missing metadata.rule_uuid'
+      );
+    });
 
-    const score = covered / expectedRuleUuids.size;
+    const score = covered / (expectedRuleUuids.size + unexpectedRuleUuids.length);
     return Promise.resolve({
       score,
       explanation:
