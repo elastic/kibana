@@ -74,7 +74,7 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
     await eisModels.manageRegionsCustomPolicyToggle.click();
     await expect(eisModels.manageRegionsCallout).toBeVisible();
 
-    await eisModels.manageRegionsCallout.getByRole('button', { name: /dismiss/i }).click();
+    await eisModels.manageRegionsCalloutDismiss.click();
     await expect(eisModels.manageRegionsCallout).toBeHidden();
   });
 

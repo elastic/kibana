@@ -160,8 +160,9 @@ describe('ManageRegionsModal', () => {
       fireEvent.click(screen.getByTestId('manageRegionsRegionsTab'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsNoRegions')).toBeInTheDocument();
-        expect(screen.getByText('No regions available')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsNoRegions')).toHaveTextContent(
+          'No regions available'
+        );
       });
     });
 
@@ -384,7 +385,9 @@ describe('ManageRegionsModal', () => {
       renderWithGeoTab();
 
       await waitFor(() => {
-        expect(screen.getByText('0 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '0 of 2 selected'
+        );
       });
     });
   });
@@ -411,10 +414,8 @@ describe('ManageRegionsModal', () => {
 
       // us-east-1 → North America zone, europe-west1 → Europe zone
       await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsZone-us')).toBeInTheDocument();
-        expect(screen.getByTestId('manageRegionsZone-eu')).toBeInTheDocument();
-        expect(screen.getByText('North America')).toBeInTheDocument();
-        expect(screen.getByText('Europe')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsZone-us')).toHaveTextContent('North America');
+        expect(screen.getByTestId('manageRegionsZone-eu')).toHaveTextContent('Europe');
       });
     });
 
@@ -468,7 +469,9 @@ describe('ManageRegionsModal', () => {
 
       // No policy → nothing pre-selected
       await waitFor(() => {
-        expect(screen.getByText('0 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '0 of 2 selected'
+        );
       });
     });
 
@@ -497,7 +500,9 @@ describe('ManageRegionsModal', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '2 of 2 selected'
+        );
       });
     });
 
@@ -614,13 +619,17 @@ describe('ManageRegionsModal', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('manageRegionsSelectAllButton')).toHaveTextContent('Select all');
-        expect(screen.getByText('0 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '0 of 2 selected'
+        );
       });
 
       fireEvent.click(screen.getByTestId('manageRegionsSelectAllButton'));
 
       await waitFor(() => {
-        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '2 of 2 selected'
+        );
         expect(screen.getByTestId('manageRegionsSelectAllButton')).toHaveTextContent(
           'Deselect all'
         );
@@ -661,7 +670,9 @@ describe('ManageRegionsModal', () => {
       fireEvent.click(screen.getByTestId('manageRegionsSelectAllButton'));
 
       await waitFor(() => {
-        expect(screen.getByText('0 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '0 of 2 selected'
+        );
         expect(screen.getByTestId('manageRegionsSelectAllButton')).toHaveTextContent('Select all');
       });
     });
@@ -694,7 +705,9 @@ describe('ManageRegionsModal', () => {
 
       // Existing policy seeded → isDirty = false → Save disabled.
       await waitFor(() => {
-        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '2 of 2 selected'
+        );
       });
 
       expect(screen.getByTestId('manageRegionsSaveButton')).toBeDisabled();
@@ -989,7 +1002,7 @@ describe('ManageRegionsModal', () => {
       });
 
       // Confirm button is disabled until acknowledgement.
-      const confirmButton = screen.getByRole('button', { name: /reset to default/i });
+      const confirmButton = screen.getByTestId('confirmModalConfirmButton');
       expect(confirmButton).toBeDisabled();
 
       fireEvent.click(screen.getByTestId('confirmDeleteRegionPolicyAcknowledge'));
@@ -1019,8 +1032,7 @@ describe('ManageRegionsModal', () => {
 
       // Scope the cancel lookup to the delete confirmation, otherwise the
       // parent modal's own Cancel button would also match.
-      const cancelButton = within(deleteConfirm).getByRole('button', { name: /^cancel$/i });
-      fireEvent.click(cancelButton);
+      fireEvent.click(within(deleteConfirm).getByTestId('confirmModalCancelButton'));
 
       await waitFor(() => {
         expect(screen.queryByTestId('confirmDeleteRegionPolicyModal')).not.toBeInTheDocument();
@@ -1052,7 +1064,7 @@ describe('ManageRegionsModal', () => {
       });
 
       fireEvent.click(screen.getByTestId('confirmDeleteRegionPolicyAcknowledge'));
-      fireEvent.click(screen.getByRole('button', { name: /reset to default/i }));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       expect(onClose).toHaveBeenCalledTimes(1);
     });
@@ -1079,7 +1091,7 @@ describe('ManageRegionsModal', () => {
       });
 
       fireEvent.click(screen.getByTestId('confirmDeleteRegionPolicyAcknowledge'));
-      fireEvent.click(screen.getByRole('button', { name: /reset to default/i }));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       expect(mockDeleteMutate).toHaveBeenCalled();
       expect(screen.getByTestId('confirmDeleteRegionPolicyModal')).toBeInTheDocument();
@@ -1148,7 +1160,9 @@ describe('ManageRegionsModal', () => {
       toggleCustomPolicyOn();
 
       await waitFor(() => {
-        expect(screen.getByText('0 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '0 of 2 selected'
+        );
         expect(screen.getByTestId('manageRegionsSaveButton')).toBeDisabled();
       });
     });
@@ -1172,7 +1186,9 @@ describe('ManageRegionsModal', () => {
       fireEvent.click(screen.getByTestId('manageRegionsSelectAllButton'));
 
       await waitFor(() => {
-        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '2 of 2 selected'
+        );
         expect(screen.getByTestId('manageRegionsSaveButton')).not.toBeDisabled();
       });
     });
@@ -1218,21 +1234,27 @@ describe('ManageRegionsModal', () => {
 
       // No policy + toggle ON → nothing selected yet → Save disabled.
       await waitFor(() => {
-        expect(screen.getByText('0 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '0 of 2 selected'
+        );
         expect(screen.getByTestId('manageRegionsSaveButton')).toBeDisabled();
       });
 
       // Select all → Save enabled.
       fireEvent.click(screen.getByTestId('manageRegionsSelectAllButton'));
       await waitFor(() => {
-        expect(screen.getByText('2 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '2 of 2 selected'
+        );
         expect(screen.getByTestId('manageRegionsSaveButton')).not.toBeDisabled();
       });
 
       // Deselect all again → Save disabled.
       fireEvent.click(screen.getByTestId('manageRegionsSelectAllButton'));
       await waitFor(() => {
-        expect(screen.getByText('0 of 2 selected')).toBeInTheDocument();
+        expect(screen.getByTestId('manageRegionsSelectionCount')).toHaveTextContent(
+          '0 of 2 selected'
+        );
         expect(screen.getByTestId('manageRegionsSaveButton')).toBeDisabled();
       });
     });
@@ -1257,8 +1279,9 @@ describe('ManageRegionsModal', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('manageRegionsErrorCallout')).toBeInTheDocument();
-      expect(screen.getByText('Failed to load region data')).toBeInTheDocument();
+      expect(screen.getByTestId('manageRegionsErrorCallout')).toHaveTextContent(
+        'Failed to load region data'
+      );
     });
 
     it('renders a danger callout when the EIS models fetch fails', () => {
@@ -1321,14 +1344,7 @@ describe('ManageRegionsModal', () => {
 
       fireEvent.click(screen.getByTestId('manageRegionsCustomPolicyToggle'));
 
-      const dismissButton = screen
-        .getByTestId('manageRegionsCallout')
-        .querySelector('[data-test-subj="euiDismissCalloutButton"]');
-      expect(dismissButton).not.toBeNull();
-      if (!dismissButton) {
-        return;
-      }
-      fireEvent.click(dismissButton);
+      fireEvent.click(screen.getByTestId('manageRegionsCalloutDismiss'));
 
       expect(screen.queryByTestId('manageRegionsCallout')).not.toBeInTheDocument();
     });

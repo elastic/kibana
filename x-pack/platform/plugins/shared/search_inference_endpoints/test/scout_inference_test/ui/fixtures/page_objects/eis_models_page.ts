@@ -45,6 +45,7 @@ export class EisModelsPage {
   readonly manageRegionsCancelButton: Locator;
   readonly manageRegionsSaveButton: Locator;
   readonly manageRegionsCallout: Locator;
+  readonly manageRegionsCalloutDismiss: Locator;
   readonly manageRegionsErrorCallout: Locator;
   readonly manageRegionsLoading: Locator;
   readonly manageRegionsNoGeos: Locator;
@@ -108,6 +109,7 @@ export class EisModelsPage {
     this.manageRegionsCancelButton = this.page.testSubj.locator('manageRegionsCancelButton');
     this.manageRegionsSaveButton = this.page.testSubj.locator('manageRegionsSaveButton');
     this.manageRegionsCallout = this.page.testSubj.locator('manageRegionsCallout');
+    this.manageRegionsCalloutDismiss = this.page.testSubj.locator('manageRegionsCalloutDismiss');
     this.manageRegionsErrorCallout = this.page.testSubj.locator('manageRegionsErrorCallout');
     this.manageRegionsLoading = this.page.testSubj.locator('manageRegionsLoading');
     this.manageRegionsNoGeos = this.page.testSubj.locator('manageRegionsNoGeos');

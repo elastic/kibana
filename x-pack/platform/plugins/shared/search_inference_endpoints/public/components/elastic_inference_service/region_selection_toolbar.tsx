@@ -30,7 +30,7 @@ export const RegionSelectionToolbar: React.FC<RegionSelectionToolbarProps> = ({
     <EuiFlexItem grow={false}>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiText size="xs">
+          <EuiText size="xs" data-test-subj="manageRegionsSelectionCount">
             <strong>
               {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.selectionCount', {
                 defaultMessage: '{selected} of {total} selected',

@@ -39,13 +39,15 @@ describe('ConfirmDeleteRegionPolicyModal', () => {
   it('renders the title, description, checkbox, and buttons', () => {
     renderModal();
 
-    expect(screen.getByText('Reset region preferences to default?')).toBeInTheDocument();
-    expect(
-      screen.getByText(/Removing your custom region preferences allows inference in all locations/)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/You'll need to set new region preferences to restrict inference again/)
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('confirmDeleteRegionPolicyTitle')).toHaveTextContent(
+      'Reset region preferences to default?'
+    );
+    expect(screen.getByTestId('confirmDeleteRegionPolicyDescription')).toHaveTextContent(
+      /Removing your custom region preferences allows inference in all locations/
+    );
+    expect(screen.getByTestId('confirmDeleteRegionPolicyReconfigureNote')).toHaveTextContent(
+      /You'll need to set new region preferences to restrict inference again/
+    );
     expect(screen.getByTestId('confirmDeleteRegionPolicyAcknowledge')).toBeInTheDocument();
     expect(screen.getByTestId('confirmModalConfirmButton')).toBeInTheDocument();
     expect(screen.getByTestId('confirmModalCancelButton')).toBeInTheDocument();

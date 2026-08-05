@@ -36,12 +36,12 @@ export const ConfirmDeleteRegionPolicyModal: React.FC<ConfirmDeleteRegionPolicyM
     <EuiConfirmModal
       maxWidth={euiTheme.base * 29}
       aria-labelledby={modalTitleId}
-      titleProps={{ id: modalTitleId }}
+      titleProps={{ id: modalTitleId, 'data-test-subj': 'confirmDeleteRegionPolicyTitle' }}
       title={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.deleteConfirm.title', {
         defaultMessage: 'Reset region preferences to default?',
       })}
       onCancel={onCancel}
-      onConfirm={onConfirm}
+      onConfirm={() => onConfirm()}
       cancelButtonText={i18n.translate(
         'xpack.searchInferenceEndpoints.manageRegions.deleteConfirm.cancelButtonLabel',
         { defaultMessage: 'Cancel' }
@@ -57,7 +57,7 @@ export const ConfirmDeleteRegionPolicyModal: React.FC<ConfirmDeleteRegionPolicyM
       data-test-subj="confirmDeleteRegionPolicyModal"
     >
       <EuiText size="s">
-        <p>
+        <p data-test-subj="confirmDeleteRegionPolicyDescription">
           {i18n.translate(
             'xpack.searchInferenceEndpoints.manageRegions.deleteConfirm.description',
             {
@@ -66,7 +66,7 @@ export const ConfirmDeleteRegionPolicyModal: React.FC<ConfirmDeleteRegionPolicyM
             }
           )}
         </p>
-        <p>
+        <p data-test-subj="confirmDeleteRegionPolicyReconfigureNote">
           <strong>
             {i18n.translate(
               'xpack.searchInferenceEndpoints.manageRegions.deleteConfirm.reconfigureNote',

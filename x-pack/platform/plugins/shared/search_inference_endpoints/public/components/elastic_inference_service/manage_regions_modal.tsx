@@ -180,6 +180,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
               iconType="warning"
               announceOnMount={false}
               onDismiss={handleDismissCallOut}
+              dismissButtonProps={{ 'data-test-subj': 'manageRegionsCalloutDismiss' }}
               data-test-subj="manageRegionsCallout"
             >
               <p>
