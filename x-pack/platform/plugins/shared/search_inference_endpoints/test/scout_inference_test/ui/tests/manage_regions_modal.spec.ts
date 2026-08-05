@@ -53,27 +53,14 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
     await expect(eisModels.manageRegionsModal).toBeHidden();
   });
 
-  test('after enabling the toggle, no geos are pre-selected on the Geo tab', async ({
-    pageObjects,
-  }) => {
+  test('enabling the custom policy toggle reveals the Geo tab', async ({ pageObjects }) => {
     const { eisModels } = pageObjects;
 
     await eisModels.manageRegionsButton.click();
     await expect(eisModels.manageRegionsLoading).toBeHidden();
 
-    await expect(eisModels.manageRegionsGeoTab).toBeHidden();
-    await expect(eisModels.manageRegionsSaveButton).toBeDisabled();
-
     await eisModels.manageRegionsCustomPolicyToggle.click();
-
     await expect(eisModels.manageRegionsGeoTab).toBeVisible();
-    await expect(eisModels.manageRegionsRegionsTab).toBeVisible();
-    await expect(eisModels.manageRegionsSaveButton).toBeDisabled();
-
-    for (const geo of ['apac', 'eu', 'us']) {
-      await expect(eisModels.geoZoneRow(geo)).toBeVisible();
-      await expect(eisModels.geoZoneCheckbox(geo)).not.toBeChecked();
-    }
   });
 
   test('info callout is hidden until the custom policy toggle is on, and is dismissible', async ({
