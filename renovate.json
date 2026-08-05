@@ -1782,7 +1782,7 @@
     },
     {
       "groupName": "adm-zip",
-      "matchDepNames": ["adm-zip", "@types/adm-zip"],
+      "matchDepNames": ["adm-zip"],
       "reviewers": ["team:security-solution"],
       "matchBaseBranches": ["main"],
       "labels": ["Team: SecuritySolution", "backport:all-open", "release_note:skip"],
@@ -2666,8 +2666,8 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "@swc/core",
-      "matchDepNames": ["@swc/core"],
+      "groupName": "@swc",
+      "matchDepNames": ["@swc/core", "@swc/helpers"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],

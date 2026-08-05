@@ -314,16 +314,17 @@ class AgentClientImpl implements AgentClient {
       await this.validateAgentToolSelection(profileUpdate.configuration.tools);
     }
 
-    const updatedConversation = updateRequestToEs({
+    const updatedAgent = updateRequestToEs({
       agentId,
       currentProps: document._source,
       update: profileUpdate,
       updateDate: new Date(),
+      user: this.user,
     });
 
     await this.storage.getClient().index({
       id: document._id,
-      document: updatedConversation,
+      document: updatedAgent,
     });
 
     return this.get(agentId);
