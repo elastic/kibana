@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { parse as yamlParse } from 'yaml';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { CreateTemplatePage } from './page';
 import { TestProviders } from '../../../../common/mock';
 import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
@@ -70,24 +71,13 @@ jest.mock('../../../use_breadcrumbs', () => ({
 const observablesEnabledFeatures = { observables: { enabled: true, autoExtract: true } };
 
 /**
- * Creating a template now opens a modal for the required name before the editor is reachable, so
- * every editor-level assertion has to walk through it first. Passing a name here also means the
- * Configuration tab already holds a valid name, which is why the tests below no longer set one.
+ * The template name is the editable page title, so naming a template is a header interaction rather
+ * than a trip to the Configuration tab.
  */
-const renderCreatePageAndName = async ({
-  name = 'My template',
-  features,
-}: { name?: string; features?: object } = {}) => {
-  const view = render(
-    <TestProviders {...(features ? { features } : {})}>
-      <CreateTemplatePage />
-    </TestProviders>
-  );
-
-  await userEvent.type(screen.getByTestId('templateMetadataNameInput'), name);
-  await userEvent.click(screen.getByTestId('createTemplateModalConfirm'));
-
-  return view;
+const nameTemplateFromPageTitle = async (name: string) => {
+  await userEvent.click(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleButton));
+  await userEvent.type(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleInput), name);
+  await userEvent.keyboard('{enter}');
 };
 
 describe('CreateTemplatePage', () => {
@@ -98,49 +88,15 @@ describe('CreateTemplatePage', () => {
     mockMutateAsync.mockResolvedValue({ templateId: 'new-tpl-id' });
   });
 
-  it('asks for the required name before the editor is reachable', () => {
-    render(
-      <TestProviders>
-        <CreateTemplatePage />
-      </TestProviders>
-    );
-
-    // The name is required but lives on the Configuration tab, which the editor does not open on.
-    // Collecting it up front is what stops the only mandatory step from being discoverable solely
-    // by failing to save.
-    expect(screen.getByTestId('createTemplateModal')).toBeInTheDocument();
-    expect(screen.queryByTestId('template-yaml-editor')).not.toBeInTheDocument();
-  });
-
-  it('skips the prompt when a named draft is already in progress', () => {
-    const metadataKey = `securitySolution.${LOCAL_STORAGE_KEYS.templatesYamlEditorCreateState}.metadata`;
-    localStorage.setItem(
-      metadataKey,
-      JSON.stringify({ name: 'Resumed draft', description: '', tags: [] })
-    );
-
-    render(
-      <TestProviders>
-        <CreateTemplatePage />
-      </TestProviders>
-    );
-
-    expect(screen.queryByTestId('createTemplateModal')).not.toBeInTheDocument();
-    expect(screen.getByTestId('template-yaml-editor')).toBeInTheDocument();
-  });
-
-  it('carries the name from the prompt into the editor', async () => {
-    await renderCreatePageAndName({ name: 'Ransomware runbook' });
-
-    await userEvent.click(screen.getByRole('tab', { name: /Configuration/ }));
-
-    expect(screen.getByTestId('templateMetadataNameInput')).toHaveValue('Ransomware runbook');
-  });
-
   it('renders the layout with header and sections', async () => {
-    await renderCreatePageAndName();
+    render(
+      <TestProviders>
+        <CreateTemplatePage />
+      </TestProviders>
+    );
 
-    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent(i18n.ADD_TEMPLATE_TITLE);
+    // A new template opens unnamed, with the placeholder standing in for the name.
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent(i18n.UNTITLED_TEMPLATE);
     expect(screen.getByTestId('appHeaderBack')).toHaveAttribute(
       'aria-label',
       `Back to ${i18n.TEMPLATE_TITLE}`
@@ -158,11 +114,17 @@ describe('CreateTemplatePage', () => {
     const storageKey = `securitySolution.${LOCAL_STORAGE_KEYS.templatesYamlEditorCreateState}`;
     localStorage.setItem(storageKey, JSON.stringify(modifiedTemplate));
 
-    await renderCreatePageAndName();
+    render(
+      <TestProviders>
+        <CreateTemplatePage />
+      </TestProviders>
+    );
 
     // Verify localStorage has the modified content
     expect(localStorage.getItem(storageKey)).toBe(JSON.stringify(modifiedTemplate));
 
+    // Click the save button
+    await nameTemplateFromPageTitle('My template');
     const saveButton = screen.getByTestId('saveTemplateHeaderButton');
     await userEvent.click(saveButton);
 
@@ -189,10 +151,13 @@ describe('CreateTemplatePage', () => {
     // Mock mutation to fail
     mockMutateAsync.mockRejectedValueOnce(new Error('Creation failed'));
 
-    await renderCreatePageAndName();
+    render(
+      <TestProviders>
+        <CreateTemplatePage />
+      </TestProviders>
+    );
 
-    // The template name is panel-owned and lives on the Configuration tab under the Fields/
-    // Configuration split, so switch to it before setting the name.
+    await nameTemplateFromPageTitle('My template');
     const saveButton = screen.getByTestId('saveTemplateHeaderButton');
     await userEvent.click(saveButton);
 
@@ -218,10 +183,13 @@ describe('CreateTemplatePage', () => {
 
   it('resets localStorage to default template on successful creation', async () => {
     const storageKey = `securitySolution.${LOCAL_STORAGE_KEYS.templatesYamlEditorCreateState}`;
-    await renderCreatePageAndName();
+    render(
+      <TestProviders>
+        <CreateTemplatePage />
+      </TestProviders>
+    );
 
-    // The template name is panel-owned and lives on the Configuration tab under the Fields/
-    // Configuration split, so switch to it before setting the name.
+    await nameTemplateFromPageTitle('My template');
     const saveButton = screen.getByTestId('saveTemplateHeaderButton');
     await userEvent.click(saveButton);
 
@@ -235,9 +203,14 @@ describe('CreateTemplatePage', () => {
   });
 
   it('defaults a new template to sync alerts + extract observables on (Security) in the saved definition', async () => {
-    await renderCreatePageAndName({ features: observablesEnabledFeatures });
+    render(
+      <TestProviders features={observablesEnabledFeatures}>
+        <CreateTemplatePage />
+      </TestProviders>
+    );
 
     // Save without touching the settings toggles — the solution defaults must still be persisted.
+    await nameTemplateFromPageTitle('My template');
     await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
 
     await waitFor(() => {
@@ -254,8 +227,13 @@ describe('CreateTemplatePage', () => {
   it('defaults extract observables off where the feature is unavailable (e.g. Observability/Stack)', async () => {
     // Default test context uses DEFAULT_FEATURES (observables autoExtract off) and a basic license,
     // so the toggle is hidden and the persisted default must be off.
-    await renderCreatePageAndName();
+    render(
+      <TestProviders>
+        <CreateTemplatePage />
+      </TestProviders>
+    );
 
+    await nameTemplateFromPageTitle('My template');
     await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
 
     await waitFor(() => {
@@ -279,8 +257,13 @@ describe('CreateTemplatePage', () => {
       JSON.stringify({ settings: { syncAlerts: false, extractObservables: false } })
     );
 
-    await renderCreatePageAndName({ features: observablesEnabledFeatures });
+    render(
+      <TestProviders features={observablesEnabledFeatures}>
+        <CreateTemplatePage />
+      </TestProviders>
+    );
 
+    await nameTemplateFromPageTitle('My template');
     await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
 
     await waitFor(() => {

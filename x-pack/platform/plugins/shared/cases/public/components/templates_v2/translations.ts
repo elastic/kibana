@@ -19,24 +19,6 @@ export const SAVE_TEMPLATE = i18n.translate('xpack.cases.templates.save', {
   defaultMessage: 'Save',
 });
 
-export const CREATE_TEMPLATE_MODAL_TITLE = i18n.translate(
-  'xpack.cases.templates.createTemplateModalTitle',
-  { defaultMessage: 'Create template' }
-);
-
-export const CREATE_TEMPLATE_MODAL_DESCRIPTION = i18n.translate(
-  'xpack.cases.templates.createTemplateModalDescription',
-  {
-    defaultMessage:
-      'Name your template. You can change this and everything else after the editor opens.',
-  }
-);
-
-export const CREATE_TEMPLATE_MODAL_CONFIRM = i18n.translate(
-  'xpack.cases.templates.createTemplateModalConfirm',
-  { defaultMessage: 'Continue' }
-);
-
 export const ADD_TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.addTemplateTitle', {
   defaultMessage: 'Add template',
 });
@@ -56,9 +38,17 @@ export const TEMPLATE_METADATA_SECTION_DESCRIPTION = i18n.translate(
   'xpack.cases.templates.templateMetadataSectionDescription',
   {
     defaultMessage:
-      'Identifies this template in the templates list. Saved with the template and edited here — these details are not part of the YAML definition and do not change case defaults.',
+      'Describes this template in the templates list. Saved with the template — these details are not part of the YAML definition and do not change case defaults. The template name is edited in the page title.',
   }
 );
+
+export const UNTITLED_TEMPLATE = i18n.translate('xpack.cases.templates.untitledTemplate', {
+  defaultMessage: 'Untitled template',
+});
+
+export const EDIT_TEMPLATE_NAME = i18n.translate('xpack.cases.templates.editTemplateName', {
+  defaultMessage: 'Edit template name',
+});
 
 export const TEMPLATE_NAME_LABEL = i18n.translate('xpack.cases.templates.templateNameLabel', {
   defaultMessage: 'Template name',
@@ -194,10 +184,9 @@ export const FIX_FIELDS_YAML_ERRORS = i18n.translate('xpack.cases.templates.fixF
   defaultMessage: 'Please fix errors in the Fields YAML editor.',
 });
 
-export const PROVIDE_TEMPLATE_NAME_IN_CONFIGURATION = i18n.translate(
-  'xpack.cases.templates.provideTemplateNameInConfiguration',
-  { defaultMessage: 'Please provide a template name in the Configuration tab.' }
-);
+export const PROVIDE_TEMPLATE_NAME = i18n.translate('xpack.cases.templates.provideTemplateName', {
+  defaultMessage: 'Name this template in the page title before saving.',
+});
 
 export const FIX_CONFIGURATION_ERRORS = i18n.translate(
   'xpack.cases.templates.fixConfigurationErrors',
@@ -208,7 +197,7 @@ export const FIX_FIELDS_YAML_AND_TEMPLATE_NAME = i18n.translate(
   'xpack.cases.templates.fixFieldsYamlAndTemplateName',
   {
     defaultMessage:
-      'Please fix errors in the Fields YAML editor and provide a template name in the Configuration tab.',
+      'Name this template in the page title and fix the errors in the Fields YAML editor.',
   }
 );
 
