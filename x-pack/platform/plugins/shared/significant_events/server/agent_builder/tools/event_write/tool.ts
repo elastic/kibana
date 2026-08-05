@@ -128,7 +128,7 @@ export function createEventsWriteTool({
       **neither**: a synthetic event_id is generated.
     `,
     schema: eventsWriteSchema,
-    tags: ['streams', 'significant_events'],
+    tags: ['streams', 'significant-events'],
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
