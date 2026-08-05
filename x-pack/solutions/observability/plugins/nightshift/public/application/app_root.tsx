@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -13,6 +12,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import React, { useMemo } from 'react';
+import { NightshiftPage } from '../nightshift_page';
 import type { NightshiftStartDependencies } from '../types';
 
 const queryClient = new QueryClient();
@@ -29,7 +29,6 @@ export function AppRoot({
   isServerless: boolean;
 }) {
   const { history } = appMountParameters;
-  const { navigation } = pluginsStart.observabilityShared;
 
   // Flat shape so `useKibana().services` destructures the same way it did while
   // this app lived inside the observability plugin.
@@ -44,10 +43,7 @@ export function AppRoot({
         <RedirectAppLinks coreStart={coreStart} data-test-subj="nightshiftMainContainer">
           <PerformanceContextProvider>
             <QueryClientProvider client={queryClient}>
-              {/* Placeholder until the Nightshift page moves in. */}
-              <navigation.PageTemplate data-test-subj="nightshiftPage" restrictWidth={false}>
-                <EuiLoadingSpinner size="xl" />
-              </navigation.PageTemplate>
+              <NightshiftPage />
             </QueryClientProvider>
           </PerformanceContextProvider>
         </RedirectAppLinks>
