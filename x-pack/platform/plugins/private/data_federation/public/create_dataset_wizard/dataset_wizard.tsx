@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiStepStatus } from '@elastic/eui';
 import {
   EuiButton,
@@ -19,6 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useForm } from 'react-hook-form';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { DataSetWithName, DataSource, DataSourceWithSecrets } from '../../common';
@@ -36,6 +37,16 @@ import {
 } from './dataset_wizard_constants';
 import { datasetWizardStrings } from './dataset_wizard_i18n';
 import type { DatasetWizardFormValues } from './dataset_wizard_form_state';
+import {
+  buildWizardStepSearch,
+  parseWizardStepFromSearch,
+  type DatasetWizardStep,
+} from './dataset_wizard_step_url';
+import {
+  clearWizardFormDraft,
+  getWizardFormDraftStorageKey,
+  saveWizardFormDraft,
+} from './dataset_wizard_form_persistence';
 import { LogisticsStep } from './steps/logistics_step';
 import { AdditionalSettingsStep } from './steps/additional_settings_step';
 import { PlaceholderStep } from './steps/placeholder_step';
@@ -64,9 +75,17 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   const {
     services: { dataSourcesClient },
   } = useKibana<DataFederationKibanaServices>();
+  const history = useHistory();
+  const location = useLocation();
+  const draftStorageKey = useMemo(
+    () => getWizardFormDraftStorageKey(isEditMode, initialDataSet?.name),
+    [initialDataSet?.name, isEditMode]
+  );
 
   const initialIdNormalized = initialDataSet?.name?.trim().toLowerCase() ?? '';
-  const [currentStep, setCurrentStep] = useState(LOGISTICS_STEP);
+  const [currentStep, setCurrentStep] = useState<DatasetWizardStep>(
+    () => parseWizardStepFromSearch(location.search) ?? LOGISTICS_STEP
+  );
   const [saveError, setSaveError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
   const [isCreateDataSourceFlyoutOpen, setIsCreateDataSourceFlyoutOpen] = useState(false);
@@ -88,6 +107,19 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   const watchedDataSource = watch('data_source');
   const watchedName = watch('name');
   const watchedResource = watch('resource');
+
+  useEffect(() => {
+    const subscription = watch((values) => {
+      saveWizardFormDraft(draftStorageKey, values as DatasetWizardFormValues);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [draftStorageKey, watch]);
+
+  const handleCancel = useCallback(() => {
+    clearWizardFormDraft(draftStorageKey);
+    onCancel();
+  }, [draftStorageKey, onCancel]);
 
   const existingDataSourceNames = useMemo(
     () => dataSources.map((dataSource) => dataSource.name),
@@ -157,57 +189,70 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     return validateName(name) === true;
   }, [validateName, watchedDataSource, watchedName, watchedResource]);
 
+  useEffect(() => {
+    const stepFromUrl = parseWizardStepFromSearch(location.search) ?? LOGISTICS_STEP;
+    setCurrentStep((previousStep) => (previousStep === stepFromUrl ? previousStep : stepFromUrl));
+  }, [location.search]);
+
+  const isStepDisabled = useCallback(
+    (step: DatasetWizardStep) => !logisticsStepComplete && currentStep < step,
+    [currentStep, logisticsStepComplete]
+  );
+
+  const goToStep = useCallback(
+    (step: DatasetWizardStep) => {
+      setCurrentStep(step);
+      history.replace({
+        pathname: location.pathname,
+        search: buildWizardStepSearch(location.search, step),
+      });
+    },
+    [history, location.pathname, location.search]
+  );
+
   const stepDefinitions = useMemo(
     () => [
       {
         step: LOGISTICS_STEP,
         title: datasetWizardStrings.stepLogistics(),
-        status: (currentStep === LOGISTICS_STEP ? 'current' : 'complete') as EuiStepStatus,
-        onClick: () => setCurrentStep(LOGISTICS_STEP),
+        status: (currentStep === LOGISTICS_STEP
+          ? 'current'
+          : logisticsStepComplete
+            ? 'complete'
+            : 'incomplete') as EuiStepStatus,
+        onClick: () => goToStep(LOGISTICS_STEP),
       },
       {
         step: ADDITIONAL_SETTINGS_STEP,
         title: datasetWizardStrings.stepAdditionalSettings(),
-        disabled: !logisticsStepComplete,
+        disabled: isStepDisabled(ADDITIONAL_SETTINGS_STEP),
         status: (currentStep === ADDITIONAL_SETTINGS_STEP
           ? 'current'
           : currentStep > ADDITIONAL_SETTINGS_STEP
             ? 'complete'
             : 'incomplete') as EuiStepStatus,
-        onClick: () => {
-          if (logisticsStepComplete) {
-            setCurrentStep(ADDITIONAL_SETTINGS_STEP);
-          }
-        },
+        onClick: () => goToStep(ADDITIONAL_SETTINGS_STEP),
       },
       {
         step: SCHEMA_MAPPINGS_STEP,
         title: datasetWizardStrings.stepSchemaMappings(),
-        disabled: !logisticsStepComplete,
+        disabled: isStepDisabled(SCHEMA_MAPPINGS_STEP),
         status: (currentStep === SCHEMA_MAPPINGS_STEP
           ? 'current'
           : currentStep > SCHEMA_MAPPINGS_STEP
             ? 'complete'
             : 'incomplete') as EuiStepStatus,
-        onClick: () => {
-          if (logisticsStepComplete) {
-            setCurrentStep(SCHEMA_MAPPINGS_STEP);
-          }
-        },
+        onClick: () => goToStep(SCHEMA_MAPPINGS_STEP),
       },
       {
         step: REVIEW_STEP,
         title: datasetWizardStrings.stepReview(),
-        disabled: !logisticsStepComplete,
+        disabled: isStepDisabled(REVIEW_STEP),
         status: (currentStep === REVIEW_STEP ? 'current' : 'incomplete') as EuiStepStatus,
-        onClick: () => {
-          if (logisticsStepComplete) {
-            setCurrentStep(REVIEW_STEP);
-          }
-        },
+        onClick: () => goToStep(REVIEW_STEP),
       },
     ],
-    [currentStep, logisticsStepComplete]
+    [currentStep, goToStep, isStepDisabled, logisticsStepComplete]
   );
 
   const handleNext = async () => {
@@ -216,31 +261,31 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
       if (!isValid) {
         return;
       }
-      setCurrentStep(ADDITIONAL_SETTINGS_STEP);
+      goToStep(ADDITIONAL_SETTINGS_STEP);
       return;
     }
 
     if (currentStep === ADDITIONAL_SETTINGS_STEP) {
-      setCurrentStep(SCHEMA_MAPPINGS_STEP);
+      goToStep(SCHEMA_MAPPINGS_STEP);
       return;
     }
 
     if (currentStep === SCHEMA_MAPPINGS_STEP) {
-      setCurrentStep(REVIEW_STEP);
+      goToStep(REVIEW_STEP);
     }
   };
 
   const handleBack = () => {
     if (currentStep === REVIEW_STEP) {
-      setCurrentStep(SCHEMA_MAPPINGS_STEP);
+      goToStep(SCHEMA_MAPPINGS_STEP);
       return;
     }
     if (currentStep === SCHEMA_MAPPINGS_STEP) {
-      setCurrentStep(ADDITIONAL_SETTINGS_STEP);
+      goToStep(ADDITIONAL_SETTINGS_STEP);
       return;
     }
     if (currentStep === ADDITIONAL_SETTINGS_STEP) {
-      setCurrentStep(LOGISTICS_STEP);
+      goToStep(LOGISTICS_STEP);
     }
   };
 
@@ -261,6 +306,8 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
       const message = await onSave(payload, initialDataSet?.name);
       if (message) {
         setSaveError(message);
+      } else {
+        clearWizardFormDraft(draftStorageKey);
       }
     } finally {
       setIsSaving(false);
@@ -324,7 +371,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
       <EuiSpacer size="xl" />
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty data-test-subj="datasetWizardCancel" onClick={onCancel}>
+          <EuiButtonEmpty data-test-subj="datasetWizardCancel" onClick={handleCancel}>
             {datasetWizardStrings.cancelButton()}
           </EuiButtonEmpty>
         </EuiFlexItem>

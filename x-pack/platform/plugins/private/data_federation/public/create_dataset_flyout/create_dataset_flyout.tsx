@@ -91,6 +91,8 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
     handleSubmit,
     control,
     reset,
+    getValues,
+    setValue,
     formState: { errors },
   } = useForm<CreateDatasetFormValues>({
     defaultValues: formDefaultValues,
@@ -303,7 +305,9 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
               />
             </EuiFormRow>
           ) : null}
-          {dataSourceIdField.value ? <CreateDatasetFlyoutSettings control={control} /> : null}
+          {dataSourceIdField.value ? (
+            <CreateDatasetFlyoutSettings control={control} getValues={getValues} setValue={setValue} />
+          ) : null}
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

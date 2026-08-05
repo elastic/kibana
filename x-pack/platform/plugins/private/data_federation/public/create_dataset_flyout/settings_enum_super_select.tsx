@@ -38,18 +38,18 @@ export function SettingsEnumSuperSelect<T extends string>({
   const { field, fieldState } = useController({ name, control, rules });
 
   const superSelectOptions = useMemo(
-    () => [
-      buildSuperSelectOption({ value: '' as T, label: placeholder }),
-      ...options.map((option) => buildSuperSelectOption(option)),
-    ],
-    [options, placeholder]
+    () => options.map((option) => buildSuperSelectOption(option)),
+    [options]
   );
+
+  const hasValue = Boolean(field.value);
 
   return (
     <EuiFormRow
       label={label}
       helpText={helpText}
       fullWidth
+      display="rowCompressed"
       isInvalid={Boolean(fieldState.error)}
       error={fieldState.error?.message}
     >
@@ -57,9 +57,10 @@ export function SettingsEnumSuperSelect<T extends string>({
         options={superSelectOptions}
         data-test-subj={dataTestSubj}
         fullWidth
+        compressed
         aria-label={label}
         placeholder={placeholder}
-        valueOfSelected={(field.value as T) || undefined}
+        valueOfSelected={hasValue ? (field.value as T) : undefined}
         onChange={(value) => field.onChange(value)}
         name={field.name}
         buttonRef={field.ref}

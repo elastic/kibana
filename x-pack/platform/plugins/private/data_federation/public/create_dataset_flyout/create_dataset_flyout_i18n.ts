@@ -143,7 +143,7 @@ export const createDatasetFlyoutStrings = {
 
   settingsErrorModePlaceholder: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsErrorModePlaceholder', {
-      defaultMessage: 'Default',
+      defaultMessage: 'Select error mode',
     }),
 
   settingsErrorModeFailFast: () =>
@@ -215,7 +215,7 @@ export const createDatasetFlyoutStrings = {
     i18n.translate(
       'xpack.dataFederation.createDatasetFlyout.settingsPartitionDetectionPlaceholder',
       {
-        defaultMessage: 'Default',
+        defaultMessage: 'Select partition detection',
       }
     ),
 
@@ -246,7 +246,7 @@ export const createDatasetFlyoutStrings = {
 
   settingsSchemaResolutionPlaceholder: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsSchemaResolutionPlaceholder', {
-      defaultMessage: 'Default',
+      defaultMessage: 'Select schema resolution',
     }),
 
   settingsSchemaResolutionFirstFileWins: () =>
@@ -277,6 +277,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Explicit path template for partition detection.',
     }),
 
+  settingsPartitionPathPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPartitionPathPlaceholder', {
+      defaultMessage: 'Select partition path',
+    }),
+
   settingsHivePartitioningLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsHivePartitioningLabel', {
       defaultMessage: 'Hive partitioning',
@@ -284,7 +289,7 @@ export const createDatasetFlyoutStrings = {
 
   settingsHivePartitioningPlaceholder: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsHivePartitioningPlaceholder', {
-      defaultMessage: 'Default',
+      defaultMessage: 'Select hive partitioning',
     }),
 
   settingsHivePartitioningEnabled: () =>
@@ -307,6 +312,31 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'The character that separates fields.',
     }),
 
+  settingsDelimiterPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDelimiterPlaceholder', {
+      defaultMessage: 'Select delimiter',
+    }),
+
+  settingsDelimiterOptionComma: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDelimiterOptionComma', {
+      defaultMessage: 'Comma (,)',
+    }),
+
+  settingsDelimiterOptionTab: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDelimiterOptionTab', {
+      defaultMessage: 'Tab',
+    }),
+
+  settingsDelimiterOptionSemicolon: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDelimiterOptionSemicolon', {
+      defaultMessage: 'Semicolon (;)',
+    }),
+
+  settingsDelimiterOptionPipe: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDelimiterOptionPipe', {
+      defaultMessage: 'Pipe (|)',
+    }),
+
   settingsModeLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsModeLabel', {
       defaultMessage: 'Quote mode',
@@ -314,7 +344,7 @@ export const createDatasetFlyoutStrings = {
 
   settingsModePlaceholder: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsModePlaceholder', {
-      defaultMessage: 'Default',
+      defaultMessage: 'Select quote mode',
     }),
 
   settingsModeQuoted: () =>
@@ -339,7 +369,7 @@ export const createDatasetFlyoutStrings = {
 
   settingsHeaderRowPlaceholder: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsHeaderRowPlaceholder', {
-      defaultMessage: 'Default',
+      defaultMessage: 'Select header row',
     }),
 
   settingsHeaderRowTrue: () =>
@@ -362,6 +392,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'The string treated as null, for example NULL or NA.',
     }),
 
+  settingsNullValuePlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsNullValuePlaceholder', {
+      defaultMessage: 'Select null value',
+    }),
+
   settingsEncodingLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsEncodingLabel', {
       defaultMessage: 'Encoding',
@@ -370,6 +405,11 @@ export const createDatasetFlyoutStrings = {
   settingsEncodingHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsEncodingHelp', {
       defaultMessage: 'Character encoding of the file.',
+    }),
+
+  settingsEncodingPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsEncodingPlaceholder', {
+      defaultMessage: 'Select encoding',
     }),
 
   settingsQuoteLabel: () =>
@@ -429,7 +469,7 @@ export const createDatasetFlyoutStrings = {
 
   settingsMultiValueSyntaxPlaceholder: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMultiValueSyntaxPlaceholder', {
-      defaultMessage: 'Default',
+      defaultMessage: 'Select multi-value syntax',
     }),
 
   settingsMultiValueSyntaxNone: () =>
@@ -482,14 +522,10 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Save',
     }),
 
-  settingsPresetCustom: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPresetCustom', {
-      defaultMessage: 'Custom value',
-    }),
-
-  settingsPresetCustomPlaceholder: () =>
-    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPresetCustomPlaceholder', {
-      defaultMessage: 'Enter a custom value',
+  settingsPresetCustomOptionText: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPresetCustomOptionText', {
+      defaultMessage: 'Add {searchValue} as a custom option',
+      values: { searchValue: '{searchValue}' },
     }),
 
   settingsFormatCsvDescription: () =>
@@ -537,6 +573,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Use the optimized Parquet reader when supported.',
     }),
 
+  settingsOptimizedReaderPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsOptimizedReaderPlaceholder', {
+      defaultMessage: 'Select optimized reader',
+    }),
+
   settingsLateMaterializationLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsLateMaterializationLabel', {
       defaultMessage: 'Late materialization',
@@ -546,6 +587,14 @@ export const createDatasetFlyoutStrings = {
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsLateMaterializationHelp', {
       defaultMessage: 'Defer column materialization until values are read.',
     }),
+
+  settingsLateMaterializationPlaceholder: () =>
+    i18n.translate(
+      'xpack.dataFederation.createDatasetFlyout.settingsLateMaterializationPlaceholder',
+      {
+        defaultMessage: 'Select late materialization',
+      }
+    ),
 
   settingsPartitionDetectionAutoDescription: () =>
     i18n.translate(

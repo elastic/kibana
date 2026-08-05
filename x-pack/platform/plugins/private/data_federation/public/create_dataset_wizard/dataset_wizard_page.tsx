@@ -23,6 +23,11 @@ import {
   dataSetToWizardFormValues,
   emptyDatasetWizardFormValues,
 } from './dataset_wizard_form_state';
+import {
+  getWizardFormDraftStorageKey,
+  loadWizardFormDraft,
+  mergeWizardFormValues,
+} from './dataset_wizard_form_persistence';
 
 const DATA_FEDERATION_MANAGEMENT_PATH = `/app/management/data/${PLUGIN_ID}`;
 
@@ -60,11 +65,13 @@ export const DatasetWizardPage: FunctionComponent = () => {
   const existingDataSetNames = useMemo(() => dataSets.map((ds) => ds.name), [dataSets]);
 
   const defaultValues = useMemo(() => {
-    if (initialDataSet) {
-      return dataSetToWizardFormValues(initialDataSet);
-    }
-    return emptyDatasetWizardFormValues();
-  }, [initialDataSet]);
+    const base = initialDataSet
+      ? dataSetToWizardFormValues(initialDataSet)
+      : emptyDatasetWizardFormValues();
+    const draft = loadWizardFormDraft(getWizardFormDraftStorageKey(isEditMode, datasetName));
+
+    return draft ? mergeWizardFormValues(base, draft) : base;
+  }, [datasetName, initialDataSet, isEditMode]);
 
   const pageTitle = isEditMode
     ? datasetWizardStrings.editPageTitle(datasetName ?? '')

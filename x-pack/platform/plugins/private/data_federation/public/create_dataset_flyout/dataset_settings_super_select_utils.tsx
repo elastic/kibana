@@ -31,5 +31,3 @@ export const buildSuperSelectOption = <T extends string>({
     label
   ),
 });
-
-export const PRESET_CUSTOM_VALUE = '__custom__';

@@ -15,11 +15,12 @@ import {
   EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { Control } from 'react-hook-form';
+import type { Control, UseFormGetValues, UseFormSetValue } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
 import {
+  emptyCreateDatasetSettingsFormValues,
   validateMaxErrorRatio,
   validateMaxErrors,
   validateMaxFieldSize,
@@ -29,6 +30,7 @@ import {
   type DatasetFormatFormValue,
   type DatasetSchemaResolutionFormValue,
 } from './create_dataset_flyout_form_state';
+import { applySettingsForFormat } from './dataset_settings_defaults';
 
 // ---------------------------------------------------------------------------
 // Module-level option factories — shared across components so each select
@@ -102,8 +104,12 @@ const BOOLEAN_OPTIONS = (placeholder: string, enabled: string, disabled: string)
 
 export function CreateDatasetFlyoutSettings({
   control,
+  getValues,
+  setValue,
 }: {
   control: Control<CreateDatasetFormValues>;
+  getValues: UseFormGetValues<CreateDatasetFormValues>;
+  setValue: UseFormSetValue<CreateDatasetFormValues>;
 }) {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const advancedId = useGeneratedHtmlId({ prefix: 'createDatasetFlyoutAdvancedSettings' });
@@ -118,6 +124,19 @@ export function CreateDatasetFlyoutSettings({
   });
 
   const format = formatField.value as DatasetFormatFormValue;
+
+  const handleFormatChange = (nextFormat: DatasetFormatFormValue) => {
+    if (!nextFormat) {
+      setValue('settings', emptyCreateDatasetSettingsFormValues(), {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      return;
+    }
+
+    const nextSettings = applySettingsForFormat(getValues('settings'), nextFormat);
+    setValue('settings', nextSettings, { shouldDirty: true, shouldValidate: true });
+  };
 
   return (
     <>
@@ -134,7 +153,7 @@ export function CreateDatasetFlyoutSettings({
           fullWidth
           aria-label={createDatasetFlyoutStrings.settingsFormatLabel()}
           value={formatField.value}
-          onChange={(e) => formatField.onChange(e.target.value)}
+          onChange={(e) => handleFormatChange(e.target.value as DatasetFormatFormValue)}
           name={formatField.name}
           inputRef={formatField.ref}
           isInvalid={Boolean(formatFieldState.error)}

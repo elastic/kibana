@@ -138,10 +138,10 @@ export const OPTIMIZED_READER_SUPER_SELECT_OPTIONS = () => [
 ];
 
 export const DELIMITER_PRESETS = () => [
-  { value: ',', label: createDatasetFlyoutStrings.settingsDelimiterLabel() + ' (,)' },
-  { value: '\t', label: 'Tab' },
-  { value: ';', label: 'Semicolon (;)' },
-  { value: '|', label: 'Pipe (|)' },
+  { value: ',', label: createDatasetFlyoutStrings.settingsDelimiterOptionComma() },
+  { value: '\t', label: createDatasetFlyoutStrings.settingsDelimiterOptionTab() },
+  { value: ';', label: createDatasetFlyoutStrings.settingsDelimiterOptionSemicolon() },
+  { value: '|', label: createDatasetFlyoutStrings.settingsDelimiterOptionPipe() },
 ];
 
 export const ENCODING_PRESETS = () => [

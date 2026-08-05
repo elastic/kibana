@@ -13,9 +13,10 @@ import { useController } from 'react-hook-form';
 
 import { DatasetSettingsAccordions } from '../../create_dataset_flyout/dataset_settings_accordions';
 import { DatasetSettingsCommonPanel } from '../../create_dataset_flyout/dataset_settings_common_panel';
-import { applyFormatDefaults } from '../../create_dataset_flyout/dataset_settings_defaults';
+import { applySettingsForFormat } from '../../create_dataset_flyout/dataset_settings_defaults';
 import { FORMAT_SUPER_SELECT_OPTIONS } from '../../create_dataset_flyout/dataset_settings_options';
 import type { DatasetFormatFormValue } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
+import { emptyCreateDatasetSettingsFormValues } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
 import { createDatasetFlyoutStrings } from '../../create_dataset_flyout/create_dataset_flyout_i18n';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
@@ -59,7 +60,7 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
   const applyFormatDefaultsToForm = useCallback(
     (nextFormat: Exclude<DatasetFormatFormValue, ''>) => {
       const currentSettings = getValues('settings');
-      const withDefaults = applyFormatDefaults(
+      const withDefaults = applySettingsForFormat(
         { ...currentSettings, format: nextFormat },
         nextFormat
       );
@@ -115,7 +116,10 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
       return;
     }
 
-    formatField.onChange('');
+    setValue('settings', emptyCreateDatasetSettingsFormValues(), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
     setAutoDetectedFormat('');
     setFormatSelectionSource('none');
   }, [

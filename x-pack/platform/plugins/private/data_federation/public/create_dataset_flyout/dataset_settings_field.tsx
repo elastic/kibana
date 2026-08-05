@@ -29,7 +29,7 @@ import {
 } from './dataset_settings_options';
 import type { DatasetSettingsFieldId } from './dataset_settings_visibility';
 import { SettingsEnumSuperSelect } from './settings_enum_super_select';
-import { SettingsPresetSuperSelect } from './settings_preset_super_select';
+import { SettingsPresetComboBox } from './settings_preset_combo_box';
 import {
   validateMaxErrorRatio,
   validateMaxErrors,
@@ -62,15 +62,14 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
       );
     case 'partition_path':
       return (
-        <SettingsPresetSuperSelect
+        <SettingsPresetComboBox
           control={control}
           name="settings.partition_path"
           label={createDatasetFlyoutStrings.settingsPartitionPathLabel()}
           helpText={createDatasetFlyoutStrings.settingsPartitionPathHelp()}
-          placeholder={createDatasetFlyoutStrings.settingsPartitionDetectionPlaceholder()}
+          placeholder={createDatasetFlyoutStrings.settingsPartitionPathPlaceholder()}
           presets={PARTITION_PATH_PRESETS()}
           data-test-subj={`${testSubjPrefix}SettingsPartitionPath`}
-          customFieldTestSubj={`${testSubjPrefix}SettingsPartitionPathCustom`}
         />
       );
     case 'schema_sample_size':
@@ -100,15 +99,14 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
       );
     case 'delimiter':
       return (
-        <SettingsPresetSuperSelect
+        <SettingsPresetComboBox
           control={control}
           name="settings.delimiter"
           label={createDatasetFlyoutStrings.settingsDelimiterLabel()}
           helpText={createDatasetFlyoutStrings.settingsDelimiterHelp()}
-          placeholder={createDatasetFlyoutStrings.settingsPartitionDetectionPlaceholder()}
+          placeholder={createDatasetFlyoutStrings.settingsDelimiterPlaceholder()}
           presets={DELIMITER_PRESETS()}
           data-test-subj={`${testSubjPrefix}SettingsDelimiter`}
-          customFieldTestSubj={`${testSubjPrefix}SettingsDelimiterCustom`}
         />
       );
     case 'mode':
@@ -154,15 +152,14 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
       );
     case 'encoding':
       return (
-        <SettingsPresetSuperSelect
+        <SettingsPresetComboBox
           control={control}
           name="settings.encoding"
           label={createDatasetFlyoutStrings.settingsEncodingLabel()}
           helpText={createDatasetFlyoutStrings.settingsEncodingHelp()}
-          placeholder={createDatasetFlyoutStrings.settingsPartitionDetectionPlaceholder()}
+          placeholder={createDatasetFlyoutStrings.settingsEncodingPlaceholder()}
           presets={ENCODING_PRESETS()}
           data-test-subj={`${testSubjPrefix}SettingsEncoding`}
-          customFieldTestSubj={`${testSubjPrefix}SettingsEncodingCustom`}
         />
       );
     case 'header_row':
@@ -188,15 +185,14 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
       );
     case 'null_value':
       return (
-        <SettingsPresetSuperSelect
+        <SettingsPresetComboBox
           control={control}
           name="settings.null_value"
           label={createDatasetFlyoutStrings.settingsNullValueLabel()}
           helpText={createDatasetFlyoutStrings.settingsNullValueHelp()}
-          placeholder={createDatasetFlyoutStrings.settingsPartitionDetectionPlaceholder()}
+          placeholder={createDatasetFlyoutStrings.settingsNullValuePlaceholder()}
           presets={NULL_VALUE_PRESETS()}
           data-test-subj={`${testSubjPrefix}SettingsNullValue`}
-          customFieldTestSubj={`${testSubjPrefix}SettingsNullValueCustom`}
         />
       );
     case 'datetime_format':
@@ -286,7 +282,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           name="settings.optimized_reader"
           label={createDatasetFlyoutStrings.settingsOptimizedReaderLabel()}
           helpText={createDatasetFlyoutStrings.settingsOptimizedReaderHelp()}
-          placeholder={createDatasetFlyoutStrings.settingsHivePartitioningPlaceholder()}
+          placeholder={createDatasetFlyoutStrings.settingsOptimizedReaderPlaceholder()}
           options={OPTIMIZED_READER_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsOptimizedReader`}
         />
@@ -298,7 +294,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
           name="settings.late_materialization"
           label={createDatasetFlyoutStrings.settingsLateMaterializationLabel()}
           helpText={createDatasetFlyoutStrings.settingsLateMaterializationHelp()}
-          placeholder={createDatasetFlyoutStrings.settingsHivePartitioningPlaceholder()}
+          placeholder={createDatasetFlyoutStrings.settingsLateMaterializationPlaceholder()}
           options={OPTIMIZED_READER_SUPER_SELECT_OPTIONS()}
           data-test-subj={`${testSubjPrefix}SettingsLateMaterialization`}
         />
@@ -323,12 +319,14 @@ const SchemaSampleSizeField: FunctionComponent<{
       label={createDatasetFlyoutStrings.settingsSchemaSampleSizeLabel()}
       helpText={createDatasetFlyoutStrings.settingsSchemaSampleSizeHelp()}
       fullWidth
+      display="rowCompressed"
       isInvalid={Boolean(fieldState.error)}
       error={fieldState.error?.message}
     >
       <EuiFieldNumber
         data-test-subj={`${testSubjPrefix}SettingsSchemaSampleSize`}
         fullWidth
+        compressed
         min={1}
         step={1}
         isInvalid={Boolean(fieldState.error)}
@@ -351,10 +349,11 @@ const TextSettingsField: FunctionComponent<{
   const { field } = useController({ name, control });
 
   return (
-    <EuiFormRow label={label} helpText={helpText} fullWidth>
+    <EuiFormRow label={label} helpText={helpText} fullWidth display="rowCompressed">
       <EuiFieldText
         data-test-subj={testSubj}
         fullWidth
+        compressed
         value={field.value}
         onChange={(event) => field.onChange(event.target.value)}
         name={field.name}
@@ -382,12 +381,14 @@ const NumberSettingsField: FunctionComponent<{
       label={label}
       helpText={helpText}
       fullWidth
+      display="rowCompressed"
       isInvalid={Boolean(fieldState.error)}
       error={fieldState.error?.message}
     >
       <EuiFieldNumber
         data-test-subj={testSubj}
         fullWidth
+        compressed
         min={min}
         max={max}
         step={step}

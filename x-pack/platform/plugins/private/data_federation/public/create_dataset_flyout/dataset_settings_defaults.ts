@@ -9,6 +9,11 @@ import type {
   CreateDatasetSettingsFormValues,
   DatasetFormatFormValue,
 } from './create_dataset_flyout_form_state';
+import { emptyCreateDatasetSettingsFormValues } from './create_dataset_flyout_form_state';
+import {
+  DATASET_SETTINGS_FIELD_IDS,
+  isFieldVisibleForFormat,
+} from './dataset_settings_visibility';
 
 const CSV_TSV_DEFAULTS: Partial<CreateDatasetSettingsFormValues> = {
   encoding: 'UTF-8',
@@ -31,22 +36,44 @@ export const getDefaultSettingsForFormat = (
   format: Exclude<DatasetFormatFormValue, ''>
 ): Partial<CreateDatasetSettingsFormValues> => FORMAT_DEFAULTS[format] ?? {};
 
-/** Applies format defaults only to fields that are currently empty. */
-export const applyFormatDefaults = (
-  current: CreateDatasetSettingsFormValues,
-  format: Exclude<DatasetFormatFormValue, ''>
-): CreateDatasetSettingsFormValues => {
-  const defaults = getDefaultSettingsForFormat(format);
-  const next = { ...current };
+const isKnownFormat = (format: DatasetFormatFormValue): format is Exclude<DatasetFormatFormValue, ''> =>
+  format !== '';
 
-  for (const [key, value] of Object.entries(defaults) as Array<
-    [keyof CreateDatasetSettingsFormValues, string]
-  >) {
-    const currentValue = next[key];
-    if (typeof currentValue === 'string' && !currentValue.trim() && value) {
-      next[key] = value;
+/**
+ * Reconciles settings with a selected format:
+ * - clears fields that do not apply to the format
+ * - applies format defaults (overwriting prior format defaults)
+ * - preserves user-entered values for shared visible fields without a format default
+ */
+export const applySettingsForFormat = (
+  current: CreateDatasetSettingsFormValues,
+  nextFormat: Exclude<DatasetFormatFormValue, ''>
+): CreateDatasetSettingsFormValues => {
+  const defaults = getDefaultSettingsForFormat(nextFormat);
+  const next = { ...emptyCreateDatasetSettingsFormValues(), format: nextFormat };
+  const previousFormat = isKnownFormat(current.format) ? current.format : undefined;
+
+  for (const fieldId of DATASET_SETTINGS_FIELD_IDS) {
+    if (!isFieldVisibleForFormat(fieldId, nextFormat)) {
+      continue;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(defaults, fieldId)) {
+      next[fieldId] = defaults[fieldId] as CreateDatasetSettingsFormValues[typeof fieldId];
+      continue;
+    }
+
+    if (
+      previousFormat &&
+      isFieldVisibleForFormat(fieldId, previousFormat) &&
+      current[fieldId]
+    ) {
+      next[fieldId] = current[fieldId];
     }
   }
 
   return next;
 };
+
+/** @deprecated Use applySettingsForFormat */
+export const applyFormatDefaults = applySettingsForFormat;

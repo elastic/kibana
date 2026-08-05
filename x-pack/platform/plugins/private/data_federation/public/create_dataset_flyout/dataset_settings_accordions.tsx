@@ -30,14 +30,6 @@ const accordionButtonCss = css`
   }
 `;
 
-const ACCORDION_EXPAND_ANIMATION_MS = 300;
-
-const scrollAccordionIntoView = (element: HTMLElement) => {
-  window.setTimeout(() => {
-    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, ACCORDION_EXPAND_ANIMATION_MS);
-};
-
 interface DatasetSettingsAccordionItemProps {
   accordionDomId: string;
   testSubj: string;
@@ -62,10 +54,10 @@ const DatasetSettingsAccordionItem: FunctionComponent<DatasetSettingsAccordionIt
       return;
     }
 
+    const element = accordionRef.current;
+
     window.requestAnimationFrame(() => {
-      if (accordionRef.current) {
-        scrollAccordionIntoView(accordionRef.current);
-      }
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   }, []);
 

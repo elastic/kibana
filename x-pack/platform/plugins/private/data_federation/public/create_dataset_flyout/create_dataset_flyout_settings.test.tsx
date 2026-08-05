@@ -16,7 +16,7 @@ import { emptyCreateDatasetSettingsFormValues } from './create_dataset_flyout_fo
 
 const renderSettings = () => {
   const Wrapper = () => {
-    const { control } = useForm<CreateDatasetFormValues>({
+    const { control, getValues, setValue } = useForm<CreateDatasetFormValues>({
       defaultValues: {
         name: '',
         description: '',
@@ -30,7 +30,7 @@ const renderSettings = () => {
 
     return (
       <EuiProvider>
-        <CreateDatasetFlyoutSettings control={control} />
+        <CreateDatasetFlyoutSettings control={control} getValues={getValues} setValue={setValue} />
         <div data-test-subj="settingsValue">{JSON.stringify(settings)}</div>
       </EuiProvider>
     );

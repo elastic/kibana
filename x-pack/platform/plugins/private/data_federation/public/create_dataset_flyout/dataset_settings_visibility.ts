@@ -138,3 +138,7 @@ export const getVisibleFieldsForAccordion = (
   );
 
 export const CSV_TSV_FIELD_IDS = CSV_TSV;
+
+export const DATASET_SETTINGS_FIELD_IDS = Object.keys(
+  FIELD_VISIBILITY
+) as DatasetSettingsFieldId[];
