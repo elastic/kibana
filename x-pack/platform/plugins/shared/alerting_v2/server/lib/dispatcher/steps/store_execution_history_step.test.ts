@@ -279,6 +279,31 @@ describe('StoreExecutionHistoryStep', () => {
     expect(eventLogger.logEvent).not.toHaveBeenCalled();
   });
 
+  it('does not emit dispatch_failed events when all dispatches succeed', async () => {
+    const rule = createRule({ id: 'rule-1' });
+    const policy = createActionPolicy({ id: 'policy-1' });
+    const episode = createAlertEpisode({ rule_id: 'rule-1', episode_id: 'ep-1' });
+    const group = createActionGroup({
+      id: 'group-1',
+      policyId: 'policy-1',
+      episodes: [episode],
+      destinations: [{ type: 'workflow', id: 'wf-a' }],
+    });
+
+    await step.execute(
+      createDispatcherPipelineState({
+        dispatch: [group],
+        dispatchable: [episode],
+        rules: new Map<RuleId, Rule>([[rule.id, rule]]),
+        policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
+        dispatchedExecutions: new Map([['group-1', ['exec-a']]]),
+      })
+    );
+
+    const actions = eventLogger.logEvent.mock.calls.map(([event]) => event?.event?.action);
+    expect(actions).not.toContain('dispatch_failed');
+  });
+
   it('emits a dispatch_failed event for a failed action-group → workflow attempt', async () => {
     const ruleA = createRule({ id: 'rule-a', spaceId: 'default' });
     const ruleB = createRule({ id: 'rule-b', spaceId: 'default' });
