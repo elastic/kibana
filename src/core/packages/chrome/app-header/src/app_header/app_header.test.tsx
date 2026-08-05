@@ -65,8 +65,8 @@ describe('AppHeaderView', () => {
     );
     fireEvent.click(titleShare);
     expect(onClick).toHaveBeenCalledTimes(1);
-    expect(onClick.mock.calls[0][0].triggerElement).toBeInstanceOf(HTMLElement);
     expect(typeof onClick.mock.calls[0][0].returnFocus).toBe('function');
+    expect(onClick.mock.calls[0][0].triggerElement).toBeUndefined();
   });
 
   it('does not derive a title share action from a menu share item', async () => {

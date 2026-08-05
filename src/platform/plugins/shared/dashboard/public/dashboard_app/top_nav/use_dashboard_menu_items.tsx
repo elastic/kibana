@@ -261,13 +261,11 @@ export const useDashboardMenuItems = ({
         testId: 'shareTopNavButton',
         disableButton: shareAction?.isDisabled ?? disableTopNav,
         run: (params) => {
-          const triggerElement = params?.triggerElement;
-          if (!triggerElement || !shareAction) {
+          if (!shareAction) {
             return;
           }
           void shareAction.onClick({
-            triggerElement,
-            returnFocus: params.returnFocus ?? (() => triggerElement.focus()),
+            returnFocus: params?.returnFocus ?? (() => params?.triggerElement?.focus()),
           });
         },
       } as AppMenuItemType,

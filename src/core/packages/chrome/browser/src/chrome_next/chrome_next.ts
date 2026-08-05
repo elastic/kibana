@@ -242,10 +242,7 @@ export interface AppHeaderFavoriteAction {
  * @public
  */
 export interface AppHeaderShareAction {
-  onClick: (context: {
-    triggerElement: HTMLElement;
-    returnFocus: () => void;
-  }) => void | Promise<void>;
+  onClick: (context: { returnFocus: () => void }) => void | Promise<void>;
   isDisabled?: boolean;
   tooltip?: {
     content: string;

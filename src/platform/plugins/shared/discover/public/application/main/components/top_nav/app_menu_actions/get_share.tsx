@@ -318,13 +318,8 @@ export const getShareAppMenuItem = ({
       testId: 'shareTopNavButton',
       disableButton: shareAction.isDisabled,
       run: (params) => {
-        const triggerElement = params?.triggerElement;
-        if (!triggerElement) {
-          return;
-        }
         void shareAction.onClick({
-          triggerElement,
-          returnFocus: params.returnFocus ?? (() => triggerElement.focus()),
+          returnFocus: params?.returnFocus ?? (() => params?.triggerElement?.focus()),
         });
       },
     });

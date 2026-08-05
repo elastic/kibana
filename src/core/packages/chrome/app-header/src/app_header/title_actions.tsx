@@ -97,7 +97,6 @@ export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favori
             onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
               const triggerElement = event.currentTarget;
               void shareAction.onClick({
-                triggerElement,
                 returnFocus: () => triggerElement.focus(),
               });
             }}
