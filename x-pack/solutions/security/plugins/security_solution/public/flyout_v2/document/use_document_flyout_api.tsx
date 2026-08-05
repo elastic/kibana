@@ -394,6 +394,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       renderCellActions = cellActionRenderer,
       onAlertUpdated = noop,
       origin,
+      title,
     }: OpenDocumentFlyoutParams) => {
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.documentFromPattern,
@@ -408,7 +409,16 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           renderCellActions={renderCellActions}
           onAlertUpdated={onAlertUpdated}
         />,
-        { ...defaultDocumentFlyoutProperties, historyKey, session: sessionMode, onClose },
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: sessionMode,
+          // Fall back to the bare "Alert" label so EUI's managed flyout never shows
+          // "Unknown Flyout" in its navigation history. Callers may supply a richer
+          // title (e.g. "Alert: <rule name>") if they know it at call time.
+          title: title ?? getAlertHistoryTitle(),
+          onClose,
+        },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType: FLYOUT_TYPE.DOCUMENT,

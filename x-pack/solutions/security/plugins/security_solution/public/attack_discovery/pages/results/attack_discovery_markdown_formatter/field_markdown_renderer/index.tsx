@@ -12,12 +12,16 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DraggableBadge } from '../../../../../common/components/draggables';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry/events/flyout_v2/types';
+import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
+import { DEFAULT_ALERTS_INDEX } from '../../../../../../common/constants';
 import { ENTITY_TYPE_BY_FIELD, getFlyoutPanelProps } from './helpers';
 import { useEntityEuidFromAlerts } from './use_entity_euid_from_alerts';
 import { useMarkdownFormatterContext } from '../context';
-import { useOpenAlertFlyout } from './use_open_alert_flyout';
 import { getAlertIdChipAriaLabel } from './translations';
 import type { ParsedField } from '../types';
+
+const ALERTS_INDEX_PATTERN = `${DEFAULT_ALERTS_INDEX}-*` as const;
 
 /** Alert-document `_id` fields whose chips open the alert-details flyout when clicked. */
 const ALERT_ID_FIELDS: ReadonlySet<string> = new Set(['_id', 'kibana.alert.uuid']);
@@ -45,11 +49,10 @@ const chipLabelCss = css`
 
 export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
   const { disableActions, scopeId, alertIds } = useMarkdownFormatterContext();
-  const { openRightPanel } = useExpandableFlyoutApi();
-  const { openHostFlyout, openUserFlyout } = useFlyoutApi();
+  const { openFlyout, openRightPanel } = useExpandableFlyoutApi();
+  const { openDocumentFlyoutFromPattern, openHostFlyout, openUserFlyout } = useFlyoutApi();
   const { euiTheme } = useEuiTheme();
   const enableNewFlyout = useIsNewFlyoutEnabled();
-  const openAlertFlyout = useOpenAlertFlyout();
 
   // Detect whether the chip label is visually truncated so the full-value tooltip is only shown
   // when needed — avoids a redundant tooltip for short values that already fit in the chip.
@@ -71,8 +74,22 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
     (alertIds?.includes(stringValue) ?? false);
 
   const onAlertIdClick = useCallback(() => {
-    if (stringValue != null) openAlertFlyout(stringValue);
-  }, [openAlertFlyout, stringValue]);
+    if (stringValue == null) return;
+    if (enableNewFlyout) {
+      openDocumentFlyoutFromPattern({
+        documentId: stringValue,
+        indexName: ALERTS_INDEX_PATTERN,
+        origin: FLYOUT_ORIGIN.ATTACK_SUMMARY_ALERT,
+      });
+    } else {
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: { id: stringValue, indexName: ALERTS_INDEX_PATTERN, scopeId },
+        },
+      });
+    }
+  }, [enableNewFlyout, openDocumentFlyoutFromPattern, openFlyout, scopeId, stringValue]);
 
   // --- Entity-field classification (host/user — opens entity flyout) ---
   const isEntityField = name in ENTITY_TYPE_BY_FIELD && typeof value === 'string';
