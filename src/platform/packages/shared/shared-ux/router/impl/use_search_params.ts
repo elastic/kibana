@@ -22,18 +22,12 @@ export type URLSearchParamsInit =
   | undefined;
 
 export type SetURLSearchParams = (
-  nextInit:
-    | URLSearchParamsInit
-    | ((prev: URLSearchParams) => URLSearchParamsInit),
+  nextInit: URLSearchParamsInit | ((prev: URLSearchParams) => URLSearchParamsInit),
   navigateOpts?: { replace?: boolean }
 ) => void;
 
 const createSearchParams = (init: URLSearchParamsInit = ''): URLSearchParams => {
-  if (
-    typeof init === 'string' ||
-    Array.isArray(init) ||
-    init instanceof URLSearchParams
-  ) {
+  if (typeof init === 'string' || Array.isArray(init) || init instanceof URLSearchParams) {
     return new URLSearchParams(init);
   }
 
