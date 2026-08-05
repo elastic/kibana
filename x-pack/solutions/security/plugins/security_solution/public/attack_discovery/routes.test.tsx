@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Redirect, type RouteComponentProps } from 'react-router-dom';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
 
 import { AttackDiscoveryRoutes } from './routes';
 import { useIsAlertsAndAttacksAlignmentEnabled } from '../common/hooks/use_is_alerts_and_attacks_alignment_enabled';
@@ -20,7 +20,7 @@ jest.mock('react-router-dom', () => ({
   Redirect: jest.fn(() => <div data-test-subj="mock-redirect" />),
 }));
 
-jest.mock('react-router-dom-v5-compat', () => ({
+jest.mock('@kbn/shared-ux-router', () => ({
   useSearchParams: jest.fn(),
 }));
 

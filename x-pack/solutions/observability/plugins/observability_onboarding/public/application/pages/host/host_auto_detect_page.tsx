@@ -10,7 +10,7 @@ import { useGeneratedHtmlId, type EuiStepsProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useLocation } from 'react-router-dom';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import {
   ASSET_DETAILS_LOCATOR_ID,

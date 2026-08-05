@@ -8,7 +8,8 @@
 import type { Context } from 'react';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { History } from 'history';
-import { UNSAFE_NavigationContext } from 'react-router-dom-v5-compat';
+// Optional history access: this hook can run outside a router (e.g. modal views).
+import { __RouterContext as RouterContext } from 'react-router-dom';
 import deepEqual from 'react-fast-compare';
 import { isEmpty } from 'lodash';
 
@@ -117,10 +118,11 @@ export function useAllCasesState(isModalView: boolean = false): UseAllCasesState
 const useAllCasesUrlState = (
   isModalView: boolean
 ): [AllCasesURLState, (updated: AllCasesTableState, mode?: 'push' | 'replace') => void] => {
-  const navigationContext = useContext(
-    UNSAFE_NavigationContext as unknown as Context<{ navigator?: History } | undefined>
+  // Prefer optional context access over useHistory(), which throws outside a router.
+  const routeContext = useContext(
+    RouterContext as unknown as Context<{ history?: History } | undefined>
   );
-  const history = navigationContext?.navigator;
+  const history = routeContext?.history;
 
   const {
     data: { customFields: customFieldsConfiguration },

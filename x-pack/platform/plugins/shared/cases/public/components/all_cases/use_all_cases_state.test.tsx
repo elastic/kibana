@@ -27,33 +27,27 @@ import { useGetCaseConfiguration } from '../../containers/configure/use_get_case
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-}));
-
-jest.mock('react-router-dom-v5-compat', () => ({
+jest.mock('react-router', () => ({
   ...(() => {
     const ReactActual = jest.requireActual('react');
     const mockLocation = { search: '' };
     const mockPush = jest.fn();
     const mockReplace = jest.fn();
-    const mockNavigationContextValue: { navigator?: unknown } = {
-      navigator: {
+    const mockRouteContextValue: { history?: unknown } = {
+      history: {
         replace: mockReplace,
         push: mockPush,
         location: mockLocation,
       },
     };
     const mockedRouterModule = {
-      ...jest.requireActual('react-router-dom-v5-compat'),
+      ...jest.requireActual('react-router'),
       __mockLocation: mockLocation,
       __mockPush: mockPush,
       __mockReplace: mockReplace,
-      __mockNavigationContextValue: mockNavigationContextValue,
+      __mockRouteContextValue: mockRouteContextValue,
     };
-    const unsafeNavigationContextKey = 'UNSAFE_NavigationContext';
-    (mockedRouterModule as Record<string, unknown>)[unsafeNavigationContextKey] =
-      ReactActual.createContext(mockNavigationContextValue);
+    mockedRouterModule.__RouterContext = ReactActual.createContext(mockRouteContextValue);
 
     return mockedRouterModule;
   })(),
@@ -64,12 +58,12 @@ const {
   __mockLocation: mockLocation,
   __mockPush: mockPush,
   __mockReplace: mockReplace,
-  __mockNavigationContextValue: mockNavigationContextValue,
-} = jest.requireMock('react-router-dom-v5-compat') as {
+  __mockRouteContextValue: mockRouteContextValue,
+} = jest.requireMock('react-router') as {
   __mockLocation: { search: string };
   __mockPush: jest.Mock;
   __mockReplace: jest.Mock;
-  __mockNavigationContextValue: { navigator?: unknown };
+  __mockRouteContextValue: { history?: unknown };
 };
 
 const LS_KEY = 'securitySolution.cases.list.state';
@@ -78,7 +72,7 @@ describe('useAllCasesQueryParams', () => {
   beforeEach(() => {
     localStorage.clear();
     mockLocation.search = '';
-    mockNavigationContextValue.navigator = {
+    mockRouteContextValue.history = {
       replace: mockReplace,
       push: mockPush,
       location: mockLocation,
@@ -747,7 +741,7 @@ describe('useAllCasesQueryParams', () => {
 
   describe('Modal', () => {
     it('does not require router context', () => {
-      mockNavigationContextValue.navigator = undefined;
+      mockRouteContextValue.history = undefined;
 
       const { result } = renderHook(() => useAllCasesState(true), {
         wrapper: ({ children }: React.PropsWithChildren<{}>) => (

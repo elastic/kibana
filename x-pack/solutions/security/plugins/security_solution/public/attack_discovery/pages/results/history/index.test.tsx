@@ -30,8 +30,8 @@ jest.mock('react-router-dom', () => ({
   withRouter: jest.fn(),
 }));
 
-jest.mock('react-router-dom-v5-compat', () => ({
-  ...jest.requireActual('react-router-dom-v5-compat'),
+jest.mock('@kbn/shared-ux-router', () => ({
+  ...jest.requireActual('@kbn/shared-ux-router'),
   useSearchParams: jest.fn(() => [{ get: jest.fn() }]),
 }));
 

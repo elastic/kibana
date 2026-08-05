@@ -10,7 +10,7 @@ import { useEuiTheme } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
-import { useLocation } from 'react-router-dom-v5-compat';
+import { useLocation } from 'react-router-dom';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { EUI_LOGO_BY_BRAND, type SupportedLogo } from '../shared/logo_icon';
 import { INTEGRATION_TILES, type IntegrationTileData } from './integration_tiles';

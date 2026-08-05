@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom-v5-compat';
+import { Link } from 'react-router-dom';
 
 import {
   EuiDroppable,

@@ -18,7 +18,7 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
 import { IntegrationsCategory } from './integrations_category';
 import { IntegrationTile } from './integration_tile';
 import { INTEGRATION_TILES } from './integration_tiles';

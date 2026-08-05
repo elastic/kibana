@@ -14,7 +14,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
 import { createCallApi } from '../../services/rest/create_call_api';
@@ -96,9 +95,7 @@ const renderWithFlag = (enabled: boolean, initialPath: string = '/') => {
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <MemoryRouter initialEntries={[initialPath]}>
-          <CompatRouter>
-            <LandingPage />
-          </CompatRouter>
+          <LandingPage />
         </MemoryRouter>
       </KibanaContextProvider>
     </I18nProvider>
@@ -116,10 +113,8 @@ const renderLandingWithRouter = (enabled: boolean) => {
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <MemoryRouter initialEntries={['/']}>
-          <CompatRouter>
-            <LandingPage />
-            <LocationDisplay />
-          </CompatRouter>
+          <LandingPage />
+          <LocationDisplay />
         </MemoryRouter>
       </KibanaContextProvider>
     </I18nProvider>
@@ -137,9 +132,7 @@ const renderFlowAtPath = (enabled: boolean, path: string) => {
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <MemoryRouter initialEntries={[path]}>
-          <CompatRouter>
-            <ObservabilityOnboardingFlow />
-          </CompatRouter>
+          <ObservabilityOnboardingFlow />
         </MemoryRouter>
       </KibanaContextProvider>
     </I18nProvider>

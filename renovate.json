@@ -366,7 +366,6 @@
         "react-router",
         "react-router-config",
         "react-router-dom",
-        "react-router-dom-v5-compat",
         "@types/react-router",
         "@types/react-router-config",
         "@types/react-router-dom",
