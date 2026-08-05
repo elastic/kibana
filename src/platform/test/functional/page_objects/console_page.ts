@@ -251,12 +251,6 @@ export class ConsolePageObject extends FtrService {
     // Retry the Play click until the request starts. A single click can be a no-op if the editor
     // hasn't finished registering the current request (see #240147).
     await this.retry.try(async () => {
-      // Monaco's autocomplete widget can sit over the Play button and swallow the click. Dismiss it
-      // first, but only while it is actually open: pressing Escape with no widget open instead
-      // toggles the editor out of edit mode, leaving a hint tooltip that covers the button (#246353).
-      if (await this.isAutocompleteVisible()) {
-        await this.pressEscape();
-      }
       await this.clickPlay();
       const started =
         (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
