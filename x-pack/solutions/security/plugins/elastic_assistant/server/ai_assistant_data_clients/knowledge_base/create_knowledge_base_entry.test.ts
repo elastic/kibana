@@ -203,7 +203,7 @@ describe('createKnowledgeBaseEntry', () => {
     expect(esClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
         document: expect.objectContaining({
-          users: [{ id: 'my_profile_uid', name: 'elastic' }],
+          users: [{ id: 'my_profile_uid', name: 'my_username' }],
         }),
       })
     );
@@ -223,7 +223,7 @@ describe('transformToCreateSchema', () => {
       }),
     });
 
-    expect(result.users).toEqual([{ id: 'my_profile_uid', name: 'elastic' }]);
+    expect(result.users).toEqual([{ id: 'my_profile_uid', name: 'my_username' }]);
   });
 
   it('returns the authenticated user as owner when client spoofs another user id on a private index entry', () => {
@@ -238,7 +238,7 @@ describe('transformToCreateSchema', () => {
       }),
     });
 
-    expect(result.users).toEqual([{ id: 'my_profile_uid', name: 'elastic' }]);
+    expect(result.users).toEqual([{ id: 'my_profile_uid', name: 'my_username' }]);
   });
 
   it('returns empty users for a global index entry', () => {
@@ -272,7 +272,7 @@ describe('transformToUpdateSchema', () => {
       },
     });
 
-    expect(result.users).toEqual([{ id: 'my_profile_uid', name: 'elastic' }]);
+    expect(result.users).toEqual([{ id: 'my_profile_uid', name: 'my_username' }]);
   });
 
   it('returns the authenticated user as owner when client spoofs another user id on a private index entry', () => {
@@ -289,6 +289,6 @@ describe('transformToUpdateSchema', () => {
       },
     });
 
-    expect(result.users).toEqual([{ id: 'my_profile_uid', name: 'elastic' }]);
+    expect(result.users).toEqual([{ id: 'my_profile_uid', name: 'my_username' }]);
   });
 });
