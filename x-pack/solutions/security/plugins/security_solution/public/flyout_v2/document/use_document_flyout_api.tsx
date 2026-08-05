@@ -225,6 +225,13 @@ export interface DocumentFlyoutApi {
    * (for callers that don't know the concrete `_index`, e.g. notes).
    */
   openDocumentFlyoutFromPattern: (params: OpenDocumentFlyoutParams) => void;
+  /**
+   * Opens the document details flyout (resolving from an index pattern) as a child of the
+   * currently open flyout (nested in its history stack, so the back button returns to it). Use this
+   * from within an already-open flyout when only an index pattern — not the concrete `_index` — is
+   * available, e.g. an alert-id chip in the Attack Summary markdown.
+   */
+  openDocumentFlyoutFromPatternAsChild: (params: OpenDocumentFlyoutParams) => void;
   /** Opens the analyzer tools flyout for a document. */
   openAnalyzer: (params: OpenAnalyzerParams) => void;
   /** Opens the session view tools flyout for a document. */
@@ -411,6 +418,58 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey, sessionMode, writeOnOpen, buildOnClose]
+  );
+
+  const openDocumentFlyoutFromPatternAsChild = useCallback(
+    ({
+      documentId,
+      indexName,
+      renderCellActions = cellActionRenderer,
+      onAlertUpdated = noop,
+      origin,
+      title,
+    }: OpenDocumentFlyoutParams) => {
+      const parentDescriptor = readFirstDescriptor();
+      writeOnOpen(
+        {
+          kind: FLYOUT_DESCRIPTOR_KIND.documentFromPattern,
+          documentId,
+          indexName: indexName ?? '',
+        },
+        'inherit'
+      );
+      const onClose = buildOnClose(parentDescriptor);
+      open(
+        <DocumentFlyoutWrapperFromPattern
+          documentId={documentId}
+          indexName={indexName}
+          renderCellActions={renderCellActions}
+          onAlertUpdated={onAlertUpdated}
+        />,
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.INHERIT,
+          title: buildFlyoutNavTitle(title ?? getAlertHistoryTitle()),
+          onClose,
+        },
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.DOCUMENT,
+          session: FLYOUT_SESSION_KIND.INHERIT,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
+      );
+    },
+    [
+      open,
+      defaultDocumentFlyoutProperties,
+      historyKey,
+      readFirstDescriptor,
+      writeOnOpen,
+      buildOnClose,
+    ]
   );
 
   const openAnalyzer = useCallback(
@@ -782,6 +841,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       openDocumentFlyoutFromIndex,
       openDocumentFlyoutFromIndexAsChild,
       openDocumentFlyoutFromPattern,
+      openDocumentFlyoutFromPatternAsChild,
       openAnalyzer,
       openSessionView,
       openDocumentEntities,
@@ -796,6 +856,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       openDocumentFlyoutFromIndex,
       openDocumentFlyoutFromIndexAsChild,
       openDocumentFlyoutFromPattern,
+      openDocumentFlyoutFromPatternAsChild,
       openAnalyzer,
       openSessionView,
       openDocumentEntities,

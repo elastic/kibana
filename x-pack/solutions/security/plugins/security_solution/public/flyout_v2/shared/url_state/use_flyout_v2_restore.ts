@@ -595,9 +595,8 @@ export const openDescriptorAsChild = (
       break;
     }
     case 'documentFromPattern': {
-      // No AsChild variant exists — open as main (best-effort fallback)
       const { documentId, indexName } = descriptor as DocumentFromPatternDescriptor;
-      api.openDocumentFlyoutFromPattern({ documentId, indexName, ...originParams });
+      api.openDocumentFlyoutFromPatternAsChild({ documentId, indexName, ...originParams });
       break;
     }
     case 'attack': {

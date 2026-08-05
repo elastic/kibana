@@ -6,6 +6,7 @@
  */
 
 import type { ParsedField } from '../types';
+import { getFieldTokenKind, getIconForKind } from '../field_token_kind';
 
 const iconLookup: Record<string, string> = {
   'host.name': 'desktop',
@@ -35,10 +36,14 @@ export const FIELD_TOKEN_REGEX = /\{\{\s*(\S+)\s+(.*?)\s*\}\}/g;
 
 /**
  * Constructs a `ParsedField` from the two capture groups of `FIELD_TOKEN_REGEX`.
+ * The icon falls back to `getIconForKind` when the field name has no explicit entry in
+ * `iconLookup`, so id-like fields (alert ids, hashes, entity ids) always get a meaningful icon.
  */
 export const parseFieldToken = (fieldName: string, fieldValue: string): ParsedField => ({
   name: fieldName,
-  icon: getIconFromFieldName(fieldName),
+  icon:
+    getIconFromFieldName(fieldName) ||
+    getIconForKind(fieldName, getFieldTokenKind(fieldName, fieldValue)),
   operator: ':',
   value: fieldValue,
 });
