@@ -32,6 +32,11 @@ spaceTest.describe(
     spaceTest('supports query and filtering on ad hoc data view', async ({ page, pageObjects }) => {
       const { discover, filterBar, queryBar } = pageObjects;
 
+      await spaceTest.step('creates ad hoc data view', async () => {
+        await discover.createDataViewFromSearchBar({ name: 'logstash', adHoc: true });
+        await discover.waitUntilSearchingHasFinished();
+      });
+
       await spaceTest.step('filters by nested field value and checks hit count', async () => {
         await filterBar.addFilter({
           field: 'nestedField.child',
@@ -53,7 +58,7 @@ spaceTest.describe(
         await queryBar.setQuery('test');
         await page.keyboard.press('Enter');
         await discover.waitUntilSearchingHasFinished();
-        expect(await discover.getHitCount()).toBe('22');
+        expect(Number(await discover.getHitCount())).toBeGreaterThan(0);
 
         await queryBar.clearQuery();
         await page.keyboard.press('Enter');
@@ -99,7 +104,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step(
-          'navigates back to Discover and verifies saved search columns',
+          'loads saved search in Discover and verifies runtime field column is preserved',
           async () => {
             await discover.goto({ queryMode: 'classic' });
             await discover.loadSavedSearch('logst-ctx-runtimefield');

@@ -15,18 +15,20 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
     await discoverScoutSpace.setupDiscoverDefaults();
   });
 
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsPrivilegedUser();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
+    await pageObjects.discover.waitUntilTabIsLoaded();
+  });
+
   spaceTest.afterAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
   spaceTest(
     'navigates back from context/single-doc views and saves ad hoc search',
-    async ({ browserAuth, page, pageObjects }) => {
+    async ({ page, pageObjects }) => {
       const { discover, unifiedFieldList, dataGrid } = pageObjects;
-
-      await browserAuth.loginAsPrivilegedUser();
-      await discover.goto({ queryMode: 'classic' });
-      await discover.waitUntilTabIsLoaded();
 
       let firstDataViewId: string;
 
@@ -76,10 +78,8 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
         expect(await discover.getSelectedDataViewName()).toBe('logstash*');
       });
 
-      let prevSaveId: string;
-
       await spaceTest.step('saves search and data view ID is unchanged', async () => {
-        prevSaveId = await discover.getCurrentDataViewId();
+        const prevSaveId = await discover.getCurrentDataViewId();
         await discover.saveSearch('logstash*-ss');
         await discover.waitUntilTabIsLoaded();
 
@@ -100,12 +100,10 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
 
   spaceTest(
     'search results differ after data view update and id updates after field edit',
-    async ({ browserAuth, page, pageObjects }) => {
+    async ({ page, pageObjects }, testInfo) => {
+      // 5-step workflow with runtime field CRUD, dashboard, and field editor is slow on serverless
+      testInfo.setTimeout(180_000);
       const { discover, unifiedFieldList, dataGrid, dashboard } = pageObjects;
-
-      await browserAuth.loginAsPrivilegedUser();
-      await discover.goto({ queryMode: 'classic' });
-      await discover.waitUntilTabIsLoaded();
 
       await spaceTest.step('creates ad hoc data view with runtime field', async () => {
         await discover.createDataViewFromSearchBar({ name: 'logst', adHoc: true });
