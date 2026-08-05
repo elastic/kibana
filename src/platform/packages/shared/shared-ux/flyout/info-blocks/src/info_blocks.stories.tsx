@@ -37,7 +37,6 @@ const meta: Meta<typeof InfoBlocks> = {
   component: InfoBlocks,
   argTypes: {
     items: { table: { disable: true } },
-    hasLeadingSpacer: { table: { disable: true } },
     compressed: { table: { disable: true } },
     'data-test-subj': { table: { disable: true } },
   },
@@ -210,12 +209,6 @@ const BIG_NUMBER_ITEMS: InfoBlockItem[] = [
   { title: 'Healthy', value: '5', size: 'xl', color: 'success' },
 ];
 
-// The first block starts its own row; the rest resume on the next row.
-const LEADING_SPACER_ITEMS: InfoBlockItem[] = [
-  { title: 'Risk score', value: '90', size: 'xl' },
-  ...SAMPLE_ITEMS.slice(0, 4),
-];
-
 const FlyoutWrapper: React.FC<{ children: React.ReactNode; title: string }> = ({
   children,
   title,
@@ -266,12 +259,6 @@ const GalleryDemo: React.FC = () => {
         <EuiSpacer size="m" />
         <InfoBlocks items={BIG_NUMBER_ITEMS} compressed={useCompressed} />
 
-        <EuiSpacer size="xl" />
-        <EuiTitle size="s">
-          <h3>Leading spacer</h3>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <InfoBlocks items={LEADING_SPACER_ITEMS} hasLeadingSpacer compressed={useCompressed} />
       </FlyoutWrapper>
     </div>
   );
@@ -280,23 +267,6 @@ const GalleryDemo: React.FC = () => {
 export const Gallery: Story = {
   parameters: { controls: { hideNoControlsWarning: true } },
   render: () => <GalleryDemo />,
-};
-
-export const LeadingSpacer: StoryObj<DefaultArgs> = {
-  argTypes: {
-    numberOfItems: {
-      description: 'Number of info blocks to render',
-      control: { type: 'range', min: 1, max: LEADING_SPACER_ITEMS.length, step: 1 },
-    },
-  },
-  args: {
-    numberOfItems: LEADING_SPACER_ITEMS.length,
-  },
-  render: ({ numberOfItems }) => (
-    <FlyoutWrapper title="Leading spacer">
-      <InfoBlocks items={LEADING_SPACER_ITEMS.slice(0, numberOfItems)} hasLeadingSpacer />
-    </FlyoutWrapper>
-  ),
 };
 
 // Tall content sets the row height.
@@ -323,11 +293,11 @@ export const InlineSvg: StoryObj<DefaultArgs> = {
   argTypes: {
     numberOfItems: {
       description: 'Number of additional info blocks to render',
-      control: { type: 'range', min: 0, max: LEADING_SPACER_ITEMS.length, step: 1 },
+      control: { type: 'range', min: 0, max: SAMPLE_ITEMS.length, step: 1 },
     },
   },
   args: {
-    numberOfItems: LEADING_SPACER_ITEMS.length,
+    numberOfItems: SAMPLE_ITEMS.length,
   },
   render: ({ numberOfItems }) => (
     <FlyoutWrapper title="Inline SVG">
@@ -335,7 +305,7 @@ export const InlineSvg: StoryObj<DefaultArgs> = {
         items={[
           // non-hideable item
           { title: 'Trend', value: TALL_SVG },
-          ...[...SAMPLE_ITEMS, ...ACTIONABLE_ITEMS].slice(0, numberOfItems),
+          ...SAMPLE_ITEMS.slice(0, numberOfItems),
         ]}
       />
     </FlyoutWrapper>

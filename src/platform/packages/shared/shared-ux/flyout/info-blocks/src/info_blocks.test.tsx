@@ -55,39 +55,4 @@ describe('InfoBlocks', () => {
     expect(screen.getByTestId('ownerBlock')).toBeInTheDocument();
   });
 
-  it('renders no spacer element for the leading spacer', () => {
-    render(
-      <InfoBlocks
-        hasLeadingSpacer
-        items={[
-          { title: 'Risk score', value: '90', size: 'xl' },
-          { title: 'Vendor', value: 'Elastic' },
-          { title: 'Result', value: 'Success' },
-        ]}
-      />
-    );
-    // The leading spacer is a CSS grid effect — no extra DOM element is inserted.
-    expect(screen.getAllByTestId('infoBlock')).toHaveLength(3);
-    expect(screen.getByTestId('infoBlocks').children).toHaveLength(3);
-    expect(screen.getByText('Risk score')).toBeInTheDocument();
-    expect(screen.getByText('Vendor')).toBeInTheDocument();
-  });
-
-  it('produces the same element count whether or not the leading spacer is active', () => {
-    render(
-      <InfoBlocks
-        data-test-subj="compressedBlocks"
-        compressed
-        hasLeadingSpacer
-        items={[
-          { title: 'Risk score', value: '90', size: 'xl' },
-          { title: 'Vendor', value: 'Elastic' },
-          { title: 'Result', value: 'Success' },
-        ]}
-      />
-    );
-
-    expect(screen.getAllByTestId('infoBlock')).toHaveLength(3);
-    expect(screen.getByTestId('compressedBlocks').children).toHaveLength(3);
-  });
 });

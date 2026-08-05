@@ -112,64 +112,21 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
         & > :nth-child(1)::after {
           display: none;
         }
-      }
-    `,
-
-    /*
-     * The panel's own ::before is a grid item reserving the rest of row 1, so the first block
-     * stands alone. Every later block shifts one column over, which the selectors below mirror.
-     */
-    leadingSpacer: css`
-      &::before {
-        content: '';
-        grid-column: 2 / -1;
-        grid-row: 1;
-      }
-
-      /* ── 3-column state ── row 1 holds only the first block, so rows now start at 2, 5, 8… */
-      /* Reset first: after the shift the base 3n rule lands on the middle column. */
-      & > :nth-child(n)::before {
-        display: block;
-      }
-      & > :nth-child(3n + 1)::before {
-        display: none;
-      }
-      & > :nth-child(3n + 1)::after {
-        display: none;
-      }
-      & > :nth-child(3n + 2)::after {
-        display: block;
-      }
-      /* The block before the spacer keeps its column divider. */
-      & > :nth-child(1)::before {
-        display: block;
-      }
-
-      /* ── 2-column state ── rows start at 2, 4, 6… */
-      @container ${CONTAINER_NAME} (width < ${twoColumnBelow}px) {
-        & > :nth-child(n)::before {
-          display: block;
-        }
-        & > :nth-child(2n + 1)::before {
-          display: none;
-        }
-        & > :nth-child(1)::before {
-          display: block;
-        }
 
         & > :nth-child(n)::after {
           display: none;
         }
-        & > :nth-child(2n)::after {
+        & > :nth-child(2n + 1)::after {
           display: block;
+        }
+        & > :nth-child(1)::after {
+          display: none;
         }
       }
 
-      /* ── 1-column state ── a single column has no room to reserve. */
+      /* ── 1-column state ── */
       @container ${CONTAINER_NAME} (width < ${oneColumnBelow}px) {
-        &::before {
-          content: none;
-        }
+        grid-template-columns: minmax(0, 1fr);
 
         & > :nth-child(n)::before {
           display: none;
@@ -196,13 +153,10 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
 /** Responsive card for a small set of labeled values. */
 export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
   items,
-  hasLeadingSpacer,
   compressed,
   ...rest
 }) => {
   const memoized = useEuiMemoizedStyles(styles);
-  // Compressed mode opts out of the row-shaping leading spacer.
-  const effectiveHasLeadingSpacer = Boolean(hasLeadingSpacer) && !compressed;
 
   return (
     <div css={memoized.wrapper}>
@@ -210,7 +164,7 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
         paddingSize="none"
         hasShadow={false}
         hasBorder
-        css={[memoized.panel, effectiveHasLeadingSpacer && memoized.leadingSpacer]}
+        css={memoized.panel}
         data-test-subj={rest['data-test-subj'] ?? 'infoBlocks'}
       >
         {items.map((item, index) => (

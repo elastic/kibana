@@ -26,10 +26,8 @@ export interface InfoBlockItem {
 }
 
 export interface InfoBlocksProps {
-  /** The blocks to render. Designed for small sets, typically up to 6 blocks. */
+  /** The blocks to render. Designed for small sets, typically up to 8 blocks. */
   items: readonly InfoBlockItem[];
-  /** Makes the first block fill its row alone; ignored when `compressed`. */
-  hasLeadingSpacer?: boolean;
   /** Compact spacing/sizing for dense presentations. */
   compressed?: boolean;
   'data-test-subj'?: string;
