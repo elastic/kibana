@@ -11,60 +11,6 @@
         "wait_for"
       ]
     },
-    "data_autocomplete_rules": {
-      "enabled": {
-        "__one_of": [
-          true,
-          false
-        ]
-      },
-      "metadata": {},
-      "roles": [],
-      "role_templates": [
-        {
-          "format": {
-            "__one_of": [
-              "string",
-              "json"
-            ]
-          },
-          "template": {
-            "__one_of": [
-              {
-                "source": "",
-                "id": "",
-                "params": {},
-                "lang": {
-                  "__one_of": [
-                    "painless",
-                    "expression",
-                    "mustache",
-                    "java"
-                  ]
-                },
-                "options": {
-                  "*": ""
-                }
-              },
-              ""
-            ]
-          }
-        }
-      ],
-      "rules": {
-        "any": [
-          {}
-        ],
-        "all": [
-          {}
-        ],
-        "field": {
-          "*": ""
-        },
-        "except": {}
-      },
-      "run_as": []
-    },
     "methods": [
       "PUT",
       "POST"

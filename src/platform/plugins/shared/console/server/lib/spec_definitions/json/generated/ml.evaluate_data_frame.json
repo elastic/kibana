@@ -6,66 +6,6 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "data_autocomplete_rules": {
-      "evaluation": {
-        "classification": {
-          "actual_field": "",
-          "predicted_field": "",
-          "top_classes_field": "",
-          "metrics": {
-            "auc_roc": {
-              "class_name": "",
-              "include_curve": {
-                "__one_of": [
-                  true,
-                  false
-                ]
-              }
-            },
-            "precision": {},
-            "recall": {},
-            "accuracy": {},
-            "multiclass_confusion_matrix": {}
-          }
-        },
-        "outlier_detection": {
-          "actual_field": "",
-          "predicted_probability_field": "",
-          "metrics": {
-            "auc_roc": {
-              "class_name": "",
-              "include_curve": {
-                "__one_of": [
-                  true,
-                  false
-                ]
-              }
-            },
-            "precision": {},
-            "recall": {},
-            "confusion_matrix": {}
-          }
-        },
-        "regression": {
-          "actual_field": "",
-          "predicted_field": "",
-          "metrics": {
-            "mse": {},
-            "msle": {
-              "offset": ""
-            },
-            "huber": {
-              "delta": ""
-            },
-            "r_squared": {}
-          }
-        }
-      },
-      "index": "",
-      "query": {
-        "__scope_link": "GLOBAL.query"
-      }
-    },
     "methods": [
       "POST"
     ],

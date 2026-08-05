@@ -147,7 +147,6 @@ const OverflowPopover = ({
         </EuiListGroup>
         {notShownCount > 0 && (
           <EuiCallOut
-            announceOnMount
             size="s"
             iconType="warning"
             color="warning"

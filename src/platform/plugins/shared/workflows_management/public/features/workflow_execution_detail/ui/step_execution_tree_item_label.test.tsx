@@ -93,18 +93,6 @@ describe('StepExecutionTreeItemLabel', () => {
     expect(screen.queryByText(/\ds/)).not.toBeInTheDocument();
   });
 
-  it('renders styled 0ms duration when executionTimeMs is 0', () => {
-    renderWithIntl({ ...defaultProps, executionTimeMs: 0 });
-    expect(screen.getByText('0ms')).toBeInTheDocument();
-    expect(screen.queryByText('0', { exact: true })).not.toBeInTheDocument();
-  });
-
-  it('does not render execution duration for non-finite values', () => {
-    renderWithIntl({ ...defaultProps, executionTimeMs: Number.NaN });
-    expect(screen.queryByText('0ms')).not.toBeInTheDocument();
-    expect(screen.queryByText('0', { exact: true })).not.toBeInTheDocument();
-  });
-
   it('renders without a status', () => {
     renderWithIntl({ ...defaultProps, status: undefined });
     expect(screen.getByTestId('workflowStepName')).toHaveTextContent('my_step');

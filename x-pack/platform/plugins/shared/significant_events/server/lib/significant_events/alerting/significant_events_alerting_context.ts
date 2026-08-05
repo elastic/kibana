@@ -9,7 +9,6 @@ import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { QUERY_TYPE_STATS, type QueryType } from '@kbn/significant-events-schema';
 import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
 import { RulesAdapterV2 } from '../../knowledge_indicators/knowledge_indicator_client/rules/v2_rules_adapter';
-import { canCompileMatchMetric } from '../rules/can_compile_match_metric';
 import type { ISignificantEventsAlertsReader } from './alerts_reader';
 import { ALERTS_READER_V2 } from './alerts_reader';
 
@@ -28,22 +27,9 @@ export interface ResolveSignificantEventsAlertingContextParams {
   getAlertingV2RulesClient: () => Promise<RulesClientApi>;
 }
 
-export interface RuleBackedQueryCandidate {
-  type: QueryType;
-  esql: { query: string };
-}
-
-/**
- * Whether a KI can be installed as a MATCH metric-series rule.
- * STATS stay unbacked until rule-on-rule provisioning (#265778). MATCH must
- * also be filter-only (`FROM` + optional `WHERE`) so the compiler can emit
- * closed-minute counts — unsupported shapes stay stored but unbacked.
- */
-export function canQueryBeRuleBacked(query: RuleBackedQueryCandidate): boolean {
-  if (query.type === QUERY_TYPE_STATS) {
-    return false;
-  }
-  return canCompileMatchMetric(query.esql.query);
+/** MATCH queries can be rule-backed; STATS cannot until rule-on-rule provisioning (#265778). */
+export function canQueryBeRuleBacked(queryType: QueryType): boolean {
+  return queryType !== QUERY_TYPE_STATS;
 }
 
 /**

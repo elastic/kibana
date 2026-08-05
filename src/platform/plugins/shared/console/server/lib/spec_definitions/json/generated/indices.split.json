@@ -21,31 +21,6 @@
         "index-setting"
       ]
     },
-    "data_autocomplete_rules": {
-      "aliases": {
-        "*": {
-          "filter": {
-            "__scope_link": "GLOBAL.query"
-          },
-          "index_routing": "",
-          "is_hidden": {
-            "__one_of": [
-              true,
-              false
-            ]
-          },
-          "is_write_index": {
-            "__one_of": [
-              true,
-              false
-            ]
-          },
-          "routing": "",
-          "search_routing": ""
-        }
-      },
-      "settings": {}
-    },
     "methods": [
       "PUT",
       "POST"

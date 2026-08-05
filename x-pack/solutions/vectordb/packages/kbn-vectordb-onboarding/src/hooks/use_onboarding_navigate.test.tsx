@@ -32,30 +32,33 @@ beforeEach(() => {
 });
 
 describe('useOnboardingNavigate', () => {
-  it('resolves the path against the current app and navigates', () => {
+  it('resolves the path against the current app and navigates, forwarding the origin as state', () => {
     mockApplication(new BehaviorSubject<string | undefined>('vectordb'));
 
-    const { result } = renderHook(() => useOnboardingNavigate());
+    const { result } = renderHook(() => useOnboardingNavigate('/tutorials'));
 
     act(() => {
-      result.current('/getting_started/ingest?path=have-vectors');
+      result.current('/onboarding/ingest?path=have-vectors');
     });
 
     expect(getUrlForApp).toHaveBeenCalledWith('vectordb', {
-      path: '/getting_started/ingest?path=have-vectors',
+      path: '/onboarding/ingest?path=have-vectors',
     });
     expect(navigateToUrl).toHaveBeenCalledWith(
-      '/app/vectordb/getting_started/ingest?path=have-vectors'
+      '/app/vectordb/onboarding/ingest?path=have-vectors',
+      {
+        state: { origin: '/tutorials' },
+      }
     );
   });
 
   it('does not navigate while the current app id is not yet resolved', () => {
     mockApplication(new Subject<string | undefined>());
 
-    const { result } = renderHook(() => useOnboardingNavigate());
+    const { result } = renderHook(() => useOnboardingNavigate('/tutorials'));
 
     act(() => {
-      result.current('/getting_started/ingest');
+      result.current('/onboarding/ingest');
     });
 
     expect(getUrlForApp).not.toHaveBeenCalled();

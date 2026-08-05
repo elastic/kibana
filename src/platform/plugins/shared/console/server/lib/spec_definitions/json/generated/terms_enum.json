@@ -6,22 +6,6 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "data_autocomplete_rules": {
-      "field": "",
-      "size": "",
-      "timeout": "",
-      "case_insensitive": {
-        "__one_of": [
-          true,
-          false
-        ]
-      },
-      "index_filter": {
-        "__scope_link": "GLOBAL.query"
-      },
-      "string": "",
-      "search_after": ""
-    },
     "methods": [
       "GET",
       "POST"

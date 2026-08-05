@@ -51,7 +51,6 @@ export const AskUserQuestionStepEvent: React.FC<AskUserQuestionStepEventProps> =
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-        isExpandable={false}
         onClick={openFlyout}
       />
       <AskUserQuestionFlyout

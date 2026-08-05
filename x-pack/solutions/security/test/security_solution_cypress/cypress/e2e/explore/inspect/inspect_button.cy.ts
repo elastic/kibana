@@ -24,14 +24,9 @@ import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 
 const DATA_VIEW = 'auditbeat-*';
 
-// The Hosts and Users pages in this suite are still individually flaky/skipped for reasons
-// tracked by their own issues below. Their root cause has not been verified as fixed, so they
-// stay skipped here. Do not remove these without separately verifying and closing those issues.
-// FLAKY (Hosts page): https://github.com/elastic/kibana/issues/178367
-// FLAKY (Users page): https://github.com/elastic/kibana/issues/199583
-const SKIPPED_PAGES = ['Hosts', 'Users'];
-
-describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/199563
+// FLAKY: https://github.com/elastic/kibana/issues/178367
+describe.skip('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     // illegal_argument_exception: unknown setting [index.lifecycle.name]
     cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
@@ -49,7 +44,7 @@ describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
     /**
      * Group all tests of a page into one "it" call to improve speed
      */
-    const testBody = () => {
+    it(`inspect ${pageName} page`, () => {
       visitWithTimeRange(url, {
         visitOptions: {
           onLoad: () => {
@@ -84,16 +79,6 @@ describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
 
         closesModal();
       });
-    };
-
-    // NOTE: the CI spec load-balancer statically parses this file for literal `it`/`it.skip`
-    // calls, so this must stay an if/else rather than a `const itFn = cond ? it.skip : it`
-    // (a dynamic reference isn't recognized and would cause the whole file to be treated as
-    // fully skipped and excluded from CI runs).
-    if (SKIPPED_PAGES.includes(pageName)) {
-      it.skip(`inspect ${pageName} page`, testBody);
-    } else {
-      it(`inspect ${pageName} page`, testBody);
-    }
+    });
   });
 });

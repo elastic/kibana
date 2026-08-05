@@ -62,8 +62,6 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { useResolutionGroup } from '../../../entity_resolution/hooks/use_resolution_group';
 import { getEntityId, getEntityField, getEntityName } from '../../../entity_resolution/helpers';
 import { useStableExpandableFlyoutState } from '../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state';
-import { useMissingRiskEnginePrivileges } from '../../../../hooks/use_missing_risk_engine_privileges';
-import { RiskEnginePrivilegesCallOut } from '../../../risk_engine_privileges_callout';
 
 export interface RiskInputsTabProps<T extends EntityType> {
   entityType: T;
@@ -144,7 +142,6 @@ export const RiskInputsTab = <T extends EntityType>({
   );
 
   const { data: watchlists } = useGetWatchlists();
-  const privileges = useMissingRiskEnginePrivileges({ readonly: true });
 
   const entityFilterQuery = useMemo(
     () =>
@@ -226,10 +223,6 @@ export const RiskInputsTab = <T extends EntityType>({
     });
     return map;
   }, [watchlists]);
-
-  if (!privileges.isLoading && !privileges.hasAllRequiredPrivileges) {
-    return <RiskEnginePrivilegesCallOut privileges={privileges} />;
-  }
 
   if (riskScoreError) {
     return (

@@ -390,29 +390,6 @@ Object {
         },
       },
     },
-    "opentelemetry/java/opentelemetry-javaagent": Object {
-      "agent": Object {
-        "activation_method": Array [],
-        "version": Array [],
-      },
-      "service": Object {
-        "framework": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "language": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-        "runtime": Object {
-          "composite": Array [],
-          "name": Array [],
-          "version": Array [],
-        },
-      },
-    },
     "opentelemetry/nodejs/elastic": Object {
       "agent": Object {
         "activation_method": Array [],
@@ -1347,7 +1324,6 @@ Object {
     "opentelemetry/java": 5,
     "opentelemetry/java/elastic": 6,
     "opentelemetry/java/opentelemetry-java-instrumentation": 0,
-    "opentelemetry/java/opentelemetry-javaagent": 0,
     "opentelemetry/nodejs/elastic": 7,
     "opentelemetry/php/elastic": 9,
     "opentelemetry/python/elastic": 8,

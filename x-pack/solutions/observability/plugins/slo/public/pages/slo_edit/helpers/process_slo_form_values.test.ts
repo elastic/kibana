@@ -136,9 +136,5 @@ describe('Transform partial URL state into form state', () => {
     it("handles optional 'syncField' URL state", () => {
       expect(transform({ settings: { syncField: 'override-field' } })).toMatchSnapshot();
     });
-
-    it("handles 'preventCrossProjectSearch: true' URL state", () => {
-      expect(transform({ settings: { preventCrossProjectSearch: true } })).toMatchSnapshot();
-    });
   });
 });

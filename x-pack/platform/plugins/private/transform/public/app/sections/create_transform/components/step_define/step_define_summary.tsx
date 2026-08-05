@@ -47,7 +47,6 @@ export const StepDefineSummary: FC<Props> = ({
     groupByList,
     aggList,
     transformFunction,
-    projectRouting,
     previewRequest: partialPreviewRequest,
     validationStatus,
   },
@@ -62,8 +61,7 @@ export const StepDefineSummary: FC<Props> = ({
     transformConfigQuery,
     partialPreviewRequest,
     runtimeMappings,
-    isDatePickerApplyEnabled ? timeRangeMs : undefined,
-    projectRouting
+    isDatePickerApplyEnabled ? timeRangeMs : undefined
   );
 
   const pivotPreviewProps = useTransformConfigData(
@@ -72,8 +70,7 @@ export const StepDefineSummary: FC<Props> = ({
     validationStatus,
     partialPreviewRequest,
     runtimeMappings,
-    isDatePickerApplyEnabled ? timeRangeMs : undefined,
-    projectRouting
+    isDatePickerApplyEnabled ? timeRangeMs : undefined
   );
 
   const isModifiedQuery =

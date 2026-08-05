@@ -43,6 +43,7 @@ export interface CreateRuleFormProps {
   filteredRuleTypes?: string[];
   shouldUseRuleProducer?: boolean;
   canShowConsumerSelection?: boolean;
+  showMustacheAutocompleteSwitch?: boolean;
   isFlyout?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
@@ -63,6 +64,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     filteredRuleTypes = [],
     shouldUseRuleProducer = false,
     canShowConsumerSelection = true,
+    showMustacheAutocompleteSwitch = false,
     isFlyout,
     onCancel,
     onSubmit,
@@ -203,6 +205,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
         validConsumers,
         flappingSettings,
         canShowConsumerSelection,
+        showMustacheAutocompleteSwitch,
         multiConsumerSelection: getInitialMultiConsumer({
           multiConsumerSelection,
           validConsumers,

@@ -9,14 +9,11 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { AlertAction } from '../../../../server/resources/datastreams/alert_actions';
-import { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants';
+import { ALERT_ACTIONS_DATA_STREAM, POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants';
 
 export interface AlertActionsFilter {
   ruleId?: string;
-  source?: string;
-  groupHash?: string;
   actionTypes?: ReadonlyArray<AlertAction['action_type']>;
 }
 
@@ -51,8 +48,6 @@ export const getAlertActionsEventsService = ({
 
       const must: object[] = [];
       if (filter.ruleId) must.push({ term: { rule_id: filter.ruleId } });
-      if (filter.source) must.push({ term: { source: filter.source } });
-      if (filter.groupHash) must.push({ term: { group_hash: filter.groupHash } });
       if (filter.actionTypes) must.push({ terms: { action_type: [...filter.actionTypes] } });
 
       const result = await esClient.search<AlertAction>({

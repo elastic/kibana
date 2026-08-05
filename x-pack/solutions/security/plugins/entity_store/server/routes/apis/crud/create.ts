@@ -55,36 +55,34 @@ export function registerCRUDCreate(router: EntityStorePluginRouter) {
           oasOperationObject: () => path.join(__dirname, '../examples/entities_create.yaml'),
         },
       },
-      wrapMiddlewares<z.infer<typeof paramsSchema>, never, z.infer<typeof Entity>>(
-        async (ctx, req, res): Promise<IKibanaResponse> => {
-          const entityStoreCtx = await ctx.entityStore;
-          const { logger, crudClient } = entityStoreCtx;
+      wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
+        const entityStoreCtx = await ctx.entityStore;
+        const { logger, crudClient } = entityStoreCtx;
 
-          logger.debug('CRUD Create api called');
+        logger.debug('CRUD Create api called');
 
-          try {
-            await crudClient.createEntity(req.params.entityType, req.body);
-          } catch (error) {
-            if (error instanceof EntityStoreNotInstalledError) {
-              return res.badRequest({ body: error });
-            }
-            if (error instanceof BadCRUDRequestError) {
-              return res.badRequest({ body: error });
-            }
-            if (error instanceof EntityAlreadyExistsError) {
-              return res.conflict({ body: error });
-            }
-
-            logger.error(error);
-            throw error;
+        try {
+          await crudClient.createEntity(req.params.entityType, req.body);
+        } catch (error) {
+          if (error instanceof EntityStoreNotInstalledError) {
+            return res.badRequest({ body: error });
+          }
+          if (error instanceof BadCRUDRequestError) {
+            return res.badRequest({ body: error });
+          }
+          if (error instanceof EntityAlreadyExistsError) {
+            return res.conflict({ body: error });
           }
 
-          return res.ok({
-            body: {
-              ok: true,
-            },
-          });
+          logger.error(error);
+          throw error;
         }
-      )
+
+        return res.ok({
+          body: {
+            ok: true,
+          },
+        });
+      })
     );
 }

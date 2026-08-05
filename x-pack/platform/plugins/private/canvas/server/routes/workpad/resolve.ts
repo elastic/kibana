@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { RouteInitializerDeps } from '..';
 import { API_ROUTE_WORKPAD } from '../../../common/lib/constants';
 import { catchErrorHandler } from '../catch_error_handler';
@@ -41,10 +40,6 @@ export function initializeResolveWorkpadRoute(deps: RouteInitializerDeps) {
         const canvasContext = await context.canvas;
         const resolved = await canvasContext.workpad.resolve(request.params.id);
         const { saved_object: workpad } = resolved;
-
-        if (isSavedObjectErrorResult(workpad)) {
-          throw new Error(workpad.error.message);
-        }
 
         shimWorkpad(workpad);
 

@@ -7,7 +7,6 @@
 
 import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useQueryClient } from '@kbn/react-query';
 import { parse } from 'papaparse';
 import { useFormatBytes } from '../../../../common/components/formatted_bytes';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
@@ -36,7 +35,6 @@ export const useWatchlistCsvUpload = ({
   const [validatedFile, setValidatedFile] = useState<ValidatedFile | undefined>();
   const [uploadResponse, setUploadResponse] = useState<UploadWatchlistCsvResponse | undefined>();
   const [error, setError] = useState<string | undefined>();
-  const queryClient = useQueryClient();
   const formatBytes = useFormatBytes();
   const { uploadWatchlistCsv } = useEntityAnalyticsRoutes();
 
@@ -154,14 +152,13 @@ export const useWatchlistCsvUpload = ({
 
     try {
       const result = await uploadWatchlistCsv(watchlistId, validatedFile.file);
-      await queryClient.invalidateQueries({ queryKey: ['watchlists-management-table'] });
       setUploadResponse(result);
       setStatus('success');
     } catch (e) {
       setStatus('error');
       setError(e.message);
     }
-  }, [queryClient, validatedFile, uploadWatchlistCsv, watchlistId]);
+  }, [validatedFile, uploadWatchlistCsv, watchlistId]);
 
   const onReset = useCallback(() => {
     setStatus('idle');

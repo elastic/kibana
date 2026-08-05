@@ -34,66 +34,6 @@
       "_source_excludes": [],
       "_source_includes": []
     },
-    "data_autocomplete_rules": {
-      "detect_noop": {
-        "__one_of": [
-          true,
-          false
-        ]
-      },
-      "doc": "",
-      "doc_as_upsert": {
-        "__one_of": [
-          true,
-          false
-        ]
-      },
-      "script": {
-        "__one_of": [
-          {
-            "source": "",
-            "id": "",
-            "params": {},
-            "lang": {
-              "__one_of": [
-                "painless",
-                "expression",
-                "mustache",
-                "java"
-              ]
-            },
-            "options": {
-              "*": ""
-            }
-          },
-          ""
-        ]
-      },
-      "scripted_upsert": {
-        "__one_of": [
-          true,
-          false
-        ]
-      },
-      "_source": {
-        "__one_of": [
-          true,
-          false,
-          {
-            "exclude_vectors": {
-              "__one_of": [
-                true,
-                false
-              ]
-            },
-            "excludes": "",
-            "includes": ""
-          },
-          ""
-        ]
-      },
-      "upsert": ""
-    },
     "methods": [
       "POST"
     ],

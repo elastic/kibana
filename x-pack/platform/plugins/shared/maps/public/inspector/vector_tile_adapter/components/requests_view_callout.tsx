@@ -7,15 +7,16 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { KbnInfoCallout } from '@kbn/ui-callout';
+import { EuiCallOut } from '@elastic/eui';
 
 export function RequestsViewCallout() {
   return (
-    <KbnInfoCallout
+    <EuiCallOut
       size="s"
       title={i18n.translate('xpack.maps.inspector.vectorTile.requestsView', {
         defaultMessage: `You're viewing vector tile search requests. To view requests submitted to the search API, set View to Requests.`,
       })}
+      iconType="info"
     />
   );
 }

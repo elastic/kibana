@@ -1,0 +1,7 @@
+{
+  "security.invalidate_token": {
+    "data_autocomplete_rules": {
+      "token": ""
+    }
+  }
+}

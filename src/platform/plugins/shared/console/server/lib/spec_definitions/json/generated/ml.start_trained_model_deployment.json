@@ -31,18 +31,6 @@
         "fully_allocated"
       ]
     },
-    "data_autocomplete_rules": {
-      "adaptive_allocations": {
-        "enabled": {
-          "__one_of": [
-            true,
-            false
-          ]
-        },
-        "min_number_of_allocations": "",
-        "max_number_of_allocations": ""
-      }
-    },
     "methods": [
       "POST"
     ],

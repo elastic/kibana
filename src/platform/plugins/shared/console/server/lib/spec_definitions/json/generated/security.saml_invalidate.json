@@ -6,11 +6,6 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "data_autocomplete_rules": {
-      "acs": "",
-      "query_string": "",
-      "realm": ""
-    },
     "methods": [
       "POST"
     ],

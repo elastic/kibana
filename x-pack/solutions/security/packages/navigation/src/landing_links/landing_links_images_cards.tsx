@@ -57,7 +57,7 @@ export const LandingLinksImageCards: React.FC<LandingLinksImagesProps> = React.m
               data-test-subj="LandingImageCards-accordionButton"
             >
               <EuiFlexItem grow={false}>
-                <EuiIcon type="logoSecurity" aria-hidden={true} />
+                <EuiIcon type="logoSecurity" />
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>

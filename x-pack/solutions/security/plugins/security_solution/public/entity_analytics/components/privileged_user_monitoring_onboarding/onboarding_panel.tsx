@@ -71,7 +71,7 @@ export const PrivilegedUserMonitoringOnboardingPanel = ({
                       gutterSize="s"
                       responsive={false}
                     >
-                      <EuiIcon type="documentation" size="m" aria-hidden={true} />
+                      <EuiIcon type="documentation" size="m" />
                       <FormattedMessage
                         id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.learnMore.label"
                         defaultMessage="Want to learn more?"

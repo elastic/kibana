@@ -60,7 +60,7 @@ function fieldsToOptions(
                   `,
                 }}
               >
-                <div tabIndex={0} />
+                <div />
               </EuiToolTip>
             </>
           );

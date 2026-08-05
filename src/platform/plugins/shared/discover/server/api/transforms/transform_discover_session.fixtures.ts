@@ -291,7 +291,6 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
         index_pattern: 'logs*,-logstash*,filebeat-*',
         time_field: '@timestamp',
         allow_hidden_indices: false,
-        name: 'logs*,-logstash*,filebeat-*',
       },
       view_mode: VIEW_MODE.DOCUMENT_LEVEL,
       hide_chart: false,

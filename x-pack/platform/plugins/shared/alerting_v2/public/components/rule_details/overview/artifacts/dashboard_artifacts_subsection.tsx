@@ -66,48 +66,46 @@ const DashboardRowActions = ({
   isDeleting,
   canWrite,
   onDelete,
-}: DashboardRowActionsProps) => {
-  const openLabel = i18n.translate(
-    'xpack.alertingV2.ruleDetails.artifacts.dashboards.openDashboardAriaLabel',
-    { defaultMessage: 'Open dashboard {dashboardTitle}', values: { dashboardTitle } }
-  );
-  const removeLabel = i18n.translate(
-    'xpack.alertingV2.ruleDetails.artifacts.dashboards.deleteAriaLabel',
-    { defaultMessage: 'Remove dashboard {dashboardTitle}', values: { dashboardTitle } }
-  );
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-      {href ? (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={openLabel} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="external"
-              color="text"
-              href={href}
-              target="_blank"
-              aria-label={openLabel}
-              data-test-subj={`ruleDashboardArtifactOpenLink-${dashboardId}`}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      ) : null}
-      {canWrite && artifactId ? (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={removeLabel} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              aria-label={removeLabel}
-              data-test-subj={`ruleDashboardArtifactDeleteButton-${dashboardId}`}
-              isDisabled={isDeleting}
-              onClick={() => onDelete(artifactId)}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      ) : null}
-    </EuiFlexGroup>
-  );
-};
+}: DashboardRowActionsProps) => (
+  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+    {href ? (
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="external"
+          color="text"
+          href={href}
+          target="_blank"
+          aria-label={i18n.translate(
+            'xpack.alertingV2.ruleDetails.artifacts.dashboards.openDashboardAriaLabel',
+            {
+              defaultMessage: 'Open dashboard {dashboardTitle}',
+              values: { dashboardTitle },
+            }
+          )}
+          data-test-subj={`ruleDashboardArtifactOpenLink-${dashboardId}`}
+        />
+      </EuiFlexItem>
+    ) : null}
+    {canWrite && artifactId ? (
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="trash"
+          color="danger"
+          aria-label={i18n.translate(
+            'xpack.alertingV2.ruleDetails.artifacts.dashboards.deleteAriaLabel',
+            {
+              defaultMessage: 'Remove dashboard {dashboardTitle}',
+              values: { dashboardTitle },
+            }
+          )}
+          data-test-subj={`ruleDashboardArtifactDeleteButton-${dashboardId}`}
+          isDisabled={isDeleting}
+          onClick={() => onDelete(artifactId)}
+        />
+      </EuiFlexItem>
+    ) : null}
+  </EuiFlexGroup>
+);
 
 const ResolvedDashboardRow = ({
   dashboardId,

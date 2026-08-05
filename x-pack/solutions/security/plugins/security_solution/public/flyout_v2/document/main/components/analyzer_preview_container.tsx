@@ -77,8 +77,8 @@ export const AnalyzerPreviewContainer = memo(
       [disableNavigation, isEnabled]
     );
 
+    const selectedPatterns = useSelectedPatterns(PageScope.analyzer);
     const { dataView, status } = useDataView(PageScope.analyzer);
-    const selectedPatterns = useSelectedPatterns(dataView);
     const dataViewLoading = status === 'loading' || status === 'pristine';
     const dataViewError =
       status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices());

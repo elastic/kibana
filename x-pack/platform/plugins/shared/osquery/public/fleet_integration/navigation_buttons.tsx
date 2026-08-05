@@ -73,7 +73,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
     <EuiFlexGroup gutterSize="l">
       <EuiFlexItem>
         <EuiCard
-          icon={<EuiIcon size="xl" type="commandLine" aria-hidden={true} />}
+          icon={<EuiIcon size="xl" type="commandLine" />}
           title={i18n.translate('xpack.osquery.fleetIntegration.runLiveQueriesButtonText', {
             defaultMessage: 'Run live queries',
           })}
@@ -85,7 +85,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiCard
-          icon={<EuiIcon size="xl" type="clock" aria-hidden={true} />}
+          icon={<EuiIcon size="xl" type="clock" />}
           title={i18n.translate('xpack.osquery.fleetIntegration.packsButtonText', {
             defaultMessage: 'Packs',
           })}

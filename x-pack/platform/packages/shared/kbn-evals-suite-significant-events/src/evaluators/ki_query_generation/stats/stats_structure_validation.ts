@@ -20,16 +20,15 @@ interface StatsQueryDetail {
 
 /**
  * Validates the structural quality of STATS-type queries using the same
- * guardrails enforced by `getStatsQueryHints` (metric-series contract).
+ * guardrails enforced by `getStatsQueryHints`.
  *
  * For each STATS query, checks:
- * - Has temporal bucketing (`BUCKET(@timestamp, …)` / `TBUCKET`)
- * - Bucket column is named `bucket` with a 1-minute interval
- * - Emits a final column named exactly `metric_value`
- * - No post-STATS `WHERE` that drops buckets (thresholds / sample floors)
- * - Denominator is filtered (`IS NOT NULL`, `IN (...)`, or equality)
- * - No forbidden commands after STATS (`SORT`, `LIMIT`)
- * - No non-temporal GROUP BY dimensions (v0: time bucket only)
+ * - Has temporal bucketing (BUCKET(@timestamp, ...))
+ * - Has threshold filter after STATS (| WHERE ...)
+ * - Has sample-size floor (heuristic)
+ * - Denominator is filtered (IS NOT NULL for mixed streams)
+ * - No forbidden commands after STATS (SORT, LIMIT, KEEP)
+ * - No excessive GROUP BY dimensions (>2 non-temporal)
  *
  * Returns `null` if no STATS queries are present.
  */
@@ -51,13 +50,11 @@ export const statsStructureValidationEvaluator: KIQueryGenerationEvaluator = {
 
       const issues = [
         hints.some((h) => h.includes('no temporal bucketing')),
-        hints.some((h) => h.includes('named exactly `bucket`')),
-        hints.some((h) => h.includes('1-minute')),
-        hints.some((h) => h.includes('metric_value')),
-        hints.some((h) => h.includes('Avoid WHERE after STATS')),
-        hints.some((h) => h.includes('unfiltered COUNT')),
+        hints.some((h) => h.includes('No threshold filter')),
+        hints.some((h) => h.includes('sample-size floor')),
+        hints.some((h) => h.includes('IS NOT NULL')),
         hints.some((h) => h.includes('should not be used')),
-        hints.some((h) => h.includes('GROUP BY')),
+        hints.some((h) => h.includes('GROUP BY dimensions')),
       ];
       const checksTotal = issues.length;
       const checksPassed = issues.filter((issue) => !issue).length;
@@ -86,7 +83,7 @@ export const statsStructureValidationEvaluator: KIQueryGenerationEvaluator = {
         issueLines.length > 0
           ? `STATS structure issues: ${issueLines.join(' | ')}`
           : `All ${statsQueries.length} STATS queries pass structural validation`,
-      metadata: {
+      details: {
         totalStatsQueries: statsQueries.length,
         perQuery: perQueryDetails,
       },

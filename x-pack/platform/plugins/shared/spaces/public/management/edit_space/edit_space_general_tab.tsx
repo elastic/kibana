@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -15,7 +15,6 @@ import { isCustomProjectRouting } from '@kbn/cps-common';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { EditSpaceTabFooter } from './footer';
@@ -347,9 +346,10 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
       showUserImpactWarning && (
         <>
           <EuiSpacer />
-          <KbnWarningCallout
+          <EuiCallOut
             announceOnMount
-            size="s"
+            color="warning"
+            iconType="info"
             title={i18n.translate(
               'xpack.spaces.management.spaceDetails.spaceChangesWarning.impactAllUsersInSpace',
               {

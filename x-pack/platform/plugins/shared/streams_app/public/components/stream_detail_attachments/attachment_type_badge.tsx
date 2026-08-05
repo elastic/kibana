@@ -20,7 +20,7 @@ export function AttachmentTypeBadge({ type }: AttachmentTypeBadgeProps) {
     <EuiBadge color="hollow">
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type={config.icon} size="s" color="subdued" aria-hidden={true} />
+          <EuiIcon type={config.icon} size="s" color="subdued" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{config.label}</EuiFlexItem>
       </EuiFlexGroup>

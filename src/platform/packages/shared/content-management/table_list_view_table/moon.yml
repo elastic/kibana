@@ -40,7 +40,6 @@ dependsOn:
   - '@kbn/shared-ux-table-persist'
   - '@kbn/react-query'
   - '@kbn/shared-ux-utility'
-  - '@kbn/ui-callout'
 tags:
   - shared-browser
   - package

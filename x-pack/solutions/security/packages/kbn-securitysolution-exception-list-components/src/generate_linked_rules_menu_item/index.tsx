@@ -37,7 +37,7 @@ export const generateLinkedRulesMenuItems = ({
         <EuiFlexGroup gutterSize="s">
           {leftIcon ? (
             <EuiFlexItem data-test-subj={`${dataTestSubj || ''}LeftIcon`} grow={false}>
-              <EuiIcon type={leftIcon} aria-hidden={true} />
+              <EuiIcon type={leftIcon} />
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem>

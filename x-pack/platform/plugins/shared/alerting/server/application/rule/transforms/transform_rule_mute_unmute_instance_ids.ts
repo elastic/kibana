@@ -6,7 +6,6 @@
  */
 
 import type { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
-import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';
 import type { BulkUpdateRuleSoParams } from '../../../data/rule';
 import type { RawRule } from '../../../saved_objects/schemas/raw_rule';
 import type { BulkMuteUnmuteAlertsParams } from '../types';
@@ -32,16 +31,12 @@ export const transformMuteUnmuteRequestToRuleAttributes = ({
     paramRules
       .map((paramRule) => {
         const savedRule = savedRules.find((rule) => rule.id === paramRule.id);
-        const existingInstanceIds =
-          savedRule && !isSavedObjectErrorResult(savedRule)
-            ? savedRule.attributes.mutedInstanceIds ?? []
-            : [];
         const newAttributes = instanceIdCalculator({
-          existingInstanceIds,
+          existingInstanceIds: savedRule?.attributes.mutedInstanceIds ?? [],
           instanceIdsFromRequest: paramRule.alertInstanceIds,
         });
 
-        if (!savedRule || isSavedObjectErrorResult(savedRule) || !newAttributes) {
+        if (!savedRule || !newAttributes) {
           return;
         }
 

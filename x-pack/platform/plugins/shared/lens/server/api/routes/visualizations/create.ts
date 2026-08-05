@@ -20,8 +20,8 @@ import {
   LENS_API_ACCESS,
   LENS_API_TAG,
 } from '../../../../common/constants';
-import type { LensCreateIn, LensSavedObject } from '../../../content_management/zod';
 import { findInvalidDurationFormat } from '../../../../common/transforms/ga_schema_validator';
+import type { LensCreateIn, LensSavedObject } from '../../../content_management';
 import type { RegisterAPIRouteFn } from '../../types';
 import type { LensCreateResponseBody } from './types';
 import { getLensRequestConfig, getLensResponseItem } from './utils';
@@ -43,8 +43,8 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
     options: {
       tags: [LENS_API_TAG],
       availability: {
-        stability: 'stable',
-        since: '9.5.0',
+        stability: 'experimental',
+        since: '9.4.0',
       },
     },
     security: {

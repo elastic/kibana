@@ -7,11 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { Subject } from 'rxjs';
-import {
-  parseMapOrientationFromAppState,
-  parseViewFiltersFromAppState,
-  useFilterUrlSync,
-} from './use_filter_url_sync';
+import { useFilterUrlSync } from './use_filter_url_sync';
 
 const mockGet = jest.fn();
 const mockSet = jest.fn();
@@ -161,38 +157,5 @@ describe('useFilterUrlSync', () => {
     const { result } = renderHook(() => useFilterUrlSync());
 
     expect(result.current.getRestoredControlSelections()).toBeUndefined();
-  });
-});
-
-describe('parseViewFiltersFromAppState', () => {
-  it('restores known connection filters and drops unknown values', () => {
-    expect(
-      parseViewFiltersFromAppState({
-        viewFilters: {
-          connectionFilter: ['orphaned', 'not-a-real-filter'],
-          alertStatusFilter: ['active'],
-        },
-      })
-    ).toEqual({
-      alertStatusFilter: ['active'],
-      sloStatusFilter: [],
-      connectionFilter: ['orphaned'],
-      anomalySeverityFilter: [],
-    });
-  });
-
-  it('returns undefined when all filter arrays are empty after validation', () => {
-    expect(
-      parseViewFiltersFromAppState({
-        viewFilters: { connectionFilter: ['bogus'] },
-      })
-    ).toBeUndefined();
-  });
-});
-
-describe('parseMapOrientationFromAppState', () => {
-  it('accepts vertical and rejects unknown values', () => {
-    expect(parseMapOrientationFromAppState({ mapOrientation: 'vertical' })).toBe('vertical');
-    expect(parseMapOrientationFromAppState({ mapOrientation: 'diagonal' })).toBeUndefined();
   });
 });

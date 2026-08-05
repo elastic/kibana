@@ -6,19 +6,6 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "data_autocomplete_rules": {
-      "description": "",
-      "index_name": "",
-      "is_native": {
-        "__one_of": [
-          true,
-          false
-        ]
-      },
-      "language": "",
-      "name": "",
-      "service_type": ""
-    },
     "methods": [
       "PUT"
     ],

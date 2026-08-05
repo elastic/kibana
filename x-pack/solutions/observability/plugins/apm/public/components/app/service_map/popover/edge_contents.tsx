@@ -67,6 +67,8 @@ export function EdgeContents({
 }: Pick<ContentsProps, 'selection' | 'environment' | 'start' | 'end'>) {
   const { query } = useAnyOfApmParams(
     '/service-map',
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map',
     '/services/{serviceName}/overview',
     '/mobile-services/{serviceName}/overview',
     '/services/{serviceName}/transactions/view',

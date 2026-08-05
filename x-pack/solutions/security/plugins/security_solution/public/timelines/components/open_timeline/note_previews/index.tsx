@@ -22,7 +22,6 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { userSelectedNotesForDeletion } from '../../../../notes';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
@@ -55,8 +54,7 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   eventId,
   timelineId,
 }) => {
-  const { dataView } = useDataView(PageScope.timeline);
-  const selectedPatterns = useSelectedPatterns(dataView);
+  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
 
   const { telemetry } = useKibana().services;
   const { openFlyout } = useExpandableFlyoutApi();

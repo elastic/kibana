@@ -19,7 +19,6 @@ import {
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
-import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 
 import {
   getAgentsById,
@@ -77,7 +76,6 @@ export async function reassignAgent(
 
   await updateAgent(esClient, agentId, {
     policy_id: newAgentPolicyId,
-    policy_base_id: removeVersionSuffixFromPolicyId(newAgentPolicyId),
     policy_revision: null,
     ...(newAgentPolicy?.space_ids ? { namespaces: newAgentPolicy.space_ids } : {}),
   });

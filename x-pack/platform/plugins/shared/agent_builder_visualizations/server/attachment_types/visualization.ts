@@ -14,7 +14,6 @@ import type {
   AttachmentTypeDefinition,
 } from '@kbn/agent-builder-server/attachments';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
 import {
   withLensReferences,
   toLensApiConfig,
@@ -57,15 +56,15 @@ export const createVisualizationAttachmentType = (): AttachmentTypeDefinition<
 
       try {
         const resolveResult = await context.savedObjectsClient.resolve('lens', origin);
-        const savedObject = resolveResult.saved_object;
+        const savedObject = resolveResult.saved_object as { error?: { message?: string } };
 
-        if (isSavedObjectErrorResult(savedObject)) {
+        if (savedObject?.error) {
           return undefined;
         }
 
         const lensAttributes = withLensReferences(
-          savedObject.attributes as LensAttributes,
-          savedObject.references
+          resolveResult.saved_object.attributes as LensAttributes,
+          resolveResult.saved_object.references
         );
 
         const lensApiConfig = toLensApiConfig(lensAttributes);

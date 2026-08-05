@@ -20,6 +20,7 @@ import {
   AgentExecutionMode,
   ConversationAccessControlMode,
   ConversationOriginType,
+  ExecutionStatus,
 } from '@kbn/agent-builder-common';
 import type {
   AgentExecutionService,
@@ -37,7 +38,6 @@ import type {
 import { internalApiPath, publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
-import { validateSkillIds } from '../services/agents/persisted/client/utils/skills';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
@@ -68,8 +68,8 @@ export const promptResponseEntrySchema = schema.oneOf([
     },
     {
       meta: {
-        availability: { stability: 'tech_preview' },
-        description: 'Answers to an `ask_user_question` prompt; one entry per question, in order.',
+        description:
+          '**Technical Preview.** Answers to an `ask_user_question` prompt; one entry per question, in order.',
       },
     }
   ),
@@ -191,8 +191,8 @@ export const conversePayloadSchema = schema.object({
       ),
       {
         meta: {
-          availability: { stability: 'tech_preview', since: '9.3.0' },
-          description: 'Optional attachments to send with the message.',
+          description:
+            '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.',
         },
       }
     )
@@ -215,8 +215,8 @@ export const conversePayloadSchema = schema.object({
       },
       {
         meta: {
-          availability: { stability: 'tech_preview', since: '9.5.0' },
-          description: 'Optional conversation access control. Defaults to private.',
+          description:
+            '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.',
         },
       }
     )
@@ -278,20 +278,6 @@ export const conversePayloadSchema = schema.object({
             { meta: { description: 'Tool selection to enable for this execution.' } }
           )
         ),
-        skill_ids: schema.maybe(
-          schema.arrayOf(schema.string({ maxLength: 256 }), {
-            maxSize: 100,
-            meta: {
-              description:
-                'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.',
-            },
-          })
-        ),
-        enable_elastic_capabilities: schema.maybe(
-          schema.boolean({
-            meta: { description: 'Whether to enable built-in Elastic skills for this execution.' },
-          })
-        ),
       },
       {
         meta: {
@@ -312,8 +298,8 @@ export const conversePayloadSchema = schema.object({
   _execution_mode: schema.maybe(
     schema.oneOf([schema.literal('local'), schema.literal('task_manager')], {
       meta: {
-        availability: { stability: 'experimental', since: '9.4.0' },
-        description: 'define how to execute the agent (local execution or via task_manager)',
+        description:
+          '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)',
       },
     })
   ),
@@ -405,17 +391,6 @@ export function registerChatRoutes({
       });
       if (errors.length > 0) {
         throw createBadRequestError(`Invalid tool override: ${errors.join(', ')}`);
-      }
-    }
-    if (payload.configuration_overrides?.skill_ids) {
-      const { skills: skillsService } = getInternalServices();
-      const skillRegistry = await skillsService.getRegistry({ request });
-      const errors = await validateSkillIds(
-        skillRegistry,
-        payload.configuration_overrides.skill_ids
-      );
-      if (errors.length > 0) {
-        throw createBadRequestError(`Invalid skill override: ${errors.join(', ')}`);
       }
     }
   };
@@ -681,6 +656,7 @@ export function registerChatRoutes({
         return response.accepted<ChatCallbackAcceptedResponse>({
           body: {
             execution_id: executionId,
+            status: ExecutionStatus.scheduled,
           },
         });
       })

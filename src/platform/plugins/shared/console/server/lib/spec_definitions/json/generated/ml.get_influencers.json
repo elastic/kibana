@@ -20,12 +20,6 @@
         "-1"
       ]
     },
-    "data_autocomplete_rules": {
-      "page": {
-        "from": "",
-        "size": ""
-      }
-    },
     "methods": [
       "GET",
       "POST"

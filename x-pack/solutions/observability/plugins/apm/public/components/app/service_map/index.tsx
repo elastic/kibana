@@ -35,7 +35,8 @@ import { EmptyPrompt } from './empty_prompt';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
 import { useServiceName } from '../../../hooks/use_service_name';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
@@ -77,8 +78,30 @@ export function ServiceMapHome() {
       rangeFrom={rangeFrom}
       rangeTo={rangeTo}
       serviceGroupId={serviceGroup}
-      // Pass `null` through — `esQuery ?? undefined` would defeat search-bar fetch gating.
-      esQuery={esQuery}
+      esQuery={esQuery ?? undefined}
+    />
+  );
+}
+
+export function ServiceMapServiceDetail() {
+  const {
+    query: { environment, kuery, rangeFrom, rangeTo },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map'
+  );
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { esQuery } = useServiceMapSearchContext();
+
+  return (
+    <ServiceMap
+      environment={environment}
+      kuery={kuery}
+      start={start}
+      end={end}
+      rangeFrom={rangeFrom}
+      rangeTo={rangeTo}
+      esQuery={esQuery ?? undefined}
     />
   );
 }
@@ -101,21 +124,33 @@ export function ServiceMap({
   rangeFrom?: string;
   rangeTo?: string;
   serviceGroupId?: string;
-  /**
-   * `null` = search bar not ready yet (gate fetch).
-   * `undefined` = no search provider (embeddable).
-   */
-  esQuery?: { bool: BoolQuery } | null;
+  esQuery?: { bool: BoolQuery };
 }) {
   const license = useLicenseContext();
   const serviceName = useServiceName();
-  const { highlightedServiceNames: highlightedFromControls } = useServiceMapSearchContext();
-  const highlightedServiceNames = useMemo(() => {
-    if (highlightedFromControls.length > 0) {
-      return highlightedFromControls;
-    }
-    return serviceName ? [serviceName] : [];
-  }, [highlightedFromControls, serviceName]);
+  const apmRouter = useApmRouter();
+  const { query } = useAnyOfApmParams(
+    '/service-map',
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map'
+  );
+
+  const fullMapHref =
+    serviceName && 'rangeFrom' in query && 'rangeTo' in query && query.rangeFrom && query.rangeTo
+      ? apmRouter.link('/service-map', {
+          query: {
+            rangeFrom: query.rangeFrom,
+            rangeTo: query.rangeTo,
+            environment: query.environment,
+            // Drop kuery when navigating to the full map — filtering moves to
+            // the Controls API / filter bar on the destination page.
+            kuery: '',
+            comparisonEnabled: query.comparisonEnabled,
+            offset: query.offset,
+            serviceGroup: 'serviceGroup' in query ? query.serviceGroup ?? '' : '',
+          },
+        })
+      : undefined;
 
   const { config } = useApmPluginContext();
   const { onPageReady } = usePerformanceContext();
@@ -296,7 +331,7 @@ export function ServiceMap({
               nodes={isLoading ? [] : nodesForGraph}
               edges={isLoading ? [] : data.edges}
               serviceName={serviceName}
-              highlightedServiceNames={highlightedServiceNames}
+              highlightedServiceName={serviceName}
               environment={environment}
               kuery={kuery}
               start={start}
@@ -306,6 +341,7 @@ export function ServiceMap({
               serviceGroupId={serviceGroupId}
               isFullscreen={isFullscreen}
               onToggleFullscreen={onToggleFullscreen}
+              fullMapHref={fullMapHref}
             />
           </div>
         </EuiPanel>

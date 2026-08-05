@@ -23,25 +23,6 @@
         "0"
       ]
     },
-    "data_autocomplete_rules": {
-      "failure_store": {
-        "enabled": {
-          "__one_of": [
-            true,
-            false
-          ]
-        },
-        "lifecycle": {
-          "data_retention": "",
-          "enabled": {
-            "__one_of": [
-              true,
-              false
-            ]
-          }
-        }
-      }
-    },
     "methods": [
       "PUT"
     ],

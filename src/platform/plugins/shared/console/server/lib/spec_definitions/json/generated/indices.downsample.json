@@ -6,15 +6,6 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "data_autocomplete_rules": {
-      "fixed_interval": "",
-      "sampling_method": {
-        "__one_of": [
-          "aggregate",
-          "last_value"
-        ]
-      }
-    },
     "methods": [
       "POST"
     ],

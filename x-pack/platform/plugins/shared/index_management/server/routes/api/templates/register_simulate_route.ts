@@ -25,7 +25,7 @@ export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteD
       },
       validate: {
         body: schema.nullable(bodySchema),
-        params: schema.object({ templateName: schema.maybe(schema.string({ maxLength: 1000 })) }),
+        params: schema.object({ templateName: schema.maybe(schema.string()) }),
       },
     },
     async (context, request, response) => {

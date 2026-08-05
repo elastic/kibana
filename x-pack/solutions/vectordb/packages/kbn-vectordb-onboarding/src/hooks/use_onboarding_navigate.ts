@@ -12,9 +12,11 @@ import { useKibana } from '../services';
 /**
  * Navigate within the hosting app using core's `navigateToUrl`. The target
  * `path` is resolved against the app's mount point via `getUrlForApp`, so core
- * performs an in-app SPA transition rather than a full page reload.
+ * performs an in-app SPA transition rather than a full page reload. The given
+ * `origin` is forwarded as navigation `state` so the destination knows what route
+ * the user came from.
  */
-export const useOnboardingNavigate = () => {
+export const useOnboardingNavigate = (origin: string) => {
   const {
     services: { application },
   } = useKibana();
@@ -24,8 +26,10 @@ export const useOnboardingNavigate = () => {
   return useCallback(
     (path: string) => {
       if (!appId) return;
-      application.navigateToUrl(application.getUrlForApp(appId, { path }));
+      application.navigateToUrl(application.getUrlForApp(appId, { path }), {
+        state: { origin },
+      });
     },
-    [application, appId]
+    [application, appId, origin]
   );
 };

@@ -34,8 +34,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let roleAuthc: RoleCredentials;
   let apiClient: SignificantEventsSupertestRepositoryClient;
 
-  // Failing: See https://github.com/elastic/kibana/issues/282874
-  describe.skip('Significant Events', function () {
+  describe('Significant Events', function () {
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
@@ -75,7 +74,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('updates the queries', async () => {
-        const esqlQuery = `FROM ${STREAM_NAME}, ${STREAM_NAME}.* | WHERE KQL("message: 'OOM Error'")`;
+        const esqlQuery = `FROM ${STREAM_NAME}, ${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message: 'OOM Error'")`;
         const response = await bulkQueries(apiClient, STREAM_NAME, [
           {
             index: {
@@ -130,7 +129,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               esql: {
                 query:
-                  'FROM logs.otel.queries-test,logs.otel.queries-test.* | WHERE KQL("message:\\"irrelevant\\"")',
+                  'FROM logs.otel.queries-test,logs.otel.queries-test.* METADATA _id, _source | WHERE KQL("message:\\"irrelevant\\"")',
               },
             },
           },
@@ -175,7 +174,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               esql: {
                 query:
-                  'FROM logs.otel.queries-test.child,logs.otel.queries-test.child.* | WHERE KQL("message:\\"irrelevant\\"")',
+                  'FROM logs.otel.queries-test.child,logs.otel.queries-test.child.* METADATA _id, _source | WHERE KQL("message:\\"irrelevant\\"")',
               },
             },
           },
@@ -194,7 +193,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               esql: {
                 query:
-                  'FROM logs.otel.queries-test.child.first,logs.otel.queries-test.child.first.* | WHERE KQL("message:\\"irrelevant\\"")',
+                  'FROM logs.otel.queries-test.child.first,logs.otel.queries-test.child.first.* METADATA _id, _source | WHERE KQL("message:\\"irrelevant\\"")',
               },
             },
           },
@@ -205,7 +204,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: '',
               esql: {
                 query:
-                  'FROM logs.otel.queries-test.child.first,logs.otel.queries-test.child.first.* | WHERE KQL("message:\\"irrelevant\\"")',
+                  'FROM logs.otel.queries-test.child.first,logs.otel.queries-test.child.first.* METADATA _id, _source | WHERE KQL("message:\\"irrelevant\\"")',
               },
             },
           },
@@ -220,7 +219,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const rules = await alertingApi.searchRulesV2(roleAuthc);
         expect(rules.body.items).to.have.length(1);
-        expect(rules.body.items[0].metadata.name).to.eql('should not be deleted (match count)');
+        expect(rules.body.items[0].metadata.name).to.eql('should not be deleted');
       });
     });
 
@@ -273,7 +272,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('updates the queries', async () => {
         const indexName = 'classic-stream-queries';
-        const esqlQuery = `FROM ${indexName} | WHERE KQL("message: 'OOM Error'")`;
+        const esqlQuery = `FROM ${indexName} METADATA _id, _source | WHERE KQL("message: 'OOM Error'")`;
         const clean = await createDataStream(indexName, { dsl: { data_retention: '77d' } });
         await putStream(apiClient, indexName, classicPutBody);
 

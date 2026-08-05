@@ -54,8 +54,6 @@ If you catch yourself thinking any of these, STOP. The thought itself is the sig
 
 **Read reference files only when explicitly instructed.** Each file in `references/` is read at the exact point in the workflow where it is needed — never speculatively at the start of a session.
 
-**Figma MCP call budget.** Because Figma responses can be very large and MCP calls are sequential, the skill enforces **hard** per-session caps on Figma MCP tools: `get_metadata` ≤ 3, `get_screenshot` ≤ 8 **opened PNGs** (vision-token cost — URL-only responses that are never inspected do not count against the cap), `get_design_context` ≤ 2, `get_figjam` ≤ 1 per FigJam link. The default flow (metadata + a few targeted opened PNGs) stays well below these caps. Once a cap is reached, the agent must not issue the next call to that tool — the only permitted overage path is: stop, announce the specific scenarios that need more fetches, ask the user for approval, and only continue if approved. If declined or the user is unavailable, apply the **per-tool fallback** table in [Step 5](references/gathering-context.md#step-5--session-budget) — the fallback shape depends on which tool's cap fired (metadata-only reasoning is valid only for the `get_screenshot` cap on design-file links; other combinations, including Slides screenshot miss, get_metadata cap, and Make-branch get_design_context miss, require different handling) — and add a Known Limitations entry naming the affected scenarios or links. See [`references/gathering-context.md`](references/gathering-context.md#figma) Step 5 for the full escalation flow and the "opened PNG" definition.
-
 ---
 
 ## Security constraints
@@ -254,16 +252,11 @@ See [`references/optional-scenarios.md`](references/optional-scenarios.md) for i
 
 Only write scenarios for things confirmed by the issue, linked docs, or Figma designs. If something is unclear, ask the user first — see the Core rule. Use `⚠️ Assumption: [describe assumption] — please confirm.` only as a fallback when the user is not available and the plan must move forward.
 
-**Immediately before writing the first scenario** — not before — read the following reference files sequentially:
+**Immediately before writing the first scenario** — not before — read both reference files sequentially:
 - `references/optional-scenarios.md` — Gherkin rules, tags, priority levels, optional section templates, and formatting rules
 - `references/output-formats.md` — scenario structure, automation coverage format, and Gherkin self-review checklist
-- `references/critical-workflows.md` — file-lookup convention and precedence for team-owned critical-workflows maps, consulted from the Priority levels section
 
-**For Figma links catalogued during Step 1**, apply the deferred Figma sub-steps here — for design-file links the metadata inventory was built in Step 1, but visual verification, escape hatch, budget enforcement, and Sources Summary / Known Limitations propagation all live in main Step 3 by design. Re-open [`references/gathering-context.md`](references/gathering-context.md#figma) and follow **Figma Steps 3–6**: targeted `get_screenshot` where a scenario needs visual anchoring or name verification, the `get_design_context` escape hatch only when metadata + screenshot cannot supply the identifier, the per-session budget cap, and the Sources Summary row + any Known Limitations entry per link. See the [phase map](references/gathering-context.md#when-each-sub-step-runs-phase-map) for exactly which sub-steps run at which main-workflow phase.
-
-**Figma Make exception.** For every Make link catalogued in Step 1 (marked *awaiting Step 4 (design-context)*), the escape-hatch clause above is **not** an escape hatch — it is the mandatory path for that link. Make files support neither `get_metadata` nor `get_screenshot`, so a Make link never has a metadata inventory or a screenshot to fall back from; Step 4 must be entered even when there is no "metadata + screenshot came up short" trigger. Follow the [*Figma Make branch*](references/gathering-context.md#step-4--escape-hatch-get_design_context) in Figma Step 4 exactly — it defines the `get_design_context` parameters, the Sources Summary status, and the Known Limitations pairing that a `✅ Design context read (Figma Make — code-only; no screenshot support)` row on its own does not attest to visual verification. Skipping this step while still emitting the `✅` status is a scenario-drafting bug (`draft-coherence-review.md` D6 catches it).
-
-For each scenario, cross-reference the test coverage catalog from Step 1 and write it using the format defined in `references/output-formats.md`. Write scenarios in priority order within each feature area: P0 first, then P1, then P2. Priority is assigned per [`references/optional-scenarios.md`](references/optional-scenarios.md#priority-levels), which consults the owning team's map (looked up via [`references/critical-workflows.md`](references/critical-workflows.md)) when one exists. After writing all scenarios, populate the Test Execution Notes section by listing every scenario by name under its priority level.
+For each scenario, cross-reference the test coverage catalog from Step 1 and write it using the format defined in `references/output-formats.md`. Write scenarios in priority order within each feature area: P0 first, then P1, then P2. After writing all scenarios, populate the Test Execution Notes section by listing every scenario by name under its priority level.
 
 ### Saving the draft
 

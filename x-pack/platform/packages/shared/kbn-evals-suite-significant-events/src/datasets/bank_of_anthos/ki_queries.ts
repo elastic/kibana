@@ -39,14 +39,14 @@ export const kiQueryGeneration: DatasetConfig['kiQueryGeneration'] = [
         },
         {
           id: 'stats-aggregate-monitoring',
-          text: 'Should generate at least one STATS metric-series query (bucket + metric_value, no post-STATS threshold WHERE) for aggregate monitoring (e.g., transaction throughput per service, request volume across ledgerwriter and loadgenerator). Descriptions should document dataset_analysis baselines, not breach thresholds.',
+          text: 'Should generate at least one STATS query for aggregate monitoring (e.g., transaction throughput per service, request volume across ledgerwriter and loadgenerator) with calibrated thresholds documented in descriptions.',
           score: 1,
         },
       ],
       expected_categories: ['operational', 'error'],
       expect_stats: true,
       expected_ground_truth:
-        'queries=[operational monitoring for service health/traffic/latency across frontend/ledgerwriter/balancereader/userservice/transactionhistory; proactive error detection using body.text patterns (Connection refused, HTTPConnectionPool, Max retries exceeded) grounded in entity and dependency features; STATS metric-series queries for aggregate transaction throughput and request volume monitoring with baselines from dataset_analysis]',
+        'queries=[operational monitoring for service health/traffic/latency across frontend/ledgerwriter/balancereader/userservice/transactionhistory; proactive error detection using body.text patterns (Connection refused, HTTPConnectionPool, Max retries exceeded) grounded in entity and dependency features; STATS queries for aggregate transaction throughput and request volume monitoring with calibrated thresholds]',
     },
     metadata: {
       difficulty: 'easy',

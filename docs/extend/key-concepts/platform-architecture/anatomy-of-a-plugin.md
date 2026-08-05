@@ -314,7 +314,7 @@ export class MyPlugin implements Plugin<FoobarPluginSetup, FoobarPluginStart> {
 }
 ```
 
-With that specified in the plugin manifest, the appropriate interfaces are then available via the second argument of setup or start:
+With that specified in the plugin manifest, the appropriate interfaces are then available via the second argument of setup and/or start:
 
 ```ts
 import type { CoreSetup, CoreStart } from '@kbn/core/server';

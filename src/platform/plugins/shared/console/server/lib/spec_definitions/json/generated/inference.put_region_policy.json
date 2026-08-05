@@ -7,17 +7,6 @@
       "pretty": "__flag__",
       "force": "__flag__"
     },
-    "data_autocomplete_rules": {
-      "region_policy": {
-        "allowed_geos": [],
-        "allowed_regions": [
-          {
-            "csp": "",
-            "region": ""
-          }
-        ]
-      }
-    },
     "methods": [
       "PUT"
     ],

@@ -8,7 +8,6 @@
  */
 
 import { EventGeneratingElementsShouldBeInstrumented } from './rules/event_generating_elements_should_be_instrumented';
-import { EbtPropsShouldBePresent } from './rules/ebt_props_should_be_present';
 
 /**
  * Custom ESLint rules, add `'@kbn/eslint-plugin-telemetry'` to your eslint config to use them
@@ -16,5 +15,4 @@ import { EbtPropsShouldBePresent } from './rules/ebt_props_should_be_present';
  */
 export const rules = {
   event_generating_elements_should_be_instrumented: EventGeneratingElementsShouldBeInstrumented,
-  ebt_props_should_be_present: EbtPropsShouldBePresent,
 };

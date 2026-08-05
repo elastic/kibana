@@ -23,7 +23,7 @@ const mockSpaces = createMockSpaces();
 
 const mockDefaultQuery = 'FROM .rule-events | WHERE type == "alert"';
 
-jest.mock('@kbn/alerting-v2-common-queries', () => ({
+jest.mock('../queries/episodes_query', () => ({
   buildEpisodesBaseQuery: jest.fn().mockReturnValue({
     print: jest.fn().mockReturnValue('FROM .rule-events | WHERE type == "alert"'),
   }),

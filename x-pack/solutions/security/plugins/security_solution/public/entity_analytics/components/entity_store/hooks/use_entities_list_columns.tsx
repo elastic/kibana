@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiButtonIcon, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
 import type { Entity } from '@kbn/entity-store/common';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
   EntityTypeToLevelField,
   EntityTypeToScoreField,
@@ -21,9 +21,6 @@ import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../../flyout/entity_details/shared/constants';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
-import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
-import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { RiskScoreLevel } from '../../severity/common';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
@@ -50,9 +47,7 @@ export type EntitiesListColumns = [
 ];
 
 export const useEntitiesListColumns = (): EntitiesListColumns => {
-  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
-  const { openEntityFlyout } = useFlyoutApi();
   const { euiTheme } = useEuiTheme();
 
   return [
@@ -69,34 +64,24 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
 
         const value = record.entity?.name;
         const onClick = () => {
-          const sharedParams = {
-            entityId: record.entity?.id,
-            contextID: ENTITIES_LIST_TABLE_ID,
-            scopeId: ENTITIES_LIST_TABLE_ID,
-          };
+          const id = EntityPanelKeyByType[entityType];
 
-          if (enableNewFlyout) {
-            openEntityFlyout({
-              engineType: entityType,
-              entityName: value ?? '',
-              entityId: record.entity?.id ?? '',
-              contextID: ENTITIES_LIST_TABLE_ID,
-              scopeId: ENTITIES_LIST_TABLE_ID,
-              origin: FLYOUT_ORIGIN.ENTITY_STORE_LIST,
-            });
-            return;
-          }
-
-          const panelKey = EntityPanelKeyByType[entityType];
-          const paramName = EntityPanelParamByType[entityType];
-          if (panelKey && paramName) {
+          if (id) {
             openFlyout({
-              right: { id: panelKey, params: { [paramName]: value, ...sharedParams } },
+              right: {
+                id,
+                params: {
+                  [EntityPanelParamByType[entityType] ?? '']: value,
+                  contextID: ENTITIES_LIST_TABLE_ID,
+                  scopeId: ENTITIES_LIST_TABLE_ID,
+                  entityId: record.entity?.id,
+                },
+              },
             });
           }
         };
 
-        if (!value || (!enableNewFlyout && !EntityPanelKeyByType[entityType])) {
+        if (!value || !EntityPanelKeyByType[entityType]) {
           return null;
         }
 

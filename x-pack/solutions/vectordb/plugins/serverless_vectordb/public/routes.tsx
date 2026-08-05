@@ -5,25 +5,38 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import {
   hasSeenOnboarding,
   IngestStep,
-  GETTING_STARTED_PATH,
   OnboardingLandingPage,
   SearchStep,
+  TutorialsPage,
 } from '@kbn/vectordb-onboarding';
 import { HomePage } from './home/home_page';
+import type { ServerlessVectordbServices } from './types';
 
 const OnboardingRoutes = () => {
+  const {
+    services: { chrome },
+  } = useKibana<ServerlessVectordbServices>();
+
+  // Capture before child components can call markOnboardingSeen()
+  const [showChrome] = useState(() => hasSeenOnboarding());
+
+  useEffect(() => {
+    chrome.setIsVisible(showChrome);
+    return () => chrome.setIsVisible(true);
+  }, [chrome, showChrome]);
+
   return (
     <Routes>
-      <Route exact path={GETTING_STARTED_PATH} component={OnboardingLandingPage} />
-      <Route exact path={`${GETTING_STARTED_PATH}/ingest`} component={IngestStep} />
-      <Route exact path={`${GETTING_STARTED_PATH}/search`} component={SearchStep} />
-      <Route render={() => <Redirect to={GETTING_STARTED_PATH} />} />
+      <Route exact path="/onboarding" component={OnboardingLandingPage} />
+      <Route exact path="/onboarding/ingest" component={IngestStep} />
+      <Route exact path="/onboarding/search" component={SearchStep} />
     </Routes>
   );
 };
@@ -33,9 +46,10 @@ export const AppRoutes = () => (
     <Route
       exact
       path="/"
-      render={() => (hasSeenOnboarding() ? <HomePage /> : <Redirect to={GETTING_STARTED_PATH} />)}
+      render={() => (hasSeenOnboarding() ? <HomePage /> : <Redirect to="/onboarding" />)}
     />
-    <Route path={GETTING_STARTED_PATH} component={OnboardingRoutes} />
+    <Route path="/onboarding" component={OnboardingRoutes} />
+    <Route exact path="/tutorials" component={TutorialsPage} />
     <Route render={() => <Redirect to="/" />} />
   </Routes>
 );

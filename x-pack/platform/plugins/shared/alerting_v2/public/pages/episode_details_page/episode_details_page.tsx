@@ -24,9 +24,9 @@ import {
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { useQueryClient } from '@kbn/react-query';
-import { useService } from '@kbn/core-di-browser';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useService } from '@kbn/core-di-browser';
 import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
@@ -37,12 +37,12 @@ import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import { AlertEpisodeOverviewListSection } from '@kbn/alerting-v2-episodes-ui/components/details/overview_list_section';
 import { AlertEpisodeRuleOverviewPanelSection } from '@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_section';
+import { AlertEpisodeLifecycleHeatmapSection } from '@kbn/alerting-v2-episodes-ui/components/details/lifecycle_heatmap_section';
 import { AlertEpisodeTrendChartSection } from '@kbn/alerting-v2-episodes-ui/components/details/trend_chart_section';
-import { AlertEpisodeTimelineHeatmapsSection } from '@kbn/alerting-v2-episodes-ui/components/details/timeline_heatmaps_section';
+import { AlertEpisodeSeverityHeatmapSection } from '@kbn/alerting-v2-episodes-ui/components/details/severity_heatmap_section';
 import { AlertEpisodesRelatedSection } from '@kbn/alerting-v2-episodes-ui/components/details/related_section';
 import { AlertEpisodeMetadataSection } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_section';
 import { AlertEpisodeRunbookSection } from '@kbn/alerting-v2-episodes-ui/components/details/runbook_section';
-import { parseEpisodeDataJson } from '@kbn/alerting-v2-episodes-ui/utils/episode_grouping_data';
 import { css } from '@emotion/react';
 import { useHistory, useParams } from 'react-router-dom';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -50,12 +50,12 @@ import { CenterJustifiedSpinner } from '../../components/center_justified_spinne
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { UserCapabilities } from '../../services/user_capabilities';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import {
   filterEpisodeActionsByPrivilege,
   EPISODE_ACTIONS_PRIVILEGE,
 } from '../../utils/filter_episode_actions_by_privilege';
+import { UserCapabilities } from '../../services/user_capabilities';
 import { getEpisodeHeaderBadges } from './utils/get_episode_header_badges';
 import { getEpisodeHeaderMenu } from './utils/get_episode_header_menu';
 import {
@@ -63,7 +63,6 @@ import {
   type EpisodeDetailsMainPanel,
 } from './utils/get_episode_header_tabs';
 import { EpisodeTimelineTab } from './components/episode_timeline_tab';
-import { EpisodeActionPolicyHistoryTab } from './components/episode_action_policy_history_tab';
 import * as i18n from './translations';
 
 interface EpisodeRouteParams {
@@ -90,8 +89,6 @@ export function EpisodeDetailsPage() {
   const largeMediaQuery = useEuiMinBreakpoint('m');
 
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
-
-  const canReadExecutionHistory = useService(UserCapabilities).canRead('executionHistory');
 
   const {
     data: episode,
@@ -127,21 +124,15 @@ export function EpisodeDetailsPage() {
 
   const showRuleDependentUi = isRuleLoaded(ruleState);
 
-  const episodeData = parseEpisodeDataJson(episode?.episode_data);
-  const episodeDataRuleName =
-    typeof episodeData.rule_name === 'string' ? episodeData.rule_name : undefined;
   const episodeBreadcrumbTitle =
     showRuleDependentUi && ruleState.rule.metadata.name
       ? ruleState.rule.metadata.name
-      : episodeDataRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
+      : i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
 
   const actualMainPanel: EpisodeDetailsMainPanel =
-    (mainPanel === 'metadata' && !showRuleDependentUi) ||
-    (mainPanel === 'action_policy_history' && !canReadExecutionHistory)
-      ? 'overview'
-      : mainPanel;
+    mainPanel === 'metadata' && !showRuleDependentUi ? 'overview' : mainPanel;
 
   const actualSidebarPanel: EpisodeDetailsSidebarPanel =
     sidebarPanel === 'runbook' && !showRuleDependentUi ? 'episode_details' : sidebarPanel;
@@ -216,10 +207,9 @@ export function EpisodeDetailsPage() {
       getEpisodeHeaderTabs({
         actualMainPanel,
         showRuleDependentUi,
-        showActionPolicyHistory: canReadExecutionHistory,
         onSelect: setMainPanel,
       }),
-    [actualMainPanel, showRuleDependentUi, canReadExecutionHistory]
+    [actualMainPanel, showRuleDependentUi]
   );
 
   const headerBadges = useMemo(
@@ -474,11 +464,6 @@ export function EpisodeDetailsPage() {
                   groupHash={groupHash}
                   services={{ data, spaces, userProfile: services.userProfile }}
                 />
-              ) : actualMainPanel === 'action_policy_history' ? (
-                <EpisodeActionPolicyHistoryTab
-                  episodeId={episodeId}
-                  episodeStart={episode?.first_timestamp}
-                />
               ) : actualMainPanel === 'metadata' ? (
                 <AlertEpisodeMetadataSection episodeId={episodeId} services={metadataServices} />
               ) : (
@@ -502,7 +487,11 @@ export function EpisodeDetailsPage() {
                       episodeId={episodeId}
                       services={detailsServices}
                     />
-                    <AlertEpisodeTimelineHeatmapsSection
+                    <AlertEpisodeLifecycleHeatmapSection
+                      episodeId={episodeId}
+                      services={detailsServices}
+                    />
+                    <AlertEpisodeSeverityHeatmapSection
                       episodeId={episodeId}
                       services={detailsServices}
                     />

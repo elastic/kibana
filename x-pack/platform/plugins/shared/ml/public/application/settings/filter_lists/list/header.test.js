@@ -30,18 +30,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   },
 }));
 
-jest.mock('../../../contexts/kibana', () => ({
-  useMlKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: jest.fn(),
-        getUrlForApp: jest.fn(() => '/app/management/ml/ad_settings/'),
-      },
-    },
-  }),
-  useNavigateToPath: () => jest.fn(),
-}));
-
 import { FilterListsHeader } from './header';
 
 describe('Filter Lists Header', () => {
@@ -57,14 +45,8 @@ describe('Filter Lists Header', () => {
       ...requiredProps,
     };
 
-    const { getByRole, getByTestId, getByText } = renderWithI18n(<FilterListsHeader {...props} />);
+    const { container } = renderWithI18n(<FilterListsHeader {...props} />);
 
-    expect(getByTestId('appHeaderTitle')).toHaveTextContent('Filter Lists');
-    expect(getByText('3 in total')).toBeInTheDocument();
-    expect(getByTestId('mlFilterListRefreshButton')).toHaveTextContent('Refresh');
-    expect(getByRole('link', { name: /^Learn more/ })).toHaveAttribute(
-      'href',
-      'https://www.elastic.co/guide/en/machine-learning/current/ml-rules.html'
-    );
+    expect(container).toMatchSnapshot();
   });
 });

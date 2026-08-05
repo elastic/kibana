@@ -57,7 +57,11 @@ function checkForForbiddenServiceNames(form: DiagnosticFormState | null): boolea
 export function DiagnosticFlyout({ onClose, isOpen, selection }: DiagnosticFlyoutProps) {
   const {
     query: { rangeFrom, rangeTo },
-  } = useAnyOfApmParams('/service-map');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/service-map',
+    '/service-map',
+    '/mobile-services/{serviceName}/service-map'
+  );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const {
     services: { notifications },

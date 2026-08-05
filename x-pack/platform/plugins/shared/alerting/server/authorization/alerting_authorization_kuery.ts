@@ -19,7 +19,6 @@ export enum AlertingAuthorizationFilterType {
 export interface AlertingAuthorizationFilterOpts {
   type: AlertingAuthorizationFilterType;
   fieldNames: AlertingAuthorizationFilterFieldNames;
-  namespaces?: Array<string | undefined>;
 }
 
 export interface AlertingAuthorizationFilterOptsBySpaceId {

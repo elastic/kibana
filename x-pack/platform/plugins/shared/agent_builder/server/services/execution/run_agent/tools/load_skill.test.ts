@@ -43,7 +43,6 @@ describe('load_skill tool', () => {
 
   beforeEach(() => {
     ctx = createToolHandlerContextMock();
-    ctx.skillsStore.has.mockReturnValue(true);
   });
 
   it('has the expected tool id and is recognized as internal', () => {
@@ -85,20 +84,6 @@ describe('load_skill tool', () => {
 
     expect(result.results[0].type).toBe(ToolResultType.error);
     expect((result.results[0] as any).data.message).toBe("Skill 'nope' not found.");
-  });
-
-  it('returns an error result when the skill is not in the skills store', async () => {
-    const skill = createMockSkill();
-    ctx.skills.list.mockResolvedValue([skill]);
-    ctx.skillsStore.has.mockReturnValue(false);
-
-    const tool = createLoadSkillTool();
-    const result = await callHandler(tool, { skill: 'my-skill' }, ctx);
-
-    expect(result.results[0].type).toBe(ToolResultType.error);
-    expect((result.results[0] as any).data.message).toBe(
-      "Skill 'my-skill' is not available for this agent. Only skills configured for this agent can be loaded."
-    );
   });
 
   it('registers inline + registry tools into the tool manager and returns their ids', async () => {

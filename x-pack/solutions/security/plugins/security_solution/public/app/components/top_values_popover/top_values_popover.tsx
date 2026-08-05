@@ -20,7 +20,7 @@ export const TopValuesPopover = React.memo(() => {
   const { pathname } = useLocation();
   const scope = getScopeFromPath(pathname);
   const { dataView } = useDataView(scope);
-  const browserFields = useBrowserFields(dataView);
+  const browserFields = useBrowserFields(scope);
 
   const {
     services: { topValuesPopover },

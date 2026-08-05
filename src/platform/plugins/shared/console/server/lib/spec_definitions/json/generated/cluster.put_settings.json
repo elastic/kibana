@@ -17,10 +17,6 @@
         "0"
       ]
     },
-    "data_autocomplete_rules": {
-      "persistent": {},
-      "transient": {}
-    },
     "methods": [
       "PUT"
     ],

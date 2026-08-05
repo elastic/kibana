@@ -30,15 +30,9 @@ import type {
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
-import {
-  APP_UI_ID,
-  ENABLE_NEW_FLYOUT_SETTING,
-  SecurityAgentBuilderAttachments,
-} from '../../../common/constants';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import { APP_UI_ID, SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { EMPTY_SEVERITY_COUNT, RiskSeverity } from '../../../common/search_strategy';
 import type { SeverityCount } from '../../entity_analytics/components/severity/types';
 import { RiskLevelBreakdownTable } from '../../entity_analytics/components/home/risk_level_breakdown_table';
@@ -493,17 +487,13 @@ export const registerEntityAnalyticsDashboardAttachment = ({
   application,
   agentBuilder,
   chrome,
-  experimentalFeatures,
   searchSession,
-  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
-  experimentalFeatures: ExperimentalFeatures;
   searchSession?: ISessionService;
-  uiSettings: IUiSettingsClient;
 }): void => {
   attachments.addAttachmentType(
     SecurityAgentBuilderAttachments.entityAnalyticsDashboard,
@@ -511,9 +501,7 @@ export const registerEntityAnalyticsDashboardAttachment = ({
       application,
       agentBuilder,
       chrome,
-      experimentalFeatures,
       searchSession,
-      uiSettings,
     })
   );
 };
@@ -522,21 +510,13 @@ export const createEntityAnalyticsDashboardAttachmentDefinition = ({
   application,
   agentBuilder,
   chrome,
-  experimentalFeatures,
   searchSession,
-  uiSettings,
 }: {
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
-  experimentalFeatures: ExperimentalFeatures;
   searchSession?: ISessionService;
-  uiSettings?: IUiSettingsClient;
 }): AttachmentUIDefinition<EntityAnalyticsDashboardAttachment> => {
-  const getIsNewFlyoutEnabled = (): boolean =>
-    !experimentalFeatures.newFlyoutSystemDisabled &&
-    (uiSettings?.get<boolean>(ENABLE_NEW_FLYOUT_SETTING, true) ?? false);
-
   return {
     getLabel: (attachment) =>
       attachment.data.attachmentLabel ??
@@ -553,7 +533,6 @@ export const createEntityAnalyticsDashboardAttachmentDefinition = ({
         chrome={chrome}
         openSidebarConversation={props.openSidebarConversation}
         searchSession={searchSession}
-        isNewFlyoutEnabled={getIsNewFlyoutEnabled()}
         closeCanvas={closeCanvas}
       >
         <EntityAnalyticsDashboardCanvasContent {...props} />

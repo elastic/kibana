@@ -7,9 +7,6 @@
       "pretty": "__flag__",
       "refresh": "__flag__"
     },
-    "data_autocomplete_rules": {
-      "synonyms": ""
-    },
     "methods": [
       "PUT"
     ],

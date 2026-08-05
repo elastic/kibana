@@ -8,6 +8,10 @@
         "pipeline_settings": {},
         "username": ""
       },
+      "last_modified": "",
+      "pipeline_metadata": {},
+      "username": "",
+      "pipeline": "",
       "pipeline_settings": {
         "pipeline.id": "main",
         "pipeline.workers": 0,
@@ -55,7 +59,8 @@
         "config.test_and_exit": false,
         "config.string": "",
         "node.name": ""
-      }
+      },
+      "description": ""
     }
   }
 }

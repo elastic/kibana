@@ -17,7 +17,8 @@ project:
   owner: '@elastic/kibana-presentation'
   sourceRoot: src/platform/packages/shared/presentation/presentation_publishing_schemas
 dependsOn:
-  - '@kbn/zod'
+  - '@kbn/config-schema'
+  - '@kbn/utility-types'
   - '@kbn/es-query-server'
 tags:
   - shared-server

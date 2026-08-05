@@ -6,16 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import type { Case } from '@kbn/cases-plugin/common/types/domain';
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import {
-  CASE_ATTACHMENT_SAVED_OBJECT,
   COMMENT_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
   OSQUERY_ATTACHMENT_TYPE,
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -284,135 +281,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(updatedCase.comments?.length).to.be(3);
-      });
-    });
-
-    describe('cross-type stats and documents over a mixed case', () => {
-      it('reports correct totals and retrieves every attachment across both SOs', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-
-        // Track ids as they appear — each response returns the full comment list.
-        const seen = new Set<string>();
-        const nextId = (c: Case): string => {
-          const id = c.comments!.find((cm) => !seen.has(cm.id))!.id;
-          seen.add(id);
-          return id;
-        };
-
-        // v1 user comment (cases-comments).
-        const userId = nextId(
-          await createComment({ supertest, caseId: postedCase.id, params: postCommentUserReq })
-        );
-        // v2 comment (cases-attachments).
-        const commentId = nextId(
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: [
-              {
-                type: COMMENT_ATTACHMENT_TYPE,
-                data: { content: 'unified comment' },
-                owner: 'securitySolutionFixture',
-              },
-            ],
-          })
-        );
-        // v2 event (cases-attachments).
-        const eventId = nextId(
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: [
-              {
-                type: 'security.event' as const,
-                attachmentId: 'stats-event-1',
-                metadata: { index: 'test-events-index' },
-                owner: 'securitySolutionFixture',
-              },
-            ],
-          })
-        );
-        // v1 actions (folded to security.endpoint on cases-attachments).
-        const actionsId = nextId(
-          await createComment({ supertest, caseId: postedCase.id, params: postCommentActionsReq })
-        );
-        // v2 endpoint (cases-attachments).
-        const endpointId = nextId(
-          await createComment({
-            supertest,
-            caseId: postedCase.id,
-            params: {
-              type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-              attachmentId: 'stats-endpoint-1',
-              owner: 'securitySolutionFixture',
-              data: { content: 'isolated' },
-              metadata: {
-                command: 'isolate',
-                targets: [{ endpointId: 'endpoint-1', hostname: 'host-1', agentType: 'endpoint' }],
-              },
-            } as AttachmentRequestV2,
-          })
-        );
-
-        const refreshedCase = await getCase({ supertest, caseId: postedCase.id });
-        // Only user + unified comment count as comments; only the event counts as an event.
-        expect(refreshedCase.totalComment).to.be(2);
-        expect(refreshedCase.totalEvents).to.be(1);
-
-        const allIds = [userId, commentId, eventId, actionsId, endpointId];
-        const bulkResult = await bulkGetAttachments({
-          supertest,
-          caseId: postedCase.id,
-          savedObjectIds: allIds,
-        });
-        expect(bulkResult.attachments.length).to.be(5);
-        const retrievedIds = bulkResult.attachments.map((a: { id: string }) => a.id);
-        allIds.forEach((id) => expect(retrievedIds).to.contain(id));
-      });
-    });
-
-    describe('migration window: unified-only row read via the always-on dual fetch', () => {
-      it('surfaces a raw cases-attachments comment through getCase and bulkGetAttachments', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-
-        // Seed a unified row directly into cases-attachments to emulate an
-        // attachment written in the FF-ON config being read back through the
-        // always-span-both-SOs read path (post-#275225).
-        const seededId = 'unified-seeded-comment';
-        await es.index({
-          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-          id: `${CASE_ATTACHMENT_SAVED_OBJECT}:${seededId}`,
-          refresh: 'wait_for',
-          document: {
-            type: CASE_ATTACHMENT_SAVED_OBJECT,
-            [CASE_ATTACHMENT_SAVED_OBJECT]: {
-              type: COMMENT_ATTACHMENT_TYPE,
-              owner: 'securitySolutionFixture',
-              data: { content: 'seeded unified comment' },
-              created_at: '2024-01-01T00:00:00.000Z',
-              created_by: { username: 'elastic', full_name: null, email: null },
-              pushed_at: null,
-              pushed_by: null,
-              updated_at: null,
-              updated_by: null,
-            },
-            references: [{ type: 'cases', id: postedCase.id, name: 'associated-cases' }],
-            namespaces: ['default'],
-            updated_at: '2024-01-01T00:00:00.000Z',
-            coreMigrationVersion: '8.8.0',
-          },
-        });
-
-        const refreshedCase = await getCase({ supertest, caseId: postedCase.id });
-        expect(refreshedCase.totalComment).to.be(1);
-
-        const bulkResult = await bulkGetAttachments({
-          supertest,
-          caseId: postedCase.id,
-          savedObjectIds: [seededId],
-        });
-        expect(bulkResult.attachments.length).to.be(1);
-        expect(bulkResult.attachments[0].id).to.be(seededId);
       });
     });
   });

@@ -16,7 +16,6 @@ import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import type { ManagedUserHit } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
-import { FLYOUT_ORIGIN, type FlyoutOrigin } from '../../../common/lib/telemetry';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../data_view_manager/constants';
 import type { FlyoutApi } from '../../use_flyout_api';
@@ -59,7 +58,6 @@ import type {
   UserDescriptor,
 } from './flyout_v2_url_param';
 import { decodeFlyoutV2UrlParam } from './flyout_v2_url_param';
-import { subscribeToFlyoutV2Navigation } from './flyout_v2_navigation';
 
 // ---------------------------------------------------------------------------
 // Constants — which descriptor kinds require an async data fetch
@@ -152,23 +150,20 @@ const buildShowEntityCallback = (
 export const openDescriptorAsStart = (
   descriptor: FlyoutDescriptor,
   ctx: RestoreContext,
-  api: FlyoutApi,
-  originOverride?: FlyoutOrigin
+  api: FlyoutApi
 ): void => {
   const { kind } = descriptor;
-  const origin = originOverride ?? descriptor.origin;
-  const originParams = origin ? { origin } : {};
 
   switch (kind) {
     // --- Document main flyouts ---
     case 'document': {
       const { documentId, indexName } = descriptor as DocumentDescriptor;
-      api.openDocumentFlyoutFromIndex({ documentId, indexName, ...originParams });
+      api.openDocumentFlyoutFromIndex({ documentId, indexName });
       break;
     }
     case 'documentFromPattern': {
       const { documentId, indexName } = descriptor as DocumentFromPatternDescriptor;
-      api.openDocumentFlyoutFromPattern({ documentId, indexName, ...originParams });
+      api.openDocumentFlyoutFromPattern({ documentId, indexName });
       break;
     }
 
@@ -176,13 +171,9 @@ export const openDescriptorAsStart = (
     case 'analyzer': {
       const d = descriptor as AnalyzerDescriptor;
       if (ctx.docHit) {
-        api.openAnalyzer({ hit: ctx.docHit, ...originParams });
+        api.openAnalyzer({ hit: ctx.docHit });
       } else {
-        api.openDocumentFlyoutFromIndex({
-          documentId: d.documentId,
-          indexName: d.indexName,
-          ...originParams,
-        });
+        api.openDocumentFlyoutFromIndex({ documentId: d.documentId, indexName: d.indexName });
       }
       break;
     }
@@ -193,27 +184,18 @@ export const openDescriptorAsStart = (
           hit: ctx.docHit,
           jumpToCursor: d.jumpToCursor,
           jumpToEntityId: d.jumpToEntityId,
-          ...originParams,
         });
       } else {
-        api.openDocumentFlyoutFromIndex({
-          documentId: d.documentId,
-          indexName: d.indexName,
-          ...originParams,
-        });
+        api.openDocumentFlyoutFromIndex({ documentId: d.documentId, indexName: d.indexName });
       }
       break;
     }
     case 'documentEntities': {
       const d = descriptor as DocumentEntitiesDescriptor;
       if (ctx.docHit) {
-        api.openDocumentEntities({ hit: ctx.docHit, scopeId: d.scopeId, ...originParams });
+        api.openDocumentEntities({ hit: ctx.docHit, scopeId: d.scopeId });
       } else {
-        api.openDocumentFlyoutFromIndex({
-          documentId: d.documentId,
-          indexName: d.indexName,
-          ...originParams,
-        });
+        api.openDocumentFlyoutFromIndex({ documentId: d.documentId, indexName: d.indexName });
       }
       break;
     }
@@ -224,17 +206,12 @@ export const openDescriptorAsStart = (
           hit: ctx.docHit,
           scopeId: d.scopeId,
           isRulePreview: d.isRulePreview,
-          ...originParams,
           // Provide a default onShowAlert that opens the alert as a child flyout.
           onShowAlert: (alertId, indexName) =>
             api.openDocumentFlyoutFromIndexAsChild({ documentId: alertId, indexName }),
         });
       } else {
-        api.openDocumentFlyoutFromIndex({
-          documentId: d.documentId,
-          indexName: d.indexName,
-          ...originParams,
-        });
+        api.openDocumentFlyoutFromIndex({ documentId: d.documentId, indexName: d.indexName });
       }
       break;
     }
@@ -245,79 +222,54 @@ export const openDescriptorAsStart = (
           hit: ctx.docHit,
           scopeId: d.scopeId,
           investigationFields: d.investigationFields,
-          ...originParams,
         });
       } else {
-        api.openDocumentFlyoutFromIndex({
-          documentId: d.documentId,
-          indexName: d.indexName,
-          ...originParams,
-        });
+        api.openDocumentFlyoutFromIndex({ documentId: d.documentId, indexName: d.indexName });
       }
       break;
     }
     case 'documentResponse': {
       const d = descriptor as DocumentResponseDescriptor;
       if (ctx.docHit) {
-        api.openDocumentResponse({ hit: ctx.docHit, ...originParams });
+        api.openDocumentResponse({ hit: ctx.docHit });
       } else {
-        api.openDocumentFlyoutFromIndex({
-          documentId: d.documentId,
-          indexName: d.indexName,
-          ...originParams,
-        });
+        api.openDocumentFlyoutFromIndex({ documentId: d.documentId, indexName: d.indexName });
       }
       break;
     }
     case 'documentThreatIntelligence': {
       const d = descriptor as DocumentThreatIntelligenceDescriptor;
       if (ctx.docHit) {
-        api.openDocumentThreatIntelligence({ hit: ctx.docHit, ...originParams });
+        api.openDocumentThreatIntelligence({ hit: ctx.docHit });
       } else {
-        api.openDocumentFlyoutFromIndex({
-          documentId: d.documentId,
-          indexName: d.indexName,
-          ...originParams,
-        });
+        api.openDocumentFlyoutFromIndex({ documentId: d.documentId, indexName: d.indexName });
       }
       break;
     }
     case 'documentInvestigationGuide': {
       const d = descriptor as DocumentInvestigationGuideDescriptor;
       if (ctx.docHit) {
-        api.openDocumentInvestigationGuide({ hit: ctx.docHit, ...originParams });
+        api.openDocumentInvestigationGuide({ hit: ctx.docHit });
       } else {
-        api.openDocumentFlyoutFromIndex({
-          documentId: d.documentId,
-          indexName: d.indexName,
-          ...originParams,
-        });
+        api.openDocumentFlyoutFromIndex({ documentId: d.documentId, indexName: d.indexName });
       }
       break;
     }
     case 'documentGraph': {
       const d = descriptor as DocumentGraphDescriptor;
       if (ctx.docHit) {
-        api.openDocumentGraph({ hit: ctx.docHit, ...originParams });
+        api.openDocumentGraph({ hit: ctx.docHit });
       } else {
-        api.openDocumentFlyoutFromIndex({
-          documentId: d.documentId,
-          indexName: d.indexName,
-          ...originParams,
-        });
+        api.openDocumentFlyoutFromIndex({ documentId: d.documentId, indexName: d.indexName });
       }
       break;
     }
     case 'notes': {
       const d = descriptor as NotesDescriptor;
       if (ctx.docHit) {
-        api.openNotes({ hit: ctx.docHit, ...originParams });
+        api.openNotes({ hit: ctx.docHit });
       } else {
-        api.openDocumentFlyoutFromIndex({
-          documentId: d.documentId,
-          indexName: d.indexName,
-          ...originParams,
-        });
+        api.openDocumentFlyoutFromIndex({ documentId: d.documentId, indexName: d.indexName });
       }
       break;
     }
@@ -325,32 +277,24 @@ export const openDescriptorAsStart = (
     // --- Attack main flyout + tools ---
     case 'attack': {
       const { attackId, indexName } = descriptor as AttackDescriptor;
-      api.openAttackFlyout({ attackId, indexName, ...originParams });
+      api.openAttackFlyout({ attackId, indexName });
       break;
     }
     case 'attackCorrelations': {
       const d = descriptor as AttackCorrelationsDescriptor;
       if (ctx.attackHit) {
-        api.openAttackCorrelations({ hit: ctx.attackHit, alertIds: d.alertIds, ...originParams });
+        api.openAttackCorrelations({ hit: ctx.attackHit, alertIds: d.alertIds });
       } else {
-        api.openAttackFlyout({
-          attackId: d.attackId,
-          indexName: d.indexName,
-          ...originParams,
-        });
+        api.openAttackFlyout({ attackId: d.attackId, indexName: d.indexName });
       }
       break;
     }
     case 'attackEntities': {
       const d = descriptor as AttackEntitiesDescriptor;
       if (ctx.attackHit) {
-        api.openAttackEntities({ hit: ctx.attackHit, alertIds: d.alertIds, ...originParams });
+        api.openAttackEntities({ hit: ctx.attackHit, alertIds: d.alertIds });
       } else {
-        api.openAttackFlyout({
-          attackId: d.attackId,
-          indexName: d.indexName,
-          ...originParams,
-        });
+        api.openAttackFlyout({ attackId: d.attackId, indexName: d.indexName });
       }
       break;
     }
@@ -358,17 +302,17 @@ export const openDescriptorAsStart = (
     // --- Entity main flyouts ---
     case 'host': {
       const { hostName, entityId, scopeId } = descriptor as HostDescriptor;
-      api.openHostFlyout({ hostName, entityId, scopeId, ...originParams });
+      api.openHostFlyout({ hostName, entityId, scopeId });
       break;
     }
     case 'user': {
       const { userName, entityId, scopeId } = descriptor as UserDescriptor;
-      api.openUserFlyout({ userName, entityId, scopeId, ...originParams });
+      api.openUserFlyout({ userName, entityId, scopeId });
       break;
     }
     case 'service': {
       const { serviceName, entityId, scopeId } = descriptor as ServiceDescriptor;
-      api.openServiceFlyout({ serviceName, entityId, scopeId, ...originParams });
+      api.openServiceFlyout({ serviceName, entityId, scopeId });
       break;
     }
     case 'genericEntity': {
@@ -380,7 +324,7 @@ export const openDescriptorAsStart = (
           : entityId
           ? { entityId }
           : { entityDocId: entityDocId as string };
-      api.openGenericEntityFlyout({ scopeId, ...idProps, ...originParams });
+      api.openGenericEntityFlyout({ scopeId, ...idProps });
       break;
     }
 
@@ -394,7 +338,6 @@ export const openDescriptorAsStart = (
           | EntityType.service,
         entityName: d.entityName,
         entityId: d.entityId,
-        ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.entityName,
@@ -409,7 +352,6 @@ export const openDescriptorAsStart = (
         entityType: d.entityType as unknown as EntityType.host | EntityType.user,
         value: d.value,
         entityId: d.entityId,
-        ...originParams,
         onOpenEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
@@ -427,7 +369,6 @@ export const openDescriptorAsStart = (
           | EntityType.generic,
         value: d.value,
         entityId: d.entityId,
-        ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
@@ -445,7 +386,6 @@ export const openDescriptorAsStart = (
           | EntityType.generic,
         value: d.value,
         entityId: d.entityId,
-        ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
@@ -460,7 +400,6 @@ export const openDescriptorAsStart = (
         value: d.value,
         entityId: d.entityId,
         entityType: d.entityType as unknown as EntityType.host | EntityType.generic | undefined,
-        ...originParams,
         onShowHost: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
@@ -475,7 +414,6 @@ export const openDescriptorAsStart = (
         entityId: d.entityId,
         scopeId: d.scopeId,
         entityName: d.entityName,
-        ...originParams,
         onShowEntity: noop,
         onShowOriginatingEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
@@ -493,7 +431,6 @@ export const openDescriptorAsStart = (
         entityType: d.entityType as EntityType,
         entityName: d.entityName,
         scopeId: d.scopeId,
-        ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.entityName,
@@ -511,7 +448,7 @@ export const openDescriptorAsStart = (
         _id: d.managedUserId,
         _index: d.managedUserIndex,
       };
-      api.openEntityEntraInsights({ managedUser, value: d.value, ...originParams });
+      api.openEntityEntraInsights({ managedUser, value: d.value });
       break;
     }
     case 'entityOktaInsights': {
@@ -520,30 +457,26 @@ export const openDescriptorAsStart = (
         _id: d.managedUserId,
         _index: d.managedUserIndex,
       };
-      api.openEntityOktaInsights({ managedUser, value: d.value, ...originParams });
+      api.openEntityOktaInsights({ managedUser, value: d.value });
       break;
     }
 
     // --- Network / Rule ---
     case 'network': {
       const { ip, flowTarget } = descriptor as NetworkDescriptor;
-      api.openNetworkFlyout({
-        ip,
-        flowTarget: flowTarget as FlowTargetSourceDest,
-        ...originParams,
-      });
+      api.openNetworkFlyout({ ip, flowTarget: flowTarget as FlowTargetSourceDest });
       break;
     }
     case 'rule': {
       const { ruleId } = descriptor as RuleDescriptor;
-      api.openRuleFlyout({ ruleId, ...originParams });
+      api.openRuleFlyout({ ruleId });
       break;
     }
 
     // --- IOC ---
     case 'ioc': {
       if (ctx.iocIndicator) {
-        api.openIocFlyout({ indicator: ctx.iocIndicator, ...originParams });
+        api.openIocFlyout({ indicator: ctx.iocIndicator });
       }
       // If indicator could not be fetched: skip rather than open with empty data.
       break;
@@ -552,7 +485,7 @@ export const openDescriptorAsStart = (
     // --- CSP ---
     case 'cspMisconfiguration': {
       const { resourceId, ruleId } = descriptor as CspMisconfigurationDescriptor;
-      api.openMisconfigurationFinding({ resourceId, ruleId, ...originParams });
+      api.openMisconfigurationFinding({ resourceId, ruleId });
       break;
     }
     case 'cspVulnerability': {
@@ -563,7 +496,6 @@ export const openDescriptorAsStart = (
         packageName: d.packageName,
         packageVersion: d.packageVersion,
         eventId: d.eventId,
-        ...originParams,
       });
       break;
     }
@@ -580,44 +512,41 @@ export const openDescriptorAsStart = (
 export const openDescriptorAsChild = (
   descriptor: FlyoutDescriptor,
   ctx: RestoreContext,
-  api: FlyoutApi,
-  originOverride?: FlyoutOrigin
+  api: FlyoutApi
 ): void => {
   const { kind } = descriptor;
-  const origin = originOverride ?? descriptor.origin;
-  const originParams = origin ? { origin } : {};
 
   switch (kind) {
     // Main flyouts that have an explicit AsChild variant
     case 'document': {
       const { documentId, indexName } = descriptor as DocumentDescriptor;
-      api.openDocumentFlyoutFromIndexAsChild({ documentId, indexName, ...originParams });
+      api.openDocumentFlyoutFromIndexAsChild({ documentId, indexName });
       break;
     }
     case 'documentFromPattern': {
       // No AsChild variant exists — open as main (best-effort fallback)
       const { documentId, indexName } = descriptor as DocumentFromPatternDescriptor;
-      api.openDocumentFlyoutFromPattern({ documentId, indexName, ...originParams });
+      api.openDocumentFlyoutFromPattern({ documentId, indexName });
       break;
     }
     case 'attack': {
       const { attackId, indexName } = descriptor as AttackDescriptor;
-      api.openAttackFlyoutAsChild({ attackId, indexName, ...originParams });
+      api.openAttackFlyoutAsChild({ attackId, indexName });
       break;
     }
     case 'host': {
       const { hostName, entityId, scopeId } = descriptor as HostDescriptor;
-      api.openHostFlyoutAsChild({ hostName, entityId, scopeId, ...originParams });
+      api.openHostFlyoutAsChild({ hostName, entityId, scopeId });
       break;
     }
     case 'user': {
       const { userName, entityId, scopeId } = descriptor as UserDescriptor;
-      api.openUserFlyoutAsChild({ userName, entityId, scopeId, ...originParams });
+      api.openUserFlyoutAsChild({ userName, entityId, scopeId });
       break;
     }
     case 'service': {
       const { serviceName, entityId, scopeId } = descriptor as ServiceDescriptor;
-      api.openServiceFlyoutAsChild({ serviceName, entityId, scopeId, ...originParams });
+      api.openServiceFlyoutAsChild({ serviceName, entityId, scopeId });
       break;
     }
     case 'genericEntity': {
@@ -629,32 +558,28 @@ export const openDescriptorAsChild = (
           : entityId
           ? { entityId }
           : { entityDocId: entityDocId as string };
-      api.openGenericEntityFlyoutAsChild({ scopeId, ...idProps, ...originParams });
+      api.openGenericEntityFlyoutAsChild({ scopeId, ...idProps });
       break;
     }
     case 'network': {
       const { ip, flowTarget } = descriptor as NetworkDescriptor;
-      api.openNetworkFlyoutAsChild({
-        ip,
-        flowTarget: flowTarget as FlowTargetSourceDest,
-        ...originParams,
-      });
+      api.openNetworkFlyoutAsChild({ ip, flowTarget: flowTarget as FlowTargetSourceDest });
       break;
     }
     case 'rule': {
       const { ruleId } = descriptor as RuleDescriptor;
-      api.openRuleFlyoutAsChild({ ruleId, ...originParams });
+      api.openRuleFlyoutAsChild({ ruleId });
       break;
     }
     case 'ioc': {
       if (ctx.iocIndicator) {
-        api.openIocFlyoutAsChild({ indicator: ctx.iocIndicator, ...originParams });
+        api.openIocFlyoutAsChild({ indicator: ctx.iocIndicator });
       }
       break;
     }
     case 'cspMisconfiguration': {
       const { resourceId, ruleId } = descriptor as CspMisconfigurationDescriptor;
-      api.openMisconfigurationFindingAsChild({ resourceId, ruleId, ...originParams });
+      api.openMisconfigurationFindingAsChild({ resourceId, ruleId });
       break;
     }
     case 'cspVulnerability': {
@@ -665,14 +590,13 @@ export const openDescriptorAsChild = (
         packageName: d.packageName,
         packageVersion: d.packageVersion,
         eventId: d.eventId,
-        ...originParams,
       });
       break;
     }
 
     // Tool kinds and everything else: re-use the 'start' path (tools have no child variants).
     default:
-      openDescriptorAsStart(descriptor, ctx, api, originOverride);
+      openDescriptorAsStart(descriptor, ctx, api);
       break;
   }
 };
@@ -713,31 +637,6 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
     const raw = new URLSearchParams(history.location.search).get(urlParamKey);
     return raw != null && decodeFlyoutV2UrlParam(raw) === null;
   });
-
-  // The restore state above is intentionally mount-only. Agent Builder can also navigate to a
-  // different entity while Entity Analytics is already mounted, so handle that same-app signal
-  // directly instead of waiting for a remount that will not happen.
-  useEffect(() => {
-    let pendingOpen: ReturnType<typeof setTimeout> | undefined;
-    const unsubscribe = subscribeToFlyoutV2Navigation(
-      ({ urlParamKey: navigationParamKey, descriptors: next }) => {
-        if (!isNewFlyoutEnabled || navigationParamKey !== urlParamKey) return;
-        const [first, second] = next;
-        clearTimeout(pendingOpen);
-        pendingOpen = setTimeout(() => {
-          openDescriptorAsStart(first, {}, flyoutApi);
-          if (second) {
-            openDescriptorAsChild(second, {}, flyoutApi);
-          }
-        }, 0);
-      }
-    );
-
-    return () => {
-      unsubscribe();
-      clearTimeout(pendingOpen);
-    };
-  }, [flyoutApi, isNewFlyoutEnabled, urlParamKey]);
 
   // Strip malformed param once on mount.
   useEffect(() => {
@@ -878,9 +777,9 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
     // Defer to a macrotask to avoid z-index ordering races with Timeline restore, which also
     // fires on mount and claims its slot in the same render cycle.
     setTimeout(() => {
-      openDescriptorAsStart(first, ctx, flyoutApi, FLYOUT_ORIGIN.URL_RESTORE);
+      openDescriptorAsStart(first, ctx, flyoutApi);
       if (second) {
-        openDescriptorAsChild(second, ctx, flyoutApi, FLYOUT_ORIGIN.URL_RESTORE);
+        openDescriptorAsChild(second, ctx, flyoutApi);
       }
     }, 0);
   }, [

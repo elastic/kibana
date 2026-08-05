@@ -7,14 +7,7 @@
 
 export { fetchContent } from './fetch_content';
 export { parseMarkdownFiles } from './parse_markdown';
-export {
-  createTargetIndex,
-  getSemanticTextMapping,
-  DEFAULT_ELSER,
-  DEFAULT_E5_SMALL,
-  DEFAULT_JINA,
-} from './create_index';
-export type { SemanticTextMapping } from './create_index';
+export { createTargetIndex } from './create_index';
 export { indexDocuments } from './index_documents';
 export { createChunkFiles } from './create_chunk_files';
 export { createArtifact } from './create_artifact';

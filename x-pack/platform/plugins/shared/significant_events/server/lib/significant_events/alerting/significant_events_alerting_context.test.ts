@@ -14,34 +14,12 @@ import {
 } from './significant_events_alerting_context';
 
 describe('canQueryBeRuleBacked', () => {
-  it('allows filter-only MATCH queries to be rule-backed', () => {
-    expect(
-      canQueryBeRuleBacked({
-        type: 'match',
-        esql: { query: 'FROM logs-* | WHERE level == "error"' },
-      })
-    ).toBe(true);
+  it('allows MATCH queries to be rule-backed', () => {
+    expect(canQueryBeRuleBacked('match')).toBe(true);
   });
 
   it('does not allow STATS queries until rule-on-rule provisioning', () => {
-    expect(
-      canQueryBeRuleBacked({
-        type: 'stats',
-        esql: {
-          query:
-            'FROM logs | STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute) | KEEP bucket, metric_value',
-        },
-      })
-    ).toBe(false);
-  });
-
-  it('does not allow MATCH queries that are not filter-only', () => {
-    expect(
-      canQueryBeRuleBacked({
-        type: 'match',
-        esql: { query: 'FROM logs-* | KEEP message | WHERE level == "error"' },
-      })
-    ).toBe(false);
+    expect(canQueryBeRuleBacked('stats')).toBe(false);
   });
 });
 

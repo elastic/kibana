@@ -81,10 +81,6 @@ components:
           type: number
         total_tokens:
           type: integer
-          description: >-
-            Approximate token usage. Only a bounded number of traces per project
-            contribute, so the value under-reports high-volume projects and varies
-            with per_page.
         last_trace_time:
           type: string
       required:

@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
-import { getDataViewsAsCodeService, requestHandler } from './utils';
+import { getDataViewsAsCodeService, handleErrors } from './utils';
 import { BASE_PATH, INITIAL_REST_VERSION } from './constants';
-import type { RegisterRouteArgs } from './types';
+import type { DataViewsAsCodeServerPluginStartDependencies } from '../types';
 
 const DELETE_DATA_VIEW_AS_CODE_PATH = BASE_PATH + '/{id}';
 
-export const registerDeleteDataViewAsCodeRoute = ({
-  router,
-  getStartServices,
-  ...args
-}: RegisterRouteArgs) =>
+export const registerDeleteDataViewAsCodeRoute = (
+  router: IRouter,
+  getStartServices: StartServicesAccessor<DataViewsAsCodeServerPluginStartDependencies, void>
+) =>
   router.versioned
     .delete({
       path: DELETE_DATA_VIEW_AS_CODE_PATH,
@@ -62,7 +62,7 @@ export const registerDeleteDataViewAsCodeRoute = ({
           },
         },
       },
-      requestHandler(args, async (ctx, req, res) => {
+      handleErrors(async (ctx, req, res) => {
         const id = req.params.id;
 
         const dataViewsAsCodeService = await getDataViewsAsCodeService(ctx, getStartServices, req);

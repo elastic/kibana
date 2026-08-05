@@ -16,12 +16,7 @@ import { faker } from '@faker-js/faker';
 import moment from 'moment';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { ConfigSchema } from '../../config';
-import type {
-  AuthenticatedUser,
-  SavedObject,
-  SavedObjectErrorResult,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { AuthenticatedUser, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { SEARCH_SESSION_TYPE, SearchSessionStatus, SearchStatus } from '../../../common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import * as updateSessionStatusModule from './status/update_session_status';
@@ -1126,7 +1121,7 @@ describe('SearchSessionService', () => {
                 id: 'error_object',
                 type: SEARCH_SESSION_TYPE,
                 error: { error: 'some error', message: 'some error', statusCode: 500 },
-              } as SavedObjectErrorResult,
+              } as SavedObject,
             ],
           });
           const spy = jest.spyOn(updateSessionStatusModule, 'updateSessionStatus');

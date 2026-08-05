@@ -13,7 +13,6 @@ import type { Request } from '@hapi/hapi';
 import numeral from '@elastic/numeral';
 import type { LogMeta, Logger } from '@kbn/logging';
 import type { KibanaRequestState } from '@kbn/core-http-server';
-import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
 import { getResponsePayloadBytes } from './get_payload_size';
 
 // If you are updating these, consider whether they should also be updated in the
@@ -24,7 +23,6 @@ const FORBIDDEN_HEADERS = [
   'set-cookie',
   'x-elastic-app-auth',
   'es-client-authentication',
-  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 ];
 const REDACTED_HEADER_TEXT = '[REDACTED]';
 

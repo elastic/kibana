@@ -15,8 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useAttachmentAccordionOpenedEBT } from '../../../analytics/use_attachments_tab_ebt';
+import React, { useCallback, useState } from 'react';
 
 interface AttachmentAccordionProps {
   id: string;
@@ -30,19 +29,7 @@ export const AttachmentAccordion = ({ id, title, count, children }: AttachmentAc
   const accordionId = useGeneratedHtmlId({ prefix: `case-view-attachment-${id}` });
   // Controlled isOpen so we can fully unmount children when collapsed
   const [isOpen, setIsOpen] = useState(true);
-  const trackAttachmentAccordionOpened = useAttachmentAccordionOpenedEBT();
-
-  // Reports every time the accordion becomes visible, including the initial mount (accordions
-  // default to open), not just on user-driven re-opens.
-  useEffect(() => {
-    if (isOpen) {
-      trackAttachmentAccordionOpened(id);
-    }
-  }, [isOpen, id, trackAttachmentAccordionOpened]);
-
-  const onToggle = useCallback((nextIsOpen: boolean) => {
-    setIsOpen(nextIsOpen);
-  }, []);
+  const onToggle = useCallback((nextIsOpen: boolean) => setIsOpen(nextIsOpen), []);
   return (
     <EuiFlexItem grow={false}>
       <EuiPanel hasBorder>

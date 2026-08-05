@@ -11,17 +11,12 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TakeAction } from './take_action';
 import { TestProviders } from '../../../../common/mock';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
-import { useShowTimeline } from '../../../../common/utils/timeline/use_show_timeline';
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
 }));
 
 jest.mock('../../../../common/hooks/timeline/use_investigate_in_timeline');
-
-jest.mock('../../../../common/utils/timeline/use_show_timeline', () => ({
-  useShowTimeline: jest.fn(() => [true]),
-}));
 
 describe('<TakeAction />', () => {
   const kqlQuery = 'host.name: "test-host"';
@@ -32,7 +27,6 @@ describe('<TakeAction />', () => {
     jest.clearAllMocks();
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ closeFlyout });
     (useInvestigateInTimeline as jest.Mock).mockReturnValue({ investigateInTimeline });
-    (useShowTimeline as jest.Mock).mockReturnValue([true]);
   });
 
   it('renders the Take Action button', () => {
@@ -48,36 +42,6 @@ describe('<TakeAction />', () => {
     });
     const button = getByRole('button', { name: /take action/i });
     expect(button).toBeDisabled();
-  });
-
-  it('hides Take Action when Timeline is unavailable and there are no additional items', () => {
-    (useShowTimeline as jest.Mock).mockReturnValue([false]);
-
-    const { queryByTestId } = render(<TakeAction kqlQuery={kqlQuery} />, {
-      wrapper: TestProviders,
-    });
-
-    expect(queryByTestId('take-action-button')).not.toBeInTheDocument();
-  });
-
-  it('keeps Take Action when Timeline is unavailable but additional items exist', () => {
-    (useShowTimeline as jest.Mock).mockReturnValue([false]);
-
-    const { getByRole, queryByTestId, getByTestId } = render(
-      <TakeAction
-        kqlQuery={kqlQuery}
-        additionalItems={() => [
-          <button key="extra" type="button" data-test-subj="extra-take-action-item">
-            {'Extra action'}
-          </button>,
-        ]}
-      />,
-      { wrapper: TestProviders }
-    );
-
-    fireEvent.click(getByRole('button', { name: /take action/i }));
-    expect(queryByTestId('investigate-in-timeline-take-action-button')).not.toBeInTheDocument();
-    expect(getByTestId('extra-take-action-item')).toBeInTheDocument();
   });
 
   describe('Investigate in Timeline', () => {

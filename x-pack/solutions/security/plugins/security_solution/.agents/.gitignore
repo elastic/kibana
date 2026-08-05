@@ -1,3 +1,0 @@
-# The Python helpers here are run in place from a git checkout, so importing
-# them would otherwise leave untracked bytecode in the working tree.
-__pycache__/

@@ -970,21 +970,9 @@ export const RulesListTable = (props: RulesListTableProps) => {
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column">
-      <EuiFlexGroup
-        justifyContent="spaceBetween"
-        gutterSize="none"
-        alignItems="center"
-        responsive={false}
-        wrap
-      >
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            justifyContent="flexStart"
-            gutterSize="s"
-            alignItems="center"
-            responsive={false}
-            wrap
-          >
+          <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               {numberOfSelectedRules > 0 ? (
                 renderSelectAllDropdown?.()
@@ -1013,7 +1001,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
             </EuiFlexItem>
             {numberOfFilters > 0 && (
               <EuiFlexItem
-                grow={false}
                 css={{
                   borderLeft: euiTheme.border.thin,
                   paddingLeft: euiTheme.size.m,
@@ -1038,7 +1025,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
         grow={true}
         css={css`
           overflow-x: auto;
-          min-width: 0;
         `}
       >
         <EuiBasicTable
@@ -1055,7 +1041,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
           columns={[selectionColumn, ...rulesListColumns]}
           sorting={{ sort }}
           rowHeader="name"
-          responsiveBreakpoint={false}
           rowProps={rowProps}
           css={ruleRowCss}
           cellProps={(rule: RuleTableItem) => ({

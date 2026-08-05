@@ -11,7 +11,15 @@ import React, { useEffect, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
-import { EuiButton, EuiLoadingSpinner, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
 import type { OptionsListControlApi } from '@kbn/controls-plugin/public';
 import type { CanClearSelections } from '@kbn/controls-plugin/public/types';
@@ -22,7 +30,6 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
-import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { PLUGIN_ID } from '../../constants';
 import type { ControlsExampleStartDeps } from '../../plugin';
@@ -175,10 +182,9 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
           timeRange={timeRange}
         />
         <EuiSpacer />
-        <KbnInfoCallout
-          title="Search results"
-          text={isSearching ? <EuiLoadingSpinner size="l" /> : <p>Hits: {hits}</p>}
-        />
+        <EuiCallOut title="Search results">
+          {isSearching ? <EuiLoadingSpinner size="l" /> : <p>Hits: {hits}</p>}
+        </EuiCallOut>
 
         <EuiSpacer />
         <EuiButton

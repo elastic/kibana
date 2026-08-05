@@ -1,1 +1,0 @@
-{"network":[{"id":4,"method":"GET","url":"http://127.0.0.1:8931/api/seeded/slow?delay=2000","status":null,"ok":null,"failure":"net::ERR_ABORTED","requestedAt":1785467399737,"respondedAt":1785467399833,"resourceType":"fetch","abandonedByNavigation":false}],"console":[]}

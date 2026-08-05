@@ -1,6 +1,8 @@
 {
   "search_template": {
     "data_autocomplete_rules": {
+      "id": "",
+      "params": {},
       "source": {},
       "explain": false,
       "profile": false

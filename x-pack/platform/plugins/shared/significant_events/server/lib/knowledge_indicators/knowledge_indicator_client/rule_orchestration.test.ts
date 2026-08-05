@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import { MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import { toRuleDefinition } from './rule_orchestration';
-import {
-  METRIC_SERIES_EVERY,
-  METRIC_SERIES_RULE_NAME_SUFFIX,
-} from '../../significant_events/rules/metric_series_contract';
 
-const makeQueryLink = (severityScore?: number, title = 'Error logs'): QueryLink => ({
+const makeQueryLink = (severityScore?: number): QueryLink => ({
   query: {
     id: 'query-1',
     type: 'match',
-    title,
+    title: 'Error logs',
     description: 'Matches error logs',
     esql: { query: 'FROM logs-* | WHERE level == "error"' },
     severity_score: severityScore,
@@ -28,22 +23,22 @@ const makeQueryLink = (severityScore?: number, title = 'Error logs'): QueryLink 
 });
 
 describe('toRuleDefinition', () => {
+  it.each([
+    [85, '1m'],
+    [80, '1m'],
+    [60, '5m'],
+    [undefined, '5m'],
+  ])('sets schedule for severity %s to %s', (severityScore, expectedInterval) => {
+    expect(toRuleDefinition(makeQueryLink(severityScore)).schedule.interval).toBe(expectedInterval);
+  });
+
   it('maps a query link to the v2-native Significant Events rule definition', () => {
-    // Severity no longer changes execution cadence — critical vs default only
-    // affects analysis profiles, so a high score still uses METRIC_SERIES_EVERY.
-    expect(toRuleDefinition(makeQueryLink(85))).toEqual({
-      name: `Error logs${METRIC_SERIES_RULE_NAME_SUFFIX}`,
+    expect(toRuleDefinition(makeQueryLink())).toEqual({
+      name: 'Error logs',
       streamName: 'logs.test',
       timestampField: '@timestamp',
       esqlQuery: 'FROM logs-* | WHERE level == "error"',
-      schedule: { interval: METRIC_SERIES_EVERY },
+      schedule: { interval: '5m' },
     });
-  });
-
-  it('trims an overlong title so the name fits the Alerting v2 cap, suffix intact', () => {
-    const { name } = toRuleDefinition(makeQueryLink(85, 'A'.repeat(MAX_NAME_LENGTH + 50)));
-
-    expect(name).toHaveLength(MAX_NAME_LENGTH);
-    expect(name.endsWith(METRIC_SERIES_RULE_NAME_SUFFIX)).toBe(true);
   });
 });

@@ -25,7 +25,6 @@ interface EntityAnalyticsAgentNavigationContextValue {
   chrome?: SecurityAgentBuilderChrome;
   openSidebarConversation?: () => void;
   searchSession?: ISessionService;
-  isNewFlyoutEnabled?: boolean;
   /**
    * Dismisses the Agent Builder canvas overlay. Navigation helpers call this
    * before updating the Entity Analytics URL so that the canvas doesn't sit
@@ -45,7 +44,6 @@ export const EntityAnalyticsAgentNavigationProvider: React.FC<
   chrome,
   openSidebarConversation,
   searchSession,
-  isNewFlyoutEnabled,
   closeCanvas,
   children,
 }) => {
@@ -56,18 +54,9 @@ export const EntityAnalyticsAgentNavigationProvider: React.FC<
       chrome,
       openSidebarConversation,
       searchSession,
-      isNewFlyoutEnabled,
       closeCanvas,
     }),
-    [
-      application,
-      agentBuilder,
-      chrome,
-      openSidebarConversation,
-      searchSession,
-      isNewFlyoutEnabled,
-      closeCanvas,
-    ]
+    [application, agentBuilder, chrome, openSidebarConversation, searchSession, closeCanvas]
   );
   return (
     <EntityAnalyticsAgentNavigationContext.Provider value={value}>
@@ -78,22 +67,14 @@ export const EntityAnalyticsAgentNavigationProvider: React.FC<
 
 interface EntityAnalyticsAgentNavigation {
   canNavigate: boolean;
-  isNewFlyoutEnabled: boolean;
   navigateWithFlyout: (flyout: EntityAnalyticsFlyoutNavigationState) => void;
   navigateToHome: (opts?: { watchlistId?: string; watchlistName?: string }) => void;
   closeCanvas?: () => void;
 }
 
 export const useEntityAnalyticsAgentNavigation = (): EntityAnalyticsAgentNavigation => {
-  const {
-    application,
-    agentBuilder,
-    chrome,
-    openSidebarConversation,
-    searchSession,
-    isNewFlyoutEnabled,
-    closeCanvas,
-  } = useContext(EntityAnalyticsAgentNavigationContext);
+  const { application, agentBuilder, chrome, openSidebarConversation, searchSession, closeCanvas } =
+    useContext(EntityAnalyticsAgentNavigationContext);
 
   const canNavigate = application != null;
 
@@ -109,18 +90,9 @@ export const useEntityAnalyticsAgentNavigation = (): EntityAnalyticsAgentNavigat
         chrome,
         openSidebarConversation,
         searchSession,
-        isNewFlyoutEnabled,
       });
     },
-    [
-      application,
-      agentBuilder,
-      chrome,
-      openSidebarConversation,
-      searchSession,
-      isNewFlyoutEnabled,
-      closeCanvas,
-    ]
+    [application, agentBuilder, chrome, openSidebarConversation, searchSession, closeCanvas]
   );
 
   const navigateToHome = useCallback(
@@ -140,11 +112,5 @@ export const useEntityAnalyticsAgentNavigation = (): EntityAnalyticsAgentNavigat
     [application, agentBuilder, chrome, openSidebarConversation, searchSession, closeCanvas]
   );
 
-  return {
-    canNavigate,
-    isNewFlyoutEnabled: isNewFlyoutEnabled ?? false,
-    navigateWithFlyout,
-    navigateToHome,
-    closeCanvas,
-  };
+  return { canNavigate, navigateWithFlyout, navigateToHome, closeCanvas };
 };

@@ -255,9 +255,6 @@ const parseConfigDirectives = (cspConfig: CspConfigType): CspConfigDirectives =>
   if (cspConfig.object_src?.length) {
     enforceDirectives.set('object-src', cspConfig.object_src);
   }
-  if (cspConfig.media_src?.length) {
-    enforceDirectives.set('media-src', cspConfig.media_src);
-  }
   if (cspConfig.form_action?.length) {
     enforceDirectives.set('form-action', cspConfig.form_action);
   }

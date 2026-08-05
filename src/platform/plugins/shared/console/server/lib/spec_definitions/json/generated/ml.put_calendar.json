@@ -6,10 +6,6 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "data_autocomplete_rules": {
-      "job_ids": [],
-      "description": ""
-    },
     "methods": [
       "PUT"
     ],

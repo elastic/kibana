@@ -109,10 +109,7 @@ export const registerSmlCrawlerTaskDefinition = ({
             }
 
             const esClient = elasticsearch.client.asInternalUser;
-
-            const soRepository = savedObjects.createInternalRepository([
-              ...(definition.requiredHiddenTypes ?? []),
-            ]);
+            const soRepository = savedObjects.createInternalRepository();
 
             try {
               await smlService.getCrawler().crawl({

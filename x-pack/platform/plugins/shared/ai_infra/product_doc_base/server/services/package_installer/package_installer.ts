@@ -452,14 +452,13 @@ export class PackageInstaller {
       // Determine version to install
       selectedVersion = version;
       if (!selectedVersion) {
-        const availableVersions = await fetchSecurityLabsVersions({
-          ...this.getArtifactRepositoryOptions(),
-          inferenceId: effectiveInferenceId,
-        });
+        const availableVersions = await fetchSecurityLabsVersions(
+          this.getArtifactRepositoryOptions()
+        );
         if (availableVersions.length === 0) {
           throw new Error('No Security Labs versions available');
         }
-        // Select the latest version for this inference ID
+        // Select the latest version
         selectedVersion = availableVersions.sort().reverse()[0];
       }
 
@@ -578,10 +577,7 @@ export class PackageInstaller {
       // Compute latest version (best-effort) for UX and auto-update checks.
       let repoLatestVersion: string | undefined;
       try {
-        const versions = await fetchSecurityLabsVersions({
-          ...this.getArtifactRepositoryOptions(),
-          inferenceId: effectiveInferenceId,
-        });
+        const versions = await fetchSecurityLabsVersions(this.getArtifactRepositoryOptions());
         if (versions.length > 0) {
           repoLatestVersion = versions.slice().sort().reverse()[0];
         }
@@ -630,10 +626,7 @@ export class PackageInstaller {
       return;
     }
 
-    const availableVersions = await fetchSecurityLabsVersions({
-      ...this.getArtifactRepositoryOptions(),
-      inferenceId,
-    });
+    const availableVersions = await fetchSecurityLabsVersions(this.getArtifactRepositoryOptions());
     if (availableVersions.length === 0) {
       return;
     }

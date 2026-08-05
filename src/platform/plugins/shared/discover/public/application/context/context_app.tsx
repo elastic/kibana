@@ -8,7 +8,15 @@
  */
 
 import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
-import { EuiPage, EuiPageBody } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiText,
+  EuiPage,
+  EuiPageBody,
+  EuiSpacer,
+  euiPaddingSize,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { cloneDeep } from 'lodash';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -20,7 +28,7 @@ import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { AppHeader, type AppHeaderBack } from '@kbn/app-header';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { ContextErrorMessage } from './components/context_error_message';
@@ -227,18 +235,8 @@ export const ContextApp = ({
     };
   };
 
-  const title = i18n.translate('discover.context.pageTitle', {
-    defaultMessage: 'Documents surrounding #{anchorId}',
-    values: { anchorId },
-  });
-  const back: AppHeaderBack = {
-    href: referrer ?? '#/',
-    label: i18n.translate('discover.context.backButtonLabel', { defaultMessage: 'Discover' }),
-  };
-
   return (
     <Fragment>
-      <AppHeader title={title} back={back} spacing="compact" />
       {fetchedState.anchorStatus.value === LoadingStatus.FAILED ? (
         <ContextErrorMessage status={fetchedState.anchorStatus} />
       ) : (
@@ -248,16 +246,29 @@ export const ContextApp = ({
             className="euiScreenReaderOnly"
             data-test-subj="discoverContextAppTitle"
           >
-            {title}
+            {i18n.translate('discover.context.pageTitle', {
+              defaultMessage: 'Documents surrounding #{anchorId}',
+              values: { anchorId },
+            })}
           </h1>
           <TopNavMenu {...getNavBarProps()} />
-          <EuiPage>
+          <EuiPage css={styles.docsPage}>
             <EuiPageBody
               panelled
               paddingSize="none"
               css={styles.docsContent}
-              panelProps={{ role: 'main', hasShadow: false }}
+              panelProps={{ role: 'main' }}
             >
+              <EuiText data-test-subj="contextDocumentSurroundingHeader" css={styles.title}>
+                <FormattedMessage
+                  id="discover.context.contextOfTitle"
+                  defaultMessage="Documents surrounding {anchorId}"
+                  values={{
+                    anchorId: <span css={styles.documentId}>#{anchorId}</span>,
+                  }}
+                />
+              </EuiText>
+              <EuiSpacer size="s" />
               <ContextAppContentMemoized
                 dataView={dataView}
                 columns={columns}
@@ -295,4 +306,20 @@ const componentStyles = {
     flexDirection: 'column',
     height: '100%',
   }),
+  docsPage: kbnFullBodyHeightCss('54px'), // 54px is the action bar height
+  title: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+    const titlePadding = euiPaddingSize(themeContext, 's');
+
+    return css({
+      padding: `${titlePadding} ${titlePadding} 0`,
+      fontWeight: euiTheme.font.weight.bold,
+    });
+  },
+  documentId: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.backgroundBaseWarning,
+      color: euiTheme.colors.textWarning,
+      padding: `0 ${euiTheme.size.xs}`,
+    }),
 };

@@ -13,11 +13,6 @@
         "0"
       ]
     },
-    "data_autocomplete_rules": {
-      "end": "",
-      "start": "",
-      "timeout": ""
-    },
     "methods": [
       "POST"
     ],

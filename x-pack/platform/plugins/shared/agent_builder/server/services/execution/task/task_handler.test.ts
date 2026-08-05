@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { defer, firstValueFrom, of, toArray } from 'rxjs';
+import { of } from 'rxjs';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   ChatEventType,
@@ -17,8 +17,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { AgentExecutionMode } from '@kbn/agent-builder-common/agents';
 import { createTaskHandler } from './task_handler';
-import type { CallbackDeliveryService } from '../callback/callback_delivery_service';
-import { deliverCallbackEvents } from '../callback/deliver_callback_events';
+import type { CallbackDeliveryService } from '../callback_delivery_service';
 import {
   collectAndWriteEvents,
   handleAgentExecution,
@@ -28,7 +27,6 @@ import { createAgentExecutionClient } from '../persistence';
 
 jest.mock('../execution_runner');
 jest.mock('../persistence');
-jest.mock('../callback/deliver_callback_events');
 
 const handleAgentExecutionMock = handleAgentExecution as jest.MockedFunction<
   typeof handleAgentExecution
@@ -42,11 +40,8 @@ const serializeExecutionErrorMock = serializeExecutionError as jest.MockedFuncti
 const createAgentExecutionClientMock = createAgentExecutionClient as jest.MockedFunction<
   typeof createAgentExecutionClient
 >;
-const deliverCallbackEventsMock = deliverCallbackEvents as jest.MockedFunction<
-  typeof deliverCallbackEvents
->;
 
-describe('TaskHandler event streaming and finalization', () => {
+describe('TaskHandler callback finalization', () => {
   const events: ChatEvent[] = [
     {
       type: ChatEventType.conversationUpdated,
@@ -92,7 +87,7 @@ describe('TaskHandler event streaming and finalization', () => {
       conversationId: 'conversation-1',
       nextInput: { message: 'hello' },
       callback: {
-        url: 'https://callback.example.com/events?token=abc',
+        url: 'https://relay.example.com/events?token=abc',
       },
     },
   } as const;
@@ -108,8 +103,11 @@ describe('TaskHandler event streaming and finalization', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     logger = loggingSystemMock.createLogger();
-    callbackDeliveryService = {} as unknown as jest.Mocked<CallbackDeliveryService>;
-    deliverCallbackEventsMock.mockResolvedValue(undefined);
+    callbackDeliveryService = {
+      validateCallbackUrl: jest.fn(),
+      makeSuccessCallbackRequestIfConfigured: jest.fn().mockResolvedValue(undefined),
+      makeFailureCallbackRequestIfConfigured: jest.fn().mockResolvedValue(undefined),
+    } as unknown as jest.Mocked<CallbackDeliveryService>;
     executionClient = {
       get: jest.fn().mockResolvedValue(execution),
       updateStatus: jest.fn().mockResolvedValue(undefined),
@@ -117,9 +115,7 @@ describe('TaskHandler event streaming and finalization', () => {
     };
     createAgentExecutionClientMock.mockReturnValue(executionClient as never);
     handleAgentExecutionMock.mockResolvedValue(of(...events));
-    collectAndWriteEventsMock.mockImplementation(async ({ events$ }) => {
-      await firstValueFrom(events$.pipe(toArray()));
-    });
+    collectAndWriteEventsMock.mockResolvedValue(events);
     serializeExecutionErrorMock.mockImplementation((error: unknown) => ({
       code: 'internal_error' as never,
       message: error instanceof Error ? error.message : String(error),
@@ -133,117 +129,39 @@ describe('TaskHandler event streaming and finalization', () => {
       callbackDeliveryService,
     } as never);
 
-  const run = () =>
-    createHandler().run({
+  it('delivers a success callback before marking the execution completed', async () => {
+    await createHandler().run({
       executionId: 'execution-1',
       fakeRequest: httpServerMock.createKibanaRequest(),
     });
 
-  /**
-   * The stream is connectable (no replay): events flow only while `run()` is in flight,
-   * so the mock must subscribe when it is called, like the real `deliverCallbackEvents` does.
-   */
-  const observeDeliveredStream = () => {
-    const seen: ChatEvent[] = [];
-    let error: unknown;
-    deliverCallbackEventsMock.mockImplementation(
-      ({ events$ }) =>
-        new Promise((resolve) => {
-          events$.subscribe({
-            next: (event) => seen.push(event),
-            complete: () => resolve(),
-            error: (err) => {
-              error = err;
-              resolve();
-            },
-          });
-        })
-    );
-    return {
-      seen,
-      getError: () => error,
-    };
-  };
-
-  it('passes the same shared event stream to persistence and callback delivery', async () => {
-    await run();
-
-    expect(deliverCallbackEventsMock).toHaveBeenCalledTimes(1);
-    expect(deliverCallbackEventsMock).toHaveBeenCalledWith({
+    expect(callbackDeliveryService.makeSuccessCallbackRequestIfConfigured).toHaveBeenCalledWith({
       execution,
-      events$: expect.anything(),
-      callbackDeliveryService,
-      logger: expect.anything(),
+      events,
     });
-    expect(collectAndWriteEventsMock).toHaveBeenCalledTimes(1);
-    expect(collectAndWriteEventsMock.mock.calls[0][0].events$).toBe(
-      deliverCallbackEventsMock.mock.calls[0][0].events$
-    );
-  });
-
-  it('emits the agent events through the delivered stream', async () => {
-    const { seen } = observeDeliveredStream();
-
-    await run();
-
-    expect(seen).toEqual(events);
-  });
-
-  it('subscribes the underlying agent stream only once across both consumers', async () => {
-    let subscriptions = 0;
-    handleAgentExecutionMock.mockResolvedValue(
-      defer(() => {
-        subscriptions++;
-        return of(...events);
-      })
-    );
-    observeDeliveredStream();
-
-    await run();
-
-    expect(subscriptions).toBe(1);
-  });
-
-  it('drains callback delivery before marking the execution completed', async () => {
-    const order: string[] = [];
-    deliverCallbackEventsMock.mockImplementation(
-      () =>
-        new Promise((resolve) =>
-          setImmediate(() => {
-            order.push('delivered');
-            resolve();
-          })
-        )
-    );
-    executionClient.updateStatus.mockImplementation(async (_id: string, status: string) => {
-      order.push(`status:${status}`);
-    });
-
-    await run();
-
-    expect(order).toEqual(['status:running', 'delivered', 'status:completed']);
-  });
-
-  it('turns errors thrown before the stream exists into a delivered stream error', async () => {
-    handleAgentExecutionMock.mockRejectedValue(new Error('setup failed'));
-    const { getError } = observeDeliveredStream();
-
-    await run();
-
-    expect(deliverCallbackEventsMock).toHaveBeenCalledTimes(1);
-    expect(getError()).toEqual(new Error('setup failed'));
+    expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).not.toHaveBeenCalled();
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
-      ExecutionStatus.failed,
-      { code: 'internal_error', message: 'setup failed' }
+      ExecutionStatus.completed
     );
   });
 
-  it('marks the execution failed when persistence rejects', async () => {
-    collectAndWriteEventsMock.mockRejectedValue(new Error('agent failed'));
+  it('delivers a failure callback before marking the execution failed', async () => {
+    handleAgentExecutionMock.mockRejectedValue(new Error('agent failed'));
 
-    await run();
+    await createHandler().run({
+      executionId: 'execution-1',
+      fakeRequest: httpServerMock.createKibanaRequest(),
+    });
 
+    expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).toHaveBeenCalledWith({
+      execution,
+      payload: {
+        execution_id: 'execution-1',
+        error: { code: 'internal_error', message: 'agent failed' },
+        status: ExecutionStatus.failed,
+      },
+    });
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
       ExecutionStatus.failed,
@@ -251,13 +169,57 @@ describe('TaskHandler event streaming and finalization', () => {
     );
   });
 
-  it('marks the execution aborted for request-aborted errors', async () => {
-    collectAndWriteEventsMock.mockRejectedValue(
+  it('omits the conversation id from source-based failure callbacks', async () => {
+    const sourceBasedExecution = {
+      ...execution,
+      agentParams: {
+        nextInput: { message: 'hello' },
+        source: {
+          type: 'slack',
+          external_conversation_id: 'team:T123/channel:C123/thread:callback-continuation',
+        },
+        callback: {
+          url: 'https://relay.example.com/events?token=abc',
+        },
+      },
+    };
+    executionClient.get.mockResolvedValue(sourceBasedExecution);
+    handleAgentExecutionMock.mockResolvedValue(of());
+    collectAndWriteEventsMock.mockRejectedValue(new Error('agent failed'));
+
+    await createHandler().run({
+      executionId: 'execution-1',
+      fakeRequest: httpServerMock.createKibanaRequest(),
+    });
+
+    expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).toHaveBeenCalledWith({
+      execution: sourceBasedExecution,
+      payload: {
+        execution_id: 'execution-1',
+        error: { code: 'internal_error', message: 'agent failed' },
+        status: ExecutionStatus.failed,
+      },
+    });
+  });
+
+  it('delivers an aborted callback before marking the execution aborted', async () => {
+    handleAgentExecutionMock.mockRejectedValue(
       createRequestAbortedError('Converse request was aborted')
     );
 
-    await run();
+    await createHandler().run({
+      executionId: 'execution-1',
+      fakeRequest: httpServerMock.createKibanaRequest(),
+    });
 
+    expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).toHaveBeenCalledWith({
+      execution,
+      payload: {
+        execution_id: 'execution-1',
+        error: { code: 'internal_error', message: 'Converse request was aborted' },
+        status: ExecutionStatus.aborted,
+      },
+    });
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
       ExecutionStatus.aborted,
@@ -265,11 +227,21 @@ describe('TaskHandler event streaming and finalization', () => {
     );
   });
 
-  it('omits the error from the status update when no error value was thrown', async () => {
-    collectAndWriteEventsMock.mockRejectedValue(undefined);
+  it('omits error from failure callbacks when no error value was thrown', async () => {
+    handleAgentExecutionMock.mockRejectedValue(undefined);
 
-    await run();
+    await createHandler().run({
+      executionId: 'execution-1',
+      fakeRequest: httpServerMock.createKibanaRequest(),
+    });
 
+    expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).toHaveBeenCalledWith({
+      execution,
+      payload: {
+        execution_id: 'execution-1',
+        status: ExecutionStatus.failed,
+      },
+    });
     expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
       'execution-1',
       ExecutionStatus.failed,
@@ -277,37 +249,100 @@ describe('TaskHandler event streaming and finalization', () => {
     );
   });
 
-  it('drains callback delivery before finalizing a failed execution', async () => {
-    const order: string[] = [];
-    collectAndWriteEventsMock.mockRejectedValue(new Error('agent failed'));
-    deliverCallbackEventsMock.mockImplementation(
-      () =>
-        new Promise((resolve) =>
-          setImmediate(() => {
-            order.push('delivered');
-            resolve();
-          })
-        )
+  it('marks an aborted execution failed when aborted callback delivery fails', async () => {
+    handleAgentExecutionMock.mockRejectedValue(
+      createRequestAbortedError('Converse request was aborted')
     );
-    executionClient.updateStatus.mockImplementation(async (_id: string, status: string) => {
-      order.push(`status:${status}`);
+    callbackDeliveryService.makeFailureCallbackRequestIfConfigured.mockRejectedValue(
+      new Error('callback failed')
+    );
+    serializeExecutionErrorMock
+      .mockReturnValueOnce({
+        code: 'internal_error' as never,
+        message: 'Converse request was aborted',
+      })
+      .mockReturnValueOnce({
+        code: 'internal_error' as never,
+        message: 'callback failed',
+      });
+
+    await createHandler().run({
+      executionId: 'execution-1',
+      fakeRequest: httpServerMock.createKibanaRequest(),
     });
 
-    await run();
+    expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).toHaveBeenCalledWith({
+      execution,
+      payload: {
+        execution_id: 'execution-1',
+        error: { code: 'internal_error', message: 'Converse request was aborted' },
+        status: ExecutionStatus.aborted,
+      },
+    });
+    expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
+      'execution-1',
+      ExecutionStatus.failed,
+      { code: 'internal_error', message: 'callback failed' }
+    );
+  });
 
-    expect(order).toEqual(['status:running', 'delivered', 'status:failed']);
+  it('passes standalone executions through to failure callback delivery', async () => {
+    const standaloneExecution = {
+      ...execution,
+      executionMode: AgentExecutionMode.standalone,
+      agentParams: {
+        nextInput: { message: 'hello' },
+        telemetryMetadata: undefined,
+      },
+    };
+    executionClient.get.mockResolvedValue(standaloneExecution);
+    handleAgentExecutionMock.mockRejectedValue(new Error('agent failed'));
+
+    await createHandler().run({
+      executionId: 'execution-1',
+      fakeRequest: httpServerMock.createKibanaRequest(),
+    });
+
+    expect(callbackDeliveryService.makeFailureCallbackRequestIfConfigured).toHaveBeenCalledWith({
+      execution: standaloneExecution,
+      payload: {
+        execution_id: 'execution-1',
+        error: { code: 'internal_error', message: 'agent failed' },
+        status: ExecutionStatus.failed,
+      },
+    });
   });
 
   it('logs when persisting the failure status fails', async () => {
-    collectAndWriteEventsMock.mockRejectedValue(new Error('agent failed'));
+    handleAgentExecutionMock.mockRejectedValue(new Error('agent failed'));
     executionClient.updateStatus
       .mockResolvedValueOnce(undefined)
       .mockRejectedValueOnce(new Error('status update failed'));
 
-    await run();
+    await createHandler().run({
+      executionId: 'execution-1',
+      fakeRequest: httpServerMock.createKibanaRequest(),
+    });
 
     expect(logger.error).toHaveBeenCalledWith(
       'Failed to update status for execution execution-1: status update failed'
+    );
+  });
+
+  it('marks the execution failed when success callback delivery fails', async () => {
+    callbackDeliveryService.makeSuccessCallbackRequestIfConfigured.mockRejectedValue(
+      new Error('callback failed')
+    );
+
+    await createHandler().run({
+      executionId: 'execution-1',
+      fakeRequest: httpServerMock.createKibanaRequest(),
+    });
+
+    expect(executionClient.updateStatus).toHaveBeenLastCalledWith(
+      'execution-1',
+      ExecutionStatus.failed,
+      { code: 'internal_error', message: 'callback failed' }
     );
   });
 });

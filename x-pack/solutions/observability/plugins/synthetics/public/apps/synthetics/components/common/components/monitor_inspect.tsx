@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 
-import { stringify } from 'yaml';
+import yaml from 'js-yaml';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import type {
@@ -321,7 +321,7 @@ const formatContent = (result: MonitorInspectResponse, asJson: boolean) => {
 
   const data = { publicConfig: firstResult ?? {}, privateConfig: compiledConfig ?? {} };
   if (!asJson) {
-    return stringify(data);
+    return yaml.dump(data);
   }
 
   return JSON.stringify(data, null, 2);

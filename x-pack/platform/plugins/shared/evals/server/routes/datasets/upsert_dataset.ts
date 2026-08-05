@@ -100,8 +100,7 @@ export const registerUpsertDatasetRoute = ({
           });
           if (tooLarge) return tooLarge;
 
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          logger.error(`Failed to upsert evaluation dataset: ${errorMessage}`);
+          logger.error(`Failed to upsert evaluation dataset: ${error}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to upsert evaluation dataset' },

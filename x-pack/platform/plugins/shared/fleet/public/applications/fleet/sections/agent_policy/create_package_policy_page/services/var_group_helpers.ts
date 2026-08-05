@@ -9,7 +9,6 @@ import {
   doesPackageHaveIntegrations,
   getNormalizedInputs,
 } from '../../../../../../../common/services';
-import { isInputAllowedForDeploymentMode } from '../../../../../../../common/services/agentless_policy_helper';
 import type {
   PackageInfo,
   RegistryInput,
@@ -87,59 +86,6 @@ export function isInputVisibleForVarGroupSelections(
   }
 
   return isInputCompatibleWithVarGroupSelections(registryInput, varGroupSelections);
-}
-
-/**
- * Compute the var_group options to hide when the package policy form is scoped to a
- * single policy template (integration). An option is hidden when every input of that
- * policy template available in the selected deployment mode declares it in
- * `hide_in_var_group_options`, since selecting it would leave the integration without
- * any usable inputs.
- */
-export function getHiddenVarGroupOptionsForPolicyTemplate(
-  packageInfo: PackageInfo | undefined,
-  policyTemplateName: string | undefined,
-  isAgentlessEnabled: boolean
-): Record<string, string[]> | undefined {
-  if (!packageInfo?.var_groups?.length || !policyTemplateName) {
-    return undefined;
-  }
-
-  const policyTemplate = packageInfo.policy_templates?.find(
-    (template) => template.name === policyTemplateName
-  );
-  if (!policyTemplate) {
-    return undefined;
-  }
-
-  const deploymentMode = isAgentlessEnabled ? 'agentless' : 'default';
-  const inputs = getNormalizedInputs(policyTemplate).filter((input) =>
-    isInputAllowedForDeploymentMode(
-      { type: input.type, policy_template: policyTemplateName },
-      deploymentMode,
-      packageInfo
-    )
-  );
-  if (!inputs.length) {
-    return undefined;
-  }
-
-  const hiddenOptions: Record<string, string[]> = {};
-  for (const varGroup of packageInfo.var_groups) {
-    const hiddenOptionNames = varGroup.options
-      .filter((option) =>
-        inputs.every((input) =>
-          input.hide_in_var_group_options?.[varGroup.name]?.includes(option.name)
-        )
-      )
-      .map((option) => option.name);
-
-    if (hiddenOptionNames.length > 0) {
-      hiddenOptions[varGroup.name] = hiddenOptionNames;
-    }
-  }
-
-  return Object.keys(hiddenOptions).length > 0 ? hiddenOptions : undefined;
 }
 
 /**

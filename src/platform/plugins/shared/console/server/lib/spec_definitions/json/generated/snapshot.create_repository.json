@@ -17,9 +17,6 @@
       ],
       "verify": "__flag__"
     },
-    "data_autocomplete_rules": {
-      "uuid": ""
-    },
     "methods": [
       "PUT",
       "POST"

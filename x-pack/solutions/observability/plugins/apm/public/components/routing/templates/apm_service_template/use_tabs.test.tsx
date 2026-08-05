@@ -142,6 +142,7 @@ describe('APM service template', () => {
       'Errors',
       'Metrics',
       'Infrastructure',
+      'Service map',
       'Logs',
       'Alerts',
       'Universal Profiling',

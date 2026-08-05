@@ -16,64 +16,6 @@
         "0"
       ]
     },
-    "data_autocomplete_rules": {
-      "actions": [
-        {
-          "add": {
-            "alias": "",
-            "aliases": "",
-            "filter": {
-              "__scope_link": "GLOBAL.query"
-            },
-            "index": "",
-            "indices": "",
-            "index_routing": "",
-            "is_hidden": {
-              "__one_of": [
-                true,
-                false
-              ]
-            },
-            "is_write_index": {
-              "__one_of": [
-                true,
-                false
-              ]
-            },
-            "routing": "",
-            "search_routing": "",
-            "must_exist": {
-              "__one_of": [
-                true,
-                false
-              ]
-            }
-          },
-          "remove": {
-            "alias": "",
-            "aliases": "",
-            "index": "",
-            "indices": "",
-            "must_exist": {
-              "__one_of": [
-                true,
-                false
-              ]
-            }
-          },
-          "remove_index": {
-            "index": "",
-            "indices": "",
-            "must_exist": {
-              "__one_of": [
-                true,
-                false
-              ]
-            }
-          }
-        }
-      ]
-    },
     "methods": [
       "POST"
     ],

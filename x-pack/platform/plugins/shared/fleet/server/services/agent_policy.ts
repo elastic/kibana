@@ -17,7 +17,6 @@ import type {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsClientContract,
   SavedObject,
-  SavedObjectErrorResult,
   SavedObjectsUpdateResponse,
   SavedObjectsFindOptions,
   Logger,
@@ -52,7 +51,7 @@ import {
 import {
   BUMP_AGENT_POLICIES_BATCH_SIZE,
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-  AGENTS_INDEX,
+  AGENTS_PREFIX,
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
@@ -129,6 +128,7 @@ import {
 import {
   hasVersionSuffix,
   removeVersionSuffixFromPolicyId,
+  buildPolicyIdOrVariantsKuery,
   buildPolicyIdOrVariantsEsFilter,
 } from '../../common/services/version_specific_policies_utils';
 
@@ -147,8 +147,7 @@ import {
 
 import { bulkInstallPackages, getPackageInfo } from './epm/packages';
 import { ensureInstalledPackage } from './epm/packages/install';
-import { unenrollForAgentPolicyId } from './agents';
-import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
+import { getAgentsByKuery, unenrollForAgentPolicyId } from './agents';
 import {
   buildCurrentRevisionFilter,
   getCompiledVersionsForAgentPolicy,
@@ -178,7 +177,6 @@ import { getSpaceForAgentPolicy, getSpaceForAgentPolicySO } from './spaces/helpe
 import {
   getVersionSpecificPolicies,
   getAgentVersionsForVersionSpecificPolicies,
-  reassignAgentsFromVersionSpecificPolicies,
 } from './utils/version_specific_policies';
 import { scheduleReassignAgentsToVersionSpecificPoliciesTask } from './agent_policies/reassign_agents_to_version_specific_policies_task';
 
@@ -335,32 +333,6 @@ class AgentPolicyService {
             spaceId: soClient.getCurrentNamespace(),
           },
         ]);
-      }
-    }
-
-    // If this policy no longer requires version-specific policies (e.g. the integration/input
-    // that required them was removed), reassign any agents still assigned to a variant policy back
-    // to the base policy and clean up the stale variant documents. Otherwise those agents stay on
-    // a variant policy that is never updated again and get stuck reporting an outdated policy.
-    // See https://github.com/elastic/kibana/issues/276294
-    if (
-      appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
-      existingAgentPolicy.has_agent_version_conditions &&
-      options.hasAgentVersionConditions === false
-    ) {
-      logger.debug(
-        `Agent policy [${id}] no longer has agent version conditions, reassigning agents from version-specific policies back to the base policy`
-      );
-      // Swallow and log: the SO update, revision bump, and deploy have already committed above, so
-      // a transient failure here must not fail the whole update (a retry would also skip this
-      // branch, since has_agent_version_conditions is now false). The periodic sweep is the
-      // fallback that recovers any agents this inline pass misses.
-      try {
-        await reassignAgentsFromVersionSpecificPolicies(soClient, esClient, id);
-      } catch (error) {
-        logger.error(
-          `Failed to reassign agents from version-specific policies for agent policy [${id}]: ${error}`
-        );
       }
     }
 
@@ -1002,11 +974,16 @@ class AgentPolicyService {
               (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicy.id)) || [];
           }
           if (options.withAgentCount) {
-            const counts = await getAgentCountForAgentPolicies(
-              appContextService.getInternalUserESClient(),
-              [agentPolicy.id]
+            const policyKuery = buildPolicyIdOrVariantsKuery(
+              agentPolicy.id,
+              `${AGENTS_PREFIX}.policy_id`
             );
-            agentPolicy.agents = counts[agentPolicy.id] ?? 0;
+            await getAgentsByKuery(appContextService.getInternalUserESClient(), soClient, {
+              showInactive: true,
+              perPage: 0,
+              page: 1,
+              kuery: policyKuery,
+            }).then(({ total }) => (agentPolicy.agents = total));
           } else {
             agentPolicy.agents = 0;
           }
@@ -1704,16 +1681,14 @@ class AgentPolicyService {
       throw new HostedAgentPolicyRestrictionRelatedError(`Cannot delete hosted agent policy ${id}`);
     }
 
-    // Prevent deleting policy when assigned agents are inactive. active:true covers
-    // online, offline, and inactive agents; active:false is unenrolled.
-    const { count: total } = await esClient.count({
-      index: AGENTS_INDEX,
-      ignore_unavailable: true,
-      query: {
-        bool: {
-          filter: [{ term: { active: 'true' } }, buildPolicyIdOrVariantsEsFilter(id)],
-        },
-      },
+    // Prevent deleting policy when assigned agents are inactive. Also matches agents on
+    // version-specific variants of this policy (e.g. `id#9.2`), which would otherwise be
+    // missed since their policy_id is not an exact match.
+    const { total } = await getAgentsByKuery(esClient, soClient, {
+      showInactive: true,
+      perPage: 0,
+      page: 1,
+      kuery: buildPolicyIdOrVariantsKuery(id, `${AGENTS_PREFIX}.policy_id`),
     });
 
     if (total > 0 && !agentPolicy?.supports_agentless) {
@@ -1943,7 +1918,6 @@ class AgentPolicyService {
             namespaces: fullPolicy.namespaces,
             data: fullPolicy as unknown as FleetServerPolicy['data'],
             policy_id: fullPolicy.id,
-            policy_base_id: fullPolicy.id,
             default_fleet_server: policy.is_default_fleet_server === true,
           };
 
@@ -2451,9 +2425,7 @@ class AgentPolicyService {
       kuery: `${savedObjectType}.is_protected: true`,
     });
 
-    const updatedAgentPolicies: Array<
-      SavedObjectsUpdateResponse<AgentPolicySOAttributes> | SavedObjectErrorResult
-    > = [];
+    const updatedAgentPolicies: Array<SavedObjectsUpdateResponse<AgentPolicySOAttributes>> = [];
 
     for await (const agentPolicyPageResults of agentPolicyFetcher) {
       const { saved_objects: bulkUpdateSavedObjects } = await soClient

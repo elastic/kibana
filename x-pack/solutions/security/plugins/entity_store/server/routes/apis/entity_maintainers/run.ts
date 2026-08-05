@@ -11,7 +11,6 @@ import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { enforceEntityStorePrivileges } from '../utils/check_entity_store_privileges';
 import { maintainerIdParamsSchema, runMaintainerQuerySchema } from './utils/validator';
 
 const RUN_MAINTAINER_SYNC_SOCKET_TIMEOUT_MS = 10 * 60 * 1000;
@@ -45,14 +44,11 @@ export function registerRunMaintainer(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManagerClient, entityMaintainersClient } = entityStoreCtx;
+        const { logger, entityMaintainersClient } = entityStoreCtx;
         const { id } = req.params;
         const { sync } = req.query;
 
         logger.debug(`Run maintainer API invoked for id: ${id}`);
-
-        const forbidden = await enforceEntityStorePrivileges(assetManagerClient, req, res);
-        if (forbidden) return forbidden;
 
         if (sync) {
           await entityMaintainersClient.runSync(id, req);

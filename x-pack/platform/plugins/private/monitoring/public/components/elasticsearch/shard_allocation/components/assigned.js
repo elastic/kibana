@@ -9,7 +9,6 @@ import React from 'react';
 import { get, sortBy } from 'lodash';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, euiFontSize, logicalCSS } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { Shard } from './shard';
 import { getSafeForExternalLink } from '../../../../lib/get_safe_for_external_link';
@@ -106,16 +105,7 @@ export class Assigned extends React.Component {
     // TODO: redesign for shard allocation
     const name = <EuiLink href={generateQueryAndLink(data)}>{data.name}</EuiLink>;
     const master =
-      data.node_type === 'master' ? (
-        <EuiIcon
-          type="starFillSpace"
-          color="primary"
-          aria-label={i18n.translate(
-            'xpack.monitoring.elasticsearch.shardAllocation.masterNodeAriaLabel',
-            { defaultMessage: 'Master node' }
-          )}
-        />
-      ) : null;
+      data.node_type === 'master' ? <EuiIcon type="starFillSpace" color="primary" /> : null;
     const shards = sortBy(data.children, 'shard').map(this.createShard);
 
     return (

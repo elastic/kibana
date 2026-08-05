@@ -8,8 +8,10 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { flattenObject } from '@kbn/object-utils';
 import { inject, injectable } from 'inversify';
-import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import { alertEpisodeStatus } from '../../../resources/datastreams/alert_events';
+import {
+  ALERT_EVENTS_DATA_STREAM,
+  alertEpisodeStatus,
+} from '../../../resources/datastreams/alert_events';
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../../saved_objects';
 import { EsServiceScopedToken } from '../es_service/tokens';
 import { RuleSavedObjectsClientToken } from '../rules_saved_object_service/tokens';

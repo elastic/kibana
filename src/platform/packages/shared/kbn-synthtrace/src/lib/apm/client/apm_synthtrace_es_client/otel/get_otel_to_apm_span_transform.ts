@@ -58,8 +58,6 @@ export function getOtelToApmTransform() {
               ? 'db'
               : document['attributes.messaging.system']
               ? 'messaging'
-              : document['attributes.gen_ai.system']
-              ? 'external'
               : 'custom';
           document['attributes.span.subtype'] =
             kind === 'Internal'
@@ -68,9 +66,7 @@ export function getOtelToApmTransform() {
               ? 'http'
               : document['attributes.db.system'] ??
                 document['attributes.messaging.system'] ??
-                (document['attributes.gen_ai.system']
-                  ? String(document['attributes.gen_ai.system'])
-                  : 'internal');
+                'internal';
 
           document['attributes.span.duration.us'] = duration;
           break;

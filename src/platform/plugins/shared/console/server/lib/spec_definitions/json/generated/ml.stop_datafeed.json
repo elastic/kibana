@@ -14,27 +14,6 @@
       ],
       "close_job": "__flag__"
     },
-    "data_autocomplete_rules": {
-      "allow_no_match": {
-        "__one_of": [
-          true,
-          false
-        ]
-      },
-      "force": {
-        "__one_of": [
-          true,
-          false
-        ]
-      },
-      "timeout": "",
-      "close_job": {
-        "__one_of": [
-          true,
-          false
-        ]
-      }
-    },
     "methods": [
       "POST"
     ],

@@ -18,8 +18,12 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { from, map, switchMap } from 'rxjs';
-import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
+import { combineLatest, from, map, switchMap } from 'rxjs';
+import {
+  CONTEXT_ENGINE_APP_ID,
+  CONTEXT_ENGINE_APP_PATH,
+  CONTEXT_ENGINE_ENABLED_FLAG,
+} from '../common/features';
 import type {
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
@@ -58,18 +62,22 @@ export class ContextEnginePlugin
       title: APP_TITLE,
       euiIconType: 'logoElasticsearch',
       visibleIn: [...VISIBLE_LOCATIONS],
-      // Inaccessible by default: the app and its routes are gated until the advanced
-      // setting is on. While inaccessible, core also removes it from every navigation
-      // surface.
+      // Inaccessible by default: the app and its routes are gated until both the
+      // feature flag and the advanced setting are on. While inaccessible, core also
+      // removes it from every navigation surface.
       status: AppStatus.inaccessible,
       keywords: ['context', 'ai index', 'context engine'],
       updater$: from(startServices).pipe(
         switchMap(([coreStart]) =>
-          coreStart.uiSettings.get$<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, false).pipe(
+          combineLatest([
+            coreStart.featureFlags.getBooleanValue$(CONTEXT_ENGINE_ENABLED_FLAG, false),
+            coreStart.uiSettings.get$<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, false),
+          ]).pipe(
             map(
-              (settingEnabled): AppUpdater =>
+              ([flagEnabled, settingEnabled]): AppUpdater =>
                 () => ({
-                  status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
+                  status:
+                    flagEnabled && settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
                 })
             )
           )

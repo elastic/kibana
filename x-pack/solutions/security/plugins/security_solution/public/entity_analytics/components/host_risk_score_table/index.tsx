@@ -7,11 +7,8 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux-v7';
-import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
-import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
-import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
+import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { HostPanelKey } from '../../../flyout/entity_details/shared/constants';
 import type {
   Columns,
@@ -86,9 +83,7 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
   type,
 }) => {
   const dispatch = useDispatch();
-  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
-  const { openHostFlyout } = useFlyoutApi();
   const getHostRiskScoreSelector = useMemo(() => hostsSelectors.hostRiskScoreSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
     getHostRiskScoreSelector(state, hostsModel.HostsType.page)
@@ -144,31 +139,26 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
     },
     [dispatch, type]
   );
-  const openHostDetails = useCallback(
+  const openHostFlyout = useCallback(
     (hostName: string) => {
-      if (enableNewFlyout) {
-        openHostFlyout({
-          hostName,
-          contextID: tableType,
-          scopeId: tableType,
-          origin: FLYOUT_ORIGIN.HOST_RISK_TABLE,
-        });
-        return;
-      }
-
       openFlyout({
         right: {
           id: HostPanelKey,
-          params: { hostName, contextID: tableType, scopeId: tableType },
+          params: {
+            hostName,
+            contextID: tableType,
+            scopeId: tableType,
+            isPreviewMode: false,
+          },
         },
       });
     },
-    [enableNewFlyout, openFlyout, openHostFlyout]
+    [openFlyout]
   );
 
   const columns = useMemo(
-    () => getHostRiskScoreColumns({ dispatchSeverityUpdate, openHostFlyout: openHostDetails }),
-    [dispatchSeverityUpdate, openHostDetails]
+    () => getHostRiskScoreColumns({ dispatchSeverityUpdate, openHostFlyout }),
+    [dispatchSeverityUpdate, openHostFlyout]
   );
 
   const risk = (

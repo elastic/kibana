@@ -21,8 +21,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const retry = getService('retry');
   const defaultSettings = { defaultIndex: 'logstash-*' };
 
-  // Failing: See https://github.com/elastic/kibana/issues/253834
-  describe.skip('Customizations', () => {
+  describe('Customizations', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsAdmin();
       await kibanaServer.savedObjects.cleanStandardList();

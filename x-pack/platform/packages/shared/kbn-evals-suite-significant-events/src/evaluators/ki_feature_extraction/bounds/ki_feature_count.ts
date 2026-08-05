@@ -37,7 +37,7 @@ export const kiFeatureCountEvaluator = {
         issues.length > 0
           ? `${issues.join('; ')} (score=${score.toFixed(2)})`
           : `KI feature count ${count} is within bounds [${min_features}, ${max_features}]`,
-      metadata: { count, min_features, max_features },
+      details: { count, min_features, max_features },
     };
   },
 } satisfies KIFeatureExtractionEvaluator;

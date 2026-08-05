@@ -51,7 +51,6 @@
       "discover",
       "exploratoryView",
       "home",
-      "globalSearch",
       "usageCollection",
       "cloud",
       "spaces",
@@ -60,7 +59,7 @@
       "investigate",
       "cps",
       "ingestHub",
-      "significantEvents"
+      "significant_events"
     ],
     "requiredBundles": [
       "aiops",
@@ -71,7 +70,7 @@
       "logsShared",
       "kibanaReact",
       "kibanaUtils",
-      "significantEvents",
+      "significant_events",
       "stackAlerts",
       "observabilityAgentBuilder"
     ],

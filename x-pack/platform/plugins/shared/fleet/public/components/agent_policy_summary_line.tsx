@@ -212,12 +212,7 @@ export const AgentPolicySummaryLine = memo<{
                       )
                     }
                   >
-                    <EuiFlexGroup
-                      alignItems="center"
-                      gutterSize="xs"
-                      responsive={false}
-                      tabIndex={0}
-                    >
+                    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                       <EuiFlexItem grow={false}>
                         <EuiIcon size="m" type="warning" color="warning" aria-hidden={true} />
                       </EuiFlexItem>
@@ -245,7 +240,7 @@ export const AgentPolicySummaryLine = memo<{
         {withDescription && description && (
           <EuiFlexItem>
             <EuiToolTip content={description}>
-              <EuiText color="subdued" size="xs" tabIndex={0}>
+              <EuiText color="subdued" size="xs">
                 {description}
               </EuiText>
             </EuiToolTip>

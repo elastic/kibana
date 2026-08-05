@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiFlexGroup, EuiPanel, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MiniMap, useReactFlow, useStore } from '@xyflow/react';
@@ -106,16 +106,15 @@ export function CanvasMinimap() {
       `}
     >
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
-        <EuiToolTip content={collapseLabel} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="minus"
-            color="text"
-            size="xs"
-            aria-label={collapseLabel}
-            onClick={collapse}
-            data-test-subj="streamsCanvasMinimapCollapse"
-          />
-        </EuiToolTip>
+        <EuiButtonIcon
+          iconType="minus"
+          color="text"
+          size="xs"
+          aria-label={collapseLabel}
+          title={collapseLabel}
+          onClick={collapse}
+          data-test-subj="streamsCanvasMinimapCollapse"
+        />
       </EuiFlexGroup>
       <MiniMap
         pannable

@@ -17,7 +17,7 @@ export const resetTransformsRequestSchema = schema.object({
    */
   transformsInfo: schema.arrayOf(
     schema.object({
-      id: schema.string({ maxLength: 1000 }),
+      id: schema.string(),
       state: transformStateSchema,
     }),
     { maxSize: 1000 }

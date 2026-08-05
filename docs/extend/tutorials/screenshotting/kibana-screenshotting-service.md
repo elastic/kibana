@@ -20,7 +20,7 @@ If you are planning to integrate with the screenshotting plugin, please get in t
 - Batch screenshotting.
 
 ### Usage
-After listing the `screenshotting` plugin in your dependencies, the plugin will be initialized on the setup stage.
+After listing the `screenshotting` plugin in your dependencies, the plugin will be intitalized on the setup stage.
 The intitalization process downloads (if it is not already present) and verifies the Chromium build.
 
 The start contract exposes a public API to interact with the plugin.

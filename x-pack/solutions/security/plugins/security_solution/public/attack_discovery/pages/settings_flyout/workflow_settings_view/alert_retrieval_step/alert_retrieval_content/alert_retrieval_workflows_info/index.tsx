@@ -19,7 +19,6 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -105,14 +104,12 @@ const AlertRetrievalWorkflowsInfoComponent: React.FC<AlertRetrievalWorkflowsInfo
 
   const button = useMemo(
     () => (
-      <EuiToolTip content={ALERT_RETRIEVAL_WORKFLOWS_INFO_ARIA_LABEL} disableScreenReaderOutput>
-        <EuiButtonIcon
-          aria-label={ALERT_RETRIEVAL_WORKFLOWS_INFO_ARIA_LABEL}
-          data-test-subj="alertRetrievalWorkflowsInfoButton"
-          iconType="info"
-          onClick={onButtonClick}
-        />
-      </EuiToolTip>
+      <EuiButtonIcon
+        aria-label={ALERT_RETRIEVAL_WORKFLOWS_INFO_ARIA_LABEL}
+        data-test-subj="alertRetrievalWorkflowsInfoButton"
+        iconType="info"
+        onClick={onButtonClick}
+      />
     ),
     [onButtonClick]
   );

@@ -13,13 +13,6 @@ area: Entity Analytics
 # requires knowledge/<area-slug>.md to be populated from a prior session.
 mode: single
 
-# [optional] legacy (default) or shadow. Experimental — leave unset unless you
-# have read scripts/action-scoped-collector.md and run its one-time capability
-# spike (scripts/action-scoped-collector-spike.md) against your own MCP setup.
-# shadow mode never changes which findings get logged; it only records where
-# an experimental collector's classification would have differed, for review.
-# collector_mode: legacy
-
 # Flows to exercise. Each flow needs at minimum a name.
 flows:
   - name: Happy path — <short description>
@@ -50,8 +43,7 @@ specs: https://github.com/elastic/security-team/issues/<NUMBER>
 session-timeout: 90
 
 # [optional] Resume a prior session by pointing at its directory.
-# The existing config must contain its session_id and session_resources
-# manifest; the agent will skip setup and jump straight to Phase 2.
+# The agent will skip setup and jump straight to Phase 2.
 # session-dir: .exploratory-session/entity-analytics-20260714-093022
 
 # [optional] Environment block — omit to use an agent-managed Scout server.
@@ -80,18 +72,8 @@ session-timeout: 90
 #   # this key is required.
 #   api-key: $KIBANA_API_KEY   # note: hyphen (invocation syntax); JSON profiles use api_key (underscore)
 #
-#   # [optional] Shared base space to use (default: exploratory-testing).
-#   # The base space is protected from automatic deletion. Parallel flow spaces
-#   # are namespaced by a generated session_id and are cleaned only when owned.
+#   # [optional] Space to use (default: exploratory-testing).
 #   # space: exploratory-testing
 #
 #   # [optional] Skip data setup if the environment is already seeded.
 #   # data-setup: skip
-#
-# CCS cleanup is blocked until the session verifies that the remote-cluster
-# state has been restored. The generated config.json tracks capture and
-# mutation progress as ccs_state: captured, mutation_pending, modified, or
-# restored. ccs_restored is false until verification succeeds.
-# capture-remote-cluster.py persists the writable restore payload, raw
-# persistent/transient settings, and restoration provenance in:
-#   ccs_restore: { remote_cluster_alias, endpoint, payload, provenance }

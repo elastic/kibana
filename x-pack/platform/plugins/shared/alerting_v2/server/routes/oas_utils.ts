@@ -8,6 +8,10 @@
 import type { ErrorResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertingOasOperationObject, OasExampleEntry } from './oas_types';
 
+/**
+ * Builds an OpenAPI media-type object with a single named JSON example.
+ * Shared by Alerting v2 route `oasOperationObject` helpers.
+ */
 export const jsonExample = <T>(name: string, summary: string, value: T) => ({
   content: {
     'application/json': {

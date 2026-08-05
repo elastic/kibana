@@ -22,7 +22,6 @@ main() {
     "kibana_api_doc_links_sync" \
     "Update Kibana API doc links" \
     "kibana_api_doc_links_existing_pr" \
-    true \
     'backport:skip' 'release_note:skip' 'Feature:Console' 'Team:Kibana Management'
 }
 

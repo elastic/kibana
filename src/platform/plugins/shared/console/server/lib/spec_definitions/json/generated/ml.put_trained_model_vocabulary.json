@@ -6,11 +6,6 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "data_autocomplete_rules": {
-      "vocabulary": [],
-      "merges": [],
-      "scores": []
-    },
     "methods": [
       "PUT"
     ],

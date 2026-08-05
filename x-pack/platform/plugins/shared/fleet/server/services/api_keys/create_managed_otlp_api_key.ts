@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { PrivilegeType } from '@kbn/apm-types';
 
 export function createManagedOtlpApiKey(esClient: ElasticsearchClient, name: string) {
   const timestamp = new Date().toISOString();
@@ -23,7 +22,7 @@ export function createManagedOtlpApiKey(esClient: ElasticsearchClient, name: str
         applications: [
           {
             application: 'apm',
-            privileges: [PrivilegeType.EVENT],
+            privileges: ['event:write'],
             resources: ['*'],
           },
         ],

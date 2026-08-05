@@ -20,7 +20,6 @@ dependsOn:
   - '@kbn/data-plugin'
   - '@kbn/test-jest-helpers'
   - '@kbn/i18n-react'
-  - '@kbn/ui-callout'
 tags:
   - shared-browser
   - package

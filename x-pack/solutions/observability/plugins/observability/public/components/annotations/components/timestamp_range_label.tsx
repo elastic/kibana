@@ -19,7 +19,6 @@ export function TimestampRangeLabel({
       <div>
         {formatDate(annotation['@timestamp'], 'longDateTime')}
         <EuiIcon
-          aria-hidden={true}
           type="sortRight"
           css={{
             margin: '0 5px',

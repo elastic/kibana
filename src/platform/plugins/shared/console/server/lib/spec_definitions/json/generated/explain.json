@@ -22,11 +22,6 @@
       "stored_fields": [],
       "q": ""
     },
-    "data_autocomplete_rules": {
-      "query": {
-        "__scope_link": "GLOBAL.query"
-      }
-    },
     "methods": [
       "GET",
       "POST"

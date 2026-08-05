@@ -6,18 +6,15 @@
  */
 
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
-import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-api-server';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { SortOrder } from '../../../common/ui/types';
 import {
-  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   OWNERS,
 } from '../../../common/constants';
-import type { Owner } from '../../../common/constants/types';
 import type {
   CollectTelemetryDataParams,
   CasesTelemetry,
@@ -26,16 +23,16 @@ import type {
   CaseAggregationResult,
   AttachmentAggregationResult,
   FileAttachmentAggregationResults,
-  CasesWithAlertsAggs,
+  CasesTelemetryWithAlertsAggsByOwnerResults,
 } from '../types';
 import {
-  bucketsToOwnerRecord,
   findValueInBuckets,
   getAggregationsBuckets,
   getAttachmentsFrameworkStats,
   getCountsAggregationQuery,
   getCountsFromBuckets,
   getMaxBucketOnCaseAggregationQuery,
+  getOnlyAlertsCommentsFilter,
   getOnlyConnectorsFilter,
   getReferencesAggregationQuery,
   getSolutionValues,
@@ -81,18 +78,18 @@ export const getCasesTelemetryData = async ({
       casesRes,
       casesWithAlertsRes,
       commentsRes,
+      totalAlertsRes,
       totalConnectorsRes,
       latestDates,
       filesRes,
-      totalParticipants,
     ] = await Promise.all([
       getCasesSavedObjectTelemetry(savedObjectsClient),
       getCasesWithAlertsByOwner(savedObjectsClient),
       getCommentsSavedObjectTelemetry(savedObjectsClient),
+      getAlertsTelemetry(savedObjectsClient),
       getConnectorsTelemetry(savedObjectsClient),
       getLatestCasesDates({ savedObjectsClient, logger }),
       getFilesTelemetry(savedObjectsClient),
-      getTotalParticipants(savedObjectsClient),
     ]);
 
     const aggregationsBuckets = getAggregationsBuckets({
@@ -105,8 +102,6 @@ export const getCasesTelemetryData = async ({
       totalCasesForOwner: casesRes.total,
       filesAggregations: filesRes.aggregations,
     });
-
-    const { all: allTotalWithAlerts, byOwner: totalWithAlertsByOwner } = casesWithAlertsRes;
 
     return {
       all: {
@@ -129,9 +124,10 @@ export const getCasesTelemetryData = async ({
           casesRes.aggregations?.totalWithMaxObservables?.buckets ?? []
         ),
         totalUsers: casesRes.aggregations?.users?.value ?? 0,
-        totalParticipants,
+        totalParticipants: commentsRes.aggregations?.participants?.value ?? 0,
         totalTags: casesRes.aggregations?.tags?.value ?? 0,
-        totalWithAlerts: allTotalWithAlerts,
+        totalWithAlerts:
+          totalAlertsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
         totalWithConnectors:
           totalConnectorsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
         latestDates,
@@ -147,21 +143,21 @@ export const getCasesTelemetryData = async ({
         caseAggregations: casesRes.aggregations,
         attachmentAggregations: commentsRes.aggregations,
         filesAggregations: filesRes.aggregations,
-        totalWithAlertsByOwner,
+        casesTotalWithAlerts: casesWithAlertsRes.aggregations,
         owner: 'securitySolution',
       }),
       obs: getSolutionValues({
         caseAggregations: casesRes.aggregations,
         attachmentAggregations: commentsRes.aggregations,
         filesAggregations: filesRes.aggregations,
-        totalWithAlertsByOwner,
+        casesTotalWithAlerts: casesWithAlertsRes.aggregations,
         owner: 'observability',
       }),
       main: getSolutionValues({
         caseAggregations: casesRes.aggregations,
         attachmentAggregations: commentsRes.aggregations,
         filesAggregations: filesRes.aggregations,
-        totalWithAlertsByOwner,
+        casesTotalWithAlerts: casesWithAlertsRes.aggregations,
         owner: 'cases',
       }),
     };
@@ -346,6 +342,11 @@ const getCommentsSavedObjectTelemetry = async (
     aggs: {
       ...attachmentsByOwnerAggregationQuery,
       ...attachmentRegistries(),
+      participants: {
+        cardinality: {
+          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.created_by.username`,
+        },
+      },
     },
   });
 };
@@ -400,6 +401,25 @@ const getFilesTelemetry = async (
   });
 };
 
+const getAlertsTelemetry = async (
+  savedObjectsClient: TelemetrySavedObjectsClient
+): Promise<SavedObjectsFindResponse<unknown, ReferencesAggregation>> => {
+  return savedObjectsClient.find<unknown, ReferencesAggregation>({
+    page: 0,
+    perPage: 0,
+    type: CASE_COMMENT_SAVED_OBJECT,
+    namespaces: ['*'],
+    filter: getOnlyAlertsCommentsFilter(),
+    aggs: {
+      ...getReferencesAggregationQuery({
+        savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+        referenceType: 'cases',
+        agg: 'cardinality',
+      }),
+    },
+  });
+};
+
 const getConnectorsTelemetry = async (
   savedObjectsClient: TelemetrySavedObjectsClient
 ): Promise<SavedObjectsFindResponse<unknown, ReferencesAggregation>> => {
@@ -419,82 +439,30 @@ const getConnectorsTelemetry = async (
   });
 };
 
-/**
- * Counts distinct cases with at least one alert via the denormalized `total_alerts`
- * counter (covers both legacy and unified attachments). Stale pre-8.7 cases keep the
- * `-1` sentinel and are excluded by `gte: 1` — a minor under-count.
- */
 const getCasesWithAlertsByOwner = async (
   savedObjectsClient: TelemetrySavedObjectsClient
-): Promise<{ all: number; byOwner: Record<Owner, number> }> => {
-  const res = await savedObjectsClient.search<SavedObjectsRawDocSource, CasesWithAlertsAggs>({
-    type: [CASE_SAVED_OBJECT],
+): Promise<SavedObjectsFindResponse<unknown, CasesTelemetryWithAlertsAggsByOwnerResults>> => {
+  return savedObjectsClient.find<unknown, CasesTelemetryWithAlertsAggsByOwnerResults>({
+    page: 0,
+    perPage: 0,
+    type: CASE_COMMENT_SAVED_OBJECT,
     namespaces: ['*'],
-    size: 0,
+    filter: getOnlyAlertsCommentsFilter(),
     aggs: {
-      withAlerts: {
-        filter: { range: { [`${CASE_SAVED_OBJECT}.total_alerts`]: { gte: 1 } } },
+      by_owner: {
+        terms: {
+          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.owner`,
+          size: 3,
+          include: ['securitySolution', 'observability', 'cases'],
+        },
         aggs: {
-          byOwner: {
-            terms: {
-              field: `${CASE_SAVED_OBJECT}.owner`,
-              size: OWNERS.length,
-              include: [...OWNERS],
-            },
-          },
+          ...getReferencesAggregationQuery({
+            savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+            referenceType: 'cases',
+            agg: 'cardinality',
+          }),
         },
       },
     },
   });
-
-  const { aggregations: aggs } = res;
-
-  return {
-    all: aggs?.withAlerts?.doc_count ?? 0,
-    byOwner: bucketsToOwnerRecord(
-      aggs?.withAlerts?.byOwner?.buckets,
-      ({ doc_count: docCount }) => docCount
-    ),
-  };
-};
-
-/**
- * Distinct participant count across both the legacy `cases-comments` and unified
- * `cases-attachments` saved objects.
- */
-const getTotalParticipants = async (
-  savedObjectsClient: TelemetrySavedObjectsClient
-): Promise<number> => {
-  const res = await savedObjectsClient.search<
-    SavedObjectsRawDocSource,
-    { participants?: { value: number } }
-  >({
-    type: [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT],
-    namespaces: ['*'],
-    size: 0,
-    runtime_mappings: {
-      participant_username: {
-        type: 'keyword',
-        script: {
-          source: `
-            def commentUser = doc['${CASE_COMMENT_SAVED_OBJECT}.created_by.username'];
-            if (commentUser.size() > 0) {
-              emit(commentUser.value);
-              return;
-            }
-            def attachmentUser = doc['${CASE_ATTACHMENT_SAVED_OBJECT}.created_by.username'];
-            if (attachmentUser.size() > 0) {
-              emit(attachmentUser.value);
-            }
-          `,
-        },
-      },
-    },
-    aggs: {
-      participants: { cardinality: { field: 'participant_username' } },
-    },
-  });
-
-  const { aggregations: aggs } = res;
-  return aggs?.participants?.value ?? 0;
 };

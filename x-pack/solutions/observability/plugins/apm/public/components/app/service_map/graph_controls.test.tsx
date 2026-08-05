@@ -229,7 +229,7 @@ describe('ServiceMapGraph - Controls', () => {
     });
   });
 
-  it('renders "View in Service map" button when fullMapHref is provided', async () => {
+  it('renders "View full service map" button when fullMapHref is provided', async () => {
     const fullMapHref = '/app/apm/service-map?rangeFrom=now-24h&rangeTo=now';
     render(
       <ReactFlowProvider>
@@ -240,10 +240,10 @@ describe('ServiceMapGraph - Controls', () => {
     const viewFullMapButton = screen.getByTestId('serviceMapViewFullMapButton');
     expect(viewFullMapButton).toBeInTheDocument();
     expect(viewFullMapButton).toHaveAttribute('href', fullMapHref);
-    await expectButtonTooltip(viewFullMapButton, 'View in Service map');
+    await expectButtonTooltip(viewFullMapButton, 'View full service map');
   });
 
-  it('does not render "View in Service map" button when fullMapHref is not provided', () => {
+  it('does not render "View full service map" button when fullMapHref is not provided', () => {
     render(
       <ReactFlowProvider>
         <ServiceMapGraph {...defaultProps} />
@@ -253,7 +253,7 @@ describe('ServiceMapGraph - Controls', () => {
     expect(screen.queryByTestId('serviceMapViewFullMapButton')).not.toBeInTheDocument();
   });
 
-  it('renders both view in Service map and fullscreen buttons when both fullMapHref and onToggleFullscreen are provided', () => {
+  it('renders both view full map and fullscreen buttons when both fullMapHref and onToggleFullscreen are provided', () => {
     const fullMapHref = '/app/apm/service-map?rangeFrom=now-24h&rangeTo=now';
     render(
       <ReactFlowProvider>

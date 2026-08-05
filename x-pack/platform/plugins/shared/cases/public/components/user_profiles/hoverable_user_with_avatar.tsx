@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { UserToolTip } from './user_tooltip';
-import { CaseUserAvatar } from './user_avatar';
+import { SmallUserAvatar } from './small_user_avatar';
 import type { UsernameProps } from './username';
 import { Username } from './username';
 
@@ -19,20 +19,20 @@ const HoverableUserWithAvatarComponent: React.FC<HoverableUserWithAvatarProps> =
   boldName,
 }) => {
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <CaseUserAvatar size="s" userInfo={userInfo} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction={'column'} gutterSize="none">
-          <EuiFlexItem>
-            <UserToolTip userInfo={userInfo}>
+    <UserToolTip userInfo={userInfo}>
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <SmallUserAvatar userInfo={userInfo} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction={'column'} gutterSize="none">
+            <EuiFlexItem>
               <Username userInfo={userInfo} boldName={boldName} />
-            </UserToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </UserToolTip>
   );
 };
 HoverableUserWithAvatarComponent.displayName = 'HoverableUserWithAvatar';

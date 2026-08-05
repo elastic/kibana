@@ -7,25 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 
-export const querySchema = z
-  .object({
-    query: z.union([
-      z.string().meta({
-        description:
-          'A text-based query such as Kibana Query Language (KQL) or Lucene query language.',
+export const querySchema = schema.object(
+  {
+    query: schema.oneOf([
+      schema.string({
+        meta: {
+          description:
+            'A text-based query such as Kibana Query Language (KQL) or Lucene query language.',
+        },
       }),
-      z.record(z.string(), z.any()),
+      schema.recordOf(schema.string(), schema.any()),
     ]),
-    language: z.string(),
-  })
-  .strict()
-  .meta({ id: 'kbn-es-query-server-querySchema' });
+    language: schema.string(),
+  },
+  { meta: { id: 'kbn-es-query-server-querySchema' } }
+);
 
-export const aggregateQuerySchema = z
-  .object({
-    esql: z.string(),
-  })
-  .strict()
-  .meta({ id: 'kbn-es-query-server-aggregateQuerySchema' });
+export const aggregateQuerySchema = schema.object(
+  {
+    esql: schema.string(),
+  },
+  { meta: { id: 'kbn-es-query-server-aggregateQuerySchema' } }
+);

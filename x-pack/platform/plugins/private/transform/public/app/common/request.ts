@@ -192,7 +192,7 @@ export const getCreateTransformRequestBody = (
   dataView: DataView,
   transformConfigState: StepDefineExposedState,
   transformDetailsState: StepDetailsExposedState,
-  projectRouting: PutTransformsRequestSchema['source']['project_routing'] = transformConfigState.projectRouting
+  projectRouting?: PutTransformsRequestSchema['source']['project_routing']
 ): PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema => ({
   ...getPreviewTransformRequestBody(
     dataView,

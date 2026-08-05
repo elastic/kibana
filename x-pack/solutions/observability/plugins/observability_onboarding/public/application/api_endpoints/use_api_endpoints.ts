@@ -8,22 +8,13 @@
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED,
-  IS_VENDOR_ENDPOINTS_ENABLED,
-} from '../../../common/feature_flags';
+import { IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED } from '../../../common/feature_flags';
 import { FETCH_STATUS, isPending, useFetcher } from '../../hooks/use_fetcher';
 import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
 import type { SupportedLogo } from '../shared/logo_icon';
 import type { ApiEndpointId } from '../../../common/api_endpoints';
 import type { ObservabilityOnboardingAppServices } from '../..';
-import {
-  API_ENDPOINTS,
-  getPopoverVendorEndpoints,
-  getVendorEndpointsForTab,
-  type ApiEndpointContext,
-  type ResolvedVendorEndpoint,
-} from './endpoints_config';
+import { API_ENDPOINTS, type ApiEndpointContext } from './endpoints_config';
 
 export interface ResolvedApiEndpoint {
   id: ApiEndpointId;
@@ -32,12 +23,10 @@ export interface ResolvedApiEndpoint {
   euiIconType?: EuiIconType;
   url?: string;
   usesManagedInput: boolean;
-  additionalEndpoints: ResolvedVendorEndpoint[];
 }
 
 export function useApiEndpoints(): {
   endpoints: ResolvedApiEndpoint[];
-  popoverEndpoints: ResolvedVendorEndpoint[];
   isLoading: boolean;
   isError: boolean;
 } {
@@ -52,7 +41,6 @@ export function useApiEndpoints(): {
     IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED,
     false
   );
-  const vendorEndpointsEnabled = featureFlags.getBooleanValue(IS_VENDOR_ENDPOINTS_ENABLED, false);
 
   const { data, status } = useFetcher(
     (callApi) => callApi('GET /internal/observability_onboarding/api_endpoints'),
@@ -60,40 +48,33 @@ export function useApiEndpoints(): {
     { showToastOnError: false }
   );
 
-  const { endpoints, popoverEndpoints } = useMemo(() => {
+  const endpoints = useMemo(() => {
     const endpointContext: ApiEndpointContext = {
       elasticsearchUrl: data?.elasticsearchUrl || undefined,
       managedOtlpServiceUrl: data?.managedOtlpServiceUrl || undefined,
       isManagedOtlpServiceAvailable,
       isServerless,
       managedOtlpPrwEndpointEnabled,
-      vendorEndpointsEnabled,
     };
 
-    return {
-      endpoints: API_ENDPOINTS.map((definition) => ({
-        id: definition.id,
-        label: definition.label,
-        logo: definition.logo,
-        euiIconType: definition.euiIconType,
-        url: definition.getUrl(endpointContext),
-        usesManagedInput: definition.usesManagedInput(endpointContext),
-        additionalEndpoints: getVendorEndpointsForTab(definition.id, endpointContext),
-      })),
-      popoverEndpoints: getPopoverVendorEndpoints(endpointContext),
-    };
+    return API_ENDPOINTS.map((definition) => ({
+      id: definition.id,
+      label: definition.label,
+      logo: definition.logo,
+      euiIconType: definition.euiIconType,
+      url: definition.getUrl(endpointContext),
+      usesManagedInput: definition.usesManagedInput(endpointContext),
+    }));
   }, [
     data?.elasticsearchUrl,
     data?.managedOtlpServiceUrl,
     isManagedOtlpServiceAvailable,
     isServerless,
     managedOtlpPrwEndpointEnabled,
-    vendorEndpointsEnabled,
   ]);
 
   return {
     endpoints,
-    popoverEndpoints,
     isLoading: isPending(status),
     isError: status === FETCH_STATUS.FAILURE,
   };

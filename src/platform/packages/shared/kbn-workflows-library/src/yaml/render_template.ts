@@ -13,14 +13,7 @@ import type { InstallFormField } from '../types/install_form';
 import type { ParsedTemplate } from './parse_template';
 
 const METADATA_KEY = 'template-metadata';
-
-/**
- * Matches `__install__.<name>` install-time placeholders in a workflow template
- * body. The capture group is the `<name>`. Global, so `String.replace` resolves
- * every occurrence; use `.source` (which ignores flags) when a single anchored
- * pattern is needed elsewhere.
- */
-export const INSTALL_PLACEHOLDER = /__install__\.([a-zA-Z0-9_-]+)/g;
+const INSTALL_PLACEHOLDER = /__install__\.([a-zA-Z0-9_-]+)/g;
 
 export interface RenderTemplateInput {
   template: ParsedTemplate;
@@ -60,11 +53,8 @@ export function renderTemplate({ template, values = {} }: RenderTemplateInput): 
  * document (body comments, blank lines, indentation) is spliced back
  * byte-for-byte. Falls back to returning the input unchanged when the block or
  * its range cannot be resolved.
- *
- * Exported for `render_install.ts` (the strict install-time renderer), not
- * part of the package public API.
  */
-export function stripMetadataBlock(raw: string): string {
+function stripMetadataBlock(raw: string): string {
   const pair = findMetadataPair(raw);
   if (!pair) {
     return raw;

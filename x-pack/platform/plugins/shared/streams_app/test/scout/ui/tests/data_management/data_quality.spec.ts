@@ -13,8 +13,7 @@ import { saveFailureStoreChanges } from '../../fixtures/data_lifecycle_helpers';
 
 const TEST_STREAM = 'logs-nginx-default';
 
-// Failing: See https://github.com/elastic/kibana/issues/267204
-test.describe.skip(
+test.describe(
   'Stream data quality',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

@@ -191,21 +191,4 @@ export class FeatureSettingsPage {
   public async selectGlobalModel(name: string): Promise<void> {
     await this.page.components.comboBox('globalModelComboBox').setSelectedOptions([name]);
   }
-
-  /**
-   * Picks a model in the Global model combobox without asserting it becomes the
-   * confirmed selection. Selecting an End-of-Life model intentionally flags the
-   * combobox invalid (which drives the EOL danger callout), and an invalid
-   * combobox reports no confirmed selection — so {@link selectGlobalModel},
-   * which verifies the value reads back as selected, can't be used here.
-   */
-  public async selectGlobalModelExpectingInvalid(name: string): Promise<void> {
-    await this.globalModelComboBox.locator('[data-test-subj="comboBoxInput"]').click();
-    // EUI stamps the options list with `${testSubj}-optionsList` as one of several
-    // space-separated test-subj tokens, so match it with `~=` (token match).
-    await this.page
-      .locator('[data-test-subj~="globalModelComboBox-optionsList"]')
-      .getByRole('option', { name })
-      .click();
-  }
 }

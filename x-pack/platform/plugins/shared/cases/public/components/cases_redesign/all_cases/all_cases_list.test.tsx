@@ -22,11 +22,7 @@ import { useGetCasesMockState, connectorsMock } from '../../../containers/mock';
 
 import { SortFieldCase } from '../../../../common/ui/types';
 import { CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
-import {
-  CASES_LIST_PAGE_VIEW_EVENT_TYPE,
-  CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../../common/constants';
+import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { AllCasesList } from './all_cases_list';
 import { VIEW_TOGGLE_LIST_ID, VIEW_TOGGLE_TABLE_ID, type ViewToggleId } from './constants';
@@ -258,11 +254,7 @@ describe('AllCasesListGeneric', () => {
       )[0]
     );
 
-    await waitFor(() => {
-      expect(screen.getByRole('tooltip')).toHaveTextContent(
-        'Damaged Raccoon (damaged_raccoon@elastic.co)'
-      );
-    });
+    expect(await screen.findByText('damaged_raccoon@elastic.co')).toBeInTheDocument();
   });
 
   it('should show a tooltip with all tags when hovered', async () => {
@@ -1286,78 +1278,6 @@ describe('AllCasesListGeneric', () => {
           });
         });
       });
-    });
-  });
-
-  describe('Telemetry', () => {
-    it('reports a cases_list_page_view EBT event on load with the view mode, columns, and page size', async () => {
-      renderWithTestingProviders(<AllCasesList />);
-
-      await screen.findByTestId('cases-table');
-
-      expect(useKibanaMock().services.analytics.reportEvent).toHaveBeenCalledWith(
-        CASES_LIST_PAGE_VIEW_EVENT_TYPE,
-        expect.objectContaining({
-          owner: SECURITY_SOLUTION_OWNER,
-          view_mode: VIEW_TOGGLE_TABLE_ID,
-          selected_columns: expect.arrayContaining(['title', 'status', 'severity']),
-          per_page: DEFAULT_QUERY_PARAMS.perPage,
-          sort_field: DEFAULT_QUERY_PARAMS.sortField,
-          sort_order: DEFAULT_QUERY_PARAMS.sortOrder,
-          active_filter_dimensions: [],
-        })
-      );
-    });
-
-    it('reports a cases_list_page_view EBT event on load in list view mode with the selected fields', async () => {
-      useViewModeMock.mockReturnValue({
-        viewMode: VIEW_TOGGLE_LIST_ID,
-        setViewMode: jest.fn(),
-      });
-
-      renderWithTestingProviders(<AllCasesList />);
-
-      await screen.findByTestId('cases-list-view');
-
-      expect(useKibanaMock().services.analytics.reportEvent).toHaveBeenCalledWith(
-        CASES_LIST_PAGE_VIEW_EVENT_TYPE,
-        expect.objectContaining({
-          owner: SECURITY_SOLUTION_OWNER,
-          view_mode: VIEW_TOGGLE_LIST_ID,
-          // No optional fields are checked in the list view by default.
-          selected_columns: [],
-          per_page: DEFAULT_QUERY_PARAMS.perPage,
-        })
-      );
-    });
-
-    it('does not report a cases_list_page_view EBT event in the selector view', async () => {
-      renderWithTestingProviders(<AllCasesList isSelectorView={true} />);
-
-      await screen.findByTestId('cases-table');
-
-      expect(useKibanaMock().services.analytics.reportEvent).not.toHaveBeenCalledWith(
-        CASES_LIST_PAGE_VIEW_EVENT_TYPE,
-        expect.anything()
-      );
-    });
-
-    it('reports a cases_list_view_mode_changed EBT event when the view toggle is clicked', async () => {
-      const setViewMode = jest.fn();
-      useViewModeMock.mockReturnValue({
-        viewMode: VIEW_TOGGLE_TABLE_ID,
-        setViewMode,
-      });
-
-      renderWithTestingProviders(<AllCasesList />);
-
-      await userEvent.click(await screen.findByRole('button', { name: /list view/i }));
-
-      expect(setViewMode).toHaveBeenCalledWith(VIEW_TOGGLE_LIST_ID);
-      expect(useKibanaMock().services.analytics.reportEvent).toHaveBeenCalledWith(
-        CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
-        expect.objectContaining({ view_mode: VIEW_TOGGLE_LIST_ID })
-      );
     });
   });
 });

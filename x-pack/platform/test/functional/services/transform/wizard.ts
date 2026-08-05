@@ -369,10 +369,13 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
 
     async assertSelectedTransformFunction(transformFunction: 'pivot' | 'latest') {
       await testSubjects.existOrFail(
-        transformFunction === 'latest'
-          ? 'transformWizardUniqueKeysSelector'
-          : 'transformGroupBySelection'
+        `transformCreation-${transformFunction}-option selectedFunction`
       );
+    },
+
+    async selectTransformFunction(transformFunction: 'pivot' | 'latest') {
+      await testSubjects.click(`transformCreation-${transformFunction}-option`);
+      await this.assertSelectedTransformFunction(transformFunction);
     },
 
     async assertFieldStatsFlyoutContentFromUniqueKeysInputTrigger(
@@ -681,12 +684,8 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     async enableAdvancedPivotEditor() {
       await this.assertAdvancedPivotEditorSwitchCheckState(false);
       await testSubjects.click('transformAdvancedPivotEditorSwitch');
-      if (!(await testSubjects.exists('transformAdvancedPivotEditor'))) {
-        await browser.pressKeys(browser.keys.SPACE);
-      }
-      await retry.tryForTime(30 * 1000, async () => {
-        await testSubjects.existOrFail('transformAdvancedPivotEditor');
-      });
+      await this.assertAdvancedPivotEditorSwitchCheckState(true);
+      await testSubjects.existOrFail('transformAdvancedPivotEditor');
     },
 
     async assertTransformIdInputExists() {

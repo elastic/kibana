@@ -6,7 +6,7 @@
  */
 
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import type { ResourceType } from './resource_type';
+import { ResourceTypes, type ResourceType } from './resource_type';
 
 export const productDocInferenceIdCandidates = [
   defaultInferenceEndpoints.JINAv5,
@@ -15,29 +15,24 @@ export const productDocInferenceIdCandidates = [
 ] as const;
 
 export interface ResolveDefaultInferenceIdOptions {
-  /**
-   * Reserved for future resource-specific defaults. Currently unused: all knowledge
-   * base content (product docs, Security Labs, OpenAPI) shares the same Jina → EIS
-   * ELSER → ELSER priority.
-   */
   resourceType?: ResourceType;
 }
+
+const prefersJinaEmbeddings = (resourceType?: ResourceType): boolean =>
+  resourceType !== ResourceTypes.securityLabs;
 
 /**
  * Resolves the default inference ID for knowledge base installation,
  * matching the priority used by GenAI Settings.
  *
- * All knowledge base content prefers Jina v5 when its endpoint is available
- * (EIS on serverless or Cloud Connected Mode), then EIS ELSER, then the default
- * ELSER. Because Jina is only selected when its endpoint actually exists,
- * on-prem clusters without EIS/CCM fall back to ELSER automatically.
+ * Product documentation prefers Jina v5 when available. Security Labs content
+ * does not support Jina embeddings yet, so ELSER is preferred instead.
  */
 export const resolveDefaultInferenceId = (
   endpointIds: ReadonlySet<string>,
-  // Options accepted for API stability; resourceType does not change priority today.
-  _options: ResolveDefaultInferenceIdOptions = {}
+  { resourceType }: ResolveDefaultInferenceIdOptions = {}
 ): string => {
-  if (endpointIds.has(defaultInferenceEndpoints.JINAv5)) {
+  if (prefersJinaEmbeddings(resourceType) && endpointIds.has(defaultInferenceEndpoints.JINAv5)) {
     return defaultInferenceEndpoints.JINAv5;
   }
   if (endpointIds.has(defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID)) {

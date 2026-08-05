@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-export {
-  VIEW_TOGGLE_LIST_ID,
-  VIEW_TOGGLE_TABLE_ID,
-  type ViewToggleId,
-} from '../../../../common/constants';
-
 export const CUSTOM_FIELD_KEY_PREFIX = 'cf_';
 export const ALL_CASES_STATE_URL_KEY = 'cases';
 
@@ -22,6 +16,11 @@ export const LEGACY_SUPPORTED_STATE_KEYS = [
   'sortField',
   'sortOrder',
 ] as const;
+
+export const VIEW_TOGGLE_LIST_ID = 'list' as const;
+export const VIEW_TOGGLE_TABLE_ID = 'table' as const;
+
+export type ViewToggleId = typeof VIEW_TOGGLE_LIST_ID | typeof VIEW_TOGGLE_TABLE_ID;
 
 /**
  * Fields rendered directly in every list item (title row + meta row).

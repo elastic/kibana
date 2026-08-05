@@ -20,7 +20,6 @@ export const NonFipsIntegrationsCallout: React.FC<{
   return nonFipsIntegrations.length > 0 ? (
     <>
       <EuiCallOut
-        announceOnMount
         size="m"
         color="warning"
         iconType="warning"

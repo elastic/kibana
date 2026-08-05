@@ -11,18 +11,9 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { encodeFlyout, FLYOUT_PARAM_KEY } from '@kbn/cloud-security-posture/src/utils/query_utils';
 import {
-  encodeFlyoutV2UrlParam,
-  FLYOUT_DESCRIPTOR_KIND,
-  FLYOUT_V2_URL_PARAM,
-  type FlyoutDescriptor,
-  type FlyoutV2UrlParamValue,
-} from '../../flyout_v2/shared/url_state/flyout_v2_url_param';
-import { notifyFlyoutV2Navigation } from '../../flyout_v2/shared/url_state/flyout_v2_navigation';
-import {
   markPreserveAgentBuilderSessionDuringNextSecurityNavigation,
   readLastAgentBuilderAgentIdForSecuritySession,
 } from '../../../common/agent_builder_navigation_gate';
-import { FLYOUT_ORIGIN } from '../../common/lib/telemetry/events/flyout_v2/types';
 
 import { SecurityPageName, ENTITY_ANALYTICS_HOME_PAGE_PATH } from '../../../common/constants';
 import {
@@ -64,158 +55,9 @@ export interface EntityAnalyticsFlyoutNavigationState {
   };
 }
 
-interface EntityDescriptorContext {
-  entityType: 'host' | 'user' | 'service';
-  entityName: string;
-  entityId?: string;
-  scopeId?: string;
-}
-
-const getEntityDescriptorContext = (
-  right: EntityAnalyticsFlyoutNavigationState['right']
-): { descriptor: FlyoutDescriptor; context: EntityDescriptorContext } | null => {
-  const { id, params } = right;
-  const entityId = params.entityId as string | undefined;
-  const scopeId = params.scopeId as string | undefined;
-
-  if (id === HostPanelKey) {
-    const hostName = params.hostName as string | undefined;
-    if (!hostName) return null;
-    return {
-      descriptor: { kind: FLYOUT_DESCRIPTOR_KIND.host, hostName, entityId, scopeId },
-      context: { entityType: 'host', entityName: hostName, entityId, scopeId },
-    };
-  }
-
-  if (id === UserPanelKey) {
-    const userName = params.userName as string | undefined;
-    if (!userName) return null;
-    return {
-      descriptor: { kind: FLYOUT_DESCRIPTOR_KIND.user, userName, entityId, scopeId },
-      context: { entityType: 'user', entityName: userName, entityId, scopeId },
-    };
-  }
-
-  if (id === ServicePanelKey) {
-    const serviceName = params.serviceName as string | undefined;
-    if (!serviceName) return null;
-    return {
-      descriptor: { kind: FLYOUT_DESCRIPTOR_KIND.service, serviceName, entityId, scopeId },
-      context: { entityType: 'service', entityName: serviceName, entityId, scopeId },
-    };
-  }
-
-  return null;
-};
-
-const getEntityToolDescriptor = (
-  left: EntityAnalyticsFlyoutNavigationState['left'],
-  context: EntityDescriptorContext
-): FlyoutDescriptor | null => {
-  const path = left?.params.path as { tab?: string; subTab?: string } | undefined;
-  if (!path?.tab) return null;
-
-  const { entityType, entityName, entityId, scopeId } = context;
-  switch (path.tab) {
-    case 'risk_inputs':
-      return {
-        kind: FLYOUT_DESCRIPTOR_KIND.entityRiskInputs,
-        entityType,
-        entityName,
-        entityId,
-      };
-    case 'anomalies':
-      return entityType === 'host' || entityType === 'user'
-        ? {
-            kind: FLYOUT_DESCRIPTOR_KIND.entityAnomalyInsights,
-            entityType,
-            value: entityName,
-            entityId,
-          }
-        : null;
-    case 'csp_insights':
-      if (path.subTab === 'vulnerabilitiesTabId') {
-        return {
-          kind: FLYOUT_DESCRIPTOR_KIND.entityVulnerabilityInsights,
-          value: entityName,
-          entityId,
-          entityType,
-        };
-      }
-      if (path.subTab === 'alertsTabId') {
-        return {
-          kind: FLYOUT_DESCRIPTOR_KIND.entityAlertsInsights,
-          entityType,
-          value: entityName,
-          entityId,
-        };
-      }
-      return {
-        kind: FLYOUT_DESCRIPTOR_KIND.entityMisconfigurationInsights,
-        entityType,
-        value: entityName,
-        entityId,
-      };
-    case 'graph_view':
-      return entityId && scopeId
-        ? {
-            kind: FLYOUT_DESCRIPTOR_KIND.entityGraphView,
-            entityId,
-            scopeId,
-            entityName,
-            entityType,
-          }
-        : null;
-    case 'resolution_group':
-      return entityId && scopeId
-        ? {
-            kind: FLYOUT_DESCRIPTOR_KIND.entityResolution,
-            entityId,
-            entityType,
-            entityName,
-            scopeId,
-          }
-        : null;
-    default:
-      return null;
-  }
-};
-
-/**
- * Converts the entity-only legacy panel payload used by Agent Builder into the equivalent
- * flyout-v2 descriptor stack. Tool views are restored as the root with the entity overview as
- * its child, matching the v2 URL restore contract.
- */
-export const buildEntityFlyoutV2NavigationState = (
-  flyout: EntityAnalyticsFlyoutNavigationState
-): FlyoutV2UrlParamValue | null => {
-  const entity = getEntityDescriptorContext(flyout.right);
-  if (!entity) return null;
-
-  const toolDescriptor = getEntityToolDescriptor(flyout.left, entity.context);
-  const withAiChatOrigin = (descriptor: FlyoutDescriptor): FlyoutDescriptor => ({
-    ...descriptor,
-    origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
-  });
-  const entityDescriptor = withAiChatOrigin(entity.descriptor);
-  return toolDescriptor ? [withAiChatOrigin(toolDescriptor), entityDescriptor] : [entityDescriptor];
-};
-
 const getEntityAnalyticsNavigationPathWithFlyout = (
-  flyout: EntityAnalyticsFlyoutNavigationState,
-  isNewFlyoutEnabled: boolean,
-  descriptors?: FlyoutV2UrlParamValue | null
+  flyout: EntityAnalyticsFlyoutNavigationState
 ): string | undefined => {
-  const searchParams = getEntityAnalyticsStateSearchParams();
-  searchParams.delete(FLYOUT_PARAM_KEY);
-  searchParams.delete(FLYOUT_V2_URL_PARAM);
-
-  if (isNewFlyoutEnabled) {
-    if (!descriptors) return undefined;
-    searchParams.set(FLYOUT_V2_URL_PARAM, encodeFlyoutV2UrlParam(descriptors));
-    return `?${searchParams.toString()}`;
-  }
-
   const encodedFlyoutSearch = encodeFlyout(flyout);
   if (encodedFlyoutSearch == null) {
     return undefined;
@@ -226,6 +68,7 @@ const getEntityAnalyticsNavigationPathWithFlyout = (
     return undefined;
   }
 
+  const searchParams = getEntityAnalyticsStateSearchParams();
   searchParams.set(FLYOUT_PARAM_KEY, flyoutValue);
   return `?${searchParams.toString()}`;
 };
@@ -445,7 +288,6 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
   chrome,
   openSidebarConversation,
   searchSession,
-  isNewFlyoutEnabled = false,
 }: {
   application: ApplicationStart;
   appId: string;
@@ -458,11 +300,8 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
    * navigating. See `clearSearchSessionBeforeSecurityNavigation` below for the rationale.
    */
   searchSession?: ISessionService;
-  /** Whether to encode the destination using the new EUI flyout URL contract. */
-  isNewFlyoutEnabled?: boolean;
 }): void => {
-  const descriptors = isNewFlyoutEnabled ? buildEntityFlyoutV2NavigationState(flyout) : null;
-  const path = getEntityAnalyticsNavigationPathWithFlyout(flyout, isNewFlyoutEnabled, descriptors);
+  const path = getEntityAnalyticsNavigationPathWithFlyout(flyout);
   if (path == null) {
     return;
   }
@@ -483,10 +322,6 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
     path,
     replace: true,
   });
-
-  if (isNewFlyoutEnabled && descriptors) {
-    notifyFlyoutV2Navigation({ urlParamKey: FLYOUT_V2_URL_PARAM, descriptors });
-  }
 
   if (!alreadyOnEaHomePage) {
     scheduleReopenAgentBuilderAfterSecurityNavigation({ agentBuilder, openSidebarConversation });

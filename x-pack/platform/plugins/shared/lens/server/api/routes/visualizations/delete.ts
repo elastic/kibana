@@ -15,7 +15,7 @@ import {
   LENS_API_ACCESS,
   LENS_API_TAG,
 } from '../../../../common/constants';
-import type { LensSavedObject } from '../../../content_management/zod';
+import type { LensSavedObject } from '../../../content_management';
 import type { RegisterAPIRouteFn } from '../../../types';
 import { lensDeleteRequestParamsSchema } from './schema';
 
@@ -32,8 +32,8 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
     options: {
       tags: [LENS_API_TAG],
       availability: {
-        stability: 'stable',
-        since: '9.5.0',
+        stability: 'experimental',
+        since: '9.4.0',
       },
     },
     security: {

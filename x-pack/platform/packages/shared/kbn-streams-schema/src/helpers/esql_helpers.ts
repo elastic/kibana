@@ -17,6 +17,7 @@ import type {
   ESQLAstItem,
   ESQLAstQueryExpression,
   ESQLBinaryExpression,
+  ESQLColumn,
   ESQLCommand,
   ESQLCommandOption,
   ESQLFunction,
@@ -49,6 +50,19 @@ type MetadataOption = ESQLCommandOption & { name: 'metadata' };
 
 function isMetadataOption(arg: ESQLAstItem): arg is MetadataOption {
   return !Array.isArray(arg) && arg.type === 'option' && arg.name === 'metadata';
+}
+
+/**
+ * Reads the column identifier name out of a single METADATA option argument
+ * (e.g. `_id` from `column(_id)`). Returns `undefined` for parameterized columns
+ * or unexpected shapes so callers can leave them untouched.
+ */
+function getMetadataIdentifierName(arg: ESQLAstItem): string | undefined {
+  if (Array.isArray(arg) || arg.type !== 'column') return undefined;
+  const column: ESQLColumn = arg;
+  const inner = column.args[0];
+  if (!inner || inner.type !== 'identifier') return undefined;
+  return inner.name;
 }
 
 function printWithUpdatedFrom(
@@ -180,6 +194,71 @@ export function ensureMetadata(esql: string): string {
   if (fromCmd.args.some(isMetadataOption)) return esql;
 
   return printWithUpdatedFrom(root, fromCmd, [...fromCmd.args, buildMetadataOption()]);
+}
+
+/**
+ * Removes METADATA columns from the FROM clause.
+ *
+ * - `stripMetadata(esql)` — drops the entire METADATA option (inverse of
+ *   {@link ensureMetadata}).
+ * - `stripMetadata(esql, ['_source'])` — drops only the listed identifiers from
+ *   METADATA, preserving any others (e.g. `_id`). When no identifiers remain,
+ *   the METADATA option itself is dropped.
+ *
+ * Returns the input unchanged when:
+ *   - the query has no FROM clause,
+ *   - the query has no METADATA option (or none of the listed identifiers),
+ *   - the input cannot be parsed.
+ *
+ * Parse failures are swallowed so a corrupted persisted query passes through
+ * untouched and surfaces a precise error at execution time, rather than
+ * crashing rule create/update flows with an opaque parser stack.
+ */
+export function stripMetadata(esql: string, identifiersToStrip?: string[]): string {
+  let parsed: ReturnType<typeof parseFromCommand>;
+  try {
+    parsed = parseFromCommand(esql);
+  } catch {
+    return esql;
+  }
+  const { root, fromCmd } = parsed;
+  if (!fromCmd) return esql;
+
+  const stripSet = identifiersToStrip ? new Set(identifiersToStrip) : null;
+
+  let changed = false;
+  const newArgs: ESQLCommand['args'] = [];
+
+  for (const arg of fromCmd.args) {
+    if (!isMetadataOption(arg)) {
+      newArgs.push(arg);
+      continue;
+    }
+
+    // No identifiers list provided → drop the entire METADATA option.
+    if (stripSet === null) {
+      changed = true;
+      continue;
+    }
+
+    const filtered = arg.args.filter((opt) => {
+      const name = getMetadataIdentifierName(opt);
+      return name === undefined || !stripSet.has(name);
+    });
+
+    if (filtered.length === arg.args.length) {
+      newArgs.push(arg);
+      continue;
+    }
+
+    changed = true;
+    if (filtered.length > 0) {
+      newArgs.push({ ...arg, args: filtered });
+    }
+  }
+
+  if (!changed) return esql;
+  return printWithUpdatedFrom(root, fromCmd, newArgs);
 }
 
 /**
@@ -379,6 +458,16 @@ export function deriveQueryType(esql: string): 'match' | 'stats' {
   return hasStatsCommand(esql) ? 'stats' : 'match';
 }
 
+const SAMPLE_FLOOR_AGG_NAMES = new Set([
+  'percentile',
+  'percentile_disc',
+  'percentile_cont',
+  'avg',
+  'median',
+]);
+
+const COMPARISON_OPERATORS = new Set(['>', '<', '>=', '<=']);
+
 function collectFunctionNames(nodes: WalkerAstNode): Set<string> {
   const names = new Set<string>();
   walk(nodes, {
@@ -394,6 +483,42 @@ function hasRateComputation(nodes: WalkerAstNode): boolean {
   return fns.has('*') && fns.has('/');
 }
 
+function needsSampleFloor(commandsFromStats: ESQLCommand[]): boolean {
+  const fns = collectFunctionNames(commandsFromStats);
+  const hasStatAgg = [...SAMPLE_FLOOR_AGG_NAMES].some((name) => fns.has(name));
+  return hasStatAgg || hasRateComputation(commandsFromStats);
+}
+
+function countComparisons(whereCommands: ESQLCommand[]): number {
+  let count = 0;
+  walk(
+    whereCommands.flatMap((cmd) => cmd.args),
+    {
+      visitFunction: (node) => {
+        if (COMPARISON_OPERATORS.has(node.name)) {
+          count++;
+        }
+      },
+    }
+  );
+  return count;
+}
+
+function checkSampleSizeFloor(
+  commandsFromStats: ESQLCommand[],
+  whereCommandsAfterStats: ESQLCommand[],
+  hints: string[]
+): void {
+  if (!needsSampleFloor(commandsFromStats)) return;
+  if (whereCommandsAfterStats.length === 0) return;
+
+  if (countComparisons(whereCommandsAfterStats) < 2) {
+    hints.push(
+      'Heuristic warning: This STATS query may lack a sample-size floor (e.g. total > 20). Low-traffic buckets can produce high-variance results that trigger false alerts. This check is approximate — compound predicates may not be detected.'
+    );
+  }
+}
+
 function containsFunction(node: WalkerAstNode, fnName: string): boolean {
   let found = false;
   walk(node, {
@@ -407,46 +532,36 @@ function containsFunction(node: WalkerAstNode, fnName: string): boolean {
   return found;
 }
 
-/**
- * For rate STATS (`*` + `/`), every COUNT in the STATS clause should carry a
- * per-aggregation WHERE. Accept any condition (`IS NOT NULL`, `IN (...)`,
- * equality) — the system prompt uses all three. Warn only when at least one
- * COUNT is bare (`total = COUNT(*)` with no WHERE).
- */
-function checkFilteredDenominator(
+function checkIsNotNullDenominator(
   statsCmd: ESQLCommand,
   commandsFromStats: ESQLCommand[],
   hints: string[]
 ): void {
   if (!hasRateComputation(commandsFromStats)) return;
 
-  let hasCount = false;
-  let hasUnfilteredCount = false;
+  let hasFilteredDenominator = false;
+  walk(statsCmd.args, {
+    visitFunction: (node) => {
+      if (node.name !== 'where' || node.subtype !== 'binary-expression') return;
+      const [aggSide, conditionSide] = node.args;
+      if (!aggSide) return;
+      if (!containsFunction(aggSide, 'count')) return;
 
-  for (const arg of statsCmd.args) {
-    if (Array.isArray(arg) || arg.type === 'option') continue;
-    if (arg.type !== 'function') continue;
-
-    // `alias = COUNT(*) WHERE <condition>` — any condition counts as filtered.
-    if (arg.name === 'where' && arg.subtype === 'binary-expression') {
-      const [aggSide] = arg.args;
-      if (aggSide && !Array.isArray(aggSide) && containsFunction(aggSide, 'count')) {
-        hasCount = true;
+      if (!conditionSide || Array.isArray(conditionSide)) return;
+      if (
+        'type' in conditionSide &&
+        conditionSide.type === 'function' &&
+        (conditionSide as ESQLFunction).name === 'is not null'
+      ) {
+        hasFilteredDenominator = true;
       }
-      continue;
-    }
+    },
+  });
 
-    // Bare `alias = COUNT(*)` (or unaliased COUNT) — unfiltered denominator risk.
-    if ((arg.name === '=' || arg.name === 'count') && containsFunction(arg, 'count')) {
-      hasCount = true;
-      hasUnfilteredCount = true;
-    }
-  }
-
-  if (!hasCount || !hasUnfilteredCount) return;
+  if (hasFilteredDenominator) return;
 
   hints.push(
-    'Note: The denominator appears to use unfiltered COUNT(*). In mixed streams, filter it with WHERE <field> IS NOT NULL, IN (...), or an equality so rows without the target field are excluded.'
+    'Note: The denominator appears to use unfiltered COUNT(*). In mixed streams, consider filtering with WHERE <field> IS NOT NULL to exclude rows without the target field.'
   );
 }
 
@@ -497,36 +612,18 @@ export function getStatsQueryHints(esql: string): string[] {
 
   const commandsAfterStats = commands.slice(statsIdx + 1);
   const hasWhereAfterStats = commandsAfterStats.some((cmd) => cmd.name === 'where');
-
-  // Metric-series contract: continuous series ending in metric_value + bucket.
-  // Do not require breach-threshold WHERE after STATS (change_point replaces thresholds).
-  const bucketColumn = extractBucketColumnName(esql);
-  if (bucketColumn && bucketColumn !== 'bucket') {
+  if (!hasWhereAfterStats) {
     hints.push(
-      'Warning: Temporal bucket column must be named exactly `bucket` (e.g. BY bucket = BUCKET(@timestamp, 1 minute)).'
-    );
-  }
-
-  const bucketIntervalMs = extractBucketIntervalMs(esql);
-  if (bucketIntervalMs != null && bucketIntervalMs !== MS_PER_UNIT.minute) {
-    hints.push(
-      'Warning: Use a 1-minute temporal bucket: BY bucket = BUCKET(@timestamp, 1 minute).'
-    );
-  }
-
-  if (!/\bmetric_value\b/.test(esql)) {
-    hints.push(
-      'Warning: STATS queries must emit a final column named exactly `metric_value` (use EVAL … AS metric_value or name the aggregate metric_value). End with | KEEP bucket, metric_value.'
+      'Warning: No threshold filter after STATS. For alerting, add | WHERE <metric> > <threshold> to distinguish normal from anomalous conditions.'
     );
   }
 
   if (hasWhereAfterStats) {
-    hints.push(
-      'Warning: Avoid WHERE after STATS that drops buckets (thresholds or sample-size floors). Emit a point for every bucket; use CASE for safe rates (e.g. CASE(total > 0, errors * 100.0 / total, 0)).'
-    );
+    const whereCommandsAfterStats = commandsAfterStats.filter((cmd) => cmd.name === 'where');
+    checkSampleSizeFloor(commandsFromStats, whereCommandsAfterStats, hints);
   }
 
-  checkFilteredDenominator(statsCmd, commandsFromStats, hints);
+  checkIsNotNullDenominator(statsCmd, commandsFromStats, hints);
 
   const byArgs = findStatsByArgs(esql);
   if (byArgs) {
@@ -534,14 +631,14 @@ export function getStatsQueryHints(esql: string): string[] {
       const fnName = getAssignmentRhsFnName(arg);
       return fnName !== 'bucket' && fnName !== 'tbucket';
     });
-    if (nonBucketByColumns.length > 0) {
+    if (nonBucketByColumns.length > 2) {
       hints.push(
-        `Warning: ${nonBucketByColumns.length} non-temporal GROUP BY dimension(s) detected. v0 metric series supports time bucket only — remove entity BY columns (e.g. service.name).`
+        `Warning: ${nonBucketByColumns.length} non-temporal GROUP BY dimensions detected. High-cardinality combinations (>50 distinct groups per bucket) cause result explosion. Prefer at most 1–2 entity dimensions.`
       );
     }
   }
 
-  const disallowed = ['sort', 'limit'];
+  const disallowed = ['sort', 'limit', 'keep'];
   const found = commandsAfterStats
     .filter((cmd) => disallowed.includes(cmd.name))
     .map((cmd) => cmd.name.toUpperCase());
@@ -549,7 +646,7 @@ export function getStatsQueryHints(esql: string): string[] {
     hints.push(
       `Warning: ${found.join(
         ', '
-      )} after STATS should not be used. Prefer | KEEP bucket, metric_value as the final step.`
+      )} after STATS should not be used. The system manages ordering and limits.`
     );
   }
 

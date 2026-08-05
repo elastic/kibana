@@ -9,12 +9,11 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { IndexPatternManagmentContext } from '../../../../types';
 
 export interface ScriptingWarningCallOutProps {
@@ -54,8 +53,10 @@ export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningC
         </p>
       </EuiText>
       <EuiSpacer size="m" />
-      <KbnWarningCallout
+      <EuiCallOut
+        color="warning"
         announceOnMount={false}
+        iconType="warning"
         title={
           <FormattedMessage
             id="indexPatternManagement.scriptedFieldsDeprecatedTitle"
@@ -63,23 +64,26 @@ export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningC
             description="Deprecation warning title within scripted field editor"
           />
         }
-        text={
-          <FormattedMessage
-            id="indexPatternManagement.scriptedFieldsDeprecatedBody"
-            defaultMessage="For greater flexibility and Painless script support, use {runtimeDocs}."
-            values={{
-              runtimeDocs: (
-                <EuiLink target="_blank" href={docLinks.runtimeFields.overview}>
-                  <FormattedMessage
-                    id="indexPatternManagement.warningCallOutLabel.runtimeLink"
-                    defaultMessage="runtime fields"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        }
-      />
+      >
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              id="indexPatternManagement.scriptedFieldsDeprecatedBody"
+              defaultMessage="For greater flexibility and Painless script support, use {runtimeDocs}."
+              values={{
+                runtimeDocs: (
+                  <EuiLink target="_blank" href={docLinks.runtimeFields.overview}>
+                    <FormattedMessage
+                      id="indexPatternManagement.warningCallOutLabel.runtimeLink"
+                      defaultMessage="runtime fields"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </EuiText>
+      </EuiCallOut>
       <EuiSpacer size="m" />
     </Fragment>
   ) : null;

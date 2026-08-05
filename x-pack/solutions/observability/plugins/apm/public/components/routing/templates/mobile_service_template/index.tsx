@@ -32,6 +32,7 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'transactions'
     | 'dependencies'
     | 'errors-and-crashes'
+    | 'service-map'
     | 'logs'
     | 'alerts'
     | 'dashboards';
@@ -221,6 +222,16 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
       }),
       label: i18n.translate('xpack.apm.serviceDetails.mobileErrorsTabLabel', {
         defaultMessage: 'Errors & Crashes',
+      }),
+    },
+    {
+      key: 'service-map',
+      href: router.link('/mobile-services/{serviceName}/service-map', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.mobileServiceDetails.serviceMapTabLabel', {
+        defaultMessage: 'Service map',
       }),
     },
     {

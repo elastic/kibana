@@ -227,6 +227,7 @@ describe('CasesOracleService', () => {
     ];
 
     beforeEach(() => {
+      // @ts-expect-error: types of the SO client are wrong and they do not accept errors
       savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: bulkGetSOs });
     });
 
@@ -341,6 +342,7 @@ describe('CasesOracleService', () => {
     ];
 
     beforeEach(() => {
+      // @ts-expect-error: types of the SO client are wrong and they do not accept errors
       savedObjectsClient.bulkCreate.mockResolvedValue({ saved_objects: bulkCreateSOs });
     });
 
@@ -489,6 +491,7 @@ describe('CasesOracleService', () => {
     ];
 
     beforeEach(() => {
+      // @ts-expect-error: types of the SO client are wrong and they do not accept errors
       savedObjectsClient.bulkUpdate.mockResolvedValue({ saved_objects: bulkUpdateSOs });
     });
 

@@ -106,8 +106,7 @@ export const useTransformConfigData = (
   validationStatus: StepDefineExposedState['validationStatus'],
   requestPayload: StepDefineExposedState['previewRequest'],
   combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings'],
-  timeRangeMs?: StepDefineExposedState['timeRangeMs'],
-  projectRouting?: StepDefineExposedState['projectRouting']
+  timeRangeMs?: StepDefineExposedState['timeRangeMs']
 ): UseIndexDataReturnType => {
   const [previewMappingsProperties, setPreviewMappingsProperties] =
     useState<PreviewMappingsProperties>({});
@@ -153,10 +152,9 @@ export const useTransformConfigData = (
         query,
         requestPayload,
         combinedRuntimeMappings,
-        timeRangeMs,
-        projectRouting
+        timeRangeMs
       ),
-    [dataView, query, requestPayload, combinedRuntimeMappings, timeRangeMs, projectRouting]
+    [dataView, query, requestPayload, combinedRuntimeMappings, timeRangeMs]
   );
 
   const {

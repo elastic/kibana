@@ -1,6 +1,7 @@
 {
   "ml.evaluate_data_frame": {
     "data_autocomplete_rules": {
+      "index": "",
       "evaluation": {
         "__one_of": [
           {

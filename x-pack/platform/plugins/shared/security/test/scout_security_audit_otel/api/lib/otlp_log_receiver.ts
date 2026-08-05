@@ -33,31 +33,6 @@ interface OtlpResource {
 /** A flattened `{ 'event.action': 'user_login', 'kibana.space.id': 'default' }`-style map. */
 export type FlatAttributes = Record<string, unknown>;
 
-/**
- * Reserved key under which the raw resource-level attributes are stashed on each flattened record.
- * The flat view merges resource + log-record attributes (log-record wins), which makes it impossible
- * to tell where a field originated. Tests that need to assert on the resource contract specifically
- * (e.g. the minimal resource emitted by the audit appender) read this via {@link getResourceAttributes}.
- * The `__` prefix cannot collide with dotted OTel attribute keys.
- */
-const RESOURCE_ATTRS_KEY = '__resourceAttributes';
-
-/**
- * Reserved key under which the raw log-record (per-record) attributes are stashed, separate from the
- * merged flat view. Needed to assert that a field is present in the per-record attributes
- * specifically — e.g. a resource attribute promoted onto each record — when the same key also exists
- * at the resource level (so the merged view can't tell them apart). Read via {@link getLogAttributes}.
- */
-const LOG_ATTRS_KEY = '__logAttributes';
-
-/** Returns the raw resource-level attributes captured for a flattened record. */
-export const getResourceAttributes = (e: FlatAttributes): FlatAttributes =>
-  (e[RESOURCE_ATTRS_KEY] as FlatAttributes) ?? {};
-
-/** Returns the raw log-record (per-record) attributes captured for a flattened record. */
-export const getLogAttributes = (e: FlatAttributes): FlatAttributes =>
-  (e[LOG_ATTRS_KEY] as FlatAttributes) ?? {};
-
 const unwrapAnyValue = (value: OtlpAnyValue | undefined): unknown => {
   if (!value) return undefined;
   if (value.arrayValue) return value.arrayValue.values.map(unwrapAnyValue);
@@ -81,18 +56,9 @@ const toFlatAttributes = (record: OtlpLogRecord, resourceAttrs: FlatAttributes):
   if (record.traceId) attrs.traceId = record.traceId;
   if (record.spanId) attrs.spanId = record.spanId;
 
-  const logAttrs: FlatAttributes = {};
   for (const { key, value } of record.attributes ?? []) {
-    const unwrapped = unwrapAnyValue(value);
-    attrs[key] = unwrapped;
-    logAttrs[key] = unwrapped;
+    attrs[key] = unwrapAnyValue(value);
   }
-
-  // Stash the raw resource and per-record attributes separately so tests can assert each contract
-  // (which fields Kibana emits at the resource vs. per-record level) independently of the merged
-  // flat view — the two overlap when a resource attribute is also promoted onto the record.
-  attrs[RESOURCE_ATTRS_KEY] = { ...resourceAttrs };
-  attrs[LOG_ATTRS_KEY] = logAttrs;
   return attrs;
 };
 

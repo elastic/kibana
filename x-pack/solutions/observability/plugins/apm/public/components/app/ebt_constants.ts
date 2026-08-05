@@ -7,8 +7,4 @@
 
 export const APM_EBT_ACTIONS = {
   EXPLORE_TRACES: 'exploreTraces',
-  SET_ENVIRONMENT: 'setEnvironment',
-  SET_TRANSACTION_TYPE: 'setTransactionType',
-  SET_LATENCY_AGGREGATION_TYPE: 'setLatencyAggregationType',
-  EXPLORE_SERVICE_MAP: 'exploreServiceMap',
 } as const;

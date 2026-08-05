@@ -21,12 +21,6 @@
         "embedding"
       ]
     },
-    "data_autocomplete_rules": {
-      "query": "",
-      "input": "",
-      "input_type": "",
-      "task_settings": ""
-    },
     "methods": [
       "POST"
     ],

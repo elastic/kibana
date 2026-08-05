@@ -116,7 +116,7 @@ describe('useServiceMapAlertsNavigateFactory', () => {
 
   it('routes through /mobile-services on the mobile map context', () => {
     mockedUseApmRoutePath.mockReturnValue(
-      '/mobile-services/{serviceName}/overview' as unknown as ReturnType<typeof useApmRoutePath>
+      '/mobile-services/{serviceName}/service-map' as unknown as ReturnType<typeof useApmRoutePath>
     );
 
     const { result } = renderHook(() => useServiceMapAlertsNavigateFactory());

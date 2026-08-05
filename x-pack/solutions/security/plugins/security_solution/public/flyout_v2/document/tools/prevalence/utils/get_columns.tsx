@@ -8,7 +8,6 @@
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { IS_OPERATOR } from '@kbn/timelines-plugin/common';
 import type { IdentityFields } from '../../../../../flyout/document_details/shared/utils';
@@ -76,10 +75,6 @@ export interface PrevalenceDetailsRow extends PrevalenceData {
    * User entity identifiers from the current document (for EUID / entity store).
    */
   documentUserEntityIdentifiers?: IdentityFields | null;
-  /**
-   * Source document used to resolve host/user identity in v2 entity flyouts.
-   */
-  documentHit?: DataTableRecord;
 }
 
 export const fieldColumn: EuiBasicTableColumn<PrevalenceDetailsRow> = {
@@ -340,7 +335,7 @@ export const getColumns = (
         const text = <EuiText size="xs">{value}</EuiText>;
         if (RenderFlyoutLink) {
           return (
-            <RenderFlyoutLink field={data.field} value={value} hit={data.documentHit}>
+            <RenderFlyoutLink field={data.field} value={value}>
               {text}
             </RenderFlyoutLink>
           );

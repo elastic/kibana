@@ -7,7 +7,6 @@
 
 import { decode, encode } from '@kbn/rison';
 import { timelineFlyoutHistoryKey } from '../constants/flyout_history';
-import type { FlyoutOrigin } from '../../../common/lib/telemetry/events/flyout_v2/types';
 
 /**
  * URL parameter that carries the currently-open flyout chain for the page (non-Timeline) context.
@@ -363,7 +362,7 @@ export interface CspVulnerabilityDescriptor {
 // Discriminated union
 // ---------------------------------------------------------------------------
 
-export type FlyoutDescriptor = (
+export type FlyoutDescriptor =
   | DocumentDescriptor
   | DocumentFromPatternDescriptor
   | AnalyzerDescriptor
@@ -396,11 +395,7 @@ export type FlyoutDescriptor = (
   | RuleDescriptor
   | IocDescriptor
   | CspMisconfigurationDescriptor
-  | CspVulnerabilityDescriptor
-) & {
-  /** UI trigger to attribute when this descriptor is restored from URL state. */
-  origin?: FlyoutOrigin;
-};
+  | CspVulnerabilityDescriptor;
 
 /** Ordered array of up to 2 descriptors representing the current open flyout chain. */
 export type FlyoutV2UrlParamValue = FlyoutDescriptor[];

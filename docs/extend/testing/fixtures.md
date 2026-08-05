@@ -75,7 +75,7 @@ Add fixtures under your test tree:
 
 ::::::::::{step} Create a `fixtures/index.ts` entry point
 
-Typically you’ll create a `fixtures/index.ts` entry point that **extends** Scout’s base `test` (UI) or `apiTest` (API), then import that in your spec files:
+Typically you’ll create a `fixtures/index.ts` entry point that **extends** Scout’s base `test` (UI) and/or `apiTest` (API), then import that in your spec files:
 
 ```ts
 // UI test spec: <plugin-root>/test/scout/ui/tests/my_suite.spec.ts

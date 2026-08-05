@@ -243,11 +243,13 @@ test.describe(
         await pageObjects.dashboard.expectTimeRangeBadgeMissing();
       });
 
-      await test.step('click View in Service map button and verify navigation', async () => {
+      await test.step('click View full service map button and verify navigation', async () => {
         await expect(pageObjects.serviceMapPage.serviceMapViewFullMapButton).toBeVisible();
         await pageObjects.serviceMapPage.serviceMapViewFullMapButton.click();
 
-        await expect(page).toHaveURL(new RegExp(`/app/apm(?:#)?/service-map`));
+        await expect(page).toHaveURL(
+          new RegExp(`/app/apm/services/${SERVICE_MAP_TEST_SERVICE}/service-map`)
+        );
       });
     });
 

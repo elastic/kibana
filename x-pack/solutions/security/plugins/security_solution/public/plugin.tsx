@@ -364,9 +364,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         application: core.application,
         agentBuilder: plugins.agentBuilder,
         chrome: core.chrome,
-        experimentalFeatures: this.experimentalFeatures,
         searchSession: plugins.data.search.session,
-        uiSettings: core.uiSettings,
       });
       registerEntityAttachment({
         attachments: plugins.agentBuilder.attachments,
@@ -377,7 +375,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         resolveSecurityCanvasContext: () =>
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
-        uiSettings: core.uiSettings,
       });
       if (this.experimentalFeatures.rulePreviewAttachmentEnabled) {
         registerRulePreviewAttachment({

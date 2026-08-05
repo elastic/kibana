@@ -6,29 +6,6 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "data_autocomplete_rules": {
-      "pipeline": {
-        "extract_binary_content": {
-          "__one_of": [
-            true,
-            false
-          ]
-        },
-        "name": "",
-        "reduce_whitespace": {
-          "__one_of": [
-            true,
-            false
-          ]
-        },
-        "run_ml_inference": {
-          "__one_of": [
-            true,
-            false
-          ]
-        }
-      }
-    },
     "methods": [
       "PUT"
     ],

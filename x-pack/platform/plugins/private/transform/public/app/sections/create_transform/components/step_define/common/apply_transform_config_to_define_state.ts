@@ -45,8 +45,6 @@ export function applyTransformConfigToDefineState(
     return state;
   }
 
-  state.projectRouting = transformConfig.source.project_routing;
-
   if (isPivotTransform(transformConfig)) {
     state.transformFunction = TRANSFORM_FUNCTION.PIVOT;
 

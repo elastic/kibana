@@ -36,7 +36,7 @@ export const SuggestionItem: React.FC<Props> = ({
       onMouseEnter={onMouseEnter}
     >
       <div css={suggestionItemIconFieldStyle(suggestion.type)}>
-        <EuiIcon type={getEuiIconType(suggestion.type)} aria-hidden={true} />
+        <EuiIcon type={getEuiIconType(suggestion.type)} />
       </div>
       <div css={suggestionItemTextFieldStyle}>{suggestion.text}</div>
       <div css={suggestionItemDescriptionFieldStyle}>{suggestion.description}</div>

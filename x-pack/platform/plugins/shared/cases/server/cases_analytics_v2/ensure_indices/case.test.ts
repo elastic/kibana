@@ -56,20 +56,15 @@ describe('ensureCaseIndex', () => {
     expect(call.settings['index.auto_expand_replicas']).toBe('0-1');
   });
 
-  it('applies an additive mapping sync (no create) when the index already exists', async () => {
+  it('skips creation and logs debug when the index already exists', async () => {
     const { esClient, logger } = buildDeps();
     (esClient.indices.exists as unknown as jest.Mock).mockResolvedValue(true);
-    (esClient.indices.putMapping as unknown as jest.Mock).mockResolvedValue({});
 
     await ensureCaseIndex({ esClient, logger });
 
     expect(esClient.indices.create).not.toHaveBeenCalled();
-    expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
-    const call = (esClient.indices.putMapping as unknown as jest.Mock).mock.calls[0][0];
-    expect(call.index).toBe(CASE_INDEX_NAME);
-    expect(call.properties).toBeDefined();
     expect(logger.debug).toHaveBeenCalledWith(
-      expect.stringContaining('applied additive mapping sync')
+      expect.stringContaining('already exists; skipping bootstrap')
     );
   });
 

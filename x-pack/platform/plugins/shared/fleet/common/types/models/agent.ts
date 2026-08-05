@@ -119,7 +119,6 @@ interface AgentBase {
   default_api_key?: string;
   default_api_key_id?: string;
   policy_id?: string;
-  policy_base_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
   last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'starting' | 'disconnected';
@@ -334,10 +333,6 @@ export interface FleetServerAgent {
    * The policy ID for the Elastic Agent
    */
   policy_id?: string;
-  /**
-   * The base policy ID (policy_id without version suffix) for efficient querying.
-   */
-  policy_base_id?: string;
   /**
    * The current policy revision_idx for the Elastic Agent
    */

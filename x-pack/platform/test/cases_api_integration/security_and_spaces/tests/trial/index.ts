@@ -36,7 +36,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     // Public API — the fields a caller may apply to a case's `extended_fields`.
     loadTestFile(require.resolve('./cases/applicable_fields'));
     loadTestFile(require.resolve('./configure'));
-    loadTestFile(require.resolve('./registered_attachments'));
+    loadTestFile(require.resolve('./attachments_framework/registered_unified_trial'));
     // sub privileges are only available with a license above basic
     loadTestFile(require.resolve('./delete_sub_privilege'));
     loadTestFile(require.resolve('./create_comment_sub_privilege.ts'));

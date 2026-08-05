@@ -100,35 +100,8 @@ export interface OtelAppenderConfig {
    * as `service.name`. Because Kibana expands dotted YAML keys into nested
    * objects, wrap dotted attribute names in `[brackets]`:
    * `"[service.name]": my-kibana`
-   *
-   * These attributes are merged into the resource; when {@link OtelAppenderConfig.includeResources}
-   * narrows the resource, they supply the values for the included keys (e.g. `service.name`).
    */
   attributes?: Record<string, string>;
-  /**
-   * Allowlist of resource-attribute keys to include in the OTLP resource. Defaults to `['*']`
-   * (include every auto-detected and configured attribute — the standard OTel resource).
-   *
-   * When set to an explicit list (anything not containing `'*'`), the resource is filtered to
-   * only those keys. Filtering is applied to the fully-resolved resource (auto-detected host/OS/
-   * process/env attributes plus {@link OtelAppenderConfig.attributes}), so
-   * `['service.name', 'service.type']` ships a deliberately minimal resource with the
-   * cloud/k8s/process/host fields excluded.
-   *
-   * An explicit allowlist fully governs the resource: a listed key is kept even if
-   * {@link OtelAppenderConfig.fieldDrops} also names it (`fieldDrops` still removes that key from
-   * the per-record attributes). `fieldDrops` only shapes the resource in the default `['*']` case.
-   */
-  includeResources?: string[];
-  /**
-   * Resource-attribute keys to also emit as per-record log attributes. Each value is captured once
-   * (at appender construction) from the resolved resource — before {@link OtelAppenderConfig.includeResources}
-   * narrows it — and added to every log record's attributes. Use when a value that arrives as a
-   * resource attribute (e.g. `project.id`, promoted from an APM global label) belongs per-record;
-   * pair with `includeResources` to keep it out of the resource and only on records. Only
-   * synchronously-resolved values are promoted; async-detected ones (e.g. `host.id`) are skipped.
-   */
-  promoteResourceAttributes?: string[];
   /**
    * Optional TLS settings for HTTPS/gRPC to the OTLP endpoint, including mutual TLS (client certificates).
    */
@@ -148,18 +121,15 @@ export interface OtelAppenderConfig {
    */
   fieldRenames?: Record<string, string | string[]>;
   /**
-   * Optional list of attribute keys to remove from the OTLP output. Always applied to the per-record
-   * log attributes. Also applied to the resource attributes **only** when
-   * {@link OtelAppenderConfig.includeResources} is `['*']` (the default) — an explicit
-   * `includeResources` allowlist takes precedence for the resource. Keys absent from the output are
-   * silently skipped. Injected programmatically (e.g. by the audit service to satisfy Serverless
-   * field exclusions).
+   * Optional list of attribute keys to remove from the OTLP output. Applied to both log record
+   * attributes and resource attributes. Keys absent from the output are silently skipped.
+   * Injected programmatically (e.g. by the audit service to satisfy Serverless field exclusions).
    */
   fieldDrops?: string[];
   /**
    * Optional default attribute values written only when the key is not already present in the log
-   * record attributes. Applied after `fieldRenames`, `fieldAdditions`, and `fieldDrops`. Use to fill
-   * in fields that are absent from some event types (e.g. `event.type` on authentication events).
+   * record attributes. Applied after `fieldRenames` and `fieldDrops`. Use to fill in fields that are
+   * absent from some event types (e.g. `event.type` on authentication events).
    * Values may be a string or an array of strings.
    */
   fieldDefaults?: Record<string, string | string[]>;
@@ -170,16 +140,4 @@ export interface OtelAppenderConfig {
    * Non-string values and absent keys are silently skipped.
    */
   fieldUppercase?: string[];
-  /**
-   * Optional map of target attribute key → template string used to add derived attributes at emit
-   * time. Templates reference other flattened attributes with `{field.path}` placeholders, resolved
-   * from the current record attributes. Applied after `fieldRenames` and before `fieldDrops`, so a
-   * template may reference fields that are subsequently dropped (e.g. build `url.original` from
-   * `url.scheme`/`url.domain`/`url.path`, then drop those components).
-   *
-   * Templates may only reference scalar fields. The addition is skipped when any referenced field is
-   * missing/nullish/empty or array/object-valued, so events that do not carry the source fields (e.g.
-   * non-http events) don't receive a degenerate value, and array attributes aren't silently joined.
-   */
-  fieldAdditions?: Record<string, string>;
 }

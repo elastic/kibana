@@ -16,20 +16,6 @@
         "0"
       ]
     },
-    "data_autocomplete_rules": {
-      "filter": {
-        "__scope_link": "GLOBAL.query"
-      },
-      "index_routing": "",
-      "is_write_index": {
-        "__one_of": [
-          true,
-          false
-        ]
-      },
-      "routing": "",
-      "search_routing": ""
-    },
     "methods": [
       "PUT",
       "POST"

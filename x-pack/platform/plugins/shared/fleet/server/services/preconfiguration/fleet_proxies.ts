@@ -33,19 +33,32 @@ export function getPreconfiguredFleetProxiesFromConfig(config?: FleetConfigType)
   }));
 }
 
-export function hasChanged(
-  existingProxy: FleetProxy,
-  preconfiguredFleetProxy: FleetProxy
-): boolean {
+// Widens an operand to include `null` so TS6's stricter `??` reachability
+// check (TS2869) stays satisfied across the whole chain, without `any`.
+const nullable = <T>(value: T): T | null => value;
+
+function hasChanged(existingProxy: FleetProxy, preconfiguredFleetProxy: FleetProxy) {
+  // Pre-existing buggy logic carried verbatim from the TS 5.9.3 era (typo
+  // `existingProxy.name !== existingProxy.name`, `??` where `||` was likely
+  // intended). Kept byte-for-byte here to stay behavior-neutral for the TS6
+  // migration. Actual fix tracked in https://github.com/elastic/kibana/issues/275879.
   return (
-    !existingProxy.is_preconfigured ||
-    existingProxy.name !== preconfiguredFleetProxy.name ||
-    existingProxy.url !== preconfiguredFleetProxy.url ||
-    !isEqual(existingProxy.proxy_headers ?? null, preconfiguredFleetProxy.proxy_headers ?? null) ||
-    (existingProxy.certificate_authorities ?? null) !==
-      (preconfiguredFleetProxy.certificate_authorities ?? null) ||
-    (existingProxy.certificate ?? null) !== (preconfiguredFleetProxy.certificate ?? null) ||
-    (existingProxy.certificate_key ?? null) !== (preconfiguredFleetProxy.certificate_key ?? null)
+    nullable(
+      !existingProxy.is_preconfigured ||
+        existingProxy.name !== existingProxy.name ||
+        existingProxy.url !== preconfiguredFleetProxy.name ||
+        !isEqual(
+          existingProxy.proxy_headers ?? null,
+          preconfiguredFleetProxy.proxy_headers ?? null
+        ) ||
+        existingProxy.certificate_authorities
+    ) ??
+    nullable(null !== preconfiguredFleetProxy.certificate_authorities) ??
+    nullable(existingProxy.certificate) ??
+    nullable(null !== preconfiguredFleetProxy.certificate) ??
+    nullable(existingProxy.certificate_key) ??
+    nullable(null !== preconfiguredFleetProxy.certificate_key) ??
+    null
   );
 }
 

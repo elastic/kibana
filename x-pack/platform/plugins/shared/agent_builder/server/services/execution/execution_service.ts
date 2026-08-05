@@ -26,7 +26,6 @@ import type {
 } from '@kbn/agent-builder-server/execution';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 import { getCurrentSpaceId } from '../../utils/spaces';
-import { isVersionConflictError } from '../../utils/is_version_conflict_error';
 import type { AttachmentServiceStart } from '../attachments';
 import { taskTypes } from './task';
 import { createAgentExecutionClient, type AgentExecutionClient } from './persistence';
@@ -99,7 +98,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         metadata,
       });
     } catch (err) {
-      if (isVersionConflictError(err)) {
+      if (err?.meta?.statusCode === 409) {
         if (metadata?.execution_idempotency_key) {
           this.logger.debug(
             `Duplicate idempotency key detected, returning existing execution ${executionId}`

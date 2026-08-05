@@ -55,4 +55,15 @@ describe('useServiceMapTabHrefBuilder', () => {
     const search = new URL(`http://x${href}`).searchParams;
     expect(search.get('kuery')).toBe('');
   });
+
+  it('builds a mobile-services overview-tab link on the mobile map context', () => {
+    const { result } = renderHook(() => useServiceMapTabHrefBuilder('overview'), {
+      wrapper: createWrapper('/mobile-services/opbeans-rum/service-map'),
+    });
+    const href = result.current('opbeans-rum');
+
+    expect(href).toContain('/app/apm/mobile-services/opbeans-rum/overview');
+    const search = new URL(`http://x${href}`).searchParams;
+    expect(search.get('kuery')).toBe('');
+  });
 });

@@ -35,7 +35,7 @@ test.describe(
         await expect(overviewTab.exploreInServiceMapLink).toBeVisible();
         await expect(overviewTab.exploreInServiceMapLink).toHaveAttribute(
           'href',
-          new RegExp(`#/service-map\\?.*controlSelections`)
+          new RegExp(`/services/${SERVICE_MOBILE_ANDROID}/service-map`)
         );
       });
 

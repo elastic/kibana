@@ -37,7 +37,7 @@ export function defineKeyRotationRoutes({
             max: DEFAULT_MAX_RESULT_WINDOW,
             defaultValue: DEFAULT_MAX_RESULT_WINDOW,
           }),
-          type: schema.maybe(schema.string({ maxLength: 256 })),
+          type: schema.maybe(schema.string()),
         }),
       },
       security: {

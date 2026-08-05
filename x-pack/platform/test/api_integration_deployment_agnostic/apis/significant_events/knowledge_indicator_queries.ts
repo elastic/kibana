@@ -23,9 +23,6 @@ import {
 } from '../streams/helpers/requests';
 import type { RoleCredentials } from '../../services';
 
-/** Alerting v2 rule display name for MATCH metric-series rules. */
-const matchCountRuleName = (title: string) => `${title} (match count)`;
-
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const alertingApi = getService('alertingApiCommon');
@@ -91,7 +88,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           title: 'OutOfMemoryError',
           description: '',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'OutOfMemoryError'")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'OutOfMemoryError'")`,
           },
         },
         {
@@ -100,7 +97,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           title: 'cluster_block_exception',
           description: '',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'cluster_block_exception'")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'cluster_block_exception'")`,
           },
         },
       ];
@@ -118,15 +115,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const rules = await alertingApi.searchRulesV2(roleAuthc, { search: 'OutOfMemoryError' });
       expect(rules.body.items).to.have.length(1);
       expect(rules.body.items[0].kind).to.eql('signal');
-      expect(rules.body.items[0].metadata.name).to.eql(matchCountRuleName('OutOfMemoryError'));
-      // MATCH rules compile to a closed-minute count series (not per-doc copies).
-      const breachQuery = rules.body.items[0].query.breach.query as string;
-      expect(breachQuery).to.contain(`FROM ${STREAM_NAME},${STREAM_NAME}.*`);
-      expect(breachQuery).to.contain(
-        'STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)'
+      // The stored breach query is pretty-printed (via BasicPrettyPrinter in
+      // stripMetadata), which normalizes the FROM source list to `a, b` with a
+      // space after the comma. Assert against that normalized form.
+      expect(rules.body.items[0].query.breach.query).to.contain(
+        `FROM ${STREAM_NAME}, ${STREAM_NAME}.* METADATA _id`
       );
-      expect(breachQuery).to.contain('KEEP bucket, metric_value');
-      expect(breachQuery).to.contain('LIMIT 6');
+      expect(rules.body.items[0].query.breach.query).not.to.contain('_source');
     });
 
     it('rejects a stray top-level `queries` field on PUT and leaves detections unchanged', async () => {
@@ -144,7 +139,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               id: v4(),
               title: 'stray query',
               esql: {
-                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'stray'")`,
+                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'stray'")`,
               },
             },
           ],
@@ -164,7 +159,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           title: 'initial title',
           description: '',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'initial query'")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'initial query'")`,
           },
         };
         const upsertQueryResponse = await apiClient
@@ -186,7 +181,25 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const rules = await alertingApi.searchRulesV2(roleAuthc);
         expect(rules.body.items).to.have.length(1);
-        expect(rules.body.items[0].metadata.name).to.eql(matchCountRuleName(query.title));
+        expect(rules.body.items[0].metadata.name).to.eql(query.title);
+      });
+
+      it('returns 400 and does not save when ES|QL query is missing METADATA _id,_source', async () => {
+        const queryId = v4();
+        await apiClient
+          .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+            params: {
+              path: { name: STREAM_NAME, queryId },
+              body: {
+                title: 'missing metadata',
+                esql: { query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'x'")` },
+              },
+            },
+          })
+          .expect(400);
+
+        const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
+        expect(getQueriesResponse.queries).to.eql([]);
       });
 
       it('returns 400 and does not save when ES|QL query references invalid sources', async () => {
@@ -197,7 +210,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: STREAM_NAME, queryId },
               body: {
                 title: 'invalid sources',
-                esql: { query: 'FROM logs.ecs' },
+                esql: { query: 'FROM logs.ecs METADATA _id, _source' },
               },
             },
           })
@@ -214,13 +227,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           title: 'initial title',
           description: '',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("initial query")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("initial query")`,
           },
         };
         await bulkQueries(apiClient, STREAM_NAME, [{ index: omit(query, 'type') }]);
         const initialRules = await alertingApi.searchRulesV2(roleAuthc);
 
-        const updatedEsql = `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("updated query")`;
+        const updatedEsql = `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("updated query")`;
         const upsertQueryResponse = await apiClient
           .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
             params: {
@@ -248,7 +261,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const updatedRules = await alertingApi.searchRulesV2(roleAuthc);
         expect(updatedRules.body.items).to.have.length(1);
-        expect(updatedRules.body.items[0].metadata.name).to.eql(matchCountRuleName(query.title));
+        expect(updatedRules.body.items[0].metadata.name).to.eql(query.title);
         // The rule id is content-addressed on the ES|QL (computeRuleId hashes
         // stream/query id/esql), so changing the ES|QL is a breaking change that
         // recreates the rule under a new id rather than updating it in place.
@@ -262,7 +275,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           title: 'initial title',
           description: '',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("initial query")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("initial query")`,
           },
         };
         await bulkQueries(apiClient, STREAM_NAME, [{ index: omit(query, 'type') }]);
@@ -295,9 +308,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const updatedRules = await alertingApi.searchRulesV2(roleAuthc);
         expect(updatedRules.body.items).to.have.length(1);
-        expect(updatedRules.body.items[0].metadata.name).to.eql(
-          matchCountRuleName('updated title')
-        );
+        expect(updatedRules.body.items[0].metadata.name).to.eql('updated title');
         expect(updatedRules.body.items[0].id).to.eql(initialRules.body.items[0].id);
       });
     });
@@ -311,7 +322,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             title: 'Significant Query',
             description: '',
             esql: {
-              query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'query'")`,
+              query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'query'")`,
             },
           },
         },
@@ -351,7 +362,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               title: 'already expired',
               esql: {
-                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'expired'")`,
+                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'expired'")`,
               },
               expires_at: '2020-01-01T00:00:00.000Z',
             },
@@ -389,7 +400,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               title: 'lingering expired query',
               esql: {
-                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'lingering'")`,
+                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'lingering'")`,
               },
               expires_at: '2020-01-01T00:00:00.000Z',
             },
@@ -415,7 +426,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         title: 'first query',
         description: '',
         esql: {
-          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 1")`,
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 1")`,
         },
       };
       const secondQuery = {
@@ -424,7 +435,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         title: 'second query',
         description: '',
         esql: {
-          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 2")`,
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 2")`,
         },
       };
       const thirdQuery = {
@@ -433,7 +444,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         title: 'third query',
         description: '',
         esql: {
-          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 3")`,
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 3")`,
         },
       };
       await bulkQueries(
@@ -448,7 +459,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         title: 'fourth query',
         description: '',
         esql: {
-          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 4")`,
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 4")`,
         },
       };
       const updateThirdQuery = {
@@ -456,7 +467,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         title: 'third query',
         description: '',
         esql: {
-          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 3 updated")`,
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 3 updated")`,
         },
       };
 
@@ -501,19 +512,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const updatedRules = await alertingApi.searchRulesV2(roleAuthc);
       expect(updatedRules.body.items).to.have.length(3);
       const ruleNames = updatedRules.body.items.map((rule: any) => rule.metadata.name);
-      expect(ruleNames.includes(matchCountRuleName(firstQuery.title))).to.be(true);
-      expect(ruleNames.includes(matchCountRuleName(updateThirdQuery.title))).to.be(true);
-      expect(ruleNames.includes(matchCountRuleName(newQuery.title))).to.be(true);
+      expect(ruleNames.includes(firstQuery.title)).to.be(true);
+      expect(ruleNames.includes(updateThirdQuery.title)).to.be(true);
+      expect(ruleNames.includes(newQuery.title)).to.be(true);
 
       const initialThirdRuleId = initialRules.body.items.find(
-        (rule: any) => rule.metadata.name === matchCountRuleName(thirdQuery.title)
+        (rule: any) => rule.metadata.name === thirdQuery.title
       ).id;
       // The third query's ES|QL changed in the bulk, so its rule is recreated
       // under a new (content-addressed) id rather than updated in place.
       expect(initialThirdRuleId).not.to.eql(
-        updatedRules.body.items.find(
-          (rule: any) => rule.metadata.name === matchCountRuleName(updateThirdQuery.title)
-        ).id
+        updatedRules.body.items.find((rule: any) => rule.metadata.name === updateThirdQuery.title)
+          .id
       );
     });
 
@@ -524,7 +534,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         title: 'first query',
         description: '',
         esql: {
-          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query 1")`,
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 1")`,
         },
       };
       await bulkQueries(apiClient, STREAM_NAME, [{ index: omit(firstQuery, 'type') }]);
@@ -534,12 +544,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         title: 'invalid query',
         description: '',
         esql: {
-          // Unterminated string literal, so the ES|QL parser reports errors.
-          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE message == "unterminated`,
+          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("query invalid")`,
         },
       };
 
-      const response = await apiClient
+      await apiClient
         .fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
           params: {
             path: { name: STREAM_NAME },
@@ -548,12 +557,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         })
-        .expect(400)
-        .then((res) => res.body);
-      // Pin the rejection to ES|QL validation so the test cannot pass on an unrelated 400.
-      expect((response as unknown as { message: string }).message).to.eql(
-        'One or more ES|QL queries are invalid'
-      );
+        .expect(400);
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
       expect(getQueriesResponse.queries).to.eql([firstQuery]);
@@ -576,7 +580,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           title: 'cross-stream bulk delete 1',
           description: '',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'q1'")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'q1'")`,
           },
         };
         const secondQuery = {
@@ -584,7 +588,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           title: 'cross-stream bulk delete 2',
           description: '',
           esql: {
-            query: `FROM ${SECOND_STREAM_NAME},${SECOND_STREAM_NAME}.* | WHERE KQL("message:'q2'")`,
+            query: `FROM ${SECOND_STREAM_NAME},${SECOND_STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'q2'")`,
           },
         };
 
@@ -623,7 +627,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           title: 'partition test',
           description: '',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'partition'")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'partition'")`,
           },
         };
         await bulkQueries(apiClient, STREAM_NAME, [{ index: query }]);
@@ -647,7 +651,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           title: 'already expired',
           description: '',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'expired'")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'expired'")`,
           },
           expires_at: '2020-01-01T00:00:00.000Z',
         };
@@ -680,7 +684,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           title: 'bulk-delete survivor',
           description: '',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'survivor'")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'survivor'")`,
           },
         };
         const target = {
@@ -688,14 +692,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           title: 'bulk-delete target',
           description: '',
           esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'target'")`,
+            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'target'")`,
           },
         };
         await bulkQueries(apiClient, STREAM_NAME, [{ index: survivor }, { index: target }]);
 
         const rulesBefore = await alertingApi.searchRulesV2(roleAuthc);
         const survivorRuleBefore = rulesBefore.body.items.find(
-          (rule: any) => rule.metadata.name === matchCountRuleName(survivor.title)
+          (rule: any) => rule.metadata.name === survivor.title
         );
         expect(survivorRuleBefore).to.be.ok();
 
@@ -713,7 +717,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const rulesAfter = await alertingApi.searchRulesV2(roleAuthc);
         const survivorRuleAfter = rulesAfter.body.items.find(
-          (rule: any) => rule.metadata.name === matchCountRuleName(survivor.title)
+          (rule: any) => rule.metadata.name === survivor.title
         );
         expect(survivorRuleAfter.id).to.eql(survivorRuleBefore.id);
         expect(survivorRuleAfter.updatedAt).to.eql(survivorRuleBefore.updatedAt);
@@ -743,7 +747,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     title,
                     description: '',
                     esql: {
-                      query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'${title}'")`,
+                      query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'${title}'")`,
                     },
                     severity_score: 10,
                     features: [{ id: testFeature.id }],
@@ -770,7 +774,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               title: 'public bulk unrelated draft',
               description: '',
               esql: {
-                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'unrelated'")`,
+                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'unrelated'")`,
               },
             },
           },

@@ -139,7 +139,7 @@ export const SnoozeAlertAction = typedMemo(
     return (
       <EuiContextMenuItem
         data-test-subj="snooze-alert-action-snooze"
-        hasPanel
+        icon="arrowRight"
         onClick={handleOpenInline}
       >
         {SNOOZE}

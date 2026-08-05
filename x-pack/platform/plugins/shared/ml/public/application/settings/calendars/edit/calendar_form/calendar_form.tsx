@@ -26,18 +26,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { MlAppHeader, useCalendarManagementBack } from '../../../../components/ml_app_header';
+import { MlAppHeader } from '../../../../components/ml_app_header';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
 import { DstEventGenerator } from './dst_event_generator';
 import { EventsTable } from '../events_table';
 
-const EditHeader: FC<{ calendarId: string; description: string; isDst: boolean }> = ({
+const EditHeader: FC<{ calendarId: string; description: string }> = ({
   calendarId,
   description,
-  isDst,
 }) => {
-  const calendarManagementBack = useCalendarManagementBack(isDst);
   return (
     <>
       <div data-test-subj="mlCalendarTitle">
@@ -46,7 +44,6 @@ const EditHeader: FC<{ calendarId: string; description: string; isDst: boolean }
             defaultMessage: 'Calendar {calendarId}',
             values: { calendarId },
           })}
-          back={calendarManagementBack}
         />
       </div>
       {description ? (
@@ -138,7 +135,6 @@ export const CalendarForm: FC<Props> = ({
     isDst ? ML_PAGES.CALENDARS_DST_MANAGE : ML_PAGES.CALENDARS_MANAGE,
     'ad_settings'
   );
-  const calendarManagementBack = useCalendarManagementBack(isDst);
 
   const addDstEvents = useCallback(
     (events: estypes.MlCalendarEvent[]) => {
@@ -151,7 +147,7 @@ export const CalendarForm: FC<Props> = ({
   return (
     <EuiForm data-test-subj={`mlCalendarForm${isEdit === true ? 'Edit' : 'New'}`}>
       {isEdit === true ? (
-        <EditHeader calendarId={calendarId} description={description} isDst={isDst} />
+        <EditHeader calendarId={calendarId} description={description} />
       ) : (
         <>
           <MlAppHeader
@@ -164,7 +160,6 @@ export const CalendarForm: FC<Props> = ({
                     defaultMessage: 'Create new calendar',
                   })
             }
-            back={calendarManagementBack}
           />
           <EuiFormRow
             label={

@@ -7,7 +7,6 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { disableNewFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import {
   interceptEntityStoreStatus,
   setGrouping,
@@ -95,7 +94,6 @@ describe(
       interceptResolutionGroup();
       interceptResolutionMutations();
       login();
-      disableNewFlyout();
       // Flat data-grid mode so we can click the row-expand button to open the entity flyout.
       setGrouping(['none']);
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);

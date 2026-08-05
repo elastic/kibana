@@ -22,7 +22,5 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./persistable_state'));
     loadTestFile(require.resolve('./endpoint'));
     loadTestFile(require.resolve('./osquery'));
-    loadTestFile(require.resolve('./timeline_unified_only'));
-    loadTestFile(require.resolve('./legacy_route_compat'));
   });
 };

@@ -9,7 +9,7 @@
 
 import { mockBuildNode } from './find_sample_objects.test.mock';
 
-import type { SavedObjectBulkResult, SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { findSampleObjects } from './find_sample_objects';
 
@@ -42,7 +42,7 @@ describe('findSampleObjects', () => {
         { ...obj2, error: { statusCode: 403 } }, // bulkGet failure - will not attempt to find by originId since the error is not 404
         { ...obj3, error: { statusCode: 404 } }, // bulkGet failure - will attempt to find by originId since the error is 404
         { ...obj4, error: { statusCode: 404 } }, // bulkGet failure - will attempt to find by originId since the error is 404
-      ] as SavedObjectBulkResult[],
+      ] as SavedObject[],
     });
     client.find.mockResolvedValue({
       saved_objects: [{ type: obj4.type, id: 'obj-id-x', originId: obj4.id }], // find success for obj4
@@ -76,7 +76,7 @@ describe('findSampleObjects', () => {
       saved_objects: [
         obj1, // bulkGet success for obj1
         { ...obj2, error: { statusCode: 403 } }, // bulkGet failure - will not attempt to find by originId since the error is not 404
-      ] as SavedObjectBulkResult[],
+      ] as SavedObject[],
     });
     const result = await findSampleObjects(params);
 
@@ -99,7 +99,7 @@ describe('findSampleObjects', () => {
     client.bulkGet.mockResolvedValue({
       saved_objects: [
         { ...obj1, error: { statusCode: 404 } }, // bulkGet failure - will attempt to find by originId since the error is 404
-      ] as SavedObjectBulkResult[],
+      ] as SavedObject[],
     });
     client.find.mockResolvedValue({
       saved_objects: [

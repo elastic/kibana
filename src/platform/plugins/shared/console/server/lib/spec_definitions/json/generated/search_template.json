@@ -31,23 +31,6 @@
       "rest_total_hits_as_int": "__flag__",
       "typed_keys": "__flag__"
     },
-    "data_autocomplete_rules": {
-      "explain": {
-        "__one_of": [
-          true,
-          false
-        ]
-      },
-      "id": "",
-      "params": {},
-      "profile": {
-        "__one_of": [
-          true,
-          false
-        ]
-      },
-      "source": ""
-    },
     "methods": [
       "GET",
       "POST"

@@ -14,15 +14,15 @@ import { OnboardingPathPanel } from './onboarding_path_panel';
 import { pathQuery } from '../../hooks/use_wizard_path';
 import { useOnboardingNavigate } from '../../hooks/use_onboarding_navigate';
 import type { VectorPath } from '../types';
-import { GETTING_STARTED_PATH } from '../../routes';
+import { ONBOARDING_PATH } from '../../routes';
 
-export const OnboardingPaths = () => {
-  const navigate = useOnboardingNavigate();
-  const choose = (path: VectorPath) => navigate(`${GETTING_STARTED_PATH}/ingest${pathQuery(path)}`);
+export const OnboardingPaths = ({ origin }: { origin: string }) => {
+  const navigate = useOnboardingNavigate(origin);
+  const choose = (path: VectorPath) => navigate(`${ONBOARDING_PATH}/ingest${pathQuery(path)}`);
 
   return (
     <>
-      <EuiTitle size="xs">
+      <EuiTitle size={origin === ONBOARDING_PATH ? 'xs' : 'xxxs'}>
         <h2>
           {i18n.translate('vectordbOnboarding.pathSelection.sectionHeader', {
             defaultMessage: 'Follow these guides to add embeddings:',

@@ -18,9 +18,10 @@ import {
   createArtifact,
   cleanupFolders,
   deleteIndex,
-  getSemanticTextMapping,
 } from './tasks';
 import type { TaskConfig } from './types';
+
+const DEFAULT_ELSER = '.elser-2-elasticsearch';
 
 const getEmbeddingClient = (config: TaskConfig) => {
   return new Client({
@@ -45,18 +46,14 @@ export const buildArtifact = async (config: TaskConfig) => {
   // Validate version format
   if (!isValidSecurityLabsVersion(config.version)) {
     throw new Error(
-      `Invalid version format: ${config.version}. Expected YYYY.MM.DD-HHMMSS (UTC) ` +
-        `(e.g., 2026.07.10-152831) or legacy YYYY.MM.DD.`
+      `Invalid version format: ${config.version}. Expected YYYY.MM.DD format (e.g., 2024.12.11)`
     );
   }
 
-  log.info(
-    `Starting Security Labs artifact build for version [${config.version}] with inference ID [${config.inferenceId}]`
-  );
+  log.info(`Starting Security Labs artifact build for version [${config.version}]`);
 
   const embeddingClient = getEmbeddingClient(config);
-  const semanticTextMapping = getSemanticTextMapping(config.inferenceId);
-  const targetIndex = getTargetIndexName(config.version, config.inferenceId);
+  const targetIndex = getTargetIndexName(config.version);
 
   await cleanupFolders({ folders: [config.buildFolder] });
 
@@ -88,11 +85,10 @@ export const buildArtifact = async (config: TaskConfig) => {
       log,
     });
 
-    // Step 4: Create target index with the inference-driven semantic_text mapping
+    // Step 4: Create target index with ELSER semantic_text mapping
     await createTargetIndex({
       client: embeddingClient,
       indexName: targetIndex,
-      semanticTextMapping,
     });
 
     // Step 5: Index documents (generates embeddings)
@@ -117,8 +113,6 @@ export const buildArtifact = async (config: TaskConfig) => {
       buildFolder,
       targetFolder: config.targetFolder,
       version: config.version,
-      inferenceId: config.inferenceId,
-      semanticTextMapping,
       log,
     });
 
@@ -129,6 +123,6 @@ export const buildArtifact = async (config: TaskConfig) => {
   }
 };
 
-const getTargetIndexName = (version: string, inferenceId: string): string => {
-  return `kb-security-labs-builder-${version}-${inferenceId}`.toLowerCase();
+const getTargetIndexName = (version: string): string => {
+  return `kb-security-labs-builder-${version}-${DEFAULT_ELSER}`.toLowerCase();
 };

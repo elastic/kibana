@@ -20,8 +20,6 @@ import { useEntityStoreRiskScoreKpi } from '../../api/hooks/use_entity_store_ris
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { RiskSeverity } from '../../../../common/search_strategy';
 import { capitalize } from 'lodash/fp';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
-import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 
 const mockedTelemetry = createTelemetryServiceMock();
 const mockedUseKibana = mockUseKibana();
@@ -89,13 +87,6 @@ jest.mock('../../../common/hooks/use_navigate_to_alerts_page_with_filters', () =
 
 const mockOpenRightPanel = jest.fn();
 jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../common/hooks/use_is_new_flyout_enabled');
-jest.mock('../../../flyout_v2/use_flyout_api');
-
-const mockOpenHostFlyout = jest.fn();
-const mockOpenUserFlyout = jest.fn();
-const mockOpenServiceFlyout = jest.fn();
-const mockUseIsNewFlyoutEnabled = useIsNewFlyoutEnabled as jest.Mock;
 
 describe.each([EntityType.host, EntityType.user, EntityType.service])(
   'EntityAnalyticsRiskScores entityType: %s',
@@ -103,12 +94,6 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
     beforeEach(() => {
       (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
         openRightPanel: mockOpenRightPanel,
-      });
-      mockUseIsNewFlyoutEnabled.mockReturnValue(false);
-      (useFlyoutApi as jest.Mock).mockReturnValue({
-        openHostFlyout: mockOpenHostFlyout,
-        openUserFlyout: mockOpenUserFlyout,
-        openServiceFlyout: mockOpenServiceFlyout,
       });
       jest.clearAllMocks();
       mockUseRiskScoreKpi.mockReturnValue({
@@ -393,63 +378,5 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
         });
       }
     );
-
-    it('opens the new entity flyout when entity name is clicked', async () => {
-      mockUseIsNewFlyoutEnabled.mockReturnValue(true);
-      mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
-      mockUseRiskScoreKpi.mockReturnValue({
-        severityCount: mockSeverityCount,
-        loading: false,
-      });
-      const name = 'testName';
-      setRiskScoreReturn({
-        ...defaultProps,
-        data: [
-          {
-            '@timestamp': '1234567899',
-            [riskEntity]: {
-              name,
-              risk: {
-                rule_risks: [],
-                calculated_level: RiskSeverity.High,
-                calculated_score_norm: 75,
-                multipliers: [],
-              },
-            },
-            alertsCount: 0,
-          },
-        ],
-      });
-
-      const { getByText } = render(
-        <TestProviders>
-          <EntityAnalyticsRiskScores riskEntity={riskEntity} />
-        </TestProviders>
-      );
-
-      fireEvent.click(getByText(name));
-
-      const openFlyoutByType = {
-        [EntityType.host]: mockOpenHostFlyout,
-        [EntityType.user]: mockOpenUserFlyout,
-        [EntityType.service]: mockOpenServiceFlyout,
-      };
-      const nameParamByType = {
-        [EntityType.host]: { hostName: name },
-        [EntityType.user]: { userName: name },
-        [EntityType.service]: { serviceName: name },
-      };
-      const testedRiskEntity = riskEntity as Exclude<EntityType, EntityType.generic>;
-
-      await waitFor(() => {
-        expect(openFlyoutByType[testedRiskEntity]).toHaveBeenCalledWith({
-          ...nameParamByType[testedRiskEntity],
-          scopeId: 'entity-risk-score-table',
-          contextID: 'entity-risk-score-table',
-          origin: 'entity_analytics_risk_score',
-        });
-      });
-      expect(mockOpenRightPanel).not.toHaveBeenCalled();
-    });
   }
 );

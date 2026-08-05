@@ -13,10 +13,6 @@
       "scroll_id": "",
       "rest_total_hits_as_int": "__flag__"
     },
-    "data_autocomplete_rules": {
-      "scroll": "",
-      "scroll_id": ""
-    },
     "methods": [
       "GET",
       "POST"

@@ -129,8 +129,8 @@ export function createNavigationTree({
       {
         id: 'vectordb_getting_started',
         icon: 'rocket',
-        link: 'vectordb:getting_started',
-        title: i18n.translate('xpack.serverlessVectordb.nav.gettingStarted', {
+        link: 'vectordb:tutorials',
+        title: i18n.translate('xpack.serverlessVectordb.nav.tutorials', {
           defaultMessage: 'Getting started',
         }),
       },

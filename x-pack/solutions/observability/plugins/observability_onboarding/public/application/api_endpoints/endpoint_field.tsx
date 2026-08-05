@@ -12,25 +12,24 @@ import React from 'react';
 interface Props {
   url?: string;
   isLoading: boolean;
-  label?: string;
-  dataTestSubjSuffix?: string;
 }
 
-export const EndpointField = ({ url, isLoading, label, dataTestSubjSuffix = '' }: Props) => {
-  const resolvedLabel =
-    label ??
-    i18n.translate('xpack.observability_onboarding.apiEndpoints.endpointLabel', {
-      defaultMessage: 'Endpoint',
-    });
-
+export const EndpointField = ({ url, isLoading }: Props) => {
   return (
-    <EuiFormRow fullWidth label={resolvedLabel}>
+    <EuiFormRow
+      fullWidth
+      label={i18n.translate('xpack.observability_onboarding.apiEndpoints.endpointLabel', {
+        defaultMessage: 'Endpoint',
+      })}
+    >
       <EuiFieldText
         fullWidth
         isLoading={isLoading}
         value={url ?? ''}
-        data-test-subj={`observabilityOnboardingApiEndpointValue${dataTestSubjSuffix}`}
-        aria-label={resolvedLabel}
+        data-test-subj="observabilityOnboardingApiEndpointValue"
+        aria-label={i18n.translate('xpack.observability_onboarding.apiEndpoints.endpointLabel', {
+          defaultMessage: 'Endpoint',
+        })}
         append={
           <EuiCopy textToCopy={url ?? ''}>
             {(copy) => (
@@ -39,12 +38,11 @@ export const EndpointField = ({ url, isLoading, label, dataTestSubjSuffix = '' }
                 iconLeft="copy"
                 onClick={copy}
                 isDisabled={!url}
-                data-test-subj={`observabilityOnboardingApiEndpointCopyButton${dataTestSubjSuffix}`}
+                data-test-subj="observabilityOnboardingApiEndpointCopyButton"
                 aria-label={i18n.translate(
-                  'xpack.observability_onboarding.apiEndpoints.copyButtonAriaLabel',
+                  'xpack.observability_onboarding.apiEndpoints.copyButton',
                   {
-                    defaultMessage: 'Copy {label} to clipboard',
-                    values: { label: resolvedLabel },
+                    defaultMessage: 'Copy to clipboard',
                   }
                 )}
               />

@@ -12,11 +12,6 @@ import {
   AttachmentType,
   ExternalReferenceStorageType,
 } from '@kbn/cases-plugin/common';
-import {
-  CASE_ATTACHMENT_SAVED_OBJECT,
-  CASE_COMMENT_SAVED_OBJECT,
-} from '@kbn/cases-plugin/common/constants';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import type { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq } from '../../../../common/lib/mock';
@@ -64,81 +59,9 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  const searchSO = (soType: string, soId: string) =>
-    es.search({
-      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-      query: {
-        bool: {
-          must: [{ term: { type: soType } }, { term: { _id: `${soType}:${soId}` } }],
-        },
-      },
-    });
-
   describe('Indicator attachment', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
-    });
-
-    describe('unified `indicator` 200 path', () => {
-      it('writes a unified `security.indicator` payload to cases-attachments (flag ON)', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patched = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: unifiedIndicatorPayload(),
-        });
-
-        const indicatorComment = patched.comments![0];
-
-        const unifiedSOs = await searchSO(CASE_ATTACHMENT_SAVED_OBJECT, indicatorComment.id);
-        expect(unifiedSOs.hits.hits.length).to.be(1);
-        const unifiedSO = unifiedSOs.hits.hits[0]._source as {
-          'cases-attachments': {
-            type: string;
-            attachmentId: string;
-            metadata?: {
-              indicatorName?: string;
-              indicatorType?: string;
-              indicatorFeedName?: string;
-            };
-          };
-        };
-        expect(unifiedSO['cases-attachments'].type).to.be(INDICATOR_ATTACHMENT_TYPE);
-        expect(unifiedSO['cases-attachments'].attachmentId).to.be('indicator-1');
-        expect(unifiedSO['cases-attachments'].metadata?.indicatorName).to.be('malware.exe');
-        expect(unifiedSO['cases-attachments'].metadata?.indicatorType).to.be('file');
-
-        // With the flag ON the row must NOT also exist in the legacy SO index.
-        const legacySOs = await searchSO(CASE_COMMENT_SAVED_OBJECT, indicatorComment.id);
-        expect(legacySOs.hits.hits.length).to.be(0);
-      });
-
-      it('lifts a legacy externalReference `indicator` payload onto a unified cases-attachments row', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patched = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: legacyIndicatorPayload(),
-        });
-
-        const indicatorComment = patched.comments![0];
-
-        // Server-side transformer promotes the legacy payload to the unified shape
-        // on write, so it lands in cases-attachments regardless of request shape.
-        const unifiedSOs = await searchSO(CASE_ATTACHMENT_SAVED_OBJECT, indicatorComment.id);
-        expect(unifiedSOs.hits.hits.length).to.be(1);
-        const unifiedSO = unifiedSOs.hits.hits[0]._source as {
-          'cases-attachments': {
-            type: string;
-            metadata?: { indicatorName?: string; indicatorFeedName?: string };
-          };
-        };
-        expect(unifiedSO['cases-attachments'].type).to.be(INDICATOR_ATTACHMENT_TYPE);
-        expect(unifiedSO['cases-attachments'].metadata?.indicatorName).to.be('malware.exe');
-
-        const legacySOs = await searchSO(CASE_COMMENT_SAVED_OBJECT, indicatorComment.id);
-        expect(legacySOs.hits.hits.length).to.be(0);
-      });
     });
 
     describe('legacy externalReference POSTs', () => {

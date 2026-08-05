@@ -219,7 +219,7 @@ describe(
           visitRulesManagementTable();
 
           cy.get(PREBUILT_RULES_UPGRADE_REMINDER_CALLOUT).within(() => {
-            cy.get('button[aria-label="Dismiss"]').click();
+            cy.get('button').contains('Dismiss').click();
           });
 
           cy.get(PREBUILT_RULES_UPGRADE_REMINDER_CALLOUT).should('not.exist');
@@ -263,7 +263,7 @@ describe(
 
         it('does NOT show a "Dismiss" button in the prebuilt rule upgrade reminder callout', () => {
           cy.get(SINGLE_PREBUILT_RULE_UPGRADE_REMINDER_CALLOUT).within(() => {
-            cy.get('button[aria-label="Dismiss"]').should('not.exist');
+            cy.get('button').contains('Dismiss').should('not.exist');
           });
         });
       });
@@ -305,7 +305,7 @@ describe(
 
         it('does NOT show a "Dismiss" button in the prebuilt rule upgrade reminder callout', () => {
           cy.get(SINGLE_PREBUILT_RULE_UPGRADE_REMINDER_CALLOUT).within(() => {
-            cy.get('button[aria-label="Dismiss"]').should('not.exist');
+            cy.get('button').contains('Dismiss').should('not.exist');
           });
         });
       });

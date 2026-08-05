@@ -24,20 +24,9 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
     stdout,
     consoleErrors,
     attachments,
-    attempt,
   } = testFailure;
 
   const testDuration = duration < 1000 ? `${duration}ms` : `${(duration / 1000).toFixed(2)}s`;
-
-  // `attempt` is only > 0 once this failure has gone through at least one Playwright retry.
-  // Most failures never retry, so this row is omitted rather than always shown as "Attempt 1".
-  const retryRow =
-    attempt !== undefined && attempt > 0
-      ? `
-            <span class="info-label">Retries:</span>
-            <span class="info-value">Failed again on retry (attempt ${attempt + 1})</span>
-`
-      : '';
 
   const screenshots = attachments
     .filter((a) => a.contentType.startsWith('image/'))
@@ -375,7 +364,6 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
 
             <span class="info-label">Duration:</span>
             <span class="info-value">${testDuration}</span>
-${retryRow}
 
             <span class="info-label">Module:</span>
             <span class="info-value">${kibanaModule?.id} ${kibanaModule?.type}</span>

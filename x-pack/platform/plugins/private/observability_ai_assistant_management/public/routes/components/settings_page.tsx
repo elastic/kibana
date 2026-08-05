@@ -161,7 +161,6 @@ export function SettingsPage() {
               <EuiIcon
                 size="xl"
                 type={logo}
-                aria-hidden={true}
                 style={{
                   backgroundColor: euiTheme.colors.backgroundBasePlain,
                   borderRadius: '50%',

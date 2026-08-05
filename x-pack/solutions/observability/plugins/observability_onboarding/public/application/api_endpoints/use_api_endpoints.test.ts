@@ -9,10 +9,6 @@ import { renderHook } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
-import {
-  IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED,
-  IS_VENDOR_ENDPOINTS_ENABLED,
-} from '../../../common/feature_flags';
 import { useApiEndpoints } from './use_api_endpoints';
 
 jest.mock('../../hooks/use_fetcher', () => {
@@ -42,7 +38,6 @@ interface Options {
   isManagedOtlpServiceAvailable?: boolean;
   isServerless?: boolean;
   managedOtlpPrwEndpointEnabled?: boolean;
-  vendorEndpointsEnabled?: boolean;
   elasticsearchUrl?: string;
   managedOtlpServiceUrl?: string;
   status?: FETCH_STATUS;
@@ -52,7 +47,6 @@ const setup = ({
   isManagedOtlpServiceAvailable = false,
   isServerless = false,
   managedOtlpPrwEndpointEnabled = false,
-  vendorEndpointsEnabled = true,
   elasticsearchUrl = 'https://es.example.com',
   managedOtlpServiceUrl = '',
   status = FETCH_STATUS.SUCCESS,
@@ -62,15 +56,7 @@ const setup = ({
     services: {
       context: { isServerless },
       featureFlags: {
-        getBooleanValue: jest.fn().mockImplementation((key: string) => {
-          if (key === IS_VENDOR_ENDPOINTS_ENABLED) {
-            return vendorEndpointsEnabled;
-          }
-          if (key === IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED) {
-            return managedOtlpPrwEndpointEnabled;
-          }
-          return false;
-        }),
+        getBooleanValue: jest.fn().mockReturnValue(managedOtlpPrwEndpointEnabled),
       },
     },
   } as unknown as ReturnType<typeof useKibana>);
@@ -247,63 +233,5 @@ describe('useApiEndpoints', () => {
     const { result } = setup({ status: FETCH_STATUS.LOADING });
 
     expect(result.current.isLoading).toBe(true);
-  });
-
-  it('resolves Supabase for the OpenTelemetry tab and both vendors for the popover when managed OTLP is available', () => {
-    const { result } = setup({
-      isManagedOtlpServiceAvailable: true,
-      managedOtlpServiceUrl: 'https://otlp.example.com:443',
-    });
-
-    expect(
-      findEndpoint(result, 'opentelemetry')?.additionalEndpoints.map((endpoint) => endpoint.id)
-    ).toEqual(['supabase']);
-    expect(result.current.popoverEndpoints.map((endpoint) => endpoint.id)).toEqual([
-      'supabase',
-      'vercel',
-    ]);
-  });
-
-  it('resolves vendor endpoint URLs from the managed OTLP URL', () => {
-    const { result } = setup({
-      isManagedOtlpServiceAvailable: true,
-      managedOtlpServiceUrl: 'https://otlp.example.com:443',
-    });
-
-    expect(findEndpoint(result, 'opentelemetry')?.additionalEndpoints[0]).toEqual({
-      id: 'supabase',
-      cardTitle: 'Supabase',
-      fieldLabel: 'Supabase logs endpoint',
-      logo: 'supabase',
-      url: 'https://otlp.example.com:443/supabase/v1/logs',
-    });
-  });
-
-  it('resolves no vendor endpoints when the managed OTLP service is unavailable', () => {
-    const { result } = setup({ managedOtlpServiceUrl: 'https://otlp.example.com:443' });
-
-    expect(findEndpoint(result, 'opentelemetry')?.additionalEndpoints).toEqual([]);
-    expect(result.current.popoverEndpoints).toEqual([]);
-  });
-
-  it('resolves no vendor endpoints for the Prometheus and Elasticsearch tabs', () => {
-    const { result } = setup({
-      isManagedOtlpServiceAvailable: true,
-      managedOtlpServiceUrl: 'https://otlp.example.com:443',
-    });
-
-    expect(findEndpoint(result, 'prometheus')?.additionalEndpoints).toEqual([]);
-    expect(findEndpoint(result, 'elasticsearch')?.additionalEndpoints).toEqual([]);
-  });
-
-  it('hides vendor endpoints when the vendor endpoints flag is disabled', () => {
-    const { result } = setup({
-      isManagedOtlpServiceAvailable: true,
-      managedOtlpServiceUrl: 'https://otlp.example.com:443',
-      vendorEndpointsEnabled: false,
-    });
-
-    expect(findEndpoint(result, 'opentelemetry')?.additionalEndpoints).toEqual([]);
-    expect(result.current.popoverEndpoints).toEqual([]);
   });
 });

@@ -78,7 +78,7 @@ describe('stats_quality_calibration evaluator', () => {
           severity_score: 50,
         },
         {
-          esql: 'FROM logs | STATS errors = COUNT(*) WHERE log.level == "ERROR", total = COUNT(*) WHERE log.level IS NOT NULL BY bucket = BUCKET(@timestamp, 1 minute) | EVAL metric_value = CASE(total > 0, errors * 100.0 / total, 0) | KEEP bucket, metric_value',
+          esql: 'FROM logs | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes) | WHERE errors > 10',
           title: 'Error rate',
           category: 'error',
           severity_score: 65,

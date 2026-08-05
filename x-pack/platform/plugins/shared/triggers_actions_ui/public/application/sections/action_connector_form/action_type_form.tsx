@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useEffect, useState, useMemo } from 'react';
+import React, { Suspense, useEffect, useState, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,6 +29,7 @@ import {
   useEuiTheme,
   EuiCallOut,
   EuiLoadingSpinner,
+  EuiSwitch,
   EuiFormPrepend,
   EuiToolTip,
 } from '@elastic/eui';
@@ -44,6 +45,7 @@ import {
   getDurationUnitValue,
   parseDuration,
 } from '@kbn/alerting-plugin/common/parse_duration';
+import type { SavedObjectAttribute } from '@kbn/core-saved-objects-api-server';
 import {
   RuleActionsNotifyWhen,
   RuleActionsAlertsFilter,
@@ -54,6 +56,7 @@ import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-t
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
+import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import type {
   IErrorObject,
   RuleAction,
@@ -79,6 +82,7 @@ export type ActionTypeFormProps = {
   onAddConnector: () => void;
   onConnectorSelected: (id: string) => void;
   onDeleteAction: () => void;
+  setActionUseAlertDataForTemplate?: (enabled: boolean, index: number) => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
   setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
   setActionAlertsFilterProperty: (
@@ -125,6 +129,7 @@ export const ActionTypeForm = ({
   onAddConnector,
   onConnectorSelected,
   onDeleteAction,
+  setActionUseAlertDataForTemplate,
   setActionParamsProperty,
   setActionFrequencyProperty,
   setActionAlertsFilterProperty,
@@ -188,7 +193,11 @@ export const ActionTypeForm = ({
 
   const isSummaryAction = actionItem.frequency?.summary;
 
-  const useAlertTemplateFields = actionItem?.useAlertDataForTemplate ?? false;
+  const [useAlertTemplateFields, setUseAlertTemplateFields] = useState(
+    actionItem?.useAlertDataForTemplate ?? false
+  );
+  const [storedActionParamsForAlertFieldsToggle, setStoredActionParamsForAlertFieldsToggle] =
+    useState<Record<string, SavedObjectAttribute>>({});
 
   const { fields: alertFields } = useRuleTypeAlertFields(http, ruleTypeId, useAlertTemplateFields);
 
@@ -224,6 +233,35 @@ export const ActionTypeForm = ({
       }
     }
   `;
+
+  let showMustacheAutocompleteSwitch;
+  try {
+    showMustacheAutocompleteSwitch =
+      getIsExperimentalFeatureEnabled('showMustacheAutocompleteSwitch') && ruleTypeId;
+  } catch (e) {
+    showMustacheAutocompleteSwitch = false;
+  }
+
+  const handleUseAlertTemplateFields = useCallback(() => {
+    setUseAlertTemplateFields((prevVal) => {
+      if (setActionUseAlertDataForTemplate) {
+        setActionUseAlertDataForTemplate(!prevVal, index);
+      }
+      return !prevVal;
+    });
+    const currentActionParams = { ...actionItem.params };
+    for (const key of Object.keys(currentActionParams)) {
+      setActionParamsProperty(key, storedActionParamsForAlertFieldsToggle[key] ?? '', index);
+    }
+    setStoredActionParamsForAlertFieldsToggle(currentActionParams);
+  }, [
+    setActionUseAlertDataForTemplate,
+    storedActionParamsForAlertFieldsToggle,
+    setStoredActionParamsForAlertFieldsToggle,
+    setActionParamsProperty,
+    actionItem.params,
+    index,
+  ]);
 
   const getDefaultParams = async () => {
     if (!actionTypeRegistry.has(actionItem.actionTypeId)) {
@@ -277,9 +315,15 @@ export const ActionTypeForm = ({
       const defaultParams = await getDefaultParams();
       if (defaultParams) {
         for (const [key, paramValue] of Object.entries(defaultParams)) {
+          const defaultAADParams: typeof defaultParams = {};
           if (actionItem.params[key] === undefined || actionItem.params[key] === null) {
             setActionParamsProperty(key, paramValue, index);
+            // Add default param to AAD defaults only if it does not contain any template code
+            if (typeof paramValue !== 'string' || !paramValue.match(/{{.*?}}/g)) {
+              defaultAADParams[key] = paramValue;
+            }
           }
+          setStoredActionParamsForAlertFieldsToggle(defaultAADParams);
         }
       }
     })();
@@ -290,9 +334,14 @@ export const ActionTypeForm = ({
     (async () => {
       const defaultParams = await getDefaultParams();
       if (defaultParams && actionGroup) {
+        const defaultAADParams: typeof defaultParams = {};
         for (const [key, paramValue] of Object.entries(defaultParams)) {
           setActionParamsProperty(key, paramValue, index);
+          if (!paramValue.match(/{{.*?}}/g)) {
+            defaultAADParams[key] = paramValue;
+          }
         }
+        setStoredActionParamsForAlertFieldsToggle(defaultAADParams);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -325,6 +374,12 @@ export const ActionTypeForm = ({
       setQueryError(validateActionFilterQuery(actionItem));
     })();
   }, [actionItem, disableErrorMessages]);
+
+  useEffect(() => {
+    if (isEmpty(storedActionParamsForAlertFieldsToggle) && actionItem.params.subAction) {
+      setStoredActionParamsForAlertFieldsToggle(actionItem.params);
+    }
+  }, [actionItem.params, storedActionParamsForAlertFieldsToggle]);
 
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -540,6 +595,16 @@ export const ActionTypeForm = ({
         {ParamsFieldsComponent ? (
           <EuiErrorBoundary>
             <EuiFlexGroup gutterSize="m" direction="column">
+              {showMustacheAutocompleteSwitch && (
+                <EuiFlexItem>
+                  <EuiSwitch
+                    label="Use template fields from alerts index"
+                    checked={useAlertTemplateFields}
+                    onChange={handleUseAlertTemplateFields}
+                    data-test-subj="mustacheAutocompleteSwitch"
+                  />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem>
                 <Suspense fallback={null}>
                   <ParamsFieldsComponent

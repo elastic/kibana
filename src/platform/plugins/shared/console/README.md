@@ -17,7 +17,7 @@ GET _search
 {"query":{"match_all":{}}}
 ```
 
-### Kibana API support ([#128562](https://github.com/elastic/kibana/pull/128562))
+### Kibana API support ([#100253](https://github.com/elastic/kibana/pull/128562))
 Console plugin now supports Kibana API endpoints. `kbn:` prefix must be used in the request URL to send a request to Kibana API. For example, the following request sends a request to the Kibana API to retrieve the list of available spaces:
 ```
 GET kbn:api/spaces/space
@@ -76,13 +76,14 @@ Autocomplete definitions are all created in the form of javascript objects loade
 ### Creating definitions
 The [`generated`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/generated) folder contains definitions created automatically from Elasticsearch specifications. See this [README](https://github.com/elastic/kibana/blob/main/packages/kbn-generate-console-definitions/README.md) file for more information on the `generate-console-definitions` script. The AppEx/Management team (@elastic/kibana-management) regularly runs the script to update the definitions and is planning to automate this process. 
 
-Manually created override files in the [`overrides`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/overrides) folder contain refinements for request body parameters. The script derives coarse body rules from the Elasticsearch specification, and overrides merge with them according to the body compiler's structure: ordinary object field maps merge recursively in curated order and append generated-only siblings, while arrays, primitives, and objects containing `__scope_link`, `__one_of`, or `__any_of` are replaced by the curated value. Any other fixes such as documentation links, request methods and patterns and url parameters
+Manually created override files in the [`overrides`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/overrides) folder contain additions for request body parameters since those
+are not created by the script. Any other fixes such as documentation links, request methods and patterns and url parameters 
 should be addressed at the source. That means this should be fixed in Elasticsearch specifications and then 
 autocomplete definitions can be re-generated with the script. 
 
 If there are any endpoints missing completely from the `generated` folder, this should also be addressed at the source, i.e. 
 Elasticsearch specifications. If for some reason, that is not possible, then additional definitions files 
-can be placed in the folder [`manual`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/manual).
+can be placed in the folder [`manual`]((https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/json/manual)).
 
 ### Kibana API doc links
 
@@ -139,7 +140,7 @@ A property that describes if an endpoint is available in stack and serverless en
 ```
 
 #### `data_autocomplete_rules`
-Request body parameters and their values. Generated definitions derive these from the Elasticsearch specification; `overrides` files merge curated rules into ordinary object field maps and replace atomic rules such as arrays, primitives, `__scope_link`, `__one_of`, and `__any_of`.
+Request body parameters and their values. Only used in `overrides` files because REST API specs don't contain any information about body request parameters.
 Refer to Elasticsearch REST API documentation when configuring this object. See the [Request body parameters](#request-body-parameters) section below for more info. An example:
 ```json
 {
@@ -318,7 +319,7 @@ To provide a different set of autocomplete suggestions based on the value config
 
 ### Dynamic parameters
 Some autocomplete definitions need to be configured with dynamic values that can't be hard coded into a json or js file, for example a list of indices in the cluster. 
-A list of dynamic parameters is defined in the  `parametrizedComponentFactories` object in [`kb.ts`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/public/lib/kb/kb.ts) file. The values of these parameters are assigned dynamically for every cluster.
+A list of dynamic parameters is defined in the  `parametrizedComponentFactories` function in [`kb.js`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/public/lib/kb/kb.js) file. The values of these parameters are assigned dynamically for every cluster. 
 Use these dynamic parameters with curly braces, for example `{index}`, `{fields}`, `{template}` etc.
 
 Dynamic parameters can be used in url patterns, for example `{index}/_search`. Url patterns can also contain unknown parameters just to indicate that any value can be used in the url, for example in the url `/_ilm/policy/{policy}` the value for `{policy}` can be any accepted policy name and the dynamic parameter `{policy}` is not defined in the autocomplete engine. 

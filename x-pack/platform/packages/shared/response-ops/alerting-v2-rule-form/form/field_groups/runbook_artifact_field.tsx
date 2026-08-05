@@ -16,7 +16,6 @@ import {
   EuiSplitPanel,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { useController, useFormContext } from 'react-hook-form';
@@ -96,36 +95,22 @@ export const RunbookArtifactField: React.FC = () => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-                  <EuiToolTip
-                    content={i18n.translate('xpack.alertingV2.ruleForm.editRunbookButton', {
+                  <EuiButtonIcon
+                    iconType="pencil"
+                    onClick={openRunbookModal}
+                    aria-label={i18n.translate('xpack.alertingV2.ruleForm.editRunbookButton', {
                       defaultMessage: 'Edit Runbook',
                     })}
-                    disableScreenReaderOutput
-                  >
-                    <EuiButtonIcon
-                      iconType="pencil"
-                      onClick={openRunbookModal}
-                      aria-label={i18n.translate('xpack.alertingV2.ruleForm.editRunbookButton', {
-                        defaultMessage: 'Edit Runbook',
-                      })}
-                      color="text"
-                    />
-                  </EuiToolTip>
-                  <EuiToolTip
-                    content={i18n.translate('xpack.alertingV2.ruleForm.deleteRunbookButton', {
+                    color="text"
+                  />
+                  <EuiButtonIcon
+                    iconType="trash"
+                    onClick={openDeleteConfirm}
+                    aria-label={i18n.translate('xpack.alertingV2.ruleForm.deleteRunbookButton', {
                       defaultMessage: 'Delete Runbook',
                     })}
-                    disableScreenReaderOutput
-                  >
-                    <EuiButtonIcon
-                      iconType="trash"
-                      onClick={openDeleteConfirm}
-                      aria-label={i18n.translate('xpack.alertingV2.ruleForm.deleteRunbookButton', {
-                        defaultMessage: 'Delete Runbook',
-                      })}
-                      color="danger"
-                    />
-                  </EuiToolTip>
+                    color="danger"
+                  />
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>

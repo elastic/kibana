@@ -6,39 +6,24 @@
  */
 
 import React from 'react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { anomalyChartStyling } from '../../../../recent_anomalies/anomaly_chart_styling';
-import { useIsNewFlyoutEnabled } from '../../../../../../common/hooks/use_is_new_flyout_enabled';
-import { FLYOUT_ORIGIN } from '../../../../../../common/lib/telemetry';
-import { useFlyoutApi } from '../../../../../../flyout_v2/use_flyout_api';
 import { UserPanelKey } from '../../../../../../flyout/entity_details/shared/constants';
 
 const PRIVILEGED_ACCESS_DETECTION_TABLE_ID = 'PadAnomalies-table';
 
 export const UserNameList: React.FC<{ userNames: string[] }> = ({ userNames }) => {
-  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
-  const { openUserFlyout } = useFlyoutApi();
 
-  const openUserDetails = (userName: string) => {
-    if (enableNewFlyout) {
-      openUserFlyout({
-        userName,
-        scopeId: PRIVILEGED_ACCESS_DETECTION_TABLE_ID,
-        contextID: PRIVILEGED_ACCESS_DETECTION_TABLE_ID,
-        origin: FLYOUT_ORIGIN.PRIVILEGED_ACCESS_DETECTION,
-      });
-      return;
-    }
-
+  const openUserFlyout = (userName: string) => {
     openFlyout({
       right: {
         id: UserPanelKey,
         params: {
-          userName,
           contextID: PRIVILEGED_ACCESS_DETECTION_TABLE_ID,
+          userName,
           scopeId: PRIVILEGED_ACCESS_DETECTION_TABLE_ID,
         },
       },
@@ -66,7 +51,7 @@ export const UserNameList: React.FC<{ userNames: string[] }> = ({ userNames }) =
             <EuiText textAlign={'right'}>
               <EuiLink
                 onClick={() => {
-                  openUserDetails(userName);
+                  openUserFlyout(userName);
                 }}
               >
                 {userName}

@@ -8,7 +8,7 @@
  */
 
 import type { EndpointDescription } from '@kbn/console-plugin/common/types';
-import { SpecificationTypes } from './types';
+import type { SpecificationTypes } from './types';
 
 /**
  * Types important for this logic:
@@ -40,17 +40,6 @@ import { SpecificationTypes } from './types';
 
 const DEFAULT_ENDPOINT_AVAILABILITY = true;
 
-// if the availability object is present, check the visibility property:
-// if visibility is missing, it's public by default -> available;
-// if visibility is set, anything other than public means not available
-export const isAvailabilityPublic = (
-  availability: SpecificationTypes.Availability | undefined
-): boolean =>
-  Boolean(
-    availability &&
-      (!availability.visibility || availability.visibility === SpecificationTypes.Visibility.public)
-  );
-
 export const generateAvailability = (
   endpoint: SpecificationTypes.Endpoint
 ): EndpointDescription['availability'] => {
@@ -66,7 +55,12 @@ export const generateAvailability = (
   if (!endpoint.availability.stack) {
     availability.stack = false;
   } else {
-    availability.stack = isAvailabilityPublic(endpoint.availability.stack);
+    // if the availability object for stack is present, check visibility property (public by default)
+    availability.stack =
+      // if visibility is missing, the endpoint is public by default
+      !endpoint.availability.stack.visibility ||
+      // if the visibility is set, anything other than public means not available
+      endpoint.availability.stack.visibility === 'public';
   }
   // the same logic for serverless
 
@@ -74,7 +68,12 @@ export const generateAvailability = (
   if (!endpoint.availability.serverless) {
     availability.serverless = false;
   } else {
-    availability.serverless = isAvailabilityPublic(endpoint.availability.serverless);
+    // if the availability object for serverless is present, check visibility property (public by default)
+    availability.serverless =
+      // if visibility is missing, the endpoint is public by default
+      !endpoint.availability.serverless.visibility ||
+      // if the visibility is set, anything other than public means not available
+      endpoint.availability.serverless.visibility === 'public';
   }
   return availability;
 };

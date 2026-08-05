@@ -295,7 +295,7 @@ The `response` parameter of the handler already provides APIs for the most commo
 - and so on
 
 However, some of the less commonly used return codes don't have such helpers. In that case, the `response.custom`
-or `response.customError` APIs should be used.
+and/or `response.customError` APIs should be used.
 
 ```ts
 import type { CoreSetup, Plugin } from '@kbn/core/server';
@@ -320,52 +320,6 @@ export class MyPlugin implements Plugin {
 ```
 
 ## Some advanced usages
-
-### Calling Kibana APIs from a route handler
-
-During the `start` lifecycle stage, `core.http.selfClient` lets a route handler make outbound HTTP calls to Kibana's own APIs on behalf of the current request user. Scope a client to the incoming request with `asScoped(request)`, then call `fetch` with a pathname and optional fetch options.
-
-This is a powerful capability: a handler can reach any Kibana API the current user is authorized to call. If you expose programmable access to agents or end users—for example, a function or endpoint that accepts a pathname and forwards it to Kibana—constrain which APIs can be reached with an allowlist or equivalent guardrails for user-controlled pathnames.
-
-By default, `fetch` uses `access: 'public'`, which restricts calls to public APIs. Internal APIs (paths under `/internal`) are inaccessible unless you set `access: 'internal'` explicitly.
-
-```ts
-import type { CoreSetup, Plugin } from '@kbn/core/server';
-
-export class MyPlugin implements Plugin {
-  public setup(core: CoreSetup) {
-    const router = core.http.createRouter();
-
-    router.get(
-      {
-        path: '/api/my_plugin/proxy_status',
-        validate: false,
-      },
-      async (context, request, response) => {
-        const [coreStart] = await core.getStartServices();
-        const status = await coreStart.http.selfClient.asScoped(request).fetch('/api/status', {
-          access: 'public',
-        });
-
-        return response.ok({ body: status });
-      }
-    );
-  }
-}
-```
-
-To call an internal API, set `access: 'internal'`:
-
-```ts
-const result = await coreStart.http.selfClient.asScoped(request).fetch('/internal/my_plugin/data', {
-  method: 'GET',
-  access: 'internal',
-});
-```
-
-:::{note}
-See the [`HttpSelfService` contract](https://github.com/elastic/kibana/blob/main/src/core/packages/http/server/src/http_contract.ts) for the full list of `fetch` options.
-:::
 
 ### Handling request cancellation
 

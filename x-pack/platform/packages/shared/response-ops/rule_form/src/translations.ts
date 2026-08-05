@@ -338,13 +338,6 @@ export const RULE_TAG_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const RULE_TAG_COPY_LABEL = i18n.translate(
-  'responseOpsRuleForm.ruleForm.ruleDetails.ruleTagsCopyLabel',
-  {
-    defaultMessage: 'Copy tags',
-  }
-);
-
 export const RULE_INVESTIGATION_GUIDE_LABEL = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetails.investigationGuide.editor.title',
   {
@@ -782,6 +775,13 @@ export const ACTION_UNABLE_TO_LOAD_CONNECTOR_DESCRIPTION = i18n.translate(
   'responseOpsRuleForm.ruleActionsItem.actionUnableToLoadConnectorTitle',
   {
     defaultMessage: `Create a connector and try again. If you can't create a connector, contact your system administrator.`,
+  }
+);
+
+export const ACTION_USE_AAD_TEMPLATE_FIELDS_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleActionsItem.actionUseAadTemplateFieldsLabel',
+  {
+    defaultMessage: 'Use template fields from alerts index',
   }
 );
 

@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiLinkAnchorProps } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 
-import { buildPolicyBaseIdWithFallbackKuery } from '../../common/services/version_specific_policies_utils';
+import { buildPolicyIdOrVariantsKuery } from '../../common/services/version_specific_policies_utils';
 
 import { useLink } from '../hooks';
 import { AGENTS_PREFIX, UNPRIVILEGED_AGENT_KUERY, PRIVILEGED_AGENT_KUERY } from '../constants';
@@ -41,12 +41,10 @@ export const LinkedAgentCount = memo<
     <EuiLink
       {...otherEuiLinkProps}
       href={getHref('agent_list', {
+        // Same as server: exact parent policy or wildcard for version-specific (policy_id: id#*).
+        // encodeURIComponent below ensures # in kuery doesn't break the URL.
         kuery: encodeURIComponent(
-          `${buildPolicyBaseIdWithFallbackKuery(
-            agentPolicyId,
-            `${AGENTS_PREFIX}.policy_base_id`,
-            `${AGENTS_PREFIX}.policy_id`
-          )}${
+          `${buildPolicyIdOrVariantsKuery(agentPolicyId, `${AGENTS_PREFIX}.policy_id`)}${
             privilegeMode
               ? ` and ${
                   privilegeMode === 'unprivileged'

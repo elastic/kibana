@@ -59,13 +59,7 @@ const CountText: React.FC<{ testSubj: string; color: string; children: React.Rea
 };
 
 const AlertIcon: React.FC<{ color: string }> = ({ color }) => (
-  <EuiIcon
-    data-test-subj={TEST_SUBJ_ALERT_ICON}
-    type="warningFill"
-    color={color}
-    size="s"
-    aria-hidden={true}
-  />
+  <EuiIcon data-test-subj={TEST_SUBJ_ALERT_ICON} type="warningFill" color={color} size="s" />
 );
 
 const EventBadge: React.FC<{

@@ -1,7 +1,10 @@
 {
   "security.saml_complete_logout": {
     "data_autocomplete_rules": {
-      "ids": []
+      "realm": "",
+      "ids": [],
+      "query_string": "",
+      "content": ""
     }
   }
 }

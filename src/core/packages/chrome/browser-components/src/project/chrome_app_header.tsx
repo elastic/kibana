@@ -115,7 +115,6 @@ function hasExplicitAppHeaderContent(config: AppHeaderConfig | undefined): boole
     !!config.badges?.length ||
     !!config.menu?.items?.length ||
     !!config.favorite ||
-    !!config.description ||
     !!config.metadata?.length
   );
 }
@@ -162,7 +161,6 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
   const isSparse =
     config?.title === undefined &&
     !config?.tabs?.length &&
-    !config?.description &&
     !config?.metadata?.length &&
     !config?.badges?.length &&
     !config?.favorite;
@@ -170,9 +168,6 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
     config?.spacing === 'compact' || isSparse
       ? RESERVED_COMPACT_MIN_HEIGHT_PX
       : RESERVED_STANDARD_MIN_HEIGHT_PX;
-  const secondaryContent = config?.description
-    ? { description: config.description }
-    : { metadata: config?.metadata };
 
   return (
     <div
@@ -189,7 +184,7 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
           badges={config?.badges}
           menu={config?.menu ?? fallback.menu}
           favorite={config?.favorite}
-          {...secondaryContent}
+          metadata={config?.metadata}
           sticky={false}
           spacing={config?.spacing}
         />

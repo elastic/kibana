@@ -11,38 +11,6 @@
         "0"
       ]
     },
-    "data_autocomplete_rules": {
-      "geo_match": {
-        "enrich_fields": "",
-        "indices": "",
-        "match_field": "",
-        "query": {
-          "__scope_link": "GLOBAL.query"
-        },
-        "name": "",
-        "elasticsearch_version": ""
-      },
-      "match": {
-        "enrich_fields": "",
-        "indices": "",
-        "match_field": "",
-        "query": {
-          "__scope_link": "GLOBAL.query"
-        },
-        "name": "",
-        "elasticsearch_version": ""
-      },
-      "range": {
-        "enrich_fields": "",
-        "indices": "",
-        "match_field": "",
-        "query": {
-          "__scope_link": "GLOBAL.query"
-        },
-        "name": "",
-        "elasticsearch_version": ""
-      }
-    },
     "methods": [
       "PUT"
     ],

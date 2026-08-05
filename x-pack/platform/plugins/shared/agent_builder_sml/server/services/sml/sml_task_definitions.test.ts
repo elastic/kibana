@@ -178,33 +178,6 @@ describe('sml_task_definitions', () => {
         "SML crawler task failed for type 'visualization': crawl failed"
       );
     });
-
-    it('creates the internal repository using only the hidden types the definition declares', async () => {
-      const mockCreateInternalRepository = jest.fn().mockReturnValue({});
-      mockGetCrawlerDeps.mockResolvedValue({
-        smlService: mockSmlService,
-        elasticsearch: { client: { asInternalUser: mockEsClient } },
-        savedObjects: { createInternalRepository: mockCreateInternalRepository },
-        uiSettings: mockUiSettings,
-        logger: mockLogger,
-      });
-
-      // Type with requiredHiddenTypes uses them; type without uses []
-      const connectorDef = createMockDefinition({
-        id: 'connector',
-        requiredHiddenTypes: ['action'],
-      });
-      const dashboardDef = createMockDefinition({ id: 'dashboard' });
-
-      mockSmlService.getTypeDefinition.mockReturnValue(connectorDef);
-      await getRegisteredTaskRunner({ attachmentType: 'connector' }).run();
-      expect(mockCreateInternalRepository).toHaveBeenCalledWith(['action']);
-
-      mockCreateInternalRepository.mockClear();
-      mockSmlService.getTypeDefinition.mockReturnValue(dashboardDef);
-      await getRegisteredTaskRunner({ attachmentType: 'dashboard' }).run();
-      expect(mockCreateInternalRepository).toHaveBeenCalledWith([]);
-    });
   });
 
   describe('scheduleSmlCrawlerTasks', () => {

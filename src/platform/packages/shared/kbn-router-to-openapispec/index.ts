@@ -14,6 +14,8 @@ export {
 
 export { OasSchemaCollisionError } from './src/oas_converter';
 
+export type { OasMetaExtensions } from './src/oas_converter/zod/lib';
+
 // Writes the operation-level `x-state` string. Exported so @kbn/api-contracts can
 // round-trip it in a test: the contract checker's parseXState decodes exactly
 // what this produces, and that test fails loudly if the wording here ever drifts.

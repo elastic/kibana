@@ -17,6 +17,10 @@ interface RulesListAutoRefreshProps {
   onRefresh: () => void;
 }
 
+const flexGroupStyle = {
+  marginLeft: 'auto',
+};
+
 const getLastUpdateText = (lastUpdate: string) => {
   if (!moment(lastUpdate).isValid()) {
     return '';
@@ -100,13 +104,8 @@ export const RulesListAutoRefresh = (props: RulesListAutoRefreshProps) => {
   );
 
   return (
-    <EuiFlexGroup
-      data-test-subj="rulesListAutoRefresh"
-      alignItems="center"
-      gutterSize="s"
-      responsive={false}
-    >
-      <EuiFlexItem grow={false}>
+    <EuiFlexGroup data-test-subj="rulesListAutoRefresh" alignItems="center">
+      <EuiFlexItem grow={false} style={flexGroupStyle}>
         <EuiText data-test-subj="rulesListAutoRefresh-lastUpdateText" size="s" color="subdued">
           {lastUpdateText}
         </EuiText>

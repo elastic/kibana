@@ -7,10 +7,7 @@
 
 import * as uuid from 'uuid';
 import type { ToolingLog } from '@kbn/tooling-log';
-import {
-  agentPolicyRouteService,
-  removeVersionSuffixFromPolicyId,
-} from '@kbn/fleet-plugin/common/services';
+import { agentPolicyRouteService } from '@kbn/fleet-plugin/common/services';
 import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import type {
   AgentPolicy,
@@ -127,7 +124,6 @@ export async function generateAgent(
       enrolled_at: new Date().toISOString(),
       last_checkin: new Date().toISOString(),
       policy_id: policyId,
-      policy_base_id: removeVersionSuffixFromPolicyId(policyId),
       policy_revision: 1,
       agent: {
         id,

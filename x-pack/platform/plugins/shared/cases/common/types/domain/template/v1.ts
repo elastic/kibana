@@ -16,7 +16,7 @@ import {
 } from '../../../constants';
 import { FieldSchema, isRefField } from './fields';
 import { CaseConnectorWithoutNameSchema } from '../../domain_zod/connector/v1';
-import { CaseUserProfilesSchema } from '../../domain_zod/user/v1';
+import { CaseAssigneesSchema } from '../../domain_zod/user/v1';
 
 /** Template tag: non-empty and length-bounded, mirroring the client-side metadata validation. */
 const TemplateTagSchema = z.string().min(1).max(MAX_TEMPLATE_TAG_LENGTH);
@@ -164,7 +164,7 @@ export const ParsedTemplateDefinitionSchema = z.object({
   tags: z.array(z.string()).optional(),
   severity: z.enum(['low', 'medium', 'high', 'critical']).nullable().optional(),
   category: z.string().nullable().optional(),
-  assignees: CaseUserProfilesSchema.optional(),
+  assignees: CaseAssigneesSchema.optional(),
   /**
    * Default connector pre-selected when creating a case from this template (`name` resolved from
    * `id` at create time). A first-class case concept, separate from the `fields` system.

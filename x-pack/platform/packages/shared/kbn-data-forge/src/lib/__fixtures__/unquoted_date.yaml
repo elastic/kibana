@@ -1,7 +1,0 @@
-# start is intentionally an UNQUOTED ISO date: js-yaml's default schema coerces
-# this to a JS Date (failing the rt.string decode), while the yaml package's
-# YAML 1.2 core schema correctly yields the string '2024-12-31'.
-schedule:
-  - template: "good"
-    start: 2024-12-31
-    end: false

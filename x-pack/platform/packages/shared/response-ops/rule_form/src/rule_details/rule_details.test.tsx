@@ -73,66 +73,6 @@ describe('RuleDetails', () => {
     });
   });
 
-  test('Should split a typed comma-separated value into multiple tags', async () => {
-    render(<RuleDetails />);
-
-    await userEvent.type(
-      within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput'),
-      'tag1, tag2 , tag3{enter}'
-    );
-    expect(mockOnChange).toHaveBeenCalledWith({
-      type: 'setTags',
-      payload: ['tag1', 'tag2', 'tag3'],
-    });
-  });
-
-  test('Should split a pasted newline-separated value into multiple tags', async () => {
-    render(<RuleDetails />);
-
-    const input = within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput');
-    await userEvent.click(input);
-    await userEvent.paste('tag1\ntag2\ntag3');
-
-    expect(mockOnChange).toHaveBeenCalledWith({
-      type: 'setTags',
-      payload: ['tag1', 'tag2', 'tag3'],
-    });
-  });
-
-  test('Should de-duplicate tags case-insensitively, keeping the first occurrence casing', async () => {
-    render(<RuleDetails />);
-
-    await userEvent.type(
-      within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput'),
-      'Tag1, tag1 , TAG1{enter}'
-    );
-    expect(mockOnChange).toHaveBeenCalledWith({
-      type: 'setTags',
-      payload: ['Tag1'],
-    });
-  });
-
-  test('Should disable the copy tags button when there are no tags', () => {
-    render(<RuleDetails />);
-
-    expect(screen.getByTestId('ruleDetailsTagsCopyButton')).toBeDisabled();
-  });
-
-  test('Should enable the copy tags button when tags exist', () => {
-    useRuleFormState.mockReturnValue({
-      plugins: {
-        contentManagement: {} as ContentManagementPublicStart,
-      },
-      formData: {
-        name: 'test',
-        tags: ['tag1', 'tag2'],
-      },
-    });
-    render(<RuleDetails />);
-
-    expect(screen.getByTestId('ruleDetailsTagsCopyButton')).toBeEnabled();
-  });
-
   test('Should display error', () => {
     useRuleFormState.mockReturnValue({
       plugins: {

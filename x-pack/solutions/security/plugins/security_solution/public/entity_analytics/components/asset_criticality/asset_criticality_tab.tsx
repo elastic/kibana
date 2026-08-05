@@ -23,7 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 
-import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics';
+import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../../common/entity_analytics/asset_criticality';
 import { AssetCriticalityFileUploader } from '../asset_criticality_file_uploader/asset_criticality_file_uploader';
 import { useAssetCriticalityPrivileges } from './use_asset_criticality';
 import { useHasSecurityCapability } from '../../../helper_hooks';
@@ -43,13 +43,14 @@ export const AssetCriticalityTab = () => {
     error: assetCriticalityPrivilegesError,
     isLoading: assetCriticalityIsLoading,
   } = useAssetCriticalityPrivileges('AssetCriticalityUploadPage');
+  const hasAssetCriticalityWritePermissions = assetCriticalityPrivileges?.has_write_permissions;
 
   return (
     <EuiFlexGroup gutterSize="xl">
       <FileUploadSection
-        assetCriticalityPrivileges={assetCriticalityPrivileges}
         assetCriticalityPrivilegesError={assetCriticalityPrivilegesError}
         hasEntityAnalyticsCapability={hasEntityAnalyticsCapability}
+        hasAssetCriticalityWritePermissions={hasAssetCriticalityWritePermissions}
         isLoading={assetCriticalityIsLoading}
       />
       <EuiFlexItem grow={2}>
@@ -60,55 +61,38 @@ export const AssetCriticalityTab = () => {
 };
 
 const FileUploadSection: React.FC<{
-  assetCriticalityPrivileges?: EntityAnalyticsPrivileges;
   assetCriticalityPrivilegesError: SecurityAppError | null;
   hasEntityAnalyticsCapability: boolean;
+  hasAssetCriticalityWritePermissions?: boolean;
   isLoading: boolean;
 }> = ({
-  assetCriticalityPrivileges,
   assetCriticalityPrivilegesError,
   hasEntityAnalyticsCapability,
+  hasAssetCriticalityWritePermissions,
   isLoading,
 }) => {
   if (isLoading) {
     return null;
   }
-
-  const hasAssetCriticalityWritePermissions = assetCriticalityPrivileges?.has_write_permissions;
-  const indicesMissingWrite = assetCriticalityPrivileges
-    ? getIndicesMissingWrite(assetCriticalityPrivileges)
-    : [];
-
-  let content: ReactNode;
   if (!hasEntityAnalyticsCapability || assetCriticalityPrivilegesError?.body.status_code === 403) {
-    content = (
+    return (
       <AssetCriticalityIssueCallout errorMessage={assetCriticalityPrivilegesError?.body.message} />
     );
-  } else if (!hasAssetCriticalityWritePermissions && indicesMissingWrite.length > 0) {
-    content = (
-      <InsufficientAssetCriticalityPrivilegesCallout indicesMissingWrite={indicesMissingWrite} />
-    );
-  } else {
-    content = (
-      <>
-        <EuiSpacer size="m" />
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.uploadDescription"
-            defaultMessage="Bulk assign asset criticality by importing a CSV, TXT, or TSV file exported from your asset management tools. This ensures data accuracy and reduces manual input errors."
-          />
-        </EuiText>
-        <EuiSpacer size="s" />
-        <AssetCriticalityFileUploader />
-      </>
-    );
   }
-
-  // Keep grow={3} for callouts and the uploader so the sidebar stays at grow={2}
-  // (grow={false} on the callout squeezed the info panel).
+  if (!hasAssetCriticalityWritePermissions) {
+    return <InsufficientAssetCriticalityPrivilegesCallout />;
+  }
   return (
     <EuiFlexItem grow={3} data-test-subj={ASSET_CRITICALITY_FILE_UPLOAD_SECTION_TEST_ID}>
-      {content}
+      <EuiSpacer size="m" />
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.uploadDescription"
+          defaultMessage="Bulk assign asset criticality by importing a CSV, TXT, or TSV file exported from your asset management tools. This ensures data accuracy and reduces manual input errors."
+        />
+      </EuiText>
+      <EuiSpacer size="s" />
+      <AssetCriticalityFileUploader />
     </EuiFlexItem>
   );
 };
@@ -172,9 +156,7 @@ const WhatIsAssetCriticalityPanel: React.FC = () => {
   );
 };
 
-const InsufficientAssetCriticalityPrivilegesCallout: React.FC<{
-  indicesMissingWrite: string[];
-}> = ({ indicesMissingWrite }) => {
+const InsufficientAssetCriticalityPrivilegesCallout: React.FC = () => {
   return (
     <EuiCallOut
       title={
@@ -189,16 +171,12 @@ const InsufficientAssetCriticalityPrivilegesCallout: React.FC<{
     >
       <EuiText size="s">
         <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.missingWriteIndexPermissionsDescription"
-          defaultMessage="Write permission is required for the following indices in order to access this functionality. Contact your administrator for further assistance."
+          id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.missingPermissionsDescription"
+          defaultMessage="Write permission is required for the {index} index pattern in order to access this functionality. Contact your administrator for further assistance."
+          values={{
+            index: <EuiCode>{ASSET_CRITICALITY_INDEX_PATTERN}</EuiCode>,
+          }}
         />
-        <ul>
-          {indicesMissingWrite.map((indexName) => (
-            <li key={indexName}>
-              <EuiCode>{indexName}</EuiCode>
-            </li>
-          ))}
-        </ul>
       </EuiText>
     </EuiCallOut>
   );
@@ -215,23 +193,20 @@ const AssetCriticalityIssueCallout: React.FC<{ errorMessage?: string | ReactNode
   );
 
   return (
-    <EuiCallOut
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.unavailable"
-          defaultMessage="Asset criticality CSV file upload functionality unavailable."
-        />
-      }
-      color="primary"
-      iconType="info"
-      data-test-subj={ASSET_CRITICALITY_ISSUE_CALLOUT_TEST_ID}
-    >
-      <EuiText size="s">{msg}</EuiText>
-    </EuiCallOut>
+    <EuiFlexItem grow={false}>
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.unavailable"
+            defaultMessage="Asset criticality CSV file upload functionality unavailable."
+          />
+        }
+        color="primary"
+        iconType="info"
+        data-test-subj={ASSET_CRITICALITY_ISSUE_CALLOUT_TEST_ID}
+      >
+        <EuiText size="s">{msg}</EuiText>
+      </EuiCallOut>
+    </EuiFlexItem>
   );
 };
-
-const getIndicesMissingWrite = (privileges: EntityAnalyticsPrivileges): string[] =>
-  Object.entries(privileges.privileges.elasticsearch.index ?? {})
-    .filter(([, indexPrivileges]) => indexPrivileges.write === false)
-    .map(([indexName]) => indexName);

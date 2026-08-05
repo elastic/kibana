@@ -115,7 +115,7 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
                 expect(response.body).to.eql({
                   error: 'Forbidden',
                   message:
-                    'Failed to find rules with gaps: Unauthorized to find rules for any rule types.',
+                    'Failed to find rules with gaps: Unauthorized to find rules for any rule types',
                   statusCode: 403,
                 });
                 return;

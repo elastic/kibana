@@ -14,7 +14,6 @@ import { render } from '@testing-library/react';
 import * as appHeaderStories from './app_header.stories';
 import * as editableTitleStories from './title_area/title_area.stories';
 import * as appBadgeStories from './app_badge.stories';
-import * as appHeaderDescriptionStories from './app_header_description.stories';
 import * as appHeaderMetadataStories from './app_header_metadata.stories';
 
 // Smoke test: render every story through `composeStories`. The stories provide the real
@@ -26,7 +25,6 @@ describe('app header stories', () => {
     'Chrome/App Header': composeStories(appHeaderStories),
     'Chrome/App Header Editable Title': composeStories(editableTitleStories),
     'Chrome/App Badge': composeStories(appBadgeStories),
-    'Chrome/App Header Description': composeStories(appHeaderDescriptionStories),
     'Chrome/App Header Metadata': composeStories(appHeaderMetadataStories),
   };
 

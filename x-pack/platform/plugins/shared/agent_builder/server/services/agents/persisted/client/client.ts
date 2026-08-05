@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import pRetry, { AbortError } from 'p-retry';
 import type {
   ElasticsearchServiceStart,
   KibanaRequest,
@@ -34,7 +33,6 @@ import type {
 } from '../../../../../common/agents';
 import type { ToolsServiceStart } from '../../../tools';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
-import { isVersionConflictError } from '../../../../utils/is_version_conflict_error';
 import type {
   AgentsUsingSkillsResult,
   AgentsUsingToolsResult,
@@ -166,11 +164,6 @@ const getAgentDocument = async ({
   return response.hits.hits.length > 0 ? (response.hits.hits[0] as Document) : undefined;
 };
 
-/**
- * Ensures a system agent exists, treating a concurrent create as success. Guarantees
- * existence, not searchability: the document may not be visible to searches yet when
- * this resolves.
- */
 const ensureSystemAgent = async ({
   storage,
   space,
@@ -214,9 +207,17 @@ const ensureSystemAgent = async ({
       document,
     });
   } catch (error) {
-    if (!isVersionConflictError(error)) {
-      throw error;
+    // Multiple Kibana nodes may attempt the create concurrently. If another node won,
+    // the desired end state already exists and this installation is complete.
+    const concurrentlyCreatedAgent = await getAgentDocument({
+      storage,
+      space,
+      agentId: profile.id,
+    });
+    if (concurrentlyCreatedAgent && fromEs(concurrentlyCreatedAgent).type === expectedType) {
+      return;
     }
+    throw error;
   }
 };
 
@@ -479,28 +480,11 @@ class AgentClientImpl implements AgentClient {
     return this.get(profile.id);
   }
 
-  /**
-   * A concurrently created agent may not be searchable right away,
-   * so the read is retried until it becomes visible.
-   */
   async ensureDefaultAgent(
     profile: AgentCreateRequest
   ): Promise<PersistedAgentDefinitionWithPermissions> {
     await ensureSystemAgent({ storage: this.storage, space: this.space, profile });
-
-    return pRetry(
-      async () => {
-        try {
-          return await this.get(profile.id);
-        } catch (error) {
-          if (isAgentNotFoundError(error)) {
-            throw error;
-          }
-          throw new AbortError(error);
-        }
-      },
-      { retries: 9, factor: 1, minTimeout: 300 }
-    );
+    return this.get(profile.id);
   }
 
   async update(
@@ -533,17 +517,16 @@ class AgentClientImpl implements AgentClient {
       await this.validateAgentToolSelection(profileUpdate.configuration.tools);
     }
 
-    const updatedAgent = updateRequestToEs({
+    const updatedConversation = updateRequestToEs({
       agentId,
       currentProps: document._source,
       update: profileUpdate,
       updateDate: new Date(),
-      user: this.user,
     });
 
     await this.storage.getClient().index({
       id: document._id,
-      document: updatedAgent,
+      document: updatedConversation,
     });
 
     return this.get(agentId);

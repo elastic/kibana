@@ -112,7 +112,13 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { uiSettings, slo: sloPlugin, telemetry } = services;
   const { link } = useApmRouter();
-  const { query } = useAnyOfApmParams('/services', '/services/{serviceName}', '/service-map');
+  const { query } = useAnyOfApmParams(
+    '/services',
+    '/services/{serviceName}',
+    '/service-map',
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map'
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
@@ -335,25 +341,24 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         width: '40px',
         render: (_: unknown, sloItem: SLOWithSummaryResponse) => {
           const expanded = isSloExpanded(sloItem);
-          const buttonLabel = expanded
-            ? i18n.translate('xpack.apm.sloOverviewFlyout.collapseButton.ariaLabel', {
-                defaultMessage: 'Close SLO details',
-              })
-            : i18n.translate('xpack.apm.sloOverviewFlyout.expandButton.ariaLabel', {
-                defaultMessage: 'Open SLO details',
-              });
           return (
-            <EuiToolTip content={buttonLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                data-test-subj="apmSloExpandButton"
-                data-event-element="sloExpandTable"
-                iconType={expanded ? 'minimize' : 'maximize'}
-                color="primary"
-                size="xs"
-                onClick={() => handleSloToggle(sloItem)}
-                aria-label={buttonLabel}
-              />
-            </EuiToolTip>
+            <EuiButtonIcon
+              data-test-subj="apmSloExpandButton"
+              data-event-element="sloExpandTable"
+              iconType={expanded ? 'minimize' : 'maximize'}
+              color="primary"
+              size="xs"
+              onClick={() => handleSloToggle(sloItem)}
+              aria-label={
+                expanded
+                  ? i18n.translate('xpack.apm.sloOverviewFlyout.collapseButton.ariaLabel', {
+                      defaultMessage: 'Close SLO details',
+                    })
+                  : i18n.translate('xpack.apm.sloOverviewFlyout.expandButton.ariaLabel', {
+                      defaultMessage: 'Open SLO details',
+                    })
+              }
+            />
           );
         },
       },

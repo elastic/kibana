@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import type { DataTableRecord } from '@kbn/discover-utils';
 import { TestProviders } from '../../../../../common/mock';
 import type { CellActionRenderer } from '../../../../shared/components/cell_actions';
 import {
@@ -45,15 +44,13 @@ jest.mock('../../../../../common/components/event_details/use_action_cell_data_p
 const MockChildLink = ({
   field,
   value,
-  hit,
   children,
 }: {
   field: string;
   value: string;
-  hit?: DataTableRecord;
   children?: React.ReactNode;
 }) => (
-  <div data-test-subj="mockChildLink" data-field={field} data-value={value} data-hit-id={hit?.id}>
+  <div data-test-subj="mockChildLink" data-field={field} data-value={value}>
     {children}
   </div>
 );
@@ -342,19 +339,13 @@ describe('getColumns', () => {
         MockChildLink
       );
       const valueColumn = columns[1];
-      const row = {
-        ...defaultRow,
-        field: 'source.ip',
-        values: ['10.0.0.1'],
-        documentHit: { id: 'document-1' } as DataTableRecord,
-      };
+      const row = { ...defaultRow, field: 'source.ip', values: ['10.0.0.1'] };
 
       renderComponent(callRender(valueColumn, row));
 
       const previewLink = screen.getByTestId('mockChildLink');
       expect(previewLink).toHaveAttribute('data-field', 'source.ip');
       expect(previewLink).toHaveAttribute('data-value', '10.0.0.1');
-      expect(previewLink).toHaveAttribute('data-hit-id', 'document-1');
     });
 
     it('renders plain text without ChildLink when RenderChildLink is not provided', () => {

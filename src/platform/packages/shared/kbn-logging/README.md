@@ -84,7 +84,7 @@ logging:
       filters:
         - type: meta
           match:
-            [labels.ruleType]: esql
+            labels.ruleType: esql
           level: debug
 ```
 

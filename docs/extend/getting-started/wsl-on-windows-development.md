@@ -21,7 +21,7 @@ This guide allows you to achieve two different kind of experiences (Basic and De
   
   ### Basic Experience
   For a basic WSL usage you must be running **Windows 10 version 2004 and higher (Build 19041 and higher) or Windows 11**. Note that in a basic setup you won't be able to use 
-  the browser GUI to visually run or debug functional tests. It's highly advisable to make sure you install the prerequisites for a default usage listed below.
+  the browser GUI to visually run and/or debug functional tests. It's highly advisable to make sure you install the prerequisites for a default usage listed below.
   
   **Note:** For a normal development cycle we really advise to use the default experience setup within Windows 11. However if you have an explicit need for using a browser GUI 
   while using Windows 10, please follow each step of the guide below applicable for the Basic Experience setup and then check our [short term workaround for Windows 10 GUI support](./wsl-on-windows-development.md#short-term-workaround-for-windows-10-gui-support).

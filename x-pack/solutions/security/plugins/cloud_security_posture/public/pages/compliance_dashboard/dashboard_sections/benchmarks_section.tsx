@@ -157,7 +157,7 @@ export const BenchmarksSection = ({
                   id="xpack.csp.dashboard.benchmarkSection.columnsHeader.complianceScoreTitle"
                   defaultMessage="Compliance Score"
                 />
-                <EuiIcon type={benchmarkSortingIcon} aria-hidden={true} />
+                <EuiIcon type={benchmarkSortingIcon} />
               </div>
             </EuiTitle>
           </button>

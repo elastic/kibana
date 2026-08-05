@@ -16,6 +16,7 @@ export type ServiceDetailsPageTabName =
   | 'errors'
   | 'metrics'
   | 'infrastructure'
+  | 'service-map'
   | 'logs'
   | 'alerts'
   | 'dashboards';

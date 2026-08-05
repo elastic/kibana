@@ -41,8 +41,7 @@ export const getHistorySnapshotIndexName = (
 
 /**
  * Returns the index pattern matching all history snapshot indices for a namespace.
- * Concrete names are `<base>.<YYYY-MM-DD>-<HH>`.
- * Used for delete, status, and the history index template.
+ * Used for delete and status.
  */
 export const getHistorySnapshotIndexPattern = (namespace: string): string =>
-  `${getHistorySnapshotBasePattern(namespace)}.*`;
+  `${getHistorySnapshotBasePattern(namespace)}*`;

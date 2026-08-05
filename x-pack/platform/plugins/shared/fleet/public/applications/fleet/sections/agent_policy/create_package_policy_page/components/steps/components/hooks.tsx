@@ -81,12 +81,6 @@ interface UseVarGroupSelectionsParams {
    * If not provided, only var_group_selections will be included in updates.
    */
   packagePolicy?: NewPackagePolicy;
-  /**
-   * Optional: options to hide per var group (e.g. options unsupported by the
-   * policy template the form is scoped to). Hidden options are excluded when
-   * computing default selections.
-   */
-  hideInVarGroupOptions?: Record<string, string[]>;
 }
 
 /**
@@ -100,27 +94,22 @@ export function useVarGroupSelections({
   isAgentlessEnabled,
   onSelectionsChange,
   packagePolicy,
-  hideInVarGroupOptions,
 }: UseVarGroupSelectionsParams) {
   // Derive current selections from saved or compute defaults
   const selections = useMemo((): VarGroupSelection => {
     if (savedSelections) return savedSelections;
-    return computeDefaultVarGroupSelections(varGroups, isAgentlessEnabled, hideInVarGroupOptions);
-  }, [savedSelections, varGroups, isAgentlessEnabled, hideInVarGroupOptions]);
+    return computeDefaultVarGroupSelections(varGroups, isAgentlessEnabled);
+  }, [savedSelections, varGroups, isAgentlessEnabled]);
 
   // Initialize with defaults on mount if not already set
   useEffect(() => {
     if (varGroups && varGroups.length > 0 && !savedSelections) {
-      const defaults = computeDefaultVarGroupSelections(
-        varGroups,
-        isAgentlessEnabled,
-        hideInVarGroupOptions
-      );
+      const defaults = computeDefaultVarGroupSelections(varGroups, isAgentlessEnabled);
       if (Object.keys(defaults).length > 0) {
         onSelectionsChange({ var_group_selections: defaults });
       }
     }
-  }, [varGroups, isAgentlessEnabled, savedSelections, onSelectionsChange, hideInVarGroupOptions]);
+  }, [varGroups, isAgentlessEnabled, savedSelections, onSelectionsChange]);
 
   // Handle selection change with policy effects computation
   const handleSelectionChange = useCallback(

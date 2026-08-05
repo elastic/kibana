@@ -16,17 +16,6 @@ jest.mock('../../../../contexts/kibana/use_create_url', () => ({
 jest.mock('../../../../capabilities/check_capabilities', () => ({
   usePermissionCheck: () => [true, true],
 }));
-jest.mock('../../../../contexts/kibana', () => ({
-  useMlKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: jest.fn(),
-        getUrlForApp: jest.fn(() => '/app/management/ml/ad_settings/calendars_list'),
-      },
-    },
-  }),
-  useNavigateToPath: () => jest.fn(),
-}));
 
 const testProps = {
   calendarId: '',
@@ -52,17 +41,13 @@ const testProps = {
   selectedJobOptions: [],
   showNewEventModal: jest.fn(),
   isGlobalCalendar: false,
-  isDst: false,
 };
 
 describe('CalendarForm', () => {
   test('Renders calendar form', () => {
-    const { getByTestId } = renderWithI18n(<CalendarForm {...testProps} />);
+    const { container } = renderWithI18n(<CalendarForm {...testProps} />);
 
-    expect(getByTestId('mlCalendarFormNew')).toBeInTheDocument();
-    expect(getByTestId('appHeaderTitle')).toHaveTextContent('Create new calendar');
-    expect(getByTestId('mlCalendarIdInput')).toHaveValue('');
-    expect(getByTestId('mlCalendarDescriptionInput')).toHaveValue('');
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('CalendarId shown as title when editing', () => {
@@ -77,7 +62,7 @@ describe('CalendarForm', () => {
 
     const calendarForm = getByTestId('mlCalendarFormEdit');
     expect(calendarForm).toBeInTheDocument();
-    expect(getByTestId('appHeaderTitle')).toHaveTextContent('Calendar test-calendar');
-    expect(getByTestId('mlCalendarDescriptionText')).toHaveTextContent('test description');
+
+    expect(calendarForm).toMatchSnapshot();
   });
 });

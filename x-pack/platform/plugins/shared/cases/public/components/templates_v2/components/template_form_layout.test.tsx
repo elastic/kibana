@@ -100,7 +100,6 @@ const TestWrapper = ({
   isSaving = false,
   hasChanges = false,
   initialValue = baseEditorYaml,
-  initialMetadata = { name: 'Template metadata', description: '', tags: [] },
 }: {
   onCreate: (
     data: YamlEditorFormValues,
@@ -111,7 +110,6 @@ const TestWrapper = ({
   isSaving?: boolean;
   hasChanges?: boolean;
   initialValue?: string;
-  initialMetadata?: TemplateMetadata;
 }) => {
   const form = useForm<YamlEditorFormValues>({
     defaultValues: {
@@ -128,7 +126,7 @@ const TestWrapper = ({
       isSaving={isSaving}
       storageKey="test-storage-key"
       initialValue={initialValue}
-      initialMetadata={initialMetadata}
+      initialMetadata={{ name: 'Template metadata', description: '', tags: [] }}
     />
   );
 };
@@ -737,17 +735,6 @@ fields:
     });
 
     renderWithTestingProviders(<TestWrapper onCreate={mockOnCreate} />);
-
-    expect(screen.getByTestId('saveTemplateHeaderButton')).toBeDisabled();
-  });
-
-  it('disables save button when the template name is missing', () => {
-    renderWithTestingProviders(
-      <TestWrapper
-        onCreate={mockOnCreate}
-        initialMetadata={{ name: '', description: '', tags: [] }}
-      />
-    );
 
     expect(screen.getByTestId('saveTemplateHeaderButton')).toBeDisabled();
   });

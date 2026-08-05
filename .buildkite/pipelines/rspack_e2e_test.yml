@@ -39,7 +39,7 @@ steps:
       provider: gcp
       machineType: c4d-standard-16
       diskType: hyperdisk-balanced
-      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d
+      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
       diskSizeGb: 200
     key: build
     timeout_in_minutes: 60
@@ -78,7 +78,6 @@ steps:
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
       FTR_CONFIGS_DEPS: 'build'
-      FTR_TEST_CHANNELS: ci-on-commit
     retry:
       automatic:
         - exit_status: '*'

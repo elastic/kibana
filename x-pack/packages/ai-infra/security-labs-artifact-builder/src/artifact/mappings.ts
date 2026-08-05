@@ -6,17 +6,19 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import type { SemanticTextMapping } from './semantic_text';
-import { getSemanticTextMapping } from './semantic_text';
+
+const DEFAULT_ELSER = '.elser-2-elasticsearch';
 
 /**
  * Returns the Elasticsearch mappings for Security Labs content.
- * The `semantic_text` fields use the provided mapping (defaults to ELSER) so the
- * artifact can be built against ELSER, E5, or Jina depending on the inference id.
+ * Uses ELSER for semantic_text fields to enable semantic search.
  */
-export const getSecurityLabsMappings = (
-  semanticTextMapping: SemanticTextMapping = getSemanticTextMapping()
-): MappingTypeMapping => {
+export const getSecurityLabsMappings = (): MappingTypeMapping => {
+  const semanticTextMapping = {
+    type: 'semantic_text' as const,
+    inference_id: DEFAULT_ELSER,
+  };
+
   return {
     dynamic: 'strict',
     properties: {

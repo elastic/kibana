@@ -277,6 +277,7 @@ export const Host: FC<HostProps> = memo(function Host({
         entityId: params.entityId,
         entityName: params.entityName,
         scopeId,
+        title: params.entityName ?? params.entityId,
         origin,
       }),
     [openEntityDetailsAsChild, scopeId]

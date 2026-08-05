@@ -11,21 +11,6 @@
         "wait_for"
       ]
     },
-    "data_autocomplete_rules": {
-      "username": "",
-      "email": "",
-      "full_name": "",
-      "metadata": {},
-      "password": "",
-      "password_hash": "",
-      "roles": [],
-      "enabled": {
-        "__one_of": [
-          true,
-          false
-        ]
-      }
-    },
     "methods": [
       "PUT",
       "POST"

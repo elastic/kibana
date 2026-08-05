@@ -12,10 +12,6 @@
         "0"
       ]
     },
-    "data_autocomplete_rules": {
-      "requests_per_second": "",
-      "timeout": ""
-    },
     "methods": [
       "DELETE"
     ],

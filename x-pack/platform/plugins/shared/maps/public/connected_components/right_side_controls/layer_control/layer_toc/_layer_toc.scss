@@ -7,7 +7,7 @@
 }
 
 .mapLayerToc-droppable-isCombining {
-  // Background color is themed reactively via Emotion (useEuiTheme) in map_container.
+  background-color: $euiColorEmptyShade !important;
 }
 
 .mapLayerToc-droppable-isDragging * {

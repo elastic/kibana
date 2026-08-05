@@ -72,7 +72,7 @@ const buildFullAttributes = (): {
   description: 'A description',
   tags: ['tag1'],
   category: 'malware',
-  assignees: [{ uid: 'u-1', username: 'u1', full_name: 'User One', email: 'u1@e.com' }],
+  assignees: [{ uid: 'u-1' }],
   severity: CasePersistedSeverity.HIGH,
   status: CasePersistedStatus.CLOSED,
   created_at: '2026-05-01T00:00:00.000Z',

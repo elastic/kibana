@@ -17,7 +17,6 @@ import {
   EuiPopoverTitle,
   EuiTextColor,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -52,22 +51,22 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const closePopover = () => setPopoverIsOpen(false);
   const popoverTitleId = useGeneratedHtmlId();
-  const metaDataLabel = i18n.translate(
-    'xpack.searchIndexDocuments.result.header.metadata.icon.ariaLabel',
-    { defaultMessage: 'Metadata for document: {id}', values: { id } }
-  );
 
   const metaDataIcon = (
-    <EuiToolTip content={metaDataLabel} disableScreenReaderOutput>
-      <EuiButtonIcon
-        display="empty"
-        size="xs"
-        iconType="info"
-        color="primary"
-        onClick={() => setPopoverIsOpen(!popoverIsOpen)}
-        aria-label={metaDataLabel}
-      />
-    </EuiToolTip>
+    <EuiButtonIcon
+      display="empty"
+      size="xs"
+      iconType="info"
+      color="primary"
+      onClick={() => setPopoverIsOpen(!popoverIsOpen)}
+      aria-label={i18n.translate(
+        'xpack.searchIndexDocuments.result.header.metadata.icon.ariaLabel',
+        {
+          defaultMessage: 'Metadata for document: {id}',
+          values: { id },
+        }
+      )}
+    />
   );
 
   return (

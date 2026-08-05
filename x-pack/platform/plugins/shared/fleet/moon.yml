@@ -66,7 +66,6 @@ dependsOn:
   - '@kbn/test'
   - '@kbn/stdio-dev-helpers'
   - '@kbn/tooling-log'
-  - '@kbn/apm-types'
   - '@kbn/apm-utils'
   - '@kbn/core-saved-objects-common'
   - '@kbn/core-http-server'

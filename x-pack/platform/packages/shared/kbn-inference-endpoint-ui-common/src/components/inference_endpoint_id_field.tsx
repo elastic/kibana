@@ -145,10 +145,8 @@ export const InferenceEndpointIdField: React.FC<InferenceEndpointIdFieldProps> =
               beforeMessage={LABELS.COPY_TOOLTIP}
               afterMessage={LABELS.COPIED_TOOLTIP}
               textToCopy={`${inferenceUri}${config.inferenceId ?? ''}`}
-              tooltipProps={{ disableScreenReaderOutput: true }}
             >
               {(copy) => (
-                /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
                 <EuiButtonIcon
                   iconType="copy"
                   aria-label={LABELS.COPY_TOOLTIP}

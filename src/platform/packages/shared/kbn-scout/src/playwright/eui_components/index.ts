@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiComboBoxObject } from '@elastic/eui-test-helpers';
+import { KbnComboBoxObject } from './combo_box_object';
 import { EuiSelectableWrapper } from './selectable';
 import { EuiCheckBoxWrapper } from './check_box';
 import { EuiDataGridWrapper } from './data_grid';
@@ -17,7 +17,7 @@ import { EuiCodeBlockWrapper } from './code_block';
 import { EuiSuperSelectWrapper } from './super_select';
 
 export {
-  EuiComboBoxObject,
+  KbnComboBoxObject,
   EuiSelectableWrapper,
   EuiCheckBoxWrapper,
   EuiDataGridWrapper,

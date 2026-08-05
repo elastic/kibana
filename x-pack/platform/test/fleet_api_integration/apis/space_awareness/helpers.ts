@@ -17,7 +17,6 @@ import {
   AGENTS_INDEX,
   type FleetServerAgent,
 } from '@kbn/fleet-plugin/common';
-import { removeVersionSuffixFromPolicyId } from '@kbn/fleet-plugin/common/services';
 import { ENROLLMENT_API_KEYS_INDEX } from '@kbn/fleet-plugin/common/constants';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
@@ -146,7 +145,6 @@ export async function createFleetAgent(
         access_api_key_id: 'api-key-3',
         active: true,
         policy_id: agentPolicyId,
-        policy_base_id: removeVersionSuffixFromPolicyId(agentPolicyId),
         policy_revision_idx: 1,
         last_checkin_status: 'online',
         type: 'PERMANENT',

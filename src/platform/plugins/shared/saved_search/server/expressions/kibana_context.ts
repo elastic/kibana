@@ -8,7 +8,6 @@
  */
 
 import type { StartServicesAccessor } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { getKibanaContextFn } from '../../common/expressions/kibana_context';
 import type { SavedSearchServerStartDeps } from '../plugin';
 import { getSavedSearch } from '../../common/service/get_saved_searches';
@@ -45,10 +44,6 @@ export function getKibanaContext(
           const so = await savedObjects
             .getScopedClient(request)
             .resolve<DiscoverSessionAttributes>('search', searchId);
-
-          if (isSavedObjectErrorResult(so.saved_object)) {
-            throw new Error(so.saved_object.error.message);
-          }
 
           return {
             item: so.saved_object,

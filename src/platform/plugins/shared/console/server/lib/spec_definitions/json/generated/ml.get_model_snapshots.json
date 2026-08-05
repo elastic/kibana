@@ -14,21 +14,6 @@
       "sort": "",
       "start": []
     },
-    "data_autocomplete_rules": {
-      "desc": {
-        "__one_of": [
-          true,
-          false
-        ]
-      },
-      "end": "",
-      "page": {
-        "from": "",
-        "size": ""
-      },
-      "sort": "",
-      "start": ""
-    },
     "methods": [
       "GET",
       "POST"

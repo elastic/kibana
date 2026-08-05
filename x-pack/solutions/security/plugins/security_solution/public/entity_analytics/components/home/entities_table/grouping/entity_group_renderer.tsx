@@ -24,9 +24,6 @@ import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../../../flyout/entity_details/shared/constants';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
-import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
-import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../constants';
 import { RISK_SCORE_NOT_AVAILABLE } from '../../../entity_resolution/translations';
 import { getRiskLevel } from '../../../../../../common/entity_analytics/risk_engine';
@@ -59,9 +56,7 @@ const ResolutionGroupPanel = ({
   targetMetadata: TargetMetadataMap;
   tableId: string;
 }) => {
-  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
-  const { openEntityFlyout } = useFlyoutApi();
 
   const entityId = String(bucket.key_as_string ?? bucket.key);
   const metadata = targetMetadata.get(entityId);
@@ -77,27 +72,23 @@ const ResolutionGroupPanel = ({
       e.stopPropagation();
       if (!targetEntityName || !entityType) return;
 
-      const sharedParams = { entityId, contextID: tableId, scopeId: tableId };
-
-      if (enableNewFlyout) {
-        openEntityFlyout({
-          engineType: entityType,
-          entityName: targetEntityName,
-          origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
-          ...sharedParams,
-        });
-        return;
-      }
-
       const panelKey = EntityPanelKeyByType[entityType];
-      const paramName = EntityPanelParamByType[entityType];
-      if (panelKey && paramName) {
-        openFlyout({
-          right: { id: panelKey, params: { [paramName]: targetEntityName, ...sharedParams } },
-        });
-      }
+      const panelParam = EntityPanelParamByType[entityType];
+      if (!panelKey || !panelParam) return;
+
+      openFlyout({
+        right: {
+          id: panelKey,
+          params: {
+            [panelParam]: targetEntityName,
+            entityId,
+            contextID: tableId,
+            scopeId: tableId,
+          },
+        },
+      });
     },
-    [enableNewFlyout, openFlyout, openEntityFlyout, targetEntityName, entityType, entityId, tableId]
+    [openFlyout, targetEntityName, entityType, entityId, tableId]
   );
 
   return (
@@ -219,7 +210,7 @@ export const createGroupStatsRenderer = (targetMetadata: TargetMetadataMap) => {
       const groupScore = metadata?.riskScore ?? bucket.resolutionRiskScore?.value;
       const isSoloGroup = bucket.doc_count === 1;
       const individualScore = isSoloGroup ? metadata?.individualRiskScore : undefined;
-      const riskScore = (isSoloGroup && !groupScore ? individualScore : groupScore) ?? null;
+      const riskScore = groupScore ?? individualScore ?? null;
 
       stats.push({
         title: riskScoreLabel,

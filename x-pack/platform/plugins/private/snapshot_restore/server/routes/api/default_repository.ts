@@ -18,7 +18,7 @@ interface DefaultRepositorySettings {
 }
 
 const defaultRepositorySchema = schema.object({
-  name: schema.string({ minLength: 1, maxLength: 1000 }),
+  name: schema.string({ minLength: 1 }),
 });
 
 const DEFAULT_REPOSITORY_PATH = 'persistent.repositories.default_repository';

@@ -22,15 +22,7 @@ import type { CasesPublicStartDependencies, CasesPublicSetupDependencies } from 
 import { CasesUiPlugin } from './plugin';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import {
-  CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE,
-  CASE_PAGE_VIEW_EVENT_TYPE,
-  CASE_VIEW_ATTACH_BUTTON_CLICKED_EVENT_TYPE,
-  CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE,
-  CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE,
-  CASES_LIST_PAGE_VIEW_EVENT_TYPE,
-  CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
-} from '../common/constants';
+import { CASE_PAGE_VIEW_EVENT_TYPE } from '../common/constants';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 
 function getConfig(overrides = {}) {
@@ -134,85 +126,6 @@ describe('Cases Ui Plugin', () => {
         expect.objectContaining({
           eventType: CASE_PAGE_VIEW_EVENT_TYPE,
           schema: expect.objectContaining({ owner: expect.objectContaining({ type: 'keyword' }) }),
-        })
-      );
-    });
-
-    it('registers cases list event types', async () => {
-      plugin.setup(coreSetup, pluginsSetup);
-
-      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
-        expect.objectContaining({
-          eventType: CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
-          schema: expect.objectContaining({
-            owner: expect.objectContaining({ type: 'keyword' }),
-            view_mode: expect.objectContaining({ type: 'keyword' }),
-          }),
-        })
-      );
-      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
-        expect.objectContaining({
-          eventType: CASES_LIST_PAGE_VIEW_EVENT_TYPE,
-          schema: expect.objectContaining({
-            owner: expect.objectContaining({ type: 'keyword' }),
-            view_mode: expect.objectContaining({ type: 'keyword' }),
-            selected_columns: expect.objectContaining({ type: 'array' }),
-            per_page: expect.objectContaining({ type: 'integer' }),
-            sort_field: expect.objectContaining({ type: 'keyword' }),
-            sort_order: expect.objectContaining({ type: 'keyword' }),
-            active_filter_dimensions: expect.objectContaining({ type: 'array' }),
-          }),
-        })
-      );
-    });
-
-    it('registers the attachment accordion opened event type', async () => {
-      plugin.setup(coreSetup, pluginsSetup);
-
-      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
-        expect.objectContaining({
-          eventType: CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE,
-          schema: expect.objectContaining({
-            owner: expect.objectContaining({ type: 'keyword' }),
-            attachment_type: expect.objectContaining({ type: 'keyword' }),
-          }),
-        })
-      );
-    });
-
-    it('registers the attach button and menu item event types', async () => {
-      plugin.setup(coreSetup, pluginsSetup);
-
-      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
-        expect.objectContaining({
-          eventType: CASE_VIEW_ATTACH_BUTTON_CLICKED_EVENT_TYPE,
-          schema: expect.objectContaining({
-            owner: expect.objectContaining({ type: 'keyword' }),
-            attach_location: expect.objectContaining({ type: 'keyword' }),
-          }),
-        })
-      );
-      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
-        expect.objectContaining({
-          eventType: CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE,
-          schema: expect.objectContaining({
-            owner: expect.objectContaining({ type: 'keyword' }),
-            attachment_type: expect.objectContaining({ type: 'keyword' }),
-          }),
-        })
-      );
-    });
-
-    it('registers the markdown editor plugin clicked event type', async () => {
-      plugin.setup(coreSetup, pluginsSetup);
-
-      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
-        expect.objectContaining({
-          eventType: CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE,
-          schema: expect.objectContaining({
-            owner: expect.objectContaining({ type: 'keyword' }),
-            plugin_type: expect.objectContaining({ type: 'keyword' }),
-          }),
         })
       );
     });

@@ -91,7 +91,6 @@ describe('AddCollectorFlyout', () => {
     mockedUseStartServices.mockReturnValue({
       cloud: { isCloudEnabled: false },
       docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
-      application: { capabilities: { api_keys: { save: true } } },
     } as any);
     mockedUseGetCreateApiKey.mockReturnValue({
       apiKey: undefined,
@@ -329,37 +328,6 @@ describe('AddCollectorFlyout', () => {
         expect(component.getByText('Create API key').closest('button')).toBeDisabled();
       });
     });
-
-    it('disables the Create API key button and shows tooltip when user lacks api_keys.save permission', async () => {
-      mockedUseStartServices.mockReturnValue({
-        cloud: { isCloudEnabled: false },
-        docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
-        application: { capabilities: { api_keys: { save: false } } },
-      } as any);
-
-      const component = renderFlyout();
-
-      const btn = await waitFor(() => {
-        const b = component.getByText('Create API key').closest('button');
-        // hasAriaDisabled renders aria-disabled="true" (not native disabled), preserving
-        // focusability and letting EUI apply pointer-events:none via CSS so the tooltip
-        // anchor span receives hover events in real browsers.
-        expect(b).toHaveAttribute('aria-disabled', 'true');
-        return b;
-      });
-
-      // In jsdom, CSS pointer-events:none is not enforced. Fire mouseOver on the EuiToolTip
-      // anchor span (button's direct parent) to simulate real-browser tooltip hover.
-      fireEvent.mouseOver(btn!.parentElement!);
-
-      await waitFor(() => {
-        expect(
-          component.getByText(
-            "You don't have permission to create API keys. Contact your administrator."
-          )
-        ).toBeInTheDocument();
-      });
-    });
   });
 
   describe('TLS configuration', () => {
@@ -374,7 +342,6 @@ describe('AddCollectorFlyout', () => {
       mockedUseStartServices.mockReturnValue({
         cloud: { isCloudEnabled: false },
         docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
-        application: { capabilities: { api_keys: { save: true } } },
       } as any);
 
       const component = renderFlyout();
@@ -389,7 +356,6 @@ describe('AddCollectorFlyout', () => {
       mockedUseStartServices.mockReturnValue({
         cloud: { isCloudEnabled: true },
         docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
-        application: { capabilities: { api_keys: { save: true } } },
       } as any);
 
       const component = renderFlyout();

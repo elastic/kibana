@@ -6,7 +6,6 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { buildPolicyBaseIdsWithFallbackKuery } from '../../../../../../../common/services';
 import { AgentStatusKueryHelper } from '../../../../services';
 import { AGENTS_PREFIX } from '../../../../constants';
 
@@ -35,11 +34,9 @@ export const getKuery = ({
     if (kueryBuilder) {
       kueryBuilder = `(${kueryBuilder}) and`;
     }
-    kueryBuilder = `${kueryBuilder} ${buildPolicyBaseIdsWithFallbackKuery(
-      selectedAgentPolicies,
-      `${AGENTS_PREFIX}.policy_base_id`,
-      `${AGENTS_PREFIX}.policy_id`
-    )}`;
+    kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.policy_id : (${selectedAgentPolicies
+      .map((agentPolicy) => `"${agentPolicy}"`)
+      .join(' or ')})`;
   }
 
   if (selectedTags?.length) {

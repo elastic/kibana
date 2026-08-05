@@ -108,7 +108,6 @@ apiTest.describe('Update action policy API key API', { tag: '@local-stateful-cla
     );
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(

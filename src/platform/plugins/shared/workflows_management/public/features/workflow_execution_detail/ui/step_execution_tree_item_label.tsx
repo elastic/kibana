@@ -85,20 +85,13 @@ export function StepExecutionTreeItemLabel({
           <TokenUsageBadge usage={usage} compact data-test-subj="workflowStepTreeTokenUsage" />
         </EuiFlexItem>
       )}
-      {executionTimeMs != null &&
-        Number.isFinite(executionTimeMs) &&
-        executionTimeMs >= 0 &&
-        status !== ExecutionStatus.WAITING_FOR_INPUT &&
-        !isTriggerPseudoStep && (
-          <EuiFlexItem
-            grow={false}
-            css={[styles.duration, isDangerous && styles.durationDangerous]}
-          >
-            <EuiText size="xs" color="subdued">
-              {formatDuration(executionTimeMs)}
-            </EuiText>
-          </EuiFlexItem>
-        )}
+      {executionTimeMs && status !== ExecutionStatus.WAITING_FOR_INPUT && !isTriggerPseudoStep && (
+        <EuiFlexItem grow={false} css={[styles.duration, isDangerous && styles.durationDangerous]}>
+          <EuiText size="xs" color="subdued">
+            {formatDuration(executionTimeMs)}
+          </EuiText>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }

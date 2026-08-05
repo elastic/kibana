@@ -16,7 +16,6 @@ import type { RuleAlertType } from '../../../../lib/detection_engine/rule_schema
 import type {
   RuleResponse,
   EndpointResponseAction,
-  KillProcessParams,
   OsqueryResponseAction,
   ProcessesParams,
   ResponseAction,
@@ -120,8 +119,6 @@ export const validateRuleResponseActions = async <
 
   const isRunscriptAutomatedResponseActionEnabled =
     endpointService.experimentalFeatures.responseActionsEndpointAutomatedRunScript;
-  const isKillProcessDescendantsEnabled =
-    endpointService.experimentalFeatures.responseActionsEndpointKillProcessDescendants;
 
   for (const actionData of responseActionsToValidate) {
     if (isEndpointResponseAction(actionData) && actionData.params.command) {
@@ -131,10 +128,7 @@ export const validateRuleResponseActions = async <
       switch (actionData.params.command) {
         case 'kill-process':
         case 'suspend-process':
-          validateEndpointKillSuspendProcessResponseAction(
-            actionData.params,
-            isKillProcessDescendantsEnabled
-          );
+          validateEndpointKillSuspendProcessResponseAction(actionData.params);
           break;
 
         case 'runscript':
@@ -336,10 +330,7 @@ const isOsqueryResponseAction = (
 };
 
 /** @private */
-const validateEndpointKillSuspendProcessResponseAction = (
-  { config, command }: ProcessesParams,
-  isKillProcessDescendantsEnabled: boolean
-) => {
+const validateEndpointKillSuspendProcessResponseAction = ({ config, command }: ProcessesParams) => {
   if (config.overwrite && config.field) {
     throw new CustomHttpRequestError(
       `Invalid [${command}] response action configuration: 'field' is not allowed when 'overwrite' is 'true'`,
@@ -352,17 +343,6 @@ const validateEndpointKillSuspendProcessResponseAction = (
       `Invalid [${command}] response action configuration: 'field' is required when 'overwrite' is 'false'`,
       400
     );
-  }
-
-  if (isKillProcessDescendantsEnabled && command === 'kill-process') {
-    const { kill_descendants: killDescendants } = config as KillProcessParams['config'];
-
-    if (killDescendants !== undefined && typeof killDescendants !== 'boolean') {
-      throw new CustomHttpRequestError(
-        `Invalid [${command}] response action configuration: 'kill_descendants' must be a boolean`,
-        400
-      );
-    }
   }
 };
 

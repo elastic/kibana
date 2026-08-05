@@ -43,7 +43,6 @@ export const ShareUrlIconButton = memo(
         <EuiToolTip content={tooltip}>
           <EuiCopy textToCopy={url}>
             {(copy) => (
-              /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
               <EuiButtonIcon
                 iconType="share"
                 color="text"

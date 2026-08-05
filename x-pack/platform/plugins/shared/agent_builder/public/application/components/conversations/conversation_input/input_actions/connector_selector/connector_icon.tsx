@@ -33,5 +33,5 @@ export const ConnectorIcon: React.FC<{ connectorName?: string }> = ({ connectorN
       iconType = matchedIcon.icon;
     }
   }
-  return <EuiIcon type={iconType} aria-hidden={true} />;
+  return <EuiIcon type={iconType} />;
 };

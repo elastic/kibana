@@ -15,9 +15,12 @@ import {
   type BulkResponse,
   type CreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
-import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
-import type { AlertAction } from '../../resources/datastreams/alert_actions';
+import {
+  ALERT_ACTIONS_DATA_STREAM,
+  type AlertAction,
+} from '../../resources/datastreams/alert_actions';
+import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
 import { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
@@ -320,7 +323,6 @@ export class AlertActionsClient {
       action_type: action.action_type,
       last_series_event_timestamp: alertEvent['@timestamp'],
       rule_id: alertEvent.rule_id,
-      source: alertEvent.source,
       group_hash: alertEvent.group_hash,
       episode_id: alertEvent.episode_id,
       space_id: alertEvent.space_id,

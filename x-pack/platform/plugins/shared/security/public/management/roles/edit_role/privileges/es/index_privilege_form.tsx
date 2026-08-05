@@ -100,19 +100,8 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       <Fragment>
         <EuiSpacer size="m" />
         <EuiFlexGroup alignItems="center" responsive={false} className="index-privilege-form">
-          <EuiFlexItem
-            css={css`
-              min-width: 330px;
-            `}
-          >
-            <EuiPanel
-              color="subdued"
-              css={css`
-                max-width: 100%;
-              `}
-            >
-              {this.getPrivilegeForm()}
-            </EuiPanel>
+          <EuiFlexItem>
+            <EuiPanel color="subdued">{this.getPrivilegeForm()}</EuiPanel>
           </EuiFlexItem>
           {!this.props.isRoleReadOnly && (
             <EuiFlexItem grow={false}>
@@ -467,7 +456,6 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                   onChange={this.onQueryChange}
                   options={{
                     readOnly: this.props.isRoleReadOnly,
-                    automaticLayout: true,
                     minimap: {
                       enabled: false,
                     },

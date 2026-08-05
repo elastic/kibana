@@ -1,6 +1,6 @@
 ---
 name: api-authz
-description: Kibana API route authorization patterns. Use when configuring route security, working with requiredPrivileges or extendedPrivileges, using authzResult for privilege-based branching, opting out of authorization, or naming custom privileges.
+description: Kibana API route authorization patterns. Use when configuring route security, working with requiredPrivileges, using authzResult for privilege-based branching, opting out of authorization, or naming custom privileges.
 ---
 
 # API Authorization
@@ -17,8 +17,6 @@ router.get({
   security: {
     authz: {
       requiredPrivileges: ['<privilege_1>', '<privilege_2>'],
-      // Optional: checked and surfaced in request.authzResult, but not enforced
-      // extendedPrivileges: ['<optional_privilege>'],
     },
   },
   ...
@@ -39,54 +37,9 @@ Privilege names follow the `<operation>_<subject>` convention using underscores 
 
 When a route handler branches logic based on user privileges (returns different data, enables different features), it **must** use `request.authzResult`. Do not use `capabilities.resolveCapabilities()` or other authorization checks for branching — `authzResult` is the single source of truth.
 
-**Look for:** routes that conditionally expose data based on permissions, or functions that check capabilities and return booleans for branching.
+**Look for:** routes with `anyRequired` (OR logic), handlers that conditionally expose data based on permissions, or functions that check capabilities and return booleans for branching.
 
-### Optional privileges that extend behavior (`extendedPrivileges`)
-
-When a privilege **gates access** and another privilege only **extends** what the route returns or allows, declare the gate in `requiredPrivileges` and the optional checks in `extendedPrivileges`. Extended privileges are checked and surfaced in `authzResult` but never produce a 403.
-
-`extendedPrivileges` is a **flat list of privilege name strings** only. Privilege sets (`anyRequired` / `allRequired`) are not supported there. When authz is enabled, `requiredPrivileges` is always required by the schema — optional privileges alone cannot protect a route.
-
-**Correct — required gate + optional extension:**
-```ts
-router.get({
-  path: '/api/path',
-  security: {
-    authz: {
-      requiredPrivileges: ['read_entity'],
-      extendedPrivileges: ['read_entity_details'],
-    },
-  },
-  ...
-}, (context, request, response) => {
-  const includeDetails = request.authzResult?.read_entity_details === true;
-  return response.ok({ body: getEntity({ includeDetails }) });
-});
-```
-
-**Wrong — abusing `anyRequired` then re-enforcing in the handler:**
-```ts
-router.get({
-  path: '/api/path',
-  security: {
-    authz: {
-      // Under-declares the real requirement; OAS implies either privilege alone grants access
-      requiredPrivileges: [{ anyRequired: ['read_entity', 'read_entity_details'] }],
-    },
-  },
-}, (context, request, response) => {
-  if (request.authzResult?.read_entity !== true) {
-    return response.forbidden(); // easy to forget → under-protected route
-  }
-  const includeDetails = request.authzResult?.read_entity_details === true;
-  return response.ok({ body: getEntity({ includeDetails }) });
-});
-```
-
-### Mutually exclusive privilege branches (`anyRequired`)
-
-When either of several privileges grants access and the handler picks a branch, use `anyRequired` and branch on `authzResult`:
-
+**Correct — use `authzResult`:**
 ```ts
 router.get({
   path: '/api/path',

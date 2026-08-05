@@ -9,12 +9,13 @@
  * Generic service-detail tab navigation helper for the Service Map.
  *
  * Resolves the service-scoped destination for a given tab from the current map
- * route (`/service-map`, or contextual embed hosts such as service overview /
- * transaction details), picking the `services` vs `mobile-services` variant
- * based on the map context. It preserves the shared time range / environment
- * params and **strips `kuery`** so a node-scoped click doesn't carry the map's
- * service-name filter into a destination where it would yield undesired side
- * effects.
+ * route (`/service-map`, `/services/{serviceName}/service-map`,
+ * `/mobile-services/{serviceName}/service-map`, or contextual embed hosts such as
+ * service overview / transaction details), picking the `services` vs
+ * `mobile-services` variant based on the map context. It preserves the shared
+ * time range / environment params and **strips `kuery`** so a node-scoped click
+ * doesn't carry the map's service-name filter into a destination where it would
+ * yield undesired side effects.
  *
  * Relies on `useAnyOfApmParams` and will throw if called outside a matching
  * APM map route — callers must mount inside `ServiceMapGraph`, which is
@@ -40,6 +41,8 @@ export function useServiceMapTabHrefBuilder(tab: ServiceMapTab): (serviceName: s
   const routePath = useApmRoutePath();
   const { query } = useAnyOfApmParams(
     '/service-map',
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map',
     '/services/{serviceName}/overview',
     '/mobile-services/{serviceName}/overview',
     '/services/{serviceName}/transactions/view',

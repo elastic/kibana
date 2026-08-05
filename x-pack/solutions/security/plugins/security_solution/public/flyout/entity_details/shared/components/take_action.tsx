@@ -17,7 +17,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
-import { useShowTimeline } from '../../../../common/utils/timeline/use_show_timeline';
 
 interface TakeActionProps {
   kqlQuery: string;
@@ -39,8 +38,6 @@ export const TakeAction = ({ kqlQuery, isDisabled, additionalItems }: TakeAction
   const closePopover = useCallback(() => {
     setPopoverOpen(false);
   }, []);
-
-  const [showTimeline] = useShowTimeline();
 
   const last30MinRange = normalizeTimeRange({
     kind: 'absolute',
@@ -89,22 +86,14 @@ export const TakeAction = ({ kqlQuery, isDisabled, additionalItems }: TakeAction
     </EuiButton>
   );
   const actionsItems = [
-    ...(showTimeline
-      ? [
-          <InvestigateInTimeline
-            key="investigateInTimeline"
-            investigateInTimelineFn={openTimelineCallback}
-            setIsLoading={setIsLoading}
-            closePopover={closePopover}
-          />,
-        ]
-      : []),
+    <InvestigateInTimeline
+      key="investigateInTimeline"
+      investigateInTimelineFn={openTimelineCallback}
+      setIsLoading={setIsLoading}
+      closePopover={closePopover}
+    />,
     ...(additionalItems?.(closePopover) ?? []),
   ];
-
-  if (actionsItems.length === 0) {
-    return null;
-  }
 
   return (
     <EuiPopover

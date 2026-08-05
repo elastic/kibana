@@ -7,15 +7,16 @@
 
 import { createHash } from 'crypto';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ConversationOriginType } from '@kbn/agent-builder-common';
+import { ConversationOriginType, ExecutionStatus } from '@kbn/agent-builder-common';
 import { of } from 'rxjs';
-import { internalApiPath, publicApiPath } from '../../common/constants';
+import { internalApiPath } from '../../common/constants';
 import {
   callbackConversePayloadSchema,
   conversePayloadSchema,
   promptResponseEntrySchema,
   registerChatRoutes,
 } from './chat';
+import { isChatCallbackRequestBodyPayload } from '../../common/http_api/chat_callback';
 
 describe('promptResponseEntrySchema', () => {
   it('accepts the confirmation variant', () => {
@@ -80,55 +81,6 @@ describe('conversePayloadSchema', () => {
       })
     ).toThrow(/access_mode/);
   });
-
-  it('accepts configuration_overrides with skill_ids', () => {
-    expect(() =>
-      conversePayloadSchema.validate({
-        input: 'Hello',
-        configuration_overrides: {
-          skill_ids: ['skill-a', 'skill-b'],
-        },
-      })
-    ).not.toThrow();
-  });
-
-  it('rejects configuration_overrides.skill_ids exceeding 100 entries', () => {
-    expect(() =>
-      conversePayloadSchema.validate({
-        input: 'Hello',
-        configuration_overrides: {
-          skill_ids: Array.from({ length: 101 }, (_, i) => `skill-${i}`),
-        },
-      })
-    ).toThrow(/skill_ids/);
-  });
-
-  it('accepts configuration_overrides with enable_elastic_capabilities true', () => {
-    expect(() =>
-      conversePayloadSchema.validate({
-        input: 'Hello',
-        configuration_overrides: { enable_elastic_capabilities: true },
-      })
-    ).not.toThrow();
-  });
-
-  it('accepts configuration_overrides with enable_elastic_capabilities false', () => {
-    expect(() =>
-      conversePayloadSchema.validate({
-        input: 'Hello',
-        configuration_overrides: { enable_elastic_capabilities: false },
-      })
-    ).not.toThrow();
-  });
-
-  it('rejects configuration_overrides.enable_elastic_capabilities when not a boolean', () => {
-    expect(() =>
-      conversePayloadSchema.validate({
-        input: 'Hello',
-        configuration_overrides: { enable_elastic_capabilities: 'yes' },
-      })
-    ).toThrow(/enable_elastic_capabilities/);
-  });
 });
 
 describe('callbackConversePayloadSchema', () => {
@@ -141,7 +93,7 @@ describe('callbackConversePayloadSchema', () => {
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
     },
     callback: {
-      url: 'https://callback.example.com/events?token=abc',
+      url: 'https://relay.example.com/events?token=abc',
     },
   };
 
@@ -217,7 +169,7 @@ describe('callbackConversePayloadSchema', () => {
       callbackConversePayloadSchema.validate({
         ...basePayload,
         callback: {
-          url: `https://callback.example.com/events?token=${'x'.repeat(2048)}`,
+          url: `https://relay.example.com/events?token=${'x'.repeat(2048)}`,
         },
       })
     ).toThrow(/url/);
@@ -228,7 +180,7 @@ describe('callbackConversePayloadSchema', () => {
       callbackConversePayloadSchema.validate({
         ...basePayload,
         callback: {
-          url: 'ftp://callback.example.com/events',
+          url: 'ftp://relay.example.com/events',
         },
       })
     ).toThrow(/url/);
@@ -259,6 +211,11 @@ describe('callbackConversePayloadSchema', () => {
         execution_idempotency_key: 'x'.repeat(257),
       })
     ).toThrow(/execution_idempotency_key/);
+  });
+
+  it('identifies callback request payloads', () => {
+    expect(isChatCallbackRequestBodyPayload(basePayload)).toBe(true);
+    expect(isChatCallbackRequestBodyPayload({ agent_id: 'agent-1', input: 'Hello' })).toBe(false);
   });
 });
 
@@ -364,7 +321,7 @@ describe('registerChatRoutes', () => {
           execution_idempotency_key: 'Ev0PV23K4AB1',
           origin,
           callback: {
-            url: 'https://callback.example.com/events?token=abc',
+            url: 'https://relay.example.com/events?token=abc',
           },
         },
       },
@@ -373,11 +330,9 @@ describe('registerChatRoutes', () => {
 
     expect(result).toEqual({
       status: 202,
-      payload: { execution_id: 'execution-1' },
+      payload: { execution_id: 'execution-1', status: ExecutionStatus.scheduled },
     });
-    expect(validateCallbackUrl).toHaveBeenCalledWith(
-      'https://callback.example.com/events?token=abc'
-    );
+    expect(validateCallbackUrl).toHaveBeenCalledWith('https://relay.example.com/events?token=abc');
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
         useTaskManager: true,
@@ -385,7 +340,7 @@ describe('registerChatRoutes', () => {
           conversationId: undefined,
           origin,
           callback: {
-            url: 'https://callback.example.com/events?token=abc',
+            url: 'https://relay.example.com/events?token=abc',
           },
         }),
       })
@@ -457,7 +412,7 @@ describe('registerChatRoutes', () => {
             external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
           },
           callback: {
-            url: 'https://callback.example.com/events?token=abc',
+            url: 'https://relay.example.com/events?token=abc',
           },
         },
       },
@@ -466,7 +421,7 @@ describe('registerChatRoutes', () => {
 
     expect(result).toEqual({
       status: 202,
-      payload: { execution_id: 'execution-1' },
+      payload: { execution_id: 'execution-1', status: ExecutionStatus.scheduled },
     });
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -559,7 +514,7 @@ describe('registerChatRoutes', () => {
             external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
           },
           callback: {
-            url: 'https://callback.example.com/events?token=abc',
+            url: 'https://relay.example.com/events?token=abc',
           },
         },
       },
@@ -570,6 +525,7 @@ describe('registerChatRoutes', () => {
       status: 202,
       payload: {
         execution_id: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
+        status: ExecutionStatus.scheduled,
       },
     });
     expect(executeAgent).toHaveBeenCalledWith(
@@ -658,120 +614,5 @@ describe('registerChatRoutes', () => {
       },
     });
     expect(executeAgent).not.toHaveBeenCalled();
-  });
-
-  describe('skill_ids override validation', () => {
-    const conversePath = `${publicApiPath}/converse`;
-
-    const buildRouter = (onConverse: (handler: Function) => void) => ({
-      versioned: {
-        post: jest.fn().mockImplementation((config: { path: string }) => ({
-          addVersion: jest.fn().mockImplementation((_versionConfig: unknown, handler: Function) => {
-            if (config.path === conversePath) {
-              onConverse(handler);
-            }
-          }),
-        })),
-      },
-    });
-
-    const baseContext = {
-      core: Promise.resolve({}),
-      licensing: Promise.resolve({
-        license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
-      }),
-      agentBuilder: Promise.resolve({
-        spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
-      }),
-    };
-
-    it('rejects unknown skill ids with a 400', async () => {
-      let converseHandler: Function | undefined;
-      const executeAgent = jest.fn();
-      const skillRegistry = { bulkGet: jest.fn().mockResolvedValue(new Map()) };
-
-      const router = buildRouter((h) => {
-        converseHandler = h;
-      });
-
-      registerChatRoutes({
-        router,
-        getInternalServices: jest.fn().mockReturnValue({
-          execution: { executeAgent },
-          skills: { getRegistry: jest.fn().mockResolvedValue(skillRegistry) },
-        }),
-        coreSetup: {} as never,
-        pluginsSetup: {},
-        logger: loggingSystemMock.createLogger(),
-      } as never);
-
-      const response = {
-        ok: jest.fn(),
-        customError: jest.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
-        forbidden: jest.fn(),
-        notFound: jest.fn(),
-      };
-
-      const result = await converseHandler!(
-        baseContext,
-        {
-          body: {
-            agent_id: 'agent-1',
-            input: 'Hello',
-            configuration_overrides: { skill_ids: ['unknown-skill'] },
-          },
-        },
-        response
-      );
-
-      expect(result).toMatchObject({ status: 400 });
-      expect(result.payload.message).toMatch(/unknown-skill/);
-      expect(executeAgent).not.toHaveBeenCalled();
-    });
-
-    it('proceeds when all skill ids are known', async () => {
-      let converseHandler: Function | undefined;
-      const executeAgent = jest.fn().mockResolvedValue({ events$: of() });
-      const skillRegistry = {
-        bulkGet: jest.fn().mockResolvedValue(new Map([['known-skill', { id: 'known-skill' }]])),
-      };
-
-      const router = buildRouter((h) => {
-        converseHandler = h;
-      });
-
-      registerChatRoutes({
-        router,
-        getInternalServices: jest.fn().mockReturnValue({
-          execution: { executeAgent },
-          skills: { getRegistry: jest.fn().mockResolvedValue(skillRegistry) },
-        }),
-        coreSetup: {} as never,
-        pluginsSetup: {},
-        logger: loggingSystemMock.createLogger(),
-      } as never);
-
-      const response = {
-        ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
-        customError: jest.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
-        forbidden: jest.fn(),
-        notFound: jest.fn(),
-      };
-
-      await converseHandler!(
-        baseContext,
-        {
-          body: {
-            agent_id: 'agent-1',
-            input: 'Hello',
-            configuration_overrides: { skill_ids: ['known-skill'] },
-          },
-        },
-        response
-      );
-
-      expect(skillRegistry.bulkGet).toHaveBeenCalledWith(['known-skill']);
-      expect(executeAgent).toHaveBeenCalled();
-    });
   });
 });

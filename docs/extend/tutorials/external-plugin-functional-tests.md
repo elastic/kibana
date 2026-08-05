@@ -82,4 +82,4 @@ node ../../kibana/scripts/functional_test_runner
 
 ## Using esArchiver [_using_esarchiver]
 
-We’re working on documentation for this, but for now the best place to look is the original [issue](https://github.com/elastic/kibana/issues/10359).
+We’re working on documentation for this, but for now the best place to look is the original [pull request](https://github.com/elastic/kibana/issues/10359).

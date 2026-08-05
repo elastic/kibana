@@ -22,41 +22,21 @@ export type ServiceMapEsQueryState = ServiceMapEsQuery | null | undefined;
 interface ServiceMapSearchContextValue {
   esQuery: ServiceMapEsQueryState;
   setEsQuery: (q: ServiceMapEsQuery) => void;
-  highlightedServiceNames: string[];
-  setHighlightedServiceNames: (names: string[]) => void;
 }
 
 const ServiceMapSearchContext = createContext<ServiceMapSearchContextValue>({
   esQuery: undefined,
   setEsQuery: () => {},
-  highlightedServiceNames: [],
-  setHighlightedServiceNames: () => {},
 });
 
 export function ServiceMapSearchProvider({ children }: { children: React.ReactNode }) {
   const [esQuery, setEsQueryState] = useState<ServiceMapEsQueryState>(null);
-  const [highlightedServiceNames, setHighlightedServiceNamesState] = useState<string[]>([]);
 
   const setEsQuery = useCallback((q: ServiceMapEsQuery) => {
     setEsQueryState(q);
   }, []);
 
-  const setHighlightedServiceNames = useCallback((names: string[]) => {
-    setHighlightedServiceNamesState((prev) => {
-      if (prev.length === names.length) {
-        const prevSet = new Set(prev);
-        if (names.every((name) => prevSet.has(name))) {
-          return prev;
-        }
-      }
-      return names;
-    });
-  }, []);
-
-  const value = useMemo(
-    () => ({ esQuery, setEsQuery, highlightedServiceNames, setHighlightedServiceNames }),
-    [esQuery, setEsQuery, highlightedServiceNames, setHighlightedServiceNames]
-  );
+  const value = useMemo(() => ({ esQuery, setEsQuery }), [esQuery, setEsQuery]);
 
   return (
     <ServiceMapSearchContext.Provider value={value}>{children}</ServiceMapSearchContext.Provider>

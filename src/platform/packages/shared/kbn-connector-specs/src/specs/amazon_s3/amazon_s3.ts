@@ -39,7 +39,7 @@ export const AmazonS3: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   auth: {
     types: ['aws_credentials'],

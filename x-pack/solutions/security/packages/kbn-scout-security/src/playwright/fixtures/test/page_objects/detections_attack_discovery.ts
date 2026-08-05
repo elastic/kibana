@@ -9,6 +9,7 @@ import type { Locator, ScoutPage, ScoutTestConfig } from '@kbn/scout';
 
 const PAGE_URL = 'securitySolutionUI';
 const ATTACKS_PAGE_URL = 'security/attacks';
+const ATTACK_DISCOVERY_PAGE_URL = 'security/attack_discovery';
 const STATEFUL_ALERTS_NAV_ITEM_SELECTOR = 'solutionSideNavItemLink-alerts';
 const STATEFUL_DETECTIONS_NAV_ITEM_SELECTOR = 'solutionSideNavItemLink-alert_detections';
 const STATEFUL_DETECTIONS_NAV_ITEM_BUTTON_SELECTOR = 'solutionSideNavItemButton-alert_detections';
@@ -185,6 +186,11 @@ export class DetectionsAttackDiscoveryPage {
     // appear after the main content tree. SiemSearchBar also skips rendering until index patterns
     // are ready. Waiting here avoids races that show up on slower CI but not locally.
     await this.attacksPageSearchBar.waitFor({ state: 'visible', timeout: 30_000 });
+  }
+
+  async navigateToAttackDiscoveryPage() {
+    await this.page.gotoApp(ATTACK_DISCOVERY_PAGE_URL);
+    await this.runButton.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async expandDetectionsSection() {

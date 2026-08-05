@@ -96,17 +96,6 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
         validateEsqlQueryForStreamOrThrow({ esqlQuery: '{{INVALID ESQL}}', stream })
       ).toThrow(expect.objectContaining({ statusCode: 400 }));
     });
-
-    it('should fail closed on parser errors even when a valid FROM is present', () => {
-      const stream = createWiredStreamDefinition('logs');
-
-      expect(() =>
-        validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs, logs.* | WHERE message == "unterminated',
-          stream,
-        })
-      ).toThrow('Invalid ES|QL query');
-    });
   });
 
   describe('FROM clause validation', () => {
@@ -133,7 +122,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs, logs.*',
+          esqlQuery: 'FROM logs, logs.* METADATA _id, _source',
           stream,
         })
       ).not.toThrow();
@@ -144,7 +133,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs.*, logs',
+          esqlQuery: 'FROM logs.*, logs METADATA _id, _source',
           stream,
         })
       ).toThrow('ES|QL query must use FROM logs, logs.*');
@@ -155,7 +144,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs',
+          esqlQuery: 'FROM logs METADATA _id, _source',
           stream,
         })
       ).toThrow('ES|QL query must use FROM logs, logs.*');
@@ -166,7 +155,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs.*',
+          esqlQuery: 'FROM logs.* METADATA _id, _source',
           stream,
         })
       ).toThrow('ES|QL query must use FROM logs, logs.*');
@@ -177,7 +166,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM metrics, metrics.*',
+          esqlQuery: 'FROM metrics, metrics.* METADATA _id, _source',
           stream,
         })
       ).toThrow('ES|QL query must use FROM logs, logs.*');
@@ -190,7 +179,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM metrics-custom',
+          esqlQuery: 'FROM metrics-custom METADATA _id, _source',
           stream,
         })
       ).not.toThrow();
@@ -201,7 +190,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM metrics-custom, metrics-custom.*',
+          esqlQuery: 'FROM metrics-custom, metrics-custom.* METADATA _id, _source',
           stream,
         })
       ).not.toThrow();
@@ -212,7 +201,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM metrics-custom.*',
+          esqlQuery: 'FROM metrics-custom.* METADATA _id, _source',
           stream,
         })
       ).toThrow(
@@ -225,7 +214,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs',
+          esqlQuery: 'FROM logs METADATA _id, _source',
           stream,
         })
       ).toThrow(
@@ -240,7 +229,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM $.query',
+          esqlQuery: 'FROM $.query METADATA _id, _source',
           stream,
         })
       ).not.toThrow();
@@ -251,7 +240,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM "$.query"',
+          esqlQuery: 'FROM "$.query" METADATA _id, _source',
           stream,
         })
       ).not.toThrow();
@@ -262,7 +251,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM query, query.*',
+          esqlQuery: 'FROM query, query.* METADATA _id, _source',
           stream,
         })
       ).toThrow('ES|QL query must use FROM $.query');
@@ -273,10 +262,56 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
 
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM $.other',
+          esqlQuery: 'FROM $.other METADATA _id, _source',
           stream,
         })
       ).toThrow('ES|QL query must use FROM $.query');
+    });
+  });
+
+  describe('METADATA validation', () => {
+    it('should throw when METADATA is missing entirely', () => {
+      const stream = createWiredStreamDefinition('logs');
+
+      expect(() =>
+        validateEsqlQueryForStreamOrThrow({
+          esqlQuery: 'FROM logs, logs.*',
+          stream,
+        })
+      ).toThrow('ES|QL query METADATA must include both `_id` and `_source`');
+    });
+
+    it('should throw when _id is missing from METADATA', () => {
+      const stream = createWiredStreamDefinition('logs');
+
+      expect(() =>
+        validateEsqlQueryForStreamOrThrow({
+          esqlQuery: 'FROM logs, logs.* METADATA _source',
+          stream,
+        })
+      ).toThrow('ES|QL query METADATA must include both `_id` and `_source`');
+    });
+
+    it('should throw when _source is missing from METADATA', () => {
+      const stream = createWiredStreamDefinition('logs');
+
+      expect(() =>
+        validateEsqlQueryForStreamOrThrow({
+          esqlQuery: 'FROM logs, logs.* METADATA _id',
+          stream,
+        })
+      ).toThrow('ES|QL query METADATA must include both `_id` and `_source`');
+    });
+
+    it('should accept METADATA with both _id and _source', () => {
+      const stream = createWiredStreamDefinition('logs');
+
+      expect(() =>
+        validateEsqlQueryForStreamOrThrow({
+          esqlQuery: 'FROM logs, logs.* METADATA _id, _source',
+          stream,
+        })
+      ).not.toThrow();
     });
   });
 });

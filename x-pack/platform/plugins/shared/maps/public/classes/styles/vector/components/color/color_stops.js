@@ -7,14 +7,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-import {
-  EuiSpacer,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiSpacer, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { removeRow, isColorInvalid } from './color_stops_utils';
 import { i18n } from '@kbn/i18n';
 import { MbValidatedColorPicker } from './mb_validated_color_picker';
@@ -92,35 +85,31 @@ export const ColorStops = ({
           isInvalid: isStopsInvalid(newColorStops),
         });
       };
-      const deleteLabel = i18n.translate('xpack.maps.styles.colorStops.deleteButtonAriaLabel', {
-        defaultMessage: 'Delete',
-      });
       deleteButton = (
-        <EuiToolTip content={deleteLabel} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="trash"
-            color="danger"
-            aria-label={deleteLabel}
-            onClick={onRemove}
-          />
-        </EuiToolTip>
+        <EuiButtonIcon
+          iconType="trash"
+          color="danger"
+          aria-label={i18n.translate('xpack.maps.styles.colorStops.deleteButtonAriaLabel', {
+            defaultMessage: 'Delete',
+          })}
+          title={i18n.translate('xpack.maps.styles.colorStops.deleteButtonLabel', {
+            defaultMessage: 'Delete',
+          })}
+          onClick={onRemove}
+        />
       );
     }
 
-    const addLabel = i18n.translate('xpack.maps.styles.colorStops.addButtonAriaLabel', {
-      defaultMessage: 'Add row',
-    });
     const colorPickerButtons = (
       <div>
         {deleteButton}
-        <EuiToolTip content={addLabel} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="plusCircle"
-            color="primary"
-            aria-label={addLabel}
-            onClick={onAdd}
-          />
-        </EuiToolTip>
+        <EuiButtonIcon
+          iconType="plusCircle"
+          color="primary"
+          aria-label="Add"
+          title="Add"
+          onClick={onAdd}
+        />
       </div>
     );
     return (

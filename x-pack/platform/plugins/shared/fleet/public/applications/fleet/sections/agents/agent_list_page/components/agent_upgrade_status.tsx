@@ -245,7 +245,7 @@ function getStatusComponents(agentUpgradeDetails?: AgentUpgradeDetails) {
         TooltipText: (
           <FormattedMessage
             id="xpack.fleet.agentUpgradeStatusTooltip.upgradeRolledBack"
-            defaultMessage="Upgrade rolled back to previous version."
+            defaultMessage="Upgrade unsuccessful. Rolling back to previous version."
           />
         ),
       };

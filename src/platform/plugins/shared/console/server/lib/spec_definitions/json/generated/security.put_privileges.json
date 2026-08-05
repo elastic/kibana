@@ -11,16 +11,6 @@
         "wait_for"
       ]
     },
-    "data_autocomplete_rules": {
-      "*": {
-        "*": {
-          "actions": [],
-          "application": "",
-          "name": "",
-          "metadata": {}
-        }
-      }
-    },
     "methods": [
       "PUT",
       "POST"

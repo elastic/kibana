@@ -55,7 +55,7 @@ test.describe('deprecation surface', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
   }) => {
     const { featureSettings } = pageObjects;
 
-    await featureSettings.selectGlobalModelExpectingInvalid('OpenAI Davinci - End of Life');
+    await featureSettings.selectGlobalModel('OpenAI Davinci - End of Life');
 
     await expect(featureSettings.eolModelsCallout).toBeVisible();
     await expect(featureSettings.eolModelsCallout).toContainText('OpenAI Davinci');

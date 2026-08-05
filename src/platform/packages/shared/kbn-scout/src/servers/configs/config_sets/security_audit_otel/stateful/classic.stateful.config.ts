@@ -9,13 +9,12 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as defaultConfig } from '../../default/stateful/classic.stateful.config';
-import { securityAuditOtelServerArgs, securityAuditOtelServerEnv } from '../shared';
+import { securityAuditOtelServerArgs } from '../shared';
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     serverArgs: [...defaultConfig.kbnTestServer.serverArgs, ...securityAuditOtelServerArgs],
-    env: { ...defaultConfig.kbnTestServer.env, ...securityAuditOtelServerEnv },
   },
 };

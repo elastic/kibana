@@ -140,7 +140,7 @@ export function VisualizeData({ onboardingId, selectedCreateStackOption, hasExis
                 data-test-subj={`observabilityOnboardingAWSService-${id}`}
                 key={id}
                 id={`${accordionId}_${id}`}
-                icon={<EuiIcon aria-hidden={true} type={logoURL} size="l" />}
+                icon={<EuiIcon type={logoURL} size="l" />}
                 title={title}
                 initialIsOpen={true}
                 borders={

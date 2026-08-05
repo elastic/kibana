@@ -81,9 +81,17 @@ describe('getGapAutoFillSchedulerSO', () => {
     expect(result).toBe(so);
   });
 
-  test('throws when saved objects client throws', async () => {
+  test('audits and throws when saved object has error payload', async () => {
+    const soWithError = {
+      id: 'gap-1',
+      type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+      error: { error: 'err', message: 'Unable to get', statusCode: 404 },
+      attributes: createSchedulerSo(),
+      references: [],
+    };
+
     const getMock = context.unsecuredSavedObjectsClient.get as jest.Mock;
-    getMock.mockRejectedValue(new Error('Unable to get'));
+    getMock.mockResolvedValue(soWithError);
 
     await expect(
       getGapAutoFillSchedulerSO({
@@ -95,5 +103,19 @@ describe('getGapAutoFillSchedulerSO', () => {
     ).rejects.toThrowError('Unable to get');
 
     expect(context.authorization.bulkEnsureAuthorized).not.toHaveBeenCalled();
+
+    expect(context.auditLogger?.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({ action: GapAutoFillSchedulerAuditAction.GET }),
+        error: expect.objectContaining({ message: 'Unable to get' }),
+        kibana: expect.objectContaining({
+          saved_object: expect.objectContaining({
+            type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+            id: 'gap-1',
+            name: 'gap-1',
+          }),
+        }),
+      })
+    );
   });
 });

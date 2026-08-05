@@ -11,18 +11,6 @@
         "0"
       ]
     },
-    "data_autocomplete_rules": {
-      "query": "",
-      "input": "",
-      "return_documents": {
-        "__one_of": [
-          true,
-          false
-        ]
-      },
-      "top_n": "",
-      "task_settings": ""
-    },
     "methods": [
       "POST"
     ],

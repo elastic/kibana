@@ -8,7 +8,6 @@
 import Boom from '@hapi/boom';
 import type {
   SavedObject,
-  SavedObjectErrorResult,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateResponse,
@@ -16,7 +15,6 @@ import type {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
@@ -624,8 +622,8 @@ export class AttachmentService {
     > = [];
 
     for (const so of res.saved_objects) {
-      if (isSavedObjectErrorResult(so)) {
-        validatedAttachments.push(so as unknown as AttachmentSavedObjectTransformed);
+      if (isSOError(so)) {
+        validatedAttachments.push(so as AttachmentSavedObjectTransformed);
       } else if (so.type === CASE_ATTACHMENT_SAVED_OBJECT) {
         successesToMirror.push(so);
         // Restore `attachmentId` for savedObject-backed unified rows; no-op
@@ -856,10 +854,9 @@ export class AttachmentService {
       }
 
       const mergedSavedObjects: Array<
-        | SavedObjectsUpdateResponse<
-            AttachmentPersistedAttributes | UnifiedAttachmentPersistedAttributes
-          >
-        | SavedObjectErrorResult
+        SavedObjectsUpdateResponse<
+          AttachmentPersistedAttributes | UnifiedAttachmentPersistedAttributes
+        >
       > = new Array(comments.length);
 
       // Issue the two bulkUpdate calls in parallel for the mixed-bucket path.
@@ -952,13 +949,11 @@ export class AttachmentService {
     for (let i = 0; i < res.saved_objects.length; i++) {
       const attachment = res.saved_objects[i];
 
-      if (isSavedObjectErrorResult(attachment)) {
+      if (isSOError(attachment)) {
         // Forcing the type here even though it is an error. The client is responsible for
         // determining what to do with the errors
         // TODO: we should fix the return type of this function so that it can return errors
-        validatedAttachments.push(
-          attachment as unknown as SavedObjectsUpdateResponse<AttachmentAttributesV2>
-        );
+        validatedAttachments.push(attachment as SavedObjectsUpdateResponse<AttachmentAttributesV2>);
       } else if (attachment.type === CASE_ATTACHMENT_SAVED_OBJECT) {
         // Saved Objects bulkUpdate may return only the attributes that were sent in the request, not
         // the full merged document. Match single update(): return the validated patch from the request.

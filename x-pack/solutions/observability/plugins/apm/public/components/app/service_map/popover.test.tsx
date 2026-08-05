@@ -55,7 +55,7 @@ jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
 }));
 
 jest.mock('../../../hooks/use_apm_route_path', () => ({
-  useApmRoutePath: () => '/service-map',
+  useApmRoutePath: () => '/services/{serviceName}/service-map',
 }));
 
 // Mock APM router

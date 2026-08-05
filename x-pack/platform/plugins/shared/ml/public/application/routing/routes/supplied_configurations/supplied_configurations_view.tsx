@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
@@ -19,7 +20,7 @@ import {
   getMlManagementBreadcrumb,
   getStackManagementBreadcrumb,
 } from '../../breadcrumbs';
-import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../components/ml_app_header';
+import { MlAppHeader } from '../../../components/ml_app_header';
 
 const SuppliedConfigurations = dynamic(async () => ({
   default: (await import('../../../supplied_configurations/supplied_configurations'))
@@ -43,26 +44,22 @@ export const suppliedConfigurationsRouteFactory = (navigateToApp: NavigateToApp)
 
 const PageWrapper: FC = () => {
   const { context } = useRouteResolver('full', ['canGetJobs'], basicResolvers());
-  const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
 
   return (
     <PageLoader context={context}>
-      <div data-test-subj="mlPageSuppliedConfigurations">
-        <MlAppHeader
-          title={i18n.translate('xpack.ml.suppliedConfigurations.preconfigurecJobsHeader', {
-            defaultMessage: 'Supplied configurations',
-          })}
-          description={i18n.translate(
-            'xpack.ml.suppliedConfigurations.preconfigurecJobsHeaderDescription',
-            {
-              defaultMessage:
-                'This page lists pre-defined anomaly detection job configurations with related Kibana assets.',
-            }
-          )}
-          back={anomalyDetectionJobsBack}
-        />
-        <SuppliedConfigurations />
-      </div>
+      <MlAppHeader
+        title={i18n.translate('xpack.ml.suppliedConfigurations.preconfigurecJobsHeader', {
+          defaultMessage: 'Supplied configurations',
+        })}
+      />
+      <EuiText data-test-subj="mlPageSuppliedConfigurations">
+        {i18n.translate('xpack.ml.suppliedConfigurations.preconfigurecJobsHeaderDescription', {
+          defaultMessage:
+            'This page lists pre-defined anomaly detection job configurations with related Kibana assets.',
+        })}
+      </EuiText>
+      <EuiSpacer />
+      <SuppliedConfigurations />
     </PageLoader>
   );
 };

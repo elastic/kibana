@@ -9,7 +9,6 @@
     "apmCommon": "x-pack/platform/packages/shared/kbn-apm-common",
     "apmUiShared": "src/platform/packages/shared/kbn-apm-ui-shared",
     "apmTypes": "x-pack/platform/packages/shared/kbn-apm-types",
-    "asCodeExport": "src/platform/packages/shared/as-code/export-flyout-component",
     "autocomplete": "x-pack/solutions/security/packages/kbn-securitysolution-autocomplete/src",
     "avcBanner": "src/platform/packages/shared/kbn-avc-banner/src",
     "cases": [
@@ -146,8 +145,7 @@
       "x-pack/solutions/security/packages/kbn-cloud-security-posture",
       "x-pack/solutions/security/packages/navigation",
       "x-pack/solutions/security/packages/side-nav",
-      "x-pack/solutions/security/packages/upselling",
-      "x-pack/solutions/security/packages/distribution-bar"
+      "x-pack/solutions/security/packages/upselling"
     ],
     "sharedPlatformPackages": [
       "x-pack/platform/packages/shared/kbn-cloud-security-posture"

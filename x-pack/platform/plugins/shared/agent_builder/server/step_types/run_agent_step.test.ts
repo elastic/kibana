@@ -11,7 +11,6 @@ import { ChatEventType, createRequestAbortedError } from '@kbn/agent-builder-com
 import {
   AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
   ConfigSchema,
-  InputSchema,
 } from '../../common/step_types/run_agent_step';
 import {
   CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
@@ -406,67 +405,6 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       })
     );
     expect(res.output?.message).toBe('ok');
-  });
-
-  describe('configuration_overrides (InputSchema)', () => {
-    it('accepts configuration_overrides with all optional fields', () => {
-      const parsed = InputSchema.safeParse({
-        message: 'hello',
-        configuration_overrides: {
-          instructions: 'Custom instructions.',
-          tools: [{ tool_ids: ['tool-a', 'tool-b'] }],
-          skill_ids: ['skill-a'],
-        },
-      });
-      expect(parsed.success).toBe(true);
-    });
-
-    it('accepts configuration_overrides with a subset of fields', () => {
-      expect(
-        InputSchema.safeParse({ message: 'hi', configuration_overrides: { skill_ids: ['s1'] } })
-          .success
-      ).toBe(true);
-      expect(
-        InputSchema.safeParse({
-          message: 'hi',
-          configuration_overrides: { instructions: 'override' },
-        }).success
-      ).toBe(true);
-    });
-
-    it('accepts an omitted configuration_overrides field', () => {
-      const parsed = InputSchema.safeParse({ message: 'hello' });
-      expect(parsed.success).toBe(true);
-      if (parsed.success) {
-        expect(parsed.data.configuration_overrides).toBeUndefined();
-      }
-    });
-
-    it('rejects instructions exceeding 2048 characters', () => {
-      const parsed = InputSchema.safeParse({
-        message: 'hello',
-        configuration_overrides: { instructions: 'a'.repeat(2049) },
-      });
-      expect(parsed.success).toBe(false);
-    });
-
-    it('rejects skill_ids list exceeding 50 entries', () => {
-      const parsed = InputSchema.safeParse({
-        message: 'hello',
-        configuration_overrides: { skill_ids: Array.from({ length: 51 }, (_, i) => `s-${i}`) },
-      });
-      expect(parsed.success).toBe(false);
-    });
-
-    it('rejects tools list exceeding 50 entries', () => {
-      const parsed = InputSchema.safeParse({
-        message: 'hello',
-        configuration_overrides: {
-          tools: Array.from({ length: 51 }, (_, i) => ({ tool_ids: [`t-${i}`] })),
-        },
-      });
-      expect(parsed.success).toBe(false);
-    });
   });
 
   describe('connector-id / inference-id', () => {

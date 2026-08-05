@@ -5,44 +5,13 @@
  * 2.0.
  */
 
+import { getPivotDropdownOptions } from '.';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-
-import type { SearchItems } from '../../../../../hooks/use_search_items';
-import type { TransformPivotConfig } from '../../../../../../../common/types/transform';
-import {
-  applyTransformConfigToDefineState,
-  getDefaultStepDefineState,
-  getPivotDropdownOptions,
-} from '.';
 import { FilterAggForm } from './filter_agg/components';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { PercentilesAggForm } from './percentiles_agg/percentiles_form_component';
 
 describe('Transform: Define Pivot Common', () => {
-  test('applyTransformConfigToDefineState() preserves project routing', () => {
-    const transformConfig = {
-      id: 'the-transform-id',
-      source: {
-        index: ['the-source-index'],
-        project_routing: '_alias:*',
-      },
-      dest: {
-        index: 'the-destination-index',
-      },
-      pivot: {
-        group_by: {},
-        aggregations: {},
-      },
-    } as TransformPivotConfig;
-
-    const state = applyTransformConfigToDefineState(
-      getDefaultStepDefineState({} as SearchItems),
-      transformConfig
-    );
-
-    expect(state.projectRouting).toBe('_alias:*');
-  });
-
   test('getPivotDropdownOptions()', () => {
     // The field name includes the characters []> as well as a leading and ending space character
     // which cannot be used for aggregation names. The test results verifies that the characters

@@ -27,12 +27,12 @@ import {
   AlertsSearchBarContextProvider,
   AlertsHeaderSearchBar,
 } from '../../app/alerts_overview';
+import { ServiceMapServiceDetail } from '../../app/service_map';
 import { MobileServiceTemplate } from '../templates/mobile_service_template';
 import { MobileServiceOverview } from '../../app/mobile/service_overview';
 import { MobileTransactionOverview } from '../../app/mobile/transaction_overview';
 import { TransactionDetails } from '../../app/transaction_details';
 import { RedirectToDefaultServiceRouteView } from '../service_detail/redirect_to_default_service_route_view';
-import { RedirectFocusedServiceMapToGlobal } from '../service_detail/redirect_focused_service_map_to_global';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { ErrorGroupDetails } from '../../app/mobile/errors_and_crashes_group_details/error_group_details';
 import { CrashGroupDetails } from '../../app/mobile/errors_and_crashes_group_details/crash_group_details';
@@ -40,6 +40,8 @@ import { MobileErrorCrashesOverview } from '../../app/mobile/errors_and_crashes_
 import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceDashboards } from '../../app/service_dashboards';
 import type { MobileSearchBar } from '../../app/mobile/search_bar';
+import { ServiceMapSearchBar } from '../../app/service_map/service_map_search_bar';
+import { ServiceMapSearchProvider } from '../../app/service_map/service_map_search_context';
 
 const ServiceLogs = dynamic(() =>
   import('../../app/service_logs').then((mod) => ({ default: mod.ServiceLogs }))
@@ -283,9 +285,19 @@ export const mobileServiceDetailRoute = {
           showTimeComparison: true,
         },
       }),
-      '/mobile-services/{serviceName}/service-map': {
-        element: <RedirectFocusedServiceMapToGlobal />,
-      },
+      '/mobile-services/{serviceName}/service-map': page({
+        tabKey: 'service-map',
+        title: i18n.translate('xpack.apm.views.serviceMap.title', {
+          defaultMessage: 'Service map',
+        }),
+        element: <ServiceMapServiceDetail />,
+        customSearchBar: <ServiceMapSearchBar />,
+        contextWrapper: ServiceMapSearchProvider,
+        searchBarOptions: {
+          showTimeComparison: true,
+          showFilterBar: true,
+        },
+      }),
       '/mobile-services/{serviceName}/logs': page({
         tabKey: 'logs',
         title: i18n.translate('xpack.apm.views.logs.title', {

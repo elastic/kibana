@@ -304,117 +304,6 @@ describe('EPM index template install', () => {
       });
     });
 
-    it('should default OTel metrics data streams to time_series index mode', () => {
-      const otelIntegrationPackageInstallContext = {
-        packageInfo: {
-          name: 'supabase',
-          version: '0.1.0',
-          type: 'integration',
-          policy_templates: [
-            {
-              name: 'supabase',
-              title: 'Supabase',
-              inputs: [
-                { type: 'otelcol', title: 'OTel Prometheus', description: 'Collect metrics' },
-              ],
-            },
-          ],
-        },
-        paths: [],
-        archiveIterator: {},
-      } as any as PackageInstallContext;
-
-      const dataStream = {
-        type: 'metrics',
-        dataset: 'supabase.metrics',
-        title: 'Supabase Metrics',
-        release: 'experimental',
-        package: 'supabase',
-        path: 'metrics',
-        ingest_pipeline: 'default',
-        streams: [{ input: 'otelcol', title: 'Supabase Metrics' }],
-      } as RegistryDataStream;
-
-      const { indexTemplate } = prepareTemplate({
-        packageInstallContext: otelIntegrationPackageInstallContext,
-        fieldAssetsMap: new Map(),
-        dataStream,
-        ilmMigrationStatusMap: new Map(),
-      });
-
-      expect(indexTemplate.indexTemplate.template.settings).toEqual({
-        index: { mode: 'time_series' },
-      });
-      expect(indexTemplate.indexTemplate.index_patterns).toEqual([
-        'metrics-supabase.metrics.otel-*',
-      ]);
-    });
-
-    it('should not default OTel non-metrics data streams to time_series index mode', () => {
-      const otelIntegrationPackageInstallContext = {
-        packageInfo: {
-          name: 'integration_otel',
-          version: '1.0.0',
-          type: 'integration',
-          policy_templates: [
-            {
-              name: 'integration_otel',
-              title: 'Integration OTel',
-              inputs: [{ type: 'otelcol', title: 'OTel', description: 'Collect OTel data' }],
-            },
-          ],
-        },
-        paths: [],
-        archiveIterator: {},
-      } as any as PackageInstallContext;
-
-      const dataStream = {
-        type: 'logs',
-        dataset: 'integration_otel.otel_logs',
-        title: 'OTel logs',
-        release: 'experimental',
-        package: 'integration_otel',
-        path: 'otel_logs',
-        ingest_pipeline: 'default',
-        streams: [{ input: 'otelcol', title: 'OTel logs' }],
-      } as RegistryDataStream;
-
-      const { indexTemplate } = prepareTemplate({
-        packageInstallContext: otelIntegrationPackageInstallContext,
-        fieldAssetsMap: new Map(),
-        dataStream,
-        ilmMigrationStatusMap: new Map(),
-      });
-
-      expect(indexTemplate.indexTemplate.template.settings).toEqual({
-        index: {},
-      });
-    });
-
-    it('should not default non-OTel metrics data streams to time_series index mode', () => {
-      const dataStream = {
-        type: 'metrics',
-        dataset: 'package.dataset',
-        title: 'test data stream',
-        release: 'experimental',
-        package: 'package',
-        path: 'path',
-        ingest_pipeline: 'default',
-        streams: [{ input: 'system/metrics', title: 'System metrics' }],
-      } as RegistryDataStream;
-
-      const { indexTemplate } = prepareTemplate({
-        packageInstallContext,
-        fieldAssetsMap: new Map(),
-        dataStream,
-        ilmMigrationStatusMap: new Map(),
-      });
-
-      expect(indexTemplate.indexTemplate.template.settings).toEqual({
-        index: {},
-      });
-    });
-
     it('should set ignore_malformed in settings', () => {
       const dataStream = {
         type: 'logs',
@@ -892,15 +781,11 @@ describe('EPM index template install', () => {
         ],
       } as RegistryDataStream;
 
-      const { componentTemplates, indexTemplate } = prepareTemplate({
+      const { componentTemplates } = prepareTemplate({
         packageInstallContext: otelInputPackageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream,
         ilmMigrationStatusMap: new Map(),
-      });
-
-      expect(indexTemplate.indexTemplate.template.settings).toEqual({
-        index: { mode: 'time_series' },
       });
 
       expect(componentTemplates).toStrictEqual({
@@ -942,7 +827,6 @@ describe('EPM index template install', () => {
               properties: {
                 test_dimension: {
                   type: 'keyword',
-                  time_series_dimension: true,
                 },
               },
             },

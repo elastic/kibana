@@ -8,21 +8,10 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { ensureMetadata } from '@kbn/streams-schema';
 import type { SeedContext, SeededQuery } from '../types';
 import { deterministicId } from '../types';
 
-function toClosedMinuteEpochMs(timestamp: string | number | Date): number {
-  const date = new Date(timestamp);
-  date.setUTCSeconds(0, 0);
-  return date.getTime();
-}
-
-/**
- * Seeds `.rule-events` with MATCH metric-series documents:
- * `{ bucket: epochMs, metric_value }` per closed minute (same shape Alerting
- * persists for ES|QL date columns). Also writes a second overlapping revision
- * for the busiest minute so readers can exercise MAX-per-minute collapse.
- */
 export async function seedAlerts(
   ctx: SeedContext,
   seededQueries: SeededQuery[],
@@ -47,7 +36,7 @@ export async function seedAlerts(
   await esClient.indices.refresh({ index: `${ctx.streamName}*` });
 
   for (const seededQuery of seededQueries) {
-    const queryText = seededQuery.esql;
+    const queryText = ensureMetadata(seededQuery.esql);
 
     const esqlResult = await esClient.esql.query({
       query: queryText,
@@ -66,41 +55,36 @@ export async function seedAlerts(
       continue;
     }
 
-    const countsByBucket = new Map<number, number>();
-    for (const row of rows) {
-      const timestamp = row['@timestamp'] || new Date(failureStartMs).toISOString();
-      const bucket = toClosedMinuteEpochMs(timestamp as string);
-      countsByBucket.set(bucket, (countsByBucket.get(bucket) ?? 0) + 1);
-    }
-
     log.info(
-      `seedAlerts: "${seededQuery.title}" matched ${rows.length} log row(s) → ${countsByBucket.size} minute bucket(s) (rule ${seededQuery.ruleId})`
+      `seedAlerts: "${seededQuery.title}" matched ${rows.length} log row(s) in failure window (rule ${seededQuery.ruleId})`
     );
 
-    let busiestBucket: number | undefined;
-    let busiestCount = -1;
-    for (const [bucket, count] of countsByBucket) {
-      if (count > busiestCount) {
-        busiestBucket = bucket;
-        busiestCount = count;
+    let indexedForQuery = 0;
+    for (const row of rows) {
+      const logDocId = String(row._id ?? '');
+      if (!logDocId) {
+        log.warning(`seedAlerts: skipping row without _id for query "${seededQuery.title}"`);
+        continue;
       }
-    }
+      indexedForQuery += 1;
 
-    for (const [bucket, metricValue] of countsByBucket) {
-      const writeTime = new Date(bucket).toISOString();
-      const alertDocId = deterministicId(String(bucket), seededQuery.ruleId, ctx.space);
+      const alertDocId = deterministicId(logDocId, seededQuery.ruleId, ctx.space);
+      const timestamp = row['@timestamp'] || new Date(failureStartMs).toISOString();
+
+      const originalSource = {
+        _id: logDocId,
+        ...(typeof row._source === 'object' && row._source !== null ? row._source : {}),
+      };
+
       const doc = {
-        '@timestamp': writeTime,
-        scheduled_timestamp: writeTime,
+        '@timestamp': timestamp,
+        scheduled_timestamp: timestamp,
         rule: {
           id: seededQuery.ruleId,
           version: 1,
         },
-        group_hash: deterministicId(String(bucket), seededQuery.ruleId),
-        data: {
-          bucket,
-          metric_value: metricValue,
-        },
+        group_hash: deterministicId(logDocId, seededQuery.ruleId),
+        data: originalSource,
         status: 'breached',
         source: 'internal',
         type: 'signal',
@@ -114,27 +98,12 @@ export async function seedAlerts(
         },
       });
       bulkOps.push(doc);
+    }
 
-      // Overlapping revision: later write-time, higher count (MAX should win).
-      if (bucket === busiestBucket) {
-        const revisionWriteTime = new Date(bucket + 30_000).toISOString();
-        const revisionId = deterministicId(String(bucket), seededQuery.ruleId, ctx.space, 'rev');
-        bulkOps.push({
-          index: {
-            _index: '.rule-events',
-            _id: revisionId,
-          },
-        });
-        bulkOps.push({
-          ...doc,
-          '@timestamp': revisionWriteTime,
-          scheduled_timestamp: revisionWriteTime,
-          data: {
-            bucket,
-            metric_value: metricValue + 1,
-          },
-        });
-      }
+    if (indexedForQuery === 0) {
+      throw new Error(
+        `ESQL returned rows for '${seededQuery.title}' but none had _id — possible causes: METADATA _id not applied, or field mapping drift`
+      );
     }
   }
 
@@ -150,5 +119,5 @@ export async function seedAlerts(
     throw new Error(`Alert bulk indexing failed (${failedItems.length} item(s)): ${reasons}`);
   }
 
-  log.info(`seedAlerts: indexed ${bulkOps.length / 2} metric-series event(s) into .rule-events`);
+  log.info(`seedAlerts: indexed ${bulkOps.length / 2} alert event(s) into .rule-events`);
 }

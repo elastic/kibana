@@ -7,17 +7,6 @@
       "pretty": "__flag__",
       "data": []
     },
-    "data_autocomplete_rules": {
-      "name": "",
-      "size": "",
-      "data": "",
-      "hint": {
-        "uids": [],
-        "labels": {
-          "*": ""
-        }
-      }
-    },
     "methods": [
       "GET",
       "POST"

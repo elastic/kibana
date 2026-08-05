@@ -17,40 +17,9 @@ const allowedProductNames: (ProductName | 'openapi')[] = [
 export const DEFAULT_ELSER = '.elser-2-elasticsearch';
 
 /**
- * Security Labs artifact versions.
- *
- * - Current: `YYYY.MM.DD-HHMMSS` (UTC) — unique per publish so same-day rebuilds
- *   are distinct and lexicographically sortable for "latest".
- * - Legacy: `YYYY.MM.DD` — still accepted so existing CDN artifacts keep working.
+ * Date version pattern for Security Labs artifacts (YYYY.MM.DD)
  */
-const SECURITY_LABS_VERSION_PATTERN = /^\d{4}\.\d{2}\.\d{2}(-\d{6})?$/;
-
-/**
- * Builds a UTC timestamp version for a new Security Labs artifact publish.
- * Example: `2026.07.10-152831`
- */
-export const getSecurityLabsUtcTimestampVersion = (date: Date = new Date()): string => {
-  const pad = (value: number) => String(value).padStart(2, '0');
-  return (
-    `${date.getUTCFullYear()}.` +
-    `${pad(date.getUTCMonth() + 1)}.` +
-    `${pad(date.getUTCDate())}-` +
-    `${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}${pad(date.getUTCSeconds())}`
-  );
-};
-
-/**
- * Derives the legacy `YYYY.MM.DD` version from a timestamp version.
- *
- * Used to publish a second ELSER CDN object for Kibana 9.3/9.4 BWC — those
- * releases only parse date-only names from
- * https://github.com/elastic/kibana/pull/246099. Returns undefined when
- * `version` is already date-only or not a timestamp version.
- */
-export const getSecurityLabsLegacyDateVersion = (version: string): string | undefined => {
-  const match = version.match(/^(\d{4}\.\d{2}\.\d{2})-\d{6}$/);
-  return match?.[1];
-};
+const SECURITY_LABS_VERSION_PATTERN = /^\d{4}\.\d{2}\.\d{2}$/;
 
 export const getArtifactName = ({
   productName,
@@ -100,7 +69,7 @@ export const parseArtifactName = (artifactName: string) => {
 /**
  * Generates the artifact name for Security Labs content.
  * Format: security-labs-{version}[--{inferenceId}].zip
- * Version uses `YYYY.MM.DD-HHMMSS` (UTC), with legacy `YYYY.MM.DD` still supported.
+ * Version uses date format: YYYY.MM.DD
  */
 export const getSecurityLabsArtifactName = ({
   version,
@@ -140,8 +109,8 @@ export const parseSecurityLabsArtifactName = (
     name = name.slice(0, lastDashDash);
   }
 
-  // Current: security-labs-YYYY.MM.DD-HHMMSS ; legacy: security-labs-YYYY.MM.DD
-  const match = name.match(/^security-labs-(\d{4}\.\d{2}\.\d{2}(?:-\d{6})?)$/);
+  // match the pattern security-labs-<version>
+  const match = name.match(/^security-labs-(\d{4}\.\d{2}\.\d{2})$/);
   if (!match) return;
 
   const version = match[1];
@@ -167,8 +136,7 @@ export const getResourceTypeFromArtifactName = (artifactName: string): ResourceT
 };
 
 /**
- * Validates a Security Labs version string.
- * Accepts `YYYY.MM.DD-HHMMSS` (UTC) and legacy `YYYY.MM.DD`.
+ * Validates a Security Labs version string (YYYY.MM.DD format).
  */
 export const isValidSecurityLabsVersion = (version: string): boolean => {
   return SECURITY_LABS_VERSION_PATTERN.test(version);

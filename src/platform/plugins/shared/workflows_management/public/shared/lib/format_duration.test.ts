@@ -56,8 +56,8 @@ describe('formatDuration', () => {
   });
 
   describe('boundary conditions', () => {
-    it('formats 0 ms as 0ms', () => {
-      expect(formatDuration(0)).toBe('0ms');
+    it('returns empty string for 0 ms', () => {
+      expect(formatDuration(0)).toBe('');
     });
 
     it('formats exactly one week', () => {

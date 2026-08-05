@@ -85,7 +85,7 @@ describe('discover session API transforms', () => {
     ],
   };
 
-  const expectedControlGroup = {
+  const expectedControlGroupJson = JSON.stringify({
     'control-1': {
       order: 0,
       type: ESQL_CONTROL,
@@ -98,7 +98,7 @@ describe('discover session API transforms', () => {
       selected_options: ['bar'],
       single_select: true,
     },
-  };
+  });
 
   describe('transform out', () => {
     it('maps saved object attributes to API data', () => {
@@ -157,7 +157,7 @@ describe('discover session API transforms', () => {
               usesAdHocDataView: true,
               kibanaSavedObjectMeta: {
                 searchSourceJSON:
-                  '{"query":{"query":"","language":"kuery"},"filter":[],"index":{"title":"logs*,-logstash*,filebeat-*","timeFieldName":"@timestamp","allowHidden":false,"name":"logs*,-logstash*,filebeat-*"}}',
+                  '{"query":{"query":"","language":"kuery"},"filter":[],"index":{"title":"logs*,-logstash*,filebeat-*","timeFieldName":"@timestamp","allowHidden":false}}',
               },
               viewMode: VIEW_MODE.DOCUMENT_LEVEL,
               hideAggregatedPreview: false,
@@ -273,10 +273,7 @@ describe('discover session API transforms', () => {
           state: { foo: 'bar' },
         },
       });
-      // Order of the control group JSON is not guaranteed, so we need to parse it and compare the objects
-      expect(JSON.parse(attributes.tabs[1].attributes.controlGroupJson!)).toEqual(
-        expectedControlGroup
-      );
+      expect(attributes.tabs[1].attributes.controlGroupJson).toBe(expectedControlGroupJson);
       expect(references).toContainEqual({
         name: 'tab_tab-classic.kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
@@ -467,22 +464,8 @@ describe('discover session API transforms', () => {
       ).attributes;
       const expected = transformDiscoverSessionIn(discoverSessionApiData).attributes;
 
-      // `controlGroupJson` is a serialized string whose key order isn't guaranteed,
-      // so ignore it on each tab for the structural comparison.
-      const omitTabsControlGroupJson = (attributes: typeof reverted) => ({
-        ...attributes,
-        tabs: attributes.tabs.map(({ attributes: { controlGroupJson, ...tabAttrs }, ...tab }) => ({
-          ...tab,
-          attributes: tabAttrs,
-        })),
-      });
-
-      expect(omitTabsControlGroupJson(reverted)).toEqual(omitTabsControlGroupJson(expected));
+      expect(reverted).toEqual(expected);
       expect(reverted.tabs[0].attributes.controlGroupJson).toBeUndefined();
-      // Order of the control group JSON is not guaranteed, so we need to parse it and compare the objects
-      expect(JSON.parse(reverted.tabs[1].attributes.controlGroupJson!)).toEqual(
-        JSON.parse(expected.tabs[1].attributes.controlGroupJson!)
-      );
       expect(reverted.tabs[1].attributes.usesAdHocDataView).toBe(false);
     });
   });
@@ -495,9 +478,13 @@ describe('discover session API transforms', () => {
     expect(roundTripped).toMatchObject(apiData);
     expect(roundTripped.tabs[0]).toMatchObject({
       column_order: [],
+      density: 'compact',
+      header_row_height: 3,
     });
     expect(roundTripped.tabs[1]).toMatchObject({
       column_order: [],
+      density: 'compact',
+      header_row_height: 3,
       control_panels: [
         {
           width: 'medium',
@@ -505,15 +492,6 @@ describe('discover session API transforms', () => {
         },
       ],
     });
-
-    expect(roundTripped.tabs[0].density).toBeUndefined();
-    expect(roundTripped.tabs[0].header_row_height).toBeUndefined();
-    expect(roundTripped.tabs[1].density).toBeUndefined();
-    expect(roundTripped.tabs[1].header_row_height).toBeUndefined();
-    expect(reverted.attributes.tabs[0].attributes.density).toBeUndefined();
-    expect(reverted.attributes.tabs[0].attributes.headerRowHeight).toBeUndefined();
-    expect(reverted.attributes.tabs[1].attributes.density).toBeUndefined();
-    expect(reverted.attributes.tabs[1].attributes.headerRowHeight).toBeUndefined();
     expect(reverted.attributes.tabs[0].attributes.visContext).toEqual({
       suggestionType: UnifiedHistogramSuggestionType.histogramForDataView,
       requestData: {
@@ -526,10 +504,7 @@ describe('discover session API transforms', () => {
         state: { foo: 'bar' },
       },
     });
-    // Order of the control group JSON is not guaranteed, so we need to parse it and compare the objects
-    expect(JSON.parse(reverted.attributes.tabs[1].attributes.controlGroupJson!)).toEqual(
-      expectedControlGroup
-    );
+    expect(reverted.attributes.tabs[1].attributes.controlGroupJson).toBe(expectedControlGroupJson);
     expect(reverted.references).toEqual(references);
   });
 });

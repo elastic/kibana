@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiComboBoxObject, Locator, ScoutPage } from '@kbn/scout';
+import type { KbnComboBoxObject, Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 type LinksLayoutType = 'horizontal' | 'vertical';
@@ -28,7 +28,7 @@ export class DashboardLinks {
   // Link types
   private readonly dashboardLinkRadioBtn: Locator;
   private readonly externalLinkRadioBtn: Locator;
-  private readonly dashboardLinkComboBox: EuiComboBoxObject;
+  private readonly dashboardLinkComboBox: KbnComboBoxObject;
   private readonly externalLinkInput: Locator;
 
   // Links panel

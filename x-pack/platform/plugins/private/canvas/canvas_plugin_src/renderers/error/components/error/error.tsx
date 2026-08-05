@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { KbnDangerCallout } from '@kbn/ui-callout';
+import { EuiButtonIcon, EuiCallOut, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { ShowDebugging } from './show_debugging';
@@ -33,24 +33,38 @@ const strings = {
 export const Error: FC<Props> = ({ payload, onClose }) => {
   const message = payload.error?.message;
 
-  return (
-    <KbnDangerCallout
-      css={{ maxWidth: 500 }}
-      title={strings.getTitle()}
-      text={message ? strings.getDescription() : ''}
-      onDismiss={onClose}
-      dismissButtonProps={{
-        'aria-label': i18n.translate('xpack.canvas.errorComponent.dismissErrorAriaLabel', {
-          defaultMessage: 'Dismiss error',
-        }),
-      }}
+  const CloseIconButton = () => (
+    <EuiToolTip
+      content={i18n.translate('xpack.canvas.errorComponent.dismissErrorAriaLabel', {
+        defaultMessage: 'Dismiss error',
+      })}
+      disableScreenReaderOutput
     >
+      <EuiButtonIcon
+        color="danger"
+        iconType="cross"
+        onClick={onClose}
+        aria-label={i18n.translate('xpack.canvas.errorComponent.dismissErrorAriaLabel', {
+          defaultMessage: 'Dismiss error',
+        })}
+      />
+    </EuiToolTip>
+  );
+
+  return (
+    <EuiCallOut
+      css={{ maxWidth: 500 }}
+      color="danger"
+      iconType={CloseIconButton}
+      title={strings.getTitle()}
+    >
+      <p>{message ? strings.getDescription() : ''}</p>
       {message && (
         <p style={{ padding: '0 16px' }}>
           <Markdown readOnly>{message}</Markdown>
         </p>
       )}
       <ShowDebugging payload={payload} />
-    </KbnDangerCallout>
+    </EuiCallOut>
   );
 };

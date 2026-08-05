@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiSpacer,
   EuiFlexItem,
@@ -58,9 +57,6 @@ export const TruncatedCopyableText = ({ textToCopy }: { textToCopy: string }) =>
             `}
             onClick={copy}
             type="copy"
-            aria-label={i18n.translate('xpack.csp.findings.findingsFlyout.header.copyToClipboard', {
-              defaultMessage: 'Copy to clipboard',
-            })}
           />
         )}
       </EuiCopy>

@@ -10,8 +10,8 @@ import type { SyntheticEvent } from 'react';
 import { useDispatch } from 'react-redux-v7';
 
 import { EuiLink, EuiText } from '@elastic/eui';
-import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality';
 import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
@@ -44,9 +44,6 @@ import { VIEW_USERS_BY_SEVERITY } from '../../../../entity_analytics/components/
 import { SecurityPageName } from '../../../../app/types';
 import { UsersTableType } from '../../store/model';
 import { useNavigateTo } from '../../../../common/lib/kibana';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
-import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
-import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { UserPanelKey } from '../../../../flyout/entity_details/shared/constants';
 
 const tableType = usersModel.UsersTableType.allUsers;
@@ -212,31 +209,24 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   const { activePage, limit } = useDeepEqualSelector((state) => getUsersSelector(state));
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   const { navigateTo } = useNavigateTo();
-  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
-  const { openUserFlyout } = useFlyoutApi();
 
-  const openUserDetails = useCallback(
+  const openUserFlyout = useCallback(
     (userName: string, entityId: string) => {
-      if (enableNewFlyout) {
-        openUserFlyout({
-          userName,
-          entityId,
-          contextID: tableType,
-          scopeId: tableType,
-          origin: FLYOUT_ORIGIN.USERS_TABLE,
-        });
-        return;
-      }
-
       openFlyout({
         right: {
           id: UserPanelKey,
-          params: { userName, entityId, contextID: tableType, scopeId: tableType },
+          params: {
+            userName,
+            entityId,
+            contextID: tableType,
+            scopeId: tableType,
+            isPreviewMode: false,
+          },
         },
       });
     },
-    [enableNewFlyout, openFlyout, openUserFlyout]
+    [openFlyout]
   );
 
   const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
@@ -298,8 +288,8 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   );
 
   const columns = useMemo(
-    () => getUsersColumns(isPlatinumOrTrialLicense, dispatchSeverityUpdate, openUserDetails),
-    [isPlatinumOrTrialLicense, dispatchSeverityUpdate, openUserDetails]
+    () => getUsersColumns(isPlatinumOrTrialLicense, dispatchSeverityUpdate, openUserFlyout),
+    [isPlatinumOrTrialLicense, dispatchSeverityUpdate, openUserFlyout]
   );
 
   return (

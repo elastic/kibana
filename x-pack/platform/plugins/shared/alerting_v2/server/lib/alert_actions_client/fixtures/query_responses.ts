@@ -37,8 +37,7 @@ const toAlertEventRow = (record: Partial<RawAlertEventRow>): FieldValue[] => [
   record.episode_id ?? 'episode-1',
   record.episode_status === undefined ? 'active' : record.episode_status,
   record.episode_status_count === undefined ? null : record.episode_status_count,
-  // Use explicit undefined-check so callers can pass null to simulate a missing rule_id
-  record.rule_id === undefined ? 'test-rule-id' : record.rule_id,
+  record.rule_id ?? 'test-rule-id',
   record.rule_version ?? 1,
   record.space_id ?? 'default',
   record.status ?? 'breached',

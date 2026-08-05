@@ -16,7 +16,6 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -180,18 +179,13 @@ export const RedirectUriSection = () => {
                   data-test-subj={`${testSubjPrefix}-${field.id}`}
                   append={
                     !isRemote && fields.length > 1 ? (
-                      <EuiToolTip
-                        content={labels.tools.mcpClients.form.removeUriAriaLabel}
-                        disableScreenReaderOutput
-                      >
-                        <EuiButtonIcon
-                          color="danger"
-                          iconType="trash"
-                          aria-label={labels.tools.mcpClients.form.removeUriAriaLabel}
-                          onClick={() => remove(index)}
-                          data-test-subj={`mcpClientRemoveUri-${field.id}`}
-                        />
-                      </EuiToolTip>
+                      <EuiButtonIcon
+                        color="danger"
+                        iconType="trash"
+                        aria-label={labels.tools.mcpClients.form.removeUriAriaLabel}
+                        onClick={() => remove(index)}
+                        data-test-subj={`mcpClientRemoveUri-${field.id}`}
+                      />
                     ) : undefined
                   }
                 />

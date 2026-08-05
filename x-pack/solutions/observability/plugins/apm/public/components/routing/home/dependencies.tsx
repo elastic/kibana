@@ -99,7 +99,6 @@ export const dependencies = {
                 z.literal(TransactionTab.timeline),
                 z.literal(TransactionTab.metadata),
                 z.literal(TransactionTab.logs),
-                z.literal(TransactionTab.genAi),
               ]),
               showCriticalPath: toBooleanFromString,
             })

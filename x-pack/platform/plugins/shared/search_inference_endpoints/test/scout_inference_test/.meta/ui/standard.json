@@ -1,5 +1,5 @@
 {
-  "sha1": "c908418a5a7e7bd4f5fe14ea73b1eacc6aa39f42",
+  "sha1": "7a4f8a5bec99d31a70bc9673a7a6b025093f8981",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -11,12 +11,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 18,
-        "column": 23
+        "line": 25,
+        "column": 7
       }
     },
     {
@@ -25,12 +26,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 21,
-        "column": 38
+        "line": 30,
+        "column": 7
       }
     },
     {
@@ -39,12 +41,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 31,
-        "column": 38
+        "line": 47,
+        "column": 7
       }
     },
     {
@@ -53,12 +56,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 47,
-        "column": 65
+        "line": 66,
+        "column": 7
       }
     },
     {
@@ -67,11 +71,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 63,
+        "line": 85,
         "column": 7
       }
     },
@@ -81,12 +86,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 79,
-        "column": 11
+        "line": 103,
+        "column": 7
       }
     },
     {
@@ -95,12 +101,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 93,
-        "column": 46
+        "line": 126,
+        "column": 7
       }
     },
     {
@@ -109,12 +116,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_empty_state.spec.ts",
-        "line": 20,
-        "column": 7
+        "line": 26,
+        "column": 9
       }
     },
     {
@@ -123,12 +131,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_empty_state.spec.ts",
-        "line": 26,
-        "column": 10
+        "line": 34,
+        "column": 9
       }
     },
     {
@@ -137,12 +146,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_group_by.spec.ts",
-        "line": 21,
-        "column": 7
+        "line": 27,
+        "column": 9
       }
     },
     {
@@ -151,12 +161,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_group_by.spec.ts",
-        "line": 34,
-        "column": 13
+        "line": 46,
+        "column": 9
       }
     },
     {
@@ -165,12 +176,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_header.spec.ts",
-        "line": 21,
-        "column": 7
+        "line": 27,
+        "column": 9
       }
     },
     {
@@ -179,12 +191,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_header.spec.ts",
-        "line": 27,
-        "column": 10
+        "line": 37,
+        "column": 9
       }
     },
     {
@@ -193,12 +206,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_row_actions.spec.ts",
-        "line": 23,
-        "column": 7
+        "line": 29,
+        "column": 9
       }
     },
     {
@@ -207,12 +221,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_row_actions.spec.ts",
-        "line": 29,
-        "column": 10
+        "line": 39,
+        "column": 9
       }
     },
     {
@@ -221,12 +236,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_row_actions.spec.ts",
-        "line": 45,
-        "column": 15
+        "line": 64,
+        "column": 9
       }
     },
     {
@@ -235,12 +251,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_table.spec.ts",
-        "line": 23,
-        "column": 7
+        "line": 29,
+        "column": 9
       }
     },
     {
@@ -249,12 +266,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_table.spec.ts",
-        "line": 38,
-        "column": 13
+        "line": 54,
+        "column": 9
       }
     },
     {
@@ -263,12 +281,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_table.spec.ts",
-        "line": 54,
-        "column": 90
+        "line": 71,
+        "column": 9
       }
     },
     {
@@ -277,12 +296,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_table.spec.ts",
-        "line": 71,
-        "column": 10
+        "line": 90,
+        "column": 9
       }
     },
     {
@@ -291,12 +311,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_table.spec.ts",
-        "line": 83,
-        "column": 15
+        "line": 111,
+        "column": 9
       }
     },
     {
@@ -305,12 +326,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
-        "line": 21,
-        "column": 65
+        "line": 27,
+        "column": 7
       }
     },
     {
@@ -319,12 +341,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
-        "line": 27,
-        "column": 8
+        "line": 34,
+        "column": 7
       }
     },
     {
@@ -333,12 +356,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
-        "line": 38,
-        "column": 44
+        "line": 53,
+        "column": 7
       }
     },
     {
@@ -347,12 +371,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
-        "line": 44,
-        "column": 94
+        "line": 65,
+        "column": 7
       }
     },
     {
@@ -361,12 +386,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
-        "line": 61,
-        "column": 11
+        "line": 89,
+        "column": 7
       }
     },
     {
@@ -375,12 +401,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
-        "line": 89,
-        "column": 8
+        "line": 120,
+        "column": 7
       }
     },
     {
@@ -389,12 +416,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
-        "line": 99,
-        "column": 11
+        "line": 136,
+        "column": 7
       }
     },
     {
@@ -403,12 +431,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 25,
-        "column": 5
+        "line": 32,
+        "column": 7
       }
     },
     {
@@ -417,12 +446,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 32,
-        "column": 71
+        "line": 42,
+        "column": 7
       }
     },
     {
@@ -431,12 +461,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 35,
-        "column": 11
+        "line": 51,
+        "column": 7
       }
     },
     {
@@ -445,12 +476,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 43,
-        "column": 13
+        "line": 63,
+        "column": 7
       }
     },
     {
@@ -459,12 +491,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 51,
-        "column": 8
+        "line": 75,
+        "column": 7
       }
     },
     {
@@ -473,12 +506,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 63,
-        "column": 8
+        "line": 93,
+        "column": 7
       }
     },
     {
@@ -487,12 +521,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 69,
-        "column": 11
+        "line": 105,
+        "column": 7
       }
     },
     {
@@ -501,12 +536,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 76,
-        "column": 11
+        "line": 118,
+        "column": 7
       }
     },
     {
@@ -515,11 +551,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 80,
+        "line": 125,
         "column": 7
       }
     },
@@ -529,12 +566,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 96,
-        "column": 44
+        "line": 146,
+        "column": 7
       }
     },
     {
@@ -543,12 +581,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 103,
-        "column": 5
+        "line": 159,
+        "column": 7
       }
     },
     {
@@ -557,12 +596,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 126,
-        "column": 5
+        "line": 189,
+        "column": 7
       }
     },
     {
@@ -571,12 +611,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 131,
-        "column": 11
+        "line": 198,
+        "column": 7
       }
     },
     {
@@ -585,12 +626,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 149,
-        "column": 44
+        "line": 219,
+        "column": 7
       }
     },
     {
@@ -599,11 +641,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
-        "line": 180,
+        "line": 253,
         "column": 7
       }
     },
@@ -617,8 +660,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation_search_solution.spec.ts",
-        "line": 25,
-        "column": 25
+        "line": 32,
+        "column": 14
       }
     },
     {
@@ -631,8 +674,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation_search_solution.spec.ts",
-        "line": 34,
-        "column": 22
+        "line": 46,
+        "column": 14
       }
     },
     {
@@ -645,8 +688,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation_search_solution.spec.ts",
-        "line": 48,
-        "column": 22
+        "line": 60,
+        "column": 14
       }
     },
     {
@@ -659,8 +702,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
-        "line": 18,
-        "column": 23
+        "line": 25,
+        "column": 7
       }
     },
     {
@@ -673,8 +716,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
-        "line": 29,
-        "column": 13
+        "line": 40,
+        "column": 7
       }
     },
     {
@@ -687,8 +730,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
-        "line": 50,
-        "column": 25
+        "line": 55,
+        "column": 7
       }
     },
     {
@@ -701,8 +744,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
-        "line": 68,
-        "column": 4
+        "line": 70,
+        "column": 7
       }
     },
     {
@@ -715,8 +758,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
-        "line": 87,
-        "column": 16
+        "line": 85,
+        "column": 7
       }
     },
     {
@@ -729,8 +772,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
-        "line": 103,
-        "column": 18
+        "line": 100,
+        "column": 7
       }
     },
     {
@@ -739,12 +782,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 27,
-        "column": 5
+        "line": 34,
+        "column": 7
       }
     },
     {
@@ -753,12 +797,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 29,
-        "column": 38
+        "line": 38,
+        "column": 7
       }
     },
     {
@@ -767,12 +812,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 34,
-        "column": 72
+        "line": 45,
+        "column": 7
       }
     },
     {
@@ -781,12 +827,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 39,
-        "column": 11
+        "line": 55,
+        "column": 7
       }
     },
     {
@@ -795,12 +842,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 56,
-        "column": 11
+        "line": 75,
+        "column": 7
       }
     },
     {
@@ -809,12 +857,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 66,
-        "column": 11
+        "line": 85,
+        "column": 7
       }
     },
     {
@@ -823,11 +872,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 72,
+        "line": 96,
         "column": 7
       }
     },
@@ -837,12 +887,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 76,
-        "column": 38
+        "line": 107,
+        "column": 7
       }
     },
     {
@@ -851,12 +902,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 96,
-        "column": 8
+        "line": 133,
+        "column": 7
       }
     },
     {
@@ -865,12 +917,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 105,
-        "column": 5
+        "line": 150,
+        "column": 7
       }
     },
     {
@@ -879,12 +932,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 116,
-        "column": 11
+        "line": 165,
+        "column": 7
       }
     },
     {
@@ -893,12 +947,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 136,
-        "column": 38
+        "line": 184,
+        "column": 7
       }
     },
     {
@@ -907,12 +962,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 156,
-        "column": 21
+        "line": 208,
+        "column": 7
       }
     },
     {
@@ -921,12 +977,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 171,
-        "column": 21
+        "line": 227,
+        "column": 7
       }
     },
     {
@@ -935,12 +992,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 198,
-        "column": 13
+        "line": 255,
+        "column": 7
       }
     },
     {
@@ -949,12 +1007,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_modal.spec.ts",
-        "line": 227,
-        "column": 8
+        "line": 285,
+        "column": 7
       }
     },
     {
@@ -963,12 +1022,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_privileges.spec.ts",
-        "line": 20,
-        "column": 8
+        "line": 24,
+        "column": 7
       }
     },
     {
@@ -977,12 +1037,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/manage_regions_privileges.spec.ts",
-        "line": 24,
-        "column": 78
+        "line": 32,
+        "column": 7
       }
     },
     {
@@ -991,12 +1052,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 18,
-        "column": 23
+        "line": 25,
+        "column": 7
       }
     },
     {
@@ -1005,12 +1067,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 34,
-        "column": 13
+        "line": 48,
+        "column": 7
       }
     },
     {
@@ -1019,12 +1082,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 49,
-        "column": 38
+        "line": 72,
+        "column": 7
       }
     },
     {
@@ -1033,12 +1097,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 72,
-        "column": 67
+        "line": 97,
+        "column": 7
       }
     },
     {
@@ -1047,12 +1112,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 98,
-        "column": 38
+        "line": 123,
+        "column": 7
       }
     },
     {
@@ -1061,11 +1127,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 114,
+        "line": 142,
         "column": 7
       }
     },
@@ -1075,12 +1142,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 130,
-        "column": 11
+        "line": 161,
+        "column": 7
       }
     },
     {
@@ -1089,12 +1157,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 149,
-        "column": 38
+        "line": 185,
+        "column": 7
       }
     },
     {
@@ -1103,11 +1172,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 162,
+        "line": 198,
         "column": 7
       }
     },
@@ -1117,12 +1187,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@local-stateful-search",
         "@local-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 178,
-        "column": 13
+        "line": 218,
+        "column": 7
       }
     }
   ]

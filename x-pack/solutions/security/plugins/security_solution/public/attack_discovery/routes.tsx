@@ -14,7 +14,6 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildAttackDetailPath } from '../../common/utils/attack_detail_path';
 import { AttackDiscoveryPage } from './pages';
-import { AttackDiscoveryMovedPage } from './pages/attack_discovery_moved';
 
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
@@ -63,7 +62,7 @@ export const AttackDiscoveryRoutes = React.memo((props: RouteComponentProps) => 
   return (
     <PluginTemplateWrapper>
       <SecurityRoutePageWrapper pageName={SecurityPageName.attackDiscovery}>
-        {enableAlertsAndAttacksAlignment ? <AttackDiscoveryMovedPage /> : <AttackDiscoveryPage />}
+        <AttackDiscoveryPage />
       </SecurityRoutePageWrapper>
     </PluginTemplateWrapper>
   );

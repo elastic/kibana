@@ -31,7 +31,6 @@ import {
   type ISavedObjectsSerializer,
   type WithAuditName,
   SavedObjectsErrorHelpers,
-  isSavedObjectErrorResult,
 } from '@kbn/core-saved-objects-server';
 import {
   LEGACY_URL_ALIAS_TYPE,
@@ -219,9 +218,7 @@ export async function internalBulkResolve<T>(
         resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
       }
 
-      // `saved_object` is always successful here; guard is required because
-      // `SavedObjectsResolveResponse.saved_object` is typed as `SavedObjectBulkResult`.
-      if (result && securityExtension && !isSavedObjectErrorResult(result.saved_object)) {
+      if (result && securityExtension) {
         (result.saved_object as WithAuditName<SavedObject>).name = SavedObjectsUtils.getName(
           registry.getNameAttribute(type),
           result.saved_object

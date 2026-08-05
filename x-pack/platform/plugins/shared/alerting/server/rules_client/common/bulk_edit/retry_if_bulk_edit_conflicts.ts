@@ -10,7 +10,6 @@ import { chunk } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import type {
   Logger,
-  SavedObjectErrorResult,
   SavedObjectsBulkUpdateObject,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
@@ -28,7 +27,7 @@ const MaxIdsNumberInRetryFilter = 1000;
 export interface BulkEditOperationResult {
   apiKeysToInvalidate: string[];
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
-  resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule> | SavedObjectErrorResult>;
+  resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
   errors: BulkOperationError[];
   skipped: BulkEditActionSkipResult[];
 }

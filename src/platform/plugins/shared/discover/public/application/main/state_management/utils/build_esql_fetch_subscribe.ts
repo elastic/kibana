@@ -151,6 +151,20 @@ export const buildEsqlFetchSubscribe = ({
       getIndexPatternFromESQLQuery(nextQuery.esql) !==
       getIndexPatternFromESQLQuery(prevEsqlData.query);
 
+    const allColumnsChanged = !isEqual(nextAllColumns, prevEsqlData.allColumns);
+
+    // If the index pattern hasn't changed, but the available columns have changed
+    // due to transformational commands, mark the associated profile state fields to reset
+    if (!indexPatternChanged && allColumnsChanged) {
+      internalState.dispatch(
+        // This reset comes from the current fetch, so keep the same resetId.
+        // Otherwise the snapshot taken at fetch start looks stale when cleanup runs.
+        injectCurrentTab(internalStateActions.setProfileStateFieldsToResetWithoutResetId)({
+          fieldsToReset: ['columns'],
+        })
+      );
+    }
+
     const changeDefaultColumns =
       indexPatternChanged || !isEqual(nextDefaultColumns, prevEsqlData.defaultColumns);
 

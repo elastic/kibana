@@ -261,7 +261,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
     });
     await pageObjects.lens.clearDimensionField();
     const fieldComboBox = page.components.comboBox('indexPattern-dimension-field');
-    expect(await fieldComboBox.getAllVisibleOptions()).not.toHaveLength(0);
+    expect(await fieldComboBox.getAvailableOptions()).not.toHaveLength(0);
     const optionsList = page.getByRole('listbox');
 
     // role="presentation" is EUI's combobox group label — no data-test-subj available

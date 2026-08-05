@@ -5,16 +5,7 @@
  * 2.0.
  */
 
-import {
-  getArtifactName,
-  parseArtifactName,
-  getSecurityLabsArtifactName,
-  parseSecurityLabsArtifactName,
-  getSecurityLabsUtcTimestampVersion,
-  getSecurityLabsLegacyDateVersion,
-  isValidSecurityLabsVersion,
-  DEFAULT_ELSER,
-} from './artifact';
+import { getArtifactName, parseArtifactName, DEFAULT_ELSER } from './artifact';
 
 describe('getArtifactName', () => {
   it('builds the name based on the provided product name and version', () => {
@@ -140,84 +131,5 @@ describe('parseArtifactName', () => {
       productVersion: '8.16',
       inferenceId: '.multilingual-e5-small-elasticsearch',
     });
-  });
-});
-
-describe('getSecurityLabsUtcTimestampVersion', () => {
-  it('formats a UTC timestamp as YYYY.MM.DD-HHMMSS', () => {
-    expect(getSecurityLabsUtcTimestampVersion(new Date('2026-07-10T15:28:31.000Z'))).toBe(
-      '2026.07.10-152831'
-    );
-  });
-});
-
-describe('getSecurityLabsLegacyDateVersion', () => {
-  it('strips the HHMMSS suffix from a timestamp version', () => {
-    expect(getSecurityLabsLegacyDateVersion('2026.07.10-152831')).toBe('2026.07.10');
-  });
-
-  it('returns undefined for date-only or invalid versions', () => {
-    expect(getSecurityLabsLegacyDateVersion('2026.07.10')).toBeUndefined();
-    expect(getSecurityLabsLegacyDateVersion('2026.07.10-1528')).toBeUndefined();
-    expect(getSecurityLabsLegacyDateVersion('not-a-version')).toBeUndefined();
-  });
-});
-
-describe('isValidSecurityLabsVersion', () => {
-  it('accepts legacy date versions and UTC timestamp versions', () => {
-    expect(isValidSecurityLabsVersion('2026.07.10')).toBe(true);
-    expect(isValidSecurityLabsVersion('2026.07.10-152831')).toBe(true);
-  });
-
-  it('rejects invalid versions', () => {
-    expect(isValidSecurityLabsVersion('2026-07-10')).toBe(false);
-    expect(isValidSecurityLabsVersion('2026.07.10-1528')).toBe(false);
-    expect(isValidSecurityLabsVersion('abc')).toBe(false);
-  });
-});
-
-describe('getSecurityLabsArtifactName / parseSecurityLabsArtifactName', () => {
-  it('builds and parses a UTC timestamp version artifact name', () => {
-    expect(
-      getSecurityLabsArtifactName({
-        version: '2026.07.10-152831',
-      })
-    ).toEqual('security-labs-2026.07.10-152831.zip');
-
-    expect(parseSecurityLabsArtifactName('security-labs-2026.07.10-152831.zip')).toEqual({
-      version: '2026.07.10-152831',
-      resourceType: 'security_labs',
-    });
-  });
-
-  it('builds and parses a Jina artifact with a UTC timestamp version', () => {
-    expect(
-      getSecurityLabsArtifactName({
-        version: '2026.07.10-152831',
-        inferenceId: '.jina-embeddings-v5-text-small',
-      })
-    ).toEqual('security-labs-2026.07.10-152831--.jina-embeddings-v5-text-small.zip');
-
-    expect(
-      parseSecurityLabsArtifactName(
-        'security-labs-2026.07.10-152831--.jina-embeddings-v5-text-small.zip'
-      )
-    ).toEqual({
-      version: '2026.07.10-152831',
-      inferenceId: '.jina-embeddings-v5-text-small',
-      resourceType: 'security_labs',
-    });
-  });
-
-  it('still parses legacy date-only artifact names', () => {
-    expect(parseSecurityLabsArtifactName('security-labs-2025.12.12.zip')).toEqual({
-      version: '2025.12.12',
-      resourceType: 'security_labs',
-    });
-  });
-
-  it('sorts timestamp versions after same-day legacy versions', () => {
-    const versions = ['2026.07.10', '2026.07.10-090000', '2026.07.09-235959', '2026.07.10-152831'];
-    expect([...versions].sort().reverse()[0]).toBe('2026.07.10-152831');
   });
 });

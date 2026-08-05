@@ -6,7 +6,7 @@
  */
 
 import { Parser, Walker } from '@elastic/esql';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, hasStatsCommand } from '@kbn/streams-schema';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import { StatusError } from '../errors/status_error';
 
@@ -25,21 +25,12 @@ export function validateEsqlQueryForStreamOrThrow({
   stream: Streams.all.Definition;
 }): void {
   let root: ESQLAstQueryExpression;
-  let parseErrors: ReturnType<typeof Parser.parse>['errors'];
 
   try {
-    ({ root, errors: parseErrors } = Parser.parse(esqlQuery));
+    ({ root } = Parser.parse(esqlQuery));
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new EsqlQueryValidationError(`Invalid ES|QL query: ${message}`);
-  }
-
-  // `Parser.parse` reports syntax errors in `errors` (it does not throw). Fail
-  // closed: an unparseable query would install a rule that breaks on execution.
-  if (parseErrors.length > 0) {
-    throw new EsqlQueryValidationError(
-      `Invalid ES|QL query: ${parseErrors.map((error) => error.message).join('; ')}`
-    );
   }
 
   const fromCmd = Walker.match(root, { type: 'command', name: 'from' });
@@ -68,5 +59,20 @@ export function validateEsqlQueryForStreamOrThrow({
     }
   } else if (!matchesWiredPattern) {
     throw new EsqlQueryValidationError(`ES|QL query must use FROM ${wiredPattern}`);
+  }
+
+  const isStatsQuery = hasStatsCommand(esqlQuery);
+
+  if (!isStatsQuery) {
+    const metadataOption = Walker.match(fromCmd, { type: 'option', name: 'metadata' });
+    const metadataFields = metadataOption
+      ? Walker.matchAll(metadataOption, { type: 'column' }).map((col) => col.name)
+      : [];
+
+    if (!metadataFields.includes('_id') || !metadataFields.includes('_source')) {
+      throw new EsqlQueryValidationError(
+        'ES|QL query METADATA must include both `_id` and `_source`'
+      );
+    }
   }
 }

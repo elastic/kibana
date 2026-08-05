@@ -73,7 +73,7 @@ class LicenseStatus extends React.PureComponent<LicenseStatusProps> {
     let title;
     let message;
     if (isExpired) {
-      icon = <EuiIcon color="danger" type="warning" aria-hidden={true} />;
+      icon = <EuiIcon color="danger" type="warning" />;
       message = (
         <Fragment>
           <FormattedMessage
@@ -95,7 +95,7 @@ class LicenseStatus extends React.PureComponent<LicenseStatusProps> {
         />
       );
     } else {
-      icon = <EuiIcon color="success" type="checkCircleFill" size="l" aria-hidden={true} />;
+      icon = <EuiIcon color="success" type="checkCircleFill" size="l" />;
       message = expiryDate ? (
         <Fragment>
           <FormattedMessage

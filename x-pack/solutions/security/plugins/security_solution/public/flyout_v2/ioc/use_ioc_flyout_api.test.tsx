@@ -40,6 +40,7 @@ jest.mock('../shared/components/flyout_provider', () => ({
 }));
 jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
   useDefaultDocumentFlyoutProperties: jest.fn(() => ({ size: 's' })),
+  defaultToolsFlyoutProperties: { size: 'm' },
 }));
 
 const mockOpenSystemFlyout = jest.fn();

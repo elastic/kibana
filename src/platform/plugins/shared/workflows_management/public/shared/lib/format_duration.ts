@@ -61,8 +61,8 @@ export function formatDuration(durationMs: number): string {
   if (seconds > 0) {
     result += `${seconds}s `;
   }
-  // When no larger units are present, show milliseconds (including 0ms for zero duration)
-  if (!result && milliseconds >= 0) {
+  // hide milliseconds if there are any other units
+  if (!result && milliseconds > 0) {
     result += `${milliseconds}ms`;
   }
   return result;

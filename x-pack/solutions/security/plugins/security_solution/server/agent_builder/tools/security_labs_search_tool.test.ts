@@ -12,9 +12,7 @@ import type {
 } from '@kbn/agent-builder-server/tools';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
-import { ResourceTypes } from '@kbn/product-doc-common';
 import {
   createToolAvailabilityContext,
   createToolHandlerContext,
@@ -109,7 +107,25 @@ describe('securityLabsSearchTool', () => {
   });
 
   describe('handler', () => {
-    it('calls retrieveDocumentation with Security Labs resource type and inference id', async () => {
+    it('enhances query with Security Labs filter', async () => {
+      retrieveDocumentationAvailable.mockResolvedValue(true);
+      retrieveDocumentation.mockResolvedValue({
+        success: true,
+        documents: [],
+      });
+
+      await tool.handler(
+        { query: 'test query' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider,
+          events: mockEvents,
+        })
+      );
+
+      expect(retrieveDocumentation).toHaveBeenCalled();
+    });
+
+    it('calls retrieveDocumentation with correct parameters', async () => {
       retrieveDocumentationAvailable.mockResolvedValue(true);
       const mockDocs = [
         {
@@ -134,144 +150,8 @@ describe('securityLabsSearchTool', () => {
           searchTerm: 'malware analysis',
           max: 3,
           connectorId: 'fake-connector',
-          resourceTypes: [ResourceTypes.securityLabs],
         })
       );
-    });
-
-    it('returns an error result when retrieval fails', async () => {
-      retrieveDocumentationAvailable.mockResolvedValue(true);
-      retrieveDocumentation.mockResolvedValue({
-        success: false,
-        documents: [],
-      });
-
-      const result = (await tool.handler(
-        { query: 'test query' },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider,
-          events: mockEvents as ToolHandlerContext['events'],
-        })
-      )) as ToolHandlerStandardReturn;
-
-      const errorResult = result.results[0] as ErrorResult;
-      expect(errorResult.type).toBe(ToolResultType.error);
-      expect(errorResult.data.message).toContain('Failed to retrieve Security Labs');
-    });
-
-    it('returns empty results when retrieval succeeds with no documents', async () => {
-      retrieveDocumentationAvailable.mockResolvedValue(true);
-      retrieveDocumentation.mockResolvedValue({
-        success: true,
-        documents: [],
-      });
-
-      const result = (await tool.handler(
-        { query: 'test query' },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider,
-          events: mockEvents as ToolHandlerContext['events'],
-        })
-      )) as ToolHandlerStandardReturn;
-
-      expect(result.results).toEqual([]);
-    });
-
-    it('prefers Jina when its endpoint exists and Jina Security Labs docs are installed', async () => {
-      (mockEsClient.asInternalUser.inference.get as unknown as jest.Mock).mockResolvedValue({
-        endpoints: [
-          { inference_id: defaultInferenceEndpoints.ELSER },
-          { inference_id: defaultInferenceEndpoints.JINAv5 },
-        ],
-      });
-      retrieveDocumentationAvailable.mockImplementation(
-        async ({ inferenceId }: { inferenceId: string }) =>
-          inferenceId === defaultInferenceEndpoints.JINAv5
-      );
-      retrieveDocumentation.mockResolvedValue({ success: true, documents: [] });
-
-      await tool.handler(
-        { query: 'malware analysis' },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider,
-          events: mockEvents,
-        })
-      );
-
-      expect(retrieveDocumentation).toHaveBeenCalledWith(
-        expect.objectContaining({ inferenceId: defaultInferenceEndpoints.JINAv5 })
-      );
-    });
-
-    it('falls back to ELSER when no Jina endpoint is available (on-prem)', async () => {
-      (mockEsClient.asInternalUser.inference.get as unknown as jest.Mock).mockResolvedValue({
-        endpoints: [{ inference_id: defaultInferenceEndpoints.ELSER }],
-      });
-      retrieveDocumentationAvailable.mockImplementation(
-        async ({ inferenceId }: { inferenceId: string }) =>
-          inferenceId === defaultInferenceEndpoints.ELSER
-      );
-      retrieveDocumentation.mockResolvedValue({ success: true, documents: [] });
-
-      await tool.handler(
-        { query: 'malware analysis' },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider,
-          events: mockEvents,
-        })
-      );
-
-      expect(retrieveDocumentation).toHaveBeenCalledWith(
-        expect.objectContaining({ inferenceId: defaultInferenceEndpoints.ELSER })
-      );
-    });
-
-    it('returns install guidance when no candidate model has Security Labs installed', async () => {
-      (mockEsClient.asInternalUser.inference.get as unknown as jest.Mock).mockResolvedValue({
-        endpoints: [{ inference_id: defaultInferenceEndpoints.JINAv5 }],
-      });
-      retrieveDocumentationAvailable.mockResolvedValue(false);
-
-      const result = (await tool.handler(
-        { query: 'test query' },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider,
-          events: mockEvents as ToolHandlerContext['events'],
-        })
-      )) as ToolHandlerStandardReturn;
-
-      expect(retrieveDocumentation).not.toHaveBeenCalled();
-      const errorResult = result.results[0] as ErrorResult;
-      expect(errorResult.type).toBe(ToolResultType.error);
-      expect(errorResult.data.message).toContain('not installed');
-      // Must include server.basePath so Agent Builder treats the link as internal.
-      expect(errorResult.data.metadata).toEqual({
-        settingsUrl: '/mock-server-basepath/app/management/ai/genAiSettings',
-      });
-      expect(errorResult.data.message).toContain(
-        '[GenAI Settings](/mock-server-basepath/app/management/ai/genAiSettings)'
-      );
-    });
-
-    it('includes the current space in the GenAI Settings install URL', async () => {
-      (mockEsClient.asInternalUser.inference.get as unknown as jest.Mock).mockResolvedValue({
-        endpoints: [{ inference_id: defaultInferenceEndpoints.JINAv5 }],
-      });
-      retrieveDocumentationAvailable.mockResolvedValue(false);
-
-      const result = (await tool.handler(
-        { query: 'test query' },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider,
-          events: mockEvents as ToolHandlerContext['events'],
-          spaceId: 'security',
-        })
-      )) as ToolHandlerStandardReturn;
-
-      const errorResult = result.results[0] as ErrorResult;
-      expect(errorResult.data.metadata).toEqual({
-        settingsUrl: '/mock-server-basepath/s/security/app/management/ai/genAiSettings',
-      });
     });
 
     it('handles errors', async () => {

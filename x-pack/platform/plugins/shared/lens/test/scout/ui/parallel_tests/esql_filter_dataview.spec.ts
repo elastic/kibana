@@ -121,7 +121,7 @@ spaceTest.describe.skip(
 
           const allOptionTexts = await page.components
             .comboBox('filterIndexPatternsSelect')
-            .getAllVisibleOptions();
+            .getAvailableOptions();
           expect(allOptionTexts.length).toBeGreaterThan(0);
           expect(allOptionTexts).toHaveLength(new Set(allOptionTexts).size);
         });
@@ -172,7 +172,7 @@ spaceTest.describe.skip(
 
           const fieldOptions = await page.components
             .comboBox('filterFieldSuggestionList')
-            .getAllVisibleOptions();
+            .getAvailableOptions();
           expect(fieldOptions.length).toBeGreaterThan(0);
         });
       }

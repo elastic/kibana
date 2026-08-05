@@ -44,10 +44,6 @@ jest.mock('./pages', () => ({
   AttackDiscoveryPage: () => <div data-test-subj="mock-attack-discovery-page" />,
 }));
 
-jest.mock('./pages/attack_discovery_moved', () => ({
-  AttackDiscoveryMovedPage: () => <div data-test-subj="mock-attack-discovery-moved-page" />,
-}));
-
 jest.mock('../common/components/plugin_template_wrapper', () => ({
   PluginTemplateWrapper: ({ children }: { children: React.ReactNode }) => (
     <div data-test-subj="mock-plugin-template-wrapper">{children}</div>
@@ -71,36 +67,29 @@ describe('AttackDiscoveryRoutes', () => {
     (useIdsFromUrl as jest.Mock).mockReturnValue({ ids: [] });
   });
 
-  it('renders the legacy AttackDiscoveryPage when alignment is disabled', () => {
-    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(false);
-
-    render(<AttackDiscoveryRoutes {...mockRouteProps} />);
-
-    expect(screen.getByTestId('mock-attack-discovery-page')).toBeInTheDocument();
-    expect(screen.queryByTestId('mock-attack-discovery-moved-page')).not.toBeInTheDocument();
-    expect(Redirect).not.toHaveBeenCalled();
-  });
-
-  it('renders the AttackDiscoveryMovedPage when alignment is enabled', () => {
-    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(true);
-
-    render(<AttackDiscoveryRoutes {...mockRouteProps} />);
-
-    expect(screen.getByTestId('mock-attack-discovery-moved-page')).toBeInTheDocument();
-    expect(screen.queryByTestId('mock-attack-discovery-page')).not.toBeInTheDocument();
-    expect(Redirect).not.toHaveBeenCalled();
-  });
-
   // The legacy `/attack_discovery` -> Attacks redirect is intentionally disabled
-  // (see ENABLE_LEGACY_ATTACK_DISCOVERY_REDIRECT in routes.tsx), so the route never redirects
-  // even when the URL contains attack ids.
+  // (see ENABLE_LEGACY_ATTACK_DISCOVERY_REDIRECT in routes.tsx). Attack Discovery is now a
+  // permanent top-level page, so the route always renders the page and never redirects,
+  // regardless of the alerts-and-attacks alignment setting.
+  it.each([false, true])(
+    'renders the AttackDiscoveryPage without redirecting when alignment enabled = %s',
+    (alignmentEnabled) => {
+      (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(alignmentEnabled);
+
+      render(<AttackDiscoveryRoutes {...mockRouteProps} />);
+
+      expect(screen.getByTestId('mock-attack-discovery-page')).toBeInTheDocument();
+      expect(Redirect).not.toHaveBeenCalled();
+    }
+  );
+
   it('does not redirect even when the URL contains attack ids', () => {
     (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(true);
     (useIdsFromUrl as jest.Mock).mockReturnValue({ ids: ['attack-id-1', 'attack-id-2'] });
 
     render(<AttackDiscoveryRoutes {...mockRouteProps} />);
 
-    expect(screen.getByTestId('mock-attack-discovery-moved-page')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-attack-discovery-page')).toBeInTheDocument();
     expect(Redirect).not.toHaveBeenCalled();
     expect(buildAttackDetailPath).not.toHaveBeenCalled();
   });

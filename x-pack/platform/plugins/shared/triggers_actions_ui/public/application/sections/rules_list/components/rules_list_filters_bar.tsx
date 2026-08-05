@@ -170,7 +170,7 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
           onQuerySubmit={(kueryNode) => updateFilters({ filter: 'kueryNode', value: kueryNode })}
         />
       )}
-      <EuiFlexGroup gutterSize="s" wrap>
+      <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFieldSearch
             data-test-subj="ruleSearchField"
@@ -212,48 +212,40 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m" wrap>
-        <EuiFlexItem grow={false}>
-          <RulesListStatuses
-            rulesStatuses={rulesStatusesTotal}
-            rulesLastRunOutcomes={rulesLastRunOutcomesTotal}
-          />
-        </EuiFlexItem>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="m" wrap>
-            <EuiFlexItem grow={false}>
-              <RulesListAutoRefresh lastUpdate={lastUpdate} onRefresh={onRefreshRules} />
-            </EuiFlexItem>
-            {rulesStatusesTotal.error > 0 && (
-              <EuiFlexItem grow={false}>
-                <EuiLink
-                  data-test-subj="expandRulesError"
-                  color="primary"
-                  onClick={onToggleRuleErrors}
-                >
-                  {!showErrors && (
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.rulesList.showAllErrors"
-                      defaultMessage="Show {totalStatusesError, plural, one {error} other {errors}}"
-                      values={{
-                        totalStatusesError: rulesStatusesTotal.error,
-                      }}
-                    />
-                  )}
-                  {showErrors && (
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.rulesList.hideAllErrors"
-                      defaultMessage="Hide {totalStatusesError, plural, one {error} other {errors}}"
-                      values={{
-                        totalStatusesError: rulesStatusesTotal.error,
-                      }}
-                    />
-                  )}
-                </EuiLink>
-              </EuiFlexItem>
-            )}
+          <EuiFlexGroup alignItems="center" gutterSize="none">
+            <RulesListStatuses
+              rulesStatuses={rulesStatusesTotal}
+              rulesLastRunOutcomes={rulesLastRunOutcomesTotal}
+            />
+            <RulesListAutoRefresh lastUpdate={lastUpdate} onRefresh={onRefreshRules} />
           </EuiFlexGroup>
         </EuiFlexItem>
+        {rulesStatusesTotal.error > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiLink data-test-subj="expandRulesError" color="primary" onClick={onToggleRuleErrors}>
+              {!showErrors && (
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.rulesList.showAllErrors"
+                  defaultMessage="Show {totalStatusesError, plural, one {error} other {errors}}"
+                  values={{
+                    totalStatusesError: rulesStatusesTotal.error,
+                  }}
+                />
+              )}
+              {showErrors && (
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.rulesList.hideAllErrors"
+                  defaultMessage="Hide {totalStatusesError, plural, one {error} other {errors}}"
+                  values={{
+                    totalStatusesError: rulesStatusesTotal.error,
+                  }}
+                />
+              )}
+            </EuiLink>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );

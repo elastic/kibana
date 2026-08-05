@@ -117,26 +117,26 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const closePopover = () => setPopoverIsOpen(false);
   const popoverTitleId = useGeneratedHtmlId();
-  const metaDataLabel = i18n.translate(
-    'xpack.searchIndexDocuments.result.header.metadata.icon.ariaLabel',
-    { defaultMessage: 'Metadata for document: {id}', values: { id } }
-  );
 
   const metaDataIcon = (
-    <EuiToolTip content={metaDataLabel} disableScreenReaderOutput>
-      <EuiButtonIcon
-        display="empty"
-        size="s"
-        iconType="info"
-        color="primary"
-        data-test-subj="documentMetadataButton"
-        onClick={(e: React.MouseEvent<HTMLElement>) => {
-          e.stopPropagation();
-          setPopoverIsOpen(!popoverIsOpen);
-        }}
-        aria-label={metaDataLabel}
-      />
-    </EuiToolTip>
+    <EuiButtonIcon
+      display="empty"
+      size="s"
+      iconType="info"
+      color="primary"
+      data-test-subj="documentMetadataButton"
+      onClick={(e: React.MouseEvent<HTMLElement>) => {
+        e.stopPropagation();
+        setPopoverIsOpen(!popoverIsOpen);
+      }}
+      aria-label={i18n.translate(
+        'xpack.searchIndexDocuments.result.header.metadata.icon.ariaLabel',
+        {
+          defaultMessage: 'Metadata for document: {id}',
+          values: { id },
+        }
+      )}
+    />
   );
 
   return (

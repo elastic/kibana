@@ -28,34 +28,13 @@ export interface SearchKnowledgeIndicatorsInput {
   kind?: SearchKnowledgeIndicatorsKind[];
 
   /**
-   * Optional feature filters.
+   * Optional safety cap.
    */
-  feature_types?: Array<Feature['type']>;
-  feature_ids?: string[];
-
-  /**
-   * Optional query filters.
-   */
-  query_types?: Array<StreamQuery['type']>;
-  query_ids?: string[];
-  rule_ids?: string[];
-  rule_backed?: boolean;
-
-  /**
-   * One-based result page and page size.
-   */
-  page?: number;
-  per_page?: number;
+  limit?: number;
 }
 
 export interface SearchKnowledgeIndicatorsOutput {
   knowledge_indicators: KnowledgeIndicator[];
-  page: number;
-  per_page: number;
-  returned: number;
-  total: number;
-  has_more: boolean;
-  next_page: number | null;
 }
 
 export type KnowledgeIndicator = KnowledgeIndicatorFeature | KnowledgeIndicatorQuery;

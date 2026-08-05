@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { css } from '@emotion/react';
-import { EuiPageTemplate } from '@elastic/eui';
-import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
-import { createChromeStorybookStart } from '@kbn/core-chrome-browser-mocks';
+import { EuiPageTemplate, EuiTitle } from '@elastic/eui';
 import type { AppHeaderMetadataItems } from '../types';
-import { AppHeaderView } from './app_header';
+import { AppHeaderMetadata } from './app_header_metadata';
+import { AppHeaderShell } from './app_header_shell';
 
 interface AppHeaderMetadataStoryProps {
   title: string;
@@ -24,18 +23,22 @@ interface AppHeaderMetadataStoryProps {
 }
 
 const HeaderWithMetadata = ({ title, metadata, width }: AppHeaderMetadataStoryProps) => {
-  const chrome = useMemo(() => createChromeStorybookStart(), []);
-
   return (
-    <ChromeServiceProvider value={{ chrome }}>
-      <div
-        css={css`
-          width: ${width ? `${width}px` : '100%'};
-        `}
-      >
-        <AppHeaderView title={title} metadata={metadata} sticky={false} />
-      </div>
-    </ChromeServiceProvider>
+    <div
+      css={css`
+        width: ${width ? `${width}px` : '100%'};
+      `}
+    >
+      <AppHeaderShell
+        title={
+          <EuiTitle size="xs">
+            <h1>{title}</h1>
+          </EuiTitle>
+        }
+        metadata={<AppHeaderMetadata metadata={metadata} />}
+        sticky={false}
+      />
+    </div>
   );
 };
 

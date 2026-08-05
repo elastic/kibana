@@ -20,9 +20,6 @@ import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../flyout/entity_details/shared/constants';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
-import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
-import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/types';
 
 type RiskScoreColumn = EuiBasicTableColumn<EntityRiskScoreRecord> & {
   field: keyof EntityRiskScoreRecord;
@@ -39,25 +36,11 @@ const EntityFlyoutLink = ({
   displayName: string;
   entityType: EntityType;
 }) => {
-  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openRightPanel } = useExpandableFlyoutApi();
-  const { openEntityFlyout } = useFlyoutApi();
   const panelKey = EntityPanelKeyByType[entityType];
   const paramName = EntityPanelParamByType[entityType];
 
   const onClick = useCallback(() => {
-    if (enableNewFlyout) {
-      openEntityFlyout({
-        engineType: entityType,
-        entityId,
-        entityName: displayName,
-        contextID: PREVIEW_TABLE_SCOPE_ID,
-        scopeId: PREVIEW_TABLE_SCOPE_ID,
-        origin: FLYOUT_ORIGIN.RISK_SCORE_PREVIEW,
-      });
-      return;
-    }
-
     if (panelKey && paramName) {
       openRightPanel({
         id: panelKey,
@@ -69,18 +52,9 @@ const EntityFlyoutLink = ({
         },
       });
     }
-  }, [
-    displayName,
-    enableNewFlyout,
-    entityId,
-    entityType,
-    openEntityFlyout,
-    openRightPanel,
-    panelKey,
-    paramName,
-  ]);
+  }, [openRightPanel, panelKey, paramName, displayName, entityId]);
 
-  if (!enableNewFlyout && !panelKey) {
+  if (!panelKey) {
     return <>{displayName}</>;
   }
 

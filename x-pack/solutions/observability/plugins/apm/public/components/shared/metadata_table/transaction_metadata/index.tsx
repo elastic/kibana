@@ -12,23 +12,16 @@ import { getSectionsFromFields } from '../helper';
 import { MetadataTable } from '..';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
-interface PrefetchedMetadata {
-  metadata: Record<string, unknown>;
-  isLoading: boolean;
-}
-
 interface Props {
   transaction: Transaction;
-  /** Pre-fetched metadata from the flyout body. When provided the internal fetch is skipped. */
-  prefetchedMetadata?: PrefetchedMetadata;
 }
 
-export function TransactionMetadata({ transaction, prefetchedMetadata }: Props) {
+export function TransactionMetadata({ transaction }: Props) {
   const transactionId = transaction.transaction?.id;
 
   const { data: transactionEvent, status } = useFetcher(
     (callApmApi) => {
-      if (prefetchedMetadata || !transactionId) {
+      if (!transactionId) {
         return;
       }
 
@@ -45,17 +38,12 @@ export function TransactionMetadata({ transaction, prefetchedMetadata }: Props) 
         },
       });
     },
-    [transaction, transactionId, prefetchedMetadata]
+    [transaction, transactionId]
   );
-
-  const isLoading = prefetchedMetadata
-    ? prefetchedMetadata.isLoading
-    : status === FETCH_STATUS.LOADING;
 
   const sections = useMemo(
-    () => getSectionsFromFields(prefetchedMetadata?.metadata ?? transactionEvent?.metadata ?? {}),
-    [prefetchedMetadata, transactionEvent?.metadata]
+    () => getSectionsFromFields(transactionEvent?.metadata || {}),
+    [transactionEvent?.metadata]
   );
-
-  return <MetadataTable sections={sections} isLoading={isLoading} />;
+  return <MetadataTable sections={sections} isLoading={status === FETCH_STATUS.LOADING} />;
 }

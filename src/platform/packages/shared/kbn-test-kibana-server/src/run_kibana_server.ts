@@ -79,15 +79,6 @@ export async function runKibanaServer(options: RunKibanaServerOptions) {
     prefixArgs.unshift('--inspect');
   }
 
-  // Code generation from strings (eval / new Function) is disallowed by default, matching the
-  // distributable `bin/kibana` that running from source bypasses. Opt out by setting
-  // KBN_DISALLOW_CODE_GEN_FROM_STRINGS=false. Passed as a node exec arg rather than via NODE_OPTIONS
-  // so it reaches the dev CLI's server child process (which forwards `process.execArgv`) without
-  // leaking into the optimizer's webpack workers.
-  if (devMode && env.KBN_DISALLOW_CODE_GEN_FROM_STRINGS !== 'false') {
-    prefixArgs.unshift('--disallow-code-generation-from-strings');
-  }
-
   const buildArgs: string[] = (config.get('kbnTestServer.buildArgs') as string[] | undefined) || [];
   const sourceArgs: string[] =
     (config.get('kbnTestServer.sourceArgs') as string[] | undefined) || [];

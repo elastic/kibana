@@ -26,48 +26,44 @@ const NON_MATCHING_INDICES = {
   metric: 'foo-*',
 };
 
-test.describe(
-  'APM no data screen',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  () => {
-    test.beforeAll(async ({ kbnClient }) => {
-      await kbnClient.request({
-        method: 'POST',
-        path: '/internal/apm-sources/settings/apm-indices/save',
-        headers: { 'kbn-xsrf': 'scout' },
-        body: NON_MATCHING_INDICES,
-      });
+test.describe('APM no data screen', { tag: tags.stateful.classic }, () => {
+  test.beforeAll(async ({ kbnClient }) => {
+    await kbnClient.request({
+      method: 'POST',
+      path: '/internal/apm-sources/settings/apm-indices/save',
+      headers: { 'kbn-xsrf': 'scout' },
+      body: NON_MATCHING_INDICES,
     });
+  });
 
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsPrivilegedUser();
-    });
+  test.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginAsPrivilegedUser();
+  });
 
-    test.afterAll(async ({ kbnClient }) => {
-      await kbnClient.savedObjects
-        .delete({ type: APM_INDICES_SAVED_OBJECT_TYPE, id: APM_INDICES_SAVED_OBJECT_ID })
-        .catch(() => {});
-    });
+  test.afterAll(async ({ kbnClient }) => {
+    await kbnClient.savedObjects
+      .delete({ type: APM_INDICES_SAVED_OBJECT_TYPE, id: APM_INDICES_SAVED_OBJECT_ID })
+      .catch(() => {});
+  });
 
-    test('shows the no data screen instead of the service inventory', async ({
-      page,
-      pageObjects: { navigationPage },
-    }) => {
-      await navigationPage.gotoApm('/');
-      await expect(page.getByTestId('noDataDefaultActionButton')).toBeVisible({
-        timeout: EXTENDED_TIMEOUT,
-      });
+  test('shows the no data screen instead of the service inventory', async ({
+    page,
+    pageObjects: { navigationPage },
+  }) => {
+    await navigationPage.gotoApm('/');
+    await expect(page.getByTestId('noDataDefaultActionButton')).toBeVisible({
+      timeout: EXTENDED_TIMEOUT,
     });
+  });
 
-    test('bypasses the no data screen on settings pages', async ({
-      page,
-      pageObjects: { navigationPage },
-    }) => {
-      await navigationPage.gotoApm('/settings');
-      await expect(page.getByText('Welcome to Elastic Observability!')).toBeHidden();
-      await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible({
-        timeout: EXTENDED_TIMEOUT,
-      });
+  test('bypasses the no data screen on settings pages', async ({
+    page,
+    pageObjects: { navigationPage },
+  }) => {
+    await navigationPage.gotoApm('/settings');
+    await expect(page.getByText('Welcome to Elastic Observability!')).toBeHidden();
+    await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible({
+      timeout: EXTENDED_TIMEOUT,
     });
-  }
-);
+  });
+});

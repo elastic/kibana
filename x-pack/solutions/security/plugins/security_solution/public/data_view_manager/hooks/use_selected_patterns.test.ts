@@ -6,33 +6,59 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { type DataView } from '@kbn/data-views-plugin/public';
 import { useSelectedPatterns } from './use_selected_patterns';
+import { useDataView } from './use_data_view';
+import type { PageScope } from '../constants';
+
+// Mock the useDataView hook
+jest.mock('./use_data_view');
 
 describe('useSelectedPatterns', () => {
-  it('should return an array of patterns when the dataView returns an index pattern', () => {
-    const dataView = {
-      getIndexPattern: () => 'pattern1,pattern2,pattern3',
-    } as unknown as DataView;
-
-    const { result } = renderHook(() => useSelectedPatterns(dataView));
-
-    expect(result.current).toEqual(['pattern1', 'pattern2', 'pattern3']);
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('should return an empty array when the dataView returns an empty pattern', () => {
-    const dataView = {
-      getIndexPattern: () => '',
-    } as unknown as DataView;
+  it('should return an array of patterns when dataView returns an index pattern', () => {
+    // Setup
+    (useDataView as jest.Mock).mockReturnValue({
+      dataView: {
+        getIndexPattern: () => 'pattern1,pattern2,pattern3',
+      },
+    });
 
-    const { result } = renderHook(() => useSelectedPatterns(dataView));
+    // Execute
+    const { result } = renderHook(() => useSelectedPatterns('mockScope' as PageScope));
 
+    // Verify
+    expect(result.current).toEqual(['pattern1', 'pattern2', 'pattern3']);
+    expect(useDataView).toHaveBeenCalledWith('mockScope');
+  });
+
+  it('should return an empty array when dataView returns an empty pattern', () => {
+    // Setup
+    (useDataView as jest.Mock).mockReturnValue({
+      dataView: {
+        getIndexPattern: () => '',
+      },
+    });
+
+    // Execute
+    const { result } = renderHook(() => useSelectedPatterns('mockScope' as PageScope));
+
+    // Verify
     expect(result.current).toEqual([]);
   });
 
-  it('should return an empty array when the dataView is falsy', () => {
-    const { result } = renderHook(() => useSelectedPatterns(null as unknown as DataView));
+  it('should return an empty array when dataView is falsy', () => {
+    // Setup
+    (useDataView as jest.Mock).mockReturnValue({
+      dataView: null,
+    });
 
+    // Execute
+    const { result } = renderHook(() => useSelectedPatterns('mockScope' as PageScope));
+
+    // Verify
     expect(result.current).toEqual([]);
   });
 });

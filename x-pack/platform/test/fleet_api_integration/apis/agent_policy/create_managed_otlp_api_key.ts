@@ -39,16 +39,20 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.item.api_key).to.be.a('string');
       });
 
-      it('returns 403 for a user with Fleet: Agents All but no ES api-key privilege', async () => {
-        // fleet_agents_all_only has Kibana Fleet: Agents All but no manage_own_api_key cluster
-        // privilege and no apm event:write application privilege. The handler uses asCurrentUser,
-        // so ES clamps the key's role_descriptors to the intersection of the caller's privileges —
-        // which excludes apm/event:write. The pre-check catches this and returns 403.
+      // Regression test for https://github.com/elastic/kibana/issues/275751:
+      // A user with Kibana Fleet: Agents All but NO ES cluster api-key privilege must be able
+      // to create the managed OTLP key. The handler now mints the key as asInternalUser so the
+      // caller's ES privileges are irrelevant; route authz (fleet-agents-all) still applies.
+      it('returns an encoded APM-scoped api key for a user with Fleet: Agents All but no ES api-key privilege', async () => {
         const apiClient = new SpaceTestApiClient(supertestWithoutAuth, {
           username: testUsers.fleet_agents_all_only.username,
           password: testUsers.fleet_agents_all_only.password,
         });
-        await expectToRejectWithError(() => apiClient.postManagedOtlpApiKey('managed-otlp'), /403/);
+        const res = await apiClient.postManagedOtlpApiKey('managed-otlp');
+
+        expect(res.item.encoded).to.be.a('string');
+        expect(res.item.id).to.be.a('string');
+        expect(res.item.api_key).to.be.a('string');
       });
 
       it('returns 403 for a user without Fleet privileges', async () => {

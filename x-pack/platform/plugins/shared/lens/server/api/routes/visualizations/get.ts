@@ -12,7 +12,7 @@ import {
   AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
 } from '@kbn/as-code-shared-schemas';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import type { z } from '@kbn/zod';
+import type { TypeOf } from '@kbn/config-schema';
 
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import {
@@ -21,7 +21,7 @@ import {
   LENS_API_ACCESS,
   LENS_API_TAG,
 } from '../../../../common/constants';
-import type { LensSavedObject } from '../../../content_management/zod';
+import type { LensSavedObject } from '../../../content_management';
 import { lensGetRequestParamsSchema, lensGetResponseBodySchema } from './schema';
 import { getLensResponseItem } from './utils';
 import type { RegisterAPIRouteFn } from '../../types';
@@ -38,8 +38,8 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
     options: {
       tags: [LENS_API_TAG],
       availability: {
-        stability: 'stable',
-        since: '9.5.0',
+        stability: 'experimental',
+        since: '9.4.0',
       },
     },
     security: {
@@ -102,7 +102,7 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
           const { result } = await client.get(req.params.id);
           const responseItem = getLensResponseItem(builder, result.item, useGASchemas);
 
-          return res.ok<z.output<typeof lensGetResponseBodySchema>>({
+          return res.ok<TypeOf<typeof lensGetResponseBodySchema>>({
             body: responseItem,
           });
         } catch (error) {

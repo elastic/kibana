@@ -105,7 +105,6 @@ export interface AgentSOAttributes {
   default_api_key?: string;
   default_api_key_id?: string;
   policy_id?: string;
-  policy_base_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
   last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'disconnected';

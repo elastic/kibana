@@ -63,7 +63,7 @@ export type SkillsDirectoryStructure = Directory<{
 /**
  * Base paths where files can be placed (exact paths from the structure)
  */
-export type DirectoryPath = FilePathsFromStructure<SkillsDirectoryStructure>;
+type DirectoryPath = FilePathsFromStructure<SkillsDirectoryStructure>;
 
 /**
  * Server-side definition of a skill type.
@@ -157,13 +157,11 @@ export interface ReferencedContent {
    * Valid relative paths are:
    * - "." - stores reference content in the same directory as the skill
    * - "./[directory]" - stores reference content in the "[directory]" directory
-   * - "./[directory]/[subdirectory]" - nested subdirectories are supported; each segment must
-   *   contain only lowercase letters, numbers, underscores, and hyphens. Parent traversal ("../") is not allowed.
+   * - Avoid multiple levels of directories (such as "./[directory]/[subdirectory]") to keep the structure flat.
    *
    * Examples:
    * - basePath: "skills/security/alerts/rules" & relativePath: "." - stores reference content in the "skills/security/alerts/rules/[name].md" file
    * - basePath: "skills/security/alerts/rules" & relativePath: "./queries" - stores reference content in the "skills/security/alerts/rules/queries/[name].md" file
-   * - basePath: "skills/security/alerts/rules" & relativePath: "./queries/esql" - stores reference content in the "skills/security/alerts/rules/queries/esql/[name].md" file
    */
   relativePath: string;
   /**
@@ -186,8 +184,8 @@ export const referencedContentSchema = z.array(
       .string()
       .min(1, 'Relative path must be non-empty')
       .regex(
-        /^\.(?:\/[a-z0-9-_]+)*$/,
-        'Relative path must start with a dot and may contain "/"-separated segments of lowercase letters, numbers, underscores, and hyphens (no "../")'
+        /^(?:\.|\.\/[a-z0-9-_]+)$/,
+        'Relative path must start with a dot and contain only lowercase letters, numbers, underscores, and hyphens'
       ),
     content: z.string().min(1, 'Content must be non-empty'),
   })

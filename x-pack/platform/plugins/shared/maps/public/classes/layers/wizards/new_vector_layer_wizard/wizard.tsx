@@ -6,9 +6,8 @@
  */
 
 import React, { Component } from 'react';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 import { createNewIndexAndPattern } from './create_new_index_pattern';
 import type { RenderWizardArguments } from '../layer_wizard_registry';
 import { createDefaultLayerDescriptor } from '../../../sources/es_search_source/es_documents_layer_wizard';
@@ -151,23 +150,29 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
     if (this.state.createIndexError) {
       if (!this.state.userHasIndexWritePermissions) {
         return (
-          <KbnDangerCallout
+          <EuiCallOut
             announceOnMount
             title={i18n.translate('xpack.maps.layers.newVectorLayerWizard.indexPrivsErrorTitle', {
               defaultMessage: 'Missing index privileges',
             })}
-            text={this.state.createIndexError}
-          />
+            color="danger"
+            iconType="warning"
+          >
+            <p>{this.state.createIndexError}</p>
+          </EuiCallOut>
         );
       }
       return (
-        <KbnDangerCallout
+        <EuiCallOut
           announceOnMount
           title={i18n.translate('xpack.maps.layers.newVectorLayerWizard.createIndexErrorTitle', {
             defaultMessage: 'Unable to create index',
           })}
-          text={this.state.createIndexError}
-        />
+          color="danger"
+          iconType="warning"
+        >
+          <p>{this.state.createIndexError}</p>
+        </EuiCallOut>
       );
     }
 

@@ -12,8 +12,6 @@ export interface ResultFieldProps {
   fieldName: string;
   fieldType: string;
   fieldValue: string;
-  dimensions?: number;
-  embeddings?: string;
   iconType?: IconType;
   isExpanded?: boolean;
 }
@@ -30,6 +28,4 @@ export interface FieldProps {
   fieldName: string;
   fieldType: Exclude<MappingProperty['type'], undefined>;
   fieldValue: string;
-  dimensions?: number;
-  embeddings?: string;
 }

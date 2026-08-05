@@ -83,7 +83,6 @@ export const EDOT_AGENT_NAMES: OpenTelemetryAgentName[] = [
 
 export const OTEL_AGENT_NAMES: OpenTelemetryAgentName[] = [
   'opentelemetry/java/opentelemetry-java-instrumentation',
-  'opentelemetry/java/opentelemetry-javaagent',
 ];
 
 export type JavaAgentName = 'java' | 'opentelemetry/java' | 'otlp/java';

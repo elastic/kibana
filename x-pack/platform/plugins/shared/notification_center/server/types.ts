@@ -6,10 +6,6 @@
  */
 
 import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
-import type {
   NotificationNamespace,
   NotificationTypeName,
   NotificationKindOf,
@@ -57,10 +53,6 @@ export interface NotificationCenterPluginSetup {
 
 export type NotificationCenterPluginStart = Record<string, never>;
 
-export interface NotificationCenterSetupDependencies {
-  taskManager: TaskManagerSetupContract;
-}
+export type NotificationCenterSetupDependencies = Record<string, never>;
 
-export interface NotificationCenterStartDependencies {
-  taskManager: TaskManagerStartContract;
-}
+export type NotificationCenterStartDependencies = Record<string, never>;

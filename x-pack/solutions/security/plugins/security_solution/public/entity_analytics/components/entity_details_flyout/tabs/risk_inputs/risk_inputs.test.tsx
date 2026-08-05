@@ -92,16 +92,6 @@ jest.mock('../../../../api/hooks/use_risk_score', () => ({
   useRiskScore: (params: unknown) => mockUseRiskScore(params),
 }));
 
-const mockUseMissingRiskEnginePrivileges = jest.fn();
-
-jest.mock('../../../../hooks/use_missing_risk_engine_privileges', () => ({
-  useMissingRiskEnginePrivileges: (params: unknown) => mockUseMissingRiskEnginePrivileges(params),
-}));
-
-jest.mock('../../../risk_engine_privileges_callout', () => ({
-  RiskEnginePrivilegesCallOut: () => <div data-test-subj="missing-risk-engine-privileges" />,
-}));
-
 const mockUseGetWatchlists = jest.fn().mockReturnValue({ data: [] });
 
 jest.mock('../../../../api/hooks/use_get_watchlists', () => ({
@@ -187,10 +177,6 @@ describe('RiskInputsTab', () => {
     mockUseStableExpandableFlyoutState.mockReturnValue({});
     mockUseRiskScoreHistory.mockReturnValue({ data: undefined, isFetching: false });
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-    mockUseMissingRiskEnginePrivileges.mockReturnValue({
-      isLoading: false,
-      hasAllRequiredPrivileges: true,
-    });
     mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown; skip?: boolean }) =>
       params?.skip
         ? {
@@ -236,49 +222,6 @@ describe('RiskInputsTab', () => {
 
     expect(queryByTestId('risk-input-asset-criticality-title')).not.toBeInTheDocument();
     expect(getByTestId('risk-input-table-description-cell')).toHaveTextContent('Rule Name');
-  });
-
-  it('shows the missing privileges callout instead of the generic error', () => {
-    mockUseMissingRiskEnginePrivileges.mockReturnValue({
-      isLoading: false,
-      hasAllRequiredPrivileges: false,
-      missingPrivileges: {
-        indexPrivileges: [['.risk-score.risk-*', ['read']]],
-        clusterPrivileges: { enable: [], run: [] },
-      },
-    });
-    mockUseRiskScore.mockReturnValue({ loading: false, error: true, data: [] });
-
-    const { getByTestId, queryByText } = render(
-      <TestProviders>
-        <RiskInputsTab
-          entityType={EntityType.user}
-          entityName="elastic"
-          onShowAlert={mockOnShowAlert}
-        />
-      </TestProviders>
-    );
-
-    expect(mockUseMissingRiskEnginePrivileges).toHaveBeenCalledWith({ readonly: true });
-    expect(getByTestId('missing-risk-engine-privileges')).toBeInTheDocument();
-    expect(queryByText('Something went wrong')).not.toBeInTheDocument();
-  });
-
-  it('shows the generic error when risk inputs fail without missing privileges', () => {
-    mockUseRiskScore.mockReturnValue({ loading: false, error: true, data: [] });
-
-    const { getByText, queryByTestId } = render(
-      <TestProviders>
-        <RiskInputsTab
-          entityType={EntityType.user}
-          entityName="elastic"
-          onShowAlert={mockOnShowAlert}
-        />
-      </TestProviders>
-    );
-
-    expect(getByText('Something went wrong')).toBeInTheDocument();
-    expect(queryByTestId('missing-risk-engine-privileges')).not.toBeInTheDocument();
   });
 
   it('Does not render the context section if enabled but no asset criticality', () => {

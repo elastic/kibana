@@ -11,7 +11,6 @@ import { pick, range } from 'lodash';
 import Path from 'path';
 import '../jest_matchers';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { createType } from '../test_utils';
 import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import { createModelVersionTestBed } from '@kbn/core-test-helpers-model-versions';
@@ -112,13 +111,13 @@ describe('Higher version doc conversion', () => {
   describe('#bulkGet', () => {
     it('returns the documents with the correct shape', async () => {
       const docsV1 = await repositoryV1.bulkGet([{ type: 'test-type', id: 'doc-1' }]);
-      expect((docsV1.saved_objects[0] as SavedObject).attributes).toEqual({
+      expect(docsV1.saved_objects[0].attributes).toEqual({
         bool: true,
         text: 'a_1',
       });
 
       const docV2 = await repositoryV2.bulkGet([{ type: 'test-type', id: 'doc-1' }]);
-      expect((docV2.saved_objects[0] as SavedObject).attributes).toEqual({
+      expect(docV2.saved_objects[0].attributes).toEqual({
         bool: true,
         text: 'a_1',
         newField: 'someValue',
@@ -129,13 +128,13 @@ describe('Higher version doc conversion', () => {
   describe('#resolve', () => {
     it('returns the documents with the correct shape', async () => {
       const docV1 = await repositoryV1.resolve('test-type', 'doc-1');
-      expect((docV1.saved_object as SavedObject).attributes).toEqual({
+      expect(docV1.saved_object.attributes).toEqual({
         bool: true,
         text: 'a_1',
       });
 
       const docV2 = await repositoryV2.resolve('test-type', 'doc-1');
-      expect((docV2.saved_object as SavedObject).attributes).toEqual({
+      expect(docV2.saved_object.attributes).toEqual({
         bool: true,
         text: 'a_1',
         newField: 'someValue',
@@ -146,13 +145,13 @@ describe('Higher version doc conversion', () => {
   describe('#bulkResolve', () => {
     it('returns the documents with the correct shape', async () => {
       const docsV1 = await repositoryV1.bulkResolve([{ type: 'test-type', id: 'doc-1' }]);
-      expect((docsV1.resolved_objects[0].saved_object as SavedObject).attributes).toEqual({
+      expect(docsV1.resolved_objects[0].saved_object.attributes).toEqual({
         bool: true,
         text: 'a_1',
       });
 
       const docV2 = await repositoryV2.bulkResolve([{ type: 'test-type', id: 'doc-1' }]);
-      expect((docV2.resolved_objects[0].saved_object as SavedObject).attributes).toEqual({
+      expect(docV2.resolved_objects[0].saved_object.attributes).toEqual({
         bool: true,
         text: 'a_1',
         newField: 'someValue',

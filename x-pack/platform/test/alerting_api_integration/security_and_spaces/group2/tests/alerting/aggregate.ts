@@ -126,7 +126,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
                 expectedStatusCode: 403,
                 expectedResponse: {
                   error: 'Forbidden',
-                  message: 'Unauthorized to find rules for any rule types.',
+                  message: 'Unauthorized to find rules for any rule types',
                   statusCode: 403,
                 },
               });

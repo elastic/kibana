@@ -6,15 +6,13 @@
  */
 
 import { useMemo } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { PageScope } from '../constants';
+import { useDataView } from './use_data_view';
 
 const emptyArray: string[] = [];
 
-/**
- * Returns the list of index patterns for the provided dataView.
- * The dataView should be retrieved once via the useDataView hook and passed in here.
- */
-export const useSelectedPatterns = (dataView: DataView): string[] => {
+export const useSelectedPatterns = (scope: PageScope = PageScope.default): string[] => {
+  const { dataView } = useDataView(scope);
   const indexPattern = dataView?.getIndexPattern?.() ?? '';
 
   return useMemo(

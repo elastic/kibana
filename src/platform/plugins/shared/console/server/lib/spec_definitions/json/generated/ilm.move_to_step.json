@@ -6,18 +6,6 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "data_autocomplete_rules": {
-      "current_step": {
-        "action": "",
-        "name": "",
-        "phase": ""
-      },
-      "next_step": {
-        "action": "",
-        "name": "",
-        "phase": ""
-      }
-    },
     "methods": [
       "POST"
     ],

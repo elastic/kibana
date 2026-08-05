@@ -23,7 +23,6 @@ import type {
 import { cleanupFormulaReferenceColumns } from '@kbn/lens-common';
 import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import { Sha256 } from '@kbn/crypto-browser';
-import { stableStringify } from '@kbn/std';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FILTERS, isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
 import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
@@ -66,25 +65,11 @@ export type DataSourceStateLayer =
   | PersistedIndexPatternLayer
   | TextBasedPersistedState['layers'][0];
 
-/**
- * Reference name under which an XY by-value annotation layer persists its data
- * view. Must match the name produced by the Lens XY persistence logic
- * (`getLayerReferenceName` in x-pack/.../lens/public/visualizations/xy/persistence.ts),
- * which lives in a plugin this shared package cannot import from.
- */
-export function getXYAnnotationLayerReferenceName(layerId: string): string {
-  return `${LENS_XY_ANNOTATION_LAYER_SUFFIX}${layerId}`;
-}
-
-function getXYDataLayerReferenceName(layerId: string): string {
-  return `${LENS_LAYER_SUFFIX}${layerId}`;
-}
-
 function createDataViewReference(dataViewId: string, layerId: string): SavedObjectReference {
   return {
     type: INDEX_PATTERN_ID,
     id: dataViewId,
-    name: getXYDataLayerReferenceName(layerId),
+    name: `${LENS_LAYER_SUFFIX}${layerId}`,
   };
 }
 
@@ -95,7 +80,7 @@ function createAnnotationLayerDataViewReference(
   return {
     type: INDEX_PATTERN_ID,
     id: dataViewId,
-    name: getXYAnnotationLayerReferenceName(layerId),
+    name: `${LENS_XY_ANNOTATION_LAYER_SUFFIX}${layerId}`,
   };
 }
 
@@ -157,46 +142,17 @@ function normalizeWhitespace(str: string): string {
 }
 
 export function generateAdHocDataViewId(
-  dataView: Pick<
-    APIAdHocDataView,
-    | 'index'
-    | 'timeFieldName'
-    | 'esqlQuery'
-    | 'dataSourceType'
-    | 'name'
-    | 'allowHidden'
-    | 'fieldSettings'
-  >
+  dataView: Pick<APIAdHocDataView, 'index' | 'timeFieldName' | 'esqlQuery' | 'dataSourceType'>
 ): string {
   const base = `${dataView.index}${dataView.timeFieldName ? `-${dataView.timeFieldName}` : ''}`;
   // When timeFieldName is not explicitly provided in the query, then it is not persisted during the transformations and
   // at runtime we fallback to @timestamp if it exists in the index.
   // But different ES|QL queries against the same index can resolve to different time fields. See: https://github.com/elastic/kibana/pull/256764
   // Including a hash of the query in the ID ensures each distinct query gets its own cached DataView, preventing stale time-field resolution.
-  if (dataView.dataSourceType === 'esql') {
-    return !dataView.timeFieldName && dataView.esqlQuery
-      ? `${base}-${sha256Sync(normalizeWhitespace(dataView.esqlQuery))}`
-      : base;
+  if (dataView.dataSourceType === 'esql' && !dataView.timeFieldName && dataView.esqlQuery) {
+    return `${base}-${sha256Sync(normalizeWhitespace(dataView.esqlQuery))}`;
   }
-
-  // For form-based ad hoc data views, two over the same index+timeField can
-  // still differ in specifications (custom name, allowHidden, or runtime/scripted
-  // field settings). Always append a hash of the canonical specification fields so
-  // that identical specs map to the same id and different specs get distinct ids.
-  // Mirrors the ES|QL `base-<hash>` pattern above.
-  //
-  // `stableStringify` sorts keys and omits `undefined` values, so key order and
-  // absent/optional field settings can't perturb the hash.
-  const canonical = {
-    name: dataView.name ?? dataView.index,
-    allowHidden: dataView.allowHidden ? true : undefined, // treat false as undefined
-    fieldSettings:
-      dataView.fieldSettings && Object.keys(dataView.fieldSettings).length > 0
-        ? dataView.fieldSettings
-        : undefined,
-  };
-
-  return `${base}-${sha256Sync(stableStringify(canonical))}`;
+  return base;
 }
 
 export function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
@@ -204,7 +160,7 @@ export function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
     // Improve id genertation to be more predictable and hit cache more often
     id: generateAdHocDataViewId(dataView),
     title: dataView.index,
-    name: dataView.name ?? dataView.index,
+    name: dataView.index,
     timeFieldName: dataView.timeFieldName,
     sourceFilters: [],
     ...fromApiFieldSettings(dataView.fieldSettings),
@@ -267,72 +223,8 @@ export function isDataViewSpec(spec: unknown): spec is DataViewSpec {
   return spec != null && typeof spec === 'object' && 'title' in spec;
 }
 
-export function isDataViewSpecWithTitle(spec: unknown): spec is DataViewSpec & { title: string } {
-  return isDataViewSpec(spec) && typeof spec.title === 'string' && spec.title.length > 0;
-}
-
-/**
- * Builds the `data_view_spec` data source from an ad-hoc
- * `DataViewSpec`. Shared by data layers and XY annotation layers so both emit an
- * inline data view identically.
- */
-export function buildDataViewSpecDataSource(
-  dataViewSpec: DataViewSpec & { title: string }
-): Extract<DataSourceType, { type: typeof AS_CODE_DATA_VIEW_SPEC_TYPE }> {
-  const fieldSettings = toApiFieldSettings(dataViewSpec);
-  return {
-    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
-    index_pattern: dataViewSpec.title,
-    time_field: dataViewSpec.timeFieldName,
-    ...(dataViewSpec.name ? { name: dataViewSpec.name } : {}),
-    ...(dataViewSpec.allowHidden !== undefined
-      ? { allow_hidden_indices: dataViewSpec.allowHidden }
-      : {}),
-    ...(fieldSettings ? { field_settings: fieldSettings } : {}),
-  };
-}
-
-/**
- * Resolves the data view id for a NoESQL layer. The id is taken, in priority
- * order, from an ad hoc reference (`state.internalReferences`), a persisted
- * reference (top-level `references`), or the layer's own inline `indexPatternId`.
- * Data layers and XY annotation layers persist their data view under different
- * reference names, hence the `referenceName` parameter.
- */
-export function resolveDataViewId(
-  references: SavedObjectReference[],
-  adhocReferences: SavedObjectReference[],
-  referenceName: string,
-  inlineDataViewId?: string
-): string | undefined {
-  const matchesName = (ref: SavedObjectReference) => ref.name === referenceName;
-  return (
-    adhocReferences.find(matchesName)?.id ?? references.find(matchesName)?.id ?? inlineDataViewId
-  );
-}
-
-/**
- * Builds the NoESQL `data_source` for a resolved data view id: an inline
- * `data_view_spec` when the id points at an ad hoc data view, otherwise a
- * `data_view_reference`. Shared by data layers and XY annotation layers so both
- * emit the data view identically.
- *
- * `dataViewId` must be a non-empty id: an empty `ref_id` is not a valid data
- * source, so callers are responsible for resolving the id (or handling its
- * absence) before calling this.
- */
-export function buildDataViewDataSource(
-  dataViewId: string,
-  adHocDataViews: Record<string, unknown>
-): DataSourceTypeNoESQL {
-  const dataViewSpec = adHocDataViews[dataViewId];
-  if (isDataViewSpecWithTitle(dataViewSpec)) {
-    return buildDataViewSpecDataSource(dataViewSpec);
-  }
-  return {
-    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-    ref_id: dataViewId,
-  };
+function getReferenceCriteria(layerId: string) {
+  return (ref: SavedObjectReference) => ref.name === `${LENS_LAYER_SUFFIX}${layerId}`;
 }
 
 export function buildDataSourceStateNoESQL(
@@ -340,20 +232,39 @@ export function buildDataSourceStateNoESQL(
   layerId: string,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
-  adhocReferences: SavedObjectReference[] = [],
-  referenceName: string = getXYDataLayerReferenceName(layerId)
+  adhocReferences: SavedObjectReference[] = []
 ): DataSourceTypeNoESQL {
-  const inlineDataViewId = 'indexPatternId' in layer ? layer.indexPatternId : undefined;
-  const dataViewId = resolveDataViewId(
-    references,
-    adhocReferences,
-    referenceName,
-    inlineDataViewId
-  );
-  if (!dataViewId) {
-    throw new Error(`Cannot resolve the data view for layer "${layerId}".`);
+  const referenceCriteria = getReferenceCriteria(layerId);
+  const adhocReference = adhocReferences?.find(referenceCriteria);
+
+  if (adhocReference && adHocDataViews?.[adhocReference.id]) {
+    const dataViewSpec = adHocDataViews[adhocReference.id];
+    if (isDataViewSpec(dataViewSpec) && dataViewSpec.title) {
+      const fieldSettings = toApiFieldSettings(dataViewSpec);
+      return {
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+        index_pattern: dataViewSpec.title,
+        time_field: dataViewSpec.timeFieldName,
+        ...(dataViewSpec.allowHidden !== undefined
+          ? { allow_hidden_indices: dataViewSpec.allowHidden }
+          : {}),
+        ...(fieldSettings ? { field_settings: fieldSettings } : {}),
+      };
+    }
   }
-  return buildDataViewDataSource(dataViewId, adHocDataViews);
+
+  const reference = references?.find(referenceCriteria);
+  if (reference) {
+    return {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: reference.id,
+    };
+  }
+
+  return {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: 'indexPatternId' in layer ? layer.indexPatternId ?? '' : '',
+  };
 }
 
 /**
@@ -418,7 +329,6 @@ export function getDataSourceIndex(dataSource: DataSourceType) {
       return {
         index: dataSource.index_pattern,
         timeFieldName: dataSource.time_field ?? timeFieldName,
-        ...(dataSource.name ? { name: dataSource.name } : {}),
         ...(dataSource.allow_hidden_indices !== undefined
           ? { allowHidden: dataSource.allow_hidden_indices }
           : {}),

@@ -34,7 +34,7 @@ export const RulesListStatuses = (props: RulesListStatusesProps) => {
 
   if (isRuleUsingExecutionStatus) {
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+      <EuiFlexGroup alignItems="center" gutterSize="none">
         <EuiFlexItem grow={false}>
           <EuiHealth color={euiTheme.colors.success} data-test-subj="totalActiveRulesCount">
             {RULE_STATUS_ACTIVE(rulesStatuses.active)}
@@ -70,7 +70,7 @@ export const RulesListStatuses = (props: RulesListStatusesProps) => {
   }
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+    <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
         <EuiHealth color={euiTheme.colors.success} data-test-subj="totalSucceededRulesCount">
           {RULE_LAST_RUN_OUTCOME_SUCCEEDED_DESCRIPTION(rulesLastRunOutcomes.succeeded)}

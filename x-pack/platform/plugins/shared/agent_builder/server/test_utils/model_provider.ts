@@ -20,7 +20,6 @@ export const createModelProviderMock = (): ModelProviderMock => {
     getDefaultModel: jest.fn().mockResolvedValue({ chatModel }),
     selectModel: jest.fn(),
     getModelById: jest.fn(),
-    hasFastModel: jest.fn().mockResolvedValue(true),
     getUsageStats: jest.fn().mockReturnValue({ calls: [] }),
   };
 };

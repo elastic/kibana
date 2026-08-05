@@ -39,7 +39,11 @@ export function DiagnosticConfigurationForm({
 }: DiagnosticConfigurationFormProps) {
   const {
     query: { rangeFrom, rangeTo },
-  } = useAnyOfApmParams('/service-map');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/service-map',
+    '/service-map',
+    '/mobile-services/{serviceName}/service-map'
+  );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const steps = [

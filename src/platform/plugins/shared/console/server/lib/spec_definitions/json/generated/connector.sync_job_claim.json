@@ -6,10 +6,6 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "data_autocomplete_rules": {
-      "sync_cursor": "",
-      "worker_hostname": ""
-    },
     "methods": [
       "PUT"
     ],

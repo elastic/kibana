@@ -6,7 +6,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { PrivilegeType, ClusterPrivilegeType } from '@kbn/apm-types';
 
 import { createManagedOtlpApiKey } from '../../services/api_keys';
 import type { FleetRequestHandler, PostManagedOtlpAPIKeyRequestSchema } from '../../types';
@@ -17,29 +16,12 @@ export const createManagedOtlpApiKeyHandler: FleetRequestHandler<
   TypeOf<typeof PostManagedOtlpAPIKeyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
-  // Must use asCurrentUser, not asInternalUser. ES silently clamps an API key's
-  // role_descriptors to the intersection of the requesting user's privileges. The
-  // kibana_system built-in role has no apm/event:write application privilege, so
-  // asInternalUser produces a key with an empty role descriptor that the managed
-  // OTLP service rejects with PermissionDenied.
-  const esClient = coreContext.elasticsearch.client.asCurrentUser;
-
-  // Pre-check: verify the caller holds the privileges the key will carry. Without
-  // this, ES would still clamp silently and hand back a useless key.
-  const privilegeCheck = await esClient.security.hasPrivileges({
-    cluster: [ClusterPrivilegeType.MANAGE_OWN_API_KEY],
-    application: [{ application: 'apm', privileges: [PrivilegeType.EVENT], resources: ['*'] }],
-  });
-
-  if (!privilegeCheck.has_all_requested) {
-    return response.forbidden({
-      body: {
-        message:
-          "You don't have the privileges required to create a managed OTLP API key. " +
-          'You need the manage_own_api_key cluster privilege and the apm event:write application privilege.',
-      },
-    });
-  }
+  // Mint the key as the internal (Fleet system) user, not asCurrentUser.
+  // The APM-scoped role_descriptor is fixed and not derived from the caller, so there is no
+  // need to require the caller to hold the ES `manage_own_api_key` cluster privilege —
+  // a privilege that `Fleet: All` does not confer. Route authz (`fleet-agents-all`) already
+  // controls who can call this endpoint. Mirrors how enrollment-api-key routes mint keys.
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   const key = await createManagedOtlpApiKey(esClient, request.body.name);
 

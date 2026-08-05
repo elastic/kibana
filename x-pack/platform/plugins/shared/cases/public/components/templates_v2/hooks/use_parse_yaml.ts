@@ -11,7 +11,7 @@ import { FieldSchema } from '../../../../common/types/domain/template/fields';
 import { TemplateSettingsSchema } from '../../../../common/types/domain/template/v1';
 import { CaseSeveritySchema } from '../../../../common/types/domain_zod/case/v1';
 import { CaseConnectorWithoutNameSchema } from '../../../../common/types/domain_zod/connector/v1';
-import { CaseUserProfilesSchema } from '../../../../common/types/domain_zod/user/v1';
+import { CaseAssigneesSchema } from '../../../../common/types/domain_zod/user/v1';
 import { MAX_TEMPLATES_PER_FILE, MAX_TOTAL_IMPORT_TEMPLATES } from '../constants';
 import { checkTemplateExists } from '../utils';
 import type { ValidatedFile } from './use_validate_yaml';
@@ -49,7 +49,7 @@ const ImportedTemplateSchema = z
     // Legacy top-level import shape support.
     severity: CaseSeveritySchema.optional(),
     category: z.string().nullable().optional(),
-    assignees: CaseUserProfilesSchema.optional(),
+    assignees: CaseAssigneesSchema.optional(),
     connector: CaseConnectorWithoutNameSchema.optional(),
     settings: TemplateSettingsSchema.optional(),
     author: z.string().optional(),
@@ -80,7 +80,7 @@ export interface ParsedTemplateEntry {
     tags?: string[];
     severity?: z.infer<typeof CaseSeveritySchema>;
     category?: string | null;
-    assignees?: z.infer<typeof CaseUserProfilesSchema>;
+    assignees?: z.infer<typeof CaseAssigneesSchema>;
   };
   severity?: z.infer<typeof CaseSeveritySchema>;
   category?: string | null;

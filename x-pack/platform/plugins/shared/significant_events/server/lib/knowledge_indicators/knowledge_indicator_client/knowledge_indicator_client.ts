@@ -27,7 +27,7 @@ import { RevisionReader } from './revision_reader';
 import { IndicatorWriter } from './indicator_writer';
 import { IndicatorReader } from './indicator_reader';
 import { IndicatorSearcher } from './indicator_searcher';
-import { QueryRuleOrchestrator, type PromoteQueriesResult } from './query_rule_orchestrator';
+import { QueryRuleOrchestrator } from './query_rule_orchestrator';
 import { computeExpiresAt } from './serializers';
 import type { SignificantEventsAlertingContext } from '../../significant_events/alerting/significant_events_alerting_context';
 
@@ -96,9 +96,7 @@ export class KnowledgeIndicatorClient {
     streams: string | string[],
     options?: {
       type?: string[];
-      excludedType?: string[];
       id?: string[];
-      featureIds?: string[];
       minConfidence?: number;
       limit?: number;
       includeExcluded?: boolean;
@@ -129,8 +127,6 @@ export class KnowledgeIndicatorClient {
     filters?: {
       ruleUnbacked?: RuleUnbackedFilter;
       queryIds?: string[];
-      queryTypes?: string[];
-      ruleIds?: string[];
       minSeverityScore?: number;
       includeExpired?: boolean;
     }
@@ -191,12 +187,6 @@ export class KnowledgeIndicatorClient {
       searchMode?: SearchMode;
       limit?: number;
       includeExcluded?: boolean;
-      featureTypes?: string[];
-      featureIds?: string[];
-      queryTypes?: string[];
-      queryIds?: string[];
-      ruleIds?: string[];
-      ruleUnbacked?: RuleUnbackedFilter;
     }
   ): Promise<{ hits: KnowledgeIndicator[] }> {
     return this.searcher.findIndicators(streams, query, options);
@@ -205,13 +195,7 @@ export class KnowledgeIndicatorClient {
   findFeatures(
     streams: string | string[],
     query: string,
-    options?: {
-      searchMode?: SearchMode;
-      limit?: number;
-      includeExcluded?: boolean;
-      featureTypes?: string[];
-      featureIds?: string[];
-    }
+    options?: { searchMode?: SearchMode; limit?: number; includeExcluded?: boolean }
   ): Promise<{ hits: Feature[] }> {
     return this.searcher.findFeatures(streams, query, options);
   }
@@ -219,12 +203,7 @@ export class KnowledgeIndicatorClient {
   findQueries(
     streams: string | string[],
     query: string,
-    filters?: {
-      ruleUnbacked?: RuleUnbackedFilter;
-      queryTypes?: string[];
-      queryIds?: string[];
-      ruleIds?: string[];
-    },
+    filters?: { ruleUnbacked?: RuleUnbackedFilter },
     searchMode?: SearchMode
   ): Promise<QueryLink[]> {
     return this.searcher.findQueries(streams, query, filters, searchMode);
@@ -270,7 +249,7 @@ export class KnowledgeIndicatorClient {
   promoteQueries(
     definition: Streams.all.Definition,
     queryIds: string[]
-  ): Promise<PromoteQueriesResult> {
+  ): Promise<{ promoted: number; skipped_stats: number }> {
     return this.orchestrator.promoteQueries(definition, queryIds);
   }
 
@@ -278,7 +257,7 @@ export class KnowledgeIndicatorClient {
     queryIds?: string[];
     minSeverityScore?: number;
     streamDefinitions: Map<string, Streams.all.Definition>;
-  }): Promise<PromoteQueriesResult> {
+  }): Promise<{ promoted: number; skipped_stats: number }> {
     return this.orchestrator.promoteUnbackedQueries(args);
   }
 

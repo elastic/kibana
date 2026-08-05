@@ -21,7 +21,6 @@ import {
   EuiSwitch,
   EuiTextArea,
   EuiFieldNumber,
-  EuiToolTip,
 } from '@elastic/eui';
 
 import { isEmpty } from 'lodash/fp';
@@ -279,12 +278,11 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
     headerIndex: number,
     elementIndex: number
   ) => {
-    const newValue = e.target.value;
-    setHeadersList((prevHeadersList) =>
-      prevHeadersList.map((header, i) =>
-        i === headerIndex ? header.map((cell, j) => (j === elementIndex ? newValue : cell)) : header
-      )
-    );
+    setHeadersList((prevHeadersList) => {
+      const newHeaders = [...prevHeadersList];
+      newHeaders[headerIndex][elementIndex] = e.target.value;
+      return newHeaders;
+    });
   };
 
   const onBlur = () => {
@@ -361,29 +359,27 @@ export const ConfigInputMapField: React.FC<ConfigInputFieldProps> = ({
                     </EuiFormRow>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiToolTip content={DELETE_LABEL} disableScreenReaderOutput>
-                      <EuiButtonIcon
-                        disabled={isLoading || (isEdit && !updatable)}
-                        display="base"
-                        color="danger"
-                        css={{ marginTop: '22px' }}
-                        onClick={() => {
-                          const newHeaders = headersList.toSpliced(index, 1);
-                          const hasDuplicateKeys = checkForDuplicateKeys(newHeaders);
-                          const headersObj = Object.fromEntries(newHeaders);
-                          if (!hasDuplicateKeys && errorMessage) {
-                            setErrorMessage(undefined);
-                          }
-                          setHeadersList(newHeaders);
-                          validateAndSetConfigValue(
-                            Object.keys(headersObj).length > 0 ? headersObj : ''
-                          );
-                        }}
-                        iconType="minusCircle"
-                        aria-label={DELETE_LABEL}
-                        data-test-subj={`${key}-delete-button-${index}`}
-                      />
-                    </EuiToolTip>
+                    <EuiButtonIcon
+                      disabled={isLoading || (isEdit && !updatable)}
+                      display="base"
+                      color="danger"
+                      css={{ marginTop: '22px' }}
+                      onClick={() => {
+                        const newHeaders = headersList.toSpliced(index, 1);
+                        const hasDuplicateKeys = checkForDuplicateKeys(newHeaders);
+                        const headersObj = Object.fromEntries(newHeaders);
+                        if (!hasDuplicateKeys && errorMessage) {
+                          setErrorMessage(undefined);
+                        }
+                        setHeadersList(newHeaders);
+                        validateAndSetConfigValue(
+                          Object.keys(headersObj).length > 0 ? headersObj : ''
+                        );
+                      }}
+                      iconType="minusCircle"
+                      aria-label={DELETE_LABEL}
+                      data-test-subj={`${key}-delete-button-${index}`}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

@@ -49,4 +49,4 @@ Now your `DO_SOMETHING` action will automatically execute when `on_click_value` 
 
 ## Examples [_examples_9]
 
-Examples are being updated. Check back in a future release.
+[TODO: Recreate a new UI action example once the new post-trigger registry paradigm is finalized]

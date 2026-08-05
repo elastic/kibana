@@ -47,10 +47,6 @@ export const WatchlistObject = lazySchema(() =>
      */
     entityCount: z.number().optional(),
     /**
-     * Indicates whether the watchlist contains manually assigned entities
-     */
-    hasManualEntities: z.boolean().optional(),
-    /**
      * Timestamp indicating when the watchlist was created
      */
     createdAt: z.string().datetime().optional(),

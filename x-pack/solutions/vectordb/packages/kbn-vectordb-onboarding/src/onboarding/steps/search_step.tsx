@@ -11,18 +11,19 @@ import { useKibana } from '../../services';
 import { ApiStep } from '../components/api_step';
 import { getStepContent } from '../components/onboarding_data';
 import { StepLayout } from '../components/step_layout';
-import { pathQuery, useWizardPath } from '../../hooks/use_wizard_path';
+import { pathQuery, useReturnPath, useWizardPath } from '../../hooks/use_wizard_path';
 import { useOnboardingNavigate } from '../../hooks/use_onboarding_navigate';
-import { GETTING_STARTED_PATH } from '../../routes';
+import { ONBOARDING_PATH } from '../../routes';
 
 export const SearchStep = () => {
-  const navigate = useOnboardingNavigate();
+  const origin = useReturnPath();
+  const navigate = useOnboardingNavigate(origin);
   const path = useWizardPath();
   const {
     services: { docLinks },
   } = useKibana();
 
-  if (!path) return <Redirect to={GETTING_STARTED_PATH} />;
+  if (!path) return <Redirect to={ONBOARDING_PATH} />;
 
   const contentKey = path === 'generate-vectors' ? 'generate' : 'have_vectors';
   const { title, description, api, docsPanel, pills } = getStepContent(docLinks)[contentKey].search;
@@ -35,7 +36,7 @@ export const SearchStep = () => {
       step={step}
       title={title}
       description={description}
-      onBack={() => navigate(`${GETTING_STARTED_PATH}/ingest${pathQuery(path)}`)}
+      onBack={() => navigate(`${ONBOARDING_PATH}/ingest${pathQuery(path)}`)}
       onComplete={() => navigate('/')}
     >
       <ApiStep

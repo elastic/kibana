@@ -101,7 +101,7 @@ export const EditSourcesFlyout = ({ aiIndex, onClose, onSaved }: EditSourcesFlyo
             >
               <FormattedMessage
                 id="xpack.contextEngine.editSources.doneButton"
-                defaultMessage="Save"
+                defaultMessage="Done"
               />
             </EuiButton>
           </EuiFlexItem>

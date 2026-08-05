@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { injectMetaAttributes } from './inject_meta_attributes';
 import type { ISavedObjectsManagement } from '../services';
@@ -60,7 +60,7 @@ export async function findRelationships({
 
   const relations = [
     ...childReferencesResponse.saved_objects
-      .filter((obj): obj is SavedObject => !isSavedObjectErrorResult(obj))
+      .filter((obj) => !isSavedObjectErrorResult(obj))
       .map((obj) => injectMetaAttributes(obj, savedObjectsManagement))
       .map(extractCommonProperties)
       .map((obj) => ({

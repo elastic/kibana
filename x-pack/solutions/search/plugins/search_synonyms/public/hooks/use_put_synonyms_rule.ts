@@ -26,9 +26,7 @@ export const usePutSynonymsRule = (onSuccess?: () => void, onError?: (error: str
   return useMutation(
     async ({ synonymsSetId, ruleId, synonyms }: MutationArgs) => {
       return await http.put<SynonymsPutSynonymRuleResponse>(
-        `/internal/search_synonyms/synonyms/${encodeURIComponent(
-          synonymsSetId
-        )}/${encodeURIComponent(ruleId)}`,
+        `/internal/search_synonyms/synonyms/${synonymsSetId}/${ruleId}`,
         {
           body: JSON.stringify({
             synonyms,

@@ -104,8 +104,7 @@ export const registerListDatasetsRoute = ({
               body: { message: error.message },
             });
           }
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          logger.error(`Failed to list evaluation datasets: ${errorMessage}`);
+          logger.error(`Failed to list evaluation datasets: ${error}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to list evaluation datasets' },

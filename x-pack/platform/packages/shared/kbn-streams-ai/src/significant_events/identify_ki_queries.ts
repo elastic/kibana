@@ -10,11 +10,13 @@ import type { QueryType } from '@kbn/significant-events-schema';
 import type { Feature, QueryFeature } from '@kbn/significant-events-schema';
 import {
   deriveQueryType,
+  ensureMetadata,
   getSourcesForStream,
   getStatsQueryHints,
   normalizeEsqlSafe,
   replaceFromSources,
 } from '@kbn/streams-schema';
+import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
@@ -31,7 +33,6 @@ import { sumTokens } from '../helpers/sum_tokens';
 import { getComputedFeatureInstructions } from '../features/computed';
 import {
   SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES,
-  QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
   getFeatureQueryFromToolArgs,
   resolveFeatureTypeFilters,
   toFeatureForLlmContext,
@@ -253,9 +254,7 @@ export async function identifyKIQueries({
         name: stream.name,
         description: stream.description,
         available_feature_types: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '),
-        computed_feature_instructions: getComputedFeatureInstructions(
-          QUERY_GENERATION_EXCLUDED_FEATURE_TYPES
-        ),
+        computed_feature_instructions: getComputedFeatureInstructions(),
         existing_queries: existingQueriesContext,
       },
       maxSteps: maxSteps ?? (additionalToolCallbacks ? 6 : 4),
@@ -361,7 +360,11 @@ export async function identifyKIQueries({
                   run_id: returnedFeatureMap.get(id),
                 }));
 
-                const rewritten = replaceFromSources(query.esql, targetSources);
+                const sourceRewritten = replaceFromSources(query.esql, targetSources);
+                const rewritten =
+                  derivedType === QUERY_TYPE_STATS
+                    ? sourceRewritten
+                    : ensureMetadata(sourceRewritten);
 
                 if (normalizedStoredEsqls.has(normalizeEsqlSafe(rewritten))) {
                   return {

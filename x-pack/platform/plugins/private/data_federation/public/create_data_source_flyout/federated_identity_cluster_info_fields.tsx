@@ -11,26 +11,21 @@ import { EuiButtonIcon, EuiCopy, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { FederatedIdentityClusterInfo } from './federated_identity_cluster_info';
 
 function ReadOnlyFormRow({ label, value }: { label: string; value: string }) {
-  const copyLabel = i18n.translate('xpack.dataFederation.createFlyout.federated.copyAriaLabel', {
-    defaultMessage: 'Copy to clipboard',
-  });
   return (
     <EuiFormRow label={label} fullWidth>
       <div style={{ position: 'relative' }}>
         <EuiFieldText readOnly fullWidth value={value} style={{ paddingRight: '2rem' }} />
         <div style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)' }}>
-          <EuiCopy
-            textToCopy={value}
-            beforeMessage={copyLabel}
-            tooltipProps={{ disableScreenReaderOutput: true }}
-          >
+          <EuiCopy textToCopy={value}>
             {(copy) => (
-              /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
               <EuiButtonIcon
                 iconType="copyClipboard"
                 display="empty"
                 onClick={copy}
-                aria-label={copyLabel}
+                aria-label={i18n.translate(
+                  'xpack.dataFederation.createFlyout.federated.copyAriaLabel',
+                  { defaultMessage: 'Copy to clipboard' }
+                )}
               />
             )}
           </EuiCopy>

@@ -8,7 +8,7 @@
  */
 
 import type { WorkflowDetailDto } from '../..';
-import { WorkflowDisabledError, WorkflowNotFoundError } from '../../common/errors';
+import { WorkflowDisabledError } from '../../common/errors';
 
 /**
  * Validates that a workflow is in a runnable state before execution.
@@ -25,7 +25,7 @@ export function validateWorkflowForExecution(
   definition: NonNullable<WorkflowDetailDto['definition']>;
 } {
   if (!workflow) {
-    throw new WorkflowNotFoundError(workflowId);
+    throw new Error(`Workflow not found: ${workflowId}`);
   }
 
   if (!workflow.definition) {

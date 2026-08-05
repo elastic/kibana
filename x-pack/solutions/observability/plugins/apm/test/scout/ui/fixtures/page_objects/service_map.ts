@@ -6,14 +6,14 @@
  */
 
 import {
-  type EuiComboBoxObject,
+  type KbnComboBoxObject,
   type KibanaUrl,
   type Locator,
   type ScoutPage,
 } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
-import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT } from '../constants';
+import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT, SERVICE_OPBEANS_JAVA } from '../constants';
 
 export class ServiceMapPage {
   public serviceMap: Locator;
@@ -44,7 +44,7 @@ export class ServiceMapPage {
   public serviceMapFindMatchSummary: Locator;
   public readonly serviceMapEmbeddable: Locator;
   public readonly serviceMapEditorSaveButton: Locator;
-  public readonly serviceMapEditorServiceNameComboBox: EuiComboBoxObject;
+  public readonly serviceMapEditorServiceNameComboBox: KbnComboBoxObject;
   public readonly serviceMapEditorKueryInput: Locator;
   public readonly serviceMapViewFullMapButton: Locator;
   public readonly dashboardEmbeddablePanel: Locator;
@@ -107,6 +107,15 @@ export class ServiceMapPage {
       params.set('kuery', options.kuery);
     }
     await this.page.goto(`${this.kbnUrl.app('apm')}/service-map?${params.toString()}`);
+    return await waitForApmSettingsHeaderLink(this.page);
+  }
+
+  async gotoDetailedServiceMapWithDateSelected(start: string, end: string) {
+    await this.page.goto(
+      `${this.kbnUrl.app(
+        'apm'
+      )}/services/${SERVICE_OPBEANS_JAVA}/service-map?rangeFrom=${start}&rangeTo=${end}&environment=${PRODUCTION_ENVIRONMENT}`
+    );
     return await waitForApmSettingsHeaderLink(this.page);
   }
 

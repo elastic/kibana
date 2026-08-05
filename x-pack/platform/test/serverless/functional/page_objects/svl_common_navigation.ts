@@ -43,11 +43,6 @@ class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
       if (await testSubjects.exists(CLASSIC_SEARCH_REVEAL, { timeout: 0 })) {
         return false;
       }
-      // Classic chrome swaps the reveal button for the conceal button once the bar is open,
-      // so an already-open bar means we're in classic chrome, not missing a trigger.
-      if (await testSubjects.exists(CLASSIC_SEARCH_CONCEAL, { timeout: 0 })) {
-        return false;
-      }
       throw new Error('No global search trigger is present');
     });
 
@@ -57,12 +52,7 @@ class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
       await testSubjects.existOrFail(CHROME_NEXT_SEARCH_MODAL);
       return;
     }
-    // Already open? classic chrome swaps reveal → conceal once the bar is open.
-    if (await testSubjects.exists(CLASSIC_SEARCH_CONCEAL, { timeout: 0 })) return;
-    // Click waits for reveal to be actionable, tolerating a transient header
-    // re-render that a zero-timeout `exists` guard would skip the click on.
     await testSubjects.click(CLASSIC_SEARCH_REVEAL);
-    await testSubjects.existOrFail(CLASSIC_SEARCH_CONCEAL);
   }
 
   async hideSearch() {
@@ -78,7 +68,6 @@ class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
     }
     if (await testSubjects.exists(CLASSIC_SEARCH_CONCEAL, { timeout: 0 })) {
       await testSubjects.click(CLASSIC_SEARCH_CONCEAL);
-      await testSubjects.missingOrFail(CLASSIC_SEARCH_CONCEAL);
     }
   }
 }

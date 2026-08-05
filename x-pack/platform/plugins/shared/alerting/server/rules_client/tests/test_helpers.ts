@@ -17,7 +17,7 @@ export const savedObjectWith500Error = {
     statusCode: 500,
   },
   version: '1',
-} as unknown as SavedObject;
+} as SavedObject;
 
 export const savedObjectWith409Error = {
   id: 'id2',
@@ -27,7 +27,7 @@ export const savedObjectWith409Error = {
     statusCode: 409,
   },
   version: '1',
-} as unknown as SavedObject;
+} as SavedObject;
 
 export const defaultRule = {
   id: 'id1',

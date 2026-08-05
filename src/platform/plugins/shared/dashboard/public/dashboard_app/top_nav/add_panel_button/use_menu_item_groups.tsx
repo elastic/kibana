@@ -106,8 +106,20 @@ export function getMenuItems(
         id: action.id,
         name: actionName,
         icon: action.getIconType?.(context) ?? 'empty',
-        onClick: (event: React.MouseEvent) =>
-          onAddPanelClick(event, dashboardApi, () => action.execute(context)),
+        onClick: (event: React.MouseEvent) => {
+          if (event.currentTarget instanceof HTMLAnchorElement) {
+            if (
+              !event.defaultPrevented && // onClick prevented default
+              event.button === 0 &&
+              (!event.currentTarget.target || event.currentTarget.target === '_self') &&
+              !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
+            ) {
+              event.preventDefault();
+            }
+          }
+          dashboardApi.clearOverlays();
+          action.execute(context);
+        },
         'data-test-subj': `create-action-${actionName}`,
         description: action?.getDisplayNameTooltip?.(context),
         isDisabled: action?.isDisabled?.(context),
@@ -120,25 +132,6 @@ export function getMenuItems(
         ? itemA.name.localeCompare(itemB.name)
         : itemB.order - itemA.order;
     });
-}
-
-export function onAddPanelClick(
-  event: React.MouseEvent,
-  dashboardApi: DashboardApi,
-  onClick: () => void
-) {
-  dashboardApi.clearOverlays();
-  if (event.currentTarget instanceof HTMLAnchorElement) {
-    if (
-      !event.defaultPrevented && // onClick prevented default
-      event.button === 0 &&
-      (!event.currentTarget.target || event.currentTarget.target === '_self') &&
-      !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
-    ) {
-      event.preventDefault();
-    }
-  }
-  onClick();
 }
 
 function generateMenuItemGroups(

@@ -7,7 +7,6 @@
 
 import {
   EuiBadge,
-  EuiDescriptionList,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -41,7 +40,6 @@ import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { isPending, isSuccess } from '../../../../hooks/use_fetcher';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { ErrorMetadata } from '../../../shared/metadata_table/error_metadata';
@@ -188,36 +186,6 @@ export function ErrorSampleDetails({
     ENVIRONMENT_NOT_DEFINED.value;
   const serviceVersion = error?.service?.version ?? transaction?.service?.version ?? undefined;
   const isUnhandled = error?.error?.exception?.[0]?.handled === false;
-  const errorType = error?.error?.exception?.[0]?.type ?? error?.error?.type;
-  const sdkName = error?.agent?.name;
-  const sdkVersion = error?.agent?.version;
-  const sdkLabel = [sdkName, sdkVersion].filter(Boolean).join(' ');
-  const errorContextItems = [
-    {
-      title: i18n.translate('xpack.apm.errorSampleDetails.errorContext.groupIdLabel', {
-        defaultMessage: 'Group ID',
-      }),
-      description: groupId || NOT_AVAILABLE_LABEL,
-    },
-    {
-      title: i18n.translate('xpack.apm.errorSampleDetails.errorContext.occurrencesLabel', {
-        defaultMessage: 'Occurrences',
-      }),
-      description: String(occurrencesCount),
-    },
-    {
-      title: i18n.translate('xpack.apm.errorSampleDetails.errorContext.typeLabel', {
-        defaultMessage: 'Type',
-      }),
-      description: errorType || NOT_AVAILABLE_LABEL,
-    },
-    {
-      title: i18n.translate('xpack.apm.errorSampleDetails.errorContext.sdkLabel', {
-        defaultMessage: 'SDK',
-      }),
-      description: sdkLabel || NOT_AVAILABLE_LABEL,
-    },
-  ];
 
   return (
     <EuiPanel hasBorder={true}>
@@ -345,17 +313,6 @@ export function ErrorSampleDetails({
       )}
 
       <EuiSpacer />
-      {!isLoading && (
-        <>
-          <EuiDescriptionList
-            type="responsiveColumn"
-            columnWidths={['20%', '80%']}
-            listItems={errorContextItems}
-          />
-          <EuiSpacer />
-        </>
-      )}
-
       {isLoading ? (
         <EuiFlexItem grow={false}>
           <EuiSpacer size="s" />

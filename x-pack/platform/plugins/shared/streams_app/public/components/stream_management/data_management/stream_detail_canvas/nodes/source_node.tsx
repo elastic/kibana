@@ -42,7 +42,7 @@ export function SourceNode({ data, selected, dragging }: NodeProps<SourceNodeTyp
                 padding: ${euiTheme.size.xs};
               `}
             >
-              <EuiIcon type={data.iconType} size="s" aria-hidden={true} />
+              <EuiIcon type={data.iconType} size="s" />
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem

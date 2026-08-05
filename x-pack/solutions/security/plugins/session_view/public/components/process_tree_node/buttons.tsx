@@ -48,7 +48,7 @@ export const ChildrenProcessesButton = ({
       aria-label={CHILD_PROCESSES}
     >
       {CHILD_PROCESSES}
-      <EuiIcon css={buttonArrow} size="s" type="chevronSingleDown" aria-hidden={true} />
+      <EuiIcon css={buttonArrow} size="s" type="chevronSingleDown" />
     </EuiButton>
   );
 };
@@ -87,15 +87,9 @@ export const AlertButton = ({
       {alertsCount > 1 &&
         (alertsCount > MAX_ALERT_COUNT ? ` (${MAX_ALERT_COUNT}+)` : ` (${alertsCount})`)}
       {alertIcons?.map((icon: string, index: number) => (
-        <EuiIcon
-          className="alertIcon"
-          key={`${icon}-${index}`}
-          size="s"
-          type={icon}
-          aria-hidden={true}
-        />
+        <EuiIcon className="alertIcon" key={`${icon}-${index}`} size="s" type={icon} />
       ))}
-      <EuiIcon css={buttonArrow} size="s" type="chevronSingleDown" aria-hidden={true} />
+      <EuiIcon css={buttonArrow} size="s" type="chevronSingleDown" />
     </EuiButton>
   );
 };
@@ -112,7 +106,7 @@ export const OutputButton = ({ onClick }: { onClick: () => void }) => {
       aria-label={OUTPUT}
     >
       {OUTPUT}
-      <EuiIcon css={buttonArrow} size="s" type="chevronSingleRight" aria-hidden={true} />
+      <EuiIcon css={buttonArrow} size="s" type="chevronSingleRight" />
     </EuiButton>
   );
 };

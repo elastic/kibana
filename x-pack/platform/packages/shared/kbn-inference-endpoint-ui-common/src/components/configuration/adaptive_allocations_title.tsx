@@ -16,7 +16,6 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiText,
-  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,10 +24,6 @@ import { i18n } from '@kbn/i18n';
 export const AdaptiveAllocationsTitle: FC = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const popoverTitleId = useGeneratedHtmlId();
-  const adaptiveResourcesLabel = i18n.translate(
-    'xpack.inferenceEndpointUICommon.components.adaptiveResourcesAriaLabel',
-    { defaultMessage: 'Open adaptive resources information popover' }
-  );
 
   return (
     <>
@@ -48,15 +43,18 @@ export const AdaptiveAllocationsTitle: FC = () => {
             anchorPosition="upCenter"
             aria-labelledby={popoverTitleId}
             button={
-              <EuiToolTip content={adaptiveResourcesLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  color="text"
-                  size="xs"
-                  onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                  iconType="info"
-                  aria-label={adaptiveResourcesLabel}
-                />
-              </EuiToolTip>
+              <EuiButtonIcon
+                color="text"
+                size="xs"
+                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                iconType="info"
+                aria-label={i18n.translate(
+                  'xpack.inferenceEndpointUICommon.components.adaptiveResourcesAriaLabel',
+                  {
+                    defaultMessage: 'Open adaptive resources information popover',
+                  }
+                )}
+              />
             }
             isOpen={isPopoverOpen}
             closePopover={() => setIsPopoverOpen(false)}
