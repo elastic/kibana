@@ -1704,7 +1704,9 @@ describe('Output Service', () => {
         `Elasticsearch output host must have default URL in serverless: ${DEFAULT_HOST}`
       );
     });
+  });
 
+  describe('input validation', () => {
     it('rejects create when both ssl.key and secrets.ssl.key are provided for elasticsearch output', async () => {
       mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);
       const soClient = getMockedSoClient();
@@ -3009,6 +3011,35 @@ describe('Output Service', () => {
           name: 'Updated OTLP',
         })
       ).rejects.toThrow('OTLP output type is not enabled');
+
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
+    });
+
+    it('Should throw when updating an OTLP output used by a policy with non-OTel inputs', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        managedOtlpOutput: true,
+      } as any);
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [
+          {
+            id: 'mixed-policy',
+            name: 'Mixed Policy',
+            package_policies: [{ inputs: [{ type: 'logfile', enabled: true }] }],
+          },
+        ],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.getByIds.mockResolvedValue([]);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+
+      // is_default: true changes is_default, which triggers validateTypeChanges for the OTLP path
+      await expect(
+        outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+          is_default: true,
+        })
+      ).rejects.toThrow(
+        'OTLP output cannot be used with agent policy "Mixed Policy" because it contains non-OTel inputs.'
+      );
 
       mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
     });
