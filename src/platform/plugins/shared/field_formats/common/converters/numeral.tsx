@@ -64,8 +64,14 @@ export abstract class NumeralFormat extends FieldFormat {
     numeral.language(defaultLocale);
 
     let pattern: string = this.param('pattern');
-    if (pattern && this.param('alwaysShowSign')) {
-      pattern = pattern.startsWith('+') || val === 0 ? pattern : `+ ${pattern}`;
+    if (pattern && this.param('alwaysShowSign') && !pattern.startsWith('+')) {
+      // add the sign only when the value doesn't round to zero under the pattern,
+      // otherwise e.g. -0.0001 with pattern '0,0' would render as '+0'
+      const roundsToZero =
+        numeralInst.set(val).format(pattern) === numeralInst.set(0).format(pattern);
+      if (!roundsToZero) {
+        pattern = `+ ${pattern}`;
+      }
     }
 
     const formatted = numeralInst.set(val).format(pattern);
