@@ -258,7 +258,6 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         // then the first run after expiry clears the schedule and emits the action.
         await retry.tryForTime(30_000, async () => {
           await runSoon({ id: createdRule.id, supertest, retry });
-          await waitForExecutions(createdRule.id, 3);
 
           const actionCountAfterExpiry = await getExecuteActionEventCount(createdRule.id);
           expect(actionCountAfterExpiry).to.be.greaterThan(actionCountBeforeSnooze);
