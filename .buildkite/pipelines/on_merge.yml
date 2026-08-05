@@ -264,18 +264,17 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - label: 'Upload on-merge fanout'
-    command: buildkite-agent pipeline upload .buildkite/pipelines/on_merge_fanout.yml
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-    timeout_in_minutes: 10
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
+  - label: 'Trigger Security Solution on-merge tests'
+    trigger: kibana-security-solution-on-merge
+    async: false
+    soft_fail: true
+    depends_on:
+      - build
+    build:
+      branch: '${BUILDKITE_BRANCH}'
+      commit: '${BUILDKITE_COMMIT}'
+      env:
+        KIBANA_BUILD_ID: '${BUILDKITE_BUILD_ID}'
 
   - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
     label: 'Build Storybooks'
