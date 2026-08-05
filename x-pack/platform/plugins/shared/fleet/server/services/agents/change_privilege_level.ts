@@ -14,6 +14,7 @@ import {
   MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION,
   isAgentPrivilegeLevelChangeSupported,
 } from '../../../common/services';
+import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import type { PackagePolicy } from '../../types';
@@ -50,8 +51,12 @@ export async function changeAgentPrivilegeLevel(
   }
 
   // Fail fast if agent contains an integration that requires root privilege.
+  // Strip the version suffix: packagePolicyService.findAllForAgentPolicy matches on base policy id.
   const packagePolicies =
-    (await packagePolicyService.findAllForAgentPolicy(soClient, agent.policy_id || '')) || [];
+    (await packagePolicyService.findAllForAgentPolicy(
+      soClient,
+      agent.policy_id ? removeVersionSuffixFromPolicyId(agent.policy_id) : ''
+    )) || [];
   const packagesWithRootPrivilege = getPackagesWithRootPrivilege(packagePolicies);
   if (packagesWithRootPrivilege.length > 0) {
     throw new FleetUnauthorizedError(

@@ -18,6 +18,7 @@ import {
   MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION,
   isAgentPrivilegeLevelChangeSupported,
 } from '../../../common/services';
+import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 import type { AgentPrivilegeLevelChangeUserInfo } from '../../../common/types';
 
 import { ActionRunner } from './action_runner';
@@ -77,7 +78,11 @@ export async function bulkChangePrivilegeAgentsBatch(
       }
       if (agent?.policy_id) {
         const allPackagePolicies =
-          (await packagePolicyService.findAllForAgentPolicy(soClient, agent.policy_id)) || [];
+          // Strip the version suffix: packagePolicyService.findAllForAgentPolicy matches on base policy id.
+          (await packagePolicyService.findAllForAgentPolicy(
+            soClient,
+            agent.policy_id ? removeVersionSuffixFromPolicyId(agent.policy_id) : ''
+          )) || [];
         const packagesWithRootPrivilege = getPackagesWithRootPrivilege(allPackagePolicies);
         // Create error if agent contains an integration that requires root privilege.
         if (packagesWithRootPrivilege.length > 0) {
