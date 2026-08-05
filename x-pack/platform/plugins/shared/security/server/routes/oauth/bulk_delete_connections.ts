@@ -18,25 +18,25 @@ import { UiamOAuth } from '../../authentication/oauth';
 import { wrapError, wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-interface BulkRevokeOAuthConnectionResultItem {
+interface BulkDeleteOAuthConnectionResultItem {
   client_id: string;
   connection_id: string;
-  status: 'revoked' | 'error';
+  status: 'deleted' | 'error';
   status_code?: number;
   message?: string;
 }
 
-interface BulkRevokeOAuthConnectionsResponseBody {
-  results: BulkRevokeOAuthConnectionResultItem[];
+interface BulkDeleteOAuthConnectionsResponseBody {
+  results: BulkDeleteOAuthConnectionResultItem[];
 }
 
-export function defineBulkRevokeOAuthConnectionsRoute({
+export function defineBulkDeleteOAuthConnectionsRoute({
   router,
   getAuthenticationService,
 }: RouteDefinitionParams) {
   router.post(
     {
-      path: '/internal/security/oauth/connections/_bulk_revoke',
+      path: '/internal/security/oauth/connections/_bulk_delete',
       security: {
         authz: {
           enabled: false,
@@ -59,7 +59,6 @@ export function defineBulkRevokeOAuthConnectionsRoute({
             }),
             { minSize: 1, maxSize: OAUTH_MAX_BULK_CONNECTIONS }
           ),
-          reason: schema.maybe(schema.string({ maxLength: OAUTH_MAX_STRING_FIELD_LENGTH })),
         }),
       },
       options: {
@@ -78,13 +77,11 @@ export function defineBulkRevokeOAuthConnectionsRoute({
         // Fail the request up front rather than reporting a bad credential against every target.
         UiamOAuth.getAccessToken(request);
 
-        const { connections, reason } = request.body;
-
-        const targets = uniqWith(connections, isEqual);
+        const targets = uniqWith(request.body.connections, isEqual);
 
         const settled = await Promise.allSettled(
           targets.map(({ client_id: clientId, connection_id: connectionId }) =>
-            oauth.revokeConnection(request, clientId, connectionId, reason)
+            oauth.deleteConnection(request, clientId, connectionId)
           )
         );
 
@@ -99,7 +96,7 @@ export function defineBulkRevokeOAuthConnectionsRoute({
           });
         }
 
-        const results: BulkRevokeOAuthConnectionResultItem[] = settled.map(
+        const results: BulkDeleteOAuthConnectionResultItem[] = settled.map(
           (settledResult, index) => {
             const { client_id: clientId, connection_id: connectionId } = targets[index];
 
@@ -113,7 +110,7 @@ export function defineBulkRevokeOAuthConnectionsRoute({
                   message: 'OAuth management is not available: security features are disabled',
                 };
               }
-              return { client_id: clientId, connection_id: connectionId, status: 'revoked' };
+              return { client_id: clientId, connection_id: connectionId, status: 'deleted' };
             }
 
             const wrapped = wrapError(settledResult.reason);
@@ -127,7 +124,7 @@ export function defineBulkRevokeOAuthConnectionsRoute({
           }
         );
 
-        const body: BulkRevokeOAuthConnectionsResponseBody = { results };
+        const body: BulkDeleteOAuthConnectionsResponseBody = { results };
         return response.ok({ body });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));

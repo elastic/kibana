@@ -10,10 +10,10 @@ import Boom from '@hapi/boom';
 import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import type { UiamOAuthConnectionResponse, UiamOAuthType } from '@kbn/core-security-server';
+import type { UiamOAuthType } from '@kbn/core-security-server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
-import { defineBulkRevokeOAuthConnectionsRoute } from './bulk_revoke_connections';
+import { defineBulkDeleteOAuthConnectionsRoute } from './bulk_delete_connections';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
@@ -23,7 +23,7 @@ interface ConnectionTarget {
   connection_id: string;
 }
 
-describe('Bulk revoke OAuth connections route', () => {
+describe('Bulk delete OAuth connections route', () => {
   function getMockContext(
     licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
   ) {
@@ -34,26 +34,10 @@ describe('Bulk revoke OAuth connections route', () => {
     });
   }
 
-  const buildConnection = (
-    overrides: Partial<UiamOAuthConnectionResponse> = {}
-  ): UiamOAuthConnectionResponse => ({
-    id: 'conn-1',
-    client_id: 'client-1',
-    resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
-    revoked: true,
-    ...overrides,
-  });
-
-  const createRequest = (
-    connections: ConnectionTarget[],
-    {
-      reason,
-      authorization = 'Bearer essu_token',
-    }: { reason?: string; authorization?: string } = {}
-  ) =>
+  const createRequest = (connections: ConnectionTarget[], authorization = 'Bearer essu_token') =>
     httpServerMock.createKibanaRequest({
       headers: { authorization },
-      body: { connections, ...(reason === undefined ? {} : { reason }) },
+      body: { connections },
     });
 
   let routeHandler: RequestHandler<any, any, any, any>;
@@ -66,61 +50,54 @@ describe('Bulk revoke OAuth connections route', () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authc);
 
-    defineBulkRevokeOAuthConnectionsRoute(mockRouteDefinitionParams);
+    defineBulkDeleteOAuthConnectionsRoute(mockRouteDefinitionParams);
 
     const [, handler] = mockRouteDefinitionParams.router.post.mock.calls.find(
-      ([{ path }]) => path === '/internal/security/oauth/connections/_bulk_revoke'
+      ([{ path }]) => path === '/internal/security/oauth/connections/_bulk_delete'
     )!;
     routeHandler = handler;
   });
 
-  it('returns a per-item revoked result when all items succeed', async () => {
-    oauthMock.revokeConnection.mockImplementation(async (_request, clientId, connectionId) =>
-      buildConnection({ id: connectionId, client_id: clientId })
-    );
+  it('returns a per-item deleted result when all items succeed', async () => {
+    oauthMock.deleteConnection.mockResolvedValue(true);
 
     const response = await routeHandler(
       getMockContext(),
-      createRequest(
-        [
-          { client_id: 'client-1', connection_id: 'conn-1' },
-          { client_id: 'client-2', connection_id: 'conn-2' },
-        ],
-        { reason: 'bulk revoked by user' }
-      ),
+      createRequest([
+        { client_id: 'client-1', connection_id: 'conn-1' },
+        { client_id: 'client-2', connection_id: 'conn-2' },
+      ]),
       kibanaResponseFactory
     );
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({
       results: [
-        { client_id: 'client-1', connection_id: 'conn-1', status: 'revoked' },
-        { client_id: 'client-2', connection_id: 'conn-2', status: 'revoked' },
+        { client_id: 'client-1', connection_id: 'conn-1', status: 'deleted' },
+        { client_id: 'client-2', connection_id: 'conn-2', status: 'deleted' },
       ],
     });
-    expect(oauthMock.revokeConnection).toHaveBeenCalledTimes(2);
-    expect(oauthMock.revokeConnection).toHaveBeenNthCalledWith(
+    expect(oauthMock.deleteConnection).toHaveBeenCalledTimes(2);
+    expect(oauthMock.deleteConnection).toHaveBeenNthCalledWith(
       1,
       expect.anything(),
       'client-1',
-      'conn-1',
-      'bulk revoked by user'
+      'conn-1'
     );
-    expect(oauthMock.revokeConnection).toHaveBeenNthCalledWith(
+    expect(oauthMock.deleteConnection).toHaveBeenNthCalledWith(
       2,
       expect.anything(),
       'client-2',
-      'conn-2',
-      'bulk revoked by user'
+      'conn-2'
     );
   });
 
   it('reports per-item failures alongside successes without failing the request', async () => {
-    oauthMock.revokeConnection.mockImplementation(async (_request, _clientId, connectionId) => {
+    oauthMock.deleteConnection.mockImplementation(async (_request, _clientId, connectionId) => {
       if (connectionId === 'conn-2') {
         throw Boom.notFound('Connection not found');
       }
-      return buildConnection({ id: connectionId });
+      return true;
     });
 
     const response = await routeHandler(
@@ -135,7 +112,7 @@ describe('Bulk revoke OAuth connections route', () => {
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({
       results: [
-        { client_id: 'client-1', connection_id: 'conn-1', status: 'revoked' },
+        { client_id: 'client-1', connection_id: 'conn-1', status: 'deleted' },
         {
           client_id: 'client-1',
           connection_id: 'conn-2',
@@ -149,10 +126,10 @@ describe('Bulk revoke OAuth connections route', () => {
 
   it('preserves the order of the input connections in the results array', async () => {
     let callOrder = 0;
-    oauthMock.revokeConnection.mockImplementation(async (_request, _clientId, connectionId) => {
+    oauthMock.deleteConnection.mockImplementation(async () => {
       const order = callOrder++;
       await new Promise((resolve) => setTimeout(resolve, order === 0 ? 10 : 0));
-      return buildConnection({ id: connectionId });
+      return true;
     });
 
     const response = await routeHandler(
@@ -168,17 +145,15 @@ describe('Bulk revoke OAuth connections route', () => {
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({
       results: [
-        { client_id: 'client-a', connection_id: 'conn-a', status: 'revoked' },
-        { client_id: 'client-b', connection_id: 'conn-b', status: 'revoked' },
-        { client_id: 'client-c', connection_id: 'conn-c', status: 'revoked' },
+        { client_id: 'client-a', connection_id: 'conn-a', status: 'deleted' },
+        { client_id: 'client-b', connection_id: 'conn-b', status: 'deleted' },
+        { client_id: 'client-c', connection_id: 'conn-c', status: 'deleted' },
       ],
     });
   });
 
-  it('collapses duplicate targets into a single revoke and a single result', async () => {
-    oauthMock.revokeConnection.mockImplementation(async (_request, clientId, connectionId) =>
-      buildConnection({ id: connectionId, client_id: clientId })
-    );
+  it('collapses duplicate targets into a single delete and a single result', async () => {
+    oauthMock.deleteConnection.mockResolvedValue(true);
 
     const response = await routeHandler(
       getMockContext(),
@@ -193,17 +168,15 @@ describe('Bulk revoke OAuth connections route', () => {
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({
       results: [
-        { client_id: 'client-1', connection_id: 'conn-1', status: 'revoked' },
-        { client_id: 'client-1', connection_id: 'conn-2', status: 'revoked' },
+        { client_id: 'client-1', connection_id: 'conn-1', status: 'deleted' },
+        { client_id: 'client-1', connection_id: 'conn-2', status: 'deleted' },
       ],
     });
-    expect(oauthMock.revokeConnection).toHaveBeenCalledTimes(2);
+    expect(oauthMock.deleteConnection).toHaveBeenCalledTimes(2);
   });
 
   it('treats the same connection id under different clients as distinct targets', async () => {
-    oauthMock.revokeConnection.mockImplementation(async (_request, clientId, connectionId) =>
-      buildConnection({ id: connectionId, client_id: clientId })
-    );
+    oauthMock.deleteConnection.mockResolvedValue(true);
 
     const response = await routeHandler(
       getMockContext(),
@@ -217,11 +190,11 @@ describe('Bulk revoke OAuth connections route', () => {
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({
       results: [
-        { client_id: 'client-1', connection_id: 'conn-1', status: 'revoked' },
-        { client_id: 'client-2', connection_id: 'conn-1', status: 'revoked' },
+        { client_id: 'client-1', connection_id: 'conn-1', status: 'deleted' },
+        { client_id: 'client-2', connection_id: 'conn-1', status: 'deleted' },
       ],
     });
-    expect(oauthMock.revokeConnection).toHaveBeenCalledTimes(2);
+    expect(oauthMock.deleteConnection).toHaveBeenCalledTimes(2);
   });
 
   it('returns 404 when OAuth is not available', async () => {
@@ -246,7 +219,7 @@ describe('Bulk revoke OAuth connections route', () => {
     );
 
     expect(response.status).toBe(401);
-    expect(oauthMock.revokeConnection).not.toHaveBeenCalled();
+    expect(oauthMock.deleteConnection).not.toHaveBeenCalled();
   });
 
   it('returns 400 for the whole request when the credential is not compatible with UIAM', async () => {
@@ -257,17 +230,17 @@ describe('Bulk revoke OAuth connections route', () => {
           { client_id: 'client-1', connection_id: 'conn-1' },
           { client_id: 'client-1', connection_id: 'conn-2' },
         ],
-        { authorization: 'Bearer not-a-uiam-token' }
+        'Bearer not-a-uiam-token'
       ),
       kibanaResponseFactory
     );
 
     expect(response.status).toBe(400);
-    expect(oauthMock.revokeConnection).not.toHaveBeenCalled();
+    expect(oauthMock.deleteConnection).not.toHaveBeenCalled();
   });
 
   it('returns 404 when security features are disabled (null upstream result)', async () => {
-    oauthMock.revokeConnection.mockResolvedValue(null);
+    oauthMock.deleteConnection.mockResolvedValue(null);
 
     const response = await routeHandler(
       getMockContext(),
@@ -282,12 +255,9 @@ describe('Bulk revoke OAuth connections route', () => {
   });
 
   it('reports per-item errors for null upstream results when some items succeed', async () => {
-    oauthMock.revokeConnection.mockImplementation(async (_request, _clientId, connectionId) => {
-      if (connectionId === 'conn-2') {
-        return null;
-      }
-      return buildConnection({ id: connectionId });
-    });
+    oauthMock.deleteConnection.mockImplementation(async (_request, _clientId, connectionId) =>
+      connectionId === 'conn-2' ? null : true
+    );
 
     const response = await routeHandler(
       getMockContext(),
@@ -301,7 +271,7 @@ describe('Bulk revoke OAuth connections route', () => {
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({
       results: [
-        { client_id: 'client-1', connection_id: 'conn-1', status: 'revoked' },
+        { client_id: 'client-1', connection_id: 'conn-1', status: 'deleted' },
         {
           client_id: 'client-1',
           connection_id: 'conn-2',
