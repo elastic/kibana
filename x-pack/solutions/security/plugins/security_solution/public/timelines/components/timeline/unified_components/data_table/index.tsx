@@ -20,7 +20,10 @@ import type {
   EuiDataGridProps,
 } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import {
+  SECURITY_CELL_ACTIONS_DEFAULT,
+  SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { createCellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
@@ -182,8 +185,16 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [events, dataView]
     );
 
+    // The new document details flyout opened from Timeline must render alert/event field cell actions
+    // on the details-flyout trigger so the "Toggle column in table" action is available (it is not
+    // registered on the default trigger). The scope is bound to `timelineId`, so the action toggles
+    // columns on this Timeline via the Redux store; no alerts table ref is needed here.
     const timelineCellActionRenderer = useMemo(
-      () => createCellActionRenderer(timelineId),
+      () =>
+        createCellActionRenderer(timelineId, {
+          triggerId: SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+          visibleCellActions: 6,
+        }),
       [timelineId]
     );
 

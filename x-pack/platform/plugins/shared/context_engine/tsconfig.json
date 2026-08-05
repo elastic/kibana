@@ -38,6 +38,8 @@
     "@kbn/core-security-server",
     "@kbn/workflows-ui",
     "@kbn/deeplinks-workflows",
-    "@kbn/deeplinks-management"
+    "@kbn/deeplinks-management",
+    "@kbn/code-editor",
+    "@kbn/ui-callout"
   ]
 }
