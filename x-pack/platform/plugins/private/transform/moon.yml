@@ -99,6 +99,7 @@ dependsOn:
   - '@kbn/task-manager-plugin'
   - '@kbn/cps-utils'
   - '@kbn/core-notifications-browser'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
