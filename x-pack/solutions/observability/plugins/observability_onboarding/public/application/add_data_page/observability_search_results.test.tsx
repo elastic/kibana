@@ -20,7 +20,9 @@ const mockAvailablePackagesHook = jest.fn();
 
 jest.mock('@kbn/fleet-plugin/public', () => {
   const ReactActual = jest.requireActual('react');
+  const { LocalSearchHook } = jest.requireActual('@kbn/fleet-plugin/public');
   return {
+    LocalSearchHook,
     AvailablePackagesHook: () => mockAvailablePackagesHook(),
     LazyPackageCard: ({ title }: { title: string }) =>
       ReactActual.createElement('div', { 'data-test-subj': 'mockPackageCard' }, title),

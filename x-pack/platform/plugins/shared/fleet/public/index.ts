@@ -105,6 +105,10 @@ export const AvailablePackagesHook = () => {
     './applications/integrations/sections/epm/screens/home/hooks/use_available_packages'
   );
 };
+export const LocalSearchHook = () => {
+  return import('./applications/integrations/hooks/use_local_search');
+};
+export type { UseLocalSearchType } from './applications/integrations/hooks/use_local_search';
 
 export const LazyPackageCard = lazy(() =>
   import('./applications/integrations/sections/epm/components/package_card').then((module) => ({

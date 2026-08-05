@@ -7,15 +7,25 @@
 
 import React, { useRef } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
-import type { AvailablePackagesHookType } from '@kbn/fleet-plugin/public';
+import type { AvailablePackagesHookType, UseLocalSearchType } from '@kbn/fleet-plugin/public';
 import { AddDataSearchResults } from '../add_data_grid';
 import { renderResultCard } from './render_result_card';
 import { useAddDataResultItems } from './use_add_data_result_items';
 
-const fetchAvailablePackagesHook = (): Promise<AvailablePackagesHookType> =>
-  import('@kbn/fleet-plugin/public')
-    .then((module) => module.AvailablePackagesHook())
-    .then((hook) => hook.useAvailablePackages);
+interface FleetHooks {
+  useAvailablePackages: AvailablePackagesHookType;
+  useLocalSearch: UseLocalSearchType;
+}
+
+const fetchFleetHooks = (): Promise<FleetHooks> =>
+  import('@kbn/fleet-plugin/public').then((module) =>
+    Promise.all([module.AvailablePackagesHook(), module.LocalSearchHook()]).then(
+      ([availablePackages, localSearch]) => ({
+        useAvailablePackages: availablePackages.useAvailablePackages,
+        useLocalSearch: localSearch.useLocalSearch,
+      })
+    )
+  );
 
 interface Props {
   searchTerm: string;
@@ -23,10 +33,10 @@ interface Props {
 
 const LoadedResults = ({
   searchTerm,
-  useAvailablePackages,
+  fleetHooks,
   onRetry,
-}: Props & { useAvailablePackages: AvailablePackagesHookType; onRetry: () => void }) => {
-  const { items, isLoading, error } = useAddDataResultItems({ searchTerm, useAvailablePackages });
+}: Props & { fleetHooks: FleetHooks; onRetry: () => void }) => {
+  const { items, isLoading, error } = useAddDataResultItems({ searchTerm, ...fleetHooks });
 
   return (
     <AddDataSearchResults
@@ -42,14 +52,14 @@ const LoadedResults = ({
 };
 
 export const ObservabilitySearchResults = ({ searchTerm }: Props) => {
-  const hookRef = useRef<AvailablePackagesHookType | null>(null);
+  const hookRef = useRef<FleetHooks | null>(null);
 
   const {
     error: errorLoading,
     retry: retryAsyncLoad,
     loading: asyncLoading,
   } = useAsyncRetry(async () => {
-    hookRef.current = await fetchAvailablePackagesHook();
+    hookRef.current = await fetchFleetHooks();
   });
 
   const retry = () => {
@@ -82,7 +92,5 @@ export const ObservabilitySearchResults = ({ searchTerm }: Props) => {
     );
   }
 
-  return (
-    <LoadedResults searchTerm={searchTerm} useAvailablePackages={hookRef.current} onRetry={retry} />
-  );
+  return <LoadedResults searchTerm={searchTerm} fleetHooks={hookRef.current} onRetry={retry} />;
 };

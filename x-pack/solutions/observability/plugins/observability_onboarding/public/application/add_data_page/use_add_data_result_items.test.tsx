@@ -7,14 +7,20 @@
 
 import { renderHook } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import { LocalSearchHook } from '@kbn/fleet-plugin/public';
+import type { IntegrationCardItem, UseLocalSearchType } from '@kbn/fleet-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CompatRouter } from 'react-router-dom-v5-compat';
-import type { SearchItemsMatcher } from './match_search_items';
 import { useAddDataResultItems } from './use_add_data_result_items';
+
+// The real Fleet matcher, loaded the same way production does.
+let useLocalSearch: UseLocalSearchType;
+beforeAll(async () => {
+  ({ useLocalSearch } = await LocalSearchHook());
+});
 
 const makeCard = (overrides: Partial<IntegrationCardItem>): IntegrationCardItem => ({
   id: 'epr:nginx',
@@ -58,12 +64,7 @@ describe('useAddDataResultItems', () => {
     ]);
 
     const { result } = renderHook(
-      () =>
-        useAddDataResultItems({
-          searchTerm: 'redis',
-          useAvailablePackages,
-          // matchItems deliberately not passed: default matcher is under test
-        }),
+      () => useAddDataResultItems({ searchTerm: 'redis', useAvailablePackages, useLocalSearch }),
       { wrapper }
     );
 
@@ -77,7 +78,8 @@ describe('useAddDataResultItems', () => {
     const useAvailablePackages = mockPackages([]);
 
     const { result } = renderHook(
-      () => useAddDataResultItems({ searchTerm: 'kubernetes', useAvailablePackages }),
+      () =>
+        useAddDataResultItems({ searchTerm: 'kubernetes', useAvailablePackages, useLocalSearch }),
       { wrapper }
     );
 
@@ -88,27 +90,29 @@ describe('useAddDataResultItems', () => {
     const useAvailablePackages = mockPackages([], new Error('registry down'));
 
     const { result } = renderHook(
-      () => useAddDataResultItems({ searchTerm: 'redis', useAvailablePackages }),
+      () => useAddDataResultItems({ searchTerm: 'redis', useAvailablePackages, useLocalSearch }),
       { wrapper }
     );
 
     expect(result.current.error).toEqual(new Error('registry down'));
   });
 
-  it('supports an injected matcher', () => {
+  // Matching is Fleet's useLocalSearch. These two assertions lock the semantics
+  // this page was built around (token prefix, no mid-word) so a Fleet change
+  // shows up here instead of silently changing the page.
+  it('matches on token prefix but not mid-word', () => {
     const useAvailablePackages = mockPackages([makeCard({})]);
-    const matchEverything: SearchItemsMatcher = (list) => list;
 
-    const { result } = renderHook(
-      () =>
-        useAddDataResultItems({
-          searchTerm: 'zzz-no-match',
-          useAvailablePackages,
-          matchItems: matchEverything,
-        }),
+    const prefix = renderHook(
+      () => useAddDataResultItems({ searchTerm: 'ngi', useAvailablePackages, useLocalSearch }),
       { wrapper }
     );
+    expect(prefix.result.current.items.map(({ name }) => name)).toEqual(['nginx']);
 
-    expect(result.current.items.some(({ name }) => name === 'nginx')).toBe(true);
+    const midWord = renderHook(
+      () => useAddDataResultItems({ searchTerm: 'ginx', useAvailablePackages, useLocalSearch }),
+      { wrapper }
+    );
+    expect(midWord.result.current.items).toEqual([]);
   });
 });

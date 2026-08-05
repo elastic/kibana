@@ -9,8 +9,10 @@ import { readdirSync, readFileSync } from 'fs';
 import { join, relative, resolve } from 'path';
 
 /**
- * Enforces the package boundary documented in `add_data_grid/README.md`. Lives
- * outside that directory because it needs `fs`/`path`, which the rule forbids.
+ * `add_data_grid/` mirrors the `src/` of a future shared package: production
+ * code may import only react, EUI, emotion and i18n, tests add the testing
+ * libraries, and hosts may reach it only through `index.ts`. This test lives
+ * outside the directory because it needs `fs`/`path`, which the rule forbids.
  */
 const GRID_ROOT = resolve(__dirname, 'add_data_grid');
 
