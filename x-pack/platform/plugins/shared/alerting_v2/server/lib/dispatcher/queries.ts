@@ -11,6 +11,8 @@ import type { AlertEventType } from '../../resources/datastreams/alert_events';
 import type { AlertEpisode, ActionGroupId } from './types';
 import { episodeSubject, SUBJECT_SEPARATOR } from './steps/utils/subject';
 
+const ALERT_EVENT_TYPE: AlertEventType = 'alert';
+
 // Field-based discrimination (type / action_type IS NULL) instead of `_index LIKE` works around
 // an ES|QL regression where `WHERE _index LIKE` before `STATS` returns 0 rows.
 // See: https://github.com/elastic/elasticsearch/issues/146318
@@ -24,10 +26,8 @@ import { episodeSubject, SUBJECT_SEPARATOR } from './steps/utils/subject';
 // schema-valid and reaches the index, but has no series identity. Deriving its subject in
 // TypeScript throws, which would fail the whole tick and drop every other episode in the batch.
 export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
-  const alertEventType: AlertEventType = 'alert';
-
   return esql`FROM ${ALERT_EVENTS_DATA_STREAM},${ALERT_ACTIONS_DATA_STREAM}
-      | WHERE type IS NULL OR type == ${alertEventType}
+      | WHERE type IS NULL OR type == ${ALERT_EVENT_TYPE}
       | EVAL
           rule_id = COALESCE(rule.id, rule_id),
           episode_id = COALESCE(episode.id, episode_id),
@@ -191,13 +191,11 @@ export const getEpisodeDataQueries = (
   episodeIds: readonly string[],
   { gte, lte }: { gte: string; lte: string }
 ): EsqlRequest[] => {
-  const alertEventType: AlertEventType = 'alert';
-
   return chunkInClauseLiterals(episodeIds).map((chunk) => {
     const ids = chunk.map((id) => esql.str(id));
 
     return esql`FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source
-        | WHERE type == ${alertEventType}
+        | WHERE type == ${ALERT_EVENT_TYPE}
             AND episode.id IN (${ids})
             AND @timestamp >= ${gte}::datetime
             AND @timestamp <= ${lte}::datetime

@@ -42,7 +42,7 @@ export class HydrateEpisodeDataStep implements DispatcherStep {
       return { type: 'continue' };
     }
 
-    const episodeIds = dispatchable.map((ep) => ep.episode_id).filter((id): id is string => !!id);
+    const episodeIds = dispatchable.map((ep) => ep.episode_id);
 
     const { gte, lte } = computeTimestampBounds(dispatchable);
 
@@ -69,13 +69,8 @@ export class HydrateEpisodeDataStep implements DispatcherStep {
     }
 
     const hydratedDispatchable: AlertEpisode[] = dispatchable.map((ep) => {
-      if (!dataByEpisodeId.has(ep.episode_id)) {
-        return ep;
-      }
       const raw = dataByEpisodeId.get(ep.episode_id);
-      if (raw == null) {
-        return ep;
-      }
+      if (raw == null) return ep;
       return { ...ep, data: parseDataJson(raw) };
     });
 
@@ -83,8 +78,10 @@ export class HydrateEpisodeDataStep implements DispatcherStep {
   }
 }
 
+const EPOCH_ISO = new Date(0).toISOString();
+
 function computeTimestampBounds(episodes: readonly AlertEpisode[]): { gte: string; lte: string } {
-  const epoch = new Date(0).toISOString();
+  const epoch = EPOCH_ISO;
   let gte: string | undefined;
   let lte: string | undefined;
 
