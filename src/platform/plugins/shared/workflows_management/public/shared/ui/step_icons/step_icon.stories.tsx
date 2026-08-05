@@ -173,7 +173,7 @@ interface IconRow {
   secondary?: string;
 }
 
-const IconRowGrid = ({ rows, columns = 3 }: { rows: IconRow[]; columns?: 1 | 2 | 3 | 4 }) => (
+const IconRowGrid = ({ rows, columns = 4 }: { rows: IconRow[]; columns?: 1 | 2 | 3 | 4 }) => (
   <EuiFlexGrid columns={columns} gutterSize="m">
     {rows.map(({ icon, primary, secondary }) => (
       <EuiFlexItem key={primary} grow={false}>
@@ -181,7 +181,7 @@ const IconRowGrid = ({ rows, columns = 3 }: { rows: IconRow[]; columns?: 1 | 2 |
           <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="s">
-              <pre style={{ margin: 0, padding: 0 }}>{primary}</pre>
+              <span style={{ fontFamily: 'monospace', margin: 0, padding: 0 }}>{primary}</span>
             </EuiText>
             {secondary && (
               <EuiText size="xs" color="subdued">
@@ -287,8 +287,8 @@ const CatalogBody = ({ extensions }: { extensions: LoadedExtensions }) => {
       const base = baseTypeFor(id.startsWith('.') ? id.slice(1) : id);
       return {
         icon: stepIconOf(base),
-        primary: spec.metadata.displayName,
-        secondary: `${id} → base: ${base}`,
+        primary: base,
+        secondary: spec.metadata.displayName,
       };
     });
 
@@ -298,25 +298,25 @@ const CatalogBody = ({ extensions }: { extensions: LoadedExtensions }) => {
         title={`Triggers (${BUILT_IN_TRIGGER_TYPES.length} built-in + ${triggerDefs.length} custom)`}
         subtitle="Raw `type` values users write in the workflow YAML. Custom triggers come from @kbn/workflows-extensions — additional ones may be registered by other plugins at runtime."
       />
-      <IconRowGrid rows={triggerRows} columns={2} />
+      <IconRowGrid rows={triggerRows} columns={4} />
 
       <SectionHeader
         title="Built-in step types"
         subtitle="Types handled by getStepIconType / HardcodedIcons — no extension lookup needed."
       />
-      <IconRowGrid rows={builtInRows} columns={3} />
+      <IconRowGrid rows={builtInRows} columns={4} />
 
       <SectionHeader
         title={`Extension step definitions (${extensionRows.length} from @kbn/workflows-extensions)`}
         subtitle="Only the defs this package ships (data.*, ai.*). cases.* and ai.agent are registered by the Cases / Agent Builder plugins at runtime and appear in real Kibana but not here."
       />
-      <IconRowGrid rows={extensionRows} columns={3} />
+      <IconRowGrid rows={extensionRows} columns={4} />
 
       <SectionHeader
         title={`Connector specs (${connectorRows.length} from @kbn/connector-specs)`}
         subtitle="Rendered as the workflow list table shows them (bare base type, e.g. `aws_lambda` for `.aws_lambda`)."
       />
-      <IconRowGrid rows={connectorRows} columns={2} />
+      <IconRowGrid rows={connectorRows} columns={4} />
     </EuiFlexGroup>
   );
 };
