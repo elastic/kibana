@@ -47,7 +47,6 @@ const inferenceErrorResponse = (): BulkResponse => ({
   ],
 });
 
-
 const otherErrorResponse = (): BulkResponse => ({
   errors: true,
   took: 0,
