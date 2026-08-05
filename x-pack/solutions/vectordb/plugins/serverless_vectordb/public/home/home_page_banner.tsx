@@ -6,16 +6,16 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiIllustration,
-  EuiLoadingSpinner,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiIllustration, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { cloudRocketDeploy } from '@elastic/eui-illustrations';
 import { AnnouncementBanner } from '@kbn/announcement-banner';
 import { useKibana } from '../hooks/use_kibana';
 import { useLocalStorage } from '../hooks/use_local_storage';
-import { BANNER_DISMISSED_KEY, HOME_PAGE_BANNER_COPY, HOME_PAGE_BANNER_DATA_TEST_SUBJ } from '../constants';
+import {
+  BANNER_DISMISSED_KEY,
+  HOME_PAGE_BANNER_COPY,
+  HOME_PAGE_BANNER_DATA_TEST_SUBJ,
+} from '../constants';
 import { GETTING_STARTED_DEEP_LINK_ID, VECTORDB_APP_ID } from '../../common/constants';
 
 interface HomePageBannerProps {
@@ -73,8 +73,7 @@ export const HomePageBanner = ({ hasData, isLoading }: HomePageBannerProps) => {
             'data-test-subj': 'homePageBannerGetStartedBtn',
             'data-telemetry-id': 'serverlessVectordbHomeBannerGetStartedBtnTelemetryId',
           },
-        }
-        }
+        }}
       />
     </>
   );

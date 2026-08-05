@@ -11,9 +11,9 @@ import React from 'react';
 import { EuiBanner, type EuiBannerProps } from '@elastic/eui';
 
 // Prop type for data-telemetry-id
-type TelemetryIdProp = {
+interface TelemetryIdProp {
   'data-telemetry-id'?: string;
-};
+}
 
 /**
  * Props for the primary action button. Rendered as an `EuiButton`.
@@ -21,7 +21,8 @@ type TelemetryIdProp = {
  */
 export type AnnouncementBannerActionPrimaryProps = NonNullable<
   EuiBannerProps['actionProps']
->['primary'] & TelemetryIdProp;
+>['primary'] &
+  TelemetryIdProp;
 
 /**
  * Props for the secondary action button. Rendered as an `EuiButtonEmpty`.
@@ -31,7 +32,8 @@ export type AnnouncementBannerActionPrimaryProps = NonNullable<
  */
 export type AnnouncementBannerActionSecondaryProps = NonNullable<
   EuiBannerProps['actionProps']
->['secondary'] & TelemetryIdProp;
+>['secondary'] &
+  TelemetryIdProp;
 
 export type AnnouncementBannerProps = Omit<EuiBannerProps, 'announceOnMount' | 'actionProps'> & {
   actionProps?: {
@@ -48,11 +50,7 @@ export type AnnouncementBannerProps = Omit<EuiBannerProps, 'announceOnMount' | '
  * the `size` prop.
  */
 export const AnnouncementBanner = (props: AnnouncementBannerProps) => {
-  const {
-    'data-test-subj': dataTestSubj = 'announcementBanner',
-    actionProps,
-    ...rest
-  } = props;
+  const { 'data-test-subj': dataTestSubj = 'announcementBanner', actionProps, ...rest } = props;
 
   const hasActions = Boolean(actionProps?.primary);
 
