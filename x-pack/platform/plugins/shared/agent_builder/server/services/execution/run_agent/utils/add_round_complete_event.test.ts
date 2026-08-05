@@ -19,6 +19,10 @@ import {
   createAttachmentStateManager,
   type AttachmentStateManager,
 } from '@kbn/agent-builder-server/attachments';
+import {
+  AgentPromptType,
+  AgentPromptRequestSourceType,
+} from '@kbn/agent-builder-common/agents/prompts';
 import { createRound } from '../../../../test_utils/conversations';
 import type { ConvertedEvents } from '../convert_graph_events';
 import { createFinalStateEvent } from '../events';
@@ -394,5 +398,49 @@ describe('addRoundCompleteEvent', () => {
     const events = await runFreshRound(undefined);
     const round = events.find(isRoundCompleteEvent)?.data.round;
     expect(round?.steps.some(isRelevantSkillsStep)).toBe(false);
+  });
+
+  it('completes a round interrupted by a browser tool call prompt without a tool-call step', async () => {
+    // Browser tool calls emit a browserToolCall event instead of a toolCall event, so the
+    // round has no matching tool-call step. buildRoundState must not require one.
+    const promptRequestEvent: ChatEvent = {
+      type: ChatEventType.promptRequest,
+      data: {
+        prompt: {
+          type: AgentPromptType.browser_tool_call,
+          id: 'prompt-1',
+          tool_id: 'capture_dashboard_screenshot',
+          params: { dashboardAttachmentId: 'dash-1' },
+          result_type: 'image',
+        },
+        source: {
+          type: AgentPromptRequestSourceType.toolCall,
+          tool_call_id: 'toolu_vrtx_123',
+        },
+      },
+    };
+
+    const events = await firstValueFrom(
+      of(
+        createFinalStateEvent({ currentCycle: 1, errorCount: 0 } as never) as ConvertedEvents,
+        promptRequestEvent as ConvertedEvents
+      ).pipe(
+        addRoundCompleteEvent({
+          ...createDeps(),
+          pendingRound: undefined,
+          userInput: { message: 'validate the dashboard' },
+          startTime: new Date('2026-01-01T00:00:00.000Z'),
+        }),
+        toArray()
+      )
+    );
+
+    const round = events.find(isRoundCompleteEvent)?.data.round;
+    expect(round?.status).toBe(ConversationRoundStatus.awaitingPrompt);
+    expect(round?.pending_prompts).toEqual([
+      expect.objectContaining({ id: 'prompt-1', type: AgentPromptType.browser_tool_call }),
+    ]);
+    // No node-state snapshot for the browser tool prompt.
+    expect(round?.state?.agent.nodes).toEqual([]);
   });
 });

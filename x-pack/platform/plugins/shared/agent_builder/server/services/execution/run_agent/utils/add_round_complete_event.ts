@@ -30,7 +30,10 @@ import type {
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
+import {
+  isAskUserQuestionPrompt,
+  isBrowserToolCallPrompt,
+} from '@kbn/agent-builder-common/agents/prompts';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
 import {
@@ -583,8 +586,11 @@ const buildRoundState = ({
   }
 
   // ask_user_question prompts don't need a node-state snapshot as they are stored as steps.
+  // browser_tool_call prompts don't either: browser tool calls never produce a tool-call
+  // step (they emit a browserToolCall event instead), and the resume path materializes the
+  // call/result pair from the prompt + response rather than re-running a server-side tool.
   const toolCallPromptRequests = promptRequestEvents.filter(
-    (event) => !isAskUserQuestionPrompt(event.prompt)
+    (event) => !isAskUserQuestionPrompt(event.prompt) && !isBrowserToolCallPrompt(event.prompt)
   );
 
   const nodes = toolCallPromptRequests.map((promptRequest) => {
