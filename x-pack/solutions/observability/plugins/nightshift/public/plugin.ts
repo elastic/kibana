@@ -76,7 +76,20 @@ export class NightshiftPlugin
     return {};
   }
 
-  start(coreStart: CoreStart): NightshiftPublicStart {
+  start(coreStart: CoreStart, pluginsStart: NightshiftStartDependencies): NightshiftPublicStart {
+    const { agentBuilder } = pluginsStart;
+    if (agentBuilder) {
+      void import('./chat/agent_builder/significant_event_attachments')
+        .then(({ registerNightshiftAgentBuilderAttachments }) => {
+          registerNightshiftAgentBuilderAttachments({ agentBuilder });
+        })
+        .catch((error) => {
+          this.context.logger
+            .get('nightshiftAgentBuilderAttachments')
+            .error(`Failed to register agent builder attachments: ${error}`);
+        });
+    }
+
     this.availabilitySubscription = coreStart.featureFlags
       .getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false)
       .pipe(

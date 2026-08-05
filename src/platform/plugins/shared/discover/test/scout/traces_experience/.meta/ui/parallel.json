@@ -1,5 +1,5 @@
 {
-  "sha1": "5cec90482a1957e8884791011cd39c8a622e2ee0",
+  "sha1": "515eaa57f78a25c4c7b24fddaa9e954bf2706666",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -300,8 +300,8 @@
       }
     },
     {
-      "id": "88503647b7e10fd-1f25e9798fd3adc",
-      "title": "Traces in Discover - Overview tab content and actions About section - service name link navigates to APM service overview",
+      "id": "88503647b7e10fd-4fe01e6dab75dad",
+      "title": "Traces in Discover - Overview tab content and actions About section - service name link opens service flyout in-place",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -311,7 +311,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 49,
+        "line": 50,
         "column": 61
       }
     },
@@ -327,8 +327,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 61,
-        "column": 27
+        "line": 62,
+        "column": 34
       }
     },
     {
@@ -343,7 +343,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 71,
+        "line": 75,
         "column": 24
       }
     },
@@ -359,8 +359,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 92,
-        "column": 15
+        "line": 93,
+        "column": 30
       }
     },
     {
@@ -375,8 +375,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 111,
-        "column": 11
+        "line": 113,
+        "column": 15
       }
     },
     {
@@ -391,8 +391,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 137,
-        "column": 24
+        "line": 140,
+        "column": 11
       }
     },
     {
@@ -408,7 +408,7 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
         "line": 158,
-        "column": 17
+        "column": 40
       }
     },
     {
@@ -423,8 +423,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 196,
-        "column": 7
+        "line": 197,
+        "column": 27
       }
     },
     {
@@ -439,8 +439,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 219,
-        "column": 6
+        "line": 171,
+        "column": 29
       }
     },
     {
@@ -743,6 +743,38 @@
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/red_metrics_charts.spec.ts",
         "line": 122,
         "column": 27
+      }
+    },
+    {
+      "id": "e4d7b0c35e4ec6a-fba1430212e5161",
+      "title": "Traces in Discover - Service flyout opens service flyout for an ECS service and renders its content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/service_flyout.spec.ts",
+        "line": 71,
+        "column": 25
+      }
+    },
+    {
+      "id": "e4d7b0c35e4ec6a-79429901d0e9508",
+      "title": "Traces in Discover - Service flyout opens service flyout for an unprocessed OTel service and renders its content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/service_flyout.spec.ts",
+        "line": 81,
+        "column": 35
       }
     },
     {

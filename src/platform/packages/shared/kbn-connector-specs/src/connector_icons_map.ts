@@ -338,4 +338,8 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+  [
+    '.zabbix',
+    lazy(() => import(/* webpackChunkName: "connectorIconZabbix" */ './specs/zabbix/icon')),
+  ],
 ]);
