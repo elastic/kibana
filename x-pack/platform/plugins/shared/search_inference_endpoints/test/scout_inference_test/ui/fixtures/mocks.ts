@@ -166,10 +166,23 @@ const putRegionPolicyResponse = (requestBody: MockRegionPolicy) => ({
 });
 
 export async function mockNoRegionPolicy(page: ScoutPage): Promise<RegionPolicyMockCounters> {
+  let currentPolicy: MockRegionPolicy | null = null;
   return createRegionPolicyRouteMock(page, {
-    get: () => ({ status: 404, body: { message: 'No region policy found' } }),
-    put: (_counters, requestBody) => putRegionPolicyResponse(requestBody),
-    delete: () => ({ status: 200, body: { acknowledged: true } }),
+    get: () =>
+      currentPolicy
+        ? {
+            status: 200,
+            body: { region_policy: currentPolicy, created_at: '2026-01-01T00:00:00Z' },
+          }
+        : { status: 404, body: { message: 'No region policy found' } },
+    put: (_counters, requestBody) => {
+      currentPolicy = requestBody;
+      return putRegionPolicyResponse(requestBody);
+    },
+    delete: () => {
+      currentPolicy = null;
+      return { status: 200, body: { acknowledged: true } };
+    },
   });
 }
 
@@ -177,13 +190,23 @@ export async function mockRegionPolicy(
   page: ScoutPage,
   policy: MockRegionPolicy
 ): Promise<RegionPolicyMockCounters> {
+  let currentPolicy: MockRegionPolicy | null = policy;
   return createRegionPolicyRouteMock(page, {
-    get: () => ({
-      status: 200,
-      body: { region_policy: policy, created_at: '2026-01-01T00:00:00Z' },
-    }),
-    put: (_counters, requestBody) => putRegionPolicyResponse(requestBody),
-    delete: () => ({ status: 200, body: { acknowledged: true } }),
+    get: () =>
+      currentPolicy
+        ? {
+            status: 200,
+            body: { region_policy: currentPolicy, created_at: '2026-01-01T00:00:00Z' },
+          }
+        : { status: 404, body: { message: 'No region policy found' } },
+    put: (_counters, requestBody) => {
+      currentPolicy = requestBody;
+      return putRegionPolicyResponse(requestBody);
+    },
+    delete: () => {
+      currentPolicy = null;
+      return { status: 200, body: { acknowledged: true } };
+    },
   });
 }
 

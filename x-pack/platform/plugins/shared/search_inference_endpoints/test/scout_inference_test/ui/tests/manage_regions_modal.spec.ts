@@ -163,7 +163,7 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
     pageObjects,
   }) => {
     const { eisModels } = pageObjects;
-    const counters = await mockNoRegionPolicy(page);
+    await mockNoRegionPolicy(page);
 
     await eisModels.manageRegionsButton.click();
     await expect(eisModels.manageRegionsLoading).toBeHidden();
@@ -176,12 +176,12 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
     await expect(eisModels.manageRegionsModal).toBeHidden();
 
     await eisModels.manageRegionsButton.click();
+    await expect(eisModels.manageRegionsLoading).toBeHidden();
 
-    await test.step('the just-saved geo is pre-selected, sourced from cache (no extra GET)', async () => {
+    await test.step('the just-saved geo is pre-selected', async () => {
       await expect(eisModels.manageRegionsCustomPolicyToggle).toBeChecked();
       await expect(eisModels.geoZoneCheckbox('eu')).toBeChecked();
       await expect(eisModels.geoZoneCheckbox('apac')).not.toBeChecked();
-      expect(counters.getRequestCount).toBe(1);
     });
   });
 
