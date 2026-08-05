@@ -17,13 +17,14 @@ import {
 } from './conversation.styles';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 
-const titleStyles = css`
-  font-weight: 400;
-`;
-
 export const NewConversationPrompt: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const { isEmbeddedContext, greetingMessage } = useConversationContext();
+
+  const titleStyles = css`
+    font-weight: 500;
+    color: ${euiTheme.colors.textSubdued};
+  `;
 
   const greeting =
     greetingMessage ??
