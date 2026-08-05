@@ -88,7 +88,7 @@ export const inferenceEndpointAdapter = {
     ).pipe(
       switchMap((stream) => eventSourceStreamIntoObservable(stream)),
       processOpenAIStream(),
-      emitTokenCountEstimateIfMissing({ request }),
+      emitTokenCountEstimateIfMissing({ request, logger }),
       useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
   },

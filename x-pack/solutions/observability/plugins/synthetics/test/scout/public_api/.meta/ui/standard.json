@@ -1,0 +1,37 @@
+{
+  "sha1": "46d88366aead67729c38e9699ac939ebfc2d41cf",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "bd79c16070e8211-c129e7cf5767d21",
+      "title": "Ingest Synthetics test data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "1a09a0195a286e4-7ada0e77e30fad0",
+      "title": "GlobalParameters creates, edits, searches, and deletes global parameters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/public_api/ui/tests/global_parameters.spec.ts",
+        "line": 14,
+        "column": 11
+      }
+    }
+  ]
+}
