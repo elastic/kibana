@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
-
-module.exports = defaultConfig;
+module.exports = require('@kbn/storybook').defaultConfig;
