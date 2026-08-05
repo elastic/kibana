@@ -251,6 +251,12 @@ describe('callKibanaApi', () => {
     await expect(
       callKibanaApi(
         { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '/api/%2e%2e%2fvictim' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
         { method: 'GET', path: '//victim/api' }
       )
     ).rejects.toThrow('Invalid Kibana API path');

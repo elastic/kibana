@@ -215,7 +215,12 @@ const validateSpaceRelativePath = (path: string): void => {
     } catch {
       throw new Error(`Invalid Kibana API path "${path}".`);
     }
-    if (decodedSegment === '.' || decodedSegment === '..' || decodedSegment.includes('\\')) {
+    if (
+      decodedSegment === '.' ||
+      decodedSegment === '..' ||
+      decodedSegment.includes('\\') ||
+      decodedSegment.includes('/')
+    ) {
       throw new Error(`Invalid Kibana API path "${path}".`);
     }
   }
