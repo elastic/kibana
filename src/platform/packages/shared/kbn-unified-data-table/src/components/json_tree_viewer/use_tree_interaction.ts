@@ -8,9 +8,9 @@
  */
 
 /**
- * The JSON tree's interactive behaviour, split from the view:
+ * This file contains the components interactive behaviour:
  *  - `useTreeExpansion` owns the expand/collapse and "show N more" state (and mirrors it to the
- *    host so it survives the remounts in-table search forces on every keystroke).
+ *    host so it survives remounts, triggered by virtualization and in-table search).
  *  - `useRovingTreeNavigation` owns the roving-tabindex keyboard model: which row is focusable,
  *    and how Arrow/Home/End/Enter move focus and drive expansion.
  */
@@ -27,10 +27,10 @@ import {
   type RenderRow,
 } from './tree_model';
 
-// The tree's expand/collapse and "show N more" state, lifted out so a host can persist it across
-// remounts (in-table search remounts every cell on key strokes, data table rows virtualization also unmounts the cells).
 export interface TreeExpansionState {
+  // User clicked a caret to expand the node and see its children.
   expanded: ReadonlySet<string>;
+  // User clicked show more to see more hidden siblings.
   revealed: ReadonlyMap<string, number>;
 }
 
@@ -38,19 +38,17 @@ interface UseTreeExpansionArgs {
   initialState?: TreeExpansionState;
   onStateChange?: (state: TreeExpansionState) => void;
   expandedBySearchNodes: ReadonlySet<string>;
-  // Every toggleable collection id, for Expand-all and the `isAllExpanded` check.
   expandableIds: string[];
 }
 
 export interface TreeExpansion {
-  // The user's expansion unioned with the search-driven set — what the flattener should honour.
+  // The user's expansion unioned with the search-driven set (we expand nodes that contains matches) — what the flattener should honour.
   effectiveExpanded: ReadonlySet<string>;
   revealed: ReadonlyMap<string, number>;
   hasControls: boolean;
   isAllExpanded: boolean;
   toggle: (id: string) => void;
   setExpandedFor: (id: string, shouldExpand: boolean) => void;
-  activatePager: (row: PagerRow) => void;
   revealMore: (id: string) => void;
   showFewer: (id: string) => void;
   expandAll: () => void;
@@ -70,9 +68,7 @@ export const useTreeExpansion = ({
     () => initialState?.revealed ?? new Map()
   );
 
-  // Mirror expand/reveal state to the host on every change so it can restore the tree after a
-  // remount. Held in a ref so a changing callback identity never re-fires the effect; local state
-  // stays the render source of truth, so expanding still re-renders only this cell.
+  // Mirror expand/reveal state to the host on every change so it can restore the tree after a remount.
   const onStateChangeRef = useRef(onStateChange);
   onStateChangeRef.current = onStateChange;
   useEffect(() => {
@@ -120,15 +116,6 @@ export const useTreeExpansion = ({
     });
   }, []);
 
-  // The pager's primary action: reveal the next chunk while items remain, else collapse back.
-  const activatePager = useCallback(
-    (row: PagerRow) =>
-      row.hiddenCount > 0 ? revealMore(row.collectionId) : showFewer(row.collectionId),
-    [revealMore, showFewer]
-  );
-
-  // Expand-all only flips expansion; it never raises reveal budgets, so the DOM stays
-  // bounded by the per-collection caps even for a huge document.
   const expandAll = useCallback(() => setExpanded(new Set(expandableIds)), [expandableIds]);
   const collapseAll = useCallback(() => setExpanded(new Set()), []);
 
@@ -142,7 +129,6 @@ export const useTreeExpansion = ({
     isAllExpanded,
     toggle,
     setExpandedFor,
-    activatePager,
     revealMore,
     showFewer,
     expandAll,
@@ -156,7 +142,6 @@ interface RovingNavActions {
   hasControls: boolean;
   toggle: (id: string) => void;
   setExpandedFor: (id: string, shouldExpand: boolean) => void;
-  activatePager: (row: PagerRow) => void;
 }
 
 export interface RovingNav {
@@ -170,7 +155,7 @@ export interface RovingNav {
 
 export const useRovingTreeNavigation = (
   rows: RenderRow[],
-  { hasControls, toggle, setExpandedFor, activatePager }: RovingNavActions
+  { hasControls, toggle, setExpandedFor }: RovingNavActions
 ): RovingNav => {
   const orderedIds = useMemo(() => rows.filter(isFocusable).map(rowKey), [rows]);
   const orderedIdSet = useMemo(() => new Set(orderedIds), [orderedIds]);
@@ -261,10 +246,9 @@ export const useRovingTreeNavigation = (
           break;
         case 'Enter':
         case ' ':
-          if (row.kind === 'pager') {
-            claim();
-            activatePager(row);
-          } else if (row.hasChildren) {
+          // Pager rows activate through their buttons (ArrowRight → button → Enter), like leaf rows;
+          // only node rows toggle straight from the row.
+          if (row.kind === 'node' && row.hasChildren) {
             claim();
             toggle(row.node.id);
           }
@@ -273,7 +257,7 @@ export const useRovingTreeNavigation = (
           break;
       }
     },
-    [orderedIds, focusRow, setExpandedFor, toggle, activatePager, hasControls]
+    [orderedIds, focusRow, setExpandedFor, toggle, hasControls]
   );
 
   // The Expand/Collapse-all control joins the tree's keyboard navigation: ArrowDown steps into the

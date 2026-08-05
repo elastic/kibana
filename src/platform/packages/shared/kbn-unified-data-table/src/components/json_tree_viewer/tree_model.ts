@@ -8,9 +8,13 @@
  */
 
 /**
- * The JSON tree's pure data model: it turns a raw document into a node tree (`buildNodes`) and
- * flattens the currently-visible slice of that tree into an ordered list of render rows
- * (`buildRows`).
+ * This file contains the JSON tree's data model. Two important functions:
+ *
+ * `buildNodes()` gets the JSON document and transforms it into a Tree of JsonNodes,
+ *  this makes every later operation easier.
+ *
+ * `buildRows()` transform the Tree of nodes into a flatten array of rows, ready to be rendered using an iteration.
+ *  Here you will find all the logic of what data is rendered.
  */
 
 import type { ReactNode } from 'react';
@@ -18,24 +22,15 @@ import type { ReactNode } from 'react';
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = Record<string, unknown> | unknown[] | JsonPrimitive | undefined;
 
-// Renders a leaf's value — e.g. wrapping a query's matched terms in `<mark>`. The tree keeps the
-// raw `value` (so copy and search still work) and only delegates its *display* to this callback;
-// returning `undefined` falls back to the default primitive rendering. `path` lets a host resolve
-// the leaf's source field (array indices included).
-export type FormatValue = (leaf: { value: JsonPrimitive; path: readonly string[] }) => ReactNode;
-
 // Each collection (root + every expanded node) renders at most this many children before a
 // "Show N more" row appears; revealing bumps the collection's budget by CHILDREN_INCREMENT.
 export const INITIAL_CHILDREN = 10;
 export const CHILDREN_INCREMENT = 10;
 
-// Stable id for the root list.
 export const ROOT_ID = 'json-syntax-$root';
 
 export const OPEN_BRACKET = { object: '{', array: '[' } as const;
 export const CLOSE_BRACKET = { object: '}', array: ']' } as const;
-
-// ---- Data model (a plain tree of raw JSON; leaf display is delegated to a `FormatValue` callback) ----
 
 export type CollectionType = 'object' | 'array';
 export type PrimitiveType = 'string' | 'number' | 'boolean' | 'null';
@@ -61,24 +56,25 @@ export interface LeafNode {
 
 export type JsonNode = CollectionNode | LeafNode;
 
-const isJsonObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+export type FormatValue = (leaf: { value: JsonPrimitive; path: readonly string[] }) => ReactNode;
 
-const getPrimitiveType = (value: unknown): PrimitiveType => {
-  if (typeof value === 'string') return 'string';
-  if (typeof value === 'number') return 'number';
-  if (typeof value === 'boolean') return 'boolean';
-  return 'null';
-};
-
-const normalizePrimitive = (value: unknown): JsonPrimitive => {
-  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-    return value;
+/**
+ * Turns a json document into a Nodes tree. Each node contains all the
+ * metadata needed to perform operations in an easy way.
+ */
+export const buildNodes = (json: JsonValue): JsonNode[] => {
+  if (Array.isArray(json)) {
+    return json.map((value, index) =>
+      buildNode({ key: String(index), path: [String(index)], value, isArrayItem: true })
+    );
   }
-  return null;
+  if (isJsonObject(json)) {
+    return Object.entries(json).map(([key, value]) =>
+      buildNode({ key, path: [key], value, isArrayItem: false })
+    );
+  }
+  return [buildNode({ key: 'value', path: ['value'], value: json, isArrayItem: false })];
 };
-
-const getNodeId = (path: string[]) => `json-syntax-${path.join('__')}`;
 
 const buildNode = ({
   key,
@@ -138,67 +134,15 @@ const buildNode = ({
   };
 };
 
-export const buildNodes = (json: JsonValue): JsonNode[] => {
-  if (Array.isArray(json)) {
-    return json.map((value, index) =>
-      buildNode({ key: String(index), path: [String(index)], value, isArrayItem: true })
-    );
-  }
-  if (isJsonObject(json)) {
-    return Object.entries(json).map(([key, value]) =>
-      buildNode({ key, path: [key], value, isArrayItem: false })
-    );
-  }
-  return [buildNode({ key: 'value', path: ['value'], value: json, isArrayItem: false })];
-};
-
-// Ids of the collections that can actually be toggled (empty `{}` / `[]` render inline and
-// are not expandable). Drives the Expand/Collapse-all control and `isAllExpanded`.
-export const collectExpandableIds = (nodes: JsonNode[]): string[] =>
-  nodes.flatMap((node) => {
-    if (node.kind !== 'collection') return [];
-    const childIds = collectExpandableIds(node.children);
-    return node.children.length > 0 ? [node.id, ...childIds] : childIds;
-  });
-
-// ---- Serialize a subtree back to JSON (drives the copy-value / copy-subtree affordances) ----
-
-// Reconstruct the plain JSON value a node stands for, so a leaf or a whole collection can be
-// copied. Mirrors the shape the tree was built from (array items positional, object fields keyed).
-export const nodeToJsonValue = (node: JsonNode): JsonValue => {
-  if (node.kind === 'leaf') {
-    return node.value;
-  }
-  if (node.collectionType === 'array') {
-    return node.children.map(nodeToJsonValue);
-  }
-  const object: Record<string, JsonValue> = {};
-  for (const child of node.children) {
-    object[child.key] = nodeToJsonValue(child);
-  }
-  return object;
-};
-
-// Pretty-printed JSON for the copy-subtree affordance.
-export const nodeToJsonString = (node: JsonNode): string =>
-  JSON.stringify(nodeToJsonValue(node), null, 2);
-
-// The root's bracket pair and list type, derived once. `brackets` is null for a primitive
-// document (rendered as a single bare value, with no enclosing braces).
-export interface RootLayout {
-  type: CollectionType;
-  brackets: { open: string; close: string } | null;
-}
-
 // ---- Flatten visible rows (drives rendering order and keyboard navigation) ----
 //
-// An expanded collection also emits a synthetic `closing` row after its children, so the tree
+// An expanded collection also emits a `closing` row after its children '}' or ']', so the tree
 // reads like formatted JSON. Closing rows are presentational (`aria-hidden`, no role, not
 // focusable) and are excluded from keyboard navigation.
 //
 // Every collection is capped at its reveal budget; when a list is truncated a `more` row is
 // emitted at the children's depth (before the closing bracket). `more` rows are real,
-// focusable treeitems so they stay in the roving-tabindex order.
+// focusable treeitems so they stay in the tabindex order.
 
 export interface NodeRow {
   kind: 'node';
@@ -206,13 +150,13 @@ export interface NodeRow {
   depth: number;
   hasChildren: boolean;
   isExpanded: boolean;
-  // Whether a sibling follows this node, i.e. it needs a trailing comma.
   trailingComma: boolean;
   parentId: string | null;
   setSize: number;
   posInSet: number;
 }
 
+// Closing bracket row '}' or ']'
 export interface ClosingRow {
   kind: 'closing';
   id: string;
@@ -221,9 +165,7 @@ export interface ClosingRow {
   trailingComma: boolean;
 }
 
-// A pager row carries a collection's "Show N more" / "Show fewer" affordances on one focusable
-// treeitem: `hiddenCount > 0` enables "Show N more" (the row's primary action) and `canShowFewer`
-// enables "Show fewer" (a nested control on the same line). At least one of the two always holds.
+// "Show N more" / "Show fewer" row
 export interface PagerRow {
   kind: 'pager';
   id: string;
@@ -237,10 +179,17 @@ export interface PagerRow {
 
 export type RenderRow = NodeRow | ClosingRow | PagerRow;
 
-export const rowKey = (row: RenderRow) => (row.kind === 'node' ? row.node.id : row.id);
-
-// Closing brackets are presentational; nodes and pager rows are the focusable treeitems.
-export const isFocusable = (row: RenderRow): row is NodeRow | PagerRow => row.kind !== 'closing';
+/**
+ * Given a tree of nodes, flatten it into a list of rows, ready to be rendered.
+ * Here lives the logic that determines which rows are visible and which are hidden;
+ * and when to render the pagination buttons.
+ */
+export const buildRows = (
+  nodes: JsonNode[],
+  rootType: CollectionType,
+  expanded: ReadonlySet<string>,
+  revealed: ReadonlyMap<string, number>
+): RenderRow[] => flattenRows(nodes, ROOT_ID, rootType, expanded, revealed, 0, null, []);
 
 const flattenRows = (
   nodes: JsonNode[],
@@ -310,14 +259,53 @@ const flattenRows = (
   return out;
 };
 
+export const rowKey = (row: RenderRow) => (row.kind === 'node' ? row.node.id : row.id);
+
+export const isFocusable = (row: RenderRow): row is NodeRow | PagerRow => row.kind !== 'closing';
+
+const isJsonObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const getPrimitiveType = (value: unknown): PrimitiveType => {
+  if (typeof value === 'string') return 'string';
+  if (typeof value === 'number') return 'number';
+  if (typeof value === 'boolean') return 'boolean';
+  return 'null';
+};
+
+const normalizePrimitive = (value: unknown): JsonPrimitive => {
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return value;
+  }
+  return null;
+};
+
+const getNodeId = (path: string[]) => `json-syntax-${path.join('__')}`;
+
 /**
- * Given a tree of nodes, flatten it into a list of rows, ready to be rendered.
- * Here lives the logic that determines which rows are visible and which are hidden;
- * and when to render the pagination buttons.
+ * Returns a list of Node ids that can be expanded. Empty coollections can't be expanded.
  */
-export const buildRows = (
-  nodes: JsonNode[],
-  rootType: CollectionType,
-  expanded: ReadonlySet<string>,
-  revealed: ReadonlyMap<string, number>
-): RenderRow[] => flattenRows(nodes, ROOT_ID, rootType, expanded, revealed, 0, null, []);
+export const collectExpandableIds = (nodes: JsonNode[]): string[] =>
+  nodes.flatMap((node) => {
+    if (node.kind !== 'collection') return [];
+    const childIds = collectExpandableIds(node.children);
+    return node.children.length > 0 ? [node.id, ...childIds] : childIds;
+  });
+
+/** Serialize a subtree back to JSON (used by the copy-value / copy-subtree features) */
+export const nodeToJsonString = (node: JsonNode): string =>
+  JSON.stringify(nodeToJsonValue(node), null, 2);
+
+export const nodeToJsonValue = (node: JsonNode): JsonValue => {
+  if (node.kind === 'leaf') {
+    return node.value;
+  }
+  if (node.collectionType === 'array') {
+    return node.children.map(nodeToJsonValue);
+  }
+  const object: Record<string, JsonValue> = {};
+  for (const child of node.children) {
+    object[child.key] = nodeToJsonValue(child);
+  }
+  return object;
+};

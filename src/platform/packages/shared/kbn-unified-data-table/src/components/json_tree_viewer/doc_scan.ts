@@ -8,7 +8,8 @@
  */
 
 /**
- * In-table search support for the JSON tree, split by the two things the grid does with a term.
+ * In-table search support for the JSON tree. Both helpers are the same depth-first `visit` over the
+ * document's node tree (`buildNodes`); they differ only in what they collect.
  *
  * `collectContainersWithMatch` drives *visible* auto-expansion: in-table search only sees rendered
  * DOM text, so when a term is active every collection whose subtree contains a matching value is
@@ -22,7 +23,7 @@
  * searchable content for the counter to walk at a fraction of the render cost.
  */
 
-import { type JsonNode, type JsonValue } from './tree_model';
+import { buildNodes, type JsonNode, type JsonValue } from './tree_model';
 
 export const EMPTY_ID_SET: ReadonlySet<string> = new Set();
 
@@ -53,21 +54,6 @@ export const collectContainersWithMatch = (
 // spanning two adjacent fields, mirroring how the rendered tree keeps each token in its own text node.
 const documentTextCache = new WeakMap<object, string>();
 
-const collectDocumentText = (value: unknown, parts: string[]): void => {
-  if (Array.isArray(value)) {
-    value.forEach((item) => collectDocumentText(item, parts));
-    return;
-  }
-  if (typeof value === 'object' && value !== null) {
-    for (const [key, childValue] of Object.entries(value)) {
-      parts.push(key);
-      collectDocumentText(childValue, parts);
-    }
-    return;
-  }
-  parts.push(value === null || value === undefined ? 'null' : String(value));
-};
-
 export const getDocumentText = (json: JsonValue): string => {
   if (typeof json !== 'object' || json === null) {
     return json === undefined ? '' : String(json);
@@ -76,8 +62,24 @@ export const getDocumentText = (json: JsonValue): string => {
   if (cached !== undefined) {
     return cached;
   }
+
   const parts: string[] = [];
-  collectDocumentText(json, parts);
+  const visit = (node: JsonNode): void => {
+    // Array items are positional, so only object fields contribute their key.
+    if (!node.isArrayItem) {
+      parts.push(node.key);
+    }
+    if (node.kind === 'leaf') {
+      parts.push(node.value === null ? 'null' : String(node.value));
+      return;
+    }
+
+    for (const child of node.children) {
+      visit(child);
+    }
+  };
+  buildNodes(json).forEach(visit);
+
   const text = parts.join('\n');
   documentTextCache.set(json, text);
   return text;

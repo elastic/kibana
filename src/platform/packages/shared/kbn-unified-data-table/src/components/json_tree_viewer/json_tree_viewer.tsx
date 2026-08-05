@@ -58,9 +58,6 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   const nodes = useMemo(() => buildNodes(json), [json]);
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
 
-  // Collections to force-open for the active search term (empty unless the document has a match).
-  // Only the on-screen cells run this; the offscreen match-counting pass renders cheap text instead
-  // of the tree (see get_render_cell_value.tsx), so this no longer needs a pre-scanned text guard.
   const searchTermLower = expandNodesContainingTerm?.trim().toLowerCase() ?? '';
   const expandedBySearchNodes = useMemo(
     () => (searchTermLower ? collectContainersWithMatch(nodes, searchTermLower) : EMPTY_ID_SET),
