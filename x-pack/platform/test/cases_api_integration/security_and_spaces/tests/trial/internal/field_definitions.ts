@@ -20,12 +20,15 @@ import {
 const FIELD_DEFINITIONS_URL = '/internal/cases/field_definitions';
 const TEMPLATES_URL = '/internal/cases/templates';
 
-const buildCreateBody = (overrides: Record<string, unknown> = {}) => ({
-  name: 'priority',
-  owner: 'securitySolutionFixture',
-  definition: 'name: priority\ncontrol: INPUT_TEXT\ntype: keyword\n',
-  ...overrides,
-});
+const buildCreateBody = (overrides: Record<string, unknown> = {}) => {
+  const name = (overrides.name as string) ?? 'priority';
+  return {
+    name,
+    owner: 'securitySolutionFixture',
+    definition: `name: ${name}\ncontrol: INPUT_TEXT\ntype: keyword\n`,
+    ...overrides,
+  };
+};
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');

@@ -28,15 +28,15 @@ const makeDefinition = (overrides: Partial<FieldDefinition> = {}): FieldDefiniti
 describe('mergeCustomFieldsIntoExtendedFieldsResolved', () => {
   const linkedIndexes = () => buildFieldLinkIndexes([makeDefinition({ legacyKey: 'text_key_1' })]);
 
-  it('mirrors a value under the resolved storage key, never the raw v1 key', () => {
+  it('mirrors a value under the v1 key-derived storage key', () => {
     const result = mergeCustomFieldsIntoExtendedFieldsResolved(
       [{ key: 'text_key_1', type: 'text', value: 'hello' }],
       {},
       linkedIndexes()
     );
 
-    expect(result.extendedFields).toEqual({ my_text_as_keyword: 'hello' });
-    expect(result.extendedFields).not.toHaveProperty('text_key_1_as_keyword');
+    expect(result.extendedFields).toEqual({ text_key_1_as_keyword: 'hello' });
+    expect(result.extendedFields).not.toHaveProperty('my_text_as_keyword');
     expect(result.unresolvedKeys).toEqual([]);
     expect(result.malformedFields).toEqual([]);
   });
@@ -56,15 +56,14 @@ describe('mergeCustomFieldsIntoExtendedFieldsResolved', () => {
       indexes
     );
 
-    // Storage key uses the definition's immutable name (case preserved), not the raw key.
-    const expectedStorageKey = 'Text_Key_1_as_keyword';
+    const expectedStorageKey = 'text_key_1_as_keyword';
     expect(result.extendedFields).toEqual({ [expectedStorageKey]: 'hello' });
   });
 
   it('clears the mirror key when the value is null', () => {
     const result = mergeCustomFieldsIntoExtendedFieldsResolved(
       [{ key: 'text_key_1', type: 'text', value: null }],
-      { my_text_as_keyword: 'stale', other_key: 'kept' },
+      { text_key_1_as_keyword: 'stale', other_key: 'kept' },
       linkedIndexes()
     );
 
@@ -124,7 +123,7 @@ describe('mergeCustomFieldsIntoExtendedFieldsResolved', () => {
   });
 
   it('returns the same reference when the merge is a value-identical no-op', () => {
-    const existing = { my_text_as_keyword: 'hello' };
+    const existing = { text_key_1_as_keyword: 'hello' };
     const result = mergeCustomFieldsIntoExtendedFieldsResolved(
       [{ key: 'text_key_1', type: 'text', value: 'hello' }],
       existing,
@@ -149,7 +148,7 @@ describe('mergeCustomFieldsIntoExtendedFieldsResolved', () => {
       toggleIndexes
     );
 
-    expect(result.extendedFields).toEqual({ my_toggle_as_boolean: 'false' });
+    expect(result.extendedFields).toEqual({ toggle_key_as_boolean: 'false' });
   });
 });
 

@@ -56,7 +56,7 @@ describe('resolveDefinitionForLegacyField', () => {
 
       expect(resolution).toMatchObject({
         status: 'resolved',
-        storageKey: 'my_text_as_keyword',
+        storageKey: 'text_key_1_as_keyword',
         needsLegacyKeyRepair: false,
       });
     });
@@ -144,8 +144,7 @@ describe('resolveDefinitionForLegacyField', () => {
       const resolution = resolveDefinitionForLegacyField(textField, indexes);
       expect(resolution).toMatchObject({
         status: 'resolved',
-        // Storage key uses the definition's immutable name, never the raw v1 key.
-        storageKey: 'Text_Key_1_as_keyword',
+        storageKey: 'text_key_1_as_keyword',
         needsLegacyKeyRepair: true,
       });
     });
@@ -225,10 +224,10 @@ describe('resolveDefinitionForLegacyField', () => {
 
       expect(
         resolveDefinitionForLegacyField({ key: 'toggle_key', type: 'toggle' }, indexes)
-      ).toMatchObject({ status: 'resolved', storageKey: 'my_toggle_as_boolean' });
+      ).toMatchObject({ status: 'resolved', storageKey: 'toggle_key_as_boolean' });
       expect(
         resolveDefinitionForLegacyField({ key: 'number_key', type: 'number' }, indexes)
-      ).toMatchObject({ status: 'resolved', storageKey: 'my_number_as_integer' });
+      ).toMatchObject({ status: 'resolved', storageKey: 'number_key_as_integer' });
     });
   });
 });
@@ -240,7 +239,7 @@ describe('addDefinitionToIndexes', () => {
 
     expect(resolveDefinitionForLegacyField(textField, indexes)).toMatchObject({
       status: 'resolved',
-      storageKey: 'my_text_as_keyword',
+      storageKey: 'text_key_1_as_keyword',
     });
   });
 });

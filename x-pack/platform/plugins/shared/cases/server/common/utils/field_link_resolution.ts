@@ -132,7 +132,11 @@ export type LegacyFieldResolution =
   | {
       status: 'resolved';
       link: LinkableFieldDefinition;
-      /** `${definition.name}_as_${parsedType}` — never derived from the raw v1 key. */
+      /**
+       * `${v1Key}_as_${parsedType}` — always derived from the raw v1 key so that
+       * analytics storage keys remain stable regardless of the definition's
+       * label-derived friendly name.
+       */
       storageKey: string;
       /**
        * True when the link was found through a name fallback and the definition
@@ -153,16 +157,18 @@ export type LegacyFieldResolution =
 const isTypeCompatible = (linkable: LinkableFieldDefinition, v1Type: string): boolean =>
   linkable.identity !== undefined && linkable.identity.type === getV2FieldType(v1Type);
 
-// The storage key uses the immutable attribute name (identity-locked by PR-A)
-// plus the parsed YAML type — never the raw v1 key.
+// The storage key uses the v1 custom-field key plus the parsed YAML type so
+// that ES analytics fields remain stable regardless of the definition's
+// label-derived friendly name.
 const toResolved = (
+  v1Key: string,
   linkable: LinkableFieldDefinition,
   identity: FieldDefinitionIdentity,
   needsLegacyKeyRepair: boolean
 ): LegacyFieldResolution => ({
   status: 'resolved',
   link: linkable,
-  storageKey: getFieldSnakeKey(linkable.definition.name, identity.type),
+  storageKey: getFieldSnakeKey(v1Key, identity.type),
   needsLegacyKeyRepair,
 });
 
@@ -201,7 +207,7 @@ export const resolveDefinitionForLegacyField = (
     if (!isTypeCompatible(candidate, type)) {
       return { status: 'malformed', reason: 'type_mismatch' };
     }
-    return toResolved(candidate, candidate.identity, false);
+    return toResolved(key, candidate, candidate.identity, false);
   }
 
   // A definition already linked to a different v1 key can never be a name-based
@@ -213,7 +219,7 @@ export const resolveDefinitionForLegacyField = (
 
   const byExactName = (indexes.byExactName.get(key) ?? []).filter(isFallbackCandidate);
   if (byExactName.length === 1) {
-    return toResolved(byExactName[0], byExactName[0].identity, true);
+    return toResolved(key, byExactName[0], byExactName[0].identity, true);
   }
   if (byExactName.length > 1) {
     return { status: 'unresolved', reason: 'ambiguous_name_match' };
@@ -223,7 +229,7 @@ export const resolveDefinitionForLegacyField = (
     indexes.byNormalizedName.get(normalizeFieldDefinitionName(key)) ?? []
   ).filter(isFallbackCandidate);
   if (byNormalizedName.length === 1) {
-    return toResolved(byNormalizedName[0], byNormalizedName[0].identity, true);
+    return toResolved(key, byNormalizedName[0], byNormalizedName[0].identity, true);
   }
   if (byNormalizedName.length > 1) {
     return { status: 'unresolved', reason: 'ambiguous_name_match' };
