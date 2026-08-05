@@ -24,11 +24,13 @@ jest.mock('@langchain/langgraph/prebuilt', () => ({
 
 const createTestGraph = ({ structuredOutput = false }: { structuredOutput?: boolean } = {}) => {
   const researchInvoke = jest.fn();
+  const answerInvoke = jest.fn();
   const structuredInvoke = jest.fn();
   const chatModel = {
     bindTools: jest.fn(() => ({
       withConfig: jest.fn(() => ({ invoke: researchInvoke })),
     })),
+    withConfig: jest.fn(() => ({ invoke: answerInvoke })),
     withStructuredOutput: jest.fn(() => ({
       withConfig: jest.fn(() => ({ invoke: structuredInvoke })),
     })),
@@ -39,23 +41,26 @@ const createTestGraph = ({ structuredOutput = false }: { structuredOutput?: bool
   } as unknown as ToolManager;
   const promptFactory = {
     getMainPrompt: jest.fn().mockResolvedValue([]),
+    getAnswerPrompt: jest.fn().mockResolvedValue([]),
     getStructuredAnswerPrompt: jest.fn().mockResolvedValue([]),
   } as jest.Mocked<PromptFactory>;
 
   const graph = createAgentGraph({
     chatModel,
     toolManager,
-    configuration: { instructions: '' },
+    configuration: {
+      research: { instructions: '' },
+      answer: { instructions: '' },
+    },
     capabilities: { visualizations: false },
     logger: {} as Logger,
     events: { emit: jest.fn() } as unknown as AgentEventEmitter,
     structuredOutput,
     processedConversation: {} as ProcessedConversation,
     promptFactory,
-    roundId: 'test-round',
   });
 
-  return { graph, researchInvoke, structuredInvoke, toolManager };
+  return { graph, researchInvoke, answerInvoke, structuredInvoke, toolManager };
 };
 
 describe('createAgentGraph', () => {
@@ -70,10 +75,11 @@ describe('createAgentGraph', () => {
   });
 
   it('resets the consecutive error counter after a valid research response', async () => {
-    const { graph, researchInvoke } = createTestGraph();
+    const { graph, researchInvoke, answerInvoke } = createTestGraph();
     researchInvoke
       .mockResolvedValueOnce(new AIMessage({ content: '' }))
-      .mockResolvedValueOnce(new AIMessage({ content: 'final answer' }));
+      .mockResolvedValueOnce(new AIMessage({ content: 'research complete' }));
+    answerInvoke.mockResolvedValue(new AIMessage({ content: 'final answer' }));
 
     const result = await graph.invoke({ cycleLimit: 10 });
 
@@ -86,7 +92,7 @@ describe('createAgentGraph', () => {
   });
 
   it('preserves valid tool-call and handover behavior', async () => {
-    const { graph, researchInvoke, toolManager } = createTestGraph();
+    const { graph, researchInvoke, answerInvoke, toolManager } = createTestGraph();
     researchInvoke
       .mockResolvedValueOnce(
         new AIMessage({
@@ -94,7 +100,8 @@ describe('createAgentGraph', () => {
           tool_calls: [{ id: 'call-1', name: 'test-tool', args: {}, type: 'tool_call' }],
         })
       )
-      .mockResolvedValueOnce(new AIMessage({ content: 'answer after tool call' }));
+      .mockResolvedValueOnce(new AIMessage({ content: 'research complete' }));
+    answerInvoke.mockResolvedValue(new AIMessage({ content: 'answer after tool call' }));
 
     const result = await graph.invoke({ cycleLimit: 10 });
 
@@ -108,7 +115,8 @@ describe('createAgentGraph', () => {
       structuredOutput: true,
     });
     researchInvoke.mockResolvedValue(new AIMessage({ content: 'research complete' }));
-    structuredInvoke.mockResolvedValue({});
+    // On 9.4, empty structured output is represented as a non-object response.
+    structuredInvoke.mockResolvedValue(null);
 
     await expect(graph.invoke({ cycleLimit: 10 }, { recursionLimit: 20 })).rejects.toMatchObject({
       meta: { errCode: AgentExecutionErrorCode.emptyResponse },
@@ -123,7 +131,7 @@ describe('createAgentGraph', () => {
     });
     researchInvoke.mockResolvedValue(new AIMessage({ content: 'research complete' }));
     structuredInvoke
-      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce(null)
       .mockResolvedValueOnce({ response: 'structured answer' });
 
     const result = await graph.invoke({ cycleLimit: 10 });
