@@ -319,7 +319,11 @@ function resolveAndCreatePipeline({
                     } as SpanModel)
                   : undefined,
               chatComplete: (options) =>
-                inferenceEndpointAdapter.chatComplete({ ...options, executor }),
+                inferenceEndpointAdapter.chatComplete({
+                  ...options,
+                  executor,
+                  endpointModelId: endpointMeta.modelId,
+                }),
             };
           }
         : async () => {
@@ -356,7 +360,11 @@ function resolveAndCreatePipeline({
                       } as SpanModel)
                     : undefined,
                 chatComplete: (options) =>
-                  inferenceEndpointAdapter.chatComplete({ ...options, executor: endpointExecutor }),
+                  inferenceEndpointAdapter.chatComplete({
+                    ...options,
+                    executor: endpointExecutor,
+                    endpointModelId: endpointMeta.modelId,
+                  }),
               };
             }
 
