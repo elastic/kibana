@@ -29,8 +29,8 @@ import type { CreateUserAction, CommonUserActionArgs } from '../../services/user
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
 import { normalizeCreateCaseRequest, populateAssigneesIdentity } from './utils';
+import { buildExtendedFieldsDefaults } from '../../../common/utils/template_fields';
 import {
-  buildExtendedFieldsDefaults,
   loadFieldLinkIndexes,
   logUnresolvedMirrorKeys,
   throwIfMalformedFieldLinkage,
@@ -277,11 +277,14 @@ export const create = async (
         paired.extendedFields != null &&
         paired.extendedFields !== normalizedCase.extended_fields
       ) {
-        const globalFields = await resolveGlobalFields(query.owner, fieldDefinitionsService);
+        const postPairingGlobalFields = await resolveGlobalFields(
+          query.owner,
+          fieldDefinitionsService
+        );
         await validateCaseExtendedFields({
           extendedFields: paired.extendedFields as Record<string, string>,
           templateId: query.template?.id,
-          globalFields,
+          globalFields: postPairingGlobalFields,
           templatesService,
           fieldDefinitionsService,
           owner: query.owner,

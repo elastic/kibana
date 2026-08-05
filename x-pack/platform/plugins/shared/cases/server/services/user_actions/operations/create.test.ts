@@ -54,7 +54,7 @@ import {
   patchRemoveTemplateCasesRequest,
   getTemplateUserActions,
 } from '../mocks';
-import { AttachmentType, UserActionTypes } from '../../../../common/types/domain';
+import { AttachmentType, CustomFieldTypes, UserActionTypes } from '../../../../common/types/domain';
 
 describe('UserActionPersister', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -559,9 +559,12 @@ describe('UserActionPersister', () => {
           {
             ...patchUpdateCustomFieldsCasesRequest.cases[0],
             updatedAttributes: {
-              ...patchUpdateCustomFieldsCasesRequest.cases[0].updatedAttributes,
+              customFields: [
+                { key: 'risk_score', type: CustomFieldTypes.TEXT as const, value: 'high' },
+              ],
               extended_fields: { risk_score: 'high' },
             },
+            pairedCustomFieldStorageKeys: { risk_score: 'risk_score' },
           },
         ],
       };

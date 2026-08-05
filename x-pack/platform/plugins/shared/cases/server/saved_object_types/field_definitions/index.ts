@@ -11,7 +11,7 @@ import { type FieldDefinition } from '../../../common/types/domain/field_definit
 import { CASE_FIELD_DEFINITION_SAVED_OBJECT } from '../../../common/constants';
 import { modelVersion1 } from './model_versions/model_version_1';
 import { modelVersion2 } from './model_versions/model_version_2';
-import { modelVersion2 } from './model_versions/model_version_2';
+import { modelVersion3 } from './model_versions/model_version_3';
 
 const mappings = {
   dynamic: false,
@@ -49,7 +49,7 @@ export const caseFieldDefinitionSavedObjectType: SavedObjectsType = {
   modelVersions: {
     1: modelVersion1,
     2: modelVersion2,
-    2: modelVersion2,
+    3: modelVersion3,
   },
   management: {
     // Ride along with case export/import; not listed/exported on their own in the SO Management UI.
@@ -62,7 +62,18 @@ export const caseFieldDefinitionSavedObjectType: SavedObjectsType = {
   },
 };
 
-// NOTE: maintain type "connection" with Domain Schema. Mapped fields must exist on the
-// domain type; not every domain field is mapped (`displayOrder` is intentionally unmapped
-// because it is only read from `_source` and sorted in application code).
-mappings.properties satisfies Partial<Record<keyof FieldDefinition, unknown>>;
+/**
+ * Attributes that are intentionally NOT indexed. `displayOrder` is only read
+ * from `_source` and sorted in application code; `legacyKey` is resolved via
+ * bounded in-memory owner/space lookups, never via an Elasticsearch query. Any
+ * future stored attribute must be deliberately mapped or added to this
+ * reviewed exception list.
+ */
+type UnmappedFieldDefinitionKeys = 'displayOrder' | 'legacyKey';
+
+// NOTE: maintain type "connection" with Domain Schema — every attribute outside
+// the reviewed unmapped set must have an explicit mapping entry.
+mappings.properties satisfies Record<
+  Exclude<keyof FieldDefinition, UnmappedFieldDefinitionKeys>,
+  unknown
+>;

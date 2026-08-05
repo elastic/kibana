@@ -88,23 +88,15 @@ export class UserActionPersister {
 
       const userActions: UserActionEvent[] = [];
       const updatedFields = Object.keys(updatedCase.updatedAttributes);
-      const suppressedCustomFieldKeys = this.getSuppressedCustomFieldKeys(updatedCase);
-      // Templates v2 mirrors a customFields edit into extended_fields in the same patch (see
-      // replace_custom_field.ts / bulk_update.ts), so both keys land in `updatedAttributes`
+      // Templates v2 can mirror a customFields edit into extended_fields in the same patch (see
+      // replace_custom_field.ts / bulk_update.ts), landing both keys in `updatedAttributes`
       // together. Surfacing two activity-log entries for what the user experiences as one edit is
-      // redundant — extended_fields is what templates v2 renders and what the mirror already
-      // captures the customFields value into, so it wins and the customFields entry is dropped.
-      // customFields-only updates (templates disabled, or a field with no migrated counterpart)
-      // are unaffected since extended_fields won't be present in that case.
-      const suppressCustomFieldsUserAction =
-        updatedFields.includes(UserActionTypes.customFields) &&
-        updatedFields.includes(UserActionTypes.extended_fields);
+      // redundant, so the customFields entries whose paired storage key the extended_fields
+      // action already records are suppressed (#282474) — see getSuppressedCustomFieldKeys.
+      const suppressedCustomFieldKeys = this.getSuppressedCustomFieldKeys(updatedCase);
 
       updatedFields
         .filter((field) => UserActionPersister.userActionFieldsAllowed.has(field))
-        .filter(
-          (field) => !(suppressCustomFieldsUserAction && field === UserActionTypes.customFields)
-        )
         .forEach((field) => {
           // Special case for status as it can possibly have an associated closeReason (syncing to alerts)
           // Persist the closeReason to the status userAction

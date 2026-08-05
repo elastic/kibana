@@ -15,7 +15,11 @@ import { createCaseError } from '../../common/error';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import type { CaseCustomField } from '../../../common/types/domain';
 import { CaseCustomFieldRt } from '../../../common/types/domain';
-import { validateCustomFieldTypesInRequest } from './validators';
+import {
+  validateCustomFieldTypesInRequest,
+  validateCaseExtendedFields,
+  resolveGlobalFields,
+} from './validators';
 import type { UserActionEvent } from '../../services/user_actions/types';
 import { validateMaxUserActions } from '../../common/validators';
 import {
@@ -56,7 +60,7 @@ export const replaceCustomField = async (
   casesClient: CasesClient
 ): Promise<CaseCustomField> => {
   const {
-    services: { caseService, userActionService },
+    services: { caseService, userActionService, templatesService, fieldDefinitionsService },
     user,
     logger,
     authorization,
@@ -140,7 +144,7 @@ export const replaceCustomField = async (
     const existingExtendedFields = caseToUpdate.attributes.extended_fields;
     const linkIndexes = await loadFieldLinkIndexes(
       caseToUpdate.attributes.owner,
-      clientArgs.services.fieldDefinitionsService
+      fieldDefinitionsService
     );
     const links = buildActiveLinkMaps(configurations[0].customFields, linkIndexes);
     const paired = pairUpdatedCaseFields({
@@ -158,6 +162,26 @@ export const replaceCustomField = async (
     });
     const extendedFieldsChanged = paired.extendedFields !== existingExtendedFields;
     incrementPairedWriteCounter(clientArgs.usageCounter, paired, extendedFieldsChanged);
+
+    // Definition-aware validation of the FINAL map, matching create.ts/bulk_create.ts/bulk_update.ts:
+    // the pairing-derived extended_fields entry must also be a valid key with a valid value
+    // against the linked definition. `partial: true` — pairing never makes an absent field
+    // "required-missing".
+    if (extendedFieldsChanged && paired.extendedFields != null) {
+      const globalFields = await resolveGlobalFields(
+        caseToUpdate.attributes.owner,
+        fieldDefinitionsService
+      );
+      await validateCaseExtendedFields({
+        extendedFields: paired.extendedFields as Record<string, string>,
+        templateId: caseToUpdate.attributes.template?.id,
+        globalFields,
+        templatesService,
+        fieldDefinitionsService,
+        owner: caseToUpdate.attributes.owner,
+        partial: true,
+      });
+    }
 
     const patchCasesPayload = {
       caseId,

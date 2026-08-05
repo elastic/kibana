@@ -713,6 +713,22 @@ describe('bulkCreate', () => {
     });
 
     it('rejects an extended field value that exceeds the maximum byte size before writing', async () => {
+      // A real global field definition so the request first clears the definition-aware
+      // key/type checks and the oversized value is what actually trips the rejection.
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [
+          {
+            fieldDefinitionId: 'fd-large',
+            name: 'large',
+            owner: SECURITY_SOLUTION_OWNER,
+            description: '',
+            isGlobal: true,
+            definition: 'name: large\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Large\n',
+          },
+        ],
+        total: 1,
+      });
+
       await expect(
         bulkCreate(
           {
@@ -727,6 +743,29 @@ describe('bulkCreate', () => {
         )
       ).rejects.toThrow(
         `Failed to bulk create cases: Error: Invalid extended_fields: Extended field "large_as_keyword" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+
+      expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
+    });
+
+    it('rejects an extended field key that does not correspond to a global field definition', async () => {
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [],
+        total: 0,
+      });
+
+      await expect(
+        bulkCreate(
+          {
+            cases: getCases({
+              extended_fields: { unknown_as_keyword: 'value' },
+            }),
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow(
+        `Failed to bulk create cases: Error: extended_fields keys [unknown_as_keyword] are not global (isGlobal) field definitions`
       );
 
       expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();

@@ -9,7 +9,10 @@ import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { FieldDefinitionsService } from '../../services';
-import type { LinkableFieldDefinition } from '../../common/utils/field_link_resolution';
+import type {
+  FieldLinkIndexes,
+  LinkableFieldDefinition,
+} from '../../common/utils/field_link_resolution';
 import {
   buildFieldLinkIndexes,
   addDefinitionToIndexes,
@@ -27,7 +30,14 @@ interface CustomFieldLike {
   defaultValue?: string | number | boolean | null;
 }
 
-const BLOCKED_REASON_DESCRIPTIONS: Record<string, string> = {
+type BlockedReason =
+  | 'duplicate_legacy_key'
+  | 'type_mismatch'
+  | 'unparseable_definition'
+  | 'ambiguous_name_match'
+  | 'capacity';
+
+const BLOCKED_REASON_DESCRIPTIONS: Record<BlockedReason, string> = {
   duplicate_legacy_key: 'multiple field definitions claim this custom field key',
   type_mismatch: 'the linked field definition has an incompatible type',
   unparseable_definition: 'the linked field definition YAML cannot be parsed',
@@ -79,7 +89,7 @@ export const ensureGlobalFieldDefinitions = async ({
   const indexes = buildFieldLinkIndexes(existingSavedObjects);
   let totalCount = existingSavedObjects.length;
 
-  const blockedFields: Array<{ key: string; reason: string }> = [];
+  const blockedFields: Array<{ key: string; reason: BlockedReason }> = [];
 
   const processCustomField = async (customField: CustomFieldLike): Promise<void> => {
     const resolution = resolveDefinitionForLegacyField(customField, indexes);
@@ -167,13 +177,15 @@ export const ensureGlobalFieldDefinitions = async ({
     }
   };
 
+  // Sequential by design: processCustomField mutates `indexes` so each iteration
+  // sees definitions created or repaired by earlier ones (intra-request dedup).
   for (const customField of customFields) {
     await processCustomField(customField);
   }
 
   if (blockedFields.length > 0) {
     const details = blockedFields
-      .map(({ key, reason }) => `"${key}" (${BLOCKED_REASON_DESCRIPTIONS[reason] ?? reason})`)
+      .map(({ key, reason }) => `"${key}" (${BLOCKED_REASON_DESCRIPTIONS[reason]})`)
       .join('; ');
     throw Boom.badRequest(
       `Cannot save the Cases configuration: the following custom fields could not be linked ` +
@@ -199,7 +211,7 @@ const repairLegacyKey = async ({
   fieldDefinitionsService: FieldDefinitionsService;
   resolutionLink: LinkableFieldDefinition;
   legacyKey: string;
-  indexes: ReturnType<typeof buildFieldLinkIndexes>;
+  indexes: FieldLinkIndexes;
   owner: string;
   logger: Logger;
 }): Promise<void> => {

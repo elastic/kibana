@@ -73,12 +73,15 @@ import type {
 import { CaseStatuses, AttachmentType } from '../../../common/types/domain';
 import {
   validateCustomFields,
+  validateCaseExtendedFields,
   validateExtendedFieldsInRequest,
   validateExtendedFieldsOnClose,
   resolveTemplateFieldsForClose,
   resolveGlobalFields,
 } from './validators';
 import type { InlineField } from '../../../common/types/domain/template/fields';
+import type { TemplatesService } from '../../services/templates';
+import type { FieldDefinitionsService } from '../../services/field_definitions';
 import { emptyCasesAssigneesSanitizer } from './sanitizers';
 import {
   loadFieldLinkIndexes,
@@ -722,13 +725,16 @@ export const bulkUpdate = async (
       );
     }
 
-    const patchCasesPayload = createPatchCasesPayload({
+    const patchCasesPayload = await createPatchCasesPayload({
       user,
       casesToUpdate,
       customFieldsConfigurationMap,
       linkMapsByOwner,
       logger,
       usageCounter: clientArgs.usageCounter,
+      templatesService,
+      fieldDefinitionsService,
+      globalFieldsByOwner,
     });
 
     // Resolve names of newly-applied templates so the "applied template" user action records the
@@ -976,13 +982,16 @@ const normalizeCaseAttributes = (
   return trimmedAttributes;
 };
 
-const createPatchCasesPayload = ({
+const createPatchCasesPayload = async ({
   casesToUpdate,
   user,
   customFieldsConfigurationMap,
   linkMapsByOwner,
   logger,
   usageCounter,
+  templatesService,
+  fieldDefinitionsService,
+  globalFieldsByOwner,
 }: {
   casesToUpdate: UpdateRequestWithOriginalCase[];
   user: User;
@@ -990,11 +999,24 @@ const createPatchCasesPayload = ({
   linkMapsByOwner: Map<string, ActiveLinkMaps>;
   logger: CasesClientArgs['logger'];
   usageCounter: CasesClientArgs['usageCounter'];
-}): PatchCasesArgs => {
+  templatesService: TemplatesService;
+  fieldDefinitionsService: FieldDefinitionsService;
+  /** Per-owner (isGlobal) field-definition cache; populated lazily for owners not pre-resolved by the caller. */
+  globalFieldsByOwner: Map<string, InlineField[]>;
+}): Promise<PatchCasesArgs> => {
   const updatedDt = new Date().toISOString();
 
-  return {
-    cases: casesToUpdate.map(({ updateReq, originalCase }) => {
+  const resolveCachedGlobalFields = async (owner: string): Promise<InlineField[]> => {
+    let globalFields = globalFieldsByOwner.get(owner);
+    if (!globalFields) {
+      globalFields = await resolveGlobalFields(owner, fieldDefinitionsService);
+      globalFieldsByOwner.set(owner, globalFields);
+    }
+    return globalFields;
+  };
+
+  const cases = await Promise.all(
+    casesToUpdate.map(async ({ updateReq, originalCase }) => {
       // intentionally removing owner and closeReason from the case so that we don't accidentally allow it to be updated
       const {
         id: caseId,
@@ -1079,7 +1101,28 @@ const createPatchCasesPayload = ({
         const customFieldsChanged =
           paired.customFields !== undefined && paired.customFields !== baseCustomFields;
         if (extendedFieldsChanged) {
-          trimmedCaseAttributes.extended_fields = paired.extendedFields as Record<string, string>;
+          const finalExtendedFields = paired.extendedFields as Record<string, string>;
+
+          // Definition-aware validation of the FINAL map, matching create.ts/bulk_create.ts:
+          // pairing-derived values must also be valid keys with valid values against the
+          // linked definition. `partial: true` — pairing never makes an absent field
+          // "required-missing".
+          const templateId =
+            updateReq.template === null
+              ? null
+              : updateReq.template?.id ?? originalCase.attributes.template?.id;
+          const globalFields = await resolveCachedGlobalFields(originalCase.attributes.owner);
+          await validateCaseExtendedFields({
+            extendedFields: finalExtendedFields,
+            templateId,
+            globalFields,
+            templatesService,
+            fieldDefinitionsService,
+            owner: originalCase.attributes.owner,
+            partial: true,
+          });
+
+          trimmedCaseAttributes.extended_fields = finalExtendedFields;
         }
         if (customFieldsChanged) {
           // Values were decoded through the per-type codecs, so they satisfy the
@@ -1133,7 +1176,11 @@ const createPatchCasesPayload = ({
         },
         version,
       };
-    }),
+    })
+  );
+
+  return {
+    cases,
     refresh: false,
   };
 };

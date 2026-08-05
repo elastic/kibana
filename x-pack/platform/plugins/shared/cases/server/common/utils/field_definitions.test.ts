@@ -90,14 +90,14 @@ describe('generateFriendlyFieldName', () => {
       legacyKey: 'key-1',
       isNameTaken: (candidate) => candidate === 'my_text',
     });
-    expect(name).toMatch(/^my_text_[0-9a-f]{8}$/);
+    expect(name).toBe('my_text_be297454');
 
     const otherKey = generateFriendlyFieldName({
       label: 'My Text',
       legacyKey: 'key-2',
       isNameTaken: (candidate) => candidate === 'my_text',
     });
-    expect(otherKey).toMatch(/^my_text_[0-9a-f]{8}$/);
+    expect(otherKey).toBe('my_text_7c36b0a9');
     expect(otherKey).not.toBe(name);
   });
 

@@ -36,6 +36,8 @@ import type { BulkCreateCasesArgs } from '../../services/cases/types';
 import type { NotifyAssigneesArgs } from '../../services/notifications/types';
 import type { CaseTransformedAttributes } from '../../common/types/case';
 import type { InlineField } from '../../../common/types/domain/template/fields';
+import type { TemplatesService } from '../../services/templates';
+import type { FieldDefinitionsService } from '../../services/field_definitions';
 import {
   loadFieldLinkIndexes,
   logUnresolvedMirrorKeys,
@@ -49,7 +51,6 @@ import {
   throwIfFieldRepresentationConflicts,
   throwIfInvalidLinkedFieldValues,
 } from '../../common/utils/pair_field_representations';
-import { validateExtendedFieldValueSizes } from '../../../common/types/domain/template/validate_extended_fields';
 
 export const bulkCreate = async (
   data: BulkCreateCasesRequest,
@@ -96,12 +97,11 @@ export const bulkCreate = async (
     }
 
     const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
-    const templatesEnabled = clientArgs.config.templates.enabled;
 
     const bulkCreateRequest: BulkCreateCasesArgs['cases'] = [];
 
     // Per-owner caches: the request may span owners, but every case of one owner
-    // shares the same active-link maps and global field set.
+    // shares the same active-link maps and (isGlobal) field definitions.
     const linkMapsByOwner = new Map<string, ActiveLinkMaps>();
     const globalFieldsByOwner = new Map<string, InlineField[]>();
 
@@ -123,35 +123,18 @@ export const bulkCreate = async (
         }
       }
 
-      const { request, extendedFields } = createBulkCreateCaseRequest({
+      const { request } = await createBulkCreateCaseRequest({
         theCase,
         user,
         customFieldsConfiguration,
         links,
         logger,
         usageCounter: clientArgs.usageCounter,
+        templatesService,
+        fieldDefinitionsService,
+        globalFieldsByOwner,
       });
       bulkCreateRequest.push(request);
-
-      // Definition-aware validation of the FINAL extended_fields map (request-provided
-      // entries + mirrored entries). `partial: true` — bulk create never enforces
-      // required-field completeness on the map itself.
-      if (templatesEnabled && extendedFields && Object.keys(extendedFields).length > 0) {
-        let globalFields = globalFieldsByOwner.get(theCase.owner);
-        if (!globalFields) {
-          globalFields = await resolveGlobalFields(theCase.owner, fieldDefinitionsService);
-          globalFieldsByOwner.set(theCase.owner, globalFields);
-        }
-        await validateCaseExtendedFields({
-          extendedFields,
-          templateId: theCase.template?.id,
-          globalFields,
-          templatesService,
-          fieldDefinitionsService,
-          owner: theCase.owner,
-          partial: true,
-        });
-      }
     }
 
     // Server-derived assignee identity, gated by feature flag `assigneeIdentity`
@@ -309,13 +292,16 @@ const validateAssigneesUsage = ({
   }
 };
 
-const createBulkCreateCaseRequest = ({
+const createBulkCreateCaseRequest = async ({
   theCase,
   customFieldsConfiguration,
   user,
   links,
   logger,
   usageCounter,
+  templatesService,
+  fieldDefinitionsService,
+  globalFieldsByOwner,
 }: {
   theCase: { id: string } & BulkCreateCasesRequest['cases'][number];
   customFieldsConfiguration?: CustomFieldsConfiguration;
@@ -324,12 +310,42 @@ const createBulkCreateCaseRequest = ({
   links?: ActiveLinkMaps;
   logger: CasesClientArgs['logger'];
   usageCounter: CasesClientArgs['usageCounter'];
-}): {
+  templatesService: TemplatesService;
+  fieldDefinitionsService: FieldDefinitionsService;
+  /** Per-owner (isGlobal) field-definition cache, shared and populated across the whole bulk request. */
+  globalFieldsByOwner: Map<string, InlineField[]>;
+}): Promise<{
   request: BulkCreateCasesArgs['cases'][number];
-  /** The final extended_fields map for post-pairing definition-aware validation. */
-  extendedFields: Record<string, string> | undefined;
-} => {
+}> => {
   const { id, ...caseWithoutId } = theCase;
+
+  const resolveCachedGlobalFields = async (): Promise<InlineField[]> => {
+    let globalFields = globalFieldsByOwner.get(theCase.owner);
+    if (!globalFields) {
+      globalFields = await resolveGlobalFields(theCase.owner, fieldDefinitionsService);
+      globalFieldsByOwner.set(theCase.owner, globalFields);
+    }
+    return globalFields;
+  };
+
+  // Definition-aware validation mirrors create.ts: unlike the pairing checks below (which only
+  // cover actively-linked fields), this rejects unknown extended_fields keys, wrong-typed
+  // values, and missing required fields for every case — including pure v2-native fields with
+  // no linked v1 customField. bulkCreate has no server-side template/global-defaults expansion
+  // (see below), so any extended_fields present here are entirely caller-supplied — `partial:
+  // false` enforces `required` on them, same as an explicit caller-supplied map on create.
+  if (caseWithoutId.extended_fields) {
+    const globalFields = await resolveCachedGlobalFields();
+    await validateCaseExtendedFields({
+      extendedFields: caseWithoutId.extended_fields,
+      templateId: theCase.template?.id,
+      globalFields,
+      templatesService,
+      fieldDefinitionsService,
+      owner: theCase.owner,
+      partial: false,
+    });
+  }
 
   /**
    * Trim title, category, description and tags
@@ -367,6 +383,23 @@ const createBulkCreateCaseRequest = ({
       paired,
       paired.extendedFields !== normalizedCase.extended_fields || paired.customFields !== undefined
     );
+
+    // Definition-aware validation of the FINAL map: the pre-pairing validation above only saw
+    // the request's extended_fields; paired entries must also be valid keys with valid values.
+    // `partial: true` — pairing never makes an absent field "required-missing".
+    if (paired.extendedFields != null && paired.extendedFields !== normalizedCase.extended_fields) {
+      const globalFields = await resolveCachedGlobalFields();
+      await validateCaseExtendedFields({
+        extendedFields: paired.extendedFields as Record<string, string>,
+        templateId: theCase.template?.id,
+        globalFields,
+        templatesService,
+        fieldDefinitionsService,
+        owner: theCase.owner,
+        partial: true,
+      });
+    }
+
     normalizedCase.extended_fields = (paired.extendedFields as Record<string, string>) ?? undefined;
     if (paired.customFields !== undefined) {
       // Values were decoded through the per-type codecs, so they satisfy the
@@ -374,13 +407,6 @@ const createBulkCreateCaseRequest = ({
       normalizedCase.customFields =
         paired.customFields as unknown as typeof normalizedCase.customFields;
     }
-  }
-
-  const extendedFieldValueErrors = validateExtendedFieldValueSizes(
-    normalizedCase.extended_fields ?? {}
-  );
-  if (extendedFieldValueErrors.length > 0) {
-    throw Boom.badRequest(`Invalid extended_fields: ${extendedFieldValueErrors.join('; ')}`);
   }
 
   return {
@@ -391,7 +417,6 @@ const createBulkCreateCaseRequest = ({
         newCase: normalizedCase,
       }),
     },
-    extendedFields: normalizedCase.extended_fields,
   };
 };
 
