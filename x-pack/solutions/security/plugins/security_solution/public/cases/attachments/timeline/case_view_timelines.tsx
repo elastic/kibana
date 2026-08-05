@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { EuiBasicTable } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -14,7 +14,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 
-import { useSelector } from 'react-redux-v7';
 import { TimelineTypeEnum, type SortFieldTimeline } from '../../../../common/api/timeline';
 import type {
   OnOpenTimeline,
@@ -37,10 +36,8 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../common/components/utility_bar';
-import { TimelineId } from '../../../../common/types/timeline';
-import { getTimelineShowStatusByIdSelector } from '../../../timelines/store/selectors';
-import type { State } from '../../../common/store';
 import { useGetTimelinesByIds } from './use_get_timelines_by_ids';
+import { useRefetchOnTimelineClose } from './use_refetch_on_timeline_close';
 import { NO_TIMELINES_ATTACHED, TIMELINE_DISPLAY_NAME } from './translations';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -86,19 +83,7 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({ case
 
   const tableRef = useRef<EuiBasicTable<OpenTimelineResult> | null>(null);
 
-  // Refetch when the active timeline modal closes so that savedSearchId (ESQL) and
-  // other fields saved during the session are reflected in the compatibility check.
-  const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-  const { show: activeTimelineVisible } = useSelector((state: State) =>
-    getTimelineShowStatus(state, TimelineId.active)
-  );
-  const prevActiveTimelineVisible = useRef(activeTimelineVisible);
-  useEffect(() => {
-    if (prevActiveTimelineVisible.current && !activeTimelineVisible) {
-      refetch();
-    }
-    prevActiveTimelineVisible.current = activeTimelineVisible;
-  }, [activeTimelineVisible, refetch]);
+  useRefetchOnTimelineClose(refetch);
 
   const queryTimelineById = useQueryTimelineById();
   const onOpenTimeline = useCallback<OnOpenTimeline>(
