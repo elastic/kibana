@@ -61,13 +61,15 @@ export function registerUninstall(router: EntityStorePluginRouter) {
 
         const { engines } = await assetManager.getStatus();
         const installedTypes = new Set(engines.map((e) => e.type));
-        const toUninstall = entityTypes.filter((type) => installedTypes.has(type));
+        const toUninstall = [...new Set(entityTypes.filter((type) => installedTypes.has(type)))];
 
         await Promise.all(toUninstall.map((type) => assetManager.uninstall(type)));
 
-        const isFullUninstall = toUninstall.length === engines.length;
+        const isFullUninstall = toUninstall.length > 0 && toUninstall.length === engines.length;
         if (isFullUninstall) {
-          await entityMaintainersClient.removeAll();
+          // since engines are removed in parallel, the cleanup inside `assetManager.uninstall` might not have been called
+          // so we call it here to ensure all namespace-scoped resources are cleaned up
+          await assetManager.cleanupNamespace();
         }
 
         return res.ok({ body: { ok: true } });

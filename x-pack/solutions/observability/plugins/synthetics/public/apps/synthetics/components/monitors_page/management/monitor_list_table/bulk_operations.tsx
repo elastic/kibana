@@ -21,11 +21,14 @@ import { SERVICE_NOT_ALLOWED } from '../disabled_callout';
 import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
 import { isMonitorBulkEditable } from './bulk_edit_eligibility';
 
+export type BulkEditAction = 'tags' | 'serviceName' | 'labels';
+
 export const BulkOperations = ({
   selectedItems,
   setMonitorPendingDeletion,
   setMonitorPendingReset,
   setMonitorPendingStatusUpdate,
+  setBulkEditAction,
   setIsLocationsFlyoutOpen,
   setIsScheduleFlyoutOpen,
   setIsMaintenanceWindowsFlyoutOpen,
@@ -37,6 +40,7 @@ export const BulkOperations = ({
     skippedMonitors: Array<{ id: string; name: string }>;
   }) => void;
   setMonitorPendingStatusUpdate: (val: { ids: string[]; enabled: boolean } | null) => void;
+  setBulkEditAction: (action: BulkEditAction) => void;
   setIsLocationsFlyoutOpen: (val: boolean) => void;
   setIsScheduleFlyoutOpen: (val: boolean) => void;
   setIsMaintenanceWindowsFlyoutOpen: (val: boolean) => void;
@@ -156,6 +160,45 @@ export const BulkOperations = ({
         setMonitorPendingStatusUpdate({ ids: disableIds, enabled: false });
       },
     },
+    {
+      name: i18n.translate('xpack.synthetics.bulkOperations.editTags', {
+        defaultMessage: 'Edit tags',
+      }),
+      icon: 'tag',
+      disabled: isActionDisabled,
+      toolTipContent: disabledTooltip,
+      'data-test-subj': 'syntheticsBulkEditTagsItem',
+      onClick: () => {
+        closePopover();
+        setBulkEditAction('tags');
+      },
+    },
+    {
+      name: i18n.translate('xpack.synthetics.bulkOperations.editServiceName', {
+        defaultMessage: 'Edit service name',
+      }),
+      icon: 'apmTrace',
+      disabled: isActionDisabled,
+      toolTipContent: disabledTooltip,
+      'data-test-subj': 'syntheticsBulkEditServiceNameItem',
+      onClick: () => {
+        closePopover();
+        setBulkEditAction('serviceName');
+      },
+    },
+    {
+      name: i18n.translate('xpack.synthetics.bulkOperations.editLabels', {
+        defaultMessage: 'Edit labels',
+      }),
+      icon: 'list',
+      disabled: isActionDisabled,
+      toolTipContent: disabledTooltip,
+      'data-test-subj': 'syntheticsBulkEditLabelsItem',
+      onClick: () => {
+        closePopover();
+        setBulkEditAction('labels');
+      },
+    },
     ...(resetIds.length > 0
       ? [
           {
@@ -165,6 +208,8 @@ export const BulkOperations = ({
               values: { count: resetIds.length },
             }),
             icon: 'refresh',
+            disabled: isActionDisabled,
+            toolTipContent: disabledTooltip,
             'data-test-subj': 'syntheticsBulkResetIntegrationButton',
             onClick: () => {
               closePopover();
