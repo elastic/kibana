@@ -50,13 +50,16 @@ function RememberLastSelectedSpaceConfigEditor() {
     <EuiDescribedFormGroup
       title={
         <h2>
-          {i18n.translate('xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.title', {
-            defaultMessage: 'Remember last selected space',
-          })}
+          {i18n.translate(
+            'xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.rememberLastSelectedSpace.title',
+            {
+              defaultMessage: 'Remember last selected space',
+            }
+          )}
         </h2>
       }
       description={i18n.translate(
-        'xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.description',
+        'xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.rememberLastSelectedSpace.description',
         {
           defaultMessage: 'Kibana will redirect to last accessed space on login.',
         }
@@ -138,7 +141,7 @@ export function SpacesConfigurationModal({
               onClick={() => closeModal()}
             >
               {i18n.translate(
-                'xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.closeButton',
+                'xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.cancelButton',
                 {
                   defaultMessage: 'Discard',
                 }
@@ -152,7 +155,7 @@ export function SpacesConfigurationModal({
               isDisabled={!isDirty || isSubmitting}
             >
               {i18n.translate(
-                'xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.closeButton',
+                'xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.saveButton',
                 {
                   defaultMessage: 'Save',
                 }

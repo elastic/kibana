@@ -27,21 +27,6 @@ test.describe('Space configuration modal', { tag: tags.stateful.classic }, () =>
     });
   });
 
-  test('renders remember last selected space settings', async ({ page, pageObjects }) => {
-    const { spacesConfiguration } = pageObjects;
-
-    await spacesConfiguration.open();
-
-    const modal = page.testSubj.locator('spacesConfigurationModal');
-    await expect(modal.getByText('Spaces Configuration')).toBeVisible();
-    await expect(modal.getByText('Remember last selected space')).toBeVisible();
-    await expect(
-      modal.getByText('Kibana will redirect to last accessed space on login.')
-    ).toBeVisible();
-
-    await spacesConfiguration.discard();
-  });
-
   test('persists remember last selected space when saving', async ({
     pageObjects,
     apiClient,

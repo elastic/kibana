@@ -18,13 +18,11 @@ import {
 
 const RUN_ID = randomUUID().slice(0, 8);
 const TARGET_SPACE_ID = `remember-${RUN_ID}`;
-const OTHER_SPACE_ID = `remember-${RUN_ID}-other`;
 
 test.describe('last selected space recollection', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await Promise.all([
       apiServices.spaces.create({ id: TARGET_SPACE_ID, name: `${TARGET_SPACE_ID} name` }),
-      apiServices.spaces.create({ id: OTHER_SPACE_ID, name: `${OTHER_SPACE_ID} name` }),
     ]);
   });
 
@@ -34,7 +32,6 @@ test.describe('last selected space recollection', { tag: tags.stateful.classic }
       lastSelectedSpaceId: null,
     });
     await apiServices.spaces.delete(TARGET_SPACE_ID);
-    await apiServices.spaces.delete(OTHER_SPACE_ID);
   });
 
   test('redirects to the last selected space when preference is already enabled', async ({
@@ -83,6 +80,8 @@ test.describe('last selected space recollection', { tag: tags.stateful.classic }
     await page.goto(kbnUrl.get('/'));
 
     await pageObjects.spaces.waitForSpaceSelector();
-    expect(pageObjects.spaces.getCurrentUrl()).not.toContain(`/s/${TARGET_SPACE_ID}/app/`);
+    await expect
+      .poll(() => pageObjects.spaces.getCurrentUrl())
+      .not.toContain(`/s/${TARGET_SPACE_ID}/app/`);
   });
 });
