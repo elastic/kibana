@@ -147,6 +147,8 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         .send(
           getTestRuleData({
             rule_type_id: 'test.cumulative-firing',
+            // Rule creation triggers an immediate execution. Keep the scheduled interval long so
+            // the test observes only that execution and gets exactly one error per connector.
             schedule: { interval: '24h' },
             actions: [
               {
@@ -177,6 +179,8 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
       expect(response.body.totalErrors).to.eql(2);
       expect(response.body.errors.length).to.eql(2);
 
+      // The action error response exposes the execution UUID as errors[].id, so no separate
+      // execution-log request is needed to exercise the UUID filter.
       const runId: string = response.body.errors[0].id;
       expect(runId).not.to.be.empty();
 

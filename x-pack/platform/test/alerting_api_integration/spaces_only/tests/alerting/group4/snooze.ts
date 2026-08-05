@@ -132,6 +132,8 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
             getTestRuleData({
               name: 'should not trigger actions when snoozed',
               rule_type_id: 'test.patternFiring',
+              // Runs are triggered explicitly below. Keep the scheduled interval long so an
+              // unrelated scheduled run cannot change the action count during the test.
               schedule: { interval: '24h' },
               throttle: null,
               notify_when: 'onActiveAlert',
@@ -238,6 +240,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         const actionCountBeforeSnooze = await getExecuteActionEventCount(createdRule.id);
         expect(actionCountBeforeSnooze).to.be.greaterThan(0);
 
+        // Use a short schedule in this test so natural expiry is exercised without a long wait.
         await alertUtils
           .getSnoozeRequest(createdRule.id)
           .send({
@@ -256,6 +259,8 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         const actionCountDuringSnooze = await getExecuteActionEventCount(createdRule.id);
         expect(actionCountDuringSnooze).to.eql(actionCountBeforeSnooze);
 
+        // Do not call unsnooze here. Repeated runs are the expiry signal: early runs are suppressed,
+        // then the first run after expiry clears the schedule and emits the action.
         await retry.tryForTime(30_000, async () => {
           await runSoon({ id: createdRule.id, supertest, retry });
           await waitForExecutions(createdRule.id, 3);
