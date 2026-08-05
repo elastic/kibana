@@ -105,7 +105,7 @@ import {
   CasesOverviewLocatorDefinition,
 } from '../common/locators/cases';
 import { TelemetryService } from './services/telemetry/telemetry_service';
-import { createNightshiftGlobalSearchProvider } from './pages/nightshift/app/nightshift_global_search_provider';
+import { createNightshiftGlobalSearchProvider } from './global_search/nightshift_global_search_provider';
 
 const nightshiftTitle = i18n.translate('xpack.observability.nightshiftLinkTitle', {
   defaultMessage: 'Nightshift',
@@ -584,19 +584,6 @@ export class Plugin
         createDefinition(coreStart, pluginsStart)
       );
     });
-
-    const agentBuilder = pluginsStart.agentBuilder;
-    if (agentBuilder) {
-      void import('./pages/nightshift/chat/agent_builder/significant_event_attachments')
-        .then(({ registerNightshiftAgentBuilderAttachments }) => {
-          registerNightshiftAgentBuilderAttachments({ agentBuilder });
-        })
-        .catch((error) => {
-          this.initContext.logger
-            .get('nightshiftAgentBuilderAttachments')
-            .error(`Failed to register agent builder attachments: ${error}`);
-        });
-    }
 
     return {
       config,
