@@ -37,6 +37,7 @@
 - [New Relic](/reference/connectors-kibana/new-relic-action-type.md): Acknowledge and resolve AI issues, manage muting rules, and run NRQL queries.
 - [Notion](/reference/connectors-kibana/notion-action-type.md): Explore content and databases in Notion.
 - [OneDrive](/reference/connectors-kibana/one-drive-action-type.md): Search files and folders, browse drives, read file content, and list files shared with you in Microsoft OneDrive.
+- [OpenSearch](/reference/connectors-kibana/opensearch-aws-opensearch-service-action-type.md): Acknowledge and search alerts, run and manage monitors, handle Security Analytics detector alerts, and search and index documents.
 - [Outlook](/reference/connectors-kibana/outlook-action-type.md): Search emails, list folders, and read messages and attachments in Microsoft Outlook.
 - [PagerDuty (MCP)](/reference/connectors-kibana/pagerduty-mcp-action-type.md): Access incidents, escalation policies, schedules, on-calls, users, and teams in PagerDuty.
 - [PostHog](/reference/connectors-kibana/posthog-action-type.md): Triage error-tracking issues, run HogQL queries, and control feature flags.
@@ -51,6 +52,7 @@
 - [Snowflake](/reference/connectors-kibana/snowflake-action-type.md): Query Snowflake, discover databases, schemas, tables, and views, and run semantic searches through Cortex Search.
 - [Tavily](/reference/connectors-kibana/tavily-action-type.md): Search the web and extract content from web pages.
 - [Workday](/reference/connectors-kibana/workday-action-type.md): Access Workday HR data across workers, org structure, time off, recruiting, and holidays.
+- [Zabbix](/reference/connectors-kibana/zabbix-action-type.md): Triage problems, manage maintenance windows, and enable or disable hosts and triggers.
 - [Zendesk](/reference/connectors-kibana/zendesk-action-type.md): Search and retrieve Zendesk tickets, users, organizations, and Help Center articles using the Zendesk API.
 - [Zoom](/reference/connectors-kibana/zoom-action-type.md): Access Zoom meetings, recordings, transcripts, and participants.
 
@@ -66,6 +68,7 @@
 
 - [AbuseIPDB](/reference/connectors-kibana/abuseipdb-action-type.md): Check IP reputation and report abusive IPs.
 - [AlienVault OTX](/reference/connectors-kibana/alienvault-otx-action-type.md): Retrieve community-driven threat intelligence.
+- [Censys](/reference/connectors-kibana/censys-action-type.md): Enrich hosts, web properties, and certificates, submit assets for rescanning, and run CensEye threat-hunting jobs.
 - [GreyNoise](/reference/connectors-kibana/greynoise-action-type.md): Detect and classify Internet scanning noise.
 - [Shodan](/reference/connectors-kibana/shodan-action-type.md): Perform Internet-wide asset discovery and vulnerability scanning.
 - [URLVoid](/reference/connectors-kibana/urlvoid-action-type.md): Check domain and URL reputation using multi-engine scanning.
