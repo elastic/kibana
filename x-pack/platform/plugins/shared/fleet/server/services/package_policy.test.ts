@@ -86,6 +86,7 @@ import { agentPolicyService } from './agent_policy';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { licenseService } from './license';
 import { cloudConnectorService } from './cloud_connector';
+import * as secretsModule from './secrets';
 
 jest.mock('./spaces/helpers', () => {
   return {
@@ -282,6 +283,8 @@ jest.mock('./secrets', () => ({
   })),
   extractAndWriteSecrets: jest.fn(),
 }));
+
+const mockedSecretsModule = secretsModule as jest.Mocked<typeof secretsModule>;
 
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
 
