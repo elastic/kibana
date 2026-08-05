@@ -16,7 +16,7 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsPrivilegedUser();
+    await browserAuth.loginAsViewer();
     await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.discover.waitUntilTabIsLoaded();
   });
