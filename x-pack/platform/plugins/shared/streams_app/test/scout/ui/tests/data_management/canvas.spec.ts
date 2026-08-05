@@ -54,7 +54,8 @@ test.describe(
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.streams.gotoStreamsLayoutTab('canvas');
+      // The canvas renders all classic streams regardless of which one is open.
+      await pageObjects.streams.gotoCanvasTab(PLAIN_STREAM);
     });
 
     test.afterAll(async ({ kbnClient, apiServices }) => {

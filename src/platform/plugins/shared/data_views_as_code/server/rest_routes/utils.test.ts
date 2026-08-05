@@ -111,22 +111,6 @@ describe('requestHandler', () => {
     expect(writeErrorHandler).not.toHaveBeenCalled();
   });
 
-  it('maps boom 400 errors to badRequest response', async () => {
-    const error = {
-      isBoom: true,
-      output: { statusCode: 400 },
-      message: 'bad request from boom',
-    };
-    const handler = jest.fn().mockRejectedValue(error);
-
-    const wrapped = requestHandler({ logger, usageCounter }, handler);
-    await wrapped(context, request, response);
-
-    expect(logRequest).toHaveBeenCalledWith(logger, request, 'warn', error.message);
-    expect(response.badRequest).toHaveBeenCalledWith({ body: { message: error.message } });
-    expect(writeErrorHandler).not.toHaveBeenCalled();
-  });
-
   it('rethrows validation errors after warning log', async () => {
     const error = new ValidationError({ message: 'invalid payload', path: [] } as any);
     const handler = jest.fn().mockRejectedValue(error);

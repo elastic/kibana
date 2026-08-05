@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 /**
- * Migration recommendation: MIXED.
+ * Migration recommendation: MIGRATE TO SCOUT — these are good smoke tests.
  */
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -39,9 +39,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    /**
-     * Migration recommendation: DELETE. Dashboards are loaded all the time using async search in other tests, so this no long adds value.
-     */
     it('not delayed should load', async () => {
       await common.navigateToApp('dashboard');
       await dashboard.loadSavedDashboard('Not Delayed');
@@ -51,9 +48,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(data.length).to.be(5);
     });
 
-    /**
-     * Migration recommendation: DELETE. Dashboards are loaded all the time using async search in other tests, so this no long adds value.
-     */
     it('delayed should load', async () => {
       await common.navigateToApp('dashboard');
       await dashboard.loadSavedDashboard('Delayed 5s');
@@ -63,9 +57,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(data.length).to.be(5);
     });
 
-    /**
-     * Migration recommendation: MIGRATE TO SCOUT — but decrease the timeout to make it faster.
-     */
     describe('given a search timeout', () => {
       before(async () => {
         await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });

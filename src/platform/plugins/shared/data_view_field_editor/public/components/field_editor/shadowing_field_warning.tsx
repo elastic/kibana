@@ -9,20 +9,25 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { KbnWarningCallout } from '@kbn/ui-callout';
+import { EuiCallOut } from '@elastic/eui';
 
 export const ShadowingFieldWarning = () => {
   return (
-    <KbnWarningCallout
+    <EuiCallOut
       title={i18n.translate('indexPatternFieldEditor.editor.form.fieldShadowingCalloutTitle', {
         defaultMessage: 'Field shadowing',
       })}
-      text={i18n.translate('indexPatternFieldEditor.editor.form.fieldShadowingCalloutDescription', {
-        defaultMessage:
-          'This field shares the name of a mapped field. Values for this field will be returned in search results.',
-      })}
+      color="warning"
+      iconType="pin"
       size="s"
       data-test-subj="shadowingFieldCallout"
-    />
+    >
+      <div>
+        {i18n.translate('indexPatternFieldEditor.editor.form.fieldShadowingCalloutDescription', {
+          defaultMessage:
+            'This field shares the name of a mapped field. Values for this field will be returned in search results.',
+        })}
+      </div>
+    </EuiCallOut>
   );
 };

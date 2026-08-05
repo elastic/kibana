@@ -109,6 +109,9 @@ export interface DataStream {
     retentionDeterminedBy?: 'default_failures_retention' | 'data_stream_configuration';
   };
   lifecycle?: IndicesDataStreamLifecycleWithRollover & {
+    enabled?: boolean;
+    effective_retention?: string;
+    retention_determined_by?: string;
     globalMaxRetention?: string;
   };
   indexMode: IndexMode;

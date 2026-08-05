@@ -141,7 +141,6 @@ export const ConvertToLookupIndexModal = ({
           {errorMessage && (
             <EuiFormRow fullWidth>
               <EuiCallOut
-                announceOnMount
                 title={i18n.translate('xpack.idxMgmt.convertToLookupIndexModal.errorCalloutTitle', {
                   defaultMessage: 'An error has occurred',
                 })}

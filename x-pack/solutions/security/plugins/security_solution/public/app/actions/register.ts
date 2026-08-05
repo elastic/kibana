@@ -9,11 +9,11 @@ import type { History } from 'history';
 import type { CoreSetup } from '@kbn/core/public';
 import {
   CELL_VALUE_TRIGGER,
-  SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
   SECURITY_CELL_ACTIONS_ALERTS_COUNT,
   SECURITY_CELL_ACTIONS_CASE_EVENTS,
   SECURITY_CELL_ACTIONS_DEFAULT,
   SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+  SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
@@ -24,16 +24,16 @@ import {
   createFilterOutDiscoverCellActionFactory,
 } from './filter';
 import {
-  createAddToTimelineCellActionFactory,
-  createAddToTimelineDiscoverCellActionFactory,
   createAddToTimelineLensAction,
+  createAddToTimelineCellActionFactory,
   createInvestigateInNewTimelineCellActionFactory,
+  createAddToTimelineDiscoverCellActionFactory,
 } from './add_to_timeline';
 import { createShowTopNCellActionFactory } from './show_top_n';
 import {
+  createCopyToClipboardLensAction,
   createCopyToClipboardCellActionFactory,
   createCopyToClipboardDiscoverCellActionFactory,
-  createCopyToClipboardLensAction,
 } from './copy_to_clipboard';
 import { createToggleColumnCellActionFactory } from './toggle_column';
 import { createToggleUserAssetFieldCellActionFactory } from './toggle_asset_column';
@@ -188,8 +188,6 @@ const registerCellActions = (
 
   registerCellActionsTrigger(SECURITY_CELL_ACTIONS_CASE_EVENTS, [
     'addToTimeline',
-    'toggleColumn',
-    'showTopN',
     'copyToClipboard',
   ]);
 };

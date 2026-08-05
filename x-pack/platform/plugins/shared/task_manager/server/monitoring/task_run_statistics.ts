@@ -90,9 +90,8 @@ interface FillPoolRawStat extends JsonObject {
 }
 
 interface ResultFrequency extends JsonObject {
-  // NOTE: TaskRunResult.Success and TaskRunResult.SuccessRescheduled share the value 'Success',
-  // so they collapse to a single key here.
   [TaskRunResult.Success]: number;
+  [TaskRunResult.SuccessRescheduled]: number;
   [TaskRunResult.RetryScheduled]: number;
   [TaskRunResult.Failed]: number;
 }

@@ -6,37 +6,27 @@
  */
 
 import { apiTest as baseApiTest } from '@kbn/scout';
-import type {
-  ApiServicesFixture,
-  EsClient,
-  KbnClient,
-  ScoutLogger,
-  ScoutTestConfig,
-} from '@kbn/scout';
+import type { ApiServicesFixture, EsClient, KbnClient, ScoutLogger } from '@kbn/scout';
 import {
   getActionPoliciesApiService,
   getAlertActionsApiService,
   getAlertActionsEventsService,
   getDispatcherApiService,
   getMaintenanceWindowsApiService,
-  getRuleChangesHistoryApiService,
   getRuleExecutionsApiService,
   getRulesApiService,
   getTaskManagerService,
   getTelemetryService,
-  getWorkflowsApiService,
   type ActionPoliciesApiService,
   type AlertActionsApiService,
   type AlertActionsEventsService,
   type DispatcherApiService,
   type MaintenanceWindowsApiService,
-  type RuleChangesHistoryApiService,
   type RuleExecutionsApiService,
   type RulesApiService,
   type RuleEventsApiService,
   type TaskManagerService,
   type TelemetryService,
-  type WorkflowsApiService,
 } from '../../common/services';
 import { getRuleEventsApiService } from '../../common/services/rule_events_api_service';
 import type { SourceIndexApiService } from '../../common/services/source_index_api_service';
@@ -44,7 +34,6 @@ import { getSourceIndexApiService } from '../../common/services/source_index_api
 
 export interface AlertingApiServices {
   rules: RulesApiService;
-  ruleChangesHistory: RuleChangesHistoryApiService;
   ruleEvents: RuleEventsApiService;
   alertActionsEvents: AlertActionsEventsService;
   alertActions: AlertActionsApiService;
@@ -55,7 +44,6 @@ export interface AlertingApiServices {
   dispatcher: DispatcherApiService;
   taskManager: TaskManagerService;
   telemetry: TelemetryService;
-  workflows: WorkflowsApiService;
 }
 
 export interface AlertingApiServicesFixture extends ApiServicesFixture {
@@ -71,17 +59,14 @@ export const buildAlertingApiServices = ({
   esClient,
   kbnClient,
   log,
-  config,
 }: {
   esClient: EsClient;
   kbnClient: KbnClient;
   log: ScoutLogger;
-  config: ScoutTestConfig;
 }): AlertingApiServices => {
   const taskManager = getTaskManagerService({ kbnClient, log });
   return {
     rules: getRulesApiService({ kbnClient, log }),
-    ruleChangesHistory: getRuleChangesHistoryApiService({ esClient, log, config }),
     ruleEvents: getRuleEventsApiService({ esClient, log }),
     alertActionsEvents: getAlertActionsEventsService({ esClient, log }),
     alertActions: getAlertActionsApiService({ kbnClient, log }),
@@ -92,19 +77,18 @@ export const buildAlertingApiServices = ({
     dispatcher: getDispatcherApiService({ esClient, log }),
     taskManager,
     telemetry: getTelemetryService({ esClient, log, taskManager }),
-    workflows: getWorkflowsApiService({ kbnClient, log }),
   };
 };
 
 export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServicesFixture }>({
   apiServices: [
     async (
-      { apiServices, esClient, kbnClient, log, config },
+      { apiServices, esClient, kbnClient, log },
       use: (extendedApiServices: AlertingApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices: AlertingApiServicesFixture = {
         ...apiServices,
-        alertingV2: buildAlertingApiServices({ esClient, kbnClient, log, config }),
+        alertingV2: buildAlertingApiServices({ esClient, kbnClient, log }),
       };
       await use(extendedApiServices);
     },
@@ -131,7 +115,6 @@ export {
   buildExternalAlertEvent,
   buildCreateRuleData,
   buildCreateActionPolicyData,
-  buildWorkflowYaml,
   getSnoozeDate,
 } from '../../common/builders';
 export {
@@ -144,8 +127,6 @@ export {
   getUnsnoozeAlertActionUrl,
   getActivateAlertActionUrl,
   getDeactivateAlertActionUrl,
-  CREATE_ALERT_EVENT_URL,
-  getCreateAlertEventBySourceUrl,
   getRuleUrl,
   getRunRuleUrl,
   getEnableRuleUrl,
@@ -165,7 +146,8 @@ export {
   getUnsnoozeActionPolicyUrl,
   getUpdateActionPolicyApiKeyUrl,
   getListExecutionHistoryUrl,
-  listRuleExecutionsUrl,
+  getCountNewExecutionHistoryEventsUrl,
+  getRuleExecutionsUrl,
 } from '../../common/urls';
 export {
   ACTION_POLICY_PER_PAGE_MAX,

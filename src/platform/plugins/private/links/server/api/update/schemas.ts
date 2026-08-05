@@ -7,23 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 import { asCodeMetaSchema, MAX_ID_LENGTH } from '@kbn/as-code-shared-schemas';
 import { linksApiStateSchema } from '../schemas';
 import { LINKS_ID_DESCRIPTION } from '../constants';
 
 export const updateRequestBodySchema = linksApiStateSchema;
 
-export const updateResponseBodySchema = z
-  .object({
-    id: z.string().max(MAX_ID_LENGTH).meta({
-      description: LINKS_ID_DESCRIPTION,
+export const updateResponseBodySchema = schema.object(
+  {
+    id: schema.string({
+      maxLength: MAX_ID_LENGTH,
+      meta: {
+        description: LINKS_ID_DESCRIPTION,
+      },
     }),
     data: linksApiStateSchema,
     meta: asCodeMetaSchema,
-  })
-  .strict()
-  .meta({
-    id: 'LinksItemResponse',
-    description: 'Response containing a links library item with metadata.',
-  });
+  },
+  {
+    meta: {
+      id: 'LinksItemResponse',
+      description: 'Response containing a links library item with metadata.',
+    },
+  }
+);

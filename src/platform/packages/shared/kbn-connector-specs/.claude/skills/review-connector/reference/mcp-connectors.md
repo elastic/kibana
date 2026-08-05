@@ -9,9 +9,6 @@ Use this reference when the connector under review is **MCP-native** (uses `with
 - Includes `listTools` and `callTool` escape-hatch actions for dynamic tool discovery.
 - Action names correspond to actual MCP tool names. Tool names use **underscores** (e.g. `tavily_search`), not hyphens. Validate against the MCP server's `listTools` response or server docs.
 - Has a connection test handler that validates the MCP connection works.
-- **`lazySchema()` wrapping**: Every schema in `types.ts` — and every inline `z.object()` used as an action `input` — must be wrapped with `lazySchema(() => z.object({...}))`. Bare `z.object()` is a runtime behavior difference, not just style. Flag any schema that is not wrapped.
-- **`callToolJson` vs `callToolContent`**: Typed data actions (search, list, get) should use `callToolJson(ctx, 'tool_name', args)`, which parses the MCP response as JSON. File download or binary actions must use `callToolContent(ctx, 'tool_name', args)`, which returns raw content parts. Using `callToolJson` on a binary response will corrupt the data. Flag any download/file action that uses `callToolJson`.
-- **Test file mock pattern**: The test file must mock `withMcpClient` with both `mockCallTool` and `mockListTools` so handlers do not require a real MCP transport. Flag test files that lack this mock or that try to instantiate a real MCP client.
 
 ## Thorough check (optional)
 

@@ -7,7 +7,7 @@
 const path = require('path');
 const fs = require('fs');
 const util = require('util');
-const { parse } = require('yaml');
+const yaml = require('js-yaml');
 const { exec: execCb } = require('child_process');
 const { reduce } = require('lodash');
 
@@ -30,9 +30,7 @@ async function generate() {
     );
   }
 
-  // Coerce to string before parsing to match the behavior of js-yaml.load,
-  // which internally calls String(input). The yaml package requires a string.
-  const flatYaml = parse((await readFile(ecsYamlFilename)).toString());
+  const flatYaml = await yaml.load(await readFile(ecsYamlFilename));
 
   const fields = reduce(
     flatYaml,

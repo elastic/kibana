@@ -49,7 +49,7 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
   const {
     path: { serviceName },
     query,
-    query: { environment, kuery, rangeFrom, rangeTo },
+    query: { kuery, rangeFrom, rangeTo },
   } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -64,7 +64,6 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
     status: serviceAgentStatus,
   } = useServiceAgentFetcher({
     serviceName,
-    environment,
     start,
     end,
   });

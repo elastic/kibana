@@ -6,7 +6,6 @@
  */
 
 import { TableId } from '@kbn/securitysolution-data-table';
-import { SECURITY_CELL_ACTIONS_DETAILS_FLYOUT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import type { RowActionProps } from '.';
@@ -194,37 +193,6 @@ describe('RowAction', () => {
     const { onAlertUpdated } = flyoutApi.openDocumentFlyoutFromIndex.mock.calls[0][0];
     onAlertUpdated?.();
     expect(refetch).toHaveBeenCalledTimes(1);
-  });
-
-  test('binds the new document flyout cell actions to the table scope and details-flyout trigger', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-
-    const wrapper = render(
-      <TestProviders>
-        <RowAction {...defaultProps} tableId={TableId.hostsPageEvents} />
-      </TestProviders>
-    );
-
-    fireEvent.click(wrapper.getByTestId('expand-event'));
-
-    const { renderCellActions } = flyoutApi.openDocumentFlyoutFromIndex.mock.calls[0][0];
-
-    // Event tables (e.g. Explore host/user pages) have no alerts table ref, but the renderer must
-    // still bind the table scope and use the details-flyout trigger so the "Toggle column in table"
-    // action is available and dispatches against the correct data table store.
-    const cellAction = renderCellActions?.({
-      field: 'host.name',
-      value: ['host-1'],
-      scopeId: '',
-      children: null,
-    }) as React.ReactElement;
-
-    expect(cellAction.props.triggerId).toEqual(SECURITY_CELL_ACTIONS_DETAILS_FLYOUT);
-    expect(cellAction.props.visibleCellActions).toEqual(6);
-    expect(cellAction.props.metadata).toEqual({
-      scopeId: TableId.hostsPageEvents,
-      alertsTableRef: undefined,
-    });
   });
 
   describe('notes', () => {

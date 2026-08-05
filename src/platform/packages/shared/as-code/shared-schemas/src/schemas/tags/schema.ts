@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 import { MAX_ID_LENGTH } from '../../constants';
 
 export const MAX_TAG_C0UNT = 1_000;
 
 export const getAsCodeTagsSchema = (customDescrption?: string, customMaxSize?: number) =>
-  z
-    .array(z.string().max(MAX_ID_LENGTH))
-    .max(customMaxSize ?? MAX_TAG_C0UNT)
-    .default([])
-    .meta({ description: customDescrption ?? 'Tag IDs associated with this library item.' });
+  schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), {
+    maxSize: customMaxSize ?? MAX_TAG_C0UNT,
+    defaultValue: [] as string[],
+    meta: { description: customDescrption ?? 'Tag IDs associated with this library item.' },
+  });

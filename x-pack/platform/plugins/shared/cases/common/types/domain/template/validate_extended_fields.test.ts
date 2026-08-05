@@ -6,7 +6,6 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import { MAX_EXTENDED_FIELD_VALUE_BYTES } from '../../../constants';
 import { validateExtendedFields } from './validate_extended_fields';
 import type { FieldSchema } from './fields';
 import { FieldType } from './fields';
@@ -89,69 +88,6 @@ const makeMarkdownField = (overrides: Partial<FieldSchemaType> = {}): FieldSchem
   } as FieldSchemaType);
 
 describe('validateExtendedFields', () => {
-  describe('value size backstop', () => {
-    const valueBearingFieldCases: Array<[string, FieldSchemaType, string]> = [
-      ['INPUT_TEXT', makeInputTextField(), 'summary_as_keyword'],
-      ['TEXTAREA', makeTextareaField(), 'notes_as_keyword'],
-      ['INPUT_NUMBER', makeInputNumberField(), 'score_as_long'],
-      ['SELECT_BASIC', makeSelectField(), 'priority_as_keyword'],
-      ['CHECKBOX_GROUP', makeCheckboxGroupField(), 'systems_as_keyword'],
-      ['USER_PICKER', makeUserPickerField(), 'assignee_as_keyword'],
-      ['TOGGLE', makeToggleField(), 'requires_escalation_as_boolean'],
-    ];
-
-    it.each(valueBearingFieldCases)(
-      'reports an error when a %s value exceeds the maximum byte size',
-      (_control, field, key) => {
-        const errors = validateExtendedFields(
-          { [key]: 'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1) },
-          [field]
-        );
-
-        expect(errors).toContain(
-          `Extended field "${key}" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
-        );
-      }
-    );
-
-    it('accepts an ASCII field value exactly at the maximum byte size', () => {
-      const fields: FieldSchemaType[] = [makeTextareaField()];
-      const errors = validateExtendedFields(
-        { notes_as_keyword: 'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES) },
-        fields
-      );
-
-      expect(errors).not.toContain(
-        `Extended field "notes_as_keyword" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
-      );
-    });
-
-    it('rejects a non-ASCII field value that exceeds the maximum byte size', () => {
-      const fields: FieldSchemaType[] = [makeTextareaField()];
-      const errors = validateExtendedFields(
-        { notes_as_keyword: '界'.repeat(Math.floor(MAX_EXTENDED_FIELD_VALUE_BYTES / 3) + 1) },
-        fields
-      );
-
-      expect(errors).toContain(
-        `Extended field "notes_as_keyword" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
-      );
-    });
-
-    it('enforces the size backstop for an unknown key', () => {
-      const fields: FieldSchemaType[] = [makeInputTextField()];
-      const errors = validateExtendedFields(
-        { rogue_as_keyword: 'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1) },
-        fields
-      );
-
-      expect(errors).toContain('Unknown extended field key: "rogue_as_keyword"');
-      expect(errors).toContain(
-        `Extended field "rogue_as_keyword" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
-      );
-    });
-  });
-
   describe('valid payload', () => {
     it('returns empty array for valid payload', () => {
       const fields: FieldSchemaType[] = [makeInputTextField()];

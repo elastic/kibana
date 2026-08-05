@@ -24,6 +24,7 @@ jest.mock('./handler', () => ({
 
 const input = {
   event_id: 'event-1',
+  discovery_id: 'discovery-1',
   status: 'open' as const,
   stream_names: ['logs.test'],
   title: 'Test event',
@@ -58,10 +59,6 @@ describe('events_write tool', () => {
         items: Array.from({ length: MAX_BULK_WRITE_ITEMS + 1 }, () => input),
       }).success
     ).toBe(false);
-  });
-
-  it('rejects input without an items array', () => {
-    expect(eventsWriteSchema.safeParse(input).success).toBe(false);
   });
 
   it('returns aligned results and tracks each item', async () => {

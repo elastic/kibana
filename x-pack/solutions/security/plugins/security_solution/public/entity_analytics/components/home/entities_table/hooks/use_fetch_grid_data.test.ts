@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  buildInspectData,
-  getEntitiesNextPageParam,
-  getEntitiesQuery,
-} from './use_fetch_grid_data';
-import { MAX_ENTITIES_TO_LOAD } from '../constants';
+import { buildInspectData, getEntitiesQuery } from './use_fetch_grid_data';
 
 describe('buildInspectData', () => {
   const queryParams = {
@@ -52,41 +47,12 @@ describe('buildInspectData', () => {
   });
 });
 
-describe('getEntitiesNextPageParam', () => {
-  const fullPage = { page: Array(MAX_ENTITIES_TO_LOAD).fill({}) };
-  const partialPage = { page: Array(MAX_ENTITIES_TO_LOAD - 1).fill({}) };
-  const emptyPage = { page: [] };
-
-  it('returns undefined when the last page has fewer than MAX_ENTITIES_TO_LOAD records', () => {
-    expect(getEntitiesNextPageParam(partialPage, [partialPage])).toBeUndefined();
-  });
-
-  it('returns undefined for an empty last page', () => {
-    expect(getEntitiesNextPageParam(emptyPage, [emptyPage])).toBeUndefined();
-  });
-
-  it('returns MAX_ENTITIES_TO_LOAD as the next offset after the first full page', () => {
-    expect(getEntitiesNextPageParam(fullPage, [fullPage])).toBe(MAX_ENTITIES_TO_LOAD);
-  });
-
-  it('advances the offset by MAX_ENTITIES_TO_LOAD per page', () => {
-    expect(getEntitiesNextPageParam(fullPage, [fullPage, fullPage])).toBe(MAX_ENTITIES_TO_LOAD * 2);
-  });
-
-  it('does not use the UI page size (25) for the offset', () => {
-    // Regression guard: the bug was allPages.length * options.pageSize (25),
-    // producing from=25 on page 2 instead of from=500, causing massive overlap.
-    const nextOffset = getEntitiesNextPageParam(fullPage, [fullPage]);
-    expect(nextOffset).toBe(500);
-    expect(nextOffset).not.toBe(25);
-  });
-});
-
 describe('getEntitiesQuery', () => {
   const options = {
     query: undefined,
     sort: [['entity.name', 'asc']] as Array<[string, string]>,
     enabled: true,
+    pageSize: 25,
   };
 
   it('throws when no index pattern is provided', () => {

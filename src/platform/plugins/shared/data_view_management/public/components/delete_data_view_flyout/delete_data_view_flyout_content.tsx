@@ -9,6 +9,7 @@
 
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
+  EuiCallOut,
   EuiBasicTable,
   EuiSpacer,
   EuiScreenReaderOnly,
@@ -21,7 +22,6 @@ import {
 } from '@elastic/eui';
 import type { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useState, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -236,10 +236,20 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
     <div>
       {showRelationshipsCallout ? (
         <>
-          <KbnDangerCallout announceOnMount={false} title={relationshipCalloutText} />
+          <EuiCallOut
+            announceOnMount={false}
+            color="danger"
+            iconType="warning"
+            title={relationshipCalloutText}
+          />
         </>
       ) : (
-        <KbnWarningCallout announceOnMount={false} title={spacesWarningText} />
+        <EuiCallOut
+          announceOnMount={false}
+          color="warning"
+          iconType="warning"
+          title={spacesWarningText}
+        />
       )}
       <EuiSpacer size="m" />
       <div>

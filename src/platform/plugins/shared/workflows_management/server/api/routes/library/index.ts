@@ -10,7 +10,6 @@
 import { registerGetTemplateRoute } from './get_template';
 import { registerGetTemplatesRoute } from './get_templates';
 import { registerLibraryHealthRoute } from './health';
-import { registerInstallTemplateRoute } from './install_template';
 import { LibraryService } from '../../../library';
 import type { RouteDependencies } from '../types';
 
@@ -24,6 +23,5 @@ export function registerLibraryRoutes(deps: RouteDependencies) {
 
   registerGetTemplatesRoute(deps, libraryService);
   registerGetTemplateRoute(deps, libraryService);
-  registerInstallTemplateRoute(deps, libraryService);
   registerLibraryHealthRoute(deps, libraryService);
 }

@@ -29,7 +29,6 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/react-kibana-context-render'
   - '@kbn/as-code-filters-schema'
-  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

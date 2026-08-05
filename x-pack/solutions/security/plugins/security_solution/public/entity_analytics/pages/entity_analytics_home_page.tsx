@@ -25,6 +25,7 @@ import { useOnAssetCriticalityToolEvent } from '../hooks/use_on_asset_criticalit
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
+import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
@@ -224,15 +225,17 @@ const EntityAnalyticsHomePageContent = () => {
     [history]
   );
 
+  const indicesExist = useMemo(
+    () => !!dataView?.matchedIndices?.length,
+    [dataView?.matchedIndices?.length]
+  );
+
+  const showEmptyPrompt = !indicesExist;
+
   const { data: entityStoreStatusData } = useEntityStoreStatus();
   const entityStoreDisabled =
     entityStoreStatusData?.status === 'not_installed' ||
     entityStoreStatusData?.status === 'stopped';
-  // While an engine is still provisioning its assets the entity-latest index (and its data
-  // view) may not be resolvable yet. Show a loader rather than the entity page or the generic
-  // onboarding screen; the status query polls every 5s while installing and re-renders to the
-  // homepage once it flips to `running`. See elastic/security-team#18599.
-  const entityStoreInstalling = entityStoreStatusData?.status === 'installing';
 
   const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
   const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
@@ -263,8 +266,8 @@ const EntityAnalyticsHomePageContent = () => {
     return <EntityStoreDisabledEmptyPrompt />;
   }
 
-  if (entityStoreInstalling) {
-    return <PageLoader />;
+  if (showEmptyPrompt) {
+    return <EmptyPrompt />;
   }
 
   return (

@@ -10,7 +10,6 @@
 import React from 'react';
 import { highlightTags } from './highlight_tags';
 import type { FieldFormatHighlightTags, ReactContextTypeHit } from '../../types';
-import { searchHighlightStyles } from '../../field_format_styles';
 
 /**
  * Resolves the applicable highlight method for a field value.
@@ -110,7 +109,7 @@ function highlightWithSubstrings(
     const [highlighted, after] = part.split(highlightTags.post);
     if (highlighted)
       nodes.push(
-        <mark css={searchHighlightStyles} key={i}>
+        <mark className="ffSearch__highlight" key={i}>
           {highlighted}
         </mark>
       );
@@ -165,7 +164,7 @@ function highlightWithInlineTags(
     }
 
     nodes.push(
-      <mark css={searchHighlightStyles} key={key++}>
+      <mark className="ffSearch__highlight" key={key++}>
         {remaining.slice(contentStart, closeIndex)}
       </mark>
     );

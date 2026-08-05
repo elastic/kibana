@@ -17,33 +17,34 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { CellActionsProvider } from '@kbn/cell-actions';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { buildDataTableRecordList } from '@kbn/discover-utils';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RerunWorkflowExecutionParams } from './build_replay_inputs_from_execution_context';
-import { useWorkflowExecutionsGridSelection } from './use_workflow_executions_grid_selection';
+import {
+  DataLoadingState,
+  type SortOrder,
+  UnifiedDataTable,
+  type UnifiedDataTableSettings,
+} from '@kbn/unified-data-table';
 import { useWorkflowExecutionsSearch } from './use_workflow_executions_search';
-import { WorkflowExecutionsDataGrid } from './workflow_executions_data_grid';
-import {
-  EXECUTION_TABLE_DEFAULT_PAGE_SIZE,
-  EXECUTION_TABLE_DEFAULT_SORT,
-  EXECUTION_TABLE_PAGE_SIZE_OPTIONS,
-  type ExecutionTableSortOrder,
-} from './workflow_executions_page_constants';
+import { WorkflowExecutionDetailFlyout } from './workflow_execution_detail_flyout';
 import { getWorkflowExecutionsFetchErrorMessage } from './workflow_executions_search_query';
-import {
-  DEFAULT_WORKFLOW_EXECUTIONS_TABLE_COLUMNS,
-  WORKFLOW_EXECUTIONS_TABLE_GRID_SETTINGS,
-} from './workflow_executions_table_config';
-import { getWorkflowExecutionsTableGridWrapperCss } from './workflow_executions_table_styles';
-import { WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW } from '../../../common';
-import { useSerialPolling } from '../../hooks/use_serial_polling';
-import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
+import { useKibana } from '../../hooks/use_kibana';
 
-const PAGE_SIZE_OPTIONS = [...EXECUTION_TABLE_PAGE_SIZE_OPTIONS];
+const DEFAULT_COLUMNS = ['workflowId', 'status', 'id', 'triggeredBy', 'executedBy'] as const;
+const DEFAULT_PAGE_SIZE = 25;
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
+const DEFAULT_SORT: SortOrder[] = [['startedAt', 'desc']];
 
-const getMaxPageIndex = (itemsPerPage: number): number =>
-  Math.max(0, Math.floor(WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW / itemsPerPage) - 1);
+const gridStyleOverride = {
+  border: 'all' as const,
+  header: 'shade' as const,
+  stripes: false,
+};
 
 const tableContainerCss = css`
   display: flex;
@@ -52,63 +53,45 @@ const tableContainerCss = css`
   min-height: 0;
 `;
 
-const gridWrapperCss = getWorkflowExecutionsTableGridWrapperCss;
+const gridWrapperCss = css`
+  flex: 1 1 auto;
+`;
 
 export interface WorkflowExecutionsTableProps {
+  dataView: DataView;
   query: Query;
   filters: Filter[];
-  liveUpdateIntervalMs?: number;
-  onReRunExecution?: (params: RerunWorkflowExecutionParams) => Promise<void>;
-  onViewAllExecutionsForWorkflow?: (workflowId: string) => void;
   timeRange: TimeRange;
   spaceId: string;
 }
 
 export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
-  ({
-    filters,
-    liveUpdateIntervalMs,
-    onReRunExecution,
-    onViewAllExecutionsForWorkflow,
-    query,
-    spaceId,
-    timeRange,
-  }) => {
-    const [visibleColumns, setVisibleColumns] = useState<string[]>([
-      ...DEFAULT_WORKFLOW_EXECUTIONS_TABLE_COLUMNS,
-    ]);
-    const [columnWidths, setColumnWidths] = useState<Partial<Record<string, number>>>(() =>
-      Object.fromEntries(
-        Object.entries(WORKFLOW_EXECUTIONS_TABLE_GRID_SETTINGS.columns)
-          .filter(([, settings]) => settings.initialWidth != null)
-          .map(([columnId, settings]) => [columnId, settings.initialWidth as number])
-      )
-    );
-    const [sort, setSort] = useState<ExecutionTableSortOrder>(EXECUTION_TABLE_DEFAULT_SORT);
-    const [pageSize, setPageSize] = useState(EXECUTION_TABLE_DEFAULT_PAGE_SIZE);
+  ({ dataView, query, filters, timeRange, spaceId }) => {
+    const {
+      data: dataService,
+      fieldFormats,
+      notifications: { toasts },
+      storage,
+      theme,
+      uiActions,
+      uiSettings,
+    } = useKibana().services;
+
     const [pageIndex, setPageIndex] = useState(0);
-    const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
-
-    const handleOpenExecution = useCallback(
-      (execution: { id: string }) => {
-        setSelectedExecution(execution.id);
-      },
-      [setSelectedExecution]
-    );
-
-    const maxPageIndex = useMemo(() => getMaxPageIndex(pageSize), [pageSize]);
-
-    const searchCriteriaKey = useMemo(
-      () => JSON.stringify({ query, filters, spaceId, timeRange }),
-      [query, filters, spaceId, timeRange]
-    );
+    const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+    const [sort, setSort] = useState<SortOrder[]>(DEFAULT_SORT);
+    const [visibleColumns, setVisibleColumns] = useState<string[]>(Array.from(DEFAULT_COLUMNS));
+    const [gridSettings, setGridSettings] = useState<UnifiedDataTableSettings>({});
+    const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
 
     const {
-      data: searchResponse,
+      data: rawResponse,
       error,
+      isFetching,
       isLoading,
       refetch,
     } = useWorkflowExecutionsSearch({
+      dataView,
       query,
       filters,
       timeRange,
@@ -118,46 +101,67 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       sort,
     });
 
-    const executions = useMemo(() => searchResponse?.results ?? [], [searchResponse?.results]);
-    const total = searchResponse?.total ?? 0;
-    const visibleExecutionIds = useMemo(
-      () => executions.map((execution) => execution.id),
-      [executions]
-    );
-    const selectionState = useWorkflowExecutionsGridSelection(visibleExecutionIds);
+    const { hits, total } = useMemo(() => {
+      const responseHits = (rawResponse?.hits?.hits ?? []).filter(
+        (hit) => hit._source != null
+      ) as unknown as EsHitRecord[];
+      const totalHits = rawResponse?.hits?.total;
+      const totalCount =
+        typeof totalHits === 'number' ? totalHits : totalHits?.value ?? responseHits.length;
 
+      return { hits: responseHits, total: totalCount };
+    }, [rawResponse]);
+
+    const loadingState =
+      isLoading || isFetching ? DataLoadingState.loading : DataLoadingState.loaded;
     const errorMessage = error ? getWorkflowExecutionsFetchErrorMessage() : null;
-
-    useSerialPolling({
-      poll: () => refetch(),
-      enabled: liveUpdateIntervalMs != null,
-      immediate: false,
-      intervalMs: liveUpdateIntervalMs ?? 0,
-      pollKey: `${searchCriteriaKey}:${pageIndex}:${pageSize}:${JSON.stringify(sort)}`,
-    });
 
     useEffect(() => {
       setPageIndex(0);
-    }, [searchCriteriaKey]);
+      setExpandedDoc(undefined);
+    }, [query, filters, spaceId, timeRange]);
 
-    const handleRetry = useCallback(() => {
-      void refetch();
-    }, [refetch]);
+    const rows = useMemo<DataTableRecord[]>(
+      () => buildDataTableRecordList({ records: hits, dataView }),
+      [hits, dataView]
+    );
+
+    const services = useMemo(
+      () => ({
+        theme,
+        fieldFormats,
+        uiSettings,
+        toastNotifications: toasts,
+        storage,
+        data: dataService,
+      }),
+      [dataService, fieldFormats, storage, theme, toasts, uiSettings]
+    );
+
+    const handleSort = useCallback((nextSort: string[][]) => {
+      setSort(nextSort.length === 0 ? DEFAULT_SORT : (nextSort as SortOrder[]));
+      setPageIndex(0);
+    }, []);
 
     const handleSetColumns = useCallback((nextColumns: string[]) => {
       setVisibleColumns(nextColumns);
     }, []);
 
-    const handleSortWithPageReset = useCallback((nextSort: ExecutionTableSortOrder) => {
-      setSort(nextSort.length > 0 ? nextSort : EXECUTION_TABLE_DEFAULT_SORT);
-      setPageIndex(0);
+    const handleResize = useCallback((resized: { columnId: string; width: number | undefined }) => {
+      setGridSettings((prev) => ({
+        ...prev,
+        columns: {
+          ...prev.columns,
+          [resized.columnId]: {
+            ...prev.columns?.[resized.columnId],
+            width: resized.width,
+          },
+        },
+      }));
     }, []);
 
-    const handleColumnResize = useCallback((columnId: string, width: number | undefined) => {
-      setColumnWidths((current) => ({
-        ...current,
-        [columnId]: width,
-      }));
+    const handlePageChange = useCallback((nextPageIndex: number) => {
+      setPageIndex(nextPageIndex);
     }, []);
 
     const handlePageSizeChange = useCallback((nextPageSize: number) => {
@@ -165,22 +169,22 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       setPageIndex(0);
     }, []);
 
-    const handlePageChange = useCallback(
-      (nextPageIndex: number) => {
-        setPageIndex(Math.min(nextPageIndex, maxPageIndex));
-      },
-      [maxPageIndex]
+    const handleCloseFlyout = useCallback(() => {
+      setExpandedDoc(undefined);
+    }, []);
+
+    const handleRetry = useCallback(() => {
+      void refetch();
+    }, [refetch]);
+
+    const renderDocumentView = useCallback(
+      (hit: DataTableRecord) => (
+        <WorkflowExecutionDetailFlyout hit={hit} onClose={handleCloseFlyout} />
+      ),
+      [handleCloseFlyout]
     );
 
-    const totalPages = useMemo(
-      () =>
-        Math.min(
-          Math.max(1, Math.ceil(total / pageSize)),
-          Math.ceil(WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW / pageSize)
-        ),
-      [pageSize, total]
-    );
-    const isPaginationLimited = total > WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
     if (errorMessage) {
       return (
@@ -209,7 +213,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       );
     }
 
-    if (isLoading && executions.length === 0) {
+    if (loadingState === DataLoadingState.loading && rows.length === 0) {
       return (
         <EuiPanel hasShadow={false} hasBorder data-test-subj="workflowExecutionsTableLoading">
           <EuiSkeletonText lines={5} />
@@ -217,7 +221,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       );
     }
 
-    if (executions.length === 0) {
+    if (rows.length === 0) {
       return (
         <EuiPanel hasShadow={false} hasBorder data-test-subj="workflowExecutionsTableEmpty">
           <EuiCallOut
@@ -234,43 +238,34 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     return (
       <div css={tableContainerCss} data-test-subj="workflowExecutionsTable">
         <div css={gridWrapperCss}>
-          <WorkflowExecutionsDataGrid
-            ariaLabelledBy="workflowExecutionsTableLabel"
-            executions={executions}
-            visibleColumns={visibleColumns}
-            columnWidths={columnWidths}
-            sort={sort}
-            selectedExecutionId={selectedExecutionId}
-            selectionState={selectionState}
-            onOpenExecution={handleOpenExecution}
-            onRefresh={handleRetry}
-            onSetColumns={handleSetColumns}
-            onSort={handleSortWithPageReset}
-            onColumnResize={handleColumnResize}
-            onReRunExecution={onReRunExecution}
-            onViewAllExecutionsForWorkflow={onViewAllExecutionsForWorkflow}
-          />
+          <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
+            <UnifiedDataTable
+              ariaLabelledBy="workflowExecutionsTableLabel"
+              canDragAndDropColumns
+              columns={visibleColumns}
+              consumer="workflows"
+              dataView={dataView}
+              expandedDoc={expandedDoc}
+              gridStyleOverride={gridStyleOverride}
+              isPaginationEnabled={false}
+              isSortEnabled
+              loadingState={loadingState}
+              onResize={handleResize}
+              onSetColumns={handleSetColumns}
+              onSort={handleSort}
+              renderDocumentView={renderDocumentView}
+              rows={rows}
+              sampleSizeState={rows.length}
+              services={services}
+              setExpandedDoc={setExpandedDoc}
+              settings={gridSettings}
+              showColumnTokens
+              showTimeCol
+              sort={sort}
+              totalHits={total}
+            />
+          </CellActionsProvider>
         </div>
-        {isPaginationLimited && (
-          <EuiCallOut
-            announceOnMount
-            color="warning"
-            data-test-subj="workflowExecutionsTablePaginationLimit"
-            size="s"
-            title={i18n.translate('workflowsManagement.executionsPage.paginationLimitTitle', {
-              defaultMessage: 'Showing the first {maxRows} executions only',
-              values: { maxRows: WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW.toLocaleString() },
-            })}
-          >
-            <p>
-              {i18n.translate('workflowsManagement.executionsPage.paginationLimitBody', {
-                defaultMessage:
-                  'Refine your search or time range to find older executions. Deep pagination beyond {maxRows} results is not supported.',
-                values: { maxRows: WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW.toLocaleString() },
-              })}
-            </p>
-          </EuiCallOut>
-        )}
         <EuiTablePagination
           activePage={pageIndex}
           itemsPerPage={pageSize}

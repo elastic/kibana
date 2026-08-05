@@ -24,7 +24,6 @@
     "@kbn/css-utils",
     "@kbn/cps-utils",
     "@kbn/cps",
-    "@kbn/ui-callout",
   ],
   "exclude": [
     "target/**/*",

@@ -40,16 +40,6 @@ export class SearchSessionsExamplesAppLocatorDefinition
 
   constructor(protected readonly getAppBasePath: () => Promise<string>) {}
 
-  public readonly getTimeRange = (params: SearchSessionsExamplesAppLocatorParams) => params.time;
-
-  public readonly setTimeRange = (
-    params: SearchSessionsExamplesAppLocatorParams,
-    timeRange?: TimeRange
-  ) => ({
-    ...params,
-    time: timeRange,
-  });
-
   public readonly getLocation = async (params: SearchSessionsExamplesAppLocatorParams) => {
     const appBasePath = await this.getAppBasePath();
     const path = `${appBasePath}/search-sessions`;

@@ -36,9 +36,9 @@ import {
   useGeneratedHtmlId,
   copyToClipboard,
   EuiToolTip,
+  EuiCallOut,
   useEuiFontSize,
 } from '@elastic/eui';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import {
   PanelContainer,
@@ -229,9 +229,11 @@ const DatePartPicker = ({ label, side, state, onChange, error }: DatePartPickerP
           )}
 
           {error && (
-            <KbnDangerCallout
+            <EuiCallOut
               announceOnMount
               title={error}
+              color="danger"
+              iconType="warning"
               size="s"
               css={css`
                 /* there's no size=xs for EuiCallOut :( */

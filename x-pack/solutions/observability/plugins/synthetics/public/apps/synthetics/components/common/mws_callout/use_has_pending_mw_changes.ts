@@ -5,32 +5,60 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
+import { useFetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useDispatch, useSelector } from 'react-redux-v7';
+import type { MaintenanceWindow } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/types';
 import { useSyncInterval } from './use_sync_interval';
-import { getActiveMaintenanceWindows, useFetchMaintenanceWindows } from '../../../hooks';
+import type { ClientPluginsStart } from '../../../../../plugin';
+import {
+  getMaintenanceWindowsAction,
+  selectMaintenanceWindowsState,
+} from '../../../state/maintenance_windows';
+import { useSyntheticsRefreshContext } from '../../../contexts';
 
 export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
-  const { data } = useFetchMaintenanceWindows();
+  const dispatch = useDispatch();
 
-  const allMWs = useMemo(() => data?.maintenanceWindows ?? [], [data]);
+  const services = useKibana<ClientPluginsStart>().services;
+  const { data: activeMWsData } = useFetchActiveMaintenanceWindows(services, {
+    enabled: true,
+  });
+
+  const { data: allMWsData } = useSelector(selectMaintenanceWindowsState);
+  const { lastRefresh } = useSyntheticsRefreshContext();
 
   const hasMonitorMWs = monitorMWIds.length > 0;
 
-  const activeMWs = useMemo(
-    () => getActiveMaintenanceWindows(allMWs, monitorMWIds),
-    [allMWs, monitorMWIds]
-  );
+  const activeMWs: MaintenanceWindow[] =
+    hasMonitorMWs && activeMWsData?.length
+      ? activeMWsData.filter((mw) => monitorMWIds.includes(mw.id))
+      : [];
 
   const needsPendingCheck = hasMonitorMWs && activeMWs.length === 0;
+
+  const activeIdsKey = useMemo(
+    () =>
+      activeMWsData
+        ?.map((mw) => mw.id)
+        .sort()
+        .join(',') ?? '',
+    [activeMWsData]
+  );
+
+  useEffect(() => {
+    if (needsPendingCheck) {
+      dispatch(getMaintenanceWindowsAction.get());
+    }
+  }, [dispatch, lastRefresh, activeIdsKey, needsPendingCheck]);
 
   const syncInterval = useSyncInterval();
 
   const hasPendingChanges = (() => {
-    // Only skip the pending check while the data has not loaded yet; an empty (but loaded)
-    // list is a valid state where every referenced MW would be treated as missing/pending.
-    if (!needsPendingCheck || data == null) return false;
+    if (!needsPendingCheck || allMWsData == null) return false;
 
-    const allMWsById = new Map(allMWs.map((mw) => [mw.id, mw]));
+    const allMWsById = new Map(allMWsData.data.map((mw) => [mw.id, mw]));
     const syncWindowMs = syncInterval * 60 * 1000;
     const now = Date.now();
 
@@ -38,8 +66,9 @@ export const useHasPendingMwChanges = (monitorMWIds: string[]) => {
       const mw = allMWsById.get(id);
       if (!mw) return true;
 
-      if (mw.updatedAt) {
-        const updatedAt = new Date(mw.updatedAt).getTime();
+      const updatedAtStr = (mw as unknown as { updated_at: string | undefined }).updated_at;
+      if (updatedAtStr) {
+        const updatedAt = new Date(updatedAtStr).getTime();
         return now - updatedAt < syncWindowMs;
       }
 

@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import type { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
-import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import type { IBasePath } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { i18n } from '@kbn/i18n';
 import type { LicenseType } from '@kbn/licensing-types';
-import { observabilityPaths, sloFeatureId } from '@kbn/observability-plugin/common';
-import { sloBurnRateParamsSchema } from '@kbn/response-ops-rule-params/slo_burn_rate';
+import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
+import type { IBasePath } from '@kbn/core/server';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { sloFeatureId } from '@kbn/observability-plugin/common';
+import { sloBurnRateParamsSchema } from '@kbn/response-ops-rule-params/slo_burn_rate';
 import { SLO_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import {
@@ -27,7 +30,10 @@ import {
 import { getRuleExecutor } from './executor';
 import { sloRuleFieldMap } from './field_map';
 
-export function sloBurnRateRuleType(basePath: IBasePath, isCpsEnabled: boolean = false) {
+export function sloBurnRateRuleType(
+  basePath: IBasePath,
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>
+) {
   return {
     id: SLO_BURN_RATE_RULE_TYPE_ID,
     name: i18n.translate('xpack.slo.rules.burnRate.name', {
@@ -55,7 +61,7 @@ export function sloBurnRateRuleType(basePath: IBasePath, isCpsEnabled: boolean =
     solution: 'observability' as const,
     minimumLicenseRequired: 'platinum' as LicenseType,
     isExportable: true,
-    executor: getRuleExecutor(basePath, isCpsEnabled),
+    executor: getRuleExecutor(basePath),
     doesSetRecoveryContext: true,
     actionVariables: {
       context: [

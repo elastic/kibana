@@ -71,10 +71,6 @@ describe('<BulkOperations />', () => {
         setMonitorPendingDeletion={jest.fn()}
         setMonitorPendingReset={jest.fn()}
         setMonitorPendingStatusUpdate={setMonitorPendingStatusUpdate}
-        setBulkEditAction={jest.fn()}
-        setIsLocationsFlyoutOpen={jest.fn()}
-        setIsScheduleFlyoutOpen={jest.fn()}
-        setIsMaintenanceWindowsFlyoutOpen={jest.fn()}
       />
     );
     fireEvent.click(utils.getByTestId('syntheticsBulkActionsButton'));
@@ -143,24 +139,5 @@ describe('<BulkOperations />', () => {
     const disableItem = getByTestId('syntheticsBulkDisableMonitorsItem');
     expect(disableItem).toHaveTextContent('Disable 1 monitor');
     expect(disableItem).not.toBeDisabled();
-  });
-
-  it('renders a disabled bulk actions button when nothing is selected', () => {
-    const { getByTestId } = render(
-      <BulkOperations
-        selectedItems={[]}
-        setMonitorPendingDeletion={jest.fn()}
-        setMonitorPendingReset={jest.fn()}
-        setMonitorPendingStatusUpdate={setMonitorPendingStatusUpdate}
-        setBulkEditAction={jest.fn()}
-        setIsLocationsFlyoutOpen={jest.fn()}
-        setIsScheduleFlyoutOpen={jest.fn()}
-        setIsMaintenanceWindowsFlyoutOpen={jest.fn()}
-      />
-    );
-
-    const button = getByTestId('syntheticsBulkActionsButton');
-    expect(button).toBeDisabled();
-    expect(button).toHaveTextContent('Bulk actions');
   });
 });

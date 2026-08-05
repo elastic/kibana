@@ -95,8 +95,6 @@ export const createWorkflowLiquidEngine = (options?: LiquidOptions): Liquid => {
     renderLimit,
     // Default max object allocations (array ops, string ops) per render
     memoryLimit,
-    // Enables grouped expressions (e.g. {% if a and (b or c) %})
-    groupedExpressions: true,
   });
   removeDisallowedLiquidTags(engine);
   registerWorkflowLiquidFilters(engine);

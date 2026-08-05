@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useMemo, useState } from 'react';
+import React, { type FC, type MouseEventHandler, useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSearchBarProps } from '@elastic/eui';
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -22,7 +23,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
-import type { TransformFunction } from '../../../../../../common/constants';
 import {
   isReauthorizeActionDisabled,
   ReauthorizeActionModal,
@@ -87,7 +87,7 @@ function getItemIdToExpandedRowMap(
 
 interface TransformListProps {
   isLoading: boolean;
-  onCreateTransform: (transformFunction: TransformFunction) => void;
+  onCreateTransform: MouseEventHandler<HTMLButtonElement>;
   pageState: ListingPageUrlState;
   transformNodes: number;
   transforms: TransformListRow[];
@@ -129,6 +129,10 @@ export const TransformList: FC<TransformListProps> = ({
   const bulkScheduleNowAction = useScheduleNowAction(false, transformNodes);
 
   const capabilities = useTransformCapabilities();
+  const disabled =
+    !capabilities.canCreateTransform ||
+    !capabilities.canPreviewTransform ||
+    !capabilities.canStartStopTransform;
 
   const { sorting, pagination, onTableChange } = useTableSettings<TransformListRow>(
     TRANSFORM_LIST_COLUMN.ID,
@@ -163,13 +167,17 @@ export const TransformList: FC<TransformListProps> = ({
           </h2>
         }
         actions={[
-          <CreateTransformButton
-            label={i18n.translate('xpack.transform.list.emptyPromptButtonText', {
+          <EuiButton
+            color="primary"
+            fill
+            onClick={onCreateTransform}
+            isDisabled={disabled}
+            data-test-subj="transformCreateFirstButton"
+          >
+            {i18n.translate('xpack.transform.list.emptyPromptButtonText', {
               defaultMessage: 'Create your first transform',
             })}
-            onClick={onCreateTransform}
-            transformNodes={transformNodes}
-          />,
+          </EuiButton>,
         ]}
         data-test-subj="transformNoTransformsFound"
       />

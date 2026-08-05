@@ -17,7 +17,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     'filterProcessDescendantsForTrustedAppsEnabled',
     'trustedDevices',
     'endpointExceptionsMovedUnderManagement',
-    'customYaraSignaturesEnabled',
   ];
 
   return {

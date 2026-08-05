@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { MAX_CONNECTOR_FIELDS_PER_CASE } from '../../../../common/constants';
 
 /**
  * Create-schema relaxations shared across model versions >= 9. Each model
@@ -21,7 +22,8 @@ export const createSchemaOverrides = {
         schema.object({
           key: schema.string(),
           value: schema.nullable(schema.any()),
-        })
+        }),
+        { maxSize: MAX_CONNECTOR_FIELDS_PER_CASE }
       )
     ),
   }),

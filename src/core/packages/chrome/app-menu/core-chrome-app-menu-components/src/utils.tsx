@@ -22,6 +22,7 @@ import {
   EuiSwitch,
   EuiToolTip,
 } from '@elastic/eui';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import { AppMenuBadge } from './components/app_menu_badge';
 import { AppMenuPopoverActionButtons } from './components/app_menu_popover_action_buttons';
 import type {
@@ -34,41 +35,6 @@ import type {
 } from './types';
 import { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
 import { APP_MENU_TEST_SUBJECTS, getAppMenuItemTestSubj } from './test_subjects';
-
-const isModifiedEvent = (event: MouseEvent) =>
-  !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
-
-const isLeftClickEvent = (event: MouseEvent) => event.button === 0;
-
-/**
- * Returns href/onClick props that let elements behave as in-app links:
- * left-click without modifiers runs onClick (and preventDefault);
- * modified/middle clicks keep native browser link behavior.
- */
-export const getLinkProps = <E extends Element = Element>({
-  href,
-  onClick,
-}: {
-  href?: string;
-  onClick: (event: MouseEvent<E>) => void;
-}) => {
-  const guardedClickHandler = (event: MouseEvent<E>) => {
-    if (event.defaultPrevented) {
-      return;
-    }
-
-    if (isModifiedEvent(event) || !isLeftClickEvent(event)) {
-      return;
-    }
-
-    // Prevent regular link behavior, which causes a browser refresh.
-    event.preventDefault();
-
-    onClick(event);
-  };
-
-  return { href, onClick: guardedClickHandler };
-};
 
 const sortByOrder = <T extends { order?: number }>(items: T[]): T[] =>
   [...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
@@ -242,9 +208,9 @@ export const mapAppMenuItemToPanelItem = (
   };
 
   const hasClickHandler = childPanelId === undefined;
-  const linkProps =
+  const routerLinkProps =
     item?.href && item?.run && hasClickHandler
-      ? getLinkProps({ href: item.href, onClick: handleClick })
+      ? getRouterLinkProps({ href: item.href, onClick: handleClick })
       : { onClick: hasClickHandler ? handleClick : undefined };
 
   const itemTestSubj = item.testId ?? getAppMenuItemTestSubj(item.id);
@@ -270,7 +236,7 @@ export const mapAppMenuItemToPanelItem = (
     ) : (
       item?.iconType
     ),
-    ...linkProps,
+    ...routerLinkProps,
     href: item?.href,
     target: item?.href ? item?.target : undefined,
     disabled: isDisabled(item?.disableButton) || loading,

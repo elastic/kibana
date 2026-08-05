@@ -3,7 +3,6 @@ plugins:
   enabled:
     - advanced_settings
     - agent_builder
-    - agent_builder_dashboards
     - alerting
     - alerting_v2
     - apm
@@ -28,8 +27,8 @@ plugins:
     - dev_tools
     - discover
     - discover_enhanced
-    - discoveries
     - embeddable_alerts_table
+    - discoveries
     - entity_store
     - error_boundary_example
     - event_annotation_listing
@@ -57,7 +56,6 @@ plugins:
     - ml
     - monitoring
     - navigation
-    - nightshift
     - observability
     - observability_onboarding
     - osquery
@@ -89,7 +87,6 @@ plugins:
     - upgrade_assistant
     - uptime
     - ux
-    - vis_types/timeseries
     - watcher
     - workflows_extensions
     - workflows_management

@@ -11,8 +11,8 @@ import {
   ACTION_POLICY_EVENT_PROVIDER,
 } from '../../../dispatcher/steps/constants';
 import {
+  buildCountActionPolicyEventsQuery,
   buildFindActionPolicyEventsQuery,
-  type BuildActionPolicyEventsQueryParams,
 } from './action_policy_events_query';
 
 const SINCE = '2026-05-04T00:00:00Z';
@@ -21,23 +21,24 @@ const filtersOf = (body: SearchRequest) =>
   ((body.query as { bool: { filter: QueryDslQueryContainer[] } }).bool.filter ??
     []) as QueryDslQueryContainer[];
 
+const hasTermsOn = (field: string) => (filter: QueryDslQueryContainer | undefined) =>
+  Boolean(filter?.terms && field in (filter.terms as object));
+
 const hasBoolShould = (filter: QueryDslQueryContainer | undefined) =>
   Boolean(filter?.bool && Array.isArray(filter.bool.should));
 
 const baseParams = { spaceId: 'default', startDate: SINCE } as const;
 
 /**
- * The shared filter and sort logic (see `buildBaseActionPolicyEventsQuery`) is
- * exercised through the find helper; `buildShared` supplies a fixed page/size so
- * each case only overrides the filter inputs under test.
+ * The find and count queries share their filter and sort logic (see
+ * `buildBaseActionPolicyEventsQuery`). We exercise the shared logic via
+ * the count helper because it has fewer required params, then verify the
+ * find/count-specific bits in dedicated blocks below.
  */
-const buildShared = (params: Partial<BuildActionPolicyEventsQueryParams> = {}): SearchRequest =>
-  buildFindActionPolicyEventsQuery({ ...baseParams, page: 1, perPage: 25, ...params });
-
 describe('action policy events queries', () => {
-  describe('shared filters', () => {
+  describe('shared filters (verified via the count helper)', () => {
     it('always filters on event.provider=alerting_v2 and the request space id', () => {
-      const filters = filtersOf(buildShared());
+      const filters = filtersOf(buildCountActionPolicyEventsQuery(baseParams));
       expect(filters).toEqual(
         expect.arrayContaining([
           { term: { 'event.provider': ACTION_POLICY_EVENT_PROVIDER } },
@@ -47,21 +48,23 @@ describe('action policy events queries', () => {
     });
 
     it('forwards the provided space id into the kibana.space_ids term filter', () => {
-      const filters = filtersOf(buildShared({ spaceId: 'my-space' }));
+      const filters = filtersOf(
+        buildCountActionPolicyEventsQuery({ ...baseParams, spaceId: 'my-space' })
+      );
       expect(filters).toEqual(
         expect.arrayContaining([{ term: { 'kibana.space_ids': 'my-space' } }])
       );
     });
 
     it('applies @timestamp >= startDate as a range filter', () => {
-      const filters = filtersOf(buildShared());
+      const filters = filtersOf(buildCountActionPolicyEventsQuery(baseParams));
       expect(filters).toEqual(
         expect.arrayContaining([{ range: { '@timestamp': { gte: SINCE } } }])
       );
     });
 
-    it('matches both dispatched and throttled when outcomes is omitted', () => {
-      const filters = filtersOf(buildShared());
+    it('matches both dispatched and throttled when outcome is omitted', () => {
+      const filters = filtersOf(buildCountActionPolicyEventsQuery(baseParams));
       expect(filters).toEqual(
         expect.arrayContaining([
           {
@@ -76,25 +79,30 @@ describe('action policy events queries', () => {
       );
     });
 
-    it('narrows event.action to the provided outcomes', () => {
-      const filters = filtersOf(buildShared({ outcomes: ['throttled'] }));
-      expect(filters).toEqual(
-        expect.arrayContaining([{ terms: { 'event.action': ['throttled'] } }])
+    it('narrows to a single action when outcome is provided', () => {
+      const filters = filtersOf(
+        buildCountActionPolicyEventsQuery({ ...baseParams, outcome: 'throttled' })
       );
+      expect(filters).toEqual(expect.arrayContaining([{ term: { 'event.action': 'throttled' } }]));
+      expect(filters.find(hasTermsOn('event.action'))).toBeUndefined();
     });
 
     it('omits the id clause when no ids are provided', () => {
-      const filters = filtersOf(buildShared());
+      const filters = filtersOf(buildCountActionPolicyEventsQuery(baseParams));
       expect(filters.find(hasBoolShould)).toBeUndefined();
     });
 
     it('omits the id clause when both id arrays are empty', () => {
-      const filters = filtersOf(buildShared({ policyIds: [], ruleIds: [] }));
+      const filters = filtersOf(
+        buildCountActionPolicyEventsQuery({ ...baseParams, policyIds: [], ruleIds: [] })
+      );
       expect(filters.find(hasBoolShould)).toBeUndefined();
     });
 
     it('matches policy ids against the action_policy saved-object type only', () => {
-      const filters = filtersOf(buildShared({ policyIds: ['p1'] }));
+      const filters = filtersOf(
+        buildCountActionPolicyEventsQuery({ ...baseParams, policyIds: ['p1'] })
+      );
       const boolFilter = filters.find(hasBoolShould);
       expect(boolFilter).toBeDefined();
       const should = (boolFilter?.bool?.should ?? []) as QueryDslQueryContainer[];
@@ -118,7 +126,9 @@ describe('action policy events queries', () => {
     });
 
     it('matches rule ids against the alerting_rule saved-object type only', () => {
-      const filters = filtersOf(buildShared({ ruleIds: ['r1', 'r2'] }));
+      const filters = filtersOf(
+        buildCountActionPolicyEventsQuery({ ...baseParams, ruleIds: ['r1', 'r2'] })
+      );
       const boolFilter = filters.find(hasBoolShould);
       const should = (boolFilter?.bool?.should ?? []) as QueryDslQueryContainer[];
       expect(should).toEqual(
@@ -141,7 +151,13 @@ describe('action policy events queries', () => {
     });
 
     it('keeps policy and rule nested clauses separate so a shared id never crosses types', () => {
-      const filters = filtersOf(buildShared({ policyIds: ['shared-id'], ruleIds: ['shared-id'] }));
+      const filters = filtersOf(
+        buildCountActionPolicyEventsQuery({
+          ...baseParams,
+          policyIds: ['shared-id'],
+          ruleIds: ['shared-id'],
+        })
+      );
       const should = (filters.find(hasBoolShould)?.bool?.should ?? []) as QueryDslQueryContainer[];
       // Two type-keyed nested clauses — the shared id is projected onto
       // each SO type separately, never as a single clause that lets the
@@ -179,8 +195,12 @@ describe('action policy events queries', () => {
     });
 
     it('adds a rule_ids spillover clause only when ruleIds are provided', () => {
-      const filtersWithRules = filtersOf(buildShared({ ruleIds: ['r1'] }));
-      const filtersWithoutRules = filtersOf(buildShared({ policyIds: ['p1'] }));
+      const filtersWithRules = filtersOf(
+        buildCountActionPolicyEventsQuery({ ...baseParams, ruleIds: ['r1'] })
+      );
+      const filtersWithoutRules = filtersOf(
+        buildCountActionPolicyEventsQuery({ ...baseParams, policyIds: ['p1'] })
+      );
 
       const withShould = (filtersWithRules.find(hasBoolShould)?.bool?.should ??
         []) as QueryDslQueryContainer[];
@@ -200,14 +220,21 @@ describe('action policy events queries', () => {
     });
 
     it('uses minimum_should_match=1 on the should clause', () => {
-      const filters = filtersOf(buildShared({ ruleIds: ['r1'] }));
+      const filters = filtersOf(
+        buildCountActionPolicyEventsQuery({ ...baseParams, ruleIds: ['r1'] })
+      );
       const boolFilter = filters.find(hasBoolShould);
       expect(boolFilter?.bool?.minimum_should_match).toBe(1);
     });
 
     describe('mandatoryRuleIds', () => {
       it('adds an AND filter with a nested SO clause and a spillover terms clause', () => {
-        const filters = filtersOf(buildShared({ mandatoryRuleIds: ['r1', 'r2'] }));
+        const filters = filtersOf(
+          buildCountActionPolicyEventsQuery({
+            ...baseParams,
+            mandatoryRuleIds: ['r1', 'r2'],
+          })
+        );
 
         // A second bool.should clause exists alongside the search-derived one
         // (which is absent here). Locate the mandatory clause by inspecting
@@ -239,7 +266,11 @@ describe('action policy events queries', () => {
 
       it('is independent from search-derived ruleIds — both clauses coexist (AND)', () => {
         const filters = filtersOf(
-          buildShared({ ruleIds: ['r-search'], mandatoryRuleIds: ['r-explicit'] })
+          buildCountActionPolicyEventsQuery({
+            ...baseParams,
+            ruleIds: ['r-search'],
+            mandatoryRuleIds: ['r-explicit'],
+          })
         );
 
         const shoulds = filters.filter(hasBoolShould);
@@ -248,9 +279,11 @@ describe('action policy events queries', () => {
       });
 
       it('is omitted when mandatoryRuleIds is empty', () => {
-        const filtersEmpty = filtersOf(buildShared({ mandatoryRuleIds: [] }));
+        const filtersEmpty = filtersOf(
+          buildCountActionPolicyEventsQuery({ ...baseParams, mandatoryRuleIds: [] })
+        );
 
-        const filtersUndefined = filtersOf(buildShared());
+        const filtersUndefined = filtersOf(buildCountActionPolicyEventsQuery({ ...baseParams }));
 
         expect(filtersEmpty.length).toBe(filtersUndefined.length);
       });
@@ -258,7 +291,9 @@ describe('action policy events queries', () => {
 
     describe('episodeIds', () => {
       it('adds an AND terms filter on episode_ids when episodeIds are provided', () => {
-        const filters = filtersOf(buildShared({ episodeIds: ['ep-1', 'ep-2'] }));
+        const filters = filtersOf(
+          buildCountActionPolicyEventsQuery({ ...baseParams, episodeIds: ['ep-1', 'ep-2'] })
+        );
         expect(filters).toEqual(
           expect.arrayContaining([
             { terms: { 'kibana.alerting_v2.dispatcher.episode_ids': ['ep-1', 'ep-2'] } },
@@ -267,7 +302,7 @@ describe('action policy events queries', () => {
       });
 
       it('omits the episode_ids terms filter when episodeIds is not provided', () => {
-        const filters = filtersOf(buildShared());
+        const filters = filtersOf(buildCountActionPolicyEventsQuery(baseParams));
         expect(
           filters.find((clause) =>
             Boolean(
@@ -279,7 +314,9 @@ describe('action policy events queries', () => {
       });
 
       it('omits the episode_ids terms filter when episodeIds is empty', () => {
-        const filters = filtersOf(buildShared({ episodeIds: [] }));
+        const filters = filtersOf(
+          buildCountActionPolicyEventsQuery({ ...baseParams, episodeIds: [] })
+        );
         expect(
           filters.find((clause) =>
             Boolean(
@@ -292,13 +329,15 @@ describe('action policy events queries', () => {
     });
 
     it('sorts by @timestamp desc', () => {
-      const body = buildShared();
+      const body = buildCountActionPolicyEventsQuery(baseParams);
       expect(body.sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
     });
 
-    it('sets track_total_hits=true', () => {
-      const body = buildShared();
-      expect(body.track_total_hits).toBe(true);
+    it('always sets track_total_hits=true on both helpers', () => {
+      const find = buildFindActionPolicyEventsQuery({ ...baseParams, page: 1, perPage: 25 });
+      const count = buildCountActionPolicyEventsQuery(baseParams);
+      expect(find.track_total_hits).toBe(true);
+      expect(count.track_total_hits).toBe(true);
     });
   });
 
@@ -314,11 +353,13 @@ describe('action policy events queries', () => {
       expect(body.from).toBe(0);
       expect(body.size).toBe(20);
     });
+  });
 
-    it('supports a count-only read via perPage=0 (size=0)', () => {
-      const body = buildFindActionPolicyEventsQuery({ ...baseParams, page: 1, perPage: 0 });
-      expect(body.from).toBe(0);
+  describe('buildCountActionPolicyEventsQuery', () => {
+    it('sets size=0 and omits from', () => {
+      const body = buildCountActionPolicyEventsQuery(baseParams);
       expect(body.size).toBe(0);
+      expect(body.from).toBeUndefined();
     });
   });
 });

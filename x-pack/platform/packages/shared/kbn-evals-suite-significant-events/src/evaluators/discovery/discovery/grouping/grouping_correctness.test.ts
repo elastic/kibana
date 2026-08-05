@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { Detection, SignificantEvent, SignalEntry } from '@kbn/significant-events-schema';
+import type { Discovery, Detection, SignalEntry } from '@kbn/significant-events-schema';
 import { groupingCorrectnessEvaluator } from './grouping_correctness';
 
 // Only `rule_uuid` matters to this evaluator (grouping is judged by rule_uuid membership per
-// discovery) — cast past the full `SignificantEvent['signals']` shape rather than filling in
+// discovery) — cast past the full `Discovery['detections']` shape rather than filling in
 // unused required fields, matching the `evaluate()` helper's casts below.
-const buildDiscovery = (...ruleUuids: string[]): Partial<SignificantEvent> => ({
+const buildDiscovery = (...ruleUuids: string[]): Partial<Discovery> => ({
   signals: ruleUuids.map(
     (rule_uuid): SignalEntry => ({
       type: 'detection',
@@ -30,17 +30,17 @@ const buildDiscovery = (...ruleUuids: string[]): Partial<SignificantEvent> => ({
 
 // The expected grouping is derived from `expected_discoveries`, so build them from the gold groups.
 // The evaluator only reads output.discoveries[].signals and expected.expected_discoveries[].signals.
-const evaluate = (discoveries: Array<Partial<SignificantEvent>>, expectedGroups?: string[][]) =>
+const evaluate = (discoveries: Array<Partial<Discovery>>, expectedGroups?: string[][]) =>
   groupingCorrectnessEvaluator.evaluate({
     input: {
       detections: [] as Detection[],
     },
-    output: { discoveries: discoveries as unknown as SignificantEvent[], steps: [] },
+    output: { discoveries: discoveries as unknown as Discovery[], steps: [] },
     expected: {
       criteria: [],
       expected_discoveries: expectedGroups?.map((group) =>
         buildDiscovery(...group)
-      ) as unknown as SignificantEvent[],
+      ) as unknown as Discovery[],
     },
     metadata: null,
   });

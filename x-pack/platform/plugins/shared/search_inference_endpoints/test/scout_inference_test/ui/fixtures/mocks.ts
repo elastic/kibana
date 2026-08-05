@@ -15,7 +15,6 @@ interface MockEndpoint {
   task_type: string;
   service: string;
   service_settings?: Record<string, unknown>;
-  task_settings?: Record<string, unknown>;
   metadata?: {
     display?: { name?: string; model_creator?: string };
     heuristics?: {

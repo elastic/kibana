@@ -15,8 +15,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing_delete.spec.ts",
-        "line": 32,
-        "column": 42
+        "line": 36,
+        "column": 14
       }
     },
     {
@@ -29,8 +29,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
-        "line": 37,
-        "column": 59
+        "line": 41,
+        "column": 12
       }
     },
     {
@@ -43,8 +43,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
-        "line": 39,
-        "column": 5
+        "line": 47,
+        "column": 12
       }
     },
     {
@@ -57,8 +57,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
-        "line": 47,
-        "column": 13
+        "line": 58,
+        "column": 12
       }
     },
     {
@@ -71,8 +71,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
-        "line": 65,
-        "column": 18
+        "line": 83,
+        "column": 12
       }
     },
     {
@@ -85,8 +85,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/event_annotation_listing/test/scout/ui/parallel_tests/annotation_listing.spec.ts",
-        "line": 77,
-        "column": 18
+        "line": 95,
+        "column": 12
       }
     }
   ]

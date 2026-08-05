@@ -1,6 +1,6 @@
 version: '1'
 name: 'Significant Events Triage'
-description: 'Analyses pending discoveries with a judge agent and promotes them to reviewed significant events.'
+description: 'Analyses unreviewed discoveries with a judge agent and creates significant events.'
 enabled: true
 tags:
   - observability
@@ -20,7 +20,7 @@ triggers:
         type: string
         default: 'now-7d'
         required: false
-        description: 'Lookback window for pending discoveries. Should match .significant_events-events retention.'
+        description: 'Lookback window for active discoveries. Should match .significant_events-discoveries retention.'
       - name: discoveryBatchMax
         type: number
         default: 10
@@ -34,7 +34,10 @@ outputs:
     type: boolean
 
 consts:
+  DISCOVERIES_INDEX: '.significant_events-discoveries'
   EVENTS_INDEX: '.significant_events-events'
+  KIND_DISCOVERY: 'discovery'
+  KIND_HANDLED: 'handled'
   INVESTIGATABLE_SEVERITIES: ['80-critical', '60-high']
 steps:
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
@@ -44,17 +47,16 @@ steps:
       spaceId: '{{ workflow.spaceId }}'
 
   # Select the latest real state per event (_id tie-break). Only events whose latest
-  # state has status == "pending" remain eligible (discovery agent wrote them as
-  # unjudged hypotheses). Score by severity + age of that pending doc.
+  # state is discovery remain eligible. Score by severity + age of that discovery doc.
   - name: get_unassessed_discoveries
     type: elasticsearch.esql.query
     with:
       query: |-
-        FROM .significant_events-events METADATA _id, _source
+        FROM .significant_events-discoveries METADATA _id, _source
         | INLINE STATS latest_timestamp = MAX(@timestamp) BY event_id
         | WHERE @timestamp == latest_timestamp
         | INLINE STATS latest_id = MAX(_id) BY event_id
-        | WHERE _id == latest_id AND status == "pending"
+        | WHERE _id == latest_id AND kind == "discovery"
         | EVAL severity_score = CASE(severity == "80-critical", 80, severity == "60-high", 60, severity == "40-medium", 40, severity == "20-low", 20, 0)
         | EVAL staleness_minutes = DATE_DIFF("minute", @timestamp, NOW())
         | EVAL score = severity_score + staleness_minutes
@@ -101,14 +103,11 @@ steps:
           hasWork: false
 
   # -----------------------------------------------------------------------
-  # Judge — evaluate pending discoveries and promote them to their final status.
-  # The judge calls events_write with the final status (open/closed/dismissed);
-  # no separate stamp step is needed — the status transition is atomic with the
-  # write, which also removes the doc from the pending queue.
+  # Judge — evaluate unreviewed discoveries.
   # -----------------------------------------------------------------------
   - name: run_judge_agent
     type: ai.agent
-    agent-id: "significant-events.discovery-judge"
+    agent-id: "significant_events.discovery-judge"
     # Keep connector-id-by-feature/plugin-id/aggregate-by in sync with @kbn/significant-events-schema
     # inference_feature_ids.ts (SIGNIFICANT_EVENTS_TRIAGE_INFERENCE_FEATURE_ID /
     # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID). Own feature — judge is a lighter,
@@ -119,18 +118,17 @@ steps:
     create-conversation: true
     public-conversation: true
     with:
-      # Rows are [event_id, _source, score]; only the ids go to the judge — it fetches each
-      # discovery itself via platform_sig_events_event_search, per judge.md.text.
       message: |
         ## Unreviewed Discoveries
 
-        event_ids: {{ steps.get_unassessed_discoveries.output.values | map: '0' | json }}
+        Columns: {{ steps.get_unassessed_discoveries.output.columns | map: 'name' | json }}
+        Rows: {{ steps.get_unassessed_discoveries.output.values | json }}
       schema:
         type: object
         properties:
           significant_events:
             type: array
-            description: 'Final events_write outcomes copied by the judge. Successful writes include event_uuid; failed writes have written: false and remain queued. The workflow uses only successful items to gate trigger_investigation.'
+            description: 'Final events_write outcomes copied by the judge. Successful writes include event_uuid; failed writes have written: false and remain queued. The workflow uses only successful items to stamp handled discoveries and gate trigger_investigation.'
             items:
               type: object
               properties:
@@ -161,9 +159,10 @@ steps:
       continue: false
 
   # -----------------------------------------------------------------------
-  # Trigger root-cause investigation for newly-opened high-severity events.
-  # The judge owns the review transition via events_write — no separate stamp
-  # step is needed here.
+  # Stamp successfully written discoveries as handled, then trigger
+  # root-cause investigation for newly-opened high-severity events.
+  # The judge owns the event decision and events_write; deterministic queue
+  # advancement stays in the workflow and does not consume agent turns.
   # -----------------------------------------------------------------------
 
   # Eviction-safe snapshot — ai.agent outputs are evictable; data.set outputs are not.
@@ -175,6 +174,71 @@ steps:
         type: data.set
         with:
           significant_events: '${{ steps.run_judge_agent.output.structured_output.significant_events }}'
+
+      - name: compute_written_event_ids
+        type: data.set
+        with:
+          written_event_ids: >-
+            ${{
+              steps.store_significant_events.output.significant_events
+                | default: []
+                | reject: 'written', false
+                | map: 'event_id'
+                | compact
+                | uniq }}
+
+      # ES|QL rows are [event_id, _source, score].
+      - name: foreach_stamp_handled
+        type: foreach
+        foreach: '${{ steps.get_unassessed_discoveries.output.values | default: [] }}'
+        iteration-on-failure:
+          continue: true
+        steps:
+          - name: check_event_written
+            type: if
+            condition: '${{ variables.written_event_ids contains foreach.item[0] }}'
+            steps:
+              # A newer handled marker already covers this discovery version.
+              - name: check_handled_exists
+                type: elasticsearch.request
+                with:
+                  method: POST
+                  path: '/{{ consts.DISCOVERIES_INDEX }}/_count?ignore_unavailable=true'
+                  body:
+                    query:
+                      bool:
+                        filter:
+                          - term:
+                              kibana.space_ids: '{{ variables.spaceId }}'
+                          - term:
+                              event_id: '{{ foreach.item[0] }}'
+                          - term:
+                              kind: '{{ consts.KIND_HANDLED }}'
+                          - range:
+                              '@timestamp':
+                                gte: '{{ foreach.item[1]["@timestamp"] }}'
+                on-failure:
+                  continue: true
+
+              - name: maybe_write_handled_marker
+                type: if
+                condition: '${{ steps.check_handled_exists.output.count == 0 }}'
+                steps:
+                  - name: write_handled_marker
+                    type: elasticsearch.request
+                    with:
+                      method: POST
+                      path: '/{{ consts.DISCOVERIES_INDEX }}/_doc'
+                      body:
+                        '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+                        kibana:
+                          space_ids:
+                            - '{{ variables.spaceId }}'
+                        kind: '{{ consts.KIND_HANDLED }}'
+                        event_id: '{{ foreach.item[0] }}'
+                        previous_discovery_id: '{{ foreach.item[1].discovery_id }}'
+                    on-failure:
+                      continue: true
 
       # Size must be computed in a separate step — comparison operators cannot follow
       # a filter chain in the same expression (see compute_batch_size above).
@@ -275,8 +339,6 @@ steps:
                               event_uuid: '{{ foreach.item.event_uuid }}'
                               event_id: '{{ foreach.item.event_id }}'
                               status: '{{ foreach.item.status }}'
-                              severity: '{{ foreach.item.severity }}'
-                              summary: '{{ foreach.item.summary }}'
 
   - name: output_result
     type: workflow.output

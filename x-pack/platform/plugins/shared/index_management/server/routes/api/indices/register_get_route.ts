@@ -29,7 +29,7 @@ export function registerGetRoute({
       },
       validate: {
         params: schema.object({
-          indexName: schema.string({ maxLength: 1000 }),
+          indexName: schema.string(),
         }),
       },
     },

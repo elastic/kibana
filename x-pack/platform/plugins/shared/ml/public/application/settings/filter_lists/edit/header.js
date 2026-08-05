@@ -28,7 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EditDescriptionPopover } from '../components/edit_description_popover';
 import { FilterListUsagePopover } from '../components/filter_list_usage_popover';
-import { MlAppHeader, useFilterListsBack } from '../../../components/ml_app_header';
+import { MlAppHeader } from '../../../components/ml_app_header';
 
 export const EditFilterListHeader = ({
   canCreateFilter,
@@ -41,7 +41,6 @@ export const EditFilterListHeader = ({
   updateNewFilterId,
   usedBy,
 }) => {
-  const filterListsBack = useFilterListsBack();
   const title =
     filterId !== undefined
       ? i18n.translate('xpack.ml.settings.filterLists.editFilterHeader.filterListTitle', {
@@ -152,7 +151,7 @@ export const EditFilterListHeader = ({
 
   return (
     <React.Fragment>
-      <MlAppHeader title={title} back={filterListsBack} />
+      <MlAppHeader title={title} />
 
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
         <EuiFlexItem grow={false}>

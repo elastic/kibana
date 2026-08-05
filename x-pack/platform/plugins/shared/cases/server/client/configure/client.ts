@@ -403,9 +403,9 @@ export async function update(
     });
 
     if (clientArgs.config.templates.enabled) {
-      // Mirror any new custom fields into global field definitions. When the patch omits
-      // customFields, falls back to the pre-patch set (all names already exist → cheap no-op).
-      // Non-fatal: logged and swallowed inside the helper.
+      // Mirror new custom fields into global field definitions. Uses the effective post-patch set
+      // so a patch that omits customFields falls back to the existing configuration's fields
+      // (all names will already exist → cheap no-op). Non-fatal: logged and swallowed.
       await ensureGlobalFieldDefinitions({
         owner: configuration.attributes.owner,
         customFields: request.customFields ?? configuration.attributes.customFields,

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod';
 import type {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
@@ -15,10 +14,11 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
 import { PAGINATION_DEFAULT_PER_PAGE } from '@kbn/as-code-shared-schemas';
+import type { TypeOf } from '@kbn/config-schema';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
 
 type TagSearchParams = Pick<
-  z.output<typeof asCodeSearchRequestSchema>,
+  TypeOf<typeof asCodeSearchRequestSchema>,
   'tags' | 'excluded_tags' | 'tag_names' | 'excluded_tag_names'
 >;
 

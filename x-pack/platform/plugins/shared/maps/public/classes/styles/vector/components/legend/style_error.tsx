@@ -6,9 +6,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { DynamicStyleProperty } from '../../properties/dynamic_style_property';
 
 interface Props {
@@ -63,12 +62,15 @@ export const StyleError = ({ error, style }: Props) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup direction="column" gutterSize="none">
-        <KbnWarningCallout
+        <EuiCallOut
           title={i18n.translate('xpack.maps.vectorStyleLegend.fetchStyleMetaDataError', {
             defaultMessage: 'Unable to fetch style meta data',
           })}
-          text={error.message}
-        />
+          color="warning"
+          iconType="warning"
+        >
+          <p>{error.message}</p>
+        </EuiCallOut>
       </EuiFlexGroup>
     </div>
   );

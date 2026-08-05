@@ -12,8 +12,6 @@ Replace `<team>` with the GitHub team that will own this connector (e.g., `@elas
 
 This creates the standard scaffold. Then modify the spec to use the MCP-native pattern.
 
-After running the generator, replace all `TODO:` placeholders in generated files with real content before proceeding.
-
 ## Implement the MCP-Native Connector Spec
 
 Follow the GitHub and Tavily connectors as reference:
@@ -22,95 +20,57 @@ Follow the GitHub and Tavily connectors as reference:
 
 ### Key elements:
 
-1. **Schema**: Wrap in `lazySchema()` and include a `serverUrl` field pointing to the MCP server URL:
+1. **Schema**: Include a `serverUrl` field pointing to the MCP server URL:
    ```typescript
-   import { z, lazySchema } from '@kbn/zod/v4';
    import { UISchemas } from '../../connector_spec_ui';
 
-   schema: lazySchema(() =>
-     z.object({
-       serverUrl: UISchemas.url('https://mcp.example.com/mcp/')
-         .describe('MCP server URL')
-         .meta({ label: 'Server URL' }),
-     })
-   ),
+   schema: z.object({
+     serverUrl: UISchemas.url('https://mcp.example.com/mcp/')
+       .describe('MCP server URL')
+       .meta({ label: 'Server URL' }),
+   }),
    ```
 
-2. **Typed actions**: Create a typed action for each MCP tool. Set `isTool: true` and add a plain-string `description`. Use `callToolJson` for actions that return JSON (the common case) and `callToolContent` for binary/file downloads:
+2. **Typed actions**: Create a typed action for each MCP tool, using `withMcpClient`. Set `isTool: true` and add a plain-string `description`:
    ```typescript
-   import { withMcpClient, callToolJson, callToolContent } from '../../lib/mcp';
+   import { withMcpClient } from '../../lib/mcp/with_mcp_client';
 
    actions: {
-     // JSON-returning action (search, list, get metadata, etc.)
      search: {
        isTool: true,
        description: 'Search for items by keyword. Returns matching results with IDs and summaries.',
        input: SearchInputSchema,
-       handler: async (ctx, input: SearchInput) => {
-         return callToolJson(ctx, 'exact_mcp_tool_name', input);
-       },
-     },
-     // Binary/file download action — use callToolContent, not callToolJson
-     downloadFile: {
-       isTool: true,
-       description:
-         'Download the content of a file. ' +
-         'WARNING: Returns base64-encoded binary for non-text files — only call this when ' +
-         'you have a plan to process the data (e.g. via an Elasticsearch ingest pipeline ' +
-         'attachment processor). Large files produce very large payloads.',
-       input: GetFileInputSchema,
-       handler: async (ctx, input: GetFileInput) => {
-         return callToolContent(ctx, 'get_file_content', { id: input.id });
-       },
+       handler: withMcpClient(async (client, input) => {
+         return client.callTool({ name: 'exact_mcp_tool_name', arguments: input });
+       }),
      },
    },
    ```
 
-3. **Escape hatches**: Always include `listTools` and `callTool` actions for dynamic tool discovery. Wrap their inline schemas in `lazySchema()`:
+3. **Escape hatches**: Always include `listTools` and `callTool` actions for dynamic tool discovery:
    ```typescript
    listTools: {
      isTool: true,
      description: 'List all MCP tools exposed by the server. Useful for dynamic discovery.',
-     input: lazySchema(() => z.object({})),
-     handler: async (ctx) => {
-       return withMcpClient(ctx, async (mcp) => {
-         const { tools } = await mcp.listTools();
-         return tools;
-       });
-     },
+     input: z.object({}),
+     handler: withMcpClient(async (client) => {
+       return client.listTools();
+     }),
    },
    callTool: {
      isTool: true,
      description: 'Call any MCP tool by name with arbitrary arguments. Use listTools first to discover available tools.',
-     input: lazySchema(() =>
-       z.object({
-         name: z.string().min(1).max(200).describe('The MCP tool name (from listTools)'),
-         arguments: z
-           .record(z.string().max(200), z.unknown())
-           .optional()
-           .describe('Tool arguments as a key/value map'),
-       })
-     ),
-     handler: async (ctx, input: CallToolInput) => {
-       return callToolContent(ctx, input.name, input.arguments);
-     },
+     input: z.object({
+       name: z.string().describe('The MCP tool name (from listTools)'),
+       arguments: z.record(z.unknown()).optional().describe('Tool arguments as a key/value map'),
+     }),
+     handler: withMcpClient(async (client, input) => {
+       return client.callTool(input);
+     }),
    },
    ```
 
-4. **Connection test**: Include a test handler that validates the MCP connection:
-   ```typescript
-   test: {
-     description: i18n.translate('connectorSpecs.yourConnector.test.description', {
-       defaultMessage: 'Verifies connection to the Your Service MCP server.',
-     }),
-     handler: async (ctx) => {
-       return withMcpClient(ctx, async (mcp) => {
-         const { tools } = await mcp.listTools();
-         return { ok: true, message: `Connected. ${tools.length} tools available.` };
-       });
-     },
-   },
-   ```
+4. **Connection test**: Include a test handler that validates the MCP connection.
 
 ## MCP Tool Discovery
 

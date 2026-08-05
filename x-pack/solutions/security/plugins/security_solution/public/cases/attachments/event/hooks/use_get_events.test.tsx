@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
-import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { type DataView } from '@kbn/data-views-plugin/public';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import { useGetEvents } from './use_get_events';
 
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { searchEvents } from './search_events';
+import { TestProviders } from '../../../../common/mock';
 import { useToasts } from '../../../../common/lib/kibana';
 
 jest.mock('./search_events');
@@ -23,11 +21,6 @@ jest.mock('../../../../common/lib/kibana');
 const mockDataView = {
   getIndexPattern: jest.fn(() => 'test-index'),
 } as unknown as DataView;
-
-const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-const wrapper = ({ children }: PropsWithChildren) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
 
 describe('useGetEvents', () => {
   beforeEach(() => {
@@ -46,7 +39,7 @@ describe('useGetEvents', () => {
           pageIndex: 0,
           itemsPerPage: 10,
         }),
-      { wrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => result.current.isSuccess);
@@ -71,7 +64,7 @@ describe('useGetEvents', () => {
           pageIndex: 0,
           itemsPerPage: 10,
         }),
-      { wrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => expect(useToasts().addError).toHaveBeenCalled());
@@ -88,7 +81,7 @@ describe('useGetEvents', () => {
           pageIndex: 0,
           itemsPerPage: 10,
         }),
-      { wrapper }
+      { wrapper: TestProviders }
     );
 
     await waitFor(() => expect(searchEvents).toHaveBeenCalled());

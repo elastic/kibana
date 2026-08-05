@@ -28,7 +28,7 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Signal Rule', version: 1 },
+  metadata: { name: 'Test Signal Rule' },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: {
@@ -45,7 +45,7 @@ const alertRule: RuleApiResponse = {
   ...baseRule,
   id: 'rule-2',
   kind: 'alert',
-  metadata: { name: 'Test Alert Rule', version: 1 },
+  metadata: { name: 'Test Alert Rule' },
   recovery_strategy: 'query',
   query: {
     format: 'standalone',
@@ -302,7 +302,7 @@ describe('RuleConditions', () => {
     it('renders description text before the ES|QL heading when it exists', () => {
       const ruleWithDesc = {
         ...baseRule,
-        metadata: { ...baseRule.metadata, name: 'Test Signal Rule', description: 'My rule desc' },
+        metadata: { name: 'Test Signal Rule', description: 'My rule desc' },
       };
       renderConditions(ruleWithDesc);
       const desc = screen.getByTestId('ruleConditionsDescription');

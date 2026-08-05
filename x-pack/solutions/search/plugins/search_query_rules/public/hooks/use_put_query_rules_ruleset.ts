@@ -35,7 +35,7 @@ export const usePutRuleset = (
   return useMutation(
     async ({ rulesetId, forceWrite, rules }: MutationArgs) => {
       return await http.put<QueryRulesQueryRuleset>(
-        `/internal/search_query_rules/ruleset/${encodeURIComponent(rulesetId)}`,
+        `/internal/search_query_rules/ruleset/${rulesetId}`,
         {
           query: { forceWrite },
           ...(rules ? { body: JSON.stringify({ rules }) } : {}),

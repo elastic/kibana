@@ -1,24 +1,10 @@
 {
-  "sha1": "774165739bf554ab6df8ecf24cef7fa860e3f6e0",
+  "sha1": "efb0dcbfc56f5d66b979ec78c34e623561df1cbc",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
   ],
   "tests": [
-    {
-      "id": "861db30738bf803-bafc6760325a526",
-      "title": "[NON-MKI] MCP OAuth authorization_code flow via SDK StreamableHTTPClientTransport should complete full MCP handshake via SAML-backed authorization_code flow",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_client_credentials_mcp.spec.ts",
-        "line": 37,
-        "column": 12
-      }
-    },
     {
       "id": "f6d065371af5227-8e2fb993048f286",
       "title": "[NON-MKI] UIAM OAuth client CRUD via Kibana proxy creates, reads, lists, patches (incl. redirect_uris), and revokes a client",

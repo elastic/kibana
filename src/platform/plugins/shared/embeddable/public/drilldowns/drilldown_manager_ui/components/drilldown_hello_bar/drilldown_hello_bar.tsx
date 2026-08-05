@@ -8,8 +8,17 @@
  */
 
 import React from 'react';
-import { KbnInfoCallout } from '@kbn/ui-callout';
-import { txtHelpTitle, txtHelpText, txtViewDocsLinkLabel, txtHideHelpButtonLabel } from './i18n';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTextColor,
+  EuiText,
+  EuiLink,
+  EuiSpacer,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import { txtHideHelpButtonLabel, txtHelpText, txtViewDocsLinkLabel } from './i18n';
 
 export interface DrilldownHelloBarProps {
   docsLink?: string;
@@ -20,25 +29,29 @@ export const WELCOME_MESSAGE_TEST_SUBJ = 'drilldownsWelcomeMessage';
 
 export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({ docsLink, onHideClick }) => {
   return (
-    <KbnInfoCallout
-      title={txtHelpTitle}
-      text={txtHelpText}
-      actionProps={
-        docsLink
-          ? {
-              primary: {
-                href: docsLink,
-                target: '_blank',
-                children: txtViewDocsLinkLabel,
-              },
-            }
-          : undefined
-      }
-      onDismiss={onHideClick}
-      dismissButtonProps={{
-        'aria-label': txtHideHelpButtonLabel,
-      }}
-      data-test-subj={WELCOME_MESSAGE_TEST_SUBJ}
-    />
+    <EuiCallOut data-test-subj={WELCOME_MESSAGE_TEST_SUBJ}>
+      <EuiFlexGroup responsive={false}>
+        <EuiFlexItem grow={1}>
+          <EuiText size={'s'}>
+            <EuiTextColor color="subdued">{txtHelpText}</EuiTextColor>
+          </EuiText>
+          {docsLink && (
+            <>
+              <EuiSpacer size={'xs'} />
+              <EuiLink href={docsLink} target="_blank" external>
+                {txtViewDocsLinkLabel}
+              </EuiLink>
+            </>
+          )}
+        </EuiFlexItem>
+        {!!onHideClick && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="xs" onClick={onHideClick}>
+              {txtHideHelpButtonLabel}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </EuiCallOut>
   );
 };

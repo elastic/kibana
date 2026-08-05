@@ -25,20 +25,12 @@ import type {
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
 import { isRefField } from '../../../common/types/domain/template/fields';
-import { getYamlDefaultAsString } from '../../../common/utils';
 import { toFieldDefinitions, trimFieldDefaults } from './utils';
-import {
-  CASE_TEMPLATE_SAVED_OBJECT,
-  MAX_EXTENDED_FIELD_VALUE_BYTES,
-  MAX_FIELDS_PER_TEMPLATE,
-  MAX_TEMPLATES_PER_OWNER,
-} from '../../../common/constants';
+import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 import type {
   TemplatesFindRequest,
   TemplatesFindResponse,
 } from '../../../common/types/api/template/v1';
-
-const textEncoder = new TextEncoder();
 
 export class TemplatesService {
   constructor(
@@ -369,15 +361,10 @@ export class TemplatesService {
       );
     }
 
-    this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
-    this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
-
     await this.assertTemplateNameIsUnique({
       name: templateName,
       owner: input.owner,
     });
-
-    await this.assertOwnerTemplateCountWithinLimit(input.owner);
 
     const libraryDefs = await this.getLibraryDefsIfReferenced(parsedDefinition.fields, input.owner);
 
@@ -431,18 +418,11 @@ export class TemplatesService {
       );
     }
 
-    this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
-    this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
-
     await this.assertTemplateNameIsUnique({
       name: templateName,
       owner: input.owner,
       excludeTemplateId: currentTemplate.attributes.templateId,
     });
-
-    if (input.owner !== currentTemplate.attributes.owner) {
-      await this.assertOwnerTemplateCountWithinLimit(input.owner);
-    }
 
     const libraryDefs = await this.getLibraryDefsIfReferenced(parsedDefinition.fields, input.owner);
 
@@ -692,69 +672,6 @@ export class TemplatesService {
     }
 
     return referencing;
-  }
-
-  private assertFieldCountWithinLimit(fieldCount: number): void {
-    if (fieldCount > MAX_FIELDS_PER_TEMPLATE) {
-      throw Boom.badRequest(
-        `A template cannot define more than ${MAX_FIELDS_PER_TEMPLATE} fields.`
-      );
-    }
-  }
-
-  /**
-   * Limits defaults stored in a newly written template definition. Value-bearing
-   * fields are later coerced into a case's `extended_fields`, so measure the
-   * same UTF-8 representation that will be persisted on the case.
-   */
-  private assertTemplateDefaultValuesWithinLimit(
-    fields: ParsedTemplate['definition']['fields']
-  ): void {
-    for (const field of fields) {
-      const metadata = field.metadata;
-      if (
-        metadata !== undefined &&
-        'default' in metadata &&
-        metadata.default !== undefined &&
-        metadata.default !== null
-      ) {
-        const value = getYamlDefaultAsString(metadata.default);
-        if (textEncoder.encode(value).byteLength > MAX_EXTENDED_FIELD_VALUE_BYTES) {
-          const fieldName = isRefField(field) ? field.name ?? field.$ref : field.name;
-          throw Boom.badRequest(
-            `Template field "${fieldName}" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
-          );
-        }
-      }
-    }
-  }
-
-  /**
-   * Counts the latest, non-deleted templates for an owner. This is a best-effort
-   * read-then-write check: every concurrent request that sees a count below the
-   * limit can create, so the limit may be temporarily exceeded. We accept this
-   * trade-off because template writes are infrequent administrative actions.
-   */
-  private async assertOwnerTemplateCountWithinLimit(owner: string): Promise<void> {
-    const escapedOwner = escapeKuery(owner);
-    const soType = CASE_TEMPLATE_SAVED_OBJECT;
-    const { total } = await this.dependencies.unsecuredSavedObjectsClient.find<Template>({
-      type: soType,
-      namespaces: [this.dependencies.namespace],
-      page: 1,
-      perPage: 0,
-      fields: ['owner', 'isLatest', 'deletedAt'],
-      filter: fromKueryExpression(
-        `${soType}.attributes.owner: "${escapedOwner}" AND ` +
-          `${soType}.attributes.isLatest: true AND NOT ${soType}.attributes.deletedAt: *`
-      ),
-    });
-
-    if (total >= MAX_TEMPLATES_PER_OWNER) {
-      throw Boom.badRequest(
-        `Cannot create more than ${MAX_TEMPLATES_PER_OWNER} templates per owner.`
-      );
-    }
   }
 
   private async assertTemplateNameIsUnique({

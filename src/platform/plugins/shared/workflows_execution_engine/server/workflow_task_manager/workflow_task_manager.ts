@@ -94,7 +94,7 @@ export class WorkflowTaskManager {
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
       },
-      { request: fakeRequest, cloneApiKey: true }
+      { request: fakeRequest }
     );
 
     return {
@@ -123,7 +123,7 @@ export class WorkflowTaskManager {
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
       },
-      { request: fakeRequest, cloneApiKey: true }
+      { request: fakeRequest }
     );
 
     return {
@@ -171,7 +171,7 @@ export class WorkflowTaskManager {
         scope: generateExecutionTaskScope(workflowExecution),
         enabled: true,
       },
-      { request, cloneApiKey: true }
+      { request }
     );
 
     return { taskId: task.id };
@@ -185,33 +185,6 @@ export class WorkflowTaskManager {
     triggeredBy?: string;
   }): Promise<void> {
     await this.taskManager.runSoon(getWorkflowRunTaskId(executionId, triggeredBy || 'manual'));
-  }
-
-  /**
-   * Returns true if Task Manager has at least one task for this execution scope that could still
-   * run (idle, claiming, or running). Existence check only (`size: 1`).
-   */
-  async hasActiveTaskForExecution(workflowExecutionId: string): Promise<boolean> {
-    const { docs } = await this.taskManager.fetch({
-      size: 1,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                'task.status': [TaskStatus.Idle, TaskStatus.Claiming, TaskStatus.Running],
-              },
-            },
-            {
-              term: {
-                'task.scope': `workflow:execution:${workflowExecutionId}`,
-              },
-            },
-          ],
-        },
-      },
-    });
-    return docs.length > 0;
   }
 
   async removeQueuedRunTask({
@@ -256,7 +229,7 @@ export class WorkflowTaskManager {
         state: {},
         scope: [`workflow:execution:${executionId}`],
       },
-      fakeRequest ? { request: fakeRequest, cloneApiKey: true } : undefined
+      fakeRequest ? { request: fakeRequest } : undefined
     );
 
     return {

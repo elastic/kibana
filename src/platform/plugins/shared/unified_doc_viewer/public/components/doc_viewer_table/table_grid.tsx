@@ -15,13 +15,12 @@ import type {
   RenderCellValue,
   UseEuiTheme,
 } from '@elastic/eui';
-import { EuiDataGrid, EuiSpacer, EuiText, euiFontSize } from '@elastic/eui';
+import { EuiCallOut, EuiDataGrid, EuiSpacer, EuiText, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { usePager } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import type { FieldRow } from './field_row';
@@ -258,7 +257,7 @@ export function TableGrid({
           {Boolean(warningMessage) && (
             <div>
               <EuiSpacer size="xs" />
-              <KbnWarningCallout announceOnMount={false} title={warningMessage} size="s" />
+              <EuiCallOut announceOnMount={false} title={warningMessage} color="warning" size="s" />
             </div>
           )}
         </>

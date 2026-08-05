@@ -33,7 +33,6 @@ import {
   isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
-  isReasoningEffortLevel,
 } from '../../../common/type_guards';
 import { getModelId } from '../../utils/get_model_id';
 import { AddEndpointModal } from './add_endpoint_modal';
@@ -48,6 +47,7 @@ import {
 } from '../../utils/eis_utils';
 import { REGION_DISPLAY_NAMES } from '../../../common/constants';
 import type { EisInferenceEndpoint } from '../../../common/types';
+import { useInferencePreferencesEnabled } from '../../feature_flag';
 import { EisModelStatus } from '../../types';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
 
@@ -76,6 +76,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEndpoint, setEditingEndpoint] = useState<EisInferenceEndpoint | undefined>();
   const usageTracker = useUsageTracker();
+  const showRegions = useInferencePreferencesEnabled();
 
   useEffect(() => {
     usageTracker.load([EventType.EIS_MODEL_VIEWED, `${EventType.EIS_MODEL_VIEWED}_${modelId}`]);
@@ -147,11 +148,6 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     setEditingEndpoint(undefined);
   }, [usageTracker, editingEndpoint]);
 
-  const initialReasoningEffort = useMemo(() => {
-    const effort = editingEndpoint?.task_settings?.reasoning?.effort;
-    return isReasoningEffortLevel(effort) ? effort : undefined;
-  }, [editingEndpoint]);
-
   const descriptionListItems = [
     {
       title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.modelAuthorLabel', {
@@ -171,7 +167,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       }),
       description: modelEOLDate,
     },
-    ...(regionZoneCounts.length > 0
+    ...(showRegions && regionZoneCounts.length > 0
       ? [
           {
             title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.regionsLabel', {
@@ -352,7 +348,6 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           taskTypes={taskTypeOptions}
           initialEndpointId={editingEndpoint?.inference_id}
           initialTaskType={editingEndpoint?.task_type}
-          initialReasoningEffort={initialReasoningEffort}
           onSave={onSaveEndpoint}
           onCancel={handleCloseModal}
         />

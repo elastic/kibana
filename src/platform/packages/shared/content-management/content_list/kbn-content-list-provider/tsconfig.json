@@ -18,7 +18,6 @@
     "@kbn/content-management-favorites-public",
     "@kbn/user-profile-components",
     "@kbn/content-management-user-profiles",
-    "@kbn/shared-ux-router",
-    "@kbn/ui-callout"
+    "@kbn/shared-ux-router"
   ]
 }

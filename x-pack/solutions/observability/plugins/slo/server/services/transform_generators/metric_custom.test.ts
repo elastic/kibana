@@ -226,7 +226,6 @@ describe('Metric Custom Transform Generator', () => {
         frequency: twoMinute(),
         syncDelay: twoMinute(),
         preventInitialBackfill: true,
-        preventCrossProjectSearch: false,
       },
     });
 

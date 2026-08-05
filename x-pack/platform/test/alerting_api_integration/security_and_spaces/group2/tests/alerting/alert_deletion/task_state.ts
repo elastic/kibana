@@ -157,15 +157,17 @@ export default function alertDeletionTaskStateTests({ getService }: FtrProviderC
               });
 
               // get the task document and check state
+              const taskResultAfter = await es.get<TaskManagerDoc>({
+                index: '.kibana_task_manager',
+                id: `task:${ruleId}`,
+              });
+
+              expect(taskResultAfter).not.to.be(undefined);
+
+              const taskStateAfter = JSON.parse(taskResultAfter._source?.task?.state!);
+
               // instance1 should have been cleared but instance2 should still be there
               await retry.try(async () => {
-                const taskResultAfter = await es.get<TaskManagerDoc>({
-                  index: '.kibana_task_manager',
-                  id: `task:${ruleId}`,
-                });
-                expect(taskResultAfter).not.to.be(undefined);
-
-                const taskStateAfter = JSON.parse(taskResultAfter._source?.task?.state!);
                 expect(get(taskStateAfter, 'alertInstances.instance1')).to.be(undefined);
                 expect(get(taskStateAfter, 'alertInstances.instance2')).not.to.be(undefined);
               });

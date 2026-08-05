@@ -220,19 +220,10 @@ describe('ApiKeyService', () => {
       });
     });
 
-    const bulkCreateResponseFor = (apiKeys: string[]) => ({
-      saved_objects: apiKeys.map((_, index) => ({
-        id: `pending-invalidation-${index}`,
-        type: API_KEY_PENDING_INVALIDATION_TYPE,
-        attributes: {},
-        references: [],
-      })),
-    });
-
     it('does not call bulkCreate when apiKeys is empty', async () => {
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
 
-      await expect(service.markApiKeysForInvalidation([])).resolves.toEqual([]);
+      await service.markApiKeysForInvalidation([]);
 
       expect(invalidationSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
     });
@@ -243,14 +234,8 @@ describe('ApiKeyService', () => {
         Buffer.from('123').toString('base64'),
         Buffer.from('id123:essu_uiam_value').toString('base64'),
       ];
-      invalidationSavedObjectsClient.bulkCreate = jest
-        .fn()
-        .mockResolvedValue(bulkCreateResponseFor(apiKeys));
 
-      await expect(service.markApiKeysForInvalidation(apiKeys)).resolves.toEqual([
-        { success: true },
-        { success: true },
-      ]);
+      await service.markApiKeysForInvalidation(apiKeys);
 
       expect(invalidationSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
       const [savedObjects] = invalidationSavedObjectsClient.bulkCreate.mock.calls[0];
@@ -272,9 +257,6 @@ describe('ApiKeyService', () => {
     it('includes uiamApiKey for UIAM credentials', async () => {
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
       const apiKeys = [Buffer.from('id123:essu_uiam_value').toString('base64')];
-      invalidationSavedObjectsClient.bulkCreate = jest
-        .fn()
-        .mockResolvedValue(bulkCreateResponseFor(apiKeys));
 
       await service.markApiKeysForInvalidation(apiKeys);
       expect(invalidationSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
@@ -286,66 +268,18 @@ describe('ApiKeyService', () => {
       });
     });
 
-    it('reports every key as failed and logs when bulkCreate throws', async () => {
+    it('logs error and does not throw when bulkCreate fails', async () => {
       const err = new Error('bulkCreate failed');
       invalidationSavedObjectsClient.bulkCreate = jest.fn().mockRejectedValue(err);
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
       const apiKeys = [Buffer.from('123').toString('base64')];
 
-      await expect(service.markApiKeysForInvalidation(apiKeys)).resolves.toEqual([
-        { success: false, message: 'bulkCreate failed' },
-      ]);
+      await expect(service.markApiKeysForInvalidation(apiKeys)).resolves.toBeUndefined();
 
       expect(logger.error).toHaveBeenCalledWith(
         'Failed to bulk mark list of API keys ["MTIz"] for invalidation: bulkCreate failed',
         { error: { stack_trace: err.stack } }
       );
-    });
-
-    it('reports per-key failures that bulkCreate resolves with rather than throws', async () => {
-      const apiKeys = [
-        Buffer.from('ok-id:secret').toString('base64'),
-        Buffer.from('bad-id:secret').toString('base64'),
-      ];
-      invalidationSavedObjectsClient.bulkCreate = jest.fn().mockResolvedValue({
-        saved_objects: [
-          {
-            id: 'pending-invalidation-0',
-            type: API_KEY_PENDING_INVALIDATION_TYPE,
-            attributes: {},
-            references: [],
-          },
-          {
-            id: 'pending-invalidation-1',
-            type: API_KEY_PENDING_INVALIDATION_TYPE,
-            attributes: {},
-            references: [],
-            error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
-          },
-        ],
-      });
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
-
-      await expect(service.markApiKeysForInvalidation(apiKeys)).resolves.toEqual([
-        { success: true },
-        { success: false, message: 'version conflict' },
-      ]);
-
-      expect(logger.error).toHaveBeenCalledWith(
-        'Failed to mark API key "bad-id" for invalidation: version conflict'
-      );
-    });
-
-    it('reports a key as failed when bulkCreate returns no entry for it', async () => {
-      const apiKeys = [Buffer.from('lonely-id:secret').toString('base64')];
-      invalidationSavedObjectsClient.bulkCreate = jest
-        .fn()
-        .mockResolvedValue({ saved_objects: [] });
-      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
-
-      await expect(service.markApiKeysForInvalidation(apiKeys)).resolves.toEqual([
-        { success: false, message: 'Saved object was not returned by bulkCreate' },
-      ]);
     });
   });
 });

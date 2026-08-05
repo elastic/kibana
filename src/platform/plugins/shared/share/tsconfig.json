@@ -37,8 +37,7 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/licensing-types",
     "@kbn/es-query",
-    "@kbn/scout",
-    "@kbn/ui-callout"
+    "@kbn/scout"
   ],
   "exclude": ["target/**/*"]
 }

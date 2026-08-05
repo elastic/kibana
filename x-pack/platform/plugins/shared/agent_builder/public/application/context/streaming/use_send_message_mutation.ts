@@ -315,7 +315,7 @@ export const useSendMessageMutation = ({
           if (succeeded && !endedInAwaitingPrompt) {
             streamActions.invalidateConversation();
           }
-          if (!succeeded && hasInsertedOptimisticListRow && !conversationPersisted) {
+          if (!succeeded && hasInsertedOptimisticListRow) {
             removeSidebarConversationListRow({
               queryClient,
               agentId: vars.agentId,

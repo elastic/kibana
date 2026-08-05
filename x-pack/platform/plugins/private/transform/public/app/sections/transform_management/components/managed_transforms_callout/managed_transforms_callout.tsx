@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
@@ -17,9 +17,9 @@ export const ManagedTransformsWarningCallout = ({
   action: string;
 }) => {
   return (
-    <EuiCallOut
-      color="warning"
-      title={
+    <>
+      <EuiSpacer size="s" />
+      <EuiCallOut color="warning">
         <FormattedMessage
           id="xpack.transform.managedTransformsWarningCallout"
           defaultMessage="{count, plural, one {This transform} other {At least one of these transforms}} is preconfigured by Elastic; {action} {count, plural, one {it} other {them}} might impact other parts of the product."
@@ -28,7 +28,7 @@ export const ManagedTransformsWarningCallout = ({
             action,
           }}
         />
-      }
-    />
+      </EuiCallOut>
+    </>
   );
 };

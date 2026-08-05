@@ -59,7 +59,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
     }).pipe(
       handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable }),
       processOpenAIStream(),
-      emitTokenCountEstimateIfMissing({ request, logger }),
+      emitTokenCountEstimateIfMissing({ request }),
       useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
   },

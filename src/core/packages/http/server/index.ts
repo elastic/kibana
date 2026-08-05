@@ -124,7 +124,6 @@ export type {
   AuthcOptional,
   Privilege,
   PrivilegeSet,
-  Privileges,
   AllRequiredCondition,
   AnyRequiredCondition,
   RouteSecurity,

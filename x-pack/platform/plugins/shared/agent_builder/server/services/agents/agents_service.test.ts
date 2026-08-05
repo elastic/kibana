@@ -217,44 +217,6 @@ describe('AgentsService', () => {
           started.ensure({ spaceId: 'space-1', agent: { ...agent, type: 'unknown' } })
         ).rejects.toThrow('unknown agent type "unknown"');
       });
-
-      it('keeps availability out of the persisted agent document', async () => {
-        await started.ensure({
-          spaceId: 'space-1',
-          agent,
-          availability: {
-            cacheMode: 'space',
-            handler: async () => ({ status: 'unavailable' }),
-          },
-        });
-
-        expect(ensureAgent).toHaveBeenCalledTimes(1);
-        expect(ensureAgent).toHaveBeenCalledWith(agent);
-      });
-
-      it('applies ensure-registered availability when reading the agent', async () => {
-        await started.ensure({
-          spaceId: 'default',
-          agent,
-          availability: {
-            cacheMode: 'none',
-            handler: async () => ({ status: 'unavailable', reason: 'off' }),
-          },
-        });
-
-        createClientMock.mockResolvedValue({
-          has: jest.fn().mockResolvedValue(true),
-          getWithAccess: jest.fn().mockResolvedValue({
-            ...agent,
-            access_control: undefined,
-            created_by: undefined,
-            permissions: { update_agent: true, update_access_control: true },
-          }),
-        } as any);
-
-        const registry = await started.getRegistry({ request });
-        await expect(registry.get(agent.id)).rejects.toThrow(`Agent ${agent.id} is not available`);
-      });
     });
 
     describe('#getAgentsUsingTools', () => {

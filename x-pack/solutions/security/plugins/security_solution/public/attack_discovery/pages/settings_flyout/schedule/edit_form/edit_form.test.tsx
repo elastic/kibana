@@ -77,26 +77,6 @@ jest.mock('../../workflow_settings_view/alert_retrieval_step/alert_retrieval_con
     />
   ),
 }));
-// Stub the heavy AlertSelection subtree (lens embeddable, unified-search bar,
-// alert-preview tabs) that otherwise blows the 5s render budget under jsdom. The
-// stub keeps the `alertSelection` marker and an `alertsRange` control wired to
-// `onSettingsChanged` so the settings-change assertion still exercises it.
-jest.mock('../../alert_selection', () => ({
-  AlertSelection: ({
-    settings,
-    onSettingsChanged,
-  }: {
-    settings: Record<string, unknown>;
-    onSettingsChanged?: (settings: Record<string, unknown>) => void;
-  }) => (
-    <div data-test-subj="alertSelection">
-      <input
-        data-test-subj="alertsRange"
-        onChange={(e) => onSettingsChanged?.({ ...settings, size: e.target.value })}
-      />
-    </div>
-  ),
-}));
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const onChangeMock = jest.fn();
@@ -127,7 +107,8 @@ const renderComponent = async () => {
   });
 };
 
-describe('EditForm', () => {
+// Failing: See https://github.com/elastic/kibana/issues/255131
+describe.skip('EditForm', () => {
   const mockTriggersActionsUi = triggersActionsUiMock.createStart();
 
   beforeEach(() => {
