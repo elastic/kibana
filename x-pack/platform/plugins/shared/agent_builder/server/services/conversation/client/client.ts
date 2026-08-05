@@ -29,6 +29,7 @@ import type {
   ConversationListOptions,
 } from './types';
 import { createSpaceDslFilter } from '../../../utils/spaces';
+import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
 import {
@@ -115,6 +116,7 @@ class ConversationClientImpl implements ConversationClient {
         'updated_at',
         'status',
         'read',
+        'pinned',
         'access_control',
         'origin',
       ],
@@ -138,16 +140,9 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async exists(conversationId: string): Promise<boolean> {
-    try {
-      await this.getDocumentWithAccess({ conversationId, access: 'converse' });
-      return true;
-    } catch (error) {
-      if (isConversationNotFoundError(error)) {
-        return false;
-      }
+    const document = await this._get(conversationId);
 
-      throw error;
-    }
+    return document !== undefined;
   }
 
   async getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined> {
@@ -193,10 +188,19 @@ class ConversationClientImpl implements ConversationClient {
       space: this.space,
     });
 
-    await this.storage.getClient().index({
-      id,
-      document: attributes,
-    });
+    try {
+      await this.storage.getClient().index({
+        id,
+        document: attributes,
+        op_type: 'create',
+      });
+    } catch (error) {
+      if (isVersionConflictError(error)) {
+        throw createConversationNotFoundError({ conversationId: id });
+      }
+
+      throw error;
+    }
 
     return this.get(id);
   }

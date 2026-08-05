@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
@@ -16,7 +17,6 @@ import {
   MAX_AI_INDEX_DESCRIPTION_LENGTH,
   MAX_AI_INDEX_DEST_VALUE_LENGTH,
   MAX_AI_INDEX_ID_LENGTH,
-  MAX_AI_INDEX_NAME_LENGTH,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDICES,
@@ -24,18 +24,25 @@ import {
   aiIndexPath,
 } from '../../common/constants';
 import type {
+  CreateAiIndexResponse,
   DeleteAiIndexResponse,
   GetAiIndexResponse,
   ListAiIndexResponse,
   PutAiIndexResponse,
 } from '../../common/http_api/ai_indices';
 import { apiPrivileges } from '../../common/features';
+import { validateAiIndexId } from '../../common/validation';
 import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
+  AiIndexManagedError,
   AiIndexNotFoundError,
+  AiIndexAlreadyExistsError,
+  InvalidConnectorSourceError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
+import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
 
 const READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },
@@ -45,23 +52,18 @@ const WRITE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] },
 };
 
-const aiIndexIdParamsSchema = schema.object({
-  aiIndexId: schema.string({
-    minLength: 1,
-    maxLength: MAX_AI_INDEX_ID_LENGTH,
-    meta: { description: 'The unique identifier of the AI index.' },
-  }),
+const aiIndexIdSchema = schema.string({
+  minLength: 1,
+  maxLength: MAX_AI_INDEX_ID_LENGTH,
+  validate: validateAiIndexId,
+  meta: { description: 'The unique identifier of the AI index.' },
 });
 
-const putAiIndexBodySchema = schema.object({
-  name: schema.string({
-    minLength: 1,
-    maxLength: MAX_AI_INDEX_NAME_LENGTH,
-    meta: {
-      description:
-        'Display name for the AI index. Separate from the id so it can be renamed if necessary.',
-    },
-  }),
+const aiIndexIdParamsSchema = schema.object({
+  aiIndexId: aiIndexIdSchema,
+});
+
+const aiIndexPropertiesSchema = {
   description: schema.maybe(
     schema.string({
       maxLength: MAX_AI_INDEX_DESCRIPTION_LENGTH,
@@ -95,20 +97,33 @@ const putAiIndexBodySchema = schema.object({
     }
   ),
   sources: schema.arrayOf(
-    schema.object({
-      type: schema.literal('esql'),
-      value: schema.string({
-        minLength: 0,
-        maxLength: MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
-        meta: { description: 'The source value; an ES|QL query when `type` is `esql`.' },
+    schema.oneOf([
+      schema.object({
+        type: schema.literal('esql'),
+        value: schema.string({
+          minLength: 0,
+          maxLength: MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
+          meta: { description: 'The source value; an ES|QL query when `type` is `esql`.' },
+        }),
       }),
-    }),
+      schema.object({
+        type: schema.literal('connector'),
+        value: schema.string({
+          minLength: 1,
+          maxLength: MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
+          meta: { description: 'The source value; a connector id when `type` is `connector`.' },
+        }),
+      }),
+    ]),
     {
       maxSize: MAX_AI_INDEX_SOURCES,
       meta: { description: 'Additional sources that provide context for the AI index.' },
     }
   ),
-});
+};
+
+const createAiIndexBodySchema = schema.object({ id: aiIndexIdSchema, ...aiIndexPropertiesSchema });
+const putAiIndexBodySchema = schema.object(aiIndexPropertiesSchema);
 
 const withContextEngineFeatureFlag =
   <P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> =>
@@ -123,13 +138,17 @@ const withContextEngineFeatureFlag =
   };
 
 const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => {
-  if (error instanceof InvalidAiIndexDestError) {
+  if (error instanceof InvalidAiIndexDestError || error instanceof InvalidConnectorSourceError) {
     return response.badRequest({ body: { message: error.message } });
   }
   if (error instanceof AiIndexNotFoundError) {
     return response.notFound({ body: { message: error.message } });
   }
-  if (error instanceof AiIndexConflictError) {
+  if (
+    error instanceof AiIndexManagedError ||
+    error instanceof AiIndexConflictError ||
+    error instanceof AiIndexAlreadyExistsError
+  ) {
     return response.conflict({ body: { message: error.message } });
   }
   throw error;
@@ -138,10 +157,55 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => 
 export const registerAiIndexRoutes = ({
   router,
   getAiIndexService,
+  getActions,
 }: {
   router: IRouter;
   getAiIndexService: () => AiIndexService;
+  getActions: () => Promise<ActionsPluginStart>;
 }) => {
+  // Create an AI index
+  router.versioned
+    .post({
+      path: aiIndexPath,
+      security: WRITE_SECURITY,
+      access: 'public',
+      summary: 'Create an AI index',
+      description:
+        'Creates an AI index record attached to a data stream or index pattern. Fails with a 409 if an AI index with the same id already exists.',
+      options: {
+        tags: ['oas-tag:context engine'],
+        availability: { stability: 'experimental' },
+      },
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_API_VERSION,
+        validate: {
+          request: {
+            body: createAiIndexBodySchema,
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { id, ...properties } = request.body;
+        try {
+          await validateConnectorSources({
+            sources: properties.sources,
+            actions: await getActions(),
+            request,
+          });
+          await getAiIndexService().create(id, properties);
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id }));
+          const body: CreateAiIndexResponse = { status: 'created' };
+          return response.created({ body });
+        } catch (error) {
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id, error }));
+          return handleAiIndexError(error, response);
+        }
+      })
+    );
+
   // Create or update an AI index
   router.versioned
     .put({
@@ -150,7 +214,7 @@ export const registerAiIndexRoutes = ({
       access: 'public',
       summary: 'Create or update an AI index',
       description:
-        'Creates or updates an AI index record attached to an existing data stream or index pattern.',
+        'Creates or updates an AI index record attached to a data stream or index pattern.',
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental' },
@@ -167,11 +231,24 @@ export const registerAiIndexRoutes = ({
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId } = request.params;
         try {
-          const status = await getAiIndexService().put(request.params.aiIndexId, request.body);
+          await validateConnectorSources({
+            sources: request.body.sources,
+            actions: await getActions(),
+            request,
+          });
+          const status = await getAiIndexService().put(aiIndexId, request.body);
+          const putAction =
+            status === 'created' ? AiIndexAuditAction.CREATE : AiIndexAuditAction.UPDATE;
+          auditLogger.log(aiIndexAuditEvent({ action: putAction, id: aiIndexId }));
           const body: PutAiIndexResponse = { status };
           return status === 'created' ? response.created({ body }) : response.ok({ body });
         } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE_OR_UPDATE, id: aiIndexId, error })
+          );
           return handleAiIndexError(error, response);
         }
       })
@@ -200,10 +277,16 @@ export const registerAiIndexRoutes = ({
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId } = request.params;
         try {
-          const body: GetAiIndexResponse = await getAiIndexService().get(request.params.aiIndexId);
+          const body: GetAiIndexResponse = await getAiIndexService().get(aiIndexId);
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
           return response.ok({ body });
         } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId, error })
+          );
           return handleAiIndexError(error, response);
         }
       })
@@ -227,11 +310,18 @@ export const registerAiIndexRoutes = ({
         version: AI_INDEX_API_VERSION,
         validate: false,
       },
-      withContextEngineFeatureFlag(async (ctx, request, response) => {
-        const body: ListAiIndexResponse = {
-          ai_indices: await getAiIndexService().list(),
-        };
-        return response.ok({ body });
+      withContextEngineFeatureFlag(async (ctx, _request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        try {
+          const body: ListAiIndexResponse = {
+            ai_indices: await getAiIndexService().list(),
+          };
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST }));
+          return response.ok({ body });
+        } catch (error) {
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, error }));
+          return handleAiIndexError(error, response);
+        }
       })
     );
 
@@ -259,11 +349,17 @@ export const registerAiIndexRoutes = ({
         },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId } = request.params;
         try {
-          await getAiIndexService().delete(request.params.aiIndexId);
+          await getAiIndexService().delete(aiIndexId);
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
           const body: DeleteAiIndexResponse = { acknowledged: true };
           return response.ok({ body });
         } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId, error })
+          );
           return handleAiIndexError(error, response);
         }
       })

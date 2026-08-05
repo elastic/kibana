@@ -10,8 +10,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { createUnresolveAction } from './unresolve';
 import * as bulk from './bulk_create_alert_actions';
-import type { AlertEpisode } from '../queries/episodes_query';
-
+import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
 const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
   '@timestamp': '2026-04-23T00:00:00Z',
   'episode.id': 'e1',
@@ -58,7 +57,7 @@ describe('createUnresolveAction', () => {
 
   it('execute: POSTs unique-by-group ACTIVATE items with reason, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 1, errors: [] });
     const onSuccess = jest.fn();
     await createUnresolveAction(deps).execute({
       episodes: [

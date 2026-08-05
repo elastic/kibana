@@ -46,6 +46,7 @@ export interface Test extends Runnable {
 export interface Runnable {
   isFailed(): boolean;
   isPending(): boolean;
+  timeout(ms?: number): number;
   duration?: number;
   titlePath(): string[];
   file?: string;

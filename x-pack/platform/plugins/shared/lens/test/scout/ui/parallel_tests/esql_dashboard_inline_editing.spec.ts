@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest, tags, KibanaCodeEditorWrapper } from '@kbn/scout';
+import { spaceTest, KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { applyLensInlineEditorAndWaitClosed, testData } from '../fixtures';
@@ -18,11 +18,13 @@ const setEsqlQueryAndRun = async (
 ) => {
   await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
   await codeEditor.setCodeEditorValue(query);
-  await page.testSubj.click('ESQLEditor-run-query-button');
+  const searchButton = page.testSubj.locator('ESQLEditor-run-query-button');
+  await expect(searchButton).toBeEnabled();
+  await searchButton.click();
   await dashboard.waitForRenderComplete();
 };
 
-spaceTest.describe('Lens ESQL dashboard inline editing', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.uiSettings.set({
       'dateFormat:tz': 'UTC',
@@ -93,6 +95,11 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: tags.stateful.cl
       const codeEditor = new KibanaCodeEditorWrapper(page);
 
       await spaceTest.step('create a line chart panel with a red Y-axis color', async () => {
+        // Wait for flyout to be ready before switching to line chart
+        await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
+        await lens.switchToVisualization('line', { search: 'Line' });
+        await dashboard.waitForPanelsToLoad(1);
+
         await setEsqlQueryAndRun(
           dashboard,
           page,
@@ -100,12 +107,14 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: tags.stateful.cl
           'from logstash-* | stats maxB = max(bytes) by geo.dest'
         );
 
-        // change to line chart
-        await lens.switchToVisualization('line');
+        const splitTriggers = page.testSubj.locator(
+          'lnsXY_splitDimensionPanel > lns-dimensionTrigger'
+        );
+        await expect(splitTriggers).toHaveCount(0);
         await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Line');
 
         // change the color to red
-        await page.testSubj.click('lnsXY_yDimensionPanel');
+        await page.testSubj.click('lnsXY_yDimensionPanel > lns-dimensionTrigger-textBased');
         const colorPickerInput = page.getByTestId(/indexPattern-dimension-colorPicker/);
         await colorPickerInput.fill('');
         await colorPickerInput.fill('#ff0000');
@@ -130,7 +139,7 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: tags.stateful.cl
 
           await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Line');
 
-          await page.testSubj.click('lnsXY_yDimensionPanel');
+          await page.testSubj.click('lnsXY_yDimensionPanel > lns-dimensionTrigger-textBased');
           const colorPickerInput = page.getByTestId(/indexPattern-dimension-colorPicker/);
           await expect(colorPickerInput).toHaveValue('#FF0000');
         }

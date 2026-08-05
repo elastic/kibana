@@ -46,6 +46,7 @@ env:
 
 imports:
   - .github/workflows/buildkite-cli-setup.md
+  - .github/workflows/shared/app-dex-agents-otel.md
 
 engine:
   id: claude
@@ -53,12 +54,11 @@ engine:
   model: opus
   max-turns: 200
   env:
-    ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
-    ENABLE_PROMPT_CACHING_1H: '1'
-    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
+    ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+    ANTHROPIC_BASE_URL: https://openrouter.ai/api
+    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-4.8[1m]
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
@@ -89,7 +89,7 @@ network:
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
-    - elastic.litellm-prod.ai
+    - openrouter.ai
 sandbox:
   agent: awf
 
@@ -120,7 +120,10 @@ safe-outputs:
     # reviewer, so the handler just logs a warning and the PR is still created.
     reviewers: ${{ github.actor }}
     base-branch: main
-    allowed-base-branches: ['main', '9.*', '8.*', '7.*']
+    # `main` only: any other base makes the handler run an unbounded `git fetch` that
+    # can't finish on a repo Kibana's size. Version-branch fixes are handed over in the
+    # outcome comment instead — see "Fixes that must target a version branch".
+    allowed-base-branches: ['main']
     if-no-changes: 'ignore'
     # Open the PR as `kibanamachine` (a user), not the default GITHUB_TOKEN bot, so
     # the PR's `opened` event can trigger the Flaky Fix Verifier (GITHUB_TOKEN events don't).
@@ -229,7 +232,13 @@ timeout-minutes: 90
 
 # Flaky Test Fixer
 
-Open a single draft PR with the smallest possible test-side fix for this flaky-test issue. Do not open a PR if either of the following is true: you find an existing open PR with an identical or similar fix (search PRs for ones that reference this issue number in their body, or check the issue timeline for PRs that reference it), or you cannot identify a credible fix. Whatever the outcome, always finish by leaving one concise comment on the issue (see "Outcome comment").
+Open a single draft PR with the smallest possible test-side fix for this flaky-test issue. Do not open a PR if any of the following is true:
+
+- an open PR already covers it: one patching the same test, or the same root cause behind a related failed-test issue. Search for PRs that reference this issue number (in their body or in the issue timeline), and for recent PRs touching the failing test's file;
+- you cannot identify a credible fix; or
+- the fix has to target a version branch (see "Fixes that must target a version branch").
+
+Whatever the outcome, always finish by leaving one concise comment on the issue (see "Outcome comment").
 
 ## Requester mention
 
@@ -243,10 +252,10 @@ Kibana is already bootstrapped for you. The `bk` (Buildkite) CLI is installed an
 
 1. **Establish a current root-cause analysis.** Read the failed-test investigator's comment(s) on the issue for the suspected root cause and proposed fix, and note the most recent one's permalink, timestamp, any attribution it makes (e.g. an implicated PR/commit), and where the failures happened, so you can cite them in the PR's Context section. **Do not treat that comment as ground truth**: a prior analysis can be based on stale data or superseded guidance, and building on a stale diagnosis is a top cause of fixes that don't hold. Assess whether it is still current and, when it is not, re-investigate from scratch before proposing anything — see [Validate the investigation is current](#validate-the-investigation-is-current). If, after that, no action is needed, skip to step 7.
 2. Read the failing test and the helpers, fixtures, and page objects it imports.
-3. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR (no PR opened) and opening a best-effort PR against the version branch.
+3. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
 4. Apply the smallest test-side patch that addresses the root cause on the target branch. Don't add explanatory code comments to the patch by default — a good test-side fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it to 1–2 sentences; a simple change like a timeout bump never warrants a comment.
 5. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check` (and, for a Jest test, run it with `node scripts/jest`). FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
-6. Decide the backport strategy and open the PR (see "PR format" and "Backport label" below).
+6. Decide the backport strategy and open the PR (see "PR format" and "Backport label" below). If the fix has to land on a version branch rather than `main`, don't open a PR at all — hand it over in the outcome comment instead (see "Fixes that must target a version branch").
 7. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 8. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
 9. **Only if you opened a PR in step 6**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
@@ -326,7 +335,7 @@ The guiding principle is to backport a fix to every older active version branch 
 
 Only apply backport labels when you are **confident** about the decision. If you're unsure, apply **no** backport label at all and explain the uncertainty in the "Backporting guidance" section so a human can decide. Never guess.
 
-When you are confident, pick the backport policy and pass the matching label(s) in the `labels` field of the `create_pull_request` safe output (the `flaky-test-fixer` label is added automatically). First figure out which open `release` branches (listed in `versions.json` at the repository root) the fix belongs on by confirming the failing test's file exists at each branch's `ref` (e.g. read the path at that ref via the GitHub API), then choose:
+When you are confident, pick the backport policy and pass the matching label(s) in the `labels` field of the `create_pull_request` safe output (the `flaky-test-fixer` label is added automatically) — or, for a version-branch fix, list them in the outcome comment's **Labels** line. First figure out which open `release` branches (listed in `versions.json` at the repository root) the fix belongs on by confirming the failing test's file exists at each branch's `ref` (e.g. read the path at that ref via the GitHub API), then choose:
 
 - **`backport:skip`** — the fix is effectively main-only: the failing test (or the file you patched) doesn't exist on any open release branch, it was recently added, or the flakiness is specific to `main`.
 - **`backport:all-open`** — the same test exists on **every** open release branch and your patch applies there unchanged, so fixing it across all of them is safe.
@@ -341,11 +350,21 @@ Sometimes the failure is on a **version branch** (e.g. `9.3`) while `main` alrea
 When it happens, do **not** open a normal `main` PR. Find the `main` PR that already fixed it (`git log` / `git blame`, or the PR the investigator implicated), then:
 
 - **Contained `main` PR** (small and single-purpose — essentially just the fix and its test, no unrelated refactors, so it backports cleanly): do **not** open a PR. Post the "Backport the existing fix" outcome comment naming that PR and the release branch(es) that still need it. When unsure whether it backports cleanly, prefer this — a recommendation beats an unverified PR.
-- **Not-contained `main` PR** (bundles unrelated changes, so a whole-PR backport isn't safe): open a **best-effort draft PR against the failing version branch** — pass `base: <version-branch>` to `create_pull_request` (the allowed base branches already include `9.*`/`8.*`) with just the extracted fix. You're bootstrapped on `main`, so you can't lint or type-check against the version branch: craft the patch from that branch's copy of the file(s) so it applies onto `base`, and list the skipped checks under "Not verified locally" (note it targets `<branch>` and relies on that branch's CI). If other release branches still need the fix too, apply the matching `backport:version` + `vX.Y.Z` labels (per "Backport label", but leave out `main` and any branch already fixed) so it propagates there on merge.
+- **Not-contained `main` PR** (bundles unrelated changes, so a whole-PR backport isn't safe): prepare a **best-effort fix for the failing version branch** with just the extracted change, and hand it over in the outcome comment — see "Fixes that must target a version branch". If other release branches still need the fix too, list the matching `backport:version` + `vX.Y.Z` labels (per "Backport label", but leave out `main` and any branch already fixed) so whoever opens the PR applies them.
+
+## Fixes that must target a version branch
+
+This workflow can only open PRs against `main`: the PR-opening job fetches the base branch into a shallow, `main`-only checkout, and on a repo Kibana's size that fetch cannot finish within the job timeout for any other branch.
+
+So when the fix has to land on a version branch, don't call `create_pull_request` — prepare the fix exactly as if you were opening the PR, then hand it over in the outcome comment (see "Proposed fix for a version branch") so a human can open it in one copy-paste:
+
+- Read the version branch's copy of every file you touch through the GitHub API (`get_file_contents` with `ref: <version-branch>`), not with git: you are on a shallow `main` clone, and fetching a version branch is exactly the operation this path exists to avoid.
+- Write those copies to a scratch directory under `/tmp`, edit them there, and generate the diff with `diff -u --label a/<path> --label b/<path> <original> <edited>`, so the hunk headers are real and the result applies onto that branch with `git apply`. Never hand-count line numbers.
+- Nothing here can be verified from a `main` checkout — no lint, type check, or test run against the version branch — so leave the PR description's "Verification" block out entirely rather than filling it with everything you couldn't check. That branch's CI covers the fix once the PR is open.
 
 ## Outcome comment
 
-In **every** run, finish by posting exactly one short comment on issue #${{ env.ISSUE_NUMBER }} via the `add-comment` safe output, and removing the `ai:fix-flaky` label (see step 8). Format the comment as a short `###` heading that states the outcome (with the leading emoji shown below), followed by a single sentence of detail, then `cc @${{ env.REQUESTED_BY }}` at the very end (see "Requester mention", only append if the requester isn't a bot). No other preamble or sign-off.
+In **every** run, finish by posting exactly one short comment on issue #${{ env.ISSUE_NUMBER }} via the `add-comment` safe output, and removing the `ai:fix-flaky` label (see step 8). Format the comment as a short `###` heading that states the outcome (with the leading emoji shown below), followed by a single sentence of detail, then `cc @${{ env.REQUESTED_BY }}` at the very end (see "Requester mention", only append if the requester isn't a bot). No other preamble or sign-off. The only variant that carries more than that sentence is the version-branch hand-off, which appends the proposed PR in collapsed sections.
 
 Follow this format:
 
@@ -353,29 +372,65 @@ Follow this format:
   ```markdown
   ### ➡️ A fix PR is ready for review: %%FIX_PR_URL%%
 
-  <one very concise sentence on what the PR changes>. cc @<github-handle-here>
+  <one very concise sentence on what the PR changes>. cc @<requester-github-handle-here-if-not-a-bot>
 
   %%FIX_PR_BADGE%%
   ```
   Include the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders verbatim — the `link_fix_pr` tool replaces them with the PR link and a live PR-state badge. Never write the PR URL, number, or badge yourself.
-  
+
+- **Proposed fix for a version branch** (no PR opened — see "Fixes that must target a version branch"). Hand over the whole PR — title, labels, description, backporting guidance, and diff — so a human can open it from the comment alone, keeping the long parts collapsed.
+
+  ````markdown
+  ### 🔧 Manual PR needed: apply this fix to <version-branch>
+
+  Open this PR against <version-branch> manually — this workflow can only target `main`. Everything you need is below. cc @<requester-github-handle-here-if-not-a-bot>
+
+  - **Title:** `<PR title, per "PR format">`
+  - **Labels:** `flaky-test-fixer`, `release_note:skip`, `<backport label(s), per "Backport label" — write "no backport label" if you weren't sure>`
+
+  <details>
+  <summary>PR description</summary>
+
+  <the PR body per "PR format", without its "Verification" and "Backporting guidance" blocks>
+
+  </details>
+
+  <details>
+  <summary>Backporting guidance</summary>
+
+  <the "Backporting guidance" content per "PR format", explaining the labels listed above>
+
+  </details>
+
+  <details>
+  <summary>Diff</summary>
+
+  Apply onto <version-branch> with `git apply`.
+
+  ```diff
+  <the unified diff>
+  ```
+
+  </details>
+  ````
+
 - **Existing PR already covers it**:
   ```markdown
   ### 🔁 A fix is already in flight
 
-  #<PR number> already covers this, so no duplicate PR was opened. cc @<github-handle-here>
+  #<PR number> already covers this, so no duplicate PR was opened. cc @<requester-github-handle-here-if-not-a-bot>
   ```
 - **No PR opened**:
   ```markdown
   ### ⏭️ No fix PR was opened
 
-  The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), not test-side, so there's nothing to patch here. cc @<github-handle-here>
+  The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), not test-side, so there's nothing to patch here. cc @<requester-github-handle-here-if-not-a-bot>
   ```
   Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified.
 - **Backport the existing fix** (fix already on `main`, contained PR — no PR opened):
   ```markdown
   ### The fix is already on `main` — it needs backporting
 
-  #<main-PR> already fixed this on `main`; add the `backport:version` + `<vX.Y.Z>` label(s) to it to backport to <branch(es)>. cc @<github-handle-here>
+  #<main-PR> already fixed this on `main`; add the `backport:version` + `<vX.Y.Z>` label(s) to it to backport to <branch(es)>. cc @<requester-github-handle-here-if-not-a-bot>
   ```
   Fill `<vX.Y.Z>` from the branch → version mapping in "Backport label" (only the branches that still need the fix).
