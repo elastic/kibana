@@ -38,10 +38,8 @@ tags:
   - shared
 fileGroups:
   src:
-    - common/**/*
     - public/**/*
     - public/**/*.json
-    - server/**/*
     - test_helpers/**/*
     - storybook/**/*
     - '!target/**/*'

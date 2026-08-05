@@ -20,9 +20,6 @@
     ],
     "requiredBundles": [
       "savedObjects"
-    ],
-    "extraPublicDirs": [
-      "common"
     ]
   }
 }

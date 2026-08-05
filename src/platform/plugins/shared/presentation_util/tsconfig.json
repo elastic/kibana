@@ -4,10 +4,8 @@
     "outDir": "target/types"
   },
   "include": [
-    "common/**/*",
     "public/**/*",
     "public/**/*.json",
-    "server/**/*",
     "test_helpers/**/*",
     "storybook/**/*",
     "../../../../../typings/**/*"
