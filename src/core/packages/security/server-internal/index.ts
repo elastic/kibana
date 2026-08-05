@@ -13,5 +13,3 @@ export type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from './src/internal_contracts';
-export { createCoreUiamService } from './src/uiam';
-export type { CoreUiamService, UiamClientAuthenticationParams } from './src/uiam';

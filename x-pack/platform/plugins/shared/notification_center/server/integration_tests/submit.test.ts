@@ -16,8 +16,8 @@ import { NOTIFICATION_TYPES } from '../../common';
 import {
   NOTIFICATION_DATA_STREAM_NAME,
   notificationDataStreamDefinition,
-} from '../storage/notification_data_stream';
-import { buildForType, NotificationValidationError } from '../lib/submit';
+} from '../data_stream/notification_data_stream';
+import { buildForType, NotificationValidationError } from '../submit';
 import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from '../types';
 
 const modelStatus = NOTIFICATION_TYPES.inference.modelStatus;

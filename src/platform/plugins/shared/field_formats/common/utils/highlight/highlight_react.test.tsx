@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import '@emotion/jest';
-import { render as renderComponent } from '@testing-library/react';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import { highlightTags } from './highlight_tags';
@@ -20,13 +18,11 @@ import type { FieldFormatHighlightTags } from '../../types';
  * an implementation detail of renderToStaticMarkup, not semantically meaningful.
  */
 function render(node: React.ReactNode): string {
-  return ReactDOM.renderToStaticMarkup(<>{node}</>)
-    .replace(/&quot;/g, '"')
-    .replace(/ class="css-[^"]+"/g, '');
+  return ReactDOM.renderToStaticMarkup(<>{node}</>).replace(/&quot;/g, '"');
 }
 
 const hl = (word: string) => `${highlightTags.pre}${word}${highlightTags.post}`;
-const mark = (word: string) => `<mark>${word}</mark>`;
+const mark = (word: string) => `<mark class="ffSearch__highlight">${word}</mark>`;
 
 describe('getHighlightReact', () => {
   it('returns plain string unchanged when no field name is provided', () => {
@@ -56,21 +52,6 @@ describe('getHighlightReact', () => {
 
     test('highlights a single word at the start', () => {
       check('lorem ipsum dolor', [`${hl('lorem')} ipsum dolor`], `${mark('lorem')} ipsum dolor`);
-    });
-
-    test('underlines highlighted text', () => {
-      const { container } = renderComponent(
-        <>
-          {getHighlightReact('lorem ipsum', 'myField', {
-            highlight: { myField: [`${hl('lorem')} ipsum`] },
-          })}
-        </>
-      );
-
-      expect(container.querySelector('mark')).toHaveStyleRule(
-        'text-decoration',
-        'dotted underline'
-      );
     });
 
     test('highlights a single word in the middle', () => {

@@ -9,7 +9,7 @@
 
 const { createRequire } = require('module');
 
-require('@kbn/swc-register').install();
+require('@kbn/babel-register').install();
 
 const requireFromHere = createRequire(__filename);
 const { executeTypeCheckValidation, TSC_LABEL } = requireFromHere(

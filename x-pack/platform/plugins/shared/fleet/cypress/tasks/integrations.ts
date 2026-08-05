@@ -108,14 +108,11 @@ export function scrollToIntegration(selector: string) {
   });
 }
 
-export function calculateAssetCount(
-  packageInfo: any,
-  { includeKnowledgeBase = true }: { includeKnowledgeBase?: boolean } = {}
-): number {
+export function calculateAssetCount(packageInfo: any): number {
   const packageAssets = packageInfo?.assets || {};
 
   // Calculate total asset count from all services and types
-  const assetCount = Object.values(packageAssets).reduce((total: number, serviceAssets: any) => {
+  return Object.values(packageAssets).reduce((total: number, serviceAssets: any) => {
     return (
       total +
       Object.values(serviceAssets || {}).reduce((serviceTotal: number, typeAssets: any) => {
@@ -123,10 +120,4 @@ export function calculateAssetCount(
       }, 0)
     );
   }, 0);
-
-  const knowledgeBaseAssetCount = includeKnowledgeBase
-    ? 0
-    : packageAssets.elasticsearch?.knowledge_base?.length ?? 0;
-
-  return assetCount - knowledgeBaseAssetCount;
 }

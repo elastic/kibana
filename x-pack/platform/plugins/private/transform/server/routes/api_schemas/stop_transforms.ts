@@ -13,7 +13,7 @@ import { transformStateSchema } from './common';
 
 export const stopTransformsRequestSchema = schema.arrayOf(
   schema.object({
-    id: schema.string({ maxLength: 1000 }),
+    id: schema.string(),
     state: transformStateSchema,
   }),
   { maxSize: 1000 }

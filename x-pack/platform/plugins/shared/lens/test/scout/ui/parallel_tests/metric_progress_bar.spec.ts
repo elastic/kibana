@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../fixtures';
 
 spaceTest.describe(
   'Lens metric progress bar on dashboard (DSL)',
-  { tag: '@local-stateful-classic' },
+  { tag: tags.stateful.classic },
   () => {
     let storedDataViewId: string | undefined;
 

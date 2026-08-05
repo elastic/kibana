@@ -136,8 +136,7 @@ describe('searchEmbeddableTransforms', () => {
       } = result.tabs[0] as DiscoverSessionClassicTab;
       expect(sort).toEqual([{ name: '@timestamp', direction: 'desc' }]);
       expect(viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
-      expect(density).toBeUndefined();
-      expect(result.tabs[0].header_row_height).toBeUndefined();
+      expect(density).toBe(DataGridDensity.COMPACT);
       expect(dataSource).toEqual({
         type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
         ref_id: 'data-view-1',

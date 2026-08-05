@@ -24,8 +24,8 @@ export function getLinksCRUResponseBody(
   return {
     id: savedObject.id,
     // Route does not apply defaults to response
-    // Instead, call parse to ensure defaults are applied to response
-    data: linksApiStateSchema.parse(
+    // Instead, call validate to ensure defaults are applied to response
+    data: linksApiStateSchema.validate(
       Object.fromEntries(
         Object.entries(transformedState).sort(([keyA], [keyB]) => keyA.localeCompare(keyB)) // sort keys of response
       )

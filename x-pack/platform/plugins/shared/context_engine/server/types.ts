@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { AiIndexProperties } from '../common/http_api/ai_indices';
 
@@ -20,6 +19,5 @@ export interface ContextEngineSetupDependencies {
   features: FeaturesPluginSetup;
 }
 
-export interface ContextEngineStartDependencies {
-  actions: ActionsPluginStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ContextEngineStartDependencies {}

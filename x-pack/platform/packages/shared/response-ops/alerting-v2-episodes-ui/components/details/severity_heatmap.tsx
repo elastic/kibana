@@ -26,7 +26,7 @@ import { i18n as kbnI18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
+import type { EpisodeEventRow } from '../../queries/episode_events_query';
 import { resolveEpisodeEventData } from '../../utils/resolve_episode_event_data';
 import {
   EPISODE_SEVERITY_CHART_VALUE,

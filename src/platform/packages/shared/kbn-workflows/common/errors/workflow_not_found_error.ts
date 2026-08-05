@@ -8,8 +8,6 @@
  */
 
 export class WorkflowNotFoundError extends Error {
-  readonly isUserError = true as const;
-
   constructor(workflowId: string) {
     super(`Workflow with id "${workflowId}" not found.`);
     this.name = 'WorkflowNotFoundError';

@@ -93,13 +93,13 @@ describe('applyLogLevelHighlighting', () => {
   it('preserves search highlight marks while adding log level highlights', () => {
     const node = (
       <>
-        INFO: User <mark>search term</mark> logged
+        INFO: User <mark className="ffSearch__highlight">search term</mark> logged
       </>
     );
     const result = applyLogLevelHighlighting(node, mockEuiTheme, false);
     const { container } = render(<>{result}</>);
 
-    expect(container.querySelector('mark')).toHaveTextContent('search term');
+    expect(container.querySelector('mark.ffSearch__highlight')).toHaveTextContent('search term');
     expect(container.querySelector('[data-test-subj="logLevelSpan"]')).toHaveTextContent('INFO');
     expect(container.textContent).toBe('INFO: User search term logged');
   });
@@ -139,7 +139,11 @@ describe('applyLogLevelHighlighting', () => {
 
 describe('search highlights + log level highlights', () => {
   it('handles log level inside search highlight', () => {
-    const result = applyLogLevelHighlighting(<mark>INFO</mark>, mockEuiTheme, false);
+    const result = applyLogLevelHighlighting(
+      <mark className="ffSearch__highlight">INFO</mark>,
+      mockEuiTheme,
+      false
+    );
     const { container } = render(<>{result}</>);
 
     expect(container.querySelector('mark')).toBeInTheDocument();
@@ -149,13 +153,14 @@ describe('search highlights + log level highlights', () => {
   it('handles multiple search highlights with log levels between them', () => {
     const node = (
       <>
-        <mark>request</mark> INFO: Processing <mark>request</mark> complete
+        <mark className="ffSearch__highlight">request</mark> INFO: Processing{' '}
+        <mark className="ffSearch__highlight">request</mark> complete
       </>
     );
     const result = applyLogLevelHighlighting(node, mockEuiTheme, false);
     const { container } = render(<>{result}</>);
 
-    expect(container.querySelectorAll('mark')).toHaveLength(2);
+    expect(container.querySelectorAll('mark.ffSearch__highlight').length).toBe(2);
     expect(container.querySelector('[data-test-subj="logLevelSpan"]')).toHaveTextContent('INFO');
   });
 });

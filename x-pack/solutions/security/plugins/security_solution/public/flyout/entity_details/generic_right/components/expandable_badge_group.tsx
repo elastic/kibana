@@ -50,10 +50,6 @@ export const ExpandableBadgeGroup = ({
 
       {remainingCount > 0 && (
         <EuiPopover
-          aria-label={i18n.translate(
-            'xpack.securitySolution.expandableBadgeGroup.remainingBadgesAriaLabel',
-            { defaultMessage: 'Remaining badges' }
-          )}
           button={
             <EuiBadge
               color="hollow"

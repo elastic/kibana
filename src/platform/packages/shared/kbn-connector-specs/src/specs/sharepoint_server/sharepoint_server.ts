@@ -48,7 +48,7 @@ export const SharepointServer: ConnectorSpec = {
         'Connect to SharePoint Server (on-premises) to search and retrieve site content.',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
     isTechnicalPreview: true,
   },
 

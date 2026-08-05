@@ -42,7 +42,6 @@ export const FilterGroup = ({
   return (
     <EuiPopover
       id={filterGroupPopoverId}
-      aria-label={filterGroupButtonLabel}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}

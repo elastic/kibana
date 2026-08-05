@@ -12,7 +12,7 @@ export {
   formatTime,
   getPlaywrightGrepTag,
   execPromise,
-  withKibanaSwcRegister,
+  withKibanaBabelRegister,
 } from './runner_utils';
 export { resolveSelector, type SelectorInput } from './locator_helper';
 export { keyTo } from './a11y_utils';

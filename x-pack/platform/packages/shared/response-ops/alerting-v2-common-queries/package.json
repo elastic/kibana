@@ -1,8 +1,0 @@
-{
-  "name": "@kbn/alerting-v2-common-queries",
-  "description": "Shared ES|QL query builders for alerting v2 episodes.",
-  "private": true,
-  "version": "1.0.0",
-  "license": "Elastic License 2.0",
-  "sideEffects": false
-}

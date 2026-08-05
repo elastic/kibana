@@ -85,7 +85,6 @@ const ErrorsPopoverComponent: React.FC<Props> = ({ addSuccessToast, errorSummary
 
   return (
     <EuiPopover
-      aria-label={VIEW_ERRORS}
       button={button}
       closePopover={closePopover}
       data-test-subj="errorsPopover"

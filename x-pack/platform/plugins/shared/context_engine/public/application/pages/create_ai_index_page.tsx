@@ -106,6 +106,20 @@ export const CreateAiIndexPage = () => {
         <EuiPanel hasBorder paddingSize="l">
           <EuiTitle size="s">
             <h2>
+              {i18n.translate('xpack.contextEngine.createAiIndex.addSource.title', {
+                defaultMessage: 'Sources',
+              })}
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <SourcePicker selectedSources={selectedSources} onChange={setSelectedSources} />
+        </EuiPanel>
+
+        <EuiSpacer size="l" />
+
+        <EuiPanel hasBorder paddingSize="l">
+          <EuiTitle size="s">
+            <h2>
               {i18n.translate('xpack.contextEngine.createAiIndex.name.title', {
                 defaultMessage: 'Name',
               })}
@@ -182,20 +196,6 @@ export const CreateAiIndexPage = () => {
               )}
             />
           </EuiFormRow>
-        </EuiPanel>
-
-        <EuiSpacer size="l" />
-
-        <EuiPanel hasBorder paddingSize="l">
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.contextEngine.createAiIndex.addSource.title', {
-                defaultMessage: 'Sources',
-              })}
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <SourcePicker selectedSources={selectedSources} onChange={setSelectedSources} />
         </EuiPanel>
 
         <EuiSpacer size="l" />

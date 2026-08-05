@@ -112,7 +112,6 @@ export const ConnectorSelector: React.FC<ConnectorSelectorProps> = ({
 
   return (
     <EuiPopover
-      aria-label={labels.selectConnector}
       panelProps={{ css: panelStyles }}
       button={connectorSelectorButton}
       isOpen={isPopoverOpen}

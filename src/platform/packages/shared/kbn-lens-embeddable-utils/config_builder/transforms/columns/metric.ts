@@ -134,8 +134,7 @@ export function fromMetricAPItoLensState(
     return [fromCounterRateAPItoLensState(options), refColumn];
   }
   if (isAPIColumnOfType<LensApiCumulativeSumOperation>('cumulative_sum', options)) {
-    const { field } = options;
-    const isCountOfRecords = field == null || field === LENS_DOCUMENT_FIELD_NAME;
+    const isCountOfRecords = options.field == null || options.field === LENS_DOCUMENT_FIELD_NAME;
     const [refColumn] = fromMetricAPItoLensState(
       isCountOfRecords
         ? {
@@ -144,7 +143,7 @@ export function fromMetricAPItoLensState(
           }
         : {
             operation: 'sum',
-            field,
+            field: options.field,
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           }
     );

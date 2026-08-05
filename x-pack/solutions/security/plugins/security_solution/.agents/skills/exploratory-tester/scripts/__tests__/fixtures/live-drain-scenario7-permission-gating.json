@@ -1,1 +1,0 @@
-{"network":[{"id":11,"method":"GET","url":"http://127.0.0.1:8931/api/seeded/admin-only","status":403,"ok":false,"failure":null,"requestedAt":1785467523754,"respondedAt":1785467523836,"resourceType":"fetch","abandonedByNavigation":false}],"console":[{"type":"error","text":"Failed to load resource: the server responded with a status of 403 (Forbidden)"}]}

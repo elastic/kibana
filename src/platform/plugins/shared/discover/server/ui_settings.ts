@@ -12,10 +12,8 @@ import { schema } from '@kbn/config-schema';
 
 import type { DocLinksServiceSetup, UiSettingsParams } from '@kbn/core/server';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { Parser } from '@elastic/esql';
 import {
   DEFAULT_COLUMNS_SETTING,
-  DEFAULT_ESQL_QUERY_SETTING,
   SAMPLE_SIZE_SETTING,
   SAMPLE_ROWS_PER_PAGE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
@@ -57,35 +55,6 @@ export const getUiSettings: (
     schema: enableValidations
       ? schema.arrayOf(schema.string(), { maxSize: MAX_DISCOVER_SESSION_COLUMNS_SERVERLESS })
       : schema.arrayOf(schema.string(), { maxSize: MAX_DISCOVER_SESSION_COLUMNS }),
-  },
-  [DEFAULT_ESQL_QUERY_SETTING]: {
-    name: i18n.translate('discover.advancedSettings.defaultEsqlQueryTitle', {
-      defaultMessage: 'Default ES|QL query',
-    }),
-    value: '',
-    sensitive: true,
-    description: i18n.translate('discover.advancedSettings.defaultEsqlQueryText', {
-      defaultMessage:
-        'The ES|QL query Discover starts with when opening in ES|QL mode. When set, it takes precedence over the query Discover would otherwise derive from your data sources. Leave empty to use the default behavior.',
-    }),
-    category: ['discover'],
-    schema: schema.string({
-      maxLength: 5000,
-      validate: (value) => {
-        const trimmedValue = value.trim();
-        if (!trimmedValue) {
-          return;
-        }
-
-        const errors = Parser.parseErrors(trimmedValue);
-        if (errors.length > 0) {
-          return i18n.translate('discover.advancedSettings.defaultEsqlQueryValidationError', {
-            defaultMessage: 'Invalid ES|QL query: {error}',
-            values: { error: errors[0].message },
-          });
-        }
-      },
-    }),
   },
   [MAX_DOC_FIELDS_DISPLAYED]: {
     name: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedTitle', {

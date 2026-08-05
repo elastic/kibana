@@ -13,31 +13,18 @@ import { SearchButton } from './search_button';
 import { AiButtonSlot } from './ai_button_slot';
 import { HelpButton } from './help_button';
 import { ChromeNextGlobalHeaderShell } from './global_header_shell';
-import {
-  useContextSwitcher,
-  useProjectBreadcrumbs,
-  useProjectPicker,
-  useUserMenu,
-} from '../../shared/chrome_hooks';
-import { HeaderPageAnnouncer } from '../../shared/header_page_announcer';
+import { useContextSwitcher, useProjectPicker, useUserMenu } from '../../shared/chrome_hooks';
 
-export const ChromeNextGlobalHeader = React.memo(() => {
-  const breadcrumbs = useProjectBreadcrumbs();
-
-  return (
-    <>
-      <HeaderPageAnnouncer breadcrumbs={breadcrumbs} />
-      <ChromeNextGlobalHeaderShell
-        logo={<ChromeNextGlobalHeaderLogo />}
-        search={<SearchButton />}
-        actions={<AiButtonSlot />}
-        help={<HelpButton />}
-        switcher={useContextSwitcher()}
-        projectPicker={useProjectPicker()}
-        userMenu={useUserMenu()}
-      />
-    </>
-  );
-});
+export const ChromeNextGlobalHeader = React.memo(() => (
+  <ChromeNextGlobalHeaderShell
+    logo={<ChromeNextGlobalHeaderLogo />}
+    search={<SearchButton />}
+    actions={<AiButtonSlot />}
+    help={<HelpButton />}
+    switcher={useContextSwitcher()}
+    projectPicker={useProjectPicker()}
+    userMenu={useUserMenu()}
+  />
+));
 
 ChromeNextGlobalHeader.displayName = 'ChromeNextGlobalHeader';

@@ -14,7 +14,6 @@ import {
   kafkaPartitionType,
   kafkaSaslMechanism,
   kafkaVerificationModes,
-  MAX_HOSTS,
   outputType,
 } from '../../../common/constants';
 
@@ -153,10 +152,7 @@ const PresetSchema = schema.oneOf([
 export const ElasticSearchSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Elasticsearch),
-  hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
-    minSize: 1,
-    maxSize: MAX_HOSTS,
-  }),
+  hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1, maxSize: 10 }),
   preset: schema.maybe(PresetSchema),
   write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
 };
@@ -165,10 +161,7 @@ const ElasticSearchUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Elasticsearch)),
   hosts: schema.maybe(
-    schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
-      minSize: 1,
-      maxSize: MAX_HOSTS,
-    })
+    schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1, maxSize: 10 })
   ),
   preset: schema.maybe(PresetSchema),
   write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
@@ -219,7 +212,7 @@ export const LogstashSchema = {
   type: schema.literal(outputType.Logstash),
   hosts: schema.arrayOf(schema.string({ validate: validateLogstashHost }), {
     minSize: 1,
-    maxSize: MAX_HOSTS,
+    maxSize: 10,
   }),
 };
 
@@ -227,10 +220,7 @@ const LogstashUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Logstash)),
   hosts: schema.maybe(
-    schema.arrayOf(schema.string({ validate: validateLogstashHost }), {
-      minSize: 1,
-      maxSize: MAX_HOSTS,
-    })
+    schema.arrayOf(schema.string({ validate: validateLogstashHost }), { minSize: 1, maxSize: 10 })
   ),
   secrets: schema.maybe(
     schema.object({
@@ -241,22 +231,10 @@ const LogstashUpdateSchema = {
 
 export const KafkaSchema = {
   ...BaseSchema,
-  // Kafka does not support proxies. proxy_id is accepted to avoid breaking existing preconfigured
-  // outputs but is silently cleared to null on save and never written into the compiled agent
-  // policy (#267281). Marked deprecated so API consumers are not misled.
-  proxy_id: schema.maybe(
-    schema.oneOf([schema.literal(null), schema.string()], {
-      meta: {
-        deprecated: true,
-        description:
-          'Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.',
-      },
-    })
-  ),
   type: schema.literal(outputType.Kafka),
   hosts: schema.arrayOf(schema.string({ validate: validateKafkaHost }), {
     minSize: 1,
-    maxSize: MAX_HOSTS,
+    maxSize: 10,
   }),
   version: schema.maybe(schema.string()),
   key: schema.maybe(schema.string()),
@@ -334,10 +312,7 @@ const KafkaUpdateSchema = {
   ...KafkaSchema,
   type: schema.maybe(schema.literal(outputType.Kafka)),
   hosts: schema.maybe(
-    schema.arrayOf(schema.string({ validate: validateKafkaHost }), {
-      minSize: 1,
-      maxSize: MAX_HOSTS,
-    })
+    schema.arrayOf(schema.string({ validate: validateKafkaHost }), { minSize: 1, maxSize: 10 })
   ),
   auth_type: schema.maybe(
     schema.oneOf([

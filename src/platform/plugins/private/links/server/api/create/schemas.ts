@@ -7,19 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 import { linksApiStateSchema } from '../schemas';
 import { LINKS_ID_DESCRIPTION } from '../constants';
 
 export const createRequestBodySchema = linksApiStateSchema;
 
-export const createResponseBodySchema = z
-  .object({
-    id: z.string().meta({
+export const createResponseBodySchema = schema.object({
+  id: schema.string({
+    meta: {
       description: LINKS_ID_DESCRIPTION,
-    }),
-    data: linksApiStateSchema,
-    meta: asCodeMetaSchema,
-  })
-  .strict();
+    },
+  }),
+  data: linksApiStateSchema,
+  meta: asCodeMetaSchema,
+});

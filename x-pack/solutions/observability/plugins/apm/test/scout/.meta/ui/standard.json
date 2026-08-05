@@ -1,5 +1,5 @@
 {
-  "sha1": "6dcaccd5666b44cbefcc77a3b35e40fdbdf6b4fd",
+  "sha1": "e37b8723ef8b6b079fcdf81265e97d6a455f7a7b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -15,7 +15,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/global.setup.ts",
-        "line": 15,
+        "line": 19,
         "column": 1
       }
     },
@@ -31,8 +31,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/01_home.spec.ts",
-        "line": 27,
-        "column": 7
+        "line": 33,
+        "column": 9
       }
     },
     {
@@ -47,8 +47,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/01_home.spec.ts",
-        "line": 34,
-        "column": 11
+        "line": 49,
+        "column": 9
       }
     },
     {
@@ -63,8 +63,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/01_home.spec.ts",
-        "line": 51,
-        "column": 20
+        "line": 68,
+        "column": 9
       }
     },
     {
@@ -79,8 +79,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/02_comparison.spec.ts",
-        "line": 34,
-        "column": 16
+        "line": 35,
+        "column": 11
       }
     },
     {
@@ -95,8 +95,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/02_comparison.spec.ts",
-        "line": 34,
-        "column": 16
+        "line": 35,
+        "column": 11
       }
     },
     {
@@ -111,8 +111,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/02_comparison.spec.ts",
-        "line": 34,
-        "column": 16
+        "line": 35,
+        "column": 11
       }
     },
     {
@@ -127,8 +127,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/02_comparison.spec.ts",
-        "line": 40,
-        "column": 32
+        "line": 50,
+        "column": 11
       }
     },
     {
@@ -143,8 +143,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/02_comparison.spec.ts",
-        "line": 40,
-        "column": 32
+        "line": 50,
+        "column": 11
       }
     },
     {
@@ -159,8 +159,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/02_comparison.spec.ts",
-        "line": 40,
-        "column": 32
+        "line": 50,
+        "column": 11
       }
     },
     {
@@ -175,8 +175,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/03_no_data_screen.spec.ts",
-        "line": 46,
-        "column": 28
+        "line": 52,
+        "column": 9
       }
     },
     {
@@ -191,8 +191,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/03_no_data_screen.spec.ts",
-        "line": 50,
-        "column": 7
+        "line": 62,
+        "column": 9
       }
     },
     {
@@ -208,7 +208,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/04_anomaly_detection.spec.ts",
         "line": 17,
-        "column": 10
+        "column": 9
       }
     },
     {
@@ -223,8 +223,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/04_anomaly_detection.spec.ts",
-        "line": 21,
-        "column": 25
+        "line": 27,
+        "column": 9
       }
     },
     {
@@ -239,8 +239,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/04_anomaly_detection.spec.ts",
-        "line": 33,
-        "column": 13
+        "line": 47,
+        "column": 9
       }
     },
     {
@@ -255,8 +255,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/04_anomaly_detection.spec.ts",
-        "line": 47,
-        "column": 10
+        "line": 65,
+        "column": 9
       }
     },
     {
@@ -271,8 +271,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/04_anomaly_detection.spec.ts",
-        "line": 65,
-        "column": 10
+        "line": 90,
+        "column": 9
       }
     },
     {
@@ -287,8 +287,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/05_resource_loading.spec.ts",
-        "line": 18,
-        "column": 25
+        "line": 21,
+        "column": 9
       }
     },
     {
@@ -301,8 +301,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/06_agent_configuration.spec.ts",
-        "line": 12,
-        "column": 14
+        "line": 13,
+        "column": 7
       }
     },
     {
@@ -315,8 +315,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/06_agent_configuration.spec.ts",
-        "line": 14,
-        "column": 45
+        "line": 23,
+        "column": 7
       }
     },
     {
@@ -329,8 +329,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/06_agent_configuration.spec.ts",
-        "line": 20,
-        "column": 11
+        "line": 33,
+        "column": 7
       }
     }
   ]

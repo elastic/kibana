@@ -33,7 +33,7 @@ export const evidenceCoverageEvaluator = {
               features.length
             } feature(s) lack evidence: ${withoutEvidence.map((f) => `"${f.id}"`).join(', ')}`
           : `All ${features.length} feature(s) include evidence`,
-      metadata: {
+      details: {
         total: features.length,
         withEvidence: withEvidence.length,
         withoutEvidence: withoutEvidence.map((f) => f.id),

@@ -156,7 +156,7 @@ describe('getAxiosInstance', () => {
     expect(result!.defaults.auth).toEqual({ username: 'user', password: 'pass' });
 
     // @ts-expect-error
-    expect(result!.interceptors.request.handlers.length).toBe(2);
+    expect(result!.interceptors.request.handlers.length).toBe(1);
 
     // @ts-expect-error
     const result2 = result!.interceptors.request.handlers[0].fulfilled({ url: 'http://test1' });
@@ -183,7 +183,7 @@ describe('getAxiosInstance', () => {
     );
 
     // @ts-expect-error
-    expect(result!.interceptors.request.handlers.length).toBe(2);
+    expect(result!.interceptors.request.handlers.length).toBe(1);
 
     // @ts-expect-error
     const result2 = result!.interceptors.request.handlers[0].fulfilled({ url: 'http://test2' });
@@ -213,7 +213,7 @@ describe('getAxiosInstance', () => {
     );
 
     // @ts-expect-error
-    expect(result!.interceptors.request.handlers.length).toBe(2);
+    expect(result!.interceptors.request.handlers.length).toBe(1);
 
     // @ts-expect-error
     const result2 = result!.interceptors.request.handlers[0].fulfilled({ url: 'http://test3' });
@@ -249,7 +249,7 @@ describe('getAxiosInstance', () => {
     );
 
     // @ts-expect-error
-    expect(result!.interceptors.request.handlers.length).toBe(2);
+    expect(result!.interceptors.request.handlers.length).toBe(1);
 
     // @ts-expect-error
     const result2 = result!.interceptors.request.handlers[0].fulfilled({ url: 'http://test3' });
@@ -284,7 +284,7 @@ describe('getAxiosInstance', () => {
     );
 
     // @ts-expect-error
-    expect(result!.interceptors.request.handlers.length).toBe(2);
+    expect(result!.interceptors.request.handlers.length).toBe(1);
 
     // @ts-expect-error
     const result2 = result!.interceptors.request.handlers[0].fulfilled({ url: 'http://test3' });
@@ -330,7 +330,7 @@ describe('getAxiosInstance', () => {
     );
 
     // @ts-expect-error
-    expect(result!.interceptors.request.handlers.length).toBe(2);
+    expect(result!.interceptors.request.handlers.length).toBe(1);
 
     // @ts-expect-error
     expect(result!.interceptors.response.handlers.length).toBe(1);
@@ -380,7 +380,7 @@ describe('getAxiosInstance', () => {
     );
 
     // @ts-expect-error
-    expect(result!.interceptors.request.handlers.length).toBe(2);
+    expect(result!.interceptors.request.handlers.length).toBe(1);
 
     // @ts-expect-error
     expect(result!.interceptors.response.handlers.length).toBe(2);
@@ -410,132 +410,13 @@ describe('getAxiosInstance', () => {
     expect(result!.defaults.auth).toBeUndefined();
 
     // @ts-expect-error
-    expect(result!.interceptors.request.handlers.length).toBe(2);
+    expect(result!.interceptors.request.handlers.length).toBe(1);
 
     // @ts-expect-error
     const result2 = result!.interceptors.request.handlers[0].fulfilled({ url: 'http://test2' });
 
     // this interceptor was cleared and the auth type specific one was used
     expect(getCustomAgents).not.toHaveBeenCalled();
-  });
-
-  test('installs beforeRedirect hook for redirect hostname validation', async () => {
-    const getAxios = getAxiosInstanceWithAuth({
-      authTypeRegistry,
-      configurationUtilities,
-      logger,
-    });
-    const result = await getAxios({ connectorId: '1', secrets: {} });
-
-    expect(typeof result.defaults.beforeRedirect).toBe('function');
-  });
-
-  test('allowlist interceptor validates the effective URL before dispatch', async () => {
-    const getAxios = getAxiosInstanceWithAuth({
-      authTypeRegistry,
-      configurationUtilities,
-      logger,
-    });
-    const result = await getAxios({
-      connectorId: '1',
-      secrets: { authType: 'basic', username: 'u', password: 'p' },
-    });
-    result.defaults.adapter = async (config) => ({
-      data: {},
-      status: 200,
-      statusText: 'OK',
-      headers: {},
-      config,
-    });
-
-    await result.request({ url: 'https://example.com/api' });
-
-    expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith('https://example.com/api');
-  });
-
-  test('allowlist interceptor blocks denied URLs before adapter dispatch', async () => {
-    const allowlistError = new Error(
-      'target url "https://denied.example.com" is not added to the Kibana config xpack.actions.allowedHosts'
-    );
-    configurationUtilities.ensureUriAllowed.mockImplementationOnce(() => {
-      throw allowlistError;
-    });
-
-    const getAxios = getAxiosInstanceWithAuth({
-      authTypeRegistry,
-      configurationUtilities,
-      logger,
-    });
-    const result = await getAxios({
-      connectorId: '1',
-      secrets: { authType: 'basic', username: 'u', password: 'p' },
-    });
-    let adapterCalled = false;
-    result.defaults.adapter = async (config) => {
-      adapterCalled = true;
-      return { data: {}, status: 200, statusText: 'OK', headers: {}, config };
-    };
-
-    await expect(result.request({ url: 'https://denied.example.com/api' })).rejects.toBe(
-      allowlistError
-    );
-    expect(adapterCalled).toBe(false);
-  });
-
-  test('allowlist interceptor resolves relative URLs against instance baseURL', async () => {
-    const getAxios = getAxiosInstanceWithAuth({
-      authTypeRegistry,
-      configurationUtilities,
-      logger,
-    });
-    const result = await getAxios({
-      connectorId: '1',
-      secrets: { authType: 'basic', username: 'u', password: 'p' },
-    });
-    result.defaults.adapter = async (config) => ({
-      data: {},
-      status: 200,
-      statusText: 'OK',
-      headers: {},
-      config,
-    });
-    result.defaults.baseURL = 'https://myhost.example.com';
-
-    await result.request({ url: '/api/resource' });
-
-    expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
-      'https://myhost.example.com/api/resource'
-    );
-  });
-
-  test('allowlist interceptor survives PFX SSL interceptor clearing and is registered after auth configuration', async () => {
-    const getAxios = getAxiosInstanceWithAuth({
-      authTypeRegistry,
-      configurationUtilities,
-      logger,
-    });
-    const result = await getAxios({
-      connectorId: '1',
-      secrets: {
-        authType: 'pfx_certificate',
-        pfx: Buffer.from("Hi i'm a pfx"),
-        passphrase: 'aaaaaaa',
-        ca: Buffer.from("Hi i'm a ca"),
-      },
-    });
-    result.defaults.adapter = async (config) => ({
-      data: {},
-      status: 200,
-      statusText: 'OK',
-      headers: {},
-      config,
-    });
-
-    await result.request({ url: 'https://pfx-target.example.com/api' });
-
-    expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
-      'https://pfx-target.example.com/api'
-    );
   });
 
   test('401 handler passes tokenResponseOptions to getOAuthAuthorizationCodeAccessToken', async () => {

@@ -7,24 +7,34 @@
 
 import type { HeatmapElementEvent } from '@elastic/charts';
 import type { EuiBadgeProps, EuiThemeComputed } from '@elastic/eui';
-import { first, get } from 'lodash';
-import {
-  EpisodeSeverity,
-  EPISODE_SEVERITIES,
-  EPISODE_SEVERITY_CHART_VALUE,
-  EPISODE_SEVERITY_FILTER_NONE,
-  isSupportedEpisodeSeverity,
-  normalizeEpisodeSeverity,
-} from '@kbn/alerting-v2-common-queries';
+import { first, get, includes, isEmpty, isString, lowerCase } from 'lodash';
 import * as i18n from './translations';
 
-export {
-  EpisodeSeverity,
-  EPISODE_SEVERITIES,
-  EPISODE_SEVERITY_CHART_VALUE,
-  EPISODE_SEVERITY_FILTER_NONE,
-  isSupportedEpisodeSeverity,
-  normalizeEpisodeSeverity,
+export enum EpisodeSeverity {
+  Info = 'info',
+  Low = 'low',
+  Medium = 'medium',
+  High = 'high',
+  Critical = 'critical',
+}
+
+export const EPISODE_SEVERITIES: EpisodeSeverity[] = [
+  EpisodeSeverity.Info,
+  EpisodeSeverity.Low,
+  EpisodeSeverity.Medium,
+  EpisodeSeverity.High,
+  EpisodeSeverity.Critical,
+];
+
+/** Just for the episodes list filters — episodes with no aggregated severity. */
+export const EPISODE_SEVERITY_FILTER_NONE = '__no_severity__';
+
+export const EPISODE_SEVERITY_CHART_VALUE: Record<EpisodeSeverity, number> = {
+  [EpisodeSeverity.Info]: 0,
+  [EpisodeSeverity.Low]: 1,
+  [EpisodeSeverity.Medium]: 2,
+  [EpisodeSeverity.High]: 3,
+  [EpisodeSeverity.Critical]: 4,
 };
 
 interface EpisodeSeverityColorBand {
@@ -73,6 +83,20 @@ export const getEpisodeSeverityHeatmapColor = (
     default:
       return euiTheme.components.badgeBackground;
   }
+};
+
+export const isSupportedEpisodeSeverity = (
+  severity: string | undefined | null
+): severity is string => {
+  if (!isString(severity) || isEmpty(severity)) {
+    return false;
+  }
+
+  return includes(EPISODE_SEVERITIES, lowerCase(severity));
+};
+
+export const normalizeEpisodeSeverity = (severity: string): EpisodeSeverity => {
+  return lowerCase(severity) as EpisodeSeverity;
 };
 
 export const getEpisodeSeverityLabel = (severity: EpisodeSeverity): string => {

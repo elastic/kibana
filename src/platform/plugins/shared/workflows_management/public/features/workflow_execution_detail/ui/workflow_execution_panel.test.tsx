@@ -14,10 +14,9 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
-import { createStartServicesMock } from '../../../mocks';
-import { getTestProvider } from '../../../shared/mocks/test_providers';
-
-const mockNavigateToApp = jest.fn();
+import { setYamlString } from '../../../entities/workflows/store';
+import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
+import { TestWrapper } from '../../../shared/test_utils';
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
@@ -106,18 +105,23 @@ describe('WorkflowExecutionPanel', () => {
     onClose: jest.fn(),
   };
 
+  let mockStore: ReturnType<
+    typeof import('../../../shared/test_utils/test_wrapper').TestWrapper extends any ? any : never
+  >;
+
   beforeEach(() => {
     jest.clearAllMocks();
-    mockNavigateToApp.mockReset();
+    mockStore = undefined;
     jest.mocked(useWorkflowsCapabilities).mockReturnValue(createMockWorkflowsCapabilities());
   });
 
-  const renderComponent = (props = {}, services = createStartServicesMock()) => {
-    services.application.navigateToApp = mockNavigateToApp;
-
-    return render(<WorkflowExecutionPanel {...defaultProps} {...props} />, {
-      wrapper: getTestProvider({ services }),
-    });
+  const renderComponent = (props = {}, store?: any) => {
+    mockStore = store;
+    return render(
+      <TestWrapper store={mockStore}>
+        <WorkflowExecutionPanel {...defaultProps} {...props} />
+      </TestWrapper>
+    );
   };
 
   describe('rendering', () => {
@@ -326,39 +330,59 @@ describe('WorkflowExecutionPanel', () => {
       expect(screen.queryByTestId('replayExecutionButton')).not.toBeInTheDocument();
     });
 
-    it('should call onReRunExecution when provided', () => {
-      const onReRunExecution = jest.fn();
-      renderComponent({
-        showBackButton: false,
-        execution: {
-          ...mockExecution,
-          status: ExecutionStatus.COMPLETED,
-          context: { inputs: { foo: 'bar' } },
+    it('should dispatch setReplayExecutionId and setIsTestModalOpen on click', () => {
+      const store = createMockStore();
+
+      store.dispatch(setYamlString(mockExecution.yaml)); // starts computation to detect syntax errors
+
+      renderComponent(
+        {
+          showBackButton: false,
+          execution: { ...mockExecution, status: ExecutionStatus.COMPLETED },
         },
-        onReRunExecution,
-      });
+        store
+      );
 
       fireEvent.click(screen.getByTestId('replayExecutionButton'));
 
-      expect(onReRunExecution).toHaveBeenCalledWith({
-        workflowId: 'workflow-123',
-        executionId: 'exec-123',
-        context: { inputs: { foo: 'bar' } },
-      });
-      expect(mockNavigateToApp).not.toHaveBeenCalled();
+      const state = store.getState();
+      expect(state.detail.replay?.executionId).toBe('exec-123');
+      expect(state.detail.isTestModalOpen).toBe(true);
     });
 
-    it('should navigate to workflow detail with replay execution id on click', () => {
-      renderComponent({
-        showBackButton: false,
-        execution: { ...mockExecution, status: ExecutionStatus.COMPLETED },
-      });
+    it('should dispatch setTestStepModalOpenStepId and setReplayStepExecutionId when step run replay', () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString(mockExecution.yaml));
+
+      const stepRunExecution = {
+        ...mockExecution,
+        status: ExecutionStatus.COMPLETED,
+        stepId: 'my-step',
+        stepExecutions: [
+          {
+            id: 'step-exec-1',
+            stepId: 'my-step',
+            workflowRunId: 'exec-123',
+            status: 'completed',
+            startedAt: '',
+          },
+        ],
+      };
+
+      renderComponent(
+        {
+          showBackButton: false,
+          execution: stepRunExecution,
+        },
+        store
+      );
 
       fireEvent.click(screen.getByTestId('replayExecutionButton'));
 
-      expect(mockNavigateToApp).toHaveBeenCalledWith('workflows', {
-        path: '/workflow-123?replayExecutionId=exec-123',
-      });
+      const state = store.getState();
+      expect(state.detail.testStepModalOpenStepId).toBe('my-step');
+      expect(state.detail.replay?.stepExecutionId).toBe('step-exec-1');
+      expect(state.detail.isTestModalOpen).toBe(false);
     });
 
     it('should disable replay button when user lacks execute capability', () => {
@@ -367,22 +391,35 @@ describe('WorkflowExecutionPanel', () => {
         canExecuteWorkflow: false,
       });
 
-      renderComponent({
-        showBackButton: false,
-        execution: { ...mockExecution, status: ExecutionStatus.COMPLETED },
-      });
+      const store = createMockStore();
+      store.dispatch(setYamlString(mockExecution.yaml));
+
+      renderComponent(
+        {
+          showBackButton: false,
+          execution: { ...mockExecution, status: ExecutionStatus.COMPLETED },
+        },
+        store
+      );
 
       const replayButton = screen.getByTestId('replayExecutionButton');
       expect(replayButton).toBeDisabled();
     });
 
-    it('should enable replay button when user can execute workflow', () => {
-      renderComponent({
-        showBackButton: false,
-        execution: { ...mockExecution, status: ExecutionStatus.COMPLETED },
-      });
+    it('should disable replay button when YAML syntax is invalid', () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString('')); // empty yaml clears computed, making syntax invalid
 
-      expect(screen.getByTestId('replayExecutionButton')).toBeEnabled();
+      renderComponent(
+        {
+          showBackButton: false,
+          execution: { ...mockExecution, status: ExecutionStatus.COMPLETED },
+        },
+        store
+      );
+
+      const replayButton = screen.getByTestId('replayExecutionButton');
+      expect(replayButton).toBeDisabled();
     });
   });
 

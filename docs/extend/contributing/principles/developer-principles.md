@@ -71,7 +71,7 @@ When building APIs, whether they be programmatic or through HTTP, there are usua
 
 In order to achieve our goals of creating a consistent product experience as well as an efficient-to-maintain project, we should aim to leverage existing features, APIs, and standards rather than reinventing the wheel. Unless it's part of a broader effort to change the way {{kib}} does something, it's best to leverage existing APIs and prefer existing conventions where possible.
 
-Before building something new, check the [building blocks](../../key-concepts/ui/building-blocks.md) and the [platform services](../../key-concepts/platform-architecture/plugins-packages-and-the-platform.md) for existing solutions.
+Before building something new, check the [building blocks](../../key-concepts/ui/building-blocks.md) and our [API documentation](../../key-concepts/platform-architecture/api-documentation.md) for existing services.
 
 ## Prioritize consistent code within {{kib}}
 

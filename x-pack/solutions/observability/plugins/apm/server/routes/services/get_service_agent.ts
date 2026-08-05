@@ -25,17 +25,14 @@ import {
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getServerlessTypeFromCloudData } from '../../../common/serverless';
 import { maybe } from '../../../common/utils/maybe';
-import { environmentQuery } from '../../../common/utils/environment_query';
 
 export async function getServiceAgent({
   serviceName,
-  environment,
   apmEventClient,
   start,
   end,
 }: {
   serviceName: string;
-  environment: string;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
@@ -69,7 +66,6 @@ export async function getServiceAgent({
         filter: [
           { term: { [SERVICE_NAME]: serviceName } },
           ...rangeQuery(start, end),
-          ...environmentQuery(environment),
           {
             bool: {
               should: [

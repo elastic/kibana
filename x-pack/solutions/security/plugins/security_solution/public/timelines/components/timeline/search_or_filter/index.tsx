@@ -260,12 +260,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateReduxTime: dispatchUpdateReduxTime(dispatch),
 });
 
-type StateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
-type DispatchProps = ReturnType<typeof mapDispatchToProps>;
-const connector = connect<StateProps, DispatchProps, OwnProps, State>(
-  makeMapStateToProps,
-  mapDispatchToProps
-);
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

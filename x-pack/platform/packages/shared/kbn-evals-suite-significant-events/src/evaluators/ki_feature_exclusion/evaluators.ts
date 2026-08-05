@@ -9,7 +9,6 @@ import type { BaseFeature } from '@kbn/significant-events-schema';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ExcludedFeatureSummary, IgnoredFeature } from '@kbn/streams-ai';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
-import type { TaskOutputWithReportedTokens } from '../reported_tokens';
 import { ExcludeCompliancePrompt } from './prompt';
 
 interface ExclusionViolation {
@@ -19,7 +18,7 @@ interface ExclusionViolation {
   reason: string;
 }
 
-export interface ExcludeExperimentOutput extends TaskOutputWithReportedTokens {
+export interface ExcludeExperimentOutput {
   initialFeatures: BaseFeature[];
   excludedFeatures: ExcludedFeatureSummary[];
   followUpRuns: Array<{

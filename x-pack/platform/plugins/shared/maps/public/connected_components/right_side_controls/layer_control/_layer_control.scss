@@ -4,17 +4,17 @@
   // sass-lint:disable-block no-important
   flex-basis: auto !important; // Fixes IE and ensures the layer items are visible
   padding-bottom: $euiSizeS + 1px;
-  // Divider color is themed reactively via Emotion (useEuiTheme) in map_container
-  // so it follows reload-less light/dark theme switches.
-  border-top-width: 1px;
-  border-top-style: solid;
+  border-top: 1px solid $euiColorLightestShade;
 }
 
 .mapLayerControl__addLayerButton {
   flex-shrink: 0;
 
-  // overrides disabled color that is transparent and doesn't work well on top of the map.
-  // Background color is themed reactively via Emotion (useEuiTheme) in map_container.
+  // overrides disabled color that is transparent and doesn't work well on top of the map
+  &.euiButton-isDisabled {
+    // sass-lint:disable-block no-important
+    background-color: $euiColorLightShade !important;
+  }
 }
 
 .mapLayerControl__addLayerButton,
@@ -32,6 +32,6 @@
 .mapLayerControl__openLayerTOCButton,
 .mapLayerControl__closeLayerTOCButton {
   @include size($euiSizeXL);
-  // background-color is applied reactively via Emotion (useEuiTheme) so it
-  // follows reload-less light/dark theme switches.
+  // sass-lint:disable-block no-important
+  background-color: $euiColorEmptyShade !important; // During all states
 }

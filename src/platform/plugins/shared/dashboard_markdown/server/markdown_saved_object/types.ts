@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod';
+import type { TypeOf } from '@kbn/config-schema';
 import type { markdownLibraryItemSchema } from '../api/schema';
 
-export type StoredMarkdownState = z.infer<typeof markdownLibraryItemSchema>;
+export type StoredMarkdownState = TypeOf<typeof markdownLibraryItemSchema>;

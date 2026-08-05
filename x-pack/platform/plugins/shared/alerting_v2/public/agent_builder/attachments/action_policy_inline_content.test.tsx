@@ -7,12 +7,11 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyInlineContent } from './action_policy_inline_content';
 
 const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}) => ({
   id: 'att-1',
-  type: ACTION_POLICY_ATTACHMENT_TYPE,
+  type: 'action_policy' as const,
   versions: [],
   current_version: 1,
   origin: overrides.origin,

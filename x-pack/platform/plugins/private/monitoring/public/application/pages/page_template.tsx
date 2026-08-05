@@ -161,7 +161,6 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
             cloudConnectUrl={cloudConnectUrl}
             onConnectClick={handleConnectClick}
             hasCloudConnectPermission={hasCloudConnectPermission}
-            compressed={false}
           />
         )}
         <EuiSpacer size="m" />

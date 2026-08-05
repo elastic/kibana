@@ -110,7 +110,6 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
       body: { assignee_uid: 'u_someone' },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects body missing assignee_uid with 400', async ({ apiClient }) => {
@@ -119,7 +118,6 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
       body: { episode_id: 'some-episode' },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects empty episode_id with 400', async ({ apiClient }) => {
@@ -128,7 +126,6 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
       body: { episode_id: '', assignee_uid: 'u_someone' },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects episode_id over 150 chars with 400', async ({ apiClient }) => {
@@ -138,7 +135,6 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects assignee_uid over 256 chars with 400', async ({ apiClient }) => {
@@ -147,7 +143,6 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
       body: { episode_id: 'some-episode', assignee_uid: 'a'.repeat(257) },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -158,7 +153,6 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
         body: { episode_id: 'some-episode', assignee_uid: 42 },
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -168,7 +162,6 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
       body: { episode_id: 'some-episode', assignee_uid: 'u_someone', extra: 'nope' },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects group_hash over 256 chars with 400', async ({ apiClient }) => {
@@ -177,7 +170,6 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
       body: { episode_id: 'some-episode', assignee_uid: 'u_someone' },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('returns 404 when group_hash matches no events', async ({ apiClient }) => {

@@ -52,6 +52,4 @@ export const createWorkflowFormValidationSchema = (toolsService: ToolsService) =
     wait_for_completion: z.boolean(),
 
     type: z.literal(ToolType.workflow),
-
-    confirmation_ask_user: sharedValidationSchemas.confirmation_ask_user,
   });

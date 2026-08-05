@@ -18,6 +18,7 @@ export const eventsMappings = {
   properties: {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
     event_uuid: mappings.keyword(),
+    discovery_id: mappings.keyword(),
     event_id: mappings.keyword(),
     previous_event_uuid: mappings.keyword(),
     stream_names: mappings.keyword(),
@@ -45,7 +46,7 @@ export const eventsMappings = {
         }),
       },
     }),
-    // Mapped so discovery can gate re-investigation with a server-side `exists` filter.
+    // Mapped so triage can gate re-investigation with a server-side `exists` filter.
     // `exists` on this object matches only when at least one sub-field has a value, so an
     // empty investigations array does not count as "investigated".
     investigations: mappings.object({
@@ -74,7 +75,7 @@ export const storedEventSchema = significantEventSchema.transform((doc) => ({
 
 export const eventsDataStream: DataStreamDefinition<typeof eventsMappings, StoredEvent> = {
   name: EVENTS_DATA_STREAM,
-  version: 12,
+  version: 10,
   hidden: true,
   template: {
     priority: 500,
