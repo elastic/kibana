@@ -28,10 +28,7 @@ describe('endpointSearchStrategyProvider', () => {
 
   const buildProvider = (
     authzOverrides: Partial<EndpointAuthz> = {},
-    {
-      cpsEnabled = false,
-      ccsEnabled = false,
-    }: { cpsEnabled?: boolean; ccsEnabled?: boolean } = {}
+    { cpsEnabled = false, ccsEnabled = false }: { cpsEnabled?: boolean; ccsEnabled?: boolean } = {}
   ) => {
     const searchResponse = of({ rawResponse: { hits: { total: 0, hits: [] } } });
     const search = jest.fn().mockReturnValue(searchResponse);
