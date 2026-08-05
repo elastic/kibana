@@ -45,11 +45,12 @@ function RememberLastSelectedSpaceConfigEditor() {
   const { euiTheme } = useEuiTheme();
   const styles = rememberLastSelectedSpaceConfigEditorStyles(euiTheme);
   const { control } = useFormContext<SpacesConfigurationFormValues>();
+  const rememberLastSpaceId = useGeneratedHtmlId();
 
   return (
     <EuiDescribedFormGroup
       title={
-        <h2>
+        <h2 id={rememberLastSpaceId}>
           {i18n.translate(
             'xpack.cloudLinks.userMenuLinks.spacesConfigurationModal.rememberLastSelectedSpace.title',
             {
@@ -77,6 +78,7 @@ function RememberLastSelectedSpaceConfigEditor() {
               <EuiSwitch
                 css={styles.switch}
                 label={null}
+                aria-labelledby={rememberLastSpaceId}
                 checked={value ?? false}
                 onChange={(e) => onChange(e.target.checked)}
                 compressed

@@ -61,13 +61,11 @@ export function SpaceConfigurationUI({
       toMountPoint(
         React.createElement(function ModalWrapper() {
           return (
-            <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
-              <SpacesConfigurationModal
-                closeModal={closeModal}
-                userProfile={userProfile!}
-                updateUserProfile={updateUserProfile}
-              />
-            </UserProfilesKibanaProvider>
+            <SpacesConfigurationModal
+              closeModal={closeModal}
+              userProfile={userProfile!}
+              updateUserProfile={updateUserProfile}
+            />
           );
         }),
         core
