@@ -11,6 +11,7 @@ import type {
   AttachmentServiceStartContract,
   RendererServiceStartContract,
   ToolServiceStartContract,
+  BrowserToolsServiceStartContract,
 } from '@kbn/agent-builder-browser';
 import type {
   AgentBuilderPluginSetup,
@@ -27,12 +28,14 @@ export type AgentsServiceStartContractMock = jest.Mocked<AgentsServiceStartContr
 export type AttachmentServiceStartContractMock = jest.Mocked<AttachmentServiceStartContract>;
 export type RendererServiceStartContractMock = jest.Mocked<RendererServiceStartContract>;
 export type ToolServiceStartContractMock = jest.Mocked<ToolServiceStartContract>;
+export type BrowserToolsServiceStartContractMock = jest.Mocked<BrowserToolsServiceStartContract>;
 
 export type AgentBuilderPluginStartMock = jest.Mocked<AgentBuilderPluginStart> & {
   agents: AgentsServiceStartContractMock;
   attachments: AttachmentServiceStartContractMock;
   renderers: RendererServiceStartContractMock;
   tools: ToolServiceStartContractMock;
+  browserTools: BrowserToolsServiceStartContractMock;
 };
 
 const createAgentStartMock = (): AgentsServiceStartContractMock => {
@@ -66,12 +69,19 @@ const createToolStartMock = (): ToolServiceStartContractMock => {
   };
 };
 
+const createBrowserToolsStartMock = (): BrowserToolsServiceStartContractMock => {
+  return {
+    register: jest.fn(),
+  };
+};
+
 const createStartContractMock = (): AgentBuilderPluginStartMock => {
   return {
     agents: createAgentStartMock(),
     attachments: createAttachmentStartMock(),
     renderers: createRendererStartMock(),
     tools: createToolStartMock(),
+    browserTools: createBrowserToolsStartMock(),
     events: {
       chat$: EMPTY,
       getChatEvents$: jest.fn().mockReturnValue(EMPTY),

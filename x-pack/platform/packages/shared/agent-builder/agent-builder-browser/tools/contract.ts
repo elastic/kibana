@@ -7,6 +7,7 @@
 
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolDefinition, ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
+import type { BrowserApiToolDefinition } from './browser_api_tool';
 
 export interface ExecuteToolParams {
   toolId: string;
@@ -53,4 +54,18 @@ export interface ToolServiceStartContract {
    * List available workflows for pre-execution selection.
    */
   listWorkflows(params: ListWorkflowsParams): Promise<ListWorkflowsResponse>;
+}
+
+/**
+ * Public-facing contract for AgentBuilder's browser tools registry.
+ *
+ * Plugins register browser API tools here so they are available in every
+ * agent builder conversation surface (standalone app and embedded hosts),
+ * without having to pass them as embed props.
+ */
+export interface BrowserToolsServiceStartContract {
+  /**
+   * Registers a browser API tool. Throws if a tool with the same id is already registered.
+   */
+  register(tool: BrowserApiToolDefinition<any>): void;
 }

@@ -18,6 +18,7 @@ import type {
   RendererServiceStartContract,
   EventsServiceStartContract,
   ToolServiceStartContract,
+  BrowserToolsServiceStartContract,
 } from '.';
 
 /**
@@ -190,6 +191,11 @@ export interface AgentBuilderPluginStart {
    * Tool service contract, can be used to list or execute tools.
    */
   tools: ToolServiceStartContract;
+  /**
+   * Browser tools registry contract, can be used to register browser API tools that are
+   * available in every conversation surface (standalone app and embedded hosts).
+   */
+  browserTools: BrowserToolsServiceStartContract;
   /**
    * Events service contract, can be used to listen to chat events.
    */

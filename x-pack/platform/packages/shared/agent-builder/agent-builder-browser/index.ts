@@ -8,6 +8,7 @@
 export { formatAgentBuilderErrorMessage } from './base/errors';
 export type {
   ToolServiceStartContract,
+  BrowserToolsServiceStartContract,
   ExecuteToolParams,
   ExecuteToolReturn,
   ListWorkflowsParams,

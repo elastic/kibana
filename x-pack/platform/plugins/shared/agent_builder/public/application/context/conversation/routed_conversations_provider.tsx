@@ -29,7 +29,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   children,
 }) => {
   const queryClient = useQueryClient();
-  const { conversationsService } = useAgentBuilderServices();
+  const { conversationsService, browserToolsService } = useAgentBuilderServices();
   const {
     services: { analytics },
   } = useKibana();
@@ -117,6 +117,12 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     });
   }, []);
 
+  // Registry tools only: the standalone app has no embed host that could pass tools as props.
+  const browserApiTools = useMemo(() => {
+    const registryTools = browserToolsService.getBrowserTools();
+    return registryTools.length > 0 ? registryTools : undefined;
+  }, [browserToolsService]);
+
   const contextValue = useMemo(
     () => ({
       conversationId,
@@ -130,6 +136,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       upsertAttachments,
       resetAttachments,
       removeAttachment,
+      browserApiTools,
     }),
     [
       conversationId,
@@ -142,6 +149,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       upsertAttachments,
       resetAttachments,
       removeAttachment,
+      browserApiTools,
     ]
   );
 

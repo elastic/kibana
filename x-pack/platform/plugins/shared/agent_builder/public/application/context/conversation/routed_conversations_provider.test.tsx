@@ -26,6 +26,7 @@ jest.mock('@kbn/react-query', () => ({
 jest.mock('../../hooks/use_agent_builder_service', () => ({
   useAgentBuilderServices: jest.fn(() => ({
     conversationsService: {},
+    browserToolsService: { getBrowserTools: jest.fn(() => []) },
   })),
 }));
 

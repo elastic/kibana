@@ -5,12 +5,5 @@
  * 2.0.
  */
 
-export type {
-  ToolServiceStartContract,
-  BrowserToolsServiceStartContract,
-  ExecuteToolParams,
-  ExecuteToolReturn,
-  ListWorkflowsParams,
-  ListWorkflowsResponse,
-  WorkflowListItem,
-} from './contract';
+export { BrowserToolsService } from './browser_tools_service';
+export { createPublicBrowserToolsContract } from './create_public_browser_tools_contract';

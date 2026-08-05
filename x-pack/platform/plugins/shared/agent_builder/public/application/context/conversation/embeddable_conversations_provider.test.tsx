@@ -85,6 +85,7 @@ const createMockServices = (): AgentBuilderInternalService =>
   ({
     agentService: { list: jest.fn().mockResolvedValue([]) },
     conversationsService: { get: jest.fn().mockRejectedValue(new Error('not found')) },
+    browserToolsService: { getBrowserTools: jest.fn(() => []) },
     startDependencies: {} as AgentBuilderStartDependencies,
   } as unknown as AgentBuilderInternalService);
 
