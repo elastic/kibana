@@ -1741,7 +1741,6 @@ describe('Output Service', () => {
       });
     });
   });
-
   describe('input validation', () => {
     it('rejects create when both ssl.key and secrets.ssl.key are provided for elasticsearch output', async () => {
       mockedAppContextService.getCloud.mockReturnValue({ isServerlessEnabled: false } as any);

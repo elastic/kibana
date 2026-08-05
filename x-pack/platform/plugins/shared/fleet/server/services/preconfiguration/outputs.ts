@@ -27,6 +27,7 @@ import type {
 } from '../../../common/types';
 import { normalizeHostsForAgents } from '../../../common/services';
 import { isBeatsOutput, isOtelExporterOutput } from '../../../common/services/output_helpers';
+import { outputType } from '../../../common/constants';
 import type { FleetConfigType } from '../../config';
 import {
   DEFAULT_OUTPUT_ID,
@@ -404,9 +405,6 @@ export async function isSecretDifferent(
   }
 }
 
-// TODO: refactor to compare non-secret fields programmatically (strip secrets/id/is_preconfigured,
-// normalize ES hosts, deep-equal the rest) so new output-type fields are covered automatically
-// without having to enumerate them here.
 async function isPreconfiguredOutputDifferentFromCurrent(
   existingOutput: Output,
   preconfiguredOutput: Partial<Output>
