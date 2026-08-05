@@ -120,7 +120,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
         <EuiModalHeader>
           <EuiModalHeaderTitle id={modalTitleId}>
             {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.title', {
-              defaultMessage: 'Manage region preferences',
+              defaultMessage: 'Region preferences',
             })}
           </EuiModalHeaderTitle>
         </EuiModalHeader>
