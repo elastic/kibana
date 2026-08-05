@@ -22,8 +22,7 @@
       "usageCollection"
     ],
     "requiredBundles": [
-      "kibanaUtils",
-      "presentationUtil"
+      "kibanaUtils"
     ]
   }
 }
