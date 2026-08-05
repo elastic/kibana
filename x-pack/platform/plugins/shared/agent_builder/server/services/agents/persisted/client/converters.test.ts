@@ -144,6 +144,35 @@ describe('fromEs', () => {
     expect(definition.configuration.enable_elastic_capabilities).toBe(true);
   });
 
+  it('converts ai_indices from the config', () => {
+    const document = getSampleDoc();
+    document._source!.config!.ai_indices = ['ai-index-1', 'ai-index-2'];
+
+    const definition = fromEs(document);
+
+    expect(definition.configuration.ai_indices).toEqual(['ai-index-1', 'ai-index-2']);
+  });
+
+  it('converts ai_indices from the legacy configuration field', () => {
+    const document = getSampleDoc();
+    // @ts-ignore simulating legacy document
+    delete document._source.config;
+    document._source!.configuration = {
+      tools: [],
+      ai_indices: ['ai-index-1'],
+    };
+
+    const definition = fromEs(document);
+
+    expect(definition.configuration.ai_indices).toEqual(['ai-index-1']);
+  });
+
+  it('leaves ai_indices undefined when the config does not set it', () => {
+    const definition = fromEs(getSampleDoc());
+
+    expect(definition.configuration.ai_indices).toBeUndefined();
+  });
+
   it('defaults enable_elastic_capabilities to true for default agent when missing', () => {
     const document = getSampleDoc();
     document._source!.id = agentBuilderDefaultAgentId;
@@ -297,6 +326,27 @@ describe('createRequestToEs', () => {
 
     expect(docProperties.config!.skill_ids).toEqual(['skill-a', 'skill-b']);
     expect(docProperties.config!.enable_elastic_capabilities).toBe(true);
+  });
+
+  it('persists ai_indices in the config', () => {
+    const createRequest: AgentCreateRequest = {
+      id: 'id',
+      name: 'name',
+      description: 'description',
+      configuration: {
+        tools: [],
+        ai_indices: ['ai-index-1', 'ai-index-2'],
+      },
+    };
+
+    const docProperties = createRequestToEs({
+      profile: createRequest,
+      user: { id: 'user-id', username: 'test-user' },
+      space: 'space',
+      creationDate: new Date(),
+    });
+
+    expect(docProperties.config!.ai_indices).toEqual(['ai-index-1', 'ai-index-2']);
   });
 
   it('defaults the type to chat and persists an explicit type', () => {
@@ -558,6 +608,77 @@ describe('updateRequestToEs', () => {
     expect(docProperties.config!.skill_ids).toEqual(['new-skill-1', 'new-skill-2']);
     expect(docProperties.config!.enable_elastic_capabilities).toBe(true);
     expect(docProperties.config!.instructions).toBe('instructions');
+  });
+
+  describe('ai_indices', () => {
+    const getAgentProps = (): AgentProperties => ({
+      id: 'id',
+      type: AgentType.chat,
+      name: 'name',
+      description: 'description',
+      space: 'space',
+      config: {
+        instructions: 'instructions',
+        tools: [],
+        ai_indices: ['ai-index-1'],
+      },
+      labels: [],
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+      created_by_id: 'test-user-id',
+      created_by_name: 'test-user',
+      created_at: creationDate,
+      updated_at: updateDate,
+    });
+
+    const convert = (update: AgentUpdateRequest, currentProps = getAgentProps()) =>
+      updateRequestToEs({
+        agentId: 'id',
+        currentProps,
+        update,
+        updateDate: new Date(),
+      });
+
+    it('replaces ai_indices when the update sets it', () => {
+      const docProperties = convert({ configuration: { ai_indices: ['ai-index-2'] } });
+
+      expect(docProperties.config!.ai_indices).toEqual(['ai-index-2']);
+    });
+
+    it('clears ai_indices when the update sets an empty list', () => {
+      const docProperties = convert({ configuration: { ai_indices: [] } });
+
+      expect(docProperties.config!.ai_indices).toEqual([]);
+    });
+
+    // ai_indices is maintained by the Context Engine rather than authored by the user, so a partial
+    // update from the agent edit form must not drop it.
+    it('preserves stored ai_indices when the update does not mention it', () => {
+      const docProperties = convert({
+        name: 'new name',
+        configuration: { instructions: 'new instructions' },
+      });
+
+      expect(docProperties.config!.ai_indices).toEqual(['ai-index-1']);
+    });
+
+    it('preserves stored ai_indices when the update has no configuration at all', () => {
+      const docProperties = convert({ name: 'new name' });
+
+      expect(docProperties.config!.ai_indices).toEqual(['ai-index-1']);
+    });
+
+    it('preserves ai_indices stored on a legacy configuration field', () => {
+      const currentProps = getAgentProps();
+      const legacyConfig = { tools: [], ai_indices: ['legacy-ai-index'] };
+      // @ts-ignore simulating legacy document without the new config field
+      delete currentProps.config;
+      currentProps.configuration = legacyConfig;
+
+      const docProperties = convert({ name: 'new name' }, currentProps);
+
+      expect(docProperties.config!.ai_indices).toEqual(['legacy-ai-index']);
+      expect(docProperties.configuration).toBeUndefined();
+    });
   });
 
   it('preserves the stored type on update (type is immutable)', () => {
