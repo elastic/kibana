@@ -57,8 +57,9 @@ describe('ensureClonedRepo', () => {
     mockGetGitCommonDir.mockResolvedValue('/path/to/main/.git');
 
     const context = createContext();
+    const sha = 'abc123def456';
 
-    await ensureClonedRepo(context, { ref: 'main' });
+    await ensureClonedRepo(context, { ref: sha });
 
     expect(mockGetGitCommonDir).toHaveBeenCalledWith(context.repoRoot);
     expect(mockExec).toHaveBeenCalledWith(
@@ -68,7 +69,7 @@ describe('ensureClonedRepo', () => {
     );
     expect(mockExec).toHaveBeenCalledWith(
       'git',
-      ['fetch', 'origin', 'main'],
+      ['fetch', 'origin', sha],
       expect.objectContaining({ cwd: context.baseCloneDir })
     );
   });
@@ -77,14 +78,15 @@ describe('ensureClonedRepo', () => {
     mockExists.mockResolvedValue(true);
 
     const context = createContext();
+    const sha = 'deadbeef';
 
-    await ensureClonedRepo(context, { ref: 'feature/foo' });
+    await ensureClonedRepo(context, { ref: sha });
 
     expect(mockGetGitCommonDir).not.toHaveBeenCalled();
     expect(mockExec).toHaveBeenCalledTimes(1);
     expect(mockExec).toHaveBeenCalledWith(
       'git',
-      ['fetch', 'origin', 'feature/foo'],
+      ['fetch', 'origin', sha],
       expect.objectContaining({ cwd: context.baseCloneDir })
     );
   });

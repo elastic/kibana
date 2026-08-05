@@ -20,6 +20,10 @@ import { getGitCommonDir } from './utils/get_git_common_dir';
  *
  * The base clone shares object storage with the source repo via `git clone --reference`.
  */
+/**
+ * Ensure the requested ref is present in the base clone.
+ * Callers should pass a resolved commit SHA so fetch updates the local object store.
+ */
 export async function ensureClonedRepo(
   context: WorkspaceGlobalContext,
   { ref }: { ref: string }
