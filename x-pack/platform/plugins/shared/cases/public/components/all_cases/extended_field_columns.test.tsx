@@ -153,7 +153,10 @@ describe('extended_field_columns helpers', () => {
         },
       } as unknown as CaseUI;
 
-      const column = getExtendedFieldTableColumn(userPickerField, userProfiles) as EuiTableFieldDataColumnType<CaseUI>;
+      const column = getExtendedFieldTableColumn(
+        userPickerField,
+        userProfiles
+      ) as EuiTableFieldDataColumnType<CaseUI>;
       renderWithTestingProviders(<>{column.render?.(theCase, theCase)}</>);
 
       expect(
@@ -166,7 +169,10 @@ describe('extended_field_columns helpers', () => {
     it('renders an empty avatar row for a user-picker field with no stored value', () => {
       const theCase = { extendedFields: {} } as unknown as CaseUI;
 
-      const column = getExtendedFieldTableColumn(userPickerField, userProfiles) as EuiTableFieldDataColumnType<CaseUI>;
+      const column = getExtendedFieldTableColumn(
+        userPickerField,
+        userProfiles
+      ) as EuiTableFieldDataColumnType<CaseUI>;
       const { container } = renderWithTestingProviders(<>{column.render?.(theCase, theCase)}</>);
 
       expect(container).toHaveTextContent('—');
@@ -182,7 +188,10 @@ describe('extended_field_columns helpers', () => {
         control: FieldType.INPUT_TEXT,
       } as InlineField;
 
-      const column = getExtendedFieldTableColumn(priorityField, userProfiles) as EuiTableFieldDataColumnType<CaseUI>;
+      const column = getExtendedFieldTableColumn(
+        priorityField,
+        userProfiles
+      ) as EuiTableFieldDataColumnType<CaseUI>;
       renderWithTestingProviders(<>{column.render?.(theCase, theCase)}</>);
 
       expect(screen.getByText('high')).toBeInTheDocument();
@@ -209,10 +218,16 @@ describe('extended_field_columns helpers', () => {
         },
       } as unknown as CaseUI;
 
-      const reviewersColumn = getExtendedFieldTableColumn(userPickerField, userProfiles) as EuiTableFieldDataColumnType<CaseUI>;
-      const approversColumn = getExtendedFieldTableColumn(approversField, userProfiles) as EuiTableFieldDataColumnType<CaseUI>;
+      const reviewersColumn = getExtendedFieldTableColumn(
+        userPickerField,
+        userProfiles
+      ) as EuiTableFieldDataColumnType<CaseUI>;
+      const approversColumn = getExtendedFieldTableColumn(
+        approversField,
+        userProfiles
+      ) as EuiTableFieldDataColumnType<CaseUI>;
 
-      const { container } = renderWithTestingProviders(
+      renderWithTestingProviders(
         <>
           {reviewersColumn.render?.(theCase, theCase)}
           {approversColumn.render?.(theCase, theCase)}
@@ -221,14 +236,10 @@ describe('extended_field_columns helpers', () => {
 
       // Each column's wrapping element must carry a distinct test subject.
       expect(
-        container.querySelectorAll(
-          '[data-test-subj="case-table-column-extendedField-reviewers_as_keyword"]'
-        )
+        screen.getAllByTestId('case-table-column-extendedField-reviewers_as_keyword')
       ).toHaveLength(1);
       expect(
-        container.querySelectorAll(
-          '[data-test-subj="case-table-column-extendedField-approvers_as_keyword"]'
-        )
+        screen.getAllByTestId('case-table-column-extendedField-approvers_as_keyword')
       ).toHaveLength(1);
     });
   });

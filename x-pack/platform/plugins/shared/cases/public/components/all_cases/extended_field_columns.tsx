@@ -47,13 +47,15 @@ const parseUserPickerField = <T,>(
     if (!Array.isArray(parsed)) {
       return null;
     }
-    const values = parsed
-      .map((item) =>
-        item != null && typeof item === 'object'
-          ? extract(item as Record<string, unknown>)
-          : undefined
-      )
-      .filter((v): v is T => v !== undefined);
+    const values = parsed.reduce<T[]>((acc, item) => {
+      if (item != null && typeof item === 'object') {
+        const extracted = extract(item as Record<string, unknown>);
+        if (extracted !== undefined) {
+          acc.push(extracted);
+        }
+      }
+      return acc;
+    }, []);
     return values.length > 0 ? values : null;
   } catch {
     return null;

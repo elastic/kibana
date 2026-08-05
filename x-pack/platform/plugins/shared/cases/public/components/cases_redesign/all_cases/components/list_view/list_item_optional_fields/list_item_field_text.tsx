@@ -43,7 +43,7 @@ export const ListItemFieldText: React.FC<ListItemFieldTextProps> = ({
           <EuiText size="xs" color="subdued">
             <span css={styles.label}>
               {label}
-              {':'}
+              {': '}
             </span>
           </EuiText>
         </EuiFlexItem>
