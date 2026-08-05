@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expect } from '..';
 import { EuiToastWrapper } from '../eui_components';
 import type { ScoutPage } from '../fixtures/scope/test';
 
@@ -33,5 +34,9 @@ export class Toasts {
   async closeAll() {
     await this.waitFor();
     await this.toast.closeAllToasts();
+  }
+
+  async waitForToastWithText(text: string, timeout = 15_000): Promise<void> {
+    await expect(this.toast.getWrapper().filter({ hasText: text })).toBeVisible({ timeout });
   }
 }

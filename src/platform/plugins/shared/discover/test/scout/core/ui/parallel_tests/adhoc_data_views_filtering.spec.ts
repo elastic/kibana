@@ -115,7 +115,7 @@ spaceTest.describe(
     spaceTest(
       'shows toast notifications for invalid filter references after data view update',
       async ({ page, pageObjects }) => {
-        const { discover, filterBar } = pageObjects;
+        const { discover, filterBar, toasts } = pageObjects;
         let prevId: string;
 
         await spaceTest.step('creates ad hoc data view and adds filters', async () => {
@@ -150,13 +150,8 @@ spaceTest.describe(
           async () => {
             await page.goBack();
 
-            const toasts = page.locator('.euiToast');
-            await expect(
-              toasts.filter({ hasText: `"${prevId}" is not a configured data view ID` })
-            ).toBeVisible({ timeout: 15_000 });
-            await expect(toasts.filter({ hasText: 'Different index references' })).toBeVisible({
-              timeout: 15_000,
-            });
+            await toasts.waitForToastWithText(`"${prevId}" is not a configured data view ID`);
+            await toasts.waitForToastWithText('Different index references');
           }
         );
       }
