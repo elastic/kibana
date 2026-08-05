@@ -10,6 +10,7 @@ import type {
   SubFeatureConfig,
   SubFeaturePrivilegeConfig,
 } from '@kbn/features-plugin/common';
+import { ApiPrivileges } from '@kbn/core-security-server';
 import {
   ALERTING_V2_ACTION_POLICIES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
@@ -28,22 +29,27 @@ type NestedValueOf<T extends Record<string, Record<string, string>>> = ValueOf<{
  * UI capability keys, and future sub-feature definitions.
  *
  * Add all new alerting_v2 privilege strings here and derive from this file.
+ *
+ * Values use the `ApiPrivileges` format (`operation_subject`) so that both the
+ * feature privilege builder and runtime privilege checks produce the same
+ * fully-qualified action string without relying on the deprecated single-arg
+ * `actions.api.get(subject)` overload.
  */
 export const ALERTING_V2_API_PRIVILEGES = {
   rules: {
-    read: 'read-alerting-v2-rules',
-    write: 'write-alerting-v2-rules',
+    read: ApiPrivileges.read('alerting-v2-rules'),
+    write: ApiPrivileges.manage('alerting-v2-rules'),
   },
   alerts: {
-    read: 'read-alerting-v2-alerts',
-    write: 'write-alerting-v2-alerts',
+    read: ApiPrivileges.read('alerting-v2-alerts'),
+    write: ApiPrivileges.manage('alerting-v2-alerts'),
   },
   actionPolicies: {
-    read: 'read-alerting-v2-action-policies',
-    write: 'write-alerting-v2-action-policies',
+    read: ApiPrivileges.read('alerting-v2-action-policies'),
+    write: ApiPrivileges.manage('alerting-v2-action-policies'),
   },
   executionHistory: {
-    read: 'read-alerting-v2-execution-history',
+    read: ApiPrivileges.read('alerting-v2-execution-history'),
   },
 } as const;
 
@@ -241,6 +247,12 @@ export const ALERTING_V2_FEATURES = {
 } as const satisfies Record<string, AlertingV2FeatureDefinition>;
 
 export type AlertingV2Feature = keyof typeof ALERTING_V2_FEATURES;
+
+export type WritableAlertingV2Feature = {
+  [K in AlertingV2Feature]: 'write' extends keyof (typeof ALERTING_V2_API_PRIVILEGES)[K]
+    ? K
+    : never;
+}[AlertingV2Feature];
 
 type TopLevelUiOf<F extends AlertingV2Feature> =
   | (typeof ALERTING_V2_FEATURES)[F]['privileges']['all']['ui'][number]

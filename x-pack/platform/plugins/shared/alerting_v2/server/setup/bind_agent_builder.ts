@@ -6,7 +6,7 @@
  */
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { Logger, OnSetup, OnStart, PluginSetup, PluginStart } from '@kbn/core-di';
+import { Logger, OnSetup, OnStart, PluginSetup } from '@kbn/core-di';
 import { CoreStart } from '@kbn/core-di-server';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { Container, ContainerModuleLoadOptions } from 'inversify';
@@ -21,9 +21,10 @@ import { AttachmentTypeToken } from '../agent_builder/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { RulesClient } from '../lib/rules_client';
+import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { SettingsServiceToken } from '../lib/services/settings_service/tokens';
-import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
+import type { AlertingServerSetupDependencies } from '../types';
 
 type AgentBuilderSetup = NonNullable<AlertingServerSetupDependencies['agentBuilder']>;
 
@@ -128,17 +129,14 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     }
 
     const workflowsManagementApi = container.get(WorkflowsManagementApiToken);
-    const securityToken =
-      PluginStart<AlertingServerStartDependencies['security']>('security');
-    const security = container.isBound(securityToken)
-      ? container.get(securityToken)
-      : undefined;
+    const injection = container.get(CoreStart('injection'));
     try {
       registerSkills(agentBuilder, {
         getWorkflow: (id, sid) => workflowsManagementApi.getWorkflow(id, sid),
         getAvailableConnectors: (sid, req) =>
           workflowsManagementApi.getAvailableConnectors(sid, req),
-        security,
+        getPrivilegeChecker: (context) =>
+          resolveRequestScoped(injection, context.request, PrivilegeChecker),
       });
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);

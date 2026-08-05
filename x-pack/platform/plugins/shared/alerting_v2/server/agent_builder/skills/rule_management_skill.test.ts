@@ -12,7 +12,8 @@ import {
 } from '@kbn/alerting-v2-constants';
 import { createRuleManagementSkill } from './rule_management_skill';
 
-const createSkill = () => createRuleManagementSkill({ security: undefined });
+const createSkill = () =>
+  createRuleManagementSkill({ getPrivilegeChecker: jest.fn() as any });
 
 describe('createRuleManagementSkill', () => {
   it('registers the skill under the stable rule-management id and name', () => {

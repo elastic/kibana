@@ -8,7 +8,7 @@
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
 import { manageRuleTool } from './manage_rule';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
 
@@ -18,24 +18,14 @@ const getEsqlQueryMock = (ctx: ToolHandlerContextMock) =>
 const getFieldCapsMock = (ctx: ToolHandlerContextMock) =>
   ctx.esClient.asCurrentUser.fieldCaps as unknown as jest.Mock;
 
-// set_query resolves the rule's time field from the source index via fieldCaps.
-// Default to an index that exposes @timestamp so query-based operations don't
-// fail time-field resolution.
 const mockResolvableTimeField = (ctx: ToolHandlerContextMock) =>
   getFieldCapsMock(ctx).mockResolvedValueOnce({ fields: { '@timestamp': { date: {} } } });
 
-const createSecurityMock = (hasAllRequested: boolean) => {
-  const atSpace = jest.fn().mockResolvedValue({ hasAllRequested });
-  const checkPrivilegesWithRequest = jest.fn().mockReturnValue({ atSpace });
-  const get = jest.fn((action: string) => `api:${action}`);
-
-  return {
-    authz: {
-      actions: { api: { get } },
-      checkPrivilegesWithRequest,
-    },
-  } as unknown as SecurityPluginStart;
-};
+const createPrivilegeCheckerMock = (canWriteResult: boolean) =>
+  ({
+    canRead: jest.fn().mockResolvedValue(true),
+    canWrite: jest.fn().mockResolvedValue(canWriteResult),
+  }) as unknown as PrivilegeChecker;
 
 const createContext = (): ToolHandlerContextMock => {
   const ctx = agentBuilderMocks.tools.createHandlerContext();
@@ -51,7 +41,7 @@ const createContext = (): ToolHandlerContextMock => {
 };
 
 describe('manageRuleTool', () => {
-  const tool = manageRuleTool({ security: createSecurityMock(true) });
+  const tool = manageRuleTool({ getPrivilegeChecker: () => createPrivilegeCheckerMock(true) });
 
   describe('handler', () => {
     it('creates a new rule attachment with valid operations', async () => {
@@ -319,7 +309,9 @@ describe('manageRuleTool', () => {
 
   describe('authorization', () => {
     it('rejects with an error result when the user lacks Rules: All', async () => {
-      const unauthorizedTool = manageRuleTool({ security: createSecurityMock(false) });
+      const unauthorizedTool = manageRuleTool({
+        getPrivilegeChecker: () => createPrivilegeCheckerMock(false),
+      });
       const ctx = createContext();
 
       const result = await unauthorizedTool.handler(
@@ -341,8 +333,10 @@ describe('manageRuleTool', () => {
       expect(ctx.attachments.update).not.toHaveBeenCalled();
     });
 
-    it('allows access when security is disabled (undefined)', async () => {
-      const noSecurityTool = manageRuleTool({ security: undefined });
+    it('resolves the PrivilegeChecker with the handler request', async () => {
+      const checkerMock = createPrivilegeCheckerMock(true);
+      const getPrivilegeChecker = jest.fn().mockReturnValue(checkerMock);
+      const authorizedTool = manageRuleTool({ getPrivilegeChecker });
       const ctx = createContext();
       getEsqlQueryMock(ctx).mockResolvedValueOnce({
         columns: [{ name: 'host.name', type: 'keyword' }],
@@ -350,10 +344,10 @@ describe('manageRuleTool', () => {
       });
       mockResolvableTimeField(ctx);
 
-      const result = await noSecurityTool.handler(
+      await authorizedTool.handler(
         {
           operations: [
-            { operation: 'set_metadata', name: 'No Security Rule' },
+            { operation: 'set_metadata', name: 'Privilege Check Test' },
             {
               operation: 'set_query',
               query: {
@@ -366,8 +360,8 @@ describe('manageRuleTool', () => {
         ctx
       );
 
-      const { results } = result as { results: Array<{ type: string }> };
-      expect(results[0].type).toBe(ToolResultType.other);
+      expect(getPrivilegeChecker).toHaveBeenCalledWith({ request: ctx.request });
+      expect(checkerMock.canWrite).toHaveBeenCalledWith('rules');
       expect(ctx.attachments.add).toHaveBeenCalledTimes(1);
     });
   });

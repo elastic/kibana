@@ -11,12 +11,12 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import { RULE_ATTACHMENT_TYPE, getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { getAlertingPrivilegeDisplayName } from '../../../../common/feature_privileges';
-import { hasRulesWritePrivilege } from '../../common/check_privileges';
+import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
 import {
   ruleOperationSchema,
   executeRuleOperations,
@@ -34,11 +34,11 @@ const manageRuleSchema = z.object({
 });
 
 export interface ManageRuleToolDeps {
-  security: SecurityPluginStart | undefined;
+  getPrivilegeChecker: (context: { request: KibanaRequest }) => PrivilegeChecker;
 }
 
 export const manageRuleTool = ({
-  security,
+  getPrivilegeChecker,
 }: ManageRuleToolDeps): BuiltinSkillBoundedTool<typeof manageRuleSchema> => ({
   id: ALERTING_TOOL_IDS.manageRule,
   type: ToolType.builtin,
@@ -67,8 +67,9 @@ Use operations[] to:
     { ruleAttachmentId: previousAttachmentId, operations },
     { logger, attachments, esClient, request, spaceId }
   ) => {
+    const privilegeChecker = getPrivilegeChecker({ request });
     const privilegeDisplayName = getAlertingPrivilegeDisplayName('rules', 'all');
-    const authorized = await hasRulesWritePrivilege({ security, request, spaceId });
+    const authorized = await privilegeChecker.canWrite('rules');
     if (!authorized) {
       return {
         results: [

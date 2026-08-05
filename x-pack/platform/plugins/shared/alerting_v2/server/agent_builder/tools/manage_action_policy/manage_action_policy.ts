@@ -11,12 +11,12 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { ActionPolicyAttachmentData } from '@kbn/alerting-v2-schemas';
 import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { getAlertingPrivilegeDisplayName } from '../../../../common/feature_privileges';
-import { hasActionPoliciesWritePrivilege } from '../../common/check_privileges';
+import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
 import {
   actionPolicyOperationSchema,
   executeActionPolicyOperations,
@@ -38,17 +38,17 @@ export interface ManageActionPolicyToolDeps {
   getWorkflow: (id: string, spaceId: string) => Promise<{ id: string; name?: string } | null>;
   getAvailableConnectors: (
     spaceId: string,
-    request: import('@kbn/core/server').KibanaRequest
+    request: KibanaRequest
   ) => Promise<{
     connectorTypes: Record<string, { instances: Array<{ id: string; name: string }> }>;
   }>;
-  security: SecurityPluginStart | undefined;
+  getPrivilegeChecker: (context: { request: KibanaRequest }) => PrivilegeChecker;
 }
 
 export const manageActionPolicyTool = ({
   getWorkflow,
   getAvailableConnectors,
-  security,
+  getPrivilegeChecker,
 }: ManageActionPolicyToolDeps): BuiltinSkillBoundedTool<typeof manageActionPolicySchema> => ({
   id: ALERTING_TOOL_IDS.manageActionPolicy,
   type: ToolType.builtin,
@@ -70,8 +70,9 @@ Use operations[] to:
     { actionPolicyAttachmentId: previousAttachmentId, operations },
     { logger, attachments, spaceId, request }
   ) => {
+    const privilegeChecker = getPrivilegeChecker({ request });
     const privilegeDisplayName = getAlertingPrivilegeDisplayName('actionPolicies', 'all');
-    const authorized = await hasActionPoliciesWritePrivilege({ security, request, spaceId });
+    const authorized = await privilegeChecker.canWrite('actionPolicies');
     if (!authorized) {
       return {
         results: [
