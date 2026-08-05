@@ -6,12 +6,17 @@
  */
 
 import React from 'react';
-import { McpClientCreate } from '../components/mcp_clients/form/mcp_client_create';
+import { useParams } from 'react-router-dom';
+import { McpClientEdit } from '../components/mcp_clients/form/mcp_client_edit';
+import { useOAuthClient } from '../hooks/oauth_clients/use_oauth_client';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
 
-export const AgentBuilderMcpClientCreatePage = () => {
+export const AgentBuilderMcpClientEditPage = () => {
+  const { clientId } = useParams<{ clientId: string }>();
+  const { client } = useOAuthClient(clientId);
+
   useBreadcrumb([
     {
       text: labels.tools.libraryTitle,
@@ -22,9 +27,10 @@ export const AgentBuilderMcpClientCreatePage = () => {
       path: appPaths.manage.mcpClients,
     },
     {
-      text: labels.tools.mcpClients.form.createBreadcrumb,
-      path: appPaths.manage.mcpClientCreate,
+      text: client?.client_name || labels.tools.mcpClients.form.editBreadcrumb,
+      path: appPaths.manage.mcpClientEdit({ clientId }),
     },
   ]);
-  return <McpClientCreate />;
+
+  return <McpClientEdit />;
 };

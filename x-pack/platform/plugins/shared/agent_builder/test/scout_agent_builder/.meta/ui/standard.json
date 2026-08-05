@@ -1,5 +1,5 @@
 {
-  "sha1": "d503ef41f576a4a93aa36155095161cc795c4710",
+  "sha1": "829d4899b8a94791697cb3dc5ec445ae605f459c",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -405,8 +405,8 @@
       }
     },
     {
-      "id": "bd9da19748d56a0-8035a9627ab4f43",
-      "title": "[NON-MKI] Agent Builder — MCP Clients management revokes a client through the row actions menu",
+      "id": "bd9da19748d56a0-f38a4af978bc4ca",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management edits a client through the row actions menu",
       "expectedStatus": "skipped",
       "tags": [
         "@local-serverless-search"
@@ -415,6 +415,45 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
         "line": 132,
         "column": 25
+      }
+    },
+    {
+      "id": "bd9da19748d56a0-fd0a0de54347003",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management prefills the remote redirect type from a stored HTTPS URI",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
+        "line": 170,
+        "column": 21
+      }
+    },
+    {
+      "id": "bd9da19748d56a0-58854346134b8b7",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management does not offer edit for a revoked client",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
+        "line": 191,
+        "column": 64
+      }
+    },
+    {
+      "id": "bd9da19748d56a0-8035a9627ab4f43",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management revokes a client through the row actions menu",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
+        "line": 206,
+        "column": 19
       }
     },
     {

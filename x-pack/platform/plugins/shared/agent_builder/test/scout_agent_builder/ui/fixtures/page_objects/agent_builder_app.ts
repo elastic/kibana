@@ -780,6 +780,43 @@ export class AgentBuilderApp {
     return id;
   }
 
+  async openMcpClientEdit(clientId: string) {
+    await this.page.testSubj.click(`agentBuilderMcpClientsListActions-${clientId}`);
+    await this.page.testSubj
+      .locator(`mcpClientEditAction-${clientId}`)
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click(`mcpClientEditAction-${clientId}`);
+    await this.page.testSubj.locator('agentBuilderMcpClientEditPage').waitFor({ state: 'visible' });
+  }
+
+  async getMcpClientName(): Promise<string> {
+    return this.page.testSubj.locator('mcpClientNameInput').inputValue();
+  }
+
+  async getMcpClientLogoSelection(): Promise<string> {
+    return this.page.testSubj.locator('mcpClientLogoSelect').innerText();
+  }
+
+  async getMcpClientRedirectUris(type: 'local' | 'remote' = 'local'): Promise<string[]> {
+    const prefix = type === 'remote' ? 'mcpClientRemoteUri-' : 'mcpClientLocalUri-';
+    const inputs = await this.page.locator(`[data-test-subj^="${prefix}"]`).all();
+    return Promise.all(inputs.map((input) => input.inputValue()));
+  }
+
+  async submitMcpClientUpdate(): Promise<void> {
+    await Promise.all([
+      this.page.waitForResponse(
+        (res) =>
+          res.url().includes('/internal/security/oauth/clients') &&
+          res.request().method() === 'PATCH'
+      ),
+      this.page.testSubj.click('mcpClientUpdateButton'),
+    ]);
+    await this.page.testSubj
+      .locator('agentBuilderMcpClientsListPage')
+      .waitFor({ state: 'visible' });
+  }
+
   async closeMcpClientDetails() {
     await this.dismissToasts();
     await this.page.testSubj.click('mcpClientDetailsCloseButton');

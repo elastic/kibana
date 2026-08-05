@@ -15,7 +15,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -23,36 +22,73 @@ import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { defer } from 'lodash';
 import React, { useCallback, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
-import { useCreateOAuthClient } from '../../../hooks/oauth_clients/use_create_oauth_client';
-import type { McpClientFormData } from './types';
-import { useMcpClientForm } from './use_mcp_client_form';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
-import { useToasts } from '../../../hooks/use_toasts';
 import { appPaths } from '../../../utils/app_paths';
 import { labels } from '../../../utils/i18n';
 import illustrationGenai from '../assets/illustration_genai.svg';
 import { McpClientForm } from './mcp_client_form';
-import { toCreateOAuthClientPayload } from './mcp_client_transform';
-import { loadDefaultLogoDataUrl } from './mcp_logo_options';
+import type { McpClientFormData } from './types';
+import { McpClientFormMode } from './types';
+import { useMcpClientForm } from './use_mcp_client_form';
 
 const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
   background-color: ${euiTheme.colors.backgroundBasePlain};
   border-block-end: none;
 `;
 
-const resolveDefaultLogoDataUrl = async (): Promise<string | undefined> => {
-  try {
-    return await loadDefaultLogoDataUrl();
-  } catch {
-    return undefined;
-  }
+interface ModeConfig {
+  pageTitle: string;
+  pageTestSubj: string;
+  submitLabel: string;
+  submitTestSubj: string;
+  submitAction: string;
+  cancelAction: string;
+}
+
+const MODE_CONFIG: Record<McpClientFormMode, ModeConfig> = {
+  [McpClientFormMode.CREATE]: {
+    pageTitle: labels.tools.mcpClients.form.pageTitle,
+    pageTestSubj: 'agentBuilderMcpClientCreatePage',
+    submitLabel: labels.tools.mcpClients.form.createButton,
+    submitTestSubj: 'mcpClientCreateButton',
+    submitAction: AGENT_BUILDER_UI_EBT.action.globalManagement.MCP_CLIENT_CREATE_SUBMIT,
+    cancelAction: AGENT_BUILDER_UI_EBT.action.globalManagement.MCP_CLIENT_CREATE_CANCEL,
+  },
+  [McpClientFormMode.EDIT]: {
+    pageTitle: labels.tools.mcpClients.form.editPageTitle,
+    pageTestSubj: 'agentBuilderMcpClientEditPage',
+    submitLabel: labels.tools.mcpClients.form.updateButton,
+    submitTestSubj: 'mcpClientUpdateButton',
+    submitAction: AGENT_BUILDER_UI_EBT.action.globalManagement.MCP_CLIENT_EDIT_SUBMIT,
+    cancelAction: AGENT_BUILDER_UI_EBT.action.globalManagement.MCP_CLIENT_EDIT_CANCEL,
+  },
 };
 
-export const McpClientCreate = () => {
+interface BaseMcpClientFormPageProps {
+  isSubmitting: boolean;
+  onSubmit: (data: McpClientFormData) => Promise<void>;
+}
+
+interface CreateMcpClientFormPageProps extends BaseMcpClientFormPageProps {
+  mode: McpClientFormMode.CREATE;
+  initialValues?: never;
+}
+
+interface EditMcpClientFormPageProps extends BaseMcpClientFormPageProps {
+  mode: McpClientFormMode.EDIT;
+  initialValues: McpClientFormData;
+}
+
+export type McpClientFormPageProps = CreateMcpClientFormPageProps | EditMcpClientFormPageProps;
+
+export const McpClientFormPage = ({
+  mode,
+  initialValues,
+  isSubmitting,
+  onSubmit,
+}: McpClientFormPageProps) => {
   const { navigateToAgentBuilderUrl } = useNavigation();
-  const { createOAuthClient, isCreating } = useCreateOAuthClient();
-  const { addSuccessToast, addErrorToast } = useToasts();
   const { services } = useKibana();
   const {
     appParams: { history },
@@ -63,43 +99,18 @@ export const McpClientCreate = () => {
 
   const [isCancelling, setIsCancelling] = useState(false);
 
-  const form = useMcpClientForm();
+  const form = useMcpClientForm(initialValues);
   const { handleSubmit, formState } = form;
   const { errors, isDirty, isSubmitSuccessful } = formState;
   const hasErrors = Object.keys(errors).length > 0;
+
+  const { pageTitle, pageTestSubj, submitLabel, submitTestSubj, submitAction, cancelAction } =
+    MODE_CONFIG[mode];
 
   const handleCancel = useCallback(() => {
     setIsCancelling(true);
     defer(() => navigateToAgentBuilderUrl(appPaths.manage.mcpClients));
   }, [navigateToAgentBuilderUrl]);
-
-  const handleCreate = useCallback(
-    async (data: McpClientFormData) => {
-      try {
-        const fallbackLogoDataUrl =
-          data.clientLogo.type === 'none' ? await resolveDefaultLogoDataUrl() : undefined;
-        const response = await createOAuthClient(
-          toCreateOAuthClientPayload(data, fallbackLogoDataUrl)
-        );
-
-        addSuccessToast({
-          title: labels.tools.mcpClients.form.createSuccessToast(data.clientName),
-        });
-
-        defer(() =>
-          navigateToAgentBuilderUrl(appPaths.manage.mcpClients, undefined, {
-            mcpClientCreated: response,
-          })
-        );
-      } catch (error) {
-        addErrorToast({
-          title: labels.tools.mcpClients.form.createErrorToast,
-          text: formatAgentBuilderErrorMessage(error),
-        });
-      }
-    },
-    [createOAuthClient, navigateToAgentBuilderUrl, addSuccessToast, addErrorToast]
-  );
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: !isCancelling && isDirty && !isSubmitSuccessful,
@@ -110,17 +121,20 @@ export const McpClientCreate = () => {
     shouldPromptOnReplace: false,
   });
 
+  const isSubmitDisabled =
+    hasErrors || isSubmitting || (mode === McpClientFormMode.EDIT && !isDirty);
+
   return (
     <FormProvider {...form}>
-      <KibanaPageTemplate data-test-subj="agentBuilderMcpClientCreatePage">
+      <KibanaPageTemplate data-test-subj={pageTestSubj}>
         <KibanaPageTemplate.Header
           css={headerStyles}
-          pageTitle={labels.tools.mcpClients.form.pageTitle}
+          pageTitle={pageTitle}
           description={labels.tools.mcpClients.form.pageDescription}
           rightSideItems={[<EuiImage src={illustrationGenai} alt="" size="100px" />]}
         />
         <KibanaPageTemplate.Section>
-          <McpClientForm onSubmit={handleSubmit(handleCreate)} />
+          <McpClientForm mode={mode} onSubmit={handleSubmit(onSubmit)} />
           <EuiSpacer size="xl" />
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
@@ -128,9 +142,10 @@ export const McpClientCreate = () => {
                 size="m"
                 color="text"
                 onClick={handleCancel}
+                data-test-subj="mcpClientFormCancelButton"
                 {...getEbtProps({
                   element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                  action: AGENT_BUILDER_UI_EBT.action.globalManagement.MCP_CLIENT_CREATE_CANCEL,
+                  action: cancelAction,
                   detail: AGENT_BUILDER_UI_EBT.entity.MCP_CLIENT,
                 })}
               >
@@ -141,17 +156,17 @@ export const McpClientCreate = () => {
               <EuiButton
                 size="m"
                 fill
-                onClick={handleSubmit(handleCreate)}
-                isLoading={isCreating}
-                disabled={hasErrors || isCreating}
-                data-test-subj="mcpClientCreateButton"
+                onClick={handleSubmit(onSubmit)}
+                isLoading={isSubmitting}
+                disabled={isSubmitDisabled}
+                data-test-subj={submitTestSubj}
                 {...getEbtProps({
                   element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                  action: AGENT_BUILDER_UI_EBT.action.globalManagement.MCP_CLIENT_CREATE_SUBMIT,
+                  action: submitAction,
                   detail: AGENT_BUILDER_UI_EBT.entity.MCP_CLIENT,
                 })}
               >
-                {labels.tools.mcpClients.form.createButton}
+                {submitLabel}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

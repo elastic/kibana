@@ -87,7 +87,7 @@ test.describe.skip(
       createdClientIds.push(clientId);
 
       const modal = page.testSubj.locator('mcpClientDetailsModal');
-      await expect(modal.getByText('MCP client secret', { exact: false })).toBeVisible();
+      await expect(modal.getByText('MCP client secret', { exact: true })).toBeVisible();
 
       await pageObjects.agentBuilder.closeMcpClientDetails();
     });
@@ -156,6 +156,85 @@ test.describe.skip(
       await expect(flyout).toContainText('api/agent_builder/mcp');
 
       await pageObjects.agentBuilder.closeMcpClientDetails();
+    });
+
+    test('edits a client through the row actions menu', async ({
+      apiClient,
+      page,
+      pageObjects,
+    }) => {
+      const clientName = uniqueClientName('scout-edit');
+      const redirectUris = ['http://localhost/callback', 'http://127.0.0.1:3000/callback'];
+      const client = await createOAuthClient(apiClient, authHeaders, {
+        clientName,
+        clientType: 'public',
+        redirectUris,
+      });
+      createdClientIds.push(client.id);
+
+      await pageObjects.agentBuilder.navigateToMcpClients();
+      await pageObjects.agentBuilder.searchMcpClients(clientName);
+      await pageObjects.agentBuilder.waitForMcpClientRow(client.id);
+      await pageObjects.agentBuilder.openMcpClientEdit(client.id);
+
+      expect(await pageObjects.agentBuilder.getMcpClientName()).toBe(clientName);
+      expect(await pageObjects.agentBuilder.getMcpClientRedirectUris()).toStrictEqual(redirectUris);
+      await expect(page.testSubj.locator('mcpClientConfidentialCheckbox')).toHaveCount(0);
+      await expect(page.testSubj.locator('mcpClientUpdateButton')).toBeDisabled();
+
+      const updatedName = `${clientName}-updated`;
+      await pageObjects.agentBuilder.fillMcpClientName(updatedName);
+      await pageObjects.agentBuilder.selectMcpClientLogo('MCP client logo');
+      await pageObjects.agentBuilder.submitMcpClientUpdate();
+
+      await pageObjects.agentBuilder.searchMcpClients(updatedName);
+      await expect(page.getByRole('button', { name: updatedName, exact: true })).toBeVisible();
+
+      await pageObjects.agentBuilder.openMcpClientDetailsFlyout(client.id);
+      await expect(
+        page.testSubj.locator('mcpClientDetailsFlyout').getByTestId('mcpClientLogo')
+      ).toBeVisible();
+      await pageObjects.agentBuilder.closeMcpClientDetails();
+    });
+
+    test('prefills the remote redirect type from a stored HTTPS URI', async ({
+      apiClient,
+      pageObjects,
+    }) => {
+      const clientName = uniqueClientName('scout-edit-remote');
+      const client = await createOAuthClient(apiClient, authHeaders, {
+        clientName,
+        clientType: 'confidential',
+        redirectUris: ['https://example.com/callback'],
+      });
+      createdClientIds.push(client.id);
+
+      await pageObjects.agentBuilder.navigateToMcpClients();
+      await pageObjects.agentBuilder.searchMcpClients(clientName);
+      await pageObjects.agentBuilder.waitForMcpClientRow(client.id);
+      await pageObjects.agentBuilder.openMcpClientEdit(client.id);
+
+      expect(await pageObjects.agentBuilder.getMcpClientRedirectUris('remote')).toStrictEqual([
+        'https://example.com/callback',
+      ]);
+    });
+
+    test('does not offer edit for a revoked client', async ({ apiClient, page, pageObjects }) => {
+      const clientName = uniqueClientName('scout-edit-revoked');
+      const client = await createOAuthClient(apiClient, authHeaders, {
+        clientName,
+        clientType: 'public',
+      });
+      createdClientIds.push(client.id);
+      await revokeOAuthClient(apiClient, authHeaders, client.id);
+
+      await pageObjects.agentBuilder.navigateToMcpClients();
+      await pageObjects.agentBuilder.searchMcpClients(clientName);
+      await pageObjects.agentBuilder.waitForMcpClientRow(client.id);
+
+      await expect(
+        page.testSubj.locator(`agentBuilderMcpClientsListActions-${client.id}`)
+      ).toBeDisabled();
     });
 
     test('revokes a client through the row actions menu', async ({ apiClient, pageObjects }) => {
