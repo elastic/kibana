@@ -21,6 +21,7 @@ import {
   ViewLogsButton,
   getFormattedRange,
 } from '../../agent_details_page/components/agent_logs/view_logs_button';
+import { AGENT_LOG_INDEX_PATTERN } from '../../agent_details_page/components/agent_logs/constants';
 
 import type { ActionStatus } from '../../../../types';
 import { useStartServices } from '../../../../hooks';
@@ -48,7 +49,12 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
       userQuery: '',
     });
     return (
-      <ViewLogsButton logStreamQuery={logStreamQuery} startTime={startTime} endTime={endTime} />
+      <ViewLogsButton
+        logStreamQuery={logStreamQuery}
+        startTime={startTime}
+        endTime={endTime}
+        logSources={AGENT_LOG_INDEX_PATTERN}
+      />
     );
   };
 

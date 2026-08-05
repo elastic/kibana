@@ -25,7 +25,7 @@ jest.mock('../../../../hooks', () => {
     useDiscoverLocator: jest.fn().mockImplementation(() => {
       return {
         id: 'DISCOVER_APP_LOCATOR',
-        getRedirectUrl: jest.fn().mockResolvedValue('app/discover/logs/someview'),
+        getRedirectUrl: jest.fn().mockReturnValue('app/discover/logs/someview'),
       };
     }),
   };
@@ -124,7 +124,7 @@ describe('ViewErrors', () => {
     } as any);
 
     const viewErrorBtn = result.getByTestId('viewInLogsBtn');
-    expect(viewErrorBtn.getAttribute('href')).toEqual(`https://discover-redirect-url`);
+    expect(viewErrorBtn.getAttribute('href')).toEqual('app/discover/logs/someview');
   });
 
   it('should not render open in Logs button if privileges are not set', () => {
