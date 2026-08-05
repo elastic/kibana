@@ -56,6 +56,8 @@ export const createRuleTypeMocks = (
     registerSubActionConnectorType: jest.fn(),
 
     getAxiosInstanceWithAuth: jest.fn(),
+    getCredential: jest.fn(),
+    getClientLeasePool: jest.fn(),
 
     isPreconfiguredConnector: (connectorId: string) => false,
 
