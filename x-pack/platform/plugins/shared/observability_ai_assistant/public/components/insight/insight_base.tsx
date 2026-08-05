@@ -103,6 +103,7 @@ export function InsightBase({
               {actions?.length ? (
                 <EuiFlexItem>
                   <EuiPopover
+                    aria-label={actionsLabel}
                     anchorPosition="downLeft"
                     button={
                       <EuiToolTip content={actionsLabel} disableScreenReaderOutput>
