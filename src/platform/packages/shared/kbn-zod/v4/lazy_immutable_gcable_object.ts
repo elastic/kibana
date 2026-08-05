@@ -62,19 +62,20 @@ export function lazyImmutableGCableObject<T extends object>(factory: () => T): T
         const originalPJS = (value as Record<PropertyKey, unknown>).processJSONSchema as (
           ...args: unknown[]
         ) => unknown;
-        return {
-          ...(value as object),
-          processJSONSchema: (
-            ctx: { seen?: Map<unknown, unknown> },
-            json: unknown,
-            params: unknown
-          ) => {
-            if (ctx?.seen instanceof Map && ctx.seen.has(self) && !ctx.seen.has(real)) {
-              ctx.seen.set(real, ctx.seen.get(self));
-            }
-            return originalPJS(ctx, json, params);
-          },
+        // Use Object.create to inherit the full _zod object (including non-enumerable
+        // getters like `value`) rather than a spread which silently drops them.
+        const wrapped = Object.create(value as object) as Record<PropertyKey, unknown>;
+        wrapped.processJSONSchema = (
+          ctx: { seen?: Map<unknown, unknown> },
+          json: unknown,
+          params: unknown
+        ) => {
+          if (ctx?.seen instanceof Map && ctx.seen.has(self) && !ctx.seen.has(real)) {
+            ctx.seen.set(real, ctx.seen.get(self));
+          }
+          return originalPJS(ctx, json, params);
         };
+        return wrapped;
       }
 
       if (typeof value === 'function') {
