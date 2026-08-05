@@ -149,10 +149,23 @@ export const create = async (
     // collision — see resolveApplicableFields), then caller-sent values (caller always wins).
     // Runs AFTER template expansion so the collision order holds, and BEFORE extended_fields
     // validation so the merged map is what gets validated.
+    //
+    // Captured before injection: when the map exists only because defaults were injected, the
+    // validation below must run with partial (update) semantics. Full create-time validation
+    // enforces `required` on absent fields, and enforcing it here would 400 requests that
+    // succeeded before defaults injection existed — e.g. every legacy customFields-only create
+    // in a space whose required v1 custom fields are mirrored into required global definitions.
+    const hadExtendedFieldsBeforeDefaults = query.extended_fields !== undefined;
     let globalFields: InlineField[] | undefined;
     if (clientArgs.config.templates.enabled) {
       globalFields = await resolveGlobalFields(query.owner, fieldDefinitionsService);
-      const globalFieldsDefaults = buildExtendedFieldsDefaults(globalFields);
+      const globalFieldsDefaults = Object.fromEntries(
+        // A field without a default produces '' — writing that adds no information and, for a
+        // required field, would immediately fail its own validation. Only inject real defaults.
+        Object.entries(buildExtendedFieldsDefaults(globalFields)).filter(
+          ([, value]) => value !== ''
+        )
+      );
       if (Object.keys(globalFieldsDefaults).length > 0) {
         query = {
           ...query,
@@ -178,6 +191,10 @@ export const create = async (
         templatesService,
         fieldDefinitionsService,
         owner: query.owner,
+        // Injection-only maps get partial semantics: validate the injected values, but do not
+        // enforce `required` on fields the caller never sent — that keeps creates that
+        // succeeded before defaults injection succeeding after it (see comment above).
+        partial: !hadExtendedFieldsBeforeDefaults,
         preResolvedTemplateFields: resolvedTemplateFields,
       });
     }

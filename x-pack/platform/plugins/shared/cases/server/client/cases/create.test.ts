@@ -1554,11 +1554,11 @@ describe('create', () => {
       await create(theCase, clientArgs, casesClientMock);
 
       const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
-      // Defaults are stored exactly as the UI would submit them: the YAML default for
-      // fields that declare one, an empty string for global fields without one.
+      // Only fields that declare a YAML default are injected. A field without one would
+      // produce '' — a value-free key that (for required fields) would fail its own
+      // validation — so `notes` must not appear.
       expect(createArgs.attributes.extended_fields).toEqual({
         risk_score_as_keyword: 'high',
-        notes_as_keyword: '',
       });
       expect(clientArgs.services.fieldDefinitionsService.getFieldDefinitions).toHaveBeenCalledWith(
         SECURITY_SOLUTION_OWNER,
@@ -1709,23 +1709,71 @@ describe('create', () => {
     });
 
     describe('required global fields', () => {
-      // The injection populates a storage key for every non-display global field, so the merged
-      // map now flows into validateCaseExtendedFields even when the caller sent no
-      // extended_fields. This is the most behaviorally significant consequence of the change:
-      // a REQUIRED global field with no default and no caller value must reject the create
-      // (matching what the UI enforces at submit time), while a default or a caller-sent value
-      // satisfies it. These tests lock that in so a future reordering of the inject/validate
-      // steps cannot silently drop the enforcement.
-      it('rejects the create when a required global field has no default and no caller value', async () => {
+      // Defaults injection must be invisible to callers that never engaged with
+      // extended_fields: a request without extended_fields that succeeded before injection
+      // existed must keep succeeding after it, even when a REQUIRED global field has no
+      // default (required stays a UI submit-time gate there, exactly like v1 required
+      // customFields). Full create-time `required` enforcement only applies when the caller —
+      // or a pinned template — actually produced an extended_fields map, which is the
+      // pre-injection behavior. These tests lock both sides in so the inject/validate steps
+      // can't silently become a breaking change (or silently drop the existing enforcement).
+      it('creates the case when a required global field has no default and no caller value (no extended_fields sent)', async () => {
+        // Regression guard for the v1 mirror: required legacy customFields are mirrored into
+        // required global definitions with no default, so rejecting here would 400 every
+        // customFields-only create in such a space.
         const clientArgs = createClientArgs();
         clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
           fieldDefinitions: [makeGlobalDef('risk_score', undefined, { required: true })],
           total: 1,
         });
 
-        await expect(create(theCase, clientArgs, casesClientMock)).rejects.toThrow(
-          'Field "risk_score" is required'
-        );
+        await create(theCase, clientArgs, casesClientMock);
+
+        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+        // Nothing to inject (no default) — the field is simply left unset.
+        expect(createArgs.attributes.extended_fields).toBeUndefined();
+      });
+
+      it('injected defaults do not trigger required enforcement of other global fields', async () => {
+        // The injection materializes an extended_fields map the caller never sent; validating
+        // that map with full create semantics would enforce `required` on the no-default field
+        // and reject a request that succeeded before injection existed.
+        const clientArgs = createClientArgs();
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+          fieldDefinitions: [
+            makeGlobalDef('notes', 'default notes'),
+            makeGlobalDef('risk_score', undefined, { required: true }),
+          ],
+          total: 2,
+        });
+
+        await create(theCase, clientArgs, casesClientMock);
+
+        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+        expect(createArgs.attributes.extended_fields).toEqual({
+          notes_as_keyword: 'default notes',
+        });
+      });
+
+      it('still rejects when the caller sends extended_fields but omits a required global field', async () => {
+        // Pre-injection behavior preserved: a caller that engages with extended_fields gets
+        // full create-time validation, including `required` on absent fields.
+        const clientArgs = createClientArgs();
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+          fieldDefinitions: [
+            makeGlobalDef('risk_score', undefined, { required: true }),
+            makeGlobalDef('notes'),
+          ],
+          total: 2,
+        });
+
+        await expect(
+          create(
+            { ...theCase, extended_fields: { notes_as_keyword: 'some notes' } },
+            clientArgs,
+            casesClientMock
+          )
+        ).rejects.toThrow('Field "risk_score" is required');
         expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
       });
 
