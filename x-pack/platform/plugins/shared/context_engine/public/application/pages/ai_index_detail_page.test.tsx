@@ -7,6 +7,7 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -44,6 +45,7 @@ jest.mock('../hooks/use_data_connectors', () => ({
   useDataConnectors: () => ({
     connectors: [],
     connectorNameById: new Map(),
+    connectorActionTypeById: new Map(),
     isLoading: false,
   }),
 }));
@@ -73,7 +75,9 @@ const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) 
   return render(
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider services={services}>
+        <KibanaContextProvider
+          services={{ ...services, triggersActionsUi: triggersActionsUiMock.createStart() }}
+        >
           <QueryClientProvider client={queryClient}>
             <MemoryRouter initialEntries={[getAiIndexDetailPath(aiIndex.id)]}>
               <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexDetailPage} />
