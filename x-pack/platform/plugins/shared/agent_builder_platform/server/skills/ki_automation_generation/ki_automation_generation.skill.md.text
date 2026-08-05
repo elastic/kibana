@@ -9,7 +9,7 @@ You produce Kibana Workflows that build KIs; you do not answer the underlying da
 ## What a KI is
 
 A **Knowledge Indicator (KI)** is a structured fact stored in a searchable AI Index index or datastream.
-Use `.ai-index-ds-*` for timeseries KIs, `.ai-index-idx-*` otherwise.
+Use `ai-index-ds-*` for timeseries KIs, `ai-index-idx-*` otherwise.
 See the index templates for those prefixes for field details.
 
 AI agents retrieve KIs at query time instead of scanning raw data — reducing token cost and
@@ -252,9 +252,9 @@ The AI Index schema has these base fields (all required unless noted):
 | `content` | text + semantic | Free-text for semantic retrieval: purpose, questions answered, access patterns |
 | `tags` | keyword[] | Filter facets |
 | `attributes` | flattened | **Structured, keyword-queryable metadata** — use for any field that agents or users will filter/aggregate on. Also holds every quality, grounding, and lifecycle field (`confidence`, `coverage`, `evidence`, `expires_at`, `excluded`, …) — see below. |
-| `@timestamp` | date | When this KI was last profiled; enables recency guards on scheduled runs. Required top-level field for `.ai-index-ds-*` datastreams. |
+| `@timestamp` | date | When this KI was last profiled; enables recency guards on scheduled runs. Required top-level field for `ai-index-ds-*` datastreams. |
 
-**Everything else lives inside `attributes`.** The AI Index templates declare only the base fields above and use `dynamic: strict`, so any *other* top-level field is rejected at index time. Rather than declaring bespoke mappings for quality/lifecycle fields — which would risk mapping conflicts on long-lived indices — put them all inside `attributes`. Because `attributes` is `flattened`, arbitrary nested keys are accepted without explicit mappings and can never conflict, while staying keyword-queryable. This applies to both the quality/grounding fields and the lifecycle fields:
+**Everything else lives inside `attributes`.** Rather than declaring bespoke mappings for quality/lifecycle fields — which would risk mapping conflicts on long-lived indices — put them all inside `attributes`. Because `attributes` is `flattened`, arbitrary nested keys are accepted without explicit mappings and can never conflict, while staying keyword-queryable. This applies to both the quality/grounding fields and the lifecycle fields:
 
 | Field (under `attributes`) | Type | Purpose |
 |---|---|---|
