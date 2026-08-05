@@ -151,12 +151,36 @@ describe('Range Transforms', () => {
       const expected: LensApiHistogramOperation = {
         operation: 'histogram',
         field: 'price',
-        granularity: 'auto',
+        granularity: 10,
         include_empty_rows: true,
         format: { type: 'number', decimals: 0, compact: false },
       };
 
       expect(fromRangeOrHistogramLensStateToAPI(input)).toEqual(expected);
+    });
+
+    it(`should persist a max-slider maxBars value (1000) without clamping to "auto"`, () => {
+      const input: RangeIndexPatternColumn = {
+        operationType: 'range',
+        dataType: 'number',
+        sourceField: 'price',
+        customLabel: false,
+        label: 'price',
+        isBucketed: true,
+        params: {
+          type: 'histogram',
+          maxBars: 1000,
+          ranges: [],
+          includeEmptyRows: false,
+        },
+      };
+
+      expect(fromRangeOrHistogramLensStateToAPI(input)).toEqual({
+        operation: 'histogram',
+        field: 'price',
+        granularity: 1000,
+        include_empty_rows: false,
+      });
     });
 
     it('should handle custom labels', () => {

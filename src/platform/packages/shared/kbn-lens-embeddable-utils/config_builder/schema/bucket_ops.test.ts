@@ -298,12 +298,19 @@ describe('Bucket Operation Schemas', () => {
       const result2 = bucketHistogramOperationSchema.safeParse({
         operation: 'histogram',
         field: 'price',
-        granularity: 8,
+        granularity: 1001,
       });
       expectPrettyError(result2).toMatchInlineSnapshot(`
-        "✖ Too big: expected number to be <=7
+        "✖ Too big: expected number to be <=1000
           → at granularity"
       `);
+
+      const atMax = bucketHistogramOperationSchema.safeParse({
+        operation: 'histogram',
+        field: 'price',
+        granularity: 1000,
+      });
+      expect(atMax.success).toBe(true);
     });
   });
 
