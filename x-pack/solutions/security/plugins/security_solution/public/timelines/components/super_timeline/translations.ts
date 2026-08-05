@@ -144,3 +144,13 @@ export const EQL_QUERY_TYPE_LABEL = i18n.translate(
   'xpack.securitySolution.timeline.superTimeline.eqlQueryTypeLabel',
   { defaultMessage: 'EQL' }
 );
+
+export const SUPER_TIMELINE_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.superTimeline.defaultTitle',
+  { defaultMessage: 'Super Timeline' }
+);
+
+export const SUPER_TIMELINE_QUERY_ALIAS = i18n.translate(
+  'xpack.securitySolution.timeline.superTimeline.queryAlias',
+  { defaultMessage: 'Super Timeline Sources' }
+);

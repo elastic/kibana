@@ -15,9 +15,8 @@ import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import type { TimelineModel } from '../../store/model';
 import { timelineDefaults } from '../../store/defaults';
 import { combineQueries } from '../../../common/lib/kuery';
-
-export const SUPER_TIMELINE_TITLE = 'Super Timeline';
-export const SUPER_TIMELINE_QUERY_ALIAS = 'Super Timeline Sources';
+import { SUPER_TIMELINE_TITLE, SUPER_TIMELINE_QUERY_ALIAS } from './translations';
+export { SUPER_TIMELINE_TITLE, SUPER_TIMELINE_QUERY_ALIAS };
 
 export type SkippedQueryReason = 'eql' | 'esql' | 'unknown';
 
