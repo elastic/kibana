@@ -1125,6 +1125,10 @@ describe('ComposeDiscoverFlyout', () => {
       act(() => {
         fireEvent.click(screen.getByTestId('mockSetFormTimeField'));
       });
+
+      const getLatestFormProps = (): FormProps =>
+        mockComposeDiscoverForm.mock.calls[mockComposeDiscoverForm.mock.calls.length - 1][0];
+
       act(() => {
         getLatestFormProps().dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 0, isAlert: true });
       });
