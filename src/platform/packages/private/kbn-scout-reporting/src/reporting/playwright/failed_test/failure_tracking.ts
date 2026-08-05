@@ -50,7 +50,10 @@ export interface ScoutFailureTrackingEntry {
 export class ScoutFailureTracker {
   private readonly log: ToolingLog;
   private readonly trackingFilePath: string;
-  private failures: ScoutFailureTrackingEntry[] = [];
+  // Keyed by test ID, not a plain array: a test that fails on every retry calls `addFailure`
+  // more than once, and this keeps only the last attempt so its GitHub issue is updated once
+  // per run rather than once per attempt.
+  private readonly failures = new Map<string, ScoutFailureTrackingEntry>();
 
   constructor(log: ToolingLog, reportRootPath: string, runId: string) {
     this.log = log;
@@ -62,7 +65,7 @@ export class ScoutFailureTracker {
    * Add a test failure to the tracking file
    */
   addFailure(failure: TestFailure) {
-    const trackingEntry: ScoutFailureTrackingEntry = {
+    this.failures.set(failure.id, {
       id: failure.id,
       suite: failure.suite,
       title: failure.title,
@@ -83,16 +86,22 @@ export class ScoutFailureTracker {
         pipeline: process.env.BUILDKITE_PIPELINE_SLUG,
         branch: process.env.BUILDKITE_BRANCH,
       },
-    };
-
-    this.failures.push(trackingEntry);
+    });
   }
 
   /**
-   * Save all tracked failures to the tracking file
+   * Save all tracked failures to the tracking file.
+   *
+   * @param excludeTestIds - IDs of tests to drop before writing, e.g. flaky tests that passed
+   * on retry and so should not open/update a GitHub issue.
    */
-  save() {
-    if (this.failures.length === 0) {
+  save({ excludeTestIds }: { excludeTestIds?: Set<string> } = {}) {
+    const allFailures = [...this.failures.values()];
+    const failuresToSave = excludeTestIds
+      ? allFailures.filter((failure) => !excludeTestIds.has(failure.id))
+      : allFailures;
+
+    if (failuresToSave.length === 0) {
       this.log.info('No Scout failures to track');
       return;
     }
@@ -102,12 +111,12 @@ export class ScoutFailureTracker {
     fs.mkdirSync(dir, { recursive: true });
 
     // Write failures as NDJSON
-    const content = this.failures.map((failure) => JSON.stringify(failure)).join('\n') + '\n';
+    const content = failuresToSave.map((failure) => JSON.stringify(failure)).join('\n') + '\n';
 
     fs.writeFileSync(this.trackingFilePath, content, 'utf-8');
 
     this.log.info(
-      `Saved ${this.failures.length} Scout failures to tracking file: ${this.trackingFilePath}`
+      `Saved ${failuresToSave.length} Scout failures to tracking file: ${this.trackingFilePath}`
     );
   }
 

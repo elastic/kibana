@@ -84,6 +84,7 @@ jest.mock('./compose_discover_form', () => {
       const { setValue, getValues } = useFormContext<FormValues>();
       readCommittedQuery = () => getValues('query');
       readRecoveryStrategy = () => getValues('recoveryStrategy');
+      readNoDataStrategy = () => getValues('noDataStrategy');
       readTimeField = () => getValues('timeField');
       return (
         <div data-test-subj="composeDiscoverFormMock">
@@ -124,6 +125,7 @@ interface SandboxFlyoutMockProps {
 let sandboxFlyoutProps: SandboxFlyoutMockProps | undefined;
 let readCommittedQuery: (() => RuleQuery) | undefined;
 let readRecoveryStrategy: (() => FormValues['recoveryStrategy']) | undefined;
+let readNoDataStrategy: (() => FormValues['noDataStrategy']) | undefined;
 let readTimeField: (() => FormValues['timeField']) | undefined;
 
 jest.mock('./query_sandbox_flyout', () => ({
@@ -315,6 +317,7 @@ describe('ComposeDiscoverFlyout', () => {
     sandboxFlyoutProps = undefined;
     readCommittedQuery = undefined;
     readRecoveryStrategy = undefined;
+    readNoDataStrategy = undefined;
     readTimeField = undefined;
     mockParseYamlToFormValues = (yaml) => ({
       values: yaml ? defaultYamlFormValues : null,
@@ -486,7 +489,7 @@ describe('ComposeDiscoverFlyout', () => {
           id: 'rule-1',
           kind: 'signal',
           enabled: true,
-          metadata: { name: 'Signal rule', owner: 'test', tags: [] },
+          metadata: { name: 'Signal rule', version: 1, owner: 'test', tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: { format: 'standalone', breach: { query: '' } },
@@ -889,7 +892,7 @@ describe('ComposeDiscoverFlyout', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          metadata: { name: 'Edit rule', version: 1, owner: 'test', tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: {
@@ -958,7 +961,7 @@ describe('ComposeDiscoverFlyout', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          metadata: { name: 'Edit rule', version: 1, owner: 'test', tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: {
@@ -1029,6 +1032,37 @@ describe('ComposeDiscoverFlyout', () => {
       expect(readCommittedQuery?.()).toEqual(manualSplitQuery);
     });
 
+    it('falls back to conditionless standalone when manual split is applied with an empty alert condition', () => {
+      renderFlyout({ mode: 'create' });
+      openSandbox();
+
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
+        });
+      });
+      clickSplitBaseAndAlert();
+
+      // Simulate user leaving alert condition tab empty
+      act(() => {
+        sandboxFlyoutProps?.onQueryChange?.({
+          format: 'composed',
+          base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+          breach: { segment: '' },
+        });
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      expect(readCommittedQuery?.()).toEqual({
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
+      });
+      expect(readNoDataStrategy?.()).toBe('none');
+    });
+
     it('preserves custom recovery when applying manual split edits', () => {
       const queryWithRecovery: RuleQuery = {
         format: 'composed',
@@ -1043,7 +1077,7 @@ describe('ComposeDiscoverFlyout', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          metadata: { name: 'Edit rule', version: 1, owner: 'test', tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: {
@@ -1200,35 +1234,7 @@ describe('ComposeDiscoverFlyout', () => {
   });
 
   describe('manual split mode', () => {
-    it('passes onManualSplit in create and edit modes', () => {
-      renderFlyout({ mode: 'create' });
-      expect(getLatestFormProps().onManualSplit).toBeDefined();
-
-      mockComposeDiscoverForm.mockClear();
-      renderFlyout({
-        mode: 'edit',
-        rule: {
-          id: 'rule-1',
-          kind: 'alert',
-          enabled: true,
-          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
-          time_field: '@timestamp',
-          schedule: { every: '1m', lookback: '5m' },
-          query: {
-            format: 'composed',
-            base: 'FROM logs-*',
-            breach: { segment: '| WHERE count > 100' },
-          },
-          createdBy: 'test',
-          createdAt: '2026-01-01T00:00:00Z',
-          updatedBy: 'test',
-          updatedAt: '2026-01-01T00:00:00Z',
-        },
-      });
-      expect(getLatestFormProps().onManualSplit).toBeDefined();
-    });
-
-    it('exposes the split control via the settings menu before any query is typed', () => {
+    it('shows the split button before any query is typed', () => {
       renderFlyout({ mode: 'create' });
       openSandbox();
 
@@ -1245,7 +1251,7 @@ describe('ComposeDiscoverFlyout', () => {
           id: 'rule-1',
           kind: 'alert',
           enabled: true,
-          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          metadata: { name: 'Edit rule', version: 1, owner: 'test', tags: [] },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: {
@@ -1406,6 +1412,7 @@ describe('ComposeDiscoverFlyout', () => {
       query: {
         format: 'standalone' as const,
         breach: { query: 'FROM logs-* | STATS c = COUNT(*) BY h | WHERE c > 100' },
+        recovery: { query: 'FROM logs-* | WHERE c < 10' },
       },
       recovery_strategy: 'query' as const,
     };
