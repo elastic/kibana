@@ -16,9 +16,6 @@ import { expect } from '@kbn/scout-security/ui';
  *
  * Proof of transience: SO counts for timelines are captured before and after
  * opening the Super Timeline and asserted to be unchanged.
- *
- * Server config: this spec runs under the `super_timeline` config set, which boots
- * Kibana with `--xpack.securitySolution.enableExperimental=superTimeline`.
  */
 
 spaceTest.describe(
