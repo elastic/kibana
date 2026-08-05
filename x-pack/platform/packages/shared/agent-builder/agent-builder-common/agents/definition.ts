@@ -129,8 +129,10 @@ export interface AgentConfiguration {
   connector_ids?: string[];
 
   /**
-   * Optional list of AI index IDs associated with this agent.
-   * Generated and maintained by the Context Engine.
+   * Optional list of AI indices IDs associated with this agent.
+   * When set, if Context Engine is enabled, the agent will first search through these indices
+   * to answer questions before potentially querying the raw data, in order to improve
+   * the accuracy and token efficiency.
    * */
   ai_indices?: string[];
 }
