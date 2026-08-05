@@ -9,16 +9,13 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
+import type { CanvasState } from './canvas_context';
 import { CanvasFlyout } from './canvas_flyout';
 
 const mockCloseCanvas = jest.fn();
 const mockOpenSidebarConversation = jest.fn();
 let mockConversationId: string | undefined = 'conversation-1';
-let mockCanvasState: {
-  attachment: UnknownAttachment;
-  isSidebar: boolean;
-  version?: number;
-} | null = null;
+let mockCanvasState: CanvasState | null = null;
 
 jest.mock('./canvas_context', () => ({
   useCanvasContext: () => ({
@@ -80,6 +77,7 @@ describe('CanvasFlyout', () => {
       },
     });
     mockCanvasState = {
+      mode: 'attachment',
       attachment: { id: 'attachment-1', type: 'test', data: {} },
       isSidebar: false,
     };
@@ -125,6 +123,7 @@ describe('CanvasFlyout', () => {
         ),
       });
       mockCanvasState = {
+        mode: 'attachment',
         attachment: { id: 'attachment-1', type: 'test', data: {} },
         isSidebar,
       };
@@ -159,6 +158,7 @@ describe('CanvasFlyout', () => {
       getActionButtons,
     });
     mockCanvasState = {
+      mode: 'attachment',
       attachment: { id: 'attachment-1', type: 'test', data: {} },
       isSidebar: false,
     };

@@ -21,8 +21,8 @@ import {
   shouldOfferSidebarConversation,
   useIsAgentWorkspaceMount,
 } from '../../../../../hooks/use_navigation';
-import { useOptionalConversationSpineContext } from '../../../../../../agent_first/conversation_spine/conversation_spine_context';
 import { AttachmentHeader } from './attachment_header';
+import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
 
 interface InlineAttachmentWithActionsProps {
@@ -50,8 +50,8 @@ const areInlineAttachmentPropsEqual = (
   prevProps.isSidebar === nextProps.isSidebar &&
   prevProps.previewBadgeState === nextProps.previewBadgeState &&
   prevProps.screenContext === nextProps.screenContext &&
-  prevProps.attachment.version === nextProps.attachment.version &&
-  prevProps.attachment.versionCount === nextProps.attachment.versionCount;
+  prevProps.attachment.versionData?.version === nextProps.attachment.versionData?.version &&
+  prevProps.attachment.versionData?.versionCount === nextProps.attachment.versionData?.versionCount;
 
 /**
  * Component that renders an inline attachment with its action buttons.
@@ -80,15 +80,10 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
   );
 
   const useOverlayPreview = isAgentWorkspaceMount && !isSidebar;
-  const spineContext = useOptionalConversationSpineContext();
 
   const openCanvas = useCallback(() => {
-    if (useOverlayPreview && spineContext) {
-      spineContext.openAttachmentPreview(attachment);
-      return;
-    }
     openCanvasContext(attachment, isSidebar);
-  }, [useOverlayPreview, spineContext, openCanvasContext, attachment, isSidebar]);
+  }, [openCanvasContext, attachment, isSidebar]);
 
   const updateOrigin = useCallback(
     async (origin: string) => {
@@ -104,7 +99,10 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
   }, [conversationId, openSidebarConversationInternal]);
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
-  const attachmentPreviewKey = getAttachmentPreviewKey(attachment.id, attachment.version);
+  const attachmentPreviewKey = getAttachmentPreviewKey(
+    attachment.id,
+    attachment.versionData?.version
+  );
   const [dynamicButtonsState, setDynamicButtonsState] = useState<{
     key: string;
     buttons: ActionButton[];
@@ -194,17 +192,21 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
         previewBadgeState={resolvedPreviewBadgeState}
       />
       <EuiSplitPanel.Inner grow={false} paddingSize="none">
-        {uiDefinition?.renderInlineContent?.(
-          {
-            attachment,
-            isSidebar,
-            screenContext,
-            openSidebarConversation: offerSidebarConversation ? openSidebarConversation : undefined,
-          },
-          {
-            registerActionButtons,
+        <AttachmentRenderErrorBoundary key={attachmentPreviewKey}>
+          {() =>
+            uiDefinition?.renderInlineContent?.(
+              {
+                attachment,
+                isSidebar,
+                screenContext,
+                openSidebarConversation: offerSidebarConversation ? openSidebarConversation : undefined,
+              },
+              {
+                registerActionButtons,
+              }
+            )
           }
-        )}
+        </AttachmentRenderErrorBoundary>
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );

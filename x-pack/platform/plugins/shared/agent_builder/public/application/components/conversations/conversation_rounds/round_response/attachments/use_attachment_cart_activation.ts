@@ -107,14 +107,8 @@ export const useAttachmentCartActivation = () => {
       };
 
       const openCanvasForAttachment = () => {
-        if (isAgentWorkspaceMount && !isSidebar && spineContext) {
-          if (isSpineGridOverlay) {
-            spineContext.closeSpine();
-            return;
-          }
-
-          spineContext.openAttachmentPreview(attachment);
-          return;
+        if (isSpineGridOverlay && spineContext) {
+          spineContext.closeSpine();
         }
         openCanvas(attachment, isSidebar);
       };
