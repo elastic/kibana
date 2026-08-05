@@ -17,7 +17,7 @@ const defaultAlertRetrieval: WorkflowItem = {
   id: 'system-attack-discovery-alert-retrieval',
   managed: true,
   name: 'Attack discovery - Default alert retrieval',
-  tags: ['Attack discovery', 'Security', 'attackDiscovery:default_alert_retrieval'],
+  tags: ['attack-discovery', 'security', 'attackDiscovery:default_alert_retrieval'],
 };
 
 const generation: WorkflowItem = {
@@ -25,7 +25,7 @@ const generation: WorkflowItem = {
   id: 'system-attack-discovery-generation',
   managed: true,
   name: 'Attack discovery - Generation',
-  tags: ['Attack discovery', 'Security', 'attackDiscovery:generation'],
+  tags: ['attack-discovery', 'security', 'attackDiscovery:generation'],
 };
 
 const defaultValidation: WorkflowItem = {
@@ -33,7 +33,7 @@ const defaultValidation: WorkflowItem = {
   id: SYSTEM_VALIDATE_WORKFLOW_ID,
   managed: true,
   name: 'Attack discovery - Default validation',
-  tags: ['Attack discovery', 'Security', 'attackDiscovery:validate'],
+  tags: ['attack-discovery', 'security', 'attackDiscovery:validate'],
 };
 
 const customValidationExample: WorkflowItem = {
@@ -41,7 +41,7 @@ const customValidationExample: WorkflowItem = {
   id: SYSTEM_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
   managed: true,
   name: 'Attack discovery - Custom validation example',
-  tags: ['Attack discovery', 'Security', 'Example', 'attackDiscovery:custom_validation_example'],
+  tags: ['attack-discovery', 'security', 'example', 'attackDiscovery:custom_validation_example'],
 };
 
 // A managed (system) workflow owned by another plugin. It carries no
