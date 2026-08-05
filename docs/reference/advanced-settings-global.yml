@@ -55,7 +55,7 @@ groups:
         id: organization-name
         description: |
           The custom image that replaces the text next to the logo in the header of all {{product.kibana}} pages. Images look best when they are no larger than 200 x 84 pixels and have a transparent background.
-        datatype: string
+        datatype: image
         applies_to:
           stack: ga
           ech: ga

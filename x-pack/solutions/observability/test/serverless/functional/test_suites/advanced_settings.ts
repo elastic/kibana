@@ -7,7 +7,10 @@
 
 import expect from '@kbn/expect';
 import { OBSERVABILITY_PROJECT_SETTINGS } from '@kbn/serverless-observability-settings';
-import { isEditorFieldSetting } from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
+import {
+  isEditorFieldSetting,
+  isGlobalSetting,
+} from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
 import {
   AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID,
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
@@ -38,6 +41,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('renders observability settings', () => {
       for (const settingId of OBSERVABILITY_PROJECT_SETTINGS) {
+        // Global settings render on the Global Settings tab
+        if (isGlobalSetting(settingId)) {
+          continue;
+        }
         // Code editors don't have their test subjects rendered
         if (isEditorFieldSetting(settingId)) {
           continue;
