@@ -309,3 +309,27 @@ export const nodeToJsonValue = (node: JsonNode): JsonValue => {
   }
   return object;
 };
+
+/**
+ * Collects the ids of every collection whose subtree contains the term.
+ **/
+export const collectContainersWithMatch = (
+  nodes: JsonNode[],
+  termLower: string
+): ReadonlySet<string> => {
+  const matched = new Set<string>();
+  const visit = (node: JsonNode): boolean => {
+    if (node.kind === 'leaf') {
+      return String(node.value).toLowerCase().includes(termLower);
+    }
+
+    let hasMatch = false;
+    for (const child of node.children) {
+      if (visit(child)) hasMatch = true;
+    }
+    if (hasMatch) matched.add(node.id);
+    return hasMatch;
+  };
+  nodes.forEach(visit);
+  return matched;
+};

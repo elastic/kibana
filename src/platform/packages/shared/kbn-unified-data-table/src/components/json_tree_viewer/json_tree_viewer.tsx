@@ -14,11 +14,11 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import {
   buildNodes,
   buildRows,
+  collectContainersWithMatch,
   collectExpandableIds,
   type FormatValue,
   type JsonValue,
 } from './tree_model';
-import { collectContainersWithMatch, EMPTY_ID_SET } from './doc_scan';
 import {
   useRovingTreeNavigation,
   useTreeExpansion,
@@ -45,6 +45,8 @@ export interface JsonTreeViewerProps {
    */
   formatValue?: FormatValue;
 }
+
+const EMPTY_ID_SET: ReadonlySet<string> = new Set();
 
 export const JsonTreeViewer = memo(function JsonTreeViewer({
   json,
