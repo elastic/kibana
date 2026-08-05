@@ -552,11 +552,10 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
         exists: jest.fn().mockResolvedValue(latestExists),
         getDataStream: jest.fn().mockImplementation(async ({ name }: { name: string }) => {
           if (name.includes('updates')) {
-            if (!updatesExists) throw new Error('resource_not_found_exception');
+            return updatesExists ? { data_streams: [{ name }] } : { data_streams: [] };
           } else {
-            if (!metadataExists) throw new Error('resource_not_found_exception');
+            return metadataExists ? { data_streams: [{ name }] } : { data_streams: [] };
           }
-          return { data_streams: [{ name }] };
         }),
       },
     } as unknown as jest.Mocked<ElasticsearchClient>;
@@ -642,5 +641,19 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
     expect(mockLogger.warn).toHaveBeenCalledWith(
       expect.stringContaining('.entities.v2.metadata.security_default')
     );
+  });
+
+  it('propagates non-404 errors from getDataStream instead of treating them as missing', async () => {
+    buildClient();
+
+    mockUserEsClient.indices.getDataStream = jest
+      .fn()
+      .mockRejectedValue({ statusCode: 503, message: 'Service Unavailable' });
+
+    await expect(client.reinstallSharedAssetsIfMissing()).rejects.toMatchObject({
+      statusCode: 503,
+    });
+    expect(mockInstallSharedElasticsearchAssets).not.toHaveBeenCalled();
+    expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 });

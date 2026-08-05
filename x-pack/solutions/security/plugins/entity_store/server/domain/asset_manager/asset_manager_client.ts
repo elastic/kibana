@@ -604,8 +604,12 @@ export class AssetManagerClient {
 
     const [latestExists, updatesExists, metadataExists] = await Promise.all([
       this.esClient.indices.exists({ index: latestIndex }),
-      this.tryAsBoolean(this.esClient.indices.getDataStream({ name: updatesDataStream })),
-      this.tryAsBoolean(this.esClient.indices.getDataStream({ name: metadataDataStream })),
+      this.esClient.indices
+        .getDataStream({ name: updatesDataStream }, { ignore: [404] })
+        .then((r) => (r?.data_streams?.length ?? 0) > 0),
+      this.esClient.indices
+        .getDataStream({ name: metadataDataStream }, { ignore: [404] })
+        .then((r) => (r?.data_streams?.length ?? 0) > 0),
     ]);
 
     if (latestExists && updatesExists && metadataExists) {
