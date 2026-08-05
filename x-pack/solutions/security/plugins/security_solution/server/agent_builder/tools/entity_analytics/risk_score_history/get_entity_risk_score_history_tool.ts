@@ -25,7 +25,7 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../pl
 import { securityTool } from '../../constants';
 import { buildRenderAttachmentTag } from '../attachment_utils';
 import { getEntityAnalyticsToolAvailability } from '../entity_analytics_availability';
-import { stripEntityIdPrefix } from '../entity_resolution';
+import { requireResolvedEntity } from '../entity_resolution';
 import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import {
   buildRiskScoreHistoryAttachmentId,
@@ -38,15 +38,18 @@ const DEFAULT_TO = 'now' as const;
 const DEFAULT_SCORE_TYPE = 'base' as const;
 
 const schema = z.object({
-  entityType: IdentifierType.describe('The type of entity: host, user, service, or generic.'),
+  entityType: IdentifierType.describe(
+    'The type of entity: host, user, service, or generic'
+  ).optional(),
   entityId: z
     .string()
     .min(1)
     .max(1000)
     .describe(
-      'The prefixed entity id (EUID) to retrieve risk score history for. ' +
-        'Examples: "host:server1", "user:jsmith". ' +
-        'When a security.entity attachment identifies the target, use its entity id here.'
+      'The entity id (EUID), canonical entity.name, or user.full_name to retrieve risk score history for. ' +
+        'Examples: "host:server1" (prefixed EUID), "server1" (non-prefixed), ' +
+        '"LAPTOP-SALES04" (entity.name), "John Doe" (user.full_name). ' +
+        'When a security.entity attachment identifies the target, use its prefixed entity id here.'
     ),
   from: z
     .string()
@@ -163,7 +166,9 @@ export const getEntityRiskScoreHistoryTool = (
 
 ONLY use when the user explicitly asks about risk score over time — e.g. trend, history, timeline, chart, "has the score changed", "why did it spike". Do NOT use for generic investigate / profile / details / "tell me about this entity" asks — those are security.get_entity only. Prefer this over get_entity's profile_history for risk-score trends (profile_history is entity-store attribute snapshots).
 
-Returns time-ordered score entries plus a \`security.entity_risk_score_history\` attachment. Copy \`renderTag\` from the \`other\` result VERBATIM onto its own line before prose — do not assemble the tag, and do not dump every history point as a markdown table.
+This tool resolves the entity, then returns time-ordered score entries plus a \`security.entity_risk_score_history\` attachment. Copy \`renderTag\` from the \`other\` result VERBATIM onto its own line before prose — do not assemble the tag, and do not dump every history point as a markdown table.
+
+When the id/name resolves to multiple candidate entities, no attachment is stored, no \`renderTag\` is returned, and you must NOT emit a render tag — instead ask the user to supply the exact entity id (EUID) from the returned candidates.
 
 IMPORTANT — entries are aggregated, not every scoring run: the series is a date_histogram. The result's \`bucketInterval\` field is the histogram bucket size (e.g. "1d" for ~90 days, down to "1h" for short ranges) — not the lookback window (\`from\`/\`to\`). Each entry is the highest calculated_score_norm in that bucket. Multiple scoring runs in the same bucket (e.g. two scores on the same day with bucketInterval "1d") collapse to ONE point. A short \`entries\` array means few buckets had data — not that only that many scoring runs ever existed. Narrow \`from\`/\`to\` (e.g. now-24h) for finer buckets. Full interactive history is in the entity flyout via the attachment.
 
@@ -212,7 +217,7 @@ Time range via optional \`from\`/\`to\` date-math (default last 90 days). Defaul
         toolId: SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID,
         spaceId,
         actionType: 'read',
-        entityTypes: [entityType],
+        entityTypes: entityType ? [entityType] : [],
       });
       telemetryTracker.recordResultCount(0);
 
@@ -223,6 +228,19 @@ Time range via optional \`from\`/\`to\` date-math (default last 90 days). Defaul
           telemetryTracker.recordFailure(accessResult.result.data.message);
           return { results: [accessResult.result] };
         }
+
+        const client = esClient.asCurrentUser;
+        const resolved = await requireResolvedEntity({
+          esClient: client,
+          spaceId,
+          entityId,
+          entityType,
+        });
+        if (!resolved.ok) {
+          return { results: resolved.results };
+        }
+
+        const { identifierType, identifier, entityStoreId } = resolved.identity;
 
         // 1 - Get the history data
         const min = dateMath.parse(from);
@@ -250,14 +268,14 @@ Time range via optional \`from\`/\`to\` date-math (default last 90 days). Defaul
         const riskScoreDataClient = new RiskScoreDataClient({
           logger,
           kibanaVersion,
-          esClient: esClient.asCurrentUser,
+          esClient: client,
           soClient: savedObjectsClient,
           namespace: spaceId,
         });
 
         const entries = await riskScoreDataClient.getRiskScoreHistory({
-          entityType,
-          entityId,
+          entityType: identifierType,
+          entityId: entityStoreId,
           range: { gte: from, lte: to },
           scoreType,
           interval: bucketInterval,
@@ -267,17 +285,16 @@ Time range via optional \`from\`/\`to\` date-math (default last 90 days). Defaul
 
         // 2 - Build the chart attachment
         const bucketIntervalLabel = `${bucketInterval.value}${bucketInterval.unit}`;
-        const entityIdentifier = stripEntityIdPrefix(entityId, entityType);
-        const attachmentLabel = `${entityType}: ${entityIdentifier}`;
+        const attachmentLabel = `${identifierType}: ${identifier}`;
 
         const attachmentResult = await ensureRiskScoreHistoryAttachment({
           attachments,
-          id: buildRiskScoreHistoryAttachmentId(entityType, entityId, scoreType),
+          id: buildRiskScoreHistoryAttachmentId(identifierType, entityStoreId, scoreType),
           data: {
             attachmentLabel,
-            identifierType: entityType,
-            identifier: entityIdentifier,
-            entityStoreId: entityId,
+            identifierType,
+            identifier,
+            entityStoreId,
             from,
             to,
             bucketInterval: bucketIntervalLabel,
@@ -290,8 +307,8 @@ Time range via optional \`from\`/\`to\` date-math (default last 90 days). Defaul
 
         // 3 - Build the tool output
         const toolOutput: Record<string, unknown> = {
-          entityId,
-          entityType,
+          entityId: entityStoreId,
+          entityType: identifierType,
           from,
           to,
           bucketInterval: bucketIntervalLabel,

@@ -7,6 +7,7 @@
 
 import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
+import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
@@ -27,9 +28,13 @@ jest.mock('../../../../lib/entity_analytics/risk_score/risk_score_data_client');
 jest.mock('../../../utils/get_agent_builder_resource_availability', () => ({
   getAgentBuilderResourceAvailability: jest.fn(),
 }));
+jest.mock('@kbn/agent-builder-genai-utils', () => ({
+  executeEsql: jest.fn(),
+}));
 
 const MockRiskScoreDataClient = RiskScoreDataClient as jest.MockedClass<typeof RiskScoreDataClient>;
 const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
+const mockExecuteEsql = executeEsql as jest.Mock;
 
 const mockExperimentalFeatures = {
   riskScoreHistoryEnabled: true,
@@ -54,6 +59,24 @@ const HISTORY_ENTRIES = [
   },
 ];
 
+const exactHostHit = {
+  columns: [
+    { name: 'entity.id', type: 'keyword' },
+    { name: 'entity.name', type: 'keyword' },
+    { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+  ],
+  values: [['host:server1', 'server1', 'host']],
+};
+
+const exactUserHit = {
+  columns: [
+    { name: 'entity.id', type: 'keyword' },
+    { name: 'entity.name', type: 'keyword' },
+    { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+  ],
+  values: [['user:alice', 'alice', 'user']],
+};
+
 describe('getEntityRiskScoreHistoryTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
   const tool = getEntityRiskScoreHistoryTool(
@@ -74,6 +97,7 @@ describe('getEntityRiskScoreHistoryTool', () => {
     jest.clearAllMocks();
     mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({ status: 'available' });
+    mockExecuteEsql.mockResolvedValue(exactHostHit);
 
     mockGetRiskScoreHistory = jest.fn().mockResolvedValue(HISTORY_ENTRIES);
     MockRiskScoreDataClient.mockImplementation(
@@ -128,6 +152,14 @@ describe('getEntityRiskScoreHistoryTool', () => {
       expect(tool.schema.safeParse({ entityType: 'host', entityId: 'host:server1' }).success).toBe(
         true
       );
+    });
+
+    it('allows an omitted entity type', () => {
+      expect(tool.schema.safeParse({ entityId: 'server1' }).success).toBe(true);
+    });
+
+    it('rejects an empty entity id', () => {
+      expect(tool.schema.safeParse({ entityId: '' }).success).toBe(false);
     });
 
     it('accepts from/to date-math ranges', () => {
@@ -308,6 +340,31 @@ describe('getEntityRiskScoreHistoryTool', () => {
       expect(attachmentData.entries[1]).not.toHaveProperty('inputs');
     });
 
+    it('resolves a bare entity name before fetching history', async () => {
+      mockExecuteEsql
+        .mockResolvedValueOnce({ columns: [], values: [] }) // exact id miss
+        .mockResolvedValueOnce(exactHostHit); // exact name hit
+
+      const result = (await runHandler({
+        entityId: 'server1',
+      })) as ToolHandlerStandardReturn;
+
+      const other = result.results.find((r) => r.type === ToolResultType.other) as OtherResult;
+      expect(other.data).toEqual(
+        expect.objectContaining({
+          entityId: 'host:server1',
+          entityType: 'host',
+          renderTag: expect.any(String),
+        })
+      );
+      expect(mockGetRiskScoreHistory).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityType: 'host',
+          entityId: 'host:server1',
+        })
+      );
+    });
+
     it('passes includeContributions through to the data client', async () => {
       await runHandler({
         entityType: 'host',
@@ -321,6 +378,8 @@ describe('getEntityRiskScoreHistoryTool', () => {
     });
 
     it('passes scoreType resolution through to the data client', async () => {
+      mockExecuteEsql.mockResolvedValueOnce(exactUserHit);
+
       await runHandler({
         entityType: 'user',
         entityId: 'user:alice',
@@ -330,6 +389,55 @@ describe('getEntityRiskScoreHistoryTool', () => {
       expect(mockGetRiskScoreHistory).toHaveBeenCalledWith(
         expect.objectContaining({ scoreType: 'resolution' })
       );
+    });
+
+    it('returns an error when no entity matches', async () => {
+      mockExecuteEsql.mockResolvedValue({ columns: [], values: [] });
+
+      const result = (await runHandler({
+        entityId: 'missing-host',
+      })) as ToolHandlerStandardReturn;
+
+      const error = result.results[0] as ErrorResult;
+      expect(error.type).toBe(ToolResultType.error);
+      expect(error.data.message).toContain('No entity found');
+      expect(mockGetRiskScoreHistory).not.toHaveBeenCalled();
+      expect(mockAttachmentsAdd).not.toHaveBeenCalled();
+    });
+
+    it('returns an ambiguous-match result (no attachment, no renderTag) for multiple candidates', async () => {
+      mockExecuteEsql
+        // 1. exact id — miss
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        // 2. exact name — miss
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        // 3. entity.id RLIKE — two rows
+        .mockResolvedValueOnce({
+          columns: [
+            { name: 'entity.id', type: 'keyword' },
+            { name: 'entity.name', type: 'keyword' },
+          ],
+          values: [
+            ['host:server1', 'server1'],
+            ['host:server10', 'server10'],
+          ],
+        });
+
+      const result = (await runHandler({
+        entityId: 'server',
+      })) as ToolHandlerStandardReturn;
+
+      expect(mockGetRiskScoreHistory).not.toHaveBeenCalled();
+      expect(mockAttachmentsAdd).not.toHaveBeenCalled();
+
+      const other = result.results[0] as OtherResult<{
+        message: string;
+        candidateEntityIds: string[];
+      }>;
+      expect(other.type).toBe(ToolResultType.other);
+      expect(other.data.message).toContain('Multiple entities matched');
+      expect(other.data.candidateEntityIds).toEqual(['host:server1', 'host:server10']);
+      expect(other.data).not.toHaveProperty('renderTag');
     });
 
     it('returns an error when the user lacks entity-analytics privileges', async () => {
@@ -343,6 +451,7 @@ describe('getEntityRiskScoreHistoryTool', () => {
       const error = result.results[0] as ErrorResult;
       expect(error.type).toBe(ToolResultType.error);
       expect(error.data.message).toContain('permission');
+      expect(mockExecuteEsql).not.toHaveBeenCalled();
       expect(mockGetRiskScoreHistory).not.toHaveBeenCalled();
     });
 

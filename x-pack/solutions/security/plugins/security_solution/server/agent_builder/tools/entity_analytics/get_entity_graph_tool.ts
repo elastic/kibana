@@ -18,7 +18,7 @@ import type { ProductFeaturesService } from '../../../lib/product_features_servi
 import { securityTool } from '../constants';
 import { buildRenderAttachmentTag } from './attachment_utils';
 import { getEntityAnalyticsToolAvailability } from './entity_analytics_availability';
-import { resolveSingleEntity } from './entity_resolution';
+import { requireResolvedEntity } from './entity_resolution';
 import {
   buildEntityGraphAttachmentId,
   ensureEntityGraphAttachment,
@@ -111,56 +111,17 @@ When the id/name resolves to multiple candidate entities, no attachment is store
 
       try {
         const client = esClient.asCurrentUser;
-        const resolved = await resolveSingleEntity({
+        const resolved = await requireResolvedEntity({
           esClient: client,
           spaceId,
           entityId,
           entityType,
         });
-
-        if (resolved.status === 'not_found') {
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.error,
-                data: { message: `No entity found for id: ${entityId}` },
-              },
-            ],
-          };
+        if (!resolved.ok) {
+          return { results: resolved.results };
         }
 
-        if (resolved.status === 'ambiguous') {
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.other,
-                data: {
-                  message: `Multiple entities matched "${entityId}". Ask the user to provide the exact entity id (EUID) to render the graph, then call this tool again.`,
-                  candidateEntityIds: resolved.candidateEntityIds,
-                },
-              },
-            ],
-          };
-        }
-
-        if (resolved.status === 'no_identity' || !resolved.identity.entityStoreId) {
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.error,
-                data: {
-                  message: `Resolved an entity for "${entityId}" but it has no canonical entity.id, so the relationship graph cannot be rendered.`,
-                },
-              },
-            ],
-          };
-        }
-
-        const { identifierType, identifier } = resolved.identity;
-        const entityStoreId = resolved.identity.entityStoreId;
+        const { identifierType, identifier, entityStoreId } = resolved.identity;
         const attachmentLabel = `${identifierType}: ${identifier}`;
 
         const attachmentResult = await ensureEntityGraphAttachment({
