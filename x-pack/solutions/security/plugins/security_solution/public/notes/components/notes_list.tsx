@@ -26,20 +26,6 @@ export const DELETE_NOTE = i18n.translate('xpack.securitySolution.notes.deleteNo
   defaultMessage: 'Delete note',
 });
 
-/** Visually distinct colors used to tag notes by their source timeline. */
-export const TIMELINE_NOTE_COLORS = [
-  '#54B399', // teal
-  '#6092C0', // blue
-  '#D36086', // pink
-  '#9170B8', // purple
-  '#D6BF57', // yellow
-  '#DA8B45', // orange
-  '#AA6556', // brown
-  '#E7664C', // red
-  '#B9A888', // tan
-  '#3EBAEE', // cyan
-];
-
 export interface NotesListProps {
   /**
    * The notes to display as a EuiComment
@@ -61,11 +47,6 @@ export interface NotesListProps {
      * If true, the delete button will be hidden (used in read-only contexts such as Super Timeline)
      */
     hideDeleteIcon?: boolean;
-    /**
-     * Maps a timeline savedObjectId to a color. When present, the note avatar is tinted with
-     * the color of the source timeline the note belongs to.
-     */
-    timelineColorMap?: Map<string, string>;
   };
 }
 
@@ -107,7 +88,6 @@ export const NotesList = memo(({ notes, options }: NotesListProps) => {
                 data-test-subj={`${NOTE_AVATAR_TEST_ID}-${index}`}
                 size="l"
                 name={note.updatedBy || '?'}
-                color={options?.timelineColorMap?.get(note.timelineId ?? '') ?? undefined}
               />
             }
           >
