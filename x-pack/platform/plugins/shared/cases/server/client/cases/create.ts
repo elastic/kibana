@@ -26,9 +26,13 @@ import {
   validateCaseExtendedFields,
 } from './validators';
 import type { CreateUserAction, CommonUserActionArgs } from '../../services/user_actions/types';
+import type { InlineField } from '../../../common/types/domain/template/fields';
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
 import { normalizeCreateCaseRequest, populateAssigneesIdentity } from './utils';
-import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
+import {
+  buildExtendedFieldsDefaults,
+  mergeCustomFieldsIntoExtendedFields,
+} from '../../../common/utils/template_fields';
 import {
   applyTemplateDefaultsToCreateRequest,
   ensureTemplateVersionIsPinned,
@@ -137,8 +141,36 @@ export const create = async (
       }
     }
 
+    // Global (isGlobal) field-definition defaults are applied client-side by the create-case UI
+    // before submission, so UI-created cases persist them — but API and workflow-step callers
+    // only send the fields they know about, which left every global field empty on non-UI cases.
+    // Merge the defaults here with the same precedence the UI create form produces: template
+    // defaults, then global defaults (the global definition is authoritative on a storage-key
+    // collision — see resolveApplicableFields), then caller-sent values (caller always wins).
+    // Runs AFTER template expansion so the collision order holds, and BEFORE extended_fields
+    // validation so the merged map is what gets validated.
+    let globalFields: InlineField[] | undefined;
+    if (clientArgs.config.templates.enabled) {
+      globalFields = await resolveGlobalFields(query.owner, fieldDefinitionsService);
+      const globalFieldsDefaults = buildExtendedFieldsDefaults(globalFields);
+      if (Object.keys(globalFieldsDefaults).length > 0) {
+        query = {
+          ...query,
+          extended_fields: {
+            ...(query.extended_fields ?? {}),
+            ...globalFieldsDefaults,
+            // The caller's original extended_fields, NOT query.extended_fields — template
+            // expansion already merged template defaults into the latter, and those must not
+            // shadow a global default on a storage-key collision.
+            ...(rawQuery.extended_fields ?? {}),
+          },
+        };
+      }
+    }
+
     if (query.extended_fields) {
-      const globalFields = await resolveGlobalFields(query.owner, fieldDefinitionsService);
+      globalFields =
+        globalFields ?? (await resolveGlobalFields(query.owner, fieldDefinitionsService));
       await validateCaseExtendedFields({
         extendedFields: query.extended_fields,
         templateId: query.template?.id,
