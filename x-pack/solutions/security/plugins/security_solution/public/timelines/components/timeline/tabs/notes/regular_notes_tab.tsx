@@ -45,8 +45,7 @@ export const RegularNotesTab: React.FC<RegularNotesTabProps> = React.memo(({ tim
   const { notesPrivileges } = useUserPrivileges();
   const canCreateNotes = notesPrivileges.crud;
 
-  const { timeline, notes, fetchStatus, savedObjectId, isTimelineSaved } =
-    useNotesTabData(timelineId);
+  const { timeline, notes, fetchStatus, isTimelineSaved } = useNotesTabData(timelineId);
 
   const timelineDescription = useMemo(() => {
     if (!timeline?.description) {

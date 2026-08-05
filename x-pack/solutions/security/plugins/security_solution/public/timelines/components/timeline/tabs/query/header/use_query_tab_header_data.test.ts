@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { TimelineTypeEnum } from '../../../../../../../common/api/timeline';
+import { TimelineTypeEnum, type TimelineType } from '../../../../../../../common/api/timeline';
 import type { State } from '../../../../../../common/store';
 import { useQueryTabHeaderData } from './use_query_tab_header_data';
 
@@ -24,7 +24,7 @@ jest.mock('../../../../../../common/hooks/use_timeline_events_count', () => ({
   useTimelineEventsCountPortal: () => ({ portalNode: mockPortalNode }),
 }));
 
-const mockTimeline = {
+const mockTimeline: { timelineType: TimelineType; isDataProviderVisible: boolean } = {
   timelineType: TimelineTypeEnum.default,
   isDataProviderVisible: false,
 };
@@ -40,7 +40,7 @@ jest.mock('react-redux-v7', () => ({
           'timeline-test': mockTimeline,
         },
       },
-    } as State),
+    } as unknown as State),
 }));
 
 // ── Tests ─────────────────────────────────────────────────────────────────────

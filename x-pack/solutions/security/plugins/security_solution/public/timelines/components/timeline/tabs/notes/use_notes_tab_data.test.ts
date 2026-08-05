@@ -262,7 +262,7 @@ describe('useNotesTabData', () => {
   describe('fetch side-effect', () => {
     beforeEach(() => {
       mockDispatch.mockClear();
-      (fetchNotesBySavedObjectIds as jest.Mock).mockClear();
+      (fetchNotesBySavedObjectIds as unknown as jest.Mock).mockClear();
     });
 
     it('dispatches fetchNotesBySavedObjectIds on mount for a saved regular timeline', () => {
