@@ -10,7 +10,7 @@
 import { readFileSync, existsSync, rmSync, mkdirSync } from 'fs';
 import { resolve } from 'path';
 import { writeImpactReport } from './write_impact_report';
-import type { TerraformImpactResult } from '../terraform/check_terraform_impact';
+import type { ImpactReport } from './write_impact_report';
 
 describe('writeImpactReport', () => {
   const testDir = resolve(__dirname, '__test_fixtures__', 'write_impact_report');
@@ -20,70 +20,49 @@ describe('writeImpactReport', () => {
     rmSync(testDir, { recursive: true, force: true });
   });
 
-  it('creates parent directories and writes a valid JSON report', () => {
-    const impact: TerraformImpactResult = {
-      hasImpact: true,
-      impactedChanges: [
+  it('creates parent directories and writes the report verbatim', () => {
+    const report: ImpactReport = {
+      entries: [
         {
-          change: {
-            type: 'path_removed',
-            path: '/api/spaces/space',
-            reason: 'Endpoint removed',
-          },
-          terraformResource: 'elasticstack_kibana_space',
-          owners: ['@elastic/kibana-security'],
+          path: '/api/x',
+          method: 'POST',
+          reason: 'Endpoint removed',
+          tier: 'stable',
         },
       ],
     };
 
-    writeImpactReport(reportPath, impact);
+    writeImpactReport(reportPath, report);
 
     expect(existsSync(reportPath)).toBe(true);
-    const written = JSON.parse(readFileSync(reportPath, 'utf-8'));
-    expect(written.impactedChanges).toHaveLength(1);
-    expect(written.impactedChanges[0]).toEqual({
-      path: '/api/spaces/space',
-      method: undefined,
-      reason: 'Endpoint removed',
-      terraformResource: 'elasticstack_kibana_space',
-      owners: ['@elastic/kibana-security'],
-    });
+    expect(JSON.parse(readFileSync(reportPath, 'utf-8'))).toEqual(report);
   });
 
-  it('writes an empty array when there are no impacted changes', () => {
+  it('writes an empty entries array when there are no detected changes', () => {
     mkdirSync(resolve(reportPath, '..'), { recursive: true });
 
-    const impact: TerraformImpactResult = {
-      hasImpact: false,
-      impactedChanges: [],
-    };
-
-    writeImpactReport(reportPath, impact);
+    writeImpactReport(reportPath, { entries: [] });
 
     const written = JSON.parse(readFileSync(reportPath, 'utf-8'));
-    expect(written.impactedChanges).toEqual([]);
+    expect(written.entries).toEqual([]);
   });
 
-  it('includes the method field when present on the change', () => {
-    const impact: TerraformImpactResult = {
-      hasImpact: true,
-      impactedChanges: [
+  it('preserves the optional "since" field', () => {
+    const report: ImpactReport = {
+      entries: [
         {
-          change: {
-            type: 'method_removed',
-            path: '/api/fleet/agent_policies',
-            method: 'POST',
-            reason: 'HTTP method removed',
-          },
-          terraformResource: 'elasticstack_fleet_agent_policy',
-          owners: ['@elastic/fleet'],
+          path: '/api/fleet/agent_policies',
+          method: 'POST',
+          reason: 'HTTP method removed',
+          tier: 'tech_preview',
+          since: '9.1',
         },
       ],
     };
 
-    writeImpactReport(reportPath, impact);
+    writeImpactReport(reportPath, report);
 
     const written = JSON.parse(readFileSync(reportPath, 'utf-8'));
-    expect(written.impactedChanges[0].method).toBe('POST');
+    expect(written.entries[0]).toEqual(report.entries[0]);
   });
 });

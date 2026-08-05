@@ -59,15 +59,10 @@ const RENDERABLE_VIEW_KEYS = [
 const hasRenderableView = (spec: Record<string, unknown>): boolean =>
   RENDERABLE_VIEW_KEYS.some((key) => key in spec);
 
-/**
- * Parse the model response into `{ title?, spec }`. Preferred shape is the
- * prompt envelope; a bare Vega-Lite object is still accepted for retries.
- * An envelope is distinguished from a faceted Vega-Lite chart (which also has
- * a nested `spec`) by the absence of renderable view keys at the top level.
- */
+/** Parse the model response into its authoring note, optional title, and Vega-Lite spec. */
 const parseAuthoringResponse = (
   responseText: string
-): { spec: Record<string, unknown>; title?: string } => {
+): { spec: Record<string, unknown>; title?: string; authoringNote?: string } => {
   const jsonMatches = Array.from(responseText.matchAll(INLINE_JSON_REGEX));
   const jsonText = jsonMatches.length > 0 ? jsonMatches[0][1].trim() : responseText.trim();
   const parsed = JSON.parse(jsonText);
@@ -76,6 +71,8 @@ const parseAuthoringResponse = (
   }
 
   const record = parsed as Record<string, unknown>;
+  const { authoring_note: rawAuthoringNote, ...specWithoutNote } = record;
+  const authoringNote = typeof rawAuthoringNote === 'string' ? rawAuthoringNote.trim() : '';
   const nestedSpec = record.spec;
   const isEnvelope =
     nestedSpec !== null &&
@@ -85,16 +82,20 @@ const parseAuthoringResponse = (
 
   if (isEnvelope) {
     const title = typeof record.title === 'string' ? record.title.trim() || undefined : undefined;
-    return { spec: nestedSpec as Record<string, unknown>, title };
+    return {
+      spec: nestedSpec as Record<string, unknown>,
+      ...(title ? { title } : {}),
+      ...(authoringNote ? { authoringNote } : {}),
+    };
   }
 
   if (!hasRenderableView(record)) {
     throw new Error(
-      'Response must be { "title": string, "spec": <Vega-Lite> } or a Vega-Lite object with a mark/composite view'
+      'Response must be { "title"?: string, "authoring_note"?: string, "spec": <Vega-Lite> } or a Vega-Lite object with a mark/composite view'
     );
   }
 
-  return { spec: record };
+  return { spec: specWithoutNote, ...(authoringNote ? { authoringNote } : {}) };
 };
 
 const VegaStateAnnotation = Annotation.Root({
@@ -117,6 +118,7 @@ const VegaStateAnnotation = Annotation.Root({
   // outputs
   spec: Annotation<string | null>(),
   title: Annotation<string | null>(),
+  authoringNote: Annotation<string | null>(),
   error: Annotation<string | null>(),
 });
 
@@ -265,7 +267,7 @@ export const createVegaGraph = async (
       .join('\n');
 
     const additionalContext = previousContext
-      ? `Previous attempts:\n${previousContext}\n\nPlease fix the errors above and return a single valid JSON object matching the response schema ("title" and "spec").`
+      ? `Previous attempts:\n${previousContext}\n\nPlease fix the errors above and return a single valid JSON object matching the response schema ("title", "authoring_note", and "spec").`
       : undefined;
 
     const prompt = createAuthorVegaSpecPrompt({
@@ -281,8 +283,10 @@ export const createVegaGraph = async (
     let action: AuthorSpecAction;
     try {
       const response = await defaultModel.chatModel.invoke(prompt);
-      const { spec, title } = parseAuthoringResponse(extractTextFromMessage(response));
-      action = { type: 'author_spec', success: true, spec, title, attempt };
+      const { spec, title, authoringNote } = parseAuthoringResponse(
+        extractTextFromMessage(response)
+      );
+      action = { type: 'author_spec', success: true, spec, title, authoringNote, attempt };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       logger.warn(
@@ -329,6 +333,7 @@ export const createVegaGraph = async (
         // Pretty-print so the stored/displayed spec stays human-readable.
         spec: JSON.stringify(normalized, null, 2),
         title: lastAuthor.title,
+        authoringNote: lastAuthor.authoringNote,
         attempt,
       };
     } catch (error) {
@@ -352,7 +357,12 @@ export const createVegaGraph = async (
     const chosen = rendered[0];
 
     if (chosen?.spec) {
-      return { spec: chosen.spec, title: chosen.title ?? null, error: null };
+      return {
+        spec: chosen.spec,
+        title: chosen.title ?? null,
+        authoringNote: chosen.authoringNote ?? null,
+        error: null,
+      };
     }
 
     // Surface an ES|QL resolution failure (an unexecutable query that was never
@@ -362,6 +372,7 @@ export const createVegaGraph = async (
       return {
         spec: null,
         title: null,
+        authoringNote: null,
         error: `Could not resolve a valid ES|QL query for the visualization: ${
           lastGenerate.error ?? 'Unknown error'
         }`,
@@ -372,6 +383,7 @@ export const createVegaGraph = async (
     return {
       spec: null,
       title: null,
+      authoringNote: null,
       error: lastValidate?.error ?? 'Failed to author a valid Vega specification',
     };
   };

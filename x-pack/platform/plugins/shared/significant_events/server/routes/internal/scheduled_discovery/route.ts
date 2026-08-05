@@ -14,11 +14,11 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
 } from '@kbn/management-settings-ids';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { assertNotPaused } from '../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
 import { StatusError } from '../../../lib/errors/status_error';
 import { installDiscoveryAgents } from '../../../agent_builder/agents/discovery';
@@ -30,7 +30,6 @@ import {
   DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
   DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
   DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
-  DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
   DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
   MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS,
   MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
@@ -59,11 +58,6 @@ const scheduledDiscoverySettingsSchema = z.object({
   targetCoverageMinutes: z.number().min(MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES).optional(),
   reviewIntervalMinutes: z.number().min(MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES).optional(),
   discoveryBatchSize: z
-    .number()
-    .min(MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE)
-    .max(MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE)
-    .optional(),
-  triageBatchSize: z
     .number()
     .min(MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE)
     .max(MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE)
@@ -111,10 +105,6 @@ const SCHEDULED_DISCOVERY_NUMERIC_SETTINGS = {
     settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
     defaultValue: DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
   },
-  triageBatchSize: {
-    settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
-    defaultValue: DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
-  },
   maxReviewPasses: {
     settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
     defaultValue: DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
@@ -123,7 +113,7 @@ const SCHEDULED_DISCOVERY_NUMERIC_SETTINGS = {
 
 type ScheduledDiscoveryNumericField = keyof typeof SCHEDULED_DISCOVERY_NUMERIC_SETTINGS;
 
-export const putScheduledDiscoverySettingsRoute = createServerRoute({
+const putScheduledDiscoverySettingsRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/_significant_events/scheduled_discovery/settings',
   options: {
     access: 'internal',
@@ -145,6 +135,7 @@ export const putScheduledDiscoverySettingsRoute = createServerRoute({
     getScopedClients,
     server,
     significantEventsScheduledWorkflowsService,
+    maintenanceService,
     getSpaceId,
     logger,
   }): Promise<{ success: true }> => {
@@ -176,6 +167,18 @@ export const putScheduledDiscoverySettingsRoute = createServerRoute({
     const previousSpaceValues: Record<string, boolean | number> = {};
     const spaceKeys = Object.keys(spaceUpdates);
     const spaceSettings = await uiSettingsClient.getAll<boolean | number>();
+
+    const previousEnabled =
+      (spaceSettings[
+        OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
+      ] as boolean) ?? false;
+    const nextEnabled = scheduledDiscovery.enabled ?? previousEnabled;
+
+    // Feature toggles are owned by Pause/Resume while paused — no edits allowed
+    // (enable, disable, or config-only updates).
+    if (Object.keys(spaceUpdates).length > 0) {
+      await assertNotPaused({ maintenanceService, request });
+    }
 
     if (spaceKeys.length > 0) {
       for (const key of spaceKeys) {
@@ -239,11 +242,6 @@ export const putScheduledDiscoverySettingsRoute = createServerRoute({
       // Reconcile the per-space workflows on an enabled-state transition, and also
       // on a config change while enabled so the rendered workflow templates pick up
       // the new cadence and batch sizes.
-      const previousEnabled =
-        (spaceSettings[
-          OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
-        ] as boolean) ?? false;
-      const nextEnabled = scheduledDiscovery.enabled ?? previousEnabled;
       const enabledChanged =
         scheduledDiscovery.enabled !== undefined && scheduledDiscovery.enabled !== previousEnabled;
       const configChanged = Object.keys(spaceUpdates).some(
@@ -271,7 +269,6 @@ export const putScheduledDiscoverySettingsRoute = createServerRoute({
             targetCoverageMinutes: resolveScheduledConfigValue('targetCoverageMinutes'),
             reviewIntervalMinutes: resolveScheduledConfigValue('reviewIntervalMinutes'),
             discoveryBatchSize: resolveScheduledConfigValue('discoveryBatchSize'),
-            triageBatchSize: resolveScheduledConfigValue('triageBatchSize'),
             maxReviewPasses: resolveScheduledConfigValue('maxReviewPasses'),
           },
         });

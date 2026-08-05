@@ -35,33 +35,85 @@ function buildAnyActorFieldNonEmptyEsql(fields: string[]): string {
   return fields.map((field) => `(\`${field}\` IS NOT NULL AND \`${field}\` != "")`).join(' OR ');
 }
 
-function buildRelationshipEsql(
-  config: StandardRelationshipIntegrationConfig | BucketedRelationshipIntegrationConfig,
-  namespace: string
-): string {
-  const indexPattern = config.indexPattern(namespace);
+/**
+ * Resolves the four actor/target ES|QL fragments that vary by config. Everything
+ * else in the pipeline (WHERE composition, MV_EXPAND, STATS, LIMIT) is identical
+ * across configs, so it lives in `buildRelationshipEsql` and is shared.
+ *
+ * `hostScopedUsersOnly` configs get minimized fragments from
+ * `euid.experimental.getHostScopedUserEuidEsql()` — ~2 EVAL columns per row instead of ~35,
+ * measured ~26× faster on logs-system.auth (~700M docs, 30d lookback). See
+ * `hostScopedUsersOnly` in `types.ts` for the data assumptions that make this valid.
+ *
+ * `config.customActor.fields` is deliberately ignored for those configs: which
+ * fields form the host-scoped user EUID is a property of the entity definition,
+ * not of the integration. Configs still declare `customActor.fields` because the
+ * Step 1 composite-agg builder uses them as bucket sources.
+ */
+function resolveActorAndTargetEsql(
+  config: StandardRelationshipIntegrationConfig | BucketedRelationshipIntegrationConfig
+): {
+  actorPresenceGate: string;
+  actorEvalLines: string;
+  targetGateLine: string;
+  targetEvalClause: string;
+} {
+  if (config.hostScopedUsersOnly) {
+    const { evalAssignment, presenceGate } = euid.experimental.getHostScopedUserEuidEsql();
+
+    return {
+      // Requires both `user.name` and `host.id`. For a host target that doubles as
+      // the target gate — `host.id` is the only field either EUID reads — so
+      // `targetGateLine` stays empty rather than emitting a redundant check.
+      actorPresenceGate: presenceGate,
+      actorEvalLines: `| EVAL ${ENGINE_COLUMNS.actor} = ${evalAssignment}`,
+      targetGateLine:
+        config.requireTargetEntityIdExists && config.targetEntityType !== 'host'
+          ? `    AND (${euid.esql.getEuidDocumentsContainsIdFilter(config.targetEntityType)})\n`
+          : '',
+      targetEvalClause:
+        config.targetEntityType === 'host'
+          ? `| EVAL targetEntityId = CONCAT("host:", TO_STRING(\`host.id\`))`
+          : `| EVAL ${euid.esql.getEuidEvaluation(config.targetEntityType, 'targetEntityId', {
+              withTypeId: true,
+            })}`,
+    };
+  }
+
   // TODO(#266748): 'user' hardcoded for actor — thread actorEntityType through config.
   const userFieldEvals = !config.customActor?.evalOverride
     ? getFieldEvaluationsEsql('user')
     : undefined;
   const userFieldEvalsLine = userFieldEvals ? `| EVAL ${userFieldEvals}\n` : '';
-  const userIdFilter = config.customActor
-    ? buildAnyActorFieldNonEmptyEsql(config.customActor.fields)
-    : euid.esql.getEuidDocumentsContainsIdFilter('user');
   const actorEvalClause = config.customActor?.evalOverride
     ? `| EVAL ${ENGINE_COLUMNS.actor} = ${config.customActor.evalOverride}`
     : `| EVAL ${euid.esql.getEuidEvaluation('user', ENGINE_COLUMNS.actor, { withTypeId: true })}`;
-  const targetEvalClause = config.targetEvalOverride
-    ? `| EVAL targetEntityId = ${config.targetEvalOverride}`
-    : `| EVAL ${euid.esql.getEuidEvaluation(config.targetEntityType, 'targetEntityId', {
-        withTypeId: true,
-      })}`;
+
+  return {
+    actorPresenceGate: config.customActor
+      ? buildAnyActorFieldNonEmptyEsql(config.customActor.fields)
+      : euid.esql.getEuidDocumentsContainsIdFilter('user'),
+    actorEvalLines: `${userFieldEvalsLine}${actorEvalClause}`,
+    targetGateLine: config.requireTargetEntityIdExists
+      ? `    AND (${euid.esql.getEuidDocumentsContainsIdFilter(config.targetEntityType)})\n`
+      : '',
+    targetEvalClause: config.targetEvalOverride
+      ? `| EVAL targetEntityId = ${config.targetEvalOverride}`
+      : `| EVAL ${euid.esql.getEuidEvaluation(config.targetEntityType, 'targetEntityId', {
+          withTypeId: true,
+        })}`,
+  };
+}
+
+function buildRelationshipEsql(
+  config: StandardRelationshipIntegrationConfig | BucketedRelationshipIntegrationConfig,
+  namespace: string
+): string {
+  const indexPattern = config.indexPattern(namespace);
+  const { actorPresenceGate, actorEvalLines, targetGateLine, targetEvalClause } =
+    resolveActorAndTargetEsql(config);
   const additionalTargetFilter = config.additionalTargetFilter
     ? `\n    ${config.additionalTargetFilter}`
-    : '';
-
-  const targetIdFilterLine = config.requireTargetEntityIdExists
-    ? `    AND (${euid.esql.getEuidDocumentsContainsIdFilter(config.targetEntityType)})\n`
     : '';
 
   const statsClause =
@@ -98,8 +150,8 @@ function buildRelationshipEsql(
   // intent (treat NULL as empty, then check non-empty) and sidesteps the bug.
   return `FROM ${indexPattern}
 | WHERE ${config.esqlWhereClause}
-    AND (${userIdFilter})
-${targetIdFilterLine}${userFieldEvalsLine}${actorEvalClause}
+    AND (${actorPresenceGate})
+${targetGateLine}${actorEvalLines}
 | WHERE COALESCE(${ENGINE_COLUMNS.actor}, "") != ""
 ${targetEvalClause}
 | MV_EXPAND targetEntityId
@@ -121,7 +173,9 @@ ${statsClause}
  *   results (see `parseTargetsPerActorRows` for the warning safety net).
  *   Override functions MUST NOT include `SET unmapped_fields="nullify"`
  *   themselves — the engine prepends it.
- * - `kind: 'standard' | 'bucketed'` → uses the default ES|QL builder.
+ * - `kind: 'standard' | 'bucketed'` → uses `buildRelationshipEsql`, which routes
+ *   its actor/target fragments through `resolveActorAndTargetEsql`. Configs with
+ *   `hostScopedUsersOnly` get the minimized host-scoped fragments there.
  */
 export const buildTargetsPerActorQuery = (
   config: RelationshipIntegrationConfig,

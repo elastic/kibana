@@ -6,11 +6,12 @@
  */
 
 import {
-  significantEventSchema,
   significantEventInvestigationSchema,
   significantEventStatusSchema,
+  SIGNIFICANT_EVENT_STATUS_OPTIONS,
   CHANGE_POINT_TYPES,
   severitySchema,
+  MAX_TEXT_LENGTH,
   type ChangePointType,
   type Detection,
   type SignificantEvent,
@@ -25,6 +26,7 @@ import { triggerInvestigationWorkflow } from '../../../lib/significant_events/ev
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../create_server_route';
+import { assertNotPaused } from '../../utils/assert_not_paused';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
 const toArray = <T extends string>(val: T | T[] | undefined): T[] | undefined =>
@@ -92,7 +94,10 @@ const eventsSearchRoute = createServerRoute({
       page: z.coerce.number().int().min(1).optional(),
       perPage: z.coerce.number().int().min(1).max(1000).optional(),
       status: z
-        .union([significantEventStatusSchema, z.array(significantEventStatusSchema).max(3)])
+        .union([
+          significantEventStatusSchema,
+          z.array(significantEventStatusSchema).max(SIGNIFICANT_EVENT_STATUS_OPTIONS.length),
+        ])
         .optional(),
       stream: z.union([z.string().max(255), z.array(z.string().max(255)).max(50)]).optional(),
       search: z.string().max(500).optional(),
@@ -121,68 +126,13 @@ const eventsSearchRoute = createServerRoute({
   },
 });
 
-const eventsHistoryRoute = createServerRoute({
-  endpoint: 'GET /internal/significant_events/events/{id}/history',
-  options: {
-    access: 'internal',
-    summary: 'Get event history',
-    description: 'Get all historical versions of a significant event entity.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    path: z.object({
-      id: z.string().max(255),
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<{ hits: SignificantEvent[] }> => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing });
-
-    return getEventClient().findByEventUuid(params.path.id);
-  },
-});
-
-const eventsBulkCreateRoute = createServerRoute({
-  endpoint: 'POST /internal/significant_events/events',
-  options: {
-    access: 'internal',
-    summary: 'Bulk create events',
-    description: 'Create event entities in bulk.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    body: z.array(significantEventSchema),
-  }),
-  handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing });
-
-    return getEventClient().bulkCreate(params.body);
-  },
-});
-
 const eventsLifecycleRoute = createServerRoute({
   endpoint: 'GET /internal/significant_events/events/{id}/lifecycle',
   options: {
     access: 'internal',
     summary: 'Get event lifecycle',
     description:
-      'Get the full lifecycle chain for a significant event: detections, discoveries, and event versions.',
+      'Get the full lifecycle chain for a significant event: detections and event versions.',
   },
   security: {
     authz: {
@@ -200,22 +150,18 @@ const eventsLifecycleRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<EventLifecycleResponse> => {
-    const { getEventClient, getDiscoveryClient, getDetectionClient, licensing } =
-      await getScopedClients({ request });
+    const { getEventClient, getDetectionClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
     const { hits: initialHits } = await getEventClient().findByEventUuid(params.path.id);
     if (initialHits.length === 0) {
-      return { detections: [], discoveries: [], events: [] };
+      return { detections: [], events: [] };
     }
 
     const { event_id: eventId } = initialHits[0];
 
-    const [{ hits: events }, { hits: discoveries }] = await Promise.all([
-      getEventClient().findByEventId(eventId),
-      getDiscoveryClient().findByEventId(eventId),
-    ]);
+    const { hits: events } = await getEventClient().findByEventId(eventId);
 
     const embedded = collectEmbeddedDetections(events);
     const { hits: allDetectionHits } = await getDetectionClient().findByIds(
@@ -250,14 +196,16 @@ const eventsLifecycleRoute = createServerRoute({
       }
     );
 
-    return { detections, discoveries, events };
+    return { detections, events };
   },
 });
 
 /**
  * Used by the managed investigation workflow (`investigation_workflow.yaml`). Keep the endpoint
- * path and body shape (`significantEventInvestigationSchema`) in sync with its
- * `attach_pending_to_significant_event` / `attach_to_significant_event` `kibana.request` steps.
+ * path and body shape in sync with its `attach_pending_to_significant_event` /
+ * `attach_to_significant_event` `kibana.request` steps. The optional `severity`/`summary`/`status`
+ * let the terminal attach also apply the investigation's reassessed fields in the same
+ * append-only version, so a completed investigation and its field updates are a single write.
  */
 const eventsAttachInvestigationRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/events/{id}/investigations',
@@ -265,7 +213,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
     access: 'internal',
     summary: 'Attach investigation to event',
     description:
-      'Record an investigation run against a significant event (pending, success, or failed).',
+      'Record an investigation run against a significant event (pending, success, or failed), optionally applying reassessed severity/summary/status in the same version.',
   },
   security: {
     authz: {
@@ -276,17 +224,24 @@ const eventsAttachInvestigationRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
-    body: significantEventInvestigationSchema,
+    body: significantEventInvestigationSchema.extend({
+      severity: severitySchema.optional(),
+      summary: z.string().min(1).max(MAX_TEXT_LENGTH).optional(),
+      status: significantEventStatusSchema.optional(),
+    }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
     const { getEventClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
+    const { severity, summary, status, ...investigation } = params.body;
+
     return attachInvestigationToEvent({
       eventClient: getEventClient(),
       eventUuid: params.path.id,
-      investigation: params.body,
+      investigation,
+      reassessedFields: { severity, summary, status },
     });
   },
 });
@@ -315,10 +270,12 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
+    maintenanceService,
   }): Promise<{ executionId: string }> => {
     const { getEventClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const { hits } = await getEventClient().findByEventUuid(params.path.id);
     if (hits.length === 0) {
@@ -380,9 +337,7 @@ const eventsUpdateRoute = createServerRoute({
 
 export const internalEventsRoutes = {
   ...eventsSearchRoute,
-  ...eventsHistoryRoute,
   ...eventsLifecycleRoute,
-  ...eventsBulkCreateRoute,
   ...eventsAttachInvestigationRoute,
   ...eventsTriggerInvestigationRoute,
   ...eventsUpdateRoute,
