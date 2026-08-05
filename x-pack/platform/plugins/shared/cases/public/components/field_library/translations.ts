@@ -175,6 +175,14 @@ export const FIELD_DEFINITION_YAML_HELP_TEXT = i18n.translate(
   { defaultMessage: 'Define one reusable field. Validation updates as you type.' }
 );
 
+export const FIELD_DEFINITION_YAML_HELP_TEXT_CREATE = i18n.translate(
+  'xpack.cases.fieldLibrary.fieldDefinitionYamlHelpTextCreate',
+  {
+    defaultMessage:
+      'Define one reusable field. Validation updates as you type. The name and type become the permanent key for case data and Cases analytics and cannot be changed after creation.',
+  }
+);
+
 export const FIELD_DEFINITION_YAML_INVALID = i18n.translate(
   'xpack.cases.fieldLibrary.fieldDefinitionYamlInvalid',
   { defaultMessage: 'Complete the required field properties and correct invalid values.' }
@@ -272,11 +280,3 @@ export const FIELD_IDENTITY_NAME_CHANGED_ERROR = (name: string) =>
       'The field name is permanent. Restore the name to "{name}" to save your changes.',
     values: { name },
   });
-
-export const FIELD_IDENTITY_CREATE_NOTE = i18n.translate(
-  'xpack.cases.fieldLibrary.fieldIdentityCreateNote',
-  {
-    defaultMessage:
-      'The name and type become the permanent key for case data and Cases analytics and cannot be changed after creation.',
-  }
-);

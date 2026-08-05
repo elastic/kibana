@@ -47,16 +47,27 @@ const push = <K>(
   }
 };
 
+interface FieldDefinitionSO {
+  attributes: FieldDefinition;
+  version?: string;
+}
+
+// Discriminate on a required FieldDefinition-only property so a future
+// `attributes` field on FieldDefinition wouldn't silently break the check.
+const isFieldDefinitionSO = (
+  entry: FieldDefinitionSO | FieldDefinition
+): entry is FieldDefinitionSO => !('fieldDefinitionId' in entry);
+
 export const buildFieldLinkIndexes = (
-  definitions: Array<{ attributes: FieldDefinition; version?: string } | FieldDefinition>
+  definitions: Array<FieldDefinitionSO | FieldDefinition>
 ): FieldLinkIndexes => {
   const all: LinkableFieldDefinition[] = definitions.map((entry) => {
-    const isSavedObject = 'attributes' in entry;
-    const attributes = isSavedObject ? entry.attributes : entry;
+    const isSO = isFieldDefinitionSO(entry);
+    const attributes = isSO ? entry.attributes : entry;
     return {
       definition: attributes,
       identity: parseFieldDefinitionIdentity(attributes.definition),
-      version: isSavedObject ? entry.version : undefined,
+      version: isSO ? entry.version : undefined,
     };
   });
 
