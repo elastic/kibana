@@ -97,6 +97,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
               onKeyDown={onControlKeyDown}
               size="xs"
               color="text"
+              data-test-subj="jsonTreeViewerExpandAll"
             >
               {isAllExpanded
                 ? i18n.translate('unifiedDataTable.jsonTreeViewer.collapseAll', {

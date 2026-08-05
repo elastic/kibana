@@ -45,7 +45,7 @@ describe('getDocumentText', () => {
 describe('collectContainersWithMatch', () => {
   it('returns the ids of every collection whose subtree contains the term', () => {
     const nodes = buildNodes({ geo: { city: 'Berlin' }, other: 'x' });
-    expect([...collectContainersWithMatch(nodes, 'berl')]).toEqual(['json-syntax-geo']);
+    expect([...collectContainersWithMatch(nodes, 'berl')]).toEqual(['json-viewer-geo']);
   });
 
   it('returns an empty set when nothing matches', () => {

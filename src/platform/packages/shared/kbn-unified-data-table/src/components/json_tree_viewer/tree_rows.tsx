@@ -140,6 +140,11 @@ export const PagerRowView = function PagerRowView({
           onPrimary();
         }}
         onKeyDown={pagerButtonKeyDown}
+        data-test-subj={
+          showMore
+            ? `jsonTreeViewerMore-${row.collectionId}`
+            : `jsonTreeViewerFewer-${row.collectionId}`
+        }
       >
         {primaryLabel}
       </EuiButtonEmpty>
@@ -236,9 +241,11 @@ const COPIED_FEEDBACK_DURATION = 1200;
 const CopyButton = function CopyButton({
   getText,
   label,
+  nodeId,
 }: {
   getText: () => string;
   label: string;
+  nodeId: string;
 }) {
   const styles = useMemoCss(treeStyles);
   const [copied, setCopied] = useState(false);
@@ -256,6 +263,7 @@ const CopyButton = function CopyButton({
         className="jsonTreeViewerCopyButton"
         color={copied ? 'success' : 'text'}
         css={styles.copyButton}
+        data-test-subj={`jsonTreeViewerCopy-${nodeId}`}
         iconSize="s"
         iconType={copied ? 'check' : 'copy'}
         onClick={(event: React.MouseEvent) => {
@@ -273,11 +281,23 @@ const CopyButton = function CopyButton({
 };
 
 // Copies a single primitive leaf as its raw text (e.g. `hello`, `1024`, `null`).
-const ValueCopyButton = memo(function ValueCopyButton({ value }: { value: JsonPrimitive }) {
+const ValueCopyButton = memo(function ValueCopyButton({
+  nodeId,
+  value,
+}: {
+  nodeId: string;
+  value: JsonPrimitive;
+}) {
   const label = i18n.translate('unifiedDataTable.jsonTreeViewer.copyValue', {
     defaultMessage: 'Copy value',
   });
-  return <CopyButton getText={() => (value === null ? 'null' : String(value))} label={label} />;
+  return (
+    <CopyButton
+      getText={() => (value === null ? 'null' : String(value))}
+      label={label}
+      nodeId={nodeId}
+    />
+  );
 });
 
 // Copies a whole object/array subtree as pretty-printed JSON.
@@ -290,7 +310,7 @@ const SubtreeCopyButton = memo(function SubtreeCopyButton({ node }: { node: Coll
       : i18n.translate('unifiedDataTable.jsonTreeViewer.copyObject', {
           defaultMessage: 'Copy object',
         });
-  return <CopyButton getText={() => nodeToJsonString(node)} label={label} />;
+  return <CopyButton getText={() => nodeToJsonString(node)} label={label} nodeId={node.id} />;
 });
 
 // The body of a node row: key prefix + value/brackets + comma.
@@ -314,7 +334,7 @@ const NodeLabel = memo(function NodeLabel({
           formatted={formatValue?.({ value: node.value, path: node.path })}
         />
         {trailingComma && <Comma />}
-        <ValueCopyButton value={node.value} />
+        <ValueCopyButton nodeId={node.id} value={node.value} />
       </span>
     );
   }

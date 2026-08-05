@@ -27,7 +27,7 @@ export type JsonValue = Record<string, unknown> | unknown[] | JsonPrimitive | un
 export const INITIAL_CHILDREN = 10;
 export const CHILDREN_INCREMENT = 10;
 
-export const ROOT_ID = 'json-syntax-$root';
+export const ROOT_ID = 'json-viewer-$root';
 
 export const OPEN_BRACKET = { object: '{', array: '[' } as const;
 export const CLOSE_BRACKET = { object: '}', array: ']' } as const;
@@ -280,7 +280,7 @@ const normalizePrimitive = (value: unknown): JsonPrimitive => {
   return null;
 };
 
-const getNodeId = (path: string[]) => `json-syntax-${path.join('__')}`;
+const getNodeId = (path: string[]) => `json-viewer-${path.join('__')}`;
 
 /**
  * Returns a list of Node ids that can be expanded. Empty coollections can't be expanded.
