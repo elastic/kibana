@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
 import { useCallback, useMemo } from 'react';
+import { getConnectorSpec } from '@kbn/connector-specs';
 import type { ConnectorItem } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
 import { useAgentBuilderAgentById } from '../agents/use_agent_by_id';
@@ -85,21 +86,69 @@ export const useAgentConnectors = ({ agentId }: { agentId: string }) => {
     },
   });
 
+  const getCurrentSkillIds = useCallback((): string[] => {
+    const currentAgent = queryClient.getQueryData<AgentDefinition>(agentQueryKey);
+    return currentAgent?.configuration?.skill_ids ?? [];
+  }, [queryClient, agentQueryKey]);
+
+  const updateSkillsMutation = useMutation({
+    mutationFn: (newSkillIds: string[]) =>
+      agentService.update(agentId, { configuration: { skill_ids: newSkillIds } }),
+    onMutate: async (newSkillIds: string[]) => {
+      await queryClient.cancelQueries({ queryKey: agentQueryKey });
+      const previousAgent = queryClient.getQueryData<AgentDefinition>(agentQueryKey);
+      if (previousAgent) {
+        queryClient.setQueryData<AgentDefinition>(agentQueryKey, {
+          ...previousAgent,
+          configuration: { ...previousAgent.configuration, skill_ids: newSkillIds },
+        });
+      }
+      return { previousAgent };
+    },
+    onError: (_err, _newSkillIds, context) => {
+      if (context?.previousAgent) {
+        queryClient.setQueryData<AgentDefinition>(agentQueryKey, context.previousAgent);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: agentQueryKey });
+    },
+  });
+
   const assign = useCallback(
-    (connector: Pick<ConnectorItem, 'id' | 'name'>) => {
+    (connector: Pick<ConnectorItem, 'id' | 'name' | 'actionTypeId'>) => {
       const currentIds = getCurrentConnectorIds();
       if (currentIds.includes(connector.id)) return;
+
+      const spec = getConnectorSpec(connector.actionTypeId);
+      const connectorSkillIds = spec?.skillFiles?.map((s) => s.name) ?? [];
+
       updateConnectorsMutation.mutate([...currentIds, connector.id], {
-        onSuccess: () =>
+        onSuccess: () => {
           addSuccessToast({
             title: i18n.translate('xpack.agentBuilder.agentConnectors.assignSuccessToast', {
               defaultMessage: '{name} added',
               values: { name: connector.name },
             }),
-          }),
+          });
+          if (connectorSkillIds.length > 0) {
+            const currentSkillIds = getCurrentSkillIds();
+            const newSkillIds = [
+              ...currentSkillIds,
+              ...connectorSkillIds.filter((id) => !currentSkillIds.includes(id)),
+            ];
+            updateSkillsMutation.mutate(newSkillIds);
+          }
+        },
       });
     },
-    [getCurrentConnectorIds, updateConnectorsMutation, addSuccessToast]
+    [
+      getCurrentConnectorIds,
+      getCurrentSkillIds,
+      updateConnectorsMutation,
+      updateSkillsMutation,
+      addSuccessToast,
+    ]
   );
 
   const unassign = useCallback(

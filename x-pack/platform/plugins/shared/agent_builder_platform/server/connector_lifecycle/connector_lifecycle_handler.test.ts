@@ -30,9 +30,26 @@ const createMockAgentBuilderSml = () => ({
   deleteAttachment: jest.fn().mockResolvedValue(undefined),
 });
 
+const createMockSkillRegistry = () => ({
+  has: jest.fn().mockResolvedValue(false),
+  get: jest.fn().mockResolvedValue(undefined),
+  bulkGet: jest.fn().mockResolvedValue(new Map()),
+  list: jest.fn().mockResolvedValue([]),
+  create: jest.fn().mockResolvedValue({}),
+  update: jest.fn().mockResolvedValue({}),
+  delete: jest.fn().mockResolvedValue(true),
+});
+
+const createMockAgentBuilder = (skillRegistry = createMockSkillRegistry()) => ({
+  skills: {
+    getRegistry: jest.fn().mockResolvedValue(skillRegistry),
+  },
+});
+
 const createMockGetStartServices = (
   uiSettingsClient = createMockUiSettingsClient(),
-  agentBuilderSml = createMockAgentBuilderSml()
+  agentBuilderSml = createMockAgentBuilderSml(),
+  agentBuilder = createMockAgentBuilder()
 ) =>
   jest.fn().mockResolvedValue([
     {
@@ -43,6 +60,7 @@ const createMockGetStartServices = (
     {
       spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue('default') } },
       agentBuilderSml,
+      agentBuilder,
     },
     {},
   ]);
@@ -157,6 +175,82 @@ describe('createConnectorLifecycleHandler', () => {
         expect.stringContaining('failed to index connector')
       );
     });
+
+    it('installs skills keyed by connector type (not instance), content passed through as-is', async () => {
+      const skillRegistry = createMockSkillRegistry();
+      const agentBuilder = createMockAgentBuilder(skillRegistry);
+      getConnectorSpecMock.mockReturnValue({
+        metadata: { id: '.test', displayName: 'Test', description: '', minimumLicense: 'basic' },
+        actions: {},
+        skillFiles: [
+          {
+            id: 'my-skill',
+            name: 'test-skill',
+            description: 'Does something useful',
+            content: 'Use --connectorId <connectorId> to do things.',
+            resources: [
+              {
+                name: 'example',
+                relativePath: './resources',
+                content: '--connectorId <connectorId>',
+              },
+            ],
+          },
+        ],
+      } as never);
+
+      const handler = createConnectorLifecycleHandler({
+        logger,
+        getStartServices: createMockGetStartServices(
+          createMockUiSettingsClient(),
+          createMockAgentBuilderSml(),
+          agentBuilder
+        ),
+      });
+
+      await handler.onPostCreate(createBaseParams() as any);
+
+      expect(skillRegistry.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-skill',
+          name: 'test-skill',
+          content: 'Use --connectorId <connectorId> to do things.',
+          referenced_content: [
+            expect.objectContaining({
+              name: 'example',
+              content: '--connectorId <connectorId>',
+            }),
+          ],
+        })
+      );
+    });
+
+    it('logs debug (not warn) and does not throw when skill create fails — expected for second connector of same type', async () => {
+      const skillRegistry = createMockSkillRegistry();
+      skillRegistry.create.mockRejectedValue(new Error('already exists'));
+      const agentBuilder = createMockAgentBuilder(skillRegistry);
+      getConnectorSpecMock.mockReturnValue({
+        metadata: { id: '.test', displayName: 'Test', description: '', minimumLicense: 'basic' },
+        actions: {},
+        skillFiles: [
+          { id: 'my-skill', name: 'test-skill', description: 'desc', content: 'content' },
+        ],
+      } as never);
+
+      const handler = createConnectorLifecycleHandler({
+        logger,
+        getStartServices: createMockGetStartServices(
+          createMockUiSettingsClient(),
+          createMockAgentBuilderSml(),
+          agentBuilder
+        ),
+      });
+
+      await expect(handler.onPostCreate(createBaseParams() as any)).resolves.toBeUndefined();
+
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('already exists'));
+      expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('skill'));
+    });
   });
 
   describe('onPostDelete', () => {
@@ -209,6 +303,31 @@ describe('createConnectorLifecycleHandler', () => {
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('failed to clean up for connector')
       );
+    });
+
+    it('does not delete skills on connector delete — per-type skills are shared across instances', async () => {
+      const skillRegistry = createMockSkillRegistry();
+      const agentBuilder = createMockAgentBuilder(skillRegistry);
+      getConnectorSpecMock.mockReturnValue({
+        metadata: { id: '.test', displayName: 'Test', description: '', minimumLicense: 'basic' },
+        actions: {},
+        skillFiles: [
+          { id: 'skill-a', name: 'test-skill-a', description: 'desc', content: 'content' },
+        ],
+      } as never);
+
+      const handler = createConnectorLifecycleHandler({
+        logger,
+        getStartServices: createMockGetStartServices(
+          createMockUiSettingsClient(),
+          createMockAgentBuilderSml(),
+          agentBuilder
+        ),
+      });
+
+      await handler.onPostDelete(createBaseParams({ connectorType: '.test' }) as any);
+
+      expect(skillRegistry.delete).not.toHaveBeenCalled();
     });
   });
 });

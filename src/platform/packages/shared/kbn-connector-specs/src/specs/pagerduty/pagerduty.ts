@@ -18,6 +18,7 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
+import { skillFiles } from './skills';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import type {
   CallToolInput,
@@ -121,7 +122,7 @@ export const PagerdutyConnector: ConnectorSpec = {
     },
 
     listSchedules: {
-      isTool: true,
+      isTool: false,
       description:
         'List PagerDuty on-call schedules. Supports free-text search across name and description fields (e.g., "primary" or "weekend"), filtering by team or user IDs, and including related resources such as schedule_layers, overrides_subschedule, or final_schedule.',
       input: ListSchedulesInputSchema,
@@ -131,7 +132,7 @@ export const PagerdutyConnector: ConnectorSpec = {
     },
 
     listEscalationPolicies: {
-      isTool: true,
+      isTool: false,
       description:
         'List PagerDuty escalation policies. Supports free-text search across name and description fields (e.g., "production" or "on-call"), and filtering by user or team IDs. Returns each policy\'s escalation rules, targets, associated services, and teams.',
       input: ListEscalationPoliciesInputSchema,
@@ -141,7 +142,7 @@ export const PagerdutyConnector: ConnectorSpec = {
     },
 
     listIncidents: {
-      isTool: true,
+      isTool: false,
       description:
         'List PagerDuty incidents. Supports filtering by status (triggered, acknowledged, resolved), service IDs, user IDs, urgency, and date range. Dates use ISO 8601 format. Results can be scoped to all incidents, team incidents, or those assigned to the current user. Supports sorting by incident_number, created_at, resolved_at, or urgency.',
       input: ListIncidentsInputSchema,
@@ -151,7 +152,7 @@ export const PagerdutyConnector: ConnectorSpec = {
     },
 
     listOncalls: {
-      isTool: true,
+      isTool: false,
       description:
         'Get current on-call assignments in PagerDuty. Use this to find who is currently on call for specific schedules or escalation policies. Supports filtering by schedule IDs, user IDs, or escalation policy IDs, and time range queries using ISO 8601 dates. Set earliest=true to return only the first on-call entry per user+policy combination.',
       input: ListOncallsInputSchema,
@@ -161,7 +162,7 @@ export const PagerdutyConnector: ConnectorSpec = {
     },
 
     listUsers: {
-      isTool: true,
+      isTool: false,
       description:
         "List PagerDuty users. Supports free-text search across name and email fields. Returns each user's id, name, email, summary, and role.",
       input: ListUsersInputSchema,
@@ -171,7 +172,7 @@ export const PagerdutyConnector: ConnectorSpec = {
     },
 
     listTeams: {
-      isTool: true,
+      isTool: false,
       description:
         "List PagerDuty teams. Supports free-text search across name and description fields. Returns each team's id, name, description, and summary.",
       input: ListTeamsInputSchema,
@@ -259,40 +260,35 @@ export const PagerdutyConnector: ConnectorSpec = {
     },
   },
 
+  skillFiles,
+
   skill: [
     '## PagerDuty Connector Usage Guide',
     '',
     '### Identifying the Authenticated User (getUserData)',
     '',
     'Call `getUserData` with no inputs to retrieve the currently authenticated PagerDuty user.',
-    "This returns the user's id, name, email, summary, role, and team memberships.",
     "Use this to confirm which account the connector is acting as, or to obtain the current user's ID for subsequent filtered queries.",
     '',
     '### Finding Who Is On Call',
     '',
-    'To find who is currently on call for a named schedule:',
-    '1. Call `listSchedules` with a `query` matching the schedule name (e.g., "primary" or "database") to get candidate schedule IDs.',
-    '2. Call `listOncalls` with `schedule_ids` set to the IDs returned in step 1 to get the current on-call assignments.',
-    '',
-    'If you only need to know who is on call right now without knowing which schedule, call `listOncalls` directly with a `since`/`until` time range (ISO 8601 format) and optionally an `escalation_policy_ids` filter.',
-    'Set `earliest: true` to return only the first on-call entry per user+policy combination and reduce noise.',
+    '1. Use the `pagerduty-oncall` to get schedule information, including who is on call.',
     '',
     '### Investigating Incidents',
     '',
-    'To investigate incidents, use `listIncidents` with one or more of these filters:',
-    '- `status`: array of statuses — "triggered", "acknowledged", or "resolved"',
-    '- `urgencies`: array — "high" or "low"',
-    '- `since` / `until`: ISO 8601 date range to scope by creation time',
-    '- `service_ids`: limit to specific services',
-    '- `request_scope`: "all" (default), "teams", or "assigned" (incidents assigned to the current user)',
-    '- `sort_by`: array of sort fields with direction, e.g. ["created_at:desc"]',
+    'To investigate incidents, use the `pagerduty-list-incidents` skill',
     '',
     'Once you have an incident ID from the list, call `getIncident` for full details including assignments, service, and timestamps.',
     '',
     '### Working with Escalation Policies',
     '',
     'To explore escalation policies:',
-    '1. Call `listEscalationPolicies` with an optional `query` (free-text name/description search) or `team_ids` / `user_ids` filters.',
+    '1. Use the `pagerduty-escalation-policies` skill for escalation related topics.',
     '2. Use the returned IDs to call `getEscalationPolicy` for full details: escalation rules, delay minutes, targets, associated services, and teams.',
+    '',
+    '### User and Team lookup',
+    'To explore teams and users:',
+    '1. Use the `pagerduty-users-teams` skill to lookup users or teams.',
+    "2. Use the returned IDs to call 'getTeam' for full team details.",
   ].join('\n'),
 };

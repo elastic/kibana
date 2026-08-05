@@ -336,7 +336,40 @@ export interface ConnectorSpec {
   // included in the connector's agent attachment representation so the LLM
   // has richer context about how to use the connector's sub-actions.
   skill?: string;
+
+  // Skill files installed into Agent Builder when a connector instance is created.
+  skillFiles?: ConnectorSkillSpec[];
 }
+
+export interface ConnectorSkillSpec {
+  /** Stable identifier used internally. */
+  id: string;
+  /** Display name. Lowercase letters, numbers, and hyphens only. Max 64 chars. */
+  name: string;
+  /** Describes what the skill does and when to use it. Max 1024 chars. */
+  description: string;
+  /** Skill instructions (markdown). Use {{CONNECTOR_ID}} where the instance ID should appear. */
+  content: string;
+  /** Supplemental reference files co-located with the skill. */
+  resources?: ConnectorSkillResource[];
+}
+
+export interface ConnectorSkillResource {
+  /** File name (no extension). Lowercase letters, numbers, and hyphens only. */
+  name: string;
+  /** Path relative to the skill directory, e.g. './resources' */
+  relativePath: string;
+  /** File content (markdown). Use {{CONNECTOR_ID}} where the instance ID should appear. */
+  content: string;
+}
+
+/**
+ * Build a skill spec with backtick/fence tokens injected so skill authors
+ * never need to escape backticks in template literals.
+ */
+export const buildSkill = (
+  factory: (tokens: { bt: string; fence: string }) => ConnectorSkillSpec
+): ConnectorSkillSpec => factory({ bt: '`', fence: '```' });
 
 // ============================================================================
 // HELPER UTILITIES

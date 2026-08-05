@@ -15,6 +15,8 @@ import type {
 import type { CoreStart } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderSmlPluginStart } from '@kbn/agent-builder-sml-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { getConnectorSpec } from '@kbn/connector-specs';
 import { isChatCallableConnectorType } from '../skills/connector_authoring/utils';
 
 interface ConnectorLifecycleHandlerDeps {
@@ -22,7 +24,11 @@ interface ConnectorLifecycleHandlerDeps {
   getStartServices: () => Promise<
     [
       CoreStart,
-      { spaces?: SpacesPluginStart; agentBuilderSml: AgentBuilderSmlPluginStart },
+      {
+        spaces?: SpacesPluginStart;
+        agentBuilderSml: AgentBuilderSmlPluginStart;
+        agentBuilder: AgentBuilderPluginStart;
+      },
       unknown
     ]
   >;
@@ -74,6 +80,46 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
               (smlError as Error).message
             }`
           );
+        }
+
+        const spec = getConnectorSpec(connectorType);
+        if (spec?.skillFiles?.length) {
+          const skillRegistry = await startDeps.agentBuilder.skills.getRegistry({ request });
+          for (const skill of spec.skillFiles) {
+            try {
+              await skillRegistry.create({
+                id: skill.name,
+                name: skill.name,
+                base_path: 'skills/platform/connectors',
+                description: skill.description,
+                content: skill.content,
+                referenced_content: skill.resources?.map((r) => ({
+                  name: r.name,
+                  relativePath: r.relativePath,
+                  content: r.content,
+                })),
+                tool_ids: [],
+              });
+              logger.info(
+                `Connector lifecycle: installed skill "${skill.name}" for connector type ${connectorType}`
+              );
+            } catch (skillError) {
+              const msg = (skillError as Error).message ?? '';
+              const isConflict =
+                (skillError as { statusCode?: number }).statusCode === 409 ||
+                /conflict|already exists/i.test(msg);
+              if (isConflict) {
+                // Expected once the skill exists — user may have customized it, so leave it alone.
+                logger.debug(
+                  `Connector lifecycle: skill "${skill.name}" already exists for type ${connectorType}`
+                );
+              } else {
+                logger.warn(
+                  `Connector lifecycle: failed to install skill "${skill.name}" for type ${connectorType}: ${msg}`
+                );
+              }
+            }
+          }
         }
       } catch (error) {
         logger.error(
