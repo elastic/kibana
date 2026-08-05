@@ -23,16 +23,14 @@ const writeExecutable = (file: string, content: string) => {
 };
 
 const runSync = ({
-  auditStatus,
   existingPr = false,
   script = SYNC_SCRIPT,
   statusOutput = ' M src/platform/plugins/shared/console/server/lib/spec_definitions/json/generated/search.json',
 }: {
-  auditStatus: number;
   existingPr?: boolean;
   script?: string;
   statusOutput?: string;
-}) => {
+} = {}) => {
   const root = fs.mkdtempSync(Path.join(os.tmpdir(), 'console-definitions-sync-'));
   const fakeBin = Path.resolve(root, 'bin');
   const kibanaDir = Path.resolve(root, 'kibana');
@@ -55,17 +53,7 @@ fi
 exit 0
 `
   );
-  writeExecutable(
-    Path.resolve(fakeBin, 'node'),
-    `#!/usr/bin/env bash
-if [[ "$*" == *"audit_console_definition_overrides.js"* ]]; then
-  echo "Changed conflicts:"
-  echo "  - watcher.put_watch::throttle_period"
-  exit "\${TEST_AUDIT_STATUS}"
-fi
-exit 0
-`
-  );
+  writeExecutable(Path.resolve(fakeBin, 'node'), '#!/usr/bin/env bash\nexit 0\n');
   writeExecutable(
     Path.resolve(fakeBin, 'gh'),
     `#!/usr/bin/env bash
@@ -105,7 +93,6 @@ printf '%s\\n' "$*" > "\${TEST_ROOT}/buildkite-agent-args"
       BUILDKITE_BRANCH: 'main',
       KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true',
       TEST_ROOT: root,
-      TEST_AUDIT_STATUS: String(auditStatus),
       TEST_EXISTING_PR: String(existingPr),
       TEST_PR_TITLE: PR_TITLE,
       TEST_STATUS_OUTPUT: statusOutput,
@@ -127,24 +114,14 @@ printf '%s\\n' "$*" > "\${TEST_ROOT}/buildkite-agent-args"
 };
 
 describe('WHEN Console definitions are synchronized', () => {
-  it('SHOULD open an audit-report PR without auto-merge and fail the build', () => {
-    const result = runSync({ auditStatus: 1 });
-    try {
-      expect(result.status).toBe(1);
-      expect(result.prCreateArgs).toContain('Override conflict audit');
-      expect(result.prCreateArgs).toContain('watcher.put_watch::throttle_period');
-      expect(result.autoMergeCalled).toBe(false);
-    } finally {
-      result.cleanup();
-    }
-  });
-
-  it('SHOULD keep auto-merge enabled when the audit passes', () => {
-    const result = runSync({ auditStatus: 0 });
+  it('SHOULD open a PR with override-conflict instructions in the body and without auto-merge', () => {
+    const result = runSync();
     try {
       expect(result.status).toBe(0);
-      expect(result.prCreateArgs).not.toContain('Override conflict audit');
-      expect(result.autoMergeCalled).toBe(true);
+      expect(result.prCreateArgs).toContain('If override conflict CI fails');
+      expect(result.prCreateArgs).toContain('--updateOverrideAudit');
+      expect(result.prCreateArgs).toContain('override_conflict_baseline.json');
+      expect(result.autoMergeCalled).toBe(false);
       expect(result.prCreateArgs).toContain('--label backport:skip');
     } finally {
       result.cleanup();
@@ -153,23 +130,22 @@ describe('WHEN Console definitions are synchronized', () => {
 
   it('SHOULD open a PR when generation only adds new scoped files', () => {
     const result = runSync({
-      auditStatus: 0,
       statusOutput:
         '?? src/platform/plugins/shared/console/server/lib/spec_definitions/json/generated/new_endpoint.json',
     });
     try {
       expect(result.status).toBe(0);
       expect(result.prCreateArgs).toContain('[Console] Update console definitions (main)');
-      expect(result.autoMergeCalled).toBe(true);
+      expect(result.autoMergeCalled).toBe(false);
     } finally {
       result.cleanup();
     }
   });
 
-  it('SHOULD remind the team instead of opening a duplicate unsafe PR', () => {
-    const result = runSync({ auditStatus: 1, existingPr: true });
+  it('SHOULD remind the team instead of opening a duplicate PR', () => {
+    const result = runSync({ existingPr: true });
     try {
-      expect(result.status).toBe(1);
+      expect(result.status).toBe(0);
       expect(result.prCreateArgs).toBeUndefined();
       expect(result.autoMergeCalled).toBe(false);
       expect(result.buildkiteAgentArgs).toContain('slack:console_defs_existing_pr:body');
@@ -179,7 +155,7 @@ describe('WHEN Console definitions are synchronized', () => {
   });
 
   it('SHOULD preserve API doc-links PR labels and auto-merge behavior', () => {
-    const result = runSync({ auditStatus: 0, script: DOC_LINKS_SYNC_SCRIPT });
+    const result = runSync({ script: DOC_LINKS_SYNC_SCRIPT });
     try {
       expect(result.status).toBe(0);
       expect(result.prCreateArgs).toContain('[Console] Update Kibana API doc links (main)');
