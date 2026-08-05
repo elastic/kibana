@@ -79,9 +79,6 @@ export const ActionPolicySnoozePopover = ({
 
   return (
     <EuiPopover
-      aria-label={i18n.translate('xpack.alertingV2.actionPolicy.snooze.ariaLabel', {
-        defaultMessage: 'Snooze action policy',
-      })}
       button={triggerButton}
       isOpen={isPopoverOpen}
       closePopover={closePopover}

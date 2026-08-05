@@ -487,7 +487,6 @@ export default function (providerContext: FtrProviderContext) {
           ),
           es_index_patterns: {
             test_logs: 'logs-all_assets.test_logs-*',
-            test_logs2: 'logs-all_assets.test_logs2-*',
             test_metrics: 'metrics-all_assets.test_metrics-*',
           },
           package_assets: [

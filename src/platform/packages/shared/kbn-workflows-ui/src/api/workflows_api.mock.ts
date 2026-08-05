@@ -52,5 +52,4 @@ export const createMockWorkflowApi = (): MockWorkflowApi =>
     getCatalog: jest.fn(),
     getTemplate: jest.fn(),
     getLibraryHealth: jest.fn(),
-    installTemplate: jest.fn(),
   } as unknown as MockWorkflowApi);

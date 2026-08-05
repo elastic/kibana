@@ -23,10 +23,7 @@ import { CasesUiPlugin } from './plugin';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import {
-  CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE,
   CASE_PAGE_VIEW_EVENT_TYPE,
-  CASE_VIEW_ATTACH_BUTTON_CLICKED_EVENT_TYPE,
-  CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE,
   CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE,
   CASES_LIST_PAGE_VIEW_EVENT_TYPE,
   CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
@@ -175,43 +172,6 @@ describe('Cases Ui Plugin', () => {
           schema: expect.objectContaining({
             owner: expect.objectContaining({ type: 'keyword' }),
             attachment_type: expect.objectContaining({ type: 'keyword' }),
-          }),
-        })
-      );
-    });
-
-    it('registers the attach button and menu item event types', async () => {
-      plugin.setup(coreSetup, pluginsSetup);
-
-      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
-        expect.objectContaining({
-          eventType: CASE_VIEW_ATTACH_BUTTON_CLICKED_EVENT_TYPE,
-          schema: expect.objectContaining({
-            owner: expect.objectContaining({ type: 'keyword' }),
-            attach_location: expect.objectContaining({ type: 'keyword' }),
-          }),
-        })
-      );
-      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
-        expect.objectContaining({
-          eventType: CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE,
-          schema: expect.objectContaining({
-            owner: expect.objectContaining({ type: 'keyword' }),
-            attachment_type: expect.objectContaining({ type: 'keyword' }),
-          }),
-        })
-      );
-    });
-
-    it('registers the markdown editor plugin clicked event type', async () => {
-      plugin.setup(coreSetup, pluginsSetup);
-
-      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
-        expect.objectContaining({
-          eventType: CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE,
-          schema: expect.objectContaining({
-            owner: expect.objectContaining({ type: 'keyword' }),
-            plugin_type: expect.objectContaining({ type: 'keyword' }),
           }),
         })
       );

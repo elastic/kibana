@@ -28,6 +28,7 @@ export interface SignificantEventsScheduledReviewWorkflowTemplateValues
   extends ManagedWorkflowTemplateValues {
   reviewIntervalMinutes: number;
   discoveryBatchSize: number;
+  triageBatchSize: number;
   maxReviewPasses: number;
 }
 
@@ -49,7 +50,7 @@ const renderTemplate = (template: string, values: Record<string, string | number
 
 export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  pluginId: 'significantEvents',
+  pluginId: 'significant_events',
   version: 3,
   billable: false,
   // The change_point agg needs >= 22 buckets, so detectionLookbackMinutes must be an exact
@@ -72,14 +73,15 @@ export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-  pluginId: 'significantEvents',
-  version: 4,
+  pluginId: 'significant_events',
+  version: 3,
   billable: false,
-  yamlTemplate: ({ reviewIntervalMinutes, discoveryBatchSize, maxReviewPasses }) =>
+  yamlTemplate: ({ reviewIntervalMinutes, discoveryBatchSize, triageBatchSize, maxReviewPasses }) =>
     renderTemplate(SCHEDULED_REVIEW_YAML, {
       __REVIEW_INTERVAL_MINUTES__: reviewIntervalMinutes,
       __MAX_REVIEW_PASSES__: maxReviewPasses,
       __DISCOVERY_BATCH_SIZE__: discoveryBatchSize,
+      __TRIAGE_BATCH_SIZE__: triageBatchSize,
     }),
   management: SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<SignificantEventsScheduledReviewWorkflowTemplateValues>;

@@ -174,7 +174,7 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
     },
 
     async addNewLensPanel() {
-      await this.addNewPanel('Create visualization');
+      await this.addNewPanel('Visualization');
     },
 
     async addNewPanel(actionName: string) {

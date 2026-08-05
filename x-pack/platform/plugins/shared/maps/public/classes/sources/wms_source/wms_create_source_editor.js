@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
+  EuiCallOut,
   EuiComboBox,
   EuiFieldText,
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import { WmsClient } from './wms_client';
 import _ from 'lodash';
 
@@ -160,13 +160,15 @@ export class WMSCreateSourceEditor extends Component {
       return (
         <Fragment>
           <EuiSpacer />
-          <KbnWarningCallout
+          <EuiCallOut
             announceOnMount={false}
             title={i18n.translate('xpack.maps.source.wms.getCapabilitiesErrorCalloutTitle', {
               defaultMessage: 'Unable to load service metadata',
             })}
-            text={this.state.getCapabilitiesError}
-          />
+            color="warning"
+          >
+            <p>{this.state.getCapabilitiesError}</p>
+          </EuiCallOut>
           <EuiSpacer />
 
           <EuiFormRow

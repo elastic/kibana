@@ -117,6 +117,18 @@ export class GettingStarted {
     await card.click();
   }
 
+  async getEmbeddedConsoleControlBar() {
+    return this.page.testSubj.locator('consoleEmbeddedControlBar');
+  }
+
+  async clickEmbeddedConsoleControlBar() {
+    await this.page.testSubj.locator('consoleEmbeddedControlBar').click();
+  }
+
+  async getEmbeddedConsole() {
+    return this.page.testSubj.locator('consoleEmbeddedBody');
+  }
+
   async getNoApiKeysAccessMessage() {
     return this.page.locator("text=You don't have access to manage API keys");
   }

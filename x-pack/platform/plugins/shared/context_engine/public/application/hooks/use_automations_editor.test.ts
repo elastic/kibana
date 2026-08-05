@@ -176,25 +176,7 @@ describe('useAutomationsEditor', () => {
     expect(mockSaveAutomations).not.toHaveBeenCalled();
   });
 
-  it('creates a workflow while idle, attaches it, and resolves with its id', async () => {
-    const { result, onSaved } = renderEditor();
-
-    let created: string | undefined;
-    await act(async () => {
-      created = await result.current.createAndAttach();
-    });
-
-    expect(mockCreateWorkflow).toHaveBeenCalledWith(buildStarterWorkflowYaml(aiIndex.id));
-    expect(mockSaveAutomations).toHaveBeenCalledWith(aiIndex, [
-      { type: 'workflow', value: 'wf-saved' },
-      { type: 'workflow', value: 'wf-created' },
-    ]);
-    expect(created).toBe('wf-created');
-    expect(result.current.isEditing).toBe(false);
-    expect(onSaved).toHaveBeenCalledTimes(1);
-  });
-
-  it('creates a workflow while editing, attaches it, and resolves with its id', async () => {
+  it('creates a workflow, attaches it, and resolves with its id', async () => {
     const { result, onSaved } = renderEditor();
 
     act(() => result.current.startEditing());

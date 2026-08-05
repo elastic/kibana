@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// @kbn/swc-register is installed by the calling process (@kbn/setup-node-env).
+// @kbn/babel-register is installed by the calling process (@kbn/setup-node-env).
 // This file is a plain .js module so webpack can require() it directly without
 // additional transpilation; TypeScript is handled by babel-loader for source files.
 

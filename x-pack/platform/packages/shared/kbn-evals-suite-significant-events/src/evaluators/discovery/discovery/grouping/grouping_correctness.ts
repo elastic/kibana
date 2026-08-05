@@ -40,29 +40,29 @@ export const groupingCorrectnessEvaluator: DiscoveryEvaluator = {
   name: 'grouping_correctness',
   kind: 'CODE',
   evaluate: ({ output, expected }) => {
-    // Derive the expected grouping from the canonical expected_significant_events: each event's
+    // Derive the expected grouping from the canonical expected_discoveries: each discovery's
     // detection signals form one group, keyed by rule_uuid from signal metadata.
-    const expectedGroups = expected?.expected_significant_events?.map((event) =>
-      (event.signals ?? []).map((s) => detectionKey(s.metadata ?? {})).filter(Boolean)
+    const expectedGroups = expected?.expected_discoveries?.map((discovery) =>
+      (discovery.signals ?? []).map((s) => detectionKey(s.metadata ?? {})).filter(Boolean)
     );
     if (!expectedGroups || expectedGroups.length === 0) {
       return Promise.resolve({
         score: null,
         label: 'unavailable',
-        explanation: 'No expected_significant_events declared for this scenario',
+        explanation: 'No expected_discoveries declared for this scenario',
       });
     }
 
-    const events = output?.significantEvents ?? [];
-    if (events.length === 0) {
+    const discoveries = output?.discoveries ?? [];
+    if (discoveries.length === 0) {
       return Promise.resolve({
         score: 0,
         label: 'missing-all-rule-assignments',
-        explanation: 'Agent emitted zero significant events — every expected rule is missing',
+        explanation: 'Agent emitted zero discoveries — every expected rule is missing',
       });
     }
-    const actualGroups = events.map((event) => {
-      const signals = event.signals ?? [];
+    const actualGroups = discoveries.map((discovery) => {
+      const signals = discovery.signals ?? [];
       return signals.map((s) => detectionKey(s.metadata ?? {})).filter(Boolean);
     });
 

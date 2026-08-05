@@ -12,7 +12,6 @@ import type { EdgeLabel } from '@dagrejs/dagre';
 import {
   alignDagreCrossAxisInPlace,
   type CrossAxis,
-  separateRankOverlapsInPlace,
   shiftEdgePointsInterpolated,
   snapshotDagreNodeCenters,
 } from './align_cross_axis';
@@ -78,10 +77,6 @@ export function applyDagre(
   const nodeIds = nodes.map((n) => n.id);
   const centersBefore = snapshotDagreNodeCenters(g, nodeIds);
   alignDagreCrossAxisInPlace(g, crossAxis, nodeSep);
-  // The barycenter pass can pull a wide subtree's head across its rank until it
-  // overlaps a sibling; restore dagre's non-overlap guarantee before positions
-  // and edge deltas are read (so edge routing reflects the final coordinates).
-  separateRankOverlapsInPlace(g, crossAxis, nodeSep);
 
   const positioned: DagPositionedNode[] = nodes.map((node) => {
     const dagreNode = g.node(node.id);

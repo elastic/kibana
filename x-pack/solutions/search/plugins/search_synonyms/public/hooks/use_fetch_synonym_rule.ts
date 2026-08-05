@@ -19,9 +19,7 @@ export const useFetchSynonymRule = (synonymsSetId: string, ruleId: string) => {
     queryKey: [SYNONYMS_RULE_FETCH_QUERY_KEY, synonymsSetId, ruleId],
     queryFn: async () => {
       return await http.get<SynonymsSynonymRule>(
-        `/internal/search_synonyms/synonyms/${encodeURIComponent(
-          synonymsSetId
-        )}/${encodeURIComponent(ruleId)}`
+        `/internal/search_synonyms/synonyms/${synonymsSetId}/${ruleId}`
       );
     },
     enabled: !!synonymsSetId && !!ruleId,

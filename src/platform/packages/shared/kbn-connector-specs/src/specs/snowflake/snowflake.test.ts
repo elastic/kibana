@@ -42,10 +42,9 @@ describe('Snowflake', () => {
       expect(Snowflake.metadata.id).toBe('.snowflake');
     });
 
-    it('should support workflows, agentBuilder, and contextEngine features', () => {
+    it('should support workflows and agentBuilder features', () => {
       expect(Snowflake.metadata.supportedFeatureIds).toContain('workflows');
       expect(Snowflake.metadata.supportedFeatureIds).toContain('agentBuilder');
-      expect(Snowflake.metadata.supportedFeatureIds).toContain('contextEngine');
     });
   });
 

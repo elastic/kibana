@@ -22,7 +22,6 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ esClient, requestAuth }) => {
       adminApiCredentials = await requestAuth.getApiKey('admin');
-      await esClient.indices.delete({ index: INDEX_NAME }, { ignore: [404] });
       await esClient.indices.create({
         index: INDEX_NAME,
         mappings: {
@@ -41,7 +40,7 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ esClient }) => {
-      await esClient.indices.delete({ index: INDEX_NAME }, { ignore: [404] });
+      await esClient.indices.delete({ index: INDEX_NAME }).catch(() => {});
     });
 
     apiTest('profiles a valid query', async ({ apiClient }) => {

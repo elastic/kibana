@@ -39,7 +39,7 @@ const mockWorkflows: WorkflowItem[] = [
     id: REAL_VALIDATION_WORKFLOW_ID,
     managed: true,
     name: 'Attack Discovery - Default Validation',
-    tags: ['attack-discovery', 'security', 'attackDiscovery:validate'],
+    tags: ['Attack discovery', 'Security', 'attackDiscovery:validate'],
   },
   {
     description: 'Custom validation workflow',
@@ -54,21 +54,21 @@ const mockWorkflowsWithAllPredefined: WorkflowItem[] = [
     id: 'system-attack-discovery-alert-retrieval',
     managed: true,
     name: 'Attack discovery - Default alert retrieval',
-    tags: ['attack-discovery', 'security', 'attackDiscovery:default_alert_retrieval'],
+    tags: ['Attack discovery', 'Security', 'attackDiscovery:default_alert_retrieval'],
   },
   {
     description: 'Generation workflow',
     id: 'system-attack-discovery-generation',
     managed: true,
     name: 'Attack discovery - Generation',
-    tags: ['attack-discovery', 'security', 'attackDiscovery:generation'],
+    tags: ['Attack discovery', 'Security', 'attackDiscovery:generation'],
   },
   {
     description: 'Validates generated attack discoveries',
     id: REAL_VALIDATION_WORKFLOW_ID,
     managed: true,
     name: 'Attack Discovery - Default Validation',
-    tags: ['attack-discovery', 'security', 'attackDiscovery:validate'],
+    tags: ['Attack discovery', 'Security', 'attackDiscovery:validate'],
   },
   {
     description: 'Orchestrates KI feature identification',

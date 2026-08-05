@@ -133,22 +133,22 @@ describe('field statistics embeddable transforms', () => {
     } satisfies RawFieldStatsState;
 
     expect(() =>
-      fieldStatsTableEmbeddableSchema.parse(
+      fieldStatsTableEmbeddableSchema.validate(
         transformOut(currentDataViewStored.state, currentDataViewStored.references)
       )
     ).not.toThrow();
     expect(() =>
-      fieldStatsTableEmbeddableSchema.parse(
+      fieldStatsTableEmbeddableSchema.validate(
         transformOut(currentEsqlStored.state, currentEsqlStored.references)
       )
     ).not.toThrow();
     expect(() =>
-      fieldStatsTableEmbeddableSchema.parse(
+      fieldStatsTableEmbeddableSchema.validate(
         transformOut(legacyDataViewStoredState, [dataViewReference])
       )
     ).not.toThrow();
     expect(() =>
-      fieldStatsTableEmbeddableSchema.parse(transformOut(legacyEsqlStoredState))
+      fieldStatsTableEmbeddableSchema.validate(transformOut(legacyEsqlStoredState))
     ).not.toThrow();
   });
 });

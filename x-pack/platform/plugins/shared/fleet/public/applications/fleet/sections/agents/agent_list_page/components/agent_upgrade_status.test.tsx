@@ -324,7 +324,7 @@ describe('AgentUpgradeStatus', () => {
       });
 
       expectUpgradeStatusBadgeLabel(results, 'Upgrade rolled back');
-      await expectTooltip(results, 'Upgrade rolled back to previous version.');
+      await expectTooltip(results, 'Upgrade unsuccessful. Rolling back to previous version.');
     });
 
     it('should render UPG_FAILED state correctly', async () => {

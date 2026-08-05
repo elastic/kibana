@@ -8,8 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiSpacer } from '@elastic/eui';
-import { KbnWarningCallout } from '@kbn/ui-callout';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const getI18nTexts = () => ({
@@ -27,13 +26,13 @@ export const ContentEditorFlyoutWarningsCallOut = ({
 
   return warningMessages?.length ? (
     <>
-      <KbnWarningCallout announceOnMount={false} title={i18nTexts.title}>
+      <EuiCallOut announceOnMount={false} title={i18nTexts.title} color="warning">
         <ul>
           {warningMessages.map((message) => (
             <li>{message}</li>
           ))}
         </ul>
-      </KbnWarningCallout>
+      </EuiCallOut>
       <EuiSpacer />
     </>
   ) : null;

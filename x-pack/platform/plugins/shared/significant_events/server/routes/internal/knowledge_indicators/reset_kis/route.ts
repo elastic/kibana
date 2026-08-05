@@ -15,7 +15,7 @@ import { resetSignificantEvents } from '../../../../lib/significant_events/reset
 
 // TODO: Remove with the time-boxed follow-up to nightshift-program#651 once supported
 // upgrade paths can no longer contain Significant Events v1 rules or alerts.
-const resetKIsRoute = createServerRoute({
+export const resetKIsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/significant_events/_reset_kis',
   options: {
     access: 'internal',
@@ -59,7 +59,7 @@ const resetKIsRoute = createServerRoute({
     return resetSignificantEvents({
       kiClient,
       esClient: scopedClusterClient.asCurrentUser,
-      logger: logger.get('significantEvents'),
+      logger: logger.get('significant_events'),
       request,
       streamsKIsOnboardingClient,
       deleteLegacyRules,

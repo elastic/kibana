@@ -1,9 +1,5 @@
 {
-  "sha1": "586d6de663b6abfd58e055f33854607a0c314fbd",
-  "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
-  ],
+  "sha1": "91eb37f13757c0fcdb676110dbc352b68de071d5",
   "tests": [
     {
       "id": "ac7591df410e28e-62e78b299821a45",
@@ -12,8 +8,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/reports/ui/parallel_tests/global.setup.ts",
-        "line": 5,
-        "column": 1
+        "line": 10,
+        "column": 16
       }
     },
     {
@@ -23,6 +19,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-security_ease",
@@ -30,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/reports/ui/parallel_tests/ai_value_report.spec.ts",
-        "line": 23,
-        "column": 27
+        "line": 22,
+        "column": 14
       }
     },
     {
@@ -41,6 +39,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-security_ease",
@@ -48,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/reports/ui/parallel_tests/ai_value_report.spec.ts",
-        "line": 30,
-        "column": 85
+        "line": 37,
+        "column": 14
       }
     },
     {
@@ -59,6 +59,8 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-security_complete",
         "@cloud-serverless-security_complete",
         "@local-serverless-security_ease",
@@ -66,8 +68,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/reports/ui/parallel_tests/ai_value_report.spec.ts",
-        "line": 39,
-        "column": 50
+        "line": 51,
+        "column": 14
       }
     },
     {
@@ -80,8 +82,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/reports/ui/parallel_tests/serverless_ai_value_report_chrome_nav.spec.ts",
-        "line": 14,
-        "column": 9
+        "line": 15,
+        "column": 14
       }
     },
     {
@@ -94,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/reports/ui/parallel_tests/serverless_ai_value_report_role_chrome_nav.spec.ts",
-        "line": 14,
-        "column": 9
+        "line": 15,
+        "column": 14
       }
     }
   ]

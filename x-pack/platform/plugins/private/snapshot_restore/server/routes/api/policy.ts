@@ -344,9 +344,7 @@ export function registerPolicyRoutes({
   );
 
   // Update retention settings
-  const retentionSettingsSchema = schema.object({
-    retentionSchedule: schema.string({ maxLength: 256 }),
-  });
+  const retentionSettingsSchema = schema.object({ retentionSchedule: schema.string() });
 
   router.put(
     {

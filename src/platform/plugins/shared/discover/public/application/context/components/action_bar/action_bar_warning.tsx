@@ -9,15 +9,17 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnInfoCallout } from '@kbn/ui-callout';
+import { EuiCallOut } from '@elastic/eui';
 import { SurrDocType } from '../../services/context';
 
 export function ActionBarWarning({ docCount, type }: { docCount: number; type: SurrDocType }) {
   if (type === SurrDocType.PREDECESSORS) {
     return (
-      <KbnInfoCallout
+      <EuiCallOut
         announceOnMount
+        color="primary"
         data-test-subj="predecessorsWarningMsg"
+        iconType="info"
         title={
           docCount === 0 ? (
             <FormattedMessage
@@ -38,8 +40,10 @@ export function ActionBarWarning({ docCount, type }: { docCount: number; type: S
   }
 
   return (
-    <KbnInfoCallout
+    <EuiCallOut
+      color="primary"
       data-test-subj="successorsWarningMsg"
+      iconType="info"
       title={
         docCount === 0 ? (
           <FormattedMessage

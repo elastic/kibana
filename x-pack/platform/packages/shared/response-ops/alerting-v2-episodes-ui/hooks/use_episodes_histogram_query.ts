@@ -12,10 +12,9 @@ import type { TimeRange } from '@kbn/es-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { useSpaceId } from './use_space_id';
 import { queryKeys } from '../query_keys';
-import { buildEpisodesHistogramQuery } from '../queries/episodes_query';
+import { buildEpisodesHistogramQuery, type EpisodesFilterState } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import {
   generateTimeBuckets,

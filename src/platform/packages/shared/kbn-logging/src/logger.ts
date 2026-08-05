@@ -45,7 +45,7 @@ import type { LogLevelId } from './log_level';
  *       filters:
  *         - type: meta
  *           match:
- *             [labels.ruleType]: esql
+ *             labels.ruleType: esql
  *           level: debug
  * ```
  *

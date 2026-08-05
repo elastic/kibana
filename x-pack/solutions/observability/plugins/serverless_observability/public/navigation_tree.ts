@@ -48,7 +48,7 @@ export const createNavigationTree = ({
     body: [
       ...filterForFeatureAvailability(
         {
-          link: 'nightshift' as const,
+          link: 'observability-overview:nightshift' as const,
           icon: NightshiftNavigationIcon,
         },
         significantEventsAvailable

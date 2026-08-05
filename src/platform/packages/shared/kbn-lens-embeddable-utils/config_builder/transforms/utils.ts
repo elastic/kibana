@@ -23,7 +23,6 @@ import type {
 import { cleanupFormulaReferenceColumns } from '@kbn/lens-common';
 import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import { Sha256 } from '@kbn/crypto-browser';
-import { stableStringify } from '@kbn/std';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FILTERS, isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
 import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
@@ -157,46 +156,17 @@ function normalizeWhitespace(str: string): string {
 }
 
 export function generateAdHocDataViewId(
-  dataView: Pick<
-    APIAdHocDataView,
-    | 'index'
-    | 'timeFieldName'
-    | 'esqlQuery'
-    | 'dataSourceType'
-    | 'name'
-    | 'allowHidden'
-    | 'fieldSettings'
-  >
+  dataView: Pick<APIAdHocDataView, 'index' | 'timeFieldName' | 'esqlQuery' | 'dataSourceType'>
 ): string {
   const base = `${dataView.index}${dataView.timeFieldName ? `-${dataView.timeFieldName}` : ''}`;
   // When timeFieldName is not explicitly provided in the query, then it is not persisted during the transformations and
   // at runtime we fallback to @timestamp if it exists in the index.
   // But different ES|QL queries against the same index can resolve to different time fields. See: https://github.com/elastic/kibana/pull/256764
   // Including a hash of the query in the ID ensures each distinct query gets its own cached DataView, preventing stale time-field resolution.
-  if (dataView.dataSourceType === 'esql') {
-    return !dataView.timeFieldName && dataView.esqlQuery
-      ? `${base}-${sha256Sync(normalizeWhitespace(dataView.esqlQuery))}`
-      : base;
+  if (dataView.dataSourceType === 'esql' && !dataView.timeFieldName && dataView.esqlQuery) {
+    return `${base}-${sha256Sync(normalizeWhitespace(dataView.esqlQuery))}`;
   }
-
-  // For form-based ad hoc data views, two over the same index+timeField can
-  // still differ in specifications (custom name, allowHidden, or runtime/scripted
-  // field settings). Always append a hash of the canonical specification fields so
-  // that identical specs map to the same id and different specs get distinct ids.
-  // Mirrors the ES|QL `base-<hash>` pattern above.
-  //
-  // `stableStringify` sorts keys and omits `undefined` values, so key order and
-  // absent/optional field settings can't perturb the hash.
-  const canonical = {
-    name: dataView.name ?? dataView.index,
-    allowHidden: dataView.allowHidden ? true : undefined, // treat false as undefined
-    fieldSettings:
-      dataView.fieldSettings && Object.keys(dataView.fieldSettings).length > 0
-        ? dataView.fieldSettings
-        : undefined,
-  };
-
-  return `${base}-${sha256Sync(stableStringify(canonical))}`;
+  return base;
 }
 
 export function getAdHocDataViewSpec(dataView: APIAdHocDataView) {

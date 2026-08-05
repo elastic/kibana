@@ -23,7 +23,6 @@
     "@kbn/shared-ux-router",
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
-    "@kbn/as-code-filters-schema",
-    "@kbn/ui-callout"
+    "@kbn/as-code-filters-schema"
   ]
 }

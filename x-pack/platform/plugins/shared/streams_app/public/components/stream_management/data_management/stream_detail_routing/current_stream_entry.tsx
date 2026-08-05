@@ -53,7 +53,6 @@ export function CurrentStreamEntry({ definition }: { definition: PartitionableDe
                         type={isLast ? 'folderOpen' : 'folderClosed'}
                         size="m"
                         color="subdued"
-                        aria-hidden={true}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -98,7 +97,6 @@ export function CurrentStreamEntry({ definition }: { definition: PartitionableDe
                       css={css`
                         margin: 0 ${euiTheme.size.xs};
                       `}
-                      aria-hidden={true}
                     />
                   </EuiFlexItem>
                 )}

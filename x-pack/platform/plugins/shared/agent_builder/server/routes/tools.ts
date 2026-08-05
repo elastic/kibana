@@ -164,25 +164,6 @@ export function registerToolsRoutes({
                   description: 'Tool-specific configuration parameters. See examples for details.',
                 },
               }),
-              confirmation: schema.maybe(
-                schema.object(
-                  {
-                    askUser: schema.maybe(
-                      schema.oneOf([
-                        schema.literal('once'),
-                        schema.literal('always'),
-                        schema.literal('never'),
-                      ])
-                    ),
-                  },
-                  {
-                    meta: {
-                      description:
-                        'Optional tool call policy to control tool call confirmation behavior',
-                    },
-                  }
-                )
-              ),
             }),
           },
         },
@@ -268,25 +249,6 @@ export function registerToolsRoutes({
                       'Updated tool-specific configuration parameters. See examples for details.',
                   },
                 })
-              ),
-              confirmation: schema.maybe(
-                schema.object(
-                  {
-                    askUser: schema.maybe(
-                      schema.oneOf([
-                        schema.literal('once'),
-                        schema.literal('always'),
-                        schema.literal('never'),
-                      ])
-                    ),
-                  },
-                  {
-                    meta: {
-                      description:
-                        'Updated tool call policy to control tool call confirmation behavior',
-                    },
-                  }
-                )
               ),
             }),
           },

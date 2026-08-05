@@ -10,13 +10,12 @@ import { ESQLVariableType } from '@kbn/esql-types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import {
-  asEsqlRows,
   buildEpisodesQuery,
-  PAGE_SIZE_ESQL_VARIABLE,
   type AlertEpisodeEsqlRow,
   type EpisodesFilterState,
   type EpisodesSortState,
-} from '@kbn/alerting-v2-common-queries';
+} from '../queries/episodes_query';
+import { PAGE_SIZE_ESQL_VARIABLE } from '../constants';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 
 export interface FetchAlertingEpisodesOptions {
@@ -59,10 +58,10 @@ export const fetchAlertingEpisodes = ({
     input.timeRange = timeRange;
   }
 
-  return executeEsqlQuery({
+  return executeEsqlQuery<AlertEpisodeEsqlRow>({
     expressions,
     query: query.print('basic'),
     input,
     abortSignal,
-  }).then((rows) => asEsqlRows(query, rows));
+  });
 };

@@ -19,8 +19,6 @@ import {
   ServiceFlyoutContextProvider,
   type ServiceFlyoutContextValue,
 } from './service_flyout_context';
-import { useServiceFlyoutCapabilities } from './hooks/use_service_flyout_capabilities';
-import { useApmIndices } from './hooks/use_apm_indices';
 export type { ServiceFlyoutService } from './types';
 
 export const SERVICE_FLYOUT_TAB_IDS = {
@@ -43,11 +41,6 @@ export const SERVICE_FLYOUT_TABS = [
   },
 ] as const;
 
-export interface ServiceFlyoutTelemetry {
-  client: { reportServiceFlyoutViewed: (params: { tabId: string; source: string }) => void };
-  source: string;
-}
-
 interface ServiceFlyoutProps {
   deps: ServiceFlyoutContextValue['deps'];
   service: ServiceFlyoutContextValue['service'];
@@ -57,21 +50,12 @@ interface ServiceFlyoutProps {
     rangeTo: string;
     transactionType?: string;
   };
-  telemetry: ServiceFlyoutTelemetry;
+  onView?: (params: { tabId: ServiceFlyoutTabId }) => void;
   onClose: () => void;
-  historyKey?: symbol;
-  contextActions?: ServiceFlyoutContextValue['contextActions'];
 }
 
-export function ServiceFlyout({
-  deps,
-  service,
-  filters,
-  telemetry,
-  onClose,
-  historyKey,
-  contextActions,
-}: ServiceFlyoutProps) {
+export function ServiceFlyout({ deps, service, filters, onView, onClose }: ServiceFlyoutProps) {
+  const { core, share, lens, dataViews, alerting } = deps;
   const { environment, rangeFrom, rangeTo, transactionType } = filters;
   const title = service.name;
   const titleId = useGeneratedHtmlId({ prefix: 'serviceFlyoutTitle' });
@@ -81,29 +65,16 @@ export function ServiceFlyout({
     rangeFrom: flyoutRange.rangeFrom,
     rangeTo: flyoutRange.rangeTo,
   });
-  const [flyoutTransactionType, setFlyoutTransactionType] = useState(transactionType ?? '');
+  const [flyoutTransactionType, setTransactionType] = useState(transactionType ?? '');
   const [refreshToken, setRefreshToken] = useState(Date.now());
-
-  const capabilities = useServiceFlyoutCapabilities({
-    serviceName: service.name,
-    environment: flyoutEnvironment,
-    start,
-    end,
-  });
-
-  const { indices: indicesValue, loading: indicesLoading } = useApmIndices({
-    http: deps.core.http,
-  });
-  const indices = indicesLoading ? undefined : indicesValue ?? null;
 
   const [selectedTabId, setSelectedTabId] = useState<ServiceFlyoutTabId>(
     SERVICE_FLYOUT_DEFAULT_TAB_ID
   );
 
-  const { client: telemetryClient, source: telemetrySource } = telemetry;
   useEffect(() => {
-    telemetryClient.reportServiceFlyoutViewed({ tabId: selectedTabId, source: telemetrySource });
-  }, [telemetryClient, telemetrySource, selectedTabId]);
+    onView?.({ tabId: selectedTabId });
+  }, [onView, selectedTabId]);
 
   const renderTabContent = () => {
     switch (selectedTabId) {
@@ -117,11 +88,8 @@ export function ServiceFlyout({
   return (
     <ServiceFlyoutContextProvider
       value={{
-        deps,
-        contextActions,
+        deps: { core, share, lens, dataViews, alerting },
         service,
-        capabilities,
-        indices,
         filters: {
           environment: flyoutEnvironment,
           setEnvironment: setFlyoutEnvironment,
@@ -131,12 +99,12 @@ export function ServiceFlyout({
           refreshToken,
           onRefresh: () => setRefreshToken(Date.now()),
           transactionType: flyoutTransactionType,
-          setTransactionType: setFlyoutTransactionType,
+          setTransactionType,
         },
       }}
     >
       <TimeRangeMetadataContextProvider
-        uiSettings={deps.core.uiSettings}
+        uiSettings={core.uiSettings}
         start={start}
         end={end}
         kuery=""
@@ -152,7 +120,6 @@ export function ServiceFlyout({
           resizable
           minWidth={660}
           session="start"
-          historyKey={historyKey}
           flyoutMenuProps={{ title }}
           aria-labelledby={titleId}
         >

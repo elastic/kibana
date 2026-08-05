@@ -60,7 +60,7 @@ spaceTest.describe(
         await expect(managementPage.assetCriticalityInsufficientPrivilegesCallout).toBeVisible({
           timeout: 30000,
         });
-        await expect(managementPage.assetCriticalityFilePicker).toBeHidden();
+        await expect(managementPage.assetCriticalityFileUploadSection).toBeHidden();
       }
     );
   }

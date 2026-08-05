@@ -69,7 +69,6 @@ export interface RuntimeLayerState {
 
 export type VectorLayerDescriptor = Omit<StoredVectorLayer, 'joins'> & {
   joins?: JoinDescriptor[];
-  [key: string]: unknown;
 } & RuntimeLayerState;
 
 export type HeatmapLayerDescriptor = StoredHeatmapLayer & RuntimeLayerState;

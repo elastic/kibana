@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('@kbn/swc-register').install();
+require('@kbn/babel-register').install();
 
 const { getStringifiedConnectorsFromConfig } = require('./load_connectors_from_env');
 

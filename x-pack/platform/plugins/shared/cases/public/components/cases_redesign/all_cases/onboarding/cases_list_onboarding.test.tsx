@@ -23,14 +23,14 @@ describe('CasesListOnboarding', () => {
     renderWithTestingProviders(<CasesListOnboarding />);
 
     expect(screen.getByTestId('cases-list-welcome-banner')).toBeInTheDocument();
-    expect(screen.getByTestId('cases-list-welcome-banner-primaryAction')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-list-welcome-banner-start-tour')).toBeInTheDocument();
     expect(screen.getByTestId('cases-list-welcome-banner-dismiss')).toBeInTheDocument();
   });
 
   it('hides the banner when the tour is started', async () => {
     renderWithTestingProviders(<CasesListOnboarding />);
 
-    await userEvent.click(screen.getByTestId('cases-list-welcome-banner-primaryAction'));
+    await userEvent.click(screen.getByTestId('cases-list-welcome-banner-start-tour'));
 
     expect(screen.queryByTestId('cases-list-welcome-banner')).not.toBeInTheDocument();
   });

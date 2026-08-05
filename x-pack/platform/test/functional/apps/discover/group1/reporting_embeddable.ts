@@ -95,9 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
   };
 
-  describe('Discover Embeddable - Generate CSV report per panel', function () {
-    this.timeout(5 * 60 * 1000);
-
+  describe('Discover Embeddable - Generate CSV report per panel', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded(

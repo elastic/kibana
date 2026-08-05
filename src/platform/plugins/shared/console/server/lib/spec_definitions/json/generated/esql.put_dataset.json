@@ -16,6 +16,30 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "data_source": "",
+      "resource": "",
+      "description": "",
+      "mappings": {
+        "dynamic": {
+          "__one_of": [
+            "true",
+            "false"
+          ]
+        },
+        "properties": {
+          "*": {
+            "type": "",
+            "path": "",
+            "format": ""
+          }
+        },
+        "_id": {
+          "path": ""
+        }
+      },
+      "settings": {}
+    },
     "methods": [
       "PUT"
     ],
@@ -25,8 +49,8 @@
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-esql-put-dataset",
     "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-esql-put-dataset",
     "availability": {
-      "stack": false,
-      "serverless": false
+      "stack": true,
+      "serverless": true
     }
   }
 }

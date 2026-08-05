@@ -37,7 +37,6 @@ export const FilterGroup = ({ label, options, onChange }: FilterGroupProps) => {
 
   return (
     <EuiPopover
-      aria-label={label}
       id={filterGroupPopoverId}
       button={
         <EuiFilterButton

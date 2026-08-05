@@ -13,9 +13,8 @@ import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getIndexPatternService, getIndexPatternSelectComponent } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 
-import { EuiFormRow, EuiPanel } from '@elastic/eui';
+import { EuiFormRow, EuiCallOut, EuiPanel } from '@elastic/eui';
 import { getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
 import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../../../common/i18n_getters';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
@@ -185,15 +184,14 @@ export class CreateSourceEditor extends Component {
     let callout;
     if (this.state.indexPattern && !this.state.indexPatternHasMultipleGeoFields) {
       callout = (
-        <KbnWarningCallout
-          announceOnMount={false}
-          title={
+        <EuiCallOut announceOnMount={false} color="warning">
+          <p>
             <FormattedMessage
               id="xpack.maps.source.pewPew.noSourceAndDestDetails"
               defaultMessage="Selected data view does not contain source and destination fields."
             />
-          }
-        />
+          </p>
+        </EuiCallOut>
       );
     }
 

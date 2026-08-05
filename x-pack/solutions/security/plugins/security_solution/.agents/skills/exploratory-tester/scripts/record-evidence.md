@@ -1,6 +1,6 @@
 # Recording video evidence for a finding
 
-Used from `phases/2-confirm-candidate.md` → "Confirm before logging" step 2, for a Level 1 or Level 2 finding that has already reproduced.
+Used from `phases/2-explore.md` → "Confirm before logging" step 2, for a Level 1 or Level 2 finding that has already reproduced.
 
 **Requires:** the `browser_run_code_unsafe` tool and a working `ffmpeg` install (`which ffmpeg`). If either is missing, skip recording — do not install `ffmpeg` or otherwise change the environment without asking the user first; just note `- Video: unavailable (<reason>)` in the finding and move on.
 

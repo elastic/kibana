@@ -99,7 +99,7 @@ export class IngestPipelinesPage {
 
   async goto() {
     await this.page.gotoApp('management/ingest/ingest_pipelines');
-    await this.appTitle.waitFor({ timeout: 60_000 });
+    await this.appTitle.waitFor();
   }
 
   async sectionHeadingText() {

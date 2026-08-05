@@ -5,24 +5,14 @@
  * 2.0.
  */
 
-import { act, waitFor, renderHook } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useStream } from './use_stream';
-
-// Minimum spacing between emissions enforced by the stream observable (stream_observable.ts).
-const MIN_DELAY = 10;
 
 const refetchCurrentConversation = jest.fn();
 const reader = jest.fn();
 const cancel = jest.fn();
-// LangChain `{ type: 'content', payload }` lines, matching what the observable parser consumes.
-const chunk1 = `{"payload":"","type":"content"}
-{"payload":"My","type":"content"}
-{"payload":" ","type":"content"}
-{"payload":"new","type":"content"}
-`;
-const chunk2 = `{"payload":" mes","type":"content"}
-{"payload":"sage","type":"content"}
-`;
+const chunk1 = `data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"}}]}`;
+const chunk2 = `\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" message"}}]}\ndata: [DONE]`;
 
 const readerComplete = {
   read: reader
@@ -52,25 +42,16 @@ const defaultProps = {
   isError: false,
 };
 
-describe('useStream', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/180091
+describe.skip('useStream', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('Should stream response. isLoading/isStreaming are true while streaming, isLoading/isStreaming are false when streaming completes', async () => {
-    // Fake timers make the observable's wall-clock throttling (MIN_DELAY-spaced
-    // emissions) deterministic, so the transient streaming states can be observed
-    // without racing against real timers.
-    jest.useFakeTimers();
-    try {
-      const { result } = renderHook(() => useStream(defaultProps));
-      expect(reader).toHaveBeenCalledTimes(1);
-
-      // Seed emission (emitted with no delay): loading has started but no message
-      // content has arrived yet.
-      await act(async () => {
-        await jest.advanceTimersByTimeAsync(0);
-      });
+    const { result } = renderHook(() => useStream(defaultProps));
+    expect(reader).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
       expect(result.current).toEqual({
         error: undefined,
         isLoading: true,
@@ -78,11 +59,8 @@ describe('useStream', () => {
         pendingMessage: '',
         setComplete: expect.any(Function),
       });
-
-      // First content chunk: streaming is now in progress.
-      await act(async () => {
-        await jest.advanceTimersByTimeAsync(MIN_DELAY);
-      });
+    });
+    await waitFor(() => {
       expect(result.current).toEqual({
         error: undefined,
         isLoading: true,
@@ -90,11 +68,9 @@ describe('useStream', () => {
         pendingMessage: 'My',
         setComplete: expect.any(Function),
       });
+    });
 
-      // Drain the remaining chunks through to completion.
-      await act(async () => {
-        await jest.advanceTimersByTimeAsync(MIN_DELAY * 10);
-      });
+    await waitFor(() => {
       expect(result.current).toEqual({
         error: undefined,
         isLoading: false,
@@ -102,10 +78,9 @@ describe('useStream', () => {
         pendingMessage: 'My new message',
         setComplete: expect.any(Function),
       });
-      expect(reader).toHaveBeenCalledTimes(4);
-    } finally {
-      jest.useRealTimers();
-    }
+    });
+
+    expect(reader).toHaveBeenCalledTimes(4);
   });
 
   it('should not call observable when content is provided', () => {

@@ -6,12 +6,10 @@
  */
 
 import { useCallback } from 'react';
-import { useDispatch } from 'react-redux-v7';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { v4 as uuidv4 } from 'uuid';
 import { PageScope } from '../../../../data_view_manager/constants';
-import { useSignalIndexName } from '../../../../data_view_manager/hooks/use_signal_index_name';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { useSelectDataView } from '../../../../data_view_manager/hooks/use_select_data_view';
+import { sourcererActions } from '../../../../sourcerer/store';
 import {
   getDataProvider,
   getDataProviderAnd,
@@ -21,6 +19,7 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { updateProviders } from '../../../../timelines/store/actions';
+import { sourcererSelectors } from '../../../../common/store';
 import type { TimeRange } from '../../../../common/store/inputs/model';
 
 export interface Filter {
@@ -32,9 +31,8 @@ export interface Filter {
 export const useNavigateToTimeline = () => {
   const dispatch = useDispatch();
 
-  const signalIndexName = useSignalIndexName();
-  const { id: defaultDataViewId } = useSecurityDefaultPatterns();
-  const setSelectedDataView = useSelectDataView();
+  const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
+  const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
 
   const clearTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
@@ -53,13 +51,15 @@ export const useNavigateToTimeline = () => {
         })
       );
 
-      setSelectedDataView({
-        scope: PageScope.timeline,
-        id: defaultDataViewId,
-        fallbackPatterns: [signalIndexName || ''],
-      });
+      dispatch(
+        sourcererActions.setSelectedDataView({
+          id: PageScope.timeline,
+          selectedDataViewId: defaultDataView.id,
+          selectedPatterns: [signalIndexName || ''],
+        })
+      );
     },
-    [clearTimeline, defaultDataViewId, dispatch, setSelectedDataView, signalIndexName]
+    [clearTimeline, defaultDataView.id, dispatch, signalIndexName]
   );
 
   /** *

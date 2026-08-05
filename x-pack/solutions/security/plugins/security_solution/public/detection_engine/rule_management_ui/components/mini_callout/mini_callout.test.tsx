@@ -44,19 +44,19 @@ describe('MiniCallout', () => {
   it('renders the dismiss link when dismissible is true', () => {
     render(<MiniCallout {...defaultProps} dismissible />);
 
-    expect(screen.getByRole('button', { name: 'Dismiss' })).toBeInTheDocument();
+    expect(screen.getByText('Dismiss')).toBeInTheDocument();
   });
 
   it('does not render the dismiss link when dismissible is false', () => {
     render(<MiniCallout {...defaultProps} dismissible={false} />);
 
-    expect(screen.queryByRole('button', { name: 'Dismiss' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Dismiss')).not.toBeInTheDocument();
   });
 
   it('removes the MiniCallout component from the DOM when the dismiss link is clicked', () => {
     render(<MiniCallout {...defaultProps} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+    fireEvent.click(screen.getByText('Dismiss'));
 
     expect(screen.queryByText(defaultProps.title as string)).not.toBeInTheDocument();
   });

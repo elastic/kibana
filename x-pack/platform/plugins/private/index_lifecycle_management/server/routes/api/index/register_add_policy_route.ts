@@ -28,9 +28,9 @@ async function addLifecyclePolicy(
 }
 
 const bodySchema = schema.object({
-  indexName: schema.string({ maxLength: 1000 }),
-  policyName: schema.string({ maxLength: 1000 }),
-  alias: schema.maybe(schema.string({ maxLength: 1000 })),
+  indexName: schema.string(),
+  policyName: schema.string(),
+  alias: schema.maybe(schema.string()),
 });
 
 export function registerAddPolicyRoute({

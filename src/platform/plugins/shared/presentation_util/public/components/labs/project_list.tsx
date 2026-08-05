@@ -8,10 +8,9 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiCallOut, useEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { SolutionName, ProjectID, Project } from '../../../common';
 import type { Props as ProjectListItemProps } from './project_list_item';
 import { ProjectListItem } from './project_list_item';
@@ -38,7 +37,7 @@ const EmptyList = ({ solutions }: { solutions?: SolutionName[] }) => {
         title = strings.getNoProjectsInSolutionMessage('Canvas');
     }
   }
-  return <KbnInfoCallout title={title} />;
+  return <EuiCallOut title={title} />;
 };
 
 export const ProjectList = (props: Props) => {

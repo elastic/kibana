@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import React, { Fragment } from 'react';
-import { EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DECIMAL_DEGREES_PRECISION } from '../../../../common/constants';
 
@@ -20,7 +20,6 @@ export interface Props {
 }
 
 export function MouseCoordinatesControl({ mouseCoordinates, zoom }: Props) {
-  const { euiTheme } = useEuiTheme();
   let latLon;
   if (mouseCoordinates) {
     latLon = (
@@ -38,7 +37,7 @@ export function MouseCoordinatesControl({ mouseCoordinates, zoom }: Props) {
   }
 
   return (
-    <div className="mapViewControl__coordinates" css={{ backgroundColor: euiTheme.colors.body }}>
+    <div className="mapViewControl__coordinates">
       <EuiText size="xs">
         <small>
           {latLon}

@@ -13,12 +13,12 @@ import {
   EuiButton,
   EuiSpacer,
   EuiIcon,
+  EuiCallOut,
   EuiButtonEmpty,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { dataViewsService } from '../../services/kibana_services';
 import { DatasourceSelector } from './datasource_selector';
@@ -203,10 +203,9 @@ export class DatasourceComponent extends PureComponent {
               </EuiFlexGroup>
             </>
           ) : (
-            <KbnWarningCallout
-              announceOnMount={false}
-              text={strings.getExpressionArgDescription()}
-            />
+            <EuiCallOut announceOnMount={false} color="warning">
+              <p>{strings.getExpressionArgDescription()}</p>
+            </EuiCallOut>
           )}
         </div>
 

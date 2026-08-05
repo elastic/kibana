@@ -10,6 +10,7 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -22,7 +23,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { DashboardState } from '../../server';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup_service';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from './_dashboard_listing_strings';
@@ -208,7 +208,7 @@ export const DashboardUnsavedListing = ({
 
   return unsavedDashboardIds.length === 0 ? null : (
     <>
-      <KbnInfoCallout
+      <EuiCallOut
         announceOnMount
         heading="h3"
         data-test-subj="unsavedDashboardsCallout"
@@ -232,7 +232,7 @@ export const DashboardUnsavedListing = ({
             />
           );
         })}
-      </KbnInfoCallout>
+      </EuiCallOut>
       <EuiSpacer size="m" />
     </>
   );

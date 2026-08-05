@@ -43,7 +43,6 @@ const createMockRoundCompleteEvent = (
           attachment_id: ref.attachment_id,
           version: 1,
           operation: ref.operation as typeof ATTACHMENT_REF_OPERATION.updated,
-          actor: 'agent' as const,
         })),
       },
     } as ConversationRound,

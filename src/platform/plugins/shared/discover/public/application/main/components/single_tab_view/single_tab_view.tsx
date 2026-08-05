@@ -14,6 +14,7 @@ import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import useLatest from 'react-use/lib/useLatest';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
+import type { MainHistoryLocationState } from '../../../../../common';
 import type { ProfileStateMap } from '../../../../../common/context_awareness';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverAppState } from '../../state_management/redux';
@@ -130,15 +131,15 @@ export const SingleTabView = ({
 
   useEffect(() => {
     if (currentTabInitializationState.initializationStatus === TabInitializationStatus.NotStarted) {
-      // The location state is captured by `initializeTabs` before the tab ID is pushed to the URL,
-      // which discards it, so it can't be read from the history here
-      const initialTabState = services.initialTabStateService.consume();
+      const historyLocationState = services.getScopedHistory<
+        MainHistoryLocationState & { defaultState?: DiscoverAppState }
+      >()?.location.state;
 
       initializeTab.current({
-        dataViewSpec: initialTabState?.dataViewSpec,
-        esqlControls: initialTabState?.esqlControls,
-        defaultUrlState: initialTabState?.defaultState,
-        profileState: initialTabState?.profileState,
+        dataViewSpec: historyLocationState?.dataViewSpec,
+        esqlControls: historyLocationState?.esqlControls,
+        defaultUrlState: historyLocationState?.defaultState,
+        profileState: historyLocationState?.profileState,
       });
     }
   }, [currentTabInitializationState.initializationStatus, initializeTab, services]);

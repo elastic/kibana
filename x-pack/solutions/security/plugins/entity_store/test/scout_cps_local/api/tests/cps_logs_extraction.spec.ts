@@ -14,7 +14,7 @@ import {
   INTERNAL_HEADERS,
   LATEST_ALIAS,
   UPDATES_INDEX,
-} from '../../../scout/common/fixtures/constants';
+} from '../../../scout/api/fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import {
   clearEntityStoreIndices,
@@ -22,7 +22,7 @@ import {
   installAllEntityTypes,
   normalizeKeywordList,
   uninstallAllEntityTypes,
-} from '../../../scout/common/fixtures/helpers';
+} from '../../../scout/api/fixtures/helpers';
 
 const CPS_TEST_LOGS_INDEX = 'logs-cps-test';
 const NOW = Date.now();

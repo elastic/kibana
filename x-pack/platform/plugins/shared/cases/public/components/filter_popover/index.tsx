@@ -68,7 +68,6 @@ export const FilterPopoverComponent = ({
 
   return (
     <EuiPopover
-      aria-label={buttonLabel}
       ownFocus
       button={
         <EuiFilterButton

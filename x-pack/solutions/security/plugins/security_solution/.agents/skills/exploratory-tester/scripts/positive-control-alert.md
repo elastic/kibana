@@ -1,6 +1,6 @@
 # Manufacturing a genuine positive-control alert
 
-Used from `phases/2-confirm-candidate.md` → "Confirm before logging" (absent-element path) and from `phases/2-flow-core.md` → "CCS-specific techniques", when you need to prove real data *exists* before concluding a feature is broken — i.e. to tell "the feature genuinely can't show this data" apart from "there is simply no data to show."
+Used from `phases/2-explore.md` → "Confirm before logging" (absent-element path) and → "CCS-specific techniques", when you need to prove real data *exists* before concluding a feature is broken — i.e. to tell "the feature genuinely can't show this data" apart from "there is simply no data to show."
 
 **Requires:** a source-cluster API key (`config.json → credentials.api_key`)
 and `$SESSION_DIR`, since every resource below is registered for cleanup.

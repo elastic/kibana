@@ -1,5 +1,5 @@
 {
-  "sha1": "34ad3766a3eacd92e761b2fde5b00fb766c90d0d",
+  "sha1": "19268882679d448b4122c274c52411fb3ca37f3d",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -23,8 +23,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 52,
-        "column": 14
+        "line": 44,
+        "column": 12
       }
     },
     {
@@ -45,8 +45,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 52,
-        "column": 14
+        "line": 44,
+        "column": 12
       }
     },
     {
@@ -67,8 +67,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 52,
-        "column": 14
+        "line": 44,
+        "column": 12
       }
     },
     {
@@ -89,8 +89,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 52,
-        "column": 14
+        "line": 44,
+        "column": 12
       }
     },
     {
@@ -111,8 +111,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 52,
-        "column": 14
+        "line": 44,
+        "column": 12
       }
     },
     {
@@ -133,8 +133,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 52,
-        "column": 14
+        "line": 44,
+        "column": 12
       }
     },
     {
@@ -155,8 +155,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 52,
-        "column": 14
+        "line": 44,
+        "column": 12
       }
     },
     {
@@ -177,8 +177,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 52,
-        "column": 14
+        "line": 44,
+        "column": 12
       }
     },
     {
@@ -199,8 +199,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 52,
-        "column": 14
+        "line": 44,
+        "column": 12
       }
     },
     {
@@ -221,8 +221,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
-        "line": 52,
-        "column": 14
+        "line": 44,
+        "column": 12
       }
     },
     {
@@ -232,6 +232,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -241,8 +247,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/capabilities.spec.ts",
-        "line": 18,
-        "column": 11
+        "line": 22,
+        "column": 10
       }
     },
     {
@@ -252,6 +258,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -261,8 +273,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/compression.spec.ts",
-        "line": 17,
-        "column": 11
+        "line": 21,
+        "column": 10
       }
     },
     {
@@ -272,6 +284,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -281,8 +299,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/compression.spec.ts",
-        "line": 25,
-        "column": 24
+        "line": 32,
+        "column": 10
       }
     },
     {
@@ -292,6 +310,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -301,8 +325,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/translations.spec.ts",
-        "line": 20,
-        "column": 11
+        "line": 22,
+        "column": 10
       }
     },
     {
@@ -312,6 +336,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -321,8 +351,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/translations.spec.ts",
-        "line": 38,
-        "column": 5
+        "line": 45,
+        "column": 10
       }
     },
     {
@@ -332,6 +362,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -341,8 +377,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/translations.spec.ts",
-        "line": 62,
-        "column": 26
+        "line": 71,
+        "column": 10
       }
     },
     {
@@ -363,8 +399,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 35,
-        "column": 21
+        "line": 38,
+        "column": 10
       }
     },
     {
@@ -385,8 +421,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 46,
-        "column": 12
+        "line": 51,
+        "column": 10
       }
     },
     {
@@ -407,8 +443,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 61,
-        "column": 12
+        "line": 68,
+        "column": 10
       }
     },
     {
@@ -429,8 +465,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 73,
-        "column": 8
+        "line": 81,
+        "column": 10
       }
     },
     {
@@ -451,8 +487,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 87,
-        "column": 78
+        "line": 98,
+        "column": 10
       }
     },
     {
@@ -473,8 +509,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
-        "line": 101,
-        "column": 12
+        "line": 111,
+        "column": 10
       }
     },
     {
@@ -496,7 +532,7 @@
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_validate.spec.ts",
         "line": 32,
-        "column": 66
+        "column": 10
       }
     },
     {
@@ -517,8 +553,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_validate.spec.ts",
-        "line": 49,
-        "column": 5
+        "line": 51,
+        "column": 10
       }
     },
     {
@@ -539,8 +575,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_validate.spec.ts",
-        "line": 67,
-        "column": 5
+        "line": 69,
+        "column": 10
       }
     },
     {
@@ -561,8 +597,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/ui_settings_validate.spec.ts",
-        "line": 84,
-        "column": 5
+        "line": 86,
+        "column": 10
       }
     }
   ]

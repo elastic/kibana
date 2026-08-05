@@ -15,7 +15,6 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -49,7 +48,6 @@ export function LayerControl({
   showAllLayers,
   zoom,
 }: Props) {
-  const { euiTheme } = useEuiTheme();
   if (!isLayerTOCOpen) {
     if (isScreenshotMode()) {
       return null;
@@ -165,7 +163,6 @@ export function LayerControl({
               >
                 <EuiButtonIcon
                   className="mapLayerControl__closeLayerTOCButton"
-                  css={{ backgroundColor: `${euiTheme.colors.emptyShade} !important` }}
                   onClick={closeLayerTOC}
                   iconType="menuRight"
                   color="text"

@@ -58,8 +58,7 @@ export interface FetchAggIntervalsParams {
 export const fetchAggIntervals = async (
   params: FetchAggIntervalsParams
 ): Promise<NumericColumnStatsMap> => {
-  const { esClient, abortSignal } = params;
-  const args = params.arguments;
+  const { esClient, abortSignal, arguments: args } = params;
   const {
     indexPattern,
     query,

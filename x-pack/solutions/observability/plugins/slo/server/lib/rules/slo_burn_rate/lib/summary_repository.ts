@@ -13,13 +13,11 @@ import type { EsSummaryDocument } from '../../../../services/summary_transform_g
 export async function getSloSummary(
   esClient: ElasticsearchClient,
   slo: SLODefinition,
-  instanceId: string,
-  projectRouting?: string
+  instanceId: string
 ) {
   try {
     const res = await esClient.search<EsSummaryDocument>({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      ...(projectRouting ? { project_routing: projectRouting } : {}),
       query: {
         bool: {
           filter: [

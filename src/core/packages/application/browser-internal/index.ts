@@ -14,7 +14,6 @@ export type {
   InternalApplicationStart,
   Mounter,
   ParsedAppUrl,
-  RegisteredAppInfo,
 } from './src/types';
 export {
   appendAppPath,

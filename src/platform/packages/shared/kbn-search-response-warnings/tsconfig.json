@@ -9,7 +9,6 @@
     "@kbn/inspector-plugin",
     "@kbn/core",
     "@kbn/es-types",
-    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

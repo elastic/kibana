@@ -37,7 +37,7 @@ const esqlTabInput = {
 
 describe('classicTabSchema', () => {
   it('validates a data view reference tab and applies defaults', () => {
-    const validated = classicTabSchema.parse(classicTabInput) as DiscoverSessionClassicTab;
+    const validated = classicTabSchema.validate(classicTabInput) as DiscoverSessionClassicTab;
 
     expect(validated.data_source.type).toBe(AS_CODE_DATA_VIEW_REFERENCE_TYPE);
     expect(validated.filters).toEqual([]);
@@ -46,7 +46,7 @@ describe('classicTabSchema', () => {
   });
 
   it('validates query and filters using as-code schemas', () => {
-    const validated = classicTabSchema.parse({
+    const validated = classicTabSchema.validate({
       ...classicTabInput,
       query: {
         expression: 'status:200',
@@ -73,7 +73,7 @@ describe('classicTabSchema', () => {
 
   it('rejects an invalid data source type', () => {
     expect(() =>
-      classicTabSchema.parse({
+      classicTabSchema.validate({
         ...classicTabInput,
         data_source: {
           type: 'invalid_type',
@@ -85,7 +85,7 @@ describe('classicTabSchema', () => {
 
   it('rejects an invalid view mode', () => {
     expect(() =>
-      classicTabSchema.parse({
+      classicTabSchema.validate({
         ...classicTabInput,
         view_mode: 'invalid_mode',
       })
@@ -94,7 +94,7 @@ describe('classicTabSchema', () => {
 
   it('rejects an invalid sort direction', () => {
     expect(() =>
-      classicTabSchema.parse({
+      classicTabSchema.validate({
         ...classicTabInput,
         sort: [{ name: '@timestamp', direction: 'sideways' }],
       })
@@ -104,7 +104,7 @@ describe('classicTabSchema', () => {
 
 describe('esqlTabSchema', () => {
   it('validates an ES|QL data source tab and applies data table defaults', () => {
-    const validated = esqlTabSchema.parse(esqlTabInput) as DiscoverSessionEsqlTab;
+    const validated = esqlTabSchema.validate(esqlTabInput) as DiscoverSessionEsqlTab;
 
     expect(validated.data_source.type).toBe(AS_CODE_ESQL_DATA_SOURCE_TYPE);
     expect(validated.data_source.query).toBe('FROM logs-* | LIMIT 10');
@@ -113,7 +113,7 @@ describe('esqlTabSchema', () => {
 
   it('rejects a nested data_source shape', () => {
     expect(() =>
-      esqlTabSchema.parse({
+      esqlTabSchema.validate({
         data_source: {
           data_view: {
             ref_id: 'logs-data-view',
@@ -124,11 +124,11 @@ describe('esqlTabSchema', () => {
   });
 
   it('rejects a classic data view reference used as an ES|QL tab', () => {
-    expect(() => esqlTabSchema.parse(classicTabInput)).toThrow();
+    expect(() => esqlTabSchema.validate(classicTabInput)).toThrow();
   });
 
   it('accepts data table limits on ES|QL tabs', () => {
-    const validated = esqlTabSchema.parse({
+    const validated = esqlTabSchema.validate({
       ...esqlTabInput,
       rows_per_page: 25,
       sample_size: 500,
@@ -141,25 +141,25 @@ describe('esqlTabSchema', () => {
 
 describe('tabSchema', () => {
   it('accepts classic and ES|QL tab shapes', () => {
-    expect(tabSchema.parse(classicTabInput).data_source.type).toBe(
+    expect(tabSchema.validate(classicTabInput).data_source.type).toBe(
       AS_CODE_DATA_VIEW_REFERENCE_TYPE
     );
-    expect(tabSchema.parse(esqlTabInput).data_source.type).toBe(AS_CODE_ESQL_DATA_SOURCE_TYPE);
+    expect(tabSchema.validate(esqlTabInput).data_source.type).toBe(AS_CODE_ESQL_DATA_SOURCE_TYPE);
   });
 
   it('rejects a tab without a data_source', () => {
-    expect(() => tabSchema.parse({ sort: [] })).toThrow();
+    expect(() => tabSchema.validate({ sort: [] })).toThrow();
   });
 });
 
 describe('panelOverridesSchema', () => {
   it('defaults to an empty object when omitted', () => {
-    expect(panelOverridesSchema.parse(undefined)).toEqual({});
+    expect(panelOverridesSchema.validate(undefined)).toEqual({});
   });
 
   it('validates partial overrides', () => {
     expect(
-      panelOverridesSchema.parse({
+      panelOverridesSchema.validate({
         column_order: ['@timestamp', 'message'],
         row_height: 'auto',
       })

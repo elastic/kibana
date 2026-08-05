@@ -67,7 +67,7 @@ export interface StreamsServer {
   cloud?: CloudSetup;
   /**
    * The running Kibana's version, e.g. `9.2.0`. Populated by the
-   * significantEvents plugin, which needs it to identify the connecting
+   * significant_events plugin, which needs it to identify the connecting
    * deployment to the Relay service.
    */
   kibanaVersion: string;

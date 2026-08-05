@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
@@ -16,7 +16,7 @@ import {
 
 spaceTest.describe(
   'Lens metric trendline conversion to ES|QL',
-  { tag: '@local-stateful-classic' },
+  { tag: tags.stateful.classic },
   () => {
     let dashboardId: string;
     let panelId: string;

@@ -6,8 +6,8 @@
  */
 
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
-import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
+import type { EpisodeEventRow } from '../../../queries/episode_events_query';
+import type { EpisodeActionHistoryEntry } from '../../../queries/episode_actions_history_query';
 import {
   deriveSeverityChangeEntries,
   deriveStateChangeEntries,

@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { TRANSFORM_FUNCTION, type TransformFunction } from '@kbn/transform-plugin/common/constants';
 
 import type { ProvidedType } from '@kbn/test';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -30,7 +29,7 @@ export function TransformManagementProvider({ getService }: FtrProviderContext) 
     },
 
     async assertCreateFirstTransformButtonExists() {
-      await testSubjects.existOrFail('transformButtonCreate');
+      await testSubjects.existOrFail('transformCreateFirstButton');
     },
 
     async assertTransformsReauthorizeCalloutExists() {
@@ -38,7 +37,7 @@ export function TransformManagementProvider({ getService }: FtrProviderContext) 
     },
 
     async assertCreateFirstTransformButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('transformButtonCreate');
+      const isEnabled = await testSubjects.isEnabled('transformCreateFirstButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "Create first transform" button to be '${
@@ -65,15 +64,13 @@ export function TransformManagementProvider({ getService }: FtrProviderContext) 
       await testSubjects.existOrFail('transformStatsBar');
     },
 
-    async startTransformCreation(transformFunction: TransformFunction = TRANSFORM_FUNCTION.PIVOT) {
-      await testSubjects.click('transformButtonCreate');
-      await testSubjects.existOrFail('transformCreatePopover');
-      await testSubjects.click(
-        transformFunction === TRANSFORM_FUNCTION.LATEST
-          ? 'transformCreateLatestButton'
-          : 'transformCreatePivotButton'
-      );
-      await testSubjects.existOrFail('transformPageCreateTransform');
+    async startTransformCreation() {
+      if (await testSubjects.exists('transformNoTransformsFound')) {
+        await testSubjects.click('transformCreateFirstButton');
+      } else {
+        await testSubjects.click('transformButtonCreate');
+      }
+      await testSubjects.existOrFail('transformSelectSourceModal');
     },
   };
 }

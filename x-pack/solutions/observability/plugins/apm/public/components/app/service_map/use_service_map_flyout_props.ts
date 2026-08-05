@@ -30,6 +30,8 @@ export function useServiceMapFlyoutProps({
             service: {
               name: selectedServiceNodeForFlyout.data.id,
               agentName: selectedServiceNodeForFlyout.data.agentName,
+              sloStatus: selectedServiceNodeForFlyout.data.sloStatus,
+              sloCount: selectedServiceNodeForFlyout.data.sloCount,
             },
             filters: {
               environment,

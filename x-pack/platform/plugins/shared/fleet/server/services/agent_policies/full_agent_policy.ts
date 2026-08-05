@@ -676,7 +676,7 @@ export function transformOutputToFullPolicyOutput(
     };
   }
 
-  if (proxy && type !== outputType.Kafka) {
+  if (proxy) {
     newOutput.proxy_url = proxy.url;
     if (!redactProxySecrets && proxy.proxy_headers) {
       newOutput.proxy_headers = proxy.proxy_headers;

@@ -30,8 +30,8 @@ interface ManagedResource {
  * - Mutating routes (update / delete) perform internal reads as part of the
  *   write operation (merge, space-scoping). These reads are implementation
  *   details and do NOT require the `read` privilege.
- * - `get_workflows` and `get_stats` use `extendedPrivileges` for optional
- *   execution/managed privileges checked via `authzResult` without gating access.
+ * - `get_workflows` and `get_stats` conditionally include execution data when
+ *   the user also holds `readExecution` (checked at runtime via `authzResult`).
  */
 export const WORKFLOW_READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [WorkflowsManagementApiActions.read] },
@@ -53,17 +53,21 @@ export const WORKFLOW_READ_WITH_MANAGED_SECURITY: RouteSecurity = {
   },
 };
 /**
- * Requires `read`, and surfaces optional execution/managed privileges in
- * `authzResult` without enforcing them. Used by list/stats routes that may
- * include execution history when the caller also holds those privileges.
+ * This security configuration allows either `read` or `readExecution` privilege.
+ * This is used to include optional `readExecution` privilege.
+ * The `read` privilege needs to be checked explicitly in the route handler to enforce it.
  */
-export const WORKFLOW_READ_WITH_EXECUTION_EXTENDED_SECURITY: RouteSecurity = {
+export const WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY: RouteSecurity = {
   authz: {
-    requiredPrivileges: [WorkflowsManagementApiActions.read],
-    extendedPrivileges: [
-      WorkflowsManagementApiActions.readManaged,
-      WorkflowsManagementApiActions.readExecution,
-      WorkflowsManagementApiActions.readManagedExecution,
+    requiredPrivileges: [
+      {
+        anyRequired: [
+          WorkflowsManagementApiActions.read,
+          WorkflowsManagementApiActions.readManaged,
+          WorkflowsManagementApiActions.readExecution,
+          WorkflowsManagementApiActions.readManagedExecution,
+        ],
+      },
     ],
   },
 };

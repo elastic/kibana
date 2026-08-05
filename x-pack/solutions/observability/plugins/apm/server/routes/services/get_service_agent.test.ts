@@ -8,11 +8,9 @@
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import {
   AGENT_NAME,
-  SERVICE_ENVIRONMENT,
   TELEMETRY_SDK_NAME,
   TELEMETRY_SDK_LANGUAGE,
 } from '../../../common/es_fields/apm';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getServiceAgent } from './get_service_agent';
 
 type SearchMock = jest.Mock<Promise<unknown>>;
@@ -22,8 +20,6 @@ const end = 1_700_000_900_000;
 
 const baseParams = {
   serviceName: 'my-service',
-  environment: ENVIRONMENT_ALL.value,
-
   start,
   end,
 };
@@ -113,29 +109,5 @@ describe('getServiceAgent', () => {
     const result = await getServiceAgent({ ...baseParams, apmEventClient });
 
     expect(result).toEqual({});
-  });
-
-  it('scopes the query to the selected environment', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValueOnce(emptyResponse());
-    const apmEventClient = { search } as unknown as APMEventClient;
-
-    await getServiceAgent({ ...baseParams, environment: 'production', apmEventClient });
-
-    const filters = getSearchParams(search)?.query?.bool?.filter ?? [];
-    expect(filters).toEqual(
-      expect.arrayContaining([{ term: { [SERVICE_ENVIRONMENT]: 'production' } }])
-    );
-  });
-
-  it('does not add an environment filter for ENVIRONMENT_ALL', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValueOnce(emptyResponse());
-    const apmEventClient = { search } as unknown as APMEventClient;
-
-    await getServiceAgent({ ...baseParams, apmEventClient });
-
-    const filters = getSearchParams(search)?.query?.bool?.filter ?? [];
-    expect(filters).not.toEqual(
-      expect.arrayContaining([{ term: { [SERVICE_ENVIRONMENT]: expect.any(String) } }])
-    );
   });
 });

@@ -9,7 +9,9 @@
 
 import React from 'react';
 
-import { KbnInfoCallout, KbnSuccessCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { EuiCallOut } from '@elastic/eui';
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MatchedIndicesSet } from '../../../types';
 
@@ -59,12 +61,14 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
   query,
   showSystemIndices,
 }) => {
+  let statusIcon: EuiIconType | undefined;
   let statusMessage;
   let statusColor: 'primary' | 'success' | 'warning' | undefined;
 
   const allIndicesLength = allIndices.length;
 
   if (query.length === 0) {
+    statusIcon = undefined;
     statusColor = 'primary';
 
     if (allIndicesLength >= 1) {
@@ -100,6 +104,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       );
     }
   } else if (exactMatchedIndices.length) {
+    statusIcon = 'check';
     statusColor = 'success';
     statusMessage = (
       <span>
@@ -117,6 +122,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       </span>
     );
   } else if (partialMatchedIndices.length) {
+    statusIcon = undefined;
     statusColor = 'primary';
     statusMessage = (
       <span>
@@ -146,20 +152,20 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       </span>
     );
   } else {
+    statusIcon = undefined;
     statusColor = 'warning';
     statusMessage = allIndicesLength
       ? NoMatchStatusMessage(allIndicesLength)
       : NoMatchNoIndicesStatusMessage();
   }
 
-  const Callout =
-    statusColor === 'warning'
-      ? KbnWarningCallout
-      : statusColor === 'success'
-      ? KbnSuccessCallout
-      : KbnInfoCallout;
-
   return (
-    <Callout size="s" data-test-subj="createIndexPatternStatusMessage" title={statusMessage} />
+    <EuiCallOut
+      size="s"
+      color={statusColor}
+      data-test-subj="createIndexPatternStatusMessage"
+      iconType={statusIcon}
+      title={statusMessage}
+    />
   );
 };
