@@ -19,7 +19,7 @@ spec:
       description: 'Runs the fast (non-e2e) checks for each GitHub merge queue group before its PRs land'
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-merge-queue-alerts'
         KIBANA_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
         GITHUB_COMMIT_STATUS_CONTEXT: buildkite/merge-queue
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
@@ -50,6 +50,8 @@ spec:
         appex-qa:
           access_level: MANAGE_BUILD_AND_READ
         kibana-tech-leads:
+          access_level: MANAGE_BUILD_AND_READ
+        apps-dx:
           access_level: MANAGE_BUILD_AND_READ
       tags:
         - kibana
