@@ -59,6 +59,7 @@ export type BufferedRawBody = FormData | Blob | URLSearchParams | ArrayBuffer | 
 
 export interface CallKibanaApiParams {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  target?: 'local';
   /**
    * Space-relative route path starting with `/`, e.g. `/api/cases`. When `deps.spaceId`
    * is a non-default space, it is prefixed with `/s/{spaceId}` automatically; pass the
@@ -268,6 +269,7 @@ export async function callKibanaApi<T = unknown>(
   const path = coreStart.http.basePath.prepend(applySpacePrefix(params.path, spaceId));
   const { response } = await coreStart.http.selfClient.asScoped(fakeRequest).fetch(path, {
     method: params.method,
+    target: params.target,
     headers: outboundHeaders,
     query: params.query,
     body: params.body ?? undefined,

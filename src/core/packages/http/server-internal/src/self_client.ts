@@ -107,7 +107,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       const fetchInit: SelfFetchInit = {
         signal,
         redirect: 'error',
-        dispatcher: this.dispatcherProvider.get(new URL(request.url)),
+        dispatcher: this.dispatcherProvider.get(new URL(request.url), this.getEffectiveTarget(options.target)),
       };
       const response = await fetch(request, fetchInit);
 
@@ -137,8 +137,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
   }
 
   private logAttempt(targetMethod: string): void {
-    const targetMode =
-      this.params.target === 'auto' && this.params.basePath.publicBaseUrl ? 'public' : 'local';
+    const targetMode = this.getEffectiveTarget() === 'local' ? 'local' : 'public';
 
     this.params.log.debug(() => 'Kibana scoped self HTTP call attempted', {
       labels: {
@@ -188,7 +187,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
   }
 
   private createUrl<TRequestBody>(path: string, options: HttpSelfFetchOptions<TRequestBody>): URL {
-    const baseUrl = this.getBaseUrl();
+    const baseUrl = this.getBaseUrl(options.target);
     const requestBasePath =
       options.prependBasePath === false
         ? this.params.basePath.serverBasePath
@@ -215,8 +214,13 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     return url;
   }
 
-  private getBaseUrl(): URL {
-    if (this.params.target === 'auto' && this.params.basePath.publicBaseUrl) {
+  private getEffectiveTarget(target?: 'local'): 'local' | 'public' {
+    if (target === 'local') return 'local';
+    return this.params.target === 'auto' && this.params.basePath.publicBaseUrl ? 'public' : 'local';
+  }
+
+  private getBaseUrl(target?: 'local'): URL {
+    if (this.getEffectiveTarget(target) === 'public' && this.params.basePath.publicBaseUrl) {
       return new URL(this.params.basePath.publicBaseUrl);
     }
 

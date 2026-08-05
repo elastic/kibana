@@ -19,20 +19,17 @@ interface SelfHttpDispatcherProviderParams {
 }
 
 export class SelfHttpDispatcherProvider {
-  private dispatcher?: Agent;
-  private trustKey?: string;
+  private readonly dispatchers = new Map<'local' | 'public', { agent?: Agent; trustKey?: string }>();
 
   constructor(private readonly params: SelfHttpDispatcherProviderParams) {}
 
-  public get(url: URL): Dispatcher | undefined {
+  public get(url: URL, target: 'local' | 'public'): Dispatcher | undefined {
     if (url.protocol !== 'https:') {
       return undefined;
     }
 
     const config = this.params.getHttpConfig();
-    const usesLocalTarget =
-      this.params.target === 'local' ||
-      (this.params.target === 'auto' && !this.params.basePath.publicBaseUrl);
+    const usesLocalTarget = target === 'local';
     // Local self calls loop back to this listener, so trust its leaf certificate directly.
     const additionalCertificateAuthorities = usesLocalTarget
       ? [config.ssl.certificate, ...(config.ssl.certificateAuthorities ?? [])]
@@ -42,16 +39,18 @@ export class SelfHttpDispatcherProvider {
     );
 
     if (certificateAuthorities.length === 0) {
-      this.replaceDispatcher(undefined, undefined);
+      this.replaceDispatcher(target, undefined, undefined);
       return undefined;
     }
 
     const trustKey = `${usesLocalTarget ? 'local' : 'public'}:${certificateAuthorities.join('\n')}`;
-    if (this.dispatcher && this.trustKey === trustKey) {
-      return this.dispatcher;
+    const profile = this.dispatchers.get(target) ?? {};
+    if (profile.agent && profile.trustKey === trustKey) {
+      return profile.agent;
     }
 
     this.replaceDispatcher(
+      target,
       new Agent({
         connect: {
           ca: [...rootCertificates, ...certificateAuthorities],
@@ -61,22 +60,22 @@ export class SelfHttpDispatcherProvider {
       }),
       trustKey
     );
-    return this.dispatcher;
+    return this.dispatchers.get(target)?.agent;
   }
 
   public async close(): Promise<void> {
-    const dispatcher = this.dispatcher;
-    this.dispatcher = undefined;
-    this.trustKey = undefined;
-    await dispatcher?.close();
+    const dispatchers = [...this.dispatchers.values()];
+    this.dispatchers.clear();
+    await Promise.all(dispatchers.map(({ agent }) => agent?.close()));
   }
 
-  private replaceDispatcher(dispatcher: Agent | undefined, trustKey: string | undefined): void {
-    const previousDispatcher = this.dispatcher;
-    this.dispatcher = dispatcher;
-    this.trustKey = trustKey;
-    if (previousDispatcher && previousDispatcher !== dispatcher) {
-      void previousDispatcher.close();
-    }
+  private replaceDispatcher(
+    target: 'local' | 'public',
+    dispatcher: Agent | undefined,
+    trustKey: string | undefined
+  ): void {
+    const previousDispatcher = this.dispatchers.get(target)?.agent;
+    this.dispatchers.set(target, { agent: dispatcher, trustKey });
+    if (previousDispatcher && previousDispatcher !== dispatcher) void previousDispatcher.close();
   }
 }

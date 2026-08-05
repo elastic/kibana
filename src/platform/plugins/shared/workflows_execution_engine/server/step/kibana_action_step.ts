@@ -64,10 +64,13 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     // Extract meta params (not forwarded as HTTP request params)
     const {
       debug = false,
-      use_server_info: _useServerInfo,
-      use_localhost: _useLocalhost,
+      use_server_info = false,
+      use_localhost = false,
       ...httpParams
     } = stepWith;
+    if (use_server_info && use_localhost) {
+      throw new Error('Cannot set both use_server_info and use_localhost — they are mutually exclusive.');
+    }
 
     try {
       this.workflowLogger.logInfo(`Executing Kibana action: ${stepType}`, {
@@ -80,7 +83,12 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         },
       });
 
-      const result = await this.executeKibanaRequest(stepType, httpParams, debug);
+      const result = await this.executeKibanaRequest(
+        stepType,
+        httpParams,
+        debug,
+        use_server_info || use_localhost ? 'local' : undefined
+      );
 
       this.workflowLogger.logInfo(`Kibana action completed: ${stepType}`, {
         event: { action: 'kibana-action', outcome: 'success' },
@@ -119,7 +127,8 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
   private async executeKibanaRequest(
     stepType: string,
     params: any,
-    debug: boolean = false
+    debug: boolean = false,
+    target?: 'local'
   ): Promise<any> {
     const spaceId = this.stepExecutionRuntime.contextManager.getWorkflowSpaceId();
     const { fetcher: _fetcherOptions, ...cleanParams } = params;
@@ -171,6 +180,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         query: requestConfig.query,
         headers: requestConfig.headers,
         maxResponseBytes: this.getMaxResponseBytes(),
+        target,
       });
     } catch (error) {
       if (error instanceof CallKibanaApiResponseTooLargeError) {

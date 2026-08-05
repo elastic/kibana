@@ -57,6 +57,8 @@ export interface HttpSelfFetchHeaders {
 
 /** @public */
 export interface HttpSelfFetchOptions<TRequestBody = unknown> {
+  /** Forces the configured local listener instead of the global self HTTP target. */
+  target?: 'local';
   /** HTTP method. Defaults to `GET`. */
   method?: string;
   /** Query string parameters to append to the target path. */

@@ -140,6 +140,13 @@ describe('InternalHttpSelfScopedClient', () => {
     ).rejects.toThrow();
   });
 
+  it('uses the local listener when a call explicitly targets local', async () => {
+    const { self } = createClient({ publicBaseUrl: 'https://public.example.com/base' });
+    await self.asScoped(createRequest()).fetch('/api/status', { target: 'local' });
+    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(request.url).toBe('http://localhost:5601/base/s/my-space/api/status');
+  });
+
   it('calls publicBaseUrl with request base path, query, auth headers, and self markers', async () => {
     const { authRequestHeaders, self } = createClient();
     const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
