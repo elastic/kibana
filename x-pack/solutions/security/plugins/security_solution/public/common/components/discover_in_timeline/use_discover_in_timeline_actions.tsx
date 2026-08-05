@@ -234,10 +234,18 @@ export const useDiscoverInTimelineActions = (
 
       // If there is already a saved search, only update the local state
       if (savedSearchId) {
-        // If the ES|QL query was cleared, drop the savedSearchId link immediately so
-        // the next explicit timeline save sends savedSearchId: null to the server and
-        // the timeline appears compatible in the list without requiring a second save.
-        if (!hasNonEmptyEsqlQuery(savedSearch.searchSource.getField('query'))) {
+        // If an ES|QL query was explicitly cleared (query has `esql` key but value is blank),
+        // drop the savedSearchId link immediately so the next explicit timeline save sends
+        // savedSearchId: null to the server and the timeline appears compatible in the list
+        // without requiring a second save. Non-ES|QL queries (kuery/lucene) must not trigger
+        // this path — they have no `esql` key and are not related to the saved-search lifecycle.
+        const currentQuery = savedSearch.searchSource.getField('query');
+        const esqlQueryWasCleared =
+          currentQuery != null &&
+          typeof currentQuery === 'object' &&
+          'esql' in currentQuery &&
+          !hasNonEmptyEsqlQuery(currentQuery);
+        if (esqlQueryWasCleared) {
           dispatch(
             timelineActions.updateSavedSearchId({ id: TimelineId.active, savedSearchId: null })
           );
