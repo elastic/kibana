@@ -54,7 +54,6 @@ dependsOn:
   - '@kbn/data-view-editor-plugin'
   - '@kbn/data-view-field-editor-plugin'
   - '@kbn/kibana-utils-plugin'
-  - '@kbn/presentation-util-plugin'
   - '@kbn/serverless'
   - '@kbn/spaces-plugin'
   - '@kbn/unified-search-plugin'
