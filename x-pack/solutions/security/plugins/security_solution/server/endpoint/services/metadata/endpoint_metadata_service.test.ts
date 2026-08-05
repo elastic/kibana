@@ -245,7 +245,6 @@ describe('EndpointMetadataService', () => {
         total: 1,
       });
     });
-
   });
 
   describe('#getHostMetadataList - policy_id suffix stripping', () => {
