@@ -68,9 +68,8 @@ export class AlertDetails extends SingleCaseAggregationHandler {
         };
       }
 
-      // Entity attachments only live on cases-attachments. Use an owners filter for that
-      // SO type alone — getAttachmentAuthorizationFilter ORs in cases-comments, which
-      // Saved Objects rejects when the find `type` list is attachments-only.
+      // Entity attachments only live on cases-attachments; getAttachmentAuthorizationFilter
+      // ORs in cases-comments, which Saved Objects rejects for an attachments-only find.
       const { authorizedOwners } = await authorization.getAuthorizationFilter(
         Operations.getAttachmentMetrics
       );

@@ -66,11 +66,8 @@ export const collectEntityAssociatedNames = (
 };
 
 /**
- * Every unique alert-derived display name for a case, independent of the top-N `values`
- * shown in the response. Required to exactly dedupe entity attachment names against alert
- * identities: the response's `values` array is capped for display, so checking membership
- * against it alone could either double-count an entity name that is actually one of the
- * alert identities that fell outside that cap, or skip a genuinely new one.
+ * Every alert-derived display name for a case, not just the displayed top-N `values`.
+ * Needed to dedupe entity attachment names against alert identities exactly.
  */
 export interface KnownAlertNames {
   userNames: Set<string>;
@@ -78,9 +75,8 @@ export interface KnownAlertNames {
 }
 
 /**
- * Unions alert-derived associated users/hosts with entity attachment display names.
- * `knownAlertNames` must contain every alert-derived name (not just the displayed top-N)
- * so overlap with entity names can be determined exactly, without double- or under-counting.
+ * Unions alert-derived users/hosts with entity attachment names. `knownAlertNames` must be
+ * exhaustive so overlaps are caught precisely (no double- or under-counting).
  */
 export const mergeAlertMetricsWithEntityNames = (
   metrics: SingleCaseMetricsResponse,

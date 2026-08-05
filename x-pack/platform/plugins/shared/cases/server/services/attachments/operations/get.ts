@@ -333,9 +333,8 @@ export class AttachmentGetter {
   }
 
   /**
-   * Retrieves unified attachments of the given `types` attached to a case.
-   * Preserves full unified `metadata` (unlike {@link getAllDocumentsAttachedToCase},
-   * whose document codec only keeps alert/event index/rule fields).
+   * Retrieves unified attachments of the given `types`, preserving full metadata
+   * (unlike {@link getAllDocumentsAttachedToCase}, which only keeps alert/event fields).
    */
   public async getUnifiedAttachmentsByTypes({
     caseId,

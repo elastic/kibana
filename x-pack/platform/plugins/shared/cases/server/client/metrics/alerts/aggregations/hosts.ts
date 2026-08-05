@@ -41,10 +41,8 @@ export class AlertHosts implements AggregationBuilder<SingleCaseMetricsResponse>
       hosts_frequency: {
         terms: {
           field: hostId,
-          // A case can have at most MAX_ALERTS_PER_CASE alerts, so it can have at most that
-          // many unique host.id values. Sizing the bucket to that bound guarantees this
-          // aggregation captures every unique value (not just the displayed top-N), which
-          // callers rely on to exactly dedupe against entity attachment names.
+          // Sized to MAX_ALERTS_PER_CASE so buckets capture every unique host.id, not just
+          // the displayed top-N — callers need the full set to dedupe against entities exactly.
           size: MAX_ALERTS_PER_CASE,
         },
         aggs: {
