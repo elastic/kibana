@@ -49,6 +49,7 @@ import {
   wrapErrorIfNeeded,
 } from '../../utils';
 import { isFannedInHit } from '../../utils/cps_read_routing';
+import { areFannedInAgentsVisibleInSpace } from '../../utils/fanned_in_space_check';
 import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
 import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
 import { EndpointError } from '../../../../common/endpoint/errors';
@@ -96,7 +97,8 @@ export class EndpointMetadataService {
    */
   protected async ensureDataValidForSpace(
     data: SearchResponse<HostMetadata>,
-    cpsRead: boolean = false
+    cpsRead: boolean = false,
+    scoped?: ScopedEndpointServices
   ): Promise<void> {
     const hits = data?.hits?.hits ?? [];
     const agentIds = hits.map((hit) => hit._source?.agent.id ?? '').filter((id) => !!id);
@@ -133,6 +135,21 @@ export class EndpointMetadataService {
           () => `Agent ids [${agentIds.join(', ')}] are not visible in space [${this.spaceId}]`
         );
 
+        throw err;
+      }
+
+      // Provenance alone does not bound a fanned-in read: a space with no routing expression fans
+      // out to every project, so the document must also match the active space on the one field it
+      // carries. This applies the same rule the endpoint list uses via buildCpsMetadataFilter.
+      const visibleInSpace = scoped
+        ? await areFannedInAgentsVisibleInSpace({
+            esClient: scoped.getEsClient(),
+            agentIds,
+            spaceId: this.spaceId,
+          })
+        : false;
+
+      if (!visibleInSpace) {
         throw err;
       }
 
@@ -207,7 +224,7 @@ export class EndpointMetadataService {
       .search<HostMetadata>(query)
       .catch(catchAndWrapError);
 
-    await this.ensureDataValidForSpace(queryResult, cpsRead);
+    await this.ensureDataValidForSpace(queryResult, cpsRead, scoped);
 
     const endpointMetadata = queryResponseToHostResult(queryResult).result;
 

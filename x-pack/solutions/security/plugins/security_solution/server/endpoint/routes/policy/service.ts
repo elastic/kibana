@@ -14,6 +14,7 @@ import { INITIAL_POLICY_ID } from '.';
 import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
 import { isFannedInHit } from '../../utils/cps_read_routing';
+import { areFannedInAgentsVisibleInSpace } from '../../utils/fanned_in_space_check';
 import type {
   EndpointAppContextService,
   ScopedEndpointServices,
@@ -88,6 +89,7 @@ export async function getPolicyResponseByAgentId({
       fleetServices,
       cpsRead,
       hitIndex: response.hits.hits[0]._index,
+      scoped,
     });
 
     return {
@@ -113,9 +115,11 @@ const ensureAgentVisibleInCurrentSpace = async ({
   fleetServices,
   cpsRead,
   hitIndex,
+  scoped,
 }: Pick<GetPolicyResponseByAgentIdOptions, 'agentID' | 'endpointService' | 'fleetServices'> & {
   cpsRead: boolean;
   hitIndex?: string;
+  scoped?: ScopedEndpointServices;
 }): Promise<void> => {
   try {
     await fleetServices.ensureInCurrentSpace({ agentIds: [agentID] });
@@ -135,6 +139,21 @@ const ensureAgentVisibleInCurrentSpace = async ({
     if (locallyEnrolledAgent) {
       logger.debug(() => `Agent [${agentID}] is not visible in space [${fleetServices.spaceId}]`);
 
+      throw err;
+    }
+
+    // Provenance alone does not bound a fanned-in read: a space with no routing expression fans
+    // out to every project, so the document must also match the active space on the one field it
+    // carries. This applies the same rule the endpoint list uses via buildCpsMetadataFilter.
+    const visibleInSpace = scoped
+      ? await areFannedInAgentsVisibleInSpace({
+          esClient: scoped.getEsClient(),
+          agentIds: [agentID],
+          spaceId: scoped.getSpaceId(),
+        })
+      : false;
+
+    if (!visibleInSpace) {
       throw err;
     }
 
