@@ -82,40 +82,8 @@ const RESOURCE_LINK = (
 const SAMPLE_ITEMS: InfoBlockItem[] = [
   { title: 'Owner', value: 'Platform' },
   { title: 'Latency', value: <EuiHealth color="success">Healthy</EuiHealth> },
-  {
-    // Long value that must truncate within its column, with a trailing copy action.
-    title: 'Resource',
-    value: (
-      <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-        <EuiFlexItem
-          grow={true}
-          css={css`
-            min-width: 0;
-          `}
-        >
-          <EuiLink
-            href="#"
-            className="eui-textTruncate"
-            css={css`
-              display: block;
-            `}
-          >
-            etcd-cspm-control-plane-8fO2b-1a2b3c4d5e6f7g8h9i0j-kube-system
-          </EuiLink>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content="Copy resource identifier" disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="copyClipboard"
-              color="text"
-              size="xs"
-              aria-label="Copy resource identifier"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-  },
+  // Long value that must truncate within its column.
+  { title: 'Resource', value: RESOURCE_LINK },
   { title: 'Throughput', value: '1.2k tpm' },
   { title: 'Environment', value: 'production' },
   { title: 'Error rate', value: <EuiHealth color="warning">0.4%</EuiHealth> },
@@ -271,10 +239,15 @@ export const Default: StoryObj<DefaultArgs> = {
       </EuiTitle>
       <EuiSpacer size="m" />
       <InfoBlocks
-        items={[{ title: 'Risk score', value: '90', size: 'xl' as const }, ...SAMPLE_ITEMS].slice(
-          0,
-          numberOfItems
-        )}
+        items={[
+          {
+            title: 'Risk score',
+            value: '90',
+            size: 'xl' as const,
+            color: 'danger',
+          },
+          ...SAMPLE_ITEMS,
+        ].slice(0, numberOfItems)}
         maxColumns={maxColumns}
       />
 
