@@ -310,6 +310,49 @@ export_report_context() {
   export KIBANA_CI_WARM_START_MEMORY_REPORT_PATH="${REPORT_PATH}"
 }
 
+validate_benchmark_result() {
+  local benchmark_status="$1"
+  local report_path="$2"
+  local report_outcome
+  local failure_status="${benchmark_status}"
+  [[ "${failure_status}" -eq 0 ]] && failure_status=1
+
+  # Always validate the report: a successful process can still produce a report
+  # whose outcome contradicts the orientation's expected result.
+  report_outcome="$(node -e "const report = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8')); if (typeof report.outcome !== 'string') process.exit(2); process.stdout.write(report.outcome)" "${report_path}")" || {
+    echo "Warm-start calibration report is invalid at ${report_path}" >&2
+    return 1
+  }
+
+  case "${ORIENTATION}" in
+    ab)
+      if [[ "${report_outcome}" != "regression" ]]; then
+        echo "Warm-start calibration expected regression for orientation ab, got ${report_outcome}" >&2
+        return "${failure_status}"
+      fi
+      if [[ "${benchmark_status}" -eq 0 ]]; then
+        echo "Warm-start calibration missed expected ab regression (exit 0)" >&2
+        return 1
+      fi
+      echo "Expected warm-start regression produced report; preserving artifacts"
+      ;;
+    aa | ba)
+      if [[ "${report_outcome}" != "observed" ]]; then
+        echo "Warm-start calibration expected observed for orientation ${ORIENTATION}, got ${report_outcome}" >&2
+        return "${failure_status}"
+      fi
+      if [[ "${benchmark_status}" -ne 0 ]]; then
+        echo "Warm-start calibration benchmark failed (exit ${benchmark_status})" >&2
+        return "${benchmark_status}"
+      fi
+      ;;
+    *)
+      echo "Invalid warm-start calibration orientation \"${ORIENTATION}\"" >&2
+      return 1
+      ;;
+  esac
+}
+
 run_benchmark() {
   echo "--- Warm-start calibration orientation=${ORIENTATION} seed=${SEED}"
   echo "left=${LEFT_BUILD_DIR} (${LEFT_COMMIT})"
@@ -335,18 +378,7 @@ run_benchmark() {
     exit 1
   fi
 
-  if [[ "${benchmark_status}" -ne 0 ]]; then
-    local report_outcome
-    report_outcome="$(node -e "const report = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8')); process.stdout.write(report.outcome || '')" "${REPORT_PATH}")" || {
-      echo "Warm-start calibration report is invalid at ${REPORT_PATH}" >&2
-      exit 1
-    }
-    if [[ "${ORIENTATION}" != "ab" && "${ORIENTATION}" != "ba" ]] || [[ "${report_outcome}" != "regression" ]]; then
-      echo "Warm-start calibration benchmark failed (exit ${benchmark_status})" >&2
-      exit "${benchmark_status}"
-    fi
-    echo "Expected warm-start regression produced report; preserving artifacts"
-  fi
+  validate_benchmark_result "${benchmark_status}" "${REPORT_PATH}"
 }
 
 upload_calibration_artifacts() {
@@ -365,49 +397,55 @@ upload_calibration_artifacts() {
   buildkite-agent artifact upload "${REPORT_PATH}"
 }
 
-cd "${REPO_ROOT}"
+main() {
+  cd "${REPO_ROOT}"
 
-if [[ -f .buildkite/scripts/common/util.sh ]]; then
-  # shellcheck source=/dev/null
-  source .buildkite/scripts/common/util.sh
+  if [[ -f .buildkite/scripts/common/util.sh ]]; then
+    # shellcheck source=/dev/null
+    source .buildkite/scripts/common/util.sh
+  fi
+
+  ORIENTATION="$(printf '%s' "${ORIENTATION}" | tr '[:upper:]' '[:lower:]')"
+  resolve_orientation "${ORIENTATION}"
+
+  LEFT_STAGE_DIR="${WORK_DIR}/.staging/left"
+  RIGHT_STAGE_DIR="${WORK_DIR}/.staging/right"
+  LEFT_ARTIFACT_PATH="${LEFT_STAGE_DIR}/${LEFT_ARTIFACT_ID}-${ARTIFACT_FILENAME}"
+  RIGHT_ARTIFACT_PATH="${RIGHT_STAGE_DIR}/${RIGHT_ARTIFACT_ID}-${ARTIFACT_FILENAME}"
+
+  write_manifest
+  export_report_context
+
+  download_side_artifact \
+    left \
+    "${LEFT_BUILD_ID}" \
+    "${LEFT_BUILD_NUMBER}" \
+    "${LEFT_ARTIFACT_ID}" \
+    "${LEFT_SHA1}" \
+    "${LEFT_SHA256}" \
+    "${LEFT_STAGE_DIR}" \
+    "${LEFT_ARTIFACT_PATH}" \
+    "${LEFT_BUILD_DIR}"
+
+  download_side_artifact \
+    right \
+    "${RIGHT_BUILD_ID}" \
+    "${RIGHT_BUILD_NUMBER}" \
+    "${RIGHT_ARTIFACT_ID}" \
+    "${RIGHT_SHA1}" \
+    "${RIGHT_SHA256}" \
+    "${RIGHT_STAGE_DIR}" \
+    "${RIGHT_ARTIFACT_PATH}" \
+    "${RIGHT_BUILD_DIR}"
+
+  run_benchmark
+  upload_calibration_artifacts
+
+  echo "Warm-start calibration complete"
+  echo "manifest=${MANIFEST_PATH}"
+  echo "report=${REPORT_PATH}"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  main "$@"
 fi
-
-ORIENTATION="$(printf '%s' "${ORIENTATION}" | tr '[:upper:]' '[:lower:]')"
-resolve_orientation "${ORIENTATION}"
-
-LEFT_STAGE_DIR="${WORK_DIR}/.staging/left"
-RIGHT_STAGE_DIR="${WORK_DIR}/.staging/right"
-LEFT_ARTIFACT_PATH="${LEFT_STAGE_DIR}/${LEFT_ARTIFACT_ID}-${ARTIFACT_FILENAME}"
-RIGHT_ARTIFACT_PATH="${RIGHT_STAGE_DIR}/${RIGHT_ARTIFACT_ID}-${ARTIFACT_FILENAME}"
-
-write_manifest
-export_report_context
-
-download_side_artifact \
-  left \
-  "${LEFT_BUILD_ID}" \
-  "${LEFT_BUILD_NUMBER}" \
-  "${LEFT_ARTIFACT_ID}" \
-  "${LEFT_SHA1}" \
-  "${LEFT_SHA256}" \
-  "${LEFT_STAGE_DIR}" \
-  "${LEFT_ARTIFACT_PATH}" \
-  "${LEFT_BUILD_DIR}"
-
-download_side_artifact \
-  right \
-  "${RIGHT_BUILD_ID}" \
-  "${RIGHT_BUILD_NUMBER}" \
-  "${RIGHT_ARTIFACT_ID}" \
-  "${RIGHT_SHA1}" \
-  "${RIGHT_SHA256}" \
-  "${RIGHT_STAGE_DIR}" \
-  "${RIGHT_ARTIFACT_PATH}" \
-  "${RIGHT_BUILD_DIR}"
-
-run_benchmark
-upload_calibration_artifacts
-
-echo "Warm-start calibration complete"
-echo "manifest=${MANIFEST_PATH}"
-echo "report=${REPORT_PATH}"

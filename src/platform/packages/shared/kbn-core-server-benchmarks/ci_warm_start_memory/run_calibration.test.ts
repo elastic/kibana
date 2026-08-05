@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFileSync } from 'fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import path from 'path';
+import { spawnSync } from 'child_process';
 import {
   resolveWarmStartCalibrationOrientation,
   WARM_START_CALIBRATION_ARTIFACT_A,
@@ -57,13 +58,66 @@ describe('run_calibration.sh metadata', () => {
     }
   });
 
-  it('preserves reports for the expected B regression but fails other benchmark errors', () => {
-    const script = readFileSync(RUN_CALIBRATION_SH, 'utf8');
+  it.each([
+    ['ab', 1, 'regression', 0, 'preserving artifacts'],
+    ['aa', 0, 'observed', 0, ''],
+  ] as const)(
+    'accepts %s with status %s and outcome %s',
+    (orientation, benchmarkStatus, outcome, expectedStatus, expectedOutput) => {
+      const result = runReportValidation(orientation, benchmarkStatus, outcome);
 
-    expect(script).toContain(
-      'Expected warm-start regression produced report; preserving artifacts'
-    );
-    expect(script).toContain('[[ "${ORIENTATION}" != "ab" && "${ORIENTATION}" != "ba" ]]');
-    expect(script).toContain('exit "${benchmark_status}"');
+      expect(result.status).toBe(expectedStatus);
+      expect(result.stdout + result.stderr).toContain(expectedOutput);
+    }
+  );
+
+  it.each([
+    ['ab', 0, 'regression', 'missed expected ab regression'],
+    ['ab', 0, 'observed', 'expected regression for orientation ab'],
+    ['ba', 1, 'observed', 'benchmark failed'],
+    ['ba', 1, 'regression', 'expected observed for orientation ba'],
+  ] as const)(
+    'rejects %s with status %s and outcome %s',
+    (orientation, benchmarkStatus, outcome, expectedOutput) => {
+      const result = runReportValidation(orientation, benchmarkStatus, outcome);
+
+      expect(result.status).not.toBe(0);
+      expect(result.stdout + result.stderr).toContain(expectedOutput);
+    }
+  );
+
+  it('rejects a report without a valid outcome', () => {
+    const result = runReportValidation('aa', 0, undefined);
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('report is invalid');
   });
 });
+
+const runReportValidation = (
+  orientation: 'aa' | 'ab' | 'ba',
+  benchmarkStatus: number,
+  outcome?: string
+) => {
+  const tempDir = mkdtempSync('/tmp/run-calibration-test-');
+  const reportPath = path.join(tempDir, 'report.json');
+  writeFileSync(reportPath, JSON.stringify(outcome === undefined ? {} : { outcome }));
+
+  try {
+    return spawnSync(
+      'bash',
+      [
+        '-c',
+        '{ script="$1"; orientation="$2"; status="$3"; report="$4"; set --; source "$script"; ORIENTATION="$orientation"; validate_benchmark_result "$status" "$report"; }',
+        '--',
+        RUN_CALIBRATION_SH,
+        orientation,
+        String(benchmarkStatus),
+        reportPath,
+      ],
+      { encoding: 'utf8' }
+    );
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true });
+  }
+};
