@@ -29,6 +29,11 @@ import {
 import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
 import { resolveTimeFieldForQuery } from './resolve_time_field';
+import {
+  findConcreteGenerationIndices,
+  formatConcreteGenerationError,
+  formatConcreteGenerationWarning,
+} from './validate_esql_index_patterns';
 
 // Mirrors the `tagsSchema` cap in @kbn/alerting-v2-schemas (max 20 tags). Kept
 // local to avoid forcing an export purely for this guard.
@@ -125,6 +130,7 @@ export interface EsqlColumn {
 export interface RuleOperationsResult {
   data: Partial<RuleAttachmentData>;
   queryColumns?: EsqlColumn[];
+  warnings?: string[];
 }
 
 /**
@@ -159,6 +165,7 @@ export const executeRuleOperations = async (
 ): Promise<RuleOperationsResult> => {
   let next = { ...data };
   let lastQueryColumns: EsqlColumn[] | undefined;
+  const warnings: string[] = [];
 
   for (const op of operations) {
     switch (op.operation) {
@@ -195,6 +202,19 @@ export const executeRuleOperations = async (
 
       case 'set_query': {
         const rootQuery = getRootEsqlQuery(op.query);
+
+        // Reject (new) or warn (edit) when FROM targets a concrete rollover /
+        // time-series generation index that will break after the next rollover.
+        const { matches: concreteGenerationMatches } = findConcreteGenerationIndices(rootQuery);
+        if (concreteGenerationMatches.length > 0) {
+          if (isNew) {
+            throw new RuleOperationValidationError(
+              formatConcreteGenerationError(concreteGenerationMatches)
+            );
+          }
+          warnings.push(formatConcreteGenerationWarning(concreteGenerationMatches));
+        }
+
         let resolvedTimeField: string | null | undefined;
         if (esClient) {
           lastQueryColumns = await validateEsqlQuery(esClient, rootQuery);
@@ -335,5 +355,6 @@ export const executeRuleOperations = async (
   return {
     data: next,
     ...(lastQueryColumns ? { queryColumns: lastQueryColumns } : {}),
+    ...(warnings.length > 0 ? { warnings } : {}),
   };
 };

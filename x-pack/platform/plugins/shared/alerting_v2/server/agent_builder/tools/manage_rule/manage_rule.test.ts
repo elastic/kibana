@@ -255,6 +255,80 @@ describe('manageRuleTool', () => {
       expect(updateCall.data.metadata?.tags).toContain(AGENT_BUILDER_TAG);
     });
 
+    it('surfaces warnings when editing a rule with a concrete generation index', async () => {
+      const ctx = createContext();
+      ctx.attachments.getAttachmentRecord.mockReturnValue({
+        versions: [
+          {
+            data: {
+              metadata: { name: 'Persisted Rule' },
+              kind: 'alert',
+            },
+          },
+        ],
+      } as never);
+      getEsqlQueryMock(ctx).mockResolvedValueOnce({
+        columns: [{ name: 'count', type: 'long' }],
+        values: [],
+      });
+      mockResolvableTimeField(ctx);
+
+      const result = await tool.handler(
+        {
+          ruleAttachmentId: 'persisting-id',
+          operations: [
+            {
+              operation: 'set_query',
+              query: {
+                format: 'standalone',
+                breach: {
+                  query: 'FROM logs-nginx.access-default-2026.06.11-000001 | STATS COUNT(*)',
+                },
+              },
+            },
+          ],
+        },
+        ctx
+      );
+
+      expect(ctx.attachments.update).toHaveBeenCalledTimes(1);
+      const { results } = result as {
+        results: Array<{ type: string; data?: { warnings?: string[] } }>;
+      };
+      expect(results[0].type).toBe(ToolResultType.other);
+      expect(results[0].data?.warnings).toEqual([
+        expect.stringContaining('concrete generation index'),
+      ]);
+      expect(results[0].data?.warnings?.[0]).toContain('logs-nginx.access-default-*');
+    });
+
+    it('returns an error when creating a rule with a concrete generation index', async () => {
+      const ctx = createContext();
+
+      const result = await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Nginx Access' },
+            {
+              operation: 'set_query',
+              query: {
+                format: 'standalone',
+                breach: {
+                  query: 'FROM logs-nginx.access-default-2026.06.11-000001 | STATS COUNT(*)',
+                },
+              },
+            },
+          ],
+        },
+        ctx
+      );
+
+      expect(ctx.attachments.add).not.toHaveBeenCalled();
+      const { results } = result as { results: Array<{ type: string; data: { message: string } }> };
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect(results[0].data.message).toContain('concrete generation index');
+    });
+
     it('returns an error when attachment persistence fails', async () => {
       const ctx = createContext();
       ctx.attachments.add.mockResolvedValue(undefined as never);
