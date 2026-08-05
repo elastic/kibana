@@ -12,12 +12,13 @@ import { useDarkMode } from '@kbn/kibana-react-plugin/public';
 import type { SecurityAppStore } from '../../../common/store/types';
 import type { StartServices } from '../../../types';
 import { useInitDataViewManager, useDataViewManagerStatus } from '../../../data_view_manager';
+import { SecuritySolutionDataViewManagerProvider } from '../../../data_view_manager/data_view_manager_provider';
 import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
 import { SecuritySolutionFlyout } from '../../../flyout';
 import { RulePreviewAttachmentErrorCallout } from './error_callout';
 import type { RulePreviewAttachmentServices } from './types';
 
-export const RulePreviewAttachmentDataViewBootstrap = () => {
+const RulePreviewAttachmentDataViewBootstrapInner = () => {
   const initDataViewManager = useInitDataViewManager();
   const sharedStatus = useDataViewManagerStatus();
 
@@ -29,6 +30,12 @@ export const RulePreviewAttachmentDataViewBootstrap = () => {
 
   return null;
 };
+
+export const RulePreviewAttachmentDataViewBootstrap = () => (
+  <SecuritySolutionDataViewManagerProvider>
+    <RulePreviewAttachmentDataViewBootstrapInner />
+  </SecuritySolutionDataViewManagerProvider>
+);
 
 const RulePreviewAttachmentThemeProvider: React.FC<React.PropsWithChildren<{}>> = ({
   children,

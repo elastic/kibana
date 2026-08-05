@@ -33,6 +33,7 @@ import { UserPrivilegesProvider } from '../common/components/user_privileges/use
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
 import { DiscoverInTimelineContextProvider } from '../common/components/discover_in_timeline/provider';
 import { InitializationProvider } from '../common/components/initialization';
+import { SecuritySolutionDataViewManagerProvider } from '../data_view_manager/data_view_manager_provider';
 import { AssistantProvider } from '../assistant/provider';
 import { TrialCompanion } from '../trial_companion/trial_companion';
 import {
@@ -61,34 +62,36 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
     <KibanaRenderContextProvider {...services}>
       <ManageGlobalToaster>
         <ReduxStoreProvider store={store}>
-          <EntityStoreEuidApiProvider>
-            <EuiThemeProvider darkMode={darkMode}>
-              <MlCapabilitiesProvider>
-                <UserPrivilegesProvider kibanaCapabilities={capabilities}>
-                  <ManageUserInfo>
-                    <NavigationProvider core={services}>
-                      <ReactQueryClientProvider>
-                        <InitializationProvider>
-                          <CellActionsProvider
-                            getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-                          >
-                            <UpsellingProvider upsellingService={upselling}>
-                              <DiscoverInTimelineContextProvider>
-                                <PageRouter history={history}>
-                                  <AssistantProvider>{children}</AssistantProvider>
-                                  <TrialCompanion />
-                                </PageRouter>
-                              </DiscoverInTimelineContextProvider>
-                            </UpsellingProvider>
-                          </CellActionsProvider>
-                        </InitializationProvider>
-                      </ReactQueryClientProvider>
-                    </NavigationProvider>
-                  </ManageUserInfo>
-                </UserPrivilegesProvider>
-              </MlCapabilitiesProvider>
-            </EuiThemeProvider>
-          </EntityStoreEuidApiProvider>
+          <SecuritySolutionDataViewManagerProvider>
+            <EntityStoreEuidApiProvider>
+              <EuiThemeProvider darkMode={darkMode}>
+                <MlCapabilitiesProvider>
+                  <UserPrivilegesProvider kibanaCapabilities={capabilities}>
+                    <ManageUserInfo>
+                      <NavigationProvider core={services}>
+                        <ReactQueryClientProvider>
+                          <InitializationProvider>
+                            <CellActionsProvider
+                              getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+                            >
+                              <UpsellingProvider upsellingService={upselling}>
+                                <DiscoverInTimelineContextProvider>
+                                  <PageRouter history={history}>
+                                    <AssistantProvider>{children}</AssistantProvider>
+                                    <TrialCompanion />
+                                  </PageRouter>
+                                </DiscoverInTimelineContextProvider>
+                              </UpsellingProvider>
+                            </CellActionsProvider>
+                          </InitializationProvider>
+                        </ReactQueryClientProvider>
+                      </NavigationProvider>
+                    </ManageUserInfo>
+                  </UserPrivilegesProvider>
+                </MlCapabilitiesProvider>
+              </EuiThemeProvider>
+            </EntityStoreEuidApiProvider>
+          </SecuritySolutionDataViewManagerProvider>
           <ErrorToastDispatcher />
           <GlobalToaster />
         </ReduxStoreProvider>

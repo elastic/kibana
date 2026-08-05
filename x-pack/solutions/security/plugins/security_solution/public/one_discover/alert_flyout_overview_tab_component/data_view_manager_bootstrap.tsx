@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useInitDataViewManager, useDataViewManagerStatus } from '../../data_view_manager';
+import { SecuritySolutionDataViewManagerProvider } from '../../data_view_manager/data_view_manager_provider';
 
-export const DataViewManagerBootstrap = () => {
+const DataViewManagerBootstrapInner = () => {
   const initDataViewManager = useInitDataViewManager();
   const sharedStatus = useDataViewManagerStatus();
 
@@ -20,3 +21,14 @@ export const DataViewManagerBootstrap = () => {
 
   return null;
 };
+
+/**
+ * Bootstraps the data view manager when rendered outside of the security
+ * solution app (e.g. embedded in Discover). Provides its own package provider
+ * so the engine hooks resolve against the package store and dependencies.
+ */
+export const DataViewManagerBootstrap = () => (
+  <SecuritySolutionDataViewManagerProvider>
+    <DataViewManagerBootstrapInner />
+  </SecuritySolutionDataViewManagerProvider>
+);
