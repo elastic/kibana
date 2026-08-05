@@ -27,7 +27,8 @@ import {
 const KEY = 'visualizations';
 
 /**
- * Visualizations section in overview. It contains analyzer preview and session view preview.
+ * Visualizations section in overview.
+ * Preview order: Graph view, Analyzer, Session view.
  */
 export const VisualizationsSection = memo(() => {
   const expanded = useExpandSection({
@@ -72,13 +73,17 @@ export const VisualizationsSection = memo(() => {
       sectionId={KEY}
       data-test-subj={VISUALIZATION_SECTION_TEST_ID}
     >
-      <SessionPreviewContainer
-        hit={hit}
-        disableNavigation={isRulePreview}
-        showIcon={!isPreviewMode}
-        onShowSessionView={navigateToSessionView}
-      />
-      <EuiSpacer />
+      {hasGraphData && (
+        <>
+          <GraphPreviewContainer
+            hit={hit}
+            onShowGraph={navigateToGraphVisualization}
+            disableNavigation={isRulePreview}
+            showIcon={!isPreviewMode}
+          />
+          <EuiSpacer />
+        </>
+      )}
       <AnalyzerPreviewContainer
         hit={hit}
         onShowAnalyzer={navigateToAnalyzer}
@@ -86,17 +91,13 @@ export const VisualizationsSection = memo(() => {
         showIcon={!isPreviewMode}
         disableNavigation={isRulePreview}
       />
-      {hasGraphData && (
-        <>
-          <EuiSpacer />
-          <GraphPreviewContainer
-            hit={hit}
-            onShowGraph={navigateToGraphVisualization}
-            disableNavigation={isRulePreview}
-            showIcon={!isPreviewMode}
-          />
-        </>
-      )}
+      <EuiSpacer />
+      <SessionPreviewContainer
+        hit={hit}
+        disableNavigation={isRulePreview}
+        showIcon={!isPreviewMode}
+        onShowSessionView={navigateToSessionView}
+      />
     </ExpandableSection>
   );
 });

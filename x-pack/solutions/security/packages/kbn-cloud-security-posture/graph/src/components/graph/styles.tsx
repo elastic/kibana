@@ -37,6 +37,7 @@ export const GlobalGraphStyles = () => {
 
         .react-flow__node:not(.non-interactive) {
           cursor: pointer;
+          overflow: visible;
         }
 
         .react-flow__node:not(.non-interactive).dragging {
@@ -56,6 +57,22 @@ export const GlobalGraphStyles = () => {
           opacity: ${GRAPH_NON_ORIGIN_NODE_OPACITY};
         }
 
+        .react-flow.graph-highlight-origins-only .react-flow__edge:not(.graph-origin-edge) {
+          transition: opacity 0.2s ease;
+          opacity: ${GRAPH_NON_ORIGIN_NODE_OPACITY};
+        }
+
+        .react-flow.graph-highlight-origins-only .react-flow__edge.graph-origin-edge .react-flow__edge-path,
+        .react-flow.graph-highlight-origins-only .graph-origin-edge-path {
+          animation: graph-origin-edge-dash 0.9s linear infinite;
+        }
+
+        @keyframes graph-origin-edge-dash {
+          to {
+            stroke-dashoffset: -20;
+          }
+        }
+
         .react-flow.graph-in-page-search-active
           .react-flow__node:not(.graph-search-match):not(:hover):not(.selected) {
           transition: opacity 0.2s ease;
@@ -71,6 +88,17 @@ export const GlobalGraphStyles = () => {
         .react-flow__node.graph-search-active-match {
           outline: 2px dashed var(--euiColorDarkShade, #343741);
           outline-offset: 2px;
+        }
+
+        /* Test B / hover actions: dim siblings only while an entity is hovered */
+        .react-flow.graph-entity-actions-hover .react-flow__node:not(.graph-actions-hover-active) {
+          transition: opacity 0.15s ease;
+          opacity: ${GRAPH_NON_ORIGIN_NODE_OPACITY};
+        }
+
+        .react-flow.graph-entity-actions-hover .react-flow__edge {
+          transition: opacity 0.15s ease;
+          opacity: ${GRAPH_NON_ORIGIN_NODE_OPACITY};
         }
       `}
     />

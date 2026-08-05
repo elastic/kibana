@@ -730,7 +730,7 @@ const processGraph = (
   });
 
   const initialEdges: Array<Edge<EdgeViewModel>> = edgesModel
-    .map((edgeData) => mapEdgeViewModelToReactFlowEdge(edgeData, nodesById))
+    .map((edgeData) => mapEdgeViewModelToReactFlowEdge(edgeData, nodesById, highlightOriginsOnly))
     .filter((edge): edge is Edge<EdgeViewModel> => edge !== null);
 
   return { initialNodes, initialEdges };

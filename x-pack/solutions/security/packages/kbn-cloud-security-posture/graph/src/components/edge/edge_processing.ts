@@ -8,6 +8,10 @@
 import type { Edge } from '@xyflow/react';
 import type { EdgeViewModel, NodeViewModel } from '../types';
 import { isConnectorShape } from '../utils';
+import {
+  GRAPH_ORIGIN_EDGE_CLASS,
+  isOriginEntityOrEventNode,
+} from '../graph/graph_origin_utils';
 
 export type GraphEdgeRenderColor = 'danger' | 'subdued';
 
@@ -62,9 +66,25 @@ export const shouldRenderGraphEdge = (
   targetShape: NodeViewModel['shape']
 ): boolean => !getEdgeHandleConfig(sourceShape, targetShape).isReturnStackEdge;
 
+const isOriginPathEdge = (
+  sourceNode: NodeViewModel,
+  targetNode: NodeViewModel
+): boolean => {
+  if (isOriginEntityOrEventNode(sourceNode) || isOriginEntityOrEventNode(targetNode)) {
+    return true;
+  }
+
+  // Relationship connectors marked as origin (spine path from starting entities).
+  return Boolean(
+    ('isOrigin' in sourceNode && sourceNode.isOrigin) ||
+      ('isOrigin' in targetNode && targetNode.isOrigin)
+  );
+};
+
 export const mapEdgeViewModelToReactFlowEdge = (
   edgeData: EdgeViewModel,
-  nodesById: Record<string, NodeViewModel>
+  nodesById: Record<string, NodeViewModel>,
+  highlightOriginsOnly = false
 ): Edge<EdgeViewModel> | null => {
   const sourceNode = nodesById[edgeData.source];
   const targetNode = nodesById[edgeData.target];
@@ -81,6 +101,7 @@ export const mapEdgeViewModelToReactFlowEdge = (
   }
 
   const { sourceHandle, targetHandle } = getEdgeHandleConfig(sourceShape, targetShape);
+  const isOriginHighlightEdge = highlightOriginsOnly && isOriginPathEdge(sourceNode, targetNode);
 
   return {
     id: edgeData.id,
@@ -92,12 +113,14 @@ export const mapEdgeViewModelToReactFlowEdge = (
     focusable: false,
     selectable: false,
     deletable: false,
+    className: isOriginHighlightEdge ? GRAPH_ORIGIN_EDGE_CLASS : undefined,
     data: {
       ...edgeData,
       sourceShape,
       sourceColor: sourceNode.color,
       targetShape,
       targetColor: targetNode.color,
+      isOriginHighlightEdge,
     },
   };
 };

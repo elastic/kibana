@@ -21,11 +21,11 @@ import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { SessionPreviewContainer } from './session_preview_container';
 import { GraphPreviewContainer } from './graph_preview_container';
-import { useGraphPreview } from '../hooks/use_graph_preview';
 import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import { AnalyzerGraph } from '../../tools/analyzer';
 import { useSessionViewConfig } from '../../tools/session_view/hooks/use_session_view_config';
 import { SessionView } from '../../tools/session_view';
+import { GraphView } from '../../tools/graph';
 import { defaultToolsFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 
@@ -57,7 +57,7 @@ export interface VisualizationsSectionProps {
 
 /**
  * Third section of the overview tab in details flyout.
- * It contains analyzer preview and session view preview.
+ * Preview order: Graph view, Analyzer, Session view.
  */
 export const VisualizationsSection = memo(
   ({ hit, renderCellActions, onAlertUpdated }: VisualizationsSectionProps) => {
@@ -66,7 +66,6 @@ export const VisualizationsSection = memo(
     const store = useStore();
     const history = useHistory();
     const sessionViewConfig = useSessionViewConfig(hit);
-    const { hasGraphData } = useGraphPreview({ hit });
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
@@ -137,6 +136,30 @@ export const VisualizationsSection = memo(
       ]
     );
 
+    const onShowGraph = useCallback(
+      () =>
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: (
+              <GraphView
+                hit={hit}
+                renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
+              />
+            ),
+          }),
+          {
+            ...defaultToolsFlyoutProperties,
+            historyKey,
+            session: 'start',
+          }
+        ),
+      [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]
+    );
+
     return (
       <ExpandableSection
         data-test-subj={VISUALIZATION_SECTION_TEST_ID}
@@ -146,11 +169,11 @@ export const VisualizationsSection = memo(
         sectionId={LOCAL_STORAGE_SECTION_KEY}
         title={VISUALIZATION_SECTION_TITLE}
       >
-        <SessionPreviewContainer
+        <GraphPreviewContainer
           disableNavigation={false}
           hit={hit}
-          onShowSessionView={onShowSessionView}
-          showIcon={false}
+          onShowGraph={onShowGraph}
+          showIcon={true}
         />
         <AnalyzerPreviewContainer
           disableNavigation={false}
@@ -159,7 +182,12 @@ export const VisualizationsSection = memo(
           shouldUseAncestor={false}
           showIcon={false}
         />
-        {hasGraphData && <GraphPreviewContainer disableNavigation hit={hit} showIcon={false} />}
+        <SessionPreviewContainer
+          disableNavigation={false}
+          hit={hit}
+          onShowSessionView={onShowSessionView}
+          showIcon={false}
+        />
       </ExpandableSection>
     );
   }

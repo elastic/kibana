@@ -6,7 +6,6 @@
  */
 import React, { memo, useMemo } from 'react';
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -21,9 +20,21 @@ import type {
   NodeDataModel,
   EdgeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
+import {
+  GRAPH_BACKGROUND_COLOR,
+  GRAPH_BACKGROUND_DOT_COLOR,
+  GRAPH_BACKGROUND_DOT_GAP,
+  GRAPH_BACKGROUND_DOT_SIZE,
+} from '@kbn/cloud-security-posture-graph/src/components/constants';
 import { GRAPH_PREVIEW_TEST_ID, GRAPH_PREVIEW_LOADING_TEST_ID } from './test_ids';
 
 const ENTITY_SHAPES = new Set(['hexagon', 'pentagon', 'ellipse', 'rectangle', 'diamond']);
+
+/** Preview node radius — matches Figma Graph view preview pills (~8px). */
+const NODE_PILL_BORDER_RADIUS = 8;
+/** Icon box radius inside the pill. */
+const NODE_ICON_BORDER_RADIUS = 4;
+const NODE_ICON_SIZE = 20;
 
 const isEntityNode = (node: NodeDataModel): boolean =>
   ENTITY_SHAPES.has((node as { shape?: string }).shape ?? '');
@@ -73,67 +84,111 @@ const LoadingComponent = () => (
 interface NodePillProps {
   label?: string;
   icon?: string;
-  count?: number;
-  color?: 'primary' | 'danger' | 'warning';
+  /** When true, render a stacked card edge for grouped neighbors. */
+  isGroup?: boolean;
 }
 
-const NodePill = ({ label, icon, count, color = 'primary' }: NodePillProps) => {
+/**
+ * Compact entity pill matching the Figma Graph view preview:
+ * backgroundBasePrimary fill, borderBasePrimary, white icon box.
+ */
+const NodePill = ({ label, icon, isGroup = false }: NodePillProps) => {
   const { euiTheme } = useEuiTheme();
-
-  const borderColor =
-    color === 'danger'
-      ? euiTheme.colors.danger
-      : color === 'warning'
-      ? euiTheme.colors.warning
-      : euiTheme.colors.primary;
+  // Screenshot tokens (Borealis light): fill #F1F6FF, border #BFDBFF — not LightPrimary / Prominent.
+  const fillColor = euiTheme.colors.backgroundBasePrimary;
+  const borderColor = euiTheme.colors.borderBasePrimary;
+  const iconBoxBg = euiTheme.colors.backgroundBasePlain;
 
   return (
-    <EuiFlexGroup
-      direction="row"
-      gutterSize="xs"
-      alignItems="center"
+    <div
       css={css`
-        border: 1.5px solid ${borderColor};
-        border-radius: ${euiTheme.border.radius.medium};
-        padding: ${euiTheme.size.xs} ${euiTheme.size.s};
-        background: ${euiTheme.colors.backgroundBasePlain};
-        max-width: 140px;
+        position: relative;
+        max-width: 148px;
       `}
     >
-      {icon && (
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={icon} size="s" aria-hidden={true} />
-        </EuiFlexItem>
+      {isGroup && (
+        <div
+          aria-hidden={true}
+          css={css`
+            position: absolute;
+            left: 2px;
+            right: 2px;
+            bottom: -4px;
+            height: 6px;
+            border-left: 1px solid ${borderColor};
+            border-right: 1px solid ${borderColor};
+            border-bottom: 1px solid ${borderColor};
+            border-radius: 0 0 ${NODE_PILL_BORDER_RADIUS}px ${NODE_PILL_BORDER_RADIUS}px;
+            background: ${iconBoxBg};
+            z-index: 0;
+          `}
+        />
       )}
-      <EuiFlexItem
-        grow={false}
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="s"
+        alignItems="center"
+        responsive={false}
         css={css`
-          overflow: hidden;
+          position: relative;
+          z-index: 1;
+          border: 1px solid ${borderColor};
+          border-radius: ${NODE_PILL_BORDER_RADIUS}px;
+          padding: 4px 8px;
+          background: ${fillColor};
+          min-height: 32px;
+          opacity: 1;
         `}
       >
-        <EuiText
-          size="xs"
+        {icon && (
+          <EuiFlexItem grow={false}>
+            <div
+              css={css`
+                width: ${NODE_ICON_SIZE}px;
+                height: ${NODE_ICON_SIZE}px;
+                border-radius: ${NODE_ICON_BORDER_RADIUS}px;
+                border: 1px solid ${borderColor};
+                background: ${iconBoxBg};
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+              `}
+            >
+              <EuiIcon type={icon} size="s" color="primary" aria-hidden={true} />
+            </div>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem
+          grow={false}
           css={css`
-            white-space: nowrap;
             overflow: hidden;
-            text-overflow: ellipsis;
+            min-width: 0;
           `}
         >
-          {label ?? '—'}
-        </EuiText>
-      </EuiFlexItem>
-      {count !== undefined && count > 1 && (
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">{count}</EuiBadge>
+          <EuiText
+            size="xs"
+            css={css`
+              font-weight: ${euiTheme.font.weight.medium};
+              color: ${euiTheme.colors.textParagraph};
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              line-height: 1.2;
+            `}
+          >
+            {label ?? '—'}
+          </EuiText>
         </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+      </EuiFlexGroup>
+    </div>
   );
 };
 
 /**
  * Graph preview under Overview, Visualizations.
- * Shows a simplified 2-node schematic: [main entity] ── [N neighbors].
+ * Shows a simplified 2-node schematic: [main entity] ──▶ [N neighbors].
+ * Canvas and pills mirror graph visualizer entity card styling.
  */
 export const GraphPreview: React.FC<GraphPreviewProps> = memo(
   ({ isLoading, isError, data }: GraphPreviewProps) => {
@@ -172,7 +227,7 @@ export const GraphPreview: React.FC<GraphPreviewProps> = memo(
 
       return {
         mainNode: main,
-        neighborCount: entityNeighborCount || nodeSet.size - 1,
+        neighborCount: entityNeighborCount || Math.max(nodeSet.size - 1, 0),
       };
     }, [data]);
 
@@ -187,48 +242,76 @@ export const GraphPreview: React.FC<GraphPreviewProps> = memo(
       );
     }
 
-    const color = (mainNode.color as 'primary' | 'danger' | 'warning') ?? 'primary';
-    const lineColor =
-      color === 'danger'
-        ? euiTheme.colors.danger
-        : color === 'warning'
-        ? euiTheme.colors.warning
-        : euiTheme.colors.primary;
+    const neighborIcon = mainNode.icon ?? 'storage';
+    const edgeColor = euiTheme.colors.borderBasePrimary;
+    const canvasBorder = euiTheme.colors.borderBasePlain;
+    const dotRadius = GRAPH_BACKGROUND_DOT_SIZE / 2;
 
     return (
       <EuiFlexGroup
         direction="row"
         gutterSize="none"
         alignItems="center"
+        responsive={false}
         data-test-subj={GRAPH_PREVIEW_TEST_ID}
         css={css`
-          padding: ${euiTheme.size.m} 0;
+          padding: ${euiTheme.size.m};
+          border: 1px solid ${canvasBorder};
+          border-radius: ${euiTheme.border.radius.medium};
+          background-color: ${GRAPH_BACKGROUND_COLOR};
+          background-image: radial-gradient(
+            ${GRAPH_BACKGROUND_DOT_COLOR} ${dotRadius}px,
+            transparent ${dotRadius}px
+          );
+          background-size: ${GRAPH_BACKGROUND_DOT_GAP}px ${GRAPH_BACKGROUND_DOT_GAP}px;
         `}
       >
         {/* Main entity */}
         <EuiFlexItem grow={false}>
-          <NodePill
-            label={mainNode.label}
-            icon={mainNode.icon}
-            count={mainNode.count}
-            color={color}
-          />
+          <NodePill label={mainNode.label} icon={mainNode.icon ?? 'storage'} />
         </EuiFlexItem>
 
-        {/* Connecting line */}
+        {/* Connecting line + arrow */}
         <EuiFlexItem
           css={css`
-            height: 1.5px;
-            background: ${lineColor};
+            display: flex;
+            align-items: center;
             min-width: ${euiTheme.size.xl};
             flex: 1;
+            margin-inline: ${euiTheme.size.xs};
           `}
-        />
+        >
+          <div
+            css={css`
+              position: relative;
+              width: 100%;
+              height: 1px;
+              background: ${edgeColor};
+            `}
+          >
+            <div
+              aria-hidden={true}
+              css={css`
+                position: absolute;
+                right: 0;
+                top: 50%;
+                width: 6px;
+                height: 6px;
+                border-top: 1px solid ${edgeColor};
+                border-right: 1px solid ${edgeColor};
+                transform: translateY(-50%) rotate(45deg);
+                background: transparent;
+              `}
+            />
+          </div>
+        </EuiFlexItem>
 
         {/* Neighbor count pill */}
         {neighborCount > 0 && (
           <EuiFlexItem grow={false}>
             <NodePill
+              isGroup={neighborCount > 1}
+              icon={neighborIcon}
               label={i18n.translate(
                 'xpack.securitySolution.flyout.right.visualizations.graphPreview.neighborCount',
                 {
@@ -236,7 +319,6 @@ export const GraphPreview: React.FC<GraphPreviewProps> = memo(
                   values: { count: neighborCount },
                 }
               )}
-              color="primary"
             />
           </EuiFlexItem>
         )}

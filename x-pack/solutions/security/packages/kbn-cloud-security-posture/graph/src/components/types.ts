@@ -43,6 +43,16 @@ export type CountryClickCallback = (e: React.MouseEvent<HTMLElement>) => void;
 
 export type EventClickCallback = (e: React.MouseEvent<HTMLButtonElement>) => void;
 
+/** Icon action used by the entity expand popover and hover toolbar. */
+export interface EntityActionItem {
+  type: 'item';
+  iconType: string;
+  label: string;
+  onClick: () => void;
+  testSubject: string;
+  disabled?: boolean;
+}
+
 export interface EntityNodeViewModel
   extends Record<string, unknown>,
     EntityNodeDataModel,
@@ -52,6 +62,19 @@ export interface EntityNodeViewModel
   ipClickHandler?: IpClickCallback;
   countryClickHandler?: CountryClickCallback;
   showEntityId?: boolean;
+  /**
+   * How entity actions popover is opened.
+   * - `button` (Test A): show `⋯` and open on click
+   * - `hover` (Test B): hide `⋯` and open on card hover
+   */
+  entityActionsMode?: 'button' | 'hover';
+  /** Closes the entity actions popover (used by hover mode cleanup). */
+  closeEntityActions?: () => void;
+  /**
+   * Returns the same expand-action items as the `⋯` popover.
+   * Used by Test B to render the hover toolbar above the entity.
+   */
+  getEntityActionItems?: () => EntityActionItem[];
 }
 
 export interface GroupNodeViewModel
@@ -96,6 +119,7 @@ export type EdgeProps = xyEdgeProps<
       sourceColor: NodeColor;
       targetShape: NodeShape;
       targetColor: NodeColor;
+      isOriginHighlightEdge?: boolean;
     }
   >
 >;

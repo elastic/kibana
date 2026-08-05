@@ -20,6 +20,11 @@ const dashedStyle = {
   strokeDasharray: '2 2',
 };
 
+const originHighlightStyle = {
+  strokeWidth: 2.5,
+  strokeDasharray: '6 4',
+};
+
 const NODES_WITHOUT_MARKER = ['label', 'group', 'relationship'];
 
 export const DefaultEdge = memo(
@@ -58,6 +63,8 @@ export const DefaultEdge = memo(
       stepOffset: useBundledEdgeRouting ? 0 : GRAPH_EDGE_STEP_OFFSET,
     });
 
+    const isOriginHighlightEdge = Boolean(data?.isOriginHighlightEdge);
+
     return (
       <>
         <BaseEdge
@@ -65,10 +72,14 @@ export const DefaultEdge = memo(
           id={id}
           path={edgePath}
           interactionWidth={0}
+          className={isOriginHighlightEdge ? 'graph-origin-edge-path' : undefined}
           style={{
             stroke: useEdgeColor(color),
-            // Defaults to solid when type is not available
-            ...(data?.type === 'dashed' ? dashedStyle : {}),
+            ...(isOriginHighlightEdge
+              ? originHighlightStyle
+              : data?.type === 'dashed'
+              ? dashedStyle
+              : {}),
           }}
           markerEnd={markerEnd}
         />

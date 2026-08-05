@@ -312,28 +312,28 @@ describe('LabelNode', () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 2 });
       const colors = getEventPillColors(getEventPillTone(analysis), false, mockEuiTheme);
       expect(colors.backgroundColor).toBe(mockEuiTheme.colors.backgroundBaseDanger);
-      expect(colors.borderColor).toBe(mockEuiTheme.colors.borderBaseProminent);
+      expect(colors.borderColor).toBe(mockEuiTheme.colors.borderBaseDanger);
     });
 
     it('returns active alert colors when selected', () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 2 });
       const colors = getEventPillColors(getEventPillTone(analysis), true, mockEuiTheme);
-      expect(colors.backgroundColor).toBe(mockEuiTheme.colors.backgroundBaseDanger);
-      expect(colors.borderColor).toBe(mockEuiTheme.colors.primary);
+      expect(colors.backgroundColor).toBe(mockEuiTheme.colors.backgroundLightDanger);
+      expect(colors.borderColor).toBe(mockEuiTheme.colors.borderStrongDanger);
     });
 
     it('returns event colors for event-only nodes', () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 2, uniqueAlertsCount: 0 });
       const colors = getEventPillColors(getEventPillTone(analysis), false, mockEuiTheme);
       expect(colors.backgroundColor).toBe(mockEuiTheme.colors.backgroundBasePlain);
-      expect(colors.borderColor).toBe(mockEuiTheme.colors.borderBaseProminent);
+      expect(colors.borderColor).toBe(mockEuiTheme.colors.borderBasePlain);
     });
 
     it('returns active event colors when selected', () => {
       const analysis = analyzeDocuments({ uniqueEventsCount: 2, uniqueAlertsCount: 0 });
       const colors = getEventPillColors(getEventPillTone(analysis), true, mockEuiTheme);
-      expect(colors.backgroundColor).toBe(mockEuiTheme.colors.backgroundBasePlain);
-      expect(colors.borderColor).toBe(mockEuiTheme.colors.primary);
+      expect(colors.backgroundColor).toBe(mockEuiTheme.colors.backgroundBaseSubdued);
+      expect(colors.borderColor).toBe(mockEuiTheme.colors.borderBasePlain);
     });
   });
 });

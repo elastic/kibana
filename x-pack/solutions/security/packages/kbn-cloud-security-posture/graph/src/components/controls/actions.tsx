@@ -148,7 +148,7 @@ export const Actions = ({
   searchFilterCounter = 0,
   searchToggled,
   searchWarningMessage,
-  searchControlsVariant = 'split',
+  searchControlsVariant = 'unified',
   nodes = [],
   ...props
 }: ActionsProps) => {

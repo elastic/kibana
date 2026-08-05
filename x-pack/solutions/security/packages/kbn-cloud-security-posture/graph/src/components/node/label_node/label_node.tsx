@@ -133,7 +133,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   const pillTone = getEventPillTone(analysis);
   const pillColors = getEventPillColors(pillTone, isActive, euiTheme);
   const originOutlineBorderColor =
-    pillTone === 'alert' ? euiTheme.colors.danger : euiTheme.colors.borderBaseProminent;
+    pillTone === 'alert' ? euiTheme.colors.borderStrongDanger : euiTheme.colors.borderBasePlain;
 
   const labelTextCss = css`
     font-size: 10.5px;

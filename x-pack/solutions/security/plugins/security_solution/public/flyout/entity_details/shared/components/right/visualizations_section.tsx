@@ -21,7 +21,8 @@ import { EntityGraphPreviewContainer } from './entity_graph_preview_container';
 const KEY = 'visualizations';
 
 /**
- * Visualizations section in overview. It contains analyzer preview and session view preview.
+ * Visualizations section in overview.
+ * Entity flyout currently shows Graph view as the first (and only) preview.
  */
 export const VisualizationsSection = memo(
   ({
@@ -46,25 +47,25 @@ export const VisualizationsSection = memo(
       openDetailsPanel?.({ tab: EntityDetailsLeftPanelTab.GRAPH_VIEW });
     }, [openDetailsPanel]);
 
+    if (!shouldShowGraph) {
+      return null;
+    }
+
     return (
-      <>
-        {shouldShowGraph && (
-          <ExpandableSection
-            expanded={expanded}
-            title={VISUALIZATION_SECTION_TITLE}
-            localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
-            sectionId={KEY}
-            data-test-subj={VISUALIZATION_SECTION_TEST_ID}
-          >
-            <EntityGraphPreviewContainer
-              entityId={entityId}
-              showIcon={!isPreviewMode}
-              disableNavigation={isPreviewMode || scopeId === TableId.rulePreview}
-              onShowGraph={handleOpenGraphViewTab}
-            />
-          </ExpandableSection>
-        )}
-      </>
+      <ExpandableSection
+        expanded={expanded}
+        title={VISUALIZATION_SECTION_TITLE}
+        localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
+        sectionId={KEY}
+        data-test-subj={VISUALIZATION_SECTION_TEST_ID}
+      >
+        <EntityGraphPreviewContainer
+          entityId={entityId}
+          showIcon={true}
+          disableNavigation={isPreviewMode || scopeId === TableId.rulePreview}
+          onShowGraph={handleOpenGraphViewTab}
+        />
+      </ExpandableSection>
     );
   }
 );

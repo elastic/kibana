@@ -95,7 +95,15 @@ const AlertCountBadge = ({
   isActive?: boolean;
   onEventClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }) => {
+  const { euiTheme } = useEuiTheme();
   const label = displayCount(count);
+  // Figma: Default = Danger hollow (Light bg); Active = Danger filled
+  const hollowCss = !isActive
+    ? css`
+        background-color: ${euiTheme.colors.backgroundLightDanger};
+        color: ${euiTheme.colors.textDanger};
+      `
+    : undefined;
   const badge = (
     <span data-test-subj={TEST_SUBJ_ALERT_ICON}>
       <EuiBadge
@@ -103,7 +111,7 @@ const AlertCountBadge = ({
         iconType="warningFilled"
         iconSide="left"
         data-test-subj={TEST_SUBJ_ALERT_COUNT}
-        css={isActive ? css({ backgroundColor: 'inherit' }) : undefined}
+        css={hollowCss}
       >
         {label}
       </EuiBadge>
@@ -136,15 +144,26 @@ const AlertCountBadge = ({
   return badge;
 };
 
-const AlertIconBadge = () => (
-  <EuiBadge
-    color="danger"
-    iconType="warningFilled"
-    iconSide="left"
-    data-test-subj={TEST_SUBJ_ALERT_ICON}
-    aria-label={POPOVER_ALERT_ARIA_LABEL}
-  />
-);
+const AlertIconBadge = ({ isActive }: { isActive?: boolean }) => {
+  const { euiTheme } = useEuiTheme();
+  const hollowCss = !isActive
+    ? css`
+        background-color: ${euiTheme.colors.backgroundLightDanger};
+        color: ${euiTheme.colors.textDanger};
+      `
+    : undefined;
+
+  return (
+    <EuiBadge
+      color="danger"
+      iconType="warningFilled"
+      iconSide="left"
+      data-test-subj={TEST_SUBJ_ALERT_ICON}
+      aria-label={POPOVER_ALERT_ARIA_LABEL}
+      css={hollowCss}
+    />
+  );
+};
 
 export const LabelNodeBadges = ({ analysis, isActive, onEventClick }: LabelNodeBadgesProps) => {
   const { euiTheme } = useEuiTheme();
@@ -162,7 +181,7 @@ export const LabelNodeBadges = ({ analysis, isActive, onEventClick }: LabelNodeB
         gap: ${euiTheme.size.xs};
       `}
     >
-      {analysis.isSingleAlert && <AlertIconBadge />}
+      {analysis.isSingleAlert && <AlertIconBadge isActive={isActive} />}
       {analysis.isGroupOfEvents && (
         <EventCountBadge count={analysis.uniqueEventsCount} onEventClick={onEventClick} />
       )}

@@ -35,7 +35,7 @@ import { AnimatedSearchBarContainer, useBorder } from './styles';
 import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from '../filters/search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
-import type { NodeViewModel } from '../types';
+import type { EntityActionItem, NodeProps, NodeViewModel } from '../types';
 import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
 import { useGraphFilters } from '../filters/use_graph_filters';
@@ -230,6 +230,13 @@ export interface GraphInvestigationProps {
    * - `unified` (Option B): top search dropdown with both actions; bottom search hidden
    */
   searchControlsVariant?: 'split' | 'unified';
+
+  /**
+   * Entity actions popover interaction for prototyping (dev-graph Test A/B).
+   * - `button` (Test A): `⋯` in header, open on click (current)
+   * - `hover` (Test B): hide `⋯`, open popover on entity hover
+   */
+  entityActionsMode?: 'button' | 'hover';
 }
 
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' } as const;
@@ -250,7 +257,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     },
     showInvestigateInTimeline = false,
     showToggleSearch = false,
-    searchControlsVariant = 'split',
+    searchControlsVariant = 'unified',
+    entityActionsMode = 'button',
     onInvestigateInTimeline,
     onOpenEventPreview,
     onOpenNetworkPreview,
@@ -472,6 +480,12 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               riskScoreMin: nodeMetadata.riskScore ? node.riskScoreMin : undefined,
               riskScoreMax: nodeMetadata.riskScore ? node.riskScoreMax : undefined,
               expandButtonClick: nodeExpandButtonClickHandler,
+              closeEntityActions: () => nodeExpandPopover.actions.closePopover(),
+              getEntityActionItems: () =>
+                nodeExpandPopover
+                  .getActionItems({ id: node.id, data: node } as NodeProps)
+                  .filter((item): item is EntityActionItem => item.type === 'item'),
+              entityActionsMode,
               ipClickHandler: createIpClickHandler(nodeMetadata.ipAddress ? nodeIps : []),
               countryClickHandler: createCountryClickHandler(
                 nodeMetadata.geolocation ? nodeCountryCodes : []
@@ -529,6 +543,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       originEntityIdsSet,
       relationshipNodeSources,
       graphFilters,
+      entityActionsMode,
     ]);
 
     const searchFilterCounter = useMemo(() => {

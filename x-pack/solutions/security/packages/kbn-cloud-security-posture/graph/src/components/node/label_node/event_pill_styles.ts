@@ -45,17 +45,38 @@ export const getEventPillColors = (
   isActive: boolean,
   euiTheme: EuiThemeComputed
 ): EventPillColors => {
+  // Figma Event component (node 11904:1238):
+  // Alert default  → Base/Danger bg + Base/Danger border
+  // Alert active   → Light/Danger bg + Strong/Danger border
+  // Event/mixed default → Base/Plain bg + Base/Plain border
+  // Event/mixed active  → Base/Subdued bg + Base/Plain border
   if (tone === 'alert') {
+    if (isActive) {
+      return {
+        backgroundColor: euiTheme.colors.backgroundLightDanger,
+        borderColor: euiTheme.colors.borderStrongDanger,
+        textColor: euiTheme.colors.textParagraph,
+      };
+    }
+
     return {
       backgroundColor: euiTheme.colors.backgroundBaseDanger,
-      borderColor: isActive ? euiTheme.colors.primary : euiTheme.colors.borderBaseProminent,
+      borderColor: euiTheme.colors.borderBaseDanger,
+      textColor: euiTheme.colors.textParagraph,
+    };
+  }
+
+  if (isActive) {
+    return {
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      borderColor: euiTheme.colors.borderBasePlain,
       textColor: euiTheme.colors.textParagraph,
     };
   }
 
   return {
     backgroundColor: euiTheme.colors.backgroundBasePlain,
-    borderColor: isActive ? euiTheme.colors.primary : euiTheme.colors.borderBaseProminent,
+    borderColor: euiTheme.colors.borderBasePlain,
     textColor: euiTheme.colors.textParagraph,
   };
 };

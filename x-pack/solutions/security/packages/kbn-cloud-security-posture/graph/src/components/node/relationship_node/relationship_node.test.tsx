@@ -251,7 +251,7 @@ describe('RelationshipNode', () => {
       expect(colors).toEqual({
         backgroundColor: mockEuiTheme.colors.backgroundLightText,
         emphasizedBackgroundColor: mockEuiTheme.colors.backgroundBaseFormsControlDisabled,
-        borderColor: mockEuiTheme.colors.borderBaseProminent,
+        borderColor: mockEuiTheme.colors.borderBasePlain,
         textColor: mockEuiTheme.colors.textParagraph,
       });
     });

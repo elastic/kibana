@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -22,7 +22,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import { Handle, Position } from '@xyflow/react';
-import type { EntityNodeViewModel, NodeProps } from '../types';
+import type { EntityNodeViewModel, NodeProps, EntityActionItem } from '../types';
 import { GraphNotificationBadge } from '../graph_notification_badge';
 import {
   ORIGIN_ENTITY_OUTLINE_BORDER_RADIUS,
@@ -30,7 +30,6 @@ import {
   OriginNodeOutline,
 } from './origin_node_outline';
 import { NodeButton, HandleStyleOverride, NodeExpandButtonContainer } from './styles';
-import { PILL_EXPAND_BUTTON_SIZE } from './pill_expand_button';
 import { getEntityTypeIcon } from './get_entity_type_icon';
 import { getEntityTypeLabel } from './get_entity_type_label';
 import { getSpanIcon } from './get_span_icon';
@@ -39,6 +38,14 @@ import { showStackedShape } from '../utils';
 import { useViewportZoom } from '../../hooks/use_viewport_zoom';
 import { useMultipleNodesSelected } from '../../hooks/use_multiple_nodes_selected';
 import { GRAPH_SIMPLIFIED_ZOOM_THRESHOLD } from '../constants';
+import {
+  EntityHoverActionsToolbar,
+  GRAPH_ENTITY_HOVER_ACTIONS_TOOLBAR_ID,
+} from './entity_hover_actions_toolbar';
+import {
+  SimplifiedActionsTrigger,
+  GRAPH_SIMPLIFIED_ACTIONS_TRIGGER_ID,
+} from './simplified_actions_trigger';
 import {
   GRAPH_ENTITY_NODE_ID,
   GRAPH_ENTITY_NODE_HOVER_SHAPE_ID,
@@ -76,6 +83,10 @@ export { GRAPH_SIMPLIFIED_ZOOM_THRESHOLD as CARD_NODE_INVESTIGATION_ZOOM_THRESHO
 
 /** Shared hover/selected transition for card shadow and expand CTA. */
 const CARD_INTERACTIVE_TRANSITION = '0.2s ease';
+/** Delay before closing hover-actions so the cursor can reach the toolbar. */
+const HOVER_ACTIONS_CLOSE_DELAY_MS = 120;
+/** Exit motion duration — keep in sync with toolbar fade-out. */
+const HOVER_ACTIONS_EXIT_MS = 140;
 
 const CARD_BORDER_RADIUS = 10;
 const ICON_SIZE = 40;
@@ -105,6 +116,18 @@ const simplifiedCardHandleStyle: React.CSSProperties = {
 type CriticalityLevel = 'extreme' | 'high' | 'medium' | 'low';
 type CriticalityHealthColor = 'danger' | 'risk' | 'warning' | 'neutral';
 
+/** Risk severity bands aligned with Entity Analytics (and Figma entity card variants). */
+type EntityRiskLevel = 'critical' | 'high' | 'moderate' | 'low' | 'unknown';
+
+interface EntityRiskTheme {
+  /** Icon square fill — Backgrounds/Light/{Danger|Risk|Warning|Neutral|Text} */
+  iconBackground: string;
+  /** Icon glyph + risk badge text */
+  accent: string;
+  /** Risk score pill fill (same light token as icon) */
+  badgeBackground: string;
+}
+
 const CRITICALITY_HEALTH_COLOR: Record<CriticalityLevel, CriticalityHealthColor> = {
   extreme: 'danger',
   high: 'risk',
@@ -119,6 +142,7 @@ const CardWrapper = styled.div<{
 }>`
   position: relative;
   width: ${({ $fitContent }) => ($fitContent ? 'max-content' : `${CARD_NODE_WIDTH}px`)};
+  overflow: visible;
 `;
 
 const SimplifiedCardContainer = styled.div`
@@ -130,6 +154,7 @@ const SimplifiedCardContainer = styled.div`
   min-width: ${SIMPLIFIED_ICON_SIZE}px;
   min-height: ${SIMPLIFIED_CARD_LAYOUT_HEIGHT}px;
   max-width: ${SIMPLIFIED_LABEL_MAX_WIDTH}px;
+  overflow: visible;
 `;
 
 const CardShell = styled.div<{
@@ -144,21 +169,25 @@ const CardShell = styled.div<{
   border: 1.5px solid ${({ defaultBorderColor }) => defaultBorderColor};
   border-radius: ${CARD_BORDER_RADIUS}px;
   background: ${({ bgColor }) => bgColor};
-  overflow: hidden;
+  /* Shadow must live on this element — do not set overflow:hidden here or it clips. */
   ${({ $defaultShadow }) => $defaultShadow ?? ''}
-  transition: border-color ${CARD_INTERACTIVE_TRANSITION},
-    border-width ${CARD_INTERACTIVE_TRANSITION}, box-shadow ${CARD_INTERACTIVE_TRANSITION};
+  transition: border-color ${CARD_INTERACTIVE_TRANSITION}, box-shadow ${CARD_INTERACTIVE_TRANSITION};
 
   .react-flow__node:not(.non-interactive):hover:not(.dragging) & {
     ${({ $hoverShadow }) => $hoverShadow ?? ''}
   }
 
-  /* Selected: primary border only; no fill tint */
+  /* Selected: primary border color only — keep width fixed to avoid layout "hug". */
   .react-flow__node:not(.non-interactive).selected:not(.dragging) &,
   .react-flow__node:not(.non-interactive).dragging & {
     border-color: ${({ activeBorderColor }) => activeBorderColor};
-    border-width: 2px;
   }
+`;
+
+/** Clips header/body to the card radius without eating the outer box-shadow. */
+const CardShellClip = styled.div`
+  overflow: hidden;
+  border-radius: inherit;
 `;
 
 const CardHeader = styled.div<{ bgColor: string }>`
@@ -171,7 +200,6 @@ const CardHeader = styled.div<{ bgColor: string }>`
 `;
 
 const IconBox = styled.div<{
-  borderColor: string;
   bgColor: string;
   emphasizedBackgroundColor: string;
 }>`
@@ -180,7 +208,8 @@ const IconBox = styled.div<{
   width: ${ICON_SIZE}px;
   height: ${ICON_SIZE}px;
   border-radius: 8px;
-  border: 1px solid ${({ borderColor }) => borderColor};
+  /* Entity card icon: light risk fill + glyph only — no border. */
+  border: none;
   background: ${({ bgColor }) => bgColor};
   display: flex;
   align-items: center;
@@ -311,10 +340,11 @@ const SimplifiedIconShell = styled.div`
   width: ${SIMPLIFIED_ICON_SIZE}px;
   height: ${SIMPLIFIED_ICON_SIZE}px;
   flex-shrink: 0;
+  /* Let Borealis Shadow/X-small paint outside the 48px icon square. */
+  overflow: visible;
 `;
 
 const SimplifiedIconBox = styled.div<{
-  defaultBorderColor: string;
   activeBorderColor: string;
   bgColor: string;
   defaultShadow?: string;
@@ -323,14 +353,16 @@ const SimplifiedIconBox = styled.div<{
   width: 100%;
   height: 100%;
   border-radius: 8px;
-  border: 1px solid ${({ defaultBorderColor }) => defaultBorderColor};
+  /* Zoom-out entity icon (PDF): light fill + shadow only — no border. */
+  border: 2px solid transparent;
   background: ${({ bgColor }) => bgColor};
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: visible;
   ${({ defaultShadow }) => defaultShadow ?? ''}
   transition: background-color 0.15s ease, box-shadow ${CARD_INTERACTIVE_TRANSITION},
-    border-color ${CARD_INTERACTIVE_TRANSITION}, border-width ${CARD_INTERACTIVE_TRANSITION};
+    border-color ${CARD_INTERACTIVE_TRANSITION};
 
   .react-flow__node:not(.non-interactive):hover:not(.dragging) & {
     ${({ hoverShadow }) => hoverShadow ?? ''}
@@ -339,7 +371,6 @@ const SimplifiedIconBox = styled.div<{
   .react-flow__node:not(.non-interactive).selected:not(.dragging) &,
   .react-flow__node:not(.non-interactive).dragging & {
     border-color: ${({ activeBorderColor }) => activeBorderColor};
-    border-width: 2px;
   }
 `;
 
@@ -354,10 +385,79 @@ const resolveIcon = (icon?: string, tag?: string): string => {
   return getEntityTypeIcon(tag);
 };
 
-const getRiskBadgeColor = (score: number): 'danger' | 'warning' | 'hollow' => {
-  if (score >= 70) return 'danger';
-  if (score >= 40) return 'warning';
-  return 'hollow';
+const getEntityRiskLevel = (score?: number): EntityRiskLevel => {
+  if (score === undefined) return 'unknown';
+  if (score > 90) return 'critical';
+  if (score >= 70) return 'high';
+  if (score >= 40) return 'moderate';
+  if (score >= 20) return 'low';
+  return 'unknown';
+};
+
+/** Borealis tokens: icon fill = Backgrounds/Light/*; glyph/badge text = Text/*. No icon border. */
+const getEntityRiskTheme = (
+  level: EntityRiskLevel,
+  colors: {
+    backgroundLightDanger: string;
+    backgroundLightRisk: string;
+    backgroundLightWarning: string;
+    backgroundLightNeutral: string;
+    backgroundLightText: string;
+    textDanger: string;
+    textRisk: string;
+    textWarning: string;
+    textNeutral: string;
+    textParagraph: string;
+  }
+): EntityRiskTheme => {
+  switch (level) {
+    case 'critical':
+      return {
+        iconBackground: colors.backgroundLightDanger,
+        accent: colors.textDanger,
+        badgeBackground: colors.backgroundLightDanger,
+      };
+    case 'high':
+      return {
+        iconBackground: colors.backgroundLightRisk,
+        accent: colors.textRisk,
+        badgeBackground: colors.backgroundLightRisk,
+      };
+    case 'moderate':
+      return {
+        iconBackground: colors.backgroundLightWarning,
+        accent: colors.textWarning,
+        badgeBackground: colors.backgroundLightWarning,
+      };
+    case 'low':
+      return {
+        iconBackground: colors.backgroundLightNeutral,
+        accent: colors.textNeutral,
+        badgeBackground: colors.backgroundLightNeutral,
+      };
+    case 'unknown':
+    default:
+      return {
+        iconBackground: colors.backgroundLightText,
+        accent: colors.textParagraph,
+        badgeBackground: colors.backgroundLightText,
+      };
+  }
+};
+
+/** Single score used for compact risk indicators (prefer max when range). */
+const getDisplayRiskScore = (
+  riskScore?: number,
+  riskScoreMin?: number,
+  riskScoreMax?: number
+): number | undefined => {
+  if (riskScore !== undefined) {
+    return riskScore;
+  }
+  if (riskScoreMax !== undefined) {
+    return riskScoreMax;
+  }
+  return riskScoreMin;
 };
 
 const formatOverflowCount = (extraCount: number): string => {
@@ -429,17 +529,14 @@ const CriticalityCountsGrid = ({
   </CriticalityGrid>
 );
 
-interface CardExpandButtonProps {
+interface CardActionsButtonProps {
   onClick?: (e: React.MouseEvent<HTMLElement>, unToggleCallback: () => void) => void;
   containerRef?: React.RefObject<HTMLDivElement | null>;
-  buttonSize?: number;
+  /** When true, button sits in the card header (always visible). */
+  inHeader?: boolean;
 }
 
-const CardExpandButton = ({
-  onClick,
-  containerRef,
-  buttonSize = PILL_EXPAND_BUTTON_SIZE,
-}: CardExpandButtonProps) => {
+const CardActionsButton = ({ onClick, containerRef, inHeader = false }: CardActionsButtonProps) => {
   const { euiTheme } = useEuiTheme();
   const [isToggled, setIsToggled] = React.useState(false);
 
@@ -449,17 +546,43 @@ const CardExpandButton = ({
 
   const onClickHandler = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
+      e.stopPropagation();
       setIsToggled((curr) => !curr);
       onClick?.(e, unToggleCallback);
     },
     [onClick, unToggleCallback]
   );
 
-  const positionCss = css`
-    right: -12px;
-    top: 50%;
-    transform: translateY(-50%);
-  `;
+  const actionsLabel = i18n.translate(
+    'securitySolutionPackages.csp.graph.node.card.expandActions',
+    { defaultMessage: 'Actions' }
+  );
+
+  if (inHeader) {
+    return (
+      <div
+        ref={containerRef}
+        className={isToggled ? 'toggled' : undefined}
+        css={css`
+          flex-shrink: 0;
+          position: relative;
+          z-index: 3;
+        `}
+      >
+        <EuiToolTip content={actionsLabel} position="top" disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="boxesVertical"
+            aria-label={actionsLabel}
+            data-test-subj={GRAPH_NODE_EXPAND_BUTTON_ID}
+            color="text"
+            display="empty"
+            size="xs"
+            onClick={onClickHandler}
+          />
+        </EuiToolTip>
+      </div>
+    );
+  }
 
   return (
     <NodeExpandButtonContainer
@@ -468,48 +591,46 @@ const CardExpandButton = ({
       css={css`
         position: absolute;
         z-index: 2;
-        opacity: 0;
-        transition: opacity ${CARD_INTERACTIVE_TRANSITION};
-        ${positionCss}
-
-        &.toggled {
-          opacity: 1;
-        }
-
-        .react-flow__node:not(.non-interactive):hover &,
-        .react-flow__node:not(.non-interactive).selected & {
-          opacity: 1;
-        }
-
-        &:has(button:focus) {
-          opacity: 1;
-        }
+        right: -10px;
+        top: 50%;
+        transform: translateY(-50%);
       `}
     >
-      <EuiButtonIcon
-        iconType={isToggled ? 'minusInCircle' : 'plusInCircle'}
-        aria-label={i18n.translate('securitySolutionPackages.csp.graph.node.card.expandActions', {
-          defaultMessage: 'Open or close node actions',
-        })}
-        data-test-subj={GRAPH_NODE_EXPAND_BUTTON_ID}
-        color="primary"
-        display="fill"
-        size="xs"
-        onClick={onClickHandler}
-        css={css`
-          width: ${buttonSize}px;
-          height: ${buttonSize}px;
-          min-width: ${buttonSize}px;
-          border-radius: 50%;
-          background-color: ${euiTheme.colors.primary};
-
-          &:hover,
-          &:focus {
-            background-color: ${euiTheme.colors.primary};
-          }
-        `}
-      />
+      <EuiToolTip content={actionsLabel} position="top" disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="boxesVertical"
+          aria-label={actionsLabel}
+          data-test-subj={GRAPH_NODE_EXPAND_BUTTON_ID}
+          color="text"
+          display="empty"
+          size="xs"
+          onClick={onClickHandler}
+          css={css`
+            background-color: ${euiTheme.colors.backgroundBasePlain};
+            border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+          `}
+        />
+      </EuiToolTip>
     </NodeExpandButtonContainer>
+  );
+};
+
+const RiskScoreBadge = ({ score }: { score: number }) => {
+  const { euiTheme } = useEuiTheme();
+  const theme = getEntityRiskTheme(getEntityRiskLevel(score), euiTheme.colors);
+
+  return (
+    <EuiBadge
+      color="hollow"
+      css={css`
+        ${metadataBadgeCss}
+        background-color: ${theme.badgeBackground};
+        color: ${theme.accent};
+        border: none;
+      `}
+    >
+      {score.toFixed(2)}
+    </EuiBadge>
   );
 };
 
@@ -519,19 +640,28 @@ interface SimplifiedCardProps {
   isGroup: boolean;
   resolvedIcon: string;
   count?: number;
-  defaultBorderColor: string;
   activeBorderColor: string;
   iconBg: string;
+  iconAccent: string;
   originOutlineColor: string;
   highlightAsOrigin?: boolean;
   defaultShadow?: string;
   hoverShadow?: string;
   interactive?: boolean;
   showExpandButton?: boolean;
-  expandButtonClick?: EntityNodeViewModel['expandButtonClick'];
   nodeClick?: EntityNodeViewModel['nodeClick'];
   nodeProps: NodeProps;
   caption: string;
+  showHoverActionsToolbar?: boolean;
+  getHoverActionItems?: () => EntityActionItem[];
+  hoverToolbarExiting?: boolean;
+  /** Test A zoom-out: show `⋯` trigger on the right with slide/fade motion. */
+  showActionsTrigger?: boolean;
+  actionsTriggerExiting?: boolean;
+  onActionsTriggerClick?: (e: React.MouseEvent<HTMLElement>, unToggleCallback: () => void) => void;
+  onActionsHoverOpen?: (e: React.MouseEvent<HTMLElement>) => void;
+  onActionsHoverLeave?: (e: React.MouseEvent<HTMLElement>) => void;
+  hoverContainerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 const SimplifiedCardLabel = ({ text, isGroup }: { text: string; isGroup: boolean }) => {
@@ -570,21 +700,38 @@ const SimplifiedCard = ({
   isGroup,
   resolvedIcon,
   count,
-  defaultBorderColor,
   activeBorderColor,
   iconBg,
+  iconAccent,
   originOutlineColor,
   highlightAsOrigin = false,
   defaultShadow,
   hoverShadow,
   interactive,
   showExpandButton = true,
-  expandButtonClick,
   nodeClick,
   nodeProps,
   caption,
+  showHoverActionsToolbar = false,
+  getHoverActionItems,
+  hoverToolbarExiting = false,
+  showActionsTrigger = false,
+  actionsTriggerExiting = false,
+  onActionsTriggerClick,
+  onActionsHoverOpen,
+  onActionsHoverLeave,
+  hoverContainerRef,
 }: SimplifiedCardProps) => (
-  <CardWrapper $fitContent data-test-subj={GRAPH_ENTITY_NODE_ID}>
+  <CardWrapper
+    ref={hoverContainerRef}
+    $fitContent
+    data-test-subj={GRAPH_ENTITY_NODE_ID}
+    onMouseEnter={onActionsHoverOpen}
+    onMouseLeave={onActionsHoverLeave}
+  >
+    {showHoverActionsToolbar && getHoverActionItems && (
+      <EntityHoverActionsToolbar getItems={getHoverActionItems} isExiting={hoverToolbarExiting} />
+    )}
     <SimplifiedCardContainer>
       <SimplifiedIconShell>
         {highlightAsOrigin && (
@@ -594,7 +741,6 @@ const SimplifiedCard = ({
           />
         )}
         <SimplifiedIconBox
-          defaultBorderColor={defaultBorderColor}
           activeBorderColor={activeBorderColor}
           bgColor={iconBg}
           defaultShadow={defaultShadow}
@@ -609,6 +755,7 @@ const SimplifiedCard = ({
           <EuiIcon
             type={resolvedIcon}
             size="l"
+            color={iconAccent}
             aria-hidden={true}
             css={css`
               svg {
@@ -619,9 +766,10 @@ const SimplifiedCard = ({
           />
         </SimplifiedIconBox>
 
-        {interactive && showExpandButton && (
-          <CardExpandButton
-            onClick={(e, unToggleCallback) => expandButtonClick?.(e, nodeProps, unToggleCallback)}
+        {showExpandButton && showActionsTrigger && (
+          <SimplifiedActionsTrigger
+            isExiting={actionsTriggerExiting}
+            onClick={onActionsTriggerClick}
           />
         )}
 
@@ -683,14 +831,132 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
     riskScoreMin,
     riskScoreMax,
     highlightAsOrigin = false,
+    entityActionsMode = 'button',
+    closeEntityActions,
+    getEntityActionItems,
   } = props.data as EntityNodeViewModel;
 
   const { euiTheme } = useEuiTheme();
+  // Borealis Shadow/X-small only — keep elevation subtle (no bump to Small on hover).
   const defaultShadow = useEuiShadow('xs');
-  const hoverShadow = useEuiShadow('s');
+  const hoverShadow = defaultShadow;
   const zoom = useViewportZoom();
   const isMultipleNodesSelected = useMultipleNodesSelected();
-  const showExpandButton = interactive && !isMultipleNodesSelected;
+  const isCompact = zoom < GRAPH_SIMPLIFIED_ZOOM_THRESHOLD;
+  const showExpandButton =
+    interactive && !isMultipleNodesSelected && entityActionsMode === 'button';
+
+  const hoverContainerRef = useRef<HTMLDivElement>(null);
+  const hoverCloseTimerRef = useRef<number | null>(null);
+  const isHoverActionsMode = entityActionsMode === 'hover';
+  /** Test A zoom-out uses the same hover reveal motion as Test B, but shows `⋯` → popover. */
+  const revealsActionsOnHover =
+    interactive &&
+    !isMultipleNodesSelected &&
+    (isHoverActionsMode || (entityActionsMode === 'button' && isCompact));
+  const [hoverToolbarState, setHoverToolbarState] = useState<'closed' | 'open' | 'exiting'>(
+    'closed'
+  );
+  const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
+  const isHoverActionsVisible = hoverToolbarState !== 'closed' || actionsMenuOpen;
+
+  const clearHoverCloseTimer = useCallback(() => {
+    if (hoverCloseTimerRef.current != null) {
+      window.clearTimeout(hoverCloseTimerRef.current);
+      hoverCloseTimerRef.current = null;
+    }
+  }, []);
+
+  const setEntityHoverFocus = useCallback((active: boolean) => {
+    const container = hoverContainerRef.current;
+    const nodeEl = container?.closest('.react-flow__node');
+    const flowEl = container?.closest('.react-flow');
+    if (!nodeEl || !flowEl) {
+      return;
+    }
+
+    if (active) {
+      flowEl.classList.add('graph-entity-actions-hover');
+      nodeEl.classList.add('graph-actions-hover-active');
+      return;
+    }
+
+    nodeEl.classList.remove('graph-actions-hover-active');
+    if (!flowEl.querySelector('.graph-actions-hover-active')) {
+      flowEl.classList.remove('graph-entity-actions-hover');
+    }
+  }, []);
+
+  const closeHoverActions = useCallback(() => {
+    clearHoverCloseTimer();
+    setHoverToolbarState((current) => (current === 'closed' ? current : 'exiting'));
+    hoverCloseTimerRef.current = window.setTimeout(() => {
+      setHoverToolbarState('closed');
+      setEntityHoverFocus(false);
+      closeEntityActions?.();
+    }, HOVER_ACTIONS_EXIT_MS);
+  }, [clearHoverCloseTimer, closeEntityActions, setEntityHoverFocus]);
+
+  const onActionsHoverOpen = useCallback(() => {
+    if (!revealsActionsOnHover) {
+      return;
+    }
+    clearHoverCloseTimer();
+    setHoverToolbarState('open');
+    setEntityHoverFocus(true);
+  }, [revealsActionsOnHover, clearHoverCloseTimer, setEntityHoverFocus]);
+
+  const onActionsHoverLeave = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      if (!revealsActionsOnHover) {
+        return;
+      }
+
+      // Keep chrome while the classic Action Menu popover is open (Test A).
+      if (actionsMenuOpen) {
+        return;
+      }
+
+      const related = e.relatedTarget;
+      if (
+        related instanceof Element &&
+        (related.closest(`[data-test-subj="${GRAPH_ENTITY_HOVER_ACTIONS_TOOLBAR_ID}"]`) ||
+          related.closest(`[data-test-subj="${GRAPH_SIMPLIFIED_ACTIONS_TRIGGER_ID}"]`))
+      ) {
+        return;
+      }
+
+      clearHoverCloseTimer();
+      hoverCloseTimerRef.current = window.setTimeout(() => {
+        closeHoverActions();
+      }, HOVER_ACTIONS_CLOSE_DELAY_MS);
+    },
+    [revealsActionsOnHover, actionsMenuOpen, clearHoverCloseTimer, closeHoverActions]
+  );
+
+  const onSimplifiedActionsClick = useCallback(
+    (e: React.MouseEvent<HTMLElement>, unToggleCallback: () => void) => {
+      setActionsMenuOpen(true);
+      expandButtonClick?.(e, props, () => {
+        setActionsMenuOpen(false);
+        unToggleCallback();
+        // Popover closed — hide trigger if the pointer already left the node.
+        const container = hoverContainerRef.current;
+        if (container && !container.matches(':hover')) {
+          closeHoverActions();
+        }
+      });
+    },
+    [expandButtonClick, props, closeHoverActions]
+  );
+
+  useEffect(
+    () => () => {
+      clearHoverCloseTimer();
+      setEntityHoverFocus(false);
+    },
+    [clearHoverCloseTimer, setEntityHoverFocus]
+  );
 
   const headerNameCss = css`
     ${metadataTextCss}
@@ -709,21 +975,22 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
 
   const entityTypeLabel = getEntityTypeLabel({ tag, icon, shape, documentsData });
   const isGroup = showStackedShape(count);
-  const isCompact = zoom < GRAPH_SIMPLIFIED_ZOOM_THRESHOLD;
 
   const entityName = label ?? props.id;
   const simplifiedCaption = isGroup ? entityTypeLabel ?? entityName : entityName;
   const headerPrimaryText = isGroup ? entityTypeLabel ?? entityName : entityName;
   const headerSecondaryText = isGroup ? undefined : entityTypeLabel;
 
-  // Figma entity card (node 13969:2409): Borders/Base/Prominent, Backgrounds/Light/Primary header.
-  const defaultBorderColor = euiTheme.colors.borderBaseProminent;
+  // Figma entity card (node 14262:12652): Base/Primary header; icon + risk badge themed by severity.
+  const defaultBorderColor = euiTheme.colors.borderBaseSubdued;
   const activeBorderColor = euiTheme.colors.borderBasePrimary;
-  const headerBg = euiTheme.colors.backgroundLightPrimary;
+  const headerBg = euiTheme.colors.backgroundBasePrimary;
   const cardBg = euiTheme.colors.backgroundBasePlain;
-  const iconBorderColor = euiTheme.colors.borderBaseProminent;
-  const iconBg = euiTheme.colors.backgroundBasePlain;
-  const iconEmphasizedBg = euiTheme.colors.backgroundBaseSubdued;
+  const displayRiskScore = getDisplayRiskScore(riskScore, riskScoreMin, riskScoreMax);
+  const riskTheme = getEntityRiskTheme(getEntityRiskLevel(displayRiskScore), euiTheme.colors);
+  const iconBg = riskTheme.iconBackground;
+  const iconEmphasizedBg = riskTheme.iconBackground;
+  const iconAccent = riskTheme.accent;
   const originOutlineColor = euiTheme.colors.borderBaseProminent;
   const resolvedIcon = resolveIcon(icon, tag);
 
@@ -746,25 +1013,44 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
         isGroup={isGroup}
         resolvedIcon={resolvedIcon}
         count={count}
-        defaultBorderColor={defaultBorderColor}
         activeBorderColor={activeBorderColor}
         iconBg={iconBg}
+        iconAccent={iconAccent}
         originOutlineColor={originOutlineColor}
         highlightAsOrigin={highlightAsOrigin}
         defaultShadow={defaultShadow}
         hoverShadow={hoverShadow}
         interactive={interactive}
         showExpandButton={showExpandButton}
-        expandButtonClick={expandButtonClick}
         nodeClick={nodeClick}
         nodeProps={props}
         caption={simplifiedCaption}
+        showHoverActionsToolbar={isHoverActionsMode && isHoverActionsVisible}
+        getHoverActionItems={getEntityActionItems}
+        hoverToolbarExiting={hoverToolbarState === 'exiting'}
+        showActionsTrigger={showExpandButton && isHoverActionsVisible}
+        actionsTriggerExiting={hoverToolbarState === 'exiting' && !actionsMenuOpen}
+        onActionsTriggerClick={onSimplifiedActionsClick}
+        onActionsHoverOpen={onActionsHoverOpen}
+        onActionsHoverLeave={onActionsHoverLeave}
+        hoverContainerRef={hoverContainerRef}
       />
     );
   }
 
   return (
-    <CardWrapper data-test-subj={GRAPH_ENTITY_NODE_ID}>
+    <CardWrapper
+      ref={hoverContainerRef}
+      data-test-subj={GRAPH_ENTITY_NODE_ID}
+      onMouseEnter={onActionsHoverOpen}
+      onMouseLeave={onActionsHoverLeave}
+    >
+      {isHoverActionsMode && isHoverActionsVisible && getEntityActionItems && (
+        <EntityHoverActionsToolbar
+          getItems={getEntityActionItems}
+          isExiting={hoverToolbarState === 'exiting'}
+        />
+      )}
       {highlightAsOrigin && (
         <OriginNodeOutline
           borderColor={originOutlineColor}
@@ -785,171 +1071,173 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
           $defaultShadow={defaultShadow}
           $hoverShadow={hoverShadow}
         >
-          {/* Header */}
-          <CardHeader bgColor={headerBg} data-test-subj={GRAPH_ENTITY_NODE_HOVER_SHAPE_ID}>
-            <IconBox
-              borderColor={iconBorderColor}
-              bgColor={iconBg}
-              emphasizedBackgroundColor={iconEmphasizedBg}
-            >
-              {isGroup && count !== undefined && (
-                <IconCountBadge>
-                  <EntityGroupCountBadge count={count} />
-                </IconCountBadge>
+          <CardShellClip>
+            {/* Header */}
+            <CardHeader bgColor={headerBg} data-test-subj={GRAPH_ENTITY_NODE_HOVER_SHAPE_ID}>
+              <IconBox bgColor={iconBg} emphasizedBackgroundColor={iconEmphasizedBg}>
+                {isGroup && count !== undefined && (
+                  <IconCountBadge>
+                    <EntityGroupCountBadge count={count} />
+                  </IconCountBadge>
+                )}
+                <EuiIcon type={resolvedIcon} size="l" color={iconAccent} aria-hidden={true} />
+              </IconBox>
+
+              <HeaderText>
+                <EuiText css={headerNameCss}>{headerPrimaryText}</EuiText>
+                {headerSecondaryText ? (
+                  <EuiText color="subdued" css={headerEntityTypeCss}>
+                    {headerSecondaryText}
+                  </EuiText>
+                ) : null}
+              </HeaderText>
+
+              {interactive && showExpandButton && (
+                <CardActionsButton
+                  inHeader
+                  onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
+                />
               )}
-              <EuiIcon type={resolvedIcon} size="l" aria-hidden={true} />
-            </IconBox>
+            </CardHeader>
 
-            <HeaderText>
-              <EuiText css={headerNameCss}>{headerPrimaryText}</EuiText>
-              {headerSecondaryText ? (
-                <EuiText color="subdued" css={headerEntityTypeCss}>
-                  {headerSecondaryText}
-                </EuiText>
-              ) : null}
-            </HeaderText>
-          </CardHeader>
-
-          {/* Metadata body */}
-          {hasBody && (
-            <CardBody data-test-subj={GRAPH_ENTITY_NODE_DETAILS_ID}>
-              {(showIp || showGeo) && (
-                <MetadataRow>
-                  {showIp && (
-                    <MetadataField>
-                      <FieldLabel>
-                        {i18n.translate(
-                          'securitySolutionPackages.csp.graph.node.card.label.ipAddress',
-                          { defaultMessage: 'IP address' }
-                        )}
-                      </FieldLabel>
-                      <MetadataValueRow>
-                        {ipClickHandler && primaryIp ? (
-                          <EuiButtonEmpty
-                            size="s"
-                            color="text"
-                            flush="both"
-                            onClick={ipClickHandler}
-                            css={css`
-                              ${metadataTextCss}
-                              font-weight: 400;
-                              height: ${CARD_METADATA_LINE_HEIGHT}px;
-                              min-height: ${CARD_METADATA_LINE_HEIGHT}px;
-                            `}
-                          >
-                            {primaryIp}
-                          </EuiButtonEmpty>
-                        ) : (
-                          <FieldValue truncate>{primaryIp}</FieldValue>
-                        )}
-                        {isGroup && extraIpCount > 0 && <OverflowBadge count={extraIpCount} />}
-                      </MetadataValueRow>
-                    </MetadataField>
-                  )}
-
-                  {showGeo && (
-                    <MetadataField>
-                      <FieldLabel>
-                        {i18n.translate(
-                          'securitySolutionPackages.csp.graph.node.card.label.geolocation',
-                          { defaultMessage: 'Geolocation' }
-                        )}
-                      </FieldLabel>
-                      <MetadataValueRow>
-                        {primaryFlag &&
-                          (countryClickHandler ? (
+            {/* Metadata body */}
+            {hasBody && (
+              <CardBody data-test-subj={GRAPH_ENTITY_NODE_DETAILS_ID}>
+                {(showIp || showGeo) && (
+                  <MetadataRow>
+                    {showIp && (
+                      <MetadataField>
+                        <FieldLabel>
+                          {i18n.translate(
+                            'securitySolutionPackages.csp.graph.node.card.label.ipAddress',
+                            { defaultMessage: 'IP address' }
+                          )}
+                        </FieldLabel>
+                        <MetadataValueRow>
+                          {ipClickHandler && primaryIp ? (
                             <EuiButtonEmpty
                               size="s"
                               color="text"
                               flush="both"
-                              onClick={countryClickHandler}
+                              onClick={ipClickHandler}
                               css={css`
+                                ${metadataTextCss}
+                                font-weight: 400;
                                 height: ${CARD_METADATA_LINE_HEIGHT}px;
                                 min-height: ${CARD_METADATA_LINE_HEIGHT}px;
-                                padding: 0;
                               `}
                             >
-                              <span css={metadataTextCss}>{primaryFlag}</span>
+                              {primaryIp}
                             </EuiButtonEmpty>
                           ) : (
-                            <span css={metadataTextCss}>{primaryFlag}</span>
-                          ))}
-                        {isGroup && extraGeoCount > 0 && <OverflowBadge count={extraGeoCount} />}
-                      </MetadataValueRow>
-                    </MetadataField>
-                  )}
-                </MetadataRow>
-              )}
+                            <FieldValue truncate>{primaryIp}</FieldValue>
+                          )}
+                          {isGroup && extraIpCount > 0 && <OverflowBadge count={extraIpCount} />}
+                        </MetadataValueRow>
+                      </MetadataField>
+                    )}
 
-              {showEntityId && (
-                <MetadataField>
-                  <FieldLabel>
-                    {i18n.translate('securitySolutionPackages.csp.graph.node.card.label.entityId', {
-                      defaultMessage: 'Entity ID',
-                    })}
-                  </FieldLabel>
-                  <MetadataValueRow>
-                    <FieldValue truncate={isGroup}>{props.id}</FieldValue>
-                    {isGroup && <OverflowBadge count={99} />}
-                  </MetadataValueRow>
-                </MetadataField>
-              )}
+                    {showGeo && (
+                      <MetadataField>
+                        <FieldLabel>
+                          {i18n.translate(
+                            'securitySolutionPackages.csp.graph.node.card.label.geolocation',
+                            { defaultMessage: 'Geolocation' }
+                          )}
+                        </FieldLabel>
+                        <MetadataValueRow>
+                          {primaryFlag &&
+                            (countryClickHandler ? (
+                              <EuiButtonEmpty
+                                size="s"
+                                color="text"
+                                flush="both"
+                                onClick={countryClickHandler}
+                                css={css`
+                                  height: ${CARD_METADATA_LINE_HEIGHT}px;
+                                  min-height: ${CARD_METADATA_LINE_HEIGHT}px;
+                                  padding: 0;
+                                `}
+                              >
+                                <span css={metadataTextCss}>{primaryFlag}</span>
+                              </EuiButtonEmpty>
+                            ) : (
+                              <span css={metadataTextCss}>{primaryFlag}</span>
+                            ))}
+                          {isGroup && extraGeoCount > 0 && <OverflowBadge count={extraGeoCount} />}
+                        </MetadataValueRow>
+                      </MetadataField>
+                    )}
+                  </MetadataRow>
+                )}
 
-              {showCriticality && (
-                <MetadataField>
-                  <FieldLabel>
-                    {i18n.translate(
-                      'securitySolutionPackages.csp.graph.node.card.label.assetCriticality',
-                      { defaultMessage: 'Asset criticality' }
-                    )}
-                  </FieldLabel>
-                  {assetCriticality && !assetCriticalityCounts && (
-                    <EuiHealth
-                      color={getCriticalityHealthColor(assetCriticality)}
-                      textSize="inherit"
-                      css={metadataTextCss}
-                    >
-                      {assetCriticality}
-                    </EuiHealth>
-                  )}
-                  {assetCriticalityCounts && (
-                    <CriticalityCountsGrid counts={assetCriticalityCounts} />
-                  )}
-                </MetadataField>
-              )}
+                {showEntityId && (
+                  <MetadataField>
+                    <FieldLabel>
+                      {i18n.translate(
+                        'securitySolutionPackages.csp.graph.node.card.label.entityId',
+                        {
+                          defaultMessage: 'Entity ID',
+                        }
+                      )}
+                    </FieldLabel>
+                    <MetadataValueRow>
+                      <FieldValue truncate={isGroup}>{props.id}</FieldValue>
+                      {isGroup && <OverflowBadge count={99} />}
+                    </MetadataValueRow>
+                  </MetadataField>
+                )}
 
-              {showRisk && (
-                <MetadataField>
-                  <FieldLabel>
-                    {i18n.translate(
-                      'securitySolutionPackages.csp.graph.node.card.label.riskScore',
-                      {
-                        defaultMessage: 'Risk score',
-                      }
+                {showCriticality && (
+                  <MetadataField>
+                    <FieldLabel>
+                      {i18n.translate(
+                        'securitySolutionPackages.csp.graph.node.card.label.assetCriticality',
+                        { defaultMessage: 'Asset criticality' }
+                      )}
+                    </FieldLabel>
+                    {assetCriticality && !assetCriticalityCounts && (
+                      <EuiHealth
+                        color={getCriticalityHealthColor(assetCriticality)}
+                        textSize="inherit"
+                        css={metadataTextCss}
+                      >
+                        {assetCriticality}
+                      </EuiHealth>
                     )}
-                  </FieldLabel>
-                  <MetadataValueRow>
-                    {riskScore !== undefined && riskScoreMin === undefined && (
-                      <EuiBadge color={getRiskBadgeColor(riskScore)} css={metadataBadgeCss}>
-                        {riskScore.toFixed(2)}
-                      </EuiBadge>
+                    {assetCriticalityCounts && (
+                      <CriticalityCountsGrid counts={assetCriticalityCounts} />
                     )}
-                    {riskScoreMin !== undefined && riskScoreMax !== undefined && (
-                      <>
-                        <EuiBadge color={getRiskBadgeColor(riskScoreMin)} css={metadataBadgeCss}>
-                          {riskScoreMin.toFixed(2)}
-                        </EuiBadge>
-                        <EuiText css={metadataTextCss}>{'–'}</EuiText>
-                        <EuiBadge color={getRiskBadgeColor(riskScoreMax)} css={metadataBadgeCss}>
-                          {riskScoreMax.toFixed(2)}
-                        </EuiBadge>
-                      </>
-                    )}
-                  </MetadataValueRow>
-                </MetadataField>
-              )}
-            </CardBody>
-          )}
+                  </MetadataField>
+                )}
+
+                {showRisk && (
+                  <MetadataField>
+                    <FieldLabel>
+                      {i18n.translate(
+                        'securitySolutionPackages.csp.graph.node.card.label.riskScore',
+                        {
+                          defaultMessage: 'Risk score',
+                        }
+                      )}
+                    </FieldLabel>
+                    <MetadataValueRow>
+                      {riskScore !== undefined && riskScoreMin === undefined && (
+                        <RiskScoreBadge score={riskScore} />
+                      )}
+                      {riskScoreMin !== undefined && riskScoreMax !== undefined && (
+                        <>
+                          <RiskScoreBadge score={riskScoreMin} />
+                          <EuiText css={metadataTextCss}>{'–'}</EuiText>
+                          <RiskScoreBadge score={riskScoreMax} />
+                        </>
+                      )}
+                    </MetadataValueRow>
+                  </MetadataField>
+                )}
+              </CardBody>
+            )}
+          </CardShellClip>
         </CardShell>
 
         {isGroup && (
@@ -957,30 +1245,23 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
             <GroupStackTab
               defaultBorderColor={defaultBorderColor}
               activeBorderColor={activeBorderColor}
-              bgColor={iconBg}
+              bgColor={cardBg}
             />
           </GroupStackWrapper>
         )}
       </div>
 
       {interactive && (
-        <>
-          {showExpandButton && (
-            <CardExpandButton
-              onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
-            />
-          )}
-          <NodeButton
-            onClick={(e) => nodeClick?.(e, props)}
-            width={CARD_NODE_WIDTH}
-            css={css`
-              position: absolute;
-              top: 0;
-              left: 0;
-              z-index: 1;
-            `}
-          />
-        </>
+        <NodeButton
+          onClick={(e) => nodeClick?.(e, props)}
+          width={CARD_NODE_WIDTH}
+          css={css`
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+          `}
+        />
       )}
 
       <Handle

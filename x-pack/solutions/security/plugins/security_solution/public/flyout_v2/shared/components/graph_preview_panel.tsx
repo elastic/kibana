@@ -68,7 +68,7 @@ export const GraphPreviewPanel = ({
         title: (
           <FormattedMessage
             id="xpack.securitySolution.flyout.document.visualizations.graphPreview.graphPreviewTitle"
-            defaultMessage="Graph preview"
+            defaultMessage="Graph view"
           />
         ),
         headerContent: (

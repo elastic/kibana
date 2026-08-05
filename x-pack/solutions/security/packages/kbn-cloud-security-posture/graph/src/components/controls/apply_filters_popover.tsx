@@ -45,7 +45,7 @@ export interface GraphFiltersState {
 }
 
 export const DEFAULT_GRAPH_FILTERS: GraphFiltersState = {
-  highlightOriginsOnly: true,
+  highlightOriginsOnly: false,
   relationshipTypes: {
     owns: true,
     accessFrequently: true,

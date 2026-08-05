@@ -1049,10 +1049,13 @@ const overflowCountries = (primary: string, secondary?: string): string[] => [
  * Simplified layout mock matching the design screenshot:
  * john.doe → Owns / Accesses frequently / Depends on → hosts & services,
  * then macbook → AuthenticateUser / SendData / GrantAccess → Entity Name hosts.
+ *
+ * Risk scores cover all 5 severity colors for UI testing:
+ *   Critical (>90) · High (70–90) · Moderate (40–70) · Low (20–40) · Unknown (<20)
  */
 const scenarioComplexPreview = (): GraphResponse =>
   extractEdges([
-    // ── Origin user ─────────────────────────────────────────────────────────
+    // ── Origin user — Critical ──────────────────────────────────────────────
     {
       id: DEV_ORIGIN_ENTITY_ID,
       label: 'john.doe',
@@ -1062,6 +1065,7 @@ const scenarioComplexPreview = (): GraphResponse =>
       tag: 'User',
       ips: ['10.128.0.1'],
       countryCodes: ['US'],
+      riskScore: 95.5,
       documentsData: mockEntityDocuments(DEV_ORIGIN_ENTITY_ID, 'user', 'User'),
     },
 
@@ -1075,6 +1079,8 @@ const scenarioComplexPreview = (): GraphResponse =>
       tag: 'Host',
       ips: ['10.128.0.93'],
       countryCodes: ['US'],
+      // Critical — Figma entity card example score
+      riskScore: 90.01,
       documentsData: mockEntityDocuments('macbook-john-work', 'host', 'Host'),
     },
     {
@@ -1084,9 +1090,10 @@ const scenarioComplexPreview = (): GraphResponse =>
       shape: 'hexagon',
       icon: 'storage',
       tag: 'Host',
-      count: 5,
-      ips: overflowIps('10.128.0.93'),
-      countryCodes: overflowCountries('US'),
+      ips: ['10.128.0.94'],
+      countryCodes: ['US'],
+      // High
+      riskScore: 85.0,
       documentsData: mockEntityDocuments('john-pc-home', 'host', 'Host'),
     },
     {
@@ -1096,57 +1103,64 @@ const scenarioComplexPreview = (): GraphResponse =>
       shape: 'hexagon',
       icon: 'storage',
       tag: 'Host',
-      count: 8,
-      ips: overflowIps('192.0.2.146'),
-      countryCodes: overflowCountries('US'),
+      ips: ['192.0.2.146'],
+      countryCodes: ['US'],
+      // Moderate
+      riskScore: 55.2,
       documentsData: mockEntityDocuments('admin-pc', 'host', 'Host'),
     },
     {
       id: 'entities-services',
-      label: 'Entities',
+      label: 'auth-service',
       color: 'danger',
       shape: 'rectangle',
       icon: 'package',
-      tag: 'Services',
-      count: 15,
-      ips: overflowIps('192.0.2.50'),
-      countryCodes: overflowCountries('US'),
+      tag: 'Service',
+      ips: ['192.0.2.50'],
+      countryCodes: ['US'],
+      // High
+      riskScore: 78.0,
       documentsData: mockEntityDocuments('entities-services', 'service', 'Service'),
     },
 
     // ── Downstream hosts from macbook actions ───────────────────────────────
     {
       id: 'entity-auth-target',
-      label: 'Entity Name',
+      label: 'low-risk-host',
       color: 'primary',
       shape: 'hexagon',
       icon: 'storage',
       tag: 'Host',
       ips: ['10.128.0.20'],
       countryCodes: ['US'],
+      // Low
+      riskScore: 28.1,
       documentsData: mockEntityDocuments('entity-auth-target', 'host', 'Host'),
     },
     {
       id: 'entity-send-target',
-      label: 'Entity Name',
+      label: 'moderate-risk-host',
       color: 'primary',
       shape: 'hexagon',
       icon: 'storage',
       tag: 'Host',
-      count: 5,
-      ips: overflowIps('10.128.0.30'),
-      countryCodes: overflowCountries('US', 'RU'),
+      ips: ['10.128.0.30'],
+      countryCodes: ['US'],
+      // Moderate
+      riskScore: 48.0,
       documentsData: mockEntityDocuments('entity-send-target', 'host', 'Host'),
     },
     {
       id: 'entity-grant-target',
-      label: 'Entity Name',
+      label: 'unknown-risk-host',
       color: 'primary',
       shape: 'hexagon',
       icon: 'storage',
       tag: 'Host',
       ips: ['10.128.0.40'],
       countryCodes: ['US'],
+      // Unknown
+      riskScore: 12.0,
       documentsData: mockEntityDocuments('entity-grant-target', 'host', 'Host'),
     },
 
@@ -1260,6 +1274,13 @@ const ENTITY_SCENARIO_MAP: Record<string, (id: string) => GraphResponse> = {
   'host:api-server-03': (id) => scenarioLargeGraph(),
   'host:monitoring-host': (id) => scenarioAttack(id),
   [DEV_ORIGIN_ENTITY_ID]: () => scenarioComplexPreview(),
+  // Entity Analytics seeded hosts — all risk colors preview
+  'macbook-john-work': () => scenarioComplexPreview(),
+  'host:macbook-john-work': () => scenarioComplexPreview(),
+  'john-pc-home': () => scenarioComplexPreview(),
+  'host:john-pc-home': () => scenarioComplexPreview(),
+  'admin-pc': () => scenarioComplexPreview(),
+  'host:admin-pc': () => scenarioComplexPreview(),
 };
 
 // Dev graph page (/app/security/dev-graph) — screenshot layout preview

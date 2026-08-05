@@ -166,9 +166,13 @@ export const useEntityNodeExpandPopover = (
     [scopeId, onOpenEventPreview]
   );
 
-  return useNodeExpandPopover({
-    id: 'entity-node-expand-popover',
-    itemsFn,
-    testSubject: GRAPH_NODE_EXPAND_POPOVER_TEST_ID,
-  });
+  return {
+    ...useNodeExpandPopover({
+      id: 'entity-node-expand-popover',
+      itemsFn,
+      testSubject: GRAPH_NODE_EXPAND_POPOVER_TEST_ID,
+    }),
+    /** Raw action items (without popover close wrapper) — used by hover toolbar. */
+    getActionItems: itemsFn,
+  };
 };

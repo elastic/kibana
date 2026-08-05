@@ -239,7 +239,7 @@ export const getEntityExpandItems = (
     const relatedEventsActive = entityFilterActions?.isRelatedEventsActive() ?? false;
     items.push({
       type: 'item',
-      iconType: 'analyzeEvent',
+      iconType: 'kubernetesPod',
       testSubject: GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
       label: relatedEventsActive
         ? i18n.translate(

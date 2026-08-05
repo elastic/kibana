@@ -9,13 +9,9 @@ import { renderHook } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useGraphPreview } from './use_graph_preview';
 import { useHasGraphVisualizationLicense } from '../../../../common/hooks/use_has_graph_visualization_license';
-import { useIsEntityStoreV2Available } from '../../../../flyout/shared/hooks/use_is_entity_store_v2_available';
-import { useEntityStoreStatus } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 
 jest.mock('../../../../common/hooks/use_has_graph_visualization_license');
-jest.mock('../../../../flyout/shared/hooks/use_is_entity_store_v2_available');
-jest.mock('../../../../entity_analytics/components/entity_store/hooks/use_entity_store');
 jest.mock('@kbn/entity-store/public', () => {
   const actual = jest.requireActual('@kbn/entity-store/public');
   return {
@@ -25,8 +21,6 @@ jest.mock('@kbn/entity-store/public', () => {
 });
 
 const mockUseHasGraphVisualizationLicense = useHasGraphVisualizationLicense as jest.Mock;
-const mockUseIsEntityStoreV2Available = useIsEntityStoreV2Available as jest.Mock;
-const mockUseEntityStoreStatus = useEntityStoreStatus as jest.Mock;
 const mockUseEntityStoreEuidApi = useEntityStoreEuidApi as jest.Mock;
 
 // Minimal stand-in for the euid module's `getEntityIdentifiersFromDocument` /
@@ -77,8 +71,6 @@ describe('useGraphPreview', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseHasGraphVisualizationLicense.mockReturnValue(true);
-    mockUseIsEntityStoreV2Available.mockReturnValue({ data: { indexExists: true } });
-    mockUseEntityStoreStatus.mockReturnValue({ data: { status: 'running' } });
     mockUseEntityStoreEuidApi.mockReturnValue({ euid: mockEuid });
   });
 
@@ -230,31 +222,10 @@ describe('useGraphPreview', () => {
     expect(result.current.shouldShowGraph).toBe(false);
   });
 
-  it('returns shouldShowGraph=false when neither entity-store signal is available', () => {
-    mockUseIsEntityStoreV2Available.mockReturnValue({ data: { indexExists: false } });
-    mockUseEntityStoreStatus.mockReturnValue({ data: { status: 'not_installed' } });
-
+  it('returns shouldShowGraph=true when graph data and license are available without entity store', () => {
     const { result } = renderHook(() => useGraphPreview({ hit: createMockHit(baseAlert) }));
 
     expect(result.current.hasGraphData).toBe(true);
-    expect(result.current.shouldShowGraph).toBe(false);
-  });
-
-  it('returns shouldShowGraph=true when only the entities index probe succeeds (Serverless editor/viewer)', () => {
-    mockUseIsEntityStoreV2Available.mockReturnValue({ data: { indexExists: true } });
-    mockUseEntityStoreStatus.mockReturnValue({ data: undefined });
-
-    const { result } = renderHook(() => useGraphPreview({ hit: createMockHit(baseAlert) }));
-
-    expect(result.current.shouldShowGraph).toBe(true);
-  });
-
-  it('returns shouldShowGraph=true when only the /status endpoint reports running', () => {
-    mockUseIsEntityStoreV2Available.mockReturnValue({ data: { indexExists: false } });
-    mockUseEntityStoreStatus.mockReturnValue({ data: { status: 'running' } });
-
-    const { result } = renderHook(() => useGraphPreview({ hit: createMockHit(baseAlert) }));
-
     expect(result.current.shouldShowGraph).toBe(true);
   });
 });

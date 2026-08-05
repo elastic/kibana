@@ -15,13 +15,12 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPanel,
+  EuiTab,
+  EuiTabs,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -44,20 +43,13 @@ const ORIGIN_EVENT_IDS = [
 const TOGGLE_SEARCH_BAR_STORAGE_KEY =
   'securitySolution.graphInvestigation:toggleSearchBarState' as const;
 
-type SearchPrototypeVariant = 'split' | 'unified';
-
-const VARIANT_OPTIONS: Array<{ id: SearchPrototypeVariant; label: string }> = [
-  { id: 'split', label: 'Option A — atual' },
-  { id: 'unified', label: 'Option B — search unificado' },
-];
+type DevGraphTestVariant = 'A' | 'B';
 
 export const DevGraphPage = () => {
   const { dataViews } = useKibana().services;
-  const { euiTheme } = useEuiTheme();
   const [dataView, setDataView] = useState<DataView | null>(null);
   const [error, setError] = useState<string | null>(null);
-  // Default to Option B so the dropdown arrow prototype is visible first.
-  const [searchVariant, setSearchVariant] = useState<SearchPrototypeVariant>('unified');
+  const [testVariant, setTestVariant] = useState<DevGraphTestVariant>('A');
 
   useEffect(() => {
     try {
@@ -114,39 +106,31 @@ export const DevGraphPage = () => {
       `}
     >
       <EuiFlexItem grow={false}>
-        <EuiPanel
-          paddingSize="s"
-          hasShadow={false}
+        <div
           css={css`
-            border-bottom: ${euiTheme.border.thin};
-            background: ${euiTheme.colors.backgroundBaseSubdued};
+            padding: 8px 12px 0;
           `}
         >
-          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <strong>{'Search prototype'}</strong>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonGroup
-                legend="Search controls prototype variant"
-                options={VARIANT_OPTIONS}
-                idSelected={searchVariant}
-                onChange={(id) => setSearchVariant(id as SearchPrototypeVariant)}
-                buttonSize="compressed"
-                color="primary"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs" color="subdued">
-                {searchVariant === 'split'
-                  ? 'A (atual): KQL no botão de cima · busca no gráfico no bottom'
-                  : 'B: bottom sem search · botão de cima com seta abre menu (KQL ou busca no gráfico)'}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+          <EuiTabs size="s">
+            <EuiTab
+              isSelected={testVariant === 'A'}
+              onClick={() => setTestVariant('A')}
+            >
+              Test A (current)
+            </EuiTab>
+            <EuiTab
+              isSelected={testVariant === 'B'}
+              onClick={() => setTestVariant('B')}
+            >
+              Test B (hover actions)
+            </EuiTab>
+          </EuiTabs>
+          <EuiText size="xs" color="subdued" css={{ padding: '4px 0 8px' }}>
+            {testVariant === 'A'
+              ? '⋯ in entity header — click to open actions'
+              : '⋯ hidden — hover entity to show action icons on top (toggles + tooltips)'}
+          </EuiText>
+        </div>
       </EuiFlexItem>
       <EuiFlexItem
         grow={true}
@@ -156,7 +140,6 @@ export const DevGraphPage = () => {
         `}
       >
         <GraphInvestigation
-          key={searchVariant}
           scopeId="dev-graph-preview"
           initialState={{
             dataView,
@@ -166,7 +149,10 @@ export const DevGraphPage = () => {
           }}
           showToggleSearch={true}
           showInvestigateInTimeline={true}
-          searchControlsVariant={searchVariant}
+          searchControlsVariant="unified"
+          entityActionsMode={testVariant === 'A' ? 'button' : 'hover'}
+          // Enables relationships + details actions in the expand/hover menus for local preview.
+          onOpenEventPreview={() => undefined}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
