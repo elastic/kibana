@@ -48,6 +48,7 @@ export interface Options {
  */
 function isRspackOptimizerEnabled(): boolean {
   if (process.env.KBN_USE_RSPACK === undefined) {
+    process.env.KBN_USE_RSPACK = 'true';
     return true;
   }
 
