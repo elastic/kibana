@@ -221,8 +221,8 @@ export interface InternalIStorageClient<TDocumentType extends { _id?: string } =
    * Ensures the index template and backing write index exist (and mappings are
    * up-to-date). Safe to call at plugin start so the first user write does not
    * pay cold-start latency. Concurrent callers share one in-flight bootstrap;
-   * success is cached for the adapter lifetime and cleared on `clean()` or
-   * bootstrap failure (so the next call can retry).
+   * success is cached for the current schema version and cleared on `clean()`,
+   * schema-version change, or bootstrap failure (so the next call can retry).
    */
   ensureReady: () => Promise<void>;
 }

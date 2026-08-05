@@ -13,6 +13,7 @@ import { errors } from '@elastic/elasticsearch';
 import { esql } from '@elastic/esql';
 import type { StorageClientBulkRequest, StorageTransportOptions } from '../..';
 import { StorageIndexAdapter, type StorageSettings } from '../..';
+import * as getSchemaVersionModule from '../get_schema_version';
 
 const createLoggerMock = (): jest.Mocked<Logger> => {
   const logger = {
@@ -786,6 +787,24 @@ describe('StorageIndexAdapter - ensureReady', () => {
     await client.ensureReady();
 
     expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+  });
+
+  it('re-bootstraps when the schema version changes after a successful ensureReady', async () => {
+    const schemaVersionSpy = jest
+      .spyOn(getSchemaVersionModule, 'getSchemaVersion')
+      .mockReturnValue('v1');
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.ensureReady();
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+
+    schemaVersionSpy.mockReturnValue('v2');
+    await client.ensureReady();
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
+    schemaVersionSpy.mockRestore();
   });
 
   it('retries ensureReady after a failed bootstrap', async () => {
