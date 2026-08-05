@@ -116,9 +116,22 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
     if (!ruleToDelete) {
       return;
     }
+    const deletedId = ruleToDelete.id;
     deleteRuleMutation.mutate(
-      { id: ruleToDelete.id, name: ruleToDelete.metadata.name },
+      { id: deletedId, name: ruleToDelete.metadata.name },
       {
+        /*
+         * Drop the deleted row from whichever set holds it: unselect it in
+         * inclusion mode, or clear its exclusion in select-all mode, so a
+         * stale ID cannot leak into a later bulk action or skew the count.
+         * A row that is merely *selected* in select-all mode (i.e. absent
+         * from the exclusion set) is left alone to avoid double-counting.
+         */
+        onSuccess: () => {
+          if (isAllSelected ? !isRowSelected(deletedId) : isRowSelected(deletedId)) {
+            onSelectRow(deletedId);
+          }
+        },
         onSettled: () => {
           setRuleToDelete(null);
           setExpandedRuleId(null);
