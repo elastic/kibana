@@ -28,6 +28,11 @@ export enum AgentType {
 export const agentBuilderDefaultAgentId = 'elastic-ai-agent';
 
 /**
+ * ID of the AI index available to every chat agent by default.
+ */
+export const agentBuilderDefaultAiIndexId = 'elastic';
+
+/**
  * Definition of a agentBuilder agent.
  */
 export interface AgentDefinition {

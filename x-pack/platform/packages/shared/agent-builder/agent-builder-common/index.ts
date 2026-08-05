@@ -112,6 +112,7 @@ export { EsResourceType } from './base/resources';
 export type { TimeRange } from './attachments';
 export {
   agentBuilderDefaultAgentId,
+  agentBuilderDefaultAiIndexId,
   AgentType,
   chatAgentTypeId,
   AgentAccessControlMode,

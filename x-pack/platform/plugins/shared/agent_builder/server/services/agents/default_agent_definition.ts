@@ -24,5 +24,6 @@ export const getDefaultAgentCreateRequest = (): AgentCreateRequest => ({
     enable_elastic_capabilities: true,
     tools: [],
     skill_ids: [],
+    ai_indices: [],
   },
 });
