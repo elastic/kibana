@@ -134,11 +134,11 @@ export interface AuthTypeDefinition {
   schema: z.ZodObject<Record<string, z.ZodType>>;
   normalizeSchema?: (defaults?: Record<string, unknown>) => z.ZodObject<Record<string, z.ZodType>>;
   authMode?: AuthMode;
-  getAuthHeaders?(ctx: AuthContext, secret: T): Promise<Record<string, string>>;
 }
 
 export interface AuthTypeSpec<T extends Record<string, unknown>> extends AuthTypeDefinition {
   configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
+  getAuthHeaders?(ctx: AuthContext, secret: T): Promise<Record<string, string>>;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
