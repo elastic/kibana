@@ -24,9 +24,9 @@ import {
 import type { ExperimentalFeatures } from '../../../../common';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
+import { buildRenderAttachmentTag } from './attachment_utils';
 import {
   buildListEntityAttachmentId,
-  buildRenderAttachmentTag,
   buildSingleEntityAttachmentId,
 } from './entity_attachment_utils';
 import { fetchRiskScoreGrounding } from './risk_score_grounding';
