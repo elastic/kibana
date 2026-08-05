@@ -662,6 +662,9 @@ export const labels = {
             defaultMessage: 'Select logo',
           }
         ),
+        defaultLogoBadge: i18n.translate('xpack.agentBuilder.mcpClients.form.defaultLogoBadge', {
+          defaultMessage: 'Default',
+        }),
         uploadLogoPrompt: i18n.translate('xpack.agentBuilder.mcpClients.form.uploadLogoPrompt', {
           defaultMessage: 'Drag and drop or click to upload',
         }),

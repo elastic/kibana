@@ -6,13 +6,31 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { fetchAsDataUrl } from '../../../utils/data_url';
 
 export interface LogoOption {
   label: string;
+  isDefault?: boolean;
   loadIconUrl: () => Promise<string>;
+  loadIconUrlDark?: () => Promise<string>;
 }
 
+const MCP_CLIENT_LOGO: LogoOption = {
+  label: i18n.translate('xpack.agentBuilder.mcpClients.form.logoOption.mcpClient', {
+    defaultMessage: 'MCP client logo',
+  }),
+  isDefault: true,
+  loadIconUrl: () =>
+    import(/* webpackChunkName: "mcpClientLogos" */ './assets/logos/mcp_client.png').then(
+      ({ default: url }) => url
+    ),
+};
+
+export const loadDefaultLogoDataUrl = async (signal?: AbortSignal): Promise<string> =>
+  fetchAsDataUrl(await MCP_CLIENT_LOGO.loadIconUrl(), signal);
+
 export const LOGO_OPTIONS: Readonly<Record<string, LogoOption>> = {
+  mcp_client: MCP_CLIENT_LOGO,
   claude: {
     label: i18n.translate('xpack.agentBuilder.mcpClients.form.logoOption.claude', {
       defaultMessage: 'Claude',
@@ -39,6 +57,10 @@ export const LOGO_OPTIONS: Readonly<Record<string, LogoOption>> = {
       import(/* webpackChunkName: "mcpClientLogos" */ './assets/logos/openai.png').then(
         ({ default: url }) => url
       ),
+    loadIconUrlDark: () =>
+      import(/* webpackChunkName: "mcpClientLogos" */ './assets/logos/openai_dark.png').then(
+        ({ default: url }) => url
+      ),
   },
   google_gemini: {
     label: i18n.translate('xpack.agentBuilder.mcpClients.form.logoOption.googleGemini', {
@@ -57,6 +79,10 @@ export const LOGO_OPTIONS: Readonly<Record<string, LogoOption>> = {
       import(/* webpackChunkName: "mcpClientLogos" */ './assets/logos/github_copilot.png').then(
         ({ default: url }) => url
       ),
+    loadIconUrlDark: () =>
+      import(
+        /* webpackChunkName: "mcpClientLogos" */ './assets/logos/github_copilot_dark.png'
+      ).then(({ default: url }) => url),
   },
   azure_openai: {
     label: i18n.translate('xpack.agentBuilder.mcpClients.form.logoOption.azureOpenAi', {
