@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import dateMath from '@elastic/datemath';
+import moment from 'moment';
+
 import {
   DATE_PICKER_ABSOLUTE_TAB,
   DATE_PICKER_ABSOLUTE_INPUT,
@@ -23,6 +26,17 @@ import {
 } from '../screens/date_picker';
 
 const NEW_PICKER_CONTROL = '[data-test-subj="dateRangePickerControlButton"]';
+
+// Mirrors EUI's useFormatTimeString: converts a raw date-math expression to the
+// humanized label rendered by the legacy EuiSuperDatePicker button.
+const toLegacyPickerLabel = (raw: string): string => {
+  if (raw === 'now') return 'now';
+  const isoMoment = moment(raw, moment.ISO_8601, true);
+  if (isoMoment.isValid()) return isoMoment.format('MMM D, YYYY @ HH:mm:ss.SSS');
+  const parsed = dateMath.parse(raw);
+  if (parsed && parsed.isValid()) return `~ ${parsed.fromNow()}`;
+  return raw;
+};
 
 // Convert legacy popover format ("MMM D, YYYY @ HH:mm:ss.SSS") to ISO 8601, which
 // the new picker's input accepts. Falls through "now" / "now-15m" / ISO unchanged.
@@ -151,10 +165,10 @@ export const expectDateRangeToBe = (
     () => {
       cy.get(`${container} [data-test-subj="superDatePickerstartDatePopoverButton"]`)
         .first()
-        .should('have.text', expected.start);
+        .should('have.text', toLegacyPickerLabel(expected.start));
       cy.get(`${container} [data-test-subj="superDatePickerendDatePopoverButton"]`)
         .first()
-        .should('have.text', expected.end);
+        .should('have.text', toLegacyPickerLabel(expected.end));
     }
   );
 };
