@@ -37048,7 +37048,6 @@
     "xpack.observability.metricWithSparkline.nATextColorLabel": "N/V",
     "xpack.observability.news.readFullStory": "Vollständige Story lesen",
     "xpack.observability.news.title": "Neuigkeiten",
-    "xpack.observability.nightshiftLinkTitle": "Nachtschicht",
     "xpack.observability.noFindingsStates.unprivileged.unprivilegedDescription": "Um Observability-Annotationsdaten anzuzeigen, müssen Sie die Berechtigungen aktualisieren. Weitere Informationen erhalten Sie von Ihrem Kibana-Admin.",
     "xpack.observability.noFindingsStates.unprivileged.unprivilegedFooterMarkdown": "Erforderliche Elasticsearch-Indexberechtigung „read“ für die folgenden Indizes:",
     "xpack.observability.noFindingsStates.unprivileged.unprivilegedTitle": "Berechtigungen erforderlich",
