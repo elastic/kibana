@@ -80,7 +80,6 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
           tab,
           existingTab,
           initialAppState,
-          profileStateRegistry: services.profileStateRegistry,
         });
 
         // If the tab had changes, we force-fetch when selecting it so the data matches the UI state.

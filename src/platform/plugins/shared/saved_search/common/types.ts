@@ -107,13 +107,6 @@ export type SerializableSavedSearch = Omit<SavedSearch, 'searchSource'> & {
   serializedSearchSource?: SerializedSearchSourceFields;
 };
 
-/**
- * Map of profile state blobs keyed by their registered profile state
- * definition key (see Discover's `ProfileStateRegistry`), e.g.
- * `{ metricsGridSort: { field: 'recency' } }`.
- */
-export type DiscoverSessionTabProfileState = Record<string, SerializableRecord>;
-
 export interface DiscoverSessionTab {
   id: string;
   label: string;
@@ -139,7 +132,6 @@ export interface DiscoverSessionTab {
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
   controlGroupJson?: string; // JSON string of ControlPanelsState<OptionsListESQLControlState>
-  profileState?: DiscoverSessionTabProfileState;
 }
 
 export interface DiscoverSession {

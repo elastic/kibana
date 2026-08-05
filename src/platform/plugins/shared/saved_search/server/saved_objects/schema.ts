@@ -160,26 +160,6 @@ export const SCHEMA_DISCOVER_SESSION_V13 = schema.object({
   tabs: schema.arrayOf(SCHEMA_TAB_V13, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
 });
 
-const SCHEMA_TAB_ATTRIBUTES_V14 = SCHEMA_TAB_ATTRIBUTES_V13.extends({
-  // Keys are profile state definition keys and their field names (short
-  // camelCase identifiers from Discover's `ProfileStateRegistry`), so bound
-  // them to keep arbitrary input out of the record keys.
-  profileState: schema.maybe(
-    schema.recordOf(
-      schema.string({ maxLength: 128 }),
-      schema.recordOf(schema.string({ maxLength: 128 }), schema.any())
-    )
-  ),
-});
-
-const SCHEMA_TAB_V14 = SCHEMA_TAB_V13.extends({
-  attributes: SCHEMA_TAB_ATTRIBUTES_V14,
-});
-
-export const SCHEMA_DISCOVER_SESSION_V14 = SCHEMA_DISCOVER_SESSION_V13.extends({
-  tabs: schema.arrayOf(SCHEMA_TAB_V14, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
-});
-
 // Add new model versions here, which automatically registers them
 export const DISCOVER_SESSION_MODEL_VERSIONS: SavedObjectsModelVersionMap = {
   13: {
@@ -198,18 +178,11 @@ export const DISCOVER_SESSION_MODEL_VERSIONS: SavedObjectsModelVersionMap = {
       create: SCHEMA_DISCOVER_SESSION_V13,
     },
   },
-  14: {
-    changes: [],
-    schemas: {
-      forwardCompatibility: SCHEMA_DISCOVER_SESSION_V14.extends({}, { unknowns: 'ignore' }),
-      create: SCHEMA_DISCOVER_SESSION_V14,
-    },
-  },
 };
 
 // Set constants to the latest schemas, which updates derived types and content management
-export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V14;
-export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V14;
+export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V13;
+export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V13;
 
 export type DiscoverSessionTabAttributes = TypeOf<typeof SCHEMA_TAB_LATEST>['attributes'];
 export type DiscoverSessionTab = TypeOf<typeof SCHEMA_TAB_LATEST>;

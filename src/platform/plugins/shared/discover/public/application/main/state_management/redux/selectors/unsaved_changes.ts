@@ -89,7 +89,6 @@ export const selectHasUnsavedChanges = (
           services,
           defaultProfileEsqlQuery: state.defaultProfileEsqlQuery,
         }),
-        profileStateRegistry: services.profileStateRegistry,
       }),
       overridenTimeRestore: Boolean(persistedTab.timeRestore),
       services,
@@ -240,7 +239,4 @@ const TAB_COMPARATORS: TabComparators = {
     const testB = JSON.parse(b ?? '{}');
     return isEqual(testA, testB);
   },
-  // Persistent profile state is stripped of defaults on write, so an absent
-  // map is equivalent to an empty one
-  profileState: fieldComparator('profileState', {}),
 };

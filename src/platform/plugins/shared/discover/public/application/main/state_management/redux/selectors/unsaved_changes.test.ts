@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { METRICS_GRID_SORT_DEFAULTS } from '@kbn/discover-utils';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { getPersistedTabMock, getTabStateMock } from '../__mocks__/internal_state.mocks';
@@ -15,7 +14,6 @@ import { internalStateActions } from '..';
 import { selectHasUnsavedChanges } from './unsaved_changes';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
-import { METRICS_GRID_SORT_STATE_DEF } from '../../../../../../common/context_awareness';
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
@@ -152,90 +150,6 @@ describe('selectHasUnsavedChanges', () => {
 
     expect(result.hasUnsavedChanges).toBe(true);
     expect(result.unsavedTabIds).toEqual([currentTab.id, 'new-tab']);
-  });
-
-  describe('profile state behavior', () => {
-    const setupProfileStateTest = async () => {
-      const services = createDiscoverServicesMock();
-      services.profileStateRegistry.registerDefinition(METRICS_GRID_SORT_STATE_DEF);
-
-      const {
-        internalState,
-        runtimeStateManager,
-        initializeTabs,
-        initializeSingleTab,
-        getCurrentTab,
-      } = getDiscoverInternalStateMock({
-        services,
-        persistedDataViews: [dataViewWithTimefieldMock],
-      });
-
-      const persistedTab = getPersistedTabMock({
-        tabId: 'persisted-tab',
-        dataView: dataViewWithTimefieldMock,
-        services,
-      });
-      const persistedDiscoverSession = createDiscoverSessionMock({
-        id: 'test-id',
-        tabs: [persistedTab],
-      });
-
-      await initializeTabs({ persistedDiscoverSession });
-      await initializeSingleTab({ tabId: persistedTab.id });
-
-      return { internalState, runtimeStateManager, services, getCurrentTab };
-    };
-
-    it('detects unsaved changes when a Persistent profile state field diverges from the persisted tab', async () => {
-      const { internalState, runtimeStateManager, services, getCurrentTab } =
-        await setupProfileStateTest();
-      const currentTab = getCurrentTab();
-
-      internalState.dispatch(
-        internalStateActions.setProfileState({
-          tabId: currentTab.id,
-          profileStateDefinition: METRICS_GRID_SORT_STATE_DEF,
-          profileState: { field: 'recency', direction: 'desc' },
-        })
-      );
-
-      const result = selectHasUnsavedChanges(internalState.getState(), {
-        runtimeStateManager,
-        services,
-      });
-
-      expect(result.hasUnsavedChanges).toBe(true);
-      expect(result.unsavedTabIds).toEqual([currentTab.id]);
-    });
-
-    it('does not detect unsaved changes when profile state returns to all defaults', async () => {
-      const { internalState, runtimeStateManager, services, getCurrentTab } =
-        await setupProfileStateTest();
-      const currentTab = getCurrentTab();
-
-      internalState.dispatch(
-        internalStateActions.setProfileState({
-          tabId: currentTab.id,
-          profileStateDefinition: METRICS_GRID_SORT_STATE_DEF,
-          profileState: { field: 'recency', direction: 'desc' },
-        })
-      );
-      internalState.dispatch(
-        internalStateActions.setProfileState({
-          tabId: currentTab.id,
-          profileStateDefinition: METRICS_GRID_SORT_STATE_DEF,
-          profileState: METRICS_GRID_SORT_DEFAULTS,
-        })
-      );
-
-      const result = selectHasUnsavedChanges(internalState.getState(), {
-        runtimeStateManager,
-        services,
-      });
-
-      expect(result.hasUnsavedChanges).toBe(false);
-      expect(result.unsavedTabIds).toEqual([]);
-    });
   });
 
   describe('timeRestore behavior', () => {

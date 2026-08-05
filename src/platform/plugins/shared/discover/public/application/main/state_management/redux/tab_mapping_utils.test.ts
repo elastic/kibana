@@ -7,13 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Evaluate the full @kbn/discover-utils barrel before any import that enters
-// the package through a deep path (e.g. `@kbn/discover-utils/src/__mocks__`).
-// Deep-first evaluation leaves the package's root export object permanently
-// missing late barrel exports (a CJS re-export snapshot taken mid-cycle),
-// which strips `defaultState` from the real metrics grid profile state
-// definitions used below.
-import '@kbn/discover-utils';
 import { omit } from 'lodash';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
@@ -31,11 +24,6 @@ import {
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
-import { TEST_PROFILE_STATE_DEF } from '../../../../context_awareness/__mocks__/profile_state';
-import {
-  METRICS_GRID_SETTINGS_STATE_DEF,
-  METRICS_GRID_SORT_STATE_DEF,
-} from '../../../../../common/context_awareness';
 
 const services = createDiscoverServicesMock();
 const tab1 = getTabStateMock({
@@ -120,7 +108,6 @@ describe('tab mapping utils', () => {
           currentDataView: undefined,
         }),
         existingTab: tab1,
-        profileStateRegistry: services.profileStateRegistry,
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
@@ -207,7 +194,6 @@ describe('tab mapping utils', () => {
           currentDataView: undefined,
         }),
         existingTab: tab1,
-        profileStateRegistry: services.profileStateRegistry,
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
@@ -308,7 +294,6 @@ describe('tab mapping utils', () => {
           currentDataView: undefined,
         }),
         existingTab: tab1,
-        profileStateRegistry: services.profileStateRegistry,
       });
 
       expect(tabState.attributes.controlGroupState).toEqual({
@@ -476,7 +461,6 @@ describe('tab mapping utils', () => {
           "id": "1",
           "isTextBasedQuery": false,
           "label": "Tab 1",
-          "profileState": undefined,
           "refreshInterval": undefined,
           "rowHeight": undefined,
           "rowsPerPage": undefined,
@@ -517,7 +501,6 @@ describe('tab mapping utils', () => {
           "id": "1",
           "isTextBasedQuery": false,
           "label": "Tab 1",
-          "profileState": undefined,
           "refreshInterval": Object {
             "pause": true,
             "value": 500,
@@ -604,162 +587,6 @@ describe('tab mapping utils', () => {
       expect(savedObjectTab.serializedSearchSource).toEqual({
         index: 'initial-data-view-id',
         query: { esql: 'FROM test' },
-      });
-    });
-  });
-
-  describe('profileState mapping', () => {
-    const createServicesWithRegistry = () => {
-      const servicesWithRegistry = createDiscoverServicesMock();
-      servicesWithRegistry.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
-      return servicesWithRegistry;
-    };
-
-    it('should write only non-default Persistent-typed fields to the saved object tab', () => {
-      const servicesWithRegistry = createServicesWithRegistry();
-      const tabWithProfileState = getTabStateMock({
-        id: 'profile-tab',
-        profileState: {
-          testProfileState: {
-            uiValue: 'customUi',
-            urlValue: 'customUrl',
-            persistentValue: 'customPersistent',
-          },
-        },
-      });
-
-      const savedObjectTab = fromTabStateToSavedObjectTab({
-        tab: tabWithProfileState,
-        services: servicesWithRegistry,
-        currentDataView: undefined,
-      });
-
-      expect(savedObjectTab.profileState).toEqual({
-        testProfileState: { persistentValue: 'customPersistent' },
-      });
-    });
-
-    it('should write undefined when all Persistent-typed fields are default', () => {
-      const servicesWithRegistry = createServicesWithRegistry();
-      const tabWithDefaultProfileState = getTabStateMock({
-        id: 'profile-tab',
-        profileState: {
-          testProfileState: {
-            uiValue: 'customUi',
-            persistentValue: 'defaultPersistent',
-          },
-        },
-      });
-
-      const savedObjectTab = fromTabStateToSavedObjectTab({
-        tab: tabWithDefaultProfileState,
-        services: servicesWithRegistry,
-        currentDataView: undefined,
-      });
-
-      expect(savedObjectTab.profileState).toBeUndefined();
-    });
-
-    it('should restore Persistent-typed fields from the saved object tab and keep existing Ui and Url overrides', () => {
-      const servicesWithRegistry = createServicesWithRegistry();
-      const existingTab = getTabStateMock({
-        id: 'profile-tab',
-        profileState: {
-          testProfileState: {
-            uiValue: 'existingUi',
-            urlValue: 'existingUrl',
-            persistentValue: 'existingPersistent',
-          },
-        },
-      });
-      const savedObjectTab = fromTabStateToSavedObjectTab({
-        tab: getTabStateMock({
-          id: 'profile-tab',
-          profileState: {
-            testProfileState: { persistentValue: 'savedPersistent' },
-          },
-        }),
-        services: servicesWithRegistry,
-        currentDataView: undefined,
-      });
-
-      const tabState = fromSavedObjectTabToTabState({
-        tab: savedObjectTab,
-        existingTab,
-        profileStateRegistry: servicesWithRegistry.profileStateRegistry,
-      });
-
-      expect(tabState.profileState).toEqual({
-        testProfileState: {
-          uiValue: 'existingUi',
-          urlValue: 'existingUrl',
-          persistentValue: 'savedPersistent',
-        },
-      });
-    });
-
-    it('should clear existing Persistent-typed overrides when the saved object tab has none', () => {
-      const servicesWithRegistry = createServicesWithRegistry();
-      const existingTab = getTabStateMock({
-        id: 'profile-tab',
-        profileState: {
-          testProfileState: {
-            uiValue: 'existingUi',
-            persistentValue: 'existingPersistent',
-          },
-        },
-      });
-      const savedObjectTab = fromTabStateToSavedObjectTab({
-        tab: getTabStateMock({ id: 'profile-tab' }),
-        services: servicesWithRegistry,
-        currentDataView: undefined,
-      });
-
-      const tabState = fromSavedObjectTabToTabState({
-        tab: savedObjectTab,
-        existingTab,
-        profileStateRegistry: servicesWithRegistry.profileStateRegistry,
-      });
-
-      expect(tabState.profileState).toEqual({
-        testProfileState: { uiValue: 'existingUi' },
-      });
-    });
-
-    it('should round-trip the real metrics grid definitions (sort and grid settings) through the saved object tab', () => {
-      const servicesWithRegistry = createDiscoverServicesMock();
-      servicesWithRegistry.profileStateRegistry.registerDefinition(METRICS_GRID_SORT_STATE_DEF);
-      servicesWithRegistry.profileStateRegistry.registerDefinition(METRICS_GRID_SETTINGS_STATE_DEF);
-
-      // Every metrics grid field is typed Persistent, so both a non-default
-      // sort and non-default grid settings are written to saved sessions.
-      const tabWithMetricsState = getTabStateMock({
-        id: 'profile-tab',
-        profileState: {
-          metricsGridSort: { field: 'recency', direction: 'desc' },
-          metricsGridSettings: { counterAggregation: 'max' },
-        },
-      });
-
-      const savedObjectTab = fromTabStateToSavedObjectTab({
-        tab: tabWithMetricsState,
-        services: servicesWithRegistry,
-        currentDataView: undefined,
-      });
-
-      expect(savedObjectTab.profileState).toEqual({
-        metricsGridSort: { field: 'recency', direction: 'desc' },
-        metricsGridSettings: { counterAggregation: 'max' },
-      });
-
-      const tabState = fromSavedObjectTabToTabState({
-        tab: savedObjectTab,
-        profileStateRegistry: servicesWithRegistry.profileStateRegistry,
-      });
-
-      expect(tabState.profileState).toEqual({
-        metricsGridSort: { field: 'recency', direction: 'desc' },
-        metricsGridSettings: { counterAggregation: 'max' },
       });
     });
   });
