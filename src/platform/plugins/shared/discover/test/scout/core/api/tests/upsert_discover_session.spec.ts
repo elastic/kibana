@@ -167,6 +167,18 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
       },
     ]);
 
+    const repeatedResponse = await apiClient.put(`${DISCOVER_SESSION_API_BASE_PATH}/${id}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: replacementBody,
+      responseType: 'json',
+    });
+
+    expect(repeatedResponse).toHaveStatusCode(200);
+    expect(repeatedResponse.body.data).toStrictEqual(response.body.data);
+
     // PUT fully replaces the session, so omitting tags removes the existing tag references.
     const responseWithoutTags = await apiClient.put(`${DISCOVER_SESSION_API_BASE_PATH}/${id}`, {
       headers: {
