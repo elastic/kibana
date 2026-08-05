@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, ElasticsearchClient } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { createOrUpdateIndex } from './helpers';
 import { PlainIndexDataClient } from './plain_index_data_client';
@@ -36,25 +36,8 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
   async initStart(coreStart: CoreStart): Promise<void> {
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const { logger } = this.deps;
-    this.initPromise = Promise.all([
-      createOrUpdateIndex({
-        esClient,
-        indexName: WORKFLOWS_EXECUTIONS_INDEX,
-        mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-        logger,
-      }),
-      createOrUpdateIndex({
-        esClient,
-        indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-        mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-        logger,
-      }),
-    ])
-      .then(() => coreStart.elasticsearch.client.asInternalUser)
-      .catch((error) => {
-        logger.error('Failed to create or update index', { error });
-        throw error;
-      });
+
+    this.initPromise = this.init(esClient, logger);
     this.started = true;
   }
 
@@ -91,5 +74,34 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
           })
       )
     );
+  }
+
+  private async init(esClient: ElasticsearchClient, logger: Logger): Promise<ElasticsearchClient> {
+    const initAttempts = 3;
+    for (let attempt = 1; attempt <= initAttempts; attempt++) {
+      try {
+        await Promise.all([
+          createOrUpdateIndex({
+            esClient,
+            indexName: WORKFLOWS_EXECUTIONS_INDEX,
+            mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+            logger,
+          }),
+          createOrUpdateIndex({
+            esClient,
+            indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+            mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
+            logger,
+          }),
+        ]);
+        return esClient;
+      } catch (error) {
+        logger.error('Failed to create or update index', { error });
+        // Wait for a short delay before retrying
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
+
+    throw new Error('Failed to initialize data client bundle after multiple attempts');
   }
 }

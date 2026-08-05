@@ -18,7 +18,7 @@ import type {
 
 export interface GetExecutionsByIdsParams<TExecution extends { id: string }> {
   esClient: ElasticsearchClient;
-  ids: (string | { id: string; index: string[] })[];
+  ids: (string | { id: string; index: string | string[] })[];
   defaultIndex: string;
   options?: GetExecutionsByIdsOptions<TExecution>;
   normalizeExecutionOnGet?: (
@@ -58,7 +58,8 @@ export const getExecutionsByIds = async <TExecution extends { id: string }>({
     if (typeof item === 'string') {
       return { _index: defaultIndex, _id: item, ...sourceFilter };
     }
-    return item.index.map((index) => ({ _index: index, _id: item.id, ...sourceFilter }));
+    const indices = Array.isArray(item.index) ? item.index : [item.index];
+    return indices.map((index) => ({ _index: index, _id: item.id, ...sourceFilter }));
   });
   const response = await retryTransientEsErrors(() => esClient.mget<TExecution>({ docs }), {
     logger,
@@ -78,12 +79,14 @@ export const getExecutionsByIds = async <TExecution extends { id: string }>({
     }
   }
 
-  const foundIds = new Set(items.map((item) => item.document.id));
+  const foundDocIds = new Set(
+    response.docs
+      .filter((doc): doc is typeof doc & { found: true } => 'found' in doc && doc.found)
+      .map((doc) => doc._id)
+  );
 
   return {
     items,
-    missing: response.docs
-      .filter((doc) => !('found' in doc && doc.found) && !foundIds.has(doc._id))
-      .map((doc) => doc._id),
+    missing: response.docs.filter((doc) => !foundDocIds.has(doc._id)).map((doc) => doc._id),
   };
 };

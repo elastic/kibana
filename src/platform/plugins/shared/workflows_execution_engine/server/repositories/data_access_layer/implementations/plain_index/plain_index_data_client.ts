@@ -70,11 +70,7 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
   ): Promise<GetExecutionsByIdsResponse<TExecution>> {
     return getExecutionsByIds({
       esClient: this.deps.esClient,
-      ids: ids.map((id) =>
-        typeof id === 'string'
-          ? { id, index: [this.deps.indexName] }
-          : { id: id.id, index: [id.index] }
-      ),
+      ids,
       defaultIndex: this.deps.indexName,
       options,
       logger: this.deps.logger,

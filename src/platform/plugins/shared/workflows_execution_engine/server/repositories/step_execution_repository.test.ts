@@ -20,6 +20,7 @@ describe('StepExecutionRepository', () => {
 
   beforeEach(() => {
     stepExecutionsDataClient = createMockStepDataClient();
+    stepExecutionsDataClient.bulk.mockResolvedValue({ errors: false, items: [] });
     underTest = new StepExecutionRepository(stepExecutionsDataClient);
   });
 
