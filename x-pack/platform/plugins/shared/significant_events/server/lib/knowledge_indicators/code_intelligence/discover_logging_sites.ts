@@ -42,7 +42,7 @@ export interface CodeGrepOptions {
 }
 
 /**
- * Greps the Sourcerer line index (`sourcerer-v1-lines*`) with a single Lucene
+ * Greps the Sourcerer line indices (`sourcerer-v1-lines*` and `sourcerer-v2-lines*`) with a single Lucene
  * RLIKE regex, scoped to an org/repo/commit and a glob file path. This is a
  * server-side port of the `sourcerer.code.grep` Agent Builder tool: the ES|QL
  * (including the recursive-glob depth logic that confines a `*` to one path

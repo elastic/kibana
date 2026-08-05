@@ -57,6 +57,17 @@ describe('listIndexedRepos', () => {
     expect(repos).toEqual([repo]);
   });
 
+  it('queries both v1 and v2 refs and admits only complete/ready statuses', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue(refsResponse([]));
+    await listIndexedRepos({ esClient, logger: loggerMock.create() });
+    const { query } = esClient.esql.query.mock.calls[0][0];
+    // v1 + v2 refs indices, explicitly (not an unbounded sourcerer-v* wildcard)
+    expect(query).toContain('FROM sourcerer-v1-refs*,sourcerer-v2-refs*');
+    // allow-list: v1 uses `complete`, v2 uses `ready`; anything else (in-progress/failed) is excluded
+    expect(query).toContain('status IN ("complete", "ready")');
+  });
+
   it('never throws — returns [] on query failure', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.esql.query.mockRejectedValue(new Error('no index'));

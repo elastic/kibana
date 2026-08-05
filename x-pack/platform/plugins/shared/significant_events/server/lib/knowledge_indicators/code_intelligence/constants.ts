@@ -82,7 +82,7 @@ export const DEFAULT_LOG_SEVERITY = 40;
  * tool. This is the substrate seam: when the Agent Builder code sandbox arrives
  * with ripgrep, only the grep driver changes, not the pattern set.
  */
-export const SOURCERER_LINES_INDEX = 'sourcerer-v1-lines*' as const;
+export const SOURCERER_LINES_INDEX = 'sourcerer-v1-lines*,sourcerer-v2-lines*' as const;
 
 /** OTel import and instrumentation idioms, one Lucene RLIKE-safe grep each. */
 export const OTEL_INSTRUMENTATION_PATTERNS = {
@@ -322,9 +322,9 @@ export const SENTENCE_LITERAL_PATTERNS: readonly string[] = [
  * the indexed repositories + their immutable commits from here (server-side
  * equivalent of the agent's `sourcerer.refs.list`).
  */
-export const SOURCERER_REFS_INDEX = 'sourcerer-v1-refs*' as const;
+export const SOURCERER_REFS_INDEX = 'sourcerer-v1-refs*,sourcerer-v2-refs*' as const;
 
-export const SOURCERER_FILES_INDEX = 'sourcerer-v1-files*' as const;
+export const SOURCERER_FILES_INDEX = 'sourcerer-v1-files*,sourcerer-v2-files*' as const;
 
 /**
  * File-extension (lowercase, no dot) -> programming/markup language, used to

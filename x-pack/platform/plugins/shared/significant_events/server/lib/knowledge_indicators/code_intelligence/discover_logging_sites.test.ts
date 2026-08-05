@@ -176,7 +176,7 @@ describe('codeGrep', () => {
     ]);
 
     const call = esClient.esql.query.mock.calls[0][0];
-    expect(call.query).toContain('FROM sourcerer-v1-lines*');
+    expect(call.query).toContain('FROM sourcerer-v1-lines*,sourcerer-v2-lines*');
     expect(call.query).toContain('line.content RLIKE ?regex');
     expect(call.params).toEqual([
       { git_org: 'open-telemetry' },

@@ -125,9 +125,12 @@ const README_LINE_LIMIT = 40;
 
 /**
  * Enumerates the repositories + immutable commits indexed in Sourcerer, from the
- * refs index (`sourcerer-v1-refs*`). Server-side equivalent of the agent's
- * `sourcerer.refs.list`. One entry per indexed ref; only `complete` refs are
- * returned. Never throws — a missing index yields an empty list.
+ * refs indices (`sourcerer-v1-refs*` and `sourcerer-v2-refs*`). Server-side
+ * equivalent of the agent's `sourcerer.refs.list`. One entry per indexed ref;
+ * only successfully-indexed refs are returned — the ready-state value differs by
+ * index version (`complete` in v1, `ready` in v2), so the allow-list below admits
+ * exactly those two and excludes any in-progress/failed states. Never throws — a
+ * missing index yields an empty list.
  */
 export async function listIndexedRepos({
   esClient,
@@ -140,7 +143,7 @@ export async function listIndexedRepos({
     const response = (await esClient.esql.query({
       query: `
         FROM ${SOURCERER_REFS_INDEX}
-        | WHERE status == "complete"
+        | WHERE status IN ("complete", "ready")
         | KEEP git.org, git.repo, git.commit, git.ref
         | SORT git.org, git.repo
         | LIMIT 1000`,
