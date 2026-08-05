@@ -138,22 +138,14 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
       }
     `,
 
-    cellDefault: css`
+    cell: css`
       padding: ${euiTheme.size.m};
-    `,
-
-    cellCompressed: css`
-      padding: ${euiTheme.size.s};
     `,
   };
 };
 
 /** Responsive card for a small set of labeled values. */
-export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
-  items,
-  compressed,
-  ...rest
-}) => {
+export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, ...rest }) => {
   const memoized = useEuiMemoizedStyles(styles);
 
   return (
@@ -166,11 +158,8 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
         data-test-subj={rest['data-test-subj'] ?? 'infoBlocks'}
       >
         {items.map((item, index) => (
-          <div
-            key={item['data-test-subj'] ?? index}
-            css={compressed ? memoized.cellCompressed : memoized.cellDefault}
-          >
-            <InfoBlock {...item} compressed={compressed} />
+          <div key={item['data-test-subj'] ?? index} css={memoized.cell}>
+            <InfoBlock {...item} />
           </div>
         ))}
       </EuiPanel>

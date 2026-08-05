@@ -12,9 +12,7 @@ import { css } from '@emotion/react';
 import { EuiText, EuiTextTruncate, euiFontSize, useEuiTheme } from '@elastic/eui';
 import type { InfoBlockItem } from './types';
 
-export interface InfoBlockProps extends InfoBlockItem {
-  compressed?: boolean;
-}
+export type InfoBlockProps = InfoBlockItem;
 
 const styles = {
   block: css`
@@ -34,13 +32,11 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
   value,
   size,
   color,
-  compressed,
   ...rest
 }) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
-  const valueFontSize =
-    size && !compressed ? euiFontSize(euiThemeContext, size, { unit: 'px' }) : undefined;
+  const valueFontSize = size ? euiFontSize(euiThemeContext, size, { unit: 'px' }) : undefined;
   // Primitive values get built-in single-line truncation.
   const isTextValue = typeof value === 'string' || typeof value === 'number';
 

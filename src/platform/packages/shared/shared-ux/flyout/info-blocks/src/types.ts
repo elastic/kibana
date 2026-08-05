@@ -18,7 +18,7 @@ export interface InfoBlockItem {
   title: string;
   /** Arbitrary content rendered as the block value. */
   value: ReactNode;
-  /** Optional font scale for the value; ignored when compressed. */
+  /** Optional font scale for the value. */
   size?: InfoBlockSize;
   /** Color for the value text, passed through to `EuiText` (e.g. `'success'`). */
   color?: EuiTextProps['color'];
@@ -28,7 +28,5 @@ export interface InfoBlockItem {
 export interface InfoBlocksProps {
   /** The blocks to render. Designed for small sets, typically up to 8 blocks. */
   items: readonly InfoBlockItem[];
-  /** Compact spacing/sizing for dense presentations. */
-  compressed?: boolean;
   'data-test-subj'?: string;
 }

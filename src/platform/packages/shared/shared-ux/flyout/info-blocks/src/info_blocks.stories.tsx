@@ -21,7 +21,6 @@ import {
   EuiHealth,
   EuiIcon,
   EuiLink,
-  EuiSwitch,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
@@ -37,7 +36,6 @@ const meta: Meta<typeof InfoBlocks> = {
   component: InfoBlocks,
   argTypes: {
     items: { table: { disable: true } },
-    compressed: { table: { disable: true } },
     'data-test-subj': { table: { disable: true } },
   },
 };
@@ -233,36 +231,22 @@ const FlyoutWrapper: React.FC<{ children: React.ReactNode; title: string }> = ({
 
 type Story = StoryObj<typeof InfoBlocks>;
 
-const GalleryDemo: React.FC = () => {
-  const [useCompressed, setUseCompressed] = React.useState(false);
+const GalleryDemo: React.FC = () => (
+  <FlyoutWrapper title="Info blocks gallery">
+    <EuiTitle size="s">
+      <h3>Sample set</h3>
+    </EuiTitle>
+    <EuiSpacer size="m" />
+    <InfoBlocks items={[...SAMPLE_ITEMS, ...ACTIONABLE_ITEMS]} />
 
-  return (
-    <div>
-      <EuiSwitch
-        id="compressed-toggle"
-        label="Use compressed layout"
-        checked={useCompressed}
-        onChange={() => setUseCompressed(!useCompressed)}
-      />
-
-      <FlyoutWrapper title="Info blocks gallery">
-        <EuiTitle size="s">
-          <h3>Sample set</h3>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <InfoBlocks items={[...SAMPLE_ITEMS, ...ACTIONABLE_ITEMS]} compressed={useCompressed} />
-
-        <EuiSpacer size="xl" />
-        <EuiTitle size="s">
-          <h3>Big number</h3>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <InfoBlocks items={BIG_NUMBER_ITEMS} compressed={useCompressed} />
-
-      </FlyoutWrapper>
-    </div>
-  );
-};
+    <EuiSpacer size="xl" />
+    <EuiTitle size="s">
+      <h3>Big number</h3>
+    </EuiTitle>
+    <EuiSpacer size="m" />
+    <InfoBlocks items={BIG_NUMBER_ITEMS} />
+  </FlyoutWrapper>
+);
 
 export const Gallery: Story = {
   parameters: { controls: { hideNoControlsWarning: true } },
