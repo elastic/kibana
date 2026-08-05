@@ -28,7 +28,7 @@ export async function activateWorktree({
     settings,
   });
 
-  await ensureClonedRepo(context);
+  await ensureClonedRepo(context, { ref });
 
   const workspaceController = new WorkspaceController(context);
 

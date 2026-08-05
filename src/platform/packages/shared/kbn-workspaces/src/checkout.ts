@@ -31,8 +31,8 @@ export async function checkout({ log, dir, sha }: CheckoutOptions): Promise<void
   let exists = await ensureObjectExists();
 
   if (!exists) {
-    await execa('git', ['fetch', '--all', '--prune', '--quiet'], { cwd: dir }).catch((error) => {
-      throw new Error(`Failed to fetch updates in worktree ${dir}`, { cause: error });
+    await execa('git', ['fetch', 'origin', sha, '--quiet'], { cwd: dir }).catch((error) => {
+      throw new Error(`Failed to fetch commit ${sha} in worktree ${dir}`, { cause: error });
     });
   }
 

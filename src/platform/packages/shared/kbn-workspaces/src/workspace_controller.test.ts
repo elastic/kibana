@@ -58,7 +58,7 @@ async function createContext(): Promise<ReturnType<typeof createWorkspaceGlobalC
 describe('@kbn/workspaces controller', () => {
   test('cache key changes when diff changes', async () => {
     const context = await createContext();
-    await ensureClonedRepo(context);
+    await ensureClonedRepo(context, { ref: 'HEAD' });
     const controller = new WorkspaceController(context);
     const source = await controller.fromSourceRepo();
     expect(source).toBeInstanceOf(SourceRepoWorkspace);
@@ -76,7 +76,7 @@ describe('@kbn/workspaces controller', () => {
 
   test('activating worktree creates directory and state', async () => {
     const context = await createContext();
-    await ensureClonedRepo(context);
+    await ensureClonedRepo(context, { ref: 'HEAD' });
     const controller = new WorkspaceController(context);
     const wt = await controller.activateWorktree('HEAD');
     expect(wt).toBeInstanceOf(WorktreeWorkspace);
@@ -89,7 +89,7 @@ describe('@kbn/workspaces controller', () => {
 
   test('checkout task cache invalidates when worktree sha changes', async () => {
     const context = await createContext();
-    await ensureClonedRepo(context);
+    await ensureClonedRepo(context, { ref: 'HEAD' });
     const controller = new WorkspaceController(context);
     const wt = await controller.activateWorktree('HEAD');
     await wt.ensureCheckout();
@@ -106,7 +106,7 @@ describe('@kbn/workspaces controller', () => {
       { cwd: context.baseCloneDir }
     );
     // fetch the new commit into the worktree so rev-parse in base clone reflects new sha
-    await execa('git', ['fetch', '--all', '--prune', '--quiet'], { cwd: context.baseCloneDir });
+    await execa('git', ['fetch', 'origin', 'HEAD', '--quiet'], { cwd: context.baseCloneDir });
 
     await wt.ensureCheckout();
 
@@ -116,7 +116,7 @@ describe('@kbn/workspaces controller', () => {
 
   test('prunes oldest workspaces beyond maxWorkspaces', async () => {
     const context = await createContext();
-    await ensureClonedRepo(context);
+    await ensureClonedRepo(context, { ref: 'HEAD' });
     const controller = new WorkspaceController(context);
 
     const a = await controller.activateWorktree('HEAD');
