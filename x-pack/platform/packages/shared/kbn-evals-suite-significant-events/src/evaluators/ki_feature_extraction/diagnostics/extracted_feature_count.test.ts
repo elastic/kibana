@@ -47,7 +47,7 @@ describe('extracted_feature_count evaluator', () => {
     });
 
     expect(result.score).toBe(2);
-    expect(result.details).toEqual({
+    expect(result.metadata).toEqual({
       featureCount: 2,
       totalEvidence: 2,
       maxEvidencePerFeature: 2,
@@ -64,6 +64,6 @@ describe('extracted_feature_count evaluator', () => {
     });
 
     expect(result.score).toBe(0);
-    expect(result.details).toMatchObject({ featureCount: 0, maxEvidencePerFeature: 0 });
+    expect(result.metadata).toMatchObject({ featureCount: 0, maxEvidencePerFeature: 0 });
   });
 });

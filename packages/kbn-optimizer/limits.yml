@@ -131,6 +131,7 @@ pageLoadAssetSize:
   monitoring: 28983
   navigation: 18855
   newsfeed: 11110
+  nightshift: 10000
   noDataPage: 1749
   notificationCenter: 1791
   observability: 122800
@@ -184,7 +185,7 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 4855
   sessionView: 47912
   share: 64059
-  significant_events: 12107
+  significantEvents: 12119
   significantEventsApp: 13163
   slo: 40437
   snapshotRestore: 22068
