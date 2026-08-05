@@ -161,7 +161,7 @@ When the id/name resolves to multiple candidate entities, no attachment is store
 
         const { identifierType, identifier } = resolved.identity;
         const entityStoreId = resolved.identity.entityStoreId;
-        const attachmentLabel = `Graph — ${identifierType}: ${identifier}`;
+        const attachmentLabel = `${identifierType}: ${identifier}`;
 
         const attachmentResult = await ensureEntityGraphAttachment({
           attachments,
