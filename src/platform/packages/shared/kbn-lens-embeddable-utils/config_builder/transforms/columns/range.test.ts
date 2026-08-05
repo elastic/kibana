@@ -183,6 +183,57 @@ describe('Range Transforms', () => {
       });
     });
 
+    it(`should pass a fractional maxBars through verbatim`, () => {
+      // The Lens editor persists a fractional default of `(histogram:maxBars - 1) / 2` (499.5 for
+      // the default ceiling of 1000). The out-transform must not round or reject it, otherwise the
+      // round-trip mutates the stored bar target.
+      const input: RangeIndexPatternColumn = {
+        operationType: 'range',
+        dataType: 'number',
+        sourceField: 'price',
+        customLabel: false,
+        label: 'price',
+        isBucketed: true,
+        params: {
+          type: 'histogram',
+          maxBars: 499.5,
+          ranges: [],
+          includeEmptyRows: false,
+        },
+      };
+
+      expect(fromRangeOrHistogramLensStateToAPI(input)).toEqual({
+        operation: 'histogram',
+        field: 'price',
+        granularity: 499.5,
+        include_empty_rows: false,
+      });
+    });
+
+    it(`should pass "auto" maxBars through as "auto" granularity`, () => {
+      const input: RangeIndexPatternColumn = {
+        operationType: 'range',
+        dataType: 'number',
+        sourceField: 'price',
+        customLabel: false,
+        label: 'price',
+        isBucketed: true,
+        params: {
+          type: 'histogram',
+          maxBars: LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
+          ranges: [],
+          includeEmptyRows: true,
+        },
+      };
+
+      expect(fromRangeOrHistogramLensStateToAPI(input)).toEqual({
+        operation: 'histogram',
+        field: 'price',
+        granularity: LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
+        include_empty_rows: true,
+      });
+    });
+
     it('should handle custom labels', () => {
       const input: RangeIndexPatternColumn = {
         operationType: 'range',
