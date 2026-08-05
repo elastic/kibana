@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
@@ -20,6 +20,7 @@ import { useGraphPreview } from '../hooks/use_graph_preview';
 import { useSessionViewConfig } from '../../tools/session_view/hooks/use_session_view_config';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { VISUALIZATION_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
+import { isRulePreviewDocument } from '../../../shared/utils/is_rule_preview_document';
 
 export const VISUALIZATION_SECTION_TEST_ID = `${PREFIX}Visualizations` as const;
 
@@ -49,6 +50,7 @@ export const VisualizationsSection = memo(
     const { openAnalyzer, openSessionView, openDocumentGraph } = useFlyoutApi();
     const sessionViewConfig = useSessionViewConfig(hit);
     const { hasGraphData } = useGraphPreview({ hit });
+    const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
 
     const expanded = useExpandSection({
       storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
@@ -108,20 +110,24 @@ export const VisualizationsSection = memo(
         title={VISUALIZATION_SECTION_TITLE}
       >
         <SessionPreviewContainer
-          disableNavigation={false}
+          disableNavigation={isRulePreview}
           hit={hit}
           onShowSessionView={onShowSessionView}
           showIcon={false}
         />
         <AnalyzerPreviewContainer
-          disableNavigation={false}
+          disableNavigation={isRulePreview}
           hit={hit}
           onShowAnalyzer={onShowAnalyzer}
-          shouldUseAncestor={false}
+          shouldUseAncestor={isRulePreview}
           showIcon={false}
         />
         {hasGraphData && (
-          <GraphPreviewContainer hit={hit} onShowGraph={onShowGraph} showIcon={false} />
+          <GraphPreviewContainer
+            hit={hit}
+            onShowGraph={isRulePreview ? undefined : onShowGraph}
+            showIcon={false}
+          />
         )}
       </ExpandableSection>
     );
