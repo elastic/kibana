@@ -42,7 +42,7 @@ import type {
   StandaloneAgentExecution,
 } from '@kbn/agent-builder-server/execution';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
-import { ElasticGenAIAttributes } from '@kbn/inference-tracing';
+import { ElasticGenAIAttributes, UserAttributes } from '@kbn/inference-tracing';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
 import {
@@ -59,7 +59,6 @@ import {
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { withConverseSpan } from '../../tracing';
-import { USER_ID_ATTR, USER_NAME_ATTR } from '../../tracing/agent_builder_context';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
@@ -247,10 +246,10 @@ const handleConversationExecution = async ({
     (span) => {
       const setUserAttributes = (user: { id?: string; username?: string }) => {
         if (user.id) {
-          span?.setAttribute(USER_ID_ATTR, user.id);
+          span?.setAttribute(UserAttributes.UserId, user.id);
         }
         if (user.username) {
-          span?.setAttribute(USER_NAME_ATTR, user.username);
+          span?.setAttribute(UserAttributes.UserName, user.username);
         }
       };
 

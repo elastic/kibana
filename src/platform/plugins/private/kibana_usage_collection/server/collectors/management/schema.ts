@@ -602,13 +602,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'agentBuilder:tracing:includeRealIds': {
     type: 'boolean',
     _meta: {
-      description: 'Whether to include real conversation and workflow IDs in traces.',
+      description: 'Whether to include real conversation, workflow, and user IDs in traces.',
     },
   },
   'agentBuilder:tracing:includeRealNames': {
     type: 'boolean',
     _meta: {
-      description: 'Whether to include real agent and tool names in traces.',
+      description: 'Whether to include real agent, tool, conversation, and user names in traces.',
     },
   },
   'agentBuilder:tracing:includeSystemPrompt': {

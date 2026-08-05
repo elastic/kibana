@@ -10,6 +10,7 @@ import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
 import {
   ElasticGenAIAttributes,
   GenAISemanticConventions,
+  UserAttributes,
   parseJsonAttr,
   type GenAIInputMessage,
   type GenAIOutputMessage,
@@ -21,13 +22,7 @@ import {
   AGENT_BUILDER_BUILTIN_AGENTS,
   AGENT_BUILDER_BUILTIN_TOOLS,
 } from '@kbn/agent-builder-server/allow_lists';
-import {
-  DATA_STREAM_NAMESPACE_ATTR,
-  isAgentBuilderSpan,
-  USER_HASH_ATTR,
-  USER_ID_ATTR,
-  USER_NAME_ATTR,
-} from './agent_builder_context';
+import { DATA_STREAM_NAMESPACE_ATTR, isAgentBuilderSpan } from './agent_builder_context';
 import { normalizeAgentIdForTelemetry, toHashedId } from '../telemetry/utils';
 
 const BUILTIN_TOOL_IDS: Set<string> = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
@@ -83,10 +78,10 @@ function hashSensitiveAttributes(attributes: Record<string, unknown>): Record<st
     result['elastic.workflow.execution_id'] = toHashedId(String(workflowExecId));
   }
 
-  const userId = result[USER_ID_ATTR];
+  const userId = result[UserAttributes.UserId];
   if (userId != null) {
-    result[USER_HASH_ATTR] = toHashedId(String(userId));
-    delete result[USER_ID_ATTR];
+    result[UserAttributes.UserHash] = toHashedId(String(userId));
+    delete result[UserAttributes.UserId];
   }
 
   return result;
@@ -108,7 +103,7 @@ function anonymizeNames(
     [GenAISemanticConventions.GenAIToolDefinitions]: _defs,
     [GenAISemanticConventions.GenAIToolDescription]: _desc,
     [ElasticGenAIAttributes.ConversationTitle]: _title,
-    [USER_NAME_ATTR]: _userName,
+    [UserAttributes.UserName]: _userName,
     ...result
   } = attributes;
   let finalSpanName = spanName;

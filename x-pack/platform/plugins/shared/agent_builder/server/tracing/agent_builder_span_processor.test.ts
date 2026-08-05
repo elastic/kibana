@@ -10,8 +10,13 @@ import { context, propagation, TraceFlags } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { resources, tracing as elasticTracing } from '@elastic/opentelemetry-node/sdk';
-import { BAGGAGE_TRACKING_BEACON_KEY, BAGGAGE_TRACKING_BEACON_VALUE } from '@kbn/inference-tracing';
-import { ElasticGenAIAttributes, GenAISemanticConventions } from '@kbn/inference-tracing';
+import {
+  BAGGAGE_TRACKING_BEACON_KEY,
+  BAGGAGE_TRACKING_BEACON_VALUE,
+  ElasticGenAIAttributes,
+  GenAISemanticConventions,
+  UserAttributes,
+} from '@kbn/inference-tracing';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
   AGENT_BUILDER_BUILTIN_AGENTS,
@@ -25,9 +30,6 @@ import {
   AGENT_BUILDER_OWNER_BAGGAGE_KEY,
   AGENT_BUILDER_OWNER_BAGGAGE_VALUE,
   DATA_STREAM_NAMESPACE_ATTR,
-  USER_HASH_ATTR,
-  USER_ID_ATTR,
-  USER_NAME_ATTR,
 } from './agent_builder_context';
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
@@ -673,15 +675,15 @@ describe('AgentBuilderSpanProcessor', () => {
 
       const readable = createMockReadableSpan({
         [SHOULD_TRACK_ATTR]: true,
-        [USER_ID_ATTR]: 'profile-uid-or-realm-id',
+        [UserAttributes.UserId]: 'profile-uid-or-realm-id',
       });
 
       processor.onEnd(readable);
 
       const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
-      expect(exported.attributes[USER_HASH_ATTR]).toMatch(/^[a-f0-9]{16}$/);
-      expect(exported.attributes[USER_HASH_ATTR]).not.toBe('profile-uid-or-realm-id');
-      expect(exported.attributes[USER_ID_ATTR]).toBeUndefined();
+      expect(exported.attributes[UserAttributes.UserHash]).toMatch(/^[a-f0-9]{16}$/);
+      expect(exported.attributes[UserAttributes.UserHash]).not.toBe('profile-uid-or-realm-id');
+      expect(exported.attributes[UserAttributes.UserId]).toBeUndefined();
     });
 
     it('preserves user.id when includeRealIds is true', () => {
@@ -693,14 +695,14 @@ describe('AgentBuilderSpanProcessor', () => {
 
       const readable = createMockReadableSpan({
         [SHOULD_TRACK_ATTR]: true,
-        [USER_ID_ATTR]: 'profile-uid-or-realm-id',
+        [UserAttributes.UserId]: 'profile-uid-or-realm-id',
       });
 
       processor.onEnd(readable);
 
       const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
-      expect(exported.attributes[USER_ID_ATTR]).toBe('profile-uid-or-realm-id');
-      expect(exported.attributes[USER_HASH_ATTR]).toBeUndefined();
+      expect(exported.attributes[UserAttributes.UserId]).toBe('profile-uid-or-realm-id');
+      expect(exported.attributes[UserAttributes.UserHash]).toBeUndefined();
     });
 
     it('hashes workflow IDs and execution IDs', () => {
@@ -902,13 +904,13 @@ describe('AgentBuilderSpanProcessor', () => {
 
       const readable = createMockReadableSpan({
         [SHOULD_TRACK_ATTR]: true,
-        [USER_NAME_ATTR]: 'jane.doe',
+        [UserAttributes.UserName]: 'jane.doe',
       });
 
       processor.onEnd(readable);
 
       const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
-      expect(exported.attributes[USER_NAME_ATTR]).toBeUndefined();
+      expect(exported.attributes[UserAttributes.UserName]).toBeUndefined();
     });
 
     it('preserves user names when includeRealNames is true', () => {
@@ -920,13 +922,13 @@ describe('AgentBuilderSpanProcessor', () => {
 
       const readable = createMockReadableSpan({
         [SHOULD_TRACK_ATTR]: true,
-        [USER_NAME_ATTR]: 'jane.doe',
+        [UserAttributes.UserName]: 'jane.doe',
       });
 
       processor.onEnd(readable);
 
       const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
-      expect(exported.attributes[USER_NAME_ATTR]).toBe('jane.doe');
+      expect(exported.attributes[UserAttributes.UserName]).toBe('jane.doe');
     });
 
     it('preserves conversation titles when includeRealNames is true', () => {
