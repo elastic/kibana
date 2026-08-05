@@ -16,14 +16,14 @@
       "fieldFormats",
       "charts",
       "visualizations",
-      "presentationUtil",
       "data"
     ],
     "optionalPlugins": [
       "usageCollection"
     ],
     "requiredBundles": [
-      "kibanaUtils"
+      "kibanaUtils",
+      "presentationUtil"
     ]
   }
 }
