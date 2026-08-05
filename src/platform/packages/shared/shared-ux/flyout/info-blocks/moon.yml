@@ -16,8 +16,7 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/platform/packages/shared/shared-ux/flyout/info-blocks
-dependsOn:
-  - '@kbn/shared-ux-flyout-common'
+dependsOn: []
 tags:
   - shared-browser
   - package

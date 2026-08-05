@@ -11,8 +11,10 @@ import React, { type FunctionComponent } from 'react';
 import { css } from '@emotion/react';
 import { EuiPanel, useEuiMemoizedStyles } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
-import { FLYOUT_MIN_CELL_WIDTH, FLYOUT_MAX_GRID_COLUMNS } from '@kbn/shared-ux-flyout-common';
 import { InfoBlock } from './info_block.component';
+
+const FLYOUT_MIN_CELL_WIDTH = 140;
+const FLYOUT_MAX_GRID_COLUMNS = 4;
 import type { InfoBlocksMaxColumns, InfoBlocksProps } from './types';
 
 const CONTAINER_NAME = 'infoBlocks';
@@ -142,7 +144,7 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
 /** Responsive card for a small set of labeled values. */
 export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
   items,
-  maxColumns = 3,
+  maxColumns = 'auto',
   ...rest
 }) => {
   const memoized = useEuiMemoizedStyles(styles);

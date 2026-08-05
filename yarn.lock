@@ -9426,10 +9426,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-flyout-common@link:src/platform/packages/shared/shared-ux/flyout/common":
-  version "0.0.0"
-  uid ""
-
 "@kbn/shared-ux-flyout-info-blocks@link:src/platform/packages/shared/shared-ux/flyout/info-blocks":
   version "0.0.0"
   uid ""
