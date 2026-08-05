@@ -8,7 +8,7 @@
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { createEsqlResponse } from '../test_utils';
 import { createExecutionContext } from '../execution_context';
-import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { fetchActiveAlertGroupHashes } from './fetch_active_alert_group_hashes';
 
 describe('fetchActiveAlertGroupHashes', () => {
