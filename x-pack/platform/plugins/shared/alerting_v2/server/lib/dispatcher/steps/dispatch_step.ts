@@ -91,19 +91,7 @@ export class DispatchStep implements DispatcherStep {
       if (!apiKey) {
         const message = `No API key found for policy ${group.policyId}, skipping dispatch of group ${group.id}`;
         this.logger.warn({ message: () => message });
-        // Group-level cause: every workflow destination is skipped, so emit one
-        // failure per destination to keep each dead route independently queryable.
-        for (const destination of group.destinations) {
-          if (destination.type !== 'workflow') continue;
-          failures.push(
-            this.buildFailure(
-              group,
-              destination.id,
-              DISPATCH_FAILURE_REASONS.MISSING_API_KEY,
-              message
-            )
-          );
-        }
+        failures.push(...this.buildGroupFailures(group, DISPATCH_FAILURE_REASONS.MISSING_API_KEY, message));
         return { groupId: group.id, executionIds, failures };
       }
 
@@ -159,19 +147,19 @@ export class DispatchStep implements DispatcherStep {
       // Reached only for failures raised before the per-destination loop (e.g.
       // request crafting). Nothing has been dispatched yet, so record one
       // failure per workflow destination.
-      for (const destination of group.destinations) {
-        if (destination.type !== 'workflow') continue;
-        failures.push(
-          this.buildFailure(
-            group,
-            destination.id,
-            DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
-            error.message
-          )
-        );
-      }
+      failures.push(...this.buildGroupFailures(group, DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR, error.message));
     }
     return { groupId: group.id, executionIds, failures };
+  }
+
+  private buildGroupFailures(
+    group: ActionGroup,
+    reason: DispatchFailureReason,
+    message: string
+  ): DispatchFailure[] {
+    return group.destinations
+      .filter((d) => d.type === 'workflow')
+      .map((d) => this.buildFailure(group, d.id, reason, message));
   }
 
   private buildFailure(

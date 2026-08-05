@@ -22,12 +22,6 @@ import type {
   Rule,
   RuleId,
 } from '../types';
-
-/**
- * Index of workflow ids that recorded a dispatch failure, keyed by action group id.
- * Used to exclude failed destinations from the `dispatched` policy summary.
- */
-type FailedDestinations = ReadonlyMap<ActionGroupId, ReadonlySet<string>>;
 import {
   ACTION_POLICY_EVENT_ACTIONS,
   type ActionPolicyEventAction,
@@ -35,6 +29,9 @@ import {
 } from './constants';
 import { getUnmatchedEpisodes } from './unmatched_episodes';
 import { episodeSubject } from './utils/subject';
+
+/** Index of workflow ids that recorded a dispatch failure, keyed by action group id. */
+type FailedDestinations = ReadonlyMap<ActionGroupId, ReadonlySet<string>>;
 
 const RULE_REF_CAP = 50;
 
@@ -183,16 +180,12 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     rules: Map<RuleId, Rule> | undefined;
   }): void {
     const ruleIds = Array.from(summary.ruleIds);
-    const capped = ruleIds.slice(0, RULE_REF_CAP);
-    const spillOver = ruleIds.slice(RULE_REF_CAP);
-
-    const refs: SavedObjectRef[] = [
-      policyRef({ id: summary.policyId, spaceId: summary.spaceId }),
-      ...capped.map((id) => {
-        const rule = rules?.get(id);
-        return ruleRef({ id, spaceId: rule?.spaceId ?? summary.spaceId });
-      }),
-    ];
+    const { refs, spillOver } = buildPolicyAndRuleRefs(
+      summary.policyId,
+      summary.spaceId,
+      ruleIds,
+      rules
+    );
 
     this.eventLogService.logEvent(
       buildEvent({
@@ -252,22 +245,20 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     failure: DispatchFailure;
     rules: Map<RuleId, Rule> | undefined;
   }): void {
-    const ruleIds = Array.from(
-      new Set(
-        failure.episodes.map((episode) => episode.rule_id).filter((id): id is string => id != null)
-      )
+    const ruleIdSet = new Set<string>();
+    const episodeIdSet = new Set<string>();
+    for (const { rule_id, episode_id } of failure.episodes) {
+      if (rule_id != null) ruleIdSet.add(rule_id);
+      episodeIdSet.add(episode_id);
+    }
+    const ruleIds = Array.from(ruleIdSet);
+    const episodeIds = Array.from(episodeIdSet);
+    const { refs, spillOver } = buildPolicyAndRuleRefs(
+      failure.policyId,
+      failure.spaceId,
+      ruleIds,
+      rules
     );
-    const episodeIds = Array.from(new Set(failure.episodes.map((episode) => episode.episode_id)));
-    const capped = ruleIds.slice(0, RULE_REF_CAP);
-    const spillOver = ruleIds.slice(RULE_REF_CAP);
-
-    const refs: SavedObjectRef[] = [
-      policyRef({ id: failure.policyId, spaceId: failure.spaceId }),
-      ...capped.map((id) => {
-        const rule = rules?.get(id);
-        return ruleRef({ id, spaceId: rule?.spaceId ?? failure.spaceId });
-      }),
-    ];
 
     this.eventLogService.logEvent(
       buildEvent({
@@ -347,15 +338,27 @@ function aggregateByPolicy(
   return summaries;
 }
 
+function buildPolicyAndRuleRefs(
+  policyId: ActionPolicyId,
+  spaceId: string,
+  ruleIds: string[],
+  rules: Map<RuleId, Rule> | undefined
+): { refs: SavedObjectRef[]; spillOver: string[] } {
+  const capped = ruleIds.slice(0, RULE_REF_CAP);
+  const spillOver = ruleIds.slice(RULE_REF_CAP);
+  const refs: SavedObjectRef[] = [
+    policyRef({ id: policyId, spaceId }),
+    ...capped.map((id) => ruleRef({ id, spaceId: rules?.get(id)?.spaceId ?? spaceId })),
+  ];
+  return { refs, spillOver };
+}
+
 function indexFailedDestinations(failures: readonly DispatchFailure[]): FailedDestinations {
   const index = new Map<ActionGroupId, Set<string>>();
-  for (const failure of failures) {
-    let workflowIds = index.get(failure.actionGroupId);
-    if (!workflowIds) {
-      workflowIds = new Set();
-      index.set(failure.actionGroupId, workflowIds);
-    }
-    workflowIds.add(failure.workflowId);
+  for (const { actionGroupId, workflowId } of failures) {
+    let ids = index.get(actionGroupId);
+    if (!ids) index.set(actionGroupId, (ids = new Set()));
+    ids.add(workflowId);
   }
   return index;
 }
