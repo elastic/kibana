@@ -242,7 +242,7 @@ export function MachineLearningTestResourcesProvider(
     },
 
     async createSavedSearchFarequoteFilterIfNeeded(dataViewTitle: string = 'ft_farequote') {
-      return await this.createSavedSearchIfNeeded(savedSearches.farequoteFilter, dataViewTitle);
+      await this.createSavedSearchIfNeeded(savedSearches.farequoteFilter, dataViewTitle);
     },
 
     async createMLTestDashboardIfNeeded(): Promise<string> {

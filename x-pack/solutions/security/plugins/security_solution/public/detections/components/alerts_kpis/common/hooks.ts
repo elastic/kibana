@@ -18,7 +18,6 @@ import { getScopeFromPath } from '../../../../sourcerer/containers/sourcerer_pat
 import { getAllFieldsByName } from '../../../../common/containers/source';
 import { isLensSupportedType } from '../../../../common/utils/lens';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 
 export interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   response: string;
@@ -102,8 +101,7 @@ export const useStackByFields = (useLensCompatibleFields?: boolean) => {
   const { addError } = useAppToasts();
   const pageScope = getScopeFromPath(pathname);
 
-  const { dataView } = useDataView(pageScope);
-  const browserFields = useBrowserFields(dataView);
+  const browserFields = useBrowserFields(pageScope);
 
   return useCallback(() => {
     try {

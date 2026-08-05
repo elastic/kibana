@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import {
   type InitMonitoringEngineResponse,
   PrivilegeMonitoringEngineStatusEnum,
@@ -32,6 +31,7 @@ import { PrivilegedUserMonitoring } from '../components/privileged_user_monitori
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
+import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
 import { HeaderPage } from '../../common/components/header_page';
 import { useEntityAnalyticsRoutes } from '../api/api';
 import { usePrivilegedMonitoringEngineStatus } from '../hooks/use_privileged_monitoring_health';
@@ -106,14 +106,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const { dataView, status } = useDataView(PageScope.explore);
-
-  const { indexPattern, fields } = useMemo<{ indexPattern: string; fields: DataViewFieldMap }>(
-    () => ({
-      indexPattern: dataView?.getIndexPattern() ?? '',
-      fields: dataView?.fields?.toSpec?.() ?? {},
-    }),
-    [dataView]
-  );
+  const { dataViewSpec } = useDataViewSpec(PageScope.explore); // TODO: newDataViewPicker - this could be left, as the fieldMap spec is actually being used
 
   const indicesExist = useMemo(
     () => !!dataView?.matchedIndices?.length,
@@ -323,8 +316,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
               callout={state.onboardingCallout}
               error={state.error}
               onManageUserClicked={onManageUserClicked}
-              indexPattern={indexPattern}
-              fields={fields}
+              dataViewSpec={dataViewSpec}
             />
           </>
         )}

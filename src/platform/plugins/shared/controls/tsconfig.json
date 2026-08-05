@@ -44,8 +44,7 @@
     "@kbn/esql",
     "@kbn/presentation-publishing-schemas",
     "@kbn/controls-renderer",
-    "@kbn/field-formats-common",
-    "@kbn/ui-callout"
+    "@kbn/field-formats-common"
   ],
   "exclude": ["target/**/*"]
 }

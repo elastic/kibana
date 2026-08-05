@@ -6,7 +6,8 @@
  */
 
 import type { TimeRange } from '@kbn/es-query';
-import type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
+import type { EpisodesFilterState, EpisodesSortState } from './queries/episodes_query';
+
 export const queryKeys = {
   all: ['alert-episodes'] as const,
   actionsAll: () => [...queryKeys.all, 'actions'] as const,

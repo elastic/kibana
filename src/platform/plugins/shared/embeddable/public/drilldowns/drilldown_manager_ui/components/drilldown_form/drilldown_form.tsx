@@ -9,9 +9,8 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiCode } from '@elastic/eui';
+import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiCallOut, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { TriggerPickerProps } from '../trigger_picker';
 import { TriggerPicker } from '../trigger_picker';
 
@@ -57,15 +56,16 @@ export const DrilldownForm: FC<PropsWithChildren<FormDrilldownWizardProps>> = ({
   if (!!triggers && !triggers.items.length) {
     // Below callout is not translated, because this message is only for developers.
     return (
-      <KbnDangerCallout
+      <EuiCallOut
         announceOnMount
         title="Sorry, there was an error"
-        text={
-          <>
-            No triggers provided in <EuiCode>triggers</EuiCode> prop.
-          </>
-        }
-      />
+        color="danger"
+        iconType="warning"
+      >
+        <p>
+          No triggers provided in <EuiCode>triggers</EuiCode> prop.
+        </p>
+      </EuiCallOut>
     );
   }
 

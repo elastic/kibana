@@ -547,17 +547,17 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
           {Prepend}
         </EuiFlexItem>
         <EuiFlexItem css={overflowCss}>
+          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+          {/* @ts-ignore*/}
           <EuiComboBox
             css={resultComboBoxCss}
+            error={resultFieldState.error?.message}
             // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
             inputRef={(ref: HTMLInputElement) => {
               inputRef.current = ref;
             }}
             fullWidth
-            // local state tracks OsquerySchemaOption directly; EUI expects the wrapped option type
-            selectedOptions={
-              selectedOptions as unknown as Array<EuiComboBoxOptionOption<OsquerySchemaOption>>
-            }
+            selectedOptions={selectedOptions}
             onChange={handleKeyChange}
             onCreateOption={handleCreateOption}
             renderOption={renderOsqueryOption}
@@ -572,10 +572,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
             )}
             {...euiFieldProps}
             data-test-subj="osqueryColumnValueSelect"
-            options={
-              ((resultTypeField.value === 'field' && euiFieldProps.options) ||
-                EMPTY_ARRAY) as unknown as Array<EuiComboBoxOptionOption<OsquerySchemaOption>>
-            }
+            options={(resultTypeField.value === 'field' && euiFieldProps.options) || EMPTY_ARRAY}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

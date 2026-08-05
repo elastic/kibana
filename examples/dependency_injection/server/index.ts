@@ -12,9 +12,7 @@ import { Route } from '@kbn/core-di-server';
 import { Echo } from './echo';
 import { EchoRoute } from './route';
 
-const pluginModule = new ContainerModule(({ bind }) => {
+export const module = new ContainerModule(({ bind }) => {
   bind(Echo).toSelf().inRequestScope();
   bind(Route).toConstantValue(EchoRoute);
 });
-
-export { pluginModule as module };

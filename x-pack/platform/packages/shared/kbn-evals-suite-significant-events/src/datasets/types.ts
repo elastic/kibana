@@ -7,7 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EvaluationCriterionStructured } from '@kbn/evals';
-import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
+import type { Detection, Discovery } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../data_generators/replay';
 import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction';
 
@@ -108,7 +108,7 @@ export interface DiscoveryScenario {
      * truth: the grouping check derives its expected groups from these `signals[].metadata.rule_uuid`s,
      * and the same discoveries feed the judge scenario's input so the two stages stay consistent.
      */
-    expected_discoveries: Array<Partial<SignificantEvent>>;
+    expected_discoveries: Array<Partial<Discovery>>;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
   snapshot_source?: SnapshotSourceOverride;
@@ -118,7 +118,7 @@ export interface DiscoveryJudgeScenario {
   id?: string;
   input: {
     scenario_id: string;
-    discoveries: Array<Partial<SignificantEvent>>;
+    discoveries: Array<Partial<Discovery>>;
   };
   output: {
     criteria: SamplingCriterion[];

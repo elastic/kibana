@@ -525,13 +525,7 @@ export function AddToDatasetFlyout({
       >
         {formError ? (
           <>
-            <EuiCallOut
-              announceOnMount
-              title={ERROR_CALLOUT_TITLE}
-              color="danger"
-              iconType="error"
-              size="s"
-            >
+            <EuiCallOut title={ERROR_CALLOUT_TITLE} color="danger" iconType="error" size="s">
               <p>{formError}</p>
             </EuiCallOut>
             <EuiSpacer size="m" />

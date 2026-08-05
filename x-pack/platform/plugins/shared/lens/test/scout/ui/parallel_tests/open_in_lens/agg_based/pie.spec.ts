@@ -14,6 +14,7 @@ import {
   canConvertToLensByTitle,
   convertToLensByTitle,
   createOpenInLensSuiteSetup,
+  getChartDebugData,
 } from '../../../fixtures';
 
 function getPieChartLabels(debugState: DebugState): string[] {
@@ -76,7 +77,7 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.deployment
     expect(sizeByText).toBe('Sum of machine.ram');
   });
 
-  spaceTest('should convert terms to slice by', async ({ pageObjects }) => {
+  spaceTest('should convert terms to slice by', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
     const expectedLabels = ['ios', 'osx', 'win 7', 'win 8', 'win xp'];
 
@@ -92,8 +93,7 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.deployment
 
     await expect
       .poll(
-        async () =>
-          getPieChartLabels(await lens.getCurrentChartDebugState('partitionVisChart')).sort(),
+        async () => getPieChartLabels(await getChartDebugData(page, 'partitionVisChart')).sort(),
         { timeout: 20_000 }
       )
       .toStrictEqual([...expectedLabels].sort());

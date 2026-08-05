@@ -6,33 +6,49 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { TestProviders } from '../../common/mock';
 import { useBrowserFields } from './use_browser_fields';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '../constants';
+import { useDataView } from './use_data_view';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
-const buildDataView = () =>
-  new DataView({
-    spec: {
-      id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-      title: 'security-solution-data-view',
-      fields: {
-        '@timestamp': {
-          name: '@timestamp',
-          type: 'date',
-          esTypes: ['date'],
-          aggregatable: true,
-          searchable: true,
-          scripted: false,
-        },
-      },
-    },
-    // @ts-expect-error: DataView constructor expects more, but this is enough for our test
-    fieldFormats: { getDefaultInstance: () => ({}) },
-  });
+jest.mock('../../common/hooks/use_experimental_features');
+
+jest.mock('./use_data_view', () => ({
+  useDataView: jest.fn(),
+}));
 
 describe('useBrowserFields', () => {
-  it('should return browser fields map built from the provided dataView', () => {
-    const wrapper = renderHook(() => useBrowserFields(buildDataView()));
+  beforeAll(() => {
+    jest.mocked(useDataView).mockReturnValue({
+      dataView: new DataView({
+        spec: {
+          id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+          title: 'security-solution-data-view',
+          fields: {
+            '@timestamp': {
+              name: '@timestamp',
+              type: 'date',
+              esTypes: ['date'],
+              aggregatable: true,
+              searchable: true,
+              scripted: false,
+            },
+          },
+        },
+        // @ts-expect-error: DataView constructor expects more, but this is enough for our test
+        fieldFormats: { getDefaultInstance: () => ({}) },
+      }),
+      status: 'ready',
+    });
+  });
+
+  it('should call the useDataView hook and return browser fields map', () => {
+    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+    const wrapper = renderHook(() => useBrowserFields(PageScope.default), {
+      wrapper: TestProviders,
+    });
 
     expect(wrapper.result.current).toMatchInlineSnapshot(`
       Object {
@@ -53,11 +69,5 @@ describe('useBrowserFields', () => {
         },
       }
     `);
-  });
-
-  it('should return empty browser fields when no dataView is provided', () => {
-    const wrapper = renderHook(() => useBrowserFields(undefined as unknown as DataView));
-
-    expect(wrapper.result.current).toEqual({});
   });
 });

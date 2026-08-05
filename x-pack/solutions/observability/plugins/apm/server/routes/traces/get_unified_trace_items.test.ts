@@ -43,8 +43,6 @@ import {
   ATTRIBUTE_HTTP_SCHEME,
   ATTRIBUTE_HTTP_STATUS_CODE,
   FAAS_COLDSTART,
-  GEN_AI_USAGE_INPUT_TOKENS,
-  GEN_AI_USAGE_OUTPUT_TOKENS,
   SPAN_COMPOSITE_COUNT,
   SPAN_COMPOSITE_SUM,
   SPAN_COMPOSITE_COMPRESSION_STRATEGY,
@@ -180,8 +178,6 @@ describe('getUnifiedTraceItems', () => {
             sync: undefined,
             agentName: undefined,
             coldstart: undefined,
-            inputTokens: undefined,
-            outputTokens: undefined,
             composite: undefined,
             spanLinksCount: {
               incoming: 0,
@@ -247,8 +243,6 @@ describe('getUnifiedTraceItems', () => {
             sync: undefined,
             agentName: undefined,
             coldstart: undefined,
-            inputTokens: undefined,
-            outputTokens: undefined,
             composite: undefined,
             spanLinksCount: {
               incoming: 0,
@@ -306,8 +300,6 @@ describe('getUnifiedTraceItems', () => {
             sync: undefined,
             agentName: undefined,
             coldstart: undefined,
-            inputTokens: undefined,
-            outputTokens: undefined,
             composite: undefined,
             spanLinksCount: {
               incoming: 0,
@@ -963,56 +955,6 @@ describe('getUnifiedTraceItems', () => {
       const result = await getUnifiedTraceItems(defaultParams);
 
       expect(result.traceItems[0].coldstart).toBeUndefined();
-    });
-
-    it('should include input and output tokens when present', async () => {
-      const mockSearchResponse = {
-        hits: {
-          hits: [
-            {
-              fields: {
-                ...defaultSearchFields,
-                [SPAN_ID]: ['span-1'],
-                [SPAN_NAME]: ['chat gpt-4o-mini'],
-                [SPAN_DURATION]: [1000],
-                [GEN_AI_USAGE_INPUT_TOKENS]: [19],
-                [GEN_AI_USAGE_OUTPUT_TOKENS]: [58],
-              },
-            },
-          ],
-        },
-      };
-
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
-
-      const result = await getUnifiedTraceItems(defaultParams);
-
-      expect(result.traceItems[0].inputTokens).toBe(19);
-      expect(result.traceItems[0].outputTokens).toBe(58);
-    });
-
-    it('should return undefined token fields when not present', async () => {
-      const mockSearchResponse = {
-        hits: {
-          hits: [
-            {
-              fields: {
-                ...defaultSearchFields,
-                [SPAN_ID]: ['span-1'],
-                [SPAN_NAME]: ['Test Span'],
-                [SPAN_DURATION]: [1000],
-              },
-            },
-          ],
-        },
-      };
-
-      (mockApmEventClient.search as jest.Mock).mockResolvedValue(mockSearchResponse);
-
-      const result = await getUnifiedTraceItems(defaultParams);
-
-      expect(result.traceItems[0].inputTokens).toBeUndefined();
-      expect(result.traceItems[0].outputTokens).toBeUndefined();
     });
 
     it('should return composite when all fields are present with exact_match strategy', async () => {

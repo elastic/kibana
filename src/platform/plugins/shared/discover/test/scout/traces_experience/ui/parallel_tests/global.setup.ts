@@ -15,7 +15,6 @@ import {
   traceCorrelatedLogs,
   minimalTraceCorrelatedLogs,
   deepTrace,
-  indexUnprocessedOtelTrace,
 } from '../fixtures';
 
 globalSetupHook(
@@ -79,8 +78,5 @@ globalSetupHook(
 
     await logsEsClient.index(minimalLogData);
     log.debug('[setup:traces] Minimal trace log data indexed');
-
-    await indexUnprocessedOtelTrace(esClient, timeRange);
-    log.debug('[setup:traces] Unprocessed OTel trace data indexed to traces-test.otel-default');
   }
 );

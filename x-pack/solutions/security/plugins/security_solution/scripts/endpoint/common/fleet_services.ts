@@ -1577,10 +1577,6 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
               dataset: 'sentinel_one.threat_event',
             },
             vars: {
-              initial_interval: {
-                value: '48h',
-                type: 'text',
-              },
               interval: {
                 value: '24h',
                 type: 'text',

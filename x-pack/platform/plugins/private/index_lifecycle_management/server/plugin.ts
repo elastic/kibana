@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { IlmExplainLifecycleResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import type { Index } from '@kbn/index-management-plugin/common/types';
 import { PLUGIN } from '../common/constants';
@@ -26,11 +25,9 @@ const indexLifecycleDataEnricher = async (
     return [];
   }
 
-  const { indices: ilmIndicesData } =
-    await client.asCurrentUser.transport.request<IlmExplainLifecycleResponse>({
-      method: 'GET',
-      path: '/_all/_ilm/explain?expand_wildcards=all',
-    });
+  const { indices: ilmIndicesData } = await client.asCurrentUser.ilm.explainLifecycle({
+    index: '*,.*',
+  });
   return indicesList.map((index: Index) => {
     return {
       ...index,

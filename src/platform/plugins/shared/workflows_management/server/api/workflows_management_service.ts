@@ -104,18 +104,8 @@ import type { WorkflowsServerPluginSetupDeps, WorkflowsServerPluginStartDeps } f
 
 export interface SearchExecutionsViewParams {
   query?: estypes.QueryDslQueryContainer;
-  statuses?: ExecutionStatus[];
-  executionTypes?: ExecutionType[];
-  executedBy?: string[];
-  concurrencyGroupKey?: string;
-  startedAfter?: string;
-  startedBefore?: string;
-  finishedAfter?: string;
-  finishedBefore?: string;
-  collapse?: WorkflowExecutionCollapseField;
-  sortField?: string;
-  sortOrder?: WorkflowExecutionSortOrder;
-  page?: number;
+  sort?: estypes.SortCombinations;
+  from?: number;
   size?: number;
   trackTotalHits?: boolean;
   includeManagedExecutions?: boolean;
@@ -487,7 +477,7 @@ export class WorkflowsService {
   public async searchExecutionsView(
     params: SearchExecutionsViewParams,
     spaceId: string
-  ): Promise<WorkflowExecutionListDto> {
+  ): Promise<estypes.SearchResponse<unknown>> {
     await this.ensureInitialized();
     return this.executionQueryService.searchExecutionsView(params, spaceId);
   }

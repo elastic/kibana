@@ -132,12 +132,12 @@ export const registerAnomalySummaryRoutes = ({
           const soClient = core.savedObjects.client;
           const securitySolution = await context.securitySolution;
           const entityStoreCrudClient = securitySolution.getEntityStoreUpdateClient();
-          const entityRecord = await checkEntityExists({
+          const entityExists = await checkEntityExists({
             crudClient: entityStoreCrudClient,
             entityId,
             entityType,
           });
-          if (!entityRecord) {
+          if (!entityExists) {
             return siemResponse.error({
               statusCode: 404,
               body: `Entity "${entityId}" not found`,
@@ -165,7 +165,6 @@ export const registerAnomalySummaryRoutes = ({
           const overview = await getEntityAnomalyOverview({
             entityId,
             entityType,
-            entityRecord,
             fromMs: from,
             toMs: to,
             scoreRanges,
@@ -250,12 +249,12 @@ export const registerAnomalySummaryRoutes = ({
           const securitySolution = await context.securitySolution;
           const entityStoreCrudClient = securitySolution.getEntityStoreUpdateClient();
 
-          const entityRecord = await checkEntityExists({
+          const entityExists = await checkEntityExists({
             crudClient: entityStoreCrudClient,
             entityId,
             entityType,
           });
-          if (!entityRecord) {
+          if (!entityExists) {
             return siemResponse.error({
               statusCode: 404,
               body: `Entity "${entityId}" not found`,
@@ -279,7 +278,6 @@ export const registerAnomalySummaryRoutes = ({
           const { anomalies, total } = await getEntityAnomalies({
             entityId,
             entityType,
-            entityRecord,
             esClient,
             fromMs: from,
             toMs: to,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { InferenceClient } from '@kbn/inference-common';
@@ -19,7 +19,7 @@ import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { AttachmentClient } from '@kbn/streams-plugin/server';
 import type { SignificantEventsAlertingContext } from '../lib/significant_events/alerting/significant_events_alerting_context';
-import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
+import type { EbtTelemetryClient } from '../lib/telemetry';
 import type { KnowledgeIndicatorClient } from '../lib/knowledge_indicators';
 import type { SignificantEventsClients } from '../lib/significant_events/significant_events_clients';
 import type { ContinuousKiOnboardingWorkflowService } from '../lib/workflows/continuous_onboarding_workflow';
@@ -35,13 +35,6 @@ export type GetScopedClients = (params: {
 
 export interface RouteHandlerScopedClients extends SignificantEventsClients {
   scopedClusterClient: IScopedClusterClient;
-  /**
-   * Client for reading *stream* data, routed across the CPS-connected projects of the active
-   * space. Use it whenever the target is a stream's ES|QL view or index pattern, which may
-   * resolve to a remote project. Everything the plugin owns (its hidden data streams) lives in
-   * the origin project and must keep using `scopedClusterClient`.
-   */
-  streamDataEsClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   attachmentClient: AttachmentClient;
   getSignificantEventsAlertingContext: () => Promise<SignificantEventsAlertingContext>;
@@ -57,7 +50,7 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   tuningConfig: SignificantEventsTuningConfig;
 }
 
-export type SignificantEventsRouteHandlerResources = {
+export interface RouteDependencies {
   server: StreamsServer;
   telemetry: EbtTelemetryClient;
   getScopedClients: GetScopedClients;
@@ -67,4 +60,7 @@ export type SignificantEventsRouteHandlerResources = {
   workflowClients: WorkflowClients;
   maintenanceService: SignificantEventsMaintenanceService;
   getSpaceId: (request: KibanaRequest) => Promise<string>;
-} & DefaultRouteHandlerResources;
+}
+
+export type SignificantEventsRouteHandlerResources = RouteDependencies &
+  DefaultRouteHandlerResources;

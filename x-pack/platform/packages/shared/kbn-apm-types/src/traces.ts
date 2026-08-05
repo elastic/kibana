@@ -52,8 +52,6 @@ export interface TraceItem {
   composite?: TraceItemComposite;
   docType: TraceItemDocType;
   missingDestination?: boolean;
-  inputTokens?: number;
-  outputTokens?: number;
 }
 
 export interface TraceItemChild {

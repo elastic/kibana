@@ -13,7 +13,6 @@ PASSED=()
 FAILED=()
 SKIPPED=()
 RETRY_SPEC_FILES=()
-TOTAL_FLAKY=0
 
 # Fail early if any of the given environment variable names are unset or empty
 check_required_env_vars() {
@@ -49,14 +48,6 @@ failed_specs_artifact_path() {
 # against this script's cwd rather than the config's directory.
 json_report_path() {
   echo ".scout/test-results-${1}.json"
-}
-
-# Reads stats.flaky from a config's JSON report. Echoes 0 if the report is missing or malformed.
-flaky_count() {
-  local idx="$1" report
-  report="$(json_report_path "$idx")"
-  [[ -f "$report" ]] || { echo 0; return; }
-  jq -r '.stats.flaky // 0' "$report" 2>/dev/null || echo 0
 }
 
 # After a config fails, persist its failed spec files so the next attempt can re-run only those.
@@ -240,7 +231,7 @@ run_scout_tests() {
     "SCOUT_TARGET_LOCATION=$SCOUT_TEST_TARGET_LOCATION"
     "SCOUT_TARGET_ARCH=$SCOUT_TEST_TARGET_ARCH"
     "SCOUT_TARGET_DOMAIN=$SCOUT_TEST_TARGET_DOMAIN"
-    "NODE_OPTIONS=${NODE_OPTIONS:-} --require=@kbn/swc-register/install"
+    "NODE_OPTIONS=${NODE_OPTIONS:-} --require=@kbn/babel-register/install"
     # Pin the JSON report to a path we control (see json_report_path).
     "PLAYWRIGHT_JSON_OUTPUT_FILE=$(json_report_path "$idx")"
   )
@@ -265,14 +256,7 @@ run_scout_tests() {
     0)
       upload_report_events "$config_path"
       mark_index_passed "$idx"
-      local flaky
-      flaky="$(flaky_count "$idx")"
-      if [[ "$flaky" -gt 0 ]]; then
-        TOTAL_FLAKY=$(( TOTAL_FLAKY + flaky ))
-        PASSED+=("$config_path ($duration, ⚠️ $flaky flaky)")
-      else
-        PASSED+=("$config_path ($duration)")
-      fi
+      PASSED+=("$config_path ($duration)")
       ;;
     *)
       upload_report_events "$config_path"
@@ -319,12 +303,7 @@ upload_report_events() {
 get_config_status() {
   local config="$1" s
   for s in "${SKIPPED[@]+"${SKIPPED[@]}"}"; do [[ "$s" == "$config" ]] && echo "skipped" && return; done
-  for s in "${PASSED[@]+"${PASSED[@]}"}"; do
-    if [[ "$s" == "$config"* ]]; then
-      [[ "$s" == *"⚠️"* ]] && echo "passed (⚠️ Flaky)" || echo "passed"
-      return
-    fi
-  done
+  for s in "${PASSED[@]+"${PASSED[@]}"}"; do [[ "$s" == "$config"* ]] && echo "passed" && return; done
   for s in "${FAILED[@]+"${FAILED[@]}"}"; do [[ "$s" == "$config" ]] && echo "failed" && return; done
   echo "unknown"
 }
@@ -354,11 +333,7 @@ print_summary() {
   echo "  Server config set: $SCOUT_TEST_SERVER_CONFIG_SET"
   echo ""
   echo "Test count by status:"
-  if [[ ${#PASSED[@]} -gt 0 ]]; then
-    local passed_suffix=""
-    [[ "$TOTAL_FLAKY" -gt 0 ]] && passed_suffix=" (⚠️ $TOTAL_FLAKY Flaky)"
-    echo "✅  Passed: ${#PASSED[@]}${passed_suffix}"
-  fi
+  [[ ${#PASSED[@]}   -gt 0 ]] && echo "✅  Passed: ${#PASSED[@]}"
   [[ ${#FAILED[@]}   -gt 0 ]] && echo "❌  Failed: ${#FAILED[@]}"
   [[ ${#SKIPPED[@]}  -gt 0 ]] && echo "⏩️ Skipped: ${#SKIPPED[@]}"
   echo ""

@@ -52,12 +52,7 @@ const mockWindows: WindowSchema[] = [
   },
 ];
 
-// Pass null to omit `windows` from rule parameters entirely (simulates absent field).
-const buildAlert = (
-  actionGroup: string,
-  reason: string,
-  windows: WindowSchema[] | null = mockWindows
-): BurnRateAlert =>
+const buildAlert = (actionGroup: string, reason: string): BurnRateAlert =>
   ({
     reason,
     start: Date.now(),
@@ -65,7 +60,7 @@ const buildAlert = (
     active: true,
     fields: {
       [ALERT_ACTION_GROUP]: actionGroup,
-      [ALERT_RULE_PARAMETERS]: { sloId: 'test-slo', ...(windows !== null && { windows }) },
+      [ALERT_RULE_PARAMETERS]: { sloId: 'test-slo', windows: mockWindows },
     },
   } as unknown as BurnRateAlert);
 
@@ -113,21 +108,5 @@ describe('getActionGroupWindow', () => {
     expect(getActionGroupWindow(buildAlert(SUPPRESSED_PRIORITY_ACTION_ID, reason))).toBe(
       expectedWindow
     );
-  });
-
-  it('returns undefined when windows is an empty array', () => {
-    expect(getActionGroupWindow(buildAlert(ALERT_ACTION_ID, CRITICAL_REASON, []))).toBeUndefined();
-  });
-
-  it('returns undefined when windows is absent from rule parameters', () => {
-    expect(
-      getActionGroupWindow(buildAlert(ALERT_ACTION_ID, CRITICAL_REASON, null))
-    ).toBeUndefined();
-  });
-
-  it('returns undefined when no window matches the action group', () => {
-    expect(
-      getActionGroupWindow(buildAlert('unknown-action-group', CRITICAL_REASON))
-    ).toBeUndefined();
   });
 });

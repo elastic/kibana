@@ -859,20 +859,6 @@ groups:
           self: ga
           serverless: ga
 
-      - setting: "discover:defaultEsqlQuery"
-        id: discover-default-esql-query
-        description: |
-          The ES|QL query that **Discover** starts with when opening in ES|QL mode. When set, it takes precedence over the query **Discover** would otherwise derive from your data sources. Leave empty to use the default behavior.
-        datatype: string
-        default: ""
-        applies_to:
-          stack: ga 9.6
-          ech: ga
-          ece: ga
-          eck: ga
-          self: ga
-          serverless: ga
-
       - setting: "discover:maxDocFieldsDisplayed"
         id: discover-max-doc-fields-displayed
         description: |

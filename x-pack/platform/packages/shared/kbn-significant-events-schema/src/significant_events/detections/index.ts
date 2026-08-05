@@ -82,3 +82,17 @@ export const detectionSchema = z.object({
 });
 
 export type Detection = z.infer<typeof detectionSchema>;
+
+/**
+ * Processed marker — a minimal companion document written to the SAME data stream
+ * to record that a detection has been ingested by the discovery pipeline. Distinguished
+ * from a detection by field presence: detections carry `change_point_type`, markers carry
+ * `processed_by`. `detection_id` references the exact detection the marker covers.
+ */
+export const processedMarkerSchema = z.object({
+  '@timestamp': z.iso.datetime({ offset: true }),
+  detection_id: z.string().max(MAX_ID_LENGTH),
+  processed_by: z.string().max(MAX_ID_LENGTH),
+});
+
+export type ProcessedMarker = z.infer<typeof processedMarkerSchema>;

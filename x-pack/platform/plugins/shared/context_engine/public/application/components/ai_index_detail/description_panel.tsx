@@ -28,15 +28,9 @@ interface DescriptionPanelProps {
   isLoading: boolean;
   aiIndex: GetAiIndexResponse | undefined;
   onSaved: () => void;
-  isManaged: boolean;
 }
 
-export const DescriptionPanel = ({
-  isLoading,
-  aiIndex,
-  onSaved,
-  isManaged,
-}: DescriptionPanelProps) => {
+export const DescriptionPanel = ({ isLoading, aiIndex, onSaved }: DescriptionPanelProps) => {
   const { saveDescription, isSaving } = useSaveAiIndexDescription();
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState('');
@@ -70,9 +64,9 @@ export const DescriptionPanel = ({
             </h2>
           </EuiTitle>
         </EuiFlexItem>
-        {!isEditing && !isManaged && !isLoading && (
+        {!isEditing && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
+            <EuiButton
               size="s"
               iconType="pencil"
               onClick={startEditing}
@@ -83,7 +77,7 @@ export const DescriptionPanel = ({
                 id="xpack.contextEngine.aiIndexDetail.description.editButton"
                 defaultMessage="Edit"
               />
-            </EuiButtonEmpty>
+            </EuiButton>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -139,18 +133,12 @@ export const DescriptionPanel = ({
       ) : (
         <EuiText size="s" color={aiIndex?.description ? undefined : 'subdued'}>
           <p>
-            {aiIndex?.description ??
-              (isManaged ? (
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.description.emptyManaged"
-                  defaultMessage="No description yet."
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.description.empty"
-                  defaultMessage="No description yet. Add one to help agents understand this AI index."
-                />
-              ))}
+            {aiIndex?.description ?? (
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.description.empty"
+                defaultMessage="No sources yet — add a source and a summary will be generated automatically."
+              />
+            )}
           </p>
         </EuiText>
       )}

@@ -26,7 +26,6 @@ import { ApiEndpointId } from '../../../common/api_endpoints';
 import {
   IS_MANAGED_OTLP_SERVICE_ENABLED,
   IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED,
-  IS_VENDOR_ENDPOINTS_ENABLED,
 } from '../../../common/feature_flags';
 
 export interface ApiEndpointsRouteResponse {
@@ -41,36 +40,6 @@ export interface ApiEndpointApiKeyResponse {
 // ES-compatible bulk availability is based on managed ingest URL presence, not the legacy OTLP feature flag.
 export const hasManagedElasticsearchBulkEndpoint = (managedOtlpServiceUrl?: string): boolean =>
   Boolean(managedOtlpServiceUrl?.trim());
-
-const VENDOR_ENDPOINT_IDS: readonly ApiEndpointId[] = [
-  ApiEndpointId.Supabase,
-  ApiEndpointId.Vercel,
-];
-
-export interface VendorEndpointAvailability {
-  isManagedOtlpServiceAvailable: boolean;
-  vendorEndpointsEnabled: boolean;
-}
-
-// Vendor paths only exist on the managed OTLP collector, so a key for them is
-// useless anywhere else. The UI never offers creation in that state, this
-// guard makes the API honest anyway.
-export function ensureVendorEndpointAvailable(
-  id: ApiEndpointId,
-  { isManagedOtlpServiceAvailable, vendorEndpointsEnabled }: VendorEndpointAvailability
-): void {
-  if (!VENDOR_ENDPOINT_IDS.includes(id)) {
-    return;
-  }
-  if (!vendorEndpointsEnabled) {
-    throw Boom.badRequest(`The ${id} endpoint is not enabled on this deployment.`);
-  }
-  if (!isManagedOtlpServiceAvailable) {
-    throw Boom.badRequest(
-      `The ${id} endpoint requires the managed OTLP service, which is not available on this deployment.`
-    );
-  }
-}
 
 function hasRequiredPrivileges(
   id: ApiEndpointId,
@@ -95,9 +64,6 @@ function hasRequiredPrivileges(
       return isManagedElasticsearchBulkEndpointAvailable
         ? hasApiKeyPrivileges(esClient, { application: [APM_EVENT_WRITE_APPLICATION] })
         : hasLogMonitoringPrivileges(esClient, true);
-    case ApiEndpointId.Supabase:
-    case ApiEndpointId.Vercel:
-      return hasApiKeyPrivileges(esClient, { application: [APM_EVENT_WRITE_APPLICATION] });
   }
 }
 
@@ -138,8 +104,6 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
         [ApiEndpointId.Prometheus]: null,
         [ApiEndpointId.OpenTelemetry]: null,
         [ApiEndpointId.Elasticsearch]: null,
-        [ApiEndpointId.Supabase]: null,
-        [ApiEndpointId.Vercel]: null,
       }),
     }),
   }),
@@ -166,14 +130,8 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     const managedOtlpPrwEndpointEnabled =
       (await featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED, false)) &&
       Boolean(managedOtlpServiceUrl);
-    const vendorEndpointsEnabled = await featureFlags.getBooleanValue(
-      IS_VENDOR_ENDPOINTS_ENABLED,
-      false
-    );
     const isManagedElasticsearchBulkEndpointAvailable =
       hasManagedElasticsearchBulkEndpoint(managedOtlpServiceUrl);
-    const isVendorEndpointAvailable =
-      isManagedOtlpServiceAvailable && Boolean(managedOtlpServiceUrl);
 
     const apiKeyFactoryContext: ApiKeyFactoryContext = {
       isManagedOtlpServiceAvailable,
@@ -181,11 +139,6 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       managedOtlpPrwEndpointEnabled,
       isManagedElasticsearchBulkEndpointAvailable,
     };
-
-    ensureVendorEndpointAvailable(id, {
-      isManagedOtlpServiceAvailable: isVendorEndpointAvailable,
-      vendorEndpointsEnabled,
-    });
 
     const hasPrivileges = await hasRequiredPrivileges(
       id,

@@ -6,7 +6,7 @@
  */
 
 import { isEmpty, isPlainObject, isString, sortBy } from 'lodash';
-import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
+import type { EpisodeEventRow } from '../queries/episode_events_query';
 import { formatGroupingValueForDisplay } from './episode_grouping_data';
 
 /**

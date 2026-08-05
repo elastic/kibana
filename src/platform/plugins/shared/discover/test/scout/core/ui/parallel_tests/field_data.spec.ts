@@ -41,9 +41,10 @@ spaceTest.describe('Discover field data', { tag: '@local-stateful-classic' }, ()
 
   spaceTest('shows expected hit counts for KQL field data queries', async ({ pageObjects }) => {
     await pageObjects.discover.writeAndSubmitKqlQuery('php');
-    await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(445);
+    expect(await pageObjects.discover.getHitCountInt()).toBe(445);
+
     await pageObjects.discover.writeAndSubmitKqlQuery('type:apache');
-    await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(11_156);
+    expect(await pageObjects.discover.getHitCountInt()).toBe(11156);
   });
 
   spaceTest('highlights search terms in field data', async ({ pageObjects }) => {
@@ -104,7 +105,7 @@ spaceTest.describe('Discover field data', { tag: '@local-stateful-classic' }, ()
     'keeps default columns while adding and removing a selected field',
     async ({ pageObjects }) => {
       expect(await pageObjects.discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
-      await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(14_004);
+      expect(await pageObjects.discover.getHitCountInt()).toBe(14004);
 
       await pageObjects.unifiedFieldList.clickFieldListItemAdd('_score');
       expect(await pageObjects.discover.getDocHeader()).toContain('_score');

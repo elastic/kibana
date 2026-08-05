@@ -2028,6 +2028,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
                     type: 'json',
                     content: {
                       code: killProcessStatus.statusCode ?? killProcessStatus.status,
+                      command: actionRequest.EndpointActions.data.command,
                       process_name: actionRequest.EndpointActions.data.parameters?.process_name,
                     },
                   },

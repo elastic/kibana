@@ -34,7 +34,6 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/cps-utils'
   - '@kbn/cps'
-  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

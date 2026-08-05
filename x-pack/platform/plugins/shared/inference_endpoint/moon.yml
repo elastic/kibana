@@ -27,6 +27,7 @@ tags:
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - __mocks__/**/*
@@ -35,4 +36,6 @@ fileGroups:
     - server/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
+  jest-config:
+    - jest.config.js
 tasks: {}

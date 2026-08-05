@@ -162,7 +162,6 @@ const defaultSLO: Omit<SLODefinition, 'id' | 'revision' | 'createdAt' | 'updated
     syncDelay: new Duration(1, DurationUnit.Minute),
     frequency: new Duration(1, DurationUnit.Minute),
     preventInitialBackfill: false,
-    preventCrossProjectSearch: false,
   },
   tags: ['critical', 'k8s'],
   enabled: true,

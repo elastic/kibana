@@ -47,29 +47,27 @@ export function registerCRUDDelete(router: EntityStorePluginRouter) {
           oasOperationObject: () => path.join(__dirname, '../examples/entities_delete.yaml'),
         },
       },
-      wrapMiddlewares<never, never, z.infer<typeof bodySchema>>(
-        async (ctx, req, res): Promise<IKibanaResponse> => {
-          const entityStoreCtx = await ctx.entityStore;
-          const { logger, crudClient } = entityStoreCtx;
+      wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
+        const entityStoreCtx = await ctx.entityStore;
+        const { logger, crudClient } = entityStoreCtx;
 
-          logger.debug('CRUD Delete api called');
+        logger.debug('CRUD Delete api called');
 
-          try {
-            await crudClient.deleteEntity(req.body.entityId);
-          } catch (error) {
-            if (error instanceof EntityNotFoundError) {
-              return res.customError({
-                statusCode: 404,
-                body: error,
-              });
-            }
-
-            logger.error(error);
-            throw error;
+        try {
+          await crudClient.deleteEntity(req.body.entityId);
+        } catch (error) {
+          if (error instanceof EntityNotFoundError) {
+            return res.customError({
+              statusCode: 404,
+              body: error,
+            });
           }
 
-          return res.ok({ body: { deleted: true } });
+          logger.error(error);
+          throw error;
         }
-      )
+
+        return res.ok({ body: { deleted: true } });
+      })
     );
 }

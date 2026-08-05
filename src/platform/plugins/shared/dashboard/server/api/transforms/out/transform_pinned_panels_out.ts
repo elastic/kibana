@@ -145,10 +145,12 @@ function transformPanels(
         ) as DashboardPinnedPanel['config'];
       }
       if (schema) {
-        config = schema.parse(config) as DashboardPinnedPanel['config'];
+        config = schema.validate(config, undefined, undefined, {
+          stripUnknownKeys: true,
+        }) as DashboardPinnedPanel['config'];
       }
       transformedPanels.push({
-        ...pinnedControlSchema.parse(rest),
+        ...pinnedControlSchema.validate(rest),
         config,
         type,
       } as DashboardPinnedPanel);

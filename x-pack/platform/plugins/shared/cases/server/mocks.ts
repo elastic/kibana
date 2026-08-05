@@ -778,7 +778,6 @@ export const mockCasesContract = (): CasesServerStart => ({
   getUnifiedAttachmentTypeRegistry: jest.fn(),
   config: {
     enabled: true,
-    assigneeIdentity: { enabled: true },
     stack: {
       enabled: true,
     },

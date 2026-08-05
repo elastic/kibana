@@ -44,10 +44,7 @@ import type {
   SyntheticsMonitorStatusAlertState,
 } from '../../common/runtime_types/alert_rules/common';
 import { SyntheticsCommonStateCodec } from '../../common/runtime_types/alert_rules/common';
-import {
-  getSyntheticsErrorRouteFromMonitorId,
-  getSyntheticsCertificatesRoute,
-} from '../../common/utils/get_synthetics_monitor_url';
+import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
 import type { MonitorStatusAlertDocument, MonitorSummaryStatusRule } from './status_rule/types';
 
@@ -140,14 +137,6 @@ export const getRelativeViewInAppUrl = ({
     locationId,
   });
 };
-
-export const getRelativeCertificatesViewInAppUrl = ({
-  commonName,
-  issuer,
-}: {
-  commonName?: string;
-  issuer?: string;
-}) => getSyntheticsCertificatesRoute({ commonName, issuer });
 
 /**
  * For ungrouped alerts, the alert ID is just the configId (no location suffix),

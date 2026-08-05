@@ -146,21 +146,9 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return `${this.getId()}_${name}`;
   }
 
-  // Returns the tileLayerId that produced the currently-loaded style data. The mb sources,
-  // layers and color filter must all be derived from this value rather than the live
-  // 'getTileLayerId()' (which reflects the global dark mode flag). When the color mode changes,
-  // the flag flips synchronously while the matching light/dark style is still being fetched
-  // asynchronously; using the live value here would namespace the mb source with the new theme
-  // while it still holds the previous theme's layers, leaving the basemap stuck on the old theme
-  // until the next re-sync.
-  _getLoadedTileLayerId() {
-    const loadedTileLayerId = this.getSourceDataRequest()?.getLoadedMeta().tileLayerId;
-    return loadedTileLayerId ?? this.getSource().getTileLayerId();
-  }
-
   _generateMbSourceIdPrefix() {
     const DELIMITTER = '___';
-    return `${this.getId()}${DELIMITTER}${this._getLoadedTileLayerId()}${DELIMITTER}`;
+    return `${this.getId()}${DELIMITTER}${this.getSource().getTileLayerId()}${DELIMITTER}`;
   }
 
   _generateMbSourceId(name: string | undefined) {
@@ -407,7 +395,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     const color = this.getCurrentStyle().getColor();
 
     const colorOperation = TMSService.colorOperationDefaults.find(({ style }) => {
-      return style === this._getLoadedTileLayerId();
+      return style === this.getSource().getTileLayerId();
     });
     if (!colorOperation) return;
     const { operation, percentage } = colorOperation;

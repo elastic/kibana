@@ -6,9 +6,9 @@
  */
 
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
+import { schema } from '@kbn/config-schema';
 import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
 import { casesSchemaV9 } from '../schemas';
-import { createSchemaOverrides } from './create_schema_overrides';
 
 export const modelVersion9: SavedObjectsModelVersion = {
   changes: [
@@ -34,6 +34,32 @@ export const modelVersion9: SavedObjectsModelVersion = {
   ],
   schemas: {
     forwardCompatibility: casesSchemaV9.extends({}, { unknowns: 'ignore' }),
-    create: casesSchemaV9.extends(createSchemaOverrides, { unknowns: 'ignore' }),
+    create: casesSchemaV9.extends(
+      {
+        connector: schema.object({
+          name: schema.string(),
+          type: schema.string(),
+          fields: schema.nullable(
+            schema.arrayOf(
+              schema.object({
+                key: schema.string(),
+                value: schema.nullable(schema.any()),
+              })
+            )
+          ),
+        }),
+        // NOTE: this aligns the SO schema with persisted severity here
+        // x-pack/platform/plugins/shared/cases/server/common/types/case.ts
+        severity: schema.oneOf([
+          schema.literal(0),
+          schema.literal(10),
+          schema.literal(20),
+          schema.literal(30),
+          // NOTE: this is required for legacy reasons
+          schema.literal(40),
+        ]),
+      },
+      { unknowns: 'ignore' }
+    ),
   },
 };

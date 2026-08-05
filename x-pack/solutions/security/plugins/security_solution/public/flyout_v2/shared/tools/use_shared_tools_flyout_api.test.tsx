@@ -29,7 +29,7 @@ jest.mock('../components/flyout_provider', () => ({
   flyoutProviders: jest.fn(() => 'FLYOUT_CONTENT'),
 }));
 jest.mock('../hooks/use_default_flyout_properties', () => ({
-  useDefaultToolsFlyoutProperties: jest.fn(() => ({ minWidth: 384, size: 'm' })),
+  defaultToolsFlyoutProperties: { size: 'm' },
 }));
 
 const mockWriteOnOpen = jest.fn();

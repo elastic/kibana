@@ -9,7 +9,6 @@
 
 import { memoize } from 'lodash';
 import moment from 'moment-timezone';
-import { NULL_LABEL } from '@kbn/field-formats-common';
 import {
   analysePatternForFract,
   DateNanosFormat,
@@ -24,19 +23,17 @@ class DateNanosFormatServer extends DateNanosFormat {
     const pattern = this.param('pattern');
     const timezone = options?.timezone || this.param('timezone');
     const fractPattern = analysePatternForFract(pattern);
-    const fallbackPattern = this.param('fallbackPattern');
+    const fallbackPattern = this.param('patternFallback');
 
     const timezoneChanged = this.timeZone !== timezone;
     const datePatternChanged = this.memoizedPattern !== pattern;
-    const fallbackPatternChanged = this.memoizedFallbackPattern !== fallbackPattern;
-    if (timezoneChanged || datePatternChanged || fallbackPatternChanged) {
+    if (timezoneChanged || datePatternChanged) {
       this.timeZone = timezone;
       this.memoizedPattern = pattern;
-      this.memoizedFallbackPattern = fallbackPattern;
 
       this.memoizedConverter = memoize((value: string | number) => {
         if (value === null || value === undefined) {
-          return NULL_LABEL;
+          return '-';
         }
 
         /* On the server, importing moment returns a new instance. Unlike on

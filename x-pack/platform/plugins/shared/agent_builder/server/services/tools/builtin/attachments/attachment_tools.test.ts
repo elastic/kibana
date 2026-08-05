@@ -112,38 +112,6 @@ describe('attachment tools', () => {
       expect((result.results[0] as any).data.type).toBe('text');
     });
 
-    it('rejects unknown type at schema level when registered types are provided', () => {
-      const typedAttachmentsService = {
-        getTypeDefinition: () => ({ isReadonly: false }),
-        getRegisteredTypeIds: () => ['text', 'esql'],
-      } as any;
-
-      const tool = createAttachmentTools({
-        attachmentManager,
-        attachmentsService: typedAttachmentsService,
-        formatContext,
-      }).find((t) => t.id === attachmentTools.add)!;
-
-      expect(tool.schema.safeParse({ type: 'text', data: {} }).success).toBe(true);
-      expect(tool.schema.safeParse({ type: 'json', data: {} }).success).toBe(false);
-    });
-
-    it('excludes readonly types from the schema enum', () => {
-      const typedAttachmentsService = {
-        getTypeDefinition: (type: string) => ({ isReadonly: type === 'screen_context' }),
-        getRegisteredTypeIds: () => ['text', 'esql', 'screen_context'],
-      } as any;
-
-      const tool = createAttachmentTools({
-        attachmentManager,
-        attachmentsService: typedAttachmentsService,
-        formatContext,
-      }).find((t) => t.id === attachmentTools.add)!;
-
-      expect(tool.schema.safeParse({ type: 'text', data: {} }).success).toBe(true);
-      expect(tool.schema.safeParse({ type: 'screen_context', data: {} }).success).toBe(false);
-    });
-
     it('returns error for unknown attachment type with list of valid types', async () => {
       const typedAttachmentsService = {
         getTypeDefinition: (type: string) =>

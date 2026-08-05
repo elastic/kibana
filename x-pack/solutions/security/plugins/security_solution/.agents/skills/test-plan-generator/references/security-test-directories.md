@@ -112,7 +112,7 @@ These skills describe test file conventions, runner commands, authentication pat
 | API integration | `test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/` |
 | Scout UI | `plugins/security_solution/test/scout/entity_analytics/ui/` |
 | Scout API | `plugins/security_solution/test/scout/entity_analytics/api/` |
-| Scout API (entity_store pkg) | `plugins/entity_store/test/scout/{lifecycle,crud_and_resolution,query_translation,logs_extraction}/api/` |
+| Scout API (entity_store pkg) | `plugins/entity_store/test/scout/api/` |
 
 ### Explore (Hosts, Network, Users, Overview)
 
@@ -264,5 +264,4 @@ These skills describe test file conventions, runner commands, authentication pat
 - Unit tests are always the first coverage signal — check for `*.test.ts` files adjacent to any modified source file before assuming there is no coverage.
 - Cypress tests are the legacy E2E layer. Scout is the current standard — new E2E and API tests should use Scout.
 - FTR API integration tests under `security_solution_api_integration/` remain the primary API test layer for Security Solution until Scout coverage reaches parity.
-- The `entity_store` plugin has its own Scout API scaffold, split into 4 namespaces at
-  `plugins/entity_store/test/scout/{lifecycle,crud_and_resolution,query_translation,logs_extraction}/api/`.
+- The `entity_store` plugin has its own Scout API scaffold at `plugins/entity_store/test/scout/api/`.

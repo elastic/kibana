@@ -9,7 +9,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { useDefaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { Footer } from '../../flyout_v2/document/main/footer';
 import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
 import type { SecurityAppStore } from '../../common/store/types';
@@ -58,7 +58,6 @@ export const AlertFlyoutFooter = ({
   const [store, setStore] = useState<SecurityAppStore | null>(null);
   const isSecurityApp = useIsInSecurityApp();
   const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-  const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
 
   const openNotesFlyout = useCallback(() => {
     if (!services || !store) {
@@ -88,7 +87,7 @@ export const AlertFlyoutFooter = ({
         origin: FLYOUT_ORIGIN.FOOTER_TAKE_ACTION,
       });
     }
-  }, [defaultToolsFlyoutProperties, history, historyKey, hit, services, store]);
+  }, [history, historyKey, hit, services, store]);
 
   useEffect(() => {
     let isCanceled = false;

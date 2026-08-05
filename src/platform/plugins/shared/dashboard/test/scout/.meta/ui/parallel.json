@@ -1,5 +1,5 @@
 {
-  "sha1": "0f8943903624c4c2679d60a56c78ebdb7d530b13",
+  "sha1": "f0b1fe9796eb8ac4a7cf6e1d2dc8dabe00d016cf",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -12,6 +12,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -21,8 +27,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 15,
-        "column": 19
+        "line": 19,
+        "column": 16
       }
     },
     {
@@ -32,6 +38,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -41,8 +53,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/async_dashboard.spec.ts",
-        "line": 38,
-        "column": 20
+        "line": 52,
+        "column": 12
       }
     },
     {
@@ -61,8 +73,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_add_panel_flyout.spec.ts",
-        "line": 110,
-        "column": 16
+        "line": 96,
+        "column": 14
       }
     },
     {
@@ -72,6 +84,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -81,8 +99,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_clone.spec.ts",
-        "line": 33,
-        "column": 51
+        "line": 42,
+        "column": 12
       }
     },
     {
@@ -92,6 +110,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -101,8 +125,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_esql_no_data.spec.ts",
-        "line": 25,
-        "column": 35
+        "line": 33,
+        "column": 14
       }
     },
     {
@@ -112,6 +136,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -121,8 +151,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
-        "line": 43,
-        "column": 31
+        "line": 54,
+        "column": 12
       }
     },
     {
@@ -132,6 +162,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -141,8 +177,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
-        "line": 57,
-        "column": 14
+        "line": 73,
+        "column": 12
       }
     },
     {
@@ -152,26 +188,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
-        "line": 75,
-        "column": 25
-      }
-    },
-    {
-      "id": "06bf75f847c06fd-b8a246034ea68f7",
-      "title": "Lens by-value panels (dashboard) opening Lens directly drops dashboard link",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -182,7 +204,33 @@
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
         "line": 92,
-        "column": 13
+        "column": 12
+      }
+    },
+    {
+      "id": "06bf75f847c06fd-b8a246034ea68f7",
+      "title": "Lens by-value panels (dashboard) opening Lens directly drops dashboard link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
+        "line": 112,
+        "column": 12
       }
     },
     {
@@ -192,6 +240,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -203,8 +257,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_listing_navigation.spec.ts",
-        "line": 30,
-        "column": 15
+        "line": 35,
+        "column": 14
       }
     },
     {
@@ -214,6 +268,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -225,8 +285,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_listing_navigation.spec.ts",
-        "line": 43,
-        "column": 19
+        "line": 56,
+        "column": 14
       }
     },
     {
@@ -236,6 +296,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -245,8 +311,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_maps_by_value.spec.ts",
-        "line": 63,
-        "column": 7
+        "line": 76,
+        "column": 12
       }
     },
     {
@@ -256,26 +322,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_maps_by_value.spec.ts",
-        "line": 72,
-        "column": 21
-      }
-    },
-    {
-      "id": "9ed65ec90a7d211-50efc6a8a2fa67c",
-      "title": "Maps by-value panels (dashboard) saving to library updates the panel",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -286,16 +338,22 @@
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_maps_by_value.spec.ts",
         "line": 86,
-        "column": 13
+        "column": 12
       }
     },
     {
-      "id": "9ed65ec90a7d211-2e5eaa4cc92bc41",
-      "title": "Maps by-value panels (dashboard) saving to library without return does not update panel",
+      "id": "9ed65ec90a7d211-50efc6a8a2fa67c",
+      "title": "Maps by-value panels (dashboard) saving to library updates the panel",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -305,8 +363,34 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_maps_by_value.spec.ts",
-        "line": 98,
-        "column": 13
+        "line": 102,
+        "column": 12
+      }
+    },
+    {
+      "id": "9ed65ec90a7d211-2e5eaa4cc92bc41",
+      "title": "Maps by-value panels (dashboard) saving to library without return does not update panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_maps_by_value.spec.ts",
+        "line": 117,
+        "column": 12
       }
     },
     {
@@ -316,28 +400,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-serverless-observability_logs_essentials",
-        "@cloud-serverless-observability_logs_essentials"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_search_by_value.spec.ts",
-        "line": 48,
-        "column": 15
-      }
-    },
-    {
-      "id": "579fb4d652e44e3-fee0d5ad4c6ff35",
-      "title": "Saved search panels (dashboard) unlinking saved search makes it by value",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -350,7 +418,35 @@
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_search_by_value.spec.ts",
         "line": 58,
-        "column": 89
+        "column": 14
+      }
+    },
+    {
+      "id": "579fb4d652e44e3-fee0d5ad4c6ff35",
+      "title": "Saved search panels (dashboard) unlinking saved search makes it by value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_search_by_value.spec.ts",
+        "line": 72,
+        "column": 14
       }
     },
     {
@@ -360,6 +456,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -369,8 +471,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/empty_dashboard.spec.ts",
-        "line": 21,
-        "column": 51
+        "line": 30,
+        "column": 12
       }
     },
     {
@@ -383,8 +485,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/controls_migration_smoke.spec.ts",
-        "line": 65,
-        "column": 51
+        "line": 74,
+        "column": 12
       }
     },
     {
@@ -397,8 +499,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/lens_migration_smoke.spec.ts",
-        "line": 53,
-        "column": 33
+        "line": 62,
+        "column": 12
       }
     },
     {
@@ -411,8 +513,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/tsvb_migration_smoke_7_12_1.spec.ts",
-        "line": 51,
-        "column": 51
+        "line": 60,
+        "column": 12
       }
     },
     {
@@ -425,8 +527,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/tsvb_migration_smoke_7_13_3.spec.ts",
-        "line": 37,
-        "column": 33
+        "line": 46,
+        "column": 12
       }
     },
     {
@@ -439,8 +541,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/visualize_migration_smoke.spec.ts",
-        "line": 51,
-        "column": 33
+        "line": 60,
+        "column": 12
       }
     },
     {
@@ -450,6 +552,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -459,8 +567,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_expand_toggle.spec.ts",
-        "line": 33,
-        "column": 51
+        "line": 42,
+        "column": 12
       }
     },
     {
@@ -470,6 +578,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -479,8 +593,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_time_range.spec.ts",
-        "line": 54,
-        "column": 51
+        "line": 63,
+        "column": 12
       }
     },
     {
@@ -490,6 +604,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -499,8 +619,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_time_range.spec.ts",
-        "line": 67,
-        "column": 15
+        "line": 81,
+        "column": 12
       }
     },
     {
@@ -510,6 +630,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -519,8 +645,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_time_range.spec.ts",
-        "line": 86,
-        "column": 15
+        "line": 103,
+        "column": 12
       }
     },
     {
@@ -530,6 +656,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -539,8 +671,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_time_range.spec.ts",
-        "line": 105,
-        "column": 42
+        "line": 124,
+        "column": 12
       }
     }
   ]

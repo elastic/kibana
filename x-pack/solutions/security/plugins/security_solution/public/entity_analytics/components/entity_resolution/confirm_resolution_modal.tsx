@@ -88,12 +88,7 @@ export const ConfirmResolutionModal: React.FC<ConfirmResolutionModalProps> = ({
           })}
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiRadioGroup
-          name="resolutionTarget"
-          options={options}
-          idSelected={selectedOption}
-          onChange={setSelectedOption}
-        />
+        <EuiRadioGroup options={options} idSelected={selectedOption} onChange={setSelectedOption} />
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onCancel} disabled={isLoading}>

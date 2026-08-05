@@ -25,7 +25,7 @@ export const ToolResult: React.FC<ToolResultProps> = ({ result }) => {
   if (isQueryResult(result)) return <QueryResult result={result} />;
   if (isEsqlResultsResult(result)) return <EsqlResults result={result} />;
   if (isErrorResult(result)) return <ToolErrorResult result={result} />;
-  return <JsonCodeBlock data={result.data} lineNumbers={false} background="subdued" />;
+  return <JsonCodeBlock data={result.data} />;
 };
 
 export const isInlineRenderableResult = (result: ToolResultType): boolean => {

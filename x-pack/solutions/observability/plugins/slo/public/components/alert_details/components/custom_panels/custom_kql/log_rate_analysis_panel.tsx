@@ -75,6 +75,61 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
 
   const actionGroupWindow = getActionGroupWindow(alert);
 
+  const alertRange = {
+    from: moment(alert.start),
+    to: alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : moment(new Date()),
+  };
+
+  const initialAnalysisStart = {
+    baselineMin: alertRange.from
+      .clone()
+      .subtract(
+        2 * actionGroupWindow.longWindow.value,
+        actionGroupWindow.longWindow.unit as DurationUnit
+      )
+      .valueOf(),
+    baselineMax: alertRange.from
+      .clone()
+      .subtract(
+        1 * actionGroupWindow.longWindow.value,
+        actionGroupWindow.longWindow.unit as DurationUnit
+      )
+      .valueOf(),
+    deviationMin: alertRange.from
+      .clone()
+      .subtract(
+        1 * actionGroupWindow.longWindow.value,
+        actionGroupWindow.longWindow.unit as DurationUnit
+      )
+      .valueOf(),
+    deviationMax: alertRange.to.clone().valueOf(),
+  };
+
+  const timeRange = {
+    min: moment(initialAnalysisStart.baselineMin),
+    max: moment(initialAnalysisStart.deviationMax),
+  };
+
+  const onAnalysisCompleted = (analysisResults: LogRateAnalysisResultsData | undefined) => {
+    const significantFieldValues = orderBy(
+      analysisResults?.significantItems?.map((item) => ({
+        field: item.fieldName,
+        value: item.fieldValue,
+        docCount: item.doc_count,
+        pValue: item.pValue,
+      })),
+      ['pValue', 'docCount'],
+      ['asc', 'asc']
+    ).slice(0, 50);
+
+    const logRateAnalysisType = analysisResults?.analysisType;
+    setLogRateAnalysisParams(
+      significantFieldValues && logRateAnalysisType
+        ? { logRateAnalysisType, significantFieldValues }
+        : undefined
+    );
+  };
+
   const messages = useMemo<Message[] | undefined>(() => {
     const hasLogRateAnalysisParams =
       logRateAnalysisParams && logRateAnalysisParams.significantFieldValues?.length > 0;
@@ -131,65 +186,6 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
       instructions: content,
     });
   }, [logRateAnalysisParams, observabilityAIAssistant]);
-
-  if (!actionGroupWindow) {
-    return null;
-  }
-
-  const alertRange = {
-    from: moment(alert.start),
-    to: alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : moment(new Date()),
-  };
-
-  const initialAnalysisStart = {
-    baselineMin: alertRange.from
-      .clone()
-      .subtract(
-        2 * actionGroupWindow.longWindow.value,
-        actionGroupWindow.longWindow.unit as DurationUnit
-      )
-      .valueOf(),
-    baselineMax: alertRange.from
-      .clone()
-      .subtract(
-        1 * actionGroupWindow.longWindow.value,
-        actionGroupWindow.longWindow.unit as DurationUnit
-      )
-      .valueOf(),
-    deviationMin: alertRange.from
-      .clone()
-      .subtract(
-        1 * actionGroupWindow.longWindow.value,
-        actionGroupWindow.longWindow.unit as DurationUnit
-      )
-      .valueOf(),
-    deviationMax: alertRange.to.clone().valueOf(),
-  };
-
-  const timeRange = {
-    min: moment(initialAnalysisStart.baselineMin),
-    max: moment(initialAnalysisStart.deviationMax),
-  };
-
-  const onAnalysisCompleted = (analysisResults: LogRateAnalysisResultsData | undefined) => {
-    const significantFieldValues = orderBy(
-      analysisResults?.significantItems?.map((item) => ({
-        field: item.fieldName,
-        value: item.fieldValue,
-        docCount: item.doc_count,
-        pValue: item.pValue,
-      })),
-      ['pValue', 'docCount'],
-      ['asc', 'asc']
-    ).slice(0, 50);
-
-    const logRateAnalysisType = analysisResults?.analysisType;
-    setLogRateAnalysisParams(
-      significantFieldValues && logRateAnalysisType
-        ? { logRateAnalysisType, significantFieldValues }
-        : undefined
-    );
-  };
 
   if (!dataView || !esSearchQuery) return null;
 

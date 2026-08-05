@@ -26,7 +26,6 @@ import type {
   ReactConvertFunction,
   TextContextTypeConvert,
 } from './types';
-import { emptyValueStyles } from './field_format_styles';
 
 export abstract class FieldFormat {
   /**
@@ -233,12 +232,12 @@ export abstract class FieldFormat {
     }
   }
 
-  protected checkForMissingValueReact(val: unknown): ReactNode | undefined {
+  protected checkForMissingValueReact(val: unknown): ReactNode | void {
     if (val === '') {
-      return <span css={emptyValueStyles}>{EMPTY_LABEL}</span>;
+      return <span className="ffString__emptyValue">{EMPTY_LABEL}</span>;
     }
     if (val == null || val === MISSING_TOKEN) {
-      return <span css={emptyValueStyles}>{NULL_LABEL}</span>;
+      return <span className="ffString__emptyValue">{NULL_LABEL}</span>;
     }
   }
 }

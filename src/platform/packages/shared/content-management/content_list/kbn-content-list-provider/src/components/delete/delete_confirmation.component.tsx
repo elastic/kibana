@@ -10,6 +10,7 @@
 import React from 'react';
 import {
   EuiButton,
+  EuiCallOut,
   EuiConfirmModal,
   EuiModal,
   EuiModalBody,
@@ -22,7 +23,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
-import { KbnInfoCallout, KbnDangerCallout } from '@kbn/ui-callout';
 import type { ContentListItem } from '../../item';
 import type { BulkActionSkippedItem } from '../../bulk_actions';
 
@@ -151,9 +151,11 @@ export const DeleteConfirmationComponent = ({
     >
       {skippedCount > 0 && (
         <>
-          <KbnInfoCallout
+          <EuiCallOut
             announceOnMount
             size="s"
+            color="primary"
+            iconType="iInCircle"
             title={i18n.translate(
               'contentManagement.contentList.deleteConfirmation.skippedCalloutTitle',
               {
@@ -165,7 +167,7 @@ export const DeleteConfirmationComponent = ({
             data-test-subj={CONTENT_LIST_TEST_SUBJECTS.deleteConfirmationSkippedCallout}
           >
             <SkippedItemList skipped={skipped} compact />
-          </KbnInfoCallout>
+          </EuiCallOut>
           <EuiSpacer size="s" />
         </>
       )}
@@ -178,16 +180,18 @@ export const DeleteConfirmationComponent = ({
       {error && (
         <>
           <EuiSpacer size="s" />
-          <KbnDangerCallout
+          <EuiCallOut
             announceOnMount
             size="s"
+            color="danger"
             title={i18n.translate('contentManagement.contentList.deleteConfirmation.error', {
               defaultMessage: 'Unable to delete {entityNamePlural}',
               values: { entityNamePlural },
             })}
-            text={error}
             data-test-subj={CONTENT_LIST_TEST_SUBJECTS.deleteError}
-          />
+          >
+            <p>{error}</p>
+          </EuiCallOut>
         </>
       )}
     </EuiConfirmModal>

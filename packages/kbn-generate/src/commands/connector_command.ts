@@ -35,13 +35,21 @@ const ALL_SPECS_FILE = Path.resolve(
 
 const CODEOWNERS_FILE = Path.resolve(REPO_ROOT, '.github/CODEOWNERS');
 const DOCS_DIR = Path.resolve(REPO_ROOT, 'docs/reference/connectors-kibana');
-// `elastic-connectors-list.md` / `elastic-connectors.md` are reserved for the small, fixed set of
-// Kibana-native connectors (Cases, Index, ServerLog, Obs AI Assistant). Every connector scaffolded
-// by this generator is a third-party integration, so it belongs in the data-context-sources list/TOC
-// section instead. See the `review-connector` skill for the full placement rule.
-const SNIPPET_FILE = Path.resolve(DOCS_DIR, '_snippets/data-context-sources-connectors-list.md');
+const SNIPPET_FILE = Path.resolve(DOCS_DIR, '_snippets/elastic-connectors-list.md');
 const TOC_FILE = Path.resolve(REPO_ROOT, 'docs/reference/toc.yml');
-const TOC_SECTION_FILE = 'connectors-kibana/data-context-sources-connectors.md';
+
+const ULTIMATE_PRIORITY_RULES_COMMENT = `
+####
+## These rules are always last so they take ultimate priority over everything else
+####
+`;
+const GENERATED_END = `
+####
+## Everything below this line overrides the default assignments for each package.
+## Items lower in the file have higher precedence:
+##  https://help.github.com/articles/about-codeowners/
+####
+`;
 
 export const ConnectorCommand: GenerateCommand = {
   name: 'connector',
@@ -117,13 +125,6 @@ export const ConnectorCommand: GenerateCommand = {
       throw createFlagError(`expected --owner to be a string starting with an @ symbol`);
     }
 
-    const pkgVersion = (
-      JSON.parse(await Fsp.readFile(Path.resolve(REPO_ROOT, 'package.json'), 'utf8')) as {
-        version: string;
-      }
-    ).version;
-    const previewVersion = pkgVersion.split('.').slice(0, 2).join('.');
-
     const connectorDir = Path.resolve(CONNECTORS_ROOT, connectorName);
     const kebabName = connectorName.replace(/_/g, '-');
     const iconDir = Path.resolve(connectorDir, 'icon');
@@ -176,7 +177,6 @@ export const ConnectorCommand: GenerateCommand = {
         name: connectorName,
         displayName,
         kebabName,
-        version: previewVersion,
       },
     });
     log.info('Wrote', Path.relative(REPO_ROOT, docsFilePath));
@@ -223,56 +223,48 @@ export const ConnectorCommand: GenerateCommand = {
       }
     }
 
-    // append to CODEOWNERS: insert within the # Connector Specs section, alphabetically
+    // append to CODEOWNERS: insert within the overrides section (below GENERATED_END)
     // Each connector gets its own line to allow different team ownership
     {
-      const content = await Fsp.readFile(CODEOWNERS_FILE, 'utf8');
+      let content = await Fsp.readFile(CODEOWNERS_FILE, 'utf8');
       const line = `src/platform/packages/shared/kbn-connector-specs/src/specs/${connectorName}/** ${owner}`;
       if (content.includes(line)) {
         log.info('CODEOWNERS already has rule for', connectorName);
       } else {
-        const lines = content.split('\n');
-        let inConnectorSpecsSection = false;
+        const genEndIdx = content.indexOf(GENERATED_END);
+        const ultIdx = content.indexOf(ULTIMATE_PRIORITY_RULES_COMMENT);
+        const prefix = genEndIdx !== -1 ? content.slice(0, genEndIdx + GENERATED_END.length) : '';
+        const middle =
+          genEndIdx !== -1
+            ? content.slice(genEndIdx + GENERATED_END.length, ultIdx === -1 ? undefined : ultIdx)
+            : content.slice(0, ultIdx === -1 ? undefined : ultIdx);
+        const suffix = ultIdx === -1 ? '' : content.slice(ultIdx);
+
+        const middleLines = middle.split('\n');
         let insertAt = -1;
-        let lastSpecsIdx = -1;
-
-        for (let i = 0; i < lines.length; i++) {
-          const trimmed = lines[i].trim();
-          if (trimmed === '# Connector Specs') {
-            inConnectorSpecsSection = true;
-            continue;
-          }
-          if (!inConnectorSpecsSection) continue;
-          // Stop at the next section header
-          if (trimmed.startsWith('#') && trimmed.length > 1) break;
-
-          const m = trimmed.match(
-            /^src\/platform\/packages\/shared\/kbn-connector-specs\/src\/specs\/([^/]+)\//
-          );
-          if (m) {
-            lastSpecsIdx = i;
-            if (insertAt === -1 && m[1] > connectorName) {
-              insertAt = i;
-            }
+        for (let i = middleLines.length - 1; i >= 0; i--) {
+          const l = middleLines[i];
+          if (l && !l.trim().startsWith('#') && l.includes('kbn-connector-specs')) {
+            insertAt = i + 1;
+            break;
           }
         }
 
-        // No alphabetically later entry — append after the last specs/** line
-        if (insertAt === -1 && lastSpecsIdx !== -1) {
-          insertAt = lastSpecsIdx + 1;
-        }
-
-        if (insertAt !== -1) {
-          lines.splice(insertAt, 0, line);
-          await Fsp.writeFile(CODEOWNERS_FILE, lines.join('\n'));
-          log.info('Updated', Path.relative(REPO_ROOT, CODEOWNERS_FILE));
+        if (insertAt === -1) {
+          // no existing kbn-connector-specs rule in overrides; add to top of overrides
+          const updatedMiddle = (middle.endsWith('\n') ? middle : middle + '\n') + line + '\n';
+          content = prefix + updatedMiddle + suffix;
         } else {
-          log.warning('Could not find # Connector Specs section in CODEOWNERS');
+          middleLines.splice(insertAt, 0, line);
+          content = prefix + middleLines.join('\n') + (middle.endsWith('\n') ? '' : '\n') + suffix;
         }
+
+        await Fsp.writeFile(CODEOWNERS_FILE, content);
+        log.info('Updated', Path.relative(REPO_ROOT, CODEOWNERS_FILE));
       }
     }
 
-    // update snippet file (data-context-sources-connectors-list.md)
+    // update snippet file (elastic-connectors-list.md)
     {
       const content = await Fsp.readFile(SNIPPET_FILE, 'utf8');
       const newEntry = `* [${displayName}](/reference/connectors-kibana/${kebabName}-action-type.md): TODO: Add brief description.`;
@@ -280,79 +272,32 @@ export const ConnectorCommand: GenerateCommand = {
       if (content.includes(`${kebabName}-action-type.md`)) {
         log.info('Snippet file already references', kebabName);
       } else {
-        // The file is split into categories with a "**Category**" header line (e.g.
-        // "**Third-party search**", "**Identity management**") separated by blank lines. Insert
-        // alphabetically within the FIRST category only, and never cross into the next category's
-        // header — most scaffolded connectors are generic third-party integrations, and it's safer
-        // to land a new entry at the end of the first section than to risk it being alphabetically
-        // sorted into an unrelated category (e.g. "Threat intelligence"). Re-categorize manually if
-        // needed. Blank lines are preserved verbatim (not filtered out) so category separators and
-        // the file's exact formatting survive every generator run.
-        const hadTrailingNewline = content.endsWith('\n');
-        const rawLines = content.split('\n');
-        if (hadTrailingNewline) {
-          rawLines.pop();
-        }
-        const isCategoryHeader = (l: string) => /^\*\*.+\*\*$/.test(l.trim());
-        const isListItem = (l: string) => l.trim().startsWith('*') && !isCategoryHeader(l);
+        // Insert in alphabetical order
+        const lines = content.split('\n').filter((l) => l.trim());
         let inserted = false;
-        let pastFirstCategory = false;
-        let sawFirstCategoryItem = false;
-        const newLines: string[] = [];
-        // Blank lines between the first category's last item and the next category's header must
-        // stay attached to that header (as its separator), not get displaced by an entry inserted
-        // after them. Hold them back until we know what follows.
-        let pendingBlankLines: string[] = [];
+        const newLines = [];
 
-        for (const line of rawLines) {
-          const isBlank = line.trim() === '';
-
-          if (!inserted && isCategoryHeader(line) && sawFirstCategoryItem) {
-            // Reached the end of the first category without finding an alphabetical spot: the new
-            // entry belongs right after the last item, before the blank separator.
-            newLines.push(newEntry, ...pendingBlankLines, line);
-            pendingBlankLines = [];
-            inserted = true;
-            pastFirstCategory = true;
-            continue;
-          }
-
-          if (!inserted && !pastFirstCategory && isListItem(line)) {
-            newLines.push(...pendingBlankLines);
-            pendingBlankLines = [];
+        for (const line of lines) {
+          if (!inserted && line.startsWith('*')) {
             const match = line.match(/\[([^\]]+)\]/);
             if (match && match[1] > displayName) {
-              newLines.push(newEntry, line);
+              newLines.push(newEntry);
               inserted = true;
-            } else {
-              if (match) {
-                sawFirstCategoryItem = true;
-              }
-              newLines.push(line);
             }
-            continue;
           }
-
-          if (!inserted && !pastFirstCategory && isBlank) {
-            pendingBlankLines.push(line);
-            continue;
-          }
-
-          newLines.push(...pendingBlankLines, line);
-          pendingBlankLines = [];
+          newLines.push(line);
         }
 
         if (!inserted) {
           newLines.push(newEntry);
         }
-        newLines.push(...pendingBlankLines);
 
-        await Fsp.writeFile(SNIPPET_FILE, newLines.join('\n') + (hadTrailingNewline ? '\n' : ''));
+        await Fsp.writeFile(SNIPPET_FILE, newLines.join('\n') + '\n');
         log.info('Updated', Path.relative(REPO_ROOT, SNIPPET_FILE));
       }
     }
 
-    // update toc.yml (add to the data-context-sources-connectors section)
+    // update toc.yml (add to elastic-connectors section)
     {
       const content = await Fsp.readFile(TOC_FILE, 'utf8');
       const docEntry = `connectors-kibana/${kebabName}-action-type.md`;
@@ -363,9 +308,9 @@ export const ConnectorCommand: GenerateCommand = {
         const lines = content.split('\n');
         let insertAt = -1;
 
-        // Find the data-context-sources-connectors section and its children
+        // Find the elastic-connectors section and its children
         for (let i = 0; i < lines.length; i++) {
-          if (lines[i].includes(`file: ${TOC_SECTION_FILE}`)) {
+          if (lines[i].includes('file: connectors-kibana/elastic-connectors.md')) {
             // Found the section, look for the children block
             let childIndent = '';
             for (let j = i + 1; j < lines.length; j++) {

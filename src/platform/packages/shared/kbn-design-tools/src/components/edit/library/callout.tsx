@@ -8,34 +8,32 @@
  */
 
 import React from 'react';
-import {
-  KbnInfoCallout,
-  KbnSuccessCallout,
-  KbnWarningCallout,
-  KbnDangerCallout,
-} from '@kbn/ui-callout';
+import { EuiCallOut } from '@elastic/eui';
 
 export const CalloutInfo = () => (
-  <KbnInfoCallout title="Information" text="Here is some important information for you." />
+  <EuiCallOut title="Information" iconType="iInCircle">
+    <p>Here is some important information for you.</p>
+  </EuiCallOut>
 );
 
 export const CalloutSuccess = () => (
-  <KbnSuccessCallout title="Success!" text="The operation completed successfully." />
+  <EuiCallOut title="Success!" color="success" iconType="check">
+    <p>The operation completed successfully.</p>
+  </EuiCallOut>
 );
 
 export const CalloutWarning = () => (
-  <KbnWarningCallout
-    title="Proceed with caution"
-    text="This action may have unintended consequences."
-  />
+  <EuiCallOut title="Proceed with caution" color="warning" iconType="warning">
+    <p>This action may have unintended consequences.</p>
+  </EuiCallOut>
 );
 
 export const CalloutDanger = () => (
-  <KbnDangerCallout title="Error" text="Something went wrong. Please try again." />
+  <EuiCallOut title="Error" color="danger" iconType="error">
+    <p>Something went wrong. Please try again.</p>
+  </EuiCallOut>
 );
 
-export const CalloutSmall = () => (
-  <KbnInfoCallout title="Small callout for inline messages" size="s" />
-);
+export const CalloutSmall = () => <EuiCallOut title="Small callout for inline messages" size="s" />;
 
-export const CalloutTitleOnly = () => <KbnInfoCallout title="Callouts can exist as just a title" />;
+export const CalloutTitleOnly = () => <EuiCallOut title="Callouts can exist as just a title" />;

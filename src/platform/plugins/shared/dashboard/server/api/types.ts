@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod';
+import type { TypeOf } from '@kbn/config-schema';
+import type { Writable } from '@kbn/utility-types';
 import type { getControlsGroupSchema as getPinnedPanelsSchema } from '@kbn/controls-schemas';
 import type {
   getDashboardStateSchema,
@@ -18,18 +19,18 @@ import type {
 } from './dashboard_state_schemas';
 import type { warningsSchema } from './warnings_schema';
 
-export type Warnings = z.output<typeof warningsSchema>;
+export type Warnings = TypeOf<typeof warningsSchema>;
 
 /** Display options for a dashboard. */
-export type DashboardOptions = z.output<typeof optionsSchema>;
+export type DashboardOptions = TypeOf<typeof optionsSchema>;
 /** Grid position and size data for a panel. */
-export type GridData = z.output<typeof panelGridSchema>;
+export type GridData = TypeOf<typeof panelGridSchema>;
 /** A panel in a dashboard containing an embeddable visualization. */
-export type DashboardPanel = z.output<ReturnType<typeof getPanelSchema>>;
+export type DashboardPanel = TypeOf<ReturnType<typeof getPanelSchema>>;
 /** A section in a dashboard that groups panels. */
-export type DashboardSection = z.output<ReturnType<typeof getSectionSchema>>;
+export type DashboardSection = TypeOf<ReturnType<typeof getSectionSchema>>;
 /** The complete state of a dashboard including panels, filters, and settings. */
-export type DashboardState = z.output<ReturnType<typeof getDashboardStateSchema>>;
-export type DashboardPinnedPanelsState = z.output<ReturnType<typeof getPinnedPanelsSchema>>;
+export type DashboardState = Writable<TypeOf<ReturnType<typeof getDashboardStateSchema>>>;
+export type DashboardPinnedPanelsState = TypeOf<ReturnType<typeof getPinnedPanelsSchema>>;
 export type DashboardPinnedPanel = DashboardPinnedPanelsState[number];
 export type Operation = 'create' | 'read' | 'update' | 'search';

@@ -17,10 +17,9 @@ import type {
   EuiTableActionsColumnType,
   CriteriaWithPagination,
 } from '@elastic/eui';
-import { EuiButton, EuiEmptyPrompt, EuiSpacer, Query, Ast } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer, Query, Ast } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -1009,14 +1008,17 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const renderFetchError = useCallback(() => {
     return (
       <React.Fragment>
-        <KbnDangerCallout
+        <EuiCallOut
           title={
             <FormattedMessage
               id="contentManagement.tableList.listing.fetchErrorTitle"
               defaultMessage="Fetching listing failed"
             />
           }
-          text={
+          color="danger"
+          iconType="warning"
+        >
+          <p>
             <FormattedMessage
               id="contentManagement.tableList.listing.fetchErrorDescription"
               defaultMessage="The {entityName} listing could not be fetched: {message}."
@@ -1025,8 +1027,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
                 message: fetchError!.body?.message || fetchError!.message,
               }}
             />
-          }
-        />
+          </p>
+        </EuiCallOut>
         <EuiSpacer size="m" />
       </React.Fragment>
     );

@@ -17,7 +17,6 @@ import { getAggsTypeFromRule } from '../../components/alerting/ui_components/ale
 import { getTimeZone } from '../../components/shared/charts/helper/timezone';
 import { ApmDocumentType } from '../../../common/document_type';
 import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 export function useAlertingProps({
   rule,
@@ -56,7 +55,6 @@ export function useAlertingProps({
   });
   const { agentName } = useServiceAgentFetcher({
     serviceName,
-    environment: ENVIRONMENT_ALL.value,
     start,
     end,
   });

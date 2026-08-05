@@ -10,13 +10,13 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiCallOut,
   EuiConfirmModal,
   EuiFieldText,
   EuiFormRow,
   EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 
 const geti18nTexts = (fieldsToDelete?: string[]) => {
   let modalTitle = '';
@@ -110,7 +110,12 @@ export function DeleteFieldModal({ fieldsToDelete, closeModal, confirmDelete }: 
       confirmButtonText={confirmButtonText}
       confirmButtonDisabled={confirmContent?.toUpperCase() !== 'REMOVE'}
     >
-      <KbnWarningCallout title={i18nTexts.warningRemovingFields} size="s">
+      <EuiCallOut
+        color="warning"
+        title={i18nTexts.warningRemovingFields}
+        iconType="warning"
+        size="s"
+      >
         {isMultiple && (
           <>
             <p>{warningMultipleFields}</p>
@@ -121,7 +126,7 @@ export function DeleteFieldModal({ fieldsToDelete, closeModal, confirmDelete }: 
             </ul>
           </>
         )}
-      </KbnWarningCallout>
+      </EuiCallOut>
       <EuiSpacer />
       <EuiFormRow label={i18nTexts.typeConfirm}>
         <EuiFieldText

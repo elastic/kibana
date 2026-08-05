@@ -25,7 +25,6 @@ dependsOn:
   - '@kbn/content-management-table-list-view-common'
   - '@kbn/content-management-tags'
   - '@kbn/content-list-page'
-  - '@kbn/ui-callout'
 tags:
   - shared-browser
   - package

@@ -85,21 +85,27 @@ test.describe(
 
     // === Embedded Console Tests ===
     test('should have embedded dev console that can be toggled', async ({ pageObjects }) => {
-      await expect(pageObjects.embeddedConsole.section).toBeVisible();
+      await pageObjects.homepage.expectEmbeddedConsoleControlBarExists();
 
       // Console body should be hidden initially
-      await expect(pageObjects.embeddedConsole.body).toBeHidden();
+      const consoleBodyInitial = await pageObjects.homepage.getEmbeddedConsoleBody();
+      await expect(consoleBodyInitial).toBeHidden();
 
       // Click to open console
-      await pageObjects.embeddedConsole.toggle();
+      await pageObjects.homepage.clickEmbeddedConsoleControlBar();
 
       // Verify console is open and fullscreen toggle is visible
-      await expect(pageObjects.embeddedConsole.fullscreenToggle).toBeVisible();
-      await expect(pageObjects.embeddedConsole.body).toBeVisible();
+      const fullscreenToggle = await pageObjects.homepage.getFullscreenToggleButton();
+      await expect(fullscreenToggle).toBeVisible();
+
+      const consoleBodyOpen = await pageObjects.homepage.getEmbeddedConsoleBody();
+      await expect(consoleBodyOpen).toBeVisible();
 
       // Click to close console
-      await pageObjects.embeddedConsole.toggle();
-      await expect(pageObjects.embeddedConsole.body).toBeHidden();
+      await pageObjects.homepage.clickEmbeddedConsoleControlBar();
+
+      const consoleBodyClosed = await pageObjects.homepage.getEmbeddedConsoleBody();
+      await expect(consoleBodyClosed).toBeHidden();
     });
 
     // === Endpoint Copy Functionality Tests ===

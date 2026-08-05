@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MAX_ID_LENGTH, type QueryOccurrencesResponse } from '@kbn/significant-events-schema';
+import type { QueryOccurrencesResponse } from '@kbn/significant-events-schema';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/significant_events/helpers/fill_bucket_gaps';
@@ -41,16 +41,6 @@ const readQueryOccurrencesRoute = createServerRoute({
         ])
         .optional()
         .describe('Stream names to filter results by'),
-      rule_uuid: z
-        .union([
-          z
-            .string()
-            .max(MAX_ID_LENGTH)
-            .transform((value) => [value]),
-          z.array(z.string().max(MAX_ID_LENGTH)),
-        ])
-        .optional()
-        .describe('Alerting rule UUIDs to include in the occurrence response'),
       searchMode: searchModeSchema,
     }),
   }),
@@ -80,15 +70,7 @@ const readQueryOccurrencesRoute = createServerRoute({
       client: scopedClusterClient.asCurrentUser,
       logger,
     });
-    const {
-      from,
-      to,
-      bucketSize,
-      query,
-      streamNames,
-      rule_uuid: ruleUuids,
-      searchMode,
-    } = params.query;
+    const { from, to, bucketSize, query, streamNames, searchMode } = params.query;
     assertValidDateRange(from, to);
 
     const resolvedStreamNames = await resolveStreamNames(streamNames, () =>
@@ -106,7 +88,6 @@ const readQueryOccurrencesRoute = createServerRoute({
         bucketSize,
         query,
         streamNames: resolvedStreamNames,
-        ruleUuids,
         searchMode,
         alertsReader,
         spaceId: await getSpaceId(request),

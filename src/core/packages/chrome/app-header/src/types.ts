@@ -14,8 +14,6 @@ import type {
   AppHeaderConfig as CoreAppHeaderConfig,
   AppHeaderDescription as CoreAppHeaderDescription,
   AppHeaderEditableTitle as CoreAppHeaderEditableTitle,
-  AppHeaderFavoriteAction as CoreAppHeaderFavoriteAction,
-  AppHeaderFavoriteStatus as CoreAppHeaderFavoriteStatus,
   AppHeaderMetadataButtonItem as CoreAppHeaderMetadataButtonItem,
   AppHeaderMetadataHealthItem as CoreAppHeaderMetadataHealthItem,
   AppHeaderMetadataItem as CoreAppHeaderMetadataItem,
@@ -38,8 +36,6 @@ export type AppHeaderBadgeItem = CoreAppHeaderBadgeItem;
 export type AppHeaderConfig = CoreAppHeaderConfig;
 export type AppHeaderDescription = CoreAppHeaderDescription;
 export type AppHeaderEditableTitle = CoreAppHeaderEditableTitle;
-export type AppHeaderFavoriteAction = CoreAppHeaderFavoriteAction;
-export type AppHeaderFavoriteStatus = CoreAppHeaderFavoriteStatus;
 export type AppHeaderMetadataButtonItem = CoreAppHeaderMetadataButtonItem;
 export type AppHeaderMetadataHealthItem = CoreAppHeaderMetadataHealthItem;
 export type AppHeaderMetadataItem = CoreAppHeaderMetadataItem;

@@ -12,11 +12,7 @@ import type {
   OverviewStatusMetaData,
 } from '../../../../../common/runtime_types';
 import { overviewStatusReducer } from '.';
-import {
-  clearOverviewStatusErrorAction,
-  fetchOverviewStatusAction,
-  fetchStaleStatusAction,
-} from './actions';
+import { fetchOverviewStatusAction, fetchStaleStatusAction } from './actions';
 
 const makeMeta = (
   overrides: Partial<OverviewStatusMetaData> & { configId: string }
@@ -76,42 +72,6 @@ const freshPriorRun = (
 });
 
 describe('overviewStatusReducer', () => {
-  describe('settled flag (drives the Getting Started redirect)', () => {
-    it('is false before any request completes', () => {
-      const state = overviewStatusReducer(undefined, { type: '@@INIT' } as any);
-      expect(state.settled).toBe(false);
-    });
-
-    it('is set on a successful load', () => {
-      const state = overviewStatusReducer(
-        undefined,
-        fetchOverviewStatusAction.success(makeStatus())
-      );
-      expect(state.settled).toBe(true);
-    });
-
-    it('is set on a failed load (even though `loaded` stays false)', () => {
-      const state = overviewStatusReducer(
-        undefined,
-        fetchOverviewStatusAction.fail(new Error('overview status request failed') as any)
-      );
-      expect(state.settled).toBe(true);
-      expect(state.loaded).toBe(false);
-    });
-
-    it('stays true after the transient error is cleared', () => {
-      const failed = overviewStatusReducer(
-        undefined,
-        fetchOverviewStatusAction.fail(new Error('boom') as any)
-      );
-      const cleared = overviewStatusReducer(failed, clearOverviewStatusErrorAction());
-      // The OverviewStatus toast effect clears `error`, but `settled` must persist
-      // so the empty-state redirect still fires.
-      expect(cleared.error).toBeNull();
-      expect(cleared.settled).toBe(true);
-    });
-  });
-
   describe('fetchStaleStatusAction.success (pending -> stale promotion)', () => {
     const loadedState = () =>
       overviewStatusReducer(

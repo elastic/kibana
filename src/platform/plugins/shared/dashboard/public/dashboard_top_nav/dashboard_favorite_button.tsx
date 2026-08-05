@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, type ReactNode } from 'react';
+import React, { useMemo } from 'react';
 import {
   FavoriteButton,
   FavoritesClient,
@@ -19,35 +19,20 @@ import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 
-/**
- * Provides favorites client + query context for dashboard favorite UI.
- * Required around any component that calls `useFavorite`.
- */
-export const DashboardFavoritesProvider = ({ children }: { children: ReactNode }) => {
-  const dashboardFavoritesClient = useMemo(
-    () =>
-      new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_SAVED_OBJECT_TYPE, {
-        http: coreServices.http,
-        userProfile: coreServices.userProfile,
-        usageCollection: usageCollectionService,
-      }),
-    []
-  );
+export const DashboardFavoriteButton = ({ dashboardId }: { dashboardId?: string }) => {
+  const dashboardFavoritesClient = useMemo(() => {
+    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_SAVED_OBJECT_TYPE, {
+      http: coreServices.http,
+      userProfile: coreServices.userProfile,
+      usageCollection: usageCollectionService,
+    });
+  }, []);
 
   return (
     <QueryClientProvider client={dashboardQueryClient}>
       <FavoritesContextProvider favoritesClient={dashboardFavoritesClient}>
-        {children}
+        {dashboardId && <FavoriteButton id={dashboardId} />}
       </FavoritesContextProvider>
     </QueryClientProvider>
-  );
-};
-
-/** Legacy chrome breadcrumbs append: self-contained favorite button with its own providers. */
-export const DashboardFavoriteButton = ({ dashboardId }: { dashboardId?: string }) => {
-  return (
-    <DashboardFavoritesProvider>
-      {dashboardId ? <FavoriteButton id={dashboardId} /> : null}
-    </DashboardFavoritesProvider>
   );
 };

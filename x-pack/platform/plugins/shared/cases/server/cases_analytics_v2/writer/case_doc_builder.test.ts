@@ -27,10 +27,7 @@ const fullCaseSO = (
       description: 'A description',
       tags: ['tag1', 'tag2'],
       category: 'malware',
-      assignees: [
-        { uid: 'u-1', username: 'u1', full_name: 'User One', email: 'u1@e.com' },
-        { uid: 'u-2' },
-      ],
+      assignees: [{ uid: 'u-1' }, { uid: 'u-2' }],
       severity: CasePersistedSeverity.HIGH,
       status: CasePersistedStatus.IN_PROGRESS,
       created_at: '2026-05-01T00:00:00.000Z',
@@ -84,14 +81,6 @@ describe('buildCaseDoc', () => {
     const so = fullCaseSO();
     const doc = buildCaseDoc({ ...so, namespaces: ['security-1'] });
     expect(doc.space_id).toBe('security-1');
-  });
-
-  it('passes assignee identity fields through to the analytics doc', () => {
-    const doc = buildCaseDoc(fullCaseSO());
-    expect(doc.case.assignees).toEqual([
-      { uid: 'u-1', username: 'u1', full_name: 'User One', email: 'u1@e.com' },
-      { uid: 'u-2' },
-    ]);
   });
 
   it('emits owner at the document root (DLS field) and mirrors it under case.*', () => {

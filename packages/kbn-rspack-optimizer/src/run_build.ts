@@ -22,7 +22,6 @@ export const IGNORED_WATCH_PATTERNS: RegExp[] = [
   /[\\/]node_modules[\\/]/,
   /[\\/]target[\\/]/,
   /\.tsbuildinfo$/,
-  /(^|[\\/])tsconfig[^\\/]*\.type_check\.json$/,
   /\.test\.[jt]sx?$/,
   /\.spec\.[jt]sx?$/,
   /\.stories\.[jt]sx?$/,

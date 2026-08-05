@@ -95,8 +95,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
 
   const { dataView, status: dataViewStatus } = useDataView(PageScope.timeline);
-  const browserFields = useBrowserFields(dataView);
-  const selectedPatterns = useSelectedPatterns(dataView);
+  const browserFields = useBrowserFields(PageScope.timeline);
+  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
   const dataViewLoading = useMemo(() => dataViewStatus !== 'ready', [dataViewStatus]);
   const dataViewId = useMemo(() => dataView.id ?? '', [dataView.id]);
 
@@ -454,8 +454,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-type StateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
-const connector = connect<StateProps, {}, TimelineTabCommonProps, State>(makeMapStateToProps);
+const connector = connect(makeMapStateToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

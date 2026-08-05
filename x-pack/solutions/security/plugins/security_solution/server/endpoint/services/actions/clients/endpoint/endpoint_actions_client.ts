@@ -136,23 +136,11 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   ): Promise<ResponseActionsClientValidateRequestResponse> {
     // Memory Dump: ensure that agents/Endpoint support this command
     if (actionRequest.command === 'memory-dump') {
-      const memDumpType = actionRequest.parameters.type;
-
-      // Memory Dump `raw` type is gated behind a feature flag
-      if (
-        memDumpType === 'raw' &&
-        !this.options.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw
-      ) {
-        return {
-          isValid: false,
-          error: new ResponseActionsClientError('memory-dump `raw` type is not enabled', 400),
-        };
-      }
-
       const endpointMetadata = await this.options.endpointService
         .getEndpointMetadataService(this.options.spaceId)
         .findHostMetadataForFleetAgents(actionRequest.endpoint_ids);
 
+      const memDumpType = actionRequest.parameters.type;
       const unsupportedAgents: string[] = [];
 
       for (const endpointMeta of endpointMetadata) {
@@ -160,8 +148,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
           (memDumpType === 'kernel' &&
             !endpointMeta.Endpoint.capabilities?.includes('memdump_kernel')) ||
           (memDumpType === 'process' &&
-            !endpointMeta.Endpoint.capabilities?.includes('memdump_process')) ||
-          (memDumpType === 'raw' && !endpointMeta.Endpoint.capabilities?.includes('memdump_raw'))
+            !endpointMeta.Endpoint.capabilities?.includes('memdump_process'))
         ) {
           unsupportedAgents.push(
             `${endpointMeta.agent.id} (agent v.${endpointMeta.agent.version})`

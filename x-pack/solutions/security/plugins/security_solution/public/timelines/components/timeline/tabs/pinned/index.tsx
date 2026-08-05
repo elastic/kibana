@@ -86,8 +86,8 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openNotes } = useFlyoutApi();
 
+  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
   const { dataView } = useDataView(PageScope.timeline);
-  const selectedPatterns = useSelectedPatterns(dataView);
   const dataViewId = useMemo(() => dataView.id ?? '', [dataView.id]);
   const runtimeMappings = useMemo(
     () => dataView.getRuntimeMappings() as RunTimeMappings,
@@ -289,8 +289,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-type StateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
-const connector = connect<StateProps, {}, TimelineTabCommonProps, State>(makeMapStateToProps);
+const connector = connect(makeMapStateToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

@@ -29,7 +29,6 @@ export const mcpToolRegistryEntry: ToolTypeRegistryEntry<McpToolFormData> = {
     type: ToolType.mcp,
     connectorId: '',
     mcpToolName: '',
-    confirmation_ask_user: 'never',
   },
   toolToFormData: (tool: ToolDefinitionWithSchema) => {
     if (!isMcpTool(tool)) {

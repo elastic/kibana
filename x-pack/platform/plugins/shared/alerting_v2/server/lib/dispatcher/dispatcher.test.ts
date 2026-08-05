@@ -10,8 +10,10 @@ import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mock
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import moment from 'moment';
-import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import type { AlertAction } from '../../resources/datastreams/alert_actions';
+import {
+  ALERT_ACTIONS_DATA_STREAM,
+  type AlertAction,
+} from '../../resources/datastreams/alert_actions';
 import type {
   ActionPolicySavedObjectAttributes,
   RuleSavedObjectAttributes,

@@ -14,26 +14,17 @@ import { createMockWorkflowApi, createMockWorkflowsCapabilities } from '@kbn/wor
 import { WorkflowExecutionList } from './workflow_execution_list_stateful';
 import { useKibana } from '../../../hooks/use_kibana';
 import { createUseKibanaMockValue } from '../../../mocks';
-import { TestProvider } from '../../../shared/mocks/test_providers';
+import { TestWrapper } from '../../../shared/test_utils';
 
 const mockSetSelectedExecution = jest.fn();
 const mockRefetch = jest.fn().mockResolvedValue(undefined);
 
 const mockWorkflowApi = createMockWorkflowApi();
 const mockUseWorkflowsCapabilities = jest.fn(() => createMockWorkflowsCapabilities());
-const mockUseUiSetting = jest.fn();
 
 jest.mock('../../../hooks/use_kibana');
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useUiSetting: (settingId: string, defaultValue?: boolean) =>
-    mockUseUiSetting(settingId, defaultValue),
-}));
-
 jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  getIndexSelectionHandler: jest.fn(() => jest.fn()),
   useWorkflowsApi: () => mockWorkflowApi,
   useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
 }));
@@ -49,6 +40,10 @@ jest.mock('../../../hooks/use_workflow_url_state', () => ({
     selectedExecutionId: null,
     setSelectedExecution: mockSetSelectedExecution,
   }),
+}));
+
+jest.mock('../../../hooks/use_workflows_experimental_ui_setting', () => ({
+  useWorkflowsExperimentalUiSetting: jest.fn().mockReturnValue(false),
 }));
 
 const mockWorkflowExecutions: WorkflowExecutionListDto = {
@@ -101,7 +96,6 @@ describe('WorkflowExecutionList (stateful)', () => {
     jest.clearAllMocks();
     mockUseWorkflowsCapabilities.mockReturnValue(createMockWorkflowsCapabilities());
     mockWorkflowApi.cancelAllWorkflowExecutions.mockResolvedValue(undefined);
-    mockUseUiSetting.mockReturnValue(true);
     (useKibana as jest.Mock).mockReturnValue(createUseKibanaMockValue());
 
     mockUseWorkflowExecutions.mockReturnValue({
@@ -116,9 +110,9 @@ describe('WorkflowExecutionList (stateful)', () => {
 
   const renderComponent = (workflowId: string | null = 'wf-1') => {
     return render(
-      <TestProvider>
+      <TestWrapper>
         <WorkflowExecutionList workflowId={workflowId} />
-      </TestProvider>
+      </TestWrapper>
     );
   };
 

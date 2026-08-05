@@ -23,7 +23,7 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
       validate: {
         body: schema.object({
           query: schema.object({}, { unknowns: 'allow' }),
-          index: schema.string({ maxLength: 1000 }),
+          index: schema.string(),
         }),
       },
     },

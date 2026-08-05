@@ -69,6 +69,13 @@ export class DetectionClient {
     }
   ) {}
 
+  async bulkCreate(detections: Detection[]) {
+    return this.clients.dataStreamClient.create({
+      space: this.clients.space,
+      documents: detections,
+    });
+  }
+
   // Detection reads group the latest revision per rule (rule_uuid), not per detection id —
   // detection_id is now unique-per-detection, so grouping by it would never collapse.
   private buildWhere(options: DetectionsSearchOptions): ESQLAstExpression {

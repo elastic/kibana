@@ -13,7 +13,7 @@ import { Watch } from '../../../models/watch';
 import type { RouteDependencies } from '../../../types';
 
 const paramsSchema = schema.object({
-  id: schema.string({ maxLength: 1000 }),
+  id: schema.string(),
 });
 
 function fetchWatch(dataClient: IScopedClusterClient, watchId: string) {
