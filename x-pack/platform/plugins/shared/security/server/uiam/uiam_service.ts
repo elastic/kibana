@@ -993,7 +993,10 @@ export class UiamService implements UiamServicePublic {
       this.#logger.debug(`Successfully deleted OAuth connection: ${connectionId}`);
     } catch (err) {
       this.#logger.error(
-        () => `Failed to delete OAuth connection ${connectionId}: ${getDetailedErrorMessage(err)}`
+        () =>
+          `Failed to delete OAuth connection ${connectionId} for client ${clientId}: ${getDetailedErrorMessage(
+            err
+          )}`
       );
       throw err;
     }

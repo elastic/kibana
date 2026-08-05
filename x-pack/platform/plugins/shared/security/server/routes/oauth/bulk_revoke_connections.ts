@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isEqual, uniqWith } from 'lodash';
+
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '..';
@@ -78,8 +80,10 @@ export function defineBulkRevokeOAuthConnectionsRoute({
 
         const { connections, reason } = request.body;
 
+        const targets = uniqWith(connections, isEqual);
+
         const settled = await Promise.allSettled(
-          connections.map(({ client_id: clientId, connection_id: connectionId }) =>
+          targets.map(({ client_id: clientId, connection_id: connectionId }) =>
             oauth.revokeConnection(request, clientId, connectionId, reason)
           )
         );
@@ -97,7 +101,7 @@ export function defineBulkRevokeOAuthConnectionsRoute({
 
         const results: BulkRevokeOAuthConnectionResultItem[] = settled.map(
           (settledResult, index) => {
-            const { client_id: clientId, connection_id: connectionId } = connections[index];
+            const { client_id: clientId, connection_id: connectionId } = targets[index];
 
             if (settledResult.status === 'fulfilled') {
               if (settledResult.value === null) {

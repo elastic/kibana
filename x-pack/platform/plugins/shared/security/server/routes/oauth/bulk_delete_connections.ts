@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isEqual, uniqWith } from 'lodash';
+
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '..';
@@ -16,12 +18,9 @@ import { UiamOAuth } from '../../authentication/oauth';
 import { wrapError, wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-interface BulkDeleteOAuthConnectionTarget {
+interface BulkDeleteOAuthConnectionResultItem {
   client_id: string;
   connection_id: string;
-}
-
-interface BulkDeleteOAuthConnectionResultItem extends BulkDeleteOAuthConnectionTarget {
   status: 'deleted' | 'error';
   status_code?: number;
   message?: string;
@@ -30,14 +29,6 @@ interface BulkDeleteOAuthConnectionResultItem extends BulkDeleteOAuthConnectionT
 interface BulkDeleteOAuthConnectionsResponseBody {
   results: BulkDeleteOAuthConnectionResultItem[];
 }
-
-const dedupeTargets = (
-  targets: readonly BulkDeleteOAuthConnectionTarget[]
-): BulkDeleteOAuthConnectionTarget[] => [
-  ...new Map(
-    targets.map((target) => [JSON.stringify([target.client_id, target.connection_id]), target])
-  ).values(),
-];
 
 export function defineBulkDeleteOAuthConnectionsRoute({
   router,
@@ -86,7 +77,7 @@ export function defineBulkDeleteOAuthConnectionsRoute({
         // Fail the request up front rather than reporting a bad credential against every target.
         UiamOAuth.getAccessToken(request);
 
-        const targets = dedupeTargets(request.body.connections);
+        const targets = uniqWith(request.body.connections, isEqual);
 
         const settled = await Promise.allSettled(
           targets.map(({ client_id: clientId, connection_id: connectionId }) =>

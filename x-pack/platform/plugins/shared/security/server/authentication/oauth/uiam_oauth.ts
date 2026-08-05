@@ -278,7 +278,9 @@ export class UiamOAuth implements UiamOAuthType {
       return true;
     } catch (e) {
       this.logger.error(
-        `Failed to delete OAuth connection ${connectionId}: ${getDetailedErrorMessage(e)}`
+        `Failed to delete OAuth connection ${connectionId} for client ${clientId}: ${getDetailedErrorMessage(
+          e
+        )}`
       );
       throw e;
     }

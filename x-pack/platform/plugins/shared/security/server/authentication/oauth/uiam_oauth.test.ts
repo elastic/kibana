@@ -435,7 +435,7 @@ describe('UiamOAuth', () => {
       );
 
       expect(logger.error).toHaveBeenCalledWith(
-        'Failed to delete OAuth connection conn1: UIAM error'
+        'Failed to delete OAuth connection conn1 for client c1: UIAM error'
       );
     });
   });

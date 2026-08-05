@@ -175,6 +175,55 @@ describe('Bulk revoke OAuth connections route', () => {
     });
   });
 
+  it('collapses duplicate targets into a single revoke and a single result', async () => {
+    oauthMock.revokeConnection.mockImplementation(async (_request, clientId, connectionId) =>
+      buildConnection({ id: connectionId, client_id: clientId })
+    );
+
+    const response = await routeHandler(
+      getMockContext(),
+      createRequest([
+        { client_id: 'client-1', connection_id: 'conn-1' },
+        { client_id: 'client-1', connection_id: 'conn-2' },
+        { client_id: 'client-1', connection_id: 'conn-1' },
+      ]),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual({
+      results: [
+        { client_id: 'client-1', connection_id: 'conn-1', status: 'revoked' },
+        { client_id: 'client-1', connection_id: 'conn-2', status: 'revoked' },
+      ],
+    });
+    expect(oauthMock.revokeConnection).toHaveBeenCalledTimes(2);
+  });
+
+  it('treats the same connection id under different clients as distinct targets', async () => {
+    oauthMock.revokeConnection.mockImplementation(async (_request, clientId, connectionId) =>
+      buildConnection({ id: connectionId, client_id: clientId })
+    );
+
+    const response = await routeHandler(
+      getMockContext(),
+      createRequest([
+        { client_id: 'client-1', connection_id: 'conn-1' },
+        { client_id: 'client-2', connection_id: 'conn-1' },
+      ]),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual({
+      results: [
+        { client_id: 'client-1', connection_id: 'conn-1', status: 'revoked' },
+        { client_id: 'client-2', connection_id: 'conn-1', status: 'revoked' },
+      ],
+    });
+    expect(oauthMock.revokeConnection).toHaveBeenCalledTimes(2);
+  });
+
   it('returns 404 when OAuth is not available', async () => {
     authc.oauth = null;
 
