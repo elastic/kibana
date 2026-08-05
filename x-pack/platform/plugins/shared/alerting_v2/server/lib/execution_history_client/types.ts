@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { ListRuleExecutionsResponse } from '@kbn/alerting-v2-schemas';
+import type { GetRuleExecutionsResponse } from '@kbn/alerting-v2-schemas';
 import type { FindRuleExecutionsQuery } from '../services/event_log_service/types';
 
 /**
  * Client-side arguments for {@link ExecutionHistoryClientContract.getRuleExecutions}.
  */
-export type ListRuleExecutionsArgs = Omit<FindRuleExecutionsQuery, 'spaceId'>;
+export type GetRuleExecutionsArgs = Omit<FindRuleExecutionsQuery, 'spaceId'>;
 
 export interface ExecutionHistoryClientContract {
-  listRuleExecutions(args: ListRuleExecutionsArgs): Promise<ListRuleExecutionsResponse>;
+  getRuleExecutions(args: GetRuleExecutionsArgs): Promise<GetRuleExecutionsResponse>;
 }

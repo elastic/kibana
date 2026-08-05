@@ -7,12 +7,13 @@
 
 import type { IconType } from '@elastic/eui';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
 import {
   isSupportedEpisodeSeverity,
   normalizeEpisodeSeverity,
   type EpisodeSeverity,
 } from '../../severity/severity_utils';
+import type { EpisodeActionHistoryEntry } from '../../../queries/episode_actions_history_query';
+
 export interface StateChangeSourceRow {
   '@timestamp': string;
   'episode.status': AlertEpisodeStatus;

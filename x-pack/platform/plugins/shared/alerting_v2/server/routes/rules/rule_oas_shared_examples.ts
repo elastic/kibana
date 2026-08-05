@@ -47,10 +47,6 @@ export const RULE_RESPONSE: RuleResponse = {
   id: 'rule-1',
   version: 'WzAsMV0=',
   enabled: true,
-  metadata: {
-    ...SAMPLE_RULE_DATA.metadata,
-    version: 1,
-  },
   createdBy: 'elastic',
   createdAt: '2026-01-15T12:00:00.000Z',
   updatedBy: 'elastic',

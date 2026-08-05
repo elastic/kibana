@@ -10,21 +10,9 @@
 import { CloudService } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
 
-// The suite exercises protected members and intentionally calls them with invalid
-// arguments to verify runtime guards, so it works against a permissive view of the
-// instance (tsgo keeps the nominal type where tsc widened the errored `new` to any).
-interface CloudServiceTestHarness {
-  getName: () => string;
-  checkIfService: () => Promise<CloudServiceResponse>;
-  _checkIfService: (signal?: unknown) => Promise<CloudServiceResponse>;
-  _createUnconfirmedResponse: () => CloudServiceResponse;
-  _stringToJson: (value?: unknown) => unknown;
-  _parseResponse: (body?: unknown, parseBodyFn?: unknown) => CloudServiceResponse;
-}
-
 describe('CloudService', () => {
   // @ts-expect-error Creating an instance of an abstract class for testing
-  const service = new CloudService('xyz') as unknown as CloudServiceTestHarness;
+  const service = new CloudService('xyz');
 
   describe('getName', () => {
     it('is named by the constructor', () => {

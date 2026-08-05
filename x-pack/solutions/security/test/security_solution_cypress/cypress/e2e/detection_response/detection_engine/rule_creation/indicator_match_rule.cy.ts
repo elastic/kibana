@@ -105,13 +105,14 @@ import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import {
   getDetails,
+  goBackToRulesTable,
   goToAlertsTab,
   visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
 } from '../../../../tasks/rule_details';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
-import { navigateBackToRulesManagement } from '../../../../tasks/rules_management';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
@@ -437,7 +438,7 @@ describe(
           fillAboutRuleAndContinue(rule);
           fillScheduleRuleAndContinue(rule);
           createAndEnableRule();
-          navigateBackToRulesManagement();
+          openRuleManagementPageViaBreadcrumbs();
 
           cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
@@ -544,7 +545,7 @@ describe(
           it('Allows the rule to be duplicated from the table', () => {
             duplicateFirstRule();
             goBackToRuleDetails();
-            navigateBackToRulesManagement();
+            goBackToRulesTable();
             checkDuplicatedRule(TESTED_RULE_DATA.name);
           });
 
@@ -565,7 +566,7 @@ describe(
           it('Allows the rule to be duplicated', () => {
             duplicateRuleFromMenu();
             goBackToRuleDetails();
-            navigateBackToRulesManagement();
+            goBackToRulesTable();
             checkDuplicatedRule(`${TESTED_RULE_DATA.name} [Duplicate]`);
           });
         });

@@ -59,6 +59,8 @@ apiTest.describe('lens visualizations - search', { tag: tags.deploymentAgnostic 
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toMatch(/unrecognized.*xyz|xyz.*unrecognized/i);
+    expect(response.body.message).toBe(
+      "[request query.xyz]: Additional properties are not allowed ('xyz' was unexpected)"
+    );
   });
 });

@@ -45,7 +45,7 @@ export const createManagedWorkflowsInstaller = ({
   const runInstall = async (): Promise<void> => {
     if (!(await isAvailable())) {
       logger.debug(
-        'significantEvents: availability flag disabled, skipping managed workflow installation'
+        'significant_events: availability flag disabled, skipping managed workflow installation'
       );
       return;
     }

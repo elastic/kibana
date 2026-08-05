@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -214,15 +215,18 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
                     <EuiCopy
                       beforeMessage={COPY_RUNTIME_FIELDS_TO_CLIPBOARD_TEXT}
                       textToCopy={advancedRuntimeMappingsConfig ?? ''}
-                      tooltipProps={{ disableScreenReaderOutput: true }}
                     >
                       {(copy: () => void) => (
-                        /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
-                        <EuiButtonIcon
-                          onClick={copy}
-                          iconType="copy"
-                          aria-label={COPY_RUNTIME_FIELDS_TO_CLIPBOARD_TEXT}
-                        />
+                        <EuiToolTip
+                          content={COPY_RUNTIME_FIELDS_TO_CLIPBOARD_TEXT}
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            onClick={copy}
+                            iconType="copy"
+                            aria-label={COPY_RUNTIME_FIELDS_TO_CLIPBOARD_TEXT}
+                          />
+                        </EuiToolTip>
                       )}
                     </EuiCopy>
                   </EuiFlexItem>

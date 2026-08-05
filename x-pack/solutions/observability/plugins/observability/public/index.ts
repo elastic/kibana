@@ -45,7 +45,7 @@ export { sloDetailsLocatorID, sloEditLocatorID } from '@kbn/deeplinks-observabil
 export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
 export { DatePicker } from './pages/overview/components/date_picker';
-export { NightshiftNavigationIcon } from '@kbn/observability-shared-plugin/public';
+export { NightshiftNavigationIcon } from './pages/nightshift/app/nightshift_mark_icon';
 
 export type {
   Stat,

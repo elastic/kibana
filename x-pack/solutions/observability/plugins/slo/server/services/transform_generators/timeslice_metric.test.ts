@@ -175,7 +175,6 @@ describe('Timeslice Metric Transform Generator', () => {
         frequency: twoMinute(),
         syncDelay: twoMinute(),
         preventInitialBackfill: true,
-        preventCrossProjectSearch: false,
       },
     });
 

@@ -220,33 +220,6 @@ describe('ClassifyAbsentGroupsStep', () => {
       const finalBatch = results[results.length - 1].state.alertEventsBatch!;
       expect(statusesByGroup(finalBatch)).toEqual({ [hashRec]: 'recovered' });
     });
-
-    it('stamps rule.version on recovery events from the rule version', async () => {
-      const { step, internalEsClient } = createStep();
-      const hashRec = hashFor('host-rec');
-      mockActiveGroups(internalEsClient, [hashRec]);
-
-      const rule = createRuleResponse({
-        kind: 'alert',
-        recovery_strategy: 'no_breach',
-        metadata: { version: 9 },
-        grouping: { fields: ['host.name'] },
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM m | WHERE breach' },
-        },
-      });
-
-      const results = await collectStreamResults(
-        step.executeStream(
-          createPipelineStream([createRulePipelineState({ rule, alertEventsBatch: [] })])
-        )
-      );
-
-      const finalBatch = results[results.length - 1].state.alertEventsBatch!;
-      expect(finalBatch).toHaveLength(1);
-      expect(finalBatch[0]?.rule?.version).toBe(9);
-    });
   });
 
   describe('no-data / continued-breach classification', () => {

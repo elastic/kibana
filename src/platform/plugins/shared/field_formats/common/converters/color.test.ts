@@ -9,11 +9,7 @@
 
 import type { ReactElement } from 'react';
 import { ColorFormat } from './color';
-import {
-  expectReactElementWithNull,
-  expectReactElementWithBlank,
-  renderReactNode,
-} from '../test_utils';
+import { expectReactElementWithNull, expectReactElementWithBlank } from '../test_utils';
 
 const expectColoredReactElement = (
   element: React.ReactNode,
@@ -197,13 +193,52 @@ describe('Color Format', () => {
     );
 
     expect(colorer.convertToText([100, 200])).toBe('["100","200"]');
-    const container = renderReactNode(colorer.convertToReact([100, 200]));
-    expect(container.textContent).toBe('[100, 200]');
-    const coloredValues = container.querySelectorAll('span[style]');
-    expect([...coloredValues].map(({ textContent }) => textContent)).toEqual(['100', '200']);
-    for (const coloredValue of coloredValues) {
-      expect(coloredValue).toHaveStyle({ color: 'blue', backgroundColor: 'yellow' });
-    }
+    expect(colorer.convertToReact([100, 200])).toMatchInlineSnapshot(`
+      <React.Fragment>
+        <span
+          className="ffArray__highlight"
+        >
+          [
+        </span>
+        <span
+          style={
+            Object {
+              "backgroundColor": "yellow",
+              "borderRadius": "3px",
+              "color": "blue",
+              "display": "inline-block",
+              "padding": "0 8px",
+            }
+          }
+        >
+          100
+        </span>
+        <span
+          className="ffArray__highlight"
+        >
+          ,
+        </span>
+         
+        <span
+          style={
+            Object {
+              "backgroundColor": "yellow",
+              "borderRadius": "3px",
+              "color": "blue",
+              "display": "inline-block",
+              "padding": "0 8px",
+            }
+          }
+        >
+          200
+        </span>
+        <span
+          className="ffArray__highlight"
+        >
+          ]
+        </span>
+      </React.Fragment>
+    `);
   });
 
   test('returns the single element without brackets for a one-element array', () => {

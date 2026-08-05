@@ -20,3 +20,11 @@ const DEFAULT_SEARCH_MODE: SearchMode = 'hybrid';
 export function resolveSearchMode(searchMode?: SearchMode): SearchMode {
   return searchMode ?? DEFAULT_SEARCH_MODE;
 }
+
+export type QueryLinkRequest = Omit<QueryLink, 'stream_name' | 'rule_backed' | 'rule_id'>;
+
+export interface QueryUnlinkRequest {
+  id: string;
+}
+
+export type Query = QueryLink;

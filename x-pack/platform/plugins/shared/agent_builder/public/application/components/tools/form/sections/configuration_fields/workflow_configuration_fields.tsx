@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiFormRow, EuiCheckbox } from '@elastic/eui';
 import { useFormContext, Controller } from 'react-hook-form';
-import { ConfirmationPolicySelect } from '../../components/confirmation_policy_select';
 import { WorkflowPicker } from '../../components/workflow/workflow_picker';
 import type { WorkflowToolFormData } from '../../types/tool_form_types';
 import { i18nMessages } from '../../i18n';
@@ -51,7 +50,6 @@ export const WorkflowConfiguration = () => {
           )}
         />
       </EuiFormRow>
-      <ConfirmationPolicySelect />
     </>
   );
 };

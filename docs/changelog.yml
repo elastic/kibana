@@ -303,6 +303,8 @@ bundle:
   directory: docs/changelog
   # Output directory for bundled changelog files
   output_directory: docs/releases
+  # Whether to resolve (copy contents) by default
+  resolve: true
   repo: kibana
   owner: elastic
   link_allow_repos:
@@ -330,6 +332,3 @@ bundle:
     serverless-release:
       output_products: "cloud-serverless {version} {lifecycle}"
       output: "cloud-serverless/kibana-{version}.yaml"
-      # Feature IDs to hide when bundling with this profile (accepts string or list)
-      hide_features:
-        - data-federation

@@ -1,5 +1,5 @@
 {
-  "sha1": "2d204e2a1fcc95b345b60b2de9e842c06212b184",
+  "sha1": "835bee53e3274ceed6e3090ff13cacc8a6f1c2e2",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -25,123 +25,6 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/global.setup.ts",
         "line": 7,
         "column": 1
-      }
-    },
-    {
-      "id": "82b761bd2797f84-18b4901c763184e",
-      "title": "search with scripted fields should show incomplete results callout when a scripted field errors",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/async_scripted_fields.spec.ts",
-        "line": 25,
-        "column": 51
-      }
-    },
-    {
-      "id": "82b761bd2797f84-545d38b9c060ea0",
-      "title": "search with scripted fields should show incomplete results warning badge on a dashboard panel",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/async_scripted_fields.spec.ts",
-        "line": 31,
-        "column": 22
-      }
-    },
-    {
-      "id": "82b761bd2797f84-dfe73c14ffa692f",
-      "title": "search with scripted fields should return results without errors for a query with a valid scripted field",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/async_scripted_fields.spec.ts",
-        "line": 39,
-        "column": 20
-      }
-    },
-    {
-      "id": "4710c4af03427d2-5b3ce35208b6e1c",
-      "title": "Discover cascade layout - data fetching does not refetch when returning to a previously expanded group",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_data_fetching.spec.ts",
-        "line": 33,
-        "column": 66
-      }
-    },
-    {
-      "id": "4710c4af03427d2-dfd74b6fa05b557",
-      "title": "Discover cascade layout - data fetching does not refetch when re-expanding a group after switching tabs",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_data_fetching.spec.ts",
-        "line": 50,
-        "column": 28
-      }
-    },
-    {
-      "id": "4710c4af03427d2-9e7e3b25088cb7c",
-      "title": "Discover cascade layout - data fetching keeps an expanded row fetch active when switching tabs quickly",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_data_fetching.spec.ts",
-        "line": 99,
-        "column": 43
-      }
-    },
-    {
-      "id": "01317eee2504745-cb5a5ae6b09708f",
-      "title": "Discover cascade layout - row actions, fullscreen, and mode switches renders grouped results, supports row actions and fullscreen, and switches modes without errors",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_interactions.spec.ts",
-        "line": 36,
-        "column": 66
-      }
-    },
-    {
-      "id": "22fda904edc58b0-192fbfbe8d1aeb8",
-      "title": "Discover cascade layout - state restoration restores cascade scroll position when switching tabs",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_state_restoration.spec.ts",
-        "line": 30,
-        "column": 66
-      }
-    },
-    {
-      "id": "22fda904edc58b0-10590105dfc02e7",
-      "title": "Discover cascade layout - state restoration restores expanded state and nested scroll when switching tabs",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_state_restoration.spec.ts",
-        "line": 55,
-        "column": 13
       }
     },
     {
@@ -392,58 +275,6 @@
       }
     },
     {
-      "id": "9f99890da1788e7-a9e47bd94859ec7",
-      "title": "Discover runtime field editor metadata adds a custom label to an existing field",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_metadata.spec.ts",
-        "line": 20,
-        "column": 52
-      }
-    },
-    {
-      "id": "9f99890da1788e7-bc6e968db391160",
-      "title": "Discover runtime field editor metadata adds and updates a custom description for an existing field",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_metadata.spec.ts",
-        "line": 33,
-        "column": 66
-      }
-    },
-    {
-      "id": "9f99890da1788e7-7379ec4a544b40d",
-      "title": "Discover runtime field editor metadata replaces the ECS description for the timestamp field",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_metadata.spec.ts",
-        "line": 52,
-        "column": 38
-      }
-    },
-    {
-      "id": "9f99890da1788e7-c43399dc9e4aeee",
-      "title": "Discover runtime field editor metadata shows a validation error when a custom description is too long",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_metadata.spec.ts",
-        "line": 80,
-        "column": 6
-      }
-    },
-    {
       "id": "6690f87edeb1cd8-62fcf40a53e2aa3",
       "title": "Discover filter editor should add a phrases filter",
       "expectedStatus": "passed",
@@ -639,253 +470,6 @@
       }
     },
     {
-      "id": "6f04bfedac6ae21-9dce01d077eaeb0",
-      "title": "Discover new search action resets filters and query in data view mode",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/new_search_action.spec.ts",
-        "line": 20,
-        "column": 50
-      }
-    },
-    {
-      "id": "6f04bfedac6ae21-b343c143ee2710e",
-      "title": "Discover new search action resets a saved search while preserving ad hoc data view mode",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/new_search_action.spec.ts",
-        "line": 35,
-        "column": 20
-      }
-    },
-    {
-      "id": "6f04bfedac6ae21-f9bcf2c134d035f",
-      "title": "Discover new search action resets unsaved ES query mode state",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/new_search_action.spec.ts",
-        "line": 61,
-        "column": 22
-      }
-    },
-    {
-      "id": "6f04bfedac6ae21-a548558c9d2022a",
-      "title": "Discover new search action resets saved ES query mode state",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/new_search_action.spec.ts",
-        "line": 70,
-        "column": 20
-      }
-    },
-    {
-      "id": "b9d2cfb478c121f-3b92bd636ef1c43",
-      "title": "preserve url goes back to last opened url",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/preserve_url.spec.ts",
-        "line": 37,
-        "column": 5
-      }
-    },
-    {
-      "id": "b9d2cfb478c121f-eeb550ab0686ceb",
-      "title": "preserve url remembers url after switching spaces",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/preserve_url.spec.ts",
-        "line": 52,
-        "column": 5
-      }
-    },
-    {
-      "id": "053bceb435aae2d-6b70caaf831ec2c",
-      "title": "Discover request cancellation allows cancelling active requests",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_cancellation.spec.ts",
-        "line": 31,
-        "column": 23
-      }
-    },
-    {
-      "id": "adcd001115fd3a8-48b9e02303701a3",
-      "title": "Discover runtime field editor CRUD creates a runtime field",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/runtime_field_crud.spec.ts",
-        "line": 19,
-        "column": 50
-      }
-    },
-    {
-      "id": "adcd001115fd3a8-7ca613e7cd0749e",
-      "title": "Discover runtime field editor CRUD renames a newly created runtime field",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/runtime_field_crud.spec.ts",
-        "line": 24,
-        "column": 29
-      }
-    },
-    {
-      "id": "adcd001115fd3a8-abb094520ff5584",
-      "title": "Discover runtime field editor CRUD persists a runtime field in a saved search",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/runtime_field_crud.spec.ts",
-        "line": 34,
-        "column": 18
-      }
-    },
-    {
-      "id": "adcd001115fd3a8-87a6f4d212ce964",
-      "title": "Discover runtime field editor CRUD deletes a runtime field",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/runtime_field_crud.spec.ts",
-        "line": 44,
-        "column": 20
-      }
-    },
-    {
-      "id": "adcd001115fd3a8-b9c1a42deddd647",
-      "title": "Discover runtime field editor CRUD shows runtime fields in the document viewer",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/runtime_field_crud.spec.ts",
-        "line": 52,
-        "column": 86
-      }
-    },
-    {
-      "id": "120cd28841dab7c-6432ec59932f2ea",
-      "title": "Discover search on page load setting does not fetch until the user requests data when disabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_on_page_load.spec.ts",
-        "line": 31,
-        "column": 7
-      }
-    },
-    {
-      "id": "120cd28841dab7c-8ceb0cc9a2a6939",
-      "title": "Discover search on page load setting loads fields after refresh button click when disabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_on_page_load.spec.ts",
-        "line": 51,
-        "column": 41
-      }
-    },
-    {
-      "id": "120cd28841dab7c-45073de3c7d92fa",
-      "title": "Discover search on page load setting loads fields after submit query when disabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_on_page_load.spec.ts",
-        "line": 70,
-        "column": 11
-      }
-    },
-    {
-      "id": "120cd28841dab7c-3a50a3ad006ed8a",
-      "title": "Discover search on page load setting loads fields after changing the time range when disabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_on_page_load.spec.ts",
-        "line": 86,
-        "column": 22
-      }
-    },
-    {
-      "id": "120cd28841dab7c-0024e2c50f6aeff",
-      "title": "Discover search on page load setting does not fetch when saving a search while disabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_on_page_load.spec.ts",
-        "line": 102,
-        "column": 59
-      }
-    },
-    {
-      "id": "120cd28841dab7c-9d1da31a2bfb370",
-      "title": "Discover search on page load setting resets to unfetched state after opening a saved search and pressing New",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_on_page_load.spec.ts",
-        "line": 125,
-        "column": 7
-      }
-    },
-    {
-      "id": "120cd28841dab7c-ea428c4e427fba5",
-      "title": "Discover search on page load setting fetches data initially when enabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_on_page_load.spec.ts",
-        "line": 140,
-        "column": 27
-      }
-    },
-    {
       "id": "3085731bee89644-502dd4a8af59315",
       "title": "Discover shared links should allow for copying the snapshot URL with state in query",
       "expectedStatus": "passed",
@@ -1035,6 +619,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -1044,7 +634,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 60,
+        "line": 55,
         "column": 5
       }
     },
@@ -1055,6 +645,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -1064,8 +660,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 69,
-        "column": 20
+        "line": 59,
+        "column": 5
       }
     },
     {
@@ -1075,6 +671,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -1084,8 +686,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 79,
-        "column": 25
+        "line": 73,
+        "column": 5
       }
     },
     {
@@ -1095,6 +697,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -1104,8 +712,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 92,
-        "column": 32
+        "line": 85,
+        "column": 20
       }
     },
     {
@@ -1115,6 +723,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -1124,8 +738,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 98,
-        "column": 25
+        "line": 93,
+        "column": 31
       }
     },
     {
@@ -1135,6 +749,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -1144,8 +764,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 144,
-        "column": 20
+        "line": 150,
+        "column": 25
       }
     },
     {
@@ -1155,6 +775,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -1164,8 +790,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
-        "line": 191,
-        "column": 29
+        "line": 205,
+        "column": 32
       }
     },
     {
@@ -1175,6 +801,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -1195,6 +827,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -1215,6 +853,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -1235,6 +879,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",

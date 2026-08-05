@@ -39,9 +39,6 @@ export const LENS_BASIC_TITLES = {
   PIE_VIS: 'lnsPieVis',
 } as const;
 
-/** Elastic Charts / Lens XY workspace chart test subject. */
-export const XY_CHART = 'xyVisChart' as const;
-
 export const LOGSTASH_IN_RANGE_DATES = {
   from: 'Sep 19, 2015 @ 06:31:44.000',
   to: 'Sep 23, 2015 @ 18:31:44.000',
@@ -62,7 +59,6 @@ const PLATFORM_KBN_ARCHIVER_DIR = 'src/platform/test/functional/fixtures/kbn_arc
 
 export const KBN_ARCHIVE_PATHS = {
   ESQL_CONVERSION_DASHBOARD: `${LENS_SCOUT_FIXTURES_DIR}/esql_conversion_dashboard.json`,
-  /** Saved Lens objects including `lnsXYvis` (group5 formula transition). */
   LONG_WINDOW_LOGSTASH_INDEX_PATTERN: `${PLATFORM_KBN_ARCHIVER_DIR}/long_window_logstash_index_pattern.json`,
   KIBANA_SAMPLE_DATA_FLIGHTS_INDEX_PATTERN: `${PLATFORM_KBN_ARCHIVER_DIR}/kibana_sample_data_flights_index_pattern.json`,
   /**
@@ -99,9 +95,6 @@ export const VISUALIZATION_TITLES = {
     },
   },
 } as const;
-
-/** Runtime field used by formula KQL field-name escaping (FTR `ab' "'`). */
-export const FORMULA_ESCAPED_RUNTIME_FIELD = `ab' "'` as const;
 
 export const DASHBOARD_TITLES = {
   OPEN_IN_LENS: {

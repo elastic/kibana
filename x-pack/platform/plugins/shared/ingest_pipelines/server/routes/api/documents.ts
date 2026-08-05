@@ -11,8 +11,8 @@ import { API_BASE_PATH } from '../../../common/constants';
 import type { RouteDependencies } from '../../types';
 
 const paramsSchema = schema.object({
-  index: schema.string({ maxLength: 1000 }),
-  id: schema.string({ maxLength: 1000 }),
+  index: schema.string(),
+  id: schema.string(),
 });
 
 export const registerDocumentsRoute = ({

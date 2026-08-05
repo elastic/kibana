@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import type { TimeRange } from '@kbn/es-query';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { isArray, isEqual, isNil, isPlainObject, isString, sortBy } from 'lodash';

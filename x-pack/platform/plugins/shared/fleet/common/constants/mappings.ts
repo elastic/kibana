@@ -106,6 +106,9 @@ export const AGENT_MAPPINGS = {
         },
       },
     },
+    default_api_key: {
+      type: 'keyword',
+    },
     default_api_key_id: {
       type: 'keyword',
     },

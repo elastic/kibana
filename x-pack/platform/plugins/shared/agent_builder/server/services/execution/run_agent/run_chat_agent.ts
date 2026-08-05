@@ -19,7 +19,6 @@ import {
   ConversationRoundStatus,
   AgentExecutionMode,
   isToolCallStep,
-  isRelevantSkillsStep,
 } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
@@ -39,11 +38,6 @@ import {
   estimatePerRoundTokens,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
-import {
-  selectRelevantSkills,
-  buildRecentContext,
-  type RelevantSkillSelection,
-} from './utils/relevant_skills/select_relevant_skills';
 import { resolveCapabilities } from './utils/capabilities';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
@@ -142,12 +136,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
 
-  // Context-aware skill filtering is active only when its flag is on AND a dedicated fast model is
-  // configured. Without a fast model, `selectModel({ effortLevel: 'low' })` falls back to the default
-  // (expensive) model, which defeats the feature — so we treat it as off (original full-list behavior).
-  const relevantSkillsEnabled =
-    experimentalFeatures.relevantSkills && (await modelProvider.hasFastModel());
-
   const pluginSkillIds = await context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []);
   const skillIdsOverride = configurationOverrides?.skill_ids;
   const filteredPluginSkillIds =
@@ -188,20 +176,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
 
-  const relevantSkillsSelectionPromise: Promise<RelevantSkillSelection> | undefined =
-    relevantSkillsEnabled && !pendingRound
-      ? selectRelevantSkills({
-          skills: filteredSkills,
-          context: {
-            userMessage: processedConversation.nextInput.message,
-            recentContext: buildRecentContext(processedConversation.previousRounds),
-          },
-          modelProvider,
-          logger,
-          abortSignal,
-        })
-      : undefined;
-
   const { staticTools, dynamicTools } = await selectTools({
     conversation: processedConversation,
     previousDynamicToolIds: conversation?.state?.dynamic_tool_ids ?? [],
@@ -235,8 +209,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     capabilities,
     abortSignal,
     backgroundExecutionService,
-    filteredSkills,
-    relevantSkillsEnabled,
   });
 
   // Then add dynamic tools
@@ -287,16 +259,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // Reassign to the (possibly compacted) conversation for prompt construction
   processedConversation = compactionResult.processedConversation;
 
-  let relevantSkillsSelection: RelevantSkillSelection | undefined;
-  if (relevantSkillsEnabled) {
-    if (pendingRound) {
-      const persisted = pendingRound.steps.find(isRelevantSkillsStep);
-      relevantSkillsSelection = persisted ? { skills: persisted.skills } : undefined;
-    } else if (relevantSkillsSelectionPromise) {
-      relevantSkillsSelection = await relevantSkillsSelectionPromise;
-    }
-  }
-
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
@@ -307,8 +269,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     conversationTimestamp,
     experimentalFeatures,
-    relevantSkillsEnabled,
-    relevantSkills: relevantSkillsSelection,
     renderers: renderers?.getRegisteredRenderers() ?? [],
   });
 
@@ -400,7 +360,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       compactionResult,
       roundId,
       initialTodos,
-      relevantSkillsSelection,
       getWorkspaceId: () => context.bashService?.getWorkspaceId(),
     }),
     evictInternalEvents(),

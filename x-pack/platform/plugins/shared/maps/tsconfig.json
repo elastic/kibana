@@ -60,7 +60,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/custom-integrations-plugin",
     "@kbn/config-schema",
-    "@kbn/zod",
     "@kbn/shared-ux-router",
     "@kbn/content-management-plugin",
     "@kbn/core-saved-objects-api-server",

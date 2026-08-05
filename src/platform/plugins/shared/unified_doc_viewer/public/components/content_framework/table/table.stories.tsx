@@ -78,7 +78,7 @@ export const APMSpan: Story = {
         description: 'Custom field description',
         formatter: (value) => (
           <div>
-            Custom formatter with highlight: <mark>{value}</mark>
+            Custom formatter with highlight: <mark className="ffSearch__highlight">{value}</mark>
           </div>
         ),
       },
@@ -118,7 +118,7 @@ export const APMTransaction: Story = {
         description: 'Custom field description',
         formatter: (value) => (
           <div>
-            Custom formatter with highlight: <mark>{value}</mark>
+            Custom formatter with highlight: <mark className="ffSearch__highlight">{value}</mark>
           </div>
         ),
       },
@@ -142,7 +142,7 @@ export const SpanOtelRedisClient: Story = {
         description: 'Custom field description',
         formatter: (value) => (
           <div>
-            Custom formatter with highlight: <mark>{value}</mark>
+            Custom formatter with highlight: <mark className="ffSearch__highlight">{value}</mark>
           </div>
         ),
       },

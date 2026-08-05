@@ -56,6 +56,10 @@ const onOpenFlyoutCallback = (): JSX.Element => {
   return <></>;
 };
 
+const title = i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
+  defaultMessage: 'Findings',
+});
+
 const customCellRenderer = (rows: DataTableRecord[]) => ({
   'result.evaluation': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const finding = getCspFinding(rows[rowIndex].raw._source);
@@ -94,7 +98,6 @@ export const LatestFindingsTable = ({
     passed,
     failed,
     total,
-    activeEvaluation,
     canShowDistributionBar,
     onDistributionBarClick,
   } = useLatestFindingsTable({
@@ -102,22 +105,6 @@ export const LatestFindingsTable = ({
     nonPersistedFilters,
     showDistributionBar,
   });
-
-  // a11y: include pass/fail context in the table title so the AdditionalControls
-  // live region announces "Total findings: N Passed findings" (or Failed) after
-  // the distribution bar filter is applied, instead of a generic "Findings".
-  const tableTitle =
-    activeEvaluation === 'passed'
-      ? i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabelPassed', {
-          defaultMessage: 'Passed findings',
-        })
-      : activeEvaluation === 'failed'
-      ? i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabelFailed', {
-          defaultMessage: 'Failed findings',
-        })
-      : i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
-          defaultMessage: 'Findings',
-        });
 
   const createMisconfigurationRuleFn = (rowIndex: number) => {
     const finding = getCspFinding(rows[rowIndex].raw._source);
@@ -155,7 +142,7 @@ export const LatestFindingsTable = ({
             onOpenFlyoutCallback={onOpenFlyoutCallback}
             cloudPostureDataTable={cloudPostureDataTable}
             loadMore={fetchNextPage}
-            title={tableTitle}
+            title={title}
             customCellRenderer={customCellRenderer}
             groupSelectorComponent={groupSelectorComponent}
             height={height}

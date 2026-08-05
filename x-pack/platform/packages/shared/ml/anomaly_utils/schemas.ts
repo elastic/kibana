@@ -5,36 +5,40 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 import { ML_ENTITY_FIELD_OPERATIONS, ML_ENTITY_FIELD_TYPE } from './anomaly_utils';
 
-const mlEntityFieldTypeSchema = z.enum(ML_ENTITY_FIELD_TYPE);
+const mlEntityFieldTypeSchema = schema.oneOf([
+  schema.literal(ML_ENTITY_FIELD_TYPE.BY),
+  schema.literal(ML_ENTITY_FIELD_TYPE.OVER),
+  schema.literal(ML_ENTITY_FIELD_TYPE.PARTITION),
+]);
 
-const mlEntityFieldOperationSchema = z.enum(ML_ENTITY_FIELD_OPERATIONS);
+const mlEntityFieldOperationSchema = schema.oneOf([
+  schema.literal(ML_ENTITY_FIELD_OPERATIONS.ADD),
+  schema.literal(ML_ENTITY_FIELD_OPERATIONS.REMOVE),
+]);
 
-export const influencerSchema = z
-  .object({
-    fieldName: z.string().max(10000),
-    fieldValue: z.any(),
-  })
-  .strict();
+export const influencerSchema = schema.object({
+  fieldName: schema.string({ maxLength: 10000 }),
+  fieldValue: schema.any(),
+});
 
-export const criteriaFieldSchema = z
-  .object({
-    fieldName: z.string().max(10000),
-    fieldValue: z.any(),
-    fieldType: mlEntityFieldTypeSchema.optional(),
-  })
-  .strict();
+export const criteriaFieldSchema = schema.object({
+  fieldName: schema.string({ maxLength: 10000 }),
+  fieldValue: schema.any(),
+  fieldType: schema.maybe(mlEntityFieldTypeSchema),
+});
 
-export const mlEntityFieldValueSchema = z.union([z.string().max(10000), z.number()]);
+export const mlEntityFieldValueSchema = schema.oneOf([
+  schema.string({ maxLength: 10000 }),
+  schema.number(),
+]);
 
-export const mlEntityFieldSchema = z
-  .object({
-    fieldName: z.string().max(10000),
-    fieldValue: mlEntityFieldValueSchema.optional(),
-    fieldType: mlEntityFieldTypeSchema.optional(),
-    operation: mlEntityFieldOperationSchema.optional(),
-    cardinality: z.number().optional(),
-  })
-  .strict();
+export const mlEntityFieldSchema = schema.object({
+  fieldName: schema.string({ maxLength: 10000 }),
+  fieldValue: schema.maybe(mlEntityFieldValueSchema),
+  fieldType: schema.maybe(mlEntityFieldTypeSchema),
+  operation: schema.maybe(mlEntityFieldOperationSchema),
+  cardinality: schema.maybe(schema.number()),
+});

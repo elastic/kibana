@@ -79,13 +79,8 @@ export function TagsComboBox({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiCopy
-          textToCopy={selectedTags.join('\n')}
-          beforeMessage={COPY_TAGS_LABEL}
-          tooltipProps={{ disableScreenReaderOutput: true }}
-        >
+        <EuiCopy textToCopy={selectedTags.join('\n')}>
           {(copy) => (
-            /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
             <EuiButtonIcon
               iconType="copyClipboard"
               display="base"
@@ -95,6 +90,7 @@ export function TagsComboBox({
               isDisabled={selectedTags.length === 0}
               data-test-subj={copyButtonDataTestSubj}
               aria-label={COPY_TAGS_LABEL}
+              title={COPY_TAGS_LABEL}
             />
           )}
         </EuiCopy>

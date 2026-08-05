@@ -133,19 +133,6 @@ describe('WorkflowStepExecutionDetails', () => {
     expect(screen.queryByRole('tab', { name: 'Input' })).not.toBeInTheDocument();
   });
 
-  it('renders a trigger without input, output, or error', () => {
-    render(
-      <TestWrapper>
-        <WorkflowStepExecutionDetails
-          workflowExecutionId="exec-1"
-          stepExecution={createTriggerStep()}
-        />
-      </TestWrapper>
-    );
-
-    expect(screen.queryAllByRole('tab')).toHaveLength(0);
-  });
-
   it('shows Output then Input tabs for regular steps', () => {
     const stepExecution = createRegularStep({
       input: { url: 'https://example.com' },

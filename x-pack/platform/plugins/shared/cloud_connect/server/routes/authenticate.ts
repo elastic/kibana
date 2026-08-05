@@ -18,7 +18,7 @@ import { createStorageService } from '../lib/create_storage_service';
 import { CLOUD_CONNECT_READ_SECURITY, CLOUD_CONNECT_MANAGE_SECURITY } from './route_security';
 
 const bodySchema = schema.object({
-  apiKey: schema.string({ minLength: 1, maxLength: 1000 }),
+  apiKey: schema.string({ minLength: 1 }),
 });
 
 interface CloudConnectedStartDeps {

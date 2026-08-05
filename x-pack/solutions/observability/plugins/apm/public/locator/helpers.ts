@@ -29,7 +29,7 @@ const SERVICE_OVERVIEW_TAB_PATHS = {
 } as const;
 
 export const APMLocatorPayloadValidator = z.union([
-  z.object({ serviceName: z.undefined().optional() }),
+  z.object({ serviceName: z.undefined() }),
   z
     .object({ serviceName: z.string() })
     .merge(z.object({ dashboardId: z.string() }))

@@ -17,9 +17,9 @@ jest.mock('../footer/hooks/use_alerts_href', () => ({
   useAlertsHref: jest.fn(() => '/app/observability/alerts?mock'),
 }));
 
-const mockUseFlyoutDiscoverHref = jest.fn();
-jest.mock('../utils/get_flyout_discover_navigation', () => ({
-  getFlyoutDiscoverNavigation: (args: unknown) => mockUseFlyoutDiscoverHref(args),
+const mockUseDiscoverHref = jest.fn();
+jest.mock('../../links/discover_links/use_discover_href', () => ({
+  useDiscoverHref: (args: unknown) => mockUseDiscoverHref(args),
 }));
 
 const mockGetRedirectUrl = jest.fn(
@@ -42,21 +42,7 @@ function makeContext(overrides: { sloRead?: boolean; transactionType?: string } 
       core: { application: { capabilities: { slo: { read: sloRead } } } },
       share: { url: { locators: { get: mockLocatorsGet } } },
     },
-    capabilities: {
-      loading: false,
-      error: undefined,
-      schema: 'ecs' as const,
-      header: { serviceNameLink: true, badges: true },
-      overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
-      footer: { alerts: true, slos: true },
-    },
     service: { name: 'opbeans-java' },
-    indices: {
-      transaction: 'traces-apm-*',
-      span: 'traces-apm-*',
-      error: 'logs-apm.error-*',
-      metric: 'metrics-apm-*',
-    },
     filters: {
       environment: 'production',
       rangeFrom: 'now-15m',
@@ -70,13 +56,11 @@ describe('useServiceFlyoutLinks', () => {
   beforeEach(() => {
     mockLocatorsGet.mockClear();
     mockGetRedirectUrl.mockClear();
-    mockUseFlyoutDiscoverHref.mockClear();
+    mockUseDiscoverHref.mockClear();
     mockUseServiceFlyoutContext.mockClear();
     mockUseServiceFlyoutContext.mockReturnValue(makeContext());
-    mockUseFlyoutDiscoverHref.mockImplementation(({ indexType }: { indexType: string }) =>
-      indexType === 'traces'
-        ? { href: '/app/discover/traces', esqlQuery: 'FROM traces-apm* | ...' }
-        : { href: '/app/discover/logs', esqlQuery: 'FROM logs-apm* | ...' }
+    mockUseDiscoverHref.mockImplementation(({ indexType }: { indexType: string }) =>
+      indexType === 'traces' ? '/app/discover/traces' : '/app/discover/logs'
     );
   });
 
@@ -90,11 +74,25 @@ describe('useServiceFlyoutLinks', () => {
     });
   });
 
+  it('builds apm.alertsTab using the APM locator, dropping the kuery', () => {
+    renderHook(() => useServiceFlyoutLinks());
+
+    expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      serviceName: 'opbeans-java',
+      serviceOverviewTab: 'alerts',
+      query: {
+        environment: 'production',
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+      },
+    });
+  });
+
   it('scopes the Discover traces link to the service, environment, and transactionType', () => {
     mockUseServiceFlyoutContext.mockReturnValue(makeContext({ transactionType: 'request' }));
     renderHook(() => useServiceFlyoutLinks());
 
-    expect(mockUseFlyoutDiscoverHref).toHaveBeenCalledWith(
+    expect(mockUseDiscoverHref).toHaveBeenCalledWith(
       expect.objectContaining({
         indexType: 'traces',
         queryParams: {
@@ -110,7 +108,7 @@ describe('useServiceFlyoutLinks', () => {
   it('passes empty string transactionType to the Discover traces link before the type resolves', () => {
     renderHook(() => useServiceFlyoutLinks());
 
-    expect(mockUseFlyoutDiscoverHref).toHaveBeenCalledWith(
+    expect(mockUseDiscoverHref).toHaveBeenCalledWith(
       expect.objectContaining({
         indexType: 'traces',
         queryParams: expect.objectContaining({ transactionType: '' }),
@@ -121,7 +119,7 @@ describe('useServiceFlyoutLinks', () => {
   it('scopes the Discover logs link to the service and environment, without transactionType', () => {
     renderHook(() => useServiceFlyoutLinks());
 
-    const logsCall = mockUseFlyoutDiscoverHref.mock.calls.find(
+    const logsCall = mockUseDiscoverHref.mock.calls.find(
       ([args]: [{ indexType: string }]) => args.indexType === 'error'
     );
     expect(logsCall?.[0].queryParams).not.toHaveProperty('transactionType');
@@ -137,32 +135,11 @@ describe('useServiceFlyoutLinks', () => {
     const { result } = renderHook(() => useServiceFlyoutLinks());
 
     expect(result.current.apm.overviewTab).toEqual('/app/apm/services/opbeans-java/overview');
+    expect(result.current.apm.alertsTab).toEqual('/app/apm/services/opbeans-java/alerts');
     expect(result.current.slos).toEqual('/app/slos?serviceName=opbeans-java');
     expect(result.current.alerts).toEqual('/app/observability/alerts?mock');
-    expect(result.current.discover.traces.href).toEqual('/app/discover/traces');
-    expect(result.current.discover.logs.href).toEqual('/app/discover/logs');
-    expect(result.current.discover.traces.openInDiscoverTab).toBeUndefined();
-    expect(result.current.discover.logs.openInDiscoverTab).toBeUndefined();
-  });
-
-  it('builds openInDiscoverTab closures when openInNewDiscoverTab is in context', () => {
-    const mockOpenInNewDiscoverTab = jest.fn();
-    mockUseServiceFlyoutContext.mockReturnValue({
-      ...makeContext({ transactionType: 'request' }),
-      contextActions: { openInNewDiscoverTab: mockOpenInNewDiscoverTab },
-    });
-
-    const { result } = renderHook(() => useServiceFlyoutLinks());
-
-    expect(result.current.discover.traces.openInDiscoverTab).toBeDefined();
-    result.current.discover.traces.openInDiscoverTab!();
-    expect(mockOpenInNewDiscoverTab).toHaveBeenCalledWith(
-      expect.objectContaining({
-        esqlQuery: 'FROM traces-apm* | ...',
-        timeRange: { from: 'now-15m', to: 'now' },
-        tabLabel: 'Traces - opbeans-java',
-      })
-    );
+    expect(result.current.discover.traces).toEqual('/app/discover/traces');
+    expect(result.current.discover.logs).toEqual('/app/discover/logs');
   });
 
   it('returns undefined slos when the slo.read capability is missing', () => {

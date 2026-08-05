@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/automatic-import-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/cloud-services'
+  defaultOwner: '@elastic/integration-experience'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/automatic-import-plugin'
   description: Moon project for @kbn/automatic-import-plugin
   channel: ''
-  owner: '@elastic/cloud-services'
+  owner: '@elastic/integration-experience'
   sourceRoot: x-pack/platform/plugins/shared/automatic_import
 dependsOn:
   - '@kbn/core'

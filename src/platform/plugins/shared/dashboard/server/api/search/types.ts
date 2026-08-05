@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod';
+import type { TypeOf } from '@kbn/config-schema';
 import type { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
 
 import type {
@@ -17,12 +17,12 @@ import type {
 } from './schemas';
 
 /** The request parameters for searching dashboards */
-export type DashboardSearchRequestParams = z.output<typeof asCodeSearchRequestSchema>;
+export type DashboardSearchRequestParams = TypeOf<typeof asCodeSearchRequestSchema>;
 /** The response body type for searching dashboards. */
-export type DashboardSearchResponseBody = z.output<typeof searchResponseBodySchema>;
+export type DashboardSearchResponseBody = TypeOf<typeof searchResponseBodySchema>;
 
 /** LEGACY **/
 /** The request parameters for searching dashboards */
-export type LegacyDashboardSearchRequestParams = z.output<typeof legacySearchRequestParamsSchema>;
+export type LegacyDashboardSearchRequestParams = TypeOf<typeof legacySearchRequestParamsSchema>;
 /** The response body type for searching dashboards. */
-export type LegacyDashboardSearchResponseBody = z.output<typeof legacySearchResponseBodySchema>;
+export type LegacyDashboardSearchResponseBody = TypeOf<typeof legacySearchResponseBodySchema>;

@@ -174,38 +174,6 @@ describe('useCaseViewHeader', () => {
     );
   });
 
-  it('falls back to the reporter email when the full name is missing', () => {
-    const caseWithoutFullName: CaseUI = {
-      ...basicCase,
-      createdBy: { username: 'lknope', fullName: null, email: 'leslie.knope@elastic.co' },
-    };
-    const { result } = renderHook(
-      () => useCaseViewHeader({ ...defaultArgs, caseData: caseWithoutFullName }),
-      { wrapper }
-    );
-
-    const reportedBy = result.current.metadata.find(
-      (m) => m?.['data-test-subj'] === 'case-view-reported-by'
-    );
-    expect(reportedBy?.label).toBe('Reported by: leslie.knope@elastic.co');
-  });
-
-  it('falls back to the reporter username when full name and email are missing', () => {
-    const caseWithUsernameOnly: CaseUI = {
-      ...basicCase,
-      createdBy: { username: 'lknope', fullName: null, email: null },
-    };
-    const { result } = renderHook(
-      () => useCaseViewHeader({ ...defaultArgs, caseData: caseWithUsernameOnly }),
-      { wrapper }
-    );
-
-    const reportedBy = result.current.metadata.find(
-      (m) => m?.['data-test-subj'] === 'case-view-reported-by'
-    );
-    expect(reportedBy?.label).toBe('Reported by: lknope');
-  });
-
   it('returns a backHref', () => {
     const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,

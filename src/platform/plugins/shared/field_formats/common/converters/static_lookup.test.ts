@@ -9,11 +9,7 @@
 
 import { NULL_LABEL, EMPTY_LABEL } from '@kbn/field-formats-common';
 import { StaticLookupFormat } from './static_lookup';
-import {
-  expectReactElementWithNull,
-  expectReactElementWithBlank,
-  renderReactNode,
-} from '../test_utils';
+import { expectReactElementWithNull, expectReactElementWithBlank } from '../test_utils';
 
 describe('StaticLookupFormat', () => {
   let formatter: StaticLookupFormat;
@@ -107,9 +103,16 @@ describe('StaticLookupFormat', () => {
           },
         },
       };
-      const container = renderReactNode(formatter.convertToReact('test', options));
-      expect(container.textContent).toBe('Test Value');
-      expect(container.querySelector('mark')).toHaveTextContent('Test');
+      expect(formatter.convertToReact('test', options)).toMatchInlineSnapshot(`
+        <React.Fragment>
+          <mark
+            className="ffSearch__highlight"
+          >
+            Test
+          </mark>
+           Value
+        </React.Fragment>
+      `);
     });
 
     test('falls back to missing value handling when lookup yields missing originals', () => {

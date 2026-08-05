@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { EMPTY_LABEL, NULL_LABEL } from '@kbn/field-formats-common';
 import { StringFormat } from './string';
 import { highlightTags } from '../utils/highlight/highlight_tags';
@@ -14,10 +16,12 @@ import {
   expectReactElementWithNull,
   expectReactElementWithBlank,
   expectReactElementAsArray,
-  renderReactNode,
 } from '../test_utils';
 
+const renderHtml = (node: React.ReactNode) =>
+  renderToStaticMarkup(React.createElement(React.Fragment, null, node)).replace(/&quot;/g, '"');
 const hl = (word: string) => `${highlightTags.pre}${word}${highlightTags.post}`;
+const mark = (word: string) => `<mark class="ffSearch__highlight">${word}</mark>`;
 
 describe('String Format', () => {
   test('convert a string to lower case', () => {
@@ -132,9 +136,13 @@ describe('String Format', () => {
         highlight: { foo: ['@kibana-highlighted-field@<img />@/kibana-highlighted-field@'] },
       },
     };
-    const container = renderReactNode(string.convertToReact('<img />', options));
-    expect(container.querySelector('mark')).toHaveTextContent('<img />');
-    expect(container.querySelector('img')).not.toBeInTheDocument();
+    expect(string.convertToReact('<img />', options)).toMatchInlineSnapshot(`
+      <mark
+        className="ffSearch__highlight"
+      >
+        &lt;img /&gt;
+      </mark>
+    `);
   });
 
   describe('highlighting with transforms', () => {
@@ -145,7 +153,7 @@ describe('String Format', () => {
       fieldName = 'foo'
     ) => {
       const string = new StringFormat(transform ? { transform } : {}, jest.fn());
-      return renderReactNode(
+      return renderHtml(
         string.convertToReact(value, {
           field: { name: fieldName },
           hit: { highlight: { [fieldName]: snippets } },
@@ -154,53 +162,49 @@ describe('String Format', () => {
     };
 
     test('highlights while applying the lower case transform', () => {
-      const container = highlight('Hello World', 'lower', [`Hello ${hl('World')}`]);
-      expect(container).toHaveTextContent('hello world');
-      expect(container.querySelector('mark')).toHaveTextContent('world');
+      expect(highlight('Hello World', 'lower', [`Hello ${hl('World')}`])).toBe(
+        `hello ${mark('world')}`
+      );
     });
 
     test('highlights while applying the upper case transform', () => {
-      const container = highlight('Hello World', 'upper', [`Hello ${hl('World')}`]);
-      expect(container).toHaveTextContent('HELLO WORLD');
-      expect(container.querySelector('mark')).toHaveTextContent('WORLD');
+      expect(highlight('Hello World', 'upper', [`Hello ${hl('World')}`])).toBe(
+        `HELLO ${mark('WORLD')}`
+      );
     });
 
     test('highlights while applying the title case transform', () => {
-      const container = highlight('hello world', 'title', [`hello ${hl('world')}`]);
-      expect(container).toHaveTextContent('Hello World');
-      expect(container.querySelector('mark')).toHaveTextContent('World');
+      expect(highlight('hello world', 'title', [`hello ${hl('world')}`])).toBe(
+        `Hello ${mark('World')}`
+      );
     });
 
     test('highlights a sub-word match while applying the title case transform', () => {
-      const container = highlight('paymentprocessor', 'title', [`${hl('pay')}mentprocessor`]);
-      expect(container).toHaveTextContent('Paymentprocessor');
-      expect(container.querySelector('mark')).toHaveTextContent('Pay');
+      expect(highlight('paymentprocessor', 'title', [`${hl('pay')}mentprocessor`])).toBe(
+        `${mark('Pay')}mentprocessor`
+      );
     });
 
     test('does not highlight short-dots values', () => {
       // Short Dots removes characters, so a transformed snippet can no longer be located within
       // the shortened value; highlighting is dropped rather than shown at the wrong position.
-      const container = highlight('dot.notated.string', 'short', [hl('dot.notated.string')]);
-      expect(container).toHaveTextContent('d.n.string');
-      expect(container.querySelector('mark')).not.toBeInTheDocument();
+      expect(highlight('dot.notated.string', 'short', [hl('dot.notated.string')])).toBe(
+        'd.n.string'
+      );
     });
 
     test('does not highlight base64-decoded values', () => {
-      const container = highlight('Zm9vYmFy', 'base64', [hl('Zm9vYmFy')]);
-      expect(container).toHaveTextContent('foobar');
-      expect(container.querySelector('mark')).not.toBeInTheDocument();
+      expect(highlight('Zm9vYmFy', 'base64', [hl('Zm9vYmFy')])).toBe('foobar');
     });
 
     test('does not highlight url-param-decoded values', () => {
-      const container = highlight('%20foo', 'urlparam', [hl('%20foo')]);
-      expect(container.textContent).toBe(' foo');
-      expect(container.querySelector('mark')).not.toBeInTheDocument();
+      expect(highlight('%20foo', 'urlparam', [hl('%20foo')])).toBe(' foo');
     });
 
     test('highlights with no transform configured', () => {
-      const container = highlight('lorem ipsum', false, [`lorem ${hl('ipsum')}`]);
-      expect(container).toHaveTextContent('lorem ipsum');
-      expect(container.querySelector('mark')).toHaveTextContent('ipsum');
+      expect(highlight('lorem ipsum', false, [`lorem ${hl('ipsum')}`])).toBe(
+        `lorem ${mark('ipsum')}`
+      );
     });
   });
 

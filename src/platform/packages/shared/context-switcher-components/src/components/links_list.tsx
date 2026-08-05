@@ -29,10 +29,8 @@ export const LinksList = ({ items }: LinksListProps) => {
           href={item.href}
           onClick={item.onClick}
           external={item.external}
-          target={item.external ? '_blank' : undefined}
           isDisabled={item.disabled}
           iconType={item.iconType}
-          wrapText
           color="text"
           data-test-subj={item['data-test-subj']}
         />

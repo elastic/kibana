@@ -14,7 +14,6 @@ import type {
   Severity,
   SignificantEventStatus,
 } from '@kbn/significant-events-schema';
-import { SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS } from '@kbn/significant-events-schema';
 import {
   type BulkCreateOptions,
   type CommonSearchOptions,
@@ -41,20 +40,8 @@ import {
   type eventsMappings,
 } from './data_stream';
 import { FIELD_EVENT_UUID, FIELD_EVENT_ID } from '../field_names';
-import type { TriggerEmitter } from '../../../workflows/triggers/emit';
-import type {
-  SignificantEventsTriggerId,
-  SignificantEventsTriggerPayloadMap,
-} from '../../../../common/workflows/triggers';
 
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
-
-/**
- * Maximum number of distinct active events returned by findLatestActive. With stream+rule
- * narrowing the result is proportional to the write batch size, so this cap is a safety bound
- * rather than an operational limit.
- */
-const MAX_DEDUP_SCAN_LIMIT = 500;
 
 const multiValueContainsAnyFilter = ({
   where,
@@ -126,21 +113,11 @@ export class EventClient {
       dataStreamClient: EventDataStreamClient;
       esClient: ElasticsearchClient;
       space: string;
-      triggerEmitter?: TriggerEmitter;
     }
   ) {}
 
-  /** Fire-and-forget: emits a workflow trigger event if an emitter is wired, otherwise a no-op. */
-  emitTrigger<T extends SignificantEventsTriggerId>(
-    triggerId: T,
-    payload: SignificantEventsTriggerPayloadMap[T]
-  ): void {
-    this.clients.triggerEmitter?.(triggerId, payload);
-  }
-
   private buildWhere(options: EventsFilterOptions): ESQLAstExpression | undefined {
     let where: ESQLAstExpression | undefined;
-
     where = inFilter({ where, field: 'status', values: options.status });
     where = multiValueContainsAnyFilter({
       where,
@@ -192,7 +169,16 @@ export class EventClient {
   async findLatestPaginated(
     options: EventsPaginatedSearchOptions = {}
   ): Promise<PaginatedResponse<SignificantEvent>> {
-    return this.findLatestByCurrentStatePaginated(options);
+    const result = await runPaginatedLatestSourceEsqlQuery<SignificantEvent>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      options,
+      index: EVENTS_DATA_STREAM,
+      where: this.buildWhere(options),
+      groupBy: FIELD_EVENT_ID,
+    });
+
+    return result;
   }
 
   async findLatestByCurrentStatePaginated(
@@ -234,8 +220,6 @@ export class EventClient {
 
       if (options.status?.length) {
         query.where`${esql.col('status')} IN (${options.status.map((status) => esql.str(status))})`;
-      } else if (!options.eventIds?.length) {
-        query.where`${esql.col('status')} != ${esql.str('pending')}`;
       }
       if (options.severity?.length) {
         query.where`${esql.col('severity')} IN (${options.severity.map((severity) =>
@@ -275,50 +259,6 @@ export class EventClient {
       perPage,
       total,
     };
-  }
-
-  /**
-   * Returns the latest version per event_id for all active events (status IN pending/open)
-   * within the given time range, optionally narrowed to candidate stream/rule identities so the
-   * scan stays proportional to the write batch instead of the whole space. The status and
-   * candidate filters are applied after grouping so a closed/dismissed event whose earlier
-   * version was pending is correctly excluded.
-   *
-   * Capped at MAX_DEDUP_SCAN_LIMIT distinct active events. With stream+rule narrowing the result
-   * set is proportional to the write batch, so this limit is never approached in practice.
-   */
-  async findLatestActive(
-    options: CommonSearchOptions & { streamNames?: string[]; ruleUuids?: string[] }
-  ): Promise<{ hits: SignificantEvent[] }> {
-    const query = applyTimeRange({
-      query: fromIndexForSpace({
-        index: EVENTS_DATA_STREAM,
-        space: this.clients.space,
-        columns: ['_id', '_source'],
-      }),
-      from: options.from,
-      to: options.to,
-    });
-
-    pickLatestPerGroup(query, FIELD_EVENT_ID);
-
-    query.where`${esql.col('status')} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((s) =>
-      esql.str(s)
-    )})`;
-
-    const candidateWhere = continuationCandidateFilter({
-      streamNames: options.streamNames,
-      ruleUuids: options.ruleUuids,
-    });
-    if (candidateWhere) {
-      query.where`${candidateWhere}`;
-    }
-
-    const hits = await executeEsqlQuery<SignificantEvent>({
-      esClient: this.clients.esClient,
-      query: query.keep('_source').limit(MAX_DEDUP_SCAN_LIMIT),
-    });
-    return { hits };
   }
 
   async findByEventUuid(id: string): Promise<{ hits: SignificantEvent[] }> {

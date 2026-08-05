@@ -47,22 +47,12 @@ describe('getApmConfig', () => {
     expect(config).toEqual(expect.objectContaining(defaultApmConfig));
   });
 
-  it('returns a low-cardinality pageLoadTransactionName for app routes', () => {
-    const config = getApmConfig('/app/apm/services/my-service/overview');
+  it('returns the requestPath as `pageLoadTransactionName`', () => {
+    const config = getApmConfig('/some-other-path');
 
     expect(config).toEqual(
       expect.objectContaining({
-        pageLoadTransactionName: '/app/apm',
-      })
-    );
-  });
-
-  it('returns the pathname as pageLoadTransactionName for non-app routes', () => {
-    const config = getApmConfig('/login');
-
-    expect(config).toEqual(
-      expect.objectContaining({
-        pageLoadTransactionName: '/login',
+        pageLoadTransactionName: '/some-other-path',
       })
     );
   });

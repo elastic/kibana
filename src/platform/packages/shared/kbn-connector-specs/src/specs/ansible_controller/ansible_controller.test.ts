@@ -213,53 +213,6 @@ describe('AnsibleControllerConnector', () => {
       ).rejects.toThrow('not permitted');
     });
 
-    it('rejects percent-encoded slashes that would decode to blocked credential/user paths', async () => {
-      // A WSGI/DRF backend percent-decodes PATH_INFO before routing, so the guard must compare
-      // against the decoded path rather than the raw wire form.
-      await expect(
-        AnsibleControllerConnector.actions.request.handler(mockContext, {
-          method: 'PATCH',
-          path: '/api/v2/credentials%2f1%2f',
-          body: { inputs: { password: 'evil' } },
-        })
-      ).rejects.toThrow('not permitted');
-
-      await expect(
-        AnsibleControllerConnector.actions.request.handler(mockContext, {
-          method: 'PATCH',
-          path: '/users%2f5%2f',
-          body: { is_superuser: true },
-        })
-      ).rejects.toThrow('not permitted');
-
-      await expect(
-        AnsibleControllerConnector.actions.request.handler(mockContext, {
-          method: 'POST',
-          path: '/api/v2/tokens%2f',
-          body: {},
-        })
-      ).rejects.toThrow('not permitted');
-    });
-
-    it('rejects dot-segment traversal that would resolve to blocked credential/user paths', async () => {
-      await expect(
-        AnsibleControllerConnector.actions.request.handler(mockContext, {
-          method: 'PATCH',
-          path: '/job_templates/../users/5/',
-          body: { is_superuser: true },
-        })
-      ).rejects.toThrow('not permitted');
-    });
-
-    it('rejects paths with invalid percent-encoding', async () => {
-      await expect(
-        AnsibleControllerConnector.actions.request.handler(mockContext, {
-          method: 'GET',
-          path: '/job_templates/%',
-        })
-      ).rejects.toThrow('invalid percent-encoding');
-    });
-
     it('still allows reading (GET) the users collection', async () => {
       mockRequest.mockResolvedValue(okResponse({ count: 0, results: [] }));
       await expect(

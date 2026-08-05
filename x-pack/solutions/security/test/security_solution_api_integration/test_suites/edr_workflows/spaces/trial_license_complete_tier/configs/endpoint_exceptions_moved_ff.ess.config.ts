@@ -25,7 +25,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   ];
   const fleetEnableExperimental: Partial<FleetExperimentalFeatures> = {
     useSpaceAwareness: true,
-    installIntegrationsKnowledge: false,
   };
 
   return {
