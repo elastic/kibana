@@ -16,7 +16,8 @@ project:
   channel: ''
   owner: '@elastic/search-kibana'
   sourceRoot: src/platform/packages/shared/serverless/settings/workplace_ai_project
-dependsOn: []
+dependsOn:
+  - '@kbn/management-settings-ids'
 tags:
   - shared-common
   - package
