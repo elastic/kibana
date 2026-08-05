@@ -14,4 +14,4 @@ export const createSignificantEventsTracedEsClient = ({
 }: {
   client: ElasticsearchClient;
   logger: Logger;
-}) => createTracedEsClient({ client, logger, plugin: 'significant_events' });
+}) => createTracedEsClient({ client, logger, plugin: 'significantEvents' });

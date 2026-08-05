@@ -28,6 +28,8 @@ import {
 } from '../../tasks/history_snapshot_task';
 import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
 import { scheduleResilienceTask, stopResilienceTask } from '../../tasks/resilience_task';
+import { removeEntityMaintainer } from '../../tasks/entity_maintainers';
+import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import { stopAndRemoveV1, stopAndRemoveV1SharedTasks } from '../../infra/remove_v1';
 
 jest.mock('./install_assets');
@@ -36,6 +38,14 @@ jest.mock('../../tasks/extract_entity_task');
 jest.mock('../../tasks/history_snapshot_task');
 jest.mock('../../tasks/status_report_task');
 jest.mock('../../tasks/resilience_task');
+jest.mock('../../tasks/entity_maintainers', () => ({
+  removeEntityMaintainer: jest.fn(),
+}));
+jest.mock('../../tasks/entity_maintainers/entity_maintainers_registry', () => ({
+  entityMaintainersRegistry: {
+    getAll: jest.fn(),
+  },
+}));
 jest.mock('../../infra/remove_v1');
 
 const mockInstallSharedElasticsearchAssets =
@@ -74,6 +84,12 @@ const mockScheduleResilienceTask = scheduleResilienceTask as jest.MockedFunction
   typeof scheduleResilienceTask
 >;
 const mockStopResilienceTask = stopResilienceTask as jest.MockedFunction<typeof stopResilienceTask>;
+const mockRemoveEntityMaintainer = removeEntityMaintainer as jest.MockedFunction<
+  typeof removeEntityMaintainer
+>;
+const mockEntityMaintainersGetAll = entityMaintainersRegistry.getAll as jest.MockedFunction<
+  typeof entityMaintainersRegistry.getAll
+>;
 const mockStopAndRemoveV1 = stopAndRemoveV1 as jest.MockedFunction<typeof stopAndRemoveV1>;
 const mockStopAndRemoveV1SharedTasks = stopAndRemoveV1SharedTasks as jest.MockedFunction<
   typeof stopAndRemoveV1SharedTasks
@@ -114,6 +130,11 @@ describe('AssetManagerClient', () => {
     mockStopStatusReportTask.mockResolvedValue(undefined);
     mockScheduleResilienceTask.mockResolvedValue(undefined);
     mockStopResilienceTask.mockResolvedValue(undefined);
+    mockRemoveEntityMaintainer.mockResolvedValue(undefined);
+    mockEntityMaintainersGetAll.mockReturnValue([
+      { id: 'automated-resolution', interval: '1h', minLicense: 'basic' },
+      { id: 'risk-score', interval: '1h', minLicense: 'platinum' },
+    ]);
     mockStopAndRemoveV1.mockResolvedValue(undefined);
     mockStopAndRemoveV1SharedTasks.mockResolvedValue(undefined);
 
@@ -169,6 +190,26 @@ describe('AssetManagerClient', () => {
     expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('host');
     expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('user');
     expect(mockScheduleExtractEntityTask).toHaveBeenCalledTimes(2);
+  });
+
+  it('schedules status and history tasks only after engine descriptors exist', async () => {
+    const order: string[] = [];
+    mockEngineDescriptorClient.init.mockImplementation(async () => {
+      order.push('descriptor');
+    });
+    mockScheduleStatusReportTask.mockImplementation(async () => {
+      order.push('status');
+    });
+    mockScheduleHistorySnapshotTasks.mockImplementation(async () => {
+      order.push('history');
+    });
+
+    await client.init({} as KibanaRequest, ['host', 'user']);
+
+    const lastDescriptor = order.lastIndexOf('descriptor');
+    expect(lastDescriptor).toBeGreaterThanOrEqual(0);
+    expect(order.indexOf('status')).toBeGreaterThan(lastDescriptor);
+    expect(order.indexOf('history')).toBeGreaterThan(lastDescriptor);
   });
 
   it('runs v1 cleanup and stored-script setup as the internal user', async () => {
@@ -297,8 +338,8 @@ describe('AssetManagerClient', () => {
   });
 
   describe('uninstall', () => {
-    // getAll is called twice in uninstall: once via getStatus (before delete) and once
-    // to compute remainingEngines (after delete). Sequence the mock accordingly.
+    // getAll is called twice: once via getStatus (before delete) and once for
+    // remainingEngines (after delete). Sequence the mock accordingly.
     it('keeps shared assets when other engines remain (see: https://github.com/elastic/security-team/issues/18143)', async () => {
       mockEngineDescriptorClient.getAll
         .mockResolvedValueOnce([
@@ -310,13 +351,17 @@ describe('AssetManagerClient', () => {
       const result = await client.uninstall('host');
 
       expect(result).toBe(true);
+      expect(mockStopExtractEntityTask).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'host', namespace })
+      );
       expect(mockEngineDescriptorClient.delete).toHaveBeenCalledWith('host');
       // Shared, per-namespace / cluster assets must survive.
       expect(mockUninstallElasticsearchAssets).not.toHaveBeenCalled();
       expect(mockDeleteEuidStoredScripts).not.toHaveBeenCalled();
       expect(mockGlobalStateClient.delete).not.toHaveBeenCalled();
-      expect(mockStopStatusReportTask).not.toHaveBeenCalled();
       expect(mockStopHistorySnapshotTask).not.toHaveBeenCalled();
+      expect(mockStopStatusReportTask).not.toHaveBeenCalled();
+      expect(mockRemoveEntityMaintainer).not.toHaveBeenCalled();
     });
 
     it('deletes shared assets when the last engine is uninstalled', async () => {
@@ -328,11 +373,18 @@ describe('AssetManagerClient', () => {
 
       expect(result).toBe(true);
       expect(mockEngineDescriptorClient.delete).toHaveBeenCalledWith('host');
-      expect(mockUninstallElasticsearchAssets).toHaveBeenCalledTimes(1);
-      expect(mockDeleteEuidStoredScripts).toHaveBeenCalledTimes(1);
+      expect(mockStopHistorySnapshotTask).toHaveBeenCalledWith(
+        expect.objectContaining({ namespace })
+      );
+      expect(mockStopStatusReportTask).toHaveBeenCalledWith(expect.objectContaining({ namespace }));
+      expect(mockRemoveEntityMaintainer).toHaveBeenCalled();
+      expect(mockUninstallElasticsearchAssets).toHaveBeenCalledWith(
+        expect.objectContaining({ esClient: mockUserEsClient, namespace })
+      );
+      expect(mockDeleteEuidStoredScripts).toHaveBeenCalledWith(
+        expect.objectContaining({ esClient: mockUserEsClient })
+      );
       expect(mockGlobalStateClient.delete).toHaveBeenCalledTimes(1);
-      expect(mockStopStatusReportTask).toHaveBeenCalledTimes(1);
-      expect(mockStopHistorySnapshotTask).toHaveBeenCalledTimes(1);
     });
 
     it('is a no-op when the type is not installed', async () => {
@@ -344,8 +396,34 @@ describe('AssetManagerClient', () => {
 
       expect(result).toBe(false);
       expect(mockEngineDescriptorClient.delete).not.toHaveBeenCalled();
+      expect(mockStopExtractEntityTask).not.toHaveBeenCalled();
       expect(mockUninstallElasticsearchAssets).not.toHaveBeenCalled();
-      expect(mockDeleteEuidStoredScripts).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('cleanupNamespace', () => {
+    it('removes namespace tasks, ES assets, EUID scripts, and global state', async () => {
+      await client.cleanupNamespace();
+
+      expect(mockStopHistorySnapshotTask).toHaveBeenCalledWith(
+        expect.objectContaining({ namespace })
+      );
+      expect(mockStopStatusReportTask).toHaveBeenCalledWith(expect.objectContaining({ namespace }));
+      expect(mockRemoveEntityMaintainer).toHaveBeenCalledTimes(2);
+      expect(mockRemoveEntityMaintainer).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'automated-resolution', namespace })
+      );
+      expect(mockRemoveEntityMaintainer).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'risk-score', namespace })
+      );
+      expect(mockUninstallElasticsearchAssets).toHaveBeenCalledWith(
+        expect.objectContaining({ esClient: mockUserEsClient, namespace })
+      );
+      expect(mockDeleteEuidStoredScripts).toHaveBeenCalledWith(
+        expect.objectContaining({ esClient: mockUserEsClient })
+      );
+      expect(mockGlobalStateClient.delete).toHaveBeenCalledTimes(1);
+      expect(mockStopExtractEntityTask).not.toHaveBeenCalled();
     });
   });
 
