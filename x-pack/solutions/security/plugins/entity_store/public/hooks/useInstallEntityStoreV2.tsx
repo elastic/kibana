@@ -95,10 +95,11 @@ export const useInstallEntityStoreV2 = (services: Services) => {
 
         const hadV1 = await isEntityStoreV1Installed(services.http);
 
-        if (!(await hasEntityStoreInstallPrivileges(services.http))) return;
-
         // Only auto-install for users migrating from v1. Fresh users must opt in explicitly.
+        // Check before privileges to avoid an unnecessary API call for the common case.
         if (!hadV1) return;
+
+        if (!(await hasEntityStoreInstallPrivileges(services.http))) return;
 
         // Entity store not installed → install entity store (init entity maintainers is already done by the install API).
         await services.http.post(installAllEntitiesRequest);
