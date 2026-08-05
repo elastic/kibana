@@ -5,6 +5,8 @@
  * 2.0.
  */
 export const TASK_MANAGER_INDEX = '.kibana_task_manager';
+// Not a saved object index: Task Manager creates and writes this one directly. It keeps the
+// `.kibana_task_manager` prefix so it stays covered by the existing system index privileges.
 export const TASK_MANAGER_CLAIM_NUDGE_INDEX = '.kibana_task_manager_claim_nudge';
 export const CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: string[] = [
   // for testing

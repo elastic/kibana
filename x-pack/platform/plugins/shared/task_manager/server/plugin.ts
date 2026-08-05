@@ -42,7 +42,6 @@ import {
   BACKGROUND_TASK_NODE_SO_NAME,
   TASK_SO_NAME,
   INVALIDATE_API_KEY_SO_NAME,
-  TASK_MANAGER_CLAIM_NUDGE_SO_NAME,
 } from './saved_objects';
 import type { TaskDefinitionRegistry } from './task_type_dictionary';
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -368,20 +367,20 @@ export class TaskManagerPlugin
     const { savedObjects, elasticsearch, executionContext, security } = core;
     const enrichFakeRequest = this.enrichFakeRequest;
     this.licenseSubscriber = new LicenseSubscriber(licensing.license$);
+    const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
 
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
       BACKGROUND_TASK_NODE_SO_NAME,
       INVALIDATE_API_KEY_SO_NAME,
-      TASK_MANAGER_CLAIM_NUDGE_SO_NAME,
     ]);
 
     if (this.config.claim_nudge.enabled) {
       this.claimNudgeService = new TaskManagerClaimNudgeService({
         logger: this.logger,
         esClient: elasticsearch.client.asInternalUser,
-        savedObjectsRepository,
         index: TASK_MANAGER_CLAIM_NUDGE_INDEX,
+        isServerless,
       });
     }
 
@@ -422,8 +421,6 @@ export class TaskManagerPlugin
       apiKeyStrategy,
     });
     this.taskStore = taskStore;
-
-    const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
 
     const defaultCapacity = getDefaultCapacity({
       autoCalculateDefaultEchCapacity: this.config.auto_calculate_default_ech_capacity,

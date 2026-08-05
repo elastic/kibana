@@ -8,11 +8,32 @@
 import { v4 } from 'uuid';
 import { Subject } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient, ISavedObjectsRepository, Logger } from '@kbn/core/server';
-import { TASK_MANAGER_CLAIM_NUDGE_SO_NAME } from '../saved_objects';
-import type { TaskManagerClaimNudge } from '../saved_objects/schemas/task_manager_claim_nudge';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 const GLOBAL_CLAIM_NUDGE_ID = 'global';
+// The global checkpoint Elasticsearch reports for an index that has never been written to.
+const NEW_INDEX_CHECKPOINT = -1;
+// The signal document is never read back — only the index's global checkpoint matters — but the
+// fields are mapped anyway so the index is self-describing and easy to inspect when debugging.
+const CLAIM_NUDGE_MAPPINGS: estypes.MappingTypeMapping = {
+  dynamic: false,
+  properties: {
+    updated_at: {
+      type: 'date',
+    },
+    nonce: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
+  },
+};
+// Mirrors the settings Core applies to saved object indices: a single shard keeps the checkpoint
+// array to one entry, and auto-expanding replicas keeps the index green on single-node clusters.
+// Serverless Elasticsearch manages shards and replicas itself and rejects these settings.
+const CLAIM_NUDGE_SETTINGS: estypes.IndicesIndexSettings = {
+  number_of_shards: 1,
+  auto_expand_replicas: '0-1',
+};
 // How long the ES `_fleet/global_checkpoints` request should long-poll for before
 // returning with `timed_out: true`. We simply re-issue the request in a loop.
 const CHECKPOINT_WAIT_TIMEOUT = '30s';
@@ -35,31 +56,33 @@ const ERROR_LOG_THROTTLE_MS = 60_000;
 export interface TaskManagerClaimNudgeServiceOptions {
   logger: Logger;
   esClient: ElasticsearchClient;
-  savedObjectsRepository: ISavedObjectsRepository;
   index: string;
+  isServerless: boolean;
+}
+
+interface ClaimNudgeSignal {
+  updated_at: string;
+  nonce: string;
 }
 
 export class TaskManagerClaimNudgeService {
   private readonly logger: Logger;
   private readonly esClient: ElasticsearchClient;
-  private readonly savedObjectsRepository: ISavedObjectsRepository;
   private readonly index: string;
+  private readonly isServerless: boolean;
   private readonly claimNudgeSubject = new Subject<void>();
   private started = false;
   private abortController: AbortController | undefined;
   private baselineSet = false;
   private lastErrorLoggedAt = 0;
+  private ensureIndexPromise: Promise<void> | undefined;
+  private createdIndex = false;
 
-  constructor({
-    logger,
-    esClient,
-    savedObjectsRepository,
-    index,
-  }: TaskManagerClaimNudgeServiceOptions) {
+  constructor({ logger, esClient, index, isServerless }: TaskManagerClaimNudgeServiceOptions) {
     this.logger = logger;
     this.esClient = esClient;
-    this.savedObjectsRepository = savedObjectsRepository;
     this.index = index;
+    this.isServerless = isServerless;
   }
 
   /**
@@ -98,20 +121,54 @@ export class TaskManagerClaimNudgeService {
    * any node currently long-polling immediately observes the advance and triggers a claim cycle.
    */
   public async notify() {
-    const attributes: TaskManagerClaimNudge = {
+    await this.ensureIndexExists();
+
+    const document: ClaimNudgeSignal = {
       updated_at: new Date().toISOString(),
       nonce: v4(),
     };
 
-    await this.savedObjectsRepository.create<TaskManagerClaimNudge>(
-      TASK_MANAGER_CLAIM_NUDGE_SO_NAME,
-      attributes,
-      {
-        id: GLOBAL_CLAIM_NUDGE_ID,
-        overwrite: true,
-        refresh: true,
+    // A single document, overwritten in place: its contents are irrelevant, the write itself is
+    // the signal. `nonce` guarantees every call is a real change rather than a no-op.
+    await this.esClient.index<ClaimNudgeSignal>({
+      index: this.index,
+      id: GLOBAL_CLAIM_NUDGE_ID,
+      document,
+      refresh: true,
+    });
+  }
+
+  /**
+   * Creates the signal index if it doesn't already exist. Unlike a saved object index, nothing
+   * creates this index during startup migrations, so both the notifying and the watching side
+   * have to be able to bring it into existence. Memoized so a healthy node only pays for it once.
+   */
+  private async ensureIndexExists() {
+    if (!this.ensureIndexPromise) {
+      this.ensureIndexPromise = this.createIndex().catch((err) => {
+        // Allow a later call to retry rather than caching the failure for the process lifetime.
+        this.ensureIndexPromise = undefined;
+        throw err;
+      });
+    }
+
+    return this.ensureIndexPromise;
+  }
+
+  private async createIndex() {
+    try {
+      await this.esClient.indices.create({
+        index: this.index,
+        mappings: CLAIM_NUDGE_MAPPINGS,
+        ...(this.isServerless ? {} : { settings: CLAIM_NUDGE_SETTINGS }),
+      });
+      this.createdIndex = true;
+    } catch (err) {
+      // Every Kibana node races to create the index; losing that race is the expected outcome.
+      if (err?.body?.error?.type !== 'resource_already_exists_exception') {
+        throw err;
       }
-    );
+    }
   }
 
   private async watchCheckpoints() {
@@ -121,6 +178,16 @@ export class TaskManagerClaimNudgeService {
       this.abortController = new AbortController();
 
       try {
+        await this.ensureIndexExists();
+
+        if (this.createdIndex && !this.baselineSet) {
+          // We created the index, so its checkpoint is known and there is no need to spend a round
+          // trip discovering it. That round trip would otherwise absorb a nudge written while we
+          // were still arming, silently dropping it.
+          checkpoints = [NEW_INDEX_CHECKPOINT];
+          this.baselineSet = true;
+        }
+
         const { global_checkpoints: nextCheckpoints, timed_out: timedOut } =
           await this.esClient.fleet.globalCheckpoints(
             {

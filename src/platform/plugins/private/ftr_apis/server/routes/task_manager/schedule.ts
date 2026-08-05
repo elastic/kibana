@@ -27,6 +27,11 @@ const scheduleBodySchema = schema.object({
     scope: schema.maybe(
       schema.arrayOf(schema.string({ minLength: 1, maxLength: 200 }), { maxSize: 10 })
     ),
+    /**
+     * ISO date string. Lets tests create a task that regular polling will not claim for a known
+     * amount of time, which is otherwise impossible without writing to the task index directly.
+     */
+    runAt: schema.maybe(schema.string({ maxLength: 100 })),
     schedule: schema.maybe(
       schema.oneOf([
         schema.object({
@@ -107,15 +112,22 @@ export const registerTaskManagerScheduleRoute = (
           schedule?: IntervalSchedule | RruleSchedule;
           timeoutOverride?: string;
           cost?: InstanceTaskCost;
+          runAt?: string;
         };
         skipRequestForScheduling?: boolean;
         onEsKey?: boolean;
       };
 
+      const { runAt, ...taskFields } = task;
+      const taskInstance = {
+        ...taskFields,
+        ...(runAt ? { runAt: new Date(runAt) } : {}),
+      };
+
       const taskResult =
         skipRequestForScheduling === true
-          ? await startContract.schedule(task)
-          : await startContract.schedule(task, {
+          ? await startContract.schedule(taskInstance)
+          : await startContract.schedule(taskInstance, {
               request: req,
               ...(onEsKey === true ? { onEsKey: true } : {}),
             });

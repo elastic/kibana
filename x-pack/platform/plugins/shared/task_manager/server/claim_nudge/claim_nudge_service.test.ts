@@ -6,39 +6,51 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { TaskManagerClaimNudgeService } from './claim_nudge_service';
-import { TASK_MANAGER_CLAIM_NUDGE_SO_NAME } from '../saved_objects';
 
 const INDEX = '.kibana_task_manager_claim_nudge';
 
 function createService({
   esClient,
   logger = loggingSystemMock.createLogger(),
-  savedObjectsRepository = savedObjectsRepositoryMock.create(),
+  isServerless = false,
 }: {
   esClient: ElasticsearchClient;
   logger?: ReturnType<typeof loggingSystemMock.createLogger>;
-  savedObjectsRepository?: ReturnType<typeof savedObjectsRepositoryMock.create>;
+  isServerless?: boolean;
 }) {
   return {
     service: new TaskManagerClaimNudgeService({
       logger,
       esClient,
-      savedObjectsRepository,
       index: INDEX,
+      isServerless,
     }),
     logger,
-    savedObjectsRepository,
   };
 }
 
+/**
+ * Defaults to an index that already exists, which is the steady state on every Kibana boot after
+ * the first. Tests covering a freshly created index let `indices.create` succeed instead.
+ */
 function createEsClientMock() {
   return {
+    index: jest.fn(),
+    indices: {
+      create: jest.fn().mockRejectedValue(createIndexAlreadyExistsError()),
+    },
     fleet: {
       globalCheckpoints: jest.fn(),
     },
   } as unknown as ElasticsearchClient;
+}
+
+function createIndexAlreadyExistsError() {
+  return Object.assign(new Error('index already exists'), {
+    body: { error: { type: 'resource_already_exists_exception' } },
+  });
 }
 
 describe('TaskManagerClaimNudgeService', () => {
@@ -48,36 +60,100 @@ describe('TaskManagerClaimNudgeService', () => {
   });
 
   describe('notify()', () => {
-    it('writes the claim nudge doc with overwrite and refresh:true', async () => {
+    it('writes the claim nudge doc to a fixed id with refresh:true', async () => {
       const esClient = createEsClientMock();
-      const { service, savedObjectsRepository } = createService({ esClient });
+      const { service } = createService({ esClient });
 
       await service.notify();
 
-      expect(savedObjectsRepository.create).toHaveBeenCalledWith(
-        TASK_MANAGER_CLAIM_NUDGE_SO_NAME,
-        expect.objectContaining({
+      expect(esClient.index).toHaveBeenCalledWith({
+        index: INDEX,
+        id: 'global',
+        document: {
           updated_at: expect.any(String),
           nonce: expect.any(String),
-        }),
-        {
-          id: 'global',
-          overwrite: true,
-          refresh: true,
-        }
-      );
+        },
+        refresh: true,
+      });
     });
 
     it('generates a new nonce on every call', async () => {
       const esClient = createEsClientMock();
-      const { service, savedObjectsRepository } = createService({ esClient });
+      const { service } = createService({ esClient });
 
       await service.notify();
       await service.notify();
 
-      const [, firstCallAttrs] = savedObjectsRepository.create.mock.calls[0];
-      const [, secondCallAttrs] = savedObjectsRepository.create.mock.calls[1];
-      expect(firstCallAttrs).not.toEqual(secondCallAttrs);
+      const [{ document: firstDocument }] = (esClient.index as jest.Mock).mock.calls[0];
+      const [{ document: secondDocument }] = (esClient.index as jest.Mock).mock.calls[1];
+      expect(firstDocument).not.toEqual(secondDocument);
+    });
+
+    it('creates the signal index with mappings and single-shard settings', async () => {
+      const esClient = createEsClientMock();
+      const { service } = createService({ esClient });
+
+      await service.notify();
+
+      expect(esClient.indices.create).toHaveBeenCalledWith({
+        index: INDEX,
+        mappings: {
+          dynamic: false,
+          properties: {
+            updated_at: { type: 'date' },
+            nonce: { type: 'keyword', ignore_above: 1024 },
+          },
+        },
+        settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
+      });
+    });
+
+    it('omits shard settings on serverless, where Elasticsearch rejects them', async () => {
+      const esClient = createEsClientMock();
+      const { service } = createService({ esClient, isServerless: true });
+
+      await service.notify();
+
+      expect(esClient.indices.create).toHaveBeenCalledWith({
+        index: INDEX,
+        mappings: expect.any(Object),
+      });
+    });
+
+    it('only attempts to create the index once', async () => {
+      const esClient = createEsClientMock();
+      const { service } = createService({ esClient });
+
+      await service.notify();
+      await service.notify();
+
+      expect(esClient.indices.create).toHaveBeenCalledTimes(1);
+      expect(esClient.index).toHaveBeenCalledTimes(2);
+    });
+
+    it('tolerates the index being created concurrently by another Kibana node', async () => {
+      const esClient = createEsClientMock();
+      (esClient.indices.create as jest.Mock).mockRejectedValue(createIndexAlreadyExistsError());
+      const { service } = createService({ esClient });
+
+      await expect(service.notify()).resolves.toBeUndefined();
+      expect(esClient.index).toHaveBeenCalledTimes(1);
+    });
+
+    it('surfaces index creation failures and retries them on the next call', async () => {
+      const esClient = createEsClientMock();
+      (esClient.indices.create as jest.Mock)
+        .mockRejectedValueOnce(new Error('ES unavailable'))
+        .mockResolvedValueOnce(undefined);
+      const { service } = createService({ esClient });
+
+      await expect(service.notify()).rejects.toThrow('ES unavailable');
+      expect(esClient.index).not.toHaveBeenCalled();
+
+      await service.notify();
+
+      expect(esClient.indices.create).toHaveBeenCalledTimes(2);
+      expect(esClient.index).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -169,6 +245,46 @@ describe('TaskManagerClaimNudgeService', () => {
         }),
         expect.objectContaining({ retryOnTimeout: false })
       );
+    });
+
+    it('creates the signal index so the long-poll has something to watch', async () => {
+      const esClient = createEsClientMock();
+      const { service } = createService({ esClient });
+
+      (esClient.fleet.globalCheckpoints as jest.Mock).mockImplementation(async () => {
+        service.stop();
+        return { global_checkpoints: [1], timed_out: false };
+      });
+
+      service.start();
+      await flushPromises();
+
+      expect(esClient.indices.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('emits for a nudge written while arming on an index it just created', async () => {
+      const esClient = createEsClientMock();
+      (esClient.indices.create as jest.Mock).mockResolvedValue(undefined);
+      const { service } = createService({ esClient });
+
+      // A notify() that lands before the watcher's first request has already advanced the
+      // checkpoint, so the very first response must count as an advance rather than a baseline.
+      (esClient.fleet.globalCheckpoints as jest.Mock).mockImplementation(async () => {
+        service.stop();
+        return { global_checkpoints: [0], timed_out: false };
+      });
+
+      const nudgeSpy = jest.fn();
+      service.claimNudge$.subscribe(nudgeSpy);
+
+      service.start();
+      await flushPromises();
+
+      expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledWith(
+        expect.objectContaining({ checkpoints: [-1] }),
+        expect.anything()
+      );
+      expect(nudgeSpy).toHaveBeenCalledTimes(1);
     });
 
     it('is a no-op when called while already started', async () => {
