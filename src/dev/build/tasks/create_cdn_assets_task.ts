@@ -97,7 +97,7 @@ export const CreateCdnAssets: Task = {
       resolve(bundles, 'kbn-ui-shared-deps-src')
     );
     // [rspack-transition] When the legacy optimizer is removed, delete the else branch.
-    if (process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1') {
+    if (process.env.KBN_USE_RSPACK !== 'false') {
       // Rspack: all bundles (core + plugins) are in the unified output directory.
       // Copy into the CDN bundles root so URLs like /bundles/kibana.bundle.js
       // and /bundles/chunks/<hash>.js resolve correctly.

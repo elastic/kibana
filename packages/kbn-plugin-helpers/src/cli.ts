@@ -23,8 +23,7 @@ import { loadConfig } from './config';
  * Check if RSPack mode is enabled via environment variable
  */
 function isRspackMode(): boolean {
-  const v = process.env.KBN_USE_RSPACK;
-  return v === 'true' || v === '1';
+  return process.env.KBN_USE_RSPACK !== 'false';
 }
 
 export function runCli() {
@@ -99,7 +98,7 @@ export function runCli() {
 
         // Use RSPack or webpack based on environment
         if (isRspackMode()) {
-          log.info('Using RSPack optimizer (KBN_USE_RSPACK=true)');
+          log.info('Using RSPack optimizer');
           await Tasks.optimizeRspack(context);
         } else {
           await Tasks.optimize(context);
@@ -185,7 +184,7 @@ export function runCli() {
 
         // Use RSPack or webpack based on environment
         if (isRspackMode()) {
-          log.info('Using RSPack optimizer (KBN_USE_RSPACK=true)');
+          log.info('Using RSPack optimizer');
           await Tasks.optimizeRspack(context);
         } else {
           await Tasks.optimize(context);

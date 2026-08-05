@@ -6,5 +6,5 @@ source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
 
-echo "--- Verify Rspack Optimizer Build"
-node scripts/build_rspack_bundles --dist
+echo "--- Verify Legacy Optimizer Build"
+KBN_USE_RSPACK=false node scripts/build_kibana_platform_plugins --dist

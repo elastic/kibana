@@ -116,8 +116,8 @@ describe('buildDistributables KBN_USE_RSPACK gate', () => {
     }
   });
 
-  it('runs BuildRspackBundles when KBN_USE_RSPACK is "true"', async () => {
-    process.env.KBN_USE_RSPACK = 'true';
+  it('runs BuildRspackBundles when KBN_USE_RSPACK is not set', async () => {
+    delete process.env.KBN_USE_RSPACK;
 
     await buildDistributables(log, minimalGenericFoldersOptions);
 
@@ -126,22 +126,13 @@ describe('buildDistributables KBN_USE_RSPACK gate', () => {
     expect(Tasks.BuildRspackBundles.run).toHaveBeenCalledTimes(1);
   });
 
-  it('runs BuildKibanaPlatformPlugins when KBN_USE_RSPACK is not set', async () => {
-    delete process.env.KBN_USE_RSPACK;
+  it('runs BuildKibanaPlatformPlugins when KBN_USE_RSPACK is "false"', async () => {
+    process.env.KBN_USE_RSPACK = 'false';
 
     await buildDistributables(log, minimalGenericFoldersOptions);
 
     expect(mockLegacyBundleTaskRun).toHaveBeenCalledTimes(1);
     expect(mockRspackBundleTaskRun).not.toHaveBeenCalled();
     expect(Tasks.BuildKibanaPlatformPlugins.run).toHaveBeenCalledTimes(1);
-  });
-
-  it('runs BuildRspackBundles when KBN_USE_RSPACK is "1"', async () => {
-    process.env.KBN_USE_RSPACK = '1';
-
-    await buildDistributables(log, minimalGenericFoldersOptions);
-
-    expect(mockRspackBundleTaskRun).toHaveBeenCalledTimes(1);
-    expect(mockLegacyBundleTaskRun).not.toHaveBeenCalled();
   });
 });

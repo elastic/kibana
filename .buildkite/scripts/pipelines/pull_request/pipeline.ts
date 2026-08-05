@@ -102,7 +102,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       'pick_test_group_run_order',
       'build_scout_tests',
       'report_package_metrics',
-      'verify_rspack_build',
+      'verify_legacy_optimizer_build',
     ]);
 
     if (prHasFIPSLabel()) {

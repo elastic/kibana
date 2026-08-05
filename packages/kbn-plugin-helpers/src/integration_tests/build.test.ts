@@ -36,10 +36,10 @@ describe('scripts/generate_plugin', () => {
   afterEach(async () => await del([PLUGIN_DIR, TMP_DIR]));
 
   it('builds a generated plugin into a viable archive', async () => {
-    // extendEnv merges process.env then this object; must override CI's KBN_USE_RSPACK=true
+    // Explicitly exercise the legacy optimizer path.
     const legacyOptimizerEnv = {
       ...process.env,
-      KBN_USE_RSPACK: '',
+      KBN_USE_RSPACK: 'false',
     };
 
     const generateProc = await execa(
@@ -138,7 +138,7 @@ describe('scripts/generate_plugin', () => {
    * Once the legacy webpack optimizer is removed, this should become the only build test
    * and the KBN_USE_RSPACK env gate should be removed from cli.ts.
    */
-  it('builds a generated plugin with rspack when KBN_USE_RSPACK is set', async () => {
+  it('builds a generated plugin with rspack by default', async () => {
     await execa(process.execPath, ['scripts/generate_plugin', '-y', '--name', 'fooTestPlugin'], {
       cwd: REPO_ROOT,
       all: true,
@@ -159,7 +159,6 @@ describe('scripts/generate_plugin', () => {
         all: true,
         env: {
           ...process.env,
-          KBN_USE_RSPACK: 'true',
         },
       }
     );

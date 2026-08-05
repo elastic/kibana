@@ -67,8 +67,8 @@ describe('CreateCdnAssets KBN_USE_RSPACK gate', () => {
     }
   });
 
-  it('copies unified rspack bundles from target/public/bundles when KBN_USE_RSPACK is "true"', async () => {
-    process.env.KBN_USE_RSPACK = 'true';
+  it('copies unified rspack bundles from target/public/bundles when KBN_USE_RSPACK is not set', async () => {
+    delete process.env.KBN_USE_RSPACK;
 
     await CreateCdnAssets.run(config, log, mockedBuild);
 
@@ -83,8 +83,8 @@ describe('CreateCdnAssets KBN_USE_RSPACK gate', () => {
     );
   });
 
-  it('copies legacy core bundles from node_modules/@kbn/core/target/public when KBN_USE_RSPACK is not set', async () => {
-    delete process.env.KBN_USE_RSPACK;
+  it('copies legacy core bundles when KBN_USE_RSPACK is "false"', async () => {
+    process.env.KBN_USE_RSPACK = 'false';
 
     await CreateCdnAssets.run(config, log, mockedBuild);
 
@@ -101,17 +101,6 @@ describe('CreateCdnAssets KBN_USE_RSPACK gate', () => {
     expect(mockedCopyAll).not.toHaveBeenCalledWith(
       resolve(buildSource, 'target/public/bundles'),
       expect.anything()
-    );
-  });
-
-  it('uses legacy core bundle path when KBN_USE_RSPACK is not exactly "true"', async () => {
-    process.env.KBN_USE_RSPACK = 'false';
-
-    await CreateCdnAssets.run(config, log, mockedBuild);
-
-    expect(mockedCopyAll).toHaveBeenCalledWith(
-      resolve(buildSource, 'node_modules/@kbn/core/target/public'),
-      expect.stringMatching(/[/\\]core$/)
     );
   });
 });
