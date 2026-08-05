@@ -63,8 +63,9 @@ export function lazyImmutableGCableObject<T extends object>(factory: () => T): T
         value != null &&
         typeof (value as Record<PropertyKey, unknown>).processJSONSchema === 'function'
       ) {
-        const originalPJS = (value as Record<PropertyKey, unknown>)
-          .processJSONSchema as (...args: unknown[]) => unknown;
+        const originalPJS = (value as Record<PropertyKey, unknown>).processJSONSchema as (
+          ...args: unknown[]
+        ) => unknown;
         return {
           ...(value as object),
           processJSONSchema: (
