@@ -133,6 +133,18 @@ interface UiamErrorDetails {
 }
 
 /**
+ * Telemetry `errorType` for an OAuth token exchange that Kibana itself rejected
+ * as opposed to a failure reported by UIAM.
+ */
+const OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE = 'KIBANA.AUDIENCE_MISMATCH';
+
+/**
+ * Telemetry `errorType` for an OAuth token exchange failure that carries no
+ * recognizable classification.
+ */
+const OAUTH_UNKNOWN_ERROR_TYPE = 'UNKNOWN';
+
+/**
  * Response containing a list of OAuth clients.
  */
 export interface OAuthClientsResponse {
@@ -266,6 +278,13 @@ export interface UiamServicePublic {
   ): Promise<OAuthClientResponse>;
 
   /**
+   * Permanently deletes an OAuth client, and all of its connections, via the UIAM service.
+   * @param accessToken UIAM session access token.
+   * @param clientId The ID of the client to delete.
+   */
+  deleteOAuthClient(accessToken: string, clientId: string): Promise<void>;
+
+  /**
    * Lists OAuth connections via the UIAM service.
    * @param accessToken UIAM session access token.
    * @param clientId Optional client ID filter.
@@ -306,6 +325,14 @@ export interface UiamServicePublic {
     connectionId: string,
     reason?: string
   ): Promise<OAuthConnectionResponse>;
+
+  /**
+   * Permanently deletes an OAuth connection via the UIAM service.
+   * @param accessToken UIAM session access token.
+   * @param clientId The ID of the client owning the connection.
+   * @param connectionId The ID of the connection to delete.
+   */
+  deleteOAuthConnection(accessToken: string, clientId: string, connectionId: string): Promise<void>;
 
   /**
    * Resolves one or more user IDs into basic user information via the UIAM service.
@@ -478,7 +505,8 @@ export class UiamService implements UiamServicePublic {
       const audience = response.credentials?.oauth?.audience;
       if (audience !== expectedAudience) {
         throw Boom.badRequest(
-          `OAuth token audience mismatch: expected "${expectedAudience}" but got "${audience}".`
+          `OAuth token audience mismatch: expected "${expectedAudience}" but got "${audience}".`,
+          { errorType: OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE }
         );
       }
 
@@ -490,6 +518,7 @@ export class UiamService implements UiamServicePublic {
     } catch (err) {
       securityTelemetry.recordOAuthTokenExchangeAttempt(performance.now() - startTime, {
         outcome: 'failure',
+        errorType: UiamService.#getOAuthTokenExchangeErrorType(err),
       });
 
       this.#logger.error(
@@ -773,6 +802,38 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
+   * See {@link UiamServicePublic.deleteOAuthClient}.
+   */
+  async deleteOAuthClient(accessToken: string, clientId: string): Promise<void> {
+    try {
+      this.#logger.debug(`Attempting to delete OAuth client: ${clientId}`);
+
+      await UiamService.#parseUiamResponse(
+        await fetch(
+          `${this.#config.url}/uiam/api/v1/oauth/clients/${encodeURIComponent(clientId)}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'User-Agent': this.#userAgentHeader,
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+              Authorization: `Bearer ${accessToken}`,
+            },
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          }
+        )
+      );
+
+      this.#logger.debug(`Successfully deleted OAuth client: ${clientId}`);
+    } catch (err) {
+      this.#logger.error(
+        () => `Failed to delete OAuth client ${clientId}: ${getDetailedErrorMessage(err)}`
+      );
+      throw err;
+    }
+  }
+
+  /**
    * See {@link UiamServicePublic.listOAuthConnections}.
    */
   async listOAuthConnections(
@@ -895,6 +956,47 @@ export class UiamService implements UiamServicePublic {
     } catch (err) {
       this.#logger.error(
         () => `Failed to revoke OAuth connection ${connectionId}: ${getDetailedErrorMessage(err)}`
+      );
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.deleteOAuthConnection}.
+   */
+  async deleteOAuthConnection(
+    accessToken: string,
+    clientId: string,
+    connectionId: string
+  ): Promise<void> {
+    try {
+      this.#logger.debug(`Attempting to delete OAuth connection: ${connectionId}`);
+
+      await UiamService.#parseUiamResponse(
+        await fetch(
+          `${this.#config.url}/uiam/api/v1/oauth/clients/${encodeURIComponent(
+            clientId
+          )}/connections/${encodeURIComponent(connectionId)}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'User-Agent': this.#userAgentHeader,
+              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+              Authorization: `Bearer ${accessToken}`,
+            },
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          }
+        )
+      );
+
+      this.#logger.debug(`Successfully deleted OAuth connection: ${connectionId}`);
+    } catch (err) {
+      this.#logger.error(
+        () =>
+          `Failed to delete OAuth connection ${connectionId} for client ${clientId}: ${getDetailedErrorMessage(
+            err
+          )}`
       );
       throw err;
     }
@@ -1037,5 +1139,15 @@ export class UiamService implements UiamServicePublic {
     };
 
     throw err;
+  }
+
+  static #getOAuthTokenExchangeErrorType(err: unknown): string {
+    if (!Boom.isBoom(err)) {
+      return OAUTH_UNKNOWN_ERROR_TYPE;
+    }
+
+    const payload = err.output?.payload as { error?: UiamErrorDetails } | undefined;
+
+    return err.data?.errorType ?? payload?.error?.type ?? OAUTH_UNKNOWN_ERROR_TYPE;
   }
 }
