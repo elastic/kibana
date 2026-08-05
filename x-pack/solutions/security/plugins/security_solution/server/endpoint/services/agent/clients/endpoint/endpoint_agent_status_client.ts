@@ -23,11 +23,17 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
     try {
       const agentIdsKql = agentIds.map((agentId) => `agent.id: ${agentId}`).join(' or ');
       const [{ data: hostInfoForAgents }, allPendingActions] = await Promise.all([
-        metadataService.getHostMetadataList({
-          page: 0,
-          pageSize: 1000,
-          kuery: agentIdsKql,
-        }),
+        // The request is threaded through so this read can fan out under CPS. Without it the read is
+        // origin-only, an agent enrolled in a linked project is simply not found, and the status
+        // below falls back to offline for a host the endpoint list is showing as healthy.
+        metadataService.getHostMetadataList(
+          {
+            page: 0,
+            pageSize: 1000,
+            kuery: agentIdsKql,
+          },
+          this.options.request
+        ),
         getPendingActionsSummary(this.options.endpointService, this.options.spaceId, agentIds),
       ]).catch(catchAndWrapError);
 

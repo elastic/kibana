@@ -83,6 +83,7 @@ export const getAgentStatusRouteHandler = (
         spaceId,
         connectorActionsClient,
         endpointService: endpointContext.service,
+        request,
       });
       const data = await agentStatusClient.getAgentStatuses(agentIds);
 

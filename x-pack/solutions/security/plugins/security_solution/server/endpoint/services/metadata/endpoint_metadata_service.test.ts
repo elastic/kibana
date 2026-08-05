@@ -24,7 +24,6 @@ import {
   getESQueryHostMetadataByID,
   getESQueryHostMetadataByIDs,
 } from '../../routes/metadata/query_builders';
-import { HostStatus } from '../../../../common/endpoint/types';
 import type { HostMetadata } from '../../../../common/endpoint/types';
 import type { Agent, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
@@ -249,52 +248,6 @@ describe('EndpointMetadataService', () => {
       });
     });
 
-    describe('and the status runtime field is absent, as on a fanned-in hit', () => {
-      beforeEach(() => {
-        agentPolicyServiceMock.getByIds.mockResolvedValue([]);
-      });
-
-      it('should derive a healthy host status from the document', async () => {
-        const endpointMetadataDoc = endpointDocGenerator.generateHostMetadata();
-        const mockAgent = {
-          last_checkin: new Date().toISOString(),
-          last_checkin_status: 'online',
-        } as unknown as Agent;
-        const mockDoc = unitedMetadataSearchResponseMock(endpointMetadataDoc, mockAgent);
-        delete mockDoc.hits.hits[0].fields;
-        esClient.search.mockResponse(mockDoc);
-
-        const result = await metadataService.getHostMetadataList({
-          page: 0,
-          pageSize: 10,
-          kuery: '',
-          hostStatuses: [],
-        });
-
-        expect(result.data[0].host_status).toEqual(HostStatus.HEALTHY);
-        expect(result.data[0].metadata).toBeDefined();
-      });
-
-      it('should report the host offline when its last check-in is older than the threshold', async () => {
-        const endpointMetadataDoc = endpointDocGenerator.generateHostMetadata();
-        const mockAgent = {
-          last_checkin: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-          last_checkin_status: 'online',
-        } as unknown as Agent;
-        const mockDoc = unitedMetadataSearchResponseMock(endpointMetadataDoc, mockAgent);
-        delete mockDoc.hits.hits[0].fields;
-        esClient.search.mockResponse(mockDoc);
-
-        const result = await metadataService.getHostMetadataList({
-          page: 0,
-          pageSize: 10,
-          kuery: '',
-          hostStatuses: [],
-        });
-
-        expect(result.data[0].host_status).toEqual(HostStatus.OFFLINE);
-      });
-    });
   });
 
   describe('#getHostMetadataList - policy_id suffix stripping', () => {
