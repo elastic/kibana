@@ -138,6 +138,7 @@ export const updateDates = (container: string = GLOBAL_FILTERS_CONTAINER) => {
     container,
     () => undefined,
     () => {
+      // eslint-disable-next-line cypress/no-force
       cy.get(GET_DATE_PICKER_APPLY_BUTTON(container)).click({ force: true });
       cy.get(GET_DATE_PICKER_APPLY_BUTTON(container)).should('not.have.text', 'Updating');
     }

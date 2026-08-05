@@ -28,9 +28,11 @@ export const assertFieldsAreLoaded = () => {
 };
 
 export const fillEsqlQueryBar = (query: string) => {
+  // eslint-disable-next-line cypress/no-force
   cy.get(DISCOVER_ESQL_EDITABLE_INPUT).should('exist').click({ force: true });
 
   const selectAll = Cypress.platform === 'darwin' ? '{cmd}a' : '{ctrl}a';
+  // eslint-disable-next-line cypress/no-force
   cy.get(DISCOVER_ESQL_EDITABLE_INPUT).type(`${selectAll}{del}`, { force: true });
 
   cy.get(DISCOVER_ESQL_EDITABLE_INPUT).then(($textarea) => {
@@ -54,6 +56,7 @@ export const selectCurrentDiscoverEsqlQuery = (
 ) => {
   // eslint-disable-next-line cypress/no-force
   cy.get(discoverEsqlInput).click({ force: true });
+  // eslint-disable-next-line cypress/no-force
   cy.get(discoverEsqlInput).type(Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}', {
     force: true,
   });
