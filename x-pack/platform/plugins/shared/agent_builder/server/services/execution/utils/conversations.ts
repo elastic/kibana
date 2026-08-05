@@ -14,6 +14,7 @@ import type {
   ConversationOrigin,
   RoundCompleteEvent,
   ConversationAction,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import { getDefaultConversationAccessControl } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
@@ -157,7 +158,12 @@ export const getConversation = async ({
     }
 
     return {
-      ...placeholderConversation({ agentId, accessControl, origin }),
+      ...placeholderConversation({
+        agentId,
+        accessControl,
+        origin,
+        user: conversationClient.user,
+      }),
       operation: 'CREATE',
     };
   }
@@ -180,7 +186,13 @@ export const getConversation = async ({
     };
   } else {
     return {
-      ...placeholderConversation({ conversationId, agentId, accessControl, origin }),
+      ...placeholderConversation({
+        conversationId,
+        agentId,
+        accessControl,
+        origin,
+        user: conversationClient.user,
+      }),
       operation: 'CREATE',
     };
   }
@@ -191,11 +203,13 @@ export const placeholderConversation = ({
   conversationId,
   accessControl,
   origin,
+  user,
 }: {
   agentId: string;
   conversationId?: string;
   accessControl?: ConversationAccessControl;
   origin?: ConversationOrigin;
+  user: UserIdAndName;
 }): Conversation => {
   return {
     id: conversationId ?? uuidv4(),
@@ -206,9 +220,6 @@ export const placeholderConversation = ({
     ...(origin ? { origin } : {}),
     updated_at: new Date().toISOString(),
     created_at: new Date().toISOString(),
-    user: {
-      id: 'unknown',
-      username: 'unknown',
-    },
+    user,
   };
 };

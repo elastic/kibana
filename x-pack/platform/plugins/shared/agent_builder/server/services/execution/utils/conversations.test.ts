@@ -69,6 +69,7 @@ describe('conversations utils', () => {
         expect(result.access_control).toEqual({
           access_mode: ConversationAccessControlMode.Private,
         });
+        expect(result.user).toEqual(conversationClient.user);
       });
 
       it('uses explicit access control for new conversation placeholders', async () => {
@@ -115,6 +116,7 @@ describe('conversations utils', () => {
 
         expect(result.operation).toBe('CREATE');
         expect(result.id).toBe('new-conversation');
+        expect(result.user).toEqual(conversationClient.user);
       });
 
       it('returns UPDATE operation when autoCreateConversationWithId=true and conversation exists', async () => {

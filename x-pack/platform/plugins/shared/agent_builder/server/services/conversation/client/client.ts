@@ -42,6 +42,7 @@ import {
 } from './converters';
 
 export interface ConversationClient {
+  readonly user: UserIdAndName;
   get(conversationId: string): Promise<Conversation>;
   exists(conversationId: string): Promise<boolean>;
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
@@ -74,7 +75,7 @@ export const createClient = ({
 class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
   private readonly storage: ConversationStorage;
-  private readonly user: UserIdAndName;
+  readonly user: UserIdAndName;
   private readonly agentRegistry: AgentRegistry;
 
   constructor({

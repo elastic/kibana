@@ -110,7 +110,6 @@ describe('handleAgentExecution', () => {
           reportExecution,
         },
         conversationService: {
-          getCurrentUser: jest.fn().mockResolvedValue({ id: 'user-1', username: 'test_user' }),
           getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
         },
       } as never,
@@ -171,7 +170,6 @@ describe('handleAgentExecution', () => {
           reportExecution: jest.fn().mockResolvedValue(undefined),
         },
         conversationService: {
-          getCurrentUser: jest.fn().mockResolvedValue({ id: 'user-1', username: 'test_user' }),
           getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
         },
       } as never;
@@ -262,7 +260,6 @@ describe('handleAgentExecution', () => {
           reportExecution: jest.fn().mockResolvedValue(undefined),
         },
         conversationService: {
-          getCurrentUser: jest.fn().mockResolvedValue({ id: 'user-1', username: 'test_user' }),
           getConversationRoundAuthor,
         },
       } as never;

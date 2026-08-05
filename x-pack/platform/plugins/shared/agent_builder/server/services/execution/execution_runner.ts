@@ -232,8 +232,8 @@ const handleConversationExecution = async ({
       : undefined;
 
   const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
-  const user = await deps.conversationService.getCurrentUser({ request });
-  const userId = user.id ?? user.username;
+  const userId = author?.id ?? conversation.user.id;
+  const userName = author?.username ?? conversation.user.username;
 
   return withConverseSpan(
     {
@@ -243,7 +243,7 @@ const handleConversationExecution = async ({
       conversationId: conversation.id,
       spaceId,
       userId,
-      userName: user.username,
+      userName,
       opikHeaders,
     },
     (span) => {
