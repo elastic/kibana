@@ -87,6 +87,7 @@ export const ElasticInferenceServiceModelsHeader = ({
       })}
       menu={menu}
       docLink={docLinks.elasticInferenceService}
+      spacing="bleed"
     />
   );
 };

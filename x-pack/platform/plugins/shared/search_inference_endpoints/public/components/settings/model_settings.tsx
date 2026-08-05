@@ -240,6 +240,7 @@ export const ModelSettings: React.FC = () => {
         })}
         menu={menu}
         docLink={docLinks.featureSettings}
+        spacing="bleed"
       />
       <EuiSpacer size="l" />
       <EuiPageTemplate.Section

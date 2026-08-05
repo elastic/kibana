@@ -54,6 +54,7 @@ export const ExternalInferenceHeader: React.FC<ExternalInferenceHeaderProps> = (
       )}
       menu={menu}
       docLink={docLinks.createInferenceEndpoint}
+      spacing="bleed"
     />
   );
 };
