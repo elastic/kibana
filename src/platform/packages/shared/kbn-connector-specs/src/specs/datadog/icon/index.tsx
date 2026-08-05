@@ -20,5 +20,7 @@ const DatadogIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-// Datadog purple, reversed to white on dark surfaces.
+// Datadog publishes a purple logo for light backgrounds and a white one for
+// dark, and asks that the colors not be inverted any other way:
+// https://www.datadoghq.com/about/resources/
 export default createBrandIcon(DatadogIcon, '#632CA6');
