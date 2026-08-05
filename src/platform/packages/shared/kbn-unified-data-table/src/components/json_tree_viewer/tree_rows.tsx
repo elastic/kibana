@@ -491,7 +491,11 @@ const treeStyles = {
   expandableRow: () => css({ cursor: 'pointer' }),
   pagerRow: () => css({ '&:hover': { backgroundColor: 'transparent' } }),
   pagerButton: ({ euiTheme }: UseEuiTheme) =>
-    css({ blockSize: euiTheme.size.base, minBlockSize: euiTheme.size.base }),
+    css({
+      blockSize: euiTheme.size.base,
+      minBlockSize: euiTheme.size.base,
+      margin: `${euiTheme.size.xs} 0`,
+    }),
   closingRow: ({ euiTheme }: UseEuiTheme) =>
     css({
       display: 'flex',
