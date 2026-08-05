@@ -18,6 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const comboBox = getService('comboBox');
   const supertest = getService('supertest');
+  const log = getService('log');
   const find = getService('find');
   const retry = getService('retry');
   const rules = getService('rules');
@@ -155,9 +156,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     async function deleteGeneratedRules() {
       for (const name of generatedRuleNames) {
-        const alerts = await getAlertsByName(name);
-        const exactMatches = alerts.filter((a: { name: string }) => a.name === name);
-        await deleteAlerts(exactMatches.map((a: { id: string }) => a.id));
+        try {
+          const alerts = await getAlertsByName(name);
+          const exactMatches = alerts.filter((a: { name: string }) => a.name === name);
+          await deleteAlerts(exactMatches.map((a: { id: string }) => a.id));
+        } catch (error) {
+          log.error(`Failed to clean up generated rule "${name}": ${error}`);
+        }
       }
       generatedRuleNames.length = 0;
     }
