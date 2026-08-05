@@ -30,8 +30,6 @@ export function MitigationAccordion({
   children,
   initialIsOpen = false,
 }: MitigationAccordionProps) {
-  // The prefix must be a valid HTML id fragment, so the localized `title` cannot be used here:
-  // it contains spaces which would produce an invalid `aria-controls` reference on the accordion button.
   const accordionId = useGeneratedHtmlId({
     prefix: dataTestSubjPrefix,
   });
