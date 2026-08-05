@@ -14,11 +14,13 @@ import type {
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { KibanaRequest } from '@kbn/core/server';
 import { buildOriginSpaceIdFilter } from './build_origin_space_id_filter';
 import { fetchOrphanActionsSpaceId } from './fetch_orphan_actions_space_id';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../constants';
-import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../../endpoint_app_context_services';
 import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../common/endpoint/service/response_actions/crowdstrike';
 import type { EndpointInternalFleetServicesInterface } from '../../fleet';
 import { stringify } from '../../../utils/stringify';
@@ -37,7 +39,7 @@ export interface FetchActionRequestsOptions {
   spaceId: string;
   endpointService: EndpointAppContextService;
   /** Required for the read to fan out under CPS; without it the read is origin-only */
-  request?: KibanaRequest;
+  scoped?: ScopedEndpointServices;
   from?: number;
   size?: number;
   startDate?: string;
@@ -75,7 +77,7 @@ interface FetchActionRequestsResponse {
 export const fetchActionRequests = async ({
   endpointService,
   spaceId,
-  request,
+  scoped,
   from = 0,
   size = 10,
   agentTypes,
@@ -87,10 +89,8 @@ export const fetchActionRequests = async ({
   unExpiredOnly = false,
   types,
 }: FetchActionRequestsOptions): Promise<FetchActionRequestsResponse> => {
-  const cpsRead = endpointService.isCpsRead(request);
-  const esClient = cpsRead
-    ? endpointService.getReadEsClient(request)
-    : endpointService.getInternalEsClient();
+  const cpsRead = scoped?.isCpsRead() ?? false;
+  const esClient = cpsRead && scoped ? scoped.getEsClient() : endpointService.getInternalEsClient();
   const logger = endpointService.createLogger('FetchActionRequests');
   const fleetServices = endpointService.getInternalFleetServices(spaceId);
   const additionalFilters = [];

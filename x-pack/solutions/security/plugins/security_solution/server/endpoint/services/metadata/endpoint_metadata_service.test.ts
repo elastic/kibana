@@ -33,6 +33,8 @@ import { appContextService as fleetAppContextService } from '@kbn/fleet-plugin/s
 import { EndpointError } from '../../../../common/endpoint/errors';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { removeVersionSuffixFromPolicyId } from '@kbn/fleet-plugin/common/services/version_specific_policies_utils';
+import { METADATA_UNITED_INDEX } from '../../../../common/endpoint/constants';
+import { applyEsClientSearchMock } from '../../mocks/utils.mock';
 
 describe('EndpointMetadataService', () => {
   let testMockedContext: EndpointMetadataServiceTestContextMock;
@@ -406,7 +408,7 @@ describe('EndpointMetadataService', () => {
       it('should read as the request user so the list can fan out to linked projects', async () => {
         await metadataService.getHostMetadataList(
           { page: 0, pageSize: 10, kuery: '', hostStatuses: [] },
-          request
+          testMockedContext.endpointAppContextService.asScoped(request)
         );
 
         expect(testMockedContext.endpointAppContextService.getReadEsClient).toHaveBeenCalledWith(
@@ -440,7 +442,7 @@ describe('EndpointMetadataService', () => {
 
         await metadataService.getHostMetadataList(
           { page: 0, pageSize: 10, kuery: '', hostStatuses: [] },
-          request
+          testMockedContext.endpointAppContextService.asScoped(request)
         );
 
         expect(testMockedContext.fleetServices.agentPolicy.getByIds).toHaveBeenCalledWith(
@@ -490,7 +492,7 @@ describe('EndpointMetadataService', () => {
 
         const result = await metadataService.getHostMetadataList(
           { page: 0, pageSize: 10, kuery: '', hostStatuses: [] },
-          request
+          testMockedContext.endpointAppContextService.asScoped(request)
         );
 
         expect(result.data).toHaveLength(1);
@@ -524,7 +526,10 @@ describe('EndpointMetadataService', () => {
         );
 
         await expect(
-          metadataService.getHostMetadata(endpointMetadataDoc.agent.id, request)
+          metadataService.getHostMetadata(
+            endpointMetadataDoc.agent.id,
+            testMockedContext.endpointAppContextService.asScoped(request)
+          )
         ).rejects.toThrow();
       });
 
@@ -549,6 +554,28 @@ describe('EndpointMetadataService', () => {
             ],
           },
         } as unknown as Awaited<ReturnType<typeof readEsClientMock.search>>);
+        // The united-index check confirms this agent is visible in the active space
+        applyEsClientSearchMock({
+          esClientMock: readEsClientMock,
+          index: METADATA_UNITED_INDEX,
+          response: {
+            took: 1,
+            timed_out: false,
+            _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+            hits: {
+              total: { value: 1, relation: 'eq' },
+              max_score: 1.0,
+              hits: [
+                {
+                  _index: METADATA_UNITED_INDEX,
+                  _id: endpointMetadataDoc.agent.id,
+                  _score: 1.0,
+                  fields: { 'united.endpoint.agent.id': [endpointMetadataDoc.agent.id] },
+                },
+              ],
+            },
+          },
+        });
         testMockedContext.fleetServices.ensureInCurrentSpace.mockRejectedValue(
           new Error('agent is not visible in this space')
         );
@@ -556,8 +583,154 @@ describe('EndpointMetadataService', () => {
         (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([]);
 
         await expect(
-          metadataService.getHostMetadata(endpointMetadataDoc.agent.id, request)
+          metadataService.getHostMetadata(
+            endpointMetadataDoc.agent.id,
+            testMockedContext.endpointAppContextService.asScoped(request)
+          )
         ).resolves.toBeDefined();
+      });
+
+      it('should render a fanned-in agent whose united document matches the active space', async () => {
+        const endpointMetadataDoc = endpointDocGenerator.generateHostMetadata();
+        readEsClientMock.search.mockResolvedValue({
+          took: 0,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            total: { value: 1, relation: 'eq' },
+            max_score: null,
+            hits: [
+              {
+                _index: 'remote-project:metrics-endpoint.metadata-default',
+                _id: 'fanned-in-hit-id',
+                _score: null,
+                _source: endpointMetadataDoc,
+                sort: [0],
+              },
+            ],
+          },
+        } as unknown as Awaited<ReturnType<typeof readEsClientMock.search>>);
+        // United index confirms the agent is in the active space
+        applyEsClientSearchMock({
+          esClientMock: readEsClientMock,
+          index: METADATA_UNITED_INDEX,
+          response: {
+            took: 1,
+            timed_out: false,
+            _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+            hits: {
+              total: { value: 1, relation: 'eq' },
+              max_score: 1.0,
+              hits: [
+                {
+                  _index: METADATA_UNITED_INDEX,
+                  _id: endpointMetadataDoc.agent.id,
+                  _score: 1.0,
+                  fields: { 'united.endpoint.agent.id': [endpointMetadataDoc.agent.id] },
+                },
+              ],
+            },
+          },
+        });
+        testMockedContext.fleetServices.ensureInCurrentSpace.mockRejectedValue(
+          new Error('agent is not visible in this space')
+        );
+        (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([]);
+
+        await expect(
+          metadataService.getHostMetadata(
+            endpointMetadataDoc.agent.id,
+            testMockedContext.endpointAppContextService.asScoped(request)
+          )
+        ).resolves.toBeDefined();
+      });
+
+      it('should throw when the fanned-in agent united document does NOT match the active space', async () => {
+        const endpointMetadataDoc = endpointDocGenerator.generateHostMetadata();
+        readEsClientMock.search.mockResolvedValue({
+          took: 0,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            total: { value: 1, relation: 'eq' },
+            max_score: null,
+            hits: [
+              {
+                _index: 'remote-project:metrics-endpoint.metadata-default',
+                _id: 'fanned-in-hit-id',
+                _score: null,
+                _source: endpointMetadataDoc,
+                sort: [0],
+              },
+            ],
+          },
+        } as unknown as Awaited<ReturnType<typeof readEsClientMock.search>>);
+        // United index returns no hits: the space filter excluded this agent
+        applyEsClientSearchMock({
+          esClientMock: readEsClientMock,
+          index: METADATA_UNITED_INDEX,
+          response: {
+            took: 1,
+            timed_out: false,
+            _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+            hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+          },
+        });
+        testMockedContext.fleetServices.ensureInCurrentSpace.mockRejectedValue(
+          new Error('agent is not visible in this space')
+        );
+        (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([]);
+
+        await expect(
+          metadataService.getHostMetadata(
+            endpointMetadataDoc.agent.id,
+            testMockedContext.endpointAppContextService.asScoped(request)
+          )
+        ).rejects.toThrow();
+      });
+
+      it('should throw when the fanned-in agent has no united document at all', async () => {
+        const endpointMetadataDoc = endpointDocGenerator.generateHostMetadata();
+        readEsClientMock.search.mockResolvedValue({
+          took: 0,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            total: { value: 1, relation: 'eq' },
+            max_score: null,
+            hits: [
+              {
+                _index: 'remote-project:metrics-endpoint.metadata-default',
+                _id: 'fanned-in-hit-id',
+                _score: null,
+                _source: endpointMetadataDoc,
+                sort: [0],
+              },
+            ],
+          },
+        } as unknown as Awaited<ReturnType<typeof readEsClientMock.search>>);
+        // No united document exists for this agent — fails closed
+        applyEsClientSearchMock({
+          esClientMock: readEsClientMock,
+          index: METADATA_UNITED_INDEX,
+          response: {
+            took: 1,
+            timed_out: false,
+            _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+            hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+          },
+        });
+        testMockedContext.fleetServices.ensureInCurrentSpace.mockRejectedValue(
+          new Error('agent is not visible in this space')
+        );
+        (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([]);
+
+        await expect(
+          metadataService.getHostMetadata(
+            endpointMetadataDoc.agent.id,
+            testMockedContext.endpointAppContextService.asScoped(request)
+          )
+        ).rejects.toThrow();
       });
 
       it('should reject when the space check fails, the hit is from a linked project, but the agent IS enrolled locally', async () => {
@@ -592,7 +765,10 @@ describe('EndpointMetadataService', () => {
         ]);
 
         await expect(
-          metadataService.getHostMetadata(endpointMetadataDoc.agent.id, request)
+          metadataService.getHostMetadata(
+            endpointMetadataDoc.agent.id,
+            testMockedContext.endpointAppContextService.asScoped(request)
+          )
         ).rejects.toThrow();
       });
     });

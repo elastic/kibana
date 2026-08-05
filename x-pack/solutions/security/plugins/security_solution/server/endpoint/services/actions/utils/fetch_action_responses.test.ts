@@ -24,6 +24,7 @@ describe('fetchActionResponses()', () => {
     esClientMock = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
     applyActionListEsSearchMock(esClientMock);
     (endpointServiceMock.isCcsEnabled as jest.Mock).mockResolvedValue(false);
+    (endpointServiceMock.isCpsEnabled as jest.Mock).mockReturnValue(false);
   });
 
   it('should return results', async () => {
@@ -156,6 +157,32 @@ describe('fetchActionResponses()', () => {
     );
   });
 
+  it('should not CCS-prefix the endpoint response index once the read fans out', async () => {
+    (endpointServiceMock.isCcsEnabled as jest.Mock).mockResolvedValue(true);
+    (endpointServiceMock.isCpsEnabled as jest.Mock).mockReturnValue(true);
+    const scopedEsClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+    applyActionListEsSearchMock(scopedEsClient);
+    (endpointServiceMock.getReadEsClient as jest.Mock).mockReturnValue(scopedEsClient);
+
+    await fetchActionResponses({
+      esClient: esClientMock,
+      endpointService: endpointServiceMock,
+      scoped: endpointServiceMock.asScoped(httpServerMock.createKibanaRequest()),
+    });
+
+    expect(scopedEsClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({ index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN }),
+      { ignore: [404] }
+    );
+    // The Fleet half never fans out, so it keeps its CCS patterns
+    expect(esClientMock.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: `${AGENT_ACTIONS_RESULTS_INDEX},*:${AGENT_ACTIONS_RESULTS_INDEX}`,
+      }),
+      { ignore: [404] }
+    );
+  });
+
   it('should filter by agentIds', async () => {
     await fetchActionResponses({
       esClient: esClientMock,
@@ -250,7 +277,7 @@ describe('fetchActionResponses()', () => {
       await fetchActionResponses({
         esClient: esClientMock,
         endpointService: endpointServiceMock,
-        request,
+        scoped: endpointServiceMock.asScoped(request),
         actionIds: ['a'],
       });
 
@@ -265,7 +292,7 @@ describe('fetchActionResponses()', () => {
       await fetchActionResponses({
         esClient: esClientMock,
         endpointService: endpointServiceMock,
-        request,
+        scoped: endpointServiceMock.asScoped(request),
         actionIds: ['a'],
       });
 
@@ -283,7 +310,7 @@ describe('fetchActionResponses()', () => {
       await fetchActionResponses({
         esClient: esClientMock,
         endpointService: endpointServiceMock,
-        request,
+        scoped: endpointServiceMock.asScoped(request),
         actionIds: ['a'],
       });
 

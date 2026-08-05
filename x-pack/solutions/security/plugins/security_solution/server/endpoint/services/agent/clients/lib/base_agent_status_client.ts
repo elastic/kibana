@@ -5,14 +5,16 @@
  * 2.0.
  */
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 import type { AgentStatusRecords } from '../../../../../../common/endpoint/types/agents';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
-import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../../../endpoint_app_context_services';
 import type { AgentStatusClientInterface } from './types';
 import { AgentStatusClientError, AgentStatusNotSupportedError } from '../errors';
 
@@ -23,7 +25,7 @@ export interface AgentStatusClientOptions {
   spaceId: string;
   connectorActionsClient?: ActionsClient;
   /** Required for reads made on the caller's behalf to fan out under CPS; without it they are origin-only */
-  request?: KibanaRequest;
+  scoped?: ScopedEndpointServices;
 }
 
 export abstract class AgentStatusClient implements AgentStatusClientInterface {

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
-import type { EndpointAppContextService } from '../../endpoint_app_context_services';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../endpoint_app_context_services';
 import { fetchActionRequestById } from './utils/fetch_action_request_by_id';
 import type { FetchActionResponsesResult } from './utils/fetch_action_responses';
 import { fetchActionResponses } from './utils/fetch_action_responses';
@@ -31,7 +33,7 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
   actionId: string,
   {
     bypassSpaceValidation = false,
-    request,
+    scoped,
   }: Partial<{
     /**
      * if `true`, then no space validations will be done on the action retrieved. Default is `false`.
@@ -39,7 +41,7 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
      */
     bypassSpaceValidation: boolean;
     /** Required for these reads to fan out under CPS; without it they are origin-only */
-    request: KibanaRequest;
+    scoped: ScopedEndpointServices;
   }> = {}
 ): Promise<T> => {
   let normalizedActionRequest: ReturnType<typeof mapToNormalizedActionRequest> | undefined;
@@ -51,14 +53,14 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
       // Get the action request(s)
       fetchActionRequestById(endpointService, spaceId, actionId, {
         bypassSpaceValidation,
-        request,
+        scoped,
       }),
 
       // Get all responses
       fetchActionResponses({
         esClient: endpointService.getInternalEsClient(),
         endpointService,
-        request,
+        scoped,
         actionIds: [actionId],
       }),
     ]);

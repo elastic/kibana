@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ISearchRequestParams } from '@kbn/search-types';
 import type { EndpointFleetServicesInterface } from '../../services/fleet';
 import { policyIndexPattern } from '../../../../common/endpoint/constants';
@@ -14,7 +14,11 @@ import { INITIAL_POLICY_ID } from '.';
 import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
 import { isFannedInHit } from '../../utils/cps_read_routing';
-import type { EndpointAppContextService } from '../../endpoint_app_context_services';
+import { areFannedInAgentsVisibleInSpace } from '../../utils/fanned_in_space_check';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../endpoint_app_context_services';
 
 export const getESQueryPolicyResponseByAgentID = (
   agentID: string,
@@ -54,7 +58,7 @@ export interface GetPolicyResponseByAgentIdOptions {
   fleetServices: EndpointFleetServicesInterface;
   ccsEnabled: boolean;
   /** Required for the read to fan out under CPS; without it the read is origin-only */
-  request?: KibanaRequest;
+  scoped?: ScopedEndpointServices;
 }
 
 export async function getPolicyResponseByAgentId({
@@ -63,9 +67,9 @@ export async function getPolicyResponseByAgentId({
   endpointService,
   fleetServices,
   ccsEnabled,
-  request,
+  scoped,
 }: GetPolicyResponseByAgentIdOptions): Promise<GetHostPolicyResponse | undefined> {
-  const cpsRead = endpointService.isCpsRead(request);
+  const cpsRead = scoped?.isCpsRead() ?? false;
   // CCS remote outputs and CPS fan-in both prefix a hit's `_index` with an alias, and the visibility
   // check below can only read one meaning out of that colon. Under CPS the policy read therefore
   // gives up searching CCS remote outputs — deliberate, since the two topologies are not meant to be
@@ -74,7 +78,7 @@ export async function getPolicyResponseByAgentId({
     agentID,
     prefixIndexPatternsWithCcs(policyIndexPattern, ccsEnabled && !cpsRead)
   );
-  const response = await (cpsRead ? endpointService.getReadEsClient(request) : esClient)
+  const response = await (cpsRead && scoped ? scoped.getEsClient() : esClient)
     .search<HostPolicyResponse>(query)
     .catch(catchAndWrapError);
 
@@ -85,6 +89,7 @@ export async function getPolicyResponseByAgentId({
       fleetServices,
       cpsRead,
       hitIndex: response.hits.hits[0]._index,
+      scoped,
     });
 
     return {
@@ -110,9 +115,11 @@ const ensureAgentVisibleInCurrentSpace = async ({
   fleetServices,
   cpsRead,
   hitIndex,
+  scoped,
 }: Pick<GetPolicyResponseByAgentIdOptions, 'agentID' | 'endpointService' | 'fleetServices'> & {
   cpsRead: boolean;
   hitIndex?: string;
+  scoped?: ScopedEndpointServices;
 }): Promise<void> => {
   try {
     await fleetServices.ensureInCurrentSpace({ agentIds: [agentID] });
@@ -132,6 +139,21 @@ const ensureAgentVisibleInCurrentSpace = async ({
     if (locallyEnrolledAgent) {
       logger.debug(() => `Agent [${agentID}] is not visible in space [${fleetServices.spaceId}]`);
 
+      throw err;
+    }
+
+    // Provenance alone does not bound a fanned-in read: a space with no routing expression fans
+    // out to every project, so the document must also match the active space on the one field it
+    // carries. This applies the same rule the endpoint list uses via buildCpsMetadataFilter.
+    const visibleInSpace = scoped
+      ? await areFannedInAgentsVisibleInSpace({
+          esClient: scoped.getEsClient(),
+          agentIds: [agentID],
+          spaceId: scoped.getSpaceId(),
+        })
+      : false;
+
+    if (!visibleInSpace) {
       throw err;
     }
 

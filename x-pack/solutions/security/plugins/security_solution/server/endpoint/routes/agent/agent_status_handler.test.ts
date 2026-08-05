@@ -76,7 +76,7 @@ describe('Agent Status API route handler', () => {
       connectorActionsClient: (await httpHandlerContextMock.actions).getActionsClient(),
       endpointService: apiTestSetup.endpointAppContextMock.service,
       spaceId: 'default',
-      request: httpRequestMock,
+      scoped: expect.anything(),
     });
   });
 

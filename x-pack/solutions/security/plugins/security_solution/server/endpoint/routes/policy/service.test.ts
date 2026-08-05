@@ -16,7 +16,7 @@ import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators
 import type { EndpointInternalFleetServicesInterfaceMocked } from '../../services/fleet/endpoint_fleet_services_factory.mocks';
 import { createEndpointFleetServicesFactoryMock } from '../../services/fleet/endpoint_fleet_services_factory.mocks';
 import { applyEsClientSearchMock } from '../../mocks/utils.mock';
-import { policyIndexPattern } from '../../../../common/endpoint/constants';
+import { METADATA_UNITED_INDEX, policyIndexPattern } from '../../../../common/endpoint/constants';
 import { EndpointPolicyResponseGenerator } from '../../../../common/endpoint/data_generators/endpoint_policy_response_generator';
 
 describe('Policy Response Services', () => {
@@ -118,6 +118,7 @@ describe('Policy Response Services', () => {
 
     describe('and CPS is enabled', () => {
       let readEsClientMock: ElasticsearchClientMock;
+      let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
       const mockPolicyResponseFrom = (index: string) => {
         applyEsClientSearchMock({
@@ -138,13 +139,14 @@ describe('Policy Response Services', () => {
 
         endpointServiceMock.isCpsEnabled.mockReturnValue(true);
         endpointServiceMock.getReadEsClient.mockReturnValue(readEsClientMock);
-        fetchOptions.request = httpServerMock.createKibanaRequest();
+        request = httpServerMock.createKibanaRequest();
+        fetchOptions.scoped = endpointServiceMock.asScoped(request);
       });
 
       it('should read as the request user so the search can fan out to linked projects', async () => {
         await getPolicyResponseByAgentId(fetchOptions);
 
-        expect(endpointServiceMock.getReadEsClient).toHaveBeenCalledWith(fetchOptions.request);
+        expect(endpointServiceMock.getReadEsClient).toHaveBeenCalledWith(request);
         expect(readEsClientMock.search).toHaveBeenCalled();
         expect(esClientMock.search).not.toHaveBeenCalled();
       });
@@ -160,6 +162,28 @@ describe('Policy Response Services', () => {
 
       it('should return the policy response of an agent that is not enrolled in this project', async () => {
         mockPolicyResponseFrom('linked:.ds-metrics-endpoint.policy-default-000001');
+        // The united-index check confirms this agent is visible in the active space
+        applyEsClientSearchMock({
+          esClientMock: readEsClientMock,
+          index: METADATA_UNITED_INDEX,
+          response: {
+            took: 1,
+            timed_out: false,
+            _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+            hits: {
+              total: { value: 1, relation: 'eq' },
+              max_score: 1.0,
+              hits: [
+                {
+                  _index: METADATA_UNITED_INDEX,
+                  _id: '1-2-3',
+                  _score: 1.0,
+                  fields: { 'united.endpoint.agent.id': ['1-2-3'] },
+                },
+              ],
+            },
+          },
+        });
         fleetServicesMock.ensureInCurrentSpace.mockRejectedValue(
           new Error('Agent ID(s) not found: [1-2-3]')
         );
@@ -170,6 +194,87 @@ describe('Policy Response Services', () => {
         await expect(getPolicyResponseByAgentId(fetchOptions)).resolves.toEqual(
           expect.objectContaining({ policy_response: expect.anything() })
         );
+      });
+
+      it('should render a fanned-in agent whose united document matches the active space', async () => {
+        mockPolicyResponseFrom('linked:.ds-metrics-endpoint.policy-default-000001');
+        applyEsClientSearchMock({
+          esClientMock: readEsClientMock,
+          index: METADATA_UNITED_INDEX,
+          response: {
+            took: 1,
+            timed_out: false,
+            _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+            hits: {
+              total: { value: 1, relation: 'eq' },
+              max_score: 1.0,
+              hits: [
+                {
+                  _index: METADATA_UNITED_INDEX,
+                  _id: '1-2-3',
+                  _score: 1.0,
+                  fields: { 'united.endpoint.agent.id': ['1-2-3'] },
+                },
+              ],
+            },
+          },
+        });
+        fleetServicesMock.ensureInCurrentSpace.mockRejectedValue(
+          new Error('Agent ID(s) not found: [1-2-3]')
+        );
+        (
+          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as jest.Mock
+        ).mockResolvedValue([]);
+
+        await expect(getPolicyResponseByAgentId(fetchOptions)).resolves.toEqual(
+          expect.objectContaining({ policy_response: expect.anything() })
+        );
+      });
+
+      it('should throw when the fanned-in agent united document does NOT match the active space', async () => {
+        mockPolicyResponseFrom('linked:.ds-metrics-endpoint.policy-default-000001');
+        // United index returns no hits: the space filter excluded this agent
+        applyEsClientSearchMock({
+          esClientMock: readEsClientMock,
+          index: METADATA_UNITED_INDEX,
+          response: {
+            took: 1,
+            timed_out: false,
+            _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+            hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+          },
+        });
+        fleetServicesMock.ensureInCurrentSpace.mockRejectedValue(
+          new Error('Agent ID(s) not found: [1-2-3]')
+        );
+        (
+          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as jest.Mock
+        ).mockResolvedValue([]);
+
+        await expect(getPolicyResponseByAgentId(fetchOptions)).rejects.toThrow();
+      });
+
+      it('should throw when the fanned-in agent has no united document at all', async () => {
+        mockPolicyResponseFrom('linked:.ds-metrics-endpoint.policy-default-000001');
+        // No united document exists for this agent — fails closed
+        applyEsClientSearchMock({
+          esClientMock: readEsClientMock,
+          index: METADATA_UNITED_INDEX,
+          response: {
+            took: 1,
+            timed_out: false,
+            _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+            hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+          },
+        });
+        fleetServicesMock.ensureInCurrentSpace.mockRejectedValue(
+          new Error('Agent ID(s) not found: [1-2-3]')
+        );
+        (
+          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as jest.Mock
+        ).mockResolvedValue([]);
+
+        await expect(getPolicyResponseByAgentId(fetchOptions)).rejects.toThrow();
       });
 
       it('should still hide an origin-local response whose agent is no longer enrolled in Fleet', async () => {

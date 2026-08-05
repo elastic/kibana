@@ -76,14 +76,22 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
           }
 
           const { service } = endpointContext;
-          const cpsRead = service.isCpsRead(deps.request);
-          const spaceId = cpsRead ? service.getActiveSpaceId(deps.request) : undefined;
+          const scoped = service.asScoped(deps.request);
+          const cpsRead = scoped.isCpsRead();
+          const spaceId = cpsRead ? scoped.getSpaceId() : undefined;
           const actionId = 'actionId' in request ? request.actionId : undefined;
           const queryFactory: EndpointFactory<T> = endpointFactory[request.factoryQueryType];
           const strictRequest = {
             factoryQueryType: request.factoryQueryType,
             sort: request.sort,
-            ccsEnabled,
+            // A fanned-out read does not also search CCS remotes, matching `routes/policy/service.ts`
+            // and `services/metadata/endpoint_metadata_service.ts`: the two topologies are not meant
+            // to be enabled together, and a `*:` remote expression alongside `project_routing` is not
+            // a shape Elasticsearch has been verified to accept. Resolved here rather than in each
+            // factory's DSL builder so both of them inherit it from the predicate that also picks the
+            // client. Both currently resolve to Endpoint indices, so `cpsRead` implies they fan out —
+            // the same assumption `cancel` below already rests on.
+            ccsEnabled: ccsEnabled && !cpsRead,
             ...(spaceId ? { spaceId } : {}),
             ...('alertIds' in request ? { alertIds: request.alertIds } : {}),
             ...('agentId' in request ? { agentId: request.agentId } : {}),
@@ -97,8 +105,8 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
           const runSearch = () =>
             useInternalUser
               ? es.search({ ...strictRequest, params: dsl }, options, deps)
-              : service
-                  .getScopedSearchClient(deps.request)
+              : scoped
+                  .getSearchClient()
                   .search<EndpointStrategyRequestType<T>, EndpointStrategyParseResponseType<T>>(
                     { ...strictRequest, params: dsl },
                     // `options.strategy` names this strategy and would recurse. `projectRouting` is
@@ -115,7 +123,7 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
             spaceId && !useInternalUser && actionId
               ? from(
                   fetchActionRequestById(service, spaceId, actionId, {
-                    request: deps.request,
+                    scoped,
                   }).then(
                     () => true,
                     (err) => {
@@ -156,8 +164,9 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
       // Async search ids belong to whoever issued them, and there is no DSL here to re-derive the
       // routing from. No factory query currently resolves to a Fleet index, so with CPS on the
       // search this id belongs to went out on the scoped client.
-      if (endpointContext.service.isCpsRead(deps.request)) {
-        return endpointContext.service.getScopedSearchClient(deps.request).cancel(id, options);
+      const scoped = endpointContext.service.asScoped(deps.request);
+      if (scoped.isCpsRead()) {
+        return scoped.getSearchClient().cancel(id, options);
       }
 
       if (es.cancel) {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../constants';
 import { stringify } from '../../../utils/stringify';
 import { NotFoundError } from '../../../errors';
@@ -16,7 +15,10 @@ import type {
   LogsEndpointAction,
 } from '../../../../../common/endpoint/types';
 import { catchAndWrapError } from '../../../utils';
-import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../../endpoint_app_context_services';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 import { fetchOrphanActionsSpaceId } from './fetch_orphan_actions_space_id';
 
@@ -37,7 +39,7 @@ export const fetchActionRequestById = async <
   actionId: string,
   {
     bypassSpaceValidation = false,
-    request,
+    scoped,
   }: Partial<{
     /**
      * if `true`, then no space validations will be done on the action retrieved. Default is `false`.
@@ -45,14 +47,12 @@ export const fetchActionRequestById = async <
      */
     bypassSpaceValidation: boolean;
     /** Required for the read to fan out under CPS; without it the read is origin-only */
-    request: KibanaRequest;
+    scoped: ScopedEndpointServices;
   }> = {}
 ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> => {
   const logger = endpointService.createLogger('fetchActionRequestById');
-  const cpsRead = endpointService.isCpsRead(request);
-  const esClient = cpsRead
-    ? endpointService.getReadEsClient(request)
-    : endpointService.getInternalEsClient();
+  const cpsRead = scoped?.isCpsRead() ?? false;
+  const esClient = cpsRead && scoped ? scoped.getEsClient() : endpointService.getInternalEsClient();
   const searchResponse = await esClient
     .search<LogsEndpointAction<TParameters, TOutputContent, TMeta>>(
       {
