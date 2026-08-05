@@ -39,10 +39,18 @@ as a manual verification checklist.">
   same class of bug.
 - **If an action could not be exercised** — live testing was deferred for this connector, credentials for
   a destructive/admin-only action weren't available, the scenario requires state that's hard to set up
-  (e.g. a paid tier feature) — mark it `⚠️ Not validated — needs manual verification` and say briefly why.
+  (e.g. a paid tier feature), or the user didn't confirm the test environment was safe to mutate (see
+  `build-connector` Task 7) — mark it `⚠️ Not validated — needs manual verification` and say briefly why.
   Never mark something `✅ Pass` without having actually observed it work.
 - **If an action failed and the failure is unresolved**, mark it `❌ Fail`, describe what broke, and link
   to a follow-up issue or note if it's a known limitation rather than silently dropping the row.
+- **At least one live-tested action must use hostile inputs, not just happy-path alphanumerics** —
+  a value containing characters that stress encoding and signing: a wildcard (`logs-*`), spaces,
+  quotes, `! ' ( )`, `=` inside a value, or unicode. Encoding/canonicalization bugs (URL building,
+  query serialization, request signing) pass every plain-alphanumeric test and then fail live as
+  generic vendor errors — a `logs-*` index pattern is exactly what exposed a SigV4 signing bug that
+  had survived a full happy-path validation pass. Note which row covered this (e.g. `✅ Pass
+  (including wildcard searchString)`); if no action can safely take such input, say so under the table.
 - Place the `## Validated` section directly above `## Test plan` in the PR body.
 
 ## When live testing is fully deferred

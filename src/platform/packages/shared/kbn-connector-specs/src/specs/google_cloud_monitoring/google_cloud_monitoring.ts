@@ -150,6 +150,12 @@ function throwMonitoringError(error: unknown): never {
   );
 }
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/nightshift-context-and-research-team';
+
 export const GoogleCloudMonitoring: ConnectorSpec = {
   metadata: {
     id: '.google_cloud_monitoring',

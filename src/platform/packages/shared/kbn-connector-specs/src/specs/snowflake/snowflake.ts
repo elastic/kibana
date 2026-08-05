@@ -190,6 +190,12 @@ const submitStatement = async (
   return response.data;
 };
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/workchat-eng';
+
 export const Snowflake: ConnectorSpec = {
   metadata: {
     id: '.snowflake',

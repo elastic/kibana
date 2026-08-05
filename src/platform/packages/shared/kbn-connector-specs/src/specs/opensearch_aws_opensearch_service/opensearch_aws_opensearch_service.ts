@@ -41,6 +41,12 @@ import {
   type UpdateMonitorInput,
 } from './types';
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/workflows-eng';
+
 function buildSearchDetectorsQuery(input: SearchDetectorsInput): Record<string, unknown> {
   const must: Array<Record<string, unknown>> = [];
   if (input.name) {

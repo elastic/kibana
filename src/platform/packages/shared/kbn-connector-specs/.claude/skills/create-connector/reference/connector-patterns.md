@@ -7,27 +7,39 @@ This document describes the file structure and patterns for creating new connect
 Connector specs live in: `src/platform/packages/shared/kbn-connector-specs/src/specs/`
 
 ```
-kbn-connector-specs/src/specs/
-├── all_specs.ts                # Registration file - ADD YOUR SPEC HERE
-├── slack/
-│   ├── slack.ts                # Connector spec
-│   ├── slack.test.ts           # Tests
-│   ├── types.ts                # Zod schemas and inferred types
-│   └── icon/
-│       └── index.tsx           # Brand icon component
-├── github/
-│   ├── github.ts
-│   ├── github.test.ts
-│   ├── types.ts
-│   └── icon/
-│       └── index.tsx
-└── {your_connector}/           # YOUR NEW CONNECTOR
-    ├── {your_connector}.ts
-    ├── {your_connector}.test.ts
-    ├── types.ts
-    └── icon/
-        └── index.tsx
+kbn-connector-specs/src/
+├── all_specs.ts                 # GENERATED — never hand-edit, see Scaffold Generator below
+├── connector_icons_map.ts       # GENERATED — never hand-edit, see Scaffold Generator below
+└── specs/
+    ├── slack/
+    │   ├── slack.ts              # Connector spec (incl. `export const OWNER`, used to generate CODEOWNERS)
+    │   ├── slack.test.ts         # Tests
+    │   ├── types.ts              # Zod schemas and inferred types
+    │   └── icon/
+    │       └── index.tsx         # Brand icon component
+    ├── github/
+    │   ├── github.ts
+    │   ├── github.test.ts
+    │   ├── types.ts
+    │   └── icon/
+    │       └── index.tsx
+    └── {your_connector}/         # YOUR NEW CONNECTOR
+        ├── {your_connector}.ts
+        ├── {your_connector}.test.ts
+        ├── types.ts
+        └── icon/
+            └── index.tsx
 ```
+
+`all_specs.ts`, `connector_icons_map.ts`, and the per-connector ownership block in
+`.github/CODEOWNERS` are all **generated** from whatever connector folders exist under `src/specs/`
+— see `scripts/generate_connector_registries.ts` in this package. They used to be hand-edited (one
+new line appended per connector, in each of the three), which made them frequent merge-conflict
+hotspots: at least twice a manually-resolved TS-file conflict left an unbalanced `lazy(...)` call
+that broke the build, and the CODEOWNERS append logic drifted over several PRs into
+misplaced/misordered entries. Never add or edit an entry in any of them by hand; regenerate them
+instead (see Scaffold Generator below), and a CI-enforced test fails the build if any of the three
+ever drifts from what the generator would produce.
 
 ## Scaffold Generator
 
@@ -37,14 +49,33 @@ For new connectors, run:
 node scripts/generate connector <name> --id ".<id>" --owner "<team>"
 ```
 
-Replace `<team>` with the owning GitHub team. Ask the user if unsure.
+Replace `<team>` with the owning GitHub team. Ask the user if unsure. This writes an
+`export const OWNER = '<team>';` into the connector's spec file — the source of truth the generator
+reads to keep CODEOWNERS in sync.
 
 The generator creates:
-- Connector spec stub, test stub, icon placeholder
+- Connector spec stub (with its `OWNER` export), test stub, icon placeholder
 - Documentation page at `docs/reference/connectors-kibana/`
-- Updates to `all_specs.ts`, `connector_icons_map.ts`, CODEOWNERS, docs TOC
+- Docs TOC entry
+
+And regenerates `all_specs.ts`, `connector_icons_map.ts`, and the CODEOWNERS ownership block from
+scratch (by scanning `src/specs/`) so your new connector's export, icon mapping, and CODEOWNERS
+entry all appear automatically — nothing to hand-edit in any of them.
+
+If you need to regenerate the three artifacts directly (e.g. after renaming or deleting a connector
+folder, or to resolve a merge conflict instead of resolving it by hand), run:
+
+```bash
+node scripts/generate connector-registries
+```
 
 After running the generator, fill in the TODO placeholders.
+
+`docs/reference/toc.yml` and the connectors snippet-list file are two more merge-conflict-prone spots
+that aren't fully regenerable (they carry hand-written navigation/description text) — see "Handling
+merge conflicts" in [`../SKILL.md`](../SKILL.md) for how to resolve conflicts in those, and in the
+three generated files above, without reintroducing the kind of silent breakage described earlier in
+this section.
 
 ## Connector Spec Structure
 
@@ -134,13 +165,13 @@ Define Zod schemas and inferred types in a separate `types.ts` file alongside th
 import { z } from '@kbn/zod/v4';
 
 export const SearchInputSchema = z.object({
-  query: z.string().describe('Search query string'),
+  query: z.string().min(1).max(2000).describe('Search query string'),
   limit: z.number().optional().describe('Maximum results (default: 20)'),
 });
 export type SearchInput = z.infer<typeof SearchInputSchema>;
 
 export const GetItemInputSchema = z.object({
-  id: z.string().describe('The item ID'),
+  id: z.string().min(1).max(200).describe('The item ID'),
 });
 export type GetItemInput = z.infer<typeof GetItemInputSchema>;
 ```
@@ -149,6 +180,22 @@ This pattern (used by ServiceNow, Slack, GitHub connectors):
 - Eliminates drift between schemas and types — `z.infer` derives the type from the schema
 - Keeps the main connector file focused on handler logic
 - Gives handlers full autocomplete without inline `as` casts
+
+### Every input must be bounded (CI-enforced)
+
+Action inputs arrive over the connector-execute HTTP API, so every schema needs an explicit size bound —
+`action_input_bounds.test.ts` fails CI on any new unbounded input (a baseline grandfathers only pre-existing
+specs, and must not grow):
+
+- `z.string()` → `.max(N)`. Common limits: 2000 for freeform queries, 1024 for paths/URLs, 200 for
+  IDs/names, 50 for short tokens. Inherently bounded formats (`z.uuid()`, `z.iso.datetime()`, ...) count;
+  a `.regex()` does **not** (an anchored pattern still accepts arbitrarily long input).
+- `z.array(...)` / `z.set(...)` → `.max(N)` on the element count (typically 50–100), in addition to
+  bounding the elements themselves.
+- `z.record(...)` → bound the key (`z.string().max(N)` or an enum) **and** cap the entry count. Zod has no
+  built-in record-size bound, so use
+  `.refine((v) => Object.keys(v).length <= 50, { message: 'Too many entries (max 50)' })`.
+  `z.unknown()` values are fine — the key and entry-count bounds are what keep them tractable.
 
 ## MCP-Native Connector Pattern
 
@@ -187,7 +234,7 @@ export const YourMcpConnector: ConnectorSpec = {
       isTool: true,
       description: 'Search Your Service by keyword using the underlying MCP tool.',
       input: z.object({
-        query: z.string().describe('Keyword or natural-language search query'),
+        query: z.string().min(1).max(2000).describe('Keyword or natural-language search query'),
       }),
       handler: withMcpClient(async (client, input) => {
         return client.callTool({ name: 'your_search', arguments: input });
@@ -206,8 +253,12 @@ export const YourMcpConnector: ConnectorSpec = {
       isTool: true,
       description: 'Call any MCP tool by name with arbitrary arguments. Use listTools first to discover available tools.',
       input: z.object({
-        name: z.string().describe('The MCP tool name (from listTools)'),
-        arguments: z.record(z.unknown()).optional().describe('Tool arguments as a key/value map'),
+        name: z.string().min(1).max(200).describe('The MCP tool name (from listTools)'),
+        arguments: z
+          .record(z.string().max(200), z.unknown())
+          .refine((v) => Object.keys(v).length <= 50, { message: 'Too many arguments (max 50)' })
+          .optional()
+          .describe('Tool arguments as a key/value map'),
       }),
       handler: withMcpClient(async (client, input) => {
         return client.callTool(input);
@@ -440,15 +491,12 @@ export default (props: ConnectorIconProps) => {
 
 ### Register the Icon
 
-Add to `src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts`:
+Once `icon/index.tsx` exists in your connector's spec folder, it's picked up automatically the next
+time `connector_icons_map.ts` is regenerated — do **not** hand-add an entry to that file. If you didn't
+use the scaffold generator (e.g. you added the icon after the fact), run:
 
-```typescript
-[
-  '.your_connector',
-  lazy(
-    () => import(/* webpackChunkName: "connectorIconYourConnector" */ './specs/your_connector/icon')
-  ),
-],
+```bash
+node scripts/generate connector-registries
 ```
 
 ## Where to Find Existing Logos
@@ -479,7 +527,10 @@ The following IDs **MUST all match exactly**:
 1. `ConnectorSpec.metadata.id` in the connector spec
 2. Key in `ConnectorIconsMap` in `connector_icons_map.ts`
 
-If a connector already exists with a given ID, use a unique variant (like `.servicenow_search`).
+Since `connector_icons_map.ts` is generated directly from each spec's `metadata.id` (see Scaffold
+Generator above), these two can no longer drift once you regenerate — the only thing to get right is
+the id itself. If a connector already exists with a given ID, use a unique variant (like
+`.servicenow_search`).
 
 ## LLM-Quality Descriptions and Skill Content
 

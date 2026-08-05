@@ -7,6 +7,10 @@ description: Review connector spec changes (spec, docs). Use when reviewing a PR
 
 Use this skill when reviewing or preparing changes to a **connector spec** (spec code, documentation). Apply the checklist below; use the optional thorough check when the user asks for deeper validation against the vendor API.
 
+This is a connector-domain checklist, not a substitute for the real `@claude` PR bot's own generic review
+criteria (correctness, security/authz, test sufficiency, architectural fit) — see **bot-parity-review** for
+a fresh-eyes pass using those instead. `build-connector` and standalone `create-connector` run both.
+
 ## When to use
 
 - Reviewing a PR that adds or changes a connector spec
@@ -69,8 +73,18 @@ Use this skill when reviewing or preparing changes to a **connector spec** (spec
   For fields where the user must enter their own value (e.g. tenant-specific URLs), use `placeholder` in
   `overrides.meta` instead of a `default`. For fields that should never be edited (e.g. fixed OAuth endpoints, scopes),
   use both a `default` and `{ hidden: true }`. Flag any visible auth field that has a `default` without `{ hidden: true }`.
-- Spec is exported from `all_specs.ts`. Do not add unused/cargo-culted flags; only set flags the platform or this
-  connector actually uses.
+- Spec is exported from `all_specs.ts`, its icon is registered in `connector_icons_map.ts`, and its
+  `OWNER` export is reflected in `.github/CODEOWNERS`. All three are generated from `src/specs/`
+  (see `scripts/generate_connector_registries.ts`) — a CI test fails if any of them drifts from what
+  the generator produces, so a passing CI run already confirms they're consistent. The same test also
+  checks the connectors snippet-list file (see the Documentation section below) for ordering and
+  duplicate-link mistakes. If CI is red on that test (most often after a hand-resolved merge conflict),
+  tell the author to run `node scripts/generate connector-registries` (or fix the snippet-list entry) and
+  commit the result, rather than hand-editing any of them — and to run `node scripts/eslint --fix` and
+  `node scripts/type_check` on whatever they hand-resolved immediately after, since a bad manual conflict
+  resolution has broken the build silently before (an unbalanced `lazy(...)` call caught only by a
+  reviewer reading the diff, not CI).
+  Do not add unused/cargo-culted flags; only set flags the platform or this connector actually uses.
 - **Input schemas & types**: Action input schemas and their `z.infer<>` types must live in a separate
   `types.ts` file alongside the spec (not inline in the spec file, and not as `as` casts in handlers).
   Handlers must be typed with the inferred type (e.g. `handler: async (ctx, input: SearchInput) => {}`),
@@ -178,11 +192,16 @@ actual documented behavior — flag them even without live access to the API, ba
 - **Snippets file**: Third-party data connectors (cloud storage, SaaS search, etc.) belong in
   `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md`, **not**
   `elastic-connectors-list.md` (which is reserved for Kibana-native connectors like Cases, Index,
-  ServerLog, and Obs AI Assistant). Order them alphabetically. Flag any third-party connector 
-  entry added to the wrong file.
+  ServerLog, and Obs AI Assistant). Flag any third-party connector entry added to the wrong file.
+  Alphabetical order within a category and duplicate links are CI-checked (`generate_connector_registries.test.ts`),
+  so you don't need to eyeball ordering here — but do check the entry landed in a sensible category
+  (most belong in "Third-party search"; re-categorize into "Threat intelligence"/"Identity management"/etc.
+  if it's a better fit — the scaffold always inserts into the first category and relies on a human to move it).
 - **`toc.yml` placement**: Third-party connectors belong under the `data-context-sources-connectors.md`
   node, **not** `elastic-connectors.md`. Flag any third-party connector whose `toc.yml` entry is a
-  child of `elastic-connectors.md`.
+  child of `elastic-connectors.md`. Ordering and duplicates within the section are CI-checked
+  (`validateConnectorToc` in `generate_connector_registries.test.ts`), so you only need to verify the
+  entry is in the right *section* — not eyeball the alphabetical order.
 - **Doc frontmatter version**: `applies_to.stack` must include a version number — `stack: preview X.Y`,
   not just `stack: preview`. The version must be ≥ every other version referenced anywhere in the doc
   (a new connector cannot have been available before any feature it references). Flag any doc where it
@@ -195,7 +214,9 @@ actual documented behavior — flag them even without live access to the API, ba
   approximations, inline comments describing the shape (e.g. `<!-- Top triangle -->`), non-standard
   brand colors, or a viewBox that doesn't match the vendor's standard. If a genuine brand icon is
   not yet available, prompt the user to obtain one from the vendor — do not accept a generated
-  placeholder.
+  placeholder. A `viewBox` that clips the path geometry (icon renders as a sliver/empty tile) is
+  CI-checked by `validateConnectorIcons` in `generate_connector_registries.test.ts`, so focus your
+  review on brand authenticity and visual quality, not coordinate math.
 
 #### Docs quality checks
 
@@ -221,17 +242,19 @@ Report documentation issues alongside code issues.
   `✅ Pass` with no concrete scenario described. If live testing hasn't happened yet, every row should
   still be present, marked `⚠️ Not validated — needs manual verification` — that's acceptable, an
   entirely missing table is not.
-- **Labels**: The PR must have both `release_note:feature` and `Feature:Actions/ConnectorTypes` applied
-  (check with `gh pr view <number> --json labels`). Flag if either is missing.
+- **Labels**: The PR must have `release_note:feature`, `Feature:Actions/ConnectorTypes`, and `backport:skip`
+  all applied (check with `gh pr view <number> --json labels`). Flag if any is missing.
 
 ### Naming and Conventions
 
 - Directory and file names follow repo conventions (snake_case for dirs/files; camelCase for TS exports)
 - Connector IDs don't collide with existing ones. If a connector already exists for the same product, use
   a distinct ID (e.g. `.servicenow_search`)
-- **CODEOWNERS section**: The connector's entry must appear in `# Connector Specs`, inserted
-  alphabetically among the other `src/platform/packages/shared/kbn-connector-specs/src/specs/**`
-  lines, not in `# Connector Agent Skills` or any other section. Flag misplacement.
+- **CODEOWNERS section**: the per-connector lines between `# BEGIN GENERATED CONNECTOR OWNERS` and
+  `# END GENERATED CONNECTOR OWNERS` are generated from each spec file's `export const OWNER = '@elastic/team';`
+  (see `generate_connector_registries.ts`) — don't hand-edit them, and don't flag their placement/order.
+  Instead, check that the connector's spec file declares the intended `OWNER`, and that
+  `node scripts/generate connector-registries --check` passes (CI enforces this).
 - If the PR changes behavior that could affect existing callers, document why and address backwards compatibility in
   the PR description
 - **TypeScript** (touched files): Use strict equality (`===` / `!==`), follow repo style (early returns, explicit
@@ -268,6 +291,27 @@ Report documentation issues alongside code issues.
   at a glance, but an array of 100,000 short, individually-valid strings is still an unbounded-input DoS
   vector — especially if the array is later joined into a URL query string, since that also risks an
   oversized upstream request.
+
+  Both of the above are now CI-enforced for action inputs by `action_input_bounds.test.ts`, so you don't
+  need to eyeball every string — instead check that the diff doesn't add entries to
+  `action_input_bounds_baseline.ts` (that list grandfathers pre-existing specs and must only shrink), and
+  still review whether the chosen limits are *sensible* for what the vendor accepts, which the test can't
+  judge.
+- **Hand-rolled request signing / canonicalization**: If the diff implements or modifies request
+  signing (SigV4, HMAC, shared-key), check it against the vendor's canonicalization spec — not against
+  what generic JS helpers do. `encodeURIComponent` is *not* RFC-3986 (it leaves `! ' ( ) *`
+  unescaped, which breaks AWS SigV4 for inputs like `logs-*`), `new URL()` normalizes paths, and
+  `JSON.stringify` key order is not canonical JSON. Flag any encoding/ordering step in a signing path
+  with no regression test covering reserved characters (`* ! ' ( )`, spaces, `=` in values, unicode) —
+  these bugs pass every alphanumeric test and live-fail as generic vendor "access denied" errors.
+- **Escape-hatch / raw-request actions**: Any generic action that lets the caller choose the path, method,
+  or headers of the upstream request (`request`, `callApi`, `rawQuery`, MCP `callTool`, ...) needs its
+  guardrails reviewed character-by-character: the method allowlist should be an enum (not a free string);
+  path restrictions must operate on *decoded, split* path segments (`decodeURIComponent`, then split on
+  `/` and compare whole segments) — substring or prefix matching is bypassable via `%2e%2e`/`%2f` encoding,
+  double slashes, or embedding the blocked word inside a longer segment; and any header pass-through needs
+  an allowlist so callers can't override `Authorization`, `Host`, or content-negotiation headers. Flag any
+  denylist built on `String.includes`/`startsWith` over the raw path.
 - **SSRF**: Any URL field in connector config or workflow action input (e.g. `base_url`, `endpoint`, `webhook_url`)
   must be validated. URLs should be allowlisted, restricted to HTTPS, or otherwise prevented from being user-controlled
   in a way that could trigger requests to internal/private hosts. Flag any case where a user-supplied URL flows

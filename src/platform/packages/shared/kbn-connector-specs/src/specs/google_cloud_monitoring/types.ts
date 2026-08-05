@@ -203,7 +203,13 @@ export const UpdateAlertPolicyInputSchema = lazySchema(() =>
         .optional()
         .describe('How multiple conditions are combined to decide whether to open an incident.'),
       conditions: z
-        .array(z.record(z.string().max(200), z.unknown()))
+        .array(
+          z
+            .record(z.string().max(200), z.unknown())
+            .refine((condition) => Object.keys(condition).length <= 30, {
+              message: 'A condition object supports at most 30 top-level fields.',
+            })
+        )
         .max(6)
         .optional()
         .describe(

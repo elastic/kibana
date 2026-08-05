@@ -17,11 +17,15 @@ The generator creates:
 - `docs/reference/connectors-kibana/<kebab-name>-action-type.md` — documentation page
 
 And updates:
-- `src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts` — export
-- `src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts` — icon mapping
-- `.github/CODEOWNERS` — ownership rule
+- `src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts` — **regenerated** (export added)
+- `src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts` — **regenerated** (icon mapping added)
+- `.github/CODEOWNERS` — **regenerated** (ownership rule added, derived from the spec's `OWNER` export)
 - `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md` — third-party connectors list
 - `docs/reference/toc.yml` — table of contents
+
+`all_specs.ts`, `connector_icons_map.ts`, and the CODEOWNERS ownership block are fully regenerated
+from `src/specs/`, not hand-appended to — never edit any of them directly, even to fix a merge
+conflict. See "Register the Icon" in `connector-patterns.md` for the standalone regenerate command.
 
 **Doc placement**: the generator adds the new entry to the third-party
 `data-context-sources-connectors-list.md`/`data-context-sources-connectors.md` list, inside the first
@@ -152,6 +156,21 @@ Fill in the generated spec stub with actions, handlers, auth config, and tests. 
 - `'bearer'` — for services where the user provides a pre-obtained OAuth access token or API token (e.g., Google APIs, Notion, GitHub). Simplest option.
 - `'api_key_header'` — for services that use API key authentication via a custom header.
 - `'oauth_client_credentials'` — for services that use OAuth 2.0 Client Credentials flow (e.g., Microsoft/Azure services like SharePoint). Requires multi-field credential input (clientId, clientSecret, tenantId).
+
+### Request Signing (SigV4, HMAC, Shared Key): Don't Hand-Roll Canonicalization
+
+If the service requires cryptographically signed requests (AWS SigV4, Azure Shared Key, HMAC
+webhooks), reuse the existing shared auth type in `src/auth_types/` (`aws_credentials`,
+`azure_shared_key`, ...) rather than writing signing logic in the connector. If you must extend or
+implement signing, treat the vendor's canonicalization spec as the source of truth and follow it
+character-by-character — generic JS helpers are *not* equivalent to it. Known trap, found live on a
+real connector PR: `encodeURIComponent` leaves `! ' ( ) *` unescaped, but AWS re-canonicalizes signed
+requests against the stricter RFC-3986 unreserved set, so a value like a `logs-*` index pattern
+produced a signature mismatch surfacing as a generic "access denied" (see
+`escapeSigV4ReservedChars` in `aws_credential_helpers.ts`). Every encoding decision in a signing path
+needs a regression test that includes the reserved characters the vendor's spec treats differently
+(`* ! ' ( )`, spaces, `/`, `=` in values, unicode) — a signing bug only reproduces with hostile
+inputs, never with plain alphanumeric test data.
 
 ### Input Schemas & Types
 

@@ -74,6 +74,12 @@ import {
 const workspaceOrigin = (ctx: { config?: Record<string, unknown> }): string =>
   new URL(ctx.config?.serverUrl as string).origin;
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/workchat-eng';
+
 export const Databricks: ConnectorSpec = {
   metadata: {
     id: '.databricks',

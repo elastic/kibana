@@ -22,15 +22,17 @@ If these skills are not available when needed (Tasks 6–7), the agent creation 
 Use `TaskCreate` to create all of the following tasks up front so the user can see the full plan. Set all tasks to `pending` initially.
 
 1. **Create the connector code** — "Generate connector spec, types, and documentation for $ARGUMENTS"
-2. **Code review** — "Review generated connector files for correctness and completeness"
+2. **Code review** — "Review generated connector files for correctness and completeness, and with a
+   fresh-eyes pass using the real PR bot's own criteria"
 3. **Edit based on review** — "Fix issues found during code review"
 4. **Wait for Kibana** — "Ask user to start Elasticsearch and Kibana"
-5. **Activate the connector** — "Create a connector instance in running Kibana"
+5. **Activate the connector** — "Ask the user to create a connector instance in the Kibana UI"
 6. **Create a test agent** — "Create an Agent Builder agent wired to the new connector tools"
 7. **Chat test** — "Send a test message to the agent and observe tool calls"
 8. **Verify tool call quality** — "Analyze chat results for successful tool executions"
 9. **Iterate on quality** — "Fix code issues and re-test until quality bar is met"
-10. **Final code review** — "Final review of all generated files and documentation"
+10. **Final code review** — "Final review of all generated files and documentation, including a
+    fresh-eyes pass using the real PR bot's own criteria"
 11. **Final chat test** — "Final end-to-end conversation to confirm everything works"
 12. **Compile the PR validation table** — "Build the `## Validated` action-by-action table for the PR description"
 13. **Report completion** — "Tell the user the connector is ready for manual inspection"
@@ -54,6 +56,13 @@ likely to need a fix-up pass once Tasks 4-11 finally run. Still produce the `## 
 connector's PR (Task 12) — every row will read `⚠️ Not validated — needs manual verification` until live
 testing happens, but the table itself is not optional; see
 `create-connector/reference/pr-validation-table.md`.
+
+Also sequence the batch's *PRs* deliberately rather than opening them all at once: every connector PR
+touches the same generated/hotspot files, so N simultaneous PRs pay roughly N² merge-from-main CI runs,
+and review findings on connector PRs are repetitive enough that a finding on the first PR almost always
+applies to the whole batch. Land a pathfinder connector first, fold its review feedback into the others
+before their PRs exist, and open the rest as a pipelined sequence — see "Sequencing multiple connector
+PRs" in `create-connector/SKILL.md`.
 
 ---
 
@@ -89,7 +98,14 @@ Mark task 2 as `in_progress`.
 
 Review the files generated in Task 1 using the **review-connector** skill. Apply its checklist to the connector spec and docs.
 
-List all issues found. If no issues are found, note that the code looks good.
+Also invoke the **bot-parity-review** skill (`Skill: bot-parity-review`) for a fresh-eyes pass using the
+real PR bot's own review criteria, not the connector checklist. `review-connector` and `bot-parity-review`
+check for different things — the connector-domain checklist doesn't cover the generic correctness/security/
+test-sufficiency/architectural-fit concerns the real bot applies, and `bot-parity-review` runs in an isolated
+context with no memory of having written this code, so it catches what the same-agent self-review pass
+tends to miss.
+
+List all issues found from both passes. If no issues are found, note that the code looks good.
 
 Mark task 2 as `completed`.
 
@@ -99,9 +115,10 @@ Mark task 2 as `completed`.
 
 Mark task 3 as `in_progress`.
 
-If issues were found in Task 2, fix them using the `Edit` tool. After fixing, re-read the files and verify the fixes are correct.
+If issues were found in Task 2 (from either `review-connector` or `bot-parity-review`), fix them using the
+`Edit` tool. After fixing, re-read the files and verify the fixes are correct.
 
-If the fixes are significant, do another review pass. Repeat the review/edit cycle until you're satisfied with the quality — typically 1-2 iterations.
+If the fixes are significant, do another review pass with both skills. Repeat the review/edit cycle until you're satisfied with the quality — typically 1-2 iterations.
 
 Mark task 3 as `completed`.
 
@@ -145,7 +162,12 @@ Skill: activate-connector
 Args: $ARGUMENTS
 ```
 
-This will list available types, ask the user for credentials, and create the connector instance via the Actions API. When `agentBuilder:experimentalFeatures` is true, the connector's sub-actions become available to agents.
+This will list available types, then ask the user to create the connector themselves through the Kibana UI
+(its preferred path) so they can confirm the creation form renders correctly and so the live credential
+never has to flow through you — see `activate-connector`'s Step 3 for why. Only fall back to its
+script-driven Step 4 if the user explicitly asks you to create it for them. When
+`agentBuilder:experimentalFeatures` is true, the connector's sub-actions become available to agents either
+way.
 
 **If the user reports `Error: No widget found for schema type: ZodNumberFormat...`** when opening the
 connector creation form in the Kibana UI, a `z.number()` field was used in the connector's config
@@ -177,6 +199,15 @@ Mark task 6 as `completed`.
 ## Task 7: Chat Test
 
 Mark task 7 as `in_progress`.
+
+**Before exercising any action that creates, updates, or deletes data**: if the connector exposes such
+actions, use `AskUserQuestion` to confirm the environment/instance being tested against is safe to
+mutate (e.g. a sandbox or personal test account, not a shared or production instance with data the user
+cares about). Only send prompts that would trigger create/update/delete actions once the user confirms
+it's safe — at that point you're free to create, edit, and delete test data as needed to validate those
+actions. If the user says it isn't safe, restrict testing to read-only actions for the rest of this
+skill (Tasks 7-11) and record in the Task 12 validation table which mutating actions were skipped for
+that reason, distinct from "blocked by missing test data/credentials".
 
 Invoke the `chat-with-agent` skill to test the agent. Use the agent ID created in Task 6. The default prompt should be:
 
@@ -272,7 +303,13 @@ Mark task 9 as `completed`.
 
 Mark task 10 as `in_progress`.
 
-Do one final review using the **review-connector** skill. Verify no TODOs/placeholders, consistent naming, no debug artifacts. The review skill will also run docs quality checks (`docs-check-style`, `crosslink-validator`, `frontmatter-audit`, `content-type-checker`, `applies-to-tagging`) on any connector docs. Make any final minor fixes if needed.
+Do one final review using the **review-connector** skill. Verify no TODOs/placeholders, consistent naming, no debug artifacts. The review skill will also run docs quality checks (`docs-check-style`, `crosslink-validator`, `frontmatter-audit`, `content-type-checker`, `applies-to-tagging`) on any connector docs.
+
+Also do one final **bot-parity-review** pass (`Skill: bot-parity-review`). Task 9's live-testing iteration
+can introduce new code after Tasks 2/3 already ran, so re-running this fresh-eyes, real-bot-criteria check
+here catches anything introduced since.
+
+Make any final minor fixes needed from either pass.
 
 Mark task 10 as `completed`.
 
@@ -292,11 +329,24 @@ Args: <agent-id>
 Use a more specific prompt this time, something like:
 > Search for recent items and give me a detailed summary of what you find.
 
+**Mutating actions**: honor whatever the user answered in Task 7 — don't re-ask if they already said it's
+safe (or not safe) to mutate the test environment. If Task 7 never reached the mutation question because
+its prompt didn't happen to trigger a create/update/delete action, and this final prompt will, ask now
+before proceeding.
+
 **If any action has optional modifier params** (`scope`, filters, `all_X` flags, an expiry timestamp)
 beyond its required fields, make sure this test (or an earlier one) actually causes the agent to set at
 least one of them to a non-default value, not just the required-fields-only happy path. A query-param-vs-
 body mismatch on an optional param doesn't error — the vendor silently ignores it — so a test that never
 sets the param will pass even though the feature is broken.
+
+**At least one live call must use a hostile input**, not just plain alphanumerics: a wildcard
+(`logs-*`), spaces, quotes, `! ' ( )`, `=` inside a value, or unicode — whichever an action can safely
+take (a search string or name filter is usually the easiest slot). Encoding and signing bugs (URL
+building, query serialization, SigV4/HMAC canonicalization) pass every alphanumeric test and then fail
+live as generic vendor errors; a `logs-*` index pattern is exactly what exposed a SigV4 signature bug
+that had survived a full happy-path validation pass. Record which action covered this — the PR
+validation table requires it (see `create-connector/reference/pr-validation-table.md`).
 
 Verify the agent successfully calls tools, gets results, and produces a useful response.
 
@@ -317,14 +367,48 @@ Read `create-connector/reference/pr-validation-table.md` for the full format and
   testing along the way), describe the concrete scenario tested and mark `✅ Pass` (noting any bug that
   was found and fixed as part of getting it to pass).
 - For actions not exercised — deliberately skipped (e.g. destructive/admin-only), blocked by missing
-  test data/credentials, or because live testing (Tasks 4-11) was deferred entirely for this connector —
-  mark `⚠️ Not validated — needs manual verification` rather than leaving the row out.
+  test data/credentials, skipped because the environment wasn't confirmed safe to mutate (see Task 7),
+  or because live testing (Tasks 4-11) was deferred entirely for this connector — mark
+  `⚠️ Not validated — needs manual verification` rather than leaving the row out.
 - For any action that failed and remains unresolved, mark `❌ Fail` with a short description.
 
 Keep this table's markdown handy (in the task output or scratch notes) — it must be included verbatim
 under a `## Validated` heading in the PR description when this connector's PR is opened, whether that
 happens later in this same session or by a human afterward. If a PR already exists for this connector,
 add or update the `## Validated` section in its description now rather than waiting.
+
+### Sync with upstream main before opening the PR
+
+Merge (or rebase onto) the latest `main` now, once, as the final step before the PR is opened — don't
+wait for the PR to be opened and GitHub to report a conflict after the fact. This is the deliberate
+one-time sync described in "Merge main in once, deliberately" (`create-connector/SKILL.md`'s merge-
+conflict guidance), not a reflex to repeat on every later push.
+
+```bash
+git fetch origin main
+git merge origin/main
+```
+
+If this produces conflicts, follow `create-connector/SKILL.md`'s "Handling merge conflicts" section:
+regenerate `all_specs.ts` / `connector_icons_map.ts` / the CODEOWNERS block (`node scripts/generate
+connector-registries`) rather than hand-resolving their conflict markers, and hand-resolve `toc.yml` and
+the docs snippet list by keeping both sides' new entries and reinserting them alphabetically. Run
+`node scripts/eslint --fix <file>` and the type check on any file you hand-resolved before continuing —
+the branch-readiness gate below re-validates the whole branch, but a bad merge resolution is faster to
+catch here than to debug from a failing check.
+
+### Run the branch-readiness gate
+
+Before marking this task complete, run the repo's `branch-readiness-checks` skill (in
+`.agents/skills/`; its `disable-model-invocation` flag only blocks *spontaneous* invocation — running
+it because this step says so is the intended path) as the final local gate, alongside
+`node scripts/generate connector-registries --check` (which it doesn't cover). Run it **once, here** —
+not per iteration; the coverage and repo-wide lint steps cost minutes. It catches what the piecemeal
+checks above miss: `check_changes`, type errors in *downstream dependents* of `@kbn/connector-specs`
+(other packages consume `all_specs.ts`, so a spec change can break a package this PR never touched),
+and CODEOWNERS/moon drift. Fix what it reports before the PR is opened — every failure it finds
+locally is a full CI round-trip saved. For its coverage report, note the numbers but don't chase the
+80% threshold with filler tests; add tests only for meaningful untested handler logic.
 
 Mark task 12 as `completed`.
 
@@ -352,13 +436,15 @@ Tell the user something like the below template, listing the actual file paths t
 > 2. Try chatting with the agent in the Kibana UI
 > 3. Review the generated code and adjust as needed
 > 4. When satisfied, commit the code changes and open a PR — include the `## Validated` table from Task 12
->    in the PR description, and add the `release_note:feature` and `Feature:Actions/ConnectorTypes` labels
+>    in the PR description, and add the `release_note:feature`, `Feature:Actions/ConnectorTypes`, and
+>    `backport:skip` labels
 
 List the actual file paths that were created or modified during the process, and include the `## Validated`
 table compiled in Task 12 in your response so the user has it even if they open the PR themselves.
 
-If you open the PR yourself (via `gh pr create`), apply both labels as part of that same command or
-immediately after with `gh pr edit <number> --add-label "release_note:feature" --add-label "Feature:Actions/ConnectorTypes"`.
+If you open the PR yourself (via `gh pr create`), apply all three labels as part of that same command or
+immediately after with `gh pr edit <number> --add-label "release_note:feature" --add-label "Feature:Actions/ConnectorTypes" --add-label "backport:skip"`.
 `release_note:feature` surfaces the new connector in the condensed release notes; `Feature:Actions/ConnectorTypes`
-routes the PR to the right reviewers and keeps it discoverable alongside other connector-type work. Use these
-exact label names/casing — check `gh label list --repo elastic/kibana --search <name>` if unsure they still exist.
+routes the PR to the right reviewers and keeps it discoverable alongside other connector-type work;
+`backport:skip` reflects that a brand-new connector only ever lands on `main`, not older release branches.
+Use these exact label names/casing — check `gh label list --repo elastic/kibana --search <name>` if unsure they still exist.

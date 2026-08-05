@@ -28,6 +28,12 @@ const throwWithApiError = (error: unknown): never => {
   throw error;
 };
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/workflows-eng';
+
 export const OnePasswordConnector: ConnectorSpec = {
   metadata: {
     id: '.1password',

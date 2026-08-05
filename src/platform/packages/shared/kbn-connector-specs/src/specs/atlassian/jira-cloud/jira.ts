@@ -42,6 +42,12 @@ const buildBaseUrl = (ctx: ActionContext): string => {
   return `https://${subdomain}.atlassian.net`;
 };
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/workchat-eng';
+
 export const JiraConnector: ConnectorSpec = {
   metadata: {
     id: '.jira-cloud',

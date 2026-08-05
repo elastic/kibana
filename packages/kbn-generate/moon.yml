@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/repo-packages'
   - '@kbn/projects-solutions-groups'
+  - '@kbn/connector-specs'
 tags:
   - shared-common
   - package

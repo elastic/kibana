@@ -2025,6 +2025,18 @@ module.exports = {
       },
     },
     /**
+     * Node-only codegen tooling for the connector specs package (regenerates all_specs.ts and
+     * connector_icons_map.ts from src/specs/). Never bundled for the browser, so the parent
+     * package's isomorphic import/no-nodejs-modules restriction doesn't apply here.
+     */
+    {
+      files: ['src/platform/packages/shared/kbn-connector-specs/scripts/**/*.{js,ts}'],
+      rules: {
+        'import/no-nodejs-modules': 'off',
+        'no-console': 'off',
+      },
+    },
+    /**
      * Exception for connector specs whose product name contains 'server' (e.g., sharepoint_server).
      * These are connector configuration specs (shared-common code), not server-side runtime code.
      * The **\/*server* pattern in the parent rule is relaxed here to allow intra-package imports.

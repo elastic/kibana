@@ -103,6 +103,12 @@ async function callGcpApi(
   }
 }
 
+/**
+ * GitHub team that owns this connector. Read by `generate_connector_registries.ts` to keep
+ * `.github/CODEOWNERS` in sync — do not remove.
+ */
+export const OWNER = '@elastic/workflows-eng';
+
 export const GcpCloudFunctionsConnector: ConnectorSpec = {
   metadata: {
     id: '.gcp_cloud_functions',
