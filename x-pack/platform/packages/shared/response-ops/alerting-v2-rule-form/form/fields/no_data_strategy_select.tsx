@@ -14,6 +14,7 @@ interface NoDataStrategySelectProps {
   value: NoDataStrategy;
   onChange: (strategy: NoDataStrategy) => void;
   disabled?: boolean;
+  disabledReason?: string;
   compressed?: boolean;
   'data-test-subj'?: string;
 }
@@ -106,10 +107,11 @@ export const NoDataStrategySelect = ({
   value,
   onChange,
   disabled = false,
+  disabledReason,
   compressed = false,
   'data-test-subj': dataTestSubj = 'ruleV2NoDataStrategySelect',
 }: NoDataStrategySelectProps) => (
-  <EuiFormRow label={LABEL_TEXT} fullWidth>
+  <EuiFormRow label={LABEL_TEXT} fullWidth helpText={disabled ? disabledReason : undefined}>
     <EuiSuperSelect<NoDataStrategy>
       options={NO_DATA_STRATEGY_OPTIONS}
       valueOfSelected={value}
