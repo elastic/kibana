@@ -31,7 +31,7 @@ export const registerTaskManagerGetRoute = (
       },
       validate: {
         params: schema.object({
-          taskId: schema.string(),
+          taskId: schema.string({ maxLength: 200 }),
         }),
       },
     },
