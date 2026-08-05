@@ -295,8 +295,9 @@ export const ConnectorIconsMap: Map<
   ],
   [
     '.jenkins',
-    lazy(() => import(/* webpackChunkName: "connectorIconjenkins" */ './specs/jenkins/icon')),
+    lazy(() => import(/* webpackChunkName: "connectorIconJenkins" */ './specs/jenkins/icon')),
   ],
+  ['.cribl', lazy(() => import(/* webpackChunkName: "connectorIconCribl" */ './specs/cribl/icon'))],
   [
     '.azure_monitor',
     lazy(
@@ -318,13 +319,12 @@ export const ConnectorIconsMap: Map<
     '.prometheus',
     lazy(() => import(/* webpackChunkName: "connectorIconPrometheus" */ './specs/prometheus/icon')),
   ],
-
   [
     '.google_cloud_monitoring',
     lazy(
       () =>
         import(
-          /* webpackChunkName: "connectorIcongooglecloudmonitoring" */ './specs/google_cloud_monitoring/icon'
+          /* webpackChunkName: "connectorIconGoogleCloudMonitoring" */ './specs/google_cloud_monitoring/icon'
         )
     ),
   ],

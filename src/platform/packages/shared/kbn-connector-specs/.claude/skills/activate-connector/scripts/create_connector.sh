@@ -15,9 +15,11 @@ CREDENTIALS_FILE=""
 CONFIG_JSON="{}"
 AUTH_TYPE=""
 HEADER_FIELD=""
+CA_CERT_FILE=""
+VERIFICATION_MODE=""
 
 usage() {
-  echo "Usage: $0 --type <connector-type-id> --name <display-name> --credentials-file <path> [--auth-type <type>] [--header-field <name>] [--config <json>] [--kibana-url <url>]"
+  echo "Usage: $0 --type <connector-type-id> --name <display-name> --credentials-file <path> [--auth-type <type>] [--header-field <name>] [--ca-cert-file <path>] [--verification-mode <mode>] [--config <json>] [--kibana-url <url>]"
   echo ""
   echo "Options:"
   echo "  --type              Connector type ID (e.g., '.github', '.slack2', '.notion')"
@@ -25,11 +27,16 @@ usage() {
   echo "  --credentials-file  Path to a file containing the credential string"
   echo "                      (bearer token, API key, or user:password)"
   echo "                      The file is deleted immediately after reading."
-  echo "  --auth-type         Auth type: 'bearer', 'api_key_header', or 'basic'"
+  echo "  --auth-type         Auth type: 'bearer', 'api_key_header', 'basic', or 'bearer_with_tls'"
   echo "                      If omitted, auto-detects: colon in credential → basic, else bearer."
   echo "  --header-field      Header field name for api_key_header auth (e.g., 'X-Api-Key', 'Key')."
   echo "                      Required when --auth-type is 'api_key_header'. Check the connector"
   echo "                      spec's auth.types[].defaults.headerField for the correct value."
+  echo "  --ca-cert-file      Optional path to a file containing a PEM CA certificate, used with"
+  echo "                      --auth-type bearer_with_tls for self-hosted APIs with a private CA."
+  echo "                      The file is deleted immediately after reading."
+  echo "  --verification-mode Optional TLS verification mode for bearer_with_tls: 'none', 'certificate',"
+  echo "                      or 'full'."
   echo "  --config            Optional JSON object for connector config (e.g., '{\"serverUrl\":\"...\"}')"
   echo "  --kibana-url        Kibana base URL (overrides auto-detection)"
   exit 1
@@ -42,6 +49,8 @@ while [[ $# -gt 0 ]]; do
     --credentials-file) CREDENTIALS_FILE="$2"; shift 2 ;;
     --auth-type) AUTH_TYPE="$2"; shift 2 ;;
     --header-field) HEADER_FIELD="$2"; shift 2 ;;
+    --ca-cert-file) CA_CERT_FILE="$2"; shift 2 ;;
+    --verification-mode) VERIFICATION_MODE="$2"; shift 2 ;;
     --config) CONFIG_JSON="$2"; shift 2 ;;
     --kibana-url) export KIBANA_URL="$2"; shift 2 ;;
     *) echo "Unknown option: $1"; usage ;;
@@ -74,7 +83,19 @@ if [[ -z "$CREDENTIALS" ]]; then
   exit 1
 fi
 
+# Read the optional CA certificate and immediately delete the file
+CA_CERT=""
+if [[ -n "$CA_CERT_FILE" ]]; then
+  if [[ ! -f "$CA_CERT_FILE" ]]; then
+    echo "Error: CA cert file not found: $CA_CERT_FILE"
+    exit 1
+  fi
+  CA_CERT="$(cat "$CA_CERT_FILE")"
+  rm -f "$CA_CERT_FILE"
+fi
+
 # Auto-detect auth type if not explicitly provided
+# (bearer_with_tls is never auto-detected; it must be passed explicitly via --auth-type)
 if [[ -z "$AUTH_TYPE" ]]; then
   if [[ "$CREDENTIALS" == *:* ]]; then
     AUTH_TYPE="basic"
@@ -107,8 +128,17 @@ if command -v jq &>/dev/null; then
       SECRETS="$(jq -n --arg u "$USER_PART" --arg p "$PASS_PART" \
         '{authType: "basic", username: $u, password: $p}')"
       ;;
+    bearer_with_tls)
+      SECRETS="$(jq -n \
+        --arg token "$CREDENTIALS" \
+        --arg caCert "$CA_CERT" \
+        --arg verificationMode "$VERIFICATION_MODE" \
+        '{authType: "bearer_with_tls", token: $token}
+          + (if $caCert != "" then {caCert: $caCert} else {} end)
+          + (if $verificationMode != "" then {verificationMode: $verificationMode} else {} end)')"
+      ;;
     *)
-      echo "Error: Unknown auth type '$AUTH_TYPE'. Use 'bearer', 'api_key_header', or 'basic'." >&2
+      echo "Error: Unknown auth type '$AUTH_TYPE'. Use 'bearer', 'api_key_header', 'basic', or 'bearer_with_tls'." >&2
       exit 1
       ;;
   esac
@@ -139,16 +169,30 @@ else
       ESC_PASS="${ESC_PASS//\"/\\\"}"
       SECRETS_JSON="{\"authType\":\"basic\",\"username\":\"${ESC_USER}\",\"password\":\"${ESC_PASS}\"}"
       ;;
+    bearer_with_tls)
+      SECRETS_JSON="{\"authType\":\"bearer_with_tls\",\"token\":\"${ESC_CREDS}\""
+      if [[ -n "$CA_CERT" ]]; then
+        ESC_CA_CERT="${CA_CERT//\"/\\\"}"
+        ESC_CA_CERT="${ESC_CA_CERT//$'\n'/\\n}"
+        ESC_CA_CERT="${ESC_CA_CERT//$'\r'/}"
+        SECRETS_JSON="${SECRETS_JSON},\"caCert\":\"${ESC_CA_CERT}\""
+      fi
+      if [[ -n "$VERIFICATION_MODE" ]]; then
+        SECRETS_JSON="${SECRETS_JSON},\"verificationMode\":\"${VERIFICATION_MODE}\""
+      fi
+      SECRETS_JSON="${SECRETS_JSON}}"
+      ;;
     *)
-      echo "Error: Unknown auth type '$AUTH_TYPE'. Use 'bearer', 'api_key_header', or 'basic'." >&2
+      echo "Error: Unknown auth type '$AUTH_TYPE'. Use 'bearer', 'api_key_header', 'basic', or 'bearer_with_tls'." >&2
       exit 1
       ;;
   esac
   PAYLOAD="{\"connector_type_id\":\"${ESC_TYPE}\",\"name\":\"${ESC_NAME}\",\"config\":${CONFIG_JSON},\"secrets\":${SECRETS_JSON}}"
 fi
 
-# Clear the credentials variable
+# Clear the credentials variables
 CREDENTIALS=""
+CA_CERT=""
 
 # Make the API call
 RESPONSE="$(kibana_curl -w "\n%{http_code}" \

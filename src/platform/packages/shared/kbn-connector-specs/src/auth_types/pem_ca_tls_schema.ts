@@ -25,7 +25,8 @@ export const pemCaTlsSchemaFields = () => ({
     .meta({
       label: i18n.BEARER_WITH_TLS_AUTH_CA_LABEL,
       helpText: i18n.BEARER_WITH_TLS_AUTH_CA_HELP_TEXT,
-      widget: 'textarea',
+      widget: 'fileUpload',
+      widgetOptions: { accept: '.pem,.crt' },
       sensitive: true,
     })
     .optional(),

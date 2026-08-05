@@ -64,6 +64,7 @@ export * from './specs/buildkite/buildkite';
 export * from './specs/dynatrace/dynatrace';
 export * from './specs/datadog/datadog';
 export * from './specs/jenkins/jenkins';
+export * from './specs/cribl/cribl';
 export * from './specs/azure_monitor/azure_monitor';
 export * from './specs/aws_cloudwatch/aws_cloudwatch';
 export * from './specs/aws_x_ray/aws_x_ray';

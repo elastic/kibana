@@ -385,7 +385,7 @@ export const BEARER_WITH_TLS_AUTH_CA_HELP_TEXT = i18n.translate(
   'connectorSpecs.bearerWithTlsAuth.ca.helpText',
   {
     defaultMessage:
-      'Paste the PEM-encoded certificate authority used to verify the server. Leave empty to rely on the system trust store or to disable verification.',
+      'Upload the PEM-encoded certificate authority used to verify the server. Leave empty to rely on the system trust store or to disable verification.',
   }
 );
 
