@@ -58,7 +58,12 @@ import {
   ChangeAgentPrivilegeLevelFlyout,
 } from './components';
 import { AddCollectorFlyout } from './components/add_collector_flyout';
-import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
+import {
+  useAgentSoftLimit,
+  useMissingEncryptionKeyCallout,
+  useFetchAgentsData,
+  useScheduledAgentActions,
+} from './hooks';
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { cloud } = useStartServices();
@@ -310,6 +315,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setAgentActivityFlyoutOpen(true);
     setLatestAgentActionErrors([]);
   }, [setAgentActivityFlyoutOpen, setLatestAgentActionErrors]);
+
+  const { scheduledActions } = useScheduledAgentActions();
 
   const refreshAgents = ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
     fetchData({ refreshTags });
@@ -573,6 +580,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onClickAgentActivity={onClickAgentActivity}
         shouldShowAgentActivityTour={showAgentActivityTour}
         latestAgentActionErrors={latestAgentActionErrors.length}
+        scheduledActionsCount={scheduledActions.length}
         sortField={sort.field}
         sortOrder={sort.direction}
         unsupportedMigrateAgents={unsupportedMigrateAgents}

@@ -9,6 +9,14 @@ import type { ActionStatus } from '../../../../../types';
 
 const today = () => new Date().toISOString().substring(0, 10);
 
+export function isScheduledAction(action: Pick<ActionStatus, 'status' | 'startTime'>): boolean {
+  return (
+    action.status === 'IN_PROGRESS' &&
+    !!action.startTime &&
+    new Date(action.startTime).getTime() > Date.now()
+  );
+}
+
 export function getOtherDaysActions(actions: ActionStatus[]) {
   const otherDays: { [day: string]: ActionStatus[] } = {};
   actions
