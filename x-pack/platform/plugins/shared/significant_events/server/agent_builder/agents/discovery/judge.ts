@@ -10,7 +10,7 @@ import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { platformSignificantEventsTools, platformCoreTools } from '@kbn/agent-builder-common/tools';
 import instructions from './instructions/judge.md.text';
 
-export const SIGNIFICANT_EVENTS_JUDGE_AGENT_ID = 'significant_events.discovery-judge';
+export const SIGNIFICANT_EVENTS_JUDGE_AGENT_ID = 'significantEvents.discovery-judge';
 export const SIGNIFICANT_EVENTS_JUDGE_AGENT_TYPE_ID = 'platform.sig_events.discovery-judge-type';
 
 export const judgeAgentType = {
