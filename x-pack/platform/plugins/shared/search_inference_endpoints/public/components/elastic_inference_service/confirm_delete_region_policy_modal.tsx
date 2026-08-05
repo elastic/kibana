@@ -62,7 +62,7 @@ export const ConfirmDeleteRegionPolicyModal: React.FC<ConfirmDeleteRegionPolicyM
             'xpack.searchInferenceEndpoints.manageRegions.deleteConfirm.description',
             {
               defaultMessage:
-                'Removing your custom policy resets inference traffic to allow all regions. Any new regions made available by Elastic Inference Service will be automatically allowed.',
+                'Removing your custom region preferences allows inference in all locations. Any new regions Elastic Inference Service adds will be allowed automatically.',
             }
           )}
         </p>
