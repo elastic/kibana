@@ -38,22 +38,29 @@ function renderTab(fields: Partial<GenAiFields> = {}) {
 }
 
 describe('GenAiTab', () => {
-  it('renders operation, model, provider, and token pills', () => {
+  it('renders operation, model, provider, and token counts as table rows', () => {
     renderTab();
-    expect(screen.getByTestId('genAiPillOperationName')).toHaveTextContent('chat');
-    expect(screen.getByTestId('genAiPillModel')).toHaveTextContent('gpt-4o');
-    expect(screen.getByTestId('genAiPillProvider')).toHaveTextContent('openai');
-    expect(screen.getByTestId('genAiPillInputTokens')).toHaveTextContent('120');
-    expect(screen.getByTestId('genAiPillOutputTokens')).toHaveTextContent('45');
+    const table = screen.getByTestId('genAiDetails');
+    expect(table).toHaveTextContent('Operation');
+    expect(table).toHaveTextContent('chat');
+    expect(table).toHaveTextContent('Request model');
+    expect(table).toHaveTextContent('gpt-4o');
+    expect(table).toHaveTextContent('Provider');
+    expect(table).toHaveTextContent('openai');
+    expect(table).toHaveTextContent('Input tokens');
+    expect(table).toHaveTextContent('120');
+    expect(table).toHaveTextContent('Output tokens');
+    expect(table).toHaveTextContent('45');
   });
 
   it('formats token counts like the waterfall badges (thousands separator)', () => {
     renderTab({ inputTokens: 960, outputTokens: 1438 });
-    expect(screen.getByTestId('genAiPillInputTokens')).toHaveTextContent('Input tokens: 960');
-    expect(screen.getByTestId('genAiPillOutputTokens')).toHaveTextContent('Output tokens: 1,438');
+    const table = screen.getByTestId('genAiDetails');
+    expect(table).toHaveTextContent('960');
+    expect(table).toHaveTextContent('1,438');
   });
 
-  it('renders detailsSlot in place of the built-in details table', () => {
+  it('renders detailsSlot in place of the built-in field table', () => {
     render(
       <EuiThemeProvider>
         <GenAiTab
@@ -66,7 +73,7 @@ describe('GenAiTab', () => {
     expect(screen.queryByTestId('genAiDetails')).toBeNull();
   });
 
-  it('renders the details section for a detailsSlot even without built-in detail rows', () => {
+  it('renders a detailsSlot even without built-in field rows', () => {
     render(
       <EuiThemeProvider>
         <GenAiTab
@@ -78,13 +85,14 @@ describe('GenAiTab', () => {
     expect(screen.getByTestId('customDetailsSlot')).toBeInTheDocument();
   });
 
-  it('hides pills when values are absent', () => {
+  it('hides rows for absent values', () => {
     renderTab({ operationName: undefined, provider: undefined, inputTokens: undefined });
-    expect(screen.queryByTestId('genAiPillOperationName')).toBeNull();
-    expect(screen.queryByTestId('genAiPillProvider')).toBeNull();
-    expect(screen.queryByTestId('genAiPillInputTokens')).toBeNull();
-    // model pill should still be present
-    expect(screen.getByTestId('genAiPillModel')).toBeInTheDocument();
+    const table = screen.getByTestId('genAiDetails');
+    expect(table).not.toHaveTextContent('Operation');
+    expect(table).not.toHaveTextContent('Provider');
+    expect(table).not.toHaveTextContent('Input tokens');
+    // the model row should still be present
+    expect(table).toHaveTextContent('Request model');
   });
 
   it('renders conversation section when messages are present', () => {
@@ -108,7 +116,7 @@ describe('GenAiTab', () => {
     expect(screen.getByTestId('genAiMessage-0')).toBeInTheDocument();
   });
 
-  it('renders details section with response model', () => {
+  it('renders the response model row', () => {
     renderTab({ responseModel: 'gpt-4o-2024-08-06' });
     expect(screen.getByTestId('genAiDetails')).toBeInTheDocument();
     expect(screen.getByText('Response model')).toBeInTheDocument();
@@ -120,20 +128,21 @@ describe('GenAiTab', () => {
     expect(screen.getByText('max_tokens')).toBeInTheDocument();
   });
 
-  it('renders all three accordion sections when data is present', () => {
+  it('renders the Details section and the conversation section when data is present', () => {
     renderTab({
       responseModel: 'gpt-4o-2024-08-06',
       inputMessages: [{ role: 'user', content: 'Hello' }],
     });
-    expect(screen.getByTestId('genAiSection-summary')).toBeInTheDocument();
     expect(screen.getByTestId('genAiSection-details')).toBeInTheDocument();
+    expect(screen.getByTestId('genAiDetails')).toBeInTheDocument();
     expect(screen.getByTestId('genAiSection-conversation')).toBeInTheDocument();
+    // No separate Summary section anymore — one flat Details table.
+    expect(screen.queryByTestId('genAiSection-summary')).toBeNull();
   });
 
-  it('omits Details and Conversation sections when their data is absent', () => {
+  it('omits the Conversation section when there are no messages', () => {
     renderTab({ responseModel: undefined, requestParams: {}, response: {} });
-    expect(screen.getByTestId('genAiSection-summary')).toBeInTheDocument();
-    expect(screen.queryByTestId('genAiSection-details')).toBeNull();
+    expect(screen.getByTestId('genAiDetails')).toBeInTheDocument();
     expect(screen.queryByTestId('genAiSection-conversation')).toBeNull();
   });
 });

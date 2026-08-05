@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiBadge,
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -25,20 +18,6 @@ import type { GenAiFields } from './get_genai_fields';
 import { GenAiFieldValue } from './genai_field_value';
 import { GenAiMessages } from './genai_messages';
 import { GenAiSection } from './genai_section';
-
-interface PillProps {
-  label: string;
-  value: string | number;
-  testSubj?: string;
-}
-
-function Pill({ label, value, testSubj }: PillProps) {
-  return (
-    <EuiBadge color="hollow" data-test-subj={testSubj}>
-      {label}: <strong>{value}</strong>
-    </EuiBadge>
-  );
-}
 
 interface DetailRow {
   id: string;
@@ -86,7 +65,7 @@ interface Props {
   /** When provided, copy-button clicks are tracked via `data-ebt-*` attributes. */
   ebt?: EbtClickAttrsElementOnly;
   /**
-   * When provided, replaces the built-in Details table — e.g. with the doc
+   * When provided, replaces the built-in field table — e.g. with the doc
    * viewer's field table that offers filter actions in the Discover context.
    */
   detailsSlot?: React.ReactNode;
@@ -108,54 +87,55 @@ export function GenAiTab({ genAi, ebt, detailsSlot }: Props) {
     conversationId,
   } = genAi;
 
-  // ── Summary pills ──────────────────────────────────────────────────────────
-  const pills: PillProps[] = [];
+  // ── Field rows (single flat table — the former Summary fields lead) ───────
+  const detailRows: DetailRow[] = [];
+
   if (operationName) {
-    pills.push({
-      label: i18n.translate('apmUiShared.genAi.pill.operationName', {
+    detailRows.push({
+      id: 'operationName',
+      label: i18n.translate('apmUiShared.genAi.params.operationName', {
         defaultMessage: 'Operation',
       }),
-      value: operationName,
-      testSubj: 'genAiPillOperationName',
+      content: <GenAiFieldValue value={operationName} />,
     });
   }
   if (requestModel) {
-    pills.push({
-      label: i18n.translate('apmUiShared.genAi.pill.model', { defaultMessage: 'Model' }),
-      value: requestModel,
-      testSubj: 'genAiPillModel',
+    detailRows.push({
+      id: 'requestModel',
+      label: i18n.translate('apmUiShared.genAi.params.requestModel', {
+        defaultMessage: 'Request model',
+      }),
+      content: <GenAiFieldValue value={requestModel} />,
     });
   }
   if (provider) {
-    pills.push({
-      label: i18n.translate('apmUiShared.genAi.pill.provider', { defaultMessage: 'Provider' }),
-      value: provider,
-      testSubj: 'genAiPillProvider',
+    detailRows.push({
+      id: 'provider',
+      label: i18n.translate('apmUiShared.genAi.params.provider', {
+        defaultMessage: 'Provider',
+      }),
+      content: <GenAiFieldValue value={provider} />,
     });
   }
   if (inputTokens !== undefined) {
-    pills.push({
-      label: i18n.translate('apmUiShared.genAi.pill.inputTokens', {
+    detailRows.push({
+      id: 'inputTokens',
+      label: i18n.translate('apmUiShared.genAi.params.inputTokens', {
         defaultMessage: 'Input tokens',
       }),
       // Same formatting as the waterfall token badges (e.g. 1,438).
-      value: asInteger(inputTokens),
-      testSubj: 'genAiPillInputTokens',
+      content: <GenAiFieldValue value={asInteger(inputTokens)} />,
     });
   }
   if (outputTokens !== undefined) {
-    pills.push({
-      label: i18n.translate('apmUiShared.genAi.pill.outputTokens', {
+    detailRows.push({
+      id: 'outputTokens',
+      label: i18n.translate('apmUiShared.genAi.params.outputTokens', {
         defaultMessage: 'Output tokens',
       }),
-      value: asInteger(outputTokens),
-      testSubj: 'genAiPillOutputTokens',
+      content: <GenAiFieldValue value={asInteger(outputTokens)} />,
     });
   }
-
-  // ── Details rows ───────────────────────────────────────────────────────────
-  const detailRows: DetailRow[] = [];
-
   if (responseModel) {
     detailRows.push({
       id: 'responseModel',
@@ -203,53 +183,32 @@ export function GenAiTab({ genAi, ebt, detailsSlot }: Props) {
 
   return (
     <>
-      {/* ── Section 1: Summary ─────────────────────────────────────────── */}
-      {pills.length > 0 && (
+      {/* ── Details: single flat field table in a collapsible section ───── */}
+      {(detailsSlot != null || detailRows.length > 0) && (
         <GenAiSection
-          id="summary"
-          title={i18n.translate('apmUiShared.genAi.section.summary', {
-            defaultMessage: 'Summary',
+          id="details"
+          title={i18n.translate('apmUiShared.genAi.section.details', {
+            defaultMessage: 'Details',
           })}
         >
-          <EuiFlexGroup gutterSize="xs" wrap data-test-subj="genAiPills">
-            {pills.map((p) => (
-              <EuiFlexItem grow={false} key={p.testSubj}>
-                <Pill {...p} />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+          {detailsSlot ?? (
+            <EuiBasicTable
+              itemId="id"
+              tableLayout="auto"
+              compressed
+              items={detailRows}
+              columns={DETAIL_COLUMNS}
+              data-test-subj="genAiDetails"
+              css={detailTableCss}
+              tableCaption={i18n.translate('apmUiShared.genAi.section.details.tableCaption', {
+                defaultMessage: 'GenAI details',
+              })}
+            />
+          )}
         </GenAiSection>
       )}
 
-      {/* ── Section 2: Details ─────────────────────────────────────────── */}
-      {(detailsSlot != null || detailRows.length > 0) && (
-        <>
-          <EuiSpacer size="m" />
-          <GenAiSection
-            id="details"
-            title={i18n.translate('apmUiShared.genAi.section.details', {
-              defaultMessage: 'Details',
-            })}
-          >
-            {detailsSlot ?? (
-              <EuiBasicTable
-                itemId="id"
-                tableLayout="auto"
-                compressed
-                items={detailRows}
-                columns={DETAIL_COLUMNS}
-                data-test-subj="genAiDetails"
-                css={detailTableCss}
-                tableCaption={i18n.translate('apmUiShared.genAi.section.details.tableCaption', {
-                  defaultMessage: 'GenAI details',
-                })}
-              />
-            )}
-          </GenAiSection>
-        </>
-      )}
-
-      {/* ── Section 3: Conversation ────────────────────────────────────── */}
+      {/* ── Conversation ─────────────────────────────────────────────────── */}
       {hasConversation && (
         <>
           <EuiSpacer size="m" />

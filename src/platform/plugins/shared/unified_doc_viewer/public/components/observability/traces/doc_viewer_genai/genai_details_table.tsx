@@ -21,6 +21,8 @@ import {
   ATTRIBUTE_GEN_AI_RESPONSE_ID,
   ATTRIBUTE_GEN_AI_RESPONSE_MODEL,
   ATTRIBUTE_GEN_AI_SYSTEM,
+  ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS,
+  ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS,
 } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -47,9 +49,8 @@ const PROVIDER_TITLE = i18n.translate(
 );
 
 const DETAIL_FIELD_TITLES: Record<string, string> = {
-  // The first three also appear as Summary pills; they are repeated here so
-  // Discover users get the field-table filter actions for them (the pills
-  // stay the glanceable summary, this table is the actionable surface).
+  // Single flat field table (no Summary/Details split) — the former summary
+  // fields lead so the most relevant information stays on top.
   [ATTRIBUTE_GEN_AI_OPERATION_NAME]: i18n.translate(
     'unifiedDocViewer.observability.traces.genAi.details.operationName',
     { defaultMessage: 'Operation' }
@@ -62,6 +63,14 @@ const DETAIL_FIELD_TITLES: Record<string, string> = {
   // Deprecated predecessor of gen_ai.provider.name — shown only when the
   // provider field is absent (see getGenAiDetailFieldNames).
   [ATTRIBUTE_GEN_AI_SYSTEM]: PROVIDER_TITLE,
+  [ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS]: i18n.translate(
+    'unifiedDocViewer.observability.traces.genAi.details.inputTokens',
+    { defaultMessage: 'Input tokens' }
+  ),
+  [ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS]: i18n.translate(
+    'unifiedDocViewer.observability.traces.genAi.details.outputTokens',
+    { defaultMessage: 'Output tokens' }
+  ),
   [ATTRIBUTE_GEN_AI_RESPONSE_MODEL]: i18n.translate(
     'unifiedDocViewer.observability.traces.genAi.details.responseModel',
     { defaultMessage: 'Response model' }

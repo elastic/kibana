@@ -133,7 +133,7 @@ describe('TransactionTabs', () => {
     renderTabs({ detailTab: TransactionTab.genAi });
 
     expect(screen.getByTestId('genAiTab')).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByTestId('genAiPillModel')).toHaveTextContent('gpt-4o');
+    expect(screen.getByTestId('genAiDetails')).toHaveTextContent('gpt-4o');
   });
 
   it('falls back to the timeline tab when the genAi tab is requested but not available', () => {
