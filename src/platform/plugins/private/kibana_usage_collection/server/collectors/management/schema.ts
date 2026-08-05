@@ -261,6 +261,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'discover:defaultEsqlQuery': {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The default ES|QL query Discover opens with in ES|QL mode. Redacted as it may contain sensitive user data.',
+    },
+  },
   'discover:maxDocFieldsDisplayed': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
@@ -572,6 +579,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'contextEngine:enabled': {
     type: 'boolean',
     _meta: { description: 'Whether the Context Engine is enabled.' },
+  },
+  'agentBuilder:uiamOAuthClientManagement': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether UIAM OAuth client management endpoints and the Agent Builder MCP Clients UI are enabled.',
+    },
   },
   'agentBuilder:tracing:enabled': {
     type: 'boolean',

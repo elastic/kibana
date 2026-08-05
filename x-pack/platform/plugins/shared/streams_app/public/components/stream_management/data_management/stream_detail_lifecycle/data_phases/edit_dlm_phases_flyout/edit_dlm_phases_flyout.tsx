@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { IngestStreamLifecycleDSL, PhaseName } from '@kbn/streams-schema';
 import {
@@ -16,7 +15,6 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiText,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormProvider, useForm, useFormState, useWatch } from 'react-hook-form';
@@ -119,18 +117,11 @@ export const EditDlmPhasesFlyout = ({
   canCreateRepository = true,
   'data-test-subj': dataTestSubjProp,
 }: EditDlmPhasesFlyoutProps) => {
-  const { euiTheme } = useEuiTheme();
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'streamsEditDlmPhasesFlyoutTitle' });
   const formId = useGeneratedHtmlId({ prefix: 'streamsEditDlmPhasesFlyoutForm' });
   const dataTestSubj = dataTestSubjProp ?? 'streamsEditIlmPhasesFlyout';
   const { sectionStyles, phaseDescriptionNoBottomPaddingStyles } = useDataPhasesFlyoutStyles();
   const { ilmPhases } = useIlmPhasesColorAndDescription();
-  const enterpriseCalloutCss = useMemo(
-    () => css`
-      padding: ${euiTheme.size.m} ${euiTheme.size.l};
-    `,
-    [euiTheme.size.l, euiTheme.size.m]
-  );
 
   const schema = useMemo(() => getDlmPhasesFlyoutFormSchema(), []);
   const methods = useForm<DlmPhasesFlyoutFormInternal>({
@@ -545,6 +536,15 @@ export const EditDlmPhasesFlyout = ({
       onClose={onClose}
       title={title}
       tabsRow={tabsRow}
+      banner={
+        showFrozenEnterpriseCallout ? (
+          <FrozenEnterpriseRequiredCallout
+            onUpgradeEnterprise={onUpgradeEnterprise}
+            calloutTestSubj={`${dataTestSubj}FrozenEnterpriseRequiredCallout`}
+            upgradeButtonTestSubj={`${dataTestSubj}UpgradeEnterpriseButton`}
+          />
+        ) : undefined
+      }
       isSubmitting={isSubmitting}
       isSaving={isSaving}
       isSaveDisabledDueToInvalid={hasFormErrors}
@@ -555,15 +555,6 @@ export const EditDlmPhasesFlyout = ({
           onSubmit={methods.handleSubmit((values) => onSave(formatDslOutput(values)))}
           noValidate
         >
-          {showFrozenEnterpriseCallout && (
-            <FrozenEnterpriseRequiredCallout
-              onUpgradeEnterprise={onUpgradeEnterprise}
-              calloutTestSubj={`${dataTestSubj}FrozenEnterpriseRequiredCallout`}
-              upgradeButtonTestSubj={`${dataTestSubj}UpgradeEnterpriseButton`}
-              calloutCss={enterpriseCalloutCss}
-            />
-          )}
-
           {!hasAdditionalPhases ? (
             <EuiFlexGroup
               justifyContent="center"

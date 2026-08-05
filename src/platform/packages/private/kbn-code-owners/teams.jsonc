@@ -42,6 +42,9 @@
   {
     "id": "apm-agent-approvers",
     "name": "APM Agent Approvers",
+    "areas": [
+      "observability"
+    ],
     "github": {
       "team": "elastic/apm-agent-approvers"
     },
@@ -96,8 +99,12 @@
   {
     "id": "cloud-services",
     "name": "Cloud Services",
+    "areas": [
+      "security"
+    ],
     "github": {
-      "team": "elastic/cloud-services"
+      "team": "elastic/cloud-services",
+      "label": "Team:Security-Cloud Services"
     }
   },
   {
@@ -184,17 +191,6 @@
     "github": {
       "team": "elastic/fleet",
       "label": "Team:Fleet"
-    }
-  },
-  {
-    "id": "integration-experience",
-    "name": "Security Integrations Integration Experience",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/integration-experience",
-      "label": "Team:Integration-Experience"
     }
   },
   {
@@ -436,7 +432,6 @@
     "github": {
       "team": "elastic/kibana-telemetry",
       "label": "Team:Core"
-      
     }
   },
   {
@@ -511,6 +506,14 @@
       "Observability observed asset model",
       "Evals"
     ]
+  },
+  {
+    "id": "nightshift-sre-agent",
+    "name": "Nightshift SRE Agent Team",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/nightshift-sre-agent-team"
+    }
   },
   {
     "id": "obs-cloudnative-monitoring",
@@ -615,6 +618,24 @@
       "Hosts UI",
       "Metrics Explorer",
       "Metrics Experience"
+    ]
+  },
+  {
+    "id": "obs-signals-logs",
+    "name": "Obs UX: Signals & Logs",
+    "areas": [
+      "observability"
+    ],
+    "github": {
+      "team": "elastic/obs-signals-logs-team",
+      "label": "Team:obs-signals-logs"
+    },
+    "responsibilities": [
+      "Logs Analytics and Skills",
+      "Logs Explorer / Logs Stream (legacy)",
+      "Left Nav & Classic Overview Page",
+      "Synthetics (Synthetics UI, Synthetics Recorder, Synthetics Service and Heartbeat)",
+      "eBPF + Profiling OTel"
     ]
   },
   {

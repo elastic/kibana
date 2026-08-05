@@ -276,6 +276,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core,
       logger,
       experimentalFeatures,
+      this.productFeaturesService,
       plugins.ml,
       {
         config: this.config,
@@ -563,6 +564,13 @@ export class Plugin implements ISecuritySolutionPlugin {
       secondaryAlias: undefined,
     });
 
+    const osquery = plugins.osquery;
+    const getOsqueryResponseActionsAuthzChecker: CreateSecurityRuleTypeWrapperProps['getOsqueryResponseActionsAuthzChecker'] =
+      osquery
+        ? (request) => (actionParams) =>
+            osquery?.checkResponseActionAuthz(request, actionParams) ?? Promise.resolve()
+        : undefined;
+
     const securityRuleTypeOptions = {
       lists: plugins.lists,
       docLinks: core.docLinks,
@@ -589,6 +597,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         const [, startPlugins] = await core.getStartServices();
         return startPlugins.entityStore;
       },
+      getOsqueryResponseActionsAuthzChecker,
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);

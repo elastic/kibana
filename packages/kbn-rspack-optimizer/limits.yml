@@ -131,6 +131,7 @@ pageLoadAssetSize:
   monitoring: 22416
   navigation: 332
   newsfeed: 10708
+  nightshift: 1961
   noDataPage: 630
   notificationCenter: 332
   observability: 3614
@@ -143,6 +144,7 @@ pageLoadAssetSize:
   observabilityShared: 7496
   osquery: 13046
   painlessLab: 2282
+  pnd: 10000
   presentationUtil: 669
   productDocBase: 4218
   productIntercept: 4738
@@ -188,7 +190,9 @@ pageLoadAssetSize:
   shared-packages: 4103474
   shared-plugins: 12276963
   shared-solution-packages: 353531
-  significant_events: 2455
+  significantEvents: 5400
+  # Proportional to webpack 14459 using prior rspack/webpack ratio (~5600/9784).
+  significantEventsApp: 8500
   slo: 19531
   snapshotRestore: 16909
   spaces: 22966
