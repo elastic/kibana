@@ -2424,7 +2424,7 @@ groups:
           Enables Elastic Workflows and related experiences.
         note: |
           :applies_to: stack: preview 9.3
-          In these versions, the default is `false`.
+          In this version, the default is `false`.
         datatype: bool
         default: true
         applies_to:
