@@ -238,8 +238,9 @@ export const updateTimelineShowTimeline = ({
 }: UpdateShowTimelineProps): TimelineById => {
   const timeline = timelineById[id];
 
-  // When a super timeline is closed, reset its transient fields so the footer
-  // reverts to a blank timeline state rather than continuing to show super timeline metadata.
+  // When a super timeline is closed, fully reset the active slot to blank defaults so the
+  // merged, non-persistable content (filters, pins, notes, data providers, columns) cannot
+  // be reopened and saved as a real timeline.
   const superTimelineReset =
     !show && timeline?.isSuperTimeline
       ? {
@@ -247,8 +248,20 @@ export const updateTimelineShowTimeline = ({
           superTimelineSourceIds: [],
           superTimelineSourceTitles: [],
           superTimelineDescriptions: [],
-          title: '',
-          description: '',
+          title: timelineDefaults.title,
+          description: timelineDefaults.description,
+          filters: timelineDefaults.filters,
+          dataProviders: timelineDefaults.dataProviders,
+          kqlQuery: timelineDefaults.kqlQuery,
+          pinnedEventIds: timelineDefaults.pinnedEventIds,
+          pinnedEventsSaveObject: timelineDefaults.pinnedEventsSaveObject,
+          noteIds: timelineDefaults.noteIds,
+          eventIdToNoteIds: timelineDefaults.eventIdToNoteIds,
+          columns: timelineDefaults.columns,
+          dateRange: timelineDefaults.dateRange,
+          savedObjectId: timelineDefaults.savedObjectId,
+          savedSearchId: timelineDefaults.savedSearchId,
+          savedSearch: timelineDefaults.savedSearch,
         }
       : {};
 

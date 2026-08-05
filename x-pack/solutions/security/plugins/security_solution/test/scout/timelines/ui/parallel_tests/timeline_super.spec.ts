@@ -20,7 +20,7 @@ import { expect } from '@kbn/scout-security/ui';
 
 spaceTest.describe(
   'Super Timeline — Timelines list entry point',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ apiServices }) => {
       await apiServices.timeline.deleteAll();

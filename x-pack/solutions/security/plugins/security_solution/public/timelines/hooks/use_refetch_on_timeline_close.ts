@@ -7,9 +7,9 @@
 
 import { useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux-v7';
-import { TimelineId } from '../../../../common/types/timeline';
-import { getTimelineShowStatusByIdSelector } from '../../../timelines/store/selectors';
-import type { State } from '../../../common/store';
+import { TimelineId } from '../../../common/types/timeline';
+import { getTimelineShowStatusByIdSelector } from '../store/selectors';
+import type { State } from '../../common/store';
 
 /**
  * Calls `refetch` whenever the active timeline modal transitions from visible to hidden.

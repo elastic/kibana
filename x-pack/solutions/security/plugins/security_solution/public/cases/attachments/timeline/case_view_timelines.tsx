@@ -37,7 +37,7 @@ import {
   UtilityBarText,
 } from '../../../common/components/utility_bar';
 import { useGetTimelinesByIds } from './use_get_timelines_by_ids';
-import { useRefetchOnTimelineClose } from './use_refetch_on_timeline_close';
+import { useRefetchOnTimelineClose } from '../../../timelines/hooks/use_refetch_on_timeline_close';
 import { NO_TIMELINES_ATTACHED, TIMELINE_DISPLAY_NAME } from './translations';
 
 const DEFAULT_PAGE_SIZE = 10;
