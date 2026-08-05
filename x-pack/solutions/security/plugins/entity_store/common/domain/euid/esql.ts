@@ -17,6 +17,7 @@ import type {
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import {
   esqlIsNotNullOrEmpty,
   esqlIsNullOrEmpty,
@@ -346,6 +347,36 @@ function buildSourceClauseEsql(evaluation: FieldEvaluation, spec: SourceMatchSpe
 
 export function getFieldEvaluationsEsql(entityType: EntityType): string | undefined {
   return getFieldEvaluationsEsqlFromDefinition(getEntityDefinitionWithoutId(entityType));
+}
+
+/** `field` is present and non-empty, referencing the raw field (no TO_STRING cast). */
+function esqlRawFieldNonEmpty(field: string): string {
+  return `(\`${field}\` IS NOT NULL AND \`${field}\` != "")`;
+}
+
+/** Fields composing the host-scoped user EUID, per the `entity.namespace == 'local'` ranking branch. */
+const HOST_SCOPED_USER_FIELDS = ['user.name', 'host.id'] as const;
+
+/**
+ * ES|QL fragments for the host-scoped (non-IDP) user EUID:
+ * `user:<user.name>@<host.id>@local`.
+ *
+ * Mirrors the `entity.namespace == 'local'` branch of
+ * `userEntityDefinition.identityField.euidRanking`, but hardcodes the namespace
+ * instead of deriving `entity.namespace`.
+ */
+export function getHostScopedUserEuidEsql(): {
+  /** RHS for `| EVAL <col> = …` producing the host-scoped user EUID. */
+  evalAssignment: string;
+  /** `WHERE` gate requiring every field this EUID composes. */
+  presenceGate: string;
+} {
+  const [userField, hostField] = HOST_SCOPED_USER_FIELDS;
+
+  return {
+    evalAssignment: `CONCAT("user:", TO_STRING(\`${userField}\`), "@", TO_STRING(\`${hostField}\`), "@${USER_ENTITY_NAMESPACE.Local}")`,
+    presenceGate: HOST_SCOPED_USER_FIELDS.map(esqlRawFieldNonEmpty).join(' AND '),
+  };
 }
 
 /**
