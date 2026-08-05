@@ -25,4 +25,4 @@ export const timeRangeComparators: StateComparators<SerializedTimeRange> = {
 export const initializeTimeRangeManager = (
   initialTimeRangeState: SerializedTimeRange
 ): StateManager<SerializedTimeRange> =>
-  initializeStateManager(initialTimeRangeState, defaultTimeRangeState, timeRangeComparators);
+  initializeStateManager(initialTimeRangeState, defaultTimeRangeState);

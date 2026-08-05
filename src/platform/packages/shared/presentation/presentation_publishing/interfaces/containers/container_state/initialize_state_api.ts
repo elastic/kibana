@@ -49,6 +49,7 @@ export const initializeStateApi = <StateType extends object = object>({
     debounceTime(UNSAVED_CHANGES_DEBOUNCE),
     map(([, lastSavedState]) => {
       const currentState = serializeState();
+
       // check state equality
       return !areComparatorsEqual(
         getComparators(),
