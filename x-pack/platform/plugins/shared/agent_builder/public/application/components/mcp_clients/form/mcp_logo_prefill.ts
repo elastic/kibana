@@ -19,46 +19,61 @@ const logoFileName = (mediaType: string): string => {
   return subtype ? `${FALLBACK_LOGO_FILE_NAME}.${subtype}` : FALLBACK_LOGO_FILE_NAME;
 };
 
-const loadPresetLogoData = async (
-  option: LogoOption,
-  signal?: AbortSignal
-): Promise<string | undefined> => {
+const loadPresetLogoData = async (option: LogoOption): Promise<string | undefined> => {
   try {
-    const dataUrl = await fetchAsDataUrl(await option.loadIconUrl(), signal);
+    const dataUrl = await fetchAsDataUrl(await option.loadIconUrl());
     return parseDataUrl(dataUrl)?.data;
   } catch {
     return undefined;
   }
 };
 
-const findPresetLogoId = async (
-  data: string,
-  signal?: AbortSignal
-): Promise<string | undefined> => {
-  const presets = await Promise.all(
-    Object.entries(LOGO_OPTIONS).map(
-      async ([id, option]): Promise<readonly [string, string | undefined]> => [
-        id,
-        await loadPresetLogoData(option, signal),
-      ]
-    )
+let presetLogoDataById: Promise<ReadonlyMap<string, string>> | undefined;
+
+const buildPresetLogoDataById = async (): Promise<ReadonlyMap<string, string>> => {
+  const dataById = new Map<string, string>();
+  let hasFailure = false;
+
+  await Promise.all(
+    Object.entries(LOGO_OPTIONS).map(async ([id, option]) => {
+      const data = await loadPresetLogoData(option);
+      if (data === undefined) {
+        hasFailure = true;
+        return;
+      }
+      dataById.set(id, data);
+    })
   );
 
-  return presets.find(([, presetData]) => presetData === data)?.[0];
+  if (hasFailure) {
+    presetLogoDataById = undefined;
+  }
+
+  return dataById;
+};
+
+const findPresetLogoId = async (data: string): Promise<string | undefined> => {
+  presetLogoDataById ??= buildPresetLogoDataById();
+  const dataById = await presetLogoDataById;
+
+  for (const [id, presetData] of dataById) {
+    if (presetData === data) {
+      return id;
+    }
+  }
+  return undefined;
 };
 
 /**
  * Maps a client's stored logo onto the form's logo field.
  *
  * @param clientLogo - The client's stored `client_logo`, if any.
- * @param signal - Optional abort signal forwarded to the preset asset loads.
  * @returns A `select` variant when the logo matches one of the presets, an
  *   `upload` variant carrying a file reconstructed from the stored bytes
  *   otherwise, and no logo when there is nothing to prefill.
  */
 export const resolveClientLogoFormValue = async (
-  clientLogo?: OAuthClientLogo,
-  signal?: AbortSignal
+  clientLogo?: OAuthClientLogo
 ): Promise<ClientLogo> => {
   if (!clientLogo || clientLogo.data === '') {
     return NO_CLIENT_LOGO;
@@ -66,7 +81,7 @@ export const resolveClientLogoFormValue = async (
 
   const dataUrl = `data:${clientLogo.media_type};base64,${clientLogo.data}`;
 
-  const presetId = await findPresetLogoId(clientLogo.data, signal);
+  const presetId = await findPresetLogoId(clientLogo.data);
   if (presetId) {
     return { type: 'select', id: presetId, dataUrl };
   }

@@ -17,7 +17,7 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { useToasts } from '../../../hooks/use_toasts';
 import { appPaths } from '../../../utils/app_paths';
 import { labels } from '../../../utils/i18n';
-import { McpClientFormPage } from './mcp_client_form_page';
+import { McpClientFormPage, McpClientPageLayout } from './mcp_client_form_page';
 import { oauthClientToFormData, toUpdateOAuthClientPayload } from './mcp_client_transform';
 import { resolveClientLogoFormValue } from './mcp_logo_prefill';
 import type { McpClientFormData } from './types';
@@ -30,16 +30,13 @@ export const McpClientEdit = () => {
   const { client, isLoading } = useOAuthClient(clientId);
   const { updateOAuthClient, isUpdating } = useUpdateOAuthClient();
 
-  const { value: initialValues } = useAbortableAsync(
-    async ({ signal }) => {
-      if (!client) {
-        return undefined;
-      }
-      const clientLogo = await resolveClientLogoFormValue(client.client_logo, signal);
-      return oauthClientToFormData(client, clientLogo);
-    },
-    [client]
-  );
+  const { value: initialValues } = useAbortableAsync(async () => {
+    if (!client) {
+      return undefined;
+    }
+    const clientLogo = await resolveClientLogoFormValue(client.client_logo);
+    return oauthClientToFormData(client, clientLogo);
+  }, [client]);
 
   const isEditable = Boolean(client) && !client?.revoked;
 
@@ -76,11 +73,13 @@ export const McpClientEdit = () => {
 
   if (!initialValues) {
     return (
-      <EuiFlexGroup justifyContent="center" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="xxl" data-test-subj="mcpClientEditLoading" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <McpClientPageLayout mode={McpClientFormMode.EDIT}>
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xxl" data-test-subj="mcpClientEditLoading" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </McpClientPageLayout>
     );
   }
 

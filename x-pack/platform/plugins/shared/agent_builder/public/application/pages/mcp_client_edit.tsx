@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { McpClientEdit } from '../components/mcp_clients/form/mcp_client_edit';
 import { useOAuthClient } from '../hooks/oauth_clients/use_oauth_client';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
+import { useToasts } from '../hooks/use_toasts';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
 
 export const AgentBuilderMcpClientEditPage = () => {
   const { clientId } = useParams<{ clientId: string }>();
-  const { client } = useOAuthClient(clientId);
+  const { client, error, isError } = useOAuthClient(clientId);
+  const { addErrorToast } = useToasts();
 
   useBreadcrumb([
     {
@@ -31,6 +34,16 @@ export const AgentBuilderMcpClientEditPage = () => {
       path: appPaths.manage.mcpClientEdit({ clientId }),
     },
   ]);
+
+  useEffect(() => {
+    if (!isError) {
+      return;
+    }
+    addErrorToast({
+      title: labels.tools.mcpClients.loadMcpClientErrorMessage,
+      text: formatAgentBuilderErrorMessage(error),
+    });
+  }, [isError, error, addErrorToast]);
 
   return <McpClientEdit />;
 };

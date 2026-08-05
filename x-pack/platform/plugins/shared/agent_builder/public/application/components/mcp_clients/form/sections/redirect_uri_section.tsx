@@ -108,9 +108,9 @@ export const RedirectUriSection = () => {
 
       const restored = redirectUrisByTypeRef.current[id];
       if (id === RedirectUriType.REMOTE) {
-        replace(restored?.[0] ? [restored[0]] : [{ value: '' }]);
+        replace(restored[0] ? [restored[0]] : [{ value: '' }]);
       } else {
-        replace(restored ?? []);
+        replace(restored.length > 0 ? restored : [{ value: '' }]);
       }
     },
     [getValues, replace]

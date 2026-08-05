@@ -787,14 +787,11 @@ export class AgentBuilderApp {
       .waitFor({ state: 'visible' });
     await this.page.testSubj.click(`mcpClientEditAction-${clientId}`);
     await this.page.testSubj.locator('agentBuilderMcpClientEditPage').waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('mcpClientNameInput').waitFor({ state: 'visible' });
   }
 
   async getMcpClientName(): Promise<string> {
     return this.page.testSubj.locator('mcpClientNameInput').inputValue();
-  }
-
-  async getMcpClientLogoSelection(): Promise<string> {
-    return this.page.testSubj.locator('mcpClientLogoSelect').innerText();
   }
 
   async getMcpClientRedirectUris(type: 'local' | 'remote' = 'local'): Promise<string[]> {

@@ -65,6 +65,27 @@ const MODE_CONFIG: Record<McpClientFormMode, ModeConfig> = {
   },
 };
 
+export interface McpClientPageLayoutProps {
+  mode: McpClientFormMode;
+  children: React.ReactNode;
+}
+
+export const McpClientPageLayout = ({ mode, children }: McpClientPageLayoutProps) => {
+  const { pageTitle, pageTestSubj } = MODE_CONFIG[mode];
+
+  return (
+    <KibanaPageTemplate data-test-subj={pageTestSubj}>
+      <KibanaPageTemplate.Header
+        css={headerStyles}
+        pageTitle={pageTitle}
+        description={labels.tools.mcpClients.form.pageDescription}
+        rightSideItems={[<EuiImage src={illustrationGenai} alt="" size="100px" />]}
+      />
+      <KibanaPageTemplate.Section>{children}</KibanaPageTemplate.Section>
+    </KibanaPageTemplate>
+  );
+};
+
 interface BaseMcpClientFormPageProps {
   isSubmitting: boolean;
   onSubmit: (data: McpClientFormData) => Promise<void>;
@@ -104,8 +125,7 @@ export const McpClientFormPage = ({
   const { errors, isDirty, isSubmitSuccessful } = formState;
   const hasErrors = Object.keys(errors).length > 0;
 
-  const { pageTitle, pageTestSubj, submitLabel, submitTestSubj, submitAction, cancelAction } =
-    MODE_CONFIG[mode];
+  const { submitLabel, submitTestSubj, submitAction, cancelAction } = MODE_CONFIG[mode];
 
   const handleCancel = useCallback(() => {
     setIsCancelling(true);
@@ -126,52 +146,44 @@ export const McpClientFormPage = ({
 
   return (
     <FormProvider {...form}>
-      <KibanaPageTemplate data-test-subj={pageTestSubj}>
-        <KibanaPageTemplate.Header
-          css={headerStyles}
-          pageTitle={pageTitle}
-          description={labels.tools.mcpClients.form.pageDescription}
-          rightSideItems={[<EuiImage src={illustrationGenai} alt="" size="100px" />]}
-        />
-        <KibanaPageTemplate.Section>
-          <McpClientForm mode={mode} onSubmit={handleSubmit(onSubmit)} />
-          <EuiSpacer size="xl" />
-          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="m"
-                color="text"
-                onClick={handleCancel}
-                data-test-subj="mcpClientFormCancelButton"
-                {...getEbtProps({
-                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                  action: cancelAction,
-                  detail: AGENT_BUILDER_UI_EBT.entity.MCP_CLIENT,
-                })}
-              >
-                {labels.tools.mcpClients.form.cancelButton}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="m"
-                fill
-                onClick={handleSubmit(onSubmit)}
-                isLoading={isSubmitting}
-                disabled={isSubmitDisabled}
-                data-test-subj={submitTestSubj}
-                {...getEbtProps({
-                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                  action: submitAction,
-                  detail: AGENT_BUILDER_UI_EBT.entity.MCP_CLIENT,
-                })}
-              >
-                {submitLabel}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </KibanaPageTemplate.Section>
-      </KibanaPageTemplate>
+      <McpClientPageLayout mode={mode}>
+        <McpClientForm mode={mode} onSubmit={handleSubmit(onSubmit)} />
+        <EuiSpacer size="xl" />
+        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="m"
+              color="text"
+              onClick={handleCancel}
+              data-test-subj="mcpClientFormCancelButton"
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: cancelAction,
+                detail: AGENT_BUILDER_UI_EBT.entity.MCP_CLIENT,
+              })}
+            >
+              {labels.tools.mcpClients.form.cancelButton}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="m"
+              fill
+              onClick={handleSubmit(onSubmit)}
+              isLoading={isSubmitting}
+              disabled={isSubmitDisabled}
+              data-test-subj={submitTestSubj}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: submitAction,
+                detail: AGENT_BUILDER_UI_EBT.entity.MCP_CLIENT,
+              })}
+            >
+              {submitLabel}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </McpClientPageLayout>
     </FormProvider>
   );
 };
