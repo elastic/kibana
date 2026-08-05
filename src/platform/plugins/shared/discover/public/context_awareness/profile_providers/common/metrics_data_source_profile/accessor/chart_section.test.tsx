@@ -33,6 +33,7 @@ import {
   useCurrentTabAction,
   useInternalStateDispatch,
 } from '../../../../../application/main/state_management/redux';
+import { METRICS_GRID_SORT_STATE_DEF } from '../../../../../../common/context_awareness';
 import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
 import type { ContextAwarenessToolkit, ContextAwarenessToolkitActions } from '../../../../toolkit';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../toolkit';
@@ -178,7 +179,7 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
         ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         actions: toolkitActions,
         getStateAdapter: jest.fn((definition) =>
-          definition.key === 'metricsGridSort' ? sortAdapter : gridSettingsAdapter
+          definition.key === METRICS_GRID_SORT_STATE_DEF.key ? sortAdapter : gridSettingsAdapter
         ) as unknown as ContextAwarenessToolkit['getStateAdapter'],
       },
     }
@@ -288,7 +289,10 @@ describe('MetricsExperienceGridWrapper', () => {
   it('passes the resolved sort (tuple form of the adapter default) to UnifiedMetricsExperienceGrid', () => {
     renderChartSection();
 
-    expect(unifiedGridProps?.metricsSort).toEqual(['alphabetically', 'asc']);
+    expect(unifiedGridProps?.metricsSort).toEqual([
+      METRICS_GRID_SORT_DEFAULTS.field,
+      METRICS_GRID_SORT_DEFAULTS.direction,
+    ]);
   });
 
   it('updates the sort state adapter when onMetricsSortChange is invoked and reflects the new sort', () => {

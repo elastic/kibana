@@ -10,7 +10,7 @@
 import { ProfileStateRegistry, ProfileStateType } from '../profile_state';
 import { METRICS_GRID_SORT_STATE_DEF } from './metrics_grid_sort_profile_state';
 
-const KEY = 'metricsGridSort';
+const KEY = METRICS_GRID_SORT_STATE_DEF.key;
 
 const createRegistry = () => {
   const registry = new ProfileStateRegistry();
@@ -25,7 +25,7 @@ describe('METRICS_GRID_SORT_STATE_DEF', () => {
     expect(registry.hasDefinition(METRICS_GRID_SORT_STATE_DEF)).toBe(true);
   });
 
-  it('types both fields as Persistent so the host persists them locally and in saved sessions', () => {
+  it('types both fields as Persistent so the host persists them locally across reloads', () => {
     expect(METRICS_GRID_SORT_STATE_DEF.descriptor).toEqual({
       field: { type: ProfileStateType.Persistent },
       direction: { type: ProfileStateType.Persistent },

@@ -14,10 +14,15 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData, DEFAULT_TIME_RANGE, SORTED_FIRST_CARD_IDS } from '../fixtures';
+import { spaceTest, testData, DEFAULT_TIME_RANGE, DEFAULT_CONFIG } from '../fixtures';
 
-const FIRST_CARD_ASC = SORTED_FIRST_CARD_IDS.ASC;
-const FIRST_CARD_DESC = SORTED_FIRST_CARD_IDS.DESC;
+const ALPHABETICALLY_SORTED_METRICS = [...DEFAULT_CONFIG.metrics].sort((a, b) =>
+  a.name.localeCompare(b.name)
+);
+const FIRST_CARD_ASC = `${ALPHABETICALLY_SORTED_METRICS[0].name}-0`;
+const FIRST_CARD_DESC = `${
+  ALPHABETICALLY_SORTED_METRICS[ALPHABETICALLY_SORTED_METRICS.length - 1].name
+}-0`;
 
 spaceTest.describe(
   'Metrics in Discover - Sorting',

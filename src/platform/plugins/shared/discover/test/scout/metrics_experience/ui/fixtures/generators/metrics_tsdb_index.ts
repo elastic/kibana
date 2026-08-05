@@ -121,20 +121,6 @@ export const DIMENSIONS_PAGINATION = {
   LAST_PAGE_ITEMS: DEFAULT_CONFIG.dimensions.length % PAGE_SIZE || PAGE_SIZE,
 } as const;
 
-const ALPHABETICALLY_SORTED_METRICS = [...DEFAULT_CONFIG.metrics].sort((a, b) =>
-  a.name.localeCompare(b.name)
-);
-
-/**
- * First metric card ids (`<metricName>-0`) for the alphabetical ascending and
- * descending sort orders of `DEFAULT_CONFIG.metrics`. Used by the sort spec
- * to assert the grid's current sort order.
- */
-export const SORTED_FIRST_CARD_IDS = {
-  ASC: `${ALPHABETICALLY_SORTED_METRICS[0].name}-0`,
-  DESC: `${ALPHABETICALLY_SORTED_METRICS[ALPHABETICALLY_SORTED_METRICS.length - 1].name}-0`,
-} as const;
-
 function getEsMapping({ type }: MetricDefinition): EsMappingProperty {
   switch (type) {
     case 'gauge':

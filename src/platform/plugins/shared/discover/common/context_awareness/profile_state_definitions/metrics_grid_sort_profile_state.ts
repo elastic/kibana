@@ -17,7 +17,9 @@ import { ProfileStateType } from '../profile_state';
  * Both fields are typed `ProfileStateType.Persistent`, which places them in
  * `LOCALLY_PERSISTED_PROFILE_STATE_TYPES` (the host persists the sort to local
  * tab storage and restores it on page reload) and includes them in the
- * persistent profile state written to saved Discover sessions and locator state.
+ * persistent profile state carried by Discover locator state. Saved Discover
+ * session persistence is tracked separately in
+ * https://github.com/elastic/kibana/issues/239373.
  */
 export const METRICS_GRID_SORT_STATE_DEF: ProfileStateDefinition<MetricsGridSort> = {
   key: 'metricsGridSort',
