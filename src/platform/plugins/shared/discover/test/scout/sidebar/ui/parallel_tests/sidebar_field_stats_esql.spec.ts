@@ -19,7 +19,7 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsViewer();
+      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.discover.goto({ queryMode: 'esql' });
       await pageObjects.discover.waitUntilTabIsLoaded();
       await pageObjects.discover.writeAndSubmitEsqlQuery(
