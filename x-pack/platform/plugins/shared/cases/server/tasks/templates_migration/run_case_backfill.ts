@@ -16,6 +16,7 @@ import {
   CASE_BACKFILL_PAGE_SIZE,
   CASE_BACKFILL_PIT_KEEP_ALIVE,
   CASE_BACKFILL_SCAN_BUDGET,
+  CASE_BACKFILL_VERSION,
 } from './types';
 import type { CaseBackfillCursor, CaseBackfillPhaseResult, SpaceBackfillResult } from './types';
 
@@ -34,12 +35,21 @@ const safeClosePit = async (
   }
 };
 
-/** Records `legacyCasesMigrated: true` on the space's configure SO once its backfill is complete. */
+/**
+ * Whether the space's completed backfill (if any) used the current semantics.
+ * `legacyCasesMigrated: true` without a recorded version means the space was flagged by a
+ * release whose backfill treated empty-string `extended_fields` values as existing values —
+ * such spaces are rescanned once so stranded legacy values are repaired.
+ */
+const isCaseBackfillCurrent = (so: SavedObject<ConfigurationPersistedAttributes>): boolean =>
+  (so.attributes.caseBackfillVersion ?? 0) >= CASE_BACKFILL_VERSION;
+
+/** Records the completion marker on the space's configure SO once its backfill is complete. */
 const setCasesMigratedFlag = async (
   repo: ISavedObjectsRepository,
   so: SavedObject<ConfigurationPersistedAttributes>
 ): Promise<void> => {
-  if (so.attributes.legacyCasesMigrated) {
+  if (so.attributes.legacyCasesMigrated && isCaseBackfillCurrent(so)) {
     return;
   }
   const namespace = so.namespaces?.[0] ?? 'default';
@@ -47,7 +57,7 @@ const setCasesMigratedFlag = async (
   await repo.update<ConfigurationPersistedAttributes>(
     CASE_CONFIGURE_SAVED_OBJECT,
     so.id,
-    { legacyCasesMigrated: true },
+    { legacyCasesMigrated: true, caseBackfillVersion: CASE_BACKFILL_VERSION },
     { ...(nsOption ? { namespace: nsOption } : {}), refresh: false }
   );
 };
@@ -55,7 +65,7 @@ const setCasesMigratedFlag = async (
 /**
  * Backfills one space's cases using an Elasticsearch Point-In-Time cursor (skip-safe, and not
  * subject to the from/size result-window limit that breaks past ~10k docs). Fills only the
- * `extended_fields` keys a case is missing (never overwriting existing values) and stops when the
+ * `extended_fields` keys a case is missing or holds empty (never overwriting a real value) and stops when the
  * space is exhausted, the per-run scan budget is hit, or the task is cancelled — returning where to
  * resume in each of those cases.
  */
@@ -245,18 +255,22 @@ const backfillCasesForSpace = async (
 
 /**
  * Whether a single space still needs its existing cases backfilled: it has legacy custom fields AND
- * has not yet been flagged `legacyCasesMigrated`. Spaces with no custom fields are never backfilled
- * (there is nothing to derive `extended_fields` from), so they are never "pending".
+ * its completed backfill (if any) predates the current `CASE_BACKFILL_VERSION` semantics. Spaces
+ * with no custom fields are never backfilled (there is nothing to derive `extended_fields` from),
+ * so they are never "pending". Exported so the task runner counts a space as "skipped" from the
+ * same source of truth.
  */
-const configureNeedsCaseBackfill = (so: SavedObject<ConfigurationPersistedAttributes>): boolean =>
-  (so.attributes.customFields?.length ?? 0) > 0 && !so.attributes.legacyCasesMigrated;
+export const configureNeedsCaseBackfill = (
+  so: SavedObject<ConfigurationPersistedAttributes>
+): boolean => (so.attributes.customFields?.length ?? 0) > 0 && !isCaseBackfillCurrent(so);
 
 /**
  * Whether ANY space still needs its existing cases backfilled — the exact predicate
  * `runCaseBackfillPhase` uses to build its pending list, exported so the task runner can decide,
  * from the same source of truth, whether a completing run actually finished outstanding backfill
- * work. This is derived purely from the (restart-durable) `legacyCasesMigrated` per-space flags on
- * the freshly-loaded configure SOs, so it is stable across Kibana restarts and multi-run backfills.
+ * work. This is derived purely from the (restart-durable) per-space completion markers
+ * (`legacyCasesMigrated` + `caseBackfillVersion`) on the freshly-loaded configure SOs, so it is
+ * stable across Kibana restarts and multi-run backfills.
  */
 export const hasPendingCaseBackfill = (
   configures: Array<SavedObject<ConfigurationPersistedAttributes>>

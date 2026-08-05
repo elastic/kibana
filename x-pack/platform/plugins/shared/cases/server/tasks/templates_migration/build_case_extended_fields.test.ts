@@ -52,7 +52,7 @@ describe('buildExtendedFieldsBackfill', () => {
     expect(result).toEqual({ c_as_keyword: 'kept' });
   });
 
-  it('never overwrites a key already present in extended_fields', () => {
+  it('never overwrites a key already present in extended_fields with a non-empty value', () => {
     const result = buildExtendedFieldsBackfill(
       [
         { key: 'summary', type: CustomFieldTypes.TEXT, value: 'from-legacy' },
@@ -62,6 +62,19 @@ describe('buildExtendedFieldsBackfill', () => {
     );
     // summary is left as-is; only the missing key is added
     expect(result).toEqual({ count_as_integer: '9' });
+  });
+
+  it('repairs a key whose extended_fields value is empty ("" or null)', () => {
+    // The v2 UI stores '' for untouched/cleared fields; an empty mirror key must not
+    // permanently block the legacy value from being backfilled.
+    const result = buildExtendedFieldsBackfill(
+      [
+        { key: 'summary', type: CustomFieldTypes.TEXT, value: 'from-legacy' },
+        { key: 'count', type: CustomFieldTypes.NUMBER, value: 9 },
+      ],
+      { summary_as_keyword: '', count_as_integer: null }
+    );
+    expect(result).toEqual({ summary_as_keyword: 'from-legacy', count_as_integer: '9' });
   });
 
   it('treats a null extended_fields the same as empty', () => {

@@ -315,6 +315,45 @@ describe('customFields → extended_fields adapter utilities', () => {
 
       expect(result).toEqual({ x_as_keyword: 'v' });
     });
+
+    it('fills a key whose existing value is the empty string', () => {
+      // FAILURE SCENARIO: the v2 UI persists '' for untouched/cleared fields on create; a
+      // migrated case with a legacy value behind such a key must still receive the value —
+      // '' means "no v2 value", not a v2 value that should win over the legacy mirror.
+      const result = buildExtendedFieldsBackfill(
+        [{ key: 'priority', type: 'text', value: 'low' }],
+        {
+          priority_as_keyword: '',
+        }
+      );
+
+      expect(result).toEqual({ priority_as_keyword: 'low' });
+    });
+
+    it('fills a key whose existing value is null', () => {
+      const result = buildExtendedFieldsBackfill(
+        [{ key: 'priority', type: 'text', value: 'low' }],
+        {
+          priority_as_keyword: null,
+        }
+      );
+
+      expect(result).toEqual({ priority_as_keyword: 'low' });
+    });
+
+    it('does not fill a key whose existing value is a non-empty string', () => {
+      const result = buildExtendedFieldsBackfill(
+        [
+          { key: 'kept', type: 'text', value: 'legacy' },
+          { key: 'zero', type: 'number', value: 1 },
+          { key: 'flag', type: 'toggle', value: true },
+        ],
+        { kept_as_keyword: 'v2-value', zero_as_integer: '0', flag_as_boolean: 'false' }
+      );
+
+      // '0' and 'false' are real (falsy-looking) v2 values and must win over the legacy mirror.
+      expect(result).toEqual({});
+    });
   });
 
   describe('mergeCustomFieldsIntoExtendedFields', () => {
