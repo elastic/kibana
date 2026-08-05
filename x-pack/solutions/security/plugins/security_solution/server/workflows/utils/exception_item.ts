@@ -256,6 +256,51 @@ export const findExceptionItemByItemId = async (
 };
 
 /**
+ * Looks up an exception item by `itemId` and checks it belongs to the list a
+ * caller has in mind, since `item_id` is not scoped to a particular list
+ * (see `findExceptionItemByItemId`). Returns the item when it matches,
+ * `undefined` when no item exists with that `item_id`, and throws a
+ * `ConflictError` when a different, unrelated item shares the `item_id`.
+ */
+export const findExceptionItemForOwnList = async ({
+  contextManager,
+  action,
+  itemId,
+  namespaceType,
+  resolveOwnListId,
+}: {
+  contextManager: StepHandlerContext['contextManager'];
+  action: ExceptionItemStepAction;
+  itemId: string;
+  namespaceType: NamespaceType;
+  /** Called only once a candidate is found */
+  resolveOwnListId: () => Promise<string | undefined>;
+}): Promise<ExceptionListItem | undefined> => {
+  const candidate = await findExceptionItemByItemId(contextManager, action, itemId, namespaceType);
+  if (candidate === undefined) {
+    return undefined;
+  }
+
+  const ownListId = await resolveOwnListId();
+  if (candidate.list_id === ownListId) {
+    return candidate;
+  }
+
+  let expectedList = `the expected list (list_id: "${ownListId}")`;
+  if (ownListId === undefined) {
+    expectedList = `the expected list (which does not exist yet)`;
+  }
+
+  throw new ExecutionError({
+    type: 'ConflictError',
+    message:
+      `Failed to ${action}: item_id "${itemId}" already exists on a different exception ` +
+      `list (list_id: "${candidate.list_id}"), not ${expectedList}. Choose a different item_id, ` +
+      `or manage that item directly.`,
+  });
+};
+
+/**
  * Creates an exception item on the rule identified by `ruleId` via the rule
  * exceptions API, which places it on the rule's default exception list
  * (creating that list if the rule has none). When `itemId` is undefined the
