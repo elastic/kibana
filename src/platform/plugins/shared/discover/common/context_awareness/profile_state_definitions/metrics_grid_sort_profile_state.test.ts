@@ -23,6 +23,9 @@ describe('METRICS_GRID_SORT_STATE_DEF', () => {
     const registry = createRegistry();
 
     expect(registry.hasDefinition(METRICS_GRID_SORT_STATE_DEF)).toBe(true);
+    // The key is a storage contract: it is persisted inside users' local tab
+    // storage with no migration path, so renaming it orphans persisted sort state.
+    expect(METRICS_GRID_SORT_STATE_DEF.key).toBe('metricsGridSort');
   });
 
   it('types both fields as Persistent so the host persists them locally across reloads', () => {

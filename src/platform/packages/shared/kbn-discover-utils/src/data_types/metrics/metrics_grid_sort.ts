@@ -32,7 +32,8 @@ export interface MetricsGridSort extends SerializableRecord {
 
 /**
  * Default metrics grid sort. Kept equal to the viewer's `DEFAULT_METRICS_SORT`
- * (`['alphabetically', 'asc']`); the drift-guard unit test enforces this.
+ * (`['alphabetically', 'asc']`); a drift-guard test in
+ * `@kbn/unified-chart-section-viewer` (`src/common/constants.test.ts`) enforces this.
  */
 export const METRICS_GRID_SORT_DEFAULTS: MetricsGridSort = {
   field: 'alphabetically',
