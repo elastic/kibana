@@ -32,6 +32,8 @@ import { RenameConversationModal } from '../rename_conversation_modal';
  * `EuiContextMenuItem` supports `hasAriaDisabled` at runtime — keeping a disabled item focusable so
  * its `toolTipContent` stays reachable — but does not declare the prop yet, so widen its props with
  * EUI's own `EuiDisabledProps`.
+ *
+ * Delete once https://github.com/elastic/eui/pull/9870 ships and Kibana picks up that EUI release.
  */
 const AriaDisabledContextMenuItem: React.FC<EuiContextMenuItemProps & EuiDisabledProps> =
   EuiContextMenuItem;

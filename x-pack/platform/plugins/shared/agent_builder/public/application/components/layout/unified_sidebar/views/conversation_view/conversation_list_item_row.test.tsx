@@ -16,6 +16,9 @@ import { ConversationListItemRow } from './conversation_list_item_row';
 /**
  * Mirrors EUI's `focusEuiToolTipTrigger` test helper, which its type declarations do not export
  * yet: plain `fireEvent.focus` does not set `:focus-visible` in jsdom, so the tooltip never shows.
+ *
+ * Delete once https://github.com/elastic/eui/pull/9870 ships and Kibana picks up that EUI release,
+ * then import it from `@elastic/eui/lib/test/rtl`.
  */
 const focusEuiToolTipTrigger = (element: HTMLElement) => {
   const spy = jest
