@@ -48,7 +48,8 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 
 - To verify a generated dashboard actually renders well, first capture a screenshot with the \`capture_dashboard_screenshot\` browser tool (pass the dashboard \`attachment_id\`; it returns an \`image_attachment_id\`), then call ${dashboardTools.validateDashboard} with the dashboard attachment id and that image attachment id.
 - The capture tool only works while the user has the conversation open in a browser. If it is unavailable or fails, you can still call ${dashboardTools.validateDashboard} without an image for a configuration-only check.
-- The verdict is advisory: apply worthwhile fixes with ${dashboardTools.generateDashboard} operations, re-render, and don't loop endlessly — one validation pass is usually enough.`;
+- The verdict is advisory: apply worthwhile fixes with ${dashboardTools.generateDashboard} operations, re-render, and don't loop endlessly — one validation pass is usually enough.
+- To show the user what the capture saw, render the screenshot inline with \`<render_attachment id="{image_attachment_id}" />\`. Do this only when it helps — e.g. when the user asks to see it, or when walking through visual findings — not on every validation.`;
 
 export const kibanaRendering: DashboardGuidanceModule = {
   guidance,
