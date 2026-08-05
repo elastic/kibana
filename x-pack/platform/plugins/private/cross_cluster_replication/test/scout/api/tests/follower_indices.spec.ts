@@ -12,7 +12,13 @@ import { expect } from '@kbn/scout/api';
 // makes tsc emit stray in-place `.d.ts`). `uniform_imports` wants relative here — override it.
 // eslint-disable-next-line @kbn/imports/uniform_imports
 import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '@kbn/cross-cluster-replication-plugin/common/constants';
-import { apiTest, testData, registerSelfReferentialRemote, removeRemote } from '../fixtures';
+import {
+  apiTest,
+  testData,
+  registerSelfReferentialRemote,
+  removeRemote,
+  REMOTE_CONNECT_TIMEOUT_MS,
+} from '../fixtures';
 
 const { API_BASE_PATH, FOLLOWER_REMOTE_CLUSTER, COMMON_HEADERS } = testData;
 
@@ -20,6 +26,12 @@ const { API_BASE_PATH, FOLLOWER_REMOTE_CLUSTER, COMMON_HEADERS } = testData;
 // shared cluster, and the follower sweep can't also match leaders.
 const LEADER_INDEX_PREFIX = 'ccr-scout-leader-';
 const FOLLOWER_INDEX_PREFIX = 'ccr-scout-follower-';
+
+// Scout's default 60s leaves too little headroom over the remote connect ceiling.
+const SETUP_HOOK_TIMEOUT_MS = REMOTE_CONNECT_TIMEOUT_MS + 60_000;
+
+const FOLLOWER_ACTIVE_TIMEOUT_MS = 15_000;
+const FOLLOWER_ACTIVE_POLL_INTERVAL_MS = 500;
 
 // A follower must be paused, closed, and unfollowed (back to a regular index)
 // before it — and its leader — can be deleted.
@@ -85,17 +97,19 @@ apiTest.describe('CCR follower indices API', { tag: ['@local-stateful-classic'] 
   // Poll until `active`: ES briefly reports `paused` right after creation, during
   // which advanced settings aren't returned.
   const waitForFollowerActive = async (apiClient: ApiClientFixture, suffix: string) => {
-    for (let attempt = 0; attempt < 20; attempt++) {
-      const response = await getFollowerIndex(apiClient, suffix);
-      if (response.body.status === 'active') {
-        return response.body;
-      }
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    }
-    throw new Error(`Follower index '${suffix}' did not become active within the timeout`);
+    await expect
+      .poll(async () => (await getFollowerIndex(apiClient, suffix)).body.status, {
+        timeout: FOLLOWER_ACTIVE_TIMEOUT_MS,
+        intervals: [FOLLOWER_ACTIVE_POLL_INTERVAL_MS],
+        message: `Follower index '${suffix}' did not become active`,
+      })
+      .toBe('active');
+
+    return (await getFollowerIndex(apiClient, suffix)).body;
   };
 
   apiTest.beforeAll(async ({ esClient, requestAuth }) => {
+    apiTest.setTimeout(SETUP_HOOK_TIMEOUT_MS);
     credentials = await requestAuth.getApiKey('admin');
     await cleanupFollowerResources(esClient);
     await registerSelfReferentialRemote(esClient, FOLLOWER_REMOTE_CLUSTER);

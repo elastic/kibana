@@ -6,6 +6,7 @@
  */
 
 import type { EsClient } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 
 // Single-cluster CCR: the remote points at the test node's own transport address.
 
@@ -23,6 +24,11 @@ const resolveTransportSeed = async (esClient: EsClient): Promise<string> => {
   return publishAddress.includes('/') ? publishAddress.split('/').slice(-1)[0] : publishAddress;
 };
 
+// Worst-case ceiling under CI load; normally a couple of seconds. Exported so
+// callers can size their hook timeout against it.
+export const REMOTE_CONNECT_TIMEOUT_MS = 30_000;
+const CONNECT_POLL_INTERVAL_MS = 1_000;
+
 export const registerSelfReferentialRemote = async (
   esClient: EsClient,
   name: string
@@ -32,14 +38,13 @@ export const registerSelfReferentialRemote = async (
     persistent: { cluster: { remote: { [name]: { seeds: [seed] } } } },
   });
 
-  for (let attempt = 0; attempt < 30; attempt++) {
-    const remoteInfo = await esClient.cluster.remoteInfo();
-    if (remoteInfo[name]?.connected) {
-      return;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
-  throw new Error(`Remote cluster '${name}' did not connect within the timeout`);
+  await expect
+    .poll(async () => Boolean((await esClient.cluster.remoteInfo())[name]?.connected), {
+      timeout: REMOTE_CONNECT_TIMEOUT_MS,
+      intervals: [CONNECT_POLL_INTERVAL_MS],
+      message: `Remote cluster '${name}' did not connect`,
+    })
+    .toBe(true);
 };
 
 export const removeRemote = async (esClient: EsClient, name: string): Promise<void> => {

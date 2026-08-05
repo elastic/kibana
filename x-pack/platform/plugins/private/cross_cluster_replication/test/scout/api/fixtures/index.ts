@@ -7,4 +7,8 @@
 
 export { apiTest } from '@kbn/scout';
 export * as testData from './constants';
-export { registerSelfReferentialRemote, removeRemote } from './remote_cluster';
+export {
+  registerSelfReferentialRemote,
+  removeRemote,
+  REMOTE_CONNECT_TIMEOUT_MS,
+} from './remote_cluster';

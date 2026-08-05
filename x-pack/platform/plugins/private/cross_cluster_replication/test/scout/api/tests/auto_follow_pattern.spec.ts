@@ -7,9 +7,18 @@
 
 import type { EsClient, RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, testData, registerSelfReferentialRemote, removeRemote } from '../fixtures';
+import {
+  apiTest,
+  testData,
+  registerSelfReferentialRemote,
+  removeRemote,
+  REMOTE_CONNECT_TIMEOUT_MS,
+} from '../fixtures';
 
 const { API_BASE_PATH, AUTO_FOLLOW_REMOTE_CLUSTER, COMMON_HEADERS } = testData;
+
+// Scout's default 60s leaves too little headroom over the remote connect ceiling.
+const SETUP_HOOK_TIMEOUT_MS = REMOTE_CONNECT_TIMEOUT_MS + 60_000;
 
 // Prefixed so cleanup only removes this suite's patterns from the shared cluster.
 const PATTERN_PREFIX = 'ccr-scout-api-pattern-';
@@ -32,6 +41,7 @@ apiTest.describe('CCR auto-follow patterns API', { tag: ['@local-stateful-classi
   let credentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ esClient, requestAuth }) => {
+    apiTest.setTimeout(SETUP_HOOK_TIMEOUT_MS);
     credentials = await requestAuth.getApiKey('admin');
     await deleteScoutAutoFollowPatterns(esClient);
     await registerSelfReferentialRemote(esClient, AUTO_FOLLOW_REMOTE_CLUSTER);
