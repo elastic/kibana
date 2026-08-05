@@ -19,13 +19,13 @@ const significantEventDetectionAttachmentDefinition: AttachmentUIDefinition<Sign
   {
     getLabel: (attachment) =>
       attachment.data.rule_name ??
-      i18n.translate('xpack.observability.nightshift.detectionAttachment.fallbackLabel', {
+      i18n.translate('xpack.nightshift.detectionAttachment.fallbackLabel', {
         defaultMessage: 'Detection',
       }),
     getIcon: () => 'bell',
     getHeader: () => ({
       icon: 'bell',
-      subtitle: i18n.translate('xpack.observability.nightshift.detectionAttachment.subtitle', {
+      subtitle: i18n.translate('xpack.nightshift.detectionAttachment.subtitle', {
         defaultMessage: 'Significant Events detection',
       }),
     }),
@@ -35,13 +35,13 @@ const kiFeatureAttachmentDefinition: AttachmentUIDefinition<KiFeatureAttachment>
   getLabel: (attachment) =>
     attachment.data.title ??
     attachment.data.id ??
-    i18n.translate('xpack.observability.nightshift.featureAttachment.fallbackLabel', {
+    i18n.translate('xpack.nightshift.featureAttachment.fallbackLabel', {
       defaultMessage: 'Entity',
     }),
   getIcon: () => 'node',
   getHeader: () => ({
     icon: 'node',
-    subtitle: i18n.translate('xpack.observability.nightshift.featureAttachment.subtitle', {
+    subtitle: i18n.translate('xpack.nightshift.featureAttachment.subtitle', {
       defaultMessage: 'Knowledge indicator feature',
     }),
   }),
