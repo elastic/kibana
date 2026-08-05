@@ -42,7 +42,7 @@ export function fromRangeOrHistogramLensApiToLensState(
     ...getLensStateBucketSharedProps(options),
     params: {
       type: 'histogram',
-      // `granularity` is the raw target bar count Lens stores as `maxBars` (1..1000 | 'auto').
+      // `granularity` is the raw target bar count Lens stores as `maxBars` (1..histogram:maxBars | 'auto').
       maxBars: options.granularity,
       ranges: [],
       format: fromFormatAPIToLensState(options.format),
