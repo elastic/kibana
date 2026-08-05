@@ -36,7 +36,13 @@ export const shouldScheduleAction = (opts: ShouldScheduleActionOpts): boolean =>
       status: ActionsCompletion.PARTIAL,
     });
     logger.debug(
-      `Rule "${opts.ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`
+      `Rule "${opts.ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`,
+      {
+        labels: {
+          actionId: action.id,
+          ruleId: opts.ruleId,
+        },
+      }
     );
     return false;
   }
@@ -49,7 +55,13 @@ export const shouldScheduleAction = (opts: ShouldScheduleActionOpts): boolean =>
   ) {
     if (!ruleRunMetricsStore.hasConnectorTypeReachedTheLimit(action.actionTypeId)) {
       logger.debug(
-        `Rule "${opts.ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${action.actionTypeId} has been reached.`
+        `Rule "${opts.ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${action.actionTypeId} has been reached.`,
+        {
+          labels: {
+            actionId: action.id,
+            ruleId: opts.ruleId,
+          },
+        }
       );
     }
     ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
@@ -61,7 +73,13 @@ export const shouldScheduleAction = (opts: ShouldScheduleActionOpts): boolean =>
 
   if (!opts.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })) {
     logger.warn(
-      `Rule "${opts.ruleId}" skipped scheduling action "${action.id}" because it is disabled`
+      `Rule "${opts.ruleId}" skipped scheduling action "${action.id}" because it is disabled`,
+      {
+        labels: {
+          actionId: action.id,
+          ruleId: opts.ruleId,
+        },
+      }
     );
     return false;
   }

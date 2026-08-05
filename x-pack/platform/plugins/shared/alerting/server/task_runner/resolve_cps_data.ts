@@ -52,8 +52,7 @@ export const resolveCpsData = async (
         // scope so rule execution is not broken, but surface it so the problem is not hidden.
         if (error?.statusCode === 403) {
           logger.warn(
-            `Unexpected 403 resolving project routing for space "${spaceId}"; the internal user should be authorized for /_project_routing. Falling back to all projects.`,
-            { labels: { spaceId } }
+            `Unexpected 403 resolving project routing for space "${spaceId}"; the internal user should be authorized for /_project_routing. Falling back to all projects.`
           );
           return PROJECT_ROUTING_ALL;
         }
@@ -81,9 +80,7 @@ export const resolveCpsData = async (
 
     return { resolvedExpression, linkedProjects };
   } catch (e) {
-    logger.warn(`Failed to resolve CPS data: ${e instanceof Error ? e.message : String(e)}`, {
-      labels: { spaceId },
-    });
+    logger.warn(`Failed to resolve CPS data: ${e instanceof Error ? e.message : String(e)}`);
     return { linkedProjects: [] };
   }
 };

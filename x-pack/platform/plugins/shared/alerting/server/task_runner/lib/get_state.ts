@@ -47,7 +47,6 @@ export function getState({
           err
         )}`;
         logger.debug(message, {
-          labels: { ruleId, ruleType: ruleTypeId, spaceId },
           tags: ['rule-run-failed', errorSourceTag],
         });
       } else {
@@ -57,7 +56,6 @@ export function getState({
           error
         )} - ${stack ?? ''}`;
         logger.error(message, {
-          labels: { ruleId, ruleType: ruleTypeId, spaceId },
           tags: ['rule-run-failed', errorSourceTag],
           error: { stack_trace: stack },
         });

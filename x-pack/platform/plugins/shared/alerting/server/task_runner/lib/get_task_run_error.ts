@@ -43,10 +43,6 @@ export function getTaskRunError({
       .join(',');
     const errorMessage = `Executing Rule ${ruleTypeId}:${ruleId} has resulted in the following error(s): ${lasRunErrorMessages}`;
     logger.error(errorMessage, {
-      labels: {
-        ruleType: ruleTypeId,
-        ruleId,
-      },
       tags: ['rule-run-failed', `${errorSource}-error`],
     });
     return {

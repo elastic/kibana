@@ -51,7 +51,8 @@ describe('shouldScheduleAction', () => {
       status: ActionsCompletion.PARTIAL,
     });
     expect(logger.debug).toHaveBeenCalledWith(
-      `Rule "1" skipped scheduling action "1" because the maximum number of allowed actions has been reached.`
+      `Rule "1" skipped scheduling action "1" because the maximum number of allowed actions has been reached.`,
+      { labels: { actionId: '1', ruleId: '1' } }
     );
   });
 
@@ -129,7 +130,13 @@ describe('shouldScheduleAction', () => {
       status: ActionsCompletion.PARTIAL,
     });
     expect(logger.debug).toHaveBeenCalledWith(
-      `Rule "1" skipped scheduling action "1" because the maximum number of allowed actions for connector type test-action-type-id has been reached.`
+      `Rule "1" skipped scheduling action "1" because the maximum number of allowed actions for connector type test-action-type-id has been reached.`,
+      {
+        labels: {
+          actionId: '1',
+          ruleId: '1',
+        },
+      }
     );
   });
 
@@ -161,7 +168,13 @@ describe('shouldScheduleAction', () => {
     ).toEqual(false);
 
     expect(logger.warn).toHaveBeenCalledWith(
-      `Rule "1" skipped scheduling action "1" because it is disabled`
+      `Rule "1" skipped scheduling action "1" because it is disabled`,
+      {
+        labels: {
+          actionId: '1',
+          ruleId: '1',
+        },
+      }
     );
   });
 

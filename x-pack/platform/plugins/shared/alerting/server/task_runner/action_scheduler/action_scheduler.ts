@@ -21,7 +21,7 @@ import type {
   RuleAlertData,
 } from '../../../common';
 import { getSummaryActionsFromTaskState } from './lib';
-import { withAlertingSpan } from '../lib';
+import { createTaskRunnerLogger, withAlertingSpan } from '../lib';
 import * as schedulers from './schedulers';
 
 const BULK_SCHEDULE_CHUNK_SIZE = 1000;
@@ -119,6 +119,17 @@ export class ActionScheduler<
     const actionsToNotLog: string[] = [];
     if (bulkScheduleResponse.length) {
       for (const r of bulkScheduleResponse) {
+        const logger = createTaskRunnerLogger({
+          logger: this.context.logger,
+          labels: {
+            ruleId: this.context.rule.id,
+            ruleType: this.context.rule.alertTypeId,
+            spaceId: this.context.taskInstance.params.spaceId,
+            executionId: this.context.executionId,
+            taskInstanceId: this.context.taskInstance.id,
+          },
+        });
+
         if (r.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
           this.context.ruleRunMetricsStore.setHasReachedQueuedActionsLimit(true);
           this.context.ruleRunMetricsStore.decrementNumberOfTriggeredActions();
@@ -130,17 +141,8 @@ export class ActionScheduler<
             status: ActionsCompletion.PARTIAL,
           });
 
-          this.context.logger.debug(
-            `Rule "${this.context.rule.id}" skipped scheduling action "${r.id}" because the maximum number of queued actions has been reached.`,
-            {
-              labels: {
-                ruleId: this.context.rule.id,
-                ruleType: this.context.rule.alertTypeId,
-                spaceId: this.context.taskInstance.params.spaceId,
-                executionId: this.context.executionId,
-                taskInstanceId: this.context.taskInstance.id,
-              },
-            }
+          logger.debug(
+            `Rule "${this.context.rule.id}" skipped scheduling action "${r.id}" because the maximum number of queued actions has been reached.`
           );
 
           const uuid = r.uuid;

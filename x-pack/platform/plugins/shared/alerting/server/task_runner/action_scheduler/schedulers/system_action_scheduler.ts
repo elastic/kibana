@@ -7,6 +7,7 @@
 
 import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
 import type { RuleSystemAction, RuleTypeParams } from '@kbn/alerting-types';
+import { createTaskRunnerLogger } from '../../lib';
 import type { CombinedSummarizedAlerts } from '../../../types';
 import type { RuleTypeState, RuleAlertData } from '../../../../common';
 import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
@@ -70,6 +71,14 @@ export class SystemActionScheduler<
       summarizedAlerts: CombinedSummarizedAlerts;
     }> = [];
     const results: ActionsToSchedule[] = [];
+    const logger = createTaskRunnerLogger({
+      logger: this.context.logger,
+      labels: {
+        ruleId: this.context.rule.id,
+        ruleType: this.context.ruleType.id,
+        spaceId: this.context.taskInstance.params.spaceId,
+      },
+    });
 
     for (const action of this.actions) {
       const options: GetSummarizedAlertsParams = {
@@ -99,7 +108,7 @@ export class SystemActionScheduler<
     const ruleUrl = buildRuleUrl({
       getViewInAppRelativeUrl: this.context.ruleType.getViewInAppRelativeUrl,
       kibanaBaseUrl: this.context.taskRunnerContext.kibanaBaseUrl,
-      logger: this.context.logger,
+      logger,
       rule: this.context.rule,
       spaceId: this.context.taskInstance.params.spaceId,
     });
@@ -112,7 +121,7 @@ export class SystemActionScheduler<
           action,
           actionsConfigMap: this.context.taskRunnerContext.actionsConfigMap,
           isActionExecutable: this.context.taskRunnerContext.actionsPlugin.isActionExecutable,
-          logger: this.context.logger,
+          logger,
           ruleId: this.context.rule.id,
           ruleRunMetricsStore: this.context.ruleRunMetricsStore,
         })
@@ -126,14 +135,14 @@ export class SystemActionScheduler<
 
       // System actions without an adapter cannot be executed
       if (!hasConnectorAdapter) {
-        this.context.logger.warn(
+        logger.warn(
           `Rule "${this.context.rule.id}" skipped scheduling system action "${action.id}" because no connector adapter is configured`,
           {
             labels: {
               actionId: action.id,
+              actionTypeId: action.actionTypeId,
               ruleId: this.context.rule.id,
-              ruleType: this.context.ruleType.id,
-              spaceId: this.context.taskInstance.params.spaceId,
+              executionId: this.context.executionId,
             },
           }
         );

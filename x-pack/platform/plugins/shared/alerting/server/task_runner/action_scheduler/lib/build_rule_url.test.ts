@@ -130,14 +130,13 @@ describe('buildRuleUrl', () => {
       buildRuleUrl({
         kibanaBaseUrl: 'foo-url',
         logger,
-        rule: { ...rule, alertTypeId: 'test' },
+        rule,
         spaceId: asSpaceId('default'),
       })
     ).toBeUndefined();
 
     expect(logger.debug).toHaveBeenCalledWith(
-      `Rule "1" encountered an error while constructing the rule.url variable: Invalid URL: foo-url`,
-      { labels: { ruleId: '1', ruleType: 'test', spaceId: 'default' } }
+      `Rule "1" encountered an error while constructing the rule.url variable: Invalid URL: foo-url`
     );
   });
 });

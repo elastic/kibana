@@ -174,7 +174,7 @@ export class AdHocTaskRunner implements CancellableTask {
           executionId: this.executionId,
           ruleId: this.ruleId,
           ruleType: this.ruleTypeId,
-          taskId: this.taskInstance.id,
+          taskInstanceId: this.taskInstance.id,
         },
       });
     }
@@ -328,7 +328,7 @@ export class AdHocTaskRunner implements CancellableTask {
             executionId: this.executionId,
             ruleId: rule.id,
             ruleType: this.ruleTypeId,
-            taskId: this.taskInstance.id,
+            taskInstanceId: this.taskInstance.id,
           },
         }
       );
@@ -348,7 +348,7 @@ export class AdHocTaskRunner implements CancellableTask {
             executionId: this.executionId,
             ruleId: rule.id,
             ruleType: this.ruleTypeId,
-            taskId: this.taskInstance.id,
+            taskInstanceId: this.taskInstance.id,
           },
         }
       );
@@ -501,7 +501,7 @@ export class AdHocTaskRunner implements CancellableTask {
               executionId: this.executionId,
               ruleId: rule.id,
               ruleType: ruleType.id,
-              taskId: this.taskInstance.id,
+              taskInstanceId: this.taskInstance.id,
             },
           }
         );
@@ -571,7 +571,7 @@ export class AdHocTaskRunner implements CancellableTask {
             executionId: this.executionId,
             ruleId: this.ruleId,
             ruleType: this.ruleTypeId,
-            taskId: this.taskInstance.id,
+            taskInstanceId: this.taskInstance.id,
           },
           tags: [adHocRunParamsId, 'rule-ad-hoc-run-failed'],
           error: { stack_trace: stack },
@@ -715,7 +715,7 @@ export class AdHocTaskRunner implements CancellableTask {
           executionId: this.executionId,
           ruleId: this.ruleId,
           ruleType: this.ruleTypeId,
-          taskId: this.taskInstance.id,
+          taskInstanceId: this.taskInstance.id,
         },
       }
     );
@@ -726,7 +726,7 @@ export class AdHocTaskRunner implements CancellableTask {
           executionId: this.executionId,
           ruleId: this.ruleId,
           ruleType: this.ruleTypeId,
-          taskId: this.taskInstance.id,
+          taskInstanceId: this.taskInstance.id,
         },
       }
     );
@@ -772,7 +772,7 @@ export class AdHocTaskRunner implements CancellableTask {
             executionId: this.executionId,
             ruleId: this.ruleId,
             ruleType: this.ruleTypeId,
-            taskId: this.taskInstance.id,
+            taskInstanceId: this.taskInstance.id,
           },
         }
       );

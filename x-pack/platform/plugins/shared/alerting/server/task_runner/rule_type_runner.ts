@@ -38,7 +38,7 @@ import type {
   RuleTypeRunnerContext,
   TaskRunnerContext,
 } from './types';
-import { withAlertingSpan } from './lib';
+import { createTaskRunnerLogger, withAlertingSpan } from './lib';
 import type { WrappedSearchSourceClient } from '../lib/wrap_search_source_client';
 
 interface ConstructorOpts<
@@ -206,7 +206,7 @@ export class RuleTypeRunner<
             context.logger.warn(
               `rule execution generated greater than ${maxAlerts} alerts: ${context.ruleLogPrefix}`,
               {
-                labels: { ruleId: context.ruleId, ruleType: ruleTypeId, spaceId: context.spaceId },
+                labels: { ruleId: context.ruleId, ruleType: ruleTypeId },
               }
             );
             context.ruleRunMetricsStore.setHasReachedAlertLimit(true);
@@ -259,6 +259,15 @@ export class RuleTypeRunner<
           };
 
           const cpsData = context.isServerless ? await executorServices.getCpsData() : undefined;
+
+          context.logger = createTaskRunnerLogger({
+            logger: context.logger,
+            labels: {
+              executionId,
+              spaceId: context.spaceId,
+              taskInstanceId: this.options.task.id,
+            },
+          });
 
           executorResult = await withAlertingSpan('rule-type-executor', () =>
             this.options.context.executionContext.withContext(ctx, () =>
@@ -414,7 +423,7 @@ export class RuleTypeRunner<
           context.logger.debug(
             `skipping persisting alerts for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`,
             {
-              labels: { ruleId: context.ruleId, ruleType: ruleTypeId, spaceId: context.spaceId },
+              labels: { ruleId: context.ruleId, ruleType: ruleTypeId },
             }
           );
         }

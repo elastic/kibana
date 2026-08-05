@@ -743,7 +743,8 @@ describe('Summary Action Scheduler', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        `Rule "rule-id-1" skipped scheduling action "action-3" because the maximum number of allowed actions has been reached.`
+        `Rule "rule-id-1" skipped scheduling action "action-3" because the maximum number of allowed actions has been reached.`,
+        { labels: { actionId: 'action-3', ruleId: 'rule-id-1' } }
       );
 
       expect(results).toHaveLength(1);
@@ -800,7 +801,8 @@ describe('Summary Action Scheduler', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        `Rule "rule-id-1" skipped scheduling action "action-3" because the maximum number of allowed actions for connector type test has been reached.`
+        `Rule "rule-id-1" skipped scheduling action "action-3" because the maximum number of allowed actions for connector type test has been reached.`,
+        { labels: { actionId: 'action-3', ruleId: 'rule-id-1' } }
       );
 
       expect(results).toHaveLength(1);

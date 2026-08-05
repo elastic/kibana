@@ -202,8 +202,8 @@ describe('Per-Alert Action Scheduler', () => {
         labels: {
           actionId: '2',
           actionTypeId: 'test',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
           ruleId: 'rule-id-1',
-          ruleType: 'test',
           spaceId: 'test1',
         },
       }
@@ -347,8 +347,7 @@ describe('Per-Alert Action Scheduler', () => {
             actionId: 'action-1',
             actionTypeId: 'test',
             alertId: '1',
-            ruleId: 'rule-id-1',
-            ruleType: 'test',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             spaceId: 'test1',
           },
         }
@@ -361,8 +360,8 @@ describe('Per-Alert Action Scheduler', () => {
             actionId: 'action-2',
             actionTypeId: 'test',
             alertId: '1',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             ruleId: 'rule-id-1',
-            ruleType: 'test',
             spaceId: 'test1',
           },
         }
@@ -403,6 +402,7 @@ describe('Per-Alert Action Scheduler', () => {
         `Invalid action group \"invalid\" for rule \"test\".`,
         {
           labels: {
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             ruleId: 'rule-id-1',
             ruleType: 'test',
             spaceId: 'test1',
@@ -414,6 +414,10 @@ describe('Per-Alert Action Scheduler', () => {
         `Invalid action group \"invalid\" for rule \"test\".`,
         {
           labels: {
+            actionId: 'action-1',
+            actionTypeId: 'test',
+            alertId: '2',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             ruleId: 'rule-id-1',
             ruleType: 'test',
             spaceId: 'test1',
@@ -560,11 +564,12 @@ describe('Per-Alert Action Scheduler', () => {
         `skipping scheduling of actions for '2' in rule rule-label: rule is muted`,
         {
           labels: {
-            alertId: '2',
+            actionId: 'action-1',
+            actionTypeId: 'test',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             ruleId: 'rule-id-1',
-            ruleLabel: 'rule-label',
-            ruleType: 'test',
             spaceId: 'test1',
+            alertId: '2',
           },
         }
       );
@@ -605,8 +610,10 @@ describe('Per-Alert Action Scheduler', () => {
         {
           labels: {
             alertId: '2',
+            actionId: 'action-1',
+            actionTypeId: 'test',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             ruleId: 'rule-id-1',
-            ruleType: 'test',
             spaceId: 'test1',
           },
         }
@@ -685,10 +692,9 @@ describe('Per-Alert Action Scheduler', () => {
             actionId: 'action-4',
             actionTypeId: 'test',
             alertId: '2',
-            ruleId: 'rule-id-1',
-            ruleLabel: 'rule-label',
-            ruleType: 'test',
             spaceId: 'test1',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            ruleId: 'rule-id-1',
           },
         }
       );
@@ -753,10 +759,9 @@ describe('Per-Alert Action Scheduler', () => {
             actionId: 'action-5',
             actionTypeId: 'test',
             alertId: '2',
-            ruleId: 'rule-id-1',
-            ruleLabel: 'rule-label',
-            ruleType: 'test',
             spaceId: 'test1',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            ruleId: 'rule-id-1',
           },
         }
       );
@@ -1274,7 +1279,17 @@ describe('Per-Alert Action Scheduler', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        `Rule "rule-id-1" skipped scheduling action "action-2" because the maximum number of allowed actions has been reached.`
+        `Rule "rule-id-1" skipped scheduling action "action-2" because the maximum number of allowed actions has been reached.`,
+        {
+          labels: {
+            actionId: 'action-2',
+            actionTypeId: 'test',
+            alertId: '2',
+            ruleId: 'rule-id-1',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            spaceId: 'test1',
+          },
+        }
       );
 
       expect(results).toHaveLength(3);
@@ -1312,7 +1327,17 @@ describe('Per-Alert Action Scheduler', () => {
       });
 
       expect(logger.debug).toHaveBeenCalledWith(
-        `Rule "rule-id-1" skipped scheduling action "action-1" because the maximum number of allowed actions for connector type test has been reached.`
+        `Rule "rule-id-1" skipped scheduling action "action-1" because the maximum number of allowed actions for connector type test has been reached.`,
+        {
+          labels: {
+            actionId: 'action-1',
+            actionTypeId: 'test',
+            alertId: '2',
+            ruleId: 'rule-id-1',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            spaceId: 'test1',
+          },
+        }
       );
 
       expect(results).toHaveLength(1);
@@ -1456,9 +1481,11 @@ describe('Per-Alert Action Scheduler', () => {
         `skipping scheduling of actions for '2' in rule rule-label: alert is delayed`,
         {
           labels: {
+            actionId: 'action-1',
+            actionTypeId: 'test',
             alertId: '2',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             ruleId: 'rule-id-1',
-            ruleType: 'test',
             spaceId: 'test1',
           },
         }

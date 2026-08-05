@@ -468,6 +468,7 @@ describe('Action Scheduler', () => {
           ruleId: '1',
           ruleType: 'test',
           spaceId: 'test1',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
         },
       }
     );
@@ -854,9 +855,8 @@ describe('Action Scheduler', () => {
       {
         labels: {
           alertId: '1',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
           ruleId: '1',
-          ruleLabel: 'rule-label',
-          ruleType: 'test',
           spaceId: 'test1',
         },
       }
@@ -891,9 +891,8 @@ describe('Action Scheduler', () => {
           alertId: '1',
           actionTypeId: 'test',
           ruleId: '1',
-          ruleLabel: 'rule-label',
-          ruleType: 'test',
           spaceId: 'test1',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
         },
       }
     );
@@ -934,12 +933,11 @@ describe('Action Scheduler', () => {
       `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is throttled`,
       {
         labels: {
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          ruleId: '1',
           actionId: '1',
           actionTypeId: 'test',
           alertId: '1',
-          ruleId: '1',
-          ruleLabel: 'rule-label',
-          ruleType: 'test',
           spaceId: 'test1',
         },
       }
@@ -998,9 +996,8 @@ describe('Action Scheduler', () => {
       {
         labels: {
           alertId: '1',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
           ruleId: '1',
-          ruleLabel: 'rule-label',
-          ruleType: 'test',
           spaceId: 'test1',
         },
       }
@@ -1790,7 +1787,16 @@ describe('Action Scheduler', () => {
     });
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledTimes(1);
     expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledWith(
-      '(2) alerts have been filtered out for: testActionTypeId:111-111'
+      '(2) alerts have been filtered out for: testActionTypeId:111-111',
+      {
+        labels: {
+          actionId: '1',
+          actionTypeId: 'testActionTypeId',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+          ruleId: '1',
+          spaceId: 'test1',
+        },
+      }
     );
   });
 
@@ -1951,8 +1957,7 @@ describe('Action Scheduler', () => {
           actionId: '1',
           actionTypeId: 'test',
           alertId: '1',
-          ruleId: '1',
-          ruleType: 'test',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
           spaceId: 'test1',
         },
       }
@@ -1964,8 +1969,7 @@ describe('Action Scheduler', () => {
           actionId: '1',
           alertId: '2',
           actionTypeId: 'test',
-          ruleId: '1',
-          ruleType: 'test',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
           spaceId: 'test1',
         },
       }
@@ -1977,8 +1981,7 @@ describe('Action Scheduler', () => {
           actionId: '1',
           alertId: '3',
           actionTypeId: 'test',
-          ruleId: '1',
-          ruleType: 'test',
+          executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
           spaceId: 'test1',
         },
       }
@@ -2882,6 +2885,8 @@ describe('Action Scheduler', () => {
         {
           labels: {
             actionId: 'action-id',
+            actionTypeId: '.connector-adapter-not-exists',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             ruleId: '1',
             ruleType: 'test',
             spaceId: 'test1',

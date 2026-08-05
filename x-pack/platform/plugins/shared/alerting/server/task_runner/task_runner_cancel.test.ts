@@ -234,7 +234,6 @@ describe('Task Runner Cancel', () => {
           spaceId: 'default',
           taskInstanceId: '1',
         },
-        tags: ['1', 'test'],
       }
     );
 
@@ -242,8 +241,13 @@ describe('Task Runner Cancel', () => {
       5,
       `skipping persisting alerts for rule test:1: 'rule-name': rule execution has been cancelled.`,
       {
-        labels: { ruleId: '1', ruleType: 'test', spaceId: 'default' },
-        tags: ['1', 'test'],
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
       }
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
@@ -255,8 +259,8 @@ describe('Task Runner Cancel', () => {
           ruleId: '1',
           ruleType: 'test',
           spaceId: 'default',
+          taskInstanceId: '1',
         },
-        tags: ['1', 'test'],
       }
     );
     expect(logger.debug).toHaveBeenNthCalledWith(
@@ -268,8 +272,8 @@ describe('Task Runner Cancel', () => {
           ruleId: '1',
           ruleType: 'test',
           spaceId: 'default',
+          taskInstanceId: '1',
         },
-        tags: ['1', 'test'],
       }
     );
 
@@ -500,8 +504,8 @@ describe('Task Runner Cancel', () => {
         ruleId: '1',
         ruleType: 'test',
         spaceId: 'default',
+        taskInstanceId: '1',
       },
-      tags: ['1', 'test'],
     });
     expect(logger.debug).nthCalledWith(
       2,
@@ -514,7 +518,6 @@ describe('Task Runner Cancel', () => {
           spaceId: 'default',
           taskInstanceId: '1',
         },
-        tags: ['1', 'test'],
       }
     );
     expect(logger.debug).nthCalledWith(
@@ -528,7 +531,6 @@ describe('Task Runner Cancel', () => {
           spaceId: 'default',
           taskInstanceId: '1',
         },
-        tags: ['1', 'test'],
       }
     );
     expect(logger.debug).nthCalledWith(
@@ -542,23 +544,46 @@ describe('Task Runner Cancel', () => {
           spaceId: 'default',
           taskInstanceId: '1',
         },
-        tags: ['1', 'test'],
       }
     );
     expect(logger.debug).nthCalledWith(
       5,
       `rule test:1: 'rule-name' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
     expect(logger.debug).nthCalledWith(
       6,
       'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
     expect(logger.debug).nthCalledWith(
       8,
       'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
   }
 
