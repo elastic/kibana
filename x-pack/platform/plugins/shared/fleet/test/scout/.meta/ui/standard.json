@@ -1,6 +1,24 @@
 {
-  "sha1": "11ef9864d227ad12262b0f78376daabee7d1201e",
+  "sha1": "1249c0d8a98ee6d30603e1b8d1d584e62ae200d9",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
+    {
+      "id": "81f30220a8b7610-653abc1400cd42f",
+      "title": "Add integration navigation clicking Add integration navigates to the add-integration page within Integrations app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/add_integration_navigation.spec.ts",
+        "line": 24,
+        "column": 7
+      }
+    },
     {
       "id": "0ab9aa6583f6769-b18346ef7c3b1d3",
       "title": "Browse integration loads the browse integration page and allow to scroll through it",
