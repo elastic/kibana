@@ -75,8 +75,14 @@ export const SearchHomepagePage = () => {
             ) : !cloud?.isCloudEnabled ? (
               <LicenseBadge />
             ) : null}
-            <span css={verticalSeparatorStyle} />
-            <CloudLinks cloud={cloud} />
+            {cloud?.isCloudEnabled && cloud?.baseUrl ? (
+              // Grouped so the separator wraps with the pill instead of being orphaned
+              // at the end of the previous line.
+              <div css={unstableRowCss({ gap: euiTheme.size.s, shrinkItems: false })}>
+                <span css={verticalSeparatorStyle} />
+                <CloudLinks cloud={cloud} />
+              </div>
+            ) : null}
           </div>
           <ConnectToElasticsearch />
         </div>

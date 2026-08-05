@@ -8,9 +8,19 @@
 import { type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+/**
+ * The pill is an atomic unit: its contents never wrap, so it moves to the next line of
+ * its parent row as a whole rather than breaking apart.
+ *
+ * `line-height: 1` keeps the intrinsic content height at the 16px icon so the box still
+ * measures 24px, and `min-block-size` lets a longer translation or a larger font grow the
+ * background instead of spilling the links outside it.
+ */
 export const CloudLinksPillStyle = ({ euiTheme }: UseEuiTheme) => css`
   background: ${euiTheme.colors.backgroundBasePrimary};
   border-radius: ${euiTheme.size.m};
-  height: 24px;
+  min-block-size: 24px;
   padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+  line-height: 1;
+  white-space: nowrap;
 `;

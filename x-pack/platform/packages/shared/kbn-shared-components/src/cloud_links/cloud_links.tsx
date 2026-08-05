@@ -83,7 +83,9 @@ export const CloudLinks = ({ cloud, CloudBaseOnly = false }: CloudLinksProps) =>
   }
 
   return (
-    <EuiFlexGroup gutterSize="m" alignItems="center" css={CloudLinksPillStyle}>
+    // `responsive={false}` is required: the default forces every item to
+    // `flex-basis: 100%` below the `m` breakpoint, stacking the pill's contents.
+    <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} css={CloudLinksPillStyle}>
       <EuiFlexItem grow={false}>
         <EuiLink
           href={cloud.baseUrl}
