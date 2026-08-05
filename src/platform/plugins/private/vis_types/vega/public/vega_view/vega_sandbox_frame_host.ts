@@ -60,8 +60,18 @@ export const createVegaSandboxFrameHost = ({
   iframe.setAttribute('src', frameSrc);
   iframe.setAttribute('title', 'Vega sandbox');
   iframe.style.border = '0';
+  iframe.style.background = 'transparent';
+  iframe.style.position = 'absolute';
+  iframe.style.inset = '0';
   iframe.style.height = '100%';
   iframe.style.width = '100%';
+
+  // Match the dashboard "custom content" panel iframe sizing pattern:
+  // a positioned container with an absolutely-positioned iframe that fills it.
+  parentEl.style.position = 'relative';
+  parentEl.style.flex = '1 1 0%';
+  parentEl.style.minWidth = '0';
+  parentEl.style.minHeight = '0';
 
   assertSandboxAttribute(iframe);
 

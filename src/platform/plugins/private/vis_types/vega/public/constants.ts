@@ -16,6 +16,9 @@ export const VEGA_EVENT_APPLY_FILTER = 'applyFilter';
 /** Browser feature flag gating the standalone Vega embeddable creation action. Off by default. */
 export const VEGA_STANDALONE_EMBEDDABLE_FLAG = 'vega.standaloneEmbeddable';
 
+/** Browser feature flag gating sandboxed Vega rendering. Off by default. */
+export const VEGA_SANDBOXED_RENDERING_FLAG = 'vega.sandboxedRendering';
+
 export const ADD_VEGA_EMBEDDABLE_ACTION_ID = 'addVegaEmbeddableAction';
 
 /** Legacy "Add Vega" action that navigates to the Visualize editor (Canvas + flag-off Dashboard). */

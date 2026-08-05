@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createSandboxCsp, getImgSrcSourcesFromPolicy } from './sandbox_route';
+import {
+  createSandboxCsp,
+  getImgSrcSourcesFromPolicy,
+  registerSandboxRoute,
+} from './sandbox_route';
+import { VEGA_SANDBOX_ROUTE_PATH } from '../common/sandbox_constants';
 
 describe('Vega sandbox route CSP helpers', () => {
   test('maps broad allow-all policy to wildcard image source when there are no deny rules', () => {
@@ -49,5 +54,75 @@ describe('Vega sandbox route CSP helpers', () => {
         "style-src 'unsafe-inline'",
       ].join('; ')
     );
+  });
+});
+
+describe('registerSandboxRoute', () => {
+  test('injects a route-scoped CSP header derived from externalUrl.policy', async () => {
+    const router = { get: jest.fn() };
+    const registerOnPreResponse = jest.fn();
+    const core = {
+      http: {
+        createRouter: () => router,
+        registerOnPreResponse,
+        staticAssets: { prependPublicUrl: (path: string) => path },
+        basePath: { publicBaseUrl: 'https://kibana.example.com/base' },
+        externalUrl: {
+          policy: [{ allow: true, host: 'static.example.com', protocol: 'https' }],
+        },
+      },
+    } as any;
+
+    registerSandboxRoute(core);
+
+    const handler = router.get.mock.calls[0][1];
+    const onPreResponse = registerOnPreResponse.mock.calls[0][0];
+
+    const request = {
+      uuid: 'request-uuid',
+      route: { path: VEGA_SANDBOX_ROUTE_PATH },
+      url: new URL('https://kibana.example.com/base/internal/vis_type_vega/sandbox'),
+    } as any;
+
+    const responseFactory = { ok: jest.fn((args) => args) } as any;
+    await handler({}, request, responseFactory);
+
+    const toolkit = { next: jest.fn((args) => args ?? { type: 'next' }) } as any;
+    const result = onPreResponse(request, {} as any, toolkit);
+
+    expect(result?.headers?.['Content-Security-Policy']).toContain("default-src 'none'");
+    expect(result?.headers?.['Content-Security-Policy']).toContain("'strict-dynamic'");
+    expect(result?.headers?.['Content-Security-Policy']).toContain('img-src');
+    expect(result?.headers?.['Content-Security-Policy']).toContain('https://kibana.example.com');
+    expect(result?.headers?.['Content-Security-Policy']).toContain('https://static.example.com');
+    expect(result?.headers?.['Content-Security-Policy']).toContain('https://*.static.example.com');
+  });
+
+  test('does not modify responses for other routes', () => {
+    const router = { get: jest.fn() };
+    const registerOnPreResponse = jest.fn();
+    const core = {
+      http: {
+        createRouter: () => router,
+        registerOnPreResponse,
+        staticAssets: { prependPublicUrl: (path: string) => path },
+        basePath: { publicBaseUrl: 'https://kibana.example.com/base' },
+        externalUrl: { policy: [] },
+      },
+    } as any;
+
+    registerSandboxRoute(core);
+    const onPreResponse = registerOnPreResponse.mock.calls[0][0];
+
+    const request = {
+      uuid: 'request-uuid',
+      route: { path: '/not-the-sandbox' },
+      url: new URL('https://kibana.example.com/base/not-the-sandbox'),
+    } as any;
+
+    const toolkit = { next: jest.fn((args) => args ?? { type: 'next' }) } as any;
+    onPreResponse(request, {} as any, toolkit);
+
+    expect(toolkit.next).toHaveBeenCalledWith();
   });
 });

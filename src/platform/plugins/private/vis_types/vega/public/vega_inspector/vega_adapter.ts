@@ -83,10 +83,30 @@ const serializeColumns = (item: Record<string, unknown>, columns: string[]) => {
 
 export class VegaAdapter {
   private debugValuesSubject = new ReplaySubject<DebugValues>(1);
+  private specSubject = new ReplaySubject<string>(1);
+  private runtimeInspectorEnabled = new BehaviorSubject<boolean>(true);
   private error = new BehaviorSubject<string | undefined>(undefined);
 
   bindInspectValues(debugValues: DebugValues) {
     this.debugValuesSubject.next(debugValues);
+    this.specSubject.next(JSON.stringify(debugValues.spec, null, 2));
+    this.runtimeInspectorEnabled.next(true);
+  }
+
+  /**
+   * Provide spec-only inspector support when runtime inspection is unavailable
+   * (e.g. sandboxed rendering).
+   */
+  setSpec(spec: Spec) {
+    this.specSubject.next(JSON.stringify(spec, null, 2));
+  }
+
+  setRuntimeInspectorEnabled(enabled: boolean) {
+    this.runtimeInspectorEnabled.next(enabled);
+  }
+
+  getRuntimeInspectorEnabled$(): Observable<boolean> {
+    return this.runtimeInspectorEnabled.asObservable();
   }
 
   getDataSetsSubscription(): Observable<InspectDataSets[]> {
@@ -157,10 +177,7 @@ export class VegaAdapter {
   }
 
   getSpecSubscription(): Observable<string> {
-    return this.debugValuesSubject.pipe(
-      filter((debugValues) => Boolean(debugValues)),
-      map((debugValues) => JSON.stringify(debugValues.spec, null, 2))
-    );
+    return this.specSubject.asObservable();
   }
 
   getErrorObservable() {

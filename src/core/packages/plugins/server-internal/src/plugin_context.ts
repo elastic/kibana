@@ -256,6 +256,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
           deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
       },
       csp: deps.http.csp,
+      externalUrl: deps.http.externalUrl,
       getServerInfo: deps.http.getServerInfo,
     },
     i18n: deps.i18n,

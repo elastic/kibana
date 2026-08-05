@@ -24,6 +24,7 @@ import type {
 import type { IBasePath } from './base_path';
 import type { IStaticAssets } from './static_assets';
 import type { ICspConfig } from './csp';
+import type { IExternalUrlConfig } from './external_url';
 import type { GetAuthState, IsAuthenticated } from './auth_state';
 import type { SessionStorageCookieOptions, SessionStorageFactory } from './session_storage';
 import type { ApiVersion } from './versioning';
@@ -384,6 +385,11 @@ export interface HttpServiceSetup<
    * The CSP config used for Kibana.
    */
   csp: ICspConfig;
+
+  /**
+   * The external URL policy config used for validating outbound URLs.
+   */
+  externalUrl: IExternalUrlConfig;
 
   /**
    * Provides ability to declare a handler function for a particular path and HTTP request method.

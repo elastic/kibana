@@ -50,6 +50,7 @@ const vegaDataInspectorStyles = {
 
 const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
   const [error, setError] = useState<string | undefined>();
+  const [runtimeInspectorEnabled, setRuntimeInspectorEnabled] = useState(true);
 
   useEffect(() => {
     const subscription = adapters.vega.getErrorObservable().subscribe((data) => {
@@ -58,6 +59,13 @@ const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
     return () => {
       subscription.unsubscribe();
     };
+  }, [adapters.vega]);
+
+  useEffect(() => {
+    const subscription = adapters.vega.getRuntimeInspectorEnabled$().subscribe((enabled) => {
+      setRuntimeInspectorEnabled(enabled);
+    });
+    return () => subscription.unsubscribe();
   }, [adapters.vega]);
 
   if (error) {
@@ -76,18 +84,22 @@ const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
   }
 
   const tabs = [
-    {
-      id: 'data-viewer--id',
-      name: dataSetsLabel,
-      content: <DataViewer vegaAdapter={adapters.vega} />,
-      'data-test-subj': 'vegaDataInspectorDataViewerButton',
-    },
-    {
-      id: 'signal-viewer--id',
-      name: signalValuesLabel,
-      content: <SignalViewer vegaAdapter={adapters.vega} />,
-      'data-test-subj': 'vegaDataInspectorSignalViewerButton',
-    },
+    ...(runtimeInspectorEnabled
+      ? [
+          {
+            id: 'data-viewer--id',
+            name: dataSetsLabel,
+            content: <DataViewer vegaAdapter={adapters.vega} />,
+            'data-test-subj': 'vegaDataInspectorDataViewerButton',
+          },
+          {
+            id: 'signal-viewer--id',
+            name: signalValuesLabel,
+            content: <SignalViewer vegaAdapter={adapters.vega} />,
+            'data-test-subj': 'vegaDataInspectorSignalViewerButton',
+          },
+        ]
+      : []),
     {
       id: 'spec-viewer--id',
       name: specLabel,

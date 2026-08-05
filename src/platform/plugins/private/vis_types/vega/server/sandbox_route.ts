@@ -108,6 +108,25 @@ const renderSandboxDocument = (nonce: string, bundleSrc: string) => `<!doctype h
   <head>
     <meta charset="utf-8" />
     <title>Vega sandbox</title>
+    <style>
+      html,
+      body,
+      #vega-sandbox-root {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        overflow: hidden;
+      }
+      #vega-sandbox-root {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        min-height: 0;
+      }
+    </style>
   </head>
   <body>
     <div id="vega-sandbox-root"></div>
@@ -151,7 +170,13 @@ export const registerSandboxRoute = (core: CoreSetup): void => {
     },
     async (_context, request, response) => {
       const nonce = createNonce();
-      responseCspByRequestId.set(request.uuid, createSandboxCsp({ imgSrcSources: [], nonce }));
+      const kibanaOrigin =
+        core.http.basePath.publicBaseUrl != null
+          ? new URL(core.http.basePath.publicBaseUrl).origin
+          : request.url.origin;
+      const imgSrcSources = getImgSrcSourcesFromPolicy(core.http.externalUrl.policy, kibanaOrigin);
+
+      responseCspByRequestId.set(request.uuid, createSandboxCsp({ imgSrcSources, nonce }));
 
       return response.ok({
         body: renderSandboxDocument(nonce, bundleSrc),

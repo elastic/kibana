@@ -24,6 +24,7 @@ export interface VegaSandboxTooltipConfig {
 export interface VegaSandboxRenderDescriptor {
   spec: Spec;
   vlspec?: Spec;
+  colorSchemes?: Record<string, string[]>;
   renderer: 'canvas' | 'svg';
   useHover: boolean;
   useResize: boolean;

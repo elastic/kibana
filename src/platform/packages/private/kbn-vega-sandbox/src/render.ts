@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { View, expressionFunction, loader, logger, parse, Warn } from 'vega';
+import { View, expressionFunction, loader, logger, parse, scheme, Warn } from 'vega';
 import { expressionInterpreter } from 'vega-interpreter';
 import {
   VEGA_SANDBOX_RENDER_FUNCTIONS,
@@ -36,6 +36,15 @@ const registerVegaFunctionForwarders = (): void => {
           view.runAfter(() => view._kbnVegaSandboxFunctionHandler?.({ fn: funcName, args }));
         }
       );
+    }
+  }
+};
+
+const registerVegaColorSchemes = (colorSchemes?: Record<string, string[]>): void => {
+  if (!colorSchemes) return;
+  for (const [name, colors] of Object.entries(colorSchemes)) {
+    if (Array.isArray(colors) && colors.length) {
+      scheme(name, colors);
     }
   }
 };
@@ -87,6 +96,7 @@ export const renderVegaDescriptor = async ({
   onWarn,
 }: VegaSandboxRenderParams): Promise<VegaSandboxRenderController> => {
   registerVegaFunctionForwarders();
+  registerVegaColorSchemes(descriptor.colorSchemes);
 
   const view = new View(
     parse(descriptor.spec, undefined, { ast: true }),

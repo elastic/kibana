@@ -129,9 +129,18 @@ export class VegaParser {
     const normalize = <T>(value: T) =>
       normalizeForRenderDescriptor(value, bypassExternalUrlCheckUrls);
 
+    const visColors = getVegaThemeColors(this.theme, 'visColors');
+    const elasticVisColors = Array.isArray(visColors) ? visColors : [visColors];
+
     return {
       spec: normalize(this.spec),
       vlspec: this.vlspec ? normalize(this.vlspec) : undefined,
+      colorSchemes: {
+        // The default 'elastic' palette is registered as a Vega color scheme at parse time.
+        // For sandboxed rendering, the Vega runtime runs inside an iframe and must register
+        // the same scheme(s) before parsing/running the spec.
+        elastic: elasticVisColors,
+      },
       isVegaLite: Boolean(this.isVegaLite),
       renderer: this.renderer === 'svg' ? 'svg' : 'canvas',
       useResize: Boolean(this.useResize),

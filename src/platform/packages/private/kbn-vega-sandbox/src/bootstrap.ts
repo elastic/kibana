@@ -32,6 +32,7 @@ declare global {
 
 let controller: VegaSandboxRenderController | undefined;
 let initialized = false;
+let hrefInterceptorInstalled = false;
 
 const getRoot = (): HTMLElement => {
   const root = document.getElementById('vega-sandbox-root');
@@ -45,6 +46,34 @@ const getRoot = (): HTMLElement => {
 
 const postToParent = (message: VegaSandboxOutboundMessage): void => {
   window.parent.postMessage(message, '*');
+};
+
+const installHrefInterceptor = (): void => {
+  if (hrefInterceptorInstalled) return;
+  hrefInterceptorInstalled = true;
+
+  const originalOpen = window.open;
+  window.open = ((url?: string | URL, _target?: string, _features?: string) => {
+    const href = typeof url === 'string' ? url : url instanceof URL ? url.toString() : undefined;
+    if (href) {
+      postToParent({ type: 'openHref', href });
+    }
+    // The sandbox disallows top navigation/popups, so we never attempt to open directly.
+    return null;
+  }) as typeof window.open;
+
+  const originalAnchorClick = HTMLAnchorElement.prototype.click;
+  HTMLAnchorElement.prototype.click = function () {
+    const href = this.getAttribute('href') ?? this.href;
+    if (href) {
+      postToParent({ type: 'openHref', href });
+      return;
+    }
+    return originalAnchorClick.call(this);
+  };
+
+  // Keep a reference so bundlers don't elide it; also helps debugging.
+  void originalOpen;
 };
 
 const isInboundMessage = (value: unknown): value is VegaSandboxInboundMessage =>
@@ -68,6 +97,7 @@ const handleInit = ({ protocolVersion }: { protocolVersion: number }): void => {
     return;
   }
 
+  installHrefInterceptor();
   initialized = true;
 };
 
@@ -76,6 +106,12 @@ const handleRender = async (message: Extract<VegaSandboxInboundMessage, { type: 
     return;
   }
 
+  if (controller?.view) {
+    const state = controller.view.getState();
+    if (state) {
+      postToParent({ type: 'saveState', state });
+    }
+  }
   controller?.destroy();
   const root = getRoot();
   root.replaceChildren();
@@ -84,6 +120,10 @@ const handleRender = async (message: Extract<VegaSandboxInboundMessage, { type: 
   const controls = document.createElement('div');
   container.style.height = '100%';
   container.style.width = '100%';
+  container.style.flex = '1 1 auto';
+  container.style.minHeight = '0';
+  container.style.minWidth = '0';
+  controls.style.flex = '0 0 auto';
   root.append(container, controls);
 
   controller = await renderVegaDescriptor({
@@ -100,6 +140,13 @@ const handleRender = async (message: Extract<VegaSandboxInboundMessage, { type: 
   }
 
   postToParent({ type: 'rendered' });
+};
+
+const handleRestoreState = async (state: unknown): Promise<void> => {
+  if (!initialized || !controller?.view || !state) {
+    return;
+  }
+  await controller.view.setState(state as any);
 };
 
 const handleMessage = (message: MessageEvent): void => {
@@ -126,6 +173,15 @@ const handleMessage = (message: MessageEvent): void => {
       controller?.resize(message.data.dimensions);
       return;
     case 'restoreState':
+      handleRestoreState(message.data.state).catch((error) => {
+        postToParent({
+          type: 'error',
+          error: {
+            code: VegaSandboxErrorCode.RenderFailed,
+            values: { message: error instanceof Error ? error.message : String(error) },
+          },
+        });
+      });
       return;
   }
 };

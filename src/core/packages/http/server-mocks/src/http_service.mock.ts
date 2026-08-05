@@ -245,6 +245,7 @@ const createSetupContractMock = <
     registerOnPreResponse: internalMock.registerOnPreResponse,
     basePath: internalMock.basePath,
     csp: CspConfig.DEFAULT,
+    externalUrl: internalMock.externalUrl,
     createRouter: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
     getServerInfo: internalMock.getServerInfo,

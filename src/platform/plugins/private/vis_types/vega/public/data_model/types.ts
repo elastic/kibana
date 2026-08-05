@@ -186,6 +186,12 @@ export interface Data {
 export interface VegaRenderState {
   spec: VegaSpec;
   vlspec?: VegaSpec;
+  /**
+   * Optional Vega color scheme registrations required at render time.
+   * In sandboxed rendering the Vega runtime is isolated in an iframe, so any
+   * custom schemes used by the spec must be registered in that environment.
+   */
+  colorSchemes?: Record<string, string[]>;
   isVegaLite: boolean;
   renderer: Renderer;
   useResize: boolean;

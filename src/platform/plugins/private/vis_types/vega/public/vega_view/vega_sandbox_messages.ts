@@ -8,36 +8,44 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { VegaSandboxErrorCode, VegaSandboxWarningCode } from '@kbn/vega-sandbox';
+import {
+  VegaSandboxErrorCode,
+  VegaSandboxWarningCode,
+  type VegaSandboxErrorPayload,
+  type VegaSandboxWarningPayload,
+} from '@kbn/vega-sandbox';
 
-export interface VegaSandboxMessage {
-  code: VegaSandboxErrorCode | VegaSandboxWarningCode;
-  values?: Record<string, unknown>;
-}
-
-const getMessageValue = ({ values }: VegaSandboxMessage): string =>
+const getMessageValue = ({ values }: { values?: Record<string, unknown> }): string =>
   typeof values?.message === 'string' ? values.message : '';
 
-export const translateVegaSandboxError = (message: VegaSandboxMessage): string => {
-  switch (message.code) {
+export const translateVegaSandboxError = (error: VegaSandboxErrorPayload): string => {
+  switch (error.code) {
     case VegaSandboxErrorCode.RenderFailed:
       return i18n.translate('visTypeVega.sandbox.renderFailedErrorMessage', {
         defaultMessage: 'Vega sandbox rendering failed: {message}',
-        values: { message: getMessageValue(message) },
+        values: { message: getMessageValue(error) },
       });
     case VegaSandboxErrorCode.UnsupportedProtocolVersion:
       return i18n.translate('visTypeVega.sandbox.unsupportedProtocolVersionErrorMessage', {
         defaultMessage: 'The Vega sandbox protocol version is not supported.',
       });
+    default:
+      return i18n.translate('visTypeVega.sandbox.unknownErrorMessage', {
+        defaultMessage: 'Vega sandbox reported an unknown error.',
+      });
   }
 };
 
-export const translateVegaSandboxWarning = (message: VegaSandboxMessage): string => {
-  switch (message.code) {
+export const translateVegaSandboxWarning = (warning: VegaSandboxWarningPayload): string => {
+  switch (warning.code) {
     case VegaSandboxWarningCode.RuntimeWarning:
       return i18n.translate('visTypeVega.sandbox.runtimeWarningMessage', {
         defaultMessage: 'Vega sandbox warning: {message}',
-        values: { message: getMessageValue(message) },
+        values: { message: getMessageValue(warning) },
+      });
+    default:
+      return i18n.translate('visTypeVega.sandbox.unknownWarningMessage', {
+        defaultMessage: 'Vega sandbox reported an unknown warning.',
       });
   }
 };
