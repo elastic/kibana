@@ -66,8 +66,8 @@ describe('ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW', () => {
     expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.pluginId).toBe('discoveries');
   });
 
-  it('bumps the version to 12 for max-step-size on the ai.agent gate step', () => {
-    expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.version).toBe(12);
+  it('bumps the version to 13 for the lowercase display tags', () => {
+    expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.version).toBe(13);
   });
 
   it('titles the workflow "Security - Attack discovery - Skill"', () => {
@@ -308,8 +308,8 @@ describe('ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW', () => {
     expect(ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW.pluginId).toBe('discoveries');
   });
 
-  it('bumps the version to 3 for max-step-size on the ai.agent render_report step', () => {
-    expect(ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW.version).toBe(3);
+  it('bumps the version to 4 for the lowercase display tags', () => {
+    expect(ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW.version).toBe(4);
   });
 
   it('is discoverable from the managed registry by id', () => {

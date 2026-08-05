@@ -9160,8 +9160,6 @@
     "uiActions.triggers.onSelectRange.title": "Sélection de la plage",
     "uiActions.triggers.panelBadgeTrigger.description": "Des actions apparaissent dans la barre de titre lorsqu'un élément pouvant être intégré est chargé dans un panneau.",
     "uiActions.triggers.panelBadgeTrigger.title": "Badges du panneau",
-    "uiActions.triggers.panelNotificationTrigger.description": "Les actions apparaissent dans l'angle supérieur droit des panneaux.",
-    "uiActions.triggers.panelNotificationTrigger.title": "Notifications du panneau",
     "uiActions.triggers.updateEsqlQueryTrigger": "Mettre à jour la requête ES|QL",
     "uiActions.triggers.updateEsqlQueryTriggerDescription": "Mettre à jour la requête ES|QL en utilisant une nouvelle requête",
     "uiActions.triggers.updateFilterReferencesTrigger": "Mettre à jour les références de filtre",
