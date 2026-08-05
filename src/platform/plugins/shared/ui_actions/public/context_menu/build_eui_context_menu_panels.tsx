@@ -48,7 +48,11 @@ type PanelDescriptor = EuiContextMenuPanelDescriptor & {
 };
 
 const onClick =
-  (action: Action | ActionInternal, context: ActionExecutionContext<object>, close: () => void) =>
+  (
+    action: Action | ActionInternal,
+    context: ActionExecutionContext<object>,
+    close: (actionId: string) => void
+  ) =>
   (event: React.MouseEvent) => {
     if (event.currentTarget instanceof HTMLAnchorElement) {
       // from react-router's <Link/>
@@ -62,7 +66,7 @@ const onClick =
         action.execute(context);
       }
     } else action.execute({ ...context, event });
-    close();
+    close(action.id);
   };
 
 /**
@@ -115,7 +119,7 @@ const removePanelMetaFields = (panels: PanelDescriptor[]): EuiContextMenuPanelDe
 export interface BuildContextMenuParams {
   actions: ActionWithContext[];
   title?: string;
-  closeMenu?: () => void;
+  closeMenu?: (actionId: string) => void;
 }
 
 /**
@@ -124,7 +128,7 @@ export interface BuildContextMenuParams {
 export async function buildContextMenuForActions({
   actions,
   title = defaultTitle,
-  closeMenu = () => {},
+  closeMenu = (actionId: string) => {},
 }: BuildContextMenuParams): Promise<EuiContextMenuPanelDescriptor[]> {
   const panels: Record<string, PanelDescriptor> = {
     mainMenu: {

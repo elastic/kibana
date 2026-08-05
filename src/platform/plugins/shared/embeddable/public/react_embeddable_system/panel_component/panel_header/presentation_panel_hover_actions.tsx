@@ -27,7 +27,12 @@ import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/publ
 import { buildContextMenuForActions, triggers } from '@kbn/ui-actions-plugin/public';
 
 import { css } from '@emotion/react';
-import type { EmbeddableApiContext, PublishesTitle, ViewMode } from '@kbn/presentation-publishing';
+import type {
+  EmbeddableApiContext,
+  PanelInteraction,
+  PublishesTitle,
+  ViewMode,
+} from '@kbn/presentation-publishing';
 import { apiCanLockHoverActions, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { getPanelContextMenuTriggerId } from '@kbn/presentation-util';
 import type { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
@@ -67,7 +72,11 @@ const getQuickActionElementId = (actionId: string, uuid: string) =>
   `presentationPanelQuickAction-${actionId}-${uuid}`;
 
 export const createClickHandler =
-  (action: Action<EmbeddableApiContext>, context: ActionExecutionContext<EmbeddableApiContext>) =>
+  (
+    action: Action<EmbeddableApiContext>,
+    context: ActionExecutionContext<EmbeddableApiContext>,
+    onInteraction: PresentationPanelHoverActionsProps['onInteraction']
+  ) =>
   (event: React.MouseEvent) => {
     if (event.currentTarget instanceof HTMLAnchorElement) {
       // from react-router's <Link/>
@@ -80,6 +89,10 @@ export const createClickHandler =
         event.preventDefault();
       }
     }
+    onInteraction({
+      type: 'panel_menu_click',
+      menuItemId: action.id,
+    });
     action.execute(context);
   };
 
@@ -93,6 +106,7 @@ export interface PresentationPanelHoverActionsProps {
   viewMode?: ViewMode;
   showNotifications?: boolean;
   showBorder?: boolean;
+  onInteraction: (interaction: PanelInteraction) => void;
 }
 
 export const PresentationPanelHoverActions = ({
@@ -104,6 +118,7 @@ export const PresentationPanelHoverActions = ({
   className,
   viewMode,
   showNotifications = true,
+  onInteraction,
 }: PresentationPanelHoverActionsProps) => {
   const [quickActions, setQuickActions] = useState<Action<EmbeddableApiContext>[]>([]);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
@@ -279,7 +294,13 @@ export const PresentationPanelHoverActions = ({
           context: apiContext,
           trigger: triggers[ON_OPEN_PANEL_MENU],
         })) as ActionWithContext[],
-        closeMenu: onClose,
+        closeMenu: (id) => {
+          onInteraction({
+            type: 'panel_menu_click',
+            menuItemId: id,
+          });
+          onClose();
+        },
       });
       setContextMenuPanels(menuPanels);
       setShowNotification(contextMenuActions.some((action) => action.showNotification));
@@ -300,6 +321,7 @@ export const PresentationPanelHoverActions = ({
     viewMode,
     quickActionIds,
     disabledActionIds,
+    onInteraction,
   ]);
 
   const quickActionElements = useMemo(() => {
@@ -320,12 +342,12 @@ export const PresentationPanelHoverActions = ({
         return {
           iconType,
           'data-test-subj': `embeddablePanelAction-${action.id}`,
-          onClick: createClickHandler(action, apiContext),
+          onClick: createClickHandler(action, apiContext, onInteraction),
           name,
           id,
         };
       });
-  }, [api, quickActions]);
+  }, [api, quickActions, onInteraction]);
 
   const notificationElements = useMemo(() => {
     if (!showNotifications || !api) return [];

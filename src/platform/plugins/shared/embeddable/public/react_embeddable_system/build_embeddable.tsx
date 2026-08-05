@@ -8,9 +8,13 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
-import type { HasPanelCapabilities, HasSerializedChildState } from '@kbn/presentation-publishing';
+import type {
+  HasPanelCapabilities,
+  HasSerializedChildState,
+  PanelInteraction,
+} from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
 import type {
   DefaultEmbeddableApi,
@@ -37,6 +41,8 @@ export async function buildEmbeddable<
   type: string;
 }) {
   const uuid = maybeId ?? generateId();
+  const interaction$ = new Subject<PanelInteraction>();
+  const onInteraction = (interaction: PanelInteraction) => interaction$.next(interaction);
 
   const finalizeApi = (apiRegistration: EmbeddableApiRegistration<SerializedState, Api>) => {
     const hasLockedHoverActions$ = new BehaviorSubject(false);
@@ -52,6 +58,7 @@ export async function buildEmbeddable<
       ...panelCapabilitiesDefaults,
       ...apiRegistration,
       uuid,
+      interaction$,
       phase$: phaseTracker.getPhase$(),
       parentApi,
       hasLockedHoverActions$,
@@ -79,7 +86,11 @@ export async function buildEmbeddable<
       parentApi,
       initializeDrilldownsManager,
     });
-    return { componentApi: api, Component };
+    return {
+      componentApi: api,
+      Component,
+      onInteraction,
+    };
   } catch (e) {
     /**
      * critical error encountered when trying to build the api / embeddable;
@@ -88,8 +99,10 @@ export async function buildEmbeddable<
     return {
       componentApi: finalizeApi({
         blockingError$: new BehaviorSubject(e),
+        interaction$,
       } as unknown as EmbeddableApiRegistration<SerializedState, Api>),
       Component: () => <span />,
+      onInteraction,
     };
   }
 }
