@@ -7178,6 +7178,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-ml@link:x-pack/platform/plugins/shared/ml/evals":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-obs-ai-assistant@link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant":
   version "0.0.0"
   uid ""
