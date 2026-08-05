@@ -19,32 +19,32 @@ const render = (condition: ESQLAstExpression): string =>
 
 describe('createTraceContextWhereClause', () => {
   it('returns a where AST node with only traceId', () => {
-    expect(render(createTraceContextWhereClause({ traceId: 'abc123' }))).toEqual(
-      'FROM foo-*\n  | WHERE trace.id == "abc123"'
-    );
+    const result = render(createTraceContextWhereClause({ traceId: 'abc123' }));
+    expect(result).toEqual('FROM foo-*\n  | WHERE trace.id == "abc123"');
   });
 
   it('returns a pipeline with traceId and spanId', () => {
-    expect(render(createTraceContextWhereClause({ traceId: 'abc123', spanId: 'span456' }))).toEqual(
-      'FROM foo-*\n  | WHERE trace.id == "abc123" AND span.id == "span456"'
-    );
+    const result = render(createTraceContextWhereClause({ traceId: 'abc123', spanId: 'span456' }));
+    expect(result).toEqual('FROM foo-*\n  | WHERE trace.id == "abc123" AND span.id == "span456"');
   });
   it('returns a pipeline with traceId and transactionId', () => {
-    expect(
-      render(createTraceContextWhereClause({ traceId: 'abc123', transactionId: 'txn789' }))
-    ).toEqual('FROM foo-*\n  | WHERE trace.id == "abc123" AND transaction.id == "txn789"');
+    const result = render(
+      createTraceContextWhereClause({ traceId: 'abc123', transactionId: 'txn789' })
+    );
+    expect(result).toEqual(
+      'FROM foo-*\n  | WHERE trace.id == "abc123" AND transaction.id == "txn789"'
+    );
   });
 
   it('returns a pipeline with all fields', () => {
-    expect(
-      render(
-        createTraceContextWhereClause({
-          traceId: 'abc123',
-          spanId: 'span456',
-          transactionId: 'txn789',
-        })
-      )
-    ).toEqual(
+    const result = render(
+      createTraceContextWhereClause({
+        traceId: 'abc123',
+        spanId: 'span456',
+        transactionId: 'txn789',
+      })
+    );
+    expect(result).toEqual(
       'FROM foo-*\n  | WHERE trace.id == "abc123" AND (transaction.id == "txn789" OR span.id == "span456")'
     );
   });
@@ -52,37 +52,39 @@ describe('createTraceContextWhereClause', () => {
 
 describe('createTraceContextWhereClauseForErrors', () => {
   it('returns a where AST node with traceId and error filters', () => {
-    expect(render(createTraceContextWhereClauseForErrors({ traceId: 'abc123' }))).toEqual(
+    const result = render(createTraceContextWhereClauseForErrors({ traceId: 'abc123' }));
+    expect(result).toEqual(
       'FROM foo-*\n  | WHERE trace.id == "abc123" AND KQL("processor.event: \\"error\\" OR error.log.level: \\"error\\" OR event_name: \\"exception\\" OR event_name: \\"error\\" ")'
     );
   });
 
   it('returns a pipeline with traceId, spanId and error filters', () => {
-    expect(
-      render(createTraceContextWhereClauseForErrors({ traceId: 'abc123', spanId: 'span456' }))
-    ).toEqual(
+    const result = render(
+      createTraceContextWhereClauseForErrors({ traceId: 'abc123', spanId: 'span456' })
+    );
+    expect(result).toEqual(
       'FROM foo-*\n  | WHERE trace.id == "abc123" AND span.id == "span456" AND KQL("processor.event: \\"error\\" OR error.log.level: \\"error\\" OR event_name: \\"exception\\" OR event_name: \\"error\\" ")'
     );
   });
 
   it('returns a pipeline with traceId, transactionId and error filters', () => {
-    expect(
-      render(createTraceContextWhereClauseForErrors({ traceId: 'abc123', transactionId: 'txn789' }))
-    ).toEqual(
+    const result = render(
+      createTraceContextWhereClauseForErrors({ traceId: 'abc123', transactionId: 'txn789' })
+    );
+    expect(result).toEqual(
       'FROM foo-*\n  | WHERE trace.id == "abc123" AND transaction.id == "txn789" AND KQL("processor.event: \\"error\\" OR error.log.level: \\"error\\" OR event_name: \\"exception\\" OR event_name: \\"error\\" ")'
     );
   });
 
   it('returns a pipeline with all fields and error filters', () => {
-    expect(
-      render(
-        createTraceContextWhereClauseForErrors({
-          traceId: 'abc123',
-          spanId: 'span456',
-          transactionId: 'txn789',
-        })
-      )
-    ).toEqual(
+    const result = render(
+      createTraceContextWhereClauseForErrors({
+        traceId: 'abc123',
+        spanId: 'span456',
+        transactionId: 'txn789',
+      })
+    );
+    expect(result).toEqual(
       'FROM foo-*\n  | WHERE trace.id == "abc123" AND (transaction.id == "txn789" OR span.id == "span456") AND KQL("processor.event: \\"error\\" OR error.log.level: \\"error\\" OR event_name: \\"exception\\" OR event_name: \\"error\\" ")'
     );
   });
