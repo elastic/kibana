@@ -559,34 +559,7 @@ export class EndpointMetadataService {
           ...runtimeFields,
         };
 
-        const hostInfo = await this.enrichHostMetadata(
-          metadata,
-          agent,
-          agentPolicy,
-          endpointPolicy
-        );
-
-        // TEMPORARY CPS DIAGNOSTIC. Lives on the flag-on image branch only, never merge to the PR.
-        // Answers why a fanned-in row renders Offline while its Last active reads current.
-        (hostInfo as unknown as Record<string, unknown>)._cpsDebug = {
-          index: doc._index,
-          fieldsStatus: doc.fields?.status ?? null,
-          fieldsLastCheckin: doc.fields?.last_checkin ?? null,
-          fieldsKeys: Object.keys(doc.fields ?? {}),
-          resolvedStatus: agent.status ?? null,
-          resolvedLastCheckin: agent.last_checkin ?? null,
-          srcLastCheckin: _agent.last_checkin ?? null,
-          srcLastCheckinStatus: _agent.last_checkin_status ?? null,
-          srcActive: _agent.active ?? null,
-          // Present on the document but absent from Fleet's `Agent` type
-          srcPolicyRevisionIdx:
-            (_agent as unknown as Record<string, unknown>).policy_revision_idx ?? null,
-          srcEnrolledAt: _agent.enrolled_at ?? null,
-          endpointTimestamp: endpoint['@timestamp'] ?? null,
-          kibanaNow: new Date().toISOString(),
-        };
-
-        hosts.push(hostInfo);
+        hosts.push(await this.enrichHostMetadata(metadata, agent, agentPolicy, endpointPolicy));
       }
     }
 

@@ -221,8 +221,6 @@ describe('EndpointMetadataService', () => {
       expect(metadataListResponse).toEqual({
         data: [
           {
-            // TEMPORARY, matches the CPS diagnostic on this image branch only
-            _cpsDebug: expect.any(Object),
             metadata: endpointMetadataDoc,
             host_status: 'healthy',
             policy_info: {
