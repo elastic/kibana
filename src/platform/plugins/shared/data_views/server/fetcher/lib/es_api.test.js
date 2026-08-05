@@ -223,5 +223,79 @@ describe('server/index_patterns/service/lib/es_api', () => {
       const passedOpts = fieldCaps.args[0][0];
       expect(passedOpts).not.toHaveProperty('project_routing');
     });
+
+    describe('with an index/pattern list too long for a single request line', () => {
+      // encoded length comfortably over the default 3000-byte chunking budget
+      const longIndices = Array.from({ length: 400 }, (_, i) => `logs-000${i}-*`);
+
+      it('issues multiple fieldCaps calls and merges the results', async () => {
+        const fieldCaps = sinon.stub().callsFake(async ({ index }) => ({
+          body: {
+            indices: index,
+            fields: {
+              [`field-for-${index[0]}`]: {
+                keyword: { type: 'keyword', searchable: true, aggregatable: true },
+              },
+            },
+          },
+        }));
+        const callCluster = {
+          indices: { getAlias: sinon.stub() },
+          fieldCaps,
+        };
+
+        const { body } = await callFieldCapsApi({ callCluster, indices: longIndices });
+
+        expect(fieldCaps.callCount).toBeGreaterThan(1);
+        // every chunk stayed under the encoded-length budget
+        for (const call of fieldCaps.args) {
+          expect(encodeURIComponent(call[0].index.join(',')).length).toBeLessThanOrEqual(3000);
+        }
+        // every index ends up covered, and each chunk's synthetic field survived the merge
+        expect(body.indices.sort()).toEqual([...longIndices].sort());
+        expect(Object.keys(body.fields).length).toBe(fieldCaps.callCount);
+      });
+
+      it('treats a chunk matching nothing as empty, without failing chunks that did match', async () => {
+        const notFoundError = Object.assign(new Error('index_not_found_exception'), {
+          body: { error: { type: 'index_not_found_exception' } },
+        });
+        const fieldCaps = sinon
+          .stub()
+          .onFirstCall()
+          .rejects(notFoundError)
+          .callsFake(async ({ index }) => ({
+            body: { indices: index, fields: {} },
+          }));
+        const callCluster = {
+          indices: { getAlias: sinon.stub() },
+          fieldCaps,
+        };
+
+        const { body } = await callFieldCapsApi({ callCluster, indices: longIndices });
+
+        expect(fieldCaps.callCount).toBeGreaterThan(1);
+        expect(body.indices.length).toBeGreaterThan(0);
+      });
+
+      it('throws via convertEsError when every chunk matches nothing', async () => {
+        const notFoundError = Object.assign(new Error('index_not_found_exception'), {
+          body: { error: { type: 'index_not_found_exception' } },
+        });
+        const convertedError = new Error('convertedError');
+        sandbox.stub(convertEsErrorNS, 'convertEsError').throws(convertedError);
+        const fieldCaps = sinon.stub().rejects(notFoundError);
+        const callCluster = {
+          indices: { getAlias: sinon.stub() },
+          fieldCaps,
+        };
+
+        await expect(callFieldCapsApi({ callCluster, indices: longIndices })).rejects.toBe(
+          convertedError
+        );
+        sinon.assert.calledOnce(convertEsError);
+        expect(convertEsError.args[0][0]).toBe(longIndices);
+      });
+    });
   });
 });
