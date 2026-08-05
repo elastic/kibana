@@ -1509,7 +1509,11 @@ describe('create', () => {
   });
 
   describe('server-side global field defaults', () => {
-    const makeGlobalDef = (name: string, defaultValue?: unknown) => ({
+    const makeGlobalDef = (
+      name: string,
+      defaultValue?: unknown,
+      { required = false }: { required?: boolean } = {}
+    ) => ({
       fieldDefinitionId: `fd-${name}`,
       name,
       owner: SECURITY_SOLUTION_OWNER,
@@ -1520,6 +1524,7 @@ describe('create', () => {
         type: 'keyword',
         control: 'INPUT_TEXT',
         label: name,
+        ...(required ? { validation: { required: true } } : {}),
         ...(defaultValue !== undefined ? { metadata: { default: defaultValue } } : {}),
       }),
     });
@@ -1701,6 +1706,60 @@ describe('create', () => {
       expect(
         clientArgs.services.fieldDefinitionsService.getFieldDefinitions
       ).not.toHaveBeenCalled();
+    });
+
+    describe('required global fields', () => {
+      // The injection populates a storage key for every non-display global field, so the merged
+      // map now flows into validateCaseExtendedFields even when the caller sent no
+      // extended_fields. This is the most behaviorally significant consequence of the change:
+      // a REQUIRED global field with no default and no caller value must reject the create
+      // (matching what the UI enforces at submit time), while a default or a caller-sent value
+      // satisfies it. These tests lock that in so a future reordering of the inject/validate
+      // steps cannot silently drop the enforcement.
+      it('rejects the create when a required global field has no default and no caller value', async () => {
+        const clientArgs = createClientArgs();
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+          fieldDefinitions: [makeGlobalDef('risk_score', undefined, { required: true })],
+          total: 1,
+        });
+
+        await expect(create(theCase, clientArgs, casesClientMock)).rejects.toThrow(
+          'Field "risk_score" is required'
+        );
+        expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
+      });
+
+      it('creates the case when a required global field has a default', async () => {
+        const clientArgs = createClientArgs();
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+          fieldDefinitions: [makeGlobalDef('risk_score', 'high', { required: true })],
+          total: 1,
+        });
+
+        await create(theCase, clientArgs, casesClientMock);
+
+        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+        expect(createArgs.attributes.extended_fields).toEqual({ risk_score_as_keyword: 'high' });
+      });
+
+      it('creates the case when the caller sends a value for a required global field without a default', async () => {
+        const clientArgs = createClientArgs();
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+          fieldDefinitions: [makeGlobalDef('risk_score', undefined, { required: true })],
+          total: 1,
+        });
+
+        await create(
+          { ...theCase, extended_fields: { risk_score_as_keyword: 'caller-value' } },
+          clientArgs,
+          casesClientMock
+        );
+
+        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+        expect(createArgs.attributes.extended_fields).toEqual({
+          risk_score_as_keyword: 'caller-value',
+        });
+      });
     });
   });
 });
