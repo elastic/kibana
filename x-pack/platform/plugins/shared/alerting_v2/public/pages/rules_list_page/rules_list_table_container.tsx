@@ -159,11 +159,15 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
     deleteRuleMutation.mutate(
       { id: deletedId, name: ruleToDelete.metadata.name },
       {
-        // Deleted rows can't stay selected — otherwise a stale ID lingers in
-        // the bulk-selection set and a follow-up bulk action would submit it,
-        // surfacing as a spurious per-row error from the server.
+        /*
+         * Drop the deleted row from whichever set holds it: unselect it in
+         * inclusion mode, or clear its exclusion in select-all mode, so a
+         * stale ID cannot leak into a later bulk action or skew the count.
+         * A row that is merely *selected* in select-all mode (i.e. absent
+         * from the exclusion set) is left alone to avoid double-counting.
+         */
         onSuccess: () => {
-          if (isRowSelected(deletedId)) {
+          if (isAllSelected ? !isRowSelected(deletedId) : isRowSelected(deletedId)) {
             onSelectRow(deletedId);
           }
         },
