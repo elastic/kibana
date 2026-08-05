@@ -150,7 +150,7 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
 
       cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK).eq(0).should('contain.text', 'Feed');
       cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK).eq(1).should('contain.text', 'Indicator type');
-      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK).eq(2).should('contain.text', 'TLP Marking-');
+      cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK).eq(2).should('contain.text', 'TLP Marking');
       cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK).eq(3).should('contain.text', 'Confidence');
 
       cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM).eq(0).should('contain.text', 'AbuseCH Malware');

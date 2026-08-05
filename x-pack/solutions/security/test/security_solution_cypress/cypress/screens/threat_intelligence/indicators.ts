@@ -52,7 +52,7 @@ export const INDICATORS_TABLE_MORE_ACTION_BUTTON_ICON = getDataTestSubjectSelect
 
 export const TOGGLE_FLYOUT_BUTTON = getDataTestSubjectSelector('tiToggleIndicatorFlyoutButton');
 export const FLYOUT_CLOSE_BUTTON = getDataTestSubjectSelector('euiFlyoutCloseButton');
-export const FLYOUT_TITLE = getDataTestSubjectSelector('securitySolutionFlyoutIOCDetailsTitle');
+export const FLYOUT_TITLE = getDataTestSubjectSelector('securitySolutionFlyoutIOCDetailsTitleText');
 export const FLYOUT_OVERVIEW_TAB = getDataTestSubjectSelector(
   'securitySolutionFlyoutIOCDetailsOverviewTab'
 );
