@@ -7,8 +7,19 @@
 
 import type { PublicAppInfo, PublicAppDeepLinkInfo, AppCategory } from '@kbn/core/public';
 import type { ChromeStyle, DeepLinkNavPath } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
 import { distance } from 'fastest-levenshtein';
 import type { GlobalSearchProviderResult } from '@kbn/global-search-plugin/public';
+
+const APP_CATEGORY_LABEL = i18n.translate(
+  'xpack.globalSearchProviders.appResult.categoryAppLabel',
+  { defaultMessage: 'App' }
+);
+
+const PAGE_CATEGORY_LABEL = i18n.translate(
+  'xpack.globalSearchProviders.appResult.categoryPageLabel',
+  { defaultMessage: 'Page' }
+);
 
 /** Type used internally to represent an application unrolled into its separate deepLinks */
 export interface AppLink {
@@ -139,11 +150,28 @@ const getNavPath = (
   if (chromeStyle !== 'project' || !deepLinkNavPaths) {
     return undefined;
   }
+
   const key = appLink.deepLinkId
     ? `${appLink.app.id}:${appLink.deepLinkId}`
     : appLink.app.id;
-  const navPath = deepLinkNavPaths.get(key);
-  return navPath && navPath.titles.length > 0 ? navPath : undefined;
+  const exact = deepLinkNavPaths.get(key);
+  if (exact && exact.titles.length > 0) {
+    return exact;
+  }
+
+  // Deep link not in the tree, but its parent app is (e.g. fleet:settings → fleet).
+  if (!appLink.deepLinkId) {
+    return undefined;
+  }
+  const parent = deepLinkNavPaths.get(appLink.app.id);
+  if (!parent || parent.titles.length === 0) {
+    return undefined;
+  }
+
+  return {
+    ...parent,
+    titles: [...parent.titles, ...appLink.subLinkTitles],
+  };
 };
 
 const getDisplayTitleParts = (appLink: AppLink, options: GetAppResultsOptions): string[] => {
@@ -173,13 +201,16 @@ const getCategoryMeta = (
   options: GetAppResultsOptions
 ): { categoryId: string | null; categoryLabel: string | null } => {
   if (navPath) {
-    // Never use registration AppCategory for nav hits. Panel category only when it
-    // isn't already the title root.
-    const categoryLabel =
+    // Prefer a distinct panel label; otherwise App vs Page by deep-link vs top-level.
+    const panelLabel =
       navPath.categoryLabel && navPath.titles[0] !== navPath.categoryLabel
         ? navPath.categoryLabel
-        : null;
-    return { categoryId: null, categoryLabel };
+        : undefined;
+    return {
+      categoryId: null,
+      categoryLabel:
+        panelLabel ?? (appLink.deepLinkId ? PAGE_CATEGORY_LABEL : APP_CATEGORY_LABEL),
+    };
   }
 
   // Soft orphans in project chrome: searchable, but no classic taxonomy label.

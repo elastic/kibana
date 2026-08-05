@@ -489,7 +489,7 @@ describe('appToResult', () => {
     expect(appToResult(appLink, 42).title).toEqual('Maps');
   });
 
-  it('uses nav-tree icon and omits panel category when it repeats the title root', () => {
+  it('uses App category when panel category repeats the title root', () => {
     const app = createApp({
       id: 'ux',
       title: 'User Experience',
@@ -518,7 +518,7 @@ describe('appToResult', () => {
         icon: 'spaces',
         meta: {
           categoryId: null,
-          categoryLabel: null,
+          categoryLabel: 'App',
         },
       })
     );
@@ -559,7 +559,7 @@ describe('appToResult', () => {
     );
   });
 
-  it('keeps registration icon but omits registration category for nav hits', () => {
+  it('uses App category for top-level nav hits without a distinct panel label', () => {
     const app = createApp({
       id: 'maps',
       title: 'Maps',
@@ -580,13 +580,13 @@ describe('appToResult', () => {
         icon: 'logoMaps',
         meta: {
           categoryId: null,
-          categoryLabel: null,
+          categoryLabel: 'App',
         },
       })
     );
   });
 
-  it('omits registration category for top-level nav apps in project chrome', () => {
+  it('uses App category for top-level nav apps in project chrome', () => {
     const app = createApp({
       id: 'discover',
       title: 'Discover',
@@ -610,7 +610,7 @@ describe('appToResult', () => {
         icon: 'productDiscover',
         meta: {
           categoryId: null,
-          categoryLabel: null,
+          categoryLabel: 'App',
         },
       })
     );
@@ -706,6 +706,80 @@ describe('getAppResults project nav scoping', () => {
     expect(results).toEqual([
       expect.objectContaining({ id: 'orphan', title: 'Orphan App' }),
     ]);
+  });
+
+  it('includes deep links whose parent app is in the nav tree', () => {
+    const apps = [
+      createApp({
+        id: 'fleet',
+        title: 'Fleet',
+        euiIconType: 'logoElastic',
+        deepLinks: [
+          {
+            id: 'settings',
+            title: 'Settings',
+            path: '/settings',
+            deepLinks: [],
+            keywords: [],
+            visibleIn: ['globalSearch'],
+          },
+        ],
+      }),
+    ];
+    const deepLinkNavPaths = new Map([
+      [
+        'fleet',
+        {
+          titles: ['Data management', 'Ingest and integrations', 'Fleet'] as const,
+          order: 0,
+          icon: 'database',
+          categoryLabel: 'Data management',
+        },
+      ],
+    ]);
+
+    const results = getAppResults('settings', apps, {
+      chromeStyle: 'project',
+      deepLinkNavPaths,
+    });
+
+    expect(results).toEqual([
+      expect.objectContaining({
+        id: 'fleet-settings',
+        title: 'Data management / Ingest and integrations / Fleet / Settings',
+        icon: 'database',
+        meta: {
+          categoryId: null,
+          categoryLabel: 'Page',
+        },
+      }),
+    ]);
+  });
+
+  it('still excludes deep links when neither they nor their parent app are in the nav', () => {
+    const apps = [
+      createApp({
+        id: 'significant_events',
+        title: 'Significant Events',
+        deepLinks: [
+          {
+            id: 'knowledge_indicators',
+            title: 'KIs',
+            path: '/knowledge_indicators',
+            deepLinks: [],
+            keywords: [],
+            visibleIn: ['globalSearch'],
+          },
+        ],
+      }),
+    ];
+
+    const results = getAppResults('kis', apps, {
+      chromeStyle: 'project',
+      deepLinkNavPaths: new Map(),
+    });
+
+    expect(results).toEqual([]);
   });
 });
 
