@@ -10,7 +10,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
-  EuiCallOut,
   EuiFlexItem,
   EuiFieldText,
   EuiFormRow,
@@ -18,6 +17,7 @@ import {
   EuiComboBox,
   EuiSteps,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
@@ -380,11 +380,7 @@ export function DataDriftIndexPatternsEditor({
             </EuiFormRow>
           ) : null}
 
-          {dataViewMsg ? (
-            <EuiCallOut announceOnMount color="primary">
-              {dataViewMsg}
-            </EuiCallOut>
-          ) : null}
+          {dataViewMsg ? <KbnInfoCallout title={dataViewMsg} /> : null}
 
           <EuiFormRow id="analyzeDriftData">
             <EuiFlexGroup>

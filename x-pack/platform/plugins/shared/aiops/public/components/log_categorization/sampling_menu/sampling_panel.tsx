@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { EuiSpacer, EuiCallOut, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import { EuiSpacer, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
@@ -131,7 +132,7 @@ const CalloutInfoMessage: FC<{
 }> = ({ calloutInfoMessage, calloutPosition }) => (
   <>
     {calloutPosition === 'bottom' ? <EuiSpacer size="s" /> : null}
-    <EuiCallOut size="s" color={'primary'} title={calloutInfoMessage} />
+    <KbnInfoCallout title={calloutInfoMessage} />
     {calloutPosition === 'top' ? <EuiSpacer size="s" /> : null}
   </>
 );

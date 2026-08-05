@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 
 interface Props {
   error: string | JSX.Element;
@@ -16,70 +16,51 @@ interface Props {
 
 export const ErrorCallout: FC<Props> = ({ error }) => {
   let errorCallout = (
-    <EuiCallOut
+    <KbnDangerCallout
       title={i18n.translate('xpack.ml.dataframe.analytics.errorCallout.generalErrorTitle', {
         defaultMessage: 'An error occurred loading the data.',
       })}
-      color="danger"
-      iconType="cross"
-    >
-      <p>{error}</p>
-    </EuiCallOut>
+      text={<p>{error}</p>}
+    />
   );
   // Job was created but not started so the destination index has not been created
   if (typeof error === 'string' && error.includes('index_not_found')) {
     errorCallout = (
-      <EuiCallOut
-        announceOnMount
+      <KbnDangerCallout
         title={i18n.translate('xpack.ml.dataframe.analytics.errorCallout.evaluateErrorTitle', {
           defaultMessage: 'An error occurred loading the data.',
         })}
-        color="danger"
-        iconType="cross"
-      >
-        <p>
-          {i18n.translate('xpack.ml.dataframe.analytics.errorCallout.noIndexCalloutBody', {
-            defaultMessage:
-              'The query for the index returned no results. Please make sure the destination index exists and contains documents.',
-          })}
-        </p>
-      </EuiCallOut>
+        text={i18n.translate('xpack.ml.dataframe.analytics.errorCallout.noIndexCalloutBody', {
+          defaultMessage:
+            'The query for the index returned no results. Please make sure the destination index exists and contains documents.',
+        })}
+      />
     );
   } else if (typeof error === 'string' && error.includes('No documents found')) {
     // Job was started but no results have been written yet
     errorCallout = (
-      <EuiCallOut
-        announceOnMount
+      <KbnInfoCallout
         title={i18n.translate('xpack.ml.dataframe.analytics.errorCallout.noDataCalloutTitle', {
           defaultMessage: 'Empty index query result.',
         })}
-        color="primary"
-      >
-        <p>
-          {i18n.translate('xpack.ml.dataframe.analytics.errorCallout.noDataCalloutBody', {
-            defaultMessage:
-              'The query for the index returned no results. Please make sure the job has completed and the index contains documents.',
-          })}
-        </p>
-      </EuiCallOut>
+        text={i18n.translate('xpack.ml.dataframe.analytics.errorCallout.noDataCalloutBody', {
+          defaultMessage:
+            'The query for the index returned no results. Please make sure the job has completed and the index contains documents.',
+        })}
+      />
     );
   } else if (typeof error === 'string' && error.includes('userProvidedQueryBuilder')) {
     // query bar syntax is incorrect
     errorCallout = (
-      <EuiCallOut
-        announceOnMount
+      <KbnInfoCallout
         title={i18n.translate('xpack.ml.dataframe.analytics.errorCallout.queryParsingErrorTitle', {
           defaultMessage: 'Unable to parse query.',
         })}
-        color="primary"
-      >
-        <p>
-          {i18n.translate('xpack.ml.dataframe.analytics.errorCallout.queryParsingErrorBody', {
-            defaultMessage:
-              'The query syntax is invalid and returned no results. Please check the query syntax and try again.',
-          })}
-        </p>
-      </EuiCallOut>
+        text={i18n.translate('xpack.ml.dataframe.analytics.errorCallout.queryParsingErrorBody', {
+          defaultMessage:
+            'The query syntax is invalid and returned no results. Please check the query syntax and try again.',
+        })}
+      />
     );
   }
 

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { ExplorerChartSeriesErrorMessages } from './explorer_charts_container_service';
 
 interface ExplorerChartsErrorCalloutsProps {
@@ -20,13 +21,16 @@ export const ExplorerChartsErrorCallOuts: FC<ExplorerChartsErrorCalloutsProps> =
 }) => {
   if (!errorMessagesByType || Object.keys(errorMessagesByType).length === 0) return null;
   const content = Object.keys(errorMessagesByType).map((errorType) => (
-    <EuiCallOut color={'warning'} size="s" key={errorType}>
-      <FormattedMessage
-        id="xpack.ml.explorerCharts.errorCallOutMessage"
-        defaultMessage="You can't view anomaly charts for {jobs} because {reason}."
-        values={{ jobs: [...errorMessagesByType[errorType]].join(', '), reason: errorType }}
-      />
-    </EuiCallOut>
+    <KbnWarningCallout
+      key={errorType}
+      title={
+        <FormattedMessage
+          id="xpack.ml.explorerCharts.errorCallOutMessage"
+          defaultMessage="You can't view anomaly charts for {jobs} because {reason}."
+          values={{ jobs: [...errorMessagesByType[errorType]].join(', '), reason: errorType }}
+        />
+      }
+    />
   ));
   return (
     <>

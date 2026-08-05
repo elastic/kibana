@@ -9,15 +9,8 @@ import type { FC } from 'react';
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiText,
-  EuiSpacer,
-  EuiCallOut,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiTitle, EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiPanel } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { isEqual, merge } from 'lodash';
 import moment from 'moment';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -298,25 +291,21 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
 
       {displayQueryWarning && (
         <>
-          <EuiCallOut
-            announceOnMount={false}
+          <KbnWarningCallout
             title={
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.searchWillBeOverwrittenLabel"
                 defaultMessage="Search will be overwritten"
               />
             }
-            color="warning"
-            iconType="warning"
-          >
-            <EuiText size="s">
+            text={
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.usingSavedSearchDescription"
                 defaultMessage="Using a saved Discover session will mean the query used in the datafeeds will be different from the default ones we supply in the {moduleId} module."
                 values={{ moduleId }}
               />
-            </EuiText>
-          </EuiCallOut>
+            }
+          />
           <EuiSpacer size="l" />
         </>
       )}

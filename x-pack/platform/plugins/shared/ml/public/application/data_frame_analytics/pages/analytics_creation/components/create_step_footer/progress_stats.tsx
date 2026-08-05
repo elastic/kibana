@@ -7,14 +7,8 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiProgress,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import type { AnalyticsProgressStats } from './create_step_footer';
 
@@ -31,7 +25,7 @@ export const ProgressStats: FC<Props> = ({ currentProgress, failedJobMessage }) 
       <EuiSpacer />
       {failedJobMessage !== undefined && (
         <>
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             data-test-subj="analyticsWizardProgressCallout"
             title={i18n.translate(
@@ -40,12 +34,8 @@ export const ProgressStats: FC<Props> = ({ currentProgress, failedJobMessage }) 
                 defaultMessage: 'Job failed',
               }
             )}
-            color={'danger'}
-            iconType={'error'}
-            size="s"
-          >
-            <p>{failedJobMessage}</p>
-          </EuiCallOut>
+            text={failedJobMessage}
+          />
           <EuiSpacer size="s" />
         </>
       )}

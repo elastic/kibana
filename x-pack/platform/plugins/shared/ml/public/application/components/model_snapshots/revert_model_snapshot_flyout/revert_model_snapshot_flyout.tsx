@@ -22,12 +22,12 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiConfirmModal,
-  EuiCallOut,
   EuiHorizontalRule,
   EuiSuperSelect,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -247,22 +247,21 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
           <EuiSpacer size="l" />
           <EuiSpacer size="l" />
 
-          <EuiCallOut
+          <KbnWarningCallout
             title={i18n.translate(
               'xpack.ml.newJob.wizard.revertModelSnapshotFlyout.warningCallout.title',
               {
                 defaultMessage: 'Anomaly data will be deleted',
               }
             )}
-            color="warning"
-            iconType="warning"
-          >
-            <FormattedMessage
-              id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.warningCallout.contents"
-              defaultMessage="All anomaly detection results after {date} will be deleted."
-              values={{ date: timeFormatter(currentSnapshot.latest_record_time_stamp!) }}
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.warningCallout.contents"
+                defaultMessage="All anomaly detection results after {date} will be deleted."
+                values={{ date: timeFormatter(currentSnapshot.latest_record_time_stamp!) }}
+              />
+            }
+          />
 
           <EuiHorizontalRule margin="xl" />
 

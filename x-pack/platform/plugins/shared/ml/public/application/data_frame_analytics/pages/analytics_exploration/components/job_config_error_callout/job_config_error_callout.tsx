@@ -8,7 +8,8 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 
-import { EuiCallOut, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 
@@ -43,9 +44,7 @@ export const JobConfigErrorCallout: FC<Props> = ({
     jobCapsServiceErrorMessage.includes('locate that index-pattern') &&
     jobCapsServiceErrorMessage.includes('click here to re-create');
 
-  const message = (
-    <p>{jobConfigErrorMessage ? jobConfigErrorMessage : jobCapsServiceErrorMessage}</p>
-  );
+  const messageText = jobConfigErrorMessage ?? jobCapsServiceErrorMessage;
   const newDataViewUrl = useMemo(
     () =>
       getUrlForApp('management', {
@@ -55,24 +54,27 @@ export const JobConfigErrorCallout: FC<Props> = ({
     []
   );
 
-  const calloutBody = containsDataViewLink ? (
-    <EuiLink href={newDataViewUrl} target="_blank">
-      {message}
-    </EuiLink>
-  ) : (
-    message
-  );
-
   return (
     <EuiPanel grow={false}>
       <EuiSpacer />
-      <EuiCallOut
+      <KbnDangerCallout
         title={jobConfigErrorMessage ? jobConfigErrorTitle : jobCapsErrorTitle}
-        color="danger"
-        iconType="cross"
-      >
-        {calloutBody}
-      </EuiCallOut>
+        text={messageText}
+        actionProps={
+          containsDataViewLink
+            ? {
+                primary: {
+                  href: newDataViewUrl,
+                  target: '_blank',
+                  children: i18n.translate(
+                    'xpack.ml.dataframe.analytics.jobConfig.recreateDataViewLinkLabel',
+                    { defaultMessage: 'Re-create data view' }
+                  ),
+                },
+              }
+            : undefined
+        }
+      />
     </EuiPanel>
   );
 };

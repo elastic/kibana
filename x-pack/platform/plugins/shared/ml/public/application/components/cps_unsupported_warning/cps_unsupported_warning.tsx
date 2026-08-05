@@ -8,7 +8,8 @@
 import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -37,23 +38,21 @@ export const CPSUnsupportedWarning: FC = () => {
 
   return (
     <>
-      <EuiCallOut
+      <KbnInfoCallout
         title={i18n.translate('xpack.ml.cpsUnsupportedCallout.title', {
           defaultMessage: 'Cross-project search for anomaly detection coming soon',
         })}
-        iconType="info"
         onDismiss={onDismiss}
         dismissButtonProps={{ 'data-test-subj': 'mlCpsUnsupportedCalloutDismiss' }}
         data-test-subj="mlCpsUnsupportedCallout"
         announceOnMount
-      >
-        <p>
+        text={
           <FormattedMessage
             id="xpack.ml.cpsUnsupportedCallout.description"
             defaultMessage="While we're working on this feature, all anomaly detection searches will be limited to the current project."
           />
-        </p>
-      </EuiCallOut>
+        }
+      />
       <EuiSpacer size="m" />
     </>
   );

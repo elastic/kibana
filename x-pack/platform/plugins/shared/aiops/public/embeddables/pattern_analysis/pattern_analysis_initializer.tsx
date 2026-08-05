@@ -18,8 +18,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutFooter,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
@@ -377,26 +377,20 @@ export const FormControls: FC<{
 const TextFieldWarning = () => {
   return (
     <>
-      <EuiCallOut
-        size="s"
+      <KbnWarningCallout
         title={i18n.translate(
           'xpack.aiops.logCategorization.embeddableMenu.textFieldWarning.title',
           {
             defaultMessage: 'The selected data view does not contain any text fields.',
           }
         )}
-        color="warning"
-        iconType="warning"
-      >
-        <p>
-          {i18n.translate(
-            'xpack.aiops.logCategorization.embeddableMenu.textFieldWarning.title.description',
-            {
-              defaultMessage: 'Pattern analysis can only be run on data views with a text field.',
-            }
-          )}
-        </p>
-      </EuiCallOut>
+        text={i18n.translate(
+          'xpack.aiops.logCategorization.embeddableMenu.textFieldWarning.title.description',
+          {
+            defaultMessage: 'Pattern analysis can only be run on data views with a text field.',
+          }
+        )}
+      />
       <EuiSpacer />
     </>
   );

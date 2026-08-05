@@ -15,7 +15,6 @@ import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCode,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -29,6 +28,7 @@ import {
   EuiPanel,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import type { IngestDocument } from '@elastic/elasticsearch/lib/api/types';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
@@ -271,14 +271,12 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
         <EuiSpacer size="m" />
         {sourceIndexMissingError && showCallOut ? (
           <EuiFlexItem>
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
               onDismiss={() => {
                 setShowCallOut(false);
               }}
-              size="s"
               title={sourceIndexMissingError}
-              iconType="warning"
             />
             <EuiSpacer size="s" />
           </EuiFlexItem>

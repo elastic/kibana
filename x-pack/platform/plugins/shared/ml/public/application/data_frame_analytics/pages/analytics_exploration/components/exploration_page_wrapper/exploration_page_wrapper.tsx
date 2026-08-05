@@ -8,7 +8,8 @@
 import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import {
   getAnalysisType,
@@ -131,19 +132,14 @@ export const ExplorationPageWrapper: FC<Props> = ({
   if (dataViewErrorMessage !== undefined) {
     return (
       <EuiPanel grow={false}>
-        <EuiCallOut
-          announceOnMount
+        <KbnDangerCallout
           title={i18n.translate('xpack.ml.dataframe.analytics.exploration.indexError', {
             defaultMessage: 'An error occurred loading the index data.',
           })}
-          color="danger"
-          iconType="cross"
+          text={dataViewErrorMessage}
         >
-          <p>
-            {dataViewErrorMessage}
-            {needsDestDataView ? <DataViewPrompt destIndex={destIndex} color="text" /> : null}
-          </p>
-        </EuiCallOut>
+          {needsDestDataView ? <DataViewPrompt destIndex={destIndex} color="text" /> : null}
+        </KbnDangerCallout>
       </EuiPanel>
     );
   }

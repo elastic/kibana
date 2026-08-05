@@ -18,8 +18,8 @@ import {
   EuiHorizontalRule,
   EuiComboBox,
   EuiFormRow,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
@@ -255,7 +255,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
           <>
             <EuiSpacer size="m" />
 
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
               size="s"
               title={

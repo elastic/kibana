@@ -19,9 +19,9 @@ import {
   EuiTitle,
   EuiFlyoutBody,
   EuiSpacer,
-  EuiCallOut,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
@@ -226,9 +226,8 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
             {showChangedIndicesWarning && (
               <>
                 <EuiSpacer />
-                <EuiCallOut
+                <KbnWarningCallout
                   announceOnMount
-                  color="warning"
                   size="s"
                   title={i18n.translate(
                     'xpack.ml.newJob.wizard.jsonFlyout.indicesChange.calloutTitle',
@@ -236,12 +235,13 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                       defaultMessage: 'Indices have changed',
                     }
                   )}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.newJob.wizard.jsonFlyout.indicesChange.calloutText"
-                    defaultMessage="You cannot alter the indices being used by the datafeed here. To select a different data view or saved Discover session, go to step 1 of the wizard and select the Change data view option."
-                  />
-                </EuiCallOut>
+                  text={
+                    <FormattedMessage
+                      id="xpack.ml.newJob.wizard.jsonFlyout.indicesChange.calloutText"
+                      defaultMessage="You cannot alter the indices being used by the datafeed here. To select a different data view or saved Discover session, go to step 1 of the wizard and select the Change data view option."
+                    />
+                  }
+                />
               </>
             )}
           </EuiFlyoutBody>
