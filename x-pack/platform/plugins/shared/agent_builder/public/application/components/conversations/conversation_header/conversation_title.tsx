@@ -13,6 +13,8 @@ import {
   EuiIcon,
   EuiPopover,
   useEuiTheme,
+  type EuiContextMenuItemProps,
+  type EuiDisabledProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -25,6 +27,14 @@ import {
 } from '../../../hooks/use_conversation';
 import { DeleteConversationModal } from '../delete_conversation_modal';
 import { RenameConversationModal } from '../rename_conversation_modal';
+
+/**
+ * `EuiContextMenuItem` supports `hasAriaDisabled` at runtime — keeping a disabled item focusable so
+ * its `toolTipContent` stays reachable — but does not declare the prop yet, so widen its props with
+ * EUI's own `EuiDisabledProps`.
+ */
+const AriaDisabledContextMenuItem: React.FC<EuiContextMenuItemProps & EuiDisabledProps> =
+  EuiContextMenuItem;
 
 const labels = {
   rename: i18n.translate('xpack.agentBuilder.conversationTitle.rename', {
@@ -79,10 +89,11 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
   }
 
   const menuItems = [
-    <EuiContextMenuItem
+    <AriaDisabledContextMenuItem
       key="rename"
       icon="pencil"
       disabled={!canRename}
+      hasAriaDisabled={!canRename}
       toolTipContent={canRename ? undefined : labels.renameNotAllowed}
       onClick={() => {
         setIsPopoverOpen(false);
@@ -96,19 +107,24 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
       })}
     >
       {labels.rename}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
+    </AriaDisabledContextMenuItem>,
+    <AriaDisabledContextMenuItem
       key="delete"
-      icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+      icon={<EuiIcon type="trash" color={canDelete ? 'danger' : 'subdued'} aria-hidden={true} />}
       disabled={!canDelete}
+      hasAriaDisabled={!canDelete}
       toolTipContent={canDelete ? undefined : labels.deleteNotAllowed}
       onClick={() => {
         setIsPopoverOpen(false);
         setIsDeleteModalOpen(true);
       }}
-      css={css`
-        color: ${euiTheme.colors.danger};
-      `}
+      css={
+        canDelete
+          ? css`
+              color: ${euiTheme.colors.danger};
+            `
+          : undefined
+      }
       data-test-subj="agentBuilderConversationDeleteButton"
       {...getEbtProps({
         element: AGENT_BUILDER_UI_EBT.element.pageContent,
@@ -117,7 +133,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
       })}
     >
       {labels.delete}
-    </EuiContextMenuItem>,
+    </AriaDisabledContextMenuItem>,
   ];
 
   const titleButtonStyles = css`

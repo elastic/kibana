@@ -22,6 +22,18 @@ jest.mock('../../../hooks/use_conversation', () => ({
   useConversationPermissions: jest.fn(),
 }));
 
+/**
+ * Mirrors EUI's `focusEuiToolTipTrigger` test helper, which its type declarations do not export
+ * yet: plain `fireEvent.focus` does not set `:focus-visible` in jsdom, so the tooltip never shows.
+ */
+const focusEuiToolTipTrigger = (element: HTMLElement) => {
+  const spy = jest
+    .spyOn(element, 'matches')
+    .mockImplementation((selector) => selector === ':focus-visible');
+  fireEvent.focus(element);
+  return () => spy.mockRestore();
+};
+
 jest.mock('../rename_conversation_modal', () => ({
   RenameConversationModal: () => null,
 }));
@@ -60,27 +72,42 @@ describe('ConversationTitle', () => {
     expect(screen.getByTestId('agentBuilderConversationDeleteButton')).toBeEnabled();
   });
 
+  // Denied items are disabled via `aria-disabled` (`hasAriaDisabled`), which keeps them focusable
+  // so the tooltip explaining the denial remains reachable — see `AriaDisabledContextMenuItem`.
   it('disables rename and delete when neither is permitted', () => {
     renderTitle({ rename: false, delete: false });
 
-    expect(screen.getByTestId('agentBuilderConversationRenameButton')).toBeDisabled();
-    expect(screen.getByTestId('agentBuilderConversationDeleteButton')).toBeDisabled();
+    expect(screen.getByTestId('agentBuilderConversationRenameButton')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+    expect(screen.getByTestId('agentBuilderConversationDeleteButton')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
   });
 
   it('explains why rename and delete are unavailable', async () => {
     renderTitle({ rename: false, delete: false });
 
-    fireEvent.mouseOver(screen.getByTestId('agentBuilderConversationRenameButton'));
+    const cleanup = focusEuiToolTipTrigger(
+      screen.getByTestId('agentBuilderConversationRenameButton')
+    );
 
     expect(
       await screen.findByText('You do not have permission to rename this conversation.')
     ).toBeInTheDocument();
+
+    cleanup();
   });
 
   it('gates rename and delete independently', () => {
     renderTitle({ rename: true, delete: false });
 
     expect(screen.getByTestId('agentBuilderConversationRenameButton')).toBeEnabled();
-    expect(screen.getByTestId('agentBuilderConversationDeleteButton')).toBeDisabled();
+    expect(screen.getByTestId('agentBuilderConversationDeleteButton')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
   });
 });

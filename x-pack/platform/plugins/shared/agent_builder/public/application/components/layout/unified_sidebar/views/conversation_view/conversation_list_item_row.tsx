@@ -20,6 +20,8 @@ import {
   EuiTextTruncate,
   EuiToolTip,
   useEuiTheme,
+  type EuiContextMenuItemProps,
+  type EuiDisabledProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -39,6 +41,14 @@ import {
 import { BaseDeleteConversationModal } from '../../../../conversations/delete_conversation_modal';
 import { BaseRenameConversationModal } from '../../../../conversations/rename_conversation_modal';
 import { ConversationStatusIndicator } from './conversation_status_indicator';
+
+/**
+ * `EuiContextMenuItem` supports `hasAriaDisabled` at runtime — keeping a disabled item focusable so
+ * its `toolTipContent` stays reachable — but does not declare the prop yet, so widen its props with
+ * EUI's own `EuiDisabledProps`.
+ */
+const AriaDisabledContextMenuItem: React.FC<EuiContextMenuItemProps & EuiDisabledProps> =
+  EuiContextMenuItem;
 
 const ACTIONS_CLASS = 'agentBuilderSidebarConversationListRowActions';
 const STATUS_INDICATOR_CLASS = 'agentBuilderSidebarConversationListRowStatusIndicator';
@@ -226,10 +236,11 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
 
   const menuItems = useMemo(
     () => [
-      <EuiContextMenuItem
+      <AriaDisabledContextMenuItem
         key="rename"
         icon="pencil"
         disabled={!canRename}
+        hasAriaDisabled={!canRename}
         toolTipContent={canRename ? undefined : labels.renameNotAllowed}
         data-test-subj={`agentBuilderSidebarConversationRename-${conversationId}`}
         onClick={() => {
@@ -242,7 +253,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         })}
       >
         {labels.rename}
-      </EuiContextMenuItem>,
+      </AriaDisabledContextMenuItem>,
       <EuiContextMenuItem
         key="read-status"
         icon={isUnread ? 'eyeClosed' : 'eye'}
@@ -283,15 +294,20 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       >
         {isPinned ? labels.unpin : labels.pin}
       </EuiContextMenuItem>,
-      <EuiContextMenuItem
+      <AriaDisabledContextMenuItem
         key="delete"
-        icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+        icon={<EuiIcon type="trash" color={canDelete ? 'danger' : 'subdued'} aria-hidden={true} />}
         disabled={!canDelete}
+        hasAriaDisabled={!canDelete}
         toolTipContent={canDelete ? undefined : labels.deleteNotAllowed}
         data-test-subj={`agentBuilderSidebarConversationDelete-${conversationId}`}
-        css={css`
-          color: ${euiTheme.colors.danger};
-        `}
+        css={
+          canDelete
+            ? css`
+                color: ${euiTheme.colors.danger};
+              `
+            : undefined
+        }
         onClick={() => {
           closePopover();
           setIsDeleteModalOpen(true);
@@ -302,7 +318,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         })}
       >
         {labels.delete}
-      </EuiContextMenuItem>,
+      </AriaDisabledContextMenuItem>,
     ],
     [
       canDelete,

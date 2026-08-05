@@ -13,6 +13,18 @@ import type { ConversationPermissions } from '../../../../../../../common/http_a
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
 import { ConversationListItemRow } from './conversation_list_item_row';
 
+/**
+ * Mirrors EUI's `focusEuiToolTipTrigger` test helper, which its type declarations do not export
+ * yet: plain `fireEvent.focus` does not set `:focus-visible` in jsdom, so the tooltip never shows.
+ */
+const focusEuiToolTipTrigger = (element: HTMLElement) => {
+  const spy = jest
+    .spyOn(element, 'matches')
+    .mockImplementation((selector) => selector === ':focus-visible');
+  fireEvent.focus(element);
+  return () => spy.mockRestore();
+};
+
 jest.mock('../../../../../hooks/use_conversation_list_mutations', () => ({
   useConversationListMutations: jest.fn(),
 }));
@@ -67,15 +79,17 @@ describe('ConversationListItemRow', () => {
     ).toBeEnabled();
   });
 
+  // Denied items are disabled via `aria-disabled` (`hasAriaDisabled`), which keeps them focusable
+  // so the tooltip explaining the denial remains reachable — see `AriaDisabledContextMenuItem`.
   it('disables rename and delete when neither is permitted', () => {
     renderRow({ rename: false, delete: false });
 
     expect(
       screen.getByTestId(`agentBuilderSidebarConversationRename-${conversationId}`)
-    ).toBeDisabled();
+    ).toHaveAttribute('aria-disabled', 'true');
     expect(
       screen.getByTestId(`agentBuilderSidebarConversationDelete-${conversationId}`)
-    ).toBeDisabled();
+    ).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('leaves mark as read available to participants', () => {
@@ -87,12 +101,14 @@ describe('ConversationListItemRow', () => {
   it('explains why delete is unavailable', async () => {
     renderRow({ rename: false, delete: false });
 
-    fireEvent.mouseOver(
+    const cleanup = focusEuiToolTipTrigger(
       screen.getByTestId(`agentBuilderSidebarConversationDelete-${conversationId}`)
     );
 
     expect(
       await screen.findByText('You do not have permission to delete this conversation.')
     ).toBeInTheDocument();
+
+    cleanup();
   });
 });
