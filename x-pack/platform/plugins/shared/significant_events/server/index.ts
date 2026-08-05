@@ -12,6 +12,7 @@ export const plugin = async (ctx: PluginInitializerContext) => {
   return new SignificantEventsPlugin(ctx);
 };
 
+export { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID } from './agent_builder/agents/discovery/judge';
 export { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from './agent_builder/agents/discovery/discovery';
 
 export { SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID } from './agent_builder/tools/tool_ids';

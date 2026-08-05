@@ -17,10 +17,8 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import { getActionPolicyOasExamples } from './get_action_policy_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { ACTION_POLICY_NOT_FOUND_DESCRIPTION } from './action_policy_route_descriptions';
 
 const getActionPolicyParamsSchema = z.object({
   id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
@@ -38,7 +36,6 @@ export class GetActionPolicyRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Get an action policy',
     description: 'Get an action policy by identifier.',
-    oasOperationObject: getActionPolicyOasExamples,
   } as const;
   static schemas = {
     request: {
@@ -51,7 +48,7 @@ export class GetActionPolicyRoute extends BaseAlertingRoute {
       },
       404: {
         body: () => errorResponseSchema,
-        description: ACTION_POLICY_NOT_FOUND_DESCRIPTION,
+        description: 'Indicates an action policy with the given ID does not exist.',
       },
     },
   };

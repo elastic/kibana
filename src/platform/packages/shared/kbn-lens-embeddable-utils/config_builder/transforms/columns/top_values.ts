@@ -22,7 +22,7 @@ import type {
   TermOperationRankByCustomPercentileRankType,
   TermOperationRankByCustomPercentileType,
 } from '../../schema/bucket_ops';
-import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
+import { fromFormatAPIToLensState } from './format';
 import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
 import type { AnyLensStateColumn } from './types';
 
@@ -116,10 +116,13 @@ export function fromTermsLensApiToLensState(
       size: limit, // it cannot be 0 (zero)
       ...(increase_accuracy != null ? { accuracyMode: increase_accuracy } : {}),
       ...(includes?.values
-        ? { include: includes.values, includeIsRegex: includes?.as_regex ?? false }
+        ? { include: includes?.values, includeIsRegex: includes?.as_regex ?? false }
         : {}),
       ...(excludes?.values
-        ? { exclude: excludes.values, excludeIsRegex: excludes?.as_regex ?? false }
+        ? {
+            exclude: excludes.values,
+            excludeIsRegex: excludes?.as_regex ?? false,
+          }
         : {}),
       ...(other_bucket != null ? { otherBucket: true } : {}),
       ...(other_bucket?.include_documents_without_field != null
@@ -129,9 +132,7 @@ export function fromTermsLensApiToLensState(
       orderDirection,
       ...(rank_by?.type === 'custom' ? { orderAgg: getCustomOrderAgg(rank_by) } : {}),
       ...(format ? { format } : {}),
-      // Mirror runtime `getParentFormatter` (`terms/index.tsx`): multi-field terms columns render
-      // through the `multi_terms` parent formatter, single-field ones through `terms`.
-      parentFormat: { id: secondaryFields.length ? 'multi_terms' : 'terms' },
+      parentFormat: { id: 'terms' },
     },
   };
 }
@@ -285,10 +286,7 @@ export function fromTermsLensStateToAPI(
       ? {
           includes: {
             as_regex: column.params.includeIsRegex,
-            // Preserve the value type verbatim: numeric fields store numbers and the runtime terms
-            // agg drops stringified numbers at render (`migrateIncludeExcludeFormat` filters with
-            // `Number.isFinite`), so coercing to strings would silently lose the include filter.
-            values: column.params.include ?? [],
+            values: column.params.include?.map((value) => String(value)) || [],
           },
         }
       : {}),
@@ -296,10 +294,7 @@ export function fromTermsLensStateToAPI(
       ? {
           excludes: {
             as_regex: column.params.excludeIsRegex,
-            // Preserve the value type verbatim: numeric fields store numbers and the runtime terms
-            // agg drops stringified numbers at render (`migrateIncludeExcludeFormat` filters with
-            // `Number.isFinite`), so coercing to strings would silently lose the exclude filter.
-            values: column.params.exclude ?? [],
+            values: column.params.exclude?.map((value) => String(value)) || [],
           },
         }
       : {}),
@@ -311,6 +306,5 @@ export function fromTermsLensStateToAPI(
         }
       : {}),
     ...(column.params.orderBy ? { rank_by: getRankByConfig(column.params, columns) } : {}),
-    ...(column.params.format ? { format: fromFormatLensStateToAPI(column.params.format) } : {}),
   };
 }

@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  APP_HEADER_BACK,
-  APP_HEADER_BACK_MENU_ITEM,
-  RULE_MANAGEMENT_PAGE_BREADCRUMB,
-  RULE_MANAGEMENT_PAGE_TITLE,
-} from '../screens/breadcrumbs';
+import { LAST_BREADCRUMB, RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../screens/breadcrumbs';
 import {
   INSTALL_PREBUILT_RULES_URL,
   RULES_MANAGEMENT_URL,
@@ -24,22 +19,10 @@ export function visitRulesManagementTable(): void {
   visit(RULES_MANAGEMENT_URL);
 }
 
-export function navigateBackToRulesManagement(): void {
-  cy.get(`${APP_HEADER_BACK},${RULE_MANAGEMENT_PAGE_BREADCRUMB}`)
-    .filter(':visible')
-    .first()
-    .should('be.visible')
-    .then(($control) => {
-      const opensMenu = $control.attr('aria-haspopup') === 'menu';
-
-      cy.wrap($control).click();
-      if (opensMenu) {
-        cy.contains(APP_HEADER_BACK_MENU_ITEM, RULE_MANAGEMENT_PAGE_TITLE)
-          .should('be.visible')
-          .click();
-      }
-    });
-  cy.url().should('include', RULES_MANAGEMENT_URL);
+export function openRuleManagementPageViaBreadcrumbs(): void {
+  cy.log('Navigate back to rules table via breadcrumbs');
+  cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).not(LAST_BREADCRUMB).click();
+  cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).filter(LAST_BREADCRUMB).should('exist');
 }
 
 export function visitAddRulesPage(): void {

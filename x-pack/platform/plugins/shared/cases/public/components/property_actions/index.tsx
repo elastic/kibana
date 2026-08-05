@@ -80,7 +80,6 @@ export const PropertyActions = React.memo<PropertyActionsProps>(
 
     return (
       <EuiPopover
-        aria-label={i18n.ACTIONS_ARIA}
         anchorPosition="downRight"
         data-test-subj={dataTestSubjPrepend}
         ownFocus

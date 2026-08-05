@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ZodObjectType } from '@kbn/zod';
+import type { Type } from '@kbn/config-schema';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DrilldownTransforms } from '../../common';
 import type { GetDrilldownsSchemaFnType } from '../drilldowns/types';
@@ -77,7 +77,7 @@ export type EmbeddableServerDefinition<
    * EmbeddableState is expected to be TypeOf<typeof schema>
    */
   // TODO - make required once all embeddables have schemas
-  getSchema?: (getDrilldownsSchema: GetDrilldownsSchemaFnType) => ZodObjectType | undefined;
+  getSchema?: (getDrilldownsSchema: GetDrilldownsSchemaFnType) => Type<object> | undefined;
 
   /**
    * Throws error when panel config is not supported.

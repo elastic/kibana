@@ -17,7 +17,6 @@ import { hasApiKeyPrivileges } from '../../lib/api_key/has_api_key_privileges';
 import { APM_EVENT_WRITE_APPLICATION } from '../../lib/api_key/privileges';
 import { resolveApiKeyFactory } from '../../lib/api_key/resolve_api_key_factory';
 import { getManagedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
-import { IS_VENDOR_ENDPOINTS_ENABLED } from '../../../common/feature_flags';
 
 jest.mock('../../lib/get_managed_otlp_service_url', () => ({
   getManagedOtlpServiceUrl: jest.fn().mockReturnValue('https://otlp.example.com:443'),
@@ -47,45 +46,19 @@ describe('hasManagedElasticsearchBulkEndpoint', () => {
 });
 
 describe('ensureVendorEndpointAvailable', () => {
-  const available = { isManagedOtlpServiceAvailable: true, vendorEndpointsEnabled: true };
-
   it('throws for vendor endpoints when the managed OTLP service is unavailable', () => {
-    expect(() =>
-      ensureVendorEndpointAvailable(ApiEndpointId.Supabase, {
-        ...available,
-        isManagedOtlpServiceAvailable: false,
-      })
-    ).toThrow(/managed OTLP service/);
-    expect(() =>
-      ensureVendorEndpointAvailable(ApiEndpointId.Vercel, {
-        ...available,
-        isManagedOtlpServiceAvailable: false,
-      })
-    ).toThrow(/managed OTLP service/);
-  });
-
-  it('throws for vendor endpoints when the vendor endpoints flag is disabled', () => {
-    expect(() =>
-      ensureVendorEndpointAvailable(ApiEndpointId.Supabase, {
-        ...available,
-        vendorEndpointsEnabled: false,
-      })
-    ).toThrow(/not enabled/);
-    expect(() =>
-      ensureVendorEndpointAvailable(ApiEndpointId.Vercel, {
-        ...available,
-        vendorEndpointsEnabled: false,
-      })
-    ).toThrow(/not enabled/);
+    expect(() => ensureVendorEndpointAvailable(ApiEndpointId.Supabase, false)).toThrow(
+      /managed OTLP service/
+    );
+    expect(() => ensureVendorEndpointAvailable(ApiEndpointId.Vercel, false)).toThrow(
+      /managed OTLP service/
+    );
   });
 
   it('marks the failure as a 400 bad request', () => {
     let error: unknown;
     try {
-      ensureVendorEndpointAvailable(ApiEndpointId.Supabase, {
-        ...available,
-        vendorEndpointsEnabled: false,
-      });
+      ensureVendorEndpointAvailable(ApiEndpointId.Supabase, false);
     } catch (caught) {
       error = caught;
     }
@@ -93,19 +66,14 @@ describe('ensureVendorEndpointAvailable', () => {
     expect((error as Boom.Boom).output.statusCode).toBe(400);
   });
 
-  it('passes vendor endpoints when the service is available and the flag is enabled', () => {
-    expect(() => ensureVendorEndpointAvailable(ApiEndpointId.Supabase, available)).not.toThrow();
-    expect(() => ensureVendorEndpointAvailable(ApiEndpointId.Vercel, available)).not.toThrow();
+  it('passes vendor endpoints when the managed OTLP service is available', () => {
+    expect(() => ensureVendorEndpointAvailable(ApiEndpointId.Supabase, true)).not.toThrow();
+    expect(() => ensureVendorEndpointAvailable(ApiEndpointId.Vercel, true)).not.toThrow();
   });
 
   it('ignores non-vendor endpoints regardless of availability', () => {
-    const unavailable = { isManagedOtlpServiceAvailable: false, vendorEndpointsEnabled: false };
-    expect(() =>
-      ensureVendorEndpointAvailable(ApiEndpointId.OpenTelemetry, unavailable)
-    ).not.toThrow();
-    expect(() =>
-      ensureVendorEndpointAvailable(ApiEndpointId.Prometheus, unavailable)
-    ).not.toThrow();
+    expect(() => ensureVendorEndpointAvailable(ApiEndpointId.OpenTelemetry, false)).not.toThrow();
+    expect(() => ensureVendorEndpointAvailable(ApiEndpointId.Prometheus, false)).not.toThrow();
   });
 });
 
@@ -133,25 +101,15 @@ describe('create_key handler', () => {
   const createResources = ({
     id,
     isServerless = true,
-    vendorEndpointsEnabled = true,
   }: {
     id: ApiEndpointId;
     isServerless?: boolean;
-    vendorEndpointsEnabled?: boolean;
   }) =>
     ({
       context: {
         core: Promise.resolve({
           elasticsearch: { client: { asCurrentUser: {} } },
-          featureFlags: {
-            getBooleanValue: jest
-              .fn()
-              .mockImplementation((key: string) =>
-                Promise.resolve(
-                  key === IS_VENDOR_ENDPOINTS_ENABLED ? vendorEndpointsEnabled : false
-                )
-              ),
-          },
+          featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(false) },
         }),
       },
       config: { serverless: { enabled: isServerless } },
@@ -199,16 +157,4 @@ describe('create_key handler', () => {
     expect(hasApiKeyPrivileges).not.toHaveBeenCalled();
     expect(resolveApiKeyFactory).not.toHaveBeenCalled();
   });
-
-  it.each([ApiEndpointId.Supabase, ApiEndpointId.Vercel])(
-    'rejects %s key creation with 400 before any privilege check when the vendor endpoints flag is disabled',
-    async (id) => {
-      await expect(
-        handler(createResources({ id, vendorEndpointsEnabled: false }))
-      ).rejects.toMatchObject({ output: { statusCode: 400 } });
-
-      expect(hasApiKeyPrivileges).not.toHaveBeenCalled();
-      expect(resolveApiKeyFactory).not.toHaveBeenCalled();
-    }
-  );
 });

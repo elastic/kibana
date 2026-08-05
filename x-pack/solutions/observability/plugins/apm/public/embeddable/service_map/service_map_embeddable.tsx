@@ -35,6 +35,7 @@ import {
   CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS,
   CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES,
 } from '../../components/app/service_map/contextual_map/constants';
+import { SERVICE_FLYOUT_SOURCES } from '../../components/shared/service_flyout/constants';
 import type { ServiceFlyoutOptions } from '../../components/shared/service_flyout/types';
 import { ServiceMapSloFlyoutProvider } from '../../components/shared/service_map/service_map_slo_flyout_context';
 import { LicensePrompt } from '../../components/shared/license_prompt';
@@ -333,6 +334,14 @@ export function ServiceMapEmbeddable({
     };
   }, [viewFilters, badgesStatus]);
 
+  const flyoutOptionsForGraph = useMemo<ServiceFlyoutOptions>(
+    () => ({
+      source: SERVICE_FLYOUT_SOURCES.dashboardEmbeddable,
+      ...flyoutOptions,
+    }),
+    [flyoutOptions]
+  );
+
   const highlightedServiceNames = useMemo(() => {
     if (highlightedServiceNamesProp && highlightedServiceNamesProp.length > 0) {
       return highlightedServiceNamesProp;
@@ -496,7 +505,7 @@ export function ServiceMapEmbeddable({
             alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
             clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
             showContextControls={!hideContextControls}
-            flyoutOptions={flyoutOptions}
+            flyoutOptions={flyoutOptionsForGraph}
           />
         ) : (
           <ServiceMapGraph
@@ -520,7 +529,7 @@ export function ServiceMapEmbeddable({
             onMapOrientationChange={onMapOrientationChange}
             viewFilters={viewFiltersForGraph}
             onViewFiltersChange={onViewFiltersChange}
-            flyoutOptions={flyoutOptions}
+            flyoutOptions={flyoutOptionsForGraph}
           />
         )}
       </div>

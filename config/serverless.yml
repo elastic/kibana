@@ -1,6 +1,4 @@
-# Common serverless config: settings here apply to every serverless project type.
-# Do not add project-specific settings; those belong in the corresponding
-# serverless.<project>.yml file (e.g. serverless.es.yml, serverless.oblt.yml).
+# Common serverless config
 
 interactiveSetup.enabled: false
 newsfeed.enabled: false

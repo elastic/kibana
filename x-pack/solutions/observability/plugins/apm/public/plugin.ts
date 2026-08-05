@@ -111,7 +111,6 @@ import type { ApmCoreSetup } from './components/alerting/utils/create_lazy_compo
 import { registerEmbeddables } from './embeddable/register_embeddables';
 import { registerServiceMapAttachment } from './agent_builder/attachment_types';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
-import { createServiceFlyoutRenderer } from './components/shared/service_flyout/service_flyout_feature';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = ReturnType<ApmPlugin['start']>;
@@ -190,7 +189,7 @@ export interface ApmPluginStartDeps {
   apmSourcesAccess: ApmSourceAccessPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
-  share: SharePublicStart;
+  share?: SharePublicStart;
   notifications: NotificationsStart;
   discoverShared: DiscoverSharedPublicStart;
   agentBuilder?: AgentBuilderPluginStart;
@@ -530,18 +529,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;
-
-    plugins.discoverShared.features.registry.register({
-      id: 'observability-service-flyout',
-      renderServiceFlyout: createServiceFlyoutRenderer({
-        share: plugins.share,
-        core,
-        lens: plugins.lens,
-        dataViews: plugins.dataViews,
-        alerting: plugins.alerting,
-        telemetryClient: this.telemetry.start(),
-      }),
-    });
     const isCpsEnabled = core.featureFlags.getBooleanValue(
       OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
       OBSERVABILITY_APM_CPS_ENABLED_DEFAULT

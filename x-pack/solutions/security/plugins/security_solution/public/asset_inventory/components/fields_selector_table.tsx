@@ -61,13 +61,6 @@ const VIEW_VALUE_ALL = i18n.translate(
   }
 );
 
-const VIEW_SELECTOR_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.assetInventory.allAssets.fieldsModal.viewSelectorAriaLabel',
-  {
-    defaultMessage: 'Field view options',
-  }
-);
-
 export interface FieldsSelectorTableProps {
   dataView: DataView;
   columns: string[];
@@ -228,7 +221,6 @@ export const FieldsSelectorTable = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
-            aria-label={VIEW_SELECTOR_ARIA_LABEL}
             panelPaddingSize="none"
             anchorPosition="downRight"
             isOpen={isPopoverOpen}

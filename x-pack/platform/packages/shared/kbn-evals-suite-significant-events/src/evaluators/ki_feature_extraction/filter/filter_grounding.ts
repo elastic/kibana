@@ -144,7 +144,7 @@ export const filterGroundingEvaluator = {
         issueLines.length > 0
           ? `Filter grounding issues — ${issueLines.join('; ')}`
           : `All ${entities.length} entity filter(s) are grounded in input documents`,
-      metadata: {
+      details: {
         totalEntities: entities.length,
         perEntity: perEntityDetails,
       },

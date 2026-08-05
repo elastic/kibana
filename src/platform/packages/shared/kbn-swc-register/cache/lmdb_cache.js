@@ -328,4 +328,6 @@ directory and report this error to the Operations team.\n`);
   }
 }
 
-exports.LmdbCache = LmdbCache;
+module.exports = {
+  LmdbCache,
+};

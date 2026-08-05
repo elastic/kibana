@@ -28,19 +28,16 @@ export function createPlaywrightEvalsConfig({
   repetitions,
   timeout,
   runGlobalSetup,
-  workers,
 }: {
   testDir: string;
   testIgnore?: PlaywrightTestConfig['testIgnore'];
   repetitions?: number;
   timeout?: number;
   runGlobalSetup?: boolean;
-  workers?: 1 | 2 | 3;
 }): PlaywrightTestConfig<{}, EvaluationTestOptions> {
   const { reporter, use, outputDir, projects, ...config } = createPlaywrightConfig({
     testDir,
     runGlobalSetup,
-    workers,
   });
 
   // gets the connectors from either the env variable or kibana.yml/kibana.dev.yml

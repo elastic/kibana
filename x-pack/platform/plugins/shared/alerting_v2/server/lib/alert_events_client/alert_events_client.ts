@@ -10,8 +10,8 @@ import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import { inject, injectable } from 'inversify';
 import type { CreateAlertEventData, CreateAlertEventResponse } from '@kbn/alerting-v2-schemas';
-import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
+  ALERT_EVENTS_DATA_STREAM,
   alertEventStatus,
   alertEpisodeStatus,
   alertEventType,

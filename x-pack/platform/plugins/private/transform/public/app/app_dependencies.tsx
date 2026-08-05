@@ -25,6 +25,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -69,6 +70,7 @@ export interface AppDependencies {
   usageCollection?: UsageCollectionStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   settings: SettingsStart;
+  contentManagement: ContentManagementPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
 }
 

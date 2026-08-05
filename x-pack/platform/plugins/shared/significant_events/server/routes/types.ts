@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { InferenceClient } from '@kbn/inference-common';
@@ -35,13 +35,6 @@ export type GetScopedClients = (params: {
 
 export interface RouteHandlerScopedClients extends SignificantEventsClients {
   scopedClusterClient: IScopedClusterClient;
-  /**
-   * Client for reading *stream* data, routed across the CPS-connected projects of the active
-   * space. Use it whenever the target is a stream's ES|QL view or index pattern, which may
-   * resolve to a remote project. Everything the plugin owns (its hidden data streams) lives in
-   * the origin project and must keep using `scopedClusterClient`.
-   */
-  streamDataEsClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   attachmentClient: AttachmentClient;
   getSignificantEventsAlertingContext: () => Promise<SignificantEventsAlertingContext>;

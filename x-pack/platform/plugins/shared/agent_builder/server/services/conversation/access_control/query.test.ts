@@ -28,13 +28,8 @@ describe('conversation access control query', () => {
                   {
                     bool: {
                       should: [
+                        { term: { user_name: user.username } },
                         { term: { user_id: user.id } },
-                        {
-                          bool: {
-                            must_not: { exists: { field: 'user_id' } },
-                            filter: { term: { user_name: user.username } },
-                          },
-                        },
                       ],
                       minimum_should_match: 1,
                     },
@@ -44,41 +39,6 @@ describe('conversation access control query', () => {
               },
             },
             { terms: { agent_id: ['agent-1', 'agent-2'] } },
-          ],
-        },
-      });
-    });
-
-    it('omits the user_id clause when the caller has no id but still matches id-less conversations', () => {
-      expect(
-        buildReadAccessFilter({ user: { username: user.username }, agentIds: ['agent-1'] })
-      ).toEqual({
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  {
-                    term: { 'access_control.access_mode': ConversationAccessControlMode.Public },
-                  },
-                  {
-                    bool: {
-                      should: [
-                        {
-                          bool: {
-                            must_not: { exists: { field: 'user_id' } },
-                            filter: { term: { user_name: user.username } },
-                          },
-                        },
-                      ],
-                      minimum_should_match: 1,
-                    },
-                  },
-                ],
-                minimum_should_match: 1,
-              },
-            },
-            { terms: { agent_id: ['agent-1'] } },
           ],
         },
       });

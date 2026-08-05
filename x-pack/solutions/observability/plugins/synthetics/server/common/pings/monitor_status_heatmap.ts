@@ -6,7 +6,6 @@
  */
 
 import type { SyntheticsEsClient } from '../../lib';
-import { getHeartbeatLocationFilter } from '../../../common/lib';
 import { getSyntheticsScopedIndex } from '../../../common/get_synthetics_indices';
 
 export async function queryMonitorHeatmap({
@@ -50,10 +49,11 @@ export async function queryMonitorHeatmap({
               'monitor.id': monitorId,
             },
           },
-          // Autodiscovery/heartbeat pings carry no `observer.geo.name` and surface
-          // under the "Heartbeat" placeholder label; a plain term on that placeholder
-          // matches zero docs, so resolve it to a `must_not exists` clause instead.
-          ...getHeartbeatLocationFilter({ field: 'observer.geo.name', value: location }),
+          {
+            term: {
+              'observer.geo.name': location,
+            },
+          },
         ],
       },
     },

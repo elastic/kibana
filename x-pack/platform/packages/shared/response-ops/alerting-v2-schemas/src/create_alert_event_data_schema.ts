@@ -117,9 +117,7 @@ export const createAlertEventDataSchema = createAlertEventBodyBaseObjectSchema
 
 /** Path params for POST /api/alerting/v2/alerts/:source */
 export const createAlertEventSourceParamsSchema = z.object({
-  source: sourceSchema.describe(
-    'The external source system that produced the alert event (for example, "datadog"). Cannot start with "elastic".'
-  ),
+  source: sourceSchema,
 });
 
 export const createAlertEventResponseSchema = z.object({

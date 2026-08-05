@@ -89,7 +89,6 @@ dependsOn:
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/scout'
-  - '@kbn/mock-idp-utils'
   - '@kbn/encrypted-saved-objects-shared'
   - '@kbn/core-analytics-server-mocks'
   - '@kbn/cps-server-utils'

@@ -74,7 +74,7 @@ test.describe(
       pageObjects,
       page,
     }) => {
-      const { observabilityNavigation: nav, chrome } = pageObjects;
+      const nav = pageObjects.observabilityNavigation;
 
       await nav.navItemInFooterById('admin_and_settings').click();
       await expect(nav.sidePanel('admin_and_settings')).toBeVisible();
@@ -83,7 +83,7 @@ test.describe(
         .sidePanel('admin_and_settings')
         .locator('[data-test-subj~="nav-item-id-management:tags"]')
         .click();
-      await expect(chrome.pageTitle).toContainText('Tags');
+      await expect(nav.breadcrumb({ text: 'Tags' })).toBeVisible();
 
       await page.reload();
       await nav.waitForLoad();

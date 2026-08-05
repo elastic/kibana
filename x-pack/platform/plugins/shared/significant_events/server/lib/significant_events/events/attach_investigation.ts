@@ -13,10 +13,6 @@ import type {
   SignificantEventStatus,
 } from '@kbn/significant-events-schema';
 import type { EventClient } from './event_client';
-import {
-  emitSignificantEventInvestigationTriggers,
-  emitSignificantEventWriteTriggers,
-} from '../../../workflows/triggers/emit_significant_event_triggers';
 
 interface SignificantEventFieldChanges {
   status?: SignificantEventStatus;
@@ -131,20 +127,6 @@ export const attachInvestigationToEvent = async ({
   };
 
   await eventClient.bulkCreate([updatedEvent], { throwOnFail: true });
-
-  emitSignificantEventWriteTriggers({
-    eventClient,
-    significantEvent: updatedEvent,
-    priorSignificantEvent: latest,
-  });
-
-  emitSignificantEventInvestigationTriggers({
-    eventClient,
-    significantEvent: updatedEvent,
-    previousInvestigations: existing,
-    nextInvestigations: investigations,
-    targetedWorkflowExecutionId: investigation.workflow_execution_id,
-  });
 
   return { event_uuid: nextEventUuid, updated: 1, ignored: 0 };
 };

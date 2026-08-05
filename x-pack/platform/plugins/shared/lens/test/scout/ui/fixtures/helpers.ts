@@ -7,8 +7,7 @@
 
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { ContentListWrapper } from '@kbn/scout';
-import type { Locator, PageObjects, ScoutPage } from '@kbn/scout';
+import type { PageObjects, Locator, ScoutPage } from '@kbn/scout';
 import {
   DATA_VIEW_ID,
   FORMULA_ESCAPED_RUNTIME_FIELD,
@@ -129,30 +128,6 @@ export async function completeLensCsvExport(page: ScoutPage): Promise<void> {
 }
 
 type DashboardAndLens = Pick<PageObjects, 'dashboard' | 'lens'>;
-type VisualizeAndLens = Pick<PageObjects, 'visualize' | 'lens'>;
-
-/**
- * Builds a fresh Lens Metric visualization directly from the editor UI, with a primary and a
- * secondary "Average of bytes" dimension. Used instead of the FTR-only `lens` service's
- * `createMetricChart` API helper, so metric specs stay self-contained.
- */
-export async function buildMetricVisualization({ visualize, lens }: VisualizeAndLens) {
-  await visualize.goto();
-  await visualize.openNewVisualizationWizard();
-  await visualize.clickVisType('lens');
-  await lens.switchToVisualization('lnsMetric', { search: 'Metric' });
-
-  await lens.configureDimension({
-    dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-empty-dimension',
-    operation: 'average',
-    field: 'bytes',
-  });
-  await lens.configureDimension({
-    dimension: 'lnsMetric_secondaryMetricDimensionPanel > lns-empty-dimension',
-    operation: 'average',
-    field: 'bytes',
-  });
-}
 
 interface LogstashSpaceSetupContext {
   scoutSpace: {
@@ -340,19 +315,6 @@ export async function applyLensInlineEditorAndWaitClosed({ lens }: Pick<PageObje
 export async function cancelLensInlineEditorAndWaitClosed({ lens }: Pick<PageObjects, 'lens'>) {
   await lens.getCancelFlyoutButton().click();
   await expect(lens.getInlineEditor()).toBeHidden();
-}
-
-/**
- * Deletes an annotation group saved object from the Visualize "Annotation library" tab, by
- * title. Navigates directly to the tab via URL hash rather than clicking through the
- * Visualize landing page's tab bar, which has no stable per-tab test subject.
- */
-export async function deleteAnnotationGroupFromLibrary(page: ScoutPage, title: string) {
-  await page.gotoApp('visualize', { hash: '/annotations' });
-  const contentList = new ContentListWrapper(page);
-  await contentList.searchBox.waitFor({ state: 'visible' });
-  await contentList.searchFor(title);
-  await contentList.selectAllAndDelete();
 }
 
 export async function convertToEsqlViaModal({

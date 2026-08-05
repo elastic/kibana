@@ -77,24 +77,6 @@ describe('registerSignificantEventsSkills', () => {
     expect(registeredIds).toHaveLength(CORE_SKILL_IDS.length);
   });
 
-  it('hides the inline tools of a registered skill once the feature becomes unavailable', async () => {
-    const isAvailable = jest.fn().mockResolvedValue(true);
-    const { agentBuilder, options } = createOptions({
-      streamsKIsOnboardingClient,
-      maintenanceService,
-      isAvailable,
-    });
-
-    await registerSignificantEventsSkills(options);
-    const { getInlineTools } = agentBuilder.skills.register.mock.calls.find(
-      ([skill]) => skill.id === KI_IDENTIFICATION_SKILL_ID
-    )![0];
-    await expect(getInlineTools!()).resolves.not.toHaveLength(0);
-
-    isAvailable.mockResolvedValue(false);
-    await expect(getInlineTools!()).resolves.toEqual([]);
-  });
-
   it('registers the investigation skill as part of core skills when available', async () => {
     const { agentBuilder, options } = createOptions({
       maintenanceService: undefined,

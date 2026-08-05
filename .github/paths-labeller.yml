@@ -13,8 +13,6 @@
     - 'src/platform/packages/shared/kbn-connector-specs/src/specs/shodan/**/*.*'
     - 'src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/**/*.*'
     - 'src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/**/*.*'
-- 'connectors-v2':
-    - 'src/platform/packages/shared/kbn-connector-specs/**/*.*'
 - 'Feature:Embedding':
     - 'src/platform/plugins/shared/embeddable/**/*.*'
     - 'src/plugins/dashboard_embeddable_container/**/*.*'
@@ -24,14 +22,13 @@
 - 'Feature:ExpressionLanguage':
     - 'src/platform/plugins/shared/expressions/**/*.*'
     - 'src/plugins/bfetch/**/*.*'
-- 'Team:obs-signals-logs':
-    - 'x-pack/solutions/observability/plugins/ux/**/*.*'
-- 'Team:obs-signals-traces':
+- 'Team:obs-presentation':
     - 'x-pack/solutions/observability/plugins/apm/**/*.*'
     - 'x-pack/solutions/observability/test/apm_api_integration/**/*.*'
     - 'src/platform/packages/shared/kbn-synthtrace/**/*.*'
     - 'src/platform/packages/shared/kbn-synthtrace-client/**/*.*'
     - 'src/platform/packages/shared/kbn-apm-utils/**/*.*'
+    - 'x-pack/solutions/observability/plugins/ux/**/*.*'
 - 'Team:Fleet':
     - 'x-pack/platform/plugins/shared/fleet/**/*.*'
     - 'x-pack/platform/test/fleet_api_integration/**/*.*'

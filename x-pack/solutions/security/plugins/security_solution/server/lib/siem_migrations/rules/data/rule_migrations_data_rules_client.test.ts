@@ -841,12 +841,13 @@ describe('RuleMigrationsDataRulesClient', () => {
         index: '.kibana-siem-rule-migrations',
         script: {
           source: expect.stringContaining(
-            `def originalQuery = ctx._source.elastic_rule.query;\n                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);\n                ctx._source.elastic_rule.query = newQuery;`
+            `def originalQuery = ctx._source.elastic_rule.query;
+                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
+                ctx._source.elastic_rule.query = newQuery;`
           ),
           lang: 'painless',
           params: {
             indexPattern,
-            placeholder: MISSING_INDEX_PATTERN_PLACEHOLDER,
           },
         },
         query: {
@@ -884,12 +885,13 @@ describe('RuleMigrationsDataRulesClient', () => {
         index: '.kibana-siem-rule-migrations',
         script: {
           source: expect.stringContaining(
-            `def originalQuery = ctx._source.elastic_rule.query;\n                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);\n                ctx._source.elastic_rule.query = newQuery;`
+            `def originalQuery = ctx._source.elastic_rule.query;
+                def newQuery = originalQuery.replace('${MISSING_INDEX_PATTERN_PLACEHOLDER}', params.indexPattern);
+                ctx._source.elastic_rule.query = newQuery;`
           ),
           lang: 'painless',
           params: {
             indexPattern,
-            placeholder: MISSING_INDEX_PATTERN_PLACEHOLDER,
           },
         },
         query: {

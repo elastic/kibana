@@ -10,8 +10,6 @@ export {
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
   getEntityTool,
   SECURITY_GET_ENTITY_TOOL_ID,
-  getEntityGraphTool,
-  SECURITY_GET_ENTITY_GRAPH_TOOL_ID,
   listWatchlistsTool,
   SECURITY_LIST_WATCHLISTS_TOOL_ID,
   searchEntitiesTool,

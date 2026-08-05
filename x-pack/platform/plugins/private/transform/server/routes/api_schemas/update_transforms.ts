@@ -14,15 +14,15 @@ import { retentionPolicySchema, settingsSchema, sourceSchema, syncSchema } from 
 
 // POST _transform/{transform_id}/_update
 export const postTransformsUpdateRequestSchema = schema.object({
-  description: schema.maybe(schema.string({ maxLength: 1000 })),
+  description: schema.maybe(schema.string()),
   // we cannot reuse `destSchema` because `index` is optional for the update request
   dest: schema.maybe(
     schema.object({
-      index: schema.string({ maxLength: 1000 }),
-      pipeline: schema.maybe(schema.string({ maxLength: 1000 })),
+      index: schema.string(),
+      pipeline: schema.maybe(schema.string()),
     })
   ),
-  frequency: schema.maybe(schema.string({ maxLength: 64 })),
+  frequency: schema.maybe(schema.string()),
   // maybe: If not set, any existing `retention_policy` config will not be updated.
   // nullable: If set to `null`, any existing `retention_policy` will be removed.
   retention_policy: schema.maybe(schema.nullable(retentionPolicySchema)),

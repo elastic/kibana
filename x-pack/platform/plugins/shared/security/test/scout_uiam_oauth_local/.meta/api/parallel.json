@@ -20,8 +20,8 @@
       }
     },
     {
-      "id": "f6d065371af5227-6880a7ca3362288",
-      "title": "[NON-MKI] UIAM OAuth client CRUD via Kibana proxy creates, reads, lists, patches (incl. redirect_uris), and deletes a client",
+      "id": "f6d065371af5227-8e2fb993048f286",
+      "title": "[NON-MKI] UIAM OAuth client CRUD via Kibana proxy creates, reads, lists, patches (incl. redirect_uris), and revokes a client",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
@@ -43,7 +43,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_clients_crud.spec.ts",
-        "line": 144,
+        "line": 130,
         "column": 12
       }
     },

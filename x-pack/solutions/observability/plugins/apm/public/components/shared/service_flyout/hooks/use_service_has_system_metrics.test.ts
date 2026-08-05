@@ -6,12 +6,20 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useServiceHasSystemMetrics } from './use_service_has_system_metrics';
 
-const mockUseAbortableAsync = jest.fn();
+const mockUseFetcher = jest.fn();
 
-jest.mock('@kbn/react-hooks', () => ({
-  useAbortableAsync: (...args: unknown[]) => mockUseAbortableAsync(...args),
+jest.mock('../../../../hooks/use_fetcher', () => ({
+  FETCH_STATUS: {
+    LOADING: 'loading',
+    SUCCESS: 'success',
+    FAILURE: 'failure',
+    NOT_INITIATED: 'not_initiated',
+  },
+  isPending: (status: string) => status === 'loading' || status === 'not_initiated',
+  useFetcher: (...args: unknown[]) => mockUseFetcher(...args),
 }));
 
 jest.mock('../../../../hooks/use_time_range', () => ({
@@ -19,11 +27,6 @@ jest.mock('../../../../hooks/use_time_range', () => ({
     start: '2024-01-01T00:00:00.000Z',
     end: '2024-01-01T01:00:00.000Z',
   }),
-}));
-
-const mockCallApmApi = jest.fn();
-jest.mock('../../../../plugin', () => ({
-  getApmInternalServices: () => ({ callApmApi: mockCallApmApi }),
 }));
 
 const baseParams = {
@@ -35,12 +38,19 @@ const baseParams = {
 
 describe('useServiceHasSystemMetrics', () => {
   beforeEach(() => {
-    mockUseAbortableAsync.mockClear();
-    mockCallApmApi.mockClear();
+    mockUseFetcher.mockClear();
   });
 
   it('returns isLoading true and hasSystemMetrics undefined while the fetch is loading', () => {
-    mockUseAbortableAsync.mockReturnValue({ value: undefined, loading: true });
+    mockUseFetcher.mockReturnValue({ data: undefined, status: FETCH_STATUS.LOADING });
+
+    const { result } = renderHook(() => useServiceHasSystemMetrics(baseParams));
+
+    expect(result.current).toEqual({ hasSystemMetrics: undefined, isLoading: true });
+  });
+
+  it('returns isLoading true when the fetch has not yet been initiated', () => {
+    mockUseFetcher.mockReturnValue({ data: undefined, status: FETCH_STATUS.NOT_INITIATED });
 
     const { result } = renderHook(() => useServiceHasSystemMetrics(baseParams));
 
@@ -48,9 +58,9 @@ describe('useServiceHasSystemMetrics', () => {
   });
 
   it('returns true when the service has system metrics', () => {
-    mockUseAbortableAsync.mockReturnValue({
-      value: { hasSystemMetrics: true },
-      loading: false,
+    mockUseFetcher.mockReturnValue({
+      data: { hasSystemMetrics: true },
+      status: FETCH_STATUS.SUCCESS,
     });
 
     const { result } = renderHook(() => useServiceHasSystemMetrics(baseParams));
@@ -59,9 +69,9 @@ describe('useServiceHasSystemMetrics', () => {
   });
 
   it('returns false when the service has no system metrics', () => {
-    mockUseAbortableAsync.mockReturnValue({
-      value: { hasSystemMetrics: false },
-      loading: false,
+    mockUseFetcher.mockReturnValue({
+      data: { hasSystemMetrics: false },
+      status: FETCH_STATUS.SUCCESS,
     });
 
     const { result } = renderHook(() => useServiceHasSystemMetrics(baseParams));
@@ -70,11 +80,7 @@ describe('useServiceHasSystemMetrics', () => {
   });
 
   it('returns isLoading false when the fetch fails, so the skeleton does not get stuck', () => {
-    mockUseAbortableAsync.mockReturnValue({
-      value: undefined,
-      loading: false,
-      error: new Error('fail'),
-    });
+    mockUseFetcher.mockReturnValue({ data: undefined, status: FETCH_STATUS.FAILURE });
 
     const { result } = renderHook(() => useServiceHasSystemMetrics(baseParams));
 
@@ -82,13 +88,13 @@ describe('useServiceHasSystemMetrics', () => {
   });
 
   it('calls the correct endpoint with the right params', () => {
-    mockUseAbortableAsync.mockReturnValue({ value: undefined, loading: true });
+    mockUseFetcher.mockReturnValue({ data: undefined, status: FETCH_STATUS.LOADING });
 
     renderHook(() => useServiceHasSystemMetrics(baseParams));
 
-    const [fetcherFn] = mockUseAbortableAsync.mock.calls[0];
-    const signal = new AbortController().signal;
-    fetcherFn({ signal });
+    const [fetcherFn] = mockUseFetcher.mock.calls[0];
+    const mockCallApmApi = jest.fn().mockResolvedValue({ hasSystemMetrics: true });
+    fetcherFn(mockCallApmApi);
 
     expect(mockCallApmApi).toHaveBeenCalledWith(
       'GET /internal/apm/services/{serviceName}/has_system_metrics',
@@ -101,7 +107,6 @@ describe('useServiceHasSystemMetrics', () => {
             end: '2024-01-01T01:00:00.000Z',
           },
         },
-        signal,
       }
     );
   });

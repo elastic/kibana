@@ -28,12 +28,6 @@ Use this skill when reviewing or preparing changes to a **connector spec** (spec
   they operate on (e.g., "Search messages, list public channels, and send messages in Slack"). Flag descriptions that
   are vague ("Connect to X to pull data"), say nothing about capabilities ("Kibana Stack Connector for X"), or omit
   actions the connector actually provides. Keep to one sentence, ~15 words.
-- **`supportedFeatureIds` on a brand-new connector type**: A new connector must reach Production-NonCanary
-  before it can declare user-facing features, otherwise a rollout or rollback can leave a node without the
-  type and break any user action referencing it. A PR that adds a connector may only declare
-  `['agentBuilder']`. Flag `'workflows'` or any other user-facing feature ID on a newly added
-  connector and ask for it to move to a follow-up PR. A PR that adds feature IDs to an existing connector
-  is fine as long as that connector is already registered in every Production-NonCanary version.
 - **Schema UI**: Every config field in `schema` has `.meta()` with at least `label` (or uses a `UISchemas.*` helper).
   Otherwise fields render as unlabeled.
 - **No numeric config fields**: Flag any `z.number()` (or `.int()`) field in the connector-level `config`

@@ -15,7 +15,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/zod",
+    "@kbn/config-schema",
     "@kbn/presentation-publishing-schemas"
   ]
 }

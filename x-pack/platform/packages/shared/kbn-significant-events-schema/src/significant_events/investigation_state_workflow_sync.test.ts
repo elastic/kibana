@@ -233,7 +233,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
   it('rejects a status event_update with an invalid enum value under both schemas', () => {
     const invalidStatus = {
       ...validPayload,
-      significant_event_updates: [{ ...statusUpdate, to: 'unknown' }],
+      significant_event_updates: [{ ...statusUpdate, to: 'pending' }],
     };
 
     expect(validate(invalidStatus)).toBe(false);

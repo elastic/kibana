@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { EuiAvatar, EuiCode } from '@elastic/eui';
+import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { ConnectorTypeIcon } from './connector_type_icon';
 import type { SourceType } from './source_picker';
 
 export interface SourceDisplay {
-  /** Pre-rendered icon for the source. */
-  icon: ReactNode;
+  iconType: string;
   typeLabel: string;
   label: string;
   /** Rendered instead of the plain-text label, when a source needs richer content. */
@@ -23,39 +21,25 @@ export interface SourceDisplay {
 
 export interface SourceDisplayDeps {
   connectorNameById: Map<string, string>;
-  connectorActionTypeById: Map<string, string>;
 }
 
 type SourceDisplayFactory = (value: string, deps: SourceDisplayDeps) => SourceDisplay;
 
 const SOURCE_DISPLAY: Record<SourceType, SourceDisplayFactory> = {
-  esql: (value) => {
-    const typeLabel = i18n.translate('xpack.contextEngine.sourceType.esql', {
+  esql: (value) => ({
+    iconType: 'editorCodeBlock',
+    typeLabel: i18n.translate('xpack.contextEngine.sourceType.esql', {
       defaultMessage: 'ES|QL',
-    });
-    return {
-      icon: (
-        <EuiAvatar
-          type="space"
-          size="m"
-          color="subdued"
-          name={typeLabel}
-          iconType="editorCodeBlock"
-          iconColor="primary"
-          iconSize="m"
-        />
-      ),
-      typeLabel,
-      label: value,
-      content: (
-        <EuiCode language="sql" transparentBackground>
-          {value}
-        </EuiCode>
-      ),
-    };
-  },
-  connector: (value, { connectorNameById, connectorActionTypeById }) => ({
-    icon: <ConnectorTypeIcon actionTypeId={connectorActionTypeById.get(value)} size="l" />,
+    }),
+    label: value,
+    content: (
+      <EuiCode language="sql" transparentBackground>
+        {value}
+      </EuiCode>
+    ),
+  }),
+  connector: (value, { connectorNameById }) => ({
+    iconType: 'plugs',
     typeLabel: i18n.translate('xpack.contextEngine.sourceType.connector', {
       defaultMessage: 'Connector',
     }),

@@ -55,7 +55,9 @@ export const transformControlPanelsOut = (
     return undefined;
   }
 
-  return discoverSessionControlPanelsSchema.parse(panels);
+  return discoverSessionControlPanelsSchema.validate(panels, undefined, undefined, {
+    stripUnknownKeys: true,
+  });
 };
 
 export const transformControlPanelsIn = (

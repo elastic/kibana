@@ -32,7 +32,6 @@ export default createTestConfig({
     `--xpack.dataUsage.autoops.api.tls.key=${KBN_KEY_PATH}`,
     `--xpack.fleet.experimentalFeatures=${JSON.stringify({
       integrationKnowledge: false,
-      installIntegrationsKnowledge: false,
     })}`,
   ],
 });

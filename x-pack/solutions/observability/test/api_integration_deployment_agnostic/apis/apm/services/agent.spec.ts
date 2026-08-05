@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { ENVIRONMENT_ALL_VALUE } from '@kbn/apm-plugin/common/environment_filter_values';
 import archives_metadata from '../../../../apm_api_integration/common/fixtures/es_archiver/archives_metadata';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { ARCHIVER_ROUTES } from '../constants/archiver';
@@ -26,7 +25,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           params: {
             path: { serviceName: 'opbeans-node' },
             query: {
-              environment: ENVIRONMENT_ALL_VALUE,
               start,
               end,
             },
@@ -52,7 +50,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           params: {
             path: { serviceName: 'opbeans-node' },
             query: {
-              environment: ENVIRONMENT_ALL_VALUE,
               start,
               end,
             },

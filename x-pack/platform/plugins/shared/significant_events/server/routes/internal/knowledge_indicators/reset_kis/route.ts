@@ -59,7 +59,7 @@ const resetKIsRoute = createServerRoute({
     return resetSignificantEvents({
       kiClient,
       esClient: scopedClusterClient.asCurrentUser,
-      logger: logger.get('significantEvents'),
+      logger: logger.get('significant_events'),
       request,
       streamsKIsOnboardingClient,
       deleteLegacyRules,

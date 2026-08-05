@@ -18,7 +18,6 @@ import {
   createAlertEventRouteSchemas,
   createAlertEventRouteSecurity,
 } from './create_alert_event_route_shared';
-import { createAlertEventOasExamples } from './create_alert_event_oas_example';
 
 /** POST /api/alerting/v2/alerts — source in body */
 @injectable()
@@ -26,10 +25,7 @@ export class CreateAlertEventRoute extends BaseAlertingRoute {
   static method = 'post' as const;
   static path = `${ALERTING_V2_ALERT_API_PATH}`;
   static security = createAlertEventRouteSecurity;
-  static routeOptions = {
-    ...createAlertEventRouteOptions,
-    oasOperationObject: createAlertEventOasExamples,
-  } as const;
+  static routeOptions = createAlertEventRouteOptions;
   static schemas = createAlertEventRouteSchemas;
 
   protected readonly routeName = 'create alert event';

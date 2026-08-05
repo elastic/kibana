@@ -257,11 +257,10 @@ it('prunes stale code entries and their source maps', async () => {
   db.putSync('legacy', [GLOBAL_ATIME - 31 * DAY, 'legacy', { legacy: true }]);
   await db.close();
 
-  const cache = makeCache({
+  makeCache({
     dir: DIR,
     prefix: 'prefix',
   });
-  await cache.close();
 
   const updatedDb = openDb();
   expect(updatedDb.get('code:old')).toBe(undefined);

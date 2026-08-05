@@ -26,7 +26,6 @@ import { ApiEndpointId } from '../../../common/api_endpoints';
 import {
   IS_MANAGED_OTLP_SERVICE_ENABLED,
   IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED,
-  IS_VENDOR_ENDPOINTS_ENABLED,
 } from '../../../common/feature_flags';
 
 export interface ApiEndpointsRouteResponse {
@@ -47,25 +46,12 @@ const VENDOR_ENDPOINT_IDS: readonly ApiEndpointId[] = [
   ApiEndpointId.Vercel,
 ];
 
-export interface VendorEndpointAvailability {
-  isManagedOtlpServiceAvailable: boolean;
-  vendorEndpointsEnabled: boolean;
-}
-
-// Vendor paths only exist on the managed OTLP collector, so a key for them is
-// useless anywhere else. The UI never offers creation in that state, this
-// guard makes the API honest anyway.
+// Vendor paths exist only on the managed OTLP collector. Reject key creation when it is unavailable.
 export function ensureVendorEndpointAvailable(
   id: ApiEndpointId,
-  { isManagedOtlpServiceAvailable, vendorEndpointsEnabled }: VendorEndpointAvailability
+  isManagedOtlpServiceAvailable: boolean
 ): void {
-  if (!VENDOR_ENDPOINT_IDS.includes(id)) {
-    return;
-  }
-  if (!vendorEndpointsEnabled) {
-    throw Boom.badRequest(`The ${id} endpoint is not enabled on this deployment.`);
-  }
-  if (!isManagedOtlpServiceAvailable) {
+  if (VENDOR_ENDPOINT_IDS.includes(id) && !isManagedOtlpServiceAvailable) {
     throw Boom.badRequest(
       `The ${id} endpoint requires the managed OTLP service, which is not available on this deployment.`
     );
@@ -166,10 +152,6 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     const managedOtlpPrwEndpointEnabled =
       (await featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED, false)) &&
       Boolean(managedOtlpServiceUrl);
-    const vendorEndpointsEnabled = await featureFlags.getBooleanValue(
-      IS_VENDOR_ENDPOINTS_ENABLED,
-      false
-    );
     const isManagedElasticsearchBulkEndpointAvailable =
       hasManagedElasticsearchBulkEndpoint(managedOtlpServiceUrl);
     const isVendorEndpointAvailable =
@@ -182,10 +164,7 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       isManagedElasticsearchBulkEndpointAvailable,
     };
 
-    ensureVendorEndpointAvailable(id, {
-      isManagedOtlpServiceAvailable: isVendorEndpointAvailable,
-      vendorEndpointsEnabled,
-    });
+    ensureVendorEndpointAvailable(id, isVendorEndpointAvailable);
 
     const hasPrivileges = await hasRequiredPrivileges(
       id,

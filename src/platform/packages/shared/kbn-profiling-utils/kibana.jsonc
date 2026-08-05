@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/profiling-utils",
   "owner": [
-    "@elastic/obs-signals-logs-team"
+    "@elastic/obs-presentation-team"
   ],
   "group": "platform",
   "visibility": "shared"

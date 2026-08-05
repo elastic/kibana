@@ -16,7 +16,7 @@ import { StreamManagementDefaultRedirect } from '../components/stream_management
 import { StreamListView } from '../components/stream_list_view';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
-import { SignificantEventsAppRedirect } from '../components/significant_events_app_redirect';
+import { SignificantEventsDiscoveryPage } from '../components/significant_events/significant_events_discovery/page';
 import { StreamsLayout } from '../components/streams_layout';
 import { DEFAULT_STREAMS_LAYOUT_TAB } from '../components/streams_layout/tabs';
 
@@ -75,7 +75,7 @@ const streamsAppRoutes = {
             element: <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />,
           },
           '/_discovery/{tab}': {
-            element: <SignificantEventsAppRedirect />,
+            element: <SignificantEventsDiscoveryPage />,
             params: t.intersection([
               t.type({
                 path: t.type({

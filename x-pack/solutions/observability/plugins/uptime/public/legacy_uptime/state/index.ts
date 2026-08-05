@@ -18,9 +18,7 @@ export type AppState = RootState;
 
 const sagaMW = createSagaMiddleware();
 
-const composeEnhancers = composeWithDevTools({ name: 'Uptime' });
-
-export const store: Store = createStore(rootReducer, composeEnhancers(applyMiddleware(sagaMW)));
+export const store: Store = createStore(rootReducer, composeWithDevTools(applyMiddleware(sagaMW)));
 
 sagaMW.run(rootEffect);
 

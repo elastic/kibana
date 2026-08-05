@@ -1,5 +1,5 @@
 {
-  "sha1": "b1430f916e22cf729679af67ec4dc88f7ef3e405",
+  "sha1": "d1e3d9a4b1516bb5970934d386d93ea493e3edc5",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -121,32 +121,6 @@
       }
     },
     {
-      "id": "f88bb646cc8c2cf-a83c30b89cc839e",
-      "title": "Lens XY annotation layers adds, edits and duplicates manual and query-based annotations",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/annotations/annotation_layers.spec.ts",
-        "line": 17,
-        "column": 13
-      }
-    },
-    {
-      "id": "b0d6e18987df8e5-cc2bbb39100dadc",
-      "title": "Lens annotation library saves an annotation group to the library, syncs edits across dashboard panels, and propagates deletion",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/annotations/annotation_library.spec.ts",
-        "line": 26,
-        "column": 13
-      }
-    },
-    {
       "id": "960754c4adc7473-ec0ed097095fb0e",
       "title": "Lens chart creation creates and saves an XY area chart, then reopens it with the same configuration",
       "expectedStatus": "passed",
@@ -183,19 +157,6 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/chart_creation.spec.ts",
         "line": 72,
         "column": 15
-      }
-    },
-    {
-      "id": "d0d41bc2dd46b90-2d55f331fb0e19b",
-      "title": "Lens disable auto-apply toggles auto-apply and applies changes on demand",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/disable_auto_apply.spec.ts",
-        "line": 15,
-        "column": 13
       }
     },
     {
@@ -615,32 +576,6 @@
       }
     },
     {
-      "id": "055afa3b87170c2-4d5121513305eb0",
-      "title": "Lens legacy metric renders, filters and dynamically colors a legacy metric",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/legacy_metric.spec.ts",
-        "line": 32,
-        "column": 11
-      }
-    },
-    {
-      "id": "7011afe9217da69-32e907ff9427175",
-      "title": "Lens metric primary and breakdown configures primary/secondary/breakdown metrics, trendlines, colors and formatting",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_primary_and_breakdown.spec.ts",
-        "line": 48,
-        "column": 44
-      }
-    },
-    {
       "id": "6d5a791f20beb95-62679370e15b14d",
       "title": "Lens metric progress bar in Lens editor uses default progress bar fill color when no custom color is set",
       "expectedStatus": "passed",
@@ -716,45 +651,6 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_progress_bar.spec.ts",
         "line": 125,
         "column": 71
-      }
-    },
-    {
-      "id": "df1bc6cfd084978-8fc72c41bb5fec9",
-      "title": "Lens metric secondary shows a badge for the secondary metric and caches static/dynamic configuration",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_secondary.spec.ts",
-        "line": 33,
-        "column": 79
-      }
-    },
-    {
-      "id": "df1bc6cfd084978-8206ad37605204f",
-      "title": "Lens metric secondary disables collapse-by aggregation when the primary metric is not numeric",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_secondary.spec.ts",
-        "line": 72,
-        "column": 24
-      }
-    },
-    {
-      "id": "df1bc6cfd084978-ccdfd4111abaa66",
-      "title": "Lens metric secondary replaces the secondary metric label and badge when the primary metric becomes non-numeric",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_secondary.spec.ts",
-        "line": 113,
-        "column": 18
       }
     },
     {
@@ -2605,19 +2501,6 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/top_n.spec.ts",
         "line": 121,
         "column": 26
-      }
-    },
-    {
-      "id": "def843e3269b580-f94217f88e11f64",
-      "title": "Lens reference lines creates, styles and duplicates reference lines",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/reference_lines.spec.ts",
-        "line": 18,
-        "column": 13
       }
     },
     {

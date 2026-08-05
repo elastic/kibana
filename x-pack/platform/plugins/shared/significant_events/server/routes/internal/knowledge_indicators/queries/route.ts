@@ -280,7 +280,7 @@ const bulkDeleteQueriesRoute = createServerRoute({
     // deleteQueries uninstalls rules before writing storage, so a mid-flight
     // throw can leave rules gone while stored links still reference them. Log
     // the backed rule IDs on failure so ops can reconcile manually.
-    const sigEventsLogger = logger.get('significantEvents');
+    const sigEventsLogger = logger.get('significant_events');
 
     let succeeded = 0;
     let failed = 0;
@@ -635,7 +635,6 @@ const generateQueriesRoute = createServerRoute({
       inferenceClient,
       soClient,
       scopedClusterClient,
-      streamDataEsClient,
       licensing,
       tuningConfig,
     } = scopedClients;
@@ -660,7 +659,6 @@ const generateQueriesRoute = createServerRoute({
         soClient,
         kiClient,
         esClient: scopedClusterClient.asCurrentUser,
-        streamDataEsClient,
         featureFlags: server.core.featureFlags,
         searchInferenceEndpoints: server.searchInferenceEndpoints,
         request,

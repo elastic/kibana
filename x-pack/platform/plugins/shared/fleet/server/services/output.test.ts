@@ -1221,38 +1221,6 @@ describe('Output Service', () => {
           { id: 'output-1' }
         );
       });
-
-      it('should clear proxy_id when creating a kafka output that has proxy_id set', async () => {
-        const soClient = getMockedSoClient({
-          defaultOutputId: 'output-test',
-        });
-        mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
-          canEncrypt: true,
-        } as any);
-        mockedAgentPolicyService.list.mockResolvedValue(
-          mockedAgentPolicyWithFleetServerResolvedValue
-        );
-        mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
-
-        await outputService.create(
-          soClient,
-          esClientMock,
-          {
-            is_default: false,
-            is_default_monitoring: false,
-            name: 'Test',
-            type: 'kafka',
-            proxy_id: 'proxy-1',
-          },
-          { id: 'output-1' }
-        );
-
-        expect(soClient.create).toBeCalledWith(
-          expect.anything(),
-          expect.objectContaining({ proxy_id: null }),
-          expect.anything()
-        );
-      });
     });
 
     describe('remote elasticsearch output', () => {
@@ -1622,26 +1590,6 @@ describe('Output Service', () => {
         version: null,
         preset: 'balanced',
       });
-    });
-
-    it('should clear proxy_id when updating a kafka output that has proxy_id set', async () => {
-      const soClient = getMockedSoClient({});
-      mockedAgentPolicyService.list.mockResolvedValue({
-        items: [{}],
-      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
-      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
-      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
-
-      await outputService.update(soClient, esClientMock, 'existing-kafka-output', {
-        proxy_id: 'proxy-1',
-        name: 'updated kafka',
-      });
-
-      expect(soClient.update).toBeCalledWith(
-        expect.anything(),
-        expect.anything(),
-        expect.objectContaining({ proxy_id: null })
-      );
     });
 
     // With logstash output
@@ -2102,7 +2050,6 @@ describe('Output Service', () => {
         timeout: 30,
         version: '1.0.0',
         write_to_logs_streams: null,
-        proxy_id: null,
       });
     });
 
@@ -2139,7 +2086,6 @@ describe('Output Service', () => {
         timeout: 30,
         type: 'kafka',
         version: '1.0.0',
-        proxy_id: null,
       });
     });
 
@@ -2179,7 +2125,6 @@ describe('Output Service', () => {
         version: '1.0.0',
         broker_timeout: 10,
         required_acks: 1,
-        proxy_id: null,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -2234,7 +2179,6 @@ describe('Output Service', () => {
         version: '1.0.0',
         broker_timeout: 10,
         required_acks: 1,
-        proxy_id: null,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -2279,7 +2223,6 @@ describe('Output Service', () => {
         version: '1.0.0',
         broker_timeout: 10,
         required_acks: 1,
-        proxy_id: null,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -2332,7 +2275,6 @@ describe('Output Service', () => {
         version: '1.0.0',
         broker_timeout: 10,
         required_acks: 1,
-        proxy_id: null,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -2378,7 +2320,6 @@ describe('Output Service', () => {
         version: '1.0.0',
         broker_timeout: 10,
         required_acks: 1,
-        proxy_id: null,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -2432,7 +2373,6 @@ describe('Output Service', () => {
         version: '1.0.0',
         broker_timeout: 10,
         required_acks: 1,
-        proxy_id: null,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),

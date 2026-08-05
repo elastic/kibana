@@ -9,48 +9,16 @@
 
 import type { ScoutPage } from '../scout_page';
 
-interface CountMatchingRequestsOptions {
-  method?: string;
-  exactPathname?: boolean;
-}
-
-interface NetworkRequest {
-  url: () => string;
-  method: () => string;
-}
-
 export class Network {
   constructor(private readonly page: ScoutPage) {}
 
-  private matchesEndpoint(
-    request: NetworkRequest,
-    endpoint: string,
-    options: CountMatchingRequestsOptions
-  ) {
-    if (options.method && request.method() !== options.method) {
-      return false;
-    }
-
-    if (!options.exactPathname) {
-      return request.url().includes(endpoint);
-    }
-
-    try {
-      return new URL(request.url()).pathname.endsWith(endpoint);
-    } catch {
-      return false;
-    }
-  }
-
   async trackMatchingRequests(
     endpoint: string,
-
-    action: (getCount: () => number) => Promise<void>,
-    options: CountMatchingRequestsOptions = {}
+    action: (getCount: () => number) => Promise<void>
   ): Promise<number> {
     let count = 0;
-    const listener = (request: NetworkRequest) => {
-      if (this.matchesEndpoint(request, endpoint, options)) {
+    const listener = (request: { url: () => string }) => {
+      if (request.url().includes(endpoint)) {
         count++;
       }
     };
@@ -64,17 +32,9 @@ export class Network {
     }
   }
 
-  async countMatchingRequests(
-    endpoint: string,
-    action: () => Promise<void>,
-    options: CountMatchingRequestsOptions = {}
-  ): Promise<number> {
-    return this.trackMatchingRequests(
-      endpoint,
-      async () => {
-        await action();
-      },
-      options
-    );
+  async countMatchingRequests(endpoint: string, action: () => Promise<void>): Promise<number> {
+    return this.trackMatchingRequests(endpoint, async () => {
+      await action();
+    });
   }
 }

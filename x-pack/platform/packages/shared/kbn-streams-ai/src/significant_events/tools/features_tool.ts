@@ -12,8 +12,12 @@ import {
 } from '@kbn/significant-events-schema';
 import {
   createGetFeatureQueryFromToolArgs,
+  createGetFeatureTypesFromToolArgs,
   resolveFeatureTypeFilters,
   toFeatureForLlmContext,
+  type GetStreamFeaturesInput,
+  type GetStreamFeaturesQuery,
+  type LlmFeature,
 } from '../../features/tool';
 
 /**
@@ -34,8 +38,16 @@ export const SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES = ALL_FEATURE_TOOL_TYPES.filt
   > => !(QUERY_GENERATION_EXCLUDED_FEATURE_TYPES as readonly string[]).includes(type)
 );
 
+export type SignificantEventsFeatureToolType =
+  (typeof SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES)[number];
+
+export const getFeatureTypesFromToolArgs = createGetFeatureTypesFromToolArgs(
+  SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES
+);
+
 export const getFeatureQueryFromToolArgs = createGetFeatureQueryFromToolArgs(
   SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES
 );
 
 export { resolveFeatureTypeFilters, toFeatureForLlmContext };
+export type { GetStreamFeaturesInput, GetStreamFeaturesQuery, LlmFeature };

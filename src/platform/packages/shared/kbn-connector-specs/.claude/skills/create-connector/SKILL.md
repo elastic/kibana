@@ -55,18 +55,6 @@ Follow the patterns in [reference/connector-patterns.md](reference/connector-pat
 
 Register in `src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts` and `connector_icons_map.ts`.
 
-### `supportedFeatureIds` on a brand-new connector: two-step release
-
-A new connector type must reach Production-NonCanary before it can declare user-facing features.
-Serverless rollouts and rollbacks leave nodes on different Kibana versions for a while, and a user action
-referencing a connector type that a node does not have breaks on that node. So the first PR ships
-`supportedFeatureIds: ['agentBuilder']`.
-
-Do not put `'workflows'` or any other user-facing feature ID in the first PR. Those are added in a
-follow-up PR once the connector is registered in every Production-NonCanary version.
-
-Mention the required follow-up PR in the first PR's description so it is not forgotten.
-
 **MCP connectors**: Use [reference/mcp-connector-setup.md](reference/mcp-connector-setup.md) as the direct starting template for the spec — it has concrete, copy-ready examples with the correct `lazySchema`, `callToolJson`/`callToolContent`, and test-mock patterns already in place. Do not reverse-engineer from existing connectors.
 
 **Type every handler explicitly.** Annotate each action's `input` parameter with its `z.infer`-derived

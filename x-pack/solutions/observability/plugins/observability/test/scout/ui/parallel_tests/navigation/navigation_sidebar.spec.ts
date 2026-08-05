@@ -66,7 +66,7 @@ test.describe(
       });
     });
 
-    test('clicking body nav items sets the active link and navigates', async ({
+    test('clicking body nav items sets the active link, updates breadcrumbs, and navigates', async ({
       pageObjects,
       page,
     }) => {
@@ -76,12 +76,14 @@ test.describe(
         await nav.navItemInPrimaryByDeepLinkId('discover').click();
         await expect(nav.pageOrNoData('dscPage')).toBeVisible();
         await expect(nav.activeNavItemByDeepLinkId('discover')).toBeVisible();
+        await expect(nav.breadcrumb({ deepLinkId: 'discover' })).toBeVisible();
       });
 
       await test.step('Dashboards', async () => {
         await nav.navItemInPrimaryByDeepLinkId('dashboards').click();
         await expect(nav.pageOrNoData('dashboardLandingPage')).toBeVisible();
         await expect(nav.activeNavItemByDeepLinkId('dashboards')).toBeVisible();
+        await expect(nav.breadcrumb({ deepLinkId: 'dashboards' })).toBeVisible();
       });
 
       await test.step('Workflows', async () => {
@@ -119,8 +121,8 @@ test.describe(
       });
     });
 
-    test('in-panel deep links navigate to the expected pages', async ({ pageObjects }) => {
-      const { observabilityNavigation: nav, chrome } = pageObjects;
+    test('in-panel deep links navigate and update breadcrumbs', async ({ pageObjects }) => {
+      const nav = pageObjects.observabilityNavigation;
 
       await test.step('Infrastructure → Inventory', async () => {
         await nav.openMoreMenu();
@@ -131,7 +133,7 @@ test.describe(
           .nestedPanel('metrics')
           .locator('[data-test-subj~="nav-item-deepLinkId-metrics:inventory"]')
           .click();
-        await expect(chrome.pageTitle).toContainText('Infrastructure inventory');
+        await expect(nav.breadcrumb({ text: 'Infrastructure inventory' })).toBeVisible();
       });
 
       await test.step('Infrastructure → Hosts', async () => {
@@ -143,7 +145,7 @@ test.describe(
           .nestedPanel('metrics')
           .locator('[data-test-subj~="nav-item-deepLinkId-metrics:hosts"]')
           .click();
-        await expect(chrome.pageTitle).toContainText('Hosts');
+        await expect(nav.breadcrumb({ text: 'Hosts' })).toBeVisible();
       });
 
       await test.step('Machine Learning → ML overview', async () => {
@@ -203,14 +205,14 @@ test.describe(
     test('navigates between apps without a full page reload (SPA) and restores via logo', async ({
       pageObjects,
     }) => {
-      const { observabilityNavigation: nav, chrome } = pageObjects;
+      const nav = pageObjects.observabilityNavigation;
 
       const expectNoReload = await nav.createNoPageReloadCheck();
 
       await test.step('Discover via sidenav', async () => {
         await nav.navItemInPrimaryByDeepLinkId('discover').click();
-        await expect(nav.pageOrNoData('dscPage')).toBeVisible();
         await expect(nav.activeNavItemByDeepLinkId('discover')).toBeVisible();
+        await expect(nav.breadcrumb({ deepLinkId: 'discover' })).toBeVisible();
       });
 
       await test.step('Infrastructure → Hosts via More', async () => {
@@ -222,11 +224,11 @@ test.describe(
           .nestedPanel('metrics')
           .locator('[data-test-subj~="nav-item-deepLinkId-metrics:hosts"]')
           .click();
-        await expect(chrome.pageTitle).toContainText('Hosts');
+        await expect(nav.breadcrumb({ text: 'Hosts' })).toBeVisible();
       });
 
       await test.step('Logo returns to observability landing', async () => {
-        await chrome.clickLogo();
+        await nav.clickLogo();
         await nav.waitForLoad();
         await expect(nav.navItemInPrimaryByDeepLinkId('discover')).toBeVisible();
       });

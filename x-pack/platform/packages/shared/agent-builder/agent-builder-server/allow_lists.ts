@@ -57,7 +57,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.create_watchlist`,
   `${internalNamespaces.security}.delete_watchlist`,
   `${internalNamespaces.security}.get_entity`,
-  `${internalNamespaces.security}.get_entity_graph`,
   `${internalNamespaces.security}.list_watchlists`,
   `${internalNamespaces.security}.remove_entities_from_watchlist`,
   `${internalNamespaces.security}.search_entities`,
@@ -128,6 +127,7 @@ export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
   `${internalNamespaces.platformSignificantEvents}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
+  `${internalNamespaces.platformSignificantEvents}.discovery-judge-type`,
 ] as const;
 
 export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];
@@ -153,7 +153,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Alerting
   'rule-management',
-  'action-policy-management',
 
   // Platform – Dashboard
   'dashboard-management',
@@ -179,7 +178,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Context Engine
   'ki-automation-generation',
-  'ki-retrieval',
 
   // Platform – Workflows
   'workflow-authoring',
@@ -200,7 +198,6 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'threat-hunting',
   'find-security-rules',
   'pci-compliance',
-  'endpoint-forensic-analysis',
   'investigate-rule',
   'siem-readiness',
   'attack-discovery-alert-retrieval-builder',
@@ -279,15 +276,14 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'cases',
 
   // Platform – Alerting v2
-  'platform.alerting.rule',
-  'platform.alerting.action_policy',
+  'rule',
+  'action_policy',
 
   // Security Solution
   'security.alert',
   'security.alerts',
   'security.entity',
   'security.entity_analytics_dashboard',
-  'security.entity_graph',
   'security.rule',
   'security.siem_readiness',
   // gated behind experimentalFeatures.rulePreviewAttachmentEnabled

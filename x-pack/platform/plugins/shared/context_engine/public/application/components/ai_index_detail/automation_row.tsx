@@ -17,9 +17,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React from 'react';
 import type { AiIndexAutomation } from '../../../../common/http_api/ai_indices';
-import { WorkflowYamlPreviewFlyout } from './workflow_yaml_preview_flyout';
 
 interface AutomationRowProps {
   automation: AiIndexAutomation;
@@ -40,12 +39,7 @@ export const AutomationRow = ({
   isRemoveDisabled,
   onRemove,
 }: AutomationRowProps) => {
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const displayName = name ?? automation.value;
-  const previewLabel = i18n.translate(
-    'xpack.contextEngine.aiIndexDetail.automations.previewWorkflowAriaLabel',
-    { defaultMessage: 'Preview workflow YAML for {name}', values: { name: displayName } }
-  );
   const removeLabel = i18n.translate(
     'xpack.contextEngine.aiIndexDetail.automations.removeButtonAriaLabel',
     { defaultMessage: 'Remove automation {name}', values: { name: displayName } }
@@ -76,16 +70,6 @@ export const AutomationRow = ({
             </EuiBadge>
           </EuiFlexItem>
         )}
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={previewLabel} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="eye"
-              aria-label={previewLabel}
-              onClick={() => setIsPreviewOpen(true)}
-              data-test-subj="contextPreviewWorkflowButton"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
         {isEditing && (
           <>
             <EuiFlexItem grow={false}>
@@ -125,13 +109,6 @@ export const AutomationRow = ({
           </>
         )}
       </EuiFlexGroup>
-      {isPreviewOpen ? (
-        <WorkflowYamlPreviewFlyout
-          workflowId={automation.value}
-          workflowName={displayName}
-          onClose={() => setIsPreviewOpen(false)}
-        />
-      ) : null}
     </EuiPanel>
   );
 };

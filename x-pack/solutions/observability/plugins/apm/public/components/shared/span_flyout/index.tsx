@@ -34,7 +34,7 @@ import type { Transaction } from '../../../../typings/es_schemas/ui/transaction'
 import { SpanMetadata } from '../metadata_table/span_metadata';
 import { getSpanLinksTabContent } from '../span_links/span_links_tab_content';
 import { getGenAiTabContent } from '../genai_tab/get_genai_tab_content';
-import { useGenAiData } from '../genai_tab/use_genai_data';
+import { getGenAiFields, hasGenAiData } from '../genai_tab/get_genai_fields';
 import { Summary } from '../summary';
 import { CompositeSpanDurationSummaryItem } from '../summary/composite_span_duration_summary_item';
 import { HttpInfoSummaryItem } from '../summary/http_info_summary_item';
@@ -240,11 +240,24 @@ function SpanFlyoutBody({
     processorEvent: ProcessorEvent.span,
   });
 
-  const { metadata, isMetadataLoading, isGenAiSpan, genAi } = useGenAiData({
-    processorEvent: ProcessorEvent.span,
-    id: span.span?.id,
-    timestamp: span['@timestamp'],
-  });
+  const spanId = span.span?.id;
+  const { data: eventMetadata, status: metadataStatus } = useFetcher(
+    (callApmApi) => {
+      if (!spanId) return;
+      return callApmApi('GET /internal/apm/event_metadata/{processorEvent}/{id}', {
+        params: {
+          path: { processorEvent: ProcessorEvent.span, id: spanId },
+          query: { start: span['@timestamp'], end: span['@timestamp'] },
+        },
+      });
+    },
+    [spanId, span]
+  );
+
+  const metadata = eventMetadata?.metadata ?? {};
+  const isMetadataLoading = isPending(metadataStatus);
+  const isGenAiSpan = hasGenAiData(metadata);
+  const genAi = isGenAiSpan ? getGenAiFields(metadata) : undefined;
 
   const genAiTabContent = getGenAiTabContent({ isGenAiSpan, genAi });
 

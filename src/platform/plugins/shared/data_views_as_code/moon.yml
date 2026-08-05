@@ -30,7 +30,6 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/core-http-server-mocks'
   - '@kbn/field-formats-plugin'
-  - '@kbn/zod'
 tags:
   - plugin
   - prod

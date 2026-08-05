@@ -419,7 +419,6 @@ export const ControlGeneralViewSelector = ({
           </div>
           <EuiFlexItem>
             <EuiPopover
-              aria-label={i18n.selectorOptions}
               id={selector.name}
               button={
                 <EuiToolTip content="Selector options" disableScreenReaderOutput>
@@ -516,7 +515,6 @@ export const ControlGeneralViewSelector = ({
       </EuiForm>
       <EuiSpacer size="m" />
       <EuiPopover
-        aria-label={i18n.addSelectorCondition}
         id="cloudDefendControlAddCondition"
         data-test-subj="cloud-defend-addconditionpopover"
         button={

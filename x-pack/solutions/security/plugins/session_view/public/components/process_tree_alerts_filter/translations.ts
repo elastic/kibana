@@ -22,13 +22,6 @@ export const SELECTED_PROCESS = {
   }),
 };
 
-export const FILTER_MENU_ARIA_LABEL = i18n.translate(
-  'xpack.sessionView.alertDetailsFilterMenuAriaLabel',
-  {
-    defaultMessage: 'Alert category filter options',
-  }
-);
-
 export const FILTER_MENU_OPTIONS = {
   all: i18n.translate('xpack.sessionView.alertDetailsAllFilterItem', {
     defaultMessage: 'View all alerts',

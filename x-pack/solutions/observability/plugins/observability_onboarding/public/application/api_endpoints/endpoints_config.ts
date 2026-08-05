@@ -16,7 +16,6 @@ export interface ApiEndpointContext {
   isManagedOtlpServiceAvailable: boolean;
   isServerless: boolean;
   managedOtlpPrwEndpointEnabled: boolean;
-  vendorEndpointsEnabled: boolean;
 }
 
 export interface ApiEndpointDefinition {
@@ -196,7 +195,7 @@ export const getVendorEndpointsForTab = (
   context: ApiEndpointContext
 ): ResolvedVendorEndpoint[] => {
   const placement = TAB_PLACEMENTS[tabId];
-  if (!placement || !context.vendorEndpointsEnabled) {
+  if (!placement) {
     return [];
   }
   return resolveVendorEndpoints(
@@ -205,14 +204,8 @@ export const getVendorEndpointsForTab = (
   );
 };
 
-export const getPopoverVendorEndpoints = (
-  context: ApiEndpointContext
-): ResolvedVendorEndpoint[] => {
-  if (!context.vendorEndpointsEnabled) {
-    return [];
-  }
-  return resolveVendorEndpoints(
+export const getPopoverVendorEndpoints = (context: ApiEndpointContext): ResolvedVendorEndpoint[] =>
+  resolveVendorEndpoints(
     VENDOR_ENDPOINTS.filter((definition) => definition.placements.includes('morePopover')),
     context
   );
-};

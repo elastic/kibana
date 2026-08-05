@@ -14,6 +14,7 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
 } from '@kbn/management-settings-ids';
 import { createServerRoute } from '../../create_server_route';
@@ -30,6 +31,7 @@ import {
   DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
   DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
   DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
+  DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
   DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
   MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS,
   MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
@@ -58,6 +60,11 @@ const scheduledDiscoverySettingsSchema = z.object({
   targetCoverageMinutes: z.number().min(MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES).optional(),
   reviewIntervalMinutes: z.number().min(MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES).optional(),
   discoveryBatchSize: z
+    .number()
+    .min(MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE)
+    .max(MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE)
+    .optional(),
+  triageBatchSize: z
     .number()
     .min(MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE)
     .max(MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE)
@@ -104,6 +111,10 @@ const SCHEDULED_DISCOVERY_NUMERIC_SETTINGS = {
   discoveryBatchSize: {
     settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
     defaultValue: DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
+  },
+  triageBatchSize: {
+    settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
+    defaultValue: DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
   },
   maxReviewPasses: {
     settingId: OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
@@ -269,6 +280,7 @@ const putScheduledDiscoverySettingsRoute = createServerRoute({
             targetCoverageMinutes: resolveScheduledConfigValue('targetCoverageMinutes'),
             reviewIntervalMinutes: resolveScheduledConfigValue('reviewIntervalMinutes'),
             discoveryBatchSize: resolveScheduledConfigValue('discoveryBatchSize'),
+            triageBatchSize: resolveScheduledConfigValue('triageBatchSize'),
             maxReviewPasses: resolveScheduledConfigValue('maxReviewPasses'),
           },
         });

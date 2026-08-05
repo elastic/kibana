@@ -147,11 +147,6 @@ Prompt-to-spec mapping showing which strategy doc prompts are covered by which s
 | V2 | Entity Store V2 search_entities routing | `v2/entity_store_v2_search_entities.spec.ts` |
 | V2 | Entity Store V2 multi-skill routing | `v2/entity_store_v2_multi_skill.spec.ts` |
 | V2 | `security.entity` attachment side-effects (single card, table, not-found) | `v2/entity_attachment_side_effect.spec.ts` |
-| V2 | `security.get_entity_graph` routing + `security.entity_graph` attachment (host, user, not-found) | `v2/entity_store_v2_get_entity_graph.spec.ts` |
-| V2 | Leads skill routing (`list_leads`, `generate_leads`, `dismiss_lead`) | `v2/entity_analytics_leads.spec.ts` |
-| V2 | `set_asset_criticality` tool selection, argument extraction, confirmation gating, unassign path | `v2/set_asset_criticality.spec.ts` |
-| V2 | `list_watchlists` routing (discovery, membership, and `get_entity` cross-checks) | `v2/list_watchlists.spec.ts` |
-| V2 | `manage-watchlists` skill routing (create/update/delete, add/remove entities, query-then-add flows) | `v2/manage_watchlists.spec.ts` |
 
 ## Adding New Tests
 

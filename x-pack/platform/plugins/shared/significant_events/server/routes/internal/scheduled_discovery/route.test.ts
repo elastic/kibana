@@ -13,6 +13,7 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
 } from '@kbn/management-settings-ids';
 import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
@@ -47,6 +48,7 @@ const createHandlerParams = ({
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 10,
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 3,
+    [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: 5,
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: 3,
   },
 }: {
@@ -113,6 +115,7 @@ describe('scheduled significant events discovery settings route', () => {
           targetCoverageMinutes: 60,
           reviewIntervalMinutes: 15,
           discoveryBatchSize: 6,
+          triageBatchSize: 8,
           maxReviewPasses: 4,
         },
       });
@@ -125,6 +128,7 @@ describe('scheduled significant events discovery settings route', () => {
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES]: 60,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 15,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 6,
+      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: 8,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: 4,
     });
     expect(installDiscoveryAgentsMock).toHaveBeenCalledWith({
@@ -145,6 +149,7 @@ describe('scheduled significant events discovery settings route', () => {
         targetCoverageMinutes: 60,
         reviewIntervalMinutes: 15,
         discoveryBatchSize: 6,
+        triageBatchSize: 8,
         maxReviewPasses: 4,
       },
     });
@@ -160,6 +165,7 @@ describe('scheduled significant events discovery settings route', () => {
         [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,
         [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 10,
         [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 3,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: 5,
         [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: 3,
       },
     });
@@ -181,6 +187,7 @@ describe('scheduled significant events discovery settings route', () => {
         targetCoverageMinutes: 30,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
+        triageBatchSize: 5,
         maxReviewPasses: 3,
       },
     });
@@ -197,6 +204,7 @@ describe('scheduled significant events discovery settings route', () => {
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 10,
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 3,
+          [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: 5,
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: 3,
         },
       });
@@ -221,6 +229,7 @@ describe('scheduled significant events discovery settings route', () => {
         targetCoverageMinutes: 30,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
+        triageBatchSize: 5,
         maxReviewPasses: 3,
       },
     });
@@ -271,6 +280,7 @@ describe('scheduled significant events discovery settings route', () => {
         [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,
         [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 10,
         [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 3,
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE]: 5,
         [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: 3,
       },
     });
@@ -292,6 +302,7 @@ describe('scheduled significant events discovery settings route', () => {
         targetCoverageMinutes: 30,
         reviewIntervalMinutes: 10,
         discoveryBatchSize: 3,
+        triageBatchSize: 5,
         maxReviewPasses: 3,
       },
     });

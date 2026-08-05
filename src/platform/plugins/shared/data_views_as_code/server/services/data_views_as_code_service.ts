@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod';
 import type { AsCodeSavedDataView } from '@kbn/as-code-data-views-schema';
 import {
   fromStoredDataViewToAsCodeSavedSchema,
@@ -20,6 +19,7 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE, type DataViewLazy } from '@kbn/data-views-
 import type { DataViewsService } from '@kbn/data-views-plugin/server';
 import { omit } from 'lodash';
 import { getMeta } from '@kbn/as-code-shared-schemas';
+import type { TypeOf } from '@kbn/config-schema';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { badRequest } from '@hapi/boom';
 import type { asCodePaginatedResponseSchema } from '../rest_routes/schema';
@@ -155,7 +155,7 @@ export class DataViewsAsCodeService {
     page?: number;
     perPage?: number;
     search?: string;
-  }): Promise<z.output<typeof asCodePaginatedResponseSchema>> {
+  }): Promise<TypeOf<typeof asCodePaginatedResponseSchema>> {
     const result = await this.savedObjectsClient.find<DataViewAttributes>({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
       page,

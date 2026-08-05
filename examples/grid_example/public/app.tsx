@@ -126,6 +126,7 @@ export const GridExample = ({
           panelProps={{
             showBadges: true,
             showBorder: true,
+            showNotifications: true,
             showShadow: false,
             setDragHandles,
           }}

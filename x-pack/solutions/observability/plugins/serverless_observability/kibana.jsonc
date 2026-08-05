@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/serverless-observability",
-  "owner": ["@elastic/observability-ui"],
+  "owner": ["@elastic/obs-presentation-team"],
   "group": "observability",
   "visibility": "private",
   "description": "Serverless customizations for observability.",
@@ -20,6 +20,6 @@
       "navigation"
     ],
     "optionalPlugins": ["cases", "streams", "observabilityAIAssistant", "workflowsManagement"],
-    "requiredBundles": ["significantEvents"]
+    "requiredBundles": ["significant_events"]
   }
 }

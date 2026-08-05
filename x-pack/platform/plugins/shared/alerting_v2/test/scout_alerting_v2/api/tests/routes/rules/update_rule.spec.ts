@@ -62,7 +62,6 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.createdAt).toBe(created.createdAt);
       expect(response.body.createdBy).toBe(created.createdBy);
       expect(response.body.updatedAt).not.toBe(created.updatedAt);
-      expect(response.body.metadata.version).toBe(created.metadata.version + 1);
     }
   );
 
@@ -126,10 +125,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         format: 'standalone',
         breach: { query: 'FROM new-index-* | LIMIT 100' },
       });
-      expect(response.body.metadata).toStrictEqual({
-        ...created.metadata,
-        version: created.metadata.version + 1,
-      });
+      expect(response.body.metadata).toStrictEqual(created.metadata);
       expect(response.body.schedule).toStrictEqual(created.schedule);
     }
   );

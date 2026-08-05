@@ -27,7 +27,6 @@ const createContext = (overrides: Partial<ApiEndpointContext> = {}): ApiEndpoint
   isManagedOtlpServiceAvailable: false,
   isServerless: false,
   managedOtlpPrwEndpointEnabled: false,
-  vendorEndpointsEnabled: true,
   ...overrides,
 });
 
@@ -341,18 +340,6 @@ describe('vendor endpoints', () => {
 
       expect(endpoints[0].url).toBe('https://otlp.example.com:443/supabase/v1/logs');
     });
-
-    it('returns an empty list when the vendor endpoints flag is disabled', () => {
-      expect(
-        getPopoverVendorEndpoints(
-          createContext({
-            isManagedOtlpServiceAvailable: true,
-            managedOtlpServiceUrl: 'https://otlp.example.com:443',
-            vendorEndpointsEnabled: false,
-          })
-        )
-      ).toEqual([]);
-    });
   });
 
   describe('getVendorEndpointsForTab', () => {
@@ -372,19 +359,6 @@ describe('vendor endpoints', () => {
         getVendorEndpointsForTab(
           ApiEndpointId.OpenTelemetry,
           createContext({ managedOtlpServiceUrl: 'https://otlp.example.com:443' })
-        )
-      ).toEqual([]);
-    });
-
-    it('returns an empty list when the vendor endpoints flag is disabled', () => {
-      expect(
-        getVendorEndpointsForTab(
-          ApiEndpointId.OpenTelemetry,
-          createContext({
-            isManagedOtlpServiceAvailable: true,
-            managedOtlpServiceUrl: 'https://otlp.example.com:443',
-            vendorEndpointsEnabled: false,
-          })
         )
       ).toEqual([]);
     });

@@ -26,7 +26,7 @@ import {
 import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
-import { MlAppHeader, useDataVisualizerBack } from '../../components/ml_app_header';
+import { MlAppHeader } from '../../components/ml_app_header';
 import { buildDependencies } from './util';
 
 export const FileDataVisualizerPage: FC = () => {
@@ -41,7 +41,6 @@ export const FileDataVisualizerPage: FC = () => {
   const mlApi = useMlApi();
   const mlLocator = useMlLocator()!;
   const mlManagementLocator = useMlManagementLocatorInternal();
-  const dataVisualizerBack = useDataVisualizerBack();
 
   useEffect(() => {
     getMlNodeCount(mlApi);
@@ -118,7 +117,6 @@ export const FileDataVisualizerPage: FC = () => {
           title={i18n.translate('xpack.ml.dataVisualizer.fileBasedLabel', {
             defaultMessage: 'File upload',
           })}
-          back={dataVisualizerBack}
         />
         <FileDataVisualizerWrapper
           getDependencies={getDependencies}

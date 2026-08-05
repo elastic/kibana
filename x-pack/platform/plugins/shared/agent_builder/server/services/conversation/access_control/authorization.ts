@@ -11,12 +11,6 @@ import type { ConversationProperties } from '../client/storage';
 
 export type ConversationAccess = 'converse' | 'owner';
 
-/**
- * Checks whether the current user owns the conversation.
- *
- * Username matching is limited to documents that never stored a `user_id`, so those owners are not
- * orphaned. It cannot distinguish same-username principals across authentication realms.
- */
 export const isConversationOwner = ({
   conversation,
   user,
@@ -28,11 +22,7 @@ export const isConversationOwner = ({
     return conversation.user_id === user.id;
   }
 
-  if (conversation.user_id === undefined && user.username !== undefined) {
-    return conversation.user_name === user.username;
-  }
-
-  return false;
+  return conversation.user_name === user.username;
 };
 
 const isPublicConversation = ({

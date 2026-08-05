@@ -10,10 +10,6 @@ import type { SignificantEventInvestigation } from '@kbn/significant-events-sche
 import { attachInvestigationToEvent } from './attach_investigation';
 import { EventClient } from './event_client';
 import type { SignificantEvent } from './data_stream';
-import {
-  EVENT_STATUS_CHANGED_TRIGGER_ID,
-  INVESTIGATION_COMPLETED_TRIGGER_ID,
-} from '../../../../common/workflows/triggers';
 
 const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
@@ -59,14 +55,12 @@ const createEventClient = (hits: SignificantEvent[], lineageHits?: SignificantEv
   }
 
   const esClient = { esql: { query: queryMock } };
-  const triggerEmitter = jest.fn();
   const client = new EventClient({
     dataStreamClient: dataStreamClient as never,
     esClient: esClient as never,
     space: 'default',
-    triggerEmitter,
   });
-  return { client, dataStreamClient, triggerEmitter };
+  return { client, dataStreamClient };
 };
 
 describe('attachInvestigationToEvent', () => {
@@ -377,45 +371,5 @@ describe('attachInvestigationToEvent', () => {
     expect(written.investigations).toHaveLength(1);
     expect(written.investigations![0].started_at).toBe(pending.started_at);
     expect(written.investigations![0].completed_at).toBe('2026-01-01T02:00:00.000Z');
-  });
-
-  it('emits eventStatusChanged when a reassessment changes the status', async () => {
-    const existing = createEvent({ event_uuid: 'event-1', status: 'open' });
-    const { client, triggerEmitter } = createEventClient([existing]);
-    const investigation = createInvestigation({ completed_at: '2026-01-01T02:00:00.000Z' });
-
-    await attachInvestigationToEvent({
-      eventClient: client,
-      eventUuid: 'event-1',
-      investigation,
-      reassessedFields: { status: 'closed' },
-    });
-
-    expect(triggerEmitter).toHaveBeenCalledWith(
-      EVENT_STATUS_CHANGED_TRIGGER_ID,
-      expect.objectContaining({ status: 'closed', previous_status: 'open' })
-    );
-    expect(triggerEmitter).toHaveBeenCalledWith(
-      INVESTIGATION_COMPLETED_TRIGGER_ID,
-      expect.objectContaining({ workflow_execution_id: investigation.workflow_execution_id })
-    );
-  });
-
-  it('does not emit eventStatusChanged when the status is unchanged', async () => {
-    const existing = createEvent({ event_uuid: 'event-1', status: 'open' });
-    const { client, triggerEmitter } = createEventClient([existing]);
-    const investigation = createInvestigation({ completed_at: '2026-01-01T02:00:00.000Z' });
-
-    await attachInvestigationToEvent({
-      eventClient: client,
-      eventUuid: 'event-1',
-      investigation,
-      reassessedFields: { severity: '80-critical' },
-    });
-
-    expect(triggerEmitter).not.toHaveBeenCalledWith(
-      EVENT_STATUS_CHANGED_TRIGGER_ID,
-      expect.anything()
-    );
   });
 });

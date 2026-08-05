@@ -1,5 +1,5 @@
 {
-  "sha1": "c908418a5a7e7bd4f5fe14ea73b1eacc6aa39f42",
+  "sha1": "3ec72f7394f285e1a5c4a008c4d923dbda0f1227",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -1051,8 +1051,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 98,
-        "column": 38
+        "line": 97,
+        "column": 87
       }
     },
     {
@@ -1065,8 +1065,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 114,
-        "column": 7
+        "line": 111,
+        "column": 13
       }
     },
     {
@@ -1079,7 +1079,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 130,
+        "line": 126,
         "column": 11
       }
     },
@@ -1093,7 +1093,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 149,
+        "line": 145,
         "column": 38
       }
     },
@@ -1107,7 +1107,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 162,
+        "line": 158,
         "column": 7
       }
     },
@@ -1121,7 +1121,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 178,
+        "line": 174,
         "column": 13
       }
     }

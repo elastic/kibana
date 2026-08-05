@@ -14,9 +14,9 @@ description: |
   surfaced as workflow output for the report phase to resume.
 enabled: true
 tags:
-  - attack-discovery
-  - security
-  - ai-agent
+  - Attack discovery
+  - Security
+  - AI Agent
   - attackDiscovery:gate
 
 triggers:

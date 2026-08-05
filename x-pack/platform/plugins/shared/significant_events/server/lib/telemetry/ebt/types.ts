@@ -149,6 +149,15 @@ interface AgentToolEventWriteProps {
   error_message?: string;
 }
 
+interface AgentToolDiscoveryWriteProps {
+  success: boolean;
+  kind: 'discovery' | 'clearance' | 'handled';
+  event_id: string;
+  stream_names: string[];
+  written: boolean;
+  error_message?: string;
+}
+
 interface AgentToolEventSearchProps {
   success: boolean;
   result_count: number;
@@ -163,6 +172,7 @@ interface AgentToolEventSearchProps {
 export {
   type AgentBuilderKnowledgeIndicatorCreatedProps,
   type AgentToolKnowledgeIndicatorIdentificationStartedProps,
+  type AgentToolDiscoveryWriteProps,
   type AgentToolEventCreateProps,
   type AgentToolEventInvestigationAttachProps,
   type AgentToolEventSearchProps,

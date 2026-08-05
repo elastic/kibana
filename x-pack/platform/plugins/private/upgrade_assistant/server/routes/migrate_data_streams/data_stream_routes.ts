@@ -38,7 +38,7 @@ export function registerMigrateDataStreamRoutes({
       },
       validate: {
         params: schema.object({
-          dataStreamName: schema.string({ maxLength: 1000 }),
+          dataStreamName: schema.string(),
         }),
       },
     },
@@ -89,7 +89,7 @@ export function registerMigrateDataStreamRoutes({
       },
       validate: {
         params: schema.object({
-          dataStreamName: schema.string({ maxLength: 1000 }),
+          dataStreamName: schema.string(),
         }),
       },
     },
@@ -138,7 +138,7 @@ export function registerMigrateDataStreamRoutes({
       },
       validate: {
         params: schema.object({
-          dataStreamName: schema.string({ maxLength: 1000 }),
+          dataStreamName: schema.string(),
         }),
       },
     },
@@ -181,7 +181,7 @@ export function registerMigrateDataStreamRoutes({
       },
       validate: {
         params: schema.object({
-          dataStreamName: schema.string({ maxLength: 1000 }),
+          dataStreamName: schema.string(),
         }),
       },
     },
@@ -236,10 +236,10 @@ export function registerMigrateDataStreamRoutes({
       },
       validate: {
         body: schema.object({
-          indices: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
+          indices: schema.arrayOf(schema.string(), { maxSize: 1000 }),
         }),
         params: schema.object({
-          dataStreamName: schema.string({ maxLength: 1000 }),
+          dataStreamName: schema.string(),
         }),
       },
     },

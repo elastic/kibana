@@ -52,10 +52,6 @@ export const PrivilegedAccessDetectionMLPopover: React.FC = () => {
     <>
       <EuiPopover
         anchorPosition="downRight"
-        aria-label={i18n.translate(
-          'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.padMlJobsPopoverAriaLabel',
-          { defaultMessage: 'Privileged access detection ML jobs' }
-        )}
         id="privileged-access-detections-popover"
         button={
           <EuiButtonEmpty

@@ -63,10 +63,7 @@ export const YourConnector: ConnectorSpec = {
       defaultMessage: 'Search items, list collections, and retrieve details from Your Service',
     }),
     minimumLicense: 'enterprise',
-    // A new connector type must reach Production-NonCanary before it can declare
-    // user-facing features. Ship ['agentBuilder'] first, then add 'workflows'
-    // and others in a follow-up PR.
-    supportedFeatureIds: ['agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
@@ -166,10 +163,7 @@ export const YourMcpConnector: ConnectorSpec = {
     displayName: 'Your MCP Connector',
     description: 'Search and retrieve data via Your Service MCP server',
     minimumLicense: 'enterprise',
-    // A new connector type must reach Production-NonCanary before it can declare
-    // user-facing features. Ship ['agentBuilder'] first, then add 'workflows'
-    // and others in a follow-up PR.
-    supportedFeatureIds: ['agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {

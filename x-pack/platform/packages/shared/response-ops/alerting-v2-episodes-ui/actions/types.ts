@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
+import type { AlertEpisode } from '../queries/episodes_query';
+
 export interface EpisodeActionContext {
   episodes: AlertEpisode[];
   /** Optional hook for the caller to refresh their data layer after a successful execute. */

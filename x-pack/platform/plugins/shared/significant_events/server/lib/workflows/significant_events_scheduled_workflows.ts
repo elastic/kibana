@@ -25,6 +25,7 @@ export interface SignificantEventsScheduledWorkflowsConfig {
   targetCoverageMinutes: number;
   reviewIntervalMinutes: number;
   discoveryBatchSize: number;
+  triageBatchSize: number;
   maxReviewPasses: number;
 }
 
@@ -142,6 +143,7 @@ export const createSignificantEventsScheduledWorkflowsService = ({
         values: {
           reviewIntervalMinutes: config.reviewIntervalMinutes,
           discoveryBatchSize: config.discoveryBatchSize,
+          triageBatchSize: config.triageBatchSize,
           maxReviewPasses: config.maxReviewPasses,
         },
       }),
