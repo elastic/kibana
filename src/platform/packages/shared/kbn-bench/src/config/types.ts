@@ -56,7 +56,6 @@ export interface PairedComparisonRun {
   readonly pairs: number;
   readonly maxAttempts: number;
   readonly seed?: string;
-  readonly enforcement?: 'observe' | 'fail';
 }
 
 export interface PairedComparisonStart {

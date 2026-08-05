@@ -2,6 +2,7 @@
 #
 # Download fixed warm-start calibration distributables, verify checksums, run the
 # paired warm-start memory benchmark, and upload manifest/report artifacts.
+# This calibrates benchmark instrumentation in CI; it is not the regular CI check entrypoint.
 #
 # Orientation (left/right artifact pairing):
 #   aa  fixed A vs fixed A (same-artifact control)

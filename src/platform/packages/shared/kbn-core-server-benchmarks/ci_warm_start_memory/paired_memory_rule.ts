@@ -16,9 +16,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const MIN_VALID_WARM_START_MEMORY_PAIRS = 8;
-export const WARM_START_MEMORY_OBSERVATION_THRESHOLD_BYTES = 5 * 1024 * 1024;
-export const WARM_START_MEMORY_BLOCKING_THRESHOLD_BYTES = 20 * 1024 * 1024;
+export const MIN_VALID_WARM_START_MEMORY_PAIRS = 6;
+
+// Heap growth exceeding 5 MiB is undesirable and should be exceptional for a PR.
+export const WARM_START_MEMORY_THRESHOLD_BYTES = 5 * 1024 * 1024;
 export const WARM_START_MEMORY_CONFIDENCE = 0.99;
 
 // One-sided 99% Student-t critical values for df 1..30.
@@ -43,18 +44,15 @@ export interface PairedMemoryRuleResult {
   readonly tCritical?: number;
   readonly lowerConfidenceBoundBytes?: number;
   readonly thresholdBytes: number;
-  readonly wouldTrigger: boolean;
 }
 
 export const evaluatePairedMemoryRule = ({
   deltas,
-  thresholdBytes = WARM_START_MEMORY_OBSERVATION_THRESHOLD_BYTES,
 }: {
   deltas: readonly number[];
-  thresholdBytes?: number;
 }): PairedMemoryRuleResult => {
   if (deltas.length < MIN_VALID_WARM_START_MEMORY_PAIRS) {
-    return { pairCount: deltas.length, thresholdBytes, wouldTrigger: false };
+    return { pairCount: deltas.length, thresholdBytes: WARM_START_MEMORY_THRESHOLD_BYTES };
   }
 
   const meanBytes = deltas.reduce((sum, delta) => sum + delta, 0) / deltas.length;
@@ -72,7 +70,6 @@ export const evaluatePairedMemoryRule = ({
     standardErrorBytes,
     tCritical,
     lowerConfidenceBoundBytes,
-    thresholdBytes,
-    wouldTrigger: lowerConfidenceBoundBytes > thresholdBytes,
+    thresholdBytes: WARM_START_MEMORY_THRESHOLD_BYTES,
   };
 };

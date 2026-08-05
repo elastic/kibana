@@ -33,9 +33,8 @@ import {
 import {
   evaluatePairedMemoryRule,
   MIN_VALID_WARM_START_MEMORY_PAIRS,
-  WARM_START_MEMORY_BLOCKING_THRESHOLD_BYTES,
   WARM_START_MEMORY_CONFIDENCE,
-  WARM_START_MEMORY_OBSERVATION_THRESHOLD_BYTES,
+  WARM_START_MEMORY_THRESHOLD_BYTES,
 } from './paired_memory_rule';
 import {
   getWarmStartMemoryRegressionReportContextFromEnv,
@@ -143,7 +142,6 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
     ({ benchmarkName }) => benchmarkName === WARM_START_BENCHMARK_NAME
   );
   const comparisonRun = left.config.comparisonRun;
-  const enforcement = comparisonRun?.enforcement ?? 'observe';
   const validPairs = pairedBenchmark?.validPairs ?? [];
   const heapPairs = getPairedMetric(validPairs, 'tailHeapUsed');
   const heapDeltas = (heapPairs.pairs as Array<{ deltaBytes: number }>).map(
@@ -160,21 +158,16 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
       ({ deltaBytes }) => deltaBytes
     ),
   });
-  const postForcedGcHeapBlockingRule = evaluatePairedMemoryRule({
-    deltas: (postForcedGcHeapPairs.pairs as Array<{ deltaBytes: number }>).map(
-      ({ deltaBytes }) => deltaBytes
-    ),
-    thresholdBytes: WARM_START_MEMORY_BLOCKING_THRESHOLD_BYTES,
-  });
   const inconclusive = validPairs.length < MIN_VALID_WARM_START_MEMORY_PAIRS;
-  const wouldObserve = !inconclusive && postForcedGcHeapRule.wouldTrigger;
-  const wouldFail = !inconclusive && postForcedGcHeapBlockingRule.wouldTrigger;
-  const outcome = inconclusive ? 'inconclusive' : wouldObserve ? 'regression' : 'observed';
+  const regression =
+    !inconclusive &&
+    (postForcedGcHeapRule.lowerConfidenceBoundBytes ?? Number.NEGATIVE_INFINITY) >
+      WARM_START_MEMORY_THRESHOLD_BYTES;
+  const outcome = inconclusive ? 'inconclusive' : regression ? 'regression' : 'observed';
 
   const report: WarmStartMemoryRegressionReport = {
     version: 1,
     outcome,
-    enforcement,
     context: getWarmStartMemoryRegressionReportContextFromEnv(),
     protocol: {
       monitorIntervalMs: left.config.monitorInterval,
@@ -182,8 +175,7 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
       tailSampleCount: TAIL_SAMPLE_COUNT,
       forcedGcTimeoutMs: FORCED_GC_TIMEOUT_MS,
       confidence: WARM_START_MEMORY_CONFIDENCE,
-      observationThresholdBytes: WARM_START_MEMORY_OBSERVATION_THRESHOLD_BYTES,
-      blockingThresholdBytes: WARM_START_MEMORY_BLOCKING_THRESHOLD_BYTES,
+      thresholdBytes: WARM_START_MEMORY_THRESHOLD_BYTES,
     },
     comparison: {
       baselineIdentity: pairedComparison?.baselineIdentity,
@@ -224,24 +216,20 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
   }
 
   log.info(
-    `Warm-start paired heap: natural mean ${formatBytes(
-      rule.meanBytes ?? 0
-    )}, natural 99% LCB ${formatBytes(
-      rule.lowerConfidenceBoundBytes ?? 0
-    )}; post-forced-GC mean ${formatBytes(
-      postForcedGcHeapRule.meanBytes ?? 0
-    )}, post-forced-GC 99% LCB ${formatBytes(
+    `Warm-start paired heap growth: ${formatBytes(
       postForcedGcHeapRule.lowerConfidenceBoundBytes ?? 0
-    )}; observation threshold ${formatBytes(
-      WARM_START_MEMORY_OBSERVATION_THRESHOLD_BYTES
-    )}, blocking threshold ${formatBytes(
-      WARM_START_MEMORY_BLOCKING_THRESHOLD_BYTES
-    )}; natural hypotheticalWouldObserve=${
-      rule.wouldTrigger
-    }, post-forced-GC wouldObserve=${wouldObserve}, post-forced-GC wouldFail=${wouldFail}. Report: ${reportPath}`
+    )} 99% LCB; ${formatBytes(WARM_START_MEMORY_THRESHOLD_BYTES)} threshold ${
+      regression ? 'exceeded' : 'not exceeded'
+    }.\n\nWarm-start paired heap results:\npost-forced-GC 99% LCB: ${formatBytes(
+      postForcedGcHeapRule.lowerConfidenceBoundBytes ?? 0
+    )}\npost-forced-GC mean: ${formatBytes(
+      postForcedGcHeapRule.meanBytes ?? 0
+    )}\nnatural 99% LCB: ${formatBytes(
+      rule.lowerConfidenceBoundBytes ?? 0
+    )}\nnatural mean: ${formatBytes(rule.meanBytes ?? 0)}\nReport: ${reportPath}`
   );
 
-  if (wouldFail && enforcement === 'fail') {
+  if (regression) {
     throw new Error(`Warm-start memory regression detected. Report: ${reportPath}`);
   }
 };

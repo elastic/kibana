@@ -33,7 +33,6 @@ export interface WarmStartMemoryRegressionReportContext {
 export interface WarmStartMemoryRegressionReport {
   readonly version: 1;
   readonly outcome: 'observed' | 'inconclusive' | 'regression';
-  readonly enforcement: 'observe' | 'fail';
   readonly context?: WarmStartMemoryRegressionReportContext;
   readonly protocol: {
     readonly monitorIntervalMs: number;
@@ -41,8 +40,7 @@ export interface WarmStartMemoryRegressionReport {
     readonly tailSampleCount: number;
     readonly forcedGcTimeoutMs: number;
     readonly confidence: number;
-    readonly observationThresholdBytes: number;
-    readonly blockingThresholdBytes: number;
+    readonly thresholdBytes: number;
   };
   readonly comparison: {
     readonly baselineIdentity?: string;

@@ -135,6 +135,8 @@ const FORCED_GC_REQUEST_FILE = 'forced_gc_request.json';
       result.inspectorConnectionDurationMs = performance.now() - connectionStart;
       await post(session, 'HeapProfiler.enable');
 
+      // Force collection before the comparison sample to reduce normal-GC timing noise.
+      // Natural heap samples remain in the benchmark report as diagnostics for reclaimable memory.
       const preForcedGcHeapUsage = await post(session, 'Runtime.getHeapUsage');
       result.preForcedGcHeapUsage = preForcedGcHeapUsage;
       result.preForcedGcHeapUsed = preForcedGcHeapUsage.usedSize;

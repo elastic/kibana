@@ -9,6 +9,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { z } from '@kbn/zod/v4';
 import type { ForcedGcHeapStats, ProcStats, ProcStatSample } from './types';
 import { aggregateProcStatSamples } from '../../report/aggregate_proc_stats';
 
@@ -73,50 +74,46 @@ const toMonitorControlError = (name: string, message: string): ForcedGcHeapStats
   };
 };
 
+const heapUsageSchema = z.object({
+  usedSize: z.number().finite(),
+  totalSize: z.number().finite(),
+  embedderHeapUsedSize: z.number().finite(),
+  backingStorageSize: z.number().finite(),
+});
+
+const forcedGcResultSchema = z.object({
+  requestedAt: z.string().min(1),
+  argv: z.array(z.string()).min(1),
+  startedAt: z.string().min(1),
+  completedAt: z.string().min(1),
+  nodeVersion: z.string().min(1),
+  v8Version: z.string().min(1),
+  inspectorConnectionDurationMs: z.number().finite(),
+  forcedGcDurationMs: z.number().finite(),
+  preForcedGcHeapUsed: z.number().finite(),
+  postForcedGcHeapUsed: z.number().finite(),
+  forcedGcHeapReduction: z.number().finite(),
+  preForcedGcHeapUsage: heapUsageSchema,
+  postForcedGcHeapUsage: heapUsageSchema,
+  postForcedGcMemoryUsage: z
+    .record(z.string(), z.unknown())
+    .refine((value) => Object.keys(value).length > 0, { message: 'must not be empty' }),
+  postForcedGcHeapStatistics: z
+    .record(z.string(), z.unknown())
+    .refine((value) => Object.keys(value).length > 0, { message: 'must not be empty' }),
+  postForcedGcHeapSpaceStatistics: z
+    .record(z.string(), z.unknown())
+    .refine((value) => Object.keys(value).length > 0, { message: 'must not be empty' }),
+});
+
 const validateForcedGcResult = (result: ForcedGcHeapStats, request: ForcedGcRequest): string[] => {
-  if (result.error) {
-    return [];
-  }
+  if (result.error) return [];
 
-  const invalid: string[] = [];
-  const requireNumber = (name: string, value: number | undefined) => {
-    if (!Number.isFinite(value)) invalid.push(name);
-  };
-  const requireHeapUsage = (name: string, value: ForcedGcHeapStats['preForcedGcHeapUsage']) => {
-    requireNumber(`${name}.usedSize`, value?.usedSize);
-    requireNumber(`${name}.totalSize`, value?.totalSize);
-    requireNumber(`${name}.embedderHeapUsedSize`, value?.embedderHeapUsedSize);
-    requireNumber(`${name}.backingStorageSize`, value?.backingStorageSize);
-  };
-
+  const validation = forcedGcResultSchema.safeParse(result);
+  const invalid = validation.success
+    ? []
+    : validation.error.issues.map(({ path: issuePath }) => issuePath.join('.'));
   if (result.requestedAt !== request.requestedAt) invalid.push('requestedAt');
-  if (!result.argv.length) invalid.push('argv');
-  if (!result.startedAt) invalid.push('startedAt');
-  if (!result.completedAt) invalid.push('completedAt');
-  if (!result.nodeVersion) invalid.push('nodeVersion');
-  if (!result.v8Version) invalid.push('v8Version');
-  requireNumber('inspectorConnectionDurationMs', result.inspectorConnectionDurationMs);
-  requireNumber('forcedGcDurationMs', result.forcedGcDurationMs);
-  requireNumber('preForcedGcHeapUsed', result.preForcedGcHeapUsed);
-  requireNumber('postForcedGcHeapUsed', result.postForcedGcHeapUsed);
-  requireNumber('forcedGcHeapReduction', result.forcedGcHeapReduction);
-  requireHeapUsage('preForcedGcHeapUsage', result.preForcedGcHeapUsage);
-  requireHeapUsage('postForcedGcHeapUsage', result.postForcedGcHeapUsage);
-  if (!result.postForcedGcMemoryUsage || !Object.keys(result.postForcedGcMemoryUsage).length) {
-    invalid.push('postForcedGcMemoryUsage');
-  }
-  if (
-    !result.postForcedGcHeapStatistics ||
-    !Object.keys(result.postForcedGcHeapStatistics).length
-  ) {
-    invalid.push('postForcedGcHeapStatistics');
-  }
-  if (
-    !result.postForcedGcHeapSpaceStatistics ||
-    !Object.keys(result.postForcedGcHeapSpaceStatistics).length
-  ) {
-    invalid.push('postForcedGcHeapSpaceStatistics');
-  }
   return invalid;
 };
 

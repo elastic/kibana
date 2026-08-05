@@ -65,7 +65,6 @@ const pairedComparisonRunSchema = z
     pairs: z.number().int().positive(),
     maxAttempts: z.number().int().positive(),
     seed: z.string().optional(),
-    enforcement: z.enum(['observe', 'fail']).optional(),
   })
   .refine(({ maxAttempts, pairs }) => maxAttempts >= pairs, {
     message: 'maxAttempts must be greater than or equal to pairs',

@@ -82,11 +82,9 @@ const makeStart = ({
 });
 
 const makeContext = ({
-  enforcement = 'observe',
   naturalDelta = (pair: number) => (pair % 2 === 0 ? 0 : 60 * MIB),
   postForcedGcDelta = 10 * MIB,
 }: {
-  readonly enforcement?: 'observe' | 'fail';
   readonly naturalDelta?: (pair: number) => number;
   readonly postForcedGcDelta?: number;
 } = {}): OnCompareContext => {
@@ -111,7 +109,6 @@ const makeContext = ({
       mode: 'randomized_paired',
       pairs: 8,
       maxAttempts: 12,
-      enforcement,
     },
   } as OnCompareContext['left']['config'];
 
@@ -149,18 +146,17 @@ describe('post-forced-GC warm-start report', () => {
     jest.clearAllMocks();
   });
 
-  it('uses post-forced-GC heap for observation while retaining a higher blocking threshold', async () => {
-    await compareWarmStartMemory(makeContext());
+  it('uses post-forced-GC heap as the threshold-enforced metric', async () => {
+    await expect(compareWarmStartMemory(makeContext())).rejects.toThrow(
+      'Warm-start memory regression detected'
+    );
 
     const report = jest.mocked(writeWarmStartMemoryRegressionReport).mock.calls[0][0];
-    expect(report.enforcement).toBe('observe');
     expect(report.outcome).toBe('regression');
-    expect(report.protocol.observationThresholdBytes).toBe(5 * MIB);
-    expect(report.protocol.blockingThresholdBytes).toBe(20 * MIB);
+    expect(report.protocol.thresholdBytes).toBe(5 * MIB);
     expect(report.tailHeapUsed).toEqual(
       expect.objectContaining({
         meanBytes: 30 * MIB,
-        wouldTrigger: false,
       })
     );
     expect(report.postForcedGcHeapUsed).toEqual(
@@ -168,7 +164,6 @@ describe('post-forced-GC warm-start report', () => {
         meanBytes: 10 * MIB,
         sampleStandardDeviationBytes: 0,
         lowerConfidenceBoundBytes: 10 * MIB,
-        wouldTrigger: true,
       })
     );
     expect(report.diagnostics.forcedGcDurationMs).toEqual(
@@ -184,13 +179,6 @@ describe('post-forced-GC warm-start report', () => {
       expect.objectContaining({ forcedGcHeapStats: expect.any(Array) })
     );
 
-    await expect(
-      compareWarmStartMemory(makeContext({ enforcement: 'fail' }))
-    ).resolves.toBeUndefined();
-    await expect(
-      compareWarmStartMemory(makeContext({ enforcement: 'fail', postForcedGcDelta: 30 * MIB }))
-    ).rejects.toThrow('Warm-start memory regression detected');
-
     await compareWarmStartMemory(
       makeContext({
         naturalDelta: () => 10 * MIB,
@@ -199,13 +187,13 @@ describe('post-forced-GC warm-start report', () => {
     );
 
     const diagnosticNaturalReport = jest.mocked(writeWarmStartMemoryRegressionReport).mock
-      .calls[3][0];
+      .calls[1][0];
     expect(diagnosticNaturalReport.outcome).toBe('observed');
     expect(diagnosticNaturalReport.tailHeapUsed).toEqual(
-      expect.objectContaining({ wouldTrigger: true })
+      expect.objectContaining({ meanBytes: 10 * MIB })
     );
     expect(diagnosticNaturalReport.postForcedGcHeapUsed).toEqual(
-      expect.objectContaining({ wouldTrigger: false })
+      expect.objectContaining({ meanBytes: 3 * MIB })
     );
   });
 });
