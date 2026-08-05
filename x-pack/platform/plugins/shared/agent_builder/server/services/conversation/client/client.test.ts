@@ -592,8 +592,8 @@ describe('ConversationClient', () => {
       const result = await client.get('conversation-1');
 
       expect(result.permissions).toEqual({
-        rename_conversation: true,
-        delete_conversation: true,
+        rename: true,
+        delete: true,
       });
     });
 
@@ -605,8 +605,8 @@ describe('ConversationClient', () => {
       const result = await client.get('conversation-1');
 
       expect(result.permissions).toEqual({
-        rename_conversation: false,
-        delete_conversation: false,
+        rename: false,
+        delete: false,
       });
     });
 
@@ -625,11 +625,11 @@ describe('ConversationClient', () => {
       expect(results.map(({ id, permissions }) => ({ id, permissions }))).toEqual([
         {
           id: 'owned',
-          permissions: { rename_conversation: true, delete_conversation: true },
+          permissions: { rename: true, delete: true },
         },
         {
           id: 'participating',
-          permissions: { rename_conversation: false, delete_conversation: false },
+          permissions: { rename: false, delete: false },
         },
       ]);
     });
@@ -641,7 +641,7 @@ describe('ConversationClient', () => {
 
       const { permissions } = await client.get('conversation-1');
 
-      expect(permissions.delete_conversation).toBe(false);
+      expect(permissions.delete).toBe(false);
       await expect(client.delete('conversation-1')).rejects.toThrow(
         'Conversation conversation-1 not found'
       );
@@ -654,7 +654,7 @@ describe('ConversationClient', () => {
 
       const { permissions } = await client.get('conversation-1');
 
-      expect(permissions.rename_conversation).toBe(false);
+      expect(permissions.rename).toBe(false);
       await expect(client.update({ id: 'conversation-1', title: 'renamed' })).rejects.toThrow(
         'Conversation conversation-1 not found'
       );

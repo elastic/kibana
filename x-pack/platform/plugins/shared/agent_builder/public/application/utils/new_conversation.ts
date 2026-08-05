@@ -8,20 +8,15 @@
 import type { ConversationRound, ConversationRoundStep } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { ConversationWithPermissions } from '../../../common/http_api/conversations';
+import type { GetConversationResponse } from '../../../common/http_api/conversations';
 
-/**
- * Builds the client-side placeholder for a conversation the current user is starting. The user owns
- * it by definition, so rename and delete are granted here rather than waiting for the server
- * payload — the cache is authoritative while the first round streams.
- */
 export const createNewConversation = ({
   id,
   agentId,
 }: {
   id: string;
   agentId: string;
-}): ConversationWithPermissions => {
+}): GetConversationResponse => {
   const now = new Date().toISOString();
   return {
     id,
@@ -31,7 +26,7 @@ export const createNewConversation = ({
     created_at: now,
     updated_at: now,
     rounds: [],
-    permissions: { rename_conversation: true, delete_conversation: true },
+    permissions: { rename: true, delete: true },
   };
 };
 

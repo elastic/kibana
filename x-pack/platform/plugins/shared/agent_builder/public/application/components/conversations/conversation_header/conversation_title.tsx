@@ -34,10 +34,10 @@ const labels = {
     defaultMessage: 'Delete',
   }),
   renameNotAllowed: i18n.translate('xpack.agentBuilder.conversationTitle.renameNotAllowed', {
-    defaultMessage: 'Only the conversation owner can rename it.',
+    defaultMessage: 'You do not have permission to rename this conversation.',
   }),
   deleteNotAllowed: i18n.translate('xpack.agentBuilder.conversationTitle.deleteNotAllowed', {
-    defaultMessage: 'Only the conversation owner can delete it.',
+    defaultMessage: 'You do not have permission to delete this conversation.',
   }),
   newConversation: i18n.translate('xpack.agentBuilder.conversationTitle.newConversation', {
     defaultMessage: 'New conversation',
@@ -54,8 +54,7 @@ interface ConversationTitleProps {
 export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabelledBy }) => {
   const { title, isLoading: isLoadingTitle } = useConversationTitle();
   const hasPersistedConversation = useHasPersistedConversation();
-  const { rename_conversation: canRename, delete_conversation: canDelete } =
-    useConversationPermissions();
+  const { rename: canRename, delete: canDelete } = useConversationPermissions();
   const { euiTheme } = useEuiTheme();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

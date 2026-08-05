@@ -7,7 +7,7 @@
 
 import type { QueryClient } from '@kbn/react-query';
 
-import type { ConversationWithoutRoundsWithPermissions } from '../../../common/http_api/conversations';
+import type { ConversationListItem } from '../../../common/http_api/conversations';
 import type { ConversationsService } from '../../services/conversations/conversations_service';
 import { queryKeys } from '../query_keys';
 
@@ -17,7 +17,7 @@ const buildSidebarConversationListRow = (p: {
   id: string;
   agent_id: string;
   title: string;
-}): ConversationWithoutRoundsWithPermissions => {
+}): ConversationListItem => {
   const t = new Date().toISOString();
   return {
     id: p.id,
@@ -26,8 +26,7 @@ const buildSidebarConversationListRow = (p: {
     title: p.title,
     created_at: t,
     updated_at: t,
-    // The current user is starting this conversation, so they own it.
-    permissions: { rename_conversation: true, delete_conversation: true },
+    permissions: { rename: true, delete: true },
   };
 };
 
@@ -53,7 +52,7 @@ export const insertSidebarConversationListRow = async ({
 
   // Ensure the server list is in cache before we prepend — otherwise `cancelQueries`
   // below kills the in-flight GET and the sidebar ends up showing only the new row.
-  if (queryClient.getQueryData<ConversationWithoutRoundsWithPermissions[]>(key) === undefined) {
+  if (queryClient.getQueryData<ConversationListItem[]>(key) === undefined) {
     try {
       await queryClient.fetchQuery({
         queryKey: key,
@@ -68,7 +67,7 @@ export const insertSidebarConversationListRow = async ({
   await queryClient.cancelQueries({ queryKey: key });
 
   let inserted = false;
-  queryClient.setQueryData<ConversationWithoutRoundsWithPermissions[] | undefined>(key, (prev) => {
+  queryClient.setQueryData<ConversationListItem[] | undefined>(key, (prev) => {
     if (prev?.some((c) => c.id === row.id)) {
       return prev;
     }
@@ -89,7 +88,7 @@ export const removeSidebarConversationListRow = ({
   conversationId: string;
 }) => {
   const key = agentConversationListKey(agentId);
-  queryClient.setQueryData<ConversationWithoutRoundsWithPermissions[] | undefined>(key, (prev) => {
+  queryClient.setQueryData<ConversationListItem[] | undefined>(key, (prev) => {
     if (!prev?.length) {
       return prev;
     }
@@ -106,17 +105,17 @@ export const patchConversationList = ({
   queryClient: QueryClient;
   agentId: string;
   conversationId: string;
-  values: Partial<ConversationWithoutRoundsWithPermissions>;
+  values: Partial<ConversationListItem>;
 }) => {
   const key = agentConversationListKey(agentId);
-  queryClient.setQueryData<ConversationWithoutRoundsWithPermissions[] | undefined>(key, (prev) => {
+  queryClient.setQueryData<ConversationListItem[] | undefined>(key, (prev) => {
     if (!prev?.length) return prev;
     let changed = false;
     const next = prev.map((c) => {
       if (c.id !== conversationId) return c;
-      const hasChanges = (
-        Object.keys(values) as Array<keyof ConversationWithoutRoundsWithPermissions>
-      ).some((k) => values[k] !== c[k]);
+      const hasChanges = (Object.keys(values) as Array<keyof ConversationListItem>).some(
+        (k) => values[k] !== c[k]
+      );
       if (!hasChanges) return c;
       changed = true;
       return { ...c, ...values };

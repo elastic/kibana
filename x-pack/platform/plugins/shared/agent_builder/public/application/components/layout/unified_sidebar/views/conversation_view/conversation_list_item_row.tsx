@@ -72,10 +72,10 @@ const labels = {
     defaultMessage: 'Failed to delete conversation',
   }),
   renameNotAllowed: i18n.translate('xpack.agentBuilder.sidebar.conversationList.renameNotAllowed', {
-    defaultMessage: 'Only the conversation owner can rename it.',
+    defaultMessage: 'You do not have permission to rename this conversation.',
   }),
   deleteNotAllowed: i18n.translate('xpack.agentBuilder.sidebar.conversationList.deleteNotAllowed', {
-    defaultMessage: 'Only the conversation owner can delete it.',
+    defaultMessage: 'You do not have permission to delete this conversation.',
   }),
 };
 
@@ -90,7 +90,6 @@ export interface ConversationListItemRowProps {
   status?: ConversationDisplayStatus;
   read?: boolean;
   isPinned?: boolean;
-  /** Server-resolved permissions. Absent means denied, so actions stay disabled. */
   permissions?: ConversationPermissions;
 }
 
@@ -107,8 +106,8 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   isPinned = false,
   permissions,
 }) => {
-  const canRename = permissions?.rename_conversation ?? false;
-  const canDelete = permissions?.delete_conversation ?? false;
+  const canRename = permissions?.rename ?? false;
+  const canDelete = permissions?.delete ?? false;
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);

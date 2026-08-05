@@ -33,7 +33,7 @@ describe('getConversationPermissions', () => {
         conversation: conversation({ user_id: user.id, user_name: 'old-alice' }),
         user,
       })
-    ).toEqual({ rename_conversation: true, delete_conversation: true });
+    ).toEqual({ rename: true, delete: true });
   });
 
   it('grants rename and delete to the owner of a legacy conversation without a profile id', () => {
@@ -42,7 +42,7 @@ describe('getConversationPermissions', () => {
         conversation: conversation({ user_id: undefined, user_name: user.username }),
         user,
       })
-    ).toEqual({ rename_conversation: true, delete_conversation: true });
+    ).toEqual({ rename: true, delete: true });
   });
 
   it('denies rename and delete to a participant of a public conversation', () => {
@@ -53,7 +53,7 @@ describe('getConversationPermissions', () => {
         }),
         user,
       })
-    ).toEqual({ rename_conversation: false, delete_conversation: false });
+    ).toEqual({ rename: false, delete: false });
   });
 
   it('denies rename and delete on a public conversation owned by a service account', () => {
@@ -66,13 +66,13 @@ describe('getConversationPermissions', () => {
         }),
         user,
       })
-    ).toEqual({ rename_conversation: false, delete_conversation: false });
+    ).toEqual({ rename: false, delete: false });
   });
 
   it('denies rename and delete to a non-owner of a private conversation', () => {
     expect(getConversationPermissions({ conversation: conversation(), user })).toEqual({
-      rename_conversation: false,
-      delete_conversation: false,
+      rename: false,
+      delete: false,
     });
   });
 });

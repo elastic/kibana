@@ -9,14 +9,14 @@ import React from 'react';
 
 import { EuiDraggable } from '@elastic/eui';
 
-import type { ConversationWithoutRoundsWithPermissions } from '../../../../../../../common/http_api/conversations';
+import type { ConversationListItem } from '../../../../../../../common/http_api/conversations';
 import { useStreamingContext } from '../../../../../context/streaming/streaming_context';
 import { ConversationListItemRow } from './conversation_list_item_row';
 import { deriveDisplayStatus } from './derive_display_status';
 
 interface DraggableConversationItemProps {
   agentId: string;
-  conversation: ConversationWithoutRoundsWithPermissions;
+  conversation: ConversationListItem;
   index: number;
   isActive: boolean;
   routeConversationId: string | undefined;

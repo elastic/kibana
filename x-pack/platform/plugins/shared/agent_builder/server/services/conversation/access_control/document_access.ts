@@ -10,10 +10,6 @@ import type { ConversationPermissions } from '../../../../common/http_api/conver
 import type { ConversationProperties } from '../client/storage';
 import { hasConversationOwnerAccess } from './authorization';
 
-/**
- * Resolves the permissions returned alongside a conversation. Derived from the same predicate the
- * rename and delete paths enforce with, so the flags cannot drift from what the API allows.
- */
 export const getConversationPermissions = ({
   conversation,
   user,
@@ -24,7 +20,7 @@ export const getConversationPermissions = ({
   const isOwner = hasConversationOwnerAccess({ conversation, user });
 
   return {
-    rename_conversation: isOwner,
-    delete_conversation: isOwner,
+    rename: isOwner,
+    delete: isOwner,
   };
 };

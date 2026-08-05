@@ -56,8 +56,8 @@ describe('ConversationListItemRow', () => {
     } as unknown as ReturnType<typeof useConversationListMutations>);
   });
 
-  it('enables rename and delete for the conversation owner', () => {
-    renderRow({ rename_conversation: true, delete_conversation: true });
+  it('enables rename and delete when both are permitted', () => {
+    renderRow({ rename: true, delete: true });
 
     expect(
       screen.getByTestId(`agentBuilderSidebarConversationRename-${conversationId}`)
@@ -67,8 +67,8 @@ describe('ConversationListItemRow', () => {
     ).toBeEnabled();
   });
 
-  it('disables rename and delete when the user is not the owner', () => {
-    renderRow({ rename_conversation: false, delete_conversation: false });
+  it('disables rename and delete when neither is permitted', () => {
+    renderRow({ rename: false, delete: false });
 
     expect(
       screen.getByTestId(`agentBuilderSidebarConversationRename-${conversationId}`)
@@ -90,20 +90,20 @@ describe('ConversationListItemRow', () => {
   });
 
   it('leaves mark as read available to participants', () => {
-    renderRow({ rename_conversation: false, delete_conversation: false });
+    renderRow({ rename: false, delete: false });
 
     expect(screen.getByText('Mark as unread')).toBeEnabled();
   });
 
   it('explains why delete is unavailable', async () => {
-    renderRow({ rename_conversation: false, delete_conversation: false });
+    renderRow({ rename: false, delete: false });
 
     fireEvent.mouseOver(
       screen.getByTestId(`agentBuilderSidebarConversationDelete-${conversationId}`)
     );
 
     expect(
-      await screen.findByText('Only the conversation owner can delete it.')
+      await screen.findByText('You do not have permission to delete this conversation.')
     ).toBeInTheDocument();
   });
 });

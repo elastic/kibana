@@ -534,7 +534,7 @@ apiTest.describe(
         });
 
         await apiTest.step(
-          'permissions report owner-only rename and delete on both GET routes',
+          'permissions reflect what rename and delete allow, on both GET routes',
           async () => {
             const getAs = async (user: { username: string; password: string }) => {
               const response = await apiClient.get(
@@ -548,12 +548,12 @@ apiTest.describe(
             };
 
             expect((await getAs(alice)).permissions).toStrictEqual({
-              rename_conversation: true,
-              delete_conversation: true,
+              rename: true,
+              delete: true,
             });
             expect((await getAs(bob)).permissions).toStrictEqual({
-              rename_conversation: false,
-              delete_conversation: false,
+              rename: false,
+              delete: false,
             });
 
             const listedForBob = await apiClient.get(`${accessControlApiBase}/conversations`, {
@@ -565,8 +565,8 @@ apiTest.describe(
               listedForBob.body as ListConversationsResponse
             ).results.find(({ id }) => id === publicConversation.conversation_id);
             expect(listedPublicConversation?.permissions).toStrictEqual({
-              rename_conversation: false,
-              delete_conversation: false,
+              rename: false,
+              delete: false,
             });
           }
         );

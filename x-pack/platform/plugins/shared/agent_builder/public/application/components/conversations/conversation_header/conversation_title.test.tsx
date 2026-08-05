@@ -53,32 +53,32 @@ describe('ConversationTitle', () => {
     jest.clearAllMocks();
   });
 
-  it('enables rename and delete for the conversation owner', () => {
-    renderTitle({ rename_conversation: true, delete_conversation: true });
+  it('enables rename and delete when both are permitted', () => {
+    renderTitle({ rename: true, delete: true });
 
     expect(screen.getByTestId('agentBuilderConversationRenameButton')).toBeEnabled();
     expect(screen.getByTestId('agentBuilderConversationDeleteButton')).toBeEnabled();
   });
 
-  it('disables rename and delete when the user is not the owner', () => {
-    renderTitle({ rename_conversation: false, delete_conversation: false });
+  it('disables rename and delete when neither is permitted', () => {
+    renderTitle({ rename: false, delete: false });
 
     expect(screen.getByTestId('agentBuilderConversationRenameButton')).toBeDisabled();
     expect(screen.getByTestId('agentBuilderConversationDeleteButton')).toBeDisabled();
   });
 
   it('explains why rename and delete are unavailable', async () => {
-    renderTitle({ rename_conversation: false, delete_conversation: false });
+    renderTitle({ rename: false, delete: false });
 
     fireEvent.mouseOver(screen.getByTestId('agentBuilderConversationRenameButton'));
 
     expect(
-      await screen.findByText('Only the conversation owner can rename it.')
+      await screen.findByText('You do not have permission to rename this conversation.')
     ).toBeInTheDocument();
   });
 
   it('gates rename and delete independently', () => {
-    renderTitle({ rename_conversation: true, delete_conversation: false });
+    renderTitle({ rename: true, delete: false });
 
     expect(screen.getByTestId('agentBuilderConversationRenameButton')).toBeEnabled();
     expect(screen.getByTestId('agentBuilderConversationDeleteButton')).toBeDisabled();
