@@ -1606,6 +1606,8 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 # Discover Profile Providers
 # TODO: this deprecation_logs folder should be owned by kibana management team after 9.0
 /src/platform/plugins/shared/discover/common/context_awareness/profile_state_definitions/metrics_grid_profile_state.ts @elastic/obs-signals-metrics-team
+/src/platform/plugins/shared/discover/common/context_awareness/profile_state_definitions/metrics_grid_sort_profile_state.ts @elastic/obs-signals-metrics-team
+/src/platform/plugins/shared/discover/common/context_awareness/profile_state_definitions/metrics_grid_sort_profile_state.test.ts @elastic/obs-signals-metrics-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/metrics_data_source_profile @elastic/obs-signals-metrics-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/deprecation_logs_data_source_profile @elastic/kibana-data-discovery @elastic/kibana-core
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/patterns_data_source_profile @elastic/ml-ui
