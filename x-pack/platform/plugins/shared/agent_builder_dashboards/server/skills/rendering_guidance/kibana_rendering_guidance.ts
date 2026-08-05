@@ -42,7 +42,13 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 ## Rendering Edge Cases
 
 - If the user asks to update a dashboard but no \`attachment_id\` is available in conversation context, ask which dashboard they mean or offer to create a new one.
-- If generation fails, surface the returned error message rather than retrying blindly.`;
+- If generation fails, surface the returned error message rather than retrying blindly.
+
+## Validating a Dashboard (optional)
+
+- To verify a generated dashboard actually renders well, first capture a screenshot with the \`capture_dashboard_screenshot\` browser tool (pass the dashboard \`attachment_id\`; it returns an \`image_attachment_id\`), then call ${dashboardTools.validateDashboard} with the dashboard attachment id and that image attachment id.
+- The capture tool only works while the user has the conversation open in a browser. If it is unavailable or fails, you can still call ${dashboardTools.validateDashboard} without an image for a configuration-only check.
+- The verdict is advisory: apply worthwhile fixes with ${dashboardTools.generateDashboard} operations, re-render, and don't loop endlessly — one validation pass is usually enough.`;
 
 export const kibanaRendering: DashboardGuidanceModule = {
   guidance,

@@ -6,7 +6,7 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { generateDashboardTool } from '../tools';
+import { generateDashboardTool, validateDashboardTool } from '../tools';
 import { dashboardGeneration } from './generation_guidance';
 import { kibanaRendering } from './rendering_guidance';
 
@@ -36,5 +36,5 @@ ${kibanaRendering.guidance}
     ...(dashboardGeneration.referencedContent ?? []),
     ...(kibanaRendering.referencedContent ?? []),
   ],
-  getInlineTools: () => [generateDashboardTool()],
+  getInlineTools: () => [generateDashboardTool(), validateDashboardTool()],
 });

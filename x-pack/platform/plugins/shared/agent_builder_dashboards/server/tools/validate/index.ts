@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { generateDashboardTool } from './generate';
-export { validateDashboardTool } from './validate';
+export { validateDashboardTool, type DashboardValidationVerdict } from './validate_dashboard_tool';
