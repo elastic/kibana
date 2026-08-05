@@ -16,8 +16,7 @@ import {
 
 const SHORT_VALUE = 'shortval';
 const LONG_UUID = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'; // 36 chars
-const LONG_SHA256 =
-  'a'.repeat(64); // 64-char hex string
+const LONG_SHA256 = 'a'.repeat(64); // 64-char hex string
 const LONG_SHA1 = 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2'; // 40 chars
 const LONG_HEX_64 = '0'.repeat(64);
 
@@ -114,9 +113,9 @@ describe('getFieldTokenKind', () => {
     });
 
     it('returns DEFAULT for a long hostname (not hex)', () => {
-      expect(getFieldTokenKind('host.name', 'very-long-hostname-that-is-not-hexadecimal-chars')).toBe(
-        FIELD_TOKEN_KIND.DEFAULT
-      );
+      expect(
+        getFieldTokenKind('host.name', 'very-long-hostname-that-is-not-hexadecimal-chars')
+      ).toBe(FIELD_TOKEN_KIND.DEFAULT);
     });
 
     it('returns DEFAULT for a file path', () => {
