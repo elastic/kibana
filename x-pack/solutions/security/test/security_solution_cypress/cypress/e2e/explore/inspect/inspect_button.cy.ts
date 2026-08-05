@@ -20,7 +20,7 @@ import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
 import { postDataView } from '../../../tasks/api_calls/common';
-import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
+import { mockEntityStoreRiskScores, mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 
 const DATA_VIEW = 'auditbeat-*';
 
@@ -32,6 +32,7 @@ describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
     cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
     login();
     mockRiskEngineEnabled();
+    mockEntityStoreRiskScores();
     // Create and select data view
     postDataView(DATA_VIEW);
   });

@@ -59,6 +59,62 @@ export const mockRiskEngineEnabled = () => {
   }).as('riskEngineStatus');
 };
 
+const ENTITY_STORE_ENTITIES_URL = '/api/security/entity_store/entities*';
+
+const entityStoreDsl = (entityIndex: string) =>
+  JSON.stringify({
+    index: [entityIndex],
+    body: { query: { bool: { filter: [{ exists: { field: 'entity.risk.calculated_score_norm' } }] } } },
+  });
+
+/**
+ * Intercepts the entity store v2 entities list API so that host/user risk score
+ * tables render with stub data in environments where the entity store index is
+ * not populated (e.g. CI inspect-button tests).
+ */
+export const mockEntityStoreRiskScores = () => {
+  const entityIndex = '.entities.v2.latest.security_default-00001';
+
+  cy.intercept('GET', ENTITY_STORE_ENTITIES_URL, (req) => {
+    const entityTypesParam = req.query?.entity_types;
+    const entityTypes: string = Array.isArray(entityTypesParam)
+      ? entityTypesParam.join(',')
+      : String(entityTypesParam ?? '');
+    const isHost = entityTypes.includes('host');
+    const isUser = entityTypes.includes('user');
+
+    const hostRecord = {
+      '@timestamp': '2025-01-01T00:00:00.000Z',
+      'host.name': 'mock-host',
+      entity: { name: 'mock-host', type: 'node', risk: { calculated_score_norm: 70, calculated_level: 'High' } },
+      host: { name: 'mock-host', risk: { calculated_score_norm: 70, calculated_level: 'High', rule_risks: [], multipliers: [] } },
+    };
+
+    const userRecord = {
+      '@timestamp': '2025-01-01T00:00:00.000Z',
+      'user.name': 'mock-user',
+      entity: { name: 'mock-user', type: 'node', risk: { calculated_score_norm: 60, calculated_level: 'Medium' } },
+      user: { name: 'mock-user', risk: { calculated_score_norm: 60, calculated_level: 'Medium', rule_risks: [], multipliers: [] } },
+    };
+
+    const records = isHost ? [hostRecord] : isUser ? [userRecord] : [];
+
+    req.reply({
+      statusCode: 200,
+      body: {
+        records,
+        page: 1,
+        per_page: 10,
+        total: records.length,
+        inspect: {
+          dsl: [entityStoreDsl(entityIndex)],
+          response: [JSON.stringify({ hits: { total: { value: records.length }, hits: [] } })],
+        },
+      },
+    });
+  }).as('entityStoreEntities');
+};
+
 export const openRiskInformationFlyout = () => cy.get(OPEN_RISK_INFORMATION_FLYOUT_BUTTON).click();
 
 export const openEntityStoreEnablementModal = () => {
