@@ -7,11 +7,9 @@
 
 import React, { useMemo } from 'react';
 
-import {
-  getLogsLocatorFromUrlService,
-  getTimeRangeStartFromTime,
-  getTimeRangeEndFromTime,
-} from '@kbn/logs-shared-plugin/common';
+import { getTimeRangeStartFromTime, getTimeRangeEndFromTime } from '@kbn/logs-shared-plugin/common';
+
+import { getAllLogsDataViewSpec } from '@kbn/discover-utils';
 
 import moment from 'moment';
 
@@ -19,44 +17,53 @@ import { EuiButton } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useStartServices, useAuthz } from '../../../../../hooks';
+import { useAuthz, useDiscoverLocator } from '../../../../../hooks';
 
 interface ViewLogsProps {
   logStreamQuery: string;
   startTime: number;
   endTime: number;
+  logSources?: string;
 }
 
 export const getFormattedRange = (date: string) => new Date(date).getTime();
 
 /*
-  Button that takes to the Logs view UI or the Discover logs, depending on what's available
-  If none is available, don't display the button at all
+  Button that opens Discover with an "All logs" ad-hoc data view backed by the
+  tab's own log sources — the same index the embedded log stream queries — so
+  Discover always shows the same documents as the tab.
+
+  Uses the Discover locator directly (not LOGS_LOCATOR) so the data view spec
+  is self-contained and resolves in any solution space, including Security.
 */
 export const ViewLogsButton: React.FunctionComponent<ViewLogsProps> = ({
   logStreamQuery,
   startTime,
   endTime,
+  logSources,
 }) => {
-  const { share } = useStartServices();
-  const logsLocator = getLogsLocatorFromUrlService(share.url);
+  const discoverLocator = useDiscoverLocator();
   const authz = useAuthz();
 
   const logsUrl = useMemo(() => {
+    if (!logSources) {
+      return undefined;
+    }
+
     const now = moment().toISOString();
     const oneDayAgo = moment().subtract(1, 'day').toISOString();
     const defaultStartTime = getFormattedRange(oneDayAgo);
     const defaultEndTime = getFormattedRange(now);
 
-    return logsLocator?.getRedirectUrl({
-      time: endTime ? endTime : defaultEndTime,
+    return discoverLocator?.getRedirectUrl({
+      dataViewSpec: getAllLogsDataViewSpec({ allLogsIndexPattern: logSources }),
       timeRange: {
         from: getTimeRangeStartFromTime(startTime ? startTime : defaultStartTime),
         to: getTimeRangeEndFromTime(endTime ? endTime : defaultEndTime),
       },
       query: { language: 'kuery', query: logStreamQuery },
     });
-  }, [endTime, logStreamQuery, logsLocator, startTime]);
+  }, [discoverLocator, endTime, logSources, logStreamQuery, startTime]);
 
   return authz.fleet.readAgents && logsUrl ? (
     <EuiButton href={logsUrl} iconType="discoverApp" data-test-subj="viewInLogsBtn">

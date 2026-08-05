@@ -32,15 +32,9 @@ jest.mock('@kbn/embeddable-plugin/public', () => ({
   },
 }));
 
-jest.mock('@kbn/logs-shared-plugin/common', () => {
-  const originalModule = jest.requireActual('@kbn/logs-shared-plugin/common');
-  return {
-    ...originalModule,
-    getLogsLocatorFromUrlService: jest
-      .fn()
-      .mockReturnValue({ getRedirectUrl: jest.fn(() => 'https://discover-redirect-url') }),
-  };
-});
+jest.mock('@kbn/logs-shared-plugin/common', () =>
+  jest.requireActual('@kbn/logs-shared-plugin/common')
+);
 
 jest.mock('@kbn/shared-ux-link-redirect-app', () => {
   return {
@@ -66,11 +60,9 @@ jest.mock('../../../../../hooks', () => {
     useLink: jest.fn(),
     useStartServices: jest.fn(),
     useAuthz: jest.fn(),
-    useDiscoverLocator: jest.fn().mockImplementation(() => {
-      return {
-        id: 'DISCOVER_APP_LOCATOR',
-        getRedirectUrl: jest.fn().mockResolvedValue('app/discover/logs/someview'),
-      };
+    useDiscoverLocator: jest.fn().mockReturnValue({
+      id: 'DISCOVER_APP_LOCATOR',
+      getRedirectUrl: jest.fn().mockReturnValue('app/discover/logs/someview'),
     }),
   };
 });
@@ -109,10 +101,7 @@ describe('AgentLogsUI', () => {
   const mockLogSources = {
     services: {
       logSourcesService: {
-        getFlattenedLogSources: jest.fn().mockResolvedValue({
-          id: 'logs-*',
-          title: 'Logs',
-        }),
+        getFlattenedLogSources: jest.fn().mockResolvedValue('logs-*-*'),
       },
     },
   };
@@ -160,28 +149,44 @@ describe('AgentLogsUI', () => {
       logsDataAccess: mockLogSources,
       searchSource: mockData.search.searchSource,
       isServerlessEnabled: isServerlessEnabled || false,
-      share: {
-        url: {
-          locators: {
-            get: () => ({
-              useUrl: () => 'https://locator.url',
-            }),
-          },
-        },
-      },
     }));
   };
 
-  it('should render Open in Logs button if privileges are set', () => {
+  it('should render Open in Discover button linking to logSources-backed data view', async () => {
     mockStartServices();
+    const { useDiscoverLocator } = jest.requireMock('../../../../../hooks');
+    const locator = useDiscoverLocator();
     const result = renderComponent();
+
+    // Wait for logSources async resolution
+    await result.findByTestId('viewInLogsBtn');
+
     expect(result.getByTestId('viewInLogsBtn')).toHaveAttribute(
       'href',
-      `https://discover-redirect-url`
+      'app/discover/logs/someview'
+    );
+
+    expect(locator.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dataViewSpec: expect.objectContaining({
+          id: 'discover-observability-solution-all-logs',
+          title: 'logs-*-*',
+        }),
+      })
     );
   });
 
-  it('should not render Open in Logs button if privileges are not set', () => {
+  it('should not render Open in Discover button while logSources is loading', () => {
+    mockStartServices();
+    // Override to never resolve so logSources.value stays undefined
+    mockLogSources.services.logSourcesService.getFlattenedLogSources.mockReturnValue(
+      new Promise(() => {})
+    );
+    const result = renderComponent();
+    expect(result.queryByTestId('viewInLogsBtn')).not.toBeInTheDocument();
+  });
+
+  it('should not render Open in Discover button if privileges are not set', async () => {
     jest.mocked(useAuthz).mockReturnValue({
       fleet: {
         readAgents: false,
@@ -189,6 +194,7 @@ describe('AgentLogsUI', () => {
     } as any);
     mockStartServices();
     const result = renderComponent();
+    await new Promise((r) => setTimeout(r, 0));
     expect(result.queryByTestId('viewInLogsBtn')).not.toBeInTheDocument();
   });
 });

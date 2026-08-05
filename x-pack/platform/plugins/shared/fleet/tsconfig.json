@@ -57,6 +57,7 @@
     "@kbn/navigation-plugin",
     "@kbn/spaces-plugin",
     "@kbn/discover-plugin",
+    "@kbn/discover-utils",
     "@kbn/data-views-plugin",
     "@kbn/global-search-plugin",
     "@kbn/utility-types",

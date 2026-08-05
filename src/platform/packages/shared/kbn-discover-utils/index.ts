@@ -116,6 +116,10 @@ export type {
 export * from './src/types';
 
 export * from './src/data_types/logs/constants';
+export {
+  getAllLogsDataViewSpec,
+  ALL_LOGS_DATA_VIEW_ID,
+} from './src/data_types/logs/utils/get_all_logs_data_view_spec';
 
 export {
   ALL_RECOMMENDED_FIELDS_FOR_ESQL,

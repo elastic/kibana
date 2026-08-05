@@ -297,6 +297,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
                   logStreamQuery={logStreamQuery.query}
                   startTime={getFormattedRange(state.start)}
                   endTime={getFormattedRange(state.end)}
+                  logSources={logSources.value}
                 />
               </RedirectAppLinks>
             </EuiFlexItem>
