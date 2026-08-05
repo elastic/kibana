@@ -136,8 +136,7 @@ export const CensysConnector: ConnectorSpec = {
     id: '.censys',
     displayName: 'Censys',
     description: i18n.translate('connectorSpecs.censys.metadata.description', {
-      defaultMessage:
-        'Get IP, domain and certificate data from the Censys Platform.',
+      defaultMessage: 'Get IP, domain and certificate data from the Censys Platform.',
     }),
     minimumLicense: 'gold',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
