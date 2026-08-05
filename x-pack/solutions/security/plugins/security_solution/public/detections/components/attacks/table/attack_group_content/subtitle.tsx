@@ -159,7 +159,12 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
               <EuiFlexItem grow={false}>
                 {attack.userId ? (
                   <UserAvatar
-                    user={runByProfile?.user}
+                    // Fall back to a synthetic user object when the profile is still loading
+                    // or the UID has no matching profile, so initials are shown instead of "?".
+                    user={
+                      runByProfile?.user ??
+                      (attack.userName ? { username: attack.userName } : undefined)
+                    }
                     avatar={runByProfile?.data?.avatar}
                     size="s"
                     data-test-subj="attack-run-by-avatar"
