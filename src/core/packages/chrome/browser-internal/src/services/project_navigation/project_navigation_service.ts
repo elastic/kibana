@@ -229,6 +229,12 @@ export class ProjectNavigationService {
       },
       getActiveSolutionNavId$: () => activeSolutionNavId$,
       getActiveSolutionNavId: () => currentNavSource$.getValue()?.id ?? null,
+      getDeepLinkNavPaths$: (): Observable<ReadonlyMap<string, readonly string[]> | null> =>
+        parsedNavigation$.pipe(
+          map((parsed) => parsed?.deepLinkNavPaths ?? null),
+          distinctUntilChanged(),
+          shareReplay(1)
+        ),
       setNavigationCustomization: (customization: NavigationCustomization | undefined) =>
         this.customization$.next(customization),
       getCustomizeNavigationHandler$: () => this.customizeNavigationHandler$.asObservable(),

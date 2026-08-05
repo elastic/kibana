@@ -329,6 +329,13 @@ export interface ChromeStart {
   getActiveSolutionNavId(): SolutionId | null;
 
   /**
+   * In project chrome, ancestor titles for each deep link id present in the active
+   * navigation tree (including the leaf). Emits `null` when project navigation is
+   * not initialized (classic chrome, or before `initNavigation`).
+   */
+  getDeepLinkNavPaths$(): Observable<ReadonlyMap<string, readonly string[]> | null>;
+
+  /**
    * Used only by the rendering service and KibanaRenderingContextProvider to wrap the rendering tree in the Chrome context providers
    */
   withProvider(component: ReactNode): ReactNode;

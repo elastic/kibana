@@ -1019,3 +1019,41 @@ describe('getActiveSolutionNavId$()', () => {
     expect(activeId).toBe('oblt');
   });
 });
+
+describe('getDeepLinkNavPaths$()', () => {
+  it('should return null initially and a path map after initNavigation', async () => {
+    const { projectNavigation } = setup({
+      navLinkIds: ['management:application_connections'],
+    });
+
+    const before = await lastValueFrom(projectNavigation.getDeepLinkNavPaths$().pipe(take(1)));
+    expect(before).toBeNull();
+
+    projectNavigation.initNavigation<any>(
+      'oblt',
+      of({
+        body: [
+          {
+            id: 'admin_and_settings',
+            title: 'Admin and Settings',
+            breadcrumbStatus: 'hidden',
+            children: [
+              {
+                id: 'access',
+                title: 'Access',
+                children: [{ link: 'management:application_connections' }],
+              },
+            ],
+          },
+        ],
+      })
+    );
+
+    const paths = await lastValueFrom(projectNavigation.getDeepLinkNavPaths$().pipe(take(1)));
+    expect(paths?.get('management:application_connections')).toEqual([
+      'Admin and Settings',
+      'Access',
+      'MANAGEMENT:APPLICATION_CONNECTIONS',
+    ]);
+  });
+});

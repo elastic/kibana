@@ -7,16 +7,17 @@
 
 import { combineLatest, from, of } from 'rxjs';
 import { take, map, takeUntil, mergeMap, shareReplay } from 'rxjs';
-import type { ApplicationStart } from '@kbn/core/public';
-import type { ChromeStyle } from '@kbn/core-chrome-browser';
+import type { ApplicationStart, ChromeStart } from '@kbn/core/public';
 import type { GlobalSearchResultProvider } from '@kbn/global-search-plugin/public';
 import { getAppResults } from './get_app_results';
 
 const applicationType = 'application';
 
+type ChromeForSearch = Pick<ChromeStart, 'getChromeStyle' | 'getDeepLinkNavPaths$'>;
+
 export const createApplicationResultProvider = (
   applicationPromise: Promise<ApplicationStart>,
-  getChromeStylePromise: Promise<() => ChromeStyle>
+  chromePromise: Promise<ChromeForSearch>
 ): GlobalSearchResultProvider => {
   const searchableApps$ = from(applicationPromise).pipe(
     mergeMap((application) => application.applications$),
@@ -35,15 +36,21 @@ export const createApplicationResultProvider = (
       if (tags || (types && !types.includes(applicationType))) {
         return of([]);
       }
-      return combineLatest([searchableApps$.pipe(take(1)), from(getChromeStylePromise)]).pipe(
+      return combineLatest([searchableApps$.pipe(take(1)), from(chromePromise)]).pipe(
         takeUntil(aborted$),
         take(1),
-        map(([apps, getChromeStyle]) => {
-          const results = getAppResults(term ?? '', [...apps.values()], {
-            omitManagementSectionTitles: getChromeStyle() === 'project',
-          });
-          return results.sort((a, b) => b.score - a.score).slice(0, maxResults);
-        })
+        mergeMap(([apps, chrome]) =>
+          chrome.getDeepLinkNavPaths$().pipe(
+            take(1),
+            map((deepLinkNavPaths) => {
+              const results = getAppResults(term ?? '', [...apps.values()], {
+                chromeStyle: chrome.getChromeStyle(),
+                deepLinkNavPaths,
+              });
+              return results.sort((a, b) => b.score - a.score).slice(0, maxResults);
+            })
+          )
+        )
       );
     },
     getSearchableTypes: () => [applicationType],

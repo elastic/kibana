@@ -6,6 +6,7 @@
  */
 
 import type { PublicAppInfo, PublicAppDeepLinkInfo, AppCategory } from '@kbn/core/public';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { distance } from 'fastest-levenshtein';
 import type { GlobalSearchProviderResult } from '@kbn/global-search-plugin/public';
 
@@ -21,7 +22,8 @@ export interface AppLink {
 }
 
 export interface GetAppResultsOptions {
-  omitManagementSectionTitles?: boolean;
+  chromeStyle?: ChromeStyle;
+  deepLinkNavPaths?: ReadonlyMap<string, readonly string[]> | null;
 }
 
 export const getAppResults = (
@@ -99,17 +101,32 @@ const scoreAppByKeywords = (term: string, keywords: string[]): number => {
   return Math.max(...scores);
 };
 
+const getManagementTitleParts = (
+  appLink: AppLink,
+  { chromeStyle = 'classic', deepLinkNavPaths = null }: GetAppResultsOptions
+): string[] => {
+  if (chromeStyle !== 'project') {
+    return appLink.subLinkTitles;
+  }
+
+  const leafDeepLinkId = appLink.id.slice(appLink.app.id.length + 1);
+  const navTitles = deepLinkNavPaths?.get(`${appLink.app.id}:${leafDeepLinkId}`);
+  if (navTitles && navTitles.length > 0) {
+    return [...navTitles];
+  }
+
+  return [appLink.subLinkTitles[appLink.subLinkTitles.length - 1]];
+};
+
 export const appToResult = (
   appLink: AppLink,
   score: number,
-  { omitManagementSectionTitles = false }: GetAppResultsOptions = {}
+  options: GetAppResultsOptions = {}
 ): GlobalSearchProviderResult => {
   const titleParts =
     // Stack Management app should not include the app title in the concatenated link label
     appLink.app.id === 'management' && appLink.subLinkTitles.length > 0
-      ? omitManagementSectionTitles
-        ? [appLink.subLinkTitles[appLink.subLinkTitles.length - 1]]
-        : appLink.subLinkTitles
+      ? getManagementTitleParts(appLink, options)
       : [appLink.app.title, ...appLink.subLinkTitles];
 
   return {

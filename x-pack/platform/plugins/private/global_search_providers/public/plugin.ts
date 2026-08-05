@@ -22,11 +22,9 @@ export class GlobalSearchProvidersPlugin
   ) {
     const startServices = getStartServices();
     const applicationPromise = startServices.then(([core]) => core.application);
-    const getChromeStylePromise = startServices.then(
-      ([core]) => () => core.chrome.getChromeStyle()
-    );
+    const chromePromise = startServices.then(([core]) => core.chrome);
     globalSearch.registerResultProvider(
-      createApplicationResultProvider(applicationPromise, getChromeStylePromise)
+      createApplicationResultProvider(applicationPromise, chromePromise)
     );
     return {};
   }

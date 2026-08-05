@@ -409,7 +409,7 @@ describe('appToResult', () => {
     expect(appToResult(appLink, 42).title).toEqual('Sub1');
   });
 
-  it('keeps management section titles for nested deep links by default', () => {
+  it('keeps management section titles for nested deep links in classic chrome', () => {
     const app = createApp({ id: 'management' });
     const appLink: AppLink = {
       id: 'management-application_connections',
@@ -420,9 +420,33 @@ describe('appToResult', () => {
     };
 
     expect(appToResult(appLink, 42).title).toEqual('Security / Application connections');
+    expect(appToResult(appLink, 42, { chromeStyle: 'classic' }).title).toEqual(
+      'Security / Application connections'
+    );
   });
 
-  it('uses only the leaf title for nested Stack Management deep links when omitting section titles', () => {
+  it('uses nav-tree titles for nested Stack Management deep links in project chrome', () => {
+    const app = createApp({ id: 'management' });
+    const appLink: AppLink = {
+      id: 'management-application_connections',
+      app,
+      path: '/security/application_connections',
+      subLinkTitles: ['Security', 'Application connections'],
+      keywords: [],
+    };
+    const deepLinkNavPaths = new Map<string, readonly string[]>([
+      [
+        'management:application_connections',
+        ['Admin and Settings', 'Access', 'Application connections'],
+      ],
+    ]);
+
+    expect(
+      appToResult(appLink, 42, { chromeStyle: 'project', deepLinkNavPaths }).title
+    ).toEqual('Admin and Settings / Access / Application connections');
+  });
+
+  it('falls back to the leaf title in project chrome when the deep link is missing from the nav tree', () => {
     const app = createApp({ id: 'management' });
     const appLink: AppLink = {
       id: 'management-application_connections',
@@ -432,8 +456,11 @@ describe('appToResult', () => {
       keywords: [],
     };
 
-    expect(appToResult(appLink, 42, { omitManagementSectionTitles: true }).title).toEqual(
-      'Application connections'
-    );
+    expect(
+      appToResult(appLink, 42, { chromeStyle: 'project', deepLinkNavPaths: null }).title
+    ).toEqual('Application connections');
+    expect(
+      appToResult(appLink, 42, { chromeStyle: 'project', deepLinkNavPaths: new Map() }).title
+    ).toEqual('Application connections');
   });
 });

@@ -186,6 +186,7 @@ export function createChromeApi({
         InternalChromeStart['getActiveSolutionNavId$']
       >,
     getActiveSolutionNavId: () => projectNavigation.getActiveSolutionNavId(),
+    getDeepLinkNavPaths$: () => projectNavigation.getDeepLinkNavPaths$(),
     project,
     next: {
       get isEnabled() {
