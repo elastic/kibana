@@ -60,14 +60,9 @@ export function initializeHistoryManager({
       disableUndoRedo$,
       state$: dashboardCurrentState$,
       mapState: (state) => {
-        const sortById = (
-          { id: idA }: DashboardState['panels'][number] | DashboardState['pinned_panels'][number],
-          { id: idB }: DashboardState['panels'][number] | DashboardState['pinned_panels'][number]
-        ) => (idA ?? '').localeCompare(idB ?? '');
         return {
           ...state,
-          panels: state.panels.sort(sortById),
-          // pinned_panels: state.pinned_panels.sort(sortById),
+          panels: state.panels.sort(sortById), // keep panel order consistent so that diffing on array works as expected
         };
       },
       maxSize: 10,
@@ -99,3 +94,8 @@ export function initializeHistoryManager({
     },
   };
 }
+
+const sortById = (
+  { id: idA }: DashboardState['panels'][number] | DashboardState['pinned_panels'][number],
+  { id: idB }: DashboardState['panels'][number] | DashboardState['pinned_panels'][number]
+) => (idA ?? '').localeCompare(idB ?? '');
