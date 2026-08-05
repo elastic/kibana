@@ -25,7 +25,7 @@ const mockUseConversationListMutations = jest.mocked(useConversationListMutation
 
 const conversationId = 'conversation-1';
 
-const renderRow = (permissions?: ConversationPermissions) => {
+const renderRow = (permissions: ConversationPermissions) => {
   render(
     <IntlProvider locale="en">
       <MemoryRouter>
@@ -69,17 +69,6 @@ describe('ConversationListItemRow', () => {
 
   it('disables rename and delete when neither is permitted', () => {
     renderRow({ rename: false, delete: false });
-
-    expect(
-      screen.getByTestId(`agentBuilderSidebarConversationRename-${conversationId}`)
-    ).toBeDisabled();
-    expect(
-      screen.getByTestId(`agentBuilderSidebarConversationDelete-${conversationId}`)
-    ).toBeDisabled();
-  });
-
-  it('denies rename and delete when permissions are absent', () => {
-    renderRow();
 
     expect(
       screen.getByTestId(`agentBuilderSidebarConversationRename-${conversationId}`)

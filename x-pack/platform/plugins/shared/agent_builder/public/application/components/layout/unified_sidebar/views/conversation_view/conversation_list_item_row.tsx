@@ -90,7 +90,7 @@ export interface ConversationListItemRowProps {
   status?: ConversationDisplayStatus;
   read?: boolean;
   isPinned?: boolean;
-  permissions?: ConversationPermissions;
+  permissions: ConversationPermissions;
 }
 
 export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = ({
@@ -106,8 +106,8 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   isPinned = false,
   permissions,
 }) => {
-  const canRename = permissions?.rename ?? false;
-  const canDelete = permissions?.delete ?? false;
+  const canRename = permissions.rename;
+  const canDelete = permissions.delete;
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);

@@ -88,8 +88,8 @@ export const useConversationPermissions = (): ConversationPermissions => {
   const { conversation } = useConversation();
 
   return {
-    rename: conversation?.permissions?.rename ?? false,
-    delete: conversation?.permissions?.delete ?? false,
+    rename: conversation?.permissions.rename ?? false,
+    delete: conversation?.permissions.delete ?? false,
   };
 };
 
