@@ -149,6 +149,7 @@
     "@elastic/ems-client": "8.7.0",
     "@elastic/esql": "4.16.0",
     "@elastic/eui": "118.0.0",
+    "@elastic/eui-illustrations": "1.0.1",
     "@elastic/eui-theme-borealis": "8.0.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/kibana-d3-color": "npm:@elastic/kibana-d3-color@2.0.1",
@@ -1410,6 +1411,7 @@
     "@turf/helpers": "6.0.1",
     "@turf/length": "6.0.2",
     "@xstate/react": "6.0.0",
+    "@xterm/xterm": "6.0.0",
     "@xyflow/react": "12.11.1",
     "adm-zip": "0.6.0",
     "ai": "5.0.190",
@@ -1628,7 +1630,6 @@
     "xml-formatter": "3.6.7",
     "xml2js": "0.6.2",
     "xstate": "5.26.0",
-    "xterm": "5.3.0",
     "yaml": "2.8.3",
     "yargs": "15.4.1",
     "yauzl": "3.4.0",
@@ -2266,5 +2267,5 @@
     "yaml-language-server": "1.23.0",
     "yarn-deduplicate": "6.0.2"
   },
-  "packageManager": "yarn@1.22.21"
+  "packageManager": "yarn@1.22.22"
 }
