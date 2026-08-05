@@ -168,6 +168,7 @@ describe('useAgentBuilderIntegration', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     mockModel = createMockModel(INITIAL_YAML);
+    useUiSettingMock.mockReturnValue(true);
     mockConsumeSidebarRestoreFor.mockReturnValue(false);
   });
 
@@ -648,6 +649,22 @@ describe('useAgentBuilderIntegration', () => {
       expect(agentBuilder.openChat).not.toHaveBeenCalled();
       expect(mockTelemetry.reportWorkflowAiChatOpened).not.toHaveBeenCalled();
     });
+
+    it('does not auto-open when experimental features are disabled', () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      useUiSettingMock.mockReturnValue(false);
+      const editor = createMockEditor(mockModel);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+        })
+      );
+
+      expect(agentBuilder.openChat).not.toHaveBeenCalled();
+    });
   });
 
   describe('cleanup closes the chat sidebar', () => {
@@ -967,9 +984,10 @@ describe('useAgentBuilderIntegration', () => {
   });
 
   describe('isAgentBuilderAvailable', () => {
-    it('returns true when agentBuilder is available', async () => {
+    it('returns true when agentBuilder is available and experimental features enabled', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
+      useUiSettingMock.mockReturnValue(true);
       const editor = createMockEditor(mockModel);
 
       const { result } = renderHook(() =>
@@ -991,6 +1009,7 @@ describe('useAgentBuilderIntegration', () => {
         hasLlmConnector: false,
       });
       setupKibanaMock(agentBuilder);
+      useUiSettingMock.mockReturnValue(true);
       const editor = createMockEditor(mockModel);
 
       const { result } = renderHook(() =>
@@ -1008,6 +1027,7 @@ describe('useAgentBuilderIntegration', () => {
     it('returns false when show privilege is missing', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder, { hasShowPrivilege: false });
+      useUiSettingMock.mockReturnValue(true);
       const editor = createMockEditor(mockModel);
 
       const { result } = renderHook(() =>
@@ -1029,6 +1049,7 @@ describe('useAgentBuilderIntegration', () => {
         hasLlmConnector: true,
       });
       setupKibanaMock(agentBuilder);
+      useUiSettingMock.mockReturnValue(true);
       const editor = createMockEditor(mockModel);
 
       const { result } = renderHook(() =>
@@ -1056,12 +1077,11 @@ describe('useAgentBuilderIntegration', () => {
 
       expect(result.current.isAgentBuilderAvailable).toBe(false);
     });
-  });
 
-  describe('no advanced-setting gate', () => {
-    it('wires up attachment sync, chat config and auto-open on a default deployment', async () => {
+    it('returns false when experimental features are disabled', () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
+      useUiSettingMock.mockReturnValue(false);
       const editor = createMockEditor(mockModel);
 
       const { result } = renderHook(() =>
@@ -1071,29 +1091,7 @@ describe('useAgentBuilderIntegration', () => {
         })
       );
 
-      await flushChatAccessCheck();
-
-      const expected = expectedAttachment(INITIAL_YAML);
-      expect(result.current.isAgentBuilderAvailable).toBe(true);
-      expect(agentBuilder.addAttachment).toHaveBeenCalledWith(expected);
-      expect(agentBuilder.setChatConfig).toHaveBeenCalledWith(expectedChatConfig(expected));
-      expect(agentBuilder.openChat).toHaveBeenCalled();
-    });
-
-    it('never reads a ui setting', async () => {
-      setupKibanaMock(createMockAgentBuilder());
-      const editor = createMockEditor(mockModel);
-
-      renderHook(() =>
-        useAgentBuilderIntegration({
-          editorRef: { current: editor },
-          isEditorMounted: true,
-        })
-      );
-
-      await flushChatAccessCheck();
-
-      expect(useUiSettingMock).not.toHaveBeenCalled();
+      expect(result.current.isAgentBuilderAvailable).toBe(false);
     });
   });
 });

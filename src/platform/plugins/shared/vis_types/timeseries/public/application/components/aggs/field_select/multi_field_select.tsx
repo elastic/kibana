@@ -44,7 +44,7 @@ export function MultiFieldSelect(props: {
             customDragHandle={true}
           >
             {(provided) => (
-              <EuiFlexGroup alignItems="center" data-test-subj={`multiFieldSelectRow-${index}`}>
+              <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiPanel
                     color="transparent"

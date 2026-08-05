@@ -26,7 +26,6 @@ export const apiKeysMock = {
         grant: jest.fn(),
         invalidate: jest.fn(),
         convert: jest.fn(),
-        getInternalCallerAttestationHeaders: jest.fn().mockReturnValue({}),
       },
     }),
 };

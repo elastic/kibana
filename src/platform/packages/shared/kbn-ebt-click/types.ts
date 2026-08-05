@@ -13,6 +13,3 @@ export interface EbtClickAttrs {
   element: string;
   detail?: string;
 }
-
-/** For components that define `action` internally and expose the rest to consumers. */
-export type EbtClickAttrsWithoutAction = Omit<EbtClickAttrs, 'action'>;

@@ -6,7 +6,7 @@
  */
 
 import { of } from 'rxjs';
-import type { Conversation, RoundCompleteEvent } from '@kbn/agent-builder-common';
+import type { RoundCompleteEvent } from '@kbn/agent-builder-common';
 import {
   ChatEventType,
   ConversationAccessControlMode,
@@ -184,137 +184,125 @@ describe('conversations utils', () => {
   });
 
   describe('updateConversation$', () => {
-    const runUpdate = async ({
-      conversationClient,
-      conversation,
-      roundCompleteEvent,
-      action,
-    }: {
-      conversationClient: ReturnType<typeof createConversationClientMock>;
-      conversation: Conversation;
-      roundCompleteEvent: RoundCompleteEvent;
-      action?: 'regenerate';
-    }) => {
-      conversationClient.upsertRound.mockResolvedValue(conversation);
-
-      const result$ = updateConversation$({
-        conversationClient,
-        conversation,
-        roundCompletedEvents$: of(roundCompleteEvent),
-        ...(action ? { action } : {}),
-      });
-
-      await new Promise<void>((resolve) => {
-        result$.subscribe({
-          complete: resolve,
-        });
-      });
-    };
-
     describe('action parameter', () => {
-      it('names the superseded round when action=regenerate', async () => {
+      it('replaces last round when action=regenerate', async () => {
         const conversationClient = createConversationClientMock();
         const existingRound = createRound({ id: 'round-1', input: { message: 'original' } });
         const conversation = createEmptyConversation({ rounds: [existingRound] });
 
-        // regenerate mints a new round id, so the superseded round must be named
         const newRound = createRound({ id: 'round-new', input: { message: 'regenerated' } });
+        const roundCompleteEvent: RoundCompleteEvent = {
+          type: ChatEventType.roundComplete,
+          data: {
+            round: newRound,
+            resumed: false,
+          },
+        };
 
-        await runUpdate({
+        conversationClient.update.mockResolvedValue(conversation);
+
+        const result$ = updateConversation$({
           conversationClient,
           conversation,
+          title$: of('Test Title'),
+          roundCompletedEvents$: of(roundCompleteEvent),
           action: 'regenerate',
-          roundCompleteEvent: {
-            type: ChatEventType.roundComplete,
-            data: { round: newRound, resumed: false },
-          },
         });
 
-        expect(conversationClient.upsertRound).toHaveBeenCalledWith(
+        await new Promise<void>((resolve) => {
+          result$.subscribe({
+            complete: resolve,
+          });
+        });
+
+        expect(conversationClient.update).toHaveBeenCalledWith(
           expect.objectContaining({
-            round: newRound,
-            replacesRoundId: 'round-1',
+            rounds: [newRound],
+            read: false,
+            status: newRound.status,
           }),
           { access: 'converse' }
         );
       });
 
-      it('passes only the new round when no action is provided', async () => {
+      it('appends round when no action is provided', async () => {
         const conversationClient = createConversationClientMock();
         const existingRound = createRound({ id: 'round-1', input: { message: 'original' } });
         const conversation = createEmptyConversation({ rounds: [existingRound] });
 
         const newRound = createRound({ id: 'round-2', input: { message: 'new' } });
+        const roundCompleteEvent: RoundCompleteEvent = {
+          type: ChatEventType.roundComplete,
+          data: {
+            round: newRound,
+            resumed: false,
+          },
+        };
 
-        await runUpdate({
+        conversationClient.update.mockResolvedValue(conversation);
+
+        const result$ = updateConversation$({
           conversationClient,
           conversation,
-          roundCompleteEvent: {
-            type: ChatEventType.roundComplete,
-            data: { round: newRound, resumed: false },
-          },
+          title$: of('Test Title'),
+          roundCompletedEvents$: of(roundCompleteEvent),
         });
 
-        expect(conversationClient.upsertRound).toHaveBeenCalledWith(
+        await new Promise<void>((resolve) => {
+          result$.subscribe({
+            complete: resolve,
+          });
+        });
+
+        expect(conversationClient.update).toHaveBeenCalledWith(
           expect.objectContaining({
-            round: newRound,
+            rounds: [existingRound, newRound],
+            read: false,
+            status: newRound.status,
           }),
           { access: 'converse' }
         );
-        expect(conversationClient.upsertRound).not.toHaveBeenCalledWith(
-          expect.objectContaining({ replacesRoundId: expect.anything() }),
-          expect.anything()
-        );
       });
 
-      it('relies on the round id alone when resumed=true (HITL flow)', async () => {
+      it('replaces last round when resumed=true (HITL flow, auto-detected)', async () => {
         const conversationClient = createConversationClientMock();
         const existingRound = createRound({ id: 'round-1', input: { message: 'original' } });
         const conversation = createEmptyConversation({ rounds: [existingRound] });
 
-        // a resumed round keeps the pending round's id, so it is matched by id
         const newRound = createRound({ id: 'round-1', input: { message: 'resumed' } });
+        const roundCompleteEvent: RoundCompleteEvent = {
+          type: ChatEventType.roundComplete,
+          data: {
+            round: newRound,
+            resumed: true,
+          },
+        };
 
-        await runUpdate({
+        conversationClient.update.mockResolvedValue(conversation);
+
+        const result$ = updateConversation$({
           conversationClient,
           conversation,
-          roundCompleteEvent: {
-            type: ChatEventType.roundComplete,
-            data: { round: newRound, resumed: true },
-          },
+          title$: of('Test Title'),
+          roundCompletedEvents$: of(roundCompleteEvent),
+          // No action - auto-detected resume via resumed flag
         });
 
-        expect(conversationClient.upsertRound).toHaveBeenCalledWith(
+        await new Promise<void>((resolve) => {
+          result$.subscribe({
+            complete: resolve,
+          });
+        });
+
+        expect(conversationClient.update).toHaveBeenCalledWith(
           expect.objectContaining({
-            round: newRound,
+            rounds: [newRound],
+            read: false,
+            status: newRound.status,
           }),
           { access: 'converse' }
         );
-        expect(conversationClient.upsertRound).not.toHaveBeenCalledWith(
-          expect.objectContaining({ replacesRoundId: expect.anything() }),
-          expect.anything()
-        );
       });
-    });
-
-    it('never passes a rounds array, so a stale snapshot cannot be written', async () => {
-      const conversationClient = createConversationClientMock();
-      const conversation = createEmptyConversation({
-        rounds: [createRound({ id: 'round-1', input: { message: 'original' } })],
-      });
-
-      await runUpdate({
-        conversationClient,
-        conversation,
-        roundCompleteEvent: {
-          type: ChatEventType.roundComplete,
-          data: { round: createRound({ id: 'round-2' }), resumed: false },
-        },
-      });
-
-      const [request] = conversationClient.upsertRound.mock.calls[0];
-      expect(request).not.toHaveProperty('rounds');
-      expect(request).not.toHaveProperty('title');
     });
   });
 });

@@ -40,12 +40,6 @@ export interface EntitiesTableConfig {
   columnsSettingsLocalStorageKey: string;
   /** `@kbn/grouping` id used to persist the active grouping selection. */
   groupingLocalStorageKey: string;
-  /**
-   * Whether "Filter For" / "Filter Out" cell actions are available. Defaults to true.
-   * Set to false in contexts (e.g. Cases attachments) where there is no filter state
-   * backing the table, to avoid showing actions that silently do nothing.
-   */
-  supportsFieldFiltering?: boolean;
 }
 
 export const DEFAULT_ENTITIES_TABLE_CONFIG: EntitiesTableConfig = {

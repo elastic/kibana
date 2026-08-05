@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana } from '../../../contexts/kibana';
-import { MlAppHeader, useDataFrameAnalyticsJobsBack } from '../../../components/ml_app_header';
+import { MlAppHeader } from '../../../components/ml_app_header';
 import { SourceSelection } from '../analytics_management/components/source_selection';
 
 export const Page: FC = () => {
@@ -19,7 +19,6 @@ export const Page: FC = () => {
     services: { docLinks },
   } = useMlKibana();
   const helpLink = docLinks.links.ml.dataFrameAnalytics;
-  const dataFrameAnalyticsJobsBack = useDataFrameAnalyticsJobsBack();
 
   return (
     <>
@@ -27,7 +26,6 @@ export const Page: FC = () => {
         title={i18n.translate('xpack.ml.dataframe.analyticsSourceSelection.title', {
           defaultMessage: 'New analytics job / Choose a source data view',
         })}
-        back={dataFrameAnalyticsJobsBack}
       />
 
       <SourceSelection />

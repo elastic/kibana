@@ -16,10 +16,14 @@ import { EuiContextMenu } from '@elastic/eui';
 
 import type { Capabilities } from '@kbn/core/public';
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '../../common';
 import { UrlPanelContent } from './url_panel_content';
-import type { ShareMenuItemLegacy, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
+import type {
+  ShareMenuItemLegacy,
+  ShareContextMenuPanelItem,
+  UrlParamExtension,
+  ShareableLocatorParams,
+} from '../types';
 import type { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 import type { BrowserUrlService } from '../types';
 
@@ -31,8 +35,8 @@ export interface ShareContextMenuProps {
   shareableUrl?: string;
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
-    locator: LocatorPublic<SerializableRecord>;
-    params: SerializableRecord;
+    locator: LocatorPublic<any>;
+    params: ShareableLocatorParams;
   };
   shareMenuItems: ShareMenuItemLegacy[];
   sharingData: any;

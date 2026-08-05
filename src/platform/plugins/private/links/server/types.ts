@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod';
+import type { TypeOf } from '@kbn/config-schema';
 import type {
   dashboardLinkSchema,
   externalLinkOptionsSchema,
@@ -18,13 +18,13 @@ import type {
   linksApiStateSchema,
 } from './api/schemas';
 
-export type LinksByValueState = z.output<typeof linksByValueSchema>;
-export type LinksByReferenceState = z.output<typeof linksByReferenceSchema>;
-export type LinksEmbeddableState = z.output<typeof linksEmbeddableSchema>;
-export type LinksApiState = z.output<typeof linksApiStateSchema>;
+export type LinksByValueState = TypeOf<typeof linksByValueSchema>;
+export type LinksByReferenceState = TypeOf<typeof linksByReferenceSchema>;
+export type LinksEmbeddableState = TypeOf<typeof linksEmbeddableSchema>;
+export type LinksApiState = TypeOf<typeof linksApiStateSchema>;
 
-export type DashboardLink = z.output<typeof dashboardLinkSchema>;
-export type ExternalLink = z.output<typeof externalLinkSchema>;
-export type ExternalLinkOptions = z.output<typeof externalLinkOptionsSchema>;
+export type DashboardLink = TypeOf<typeof dashboardLinkSchema>;
+export type ExternalLink = TypeOf<typeof externalLinkSchema>;
+export type ExternalLinkOptions = TypeOf<typeof externalLinkOptionsSchema>;
 export type Link = DashboardLink | ExternalLink;
 export type LinkOptions = DashboardLink['options'] | ExternalLinkOptions;

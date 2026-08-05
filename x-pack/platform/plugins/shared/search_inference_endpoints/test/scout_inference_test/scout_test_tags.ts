@@ -7,11 +7,9 @@
 
 /**
  * Local Scout matrix for Search Inference UI + API tests (Feature Settings, EIS, model flyout, inference settings API).
- *
- * `@local-stateful-search` is intentionally omitted: Kibana CI only schedules stateful test runs
- * tagged `classic`.
  */
 export const INFERENCE_LOCAL_TAGS = [
   '@local-stateful-classic',
+  '@local-stateful-search',
   '@local-serverless-search',
 ] as const;

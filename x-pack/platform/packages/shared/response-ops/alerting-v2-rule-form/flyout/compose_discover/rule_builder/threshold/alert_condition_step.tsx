@@ -468,7 +468,6 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       {isFieldMapError && !isLoadingFieldMap && (
         <>
           <EuiCallOut
-            announceOnMount
             size="s"
             color="warning"
             title={i18n.translate('xpack.alertingV2.ruleBuilder.fieldLoadErrorTitle', {

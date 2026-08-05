@@ -14,5 +14,4 @@ export const getSloApmLabels = (slo: SLODefinition) => ({
   slo_time_window: `${slo.timeWindow.type}_${slo.timeWindow.duration.format()}`,
   slo_has_group_by: slo.groupBy !== ALL_VALUE,
   slo_prevent_initial_backfill: slo.settings.preventInitialBackfill,
-  slo_prevent_cross_project_search: slo.settings.preventCrossProjectSearch,
 });

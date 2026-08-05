@@ -170,13 +170,6 @@ export const ADD_CONNECTOR = i18n.translate('xpack.cases.casesRedesign.details.a
   defaultMessage: 'Add connector',
 });
 
-export const CONNECTOR_SETTINGS_ARIA_LABEL = i18n.translate(
-  'xpack.cases.casesRedesign.details.connectorSettingsAriaLabel',
-  {
-    defaultMessage: 'Connector settings',
-  }
-);
-
 export const LEGACY_CUSTOM_FIELDS_TITLE = i18n.translate(
   'xpack.cases.casesRedesign.details.legacyCustomFieldsTitle',
   {

@@ -8,10 +8,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { unwrapSchema } from './unwrap_schema';
 
 export function getShape(schema: z.ZodType): Record<string, z.ZodType> {
-  const current = unwrapSchema(schema);
+  let current: unknown = schema;
+  while (current instanceof z.ZodLazy || current instanceof z.ZodOptional) {
+    current = (current as z.ZodLazy | z.ZodOptional).unwrap();
+  }
   if (current instanceof z.ZodIntersection) {
     return {
       ...getShape(current.def.left as z.ZodType),

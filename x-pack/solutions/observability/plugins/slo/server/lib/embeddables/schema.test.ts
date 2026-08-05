@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
 import { getOverviewEmbeddableSchema } from './schema';
 
@@ -23,8 +22,8 @@ describe('schema validation', () => {
         hide_title: false,
       };
 
-      expect(() => overviewEmbeddableSchema.parse(validState)).not.toThrow();
-      const result = overviewEmbeddableSchema.parse(validState);
+      expect(() => overviewEmbeddableSchema.validate(validState)).not.toThrow();
+      const result = overviewEmbeddableSchema.validate(validState);
       expect(result).toMatchObject({
         slo_id: 'test-slo-id',
         slo_instance_id: 'test-instance-id',
@@ -39,7 +38,7 @@ describe('schema validation', () => {
         overview_mode: 'single' as const,
       };
 
-      expect(() => overviewEmbeddableSchema.parse(minimalState)).not.toThrow();
+      expect(() => overviewEmbeddableSchema.validate(minimalState)).not.toThrow();
     });
 
     it('should reject invalid overview_mode value with targeted error', () => {
@@ -48,19 +47,17 @@ describe('schema validation', () => {
         overview_mode: 'invalid-mode',
       };
 
-      expectPrettyError(overviewEmbeddableSchema.safeParse(invalidState)).toMatchInlineSnapshot(`
-        "✖ Invalid discriminator value. Expected 'single' | 'groups'
-          → at overview_mode"
-      `);
+      expect(() => overviewEmbeddableSchema.validate(invalidState)).toThrow(
+        /expected "overview_mode" to be one of \["single", "groups"\]/
+      );
     });
 
     it('should report missing overview_mode without cross-variant noise', () => {
       const missingMode = { slo_id: 'test-slo-id' };
 
-      expectPrettyError(overviewEmbeddableSchema.safeParse(missingMode)).toMatchInlineSnapshot(`
-        "✖ Invalid discriminator value. Expected 'single' | 'groups'
-          → at overview_mode"
-      `);
+      expect(() => overviewEmbeddableSchema.validate(missingMode)).toThrow(
+        /"overview_mode" property is required/
+      );
     });
   });
 
@@ -87,8 +84,8 @@ describe('schema validation', () => {
         hide_title: false,
       };
 
-      expect(() => overviewEmbeddableSchema.parse(validState)).not.toThrow();
-      const result = overviewEmbeddableSchema.parse(validState);
+      expect(() => overviewEmbeddableSchema.validate(validState)).not.toThrow();
+      const result = overviewEmbeddableSchema.validate(validState);
       expect(result).toMatchObject({
         group_filters: {
           group_by: 'status',
@@ -127,7 +124,7 @@ describe('schema validation', () => {
           overview_mode: 'groups' as const,
         };
 
-        expect(() => overviewEmbeddableSchema.parse(state)).not.toThrow();
+        expect(() => overviewEmbeddableSchema.validate(state)).not.toThrow();
       });
     });
 
@@ -140,8 +137,8 @@ describe('schema validation', () => {
         overview_mode: 'groups' as const,
       };
 
-      expect(() => overviewEmbeddableSchema.parse(state)).not.toThrow();
-      const result = overviewEmbeddableSchema.parse(state);
+      expect(() => overviewEmbeddableSchema.validate(state)).not.toThrow();
+      const result = overviewEmbeddableSchema.validate(state);
       expect(result).toMatchObject({
         group_filters: {
           group_by: '_index',
@@ -159,11 +156,10 @@ describe('schema validation', () => {
         overview_mode: 'groups' as const,
       };
 
-      expectPrettyError(overviewEmbeddableSchema.safeParse(invalidState)).toMatchInlineSnapshot(`
-        "✖ Invalid input
-          → at group_filters.group_by"
-      `);
-      expect(() => overviewEmbeddableSchema.parse(invalidState)).not.toThrow(/slo_id/);
+      expect(() => overviewEmbeddableSchema.validate(invalidState)).toThrow(
+        /group_filters\.group_by/
+      );
+      expect(() => overviewEmbeddableSchema.validate(invalidState)).not.toThrow(/slo_id/);
     });
 
     it('should validate group overview state with minimal required fields', () => {
@@ -174,18 +170,18 @@ describe('schema validation', () => {
         overview_mode: 'groups' as const,
       };
 
-      expect(() => overviewEmbeddableSchema.parse(minimalState)).not.toThrow();
+      expect(() => overviewEmbeddableSchema.validate(minimalState)).not.toThrow();
     });
 
     it('should default group_filters to { group_by: "status" } when group_filters is absent', () => {
-      const result = overviewEmbeddableSchema.parse({
+      const result = overviewEmbeddableSchema.validate({
         overview_mode: 'groups' as const,
       });
       expect(result).toMatchObject({ group_filters: { group_by: 'status' } });
     });
 
     it('should default group_by to "status" when group_filters is empty', () => {
-      const result = overviewEmbeddableSchema.parse({
+      const result = overviewEmbeddableSchema.validate({
         group_filters: {},
         overview_mode: 'groups' as const,
       });
@@ -193,7 +189,7 @@ describe('schema validation', () => {
     });
 
     it('should default group_by to "status" when group_filters omits group_by', () => {
-      const result = overviewEmbeddableSchema.parse({
+      const result = overviewEmbeddableSchema.validate({
         group_filters: { groups: ['healthy'] },
         overview_mode: 'groups' as const,
       });
@@ -209,11 +205,7 @@ describe('schema validation', () => {
         overview_mode: 'groups' as const,
       };
 
-      expectPrettyError(overviewEmbeddableSchema.safeParse(stateWithTooManyGroups))
-        .toMatchInlineSnapshot(`
-        "✖ Too big: expected array to have <=100 items
-          → at group_filters.groups"
-      `);
+      expect(() => overviewEmbeddableSchema.validate(stateWithTooManyGroups)).toThrow();
     });
 
     it('should accept groups array at maxSize (100)', () => {
@@ -225,7 +217,7 @@ describe('schema validation', () => {
         overview_mode: 'groups' as const,
       };
 
-      expect(() => overviewEmbeddableSchema.parse(stateWithMaxGroups)).not.toThrow();
+      expect(() => overviewEmbeddableSchema.validate(stateWithMaxGroups)).not.toThrow();
     });
 
     it('should reject filters array exceeding maxSize (500)', () => {
@@ -244,11 +236,7 @@ describe('schema validation', () => {
         overview_mode: 'groups' as const,
       };
 
-      expectPrettyError(overviewEmbeddableSchema.safeParse(stateWithTooManyFilters))
-        .toMatchInlineSnapshot(`
-        "✖ Too big: expected array to have <=500 items
-          → at group_filters.filters"
-      `);
+      expect(() => overviewEmbeddableSchema.validate(stateWithTooManyFilters)).toThrow();
     });
 
     it('should accept filters array at maxSize (500)', () => {
@@ -267,7 +255,7 @@ describe('schema validation', () => {
         overview_mode: 'groups' as const,
       };
 
-      expect(() => overviewEmbeddableSchema.parse(stateWithMaxFilters)).not.toThrow();
+      expect(() => overviewEmbeddableSchema.validate(stateWithMaxFilters)).not.toThrow();
     });
   });
 
@@ -279,7 +267,7 @@ describe('schema validation', () => {
       // slo_instance_id, remote_name are all optional
     };
 
-    expect(() => overviewEmbeddableSchema.parse(stateWithOnlyRequiredFields)).not.toThrow();
+    expect(() => overviewEmbeddableSchema.validate(stateWithOnlyRequiredFields)).not.toThrow();
   });
 
   it('should validate group overview state when groups, filters and kql_query are omitted', () => {
@@ -290,6 +278,6 @@ describe('schema validation', () => {
       overview_mode: 'groups' as const,
     };
 
-    expect(() => overviewEmbeddableSchema.parse(stateWithoutOptionalGroupFields)).not.toThrow();
+    expect(() => overviewEmbeddableSchema.validate(stateWithoutOptionalGroupFields)).not.toThrow();
   });
 });

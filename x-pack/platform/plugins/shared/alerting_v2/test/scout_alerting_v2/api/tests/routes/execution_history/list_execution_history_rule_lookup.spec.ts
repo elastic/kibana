@@ -118,7 +118,7 @@ apiTest.describe(
         await apiServices.alertingV2.rules.delete(RULE_ID_DELETED);
 
         const seenBothIds = async (): Promise<boolean> => {
-          const response = await apiClient.get(getListExecutionHistoryUrl({ per_page: 100 }), {
+          const response = await apiClient.get(getListExecutionHistoryUrl({ perPage: 100 }), {
             headers: readerHeaders,
           });
           const ids = new Set(
@@ -133,7 +133,7 @@ apiTest.describe(
           .poll(seenBothIds, { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] })
           .toBe(true);
 
-        const response = await apiClient.get(getListExecutionHistoryUrl({ per_page: 100 }), {
+        const response = await apiClient.get(getListExecutionHistoryUrl({ perPage: 100 }), {
           headers: readerHeaders,
         });
         expect(response).toHaveStatusCode(200);

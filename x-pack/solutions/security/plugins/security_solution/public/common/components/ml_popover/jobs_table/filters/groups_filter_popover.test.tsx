@@ -41,9 +41,9 @@ describe('GroupsFilterPopover', () => {
     wrapper.find('button[data-test-subj="groups-filter-popover-button"]').first().simulate('click');
     wrapper.update();
 
-    wrapper.find('EuiFilterSelectItemComponent').first().simulate('click');
+    wrapper.find('EuiFilterSelectItemClass').first().simulate('click');
     wrapper.update();
 
-    expect(wrapper.find('EuiFilterSelectItemComponent').first().prop('checked')).toEqual('on');
+    expect(wrapper.find('EuiFilterSelectItemClass').first().prop('checked')).toEqual('on');
   });
 });

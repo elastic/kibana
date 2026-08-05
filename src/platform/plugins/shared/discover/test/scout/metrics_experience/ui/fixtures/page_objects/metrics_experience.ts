@@ -173,24 +173,6 @@ export class MetricsExperiencePage {
   }
 
   /**
-   * Clicks "Open in Discover tab" on the visible quick-action row of the given
-   * card. Discover switches to the newly created in-app tab; callers that need
-   * the original tab must capture its test subject first (via
-   * `unifiedTabs.getActiveTabTestSubj()`) and navigate back themselves.
-   */
-  public async clickExploreInDiscoverTab(cardIndex: number): Promise<void> {
-    await this.clickVisibleQuickAction(cardIndex, this.chartActionsFor(cardIndex).explore);
-  }
-
-  /**
-   * Opens the "Copy to dashboard" save modal by clicking the action on the
-   * visible quick-action row of the given card.
-   */
-  public async clickCopyToDashboard(cardIndex: number): Promise<void> {
-    await this.clickVisibleQuickAction(cardIndex, this.chartActionsFor(cardIndex).copyToDashboard);
-  }
-
-  /**
    * Returns the title element of the card at `index`
    */
   public getCardTitle(index: number): Locator {

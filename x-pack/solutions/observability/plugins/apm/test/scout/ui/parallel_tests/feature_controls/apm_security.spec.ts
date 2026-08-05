@@ -47,22 +47,26 @@ test.describe(
 
     test('with global apm all privileges does not show the read-only badge', async ({
       browserAuth,
-      pageObjects: { featureControlsPage, chrome },
+      pageObjects: { featureControlsPage },
     }) => {
       await browserAuth.loginWithCustomRole(globalApmAll);
       await featureControlsPage.gotoApm();
       await featureControlsPage.waitForApmToLoad();
-      await expect(chrome.badgeWithLabel('Read only')).toBeHidden();
+      await expect(featureControlsPage.readOnlyBadge).toBeHidden();
     });
 
     test('with global apm read-only privileges can navigate to APM and shows the read-only badge', async ({
       browserAuth,
-      pageObjects: { featureControlsPage, chrome },
+      pageObjects: { featureControlsPage },
     }) => {
       await browserAuth.loginWithCustomRole(globalApmRead);
       await featureControlsPage.gotoApm();
       await featureControlsPage.waitForApmToLoad();
-      await expect(chrome.badgeWithLabel('Read only')).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+      await expect(featureControlsPage.readOnlyBadge).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+      await expect(featureControlsPage.readOnlyBadge).toHaveAttribute(
+        'data-test-badge-label',
+        'Read only'
+      );
     });
 
     test('with no apm privileges renders the no-permission page', async ({

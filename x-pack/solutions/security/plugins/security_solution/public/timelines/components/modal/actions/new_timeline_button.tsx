@@ -81,7 +81,6 @@ export const NewTimelineButton = React.memo(({ timelineId }: NewTimelineButtonPr
 
   return (
     <EuiPopover
-      aria-label={i18n.NEW_TIMELINE_POPOVER_ARIA_LABEL}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={togglePopover}

@@ -7,20 +7,18 @@
 
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import {
-  actionPolicyTagsQuerySchema,
-  actionPolicyTagsResponseSchema,
-  errorResponseSchema,
-  type ActionPolicyTagsQuery,
-} from '@kbn/alerting-v2-schemas';
+import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
+import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
-import { actionPolicyTagsOasExamples } from './action_policy_tags_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+
+const actionPolicyTagsQuerySchema = z.object({
+  search: z.string().min(1).max(256).optional(),
+});
 
 @injectable()
 export class ActionPolicyTagsRoute extends BaseAlertingRoute {
@@ -34,20 +32,15 @@ export class ActionPolicyTagsRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Get action policy tags suggestions',
     description: 'Get suggestions for action policy tags based on an optional search query.',
-    oasOperationObject: actionPolicyTagsOasExamples,
   } as const;
   static schemas = {
     request: {
       query: actionPolicyTagsQuerySchema,
     },
     response: {
-      200: {
-        body: () => actionPolicyTagsResponseSchema,
-        description: 'Returns suggested action policy tags.',
-      },
       400: {
         body: () => errorResponseSchema,
-        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+        description: 'Indicates invalid query parameters.',
       },
     },
   };
@@ -57,7 +50,11 @@ export class ActionPolicyTagsRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, ActionPolicyTagsQuery, unknown>,
+    private readonly request: KibanaRequest<
+      unknown,
+      z.infer<typeof actionPolicyTagsQuerySchema>,
+      unknown
+    >,
     @inject(ActionPolicyClient)
     private readonly actionPolicyClient: ActionPolicyClient
   ) {

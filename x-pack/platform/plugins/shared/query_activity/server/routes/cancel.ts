@@ -20,7 +20,7 @@ export const registerCancelRoute = ({ router, logger }: RouteOptions) => {
       },
       validate: {
         body: schema.object({
-          taskId: schema.string({ minLength: 1, maxLength: 1000 }),
+          taskId: schema.string({ minLength: 1 }),
         }),
       },
       options: {

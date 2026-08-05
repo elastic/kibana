@@ -7,7 +7,7 @@
 
 import { setTimeout } from 'timers/promises';
 
-class PollTimeoutError extends Error {
+export class PollTimeoutError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'PollTimeoutError';

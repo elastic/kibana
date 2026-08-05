@@ -14,8 +14,9 @@ import type { TaskClaim, TaskTiming } from '../task_events';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import type { TaskClaimingBatches } from '../queries/task_claiming';
 import type { ConcreteTaskInstance } from '../task';
+import { claimAvailableTasksUpdateByQuery } from './strategy_update_by_query';
 import { claimAvailableTasksMget } from './strategy_mget';
-import { CLAIM_STRATEGY_MGET } from '../config';
+import { CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET } from '../config';
 import type { TaskPartitioner } from '../lib/task_partitioner';
 
 export interface TaskClaimerOpts {
@@ -46,14 +47,21 @@ export interface ClaimOwnershipResult {
 
 export type TaskClaimerFn = (opts: TaskClaimerOpts) => Promise<ClaimOwnershipResult>;
 
-const validClaimStrategies = [CLAIM_STRATEGY_MGET];
+let WarnedOnInvalidClaimer = false;
 
 export function getTaskClaimer(logger: Logger, strategy: string): TaskClaimerFn {
-  if (!validClaimStrategies.includes(strategy)) {
-    logger.warn(`Unknown task claiming strategy "${strategy}", falling back to default: mget`);
+  switch (strategy) {
+    case CLAIM_STRATEGY_UPDATE_BY_QUERY:
+      return claimAvailableTasksUpdateByQuery;
+    case CLAIM_STRATEGY_MGET:
+      return claimAvailableTasksMget;
   }
-  logger.info(`using task claiming strategy: ${CLAIM_STRATEGY_MGET}`);
-  return claimAvailableTasksMget;
+
+  if (!WarnedOnInvalidClaimer) {
+    WarnedOnInvalidClaimer = true;
+    logger.warn(`Unknown task claiming strategy "${strategy}", falling back to update_by_query`);
+  }
+  return claimAvailableTasksUpdateByQuery;
 }
 
 export function getEmptyClaimOwnershipResult(): ClaimOwnershipResult {

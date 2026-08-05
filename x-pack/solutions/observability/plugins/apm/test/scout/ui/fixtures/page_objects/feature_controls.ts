@@ -31,4 +31,8 @@ export class FeatureControlsPage {
   async waitForApmToLoad() {
     await this.apmMainContainer.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
+
+  public get readOnlyBadge() {
+    return this.page.getByTestId('headerBadge');
+  }
 }

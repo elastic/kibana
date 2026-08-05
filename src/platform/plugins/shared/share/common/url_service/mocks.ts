@@ -9,8 +9,6 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { TimeRange } from '@kbn/es-query';
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition, KibanaLocation } from '.';
 import { UrlService } from '.';
 
@@ -41,19 +39,8 @@ export class MockUrlService extends UrlService {
   }
 }
 
-type MockLocatorParams = SerializableRecord & {
-  timeRange?: TimeRange;
-};
-
-export class MockLocatorDefinition implements LocatorDefinition<MockLocatorParams> {
+export class MockLocatorDefinition implements LocatorDefinition<any> {
   constructor(public readonly id: string) {}
-
-  public readonly getTimeRange = (params: MockLocatorParams) => params.timeRange;
-
-  public readonly setTimeRange = (params: MockLocatorParams, timeRange?: TimeRange) => ({
-    ...params,
-    timeRange,
-  });
 
   public readonly getLocation = async (): Promise<KibanaLocation> => {
     return {

@@ -31,8 +31,7 @@ export async function evaluateDependencies(
   esClient: ElasticsearchClient,
   sloRepository: SLODefinitionRepository,
   dependencies: Dependency[],
-  startedAt: Date,
-  projectRouting?: string
+  startedAt: Date
 ): Promise<EvaulateDependenciesResponse> {
   const activeRules = await Promise.all(
     dependencies.map(async (dependency) => {
@@ -44,13 +43,7 @@ export async function evaluateDependencies(
           dependency.actionGroupsToSuppressOn.includes(winDef.actionGroup)
         ),
       };
-      const results = await evaluate(
-        esClient,
-        slo,
-        paramsWithSuppressOnWindows,
-        startedAt,
-        projectRouting
-      );
+      const results = await evaluate(esClient, slo, paramsWithSuppressOnWindows, startedAt);
       const instanceIdsToSuppress = results
         .filter((res) => res.shouldAlert)
         .map((res) => res.instanceId);

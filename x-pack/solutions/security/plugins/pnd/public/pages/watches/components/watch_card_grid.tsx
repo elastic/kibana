@@ -65,7 +65,7 @@ export const WatchCardGrid: React.FC<WatchCardGridProps> = ({
       >
         <EuiFlexGroup direction="column" alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="plus" size="l" color="subdued" aria-hidden={true} />
+            <EuiIcon type="plus" size="l" color="subdued" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">

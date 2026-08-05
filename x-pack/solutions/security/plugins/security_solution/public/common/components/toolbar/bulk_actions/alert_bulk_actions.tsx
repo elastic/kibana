@@ -233,12 +233,7 @@ const mapDispatchToProps = {
   clearSelected: dataTableActions.clearSelected,
 };
 
-type StateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
-type DispatchProps = typeof mapDispatchToProps;
-const connector = connect<StateProps, DispatchProps, OwnProps, DataTableState>(
-  makeMapStateToProps,
-  mapDispatchToProps
-);
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

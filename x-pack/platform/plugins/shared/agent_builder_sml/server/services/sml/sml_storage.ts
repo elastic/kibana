@@ -87,10 +87,6 @@ const smlStorageSchemaProperties = {
 
 export const storageSettings = {
   name: smlIndexName,
-  /**
-   * Ensure the SML backing index name has a higher priority than built-in AI index templates.
-   */
-  priority: 600,
   schema: {
     properties: smlStorageSchemaProperties,
   },

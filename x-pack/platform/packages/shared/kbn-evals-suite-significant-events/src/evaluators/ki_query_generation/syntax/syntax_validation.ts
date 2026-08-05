@@ -117,7 +117,7 @@ export const createSyntaxValidationEvaluator = (
           : `All ${queries.length} queries have valid syntax${
               hasFailureMode ? ' and return hits' : ' and execute successfully'
             }`,
-      metadata: {
+      details: {
         astSyntaxValidityRate,
         executionSuccessRate,
         executionHitRate,

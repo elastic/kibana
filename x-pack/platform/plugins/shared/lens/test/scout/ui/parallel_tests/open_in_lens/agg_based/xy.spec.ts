@@ -12,6 +12,7 @@ import {
   canConvertToLensByTitle,
   convertToLensByTitle,
   createOpenInLensSuiteSetup,
+  getChartDebugData,
 } from '../../../fixtures';
 
 spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentAgnostic }, () => {
@@ -187,7 +188,7 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
     expect(await lens.getSelectedAxisSide()).toBe('Right');
   });
 
-  spaceTest('should convert split series', async ({ pageObjects }) => {
+  spaceTest('should convert split series', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
     const expectedLegend = ['win 8', 'win xp', 'win 7', 'ios', 'osx'];
 
@@ -202,15 +203,13 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
     await expect
       .poll(
         async () =>
-          (
-            await lens.getCurrentChartDebugState('xyVisChart')
-          ).legend?.items.map((item) => item.name),
+          (await getChartDebugData(page, 'xyVisChart')).legend?.items.map((item) => item.name),
         { timeout: 20_000 }
       )
       .toStrictEqual(expectedLegend);
   });
 
-  spaceTest('should convert x-axis', async ({ pageObjects }) => {
+  spaceTest('should convert x-axis', async ({ page, pageObjects }) => {
     const { dashboard, lens } = pageObjects;
     const expectedLegend = ['Count'];
 
@@ -225,9 +224,7 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentA
     await expect
       .poll(
         async () =>
-          (
-            await lens.getCurrentChartDebugState('xyVisChart')
-          ).legend?.items.map((item) => item.name),
+          (await getChartDebugData(page, 'xyVisChart')).legend?.items.map((item) => item.name),
         { timeout: 20_000 }
       )
       .toStrictEqual(expectedLegend);

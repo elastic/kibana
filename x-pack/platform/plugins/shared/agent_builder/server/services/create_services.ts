@@ -32,7 +32,7 @@ import {
   type ConsumptionService,
 } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
-import { CallbackDeliveryService } from './execution/callback';
+import { CallbackDeliveryService } from './execution/callback_delivery_service';
 
 interface ServiceInstances {
   tools: ToolsService;

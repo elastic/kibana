@@ -54,13 +54,6 @@ const createText = i18n.translate(
   }
 );
 
-const createStepMenuAriaLabel = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.createStepMenuAriaLabel',
-  {
-    defaultMessage: 'Create step options',
-  }
-);
-
 interface AddStepProps {
   parentId?: string;
   branch?: StreamlangUIBranch;
@@ -160,7 +153,6 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
   return (
     <EuiPopover
       id={menuPopoverId}
-      aria-label={createStepMenuAriaLabel}
       button={mode === 'inline' ? inlineButton : button}
       isOpen={isPopoverOpen}
       closePopover={() => togglePopover(false)}

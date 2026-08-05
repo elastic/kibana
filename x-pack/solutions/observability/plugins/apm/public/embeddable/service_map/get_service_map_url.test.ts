@@ -139,41 +139,4 @@ describe('getServiceMapUrl', () => {
     const query = new URLSearchParams(getLastPath(core).slice('#/service-map?'.length));
     expect(query.get('_a')).toBe(expectedAppState);
   });
-
-  it('seeds viewFilters and non-default mapOrientation into _a', () => {
-    getServiceMapUrl(core, {
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-      viewFilters: {
-        alertStatusFilter: [],
-        sloStatusFilter: [],
-        connectionFilter: ['orphaned'],
-        anomalySeverityFilter: [],
-      },
-      mapOrientation: 'vertical',
-    });
-
-    expect(getAppStateFromPath(getLastPath(core))).toEqual({
-      viewFilters: { connectionFilter: ['orphaned'] },
-      mapOrientation: 'vertical',
-    });
-  });
-
-  it('omits empty viewFilters and default horizontal orientation from _a', () => {
-    getServiceMapUrl(core, {
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-      viewFilters: {
-        alertStatusFilter: [],
-        sloStatusFilter: [],
-        connectionFilter: [],
-        anomalySeverityFilter: [],
-      },
-      mapOrientation: 'horizontal',
-    });
-
-    const path = getLastPath(core);
-    expect(path).toBe('#/service-map?rangeFrom=now-15m&rangeTo=now');
-    expect(getAppStateFromPath(path)).toBeNull();
-  });
 });

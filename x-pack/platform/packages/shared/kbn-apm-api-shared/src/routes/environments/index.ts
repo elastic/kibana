@@ -5,11 +5,9 @@
  * 2.0.
  */
 import { environmentsRoute } from './environments';
-import { unifiedEnvironmentsRoute } from './unified_environments';
 
 export const environmentsRouteDefinitions = {
   environments: environmentsRoute,
-  unifiedEnvironments: unifiedEnvironmentsRoute,
 };
 
 export type { EnvironmentsResponse } from './environments';

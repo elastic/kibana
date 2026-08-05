@@ -178,7 +178,7 @@ function extractTcTitles(content) {
 }
 
 const defaultRel =
-  '../x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/';
+  '../x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/';
 let REL = defaultRel;
 if (process.argv[3]) {
   REL = process.argv[3];

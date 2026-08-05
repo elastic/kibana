@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { createRuleAttachmentDefinition } from './rule_attachment_definition';
 
 const mockUpsertRule = jest.fn().mockResolvedValue({});
@@ -57,7 +56,7 @@ const createMockServices = () => ({
 
 const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}) => ({
   id: 'att-1',
-  type: RULE_ATTACHMENT_TYPE,
+  type: 'rule' as const,
   versions: [],
   current_version: 1,
   origin: overrides.origin,

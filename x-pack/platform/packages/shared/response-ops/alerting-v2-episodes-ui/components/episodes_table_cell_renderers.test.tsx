@@ -244,38 +244,4 @@ describe('EpisodeRuleCell', () => {
     expect(screen.queryByTestId('episodeRuleCellGroupingTags')).not.toBeInTheDocument();
     expect(screen.getByText('FROM My Rule')).toBeInTheDocument();
   });
-
-  it('renders data.rule_name from episode_data when the rule SO is missing', () => {
-    const row = makeRow({
-      'rule.id': 'prometheus/HighCPU',
-      episode_data: JSON.stringify({ rule_name: 'High CPU on web-01' }),
-    });
-    render(
-      <EpisodeRuleCell
-        {...baseCellProps}
-        columnId="rule.id"
-        row={row}
-        rulesCache={{}}
-        isLoadingRules={false}
-        rowHeight={1}
-      />
-    );
-    expect(screen.getByText('High CPU on web-01')).toBeInTheDocument();
-  });
-
-  it('renders an em dash when rule SO, rule.name, and data.rule_name are all absent', () => {
-    const row = makeRow({ episode_data: JSON.stringify({}) });
-    delete (row.flattened as Record<string, unknown>)['rule.id'];
-    render(
-      <EpisodeRuleCell
-        {...baseCellProps}
-        columnId="rule.id"
-        row={row}
-        rulesCache={{}}
-        isLoadingRules={false}
-        rowHeight={1}
-      />
-    );
-    expect(screen.getByText('—')).toBeInTheDocument();
-  });
 });

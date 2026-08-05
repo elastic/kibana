@@ -85,7 +85,7 @@ const getDefinitionValidationErrors = (value: string): ValidationError[] => {
 export const FieldDefinitionYamlEditor: React.FC<FieldDefinitionYamlEditorProps> = ({
   value,
   onChange,
-  height = 300,
+  height = 200,
   'data-test-subj': dataTestSubj,
 }) => {
   const {

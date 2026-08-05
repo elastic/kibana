@@ -50,7 +50,7 @@ describe('Navigation Tree', () => {
     });
 
     expect(navigation.body[0]).toMatchObject({
-      link: 'nightshift',
+      link: 'observability-overview:nightshift',
       icon: NightshiftNavigationIcon,
     });
     expect(navigation.body[1]).toMatchObject({
@@ -64,7 +64,9 @@ describe('Navigation Tree', () => {
       significantEventsAvailable: false,
     });
 
-    expect(navigation.body.find((item) => item.link === 'nightshift')).toBeUndefined();
+    expect(
+      navigation.body.find((item) => item.link === 'observability-overview:nightshift')
+    ).toBeUndefined();
   });
 
   it('lists Manage jobs to Stack Management anomaly detection jobs first under ML anomaly detection nav', () => {

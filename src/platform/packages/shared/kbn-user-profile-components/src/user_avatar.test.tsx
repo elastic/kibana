@@ -7,25 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render } from '@testing-library/react';
 import React from 'react';
 
 import { UserAvatar } from './user_avatar';
 
-const delightedNightingale = {
-  username: 'delighted_nightingale',
-  email: 'delighted_nightingale@elastic.co',
-  full_name: 'Delighted Nightingale',
-};
-
-const displayLabel = 'Delighted Nightingale (delighted_nightingale@elastic.co)';
-
 describe('UserAvatar', () => {
-  it('renders an image avatar with a built-in tooltip on hover', async () => {
-    render(
+  it('should render EuiAvatar correctly with image avatar', () => {
+    const { container } = render(
       <UserAvatar
-        user={delightedNightingale}
+        user={{
+          username: 'delighted_nightingale',
+          email: 'delighted_nightingale@elastic.co',
+          full_name: 'Delighted Nightingale',
+        }}
         avatar={{
           color: '#09e8ca',
           initials: 'DN',
@@ -33,17 +28,29 @@ describe('UserAvatar', () => {
         }}
       />
     );
-
-    await userEvent.hover(screen.getByRole('img'));
-    await waitFor(() => {
-      expect(screen.getByRole('tooltip')).toHaveTextContent(displayLabel);
-    });
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-user"
+        id="generated-id_euiToolTipAnchor"
+      >
+        <div
+          aria-label="Delighted Nightingale (delighted_nightingale@elastic.co)"
+          class="euiAvatar euiAvatar--m euiAvatar--user emotion-euiAvatar-user-m-uppercase-plain"
+          role="img"
+          style="background-image: url(https://source.unsplash.com/64x64/?cat);"
+        />
+      </span>
+    `);
   });
 
-  it('renders an initials avatar with a built-in tooltip on hover', async () => {
-    render(
+  it('should render EuiAvatar correctly with initials avatar', () => {
+    const { container } = render(
       <UserAvatar
-        user={delightedNightingale}
+        user={{
+          username: 'delighted_nightingale',
+          email: 'delighted_nightingale@elastic.co',
+          full_name: 'Delighted Nightingale',
+        }}
         avatar={{
           color: '#09e8ca',
           initials: 'DN',
@@ -51,30 +58,73 @@ describe('UserAvatar', () => {
         }}
       />
     );
-
-    expect(screen.getByText('DN')).toBeInTheDocument();
-
-    await userEvent.hover(screen.getByRole('img'));
-    await waitFor(() => {
-      expect(screen.getByRole('tooltip')).toHaveTextContent(displayLabel);
-    });
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-user"
+        id="generated-id_euiToolTipAnchor"
+      >
+        <div
+          aria-label="Delighted Nightingale (delighted_nightingale@elastic.co)"
+          class="euiAvatar euiAvatar--m euiAvatar--user emotion-euiAvatar-user-m-uppercase"
+          role="img"
+          style="background-color: rgb(9, 232, 202); color: rgb(0, 0, 0);"
+        >
+          <span
+            aria-hidden="true"
+          >
+            DN
+          </span>
+        </div>
+      </span>
+    `);
   });
 
-  it('renders initials when avatar data is missing', async () => {
-    render(<UserAvatar user={delightedNightingale} />);
-
-    expect(screen.getByText('DN')).toBeInTheDocument();
-
-    await userEvent.hover(screen.getByRole('img'));
-    await waitFor(() => {
-      expect(screen.getByRole('tooltip')).toHaveTextContent(displayLabel);
-    });
+  it('should render EuiAvatar correctly without avatar data', () => {
+    const { container } = render(
+      <UserAvatar
+        user={{
+          username: 'delighted_nightingale',
+          email: 'delighted_nightingale@elastic.co',
+          full_name: 'Delighted Nightingale',
+        }}
+      />
+    );
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock-user"
+        id="generated-id_euiToolTipAnchor"
+      >
+        <div
+          aria-label="Delighted Nightingale (delighted_nightingale@elastic.co)"
+          class="euiAvatar euiAvatar--m euiAvatar--user emotion-euiAvatar-user-m-uppercase"
+          role="img"
+          style="background-color: rgb(234, 174, 1); color: rgb(0, 0, 0);"
+        >
+          <span
+            aria-hidden="true"
+          >
+            DN
+          </span>
+        </div>
+      </span>
+    `);
   });
 
-  it('renders a placeholder avatar when user data is missing', () => {
-    render(<UserAvatar />);
-
-    expect(screen.getByRole('img')).toHaveTextContent('?');
-    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+  it('should render EuiAvatar correctly without user data', () => {
+    const { container } = render(<UserAvatar />);
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <div
+        aria-label=""
+        class="euiAvatar euiAvatar--m euiAvatar--user emotion-euiAvatar-user-m-uppercase"
+        role="img"
+        style="background-color: rgb(236, 241, 249); color: rgb(0, 0, 0);"
+      >
+        <span
+          aria-hidden="true"
+        >
+          ?
+        </span>
+      </div>
+    `);
   });
 });

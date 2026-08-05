@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
-
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   metricConfigSchemaESQL,
@@ -22,8 +20,8 @@ import {
   mosaicConfigSchemaESQL,
 } from '@kbn/lens-embeddable-utils';
 
-interface ChartTypeRegistryEntry<T extends z.ZodType> {
-  schema: T;
+interface ChartTypeRegistryEntry {
+  schema: { validate: (config: unknown) => any; getSchema: () => any };
   prompt: {
     /**
      * Guidance used when selecting the best chart type for a user request.
@@ -62,20 +60,6 @@ interface ChartTypeRegistryEntry<T extends z.ZodType> {
   };
 }
 
-export interface ChartTypeRegistry {
-  [SupportedChartType.Metric]: ChartTypeRegistryEntry<typeof metricConfigSchemaESQL>;
-  [SupportedChartType.Gauge]: ChartTypeRegistryEntry<typeof gaugeConfigSchemaESQL>;
-  [SupportedChartType.XY]: ChartTypeRegistryEntry<typeof xyConfigSchemaESQL>;
-  [SupportedChartType.Heatmap]: ChartTypeRegistryEntry<typeof heatmapConfigSchemaESQL>;
-  [SupportedChartType.Tagcloud]: ChartTypeRegistryEntry<typeof tagcloudConfigSchemaESQL>;
-  [SupportedChartType.RegionMap]: ChartTypeRegistryEntry<typeof regionMapConfigSchemaESQL>;
-  [SupportedChartType.Datatable]: ChartTypeRegistryEntry<typeof datatableConfigSchemaESQL>;
-  [SupportedChartType.Pie]: ChartTypeRegistryEntry<typeof pieConfigSchemaESQL>;
-  [SupportedChartType.Treemap]: ChartTypeRegistryEntry<typeof treemapConfigSchemaESQL>;
-  [SupportedChartType.Waffle]: ChartTypeRegistryEntry<typeof waffleConfigSchemaESQL>;
-  [SupportedChartType.Mosaic]: ChartTypeRegistryEntry<typeof mosaicConfigSchemaESQL>;
-}
-
 /**
  * Central registry for all supported chart types.
  *
@@ -87,7 +71,7 @@ export interface ChartTypeRegistry {
  * TypeScript enforces exhaustiveness via `satisfies Record<SupportedChartType, ...>` —
  * a missing entry is a compile error.
  */
-export const chartTypeRegistry: ChartTypeRegistry = {
+export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntry> = {
   [SupportedChartType.Metric]: {
     schema: metricConfigSchemaESQL,
     prompt: {
@@ -254,4 +238,8 @@ export const chartTypeRegistry: ChartTypeRegistry = {
   },
 };
 
-export type VisualizationConfig = z.output<ChartTypeRegistry[SupportedChartType]['schema']>;
+export type ChartTypeRegistry = typeof chartTypeRegistry;
+
+export type VisualizationConfig = ReturnType<
+  ChartTypeRegistry[SupportedChartType]['schema']['validate']
+>;

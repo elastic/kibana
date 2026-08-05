@@ -18,7 +18,6 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getListOfCancelableResponseActions } from '../../../../../common/endpoint/service/response_actions/is_response_action_cancelable';
 import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/types';
@@ -38,11 +37,6 @@ import {
 } from '../shared/hooks';
 import { createSelectionHandler, createKeyDownHandler } from '../shared/utils';
 import { ERROR_LOADING_PENDING_ACTIONS } from '../../../common/translations';
-
-const PENDING_ACTIONS_POPOVER_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.consoleArgumentSelectors.pendingActionsSelector.popoverAriaLabel',
-  { defaultMessage: 'Pending actions available to cancel' }
-);
 
 /**
  * State for the pending actions selector component
@@ -204,7 +198,6 @@ export const CancelablePendingActionsSelector = memo<
 
   return (
     <EuiPopover
-      aria-label={PENDING_ACTIONS_POPOVER_ARIA_LABEL}
       isOpen={state.isPopoverOpen}
       offset={10}
       panelStyle={{

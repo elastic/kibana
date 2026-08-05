@@ -32,7 +32,6 @@ export type SignificantEventsRequiredPlugin = (typeof SIGNIFICANT_EVENTS_REQUIRE
  */
 export type SignificantEventsUnavailableReason =
   | 'feature_flag'
-  | 'project_type'
   | 'pricing_tier'
   | 'license'
   | SignificantEventsRequiredPlugin;

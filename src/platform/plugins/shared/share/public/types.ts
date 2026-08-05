@@ -14,6 +14,7 @@ import { type EuiCodeProps, type EuiIconProps, type EuiFlyoutProps } from '@elas
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { ILicense } from '@kbn/licensing-types';
 import type { Capabilities } from '@kbn/core/public';
+import type { TimeRange } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
@@ -332,6 +333,10 @@ export type BrowserUrlService = UrlService<
   BrowserShortUrlClient
 >;
 
+export type ShareableLocatorParams = SerializableRecord & {
+  timeRange: TimeRange | undefined;
+};
+
 /**
  * @public
  * Properties of the current object to share. Registered share
@@ -379,7 +384,7 @@ export interface ShareContext<S extends SharingData = SharingData> {
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
     locator: LocatorPublic<SerializableRecord>;
-    params: SerializableRecord;
+    params: ShareableLocatorParams;
   };
   sharingData: S;
   isDirty: boolean;

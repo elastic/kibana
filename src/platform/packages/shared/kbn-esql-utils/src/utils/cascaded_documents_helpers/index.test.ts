@@ -941,27 +941,6 @@ describe('cascaded documents helpers utils', () => {
           );
         });
 
-        it("appends a negated filter operation for a param field declared in the stats command column field group using it's param definition value before the driving stats command", () => {
-          expect(
-            appendFilteringWhereClauseForCascadeLayout(
-              'FROM kibana_sample_data_logs  | STATS count = COUNT(bytes), average = AVG(memory) BY ??field | SORT average ASC',
-              [
-                {
-                  key: 'field',
-                  type: ESQLVariableType.FIELDS,
-                  value: 'message',
-                },
-              ],
-              dataViewMock,
-              '??field',
-              'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)',
-              '-'
-            )
-          ).toBe(
-            'FROM kibana_sample_data_logs | WHERE message != "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)" | STATS count = COUNT(bytes), average = AVG(memory) BY ??field | SORT average ASC'
-          );
-        });
-
         it('the query generated from a previous filter operation can be used as the input to a subsequent filter operation', () => {
           expect(
             appendFilteringWhereClauseForCascadeLayout(
@@ -1032,27 +1011,6 @@ describe('cascaded documents helpers utils', () => {
             )
           ).toBe(
             'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE(??field) | WHERE `CATEGORIZE(??field)` == "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)" | SORT average ASC'
-          );
-        });
-
-        it('appends a negated filter operation for a function field derived from a function group with a param argument before the driving stats command', () => {
-          expect(
-            appendFilteringWhereClauseForCascadeLayout(
-              'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE(??field) | SORT average ASC',
-              [
-                {
-                  key: 'field',
-                  type: ESQLVariableType.FIELDS,
-                  value: 'message',
-                },
-              ],
-              dataViewMock,
-              'CATEGORIZE(??field)',
-              'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)',
-              '-'
-            )
-          ).toBe(
-            'FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE(??field) | WHERE `CATEGORIZE(??field)` != "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)" | SORT average ASC'
           );
         });
 

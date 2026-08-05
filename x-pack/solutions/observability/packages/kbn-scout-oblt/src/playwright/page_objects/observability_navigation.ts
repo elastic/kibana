@@ -22,6 +22,8 @@ export class ObservabilityNavigation {
   public readonly primaryNav: Locator;
   public readonly footerNav: Locator;
   public readonly morePopover: Locator;
+  public readonly breadcrumbs: Locator;
+  public readonly logo: Locator;
   public readonly moreMenuTrigger: Locator;
 
   constructor(private readonly page: ScoutPage) {
@@ -29,6 +31,8 @@ export class ObservabilityNavigation {
     this.primaryNav = this.page.testSubj.locator('kbnChromeNav-primaryNavigation');
     this.footerNav = this.page.testSubj.locator('kbnChromeNav-footer');
     this.morePopover = this.page.testSubj.locator('side-nav-popover-More');
+    this.breadcrumbs = this.page.testSubj.locator('breadcrumbs');
+    this.logo = this.page.testSubj.locator('nav-header-logo');
     this.moreMenuTrigger = this.page.testSubj.locator('kbnChromeNav-moreMenuTrigger');
   }
 
@@ -134,24 +138,12 @@ export class ObservabilityNavigation {
     return this.sidePanel(id).or(this.nestedPanel(id));
   }
 
-  /**
-   * Resolve a body nav item wherever it renders. It lives in the primary nav on some
-   * deployments but overflows into the "More" menu on others (e.g. cloud-serverless);
-   * open "More" when it is not in the primary nav so the returned locator is reachable.
-   */
-  async revealBodyNavItemByDeepLinkId(deepLinkId: string): Promise<Locator> {
-    const primaryItem = this.navItemInPrimaryByDeepLinkId(deepLinkId);
-    if (await primaryItem.isVisible()) {
-      return primaryItem;
+  /** By `breadcrumb-deepLinkId-*` test-subj or visible text. */
+  breadcrumb(by: { deepLinkId: string } | { text: string }): Locator {
+    if ('deepLinkId' in by) {
+      return this.breadcrumbs.locator(`[data-test-subj~="breadcrumb-deepLinkId-${by.deepLinkId}"]`);
     }
-    await this.openMoreMenu();
-    return this.navItemInMoreByDeepLinkId(deepLinkId);
-  }
-
-  /** Click a body nav item wherever it renders — primary nav or the "More" overflow menu. */
-  async clickBodyNavItemByDeepLinkId(deepLinkId: string) {
-    const item = await this.revealBodyNavItemByDeepLinkId(deepLinkId);
-    await item.click();
+    return this.breadcrumbs.locator('[data-test-subj~="breadcrumb"]', { hasText: by.text });
   }
 
   /** If More is already open, Escape first so the next open is the root list. */
@@ -162,6 +154,10 @@ export class ObservabilityNavigation {
     }
     await this.moreMenuTrigger.click();
     await this.morePopover.waitFor({ state: 'visible' });
+  }
+
+  async clickLogo() {
+    await this.logo.click();
   }
 
   /** Returns a function that is false after a full page reload (spec asserts). */
