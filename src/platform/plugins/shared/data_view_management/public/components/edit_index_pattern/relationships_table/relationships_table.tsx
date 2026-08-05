@@ -117,7 +117,6 @@ export const RelationshipsTable = ({
         return (
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             {showUrl ? (
-              // eslint-disable-next-line @elastic/eui/href-or-on-click
               <EuiLink
                 href={href}
                 data-test-subj="relationshipsTitle"
