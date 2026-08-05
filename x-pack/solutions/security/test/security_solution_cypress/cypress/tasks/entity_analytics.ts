@@ -71,7 +71,9 @@ export const mockRiskEnginePrivileges = () => {
       privileges: {
         elasticsearch: {
           cluster: {},
-          index: {},
+          index: {
+            'risk-score.risk-score-*': { read: true, write: true },
+          },
         },
       },
     },
