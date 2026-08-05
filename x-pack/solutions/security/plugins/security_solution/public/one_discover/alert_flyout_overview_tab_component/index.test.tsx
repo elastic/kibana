@@ -52,6 +52,14 @@ jest.mock('../../data_view_manager/hooks/use_init_data_view_manager', () => ({
   useInitDataViewManager: () => mockUseInitDataViewManager(),
 }));
 
+// The data view manager status now comes from the package store rather than the
+// global redux store, so it is controlled here via the hook rather than by
+// seeding a store.
+const mockUseDataViewManagerStatus = jest.fn();
+jest.mock('../../data_view_manager/hooks/use_data_view_manager_status', () => ({
+  useDataViewManagerStatus: () => mockUseDataViewManagerStatus(),
+}));
+
 const mockUseIsExperimentalFeatureEnabled = jest.fn();
 jest.mock('../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: (feature: string) =>
@@ -97,6 +105,8 @@ describe('AlertFlyoutOverviewTab', () => {
     mockOverviewTab.mockClear();
     mockUseInitDataViewManager.mockReset();
     mockUseInitDataViewManager.mockReturnValue(jest.fn());
+    mockUseDataViewManagerStatus.mockReset();
+    mockUseDataViewManagerStatus.mockReturnValue('pristine');
     mockUseIsExperimentalFeatureEnabled.mockReset();
     mockUseIsInSecurityApp.mockReturnValue(false);
   });
@@ -198,6 +208,7 @@ describe('AlertFlyoutOverviewTab', () => {
 
     const initSpy = jest.fn();
     mockUseInitDataViewManager.mockReturnValue(initSpy);
+    mockUseDataViewManagerStatus.mockReturnValue('error');
 
     const store = createStore(() => ({
       dataViewManager: {
@@ -264,6 +275,7 @@ describe('AlertFlyoutOverviewTab', () => {
 
     const initSpy = jest.fn();
     mockUseInitDataViewManager.mockReturnValue(initSpy);
+    mockUseDataViewManagerStatus.mockReturnValueOnce('loading').mockReturnValue('ready');
 
     const storeLoading = createStore(() => ({
       dataViewManager: {

@@ -21,6 +21,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { TestProvider as ExpandableFlyoutTestProvider } from '@kbn/expandable-flyout/src/test/provider';
+import { DataViewManagerTestProvider, mockDataViewManagerState } from '@kbn/data-view-manager';
 import { useKibana } from '../lib/kibana';
 import { UpsellingProvider } from '../components/upselling_provider';
 import { MockAssistantProvider } from './mock_assistant_provider';
@@ -83,25 +84,27 @@ export const TestProvidersComponent = ({
       <I18nProvider>
         <UpsellingProviderMock>
           <ReduxStoreProvider store={store}>
-            <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-              <QueryClientProvider client={queryClient}>
-                <MockDiscoverInTimelineContext>
-                  <MockAssistantProvider>
-                    <ExpandableFlyoutTestProvider>
-                      <ConsoleManager>
-                        <CellActionsProvider
-                          getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
-                        >
-                          <EuiProvider highContrastMode={false}>
-                            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-                          </EuiProvider>
-                        </CellActionsProvider>
-                      </ConsoleManager>
-                    </ExpandableFlyoutTestProvider>
-                  </MockAssistantProvider>
-                </MockDiscoverInTimelineContext>
-              </QueryClientProvider>
-            </ThemeProvider>
+            <DataViewManagerTestProvider state={mockDataViewManagerState}>
+              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+                <QueryClientProvider client={queryClient}>
+                  <MockDiscoverInTimelineContext>
+                    <MockAssistantProvider>
+                      <ExpandableFlyoutTestProvider>
+                        <ConsoleManager>
+                          <CellActionsProvider
+                            getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
+                          >
+                            <EuiProvider highContrastMode={false}>
+                              <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                            </EuiProvider>
+                          </CellActionsProvider>
+                        </ConsoleManager>
+                      </ExpandableFlyoutTestProvider>
+                    </MockAssistantProvider>
+                  </MockDiscoverInTimelineContext>
+                </QueryClientProvider>
+              </ThemeProvider>
+            </DataViewManagerTestProvider>
           </ReduxStoreProvider>
         </UpsellingProviderMock>
       </I18nProvider>
@@ -137,31 +140,33 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
     <I18nProvider>
       <MockKibanaContextProvider startServices={startServices}>
         <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-            <QueryClientProvider client={queryClient}>
-              <MockDiscoverInTimelineContext>
-                <MockAssistantProvider>
-                  <UserPrivilegesProvider
-                    kibanaCapabilities={
-                      {
-                        [SECURITY_FEATURE_ID]: { show: true, crud: true },
-                        [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
-                        [ASSISTANT_FEATURE_ID]: { 'ai-assistant': true },
-                      } as unknown as Capabilities
-                    }
-                  >
-                    <CellActionsProvider
-                      getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
+          <DataViewManagerTestProvider state={mockDataViewManagerState}>
+            <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+              <QueryClientProvider client={queryClient}>
+                <MockDiscoverInTimelineContext>
+                  <MockAssistantProvider>
+                    <UserPrivilegesProvider
+                      kibanaCapabilities={
+                        {
+                          [SECURITY_FEATURE_ID]: { show: true, crud: true },
+                          [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+                          [ASSISTANT_FEATURE_ID]: { 'ai-assistant': true },
+                        } as unknown as Capabilities
+                      }
                     >
-                      <EuiProvider highContrastMode={false}>
-                        <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-                      </EuiProvider>
-                    </CellActionsProvider>
-                  </UserPrivilegesProvider>
-                </MockAssistantProvider>
-              </MockDiscoverInTimelineContext>
-            </QueryClientProvider>
-          </ThemeProvider>
+                      <CellActionsProvider
+                        getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
+                      >
+                        <EuiProvider highContrastMode={false}>
+                          <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                        </EuiProvider>
+                      </CellActionsProvider>
+                    </UserPrivilegesProvider>
+                  </MockAssistantProvider>
+                </MockDiscoverInTimelineContext>
+              </QueryClientProvider>
+            </ThemeProvider>
+          </DataViewManagerTestProvider>
         </ReduxStoreProvider>
       </MockKibanaContextProvider>
     </I18nProvider>

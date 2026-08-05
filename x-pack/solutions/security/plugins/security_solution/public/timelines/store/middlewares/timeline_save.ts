@@ -21,7 +21,7 @@ import {
 } from '@kbn/es-query';
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { PageScope, scopedDataViewSelector } from '../../../data_view_manager';
+import { PageScope, scopedDataViewSelector, dataViewManagerStore } from '../../../data_view_manager';
 import {
   endTimelineSaving,
   saveTimeline,
@@ -67,7 +67,12 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
 
     const timelineTimeRange = inputsSelectors.timelineTimeRangeSelector(storeState);
 
-    const { dataViewId: reduxDataViewId } = scopedDataViewSelector(PageScope.timeline)(storeState);
+    // The data view manager owns its own redux store (in the @kbn/data-view-manager
+    // package), separate from this host store, so we read the current selection
+    // from it imperatively here.
+    const { dataViewId: reduxDataViewId } = scopedDataViewSelector(PageScope.timeline)(
+      dataViewManagerStore.getState()
+    );
 
     let dataViewId: string | null = null;
     let indexNames: string[] = [];

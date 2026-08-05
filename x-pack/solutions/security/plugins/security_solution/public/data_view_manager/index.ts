@@ -35,5 +35,6 @@ export * from './components/data_view_picker';
 export * from './utils/paths';
 export { buildBrowserFields } from '@kbn/data-view-manager';
 
-// Imperative selector for non-React consumers (e.g. redux middleware).
-export { scopedDataViewSelector } from '@kbn/data-view-manager';
+// Imperative selector + store for non-React consumers (e.g. redux middleware)
+// that need to read the current selection outside of the React tree.
+export { scopedDataViewSelector, dataViewManagerStore } from '@kbn/data-view-manager';

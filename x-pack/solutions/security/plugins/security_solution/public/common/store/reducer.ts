@@ -33,10 +33,6 @@ import { securitySolutionDiscoverReducer } from './discover/reducer';
 import type { AnalyzerState } from '../../resolver/types';
 import type { NotesState } from '../../notes/store/notes.slice';
 import { notesReducer } from '../../notes/store/notes.slice';
-import {
-  dataViewManagerReducer,
-  initialDataViewManagerState,
-} from '@kbn/data-view-manager';
 
 enableMapSet();
 
@@ -78,7 +74,6 @@ export const createInitialState = (
       savedSearch: undefined,
     },
     notes: notesState,
-    dataViewManager: initialDataViewManagerState.dataViewManager,
   };
 
   return preloadedState;
@@ -101,5 +96,4 @@ export const createReducer: (
     discover: securitySolutionDiscoverReducer,
     ...pluginsReducer,
     notes: notesReducer,
-    dataViewManager: dataViewManagerReducer,
   });

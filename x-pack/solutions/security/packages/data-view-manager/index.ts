@@ -44,6 +44,13 @@ export {
   useDispatch as useDataViewManagerDispatch,
 } from './src/redux/redux';
 
+/**
+ * The package's singleton redux store. Exposed for imperative, non-React
+ * consumers (e.g. redux middleware in the host) that need to read the current
+ * selection outside of the React tree. React consumers should use the hooks.
+ */
+export { store as dataViewManagerStore } from './src/redux/redux';
+
 export { DataViewManagerProvider } from './src/provider';
 export type { DataViewManagerProviderProps } from './src/provider';
 

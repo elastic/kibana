@@ -39,7 +39,14 @@ export interface DataViewManagerTestProviderProps {
  */
 export const DataViewManagerTestProvider: FC<
   PropsWithChildren<DataViewManagerTestProviderProps>
-> = ({ children, state = initialDataViewManagerState, dependencies = {} as DataViewManagerDependencies }) => {
+> = ({
+  children,
+  state = initialDataViewManagerState,
+  // A minimal, non-throwing default: `services` is present (so hooks that read
+  // it don't crash) but empty. Tests exercising dependency-consuming behaviour
+  // should pass proper mocks.
+  dependencies = { services: {} } as unknown as DataViewManagerDependencies,
+}) => {
   const store = useMemo(
     () =>
       configureStore({

@@ -37,7 +37,6 @@ jest.mock('react-redux-v7', () => {
             },
           },
         },
-        dataViewManager: { timeline: {} },
       }),
   };
 });

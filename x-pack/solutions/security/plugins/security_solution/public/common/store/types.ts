@@ -25,7 +25,6 @@ import type { GroupState } from './grouping/types';
 import type { SecuritySolutionDiscoverState } from './discover/model';
 import type { AnalyzerState } from '../../resolver/types';
 import type { NotesState } from '../../notes/store/notes.slice';
-import type { RootState as DataViewManagerState } from '@kbn/data-view-manager';
 
 export type State = HostsPluginState &
   UsersPluginState &
@@ -39,7 +38,7 @@ export type State = HostsPluginState &
     discover: SecuritySolutionDiscoverState;
   } & DataTableState &
   GroupState &
-  AnalyzerState & { notes: NotesState } & DataViewManagerState;
+  AnalyzerState & { notes: NotesState };
 /**
  * The Redux store type for the Security app.
  */

@@ -31,6 +31,7 @@ import {
   mockDataViewManagerState,
   mockTimelineDataViewId,
 } from '../../../data_view_manager/mocks';
+import { dataViewManagerStore, scopes, PageScope } from '@kbn/data-view-manager';
 
 jest.mock('../actions', () => {
   const actual = jest.requireActual('../actions');
@@ -72,6 +73,11 @@ describe('Timeline save middleware', () => {
       },
     });
     store = createMockStore(undefined, undefined, kibanaMock);
+    // The middleware reads the current timeline data view from the data view
+    // manager package store (not the host store), so seed it directly here.
+    dataViewManagerStore.dispatch(
+      scopes[PageScope.timeline].actions.setSelectedDataView(mockTimelineDataViewId)
+    );
     jest.clearAllMocks();
   });
 
