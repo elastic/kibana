@@ -1,0 +1,223 @@
+env:
+  GITHUB_COMMIT_STATUS_ENABLED: 'true'
+  GITHUB_COMMIT_STATUS_CONTEXT: 'buildkite/merge-queue'
+steps:
+  - command: .buildkite/scripts/lifecycle/pre_build.sh
+    label: Pre-Build
+    timeout_in_minutes: 10
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+  - wait
+
+  - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
+    label: Build Kibana Distribution
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: c4d-standard-16
+      diskType: hyperdisk-balanced
+      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
+      diskSizeGb: 200
+    key: build
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/quick_checks.sh
+    label: 'Quick Checks'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2d-standard-8
+      preemptible: true
+      spotZones: us-central1-b,us-central1-c,us-central1-f
+      diskSizeGb: 105
+    key: quick_checks
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/checks.sh
+    label: 'Checks'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2d-standard-2
+      preemptible: true
+      spotZones: us-central1-b,us-central1-c,us-central1-f
+      diskSizeGb: 105
+    key: checks
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/lint.sh
+    label: 'Linting'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n4-standard-16
+      diskType: hyperdisk-balanced
+      preemptible: true
+      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
+      diskSizeGb: 105
+    key: linting
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/lint_with_types.sh
+    label: 'Linting (with types)'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n4-standard-32
+      diskType: hyperdisk-balanced
+      preemptible: true
+      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
+      diskSizeGb: 105
+    key: linting_with_types
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/lint_with_oxlint.sh
+    label: 'Linting (with oxlint)'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n4-standard-4
+      diskType: hyperdisk-balanced
+      preemptible: true
+      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
+      diskSizeGb: 105
+    key: linting_with_oxlint
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/typecheck/check_types.sh
+    label: 'Check Types'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: c4-standard-8-lssd
+      diskType: hyperdisk-balanced
+      preemptible: true
+      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
+      diskSizeGb: 105
+    key: check_types
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
+    label: 'Check OAS Snapshot'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2d-highmem-4
+      preemptible: true
+      spotZones: us-central1-b,us-central1-c,us-central1-f
+      diskSizeGb: 105
+    key: check_oas_snapshot
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/report_package_metrics.sh
+    label: Report Package Metrics
+    key: report_package_metrics
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      diskSizeGb: 105
+    timeout_in_minutes: 15
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/ci_stats_ready.sh
+    label: Mark CI Stats as ready
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      diskSizeGb: 105
+    timeout_in_minutes: 10
+    depends_on:
+      - build
+      - report_package_metrics
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  # e2e suites (FTR, Scout, Cypress) intentionally do not run here; they run
+  # post-merge in kibana-on-merge. Only Jest unit/integration gate the queue.
+  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
+    label: 'Pick Test Group Run Order'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      diskSizeGb: 105
+    timeout_in_minutes: 15
+    env:
+      JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
+      JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
+      LIMIT_CONFIG_TYPE: 'unit,integration'
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - wait: ~
+    continue_on_failure: true
+
+  - command: .buildkite/scripts/lifecycle/post_build.sh
+    label: Post-Build
+    timeout_in_minutes: 10
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
