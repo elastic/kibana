@@ -45,7 +45,7 @@ import type { JobSettingsFormValues } from './components/job_settings_form';
 import { JobSettingsForm } from './components/job_settings_form';
 import type { TimeRange } from '../common/components';
 import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
-import { MlAppHeader } from '../../../components/ml_app_header';
+import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../components/ml_app_header';
 
 export interface ModuleJobUI extends ModuleJob {
   datafeedResult?: DatafeedResponse;
@@ -78,6 +78,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       },
     },
   } = useMlKibana();
+  const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
   const locator = useMlLocator();
 
   const [jobPrefix, setJobPrefix] = useState<string>('');
@@ -297,6 +298,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
           defaultMessage: 'New job from {pageTitle}',
           values: { pageTitle },
         })}
+        back={anomalyDetectionJobsBack}
       />
 
       {projectRouting ? (

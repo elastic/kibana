@@ -16,7 +16,7 @@ import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { isEsqlSavedSearch, type DiscoverSessionFinderAttributes } from '@kbn/discover-utils';
-import { MlAppHeader } from '../../../../components/ml_app_header';
+import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../components/ml_app_header';
 import { CreateDataViewButton } from '../../../../components/create_data_view_button';
 import {
   useMlKibana,
@@ -58,6 +58,7 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
   const cpsManager = cps?.cpsManager;
   const totalProjectCount = cpsManager?.getTotalProjectCount() ?? 0;
   const [projectRouting, setProjectRouting] = useState<string | undefined>(undefined);
+  const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
 
   useEffect(() => {
     if (cpsManager) {
@@ -107,6 +108,7 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
           title={i18n.translate('xpack.ml.newJob.wizard.selectDataViewOrSavedSearch', {
             defaultMessage: 'Select data view or saved Discover session',
           })}
+          back={anomalyDetectionJobsBack}
         />
         <EuiPanel hasShadow={false} hasBorder>
           {totalProjectCount > 1 && projects ? (
