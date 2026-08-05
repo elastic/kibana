@@ -8,14 +8,9 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../fixtures';
+import { spaceTest, tags } from '../fixtures';
 
-// Restricted to stateful classic: these tests navigate back from context/single-doc views via
-// breadcrumb clicks ([data-test-subj~="breadcrumb"][data-test-subj~="first"]), which do not
-// render the same way on serverless. Filtering and toast-notification scenarios that use
-// discover.goto() for navigation instead are covered in adhoc_data_views_filtering.spec.ts
-// with tags.deploymentAgnostic.
-spaceTest.describe('Discover — adhoc data views', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
   });
@@ -61,8 +56,8 @@ spaceTest.describe('Discover — adhoc data views', { tag: '@local-stateful-clas
           .locator('discoverContextAppTitle')
           .waitFor({ state: 'visible', timeout: 30_000 });
 
-        await page.locator('[data-test-subj~="breadcrumb"][data-test-subj~="first"]').click();
-        await page.waitForURL(/\/app\/discover/, { timeout: 30_000 });
+        await page.testSubj.locator('appHeaderBack').click();
+        await discover.waitUntilTabIsLoaded();
         expect(await discover.getSelectedDataViewName()).toBe('logstash*');
       });
 
@@ -76,8 +71,8 @@ spaceTest.describe('Discover — adhoc data views', { tag: '@local-stateful-clas
           .locator('discoverSingleDocTitle')
           .waitFor({ state: 'visible', timeout: 30_000 });
 
-        await page.locator('[data-test-subj~="breadcrumb"][data-test-subj~="first"]').click();
-        await page.waitForURL(/\/app\/discover/, { timeout: 30_000 });
+        await page.testSubj.locator('appHeaderBack').click();
+        await discover.waitUntilTabIsLoaded();
         expect(await discover.getSelectedDataViewName()).toBe('logstash*');
       });
 
