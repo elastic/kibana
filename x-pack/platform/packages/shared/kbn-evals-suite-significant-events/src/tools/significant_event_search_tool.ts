@@ -84,7 +84,7 @@ export const createEvalSignificantEventSearchTool = ({
             type: 'string' as const,
             enum: SIGNIFICANT_EVENT_STATUS_OPTIONS,
             description:
-              'Optional status filter. One of "pending", "open", "closed", "dismissed" (e.g. "dismissed" to find known-noisy / demoted patterns).',
+              'Optional status filter (e.g. "dismissed" to find known-noisy / demoted patterns).',
           },
           view: {
             type: 'string' as const,
