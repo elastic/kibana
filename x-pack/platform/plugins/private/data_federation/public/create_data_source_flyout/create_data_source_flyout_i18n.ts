@@ -40,6 +40,11 @@ export const createDataSourceFlyoutStrings = {
       defaultMessage: 'Data source type',
     }),
 
+  detailsTitle: () =>
+    i18n.translate('xpack.dataFederation.createFlyout.detailsTitle', {
+      defaultMessage: 'Details',
+    }),
+
   typeAriaLabel: () =>
     i18n.translate('xpack.dataFederation.createFlyout.typeAriaLabel', {
       defaultMessage: 'Data source type',
@@ -69,4 +74,39 @@ export const createDataSourceFlyoutStrings = {
     i18n.translate('xpack.dataFederation.createFlyout.saveButton', {
       defaultMessage: 'Save',
     }),
+
+  testConnectionButton: () =>
+    i18n.translate('xpack.dataFederation.createFlyout.testConnectionButton', {
+      defaultMessage: 'Test connection',
+    }),
+
+  testConnectionSuccessTitle: () =>
+    i18n.translate('xpack.dataFederation.createFlyout.testConnectionSuccessTitle', {
+      defaultMessage: 'Connection successful',
+    }),
+
+  testConnectionSuccessMessage: () =>
+    i18n.translate('xpack.dataFederation.createFlyout.testConnectionSuccessMessage', {
+      defaultMessage: 'Elasticsearch can reach this data source with the current settings.',
+    }),
+
+  testConnectionErrorTitle: () =>
+    i18n.translate('xpack.dataFederation.createFlyout.testConnectionErrorTitle', {
+      defaultMessage: 'Connection failed',
+    }),
+
+  testConnectionErrorMessage: () =>
+    i18n.translate('xpack.dataFederation.createFlyout.testConnectionErrorMessage', {
+      defaultMessage:
+        'Elasticsearch could not connect to this data source. Check your settings and try again.',
+    }),
+
+  optionalFieldLabel: (label: string) =>
+    i18n.translate('xpack.dataFederation.createFlyout.fieldLabelOptional', {
+      defaultMessage: '{label} (Optional)',
+      values: { label },
+    }),
+
+  fieldLabel: (label: string, isOptional: boolean) =>
+    isOptional ? createDataSourceFlyoutStrings.optionalFieldLabel(label) : label,
 };

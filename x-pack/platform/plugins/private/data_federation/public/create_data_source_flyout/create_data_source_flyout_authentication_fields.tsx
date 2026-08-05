@@ -87,6 +87,7 @@ export function CreateDataSourceFlyoutAuthenticationFields({
         {dataSourceType === 'gcs' && authenticationMode === 'federated_identity' ? (
           <CreateDataSourceFlyoutTypeSettingsGcsFederatedIdentity
             control={control}
+            cloudInfo={cloudInfo}
             unregister={unregister}
             areFieldsRequired={requireGcsFederatedIdentity}
           />
@@ -95,6 +96,7 @@ export function CreateDataSourceFlyoutAuthenticationFields({
           <CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields
             authenticationMode={authenticationMode as AzureAuthenticationMode}
             areFieldsRequired={requireAzureCredentials}
+            cloudInfo={cloudInfo}
             control={control}
             unregister={unregister}
           />

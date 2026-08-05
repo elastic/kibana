@@ -5,20 +5,31 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonEmpty,
   EuiFieldText,
   EuiFormRow,
   EuiSpacer,
   EuiTextArea,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
 import type { CreateDataSourceFlyoutFormValues } from './types';
+import { createDataSourceFlyoutStrings } from './create_data_source_flyout_i18n';
+import type { FederatedIdentityClusterInfo } from './federated_identity_cluster_info';
+import { FederatedIdentityDeployPanel } from './federated_identity_deploy_panel';
+import { FederatedIdentityManualSetup } from './federated_identity_manual_setup';
+import {
+  getGcsFederatedIdentityDeployConfig,
+  getGcsFederatedIdentityDescription,
+  getGcsFederatedIdentityManualIntro,
+  getGcsFederatedIdentityManualSteps,
+  getGcsFederatedIdentityStsAudienceHelp,
+} from './federated_identity_gcs_setup_content';
+import { FederatedIdentitySetupShell } from './federated_identity_setup_shell';
+import { resolveFederatedIdentitySetupValues } from './federated_identity_setup_values';
 
 export function CreateDataSourceFlyoutTypeSettingsGcs({
   control,
@@ -51,9 +62,11 @@ export function CreateDataSourceFlyoutTypeSettingsGcs({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.projectId', {
-          defaultMessage: 'Project ID',
-        })}
+        label={createDataSourceFlyoutStrings.optionalFieldLabel(
+          i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.projectId', {
+            defaultMessage: 'Project ID',
+          })
+        )}
         fullWidth
       >
         <EuiFieldText
@@ -67,9 +80,11 @@ export function CreateDataSourceFlyoutTypeSettingsGcs({
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.endpoint', {
-          defaultMessage: 'Endpoint',
-        })}
+        label={createDataSourceFlyoutStrings.optionalFieldLabel(
+          i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.endpoint', {
+            defaultMessage: 'Endpoint',
+          })
+        )}
         fullWidth
       >
         <EuiFieldText
@@ -83,9 +98,11 @@ export function CreateDataSourceFlyoutTypeSettingsGcs({
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.tokenUri', {
-          defaultMessage: 'Token URI',
-        })}
+        label={createDataSourceFlyoutStrings.optionalFieldLabel(
+          i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.tokenUri', {
+            defaultMessage: 'Token URI',
+          })
+        )}
         fullWidth
       >
         <EuiFieldText
@@ -134,9 +151,12 @@ export function CreateDataSourceFlyoutTypeSettingsGcsCredentials({
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.credentials', {
-        defaultMessage: 'Credentials',
-      })}
+      label={createDataSourceFlyoutStrings.fieldLabel(
+        i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.credentials', {
+          defaultMessage: 'Credentials',
+        }),
+        !areCredentialsRequired
+      )}
       fullWidth
       isInvalid={Boolean(credentialsState.error)}
       error={credentialsState.error?.message}
@@ -158,23 +178,15 @@ export function CreateDataSourceFlyoutTypeSettingsGcsCredentials({
 
 export function CreateDataSourceFlyoutTypeSettingsGcsFederatedIdentity({
   control,
+  cloudInfo,
   unregister,
   areFieldsRequired,
 }: {
   control: Control<CreateDataSourceFlyoutFormValues, any>;
+  cloudInfo?: FederatedIdentityClusterInfo;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
   areFieldsRequired: boolean;
 }) {
-  const [isOptionalOpen, setIsOptionalOpen] = useState(false);
-  const optionalId = useGeneratedHtmlId({
-    prefix: 'createDataSourceFlyoutGcsFederatedOptionalSettings',
-  });
-
-  const { field: jwtAudienceField, fieldState: jwtAudienceState } = useController({
-    name: 'settings.jwt_audience',
-    control,
-  });
-
   const { field: stsAudienceField, fieldState: stsAudienceState } = useController({
     name: 'settings.sts_audience',
     control,
@@ -190,106 +202,77 @@ export function CreateDataSourceFlyoutTypeSettingsGcsFederatedIdentity({
       : undefined,
   });
 
-  const { field: impersonationUrlField } = useController({
-    name: 'settings.service_account_impersonation_url',
-    control,
-  });
-
-  const hasOptionalError = useMemo(() => Boolean(jwtAudienceState.error), [jwtAudienceState.error]);
-
-  useEffect(() => {
-    if (hasOptionalError) {
-      setIsOptionalOpen(true);
-    }
-  }, [hasOptionalError]);
-
   useEffect(() => {
     return () => {
-      unregister('settings.jwt_audience');
       unregister('settings.sts_audience');
-      unregister('settings.service_account_impersonation_url');
     };
   }, [unregister]);
 
+  const setupValues = useMemo(
+    () => resolveFederatedIdentitySetupValues(cloudInfo),
+    [cloudInfo]
+  );
+  const manualSteps = useMemo(
+    () => getGcsFederatedIdentityManualSteps(setupValues),
+    [setupValues]
+  );
+  const deployConfig = useMemo(() => getGcsFederatedIdentityDeployConfig(), []);
+
   return (
     <>
-      <EuiFormRow
-        label={i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.stsAudience', {
-          defaultMessage: 'STS audience',
-        })}
-        fullWidth
-        isInvalid={Boolean(stsAudienceState.error)}
-        error={stsAudienceState.error?.message}
+      <FederatedIdentitySetupShell
+        description={getGcsFederatedIdentityDescription()}
+        oneClickLabel={i18n.translate(
+          'xpack.dataFederation.createFlyout.gcs.federated.setupMethod.oneClick',
+          {
+            defaultMessage: 'One-click deploy',
+          }
+        )}
+        oneClickIcon={deployConfig.cloudProviderIcon}
+        testSubjPrefix="createDataSourceFlyoutGcsFederated"
       >
-        <EuiFieldText
-          data-test-subj="createDataSourceFlyoutGcsFederatedStsAudience"
-          fullWidth
-          autoComplete="off"
-          isInvalid={Boolean(stsAudienceState.error)}
-          value={stsAudienceField.value}
-          onChange={(e) => stsAudienceField.onChange(e.target.value)}
-          name={stsAudienceField.name}
-          inputRef={stsAudienceField.ref}
-        />
-      </EuiFormRow>
-      <EuiButtonEmpty
-        size="s"
-        flush="left"
-        iconType={isOptionalOpen ? 'arrowDown' : 'arrowRight'}
-        aria-expanded={isOptionalOpen}
-        aria-controls={optionalId}
-        onClick={() => setIsOptionalOpen((value) => !value)}
-        data-test-subj="createDataSourceFlyoutGcsFederatedOptionalToggle"
-      >
-        {isOptionalOpen
-          ? i18n.translate('xpack.dataFederation.createFlyout.gcs.federated.optional.hide', {
-              defaultMessage: 'Hide optional authentication settings',
-            })
-          : i18n.translate('xpack.dataFederation.createFlyout.gcs.federated.optional.show', {
-              defaultMessage: 'Show optional authentication settings',
-            })}
-      </EuiButtonEmpty>
-      <div id={optionalId} hidden={!isOptionalOpen}>
-        <EuiSpacer size="s" />
-        <EuiFormRow
-          label={i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.jwtAudience', {
-            defaultMessage: 'JWT audience',
-          })}
-          fullWidth
-          isInvalid={Boolean(jwtAudienceState.error)}
-          error={jwtAudienceState.error?.message}
-        >
-          <EuiFieldText
-            data-test-subj="createDataSourceFlyoutGcsFederatedJwtAudience"
-            fullWidth
-            autoComplete="off"
-            isInvalid={Boolean(jwtAudienceState.error)}
-            value={jwtAudienceField.value}
-            onChange={(e) => jwtAudienceField.onChange(e.target.value)}
-            name={jwtAudienceField.name}
-            inputRef={jwtAudienceField.ref}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate(
-            'xpack.dataFederation.createFlyout.gcs.fields.serviceAccountImpersonationUrl',
-            {
-              defaultMessage: 'Service account impersonation URL',
-            }
-          )}
-          fullWidth
-        >
-          <EuiFieldText
-            data-test-subj="createDataSourceFlyoutGcsFederatedServiceAccountImpersonationUrl"
-            fullWidth
-            autoComplete="off"
-            value={impersonationUrlField.value}
-            onChange={(e) => impersonationUrlField.onChange(e.target.value)}
-            name={impersonationUrlField.name}
-            inputRef={impersonationUrlField.ref}
-          />
-        </EuiFormRow>
-      </div>
+        {(setupMethod) => (
+          <>
+            {setupMethod === 'manual' ? (
+              <FederatedIdentityManualSetup
+                intro={getGcsFederatedIdentityManualIntro()}
+                steps={manualSteps}
+                testSubjPrefix="createDataSourceFlyoutGcsFederated"
+              />
+            ) : (
+              <FederatedIdentityDeployPanel
+                {...deployConfig}
+                testSubjPrefix="createDataSourceFlyoutGcsFederated"
+              />
+            )}
+            <EuiSpacer size="l" />
+            <EuiFormRow
+              label={createDataSourceFlyoutStrings.fieldLabel(
+                i18n.translate('xpack.dataFederation.createFlyout.gcs.fields.stsAudience', {
+                  defaultMessage: 'STS audience',
+                }),
+                !areFieldsRequired
+              )}
+              fullWidth
+              isInvalid={Boolean(stsAudienceState.error)}
+              error={stsAudienceState.error?.message}
+              helpText={getGcsFederatedIdentityStsAudienceHelp(setupMethod === 'one_click')}
+            >
+              <EuiFieldText
+                data-test-subj="createDataSourceFlyoutGcsFederatedStsAudience"
+                fullWidth
+                autoComplete="off"
+                isInvalid={Boolean(stsAudienceState.error)}
+                placeholder="//iam.googleapis.com/projects/112233445566/locations/global/workloadIdentityPools/elastic-data-federation/providers/elastic-issuer"
+                value={stsAudienceField.value}
+                onChange={(e) => stsAudienceField.onChange(e.target.value)}
+                name={stsAudienceField.name}
+                inputRef={stsAudienceField.ref}
+              />
+            </EuiFormRow>
+          </>
+        )}
+      </FederatedIdentitySetupShell>
     </>
   );
 }

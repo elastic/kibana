@@ -5,21 +5,32 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonEmpty,
   EuiFieldPassword,
   EuiFieldText,
   EuiFormRow,
   EuiSpacer,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
 import type { CreateDataSourceFlyoutFormValues } from './types';
+import { createDataSourceFlyoutStrings } from './create_data_source_flyout_i18n';
 import type { AzureAuthenticationMode } from './create_data_source_flyout_authentication';
+import type { FederatedIdentityClusterInfo } from './federated_identity_cluster_info';
+import { FederatedIdentityDeployPanel } from './federated_identity_deploy_panel';
+import { FederatedIdentityManualSetup } from './federated_identity_manual_setup';
+import {
+  getAzureFederatedIdentityDeployConfig,
+  getAzureFederatedIdentityDescription,
+  getAzureFederatedIdentityFieldHelp,
+  getAzureFederatedIdentityManualIntro,
+  getAzureFederatedIdentityManualSteps,
+} from './federated_identity_azure_setup_content';
+import { FederatedIdentitySetupShell } from './federated_identity_setup_shell';
+import { resolveFederatedIdentitySetupValues } from './federated_identity_setup_values';
 
 export function CreateDataSourceFlyoutTypeSettingsAzure({
   control,
@@ -41,9 +52,11 @@ export function CreateDataSourceFlyoutTypeSettingsAzure({
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.dataFederation.createFlyout.azure.fields.endpoint', {
-        defaultMessage: 'Endpoint',
-      })}
+      label={createDataSourceFlyoutStrings.optionalFieldLabel(
+        i18n.translate('xpack.dataFederation.createFlyout.azure.fields.endpoint', {
+          defaultMessage: 'Endpoint',
+        })
+      )}
       fullWidth
     >
       <EuiFieldText
@@ -62,11 +75,13 @@ export function CreateDataSourceFlyoutTypeSettingsAzure({
 export function CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields({
   authenticationMode,
   areFieldsRequired,
+  cloudInfo,
   control,
   unregister,
 }: {
   authenticationMode: AzureAuthenticationMode;
   areFieldsRequired: boolean;
+  cloudInfo?: FederatedIdentityClusterInfo;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
@@ -84,6 +99,7 @@ export function CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields({
     return (
       <CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields
         areFieldsRequired={areFieldsRequired}
+        cloudInfo={cloudInfo}
         control={control}
         unregister={unregister}
       />
@@ -95,18 +111,15 @@ export function CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields({
 
 function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
   areFieldsRequired,
+  cloudInfo,
   control,
   unregister,
 }: {
   areFieldsRequired: boolean;
+  cloudInfo?: FederatedIdentityClusterInfo;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
-  const [isOptionalOpen, setIsOptionalOpen] = useState(false);
-  const optionalId = useGeneratedHtmlId({
-    prefix: 'createDataSourceFlyoutAzureFederatedOptionalSettings',
-  });
-
   const { field: tenantIdField, fieldState: tenantIdState } = useController({
     name: 'settings.tenant_id',
     control,
@@ -137,106 +150,101 @@ function CreateDataSourceFlyoutTypeSettingsAzureFederatedIdentityFields({
       : undefined,
   });
 
-  const { field: jwtAudienceField, fieldState: jwtAudienceState } = useController({
-    name: 'settings.jwt_audience',
-    control,
-  });
-
-  const hasOptionalError = useMemo(() => Boolean(jwtAudienceState.error), [jwtAudienceState.error]);
-
-  useEffect(() => {
-    if (hasOptionalError) {
-      setIsOptionalOpen(true);
-    }
-  }, [hasOptionalError]);
-
   useEffect(() => {
     return () => {
       unregister('settings.tenant_id');
       unregister('settings.client_id');
-      unregister('settings.jwt_audience');
     };
   }, [unregister]);
 
+  const setupValues = useMemo(
+    () => resolveFederatedIdentitySetupValues(cloudInfo),
+    [cloudInfo]
+  );
+  const manualSteps = useMemo(
+    () => getAzureFederatedIdentityManualSteps(setupValues),
+    [setupValues]
+  );
+  const deployConfig = useMemo(() => getAzureFederatedIdentityDeployConfig(), []);
+
   return (
     <>
-      <EuiFormRow
-        label={i18n.translate('xpack.dataFederation.createFlyout.azure.fields.tenantId', {
-          defaultMessage: 'Tenant ID',
-        })}
-        fullWidth
-        isInvalid={Boolean(tenantIdState.error)}
-        error={tenantIdState.error?.message}
+      <FederatedIdentitySetupShell
+        description={getAzureFederatedIdentityDescription()}
+        oneClickLabel={i18n.translate(
+          'xpack.dataFederation.createFlyout.azure.federated.setupMethod.oneClick',
+          {
+            defaultMessage: 'ARM template',
+          }
+        )}
+        oneClickIcon={deployConfig.cloudProviderIcon}
+        testSubjPrefix="createDataSourceFlyoutAzureFederated"
       >
-        <EuiFieldText
-          data-test-subj="createDataSourceFlyoutAzureTenantId"
-          fullWidth
-          autoComplete="off"
-          isInvalid={Boolean(tenantIdState.error)}
-          value={tenantIdField.value}
-          onChange={(e) => tenantIdField.onChange(e.target.value)}
-          name={tenantIdField.name}
-          inputRef={tenantIdField.ref}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('xpack.dataFederation.createFlyout.azure.fields.clientId', {
-          defaultMessage: 'Client ID',
-        })}
-        fullWidth
-        isInvalid={Boolean(clientIdState.error)}
-        error={clientIdState.error?.message}
-      >
-        <EuiFieldText
-          data-test-subj="createDataSourceFlyoutAzureClientId"
-          fullWidth
-          autoComplete="off"
-          isInvalid={Boolean(clientIdState.error)}
-          value={clientIdField.value}
-          onChange={(e) => clientIdField.onChange(e.target.value)}
-          name={clientIdField.name}
-          inputRef={clientIdField.ref}
-        />
-      </EuiFormRow>
-      <EuiButtonEmpty
-        size="s"
-        flush="left"
-        iconType={isOptionalOpen ? 'arrowDown' : 'arrowRight'}
-        aria-expanded={isOptionalOpen}
-        aria-controls={optionalId}
-        onClick={() => setIsOptionalOpen((value) => !value)}
-        data-test-subj="createDataSourceFlyoutAzureFederatedOptionalToggle"
-      >
-        {isOptionalOpen
-          ? i18n.translate('xpack.dataFederation.createFlyout.azure.federated.optional.hide', {
-              defaultMessage: 'Hide optional authentication settings',
-            })
-          : i18n.translate('xpack.dataFederation.createFlyout.azure.federated.optional.show', {
-              defaultMessage: 'Show optional authentication settings',
-            })}
-      </EuiButtonEmpty>
-      <div id={optionalId} hidden={!isOptionalOpen}>
-        <EuiSpacer size="s" />
-        <EuiFormRow
-          label={i18n.translate('xpack.dataFederation.createFlyout.azure.fields.jwtAudience', {
-            defaultMessage: 'JWT audience',
-          })}
-          fullWidth
-          isInvalid={Boolean(jwtAudienceState.error)}
-          error={jwtAudienceState.error?.message}
-        >
-          <EuiFieldText
-            data-test-subj="createDataSourceFlyoutAzureJwtAudience"
-            fullWidth
-            autoComplete="off"
-            isInvalid={Boolean(jwtAudienceState.error)}
-            value={jwtAudienceField.value}
-            onChange={(e) => jwtAudienceField.onChange(e.target.value)}
-            name={jwtAudienceField.name}
-            inputRef={jwtAudienceField.ref}
-          />
-        </EuiFormRow>
-      </div>
+        {(setupMethod) => (
+          <>
+            {setupMethod === 'manual' ? (
+              <FederatedIdentityManualSetup
+                intro={getAzureFederatedIdentityManualIntro()}
+                steps={manualSteps}
+                testSubjPrefix="createDataSourceFlyoutAzureFederated"
+              />
+            ) : (
+              <FederatedIdentityDeployPanel
+                {...deployConfig}
+                testSubjPrefix="createDataSourceFlyoutAzureFederated"
+              />
+            )}
+            <EuiSpacer size="l" />
+            <EuiFormRow
+              label={createDataSourceFlyoutStrings.fieldLabel(
+                i18n.translate('xpack.dataFederation.createFlyout.azure.fields.tenantId', {
+                  defaultMessage: 'Tenant ID',
+                }),
+                !areFieldsRequired
+              )}
+              fullWidth
+              isInvalid={Boolean(tenantIdState.error)}
+              error={tenantIdState.error?.message}
+            >
+              <EuiFieldText
+                data-test-subj="createDataSourceFlyoutAzureTenantId"
+                fullWidth
+                autoComplete="off"
+                isInvalid={Boolean(tenantIdState.error)}
+                placeholder="00000000-0000-0000-0000-000000000000"
+                value={tenantIdField.value}
+                onChange={(e) => tenantIdField.onChange(e.target.value)}
+                name={tenantIdField.name}
+                inputRef={tenantIdField.ref}
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label={createDataSourceFlyoutStrings.fieldLabel(
+                i18n.translate('xpack.dataFederation.createFlyout.azure.fields.clientId', {
+                  defaultMessage: 'Client ID',
+                }),
+                !areFieldsRequired
+              )}
+              fullWidth
+              isInvalid={Boolean(clientIdState.error)}
+              error={clientIdState.error?.message}
+              helpText={getAzureFederatedIdentityFieldHelp(setupMethod === 'one_click')}
+            >
+              <EuiFieldText
+                data-test-subj="createDataSourceFlyoutAzureClientId"
+                fullWidth
+                autoComplete="off"
+                isInvalid={Boolean(clientIdState.error)}
+                placeholder="00000000-0000-0000-0000-000000000000"
+                value={clientIdField.value}
+                onChange={(e) => clientIdField.onChange(e.target.value)}
+                name={clientIdField.name}
+                inputRef={clientIdField.ref}
+              />
+            </EuiFormRow>
+          </>
+        )}
+      </FederatedIdentitySetupShell>
     </>
   );
 }
@@ -289,9 +297,12 @@ function CreateDataSourceFlyoutTypeSettingsAzureCredentialsFields({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('xpack.dataFederation.createFlyout.azure.fields.account', {
-          defaultMessage: 'Account',
-        })}
+        label={createDataSourceFlyoutStrings.fieldLabel(
+          i18n.translate('xpack.dataFederation.createFlyout.azure.fields.account', {
+            defaultMessage: 'Account',
+          }),
+          !areFieldsRequired
+        )}
         fullWidth
         isInvalid={Boolean(accountState.error)}
         error={accountState.error?.message}
@@ -308,9 +319,12 @@ function CreateDataSourceFlyoutTypeSettingsAzureCredentialsFields({
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('xpack.dataFederation.createFlyout.azure.fields.key', {
-          defaultMessage: 'Key',
-        })}
+        label={createDataSourceFlyoutStrings.fieldLabel(
+          i18n.translate('xpack.dataFederation.createFlyout.azure.fields.key', {
+            defaultMessage: 'Key',
+          }),
+          !areFieldsRequired
+        )}
         fullWidth
         isInvalid={Boolean(keyState.error)}
         error={keyState.error?.message}

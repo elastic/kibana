@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 
 import type { Control, UseFormUnregister } from 'react-hook-form';
 import type { DataSourceType } from '../../common/datasource_types';
@@ -40,40 +39,17 @@ export function CreateDataSourceFlyoutTypeSettings({
 }
 
 /**
- * Spacer + heading for the type-specific block (keeps the main flyout lean).
+ * Type-specific connection fields shown directly on the flyout form.
  */
 export function CreateDataSourceFlyoutTypeSettingsBlock(props: {
   dataSourceType: DataSourceType;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const contentId = useGeneratedHtmlId({ prefix: 'createDataSourceFlyoutConnectionSettings' });
-
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiButtonEmpty
-        size="s"
-        flush="left"
-        iconType={isOpen ? 'arrowDown' : 'arrowRight'}
-        aria-expanded={isOpen}
-        aria-controls={contentId}
-        onClick={() => setIsOpen((value) => !value)}
-        data-test-subj="createDataSourceFlyoutConnectionSettingsToggle"
-      >
-        {isOpen
-          ? i18n.translate('xpack.dataFederation.createFlyout.connectionSettings.hide', {
-              defaultMessage: 'Hide connection settings',
-            })
-          : i18n.translate('xpack.dataFederation.createFlyout.connectionSettings.show', {
-              defaultMessage: 'Show connection settings',
-            })}
-      </EuiButtonEmpty>
-      <div id={contentId} hidden={!isOpen}>
-        <EuiSpacer size="s" />
-        <CreateDataSourceFlyoutTypeSettings {...props} />
-      </div>
+      <CreateDataSourceFlyoutTypeSettings {...props} />
     </>
   );
 }

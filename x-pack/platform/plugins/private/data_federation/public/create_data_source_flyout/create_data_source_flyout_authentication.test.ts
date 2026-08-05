@@ -15,48 +15,30 @@ import {
 
 describe('create_data_source_flyout_authentication', () => {
   describe('getDefaultAuthenticationMode', () => {
-    it('returns credentials for azure and access_and_secret_keys otherwise', () => {
-      expect(getDefaultAuthenticationMode('azure')).toBe('credentials');
-      expect(getDefaultAuthenticationMode('s3')).toBe('access_and_secret_keys');
-      expect(getDefaultAuthenticationMode('gcs')).toBe('access_and_secret_keys');
+    it('returns the first authentication option for each supported data source type', () => {
+      expect(getDefaultAuthenticationMode('azure')).toBe('federated_identity');
+      expect(getDefaultAuthenticationMode('s3')).toBe('federated_identity');
+      expect(getDefaultAuthenticationMode('gcs')).toBe('federated_identity');
     });
   });
 
   describe('getCreateDataSourceAuthenticationOptions', () => {
     it('includes Federated Identity for s3/gcs/azure', () => {
-      expect(
-        getCreateDataSourceAuthenticationOptions('s3', { enableFederatedIdentity: true }).map(
-          (o) => o.value
-        )
-      ).toEqual(['access_and_secret_keys', 'federated_identity', 'anonymous']);
-      expect(
-        getCreateDataSourceAuthenticationOptions('gcs', { enableFederatedIdentity: true }).map(
-          (o) => o.value
-        )
-      ).toEqual(['access_and_secret_keys', 'federated_identity', 'anonymous']);
-      expect(
-        getCreateDataSourceAuthenticationOptions('azure', { enableFederatedIdentity: true }).map(
-          (o) => o.value
-        )
-      ).toEqual(['credentials', 'federated_identity', 'anonymous']);
-    });
-
-    it('omits Federated Identity when disabled', () => {
-      expect(
-        getCreateDataSourceAuthenticationOptions('s3', { enableFederatedIdentity: false }).map(
-          (o) => o.value
-        )
-      ).toEqual(['access_and_secret_keys', 'anonymous']);
-      expect(
-        getCreateDataSourceAuthenticationOptions('gcs', { enableFederatedIdentity: false }).map(
-          (o) => o.value
-        )
-      ).toEqual(['access_and_secret_keys', 'anonymous']);
-      expect(
-        getCreateDataSourceAuthenticationOptions('azure', { enableFederatedIdentity: false }).map(
-          (o) => o.value
-        )
-      ).toEqual(['credentials', 'anonymous']);
+      expect(getCreateDataSourceAuthenticationOptions('s3').map((o) => o.value)).toEqual([
+        'federated_identity',
+        'access_and_secret_keys',
+        'anonymous',
+      ]);
+      expect(getCreateDataSourceAuthenticationOptions('gcs').map((o) => o.value)).toEqual([
+        'federated_identity',
+        'access_and_secret_keys',
+        'anonymous',
+      ]);
+      expect(getCreateDataSourceAuthenticationOptions('azure').map((o) => o.value)).toEqual([
+        'federated_identity',
+        'credentials',
+        'anonymous',
+      ]);
     });
   });
 

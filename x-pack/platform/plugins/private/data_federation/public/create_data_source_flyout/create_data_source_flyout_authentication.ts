@@ -32,40 +32,32 @@ export const DATA_SOURCE_TYPES_WITH_AUTHENTICATION: ReadonlySet<DataSourceType> 
 export const getDefaultAuthenticationMode = (
   dataSourceType: DataSourceType
 ): CreateDataSourceAuthenticationMode => {
-  if (dataSourceType === 'azure') {
-    return 'credentials';
-  }
-  return 'access_and_secret_keys';
+  const [firstOption] = getCreateDataSourceAuthenticationOptions(dataSourceType);
+  return firstOption?.value ?? 'access_and_secret_keys';
 };
 
 export const getCreateDataSourceAuthenticationOptions = (
-  dataSourceType: DataSourceType,
-  { enableFederatedIdentity }: { enableFederatedIdentity?: boolean } = {}
+  dataSourceType: DataSourceType
 ): Array<{
   value: CreateDataSourceAuthenticationMode;
   text: string;
 }> => {
+  const federatedIdentityOption = {
+    value: 'federated_identity' as const,
+    text: i18n.translate('xpack.dataFederation.createFlyout.authentication.federatedIdentity', {
+      defaultMessage: 'Federated Identity',
+    }),
+  };
+
   if (dataSourceType === 'azure') {
     return [
+      federatedIdentityOption,
       {
         value: 'credentials',
         text: i18n.translate('xpack.dataFederation.createFlyout.authentication.azure.credentials', {
           defaultMessage: 'Credentials',
         }),
       },
-      ...(enableFederatedIdentity
-        ? [
-            {
-              value: 'federated_identity' as const,
-              text: i18n.translate(
-                'xpack.dataFederation.createFlyout.authentication.federatedIdentity',
-                {
-                  defaultMessage: 'Federated Identity',
-                }
-              ),
-            },
-          ]
-        : []),
       {
         value: 'anonymous',
         text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
@@ -77,6 +69,7 @@ export const getCreateDataSourceAuthenticationOptions = (
 
   if (dataSourceType === 's3') {
     return [
+      federatedIdentityOption,
       {
         value: 'access_and_secret_keys',
         text: i18n.translate(
@@ -86,19 +79,6 @@ export const getCreateDataSourceAuthenticationOptions = (
           }
         ),
       },
-      ...(enableFederatedIdentity
-        ? [
-            {
-              value: 'federated_identity' as const,
-              text: i18n.translate(
-                'xpack.dataFederation.createFlyout.authentication.federatedIdentity',
-                {
-                  defaultMessage: 'Federated Identity',
-                }
-              ),
-            },
-          ]
-        : []),
       {
         value: 'anonymous',
         text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
@@ -110,6 +90,7 @@ export const getCreateDataSourceAuthenticationOptions = (
 
   if (dataSourceType === 'gcs') {
     return [
+      federatedIdentityOption,
       {
         value: 'access_and_secret_keys',
         text: i18n.translate(
@@ -119,19 +100,6 @@ export const getCreateDataSourceAuthenticationOptions = (
           }
         ),
       },
-      ...(enableFederatedIdentity
-        ? [
-            {
-              value: 'federated_identity' as const,
-              text: i18n.translate(
-                'xpack.dataFederation.createFlyout.authentication.federatedIdentity',
-                {
-                  defaultMessage: 'Federated Identity',
-                }
-              ),
-            },
-          ]
-        : []),
       {
         value: 'anonymous',
         text: i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymous', {
@@ -185,8 +153,54 @@ export const createDataSourceFlyoutAuthenticationTitle = (): string =>
 
 export const createDataSourceFlyoutAuthenticationHelpAriaLabel = (): string =>
   i18n.translate('xpack.dataFederation.createFlyout.authentication.helpAriaLabel', {
-    defaultMessage: 'Open Cloud security documentation',
+    defaultMessage: 'Open authentication documentation',
   });
+
+export const createDataSourceFlyoutAuthenticationDocumentationLabel = (): string =>
+  i18n.translate('xpack.dataFederation.createFlyout.authentication.documentationButton', {
+    defaultMessage: 'Documentation',
+  });
+
+export const getAnonymousAuthenticationDescription = (dataSourceType: DataSourceType): string => {
+  switch (dataSourceType) {
+    case 's3':
+      return i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymousDescription.s3', {
+        defaultMessage:
+          'No credentials are stored. Your S3 bucket must allow anonymous public read access.',
+      });
+    case 'gcs':
+      return i18n.translate('xpack.dataFederation.createFlyout.authentication.anonymousDescription.gcs', {
+        defaultMessage:
+          'No credentials are stored. Your GCS bucket must allow anonymous public read access.',
+      });
+    case 'azure':
+      return i18n.translate(
+        'xpack.dataFederation.createFlyout.authentication.anonymousDescription.azure',
+        {
+          defaultMessage:
+            'No credentials are stored. Your storage account must allow anonymous public blob read access.',
+        }
+      );
+    default:
+      return i18n.translate(
+        'xpack.dataFederation.createFlyout.authentication.anonymousDescription.default',
+        {
+          defaultMessage:
+            'No credentials are stored. The storage location must allow anonymous public read access.',
+        }
+      );
+  }
+};
+
+const optionalNonEmptyStringFields = (
+  fields: Record<string, string | undefined>
+): Record<string, string> =>
+  Object.fromEntries(
+    Object.entries(fields).flatMap(([key, value]) => {
+      const trimmed = value?.trim();
+      return trimmed ? [[key, trimmed]] : [];
+    })
+  );
 
 /** Applies UI authentication mode to the payload submitted to the API. */
 export const applyAuthenticationModeToDataSource = (
@@ -220,11 +234,13 @@ export const applyAuthenticationModeToDataSource = (
       } else if (mode === 'federated_identity') {
         applied = {
           role_arn: data.settings.role_arn,
-          jwt_audience: data.settings.jwt_audience,
-          role_session_name: data.settings.role_session_name,
-          sts_endpoint: data.settings.sts_endpoint,
-          sts_region: data.settings.sts_region,
           auth: 'federated_identity',
+          ...optionalNonEmptyStringFields({
+            jwt_audience: data.settings.jwt_audience,
+            role_session_name: data.settings.role_session_name,
+            sts_endpoint: data.settings.sts_endpoint,
+            sts_region: data.settings.sts_region,
+          }),
         };
       }
 
@@ -253,10 +269,12 @@ export const applyAuthenticationModeToDataSource = (
         applied = { credentials: credentialsText, auth: 'static_credentials' };
       } else if (mode === 'federated_identity') {
         applied = {
-          jwt_audience: data.settings.jwt_audience,
           sts_audience: data.settings.sts_audience,
-          service_account_impersonation_url: data.settings.service_account_impersonation_url,
           auth: 'federated_identity',
+          ...optionalNonEmptyStringFields({
+            jwt_audience: data.settings.jwt_audience,
+            service_account_impersonation_url: data.settings.service_account_impersonation_url,
+          }),
         };
       }
       return {
@@ -299,8 +317,10 @@ export const applyAuthenticationModeToDataSource = (
             ...base,
             tenant_id: data.settings.tenant_id,
             client_id: data.settings.client_id,
-            jwt_audience: data.settings.jwt_audience,
             auth: 'federated_identity',
+            ...optionalNonEmptyStringFields({
+              jwt_audience: data.settings.jwt_audience,
+            }),
           },
         };
       }

@@ -6,23 +6,25 @@
  */
 
 import React, { useMemo } from 'react';
+import type { EuiButtonGroupProps } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
-  EuiIcon,
-  EuiLink,
-  EuiSelect,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
 import type { DataSourceType } from '../../common/datasource_types';
 import {
+  createDataSourceFlyoutAuthenticationDocumentationLabel,
   createDataSourceFlyoutAuthenticationHelpAriaLabel,
   createDataSourceFlyoutAuthenticationLabel,
   createDataSourceFlyoutAuthenticationTitle,
   DATA_SOURCE_TYPES_WITH_AUTHENTICATION,
+  getAnonymousAuthenticationDescription,
   getCreateDataSourceAuthenticationOptions,
   type CreateDataSourceAuthenticationMode,
 } from './create_data_source_flyout_authentication';
@@ -33,17 +35,20 @@ const DATA_FEDERATION_AUTH_DOCS_URL =
 export function CreateDataSourceFlyoutAuthenticationSelect({
   dataSourceType,
   authenticationMode,
-  enableFederatedIdentity,
   onAuthenticationModeChange,
 }: {
   dataSourceType: DataSourceType;
   authenticationMode: CreateDataSourceAuthenticationMode;
-  enableFederatedIdentity?: boolean;
   onAuthenticationModeChange: (mode: CreateDataSourceAuthenticationMode) => void;
 }) {
-  const options = useMemo(
-    () => getCreateDataSourceAuthenticationOptions(dataSourceType, { enableFederatedIdentity }),
-    [dataSourceType, enableFederatedIdentity]
+  const buttonGroupOptions = useMemo(
+    (): EuiButtonGroupProps['options'] =>
+      getCreateDataSourceAuthenticationOptions(dataSourceType).map((option) => ({
+        id: option.value,
+        label: option.text,
+        'data-test-subj': `createDataSourceFlyoutAuthentication-${option.value}`,
+      })),
+    [dataSourceType]
   );
 
   if (!DATA_SOURCE_TYPES_WITH_AUTHENTICATION.has(dataSourceType)) {
@@ -60,30 +65,38 @@ export function CreateDataSourceFlyoutAuthenticationSelect({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink
+          <EuiButtonEmpty
+            size="s"
+            iconType="documentation"
+            iconSide="left"
             href={DATA_FEDERATION_AUTH_DOCS_URL}
             target="_blank"
-            external={false}
             rel="noopener noreferrer"
             aria-label={createDataSourceFlyoutAuthenticationHelpAriaLabel()}
             data-test-subj="createDataSourceFlyoutAuthenticationHelpLink"
           >
-            <EuiIcon type="question" aria-hidden={true} />
-          </EuiLink>
+            {createDataSourceFlyoutAuthenticationDocumentationLabel()}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiFormRow label={createDataSourceFlyoutAuthenticationLabel()} fullWidth>
-        <EuiSelect
-          data-test-subj="createDataSourceFlyoutAuthentication"
-          fullWidth
-          options={options}
-          value={authenticationMode}
-          onChange={(e) =>
-            onAuthenticationModeChange(e.target.value as CreateDataSourceAuthenticationMode)
-          }
-        />
-      </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiButtonGroup
+        legend={createDataSourceFlyoutAuthenticationLabel()}
+        type="single"
+        options={buttonGroupOptions}
+        idSelected={authenticationMode}
+        onChange={(id) => onAuthenticationModeChange(id as CreateDataSourceAuthenticationMode)}
+        isFullWidth
+        data-test-subj="createDataSourceFlyoutAuthentication"
+      />
+      {authenticationMode === 'anonymous' ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiText size="s" color="subdued" data-test-subj="createDataSourceFlyoutAuthenticationAnonymousDescription">
+            <p>{getAnonymousAuthenticationDescription(dataSourceType)}</p>
+          </EuiText>
+        </>
+      ) : null}
     </>
   );
-}
+};

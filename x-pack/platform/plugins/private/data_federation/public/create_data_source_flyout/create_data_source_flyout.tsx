@@ -10,6 +10,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -78,7 +79,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     services: { cloudInfo, featureFlags },
   } = useKibana<DataFederationKibanaServices>();
 
-  const enableFederatedIdentityAuth = featureFlags?.enableFederatedIdentityAuth;
   const enableGoogleCloudStorageDataSourceType =
     featureFlags?.enableGoogleCloudStorageDataSourceType;
   const enableAzureDataSourceType = featureFlags?.enableAzureDataSourceType;
@@ -104,6 +104,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
 
   const [saveError, setSaveError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
+  const [connectionTestResult, setConnectionTestResult] = useState<'success' | 'error'>();
 
   const [dataSourceType, setDataSourceType] = useState<DataSourceType>(
     initialDataSource?.type ?? 's3'
@@ -211,6 +212,10 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       )
     );
 
+  const onTestConnection = () => {
+    setConnectionTestResult(Math.random() < 0.5 ? 'success' : 'error');
+  };
+
   const onSubmit = async (data: CreateDataSourceFlyoutFormValues) => {
     setSaveError(undefined);
     setIsSaving(true);
@@ -229,6 +234,25 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   const flyoutTitle = isEditMode
     ? createDataSourceFlyoutStrings.editTitle()
     : createDataSourceFlyoutStrings.createTitle();
+
+  const connectionTestCallout = connectionTestResult ? (
+    <EuiCallOut
+      title={
+        connectionTestResult === 'success'
+          ? createDataSourceFlyoutStrings.testConnectionSuccessTitle()
+          : createDataSourceFlyoutStrings.testConnectionErrorTitle()
+      }
+      color={connectionTestResult === 'success' ? 'success' : 'danger'}
+      iconType={connectionTestResult === 'success' ? 'checkInCircleFilled' : 'errorFilled'}
+      data-test-subj={`createDataSourceFlyoutTestConnectionCallout-${connectionTestResult}`}
+    >
+      <p>
+        {connectionTestResult === 'success'
+          ? createDataSourceFlyoutStrings.testConnectionSuccessMessage()
+          : createDataSourceFlyoutStrings.testConnectionErrorMessage()}
+      </p>
+    </EuiCallOut>
+  ) : null;
 
   return (
     <EuiFlyout
@@ -252,7 +276,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
         )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiForm component="form" id="createDataSourceForm" onSubmit={handleSubmit(onSubmit)}>
+        <EuiForm component="div" id="createDataSourceForm">
           {saveError ? (
             <>
               <EuiText color="danger" size="s" data-test-subj="createDataSourceFlyoutSaveError">
@@ -261,6 +285,10 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               <EuiSpacer size="m" />
             </>
           ) : null}
+          <EuiTitle size="xs">
+            <h3>{createDataSourceFlyoutStrings.detailsTitle()}</h3>
+          </EuiTitle>
+          <EuiSpacer size="m" />
           <EuiFormRow label={createDataSourceFlyoutStrings.typeLabel()} fullWidth>
             <EuiSuperSelect
               options={dataSourceTypeOptions}
@@ -290,7 +318,12 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               readOnly={isEditMode}
             />
           </EuiFormRow>
-          <EuiFormRow label={createDataSourceFlyoutStrings.descriptionLabel()} fullWidth>
+          <EuiFormRow
+            label={createDataSourceFlyoutStrings.optionalFieldLabel(
+              createDataSourceFlyoutStrings.descriptionLabel()
+            )}
+            fullWidth
+          >
             <EuiTextArea
               data-test-subj="createDataSourceFlyoutDescription"
               fullWidth
@@ -310,7 +343,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           <CreateDataSourceFlyoutAuthenticationSelect
             authenticationMode={authenticationMode}
             dataSourceType={dataSourceType}
-            enableFederatedIdentity={enableFederatedIdentityAuth}
             onAuthenticationModeChange={setAuthenticationMode}
           />
           <CreateDataSourceFlyoutAuthenticationFields
@@ -328,6 +360,12 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
+        {connectionTestCallout ? (
+          <>
+            {connectionTestCallout}
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty data-test-subj="createDataSourceFlyoutCancel" onClick={() => onClose()}>
@@ -338,8 +376,18 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  type="button"
+                  data-test-subj="createDataSourceFlyoutTestConnection"
+                  onClick={onTestConnection}
+                  disabled={isSaving}
+                >
+                  {createDataSourceFlyoutStrings.testConnectionButton()}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
                   fill
-                  type="submit"
+                  type="button"
                   data-test-subj="createDataSourceFlyoutSubmit"
                   onClick={handleSubmit(onSubmit)}
                   isLoading={isSaving}

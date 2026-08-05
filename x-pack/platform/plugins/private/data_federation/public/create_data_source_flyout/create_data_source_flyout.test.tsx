@@ -38,6 +38,10 @@ const createDatasetsClientMock = (): DatasetsClient =>
   } as unknown as DatasetsClient);
 
 describe('CreateDataSourceFlyout', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('renders core actions and disables save while saving', async () => {
     const toasts = createToastsMock();
     const client = createClientMock();
@@ -90,5 +94,51 @@ describe('CreateDataSourceFlyout', () => {
     await waitFor(() => {
       expect(getByTestId('createDataSourceFlyoutSubmit')).not.toBeDisabled();
     });
+  });
+
+  it('shows a success callout when test connection succeeds', () => {
+    jest.spyOn(Math, 'random').mockReturnValue(0.1);
+
+    const services: DataFederationKibanaServices = {
+      dataSourcesClient: createClientMock(),
+      datasetsClient: createDatasetsClientMock(),
+      toasts: createToastsMock(),
+      featureFlags: {},
+    };
+
+    const { getByTestId } = render(
+      <EuiProvider>
+        <KibanaContextProvider services={services}>
+          <CreateDataSourceFlyout onClose={jest.fn()} onSave={jest.fn()} existingDataSourceNames={[]} />
+        </KibanaContextProvider>
+      </EuiProvider>
+    );
+
+    fireEvent.click(getByTestId('createDataSourceFlyoutTestConnection'));
+
+    expect(getByTestId('createDataSourceFlyoutTestConnectionCallout-success')).toBeInTheDocument();
+  });
+
+  it('shows an error callout when test connection fails', () => {
+    jest.spyOn(Math, 'random').mockReturnValue(0.9);
+
+    const services: DataFederationKibanaServices = {
+      dataSourcesClient: createClientMock(),
+      datasetsClient: createDatasetsClientMock(),
+      toasts: createToastsMock(),
+      featureFlags: {},
+    };
+
+    const { getByTestId } = render(
+      <EuiProvider>
+        <KibanaContextProvider services={services}>
+          <CreateDataSourceFlyout onClose={jest.fn()} onSave={jest.fn()} existingDataSourceNames={[]} />
+        </KibanaContextProvider>
+      </EuiProvider>
+    );
+
+    fireEvent.click(getByTestId('createDataSourceFlyoutTestConnection'));
+
+    expect(getByTestId('createDataSourceFlyoutTestConnectionCallout-error')).toBeInTheDocument();
   });
 });
