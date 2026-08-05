@@ -6,18 +6,22 @@
  */
 
 import type { AlertingOasOperationObject } from '../oas_types';
-import {
-  ACTION_POLICY_NOT_FOUND_RESPONSE,
-  INVALID_QUERY_PARAMETERS_RESPONSE,
-  actionPolicyResponseExample,
-} from './action_policy_oas_shared_examples';
 import { buildOasOperation } from '../oas_utils';
+import {
+  INVALID_QUERY_PARAMETERS_RESPONSE,
+  RULE_NOT_FOUND_RESPONSE,
+  RULE_VERSION_CONFLICT_RESPONSE,
+  ruleResponseExample,
+} from './rule_oas_shared_examples';
 
-export const getActionPolicyOasExamples = (): AlertingOasOperationObject =>
+export const disableRuleOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     responses: {
-      200: actionPolicyResponseExample('getActionPolicyResponse', 'An action policy'),
+      200: ruleResponseExample('disableRuleResponse', 'Disabled host CPU threshold rule', {
+        enabled: false,
+      }),
       400: INVALID_QUERY_PARAMETERS_RESPONSE,
-      404: ACTION_POLICY_NOT_FOUND_RESPONSE,
+      404: RULE_NOT_FOUND_RESPONSE,
+      409: RULE_VERSION_CONFLICT_RESPONSE,
     },
   });
