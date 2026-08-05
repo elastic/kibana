@@ -17,10 +17,7 @@ import type {
 } from '@kbn/connector-specs';
 import type { GetAxiosInstanceWithAuthFn, GetCredentialFn } from '../get_axios_instance';
 import { LeasePool } from '../lease_pool';
-import {
-  AllowlistDeniedError,
-  createConnectorNetworkSettings,
-} from './create_connector_network_settings';
+import { createConnectorNetworkSettings } from './create_connector_network_settings';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
@@ -648,13 +645,11 @@ describe('generateExecutorFunction', () => {
       });
     });
 
-    it('classifies a wrapped allowlist denial by walking the error cause chain', async () => {
-      const wrappedError = new Error('client connection failed', {
-        cause: new AllowlistDeniedError('host is not allowlisted'),
-      });
+    it('classifies an unwrapped client connection error as a framework error', async () => {
+      const connectionError = new Error('client connection failed');
       const fakeClientType = {
         id: 'wrapped',
-        build: jest.fn().mockRejectedValue(wrappedError),
+        build: jest.fn().mockRejectedValue(connectionError),
         terminate: jest.fn().mockResolvedValue(undefined),
       };
       const pool = new LeasePool<unknown>();
@@ -671,16 +666,12 @@ describe('generateExecutorFunction', () => {
         clientTypes: { wrapped: fakeClientType },
       });
 
-      const result = await executor(
+      const thrown = await executor(
         makeExecOptions({ subAction: 'testAction', subActionParams: {} })
-      );
+      ).catch((error) => error);
 
-      expect(result).toMatchObject({
-        status: 'error',
-        message: 'client connection failed',
-        retry: false,
-        errorSource: TaskErrorSource.USER,
-      });
+      expect(thrown).toMatchObject({ message: 'client connection failed' });
+      expect(getErrorSource(thrown)).toBe(TaskErrorSource.FRAMEWORK);
     });
 
     it('returns {status:error} for an untagged handler error — no getClient involved (regression)', async () => {

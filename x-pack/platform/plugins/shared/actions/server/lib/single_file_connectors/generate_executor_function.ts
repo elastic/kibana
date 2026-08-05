@@ -24,7 +24,7 @@ import type {
 import type { GetAxiosInstanceWithAuthFn, GetCredentialFn } from '../get_axios_instance';
 import type { LeasePool } from '../lease_pool';
 import { buildClientLeaseKey } from './build_client_lease_key';
-import { AllowlistDeniedError } from './create_connector_network_settings';
+import { AllowlistDeniedError } from './connector_network_errors';
 
 type RecordUnknown = Record<string, unknown>;
 interface FetchOptions {
@@ -70,28 +70,12 @@ const getErrorMeta = ({
   return Object.keys(errorMeta).length > 0 ? errorMeta : undefined;
 };
 
-const getCause = (error: unknown): unknown =>
-  typeof error === 'object' && error !== null && 'cause' in error
-    ? (error as { cause?: unknown }).cause
-    : undefined;
-
 const isClientUserError = (error: unknown, clientType: ClientTypeSpec<unknown>): boolean => {
-  const visited = new Set<unknown>();
-  let current: unknown = error;
-
-  while (current !== undefined && current !== null && !visited.has(current)) {
-    visited.add(current);
-    if (
-      current instanceof AllowlistDeniedError ||
-      (current instanceof Error && isUserError(current)) ||
-      (clientType.isUserError?.(current) ?? false)
-    ) {
-      return true;
-    }
-    current = getCause(current);
-  }
-
-  return false;
+  return (
+    error instanceof AllowlistDeniedError ||
+    (error instanceof Error && isUserError(error)) ||
+    (clientType.isUserError?.(error) ?? false)
+  );
 };
 
 export const generateExecutorFunction = ({

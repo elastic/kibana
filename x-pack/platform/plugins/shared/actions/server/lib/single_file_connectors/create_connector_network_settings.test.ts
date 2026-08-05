@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  createConnectorNetworkSettings,
-  AllowlistDeniedError,
-} from './create_connector_network_settings';
+import { createConnectorNetworkSettings } from './create_connector_network_settings';
+import { AllowlistDeniedError } from './connector_network_errors';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 
 describe('createConnectorNetworkSettings', () => {
