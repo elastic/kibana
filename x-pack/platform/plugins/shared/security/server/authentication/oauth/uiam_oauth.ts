@@ -139,7 +139,7 @@ export class UiamOAuth implements UiamOAuthType {
     }
   }
 
-  async deleteClient(request: KibanaRequest, clientId: string): Promise<boolean | null> {
+  async deleteClient(request: KibanaRequest, clientId: string): Promise<true | null> {
     if (!this.license.isEnabled()) {
       this.logger.debug(
         'Skipping OAuth client deletion: security features are disabled in Elasticsearch.'
@@ -261,7 +261,7 @@ export class UiamOAuth implements UiamOAuthType {
     request: KibanaRequest,
     clientId: string,
     connectionId: string
-  ): Promise<boolean | null> {
+  ): Promise<true | null> {
     if (!this.license.isEnabled()) {
       this.logger.debug(
         'Skipping OAuth connection deletion: security features are disabled in Elasticsearch.'

@@ -18,6 +18,11 @@ import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 
+interface ConnectionTarget {
+  client_id: string;
+  connection_id: string;
+}
+
 describe('Bulk delete OAuth connections route', () => {
   function getMockContext(
     licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
@@ -28,6 +33,12 @@ describe('Bulk delete OAuth connections route', () => {
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
     });
   }
+
+  const createRequest = (connections: ConnectionTarget[], authorization = 'Bearer essu_token') =>
+    httpServerMock.createKibanaRequest({
+      headers: { authorization },
+      body: { connections },
+    });
 
   let routeHandler: RequestHandler<any, any, any, any>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
@@ -52,14 +63,10 @@ describe('Bulk delete OAuth connections route', () => {
 
     const response = await routeHandler(
       getMockContext(),
-      httpServerMock.createKibanaRequest({
-        body: {
-          connections: [
-            { client_id: 'client-1', connection_id: 'conn-1' },
-            { client_id: 'client-2', connection_id: 'conn-2' },
-          ],
-        },
-      }),
+      createRequest([
+        { client_id: 'client-1', connection_id: 'conn-1' },
+        { client_id: 'client-2', connection_id: 'conn-2' },
+      ]),
       kibanaResponseFactory
     );
 
@@ -95,14 +102,10 @@ describe('Bulk delete OAuth connections route', () => {
 
     const response = await routeHandler(
       getMockContext(),
-      httpServerMock.createKibanaRequest({
-        body: {
-          connections: [
-            { client_id: 'client-1', connection_id: 'conn-1' },
-            { client_id: 'client-1', connection_id: 'conn-2' },
-          ],
-        },
-      }),
+      createRequest([
+        { client_id: 'client-1', connection_id: 'conn-1' },
+        { client_id: 'client-1', connection_id: 'conn-2' },
+      ]),
       kibanaResponseFactory
     );
 
@@ -131,15 +134,11 @@ describe('Bulk delete OAuth connections route', () => {
 
     const response = await routeHandler(
       getMockContext(),
-      httpServerMock.createKibanaRequest({
-        body: {
-          connections: [
-            { client_id: 'client-a', connection_id: 'conn-a' },
-            { client_id: 'client-b', connection_id: 'conn-b' },
-            { client_id: 'client-c', connection_id: 'conn-c' },
-          ],
-        },
-      }),
+      createRequest([
+        { client_id: 'client-a', connection_id: 'conn-a' },
+        { client_id: 'client-b', connection_id: 'conn-b' },
+        { client_id: 'client-c', connection_id: 'conn-c' },
+      ]),
       kibanaResponseFactory
     );
 
@@ -153,20 +152,91 @@ describe('Bulk delete OAuth connections route', () => {
     });
   });
 
+  it('collapses duplicate targets into a single delete and a single result', async () => {
+    oauthMock.deleteConnection.mockResolvedValue(true);
+
+    const response = await routeHandler(
+      getMockContext(),
+      createRequest([
+        { client_id: 'client-1', connection_id: 'conn-1' },
+        { client_id: 'client-1', connection_id: 'conn-2' },
+        { client_id: 'client-1', connection_id: 'conn-1' },
+      ]),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual({
+      results: [
+        { client_id: 'client-1', connection_id: 'conn-1', status: 'deleted' },
+        { client_id: 'client-1', connection_id: 'conn-2', status: 'deleted' },
+      ],
+    });
+    expect(oauthMock.deleteConnection).toHaveBeenCalledTimes(2);
+  });
+
+  it('treats the same connection id under different clients as distinct targets', async () => {
+    oauthMock.deleteConnection.mockResolvedValue(true);
+
+    const response = await routeHandler(
+      getMockContext(),
+      createRequest([
+        { client_id: 'client-1', connection_id: 'conn-1' },
+        { client_id: 'client-2', connection_id: 'conn-1' },
+      ]),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual({
+      results: [
+        { client_id: 'client-1', connection_id: 'conn-1', status: 'deleted' },
+        { client_id: 'client-2', connection_id: 'conn-1', status: 'deleted' },
+      ],
+    });
+    expect(oauthMock.deleteConnection).toHaveBeenCalledTimes(2);
+  });
+
   it('returns 404 when OAuth is not available', async () => {
     authc.oauth = null;
 
     const response = await routeHandler(
       getMockContext(),
-      httpServerMock.createKibanaRequest({
-        body: {
-          connections: [{ client_id: 'client-1', connection_id: 'conn-1' }],
-        },
-      }),
+      createRequest([{ client_id: 'client-1', connection_id: 'conn-1' }]),
       kibanaResponseFactory
     );
 
     expect(response.status).toBe(404);
+  });
+
+  it('returns 401 for the whole request when the authorization header is missing', async () => {
+    const response = await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({
+        body: { connections: [{ client_id: 'client-1', connection_id: 'conn-1' }] },
+      }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(401);
+    expect(oauthMock.deleteConnection).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 for the whole request when the credential is not compatible with UIAM', async () => {
+    const response = await routeHandler(
+      getMockContext(),
+      createRequest(
+        [
+          { client_id: 'client-1', connection_id: 'conn-1' },
+          { client_id: 'client-1', connection_id: 'conn-2' },
+        ],
+        'Bearer not-a-uiam-token'
+      ),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(400);
+    expect(oauthMock.deleteConnection).not.toHaveBeenCalled();
   });
 
   it('returns 404 when security features are disabled (null upstream result)', async () => {
@@ -174,14 +244,10 @@ describe('Bulk delete OAuth connections route', () => {
 
     const response = await routeHandler(
       getMockContext(),
-      httpServerMock.createKibanaRequest({
-        body: {
-          connections: [
-            { client_id: 'client-1', connection_id: 'conn-1' },
-            { client_id: 'client-1', connection_id: 'conn-2' },
-          ],
-        },
-      }),
+      createRequest([
+        { client_id: 'client-1', connection_id: 'conn-1' },
+        { client_id: 'client-1', connection_id: 'conn-2' },
+      ]),
       kibanaResponseFactory
     );
 
@@ -195,14 +261,10 @@ describe('Bulk delete OAuth connections route', () => {
 
     const response = await routeHandler(
       getMockContext(),
-      httpServerMock.createKibanaRequest({
-        body: {
-          connections: [
-            { client_id: 'client-1', connection_id: 'conn-1' },
-            { client_id: 'client-1', connection_id: 'conn-2' },
-          ],
-        },
-      }),
+      createRequest([
+        { client_id: 'client-1', connection_id: 'conn-1' },
+        { client_id: 'client-1', connection_id: 'conn-2' },
+      ]),
       kibanaResponseFactory
     );
 

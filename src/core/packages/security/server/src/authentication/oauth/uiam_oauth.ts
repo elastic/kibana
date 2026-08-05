@@ -145,7 +145,7 @@ export interface UiamOAuthType {
    * @returns `true` once the client has been deleted, or `null` when security features are
    * disabled.
    */
-  deleteClient(request: KibanaRequest, clientId: string): Promise<boolean | null>;
+  deleteClient(request: KibanaRequest, clientId: string): Promise<true | null>;
 
   /**
    * Lists OAuth connections, optionally filtered by client ID, connection ID and/or project ID.
@@ -201,7 +201,7 @@ export interface UiamOAuthType {
     request: KibanaRequest,
     clientId: string,
     connectionId: string
-  ): Promise<boolean | null>;
+  ): Promise<true | null>;
 
   /**
    * Resolves one or more user IDs into basic user information.

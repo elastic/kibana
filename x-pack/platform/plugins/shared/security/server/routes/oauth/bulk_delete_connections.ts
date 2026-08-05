@@ -12,12 +12,16 @@ import {
   OAUTH_MAX_BULK_CONNECTIONS,
   OAUTH_MAX_STRING_FIELD_LENGTH,
 } from '../../../common/oauth/constants';
+import { UiamOAuth } from '../../authentication/oauth';
 import { wrapError, wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-interface BulkDeleteOAuthConnectionResultItem {
+interface BulkDeleteOAuthConnectionTarget {
   client_id: string;
   connection_id: string;
+}
+
+interface BulkDeleteOAuthConnectionResultItem extends BulkDeleteOAuthConnectionTarget {
   status: 'deleted' | 'error';
   status_code?: number;
   message?: string;
@@ -26,6 +30,14 @@ interface BulkDeleteOAuthConnectionResultItem {
 interface BulkDeleteOAuthConnectionsResponseBody {
   results: BulkDeleteOAuthConnectionResultItem[];
 }
+
+const dedupeTargets = (
+  targets: readonly BulkDeleteOAuthConnectionTarget[]
+): BulkDeleteOAuthConnectionTarget[] => [
+  ...new Map(
+    targets.map((target) => [JSON.stringify([target.client_id, target.connection_id]), target])
+  ).values(),
+];
 
 export function defineBulkDeleteOAuthConnectionsRoute({
   router,
@@ -71,16 +83,19 @@ export function defineBulkDeleteOAuthConnectionsRoute({
           });
         }
 
-        const { connections } = request.body;
+        // Fail the request up front rather than reporting a bad credential against every target.
+        UiamOAuth.getAccessToken(request);
+
+        const targets = dedupeTargets(request.body.connections);
 
         const settled = await Promise.allSettled(
-          connections.map(({ client_id: clientId, connection_id: connectionId }) =>
+          targets.map(({ client_id: clientId, connection_id: connectionId }) =>
             oauth.deleteConnection(request, clientId, connectionId)
           )
         );
 
         const allUnavailable = settled.every(
-          (result) => result.status === 'fulfilled' && !result.value
+          (result) => result.status === 'fulfilled' && result.value === null
         );
         if (allUnavailable) {
           return response.notFound({
@@ -92,10 +107,10 @@ export function defineBulkDeleteOAuthConnectionsRoute({
 
         const results: BulkDeleteOAuthConnectionResultItem[] = settled.map(
           (settledResult, index) => {
-            const { client_id: clientId, connection_id: connectionId } = connections[index];
+            const { client_id: clientId, connection_id: connectionId } = targets[index];
 
             if (settledResult.status === 'fulfilled') {
-              if (!settledResult.value) {
+              if (settledResult.value === null) {
                 return {
                   client_id: clientId,
                   connection_id: connectionId,

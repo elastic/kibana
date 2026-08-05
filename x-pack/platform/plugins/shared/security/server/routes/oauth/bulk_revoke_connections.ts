@@ -12,6 +12,7 @@ import {
   OAUTH_MAX_BULK_CONNECTIONS,
   OAUTH_MAX_STRING_FIELD_LENGTH,
 } from '../../../common/oauth/constants';
+import { UiamOAuth } from '../../authentication/oauth';
 import { wrapError, wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
@@ -71,6 +72,9 @@ export function defineBulkRevokeOAuthConnectionsRoute({
             body: { message: 'OAuth management is not available: UIAM is not configured' },
           });
         }
+
+        // Fail the request up front rather than reporting a bad credential against every target.
+        UiamOAuth.getAccessToken(request);
 
         const { connections, reason } = request.body;
 
