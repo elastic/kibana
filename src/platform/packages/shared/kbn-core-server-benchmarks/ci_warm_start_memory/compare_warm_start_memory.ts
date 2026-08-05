@@ -208,19 +208,19 @@ export const compareWarmStartMemory: OnCompareCallback = async ({
     return;
   }
 
-  log.info(
-    `Warm-start paired heap growth: ${formatBytes(
-      postForcedGcHeapRule.lowerConfidenceBoundBytes ?? 0
-    )} 99% LCB; ${formatBytes(WARM_START_MEMORY_THRESHOLD_BYTES)} threshold ${
-      regression ? 'exceeded' : 'not exceeded'
-    }.\n\nWarm-start paired heap results:\npost-forced-GC 99% LCB: ${formatBytes(
-      postForcedGcHeapRule.lowerConfidenceBoundBytes ?? 0
-    )}\npost-forced-GC mean: ${formatBytes(
-      postForcedGcHeapRule.meanBytes ?? 0
-    )}\nnatural 99% LCB: ${formatBytes(
-      rule.lowerConfidenceBoundBytes ?? 0
-    )}\nnatural mean: ${formatBytes(rule.meanBytes ?? 0)}\nReport: ${reportPath}`
-  );
+  log.info(`
+Warm-start paired heap growth: ${formatBytes(
+    postForcedGcHeapRule.lowerConfidenceBoundBytes ?? 0
+  )} 99% LCB. ${formatBytes(WARM_START_MEMORY_THRESHOLD_BYTES)} threshold ${
+    regression ? 'exceeded' : 'not exceeded'
+  }.
+
+Warm-start paired heap results:
+post-forced-GC 99% LCB: ${formatBytes(postForcedGcHeapRule.lowerConfidenceBoundBytes ?? 0)}
+post-forced-GC mean: ${formatBytes(postForcedGcHeapRule.meanBytes ?? 0)}
+natural 99% LCB: ${formatBytes(rule.lowerConfidenceBoundBytes ?? 0)}
+natural mean: ${formatBytes(rule.meanBytes ?? 0)}
+Report: ${reportPath}`);
 
   if (regression) {
     throw new Error(`Warm-start memory regression detected. Report: ${reportPath}`);
