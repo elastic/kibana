@@ -13,7 +13,10 @@ describe('Utils', () => {
   describe('isGlobalEntry', () => {
     it('returns true when global is true', () => {
       expect(
-        isGlobalEntry({ global: true, users: [{ id: 'u1', name: 'user' }] } as KnowledgeBaseEntryCreateProps)
+        isGlobalEntry({
+          global: true,
+          users: [{ id: 'u1', name: 'user' }],
+        } as KnowledgeBaseEntryCreateProps)
       ).toEqual(true);
     });
 
