@@ -86,7 +86,6 @@ export const SkillContextMenu: React.FC<SkillContextMenuProps> = ({
 
   return (
     <EuiPopover
-      aria-label={labels.skills.skillContextMenuButtonLabel}
       button={
         <EuiToolTip content={labels.skills.skillContextMenuButtonLabel} disableScreenReaderOutput>
           <EuiButtonIcon

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolType, ToolConfirmationPolicy } from '@kbn/agent-builder-common';
+import type { ToolType } from '@kbn/agent-builder-common';
 import type { ScopedRunnerRunToolsParams, RunToolReturn } from '../runner';
 import type { InternalToolDefinition } from './internal';
 
@@ -32,7 +32,6 @@ export interface ToolCreateParams<TConfig extends object = {}> {
   description?: string;
   tags?: string[];
   configuration: TConfig;
-  confirmation?: ToolConfirmationPolicy;
 }
 
 /**
@@ -42,7 +41,6 @@ export interface ToolUpdateParams<TConfig extends object = {}> {
   description?: string;
   tags?: string[];
   configuration?: Partial<TConfig>;
-  confirmation?: ToolConfirmationPolicy;
 }
 
 /**

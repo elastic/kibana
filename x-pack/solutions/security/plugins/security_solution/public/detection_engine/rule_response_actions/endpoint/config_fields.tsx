@@ -13,7 +13,6 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import { RunscriptConfig } from './runscript_config';
 import { OverwriteField } from './overwrite_process_field';
 import { FieldNameField } from './field_name';
-import { KillDescendantsField } from './kill_descendants_field';
 
 interface AdditionalConfigFieldProps {
   basePath: string;
@@ -30,9 +29,6 @@ export const ConfigFieldsComponent = (props: AdditionalConfigFieldProps) => {
   const currentOverwrite = get(data, overWritePath);
   const isAutomatedRunScriptEnabled = useIsExperimentalFeatureEnabled(
     'responseActionsEndpointAutomatedRunScript'
-  );
-  const isKillProcessDescendantsEnabled = useIsExperimentalFeatureEnabled(
-    'responseActionsEndpointKillProcessDescendants'
   );
 
   if (currentCommand === 'kill-process' || currentCommand === 'suspend-process') {
@@ -52,16 +48,6 @@ export const ConfigFieldsComponent = (props: AdditionalConfigFieldProps) => {
           readDefaultValueOnForm={readDefaultValueOnForm}
           isRequired={!currentOverwrite}
         />
-        {currentCommand === 'kill-process' && isKillProcessDescendantsEnabled && (
-          <>
-            <EuiSpacer />
-            <KillDescendantsField
-              path={`${basePath}.config.kill_descendants`}
-              disabled={disabled}
-              readDefaultValueOnForm={readDefaultValueOnForm}
-            />
-          </>
-        )}
         <EuiSpacer />
       </>
     );

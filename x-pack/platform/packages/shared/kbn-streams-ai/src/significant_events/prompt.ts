@@ -17,7 +17,6 @@ import {
   SIGNIFICANT_EVENT_TYPE_SECURITY,
 } from './types';
 import { SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES } from './tools/features_tool';
-import { createGetStreamFeaturesTool } from '../features/tool';
 
 export { significantEventsSystemPrompt as significantEventsPrompt };
 
@@ -50,7 +49,31 @@ export function createGenerateSignificantEventsPrompt({
         },
       },
       tools: {
-        get_stream_features: createGetStreamFeaturesTool(SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES),
+        get_stream_features: {
+          description:
+            'Fetches extracted stream features for this stream. Supports optional filtering by type, confidence, and limit.',
+          schema: {
+            type: 'object',
+            properties: {
+              feature_types: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                  enum: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES,
+                },
+              },
+              min_confidence: {
+                type: 'number',
+                minimum: 0,
+                maximum: 100,
+              },
+              limit: {
+                type: 'number',
+                minimum: 1,
+              },
+            },
+          },
+        },
         add_queries: {
           description: `Add queries to suggest to the user`,
           schema: {

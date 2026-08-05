@@ -45,7 +45,7 @@ export const convertPersistedDefinition = <
     configuration: convertedConfiguration,
     readonly: false,
     experimental: false,
-    confirmation: tool.confirmation ?? {
+    confirmation: {
       askUser: 'never',
     },
     isAvailable: () => {

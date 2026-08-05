@@ -30,7 +30,6 @@ export interface CreateSLOForm<IndicatorType = Indicator> {
   groupBy: string[] | string;
   settings: {
     preventInitialBackfill: boolean;
-    preventCrossProjectSearch: boolean;
     syncDelay: number; // in minutes
     frequency: number; // in minutes
     syncField: string | null;

@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { createActionPolicyAttachmentDefinition } from './action_policy_attachment_definition';
 
 jest.mock('./action_policy_inline_content', () => ({
@@ -24,7 +23,7 @@ const createMockServices = () => ({
 
 const createAttachment = (overrides: { origin?: string } = {}) => ({
   id: 'att-1',
-  type: ACTION_POLICY_ATTACHMENT_TYPE,
+  type: 'action_policy' as const,
   versions: [],
   current_version: 1,
   origin: overrides.origin,

@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React from 'react';
-
-const arrayHighlightStyles = ({ euiTheme }: Partial<UseEuiTheme>) =>
-  css({
-    color: euiTheme?.colors.mediumShade ?? 'inherit',
-  });
 
 /**
  * Formats a value as a React element with proper highlighting for arrays.
@@ -27,14 +20,14 @@ export function formatValueAsElement(value: unknown): React.ReactElement | strin
   if (Array.isArray(value)) {
     return (
       <>
-        <span css={arrayHighlightStyles}>{'['}</span>
+        <span className="ffArray__highlight">{'['}</span>
         {value.map((item, index) => (
           <React.Fragment key={index}>
-            {index > 0 && <span css={arrayHighlightStyles}>{', '}</span>}
+            {index > 0 && <span className="ffArray__highlight">{', '}</span>}
             {formatValueAsElement(item)}
           </React.Fragment>
         ))}
-        <span css={arrayHighlightStyles}>{']'}</span>
+        <span className="ffArray__highlight">{']'}</span>
       </>
     );
   }

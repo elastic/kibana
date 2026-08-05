@@ -11,20 +11,17 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import React from 'react';
 import { ExecutionStatus, type WorkflowExecutionListDto } from '@kbn/workflows';
 import { WorkflowExecutionList, type WorkflowExecutionListProps } from './workflow_execution_list';
-import { createStartServicesMock, type StartServicesMock } from '../../../mocks';
-import { getTestProvider } from '../../../shared/mocks/test_providers';
+import { TestWrapper } from '../../../shared/test_utils';
 
 jest.mock('./workflow_execution_list_item', () => ({
   WorkflowExecutionListItem: ({
     status,
     startedAt,
-    executedByLabel,
     onClick,
     selected,
   }: {
     status: string;
     startedAt: Date | null;
-    executedByLabel?: string;
     onClick: () => void;
     selected: boolean;
   }) => (
@@ -32,7 +29,6 @@ jest.mock('./workflow_execution_list_item', () => ({
       data-test-subj="workflowExecutionListItem"
       data-selected={selected}
       data-started-at={startedAt ? startedAt.toISOString() : 'null'}
-      data-executed-by-label={executedByLabel}
       onClick={onClick}
       role="button"
       onKeyDown={() => {}}
@@ -105,15 +101,12 @@ describe('WorkflowExecutionList', () => {
     onConfirmCancel: jest.fn().mockResolvedValue(undefined),
   };
 
-  const renderComponent = (
-    overrides: Partial<WorkflowExecutionListProps> = {},
-    services: StartServicesMock = createStartServicesMock()
-  ) => {
-    services.userProfile.bulkGet.mockResolvedValue([]);
-
-    return render(<WorkflowExecutionList {...defaultProps} {...overrides} />, {
-      wrapper: getTestProvider({ services }),
-    });
+  const renderComponent = (overrides: Partial<WorkflowExecutionListProps> = {}) => {
+    return render(
+      <TestWrapper>
+        <WorkflowExecutionList {...defaultProps} {...overrides} />
+      </TestWrapper>
+    );
   };
 
   beforeEach(() => {
@@ -185,31 +178,6 @@ describe('WorkflowExecutionList', () => {
       const items = screen.getAllByTestId('workflowExecutionListItem');
       expect(items[0]).toHaveAttribute('data-selected', 'true');
       expect(items[1]).toHaveAttribute('data-selected', 'false');
-    });
-
-    it('shows unresolved executor labels on ESS', () => {
-      const services = createStartServicesMock();
-      services.cloud.isCloudEnabled = true;
-      services.cloud.isServerlessEnabled = false;
-
-      renderComponent({ showExecutor: true }, services);
-
-      expect(screen.getAllByTestId('workflowExecutionListItem')[0]).toHaveAttribute(
-        'data-executed-by-label',
-        'user1'
-      );
-    });
-
-    it('hides unresolved executor labels on Serverless', () => {
-      const services = createStartServicesMock();
-      services.cloud.isCloudEnabled = true;
-      services.cloud.isServerlessEnabled = true;
-
-      renderComponent({ showExecutor: true }, services);
-
-      expect(screen.getAllByTestId('workflowExecutionListItem')[0]).not.toHaveAttribute(
-        'data-executed-by-label'
-      );
     });
   });
 

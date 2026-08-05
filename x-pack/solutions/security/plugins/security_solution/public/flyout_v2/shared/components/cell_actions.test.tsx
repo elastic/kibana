@@ -7,12 +7,6 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TableId } from '@kbn/securitysolution-data-table';
-import {
-  SECURITY_CELL_ACTIONS_DEFAULT,
-  SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
-} from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
 import { TimelineId } from '../../../../common/types/timeline';
 import { PageScope } from '../../../data_view_manager/constants';
 import { cellActionRenderer, createCellActionRenderer } from './cell_actions';
@@ -73,38 +67,6 @@ describe('cellActionRenderer', () => {
         expect.objectContaining({
           metadata: { scopeId: TimelineId.active },
           sourcererScopeId: PageScope.timeline,
-        })
-      );
-    });
-
-    it('defaults to the slim default trigger with 5 visible actions', () => {
-      renderCellAction(createCellActionRenderer(TimelineId.active), '');
-
-      expect(mockSecurityCellActions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          triggerId: SECURITY_CELL_ACTIONS_DEFAULT,
-          visibleCellActions: 5,
-        })
-      );
-    });
-
-    it('uses the details-flyout trigger, visible count and alertsTableRef when provided', () => {
-      const alertsTableRef = React.createRef<AlertsTableImperativeApi>();
-
-      renderCellAction(
-        createCellActionRenderer(TableId.alertsOnAlertsPage, {
-          triggerId: SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
-          visibleCellActions: 6,
-          alertsTableRef,
-        }),
-        ''
-      );
-
-      expect(mockSecurityCellActions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          triggerId: SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
-          visibleCellActions: 6,
-          metadata: { scopeId: TableId.alertsOnAlertsPage, alertsTableRef },
         })
       );
     });

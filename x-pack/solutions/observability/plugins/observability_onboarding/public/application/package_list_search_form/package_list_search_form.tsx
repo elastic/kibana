@@ -99,7 +99,6 @@ export const PackageListSearchForm = React.forwardRef(
     if (errorLoading)
       return (
         <EuiCallOut
-          announceOnMount
           title={i18n.translate('xpack.observability_onboarding.asyncLoadFailureCallout.title', {
             defaultMessage: 'Loading failure',
           })}

@@ -27,7 +27,7 @@ import { HelpMenu } from '../../components/help_menu';
 import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
-import { MlAppHeader, useDataVisualizerBack } from '../../components/ml_app_header';
+import { MlAppHeader } from '../../components/ml_app_header';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { useDataSource } from '../../contexts/ml/data_source_context';
 import { useMlManagementLocator } from '../../contexts/kibana/use_create_url';
@@ -51,7 +51,6 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
   const mlLocator = useMlLocator()!;
   const mlManagementLocator = useMlManagementLocator();
   const mlFeaturesDisabled = !isFullLicense();
-  const dataVisualizerBack = useDataVisualizerBack();
 
   useEffect(() => {
     getMlNodeCount(mlApi);
@@ -222,7 +221,6 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
                     defaultMessage: 'Index data visualizer',
                   })
             }
-            back={dataVisualizerBack}
           />
           {!dataView && !esql ? (
             <>

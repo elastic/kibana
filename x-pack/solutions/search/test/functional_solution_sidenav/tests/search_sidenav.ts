@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -34,9 +33,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cleanUp();
     });
 
-    describe('sidenav', () => {
+    describe('sidenav & breadcrumbs', () => {
       it('renders the correct nav and navigate to links', async () => {
         await solutionNavigation.expectExists();
+        await solutionNavigation.breadcrumbs.expectExists();
 
         await solutionNavigation.sidenav.clickLink({
           deepLinkId: 'discover',
@@ -44,7 +44,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'discover',
         });
-        expect(await browser.getCurrentUrl()).to.contain('/app/discover');
+
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Discover' });
 
         // navigate to a different section
         await solutionNavigation.sidenav.clickLink({

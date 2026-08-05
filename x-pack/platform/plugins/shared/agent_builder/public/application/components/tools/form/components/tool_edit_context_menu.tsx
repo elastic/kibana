@@ -33,7 +33,6 @@ export const ToolEditContextMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <EuiPopover
-      aria-label={labels.tools.editToolContextMenuButtonLabel}
       panelPaddingSize="xs"
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}

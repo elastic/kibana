@@ -10,7 +10,7 @@ import { EuiAvatar, EuiComment, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar } from '@kbn/user-profile-components';
-import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
+import type { EpisodeActionHistoryEntry } from '../../../queries/episode_actions_history_query';
 import { ACTION_ICON } from './entries';
 import { AlertEpisodeTimelineActionEvent } from './timeline_action_event';
 import { AlertEpisodeTimelineRelativeTimestamp } from './timeline_relative_timestamp';

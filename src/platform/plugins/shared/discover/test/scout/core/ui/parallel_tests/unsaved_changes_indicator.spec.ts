@@ -8,7 +8,6 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import type { PageObjects } from '@kbn/scout';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { spaceTest, tags, testData, type DiscoverScoutSpace } from '../fixtures';
 
@@ -44,10 +43,6 @@ const createSavedSearch = async (
   });
 };
 
-async function expectColumnTitles(pageObjects: PageObjects, columns: string[]) {
-  await expect.poll(() => pageObjects.dataGrid.getColumnTitles()).toStrictEqual(columns);
-}
-
 spaceTest.describe('Discover unsaved changes indicator', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
@@ -67,8 +62,9 @@ spaceTest.describe('Discover unsaved changes indicator', { tag: tags.deploymentA
     'should not show the indicator initially nor after changes to a draft saved search',
     async ({ pageObjects }) => {
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
+
       await pageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
-      await expectColumnTitles(pageObjects, ['@timestamp', 'bytes']);
+
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
     }
   );
@@ -77,12 +73,15 @@ spaceTest.describe('Discover unsaved changes indicator', { tag: tags.deploymentA
     'should show the indicator only after changes to a persisted saved search',
     async ({ pageObjects }) => {
       await pageObjects.discover.saveSearch(SAVED_SEARCH_NAME);
+
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
 
       await pageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
+
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeVisible();
 
       await pageObjects.discover.saveUnsavedChanges();
+
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
     }
   );
@@ -93,9 +92,11 @@ spaceTest.describe('Discover unsaved changes indicator', { tag: tags.deploymentA
       const savedSearchName = 'test saved search for breakdown';
       await createSavedSearch(discoverScoutSpace, savedSearchName);
       await pageObjects.discover.loadSavedSearch(savedSearchName);
+
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
 
       await pageObjects.discover.chooseBreakdownField('_index');
+
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeVisible();
     }
   );
@@ -104,10 +105,12 @@ spaceTest.describe('Discover unsaved changes indicator', { tag: tags.deploymentA
     'should not show the indicator after loading an ES|QL saved search, only after changes',
     async ({ pageObjects }) => {
       await pageObjects.discover.loadSavedSearch('ES|QL Discover Session');
+
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
 
       await pageObjects.discover.codeEditor.setCodeEditorValue('from logstash-* | limit 100');
       await pageObjects.discover.submitQuery();
+
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeVisible();
     }
   );
@@ -118,17 +121,23 @@ spaceTest.describe('Discover unsaved changes indicator', { tag: tags.deploymentA
     await spaceTest.step('load a persisted saved search', async () => {
       await createSavedSearch(discoverScoutSpace, savedSearchName, ['bytes']);
       await pageObjects.discover.loadSavedSearch(savedSearchName);
+
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
     });
 
     await spaceTest.step('revert column changes', async () => {
-      await expectColumnTitles(pageObjects, ['@timestamp', 'bytes']);
+      expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual(['@timestamp', 'bytes']);
       await pageObjects.dataGrid.addFieldFromSidebar('extension');
-      await expectColumnTitles(pageObjects, ['@timestamp', 'bytes', 'extension']);
+
+      expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
+        '@timestamp',
+        'bytes',
+        'extension',
+      ]);
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeVisible();
 
       await pageObjects.discover.revertUnsavedChanges();
-      await expectColumnTitles(pageObjects, ['@timestamp', 'bytes']);
+      expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual(['@timestamp', 'bytes']);
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
     });
 
@@ -160,14 +169,22 @@ spaceTest.describe('Discover unsaved changes indicator', { tag: tags.deploymentA
       });
 
       await spaceTest.step('manually revert column changes', async () => {
-        await expectColumnTitles(pageObjects, ['@timestamp', 'bytes']);
+        await expect(pageObjects.dataGrid.getColumnHeader('bytes')).toBeVisible();
+        expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual(['@timestamp', 'bytes']);
         await pageObjects.dataGrid.addFieldFromSidebar('extension');
-        await expectColumnTitles(pageObjects, ['@timestamp', 'bytes', 'extension']);
+
+        expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
+          '@timestamp',
+          'bytes',
+          'extension',
+        ]);
         await expect(pageObjects.discover.unsavedChangesIndicator()).toBeVisible();
 
         await pageObjects.unifiedFieldList.clickFieldListItemRemove('extension');
+
         await pageObjects.dataGrid.waitForLoad();
-        await expectColumnTitles(pageObjects, ['@timestamp', 'bytes']);
+        await expect(pageObjects.dataGrid.getColumnHeader('extension')).toBeHidden();
+        expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual(['@timestamp', 'bytes']);
         await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
       });
 
@@ -194,11 +211,13 @@ spaceTest.describe('Discover unsaved changes indicator', { tag: tags.deploymentA
         });
         await pageObjects.filterBar.addFilter({ field: 'bytes', operator: 'exists' });
         await pageObjects.discover.saveSearch(SAVED_SEARCH_WITH_FILTERS_NAME);
+
         await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
       });
 
       await spaceTest.step('pinning a filter does not show the indicator', async () => {
         await pageObjects.filterBar.toggleFilterPinned('extension');
+
         await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
       });
 
@@ -206,10 +225,12 @@ spaceTest.describe('Discover unsaved changes indicator', { tag: tags.deploymentA
         'disabling a filter shows the indicator and can be reverted',
         async () => {
           await pageObjects.filterBar.toggleFilterNegated('bytes');
+
           await expect(pageObjects.discover.unsavedChangesIndicator()).toBeVisible();
 
           await pageObjects.discover.revertUnsavedChanges();
           await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
+
           expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
           expect(await pageObjects.discover.getHitCountInt()).toBe(1373);
         }

@@ -165,9 +165,6 @@ node scripts/evals run \
 | **filter_grounding**                   | KI feature extraction    | Entity filter equality pairs are grounded in input sample documents                       |
 | **ki_query_generation_code_evaluator** | KI query generation      | ES\|QL syntax validity, category/severity compliance, and execution hit rate              |
 | **tool_usage_validation**              | KI query generation      | Validates `get_stream_features` and `add_queries` tool calls were invoked correctly       |
-| **initial_feature_count**              | KI feature exclusion     | How many features the initial identification returned, before any exclusion is in play    |
-| **follow_up_returned_count**           | KI feature exclusion     | Raw features the model returned under exclusion instructions (median across follow-up runs) |
-| **follow_up_retained_count**           | KI feature exclusion     | Features retained after code strips exclusion leakers (median across follow-up runs)      |
 
 ### LLM-as-a-judge evaluators
 

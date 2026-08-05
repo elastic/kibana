@@ -23,8 +23,8 @@
     "@kbn/presentation-publishing",
     "@kbn/presentation-publishing-schemas",
     "@kbn/presentation-util",
-    "@kbn/content-management-utils",
-    "@kbn/zod"
+    "@kbn/config-schema",
+    "@kbn/content-management-utils"
   ],
   "exclude": ["target/**/*"]
 }

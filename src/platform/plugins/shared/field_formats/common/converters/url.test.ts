@@ -8,11 +8,7 @@
  */
 
 import { UrlFormat } from './url';
-import {
-  expectReactElementWithNull,
-  expectReactElementWithBlank,
-  renderReactNode,
-} from '../test_utils';
+import { expectReactElementWithNull, expectReactElementWithBlank } from '../test_utils';
 
 describe('UrlFormat', () => {
   test('outputs a simple <a> tag by default', () => {
@@ -640,7 +636,7 @@ describe('UrlFormat', () => {
 
   test('wraps highlighted link text in <mark>', () => {
     const url = new UrlFormat({});
-    const container = renderReactNode(
+    expect(
       url.convertToReact('http://elastic.co', {
         field: { name: 'link' },
         hit: {
@@ -649,9 +645,19 @@ describe('UrlFormat', () => {
           },
         },
       })
-    );
-    expect(container.querySelector('a')).toHaveAttribute('href', 'http://elastic.co');
-    expect(container.querySelector('mark')).toHaveTextContent('http://elastic.co');
+    ).toMatchInlineSnapshot(`
+      <a
+        href="http://elastic.co"
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        <mark
+          className="ffSearch__highlight"
+        >
+          http://elastic.co
+        </mark>
+      </a>
+    `);
   });
 
   test('renders a numeric value as text when no URL template is set', () => {
@@ -682,14 +688,40 @@ describe('UrlFormat', () => {
     expect(url.convertToText(['http://elastic.co', 'http://kibana.io'])).toBe(
       '["http://elastic.co","http://kibana.io"]'
     );
-    const container = renderReactNode(
-      url.convertToReact(['http://elastic.co', 'http://kibana.io'])
-    );
-    expect(container.textContent).toBe('[http://elastic.co, http://kibana.io]');
-    expect([...container.querySelectorAll('a')].map(({ href }) => href)).toEqual([
-      'http://elastic.co/',
-      'http://kibana.io/',
-    ]);
+    expect(url.convertToReact(['http://elastic.co', 'http://kibana.io'])).toMatchInlineSnapshot(`
+      <React.Fragment>
+        <span
+          className="ffArray__highlight"
+        >
+          [
+        </span>
+        <a
+          href="http://elastic.co"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          http://elastic.co
+        </a>
+        <span
+          className="ffArray__highlight"
+        >
+          ,
+        </span>
+         
+        <a
+          href="http://kibana.io"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          http://kibana.io
+        </a>
+        <span
+          className="ffArray__highlight"
+        >
+          ]
+        </span>
+      </React.Fragment>
+    `);
   });
 
   test('returns the single element without brackets for a one-element array', () => {

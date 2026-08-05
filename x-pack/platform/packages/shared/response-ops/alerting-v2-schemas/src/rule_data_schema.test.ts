@@ -1524,7 +1524,7 @@ describe('bulkGetRulesResponseSchema', () => {
   const sampleRule = {
     id: 'rule-1',
     kind: 'alert' as const,
-    metadata: { name: 'r', version: 1 },
+    metadata: { name: 'r' },
     time_field: '@timestamp',
     schedule: { every: '5m' },
     query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },

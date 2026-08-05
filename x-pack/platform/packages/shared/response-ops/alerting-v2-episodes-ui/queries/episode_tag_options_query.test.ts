@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { ALERT_ACTIONS_DATA_STREAM } from '../constants';
 import { buildEpisodeTagOptionsQuery } from './episode_tag_options_query';
 
 const SPACE_ID = 'default';

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  OnRequestValidationError,
-  RouteValidatorRequestAndResponses,
-} from '@kbn/core-http-server';
+import type { RouteValidatorRequestAndResponses } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { ZodType } from '@kbn/zod/v4';
 
@@ -32,13 +29,6 @@ export interface AlertingRouteSchemas {
       description?: string;
     }
   >;
-  /**
-   * Maps request schema-validation failures to a documented Kibana response.
-   * Kibana core invokes this instead of emitting its default bad-request body,
-   * letting alerting v2 return its own `errorResponseSchema` shape. Requires a
-   * matching `response` entry for the status code it emits.
-   */
-  onRequestValidationError?: OnRequestValidationError;
 }
 
 /**
@@ -75,8 +65,5 @@ export const computeRouteValidate = (
       }),
     },
     ...(hasResponseSchemas && { response: schemas.response }),
-    ...(schemas.onRequestValidationError && {
-      onRequestValidationError: schemas.onRequestValidationError,
-    }),
   };
 };

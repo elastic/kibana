@@ -412,7 +412,6 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             customRenderResponse.componentToRender = (
               <Fragment>
                 <EuiCallOut
-                  announceOnMount
                   title={i18n.translate(
                     'xpack.monitoring.elasticsearch.nodes.metricbeatMigration.detectedNodeTitle',
                     {
@@ -447,7 +446,6 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             customRenderResponse.componentToRender = (
               <Fragment>
                 <EuiCallOut
-                  announceOnMount
                   title={i18n.translate(
                     'xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionTitle',
                     {

@@ -64,6 +64,7 @@ describe('createEventToolHandler', () => {
 
     const delegatedInput = (eventsWriteHandler as jest.Mock).mock.calls[0][0].input;
     expect(delegatedInput).not.toHaveProperty('event_id');
+    expect(delegatedInput).not.toHaveProperty('discovery_id');
     expect(delegatedInput).not.toHaveProperty('assessment_note');
     expect(delegatedInput).not.toHaveProperty('signals');
     expect(delegatedInput).not.toHaveProperty('workflow_execution_id');

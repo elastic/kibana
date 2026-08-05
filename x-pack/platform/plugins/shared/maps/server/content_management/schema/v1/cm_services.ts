@@ -4,45 +4,47 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
   savedObjectSchema,
   objectTypeToGetResultSchema,
   createResultSchema,
   referencesSchema,
-} from '@kbn/content-management-utils/zod';
+} from '@kbn/content-management-utils';
 import { mapAttributesSchema } from './map_attributes_schema/map_attributes_schema';
 
 export const mapSavedObjectSchema = savedObjectSchema(mapAttributesSchema);
 
-export const searchOptionsSchema = z
-  .object({
-    onlyTitle: z.boolean().optional(),
-  })
-  .strict()
-  .optional();
+export const searchOptionsSchema = schema.maybe(
+  schema.object(
+    {
+      onlyTitle: schema.maybe(schema.boolean()),
+    },
+    { unknowns: 'forbid' }
+  )
+);
 
-export const mapsSearchOptionsSchema = z
-  .object({
-    onlyTitle: z.boolean().optional(),
-  })
-  .strict()
-  .optional();
+export const mapsSearchOptionsSchema = schema.maybe(
+  schema.object(
+    {
+      onlyTitle: schema.maybe(schema.boolean()),
+    },
+    { unknowns: 'forbid' }
+  )
+);
 
-export const mapsCreateOptionsSchema = z
-  .object({
-    references: referencesSchema.optional(),
+export const mapsCreateOptionsSchema = schema.maybe(
+  schema.object({
+    references: schema.maybe(referencesSchema),
   })
-  .strict()
-  .optional();
+);
 
-export const mapsUpdateOptionsSchema = z
-  .object({
-    references: referencesSchema.optional(),
+export const mapsUpdateOptionsSchema = schema.maybe(
+  schema.object({
+    references: schema.maybe(referencesSchema),
   })
-  .strict()
-  .optional();
+);
 
 export const mapsGetResultSchema = objectTypeToGetResultSchema(mapSavedObjectSchema);
 

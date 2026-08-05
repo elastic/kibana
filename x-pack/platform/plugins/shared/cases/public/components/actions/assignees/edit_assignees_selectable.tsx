@@ -34,7 +34,7 @@ import type { ItemSelectableOption, ItemsSelectionState } from '../types';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { EmptyMessage } from '../../user_profiles/empty_message';
 import { NoMatches } from '../../user_profiles/no_matches';
-import { CaseUserAvatar } from '../../user_profiles/user_avatar';
+import { SmallUserAvatar } from '../../user_profiles/small_user_avatar';
 import { NoSelectedAssignees } from './no_selected_assignees';
 
 interface Props {
@@ -166,7 +166,7 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
                 <EuiIcon type={icon} data-test-subj={dataTestSubj} aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <CaseUserAvatar size="s" userInfo={userInfo} />
+                <SmallUserAvatar userInfo={userInfo} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

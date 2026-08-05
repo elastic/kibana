@@ -24,6 +24,7 @@
       "navigation",
       "savedObjectsTagging",
       "share",
+      "significant_events",
       "streams",
       "unifiedSearch",
       "unifiedDocViewer",
@@ -35,11 +36,10 @@
       "cps",
       "spaces",
       "indexLifecycleManagement",
-      "evals",
-      "significantEvents",
-      "significantEventsApp"
+      "evals"
     ],
     "requiredBundles": [
+      "agentBuilder",
       "discover",
       "esql",
       "kibanaReact",

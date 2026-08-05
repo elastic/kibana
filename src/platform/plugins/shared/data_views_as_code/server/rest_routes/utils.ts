@@ -31,22 +31,13 @@ export async function getDataViewsAsCodeService(
   const core = await ctx.core;
   const savedObjectsClient = core.savedObjects.client;
   const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-  const [{ uiSettings }, { dataViews, fieldFormats }] = await getStartServices();
-
+  const [, { dataViews }] = await getStartServices();
   const dataViewsService = await dataViews.dataViewsServiceFactory(
     savedObjectsClient,
     elasticsearchClient,
     req
   );
-  const fieldFormatsRegistry = await fieldFormats.fieldFormatServiceFactory(
-    uiSettings.asScopedToClient(savedObjectsClient)
-  );
-
-  return new DataViewsAsCodeService(
-    dataViewsService,
-    core.savedObjects.getClient(),
-    fieldFormatsRegistry
-  );
+  return new DataViewsAsCodeService(dataViewsService, core.savedObjects.getClient());
 }
 
 /**
@@ -78,12 +69,6 @@ export const requestHandler =
         if (isConflict) {
           logRequest(args.logger, request, 'debug', error.message);
           return response.conflict({ body: { message: error.message } });
-        }
-
-        const isBadRequest = error.isBoom && error.output.statusCode === 400;
-        if (isBadRequest) {
-          logRequest(args.logger, request, 'warn', error.message);
-          return response.badRequest({ body: { message: error.message } });
         }
 
         if (error instanceof ValidationError) {

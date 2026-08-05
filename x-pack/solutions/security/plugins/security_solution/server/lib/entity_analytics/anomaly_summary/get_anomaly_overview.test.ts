@@ -17,16 +17,6 @@ jest.mock('../ml_anomaly_detection', () => ({
   getSecurityMlJobIds: jest.fn(),
 }));
 
-jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
-  euid: {
-    dsl: {
-      getEuidFilterBasedOnEntityRecord: jest
-        .fn()
-        .mockReturnValue({ bool: { filter: [{ term: { 'host.name': 'entity-1' } }] } }),
-    },
-  },
-}));
-
 const mockGetJobConfig = getJobConfig as jest.Mock;
 const mockGetSecurityMlJobIds = getSecurityMlJobIds as jest.Mock;
 
@@ -50,12 +40,9 @@ const mockRequest = httpServerMock.createKibanaRequest();
 const FROM_MS = 1_700_000_000_000;
 const TO_MS = FROM_MS + 7 * 24 * 60 * 60 * 1000; // 7 days later
 
-const mockEntityRecord = { entity: { id: 'entity-1' }, host: { name: 'entity-1' } };
-
 const baseParams = {
   entityId: 'entity-1',
   entityType: 'host' as const,
-  entityRecord: mockEntityRecord,
   fromMs: FROM_MS,
   toMs: TO_MS,
   logger: mockLogger,
@@ -546,7 +533,6 @@ describe('getEntityAnomalyOverview', () => {
       const result = await getEntityAnomalyOverview({
         entityId: 'entity-1',
         entityType: 'host' as const,
-        entityRecord: mockEntityRecord,
         logger: mockLogger,
         ml: mockMl,
         request: mockRequest,

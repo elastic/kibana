@@ -196,7 +196,6 @@ export const InstallationStatus: React.FC<InstallationStatusProps> = React.memo(
           className={styles.installedSpacer}
         />
         <EuiCallOut
-          announceOnMount
           data-test-subj="installation-status-callout"
           className={styles.installedCallout}
           {...getCalloutText({ installStatus, isActive })}

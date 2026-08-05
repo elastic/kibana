@@ -47,13 +47,11 @@ import type {
   GetSchemaParams,
   GetWorkflowExecutionsParams,
   GetWorkflowStepExecutionsParams,
-  InstallTemplateResponse,
   MgetWorkflowsParams,
   RestoreWorkflowVersionParams,
   RestoreWorkflowVersionResponseDto,
   ResumeExecutionParams,
   RunWorkflowOptions,
-  SearchExecutionsParams,
   SearchTriggerEventLogParams,
   SearchTriggerEventLogResult,
   TestWorkflowParams,
@@ -237,13 +235,6 @@ export class WorkflowApi {
     });
   }
 
-  async searchExecutions(params?: SearchExecutionsParams): Promise<WorkflowExecutionListDto> {
-    return this.http.get(`${BASE}/workflow/executions`, {
-      query: params as HttpFetchQuery,
-      version: API_VERSION,
-    });
-  }
-
   async getWorkflowExecutions(
     workflowId: string,
     params?: GetWorkflowExecutionsParams
@@ -361,19 +352,6 @@ export class WorkflowApi {
     return this.http.get(`${INTERNAL_BASE}/library/health`, {
       version: INTERNAL_API_VERSION,
     });
-  }
-
-  async installTemplate(
-    slug: string,
-    values: Record<string, unknown>
-  ): Promise<InstallTemplateResponse> {
-    return this.http.post(
-      `${INTERNAL_BASE}/library/templates/${encodeURIComponent(slug)}/install`,
-      {
-        body: JSON.stringify({ values }),
-        version: INTERNAL_API_VERSION,
-      }
-    );
   }
 
   async restoreWorkflowVersion(

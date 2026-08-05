@@ -25,9 +25,7 @@ export const useDeleteRulesetRule = (onSuccess?: () => void, onError?: (error: s
   return useMutation(
     async ({ rulesetId, ruleId }: MutationArgs) => {
       return await http.delete<{ acknowledged: boolean }>(
-        `/internal/search_query_rules/ruleset/${encodeURIComponent(
-          rulesetId
-        )}/rule/${encodeURIComponent(ruleId)}`
+        `/internal/search_query_rules/ruleset/${rulesetId}/rule/${ruleId}`
       );
     },
     {

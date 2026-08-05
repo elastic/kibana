@@ -74,7 +74,7 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
       paddingSize="s"
       css={css`
         max-width: 200px;
-        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.darkShade};
       `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

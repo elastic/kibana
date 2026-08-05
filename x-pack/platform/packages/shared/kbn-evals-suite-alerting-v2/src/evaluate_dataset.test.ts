@@ -10,7 +10,6 @@ import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
 import type { AgentBuilderClient, AgentBuilderClientResponse, TaskOutput } from '@kbn/evals';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { buildPromptResponses, collectScoredCriteria, createTask } from './evaluate_dataset';
 
 const askUserQuestion = (id: string, questionCount = 1): PromptRequest =>
@@ -257,7 +256,7 @@ describe('createTask', () => {
     const attachments = [
       {
         id: 'att-1',
-        type: RULE_ATTACHMENT_TYPE,
+        type: 'rule',
         current_version: 1,
         versions: [
           {
@@ -288,7 +287,7 @@ describe('createTask', () => {
     expect(output.attachments).toEqual([
       expect.objectContaining({
         id: 'att-1',
-        type: RULE_ATTACHMENT_TYPE,
+        type: 'rule',
       }),
     ]);
   });

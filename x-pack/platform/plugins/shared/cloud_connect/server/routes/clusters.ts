@@ -208,7 +208,7 @@ export const registerClustersRoute = ({
       validate: {
         body: schema.object({
           services: schema.recordOf(
-            schema.string({ maxLength: 256 }),
+            schema.string(),
             schema.object({
               enabled: schema.boolean(),
             })

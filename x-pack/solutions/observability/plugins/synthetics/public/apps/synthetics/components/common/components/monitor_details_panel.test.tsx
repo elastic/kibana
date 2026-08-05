@@ -46,12 +46,6 @@ jest.mock('@kbn/observability-shared-plugin/public', () => ({
   ),
 }));
 
-jest.mock('./monitor_maintenance_windows', () => ({
-  MonitorMaintenanceWindows: ({ monitorMWs }: { monitorMWs: string[] }) => (
-    <div data-test-subj="maintenanceWindowsStub">{monitorMWs.join(',')}</div>
-  ),
-}));
-
 const localMonitor = {
   config_id: 'config-1',
   id: 'config-1',
@@ -125,31 +119,6 @@ describe('MonitorDetailsPanel', () => {
     expect(screen.queryByTestId('monitorEnabledStub')).not.toBeInTheDocument();
     expect(screen.queryByText(/Last modified/i)).not.toBeInTheDocument();
     expect(screen.getByTestId('tagsListStub')).toHaveTextContent('env:prod');
-  });
-
-  it('renders the maintenance windows section when the monitor has attached windows', () => {
-    render(
-      <MonitorDetailsPanel
-        monitor={
-          {
-            ...localMonitor,
-            maintenance_windows: ['mw-1', 'mw-2'],
-          } as EncryptedSyntheticsSavedMonitor
-        }
-        loading={false}
-        configId="config-1"
-      />
-    );
-
-    expect(screen.getByText(/Maintenance windows/i)).toBeInTheDocument();
-    expect(screen.getByTestId('maintenanceWindowsStub')).toHaveTextContent('mw-1,mw-2');
-  });
-
-  it('hides the maintenance windows section when none are attached', () => {
-    render(<MonitorDetailsPanel monitor={localMonitor} loading={false} configId="config-1" />);
-
-    expect(screen.queryByText(/Maintenance windows/i)).not.toBeInTheDocument();
-    expect(screen.queryByTestId('maintenanceWindowsStub')).not.toBeInTheDocument();
   });
 
   it('derives the frequency from the latest ping timespan for a heartbeat monitor', () => {

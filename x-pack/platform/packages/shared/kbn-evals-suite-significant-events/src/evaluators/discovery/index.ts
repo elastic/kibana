@@ -6,5 +6,13 @@
  */
 
 export { createDiscoveryEvaluators, createContinuationEvaluators } from './discovery';
+export { createJudgeEvaluators } from './judge';
 
-export type { DiscoveryAgentOutput, DiscoveryEvaluationExample, DiscoveryEvaluator } from './types';
+export type {
+  DiscoveryAgentOutput,
+  DiscoveryEvaluationExample,
+  DiscoveryEvaluator,
+  DiscoveryJudgeAgentOutput,
+  DiscoveryJudgeEvaluationExample,
+  DiscoveryJudgeEvaluator,
+} from './types';

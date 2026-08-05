@@ -53,5 +53,4 @@ export const CASE_ATTACHMENT_TABLE_CONFIG: EntitiesTableConfig = {
   columnsSettingsLocalStorageKey:
     'securitySolution.entityAnalytics.cases.attachment.columns:settings',
   groupingLocalStorageKey: 'securitySolution.entityAnalytics.cases.attachment.grouping',
-  supportsFieldFiltering: false,
 };

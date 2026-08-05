@@ -14,8 +14,6 @@ export interface EsClusterExecOptions {
   esArgs?: string[] | string;
   esJavaOpts?: string;
   password?: string;
-  /** The port for Elasticsearch to bind to on 127.0.0.1, passed through as `http.port` */
-  port?: number;
   skipReadyCheck?: boolean;
   readyTimeout?: number;
   onEarlyExit?: (msg: string) => void;

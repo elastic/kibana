@@ -19,7 +19,6 @@ import {
   EuiPopoverFooter,
   EuiButton,
   EuiLoadingSpinner,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
@@ -65,7 +64,6 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({ selectedAgentId, o
   const navigateToApp = useNavigateToApp();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const popoverTitleId = useGeneratedHtmlId();
 
   const selectedAgent = useMemo(
     () => agents.find((agent) => agent.id === selectedAgentId),
@@ -120,7 +118,6 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({ selectedAgentId, o
 
   return (
     <EuiPopover
-      aria-labelledby={popoverTitleId}
       panelProps={{ css: panelStyles }}
       panelPaddingSize="none"
       button={agentSelectorButton}
@@ -142,7 +139,7 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({ selectedAgentId, o
             <EuiPopoverTitle paddingSize="s">
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiText id={popoverTitleId} css={agentsTitleStyles} size="xs">
+                  <EuiText css={agentsTitleStyles} size="xs">
                     {labels.agents}
                   </EuiText>
                 </EuiFlexItem>

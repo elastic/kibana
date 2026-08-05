@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { pick } from 'lodash';
+
 import { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { logRequest } from '@kbn/as-code-utils';
+import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -41,7 +44,9 @@ export function registerSearchRoute(
       },
       validate: {
         request: {
-          query: asCodeSearchRequestSchema.pick({ page: true, per_page: true, query: true }),
+          query: schema.object({
+            ...pick(asCodeSearchRequestSchema.getPropSchemas(), ['page', 'per_page', 'query']),
+          }),
         },
         response: {
           200: {

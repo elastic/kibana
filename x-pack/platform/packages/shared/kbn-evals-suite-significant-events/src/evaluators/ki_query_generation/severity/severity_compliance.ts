@@ -31,7 +31,7 @@ export const severityComplianceEvaluator: KIQueryGenerationEvaluator = {
               .map((q) => `"${q.title}" has severity ${q.severity_score}`)
               .join('; ')}`
           : `All ${queries.length} queries have valid severity scores`,
-      metadata: {
+      details: {
         total: queries.length,
         invalidQueries: invalidQueries.map((q) => ({
           title: q.title,

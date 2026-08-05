@@ -11,7 +11,7 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { Entity, EntityType } from '@kbn/entity-store/common';
+import type { EntityType } from '@kbn/entity-store/common';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type {
   AnomalyScoreRange,
@@ -60,7 +60,6 @@ const mapToAnomalySummaryEntry = (
 interface GetEntityAnomaliesParams {
   entityId: string;
   entityType: EntityType;
-  entityRecord: Entity;
   esClient: ElasticsearchClient;
   fromMs?: number;
   toMs?: number;
@@ -84,7 +83,6 @@ export interface GetEntityAnomaliesResult {
 export const getEntityAnomalies = async ({
   entityId,
   entityType,
-  entityRecord,
   esClient,
   fromMs,
   toMs,
@@ -125,7 +123,6 @@ export const getEntityAnomalies = async ({
   const { hits: page, total } = await searchEntityAnomalies({
     entityType,
     entityId,
-    entityRecord,
     fromMs,
     toMs,
     scoreRanges,
@@ -149,7 +146,6 @@ export const getEntityAnomalies = async ({
         anomaly,
         entityId,
         entityType,
-        entityRecord,
         esClient,
         fromMs,
         toMs,
