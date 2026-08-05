@@ -9161,8 +9161,6 @@
     "uiActions.triggers.onSelectRange.title": "Bereichsauswahl",
     "uiActions.triggers.panelBadgeTrigger.description": "Aktionen erscheinen in der Titelleiste, wenn ein einbettbares Element in einem Panel geladen wird.",
     "uiActions.triggers.panelBadgeTrigger.title": "Panel-Badges",
-    "uiActions.triggers.panelNotificationTrigger.description": "Aktionen erscheinen in der oberen rechten Ecke eines Panels.",
-    "uiActions.triggers.panelNotificationTrigger.title": "Panel-Benachrichtigungen",
     "uiActions.triggers.updateEsqlQueryTrigger": "ES|QL-Abfrage aktualisieren",
     "uiActions.triggers.updateEsqlQueryTriggerDescription": "Aktualisieren Sie die ES|QL-Abfrage mit einer neuen Abfrage",
     "uiActions.triggers.updateFilterReferencesTrigger": "Filterreferenzen aktualisieren",

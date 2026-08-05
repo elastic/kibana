@@ -8,4 +8,5 @@
  */
 
 export { humanizeCategoryId } from './humanize_category_id';
+export { getCategoryLabel } from './category_labels';
 export { getWorkflowTypes } from './get_workflow_types';
