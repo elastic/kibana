@@ -168,7 +168,7 @@ describe('useDeleteRegionPolicy', () => {
 
     expect(mockAddDanger).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: 'Region policy removal blocked',
+        title: "Can't reset region preferences",
         text: 'Region policy is currently in use.',
       })
     );
