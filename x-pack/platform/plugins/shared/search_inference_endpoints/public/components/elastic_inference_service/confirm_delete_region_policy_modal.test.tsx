@@ -39,12 +39,12 @@ describe('ConfirmDeleteRegionPolicyModal', () => {
   it('renders the title, description, checkbox, and buttons', () => {
     renderModal();
 
-    expect(screen.getByText('Reset to default policy')).toBeInTheDocument();
+    expect(screen.getByText('Reset region preferences to default?')).toBeInTheDocument();
     expect(
-      screen.getByText(/Removing your custom policy resets inference traffic to allow all regions/)
+      screen.getByText(/Removing your custom region preferences allows inference in all locations/)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/A new custom policy will be required to modify your preferences/)
+      screen.getByText(/You'll need to set new region preferences to restrict inference again/)
     ).toBeInTheDocument();
     expect(screen.getByTestId('confirmDeleteRegionPolicyAcknowledge')).toBeInTheDocument();
     expect(screen.getByTestId('confirmModalConfirmButton')).toBeInTheDocument();
