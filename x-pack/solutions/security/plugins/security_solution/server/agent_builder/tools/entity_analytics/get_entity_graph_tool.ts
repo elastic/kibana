@@ -17,7 +17,7 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugi
 import type { ProductFeaturesService } from '../../../lib/product_features_service';
 import { securityTool } from '../constants';
 import { buildRenderAttachmentTag } from './attachment_utils';
-import { getEntityStoreV2ToolAvailability } from './entity_store_v2_availability';
+import { getEntityAnalyticsToolAvailability } from './entity_analytics_availability';
 import { resolveSingleEntity } from './entity_resolution';
 import {
   buildEntityGraphAttachmentId,
@@ -63,15 +63,16 @@ When the id/name resolves to multiple candidate entities, no attachment is store
     availability: {
       cacheMode: 'space',
       handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
-        const entityStoreAvailability = await getEntityStoreV2ToolAvailability({
+        const entityAnalyticsAvailability = await getEntityAnalyticsToolAvailability({
           core,
           request,
           spaceId,
           experimentalFeatures,
           logger,
+          minLicense: 'platinum',
         });
-        if (entityStoreAvailability.status !== 'available') {
-          return entityStoreAvailability;
+        if (entityAnalyticsAvailability.status !== 'available') {
+          return entityAnalyticsAvailability;
         }
 
         try {
@@ -79,15 +80,6 @@ When the id/name resolves to multiple candidate entities, no attachment is store
             return {
               status: 'unavailable',
               reason: 'The entity relationship graph is not enabled for this project tier.',
-            };
-          }
-
-          const [, startPlugins] = await core.getStartServices();
-          const license = await startPlugins.licensing.getLicense();
-          if (!license.hasAtLeast('platinum')) {
-            return {
-              status: 'unavailable',
-              reason: 'The entity relationship graph requires a Platinum license or above.',
             };
           }
         } catch (error) {

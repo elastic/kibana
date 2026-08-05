@@ -17,6 +17,7 @@ import {
 import {
   SECURITY_GET_ENTITY_TOOL_ID,
   SECURITY_GET_ENTITY_GRAPH_TOOL_ID,
+  SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID,
   SECURITY_SEARCH_ENTITIES_TOOL_ID,
   SECURITY_LIST_WATCHLISTS_TOOL_ID,
   SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
@@ -59,12 +60,13 @@ or by surfacing risky entities based on their risk scores, asset criticality lev
 
 ## Rich attachments — overview
 
-Two rich attachment types are available for entity analytics answers:
+Three rich attachment types are available for entity analytics answers:
 
 - \`security.entity\` — unified entity attachment emitted **automatically** as a side effect of \`security.get_entity\` (single-entity profile) and \`security.search_entities\` (multi-entity result). The renderer dynamically shows:
   - a **single-entity card** (flyout-shaped sections with summary, risk, resolution, insights) when the attachment represents **one** entity, or
   - an **entities table** (Canvas UI) when the attachment represents **two or more** entities.
   You never call \`attachments.add\` for this type — just render the tag returned by the tool result.
+- \`security.entity_risk_score_history\` — risk-score time-series chart emitted **automatically** by \`security.get_entity_risk_score_history\`. You never call \`attachments.add\` for this type — just render the \`renderTag\` from the tool result.
 - \`security.entity_analytics_dashboard\` — an explicit **Entity Analytics home/overview** Canvas snapshot (risk level donut + highlights + entities together). You call \`attachments.add\` with this type **only** when the user explicitly asks to **show / open / view / display** the **Entity Analytics dashboard / home / overview / landing** product page.
 
 **Never duplicate the attachment in prose.** Whichever rich attachment you render (the correct one depends on the user's ask — see the "Choosing the right rich attachment" table and the "Dashboard trigger" rule below), the Canvas you embedded IS the user-facing presentation. Your prose reply is for narrative and recommendations only — it must NOT restate what the attachment already shows.
@@ -99,7 +101,7 @@ This rule takes **precedence** over the "do not use the dashboard for list / ran
 
 Rich attachments do **not** show the interactive pill, **Preview**, or **Canvas** unless you **embed** them in your **assistant markdown** in the **same turn**.
 
-\`security.get_entity\`, \`security.search_entities\`, and \`security.get_entity_graph\` return an \`other\` result that contains a ready-made \`renderTag\` string, for example:
+\`security.get_entity\`, \`security.search_entities\`, \`security.get_entity_graph\`, and \`security.get_entity_risk_score_history\` return an \`other\` result that contains a ready-made \`renderTag\` string, for example:
 
 \`\`\`json
 { "attachmentId": "security.entity:user:<hex>", "version": 1, "renderTag": "<render_attachment id=\\"security.entity:user:<hex>\\" version=\\"1\\" />" }
@@ -124,6 +126,7 @@ Rules:
 | --- | --- | --- | --- |
 | **Single entity** — details, profile, card, flyout for one identity | **this** host, named EUID, **details**, **profile**, **deep dive**, **entity card**, **card**, **flyout**, "tell me about **that** user", **the** riskiest **host** when they mean **one** winner | \`security.entity\` (emitted automatically by \`security.get_entity\`) | **Entity card** — flyout-shaped sections (summary, risk, resolution, insights). |
 | **Multiple entities** — list, set, table, ranking, comparison | **list**, **table**, **which**/**who are** **hosts**/**users**/**entities** (plural entity nouns), **top** N, **rank**, **compare**, **enumerate**, "**entities** that…", "**hosts** sorted by risk", **compound asks** naming **two+ entity kinds** (**hosts and users**) | \`security.entity\` (emitted automatically by \`security.search_entities\` when 2+ entities are returned) | **Entities table** — Canvas shows the full multi-entity table. |
+| **Risk score over time** — trend, history, timeline, chart for one entity | **risk score history**, **risk over time**, **has the score changed**, **why did it spike**, **timeline**, **chart** | \`security.entity_risk_score_history\` (emitted automatically by \`security.get_entity_risk_score_history\`) | **Risk score history chart** — time-series preview. |
 | **Entity Analytics product page** experience | **Entity Analytics dashboard / home / overview / landing page**, **show/open/view Entity Analytics**, **risk level breakdown donut with highlights**, **same layout as Entity Analytics** (product page) | \`security.entity_analytics_dashboard\` (explicit \`attachments.add\`) | **Dashboard snapshot** — two-column Canvas with donut, highlights panel, and entities table. |
 
 **Key principle — do not manually add \`security.entity\`:** the tools emit this attachment as a side effect. Your job is to render the \`<render_attachment>\` tag returned in the tool's \`other\` result. The **single-vs-table** experience is selected automatically by the renderer based on how many entities the attachment contains.
@@ -139,12 +142,13 @@ Use this skill when:
 - The user **explicitly** asks to **show**, **open**, **view**, or **walk through** the **Entity Analytics** **home**, **overview**, **landing**, or **built-in Entity Analytics dashboard** (the **product page** / same IA as Security → Entity Analytics navigation) → \`security.entity_analytics_dashboard\` after gathering entity data.
 - They want **one entity's details / card / profile / flyout-style** view → \`security.get_entity\` (which emits the \`security.entity\` attachment as a single-entity card).
 - They want to **see the relationship graph** for an entity or **how an entity is connected** to other entities/events/alerts → \`security.get_entity_graph\` (which emits the \`security.entity_graph\` attachment as an inline graph preview that links out to the full graph investigation).
+- They want **risk score over time** (trend / history / timeline / chart / "has the score changed") for a specific entity → \`security.get_entity_risk_score_history\` (which emits the \`security.entity_risk_score_history\` attachment). Do **not** use this for generic investigate / profile / details asks — those stay on \`security.get_entity\` only.
 - They want a **list / table / ranking** of entities (plural or set framing) → \`security.search_entities\` (which emits the \`security.entity\` attachment as an entities table when 2+ rows are returned).
 - One message names **several entity kinds** to compare or rank (e.g. **riskiest hosts and users**) → run \`security.search_entities\` per type (or with multiple \`entityTypes\`), and the tool will emit an aggregate \`security.entity\` attachment.
 - Investigating the current behavior of a specific entity using its ID (EUID).
 - Looking up the current profile for a specific entity using its ID (EUID), including risk score, asset criticality and watchlists.
 - Analyzing the historical behavior of a specific entity using its ID (EUID).
-- Analyzing changes in an entity's risk score or behavior over time.
+- Analyzing changes in an entity's risk score over time (prefer \`security.get_entity_risk_score_history\` over \`profile_history\` for score trends).
 - Discovering the riskiest entities in the environment based on risk scores and criticality levels.
 - Surfacing entities that require further investigation based on their attributes and behaviors.
 
@@ -176,7 +180,7 @@ When asked to investigate unusual or anomalous behavior by entities, use:
     - entity.lifecycle.first_seen - first time this entity has been seen in the entity store
     - entity.lifecycle.last_activity - last time this entity has been active in the entity store
     - risk_score_inputs - the alert inputs that contributed to the risk score calculation for this entity.
-    - profile_history - historical snapshot profiles for this entity over a specified time interval
+    - profile_history - historical snapshot profiles for this entity over a specified time interval (entity-store attribute snapshots — **not** the risk-score time series; use \`security.get_entity_risk_score_history\` for risk-over-time charts)
     - anomalies - unusual or anomalous behaviors detected for this entity, mapped to MITRE ATT&CK tactics and techniques.
     - vulnerabilities - known vulnerabilities associated with this entity, including CVE identifiers, severity levels, and descriptions.
     This tool may return multiple results if an exact match for the entity ID is not found.
@@ -208,6 +212,16 @@ Rules:
 When \`security.get_entity_graph\` resolves exactly one entity, its \`other\` result includes a \`renderTag\` field — render it per the shared **Mandatory — \`<render_attachment>\`** contract above (copy verbatim, own line, blank line before prose, once per turn). Two graph-specific rules on top of that:
 - **Ambiguous match:** when the id/name resolves to **multiple candidates**, the \`other\` result has **no** \`renderTag\` (only a \`message\` and \`candidateEntityIds\`). Do NOT emit a tag — ask the user to pick the exact entity id (EUID) from the candidates and call the tool again.
 - **Prose:** the preview IS the visualization — do not restate its nodes/edges. Keep prose to 1–3 sentences on what the graph shows and what to investigate next.
+
+### Get Entity Risk Score History Tool
+- \`security.get_entity_risk_score_history\` - Get the **historical risk score time series** for a **single** security entity and emit a \`security.entity_risk_score_history\` chart attachment. Use **only** when the user explicitly asks about risk score over time — e.g. trend, history, timeline, chart, "has the score changed", "why did it spike". Do **not** use for generic investigate / profile / details / "tell me about this entity" asks — those are \`security.get_entity\` only. Prefer this over \`get_entity\`'s \`profile_history\` for risk-score trends (\`profile_history\` is entity-store attribute snapshots).
+    - Pass \`entityType\` and \`entityId\` (prefixed EUID). When a \`security.entity\` attachment identifies the target, copy its prefixed entity id into \`entityId\`.
+    - Optional \`from\` / \`to\` Kibana date-math (default \`now-90d\` → \`now\`). Optional \`scoreType\`: \`base\` (default) or \`resolution\`. Pass \`includeContributions: true\` only when explaining *why* a score changed.
+    - Entries are aggregated by histogram bucket (\`bucketInterval\` in the result, e.g. \`"1d"\`) — not every scoring run. Multiple scores in the same bucket collapse to the peak. Narrow \`from\`/\`to\` for finer buckets.
+    - For fleet-level "who increased the most", use \`security.search_entities\` with \`riskScoreChangeInterval\` first, then drill in with this tool.
+
+#### Inline rendering
+When \`security.get_entity_risk_score_history\` succeeds, its \`other\` result includes a \`renderTag\` field — render it per the shared **Mandatory — \`<render_attachment>\`** contract above (copy verbatim, own line, blank line before prose). The chart IS the visualization — do not dump every history point as a markdown table. Keep prose to 1–3 sentences on the trend and what to investigate next.
 
 ### List Watchlists Tool
 - \`security.list_watchlists\` - Discover the watchlists configured in this space. Returns each watchlist's \`id\`, \`name\`, \`description\`, \`riskModifier\`, \`managed\`, \`entitySourceIds\`, and timestamps. Pass an optional \`nameContains\` substring to narrow the result.
@@ -390,7 +404,7 @@ User query: Who has had the biggest increase in risk score over the last 90 days
 Steps:
 1. Use \`security.search_entities\` with a riskScoreChangeInterval of '90d' to find entities with risk score changes.
 2. Analyze the results and identify which entities have had significant (greater than ${ENTITY_RISK_SCORE_SIGNIFICANT_CHANGE_THRESHOLD} score change) increases in risk score.
-3. For each entity with significant risk score change, use \`security.get_entity\` with an interval of '90d' to get their full profile history.
+3. Optionally drill into a specific entity with \`security.get_entity_risk_score_history\` (\`from: 'now-90d'\`, \`to: 'now'\`) when the user asks for that entity's risk-over-time chart.
 4. Copy the \`renderTag\` string verbatim from the \`search_entities\` \`other\` result onto its own line (entities table Canvas) and summarize in prose the previous vs current risk scores, the magnitude of change, and the drivers.
 
 ### Example 3: High Impact Assets
@@ -416,10 +430,10 @@ Steps:
 User query: Has Cielo39's risk score changed significantly?
 
 Steps:
-1. Use \`security.get_entity\` with an interval of '30d' to fetch Cielo39's current profile and profile_history for the last 30 days.
-2. Copy the \`renderTag\` string verbatim from the \`get_entity\` \`other\` result onto its own line so the user sees the entity card — that card is the profile view.
-3. Analyze the risk scores in the profile history along with the current risk score to determine if the change in risk score is significant (e.g., greater than ${ENTITY_RISK_SCORE_SIGNIFICANT_CHANGE_THRESHOLD} points).
-4. Summarize in 1–3 sentences of prose: the overall trend (stable / increasing / decreasing), whether the change crosses the significance threshold, and what to investigate next. Do NOT re-list the entity's fields as an "Entity Overview" markdown block — the entity card already shows them.
+1. Use \`security.get_entity_risk_score_history\` with \`entityType\` / \`entityId\` for Cielo39 and \`from: 'now-30d'\`, \`to: 'now'\` (defaults are last 90 days if omitted).
+2. Copy the \`renderTag\` string verbatim from the tool's \`other\` result onto its own line so the user sees the risk score history chart.
+3. Analyze the returned entries (and \`bucketInterval\`) to determine if the change is significant (e.g., greater than ${ENTITY_RISK_SCORE_SIGNIFICANT_CHANGE_THRESHOLD} points). Remember entries are peak-per-bucket, not every scoring run.
+4. Summarize in 1–3 sentences of prose: the overall trend (stable / increasing / decreasing), whether the change crosses the significance threshold, and what to investigate next. Do NOT dump every history point as a markdown table — the chart attachment already shows the series.
 
 ### Example 5a: Users From a Specific Vendor (namespace-first)
 
@@ -661,8 +675,8 @@ export const getEntityAnalyticsSkill = (ctx: EntityAnalyticsSkillsContext) =>
     name: 'entity-analytics',
     basePath: 'skills/security/entities',
     description:
-      'Security entity investigations (hosts, users, services, generic): entity store search/get_entity, list watchlists (discover watchlist names/ids and find members), risk and criticality. ' +
-      'Rich attachments: `security.entity` (emitted automatically by search_entities/get_entity — renders as a single-entity card for 1 entity and as an entities table for 2+ entities); `security.entity_analytics_dashboard` (explicit attachments.add — only when the user asks to show/open/view the Entity Analytics home/overview product page). After each tool result that emits a rich attachment, output `<render_attachment id=… version=… />` in markdown (required for Preview/Canvas UI). ' +
+      'Security entity investigations (hosts, users, services, generic): entity store search/get_entity, get_entity_risk_score_history (risk-over-time chart), list watchlists (discover watchlist names/ids and find members), risk and criticality. ' +
+      'Rich attachments: `security.entity` (emitted automatically by search_entities/get_entity — renders as a single-entity card for 1 entity and as an entities table for 2+ entities); `security.entity_risk_score_history` (emitted by get_entity_risk_score_history); `security.entity_analytics_dashboard` (explicit attachments.add — only when the user asks to show/open/view the Entity Analytics home/overview product page). After each tool result that emits a rich attachment, output `<render_attachment id=… version=… />` in markdown (required for Preview/Canvas UI). ' +
       'Risk history, alert contributions, watchlists, behaviors, discovering risky entities.',
     content: `
 # Entity Analysis Guide
@@ -680,6 +694,7 @@ ${ctx.isEntityStoreV2Enabled ? entityStoreV2Content : legacyContent}
         ? [
             SECURITY_GET_ENTITY_TOOL_ID,
             SECURITY_GET_ENTITY_GRAPH_TOOL_ID,
+            SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID,
             SECURITY_SEARCH_ENTITIES_TOOL_ID,
             SECURITY_LIST_WATCHLISTS_TOOL_ID,
             SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,

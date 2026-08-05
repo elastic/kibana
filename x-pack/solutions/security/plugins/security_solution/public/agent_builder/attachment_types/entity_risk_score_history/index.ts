@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { RiskScoreTimeline, RiskScoreTimelineChart, intervalToMs } from './risk_score_timeline';
-export type { RiskScoreTimelineProps } from './risk_score_timeline';
+export { createEntityRiskScoreHistoryAttachmentDefinition } from './entity_risk_score_history_attachment';
+export type {
+  EntityRiskScoreHistoryAttachment,
+  EntityRiskScoreHistoryAttachmentData,
+} from './types';

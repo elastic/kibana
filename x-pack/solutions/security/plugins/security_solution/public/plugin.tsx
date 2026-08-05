@@ -86,6 +86,7 @@ import {
   registerAttachmentUiDefinitions,
   registerAiRuleCreationHandler,
   registerEntityAnalyticsDashboardAttachment,
+  registerEntityRiskScoreHistoryAttachment,
   registerEntityAttachment,
   registerEntityGraphAttachment,
   registerRuleAttachment,
@@ -379,6 +380,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         experimentalFeatures: this.experimentalFeatures,
         uiSettings: core.uiSettings,
       });
+      if (this.experimentalFeatures.riskScoreHistoryEnabled) {
+        registerEntityRiskScoreHistoryAttachment({
+          attachments: plugins.agentBuilder.attachments,
+          application: core.application,
+          agentBuilder: plugins.agentBuilder,
+          chrome: core.chrome,
+          experimentalFeatures: this.experimentalFeatures,
+          searchSession: plugins.data.search.session,
+          uiSettings: core.uiSettings,
+        });
+      }
       registerEntityAttachment({
         attachments: plugins.agentBuilder.attachments,
         application: core.application,
