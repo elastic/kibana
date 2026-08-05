@@ -2113,7 +2113,7 @@
     {
       "groupName": "hdr-histogram-js",
       "matchDepNames": ["hdr-histogram-js"],
-      "reviewers": ["team:obs-presentation-team"],
+      "reviewers": ["team:obs-signals-metrics-team"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
