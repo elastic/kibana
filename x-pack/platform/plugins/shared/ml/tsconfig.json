@@ -151,12 +151,14 @@
     "@kbn/file-upload-common",
     "@kbn/kql",
     "@kbn/as-code-filters-transforms",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
+    "@kbn/zod",
     "@kbn/cps",
     "@kbn/cps-utils",
     "@kbn/lens-common",
     "@kbn/scout",
     "@kbn/core-http-common",
-    "@kbn/zod",
-    "@kbn/app-header",
+    "@kbn/app-header"
   ]
 }
