@@ -91,7 +91,9 @@ export class DispatchStep implements DispatcherStep {
       if (!apiKey) {
         const message = `No API key found for policy ${group.policyId}, skipping dispatch of group ${group.id}`;
         this.logger.warn({ message: () => message });
-        failures.push(...this.buildGroupFailures(group, DISPATCH_FAILURE_REASONS.MISSING_API_KEY, message));
+        failures.push(
+          ...this.buildGroupFailures(group, DISPATCH_FAILURE_REASONS.MISSING_API_KEY, message)
+        );
         return { groupId: group.id, executionIds, failures };
       }
 
@@ -147,7 +149,9 @@ export class DispatchStep implements DispatcherStep {
       // Reached only for failures raised before the per-destination loop (e.g.
       // request crafting). Nothing has been dispatched yet, so record one
       // failure per workflow destination.
-      failures.push(...this.buildGroupFailures(group, DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR, error.message));
+      failures.push(
+        ...this.buildGroupFailures(group, DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR, error.message)
+      );
     }
     return { groupId: group.id, executionIds, failures };
   }
