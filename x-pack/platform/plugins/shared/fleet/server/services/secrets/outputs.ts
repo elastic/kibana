@@ -116,9 +116,6 @@ export function getOutputSecretReferences(output: Output): SecretReference[] {
   }
 
   if (isOtlpOutput(output)) {
-    if (typeof output.secrets?.api_key === 'object') {
-      outputSecretPaths.push({ id: output.secrets.api_key.id });
-    }
     if (typeof output.secrets?.otlp_exporter?.tls?.key_pem === 'object') {
       outputSecretPaths.push({ id: output.secrets.otlp_exporter.tls.key_pem.id });
     }
@@ -147,9 +144,6 @@ function getOutputSecretPaths(
   }
 
   if (isOtlpOutput(typed)) {
-    if (typed.secrets?.api_key) {
-      outputSecretPaths.push({ path: 'secrets.api_key', value: typed.secrets.api_key });
-    }
     if (typed.secrets?.otlp_exporter?.tls?.key_pem) {
       outputSecretPaths.push({
         path: 'secrets.otlp_exporter.tls.key_pem',
