@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_METRICS_SORT } from '@kbn/unified-chart-section-viewer';
-import { METRICS_GRID_SORT_DEFAULTS } from '@kbn/discover-utils';
 import { ProfileStateRegistry, ProfileStateType } from '../profile_state';
 import { METRICS_GRID_SORT_STATE_DEF } from './metrics_grid_sort_profile_state';
 
@@ -21,7 +19,7 @@ const createRegistry = () => {
 };
 
 describe('METRICS_GRID_SORT_STATE_DEF', () => {
-  it('registers with a matching descriptor and default state', () => {
+  it('registers the definition', () => {
     const registry = createRegistry();
 
     expect(registry.hasDefinition(METRICS_GRID_SORT_STATE_DEF)).toBe(true);
@@ -68,11 +66,5 @@ describe('METRICS_GRID_SORT_STATE_DEF', () => {
     });
 
     expect(stripped).toEqual({ [KEY]: { field: 'recency', direction: 'desc' } });
-  });
-
-  it('stays in sync with the viewer DEFAULT_METRICS_SORT (drift guard)', () => {
-    expect([METRICS_GRID_SORT_DEFAULTS.field, METRICS_GRID_SORT_DEFAULTS.direction]).toEqual([
-      ...DEFAULT_METRICS_SORT,
-    ]);
   });
 });

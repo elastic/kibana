@@ -92,12 +92,22 @@ spaceTest.describe(
         // lands to deterministically test "persisted sort survives a reload".
         await expect
           .poll(() =>
-            page.evaluate(
-              (storageKey) => window.localStorage.getItem(storageKey) ?? '',
-              testData.DISCOVER_TABS_LOCAL_STORAGE_KEY
-            )
+            page.evaluate((storageKey) => {
+              const raw = window.localStorage.getItem(storageKey);
+              if (!raw) {
+                return false;
+              }
+              const { openTabs } = JSON.parse(raw) as {
+                openTabs?: Array<{
+                  profileState?: { metricsGridSort?: { direction?: string } };
+                }>;
+              };
+              return Boolean(
+                openTabs?.some((tab) => tab.profileState?.metricsGridSort?.direction === 'desc')
+              );
+            }, testData.DISCOVER_TABS_LOCAL_STORAGE_KEY)
           )
-          .toContain('metricsGridSort');
+          .toBe(true);
       });
 
       await spaceTest.step('the descending sort survives a full page reload', async () => {
