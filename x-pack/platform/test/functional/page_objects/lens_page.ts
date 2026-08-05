@@ -263,6 +263,27 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.setEuiSwitch('indexPattern-include-empty-rows', 'uncheck');
       }
 
+      if (
+        opts.field &&
+        !opts.keepOpen &&
+        opts.dimension.includes(' > ') &&
+        opts.dimension.endsWith('lns-empty-dimension')
+      ) {
+        // Wait for the selected field to be committed as a dimension before closing the editor:
+        // closeDimensionEditor() force-clicks the close button synchronously, so under CI load it
+        // can fire before Lens applies the column, silently dropping the just-configured dimension.
+        const panel = opts.dimension.slice(0, opts.dimension.lastIndexOf(' > '));
+        const field = opts.field;
+        await retry.try(async () => {
+          const triggerTexts = await this.getDimensionTriggersTexts(panel);
+          if (!triggerTexts.some((text) => text.toLowerCase().includes(field.toLowerCase()))) {
+            throw new Error(
+              `Field "${field}" was not applied to "${panel}" before closing the editor`
+            );
+          }
+        });
+      }
+
       if (!opts.keepOpen) {
         await this.closeDimensionEditor();
       }
