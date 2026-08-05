@@ -5,22 +5,16 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
-import { createAlertEventDataSchema } from '@kbn/alerting-v2-schemas';
+import { createAlertEventDataSchema, createAlertEventResponseSchema } from '@kbn/alerting-v2-schemas';
 
 export const CREATE_ALERT_EVENT_STEP_ID = 'alerting.create_alert' as const;
 
-export const createAlertEventOutputSchema = z.object({
-  group_hash: z.string(),
-  episode_id: z.string(),
-});
-
 export const createAlertEventStepCommonDefinition: CommonStepDefinition<
   typeof createAlertEventDataSchema,
-  typeof createAlertEventOutputSchema
+  typeof createAlertEventResponseSchema
 > = {
   id: CREATE_ALERT_EVENT_STEP_ID,
   label: i18n.translate('xpack.alertingV2.workflow.steps.createAlertEvent.label', {
@@ -32,7 +26,7 @@ export const createAlertEventStepCommonDefinition: CommonStepDefinition<
   }),
   category: StepCategory.Kibana,
   inputSchema: createAlertEventDataSchema,
-  outputSchema: createAlertEventOutputSchema,
+  outputSchema: createAlertEventResponseSchema,
   documentation: {
     details: i18n.translate(
       'xpack.alertingV2.workflow.steps.createAlertEvent.documentation.details',
