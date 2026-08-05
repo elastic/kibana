@@ -58,7 +58,8 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
       workflow_ids: configuration.workflow_ids,
       plugin_ids: configuration.plugin_ids,
       connector_ids: configuration.connector_ids,
-      ai_indices: configuration.ai_indices,
+      ai_indices:
+        configuration.ai_indices ?? (resolvedId === agentBuilderDefaultAgentId ? [] : undefined),
     },
   };
 };

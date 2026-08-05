@@ -173,6 +173,25 @@ describe('fromEs', () => {
     expect(definition.configuration.ai_indices).toBeUndefined();
   });
 
+  it('defaults ai_indices to [] for the default agent when missing', () => {
+    const document = getSampleDoc();
+    document._source!.id = agentBuilderDefaultAgentId;
+
+    const definition = fromEs(document);
+
+    expect(definition.configuration.ai_indices).toEqual([]);
+  });
+
+  it('keeps stored ai_indices for the default agent', () => {
+    const document = getSampleDoc();
+    document._source!.id = agentBuilderDefaultAgentId;
+    document._source!.config!.ai_indices = ['ai-index-1'];
+
+    const definition = fromEs(document);
+
+    expect(definition.configuration.ai_indices).toEqual(['ai-index-1']);
+  });
+
   it('defaults enable_elastic_capabilities to true for default agent when missing', () => {
     const document = getSampleDoc();
     document._source!.id = agentBuilderDefaultAgentId;
