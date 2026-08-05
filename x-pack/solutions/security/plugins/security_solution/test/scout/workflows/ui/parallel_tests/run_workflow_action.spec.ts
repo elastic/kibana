@@ -63,6 +63,11 @@ spaceTest.describe('Run workflow alert action', { tag: [...tags.stateful.classic
           headers: { 'kbn-xsrf': 'true' },
         }
       );
+      if (!createResponse.ok()) {
+        throw new Error(
+          `Failed to create workflow: ${createResponse.status()} ${await createResponse.text()}`
+        );
+      }
       const { id: workflowId } = await createResponse.json();
 
       try {

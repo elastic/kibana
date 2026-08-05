@@ -78,6 +78,8 @@ const createMockEsClient = () => {
       }),
       create: jest.fn().mockResolvedValue({}),
       exists: jest.fn().mockResolvedValue(true),
+      delete: jest.fn().mockResolvedValue({}),
+      deleteIndexTemplate: jest.fn().mockResolvedValue({}),
       simulateIndexTemplate: jest.fn().mockResolvedValue({
         template: { mappings: {} },
       }),
@@ -396,6 +398,20 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     await client.index({ id: 'doc1', document: { foo: 'bar' } });
     await client.index({ id: 'doc2', document: { foo: 'baz' } });
 
+    // First write bootstraps once (settings attempt + serverless retry); success is cached
+    // so the second write does not put the template again.
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
+    expect(esClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        template: expect.not.objectContaining({ settings: expect.anything() }),
+      })
+    );
+
+    await client.clean();
+    await client.index({ id: 'doc3', document: { foo: 'qux' } });
+
+    // isServerless is remembered, so re-bootstrap after clean omits settings on the first try.
     expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
     expect(esClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
       3,
@@ -760,5 +776,40 @@ describe('StorageIndexAdapter - ensureReady', () => {
 
     expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
     expect(esClient.indices.create).not.toHaveBeenCalled();
+  });
+
+  it('caches a successful ensureReady so later calls do not re-bootstrap', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.ensureReady();
+    await client.ensureReady();
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries ensureReady after a failed bootstrap', async () => {
+    (esClient.indices.putIndexTemplate as jest.Mock)
+      .mockRejectedValueOnce(new Error('es unavailable'))
+      .mockResolvedValue({});
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await expect(client.ensureReady()).rejects.toThrow('es unavailable');
+    await client.ensureReady();
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
+  });
+
+  it('re-bootstraps after clean clears the readiness cache', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.ensureReady();
+    await client.clean();
+    await client.ensureReady();
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
   });
 });

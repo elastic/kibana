@@ -73,7 +73,7 @@ const makeEsClient = (): jest.Mocked<ElasticsearchClient> =>
     info: jest.fn().mockResolvedValue({ version: { build_flavor: 'default' } }),
     indices: {
       // Default to cold start so init warm-up exercises template + index creation.
-      exists: jest.fn().mockResolvedValue(false),
+      // Empty alias map means no write index yet (same outcome as a 404).
       create: jest.fn().mockResolvedValue({}),
       putMapping: jest.fn(),
       getIndexTemplate: jest.fn().mockResolvedValue({ index_templates: [] }),
@@ -84,15 +84,7 @@ const makeEsClient = (): jest.Mocked<ElasticsearchClient> =>
       simulateIndexTemplate: jest.fn().mockResolvedValue({ template: { mappings: {} } }),
     },
     search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
-    index: jest.fn().mockResolvedValue({
-      _id: 'doc1',
-      _index: 'test',
-      _seq_no: 0,
-      _primary_term: 1,
-      result: 'created',
-    }),
     bulk: jest.fn(),
-    delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
     deleteByQuery: jest.fn(),
   } as unknown as jest.Mocked<ElasticsearchClient>);
 

@@ -392,14 +392,22 @@ export class StorageIndexAdapter<
   /**
    * Ensures the index template and backing write index exist, and that mappings
    * match the current schema version. Concurrent callers share one in-flight
-   * bootstrap; the cache is cleared when that bootstrap settles so later writes
-   * still re-check (e.g. after an external delete), while overlapping callers
-   * do not stampede ES.
+   * bootstrap. A successful bootstrap is cached for the adapter lifetime so a
+   * warm plugin-start call actually removes cold-start work from the first
+   * write (same idea as workflows `createIndexes`). The cache is cleared on
+   * bootstrap failure (so the next call can retry) and on `clean()`.
    */
   private async ensureReadyInternal(): Promise<void> {
     if (!this.ensureReadyPromise) {
-      this.ensureReadyPromise = this.bootstrapComponents().finally(() => {
-        this.ensureReadyPromise = undefined;
+      // Clear the cached promise on rejection so a transient failure (e.g. ES
+      // unavailable during startup) does not poison every subsequent call.
+      // In-flight callers still share the same attempt.
+      const attempt = this.bootstrapComponents();
+      this.ensureReadyPromise = attempt;
+      attempt.catch(() => {
+        if (this.ensureReadyPromise === attempt) {
+          this.ensureReadyPromise = undefined;
+        }
       });
     }
     await this.ensureReadyPromise;
@@ -617,6 +625,11 @@ export class StorageIndexAdapter<
   };
 
   private clean: StorageClientClean = async (): Promise<StorageClientCleanResponse> => {
+    // Drop cached readiness/mapping work so the next write/read re-bootstraps
+    // after indices and templates are removed.
+    this.ensureReadyPromise = undefined;
+    this.updateMappingsPromise = undefined;
+
     const allIndices = await this.getExistingIndices();
     const hasIndices = Object.keys(allIndices).length > 0;
     // Delete all indices
