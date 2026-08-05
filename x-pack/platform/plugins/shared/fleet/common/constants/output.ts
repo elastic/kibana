@@ -203,6 +203,15 @@ export const OUTPUT_TYPES_WITH_PRESET_SUPPORT: Array<ValueOf<OutputType>> = [
   outputType.RemoteElasticsearch,
 ];
 
+// Beats-based output types available to standard (non-OTel) agent policies.
+// otlp is intentionally excluded — it is only valid for OTel-only policies.
+export const BEATS_OUTPUT_TYPES: Array<ValueOf<OutputType>> = [
+  outputType.Elasticsearch,
+  outputType.Logstash,
+  outputType.Kafka,
+  outputType.RemoteElasticsearch,
+];
+
 export const OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT: Array<ValueOf<OutputType>> = [
   outputType.Elasticsearch,
   outputType.RemoteElasticsearch,

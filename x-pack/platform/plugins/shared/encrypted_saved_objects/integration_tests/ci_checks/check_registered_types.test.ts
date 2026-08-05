@@ -157,6 +157,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "ingest-outputs|4",
         "ingest-outputs|3",
         "ingest-outputs|2",
+        "ingest-outputs|11",
         "ingest-outputs|10",
         "ingest-outputs|1",
         "oauth_state|1",
