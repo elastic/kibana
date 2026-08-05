@@ -2750,6 +2750,52 @@ ssl.test: 123
     `);
   });
 
+  it('should not write proxy fields into kafka output even when a proxy is provided', () => {
+    const proxy = {
+      id: 'proxy-1',
+      name: 'Proxy 1',
+      url: 'https://proxy1.fr',
+      certificate_authorities: '/tmp/ssl/ca.crt',
+      proxy_headers: { Authorization: 'Bearer SECRET' },
+      certificate: 'my-cert',
+      certificate_key: 'PRIVATE_KEY',
+      is_preconfigured: false,
+    } as any;
+
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        hosts: ['test:9999'],
+        topic: 'test',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'kafka',
+        config_yaml: '',
+        client_id: 'Elastic',
+        version: '1.0.0',
+        compression: 'none',
+        auth_type: 'none',
+        connection_type: 'plaintext',
+        partition: 'random',
+        random: { group_events: 1 },
+        headers: [],
+        timeout: 30,
+        broker_timeout: 30,
+        required_acks: 1,
+        proxy_id: 'proxy-1',
+      },
+      proxy
+    );
+
+    expect(policyOutput).not.toHaveProperty('proxy_url');
+    expect(policyOutput).not.toHaveProperty('proxy_headers');
+    // proxy-sourced SSL entries must not appear
+    expect((policyOutput as any).ssl?.certificate_authorities).toBeUndefined();
+    expect((policyOutput as any).ssl?.certificate).toBeUndefined();
+    expect((policyOutput as any).ssl?.key).toBeUndefined();
+  });
+
   it('should redact proxy_headers and ssl.key when redactProxySecrets=true', () => {
     const proxy = {
       id: 'proxy-1',
