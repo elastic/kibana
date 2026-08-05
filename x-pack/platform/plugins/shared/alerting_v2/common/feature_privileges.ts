@@ -267,13 +267,6 @@ export type AlertingV2UICapabilityFor<F extends AlertingV2Feature> =
 
 type AlertingV2PrivilegeLevel = 'read' | 'all';
 
-/**
- * Returns a user-facing privilege display name for the given feature and level,
- * matching the format shown in Kibana Role Management and the
- * RequiredPrivilegesPrompt interstitial (e.g. "Rules: All",
- * "Action Policies: Read"). Suitable for embedding in agent tool-error messages
- * so the agent can relay the missing privilege to the user in plain language.
- */
 export const getAlertingPrivilegeDisplayName = (
   feature: AlertingV2Feature,
   level: AlertingV2PrivilegeLevel
