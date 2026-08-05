@@ -61,7 +61,7 @@ When the user wants to investigate a Significant Event, gather the event's metad
 **2. Build the workflow inputs from the event:**
 - `message`: `"{title}\n\n{summary}"`
 - `stream_names`: the event's `Streams`
-- `concurrency_key`: the event's `Event ID` — this de-duplicates with the investigation that the significant-events triage automatically launches for promoted events (so a chat-initiated investigation supersedes an in-flight automatic one rather than running twice).
+- `concurrency_key`: the event's `Event ID` — this de-duplicates with the investigation that the significant-events discovery automatically launches for promoted events (so a chat-initiated investigation supersedes an in-flight automatic one rather than running twice).
 - `context`: a structured object with the event metadata you can read from the attachment.
 
 **Example call (sig event context):**
@@ -152,7 +152,7 @@ When you trigger an investigation for a Significant Event, record it on the even
 - `started_at` — same start time as the initial call.
 - `completed_at` — the current ISO-8601 datetime.
 
-This tool is idempotent (replace-by-`workflow_execution_id`): the investigation workflow also auto-records both the start and terminal entries when it runs via the triage pipeline, so calling this tool for the same execution id is always safe.
+This tool is idempotent (replace-by-`workflow_execution_id`): the investigation workflow also auto-records both the start and terminal entries when it runs via the discovery pipeline, so calling this tool for the same execution id is always safe.
 
 Only call this tool when a Significant Event was the context for the investigation (`event_uuid` is known). Skip it for free-form issues or alert investigations.
 
