@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
+  MarkPinnedConversationResponse,
   MarkReadConversationResponse,
   RenameConversationResponse,
 } from '../../../common/http_api/conversations';
@@ -45,10 +46,13 @@ export function registerInternalConversationRoutes({
       const { title } = request.body;
 
       const client = await conversationsService.getScopedClient({ request });
-      const updatedConversation = await client.update({
-        id: conversationId,
-        title,
-      });
+      const updatedConversation = await client.update(
+        {
+          id: conversationId,
+          title,
+        },
+        { access: 'owner', retryOnConflict: true }
+      );
 
       return response.ok<RenameConversationResponse>({
         body: {
@@ -86,13 +90,49 @@ export function registerInternalConversationRoutes({
           id: conversationId,
           read,
         },
-        { access: 'converse' }
+        { access: 'converse', retryOnConflict: true }
       );
 
       return response.ok<MarkReadConversationResponse>({
         body: {
           id: updatedConversation.id,
           read: updatedConversation.read!,
+        },
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: `${internalApiPath}/conversations/{conversation_id}/_set_pinned`,
+      validate: {
+        params: schema.object({
+          conversation_id: schema.string({ maxLength: 256 }),
+        }),
+        body: schema.object({
+          pinned: schema.boolean(),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId } = request.params;
+      const { pinned } = request.body;
+
+      const client = await conversationsService.getScopedClient({ request });
+      const updatedConversation = await client.update(
+        { id: conversationId, pinned },
+        { access: 'converse', retryOnConflict: true }
+      );
+
+      return response.ok<MarkPinnedConversationResponse>({
+        body: {
+          id: updatedConversation.id,
+          pinned: updatedConversation.pinned ?? false,
         },
       });
     })

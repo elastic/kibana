@@ -57,7 +57,9 @@ interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
 
 export interface Phase1BaseScoringSummary extends StepResult {
   pagesProcessed: number;
-  scoresWritten: number;
+  scoresWrittenRiskIndex: number;
+  scoresCalculated: number;
+  scoresDroppedNotInStore: number;
   scores: Record<string, number>;
   /** EUID-valid scores whose entity was created via the create-if-missing path. */
   entitiesCreated: number;
@@ -168,13 +170,18 @@ export const scoreBaseEntities = async ({
   ...params
 }: ScoreAndPersistBaseEntitiesParams): Promise<Phase1BaseScoringSummary> => {
   let pagesProcessed = 0;
-  let scoresWritten = 0;
+  let scoresWrittenRiskIndex = 0;
+  let scoresWrittenEntityStore = 0;
+  let scoresCalculated = 0;
+  let scoresDroppedNotInStore = 0;
+  let scoresFailed = 0;
   let entitiesCreated = 0;
   let entitiesCreateRejected = 0;
   const newScores: Record<string, number> = {};
 
   for await (const page of calculateBaseEntityScores(params)) {
     pagesProcessed += 1;
+    scoresCalculated += page.scores.length;
     // The composite aggregation discovers EUIDs from alerts, which can include
     // identifiers with no canonical store entity (host.id variations, synthetic
     // identifiers, alerts that name an entity the entity store has no record
@@ -227,20 +234,24 @@ export const scoreBaseEntities = async ({
       }
     }
 
-    scoresWritten += await persistScoresToRiskIndex({
+    scoresDroppedNotInStore += page.scores.length - riskIndexScores.length;
+
+    scoresWrittenRiskIndex += await persistScoresToRiskIndex({
       writer,
       entityType: params.entityType,
       scores: riskIndexScores,
       logger: params.logger,
       refresh,
     });
-    await persistScoresToEntityStore({
+    const { docsWritten, errorsCount } = await persistScoresToEntityStore({
       crudClient: params.crudClient,
       logger: params.logger,
       entityType: params.entityType,
       scores: entityStoreScores,
       enabled: idBasedRiskScoringEnabled,
     });
+    scoresWrittenEntityStore += docsWritten;
+    scoresFailed += errorsCount;
 
     if (collectScores) {
       for (const score of riskIndexScores) {
@@ -251,7 +262,11 @@ export const scoreBaseEntities = async ({
 
   return {
     pagesProcessed,
-    scoresWritten,
+    scoresWrittenRiskIndex,
+    scoresWrittenEntityStore,
+    scoresCalculated,
+    scoresDroppedNotInStore,
+    scoresFailed,
     scores: newScores,
     entitiesCreated,
     entitiesCreateRejected,
