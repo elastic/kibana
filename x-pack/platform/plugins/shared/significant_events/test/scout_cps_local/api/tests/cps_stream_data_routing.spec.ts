@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { EsClient } from '@kbn/scout';
+import { LOG_SAMPLES_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import { significantEventsCpsApiTest as apiTest, COMMON_API_HEADERS } from '../fixtures';
 
 const CPS_LINKED_INDEX = 'logs-cps-se-ki-test';
@@ -39,7 +40,7 @@ async function ingestMarkerOnLinked(
   await linkedEsClient.index({
     index: CPS_LINKED_INDEX,
     refresh: 'wait_for',
-    body: {
+    document: {
       '@timestamp': timestamp,
       cps_se_marker: markerValue,
       message: `CPS significant events marker ${markerValue}`,
@@ -55,29 +56,29 @@ apiTest.describe(
     const markerValue = `cps_marker_${Date.now()}`;
     let cookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ samlAuth, apiServices }) => {
+    apiTest.beforeAll(async ({ samlAuth, streamsTest }) => {
       const credentials = await samlAuth.asStreamsAdmin();
       cookieHeader = credentials.cookieHeader;
 
-      await apiServices.streamsTest.enableQueryStreams();
+      await streamsTest.enableQueryStreams();
 
-      await apiServices.streamsTest.forkStream(ROOT_STREAM, PARENT_STREAM, {
+      await streamsTest.forkStream(ROOT_STREAM, PARENT_STREAM, {
         field: 'service.name',
         eq: 'cps-se-test',
       });
 
-      await apiServices.streamsTest.createEsqlView(PARENT_VIEW, `FROM ${CPS_LINKED_INDEX}`);
+      await streamsTest.createEsqlView(PARENT_VIEW, `FROM ${CPS_LINKED_INDEX}`);
 
-      await apiServices.streamsTest.createQueryStream(
+      await streamsTest.createQueryStream(
         QUERY_STREAM,
         `FROM ${PARENT_VIEW} | KEEP @timestamp, cps_se_marker, message, \`service.name\``
       );
     });
 
-    apiTest.afterAll(async ({ apiServices, linkedProject }) => {
-      await apiServices.streamsTest.deleteEsqlView(PARENT_VIEW);
-      await apiServices.streamsTest.cleanupTestStreams(PARENT_STREAM);
-      await apiServices.streamsTest.disableQueryStreams();
+    apiTest.afterAll(async ({ streamsTest, linkedProject }) => {
+      await streamsTest.deleteEsqlView(PARENT_VIEW);
+      await streamsTest.cleanupTestStreams(PARENT_STREAM);
+      await streamsTest.disableQueryStreams();
       await linkedProject.esClient.indices.delete({ index: CPS_LINKED_INDEX }, { ignore: [404] });
     });
 
@@ -91,9 +92,12 @@ apiTest.describe(
         );
 
         // Negative control: origin-only routing must not see linked-only data.
+        // The index exists solely on the linked project, so origin has to tolerate
+        // it being missing instead of failing with index_not_found_exception.
         const originHits = await esClient.search({
           index: CPS_LINKED_INDEX,
           query: { term: { cps_se_marker: markerValue } },
+          ignore_unavailable: true,
         });
         expect(originHits.hits.hits).toHaveLength(0);
 
@@ -118,7 +122,7 @@ apiTest.describe(
         expect(serializedFeatures).toContain(markerValue);
 
         const logSamples = response.computedFeatures.find(
-          (feature) => feature.type === 'log_samples'
+          (feature) => feature.type === LOG_SAMPLES_FEATURE_TYPE
         );
         expect(logSamples).toBeDefined();
         expect(JSON.stringify(logSamples?.properties)).toContain(markerValue);

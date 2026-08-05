@@ -5,76 +5,29 @@
  * 2.0.
  */
 
-import { apiTest } from '@kbn/scout';
-import type {
-  RoleApiCredentials,
-  RoleSessionCredentials,
-  ApiServicesFixture,
-  RequestAuthFixture,
-  SamlAuth,
-} from '@kbn/scout';
-import type { StreamsTestApiService } from '@kbn/streams-plugin/test/scout/api/services/streams_api_service';
-import { getStreamsTestApiService } from '@kbn/streams-plugin/test/scout/api/services/streams_api_service';
-import { getStreamsUsers } from '@kbn/streams-plugin/test/scout/api/fixtures/constants';
 import {
-  getSignificantEventsTestApiService,
-  type SignificantEventsTestApiService,
-} from '../../../scout/api/services/significant_events_api_service';
+  getStreamsTestApiService,
+  type StreamsTestApiService,
+} from '@kbn/streams-plugin/test/scout/api/services/streams_api_service';
+import { significantEventsApiTest } from '../../../scout/api/fixtures';
 
-export interface StreamsSamlAuthFixture extends SamlAuth {
-  asStreamsAdmin: () => Promise<RoleSessionCredentials>;
-  asStreamsReadOnly: () => Promise<RoleSessionCredentials>;
-}
-
-export interface StreamsRequestAuthFixture extends RequestAuthFixture {
-  loginAsStreamsAdmin: () => Promise<RoleApiCredentials>;
-  loginAsStreamsReadOnly: () => Promise<RoleApiCredentials>;
-}
-
-export interface SignificantEventsCpsApiServicesFixture extends ApiServicesFixture {
-  streamsTest: StreamsTestApiService;
-  significantEventsTest: SignificantEventsTestApiService;
-}
-
-export const significantEventsCpsApiTest = apiTest.extend<{
-  requestAuth: StreamsRequestAuthFixture;
-  samlAuth: StreamsSamlAuthFixture;
-  apiServices: SignificantEventsCpsApiServicesFixture;
-}>({
-  requestAuth: async ({ requestAuth, config }, use) => {
-    const streamsUsers = getStreamsUsers(config);
-
-    const extendedRequestAuth: StreamsRequestAuthFixture = {
-      ...requestAuth,
-      loginAsStreamsAdmin: async () =>
-        requestAuth.getApiKeyForCustomRole(streamsUsers.streamsAdmin),
-      loginAsStreamsReadOnly: async () =>
-        requestAuth.getApiKeyForCustomRole(streamsUsers.streamsReadOnly),
-    };
-    await use(extendedRequestAuth);
-  },
-
-  samlAuth: async ({ samlAuth, config }, use) => {
-    const streamsUsers = getStreamsUsers(config);
-
-    const extendedSamlAuth: StreamsSamlAuthFixture = {
-      ...samlAuth,
-      asStreamsAdmin: async () => samlAuth.asInteractiveUser(streamsUsers.streamsAdmin),
-      asStreamsReadOnly: async () => samlAuth.asInteractiveUser(streamsUsers.streamsReadOnly),
-    };
-
-    await use(extendedSamlAuth);
-  },
-
-  apiServices: async ({ apiServices, kbnClient, esClient, log }, use) => {
-    const extendedApiServices = apiServices as SignificantEventsCpsApiServicesFixture;
-    extendedApiServices.streamsTest = getStreamsTestApiService({ kbnClient, esClient, log });
-    extendedApiServices.significantEventsTest = getSignificantEventsTestApiService({
-      kbnClient,
-      log,
-    });
-    await use(extendedApiServices);
-  },
+/**
+ * CPS variant of the Significant Events API test. It inherits the Streams auth
+ * roles and shared API services from the base suite and adds the Streams API
+ * service needed to set up the query stream under test.
+ *
+ * `streamsTest` is worker scoped so that `beforeAll`/`afterAll` hooks can use it.
+ */
+export const significantEventsCpsApiTest = significantEventsApiTest.extend<
+  {},
+  { streamsTest: StreamsTestApiService }
+>({
+  streamsTest: [
+    async ({ kbnClient, esClient, log }, use) => {
+      await use(getStreamsTestApiService({ kbnClient, esClient, log }));
+    },
+    { scope: 'worker' },
+  ],
 });
 
-export { COMMON_API_HEADERS, PUBLIC_API_HEADERS } from '../../../scout/api/fixtures/constants';
+export { COMMON_API_HEADERS, PUBLIC_API_HEADERS } from '../../../scout/api/fixtures';

@@ -10,6 +10,10 @@ CONFIG_PATHS=(
   "x-pack/solutions/security/plugins/entity_store/test/scout_cps_local/api/playwright.config.ts"
 )
 
+OBSERVABILITY_CONFIG_PATHS=(
+  "x-pack/platform/plugins/shared/significant_events/test/scout_cps_local/api/playwright.config.ts"
+)
+
 SPACES_CPS_CONFIG="x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/playwright.config.ts"
 
 echo "--- Cross Project Search (CPS) Tests"
@@ -38,6 +42,10 @@ run_cps_tests() {
 
 for CONFIG_PATH in "${CONFIG_PATHS[@]}"; do
   run_cps_tests "$CONFIG_PATH" "security_complete"
+done
+
+for CONFIG_PATH in "${OBSERVABILITY_CONFIG_PATHS[@]}"; do
+  run_cps_tests "$CONFIG_PATH" "observability_complete"
 done
 
 # Spaces project-routing visibility/save/capability coverage across eligible and
