@@ -13,6 +13,7 @@ type Vote = 'up' | 'down' | null;
 export interface FeedbackState {
   vote: Vote;
   chips: string[];
+  comment: string;
   commentOpen: boolean;
   inviteVisible: boolean;
   submitted: boolean;
@@ -22,48 +23,72 @@ export interface FeedbackState {
 export interface UseFeedbackReturn extends FeedbackState {
   setVote: (vote: 'up' | 'down') => void;
   toggleChip: (chip: string) => void;
+  setComment: (value: string) => void;
   openComment: () => void;
-  closeComment: () => void;
   dismissInvite: () => void;
-  submit: (comment: string) => Promise<void>;
+  cancel: () => void;
+  submit: () => Promise<void>;
 }
 
 export const useFeedback = (roundId: string): UseFeedbackReturn => {
   const [vote, setVoteState] = useState<Vote>(null);
   const [chips, setChips] = useState<string[]>([]);
+  const [comment, setCommentState] = useState('');
   const [commentOpen, setCommentOpen] = useState(false);
   const [inviteVisible, setInviteVisible] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Refs so callbacks always see latest values without re-creating
   const voteRef = useRef(vote);
   const chipsRef = useRef(chips);
+  const commentRef = useRef(comment);
   voteRef.current = vote;
   chipsRef.current = chips;
+  commentRef.current = comment;
 
-  const setVote = useCallback((next: 'up' | 'down') => {
-    setVoteState((prev) => {
+  const reset = useCallback(() => {
+    setVoteState(null);
+    setChips([]);
+    setCommentState('');
+    setCommentOpen(false);
+    setInviteVisible(false);
+    setSubmitted(false);
+  }, []);
+
+  const setVote = useCallback(
+    (next: 'up' | 'down') => {
+      const prev = voteRef.current;
+
       if (prev === next) {
-        setChips([]);
-        setCommentOpen(false);
-        setInviteVisible(false);
-        return null;
+        reset();
+        return;
       }
+
       setChips([]);
+      setCommentState('');
       setSubmitted(false);
+
       if (next === 'down') {
+        setVoteState('down');
         setCommentOpen(true);
         setInviteVisible(false);
       } else {
+        setVoteState('up');
         setCommentOpen(false);
         setInviteVisible(true);
+        submitFeedback({ roundId, vote: 'up', chips: [], comment: '' });
       }
-      return next;
-    });
-  }, []);
+    },
+    [roundId, reset]
+  );
 
   const toggleChip = useCallback((chip: string) => {
     setChips((prev) => (prev.includes(chip) ? prev.filter((c) => c !== chip) : [...prev, chip]));
+  }, []);
+
+  const setComment = useCallback((value: string) => {
+    setCommentState(value);
   }, []);
 
   const openComment = useCallback(() => {
@@ -71,38 +96,44 @@ export const useFeedback = (roundId: string): UseFeedbackReturn => {
     setInviteVisible(false);
   }, []);
 
-  const closeComment = useCallback(() => setCommentOpen(false), []);
-
   const dismissInvite = useCallback(() => setInviteVisible(false), []);
 
-  const submit = useCallback(
-    async (comment: string) => {
-      const currentVote = voteRef.current;
-      if (!currentVote) return;
-      setIsSubmitting(true);
-      try {
-        await submitFeedback({ roundId, vote: currentVote, chips: chipsRef.current, comment });
-        setSubmitted(true);
-        setCommentOpen(false);
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [roundId]
-  );
+  const cancel = useCallback(() => {
+    reset();
+  }, [reset]);
+
+  const submit = useCallback(async () => {
+    const currentVote = voteRef.current;
+    if (!currentVote) return;
+    setIsSubmitting(true);
+    try {
+      await submitFeedback({
+        roundId,
+        vote: currentVote,
+        chips: chipsRef.current,
+        comment: commentRef.current,
+      });
+      setSubmitted(true);
+      setCommentOpen(false);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [roundId]);
 
   return {
     vote,
     chips,
+    comment,
     commentOpen,
     inviteVisible,
     submitted,
     isSubmitting,
     setVote,
     toggleChip,
+    setComment,
     openComment,
-    closeComment,
     dismissInvite,
+    cancel,
     submit,
   };
 };
