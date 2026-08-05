@@ -79,9 +79,7 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
   describe('basic/simple url', () => {
     beforeEach(() => {
       login();
-      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('indicatorsSearch');
       visitWithTimeRange(URL);
-      cy.wait('@indicatorsSearch', { timeout: 120000 });
       waitForViewToBeLoaded();
     });
 
@@ -213,9 +211,7 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
   describe('Field browser', () => {
     beforeEach(() => {
       login();
-      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('indicatorsSearch');
       visitWithTimeRange(URL);
-      cy.wait('@indicatorsSearch', { timeout: 120000 });
       waitForViewToBeLoaded();
     });
 
@@ -231,9 +227,7 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
   describe('Request inspector', () => {
     beforeEach(() => {
       login();
-      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('indicatorsSearch');
       visitWithTimeRange(URL);
-      cy.wait('@indicatorsSearch', { timeout: 120000 });
       waitForViewToBeLoaded();
     });
 
@@ -266,9 +260,7 @@ describe('Multiple indicators', { tags: ['@ess'] }, () => {
   describe('Indicator page search', () => {
     beforeEach(() => {
       login();
-      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('indicatorsSearch');
       visitWithTimeRange(URL);
-      cy.wait('@indicatorsSearch', { timeout: 120000 });
       waitForViewToBeLoaded();
     });
 
@@ -317,9 +309,7 @@ describe('Invalid Indicators', { tags: ['@ess'] }, () => {
   describe('verify the grid loads even with missing fields', () => {
     beforeEach(() => {
       login();
-      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('indicatorsSearch');
       visitWithTimeRange(URL);
-      cy.wait('@indicatorsSearch', { timeout: 120000 });
       waitForViewToBeLoaded();
     });
 
@@ -376,9 +366,7 @@ describe('Missing mappings', { tags: ['@ess'] }, () => {
   describe('verify the grid loads even with missing mappings and missing fields', () => {
     beforeEach(() => {
       login();
-      cy.intercept('POST', THREAT_INTELLIGENCE_API).as('indicatorsSearch');
       visitWithTimeRange(URL);
-      cy.wait('@indicatorsSearch', { timeout: 120000 });
       waitForViewToBeLoaded();
     });
 
