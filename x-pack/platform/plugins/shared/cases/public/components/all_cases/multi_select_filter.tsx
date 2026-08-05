@@ -125,6 +125,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
 
   return (
     <EuiPopover
+      aria-label={i18n.FILTER_OPTIONS_POPOVER_ARIA_LABEL}
       ownFocus
       button={
         <EuiFilterButton
