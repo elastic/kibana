@@ -155,6 +155,9 @@ When the user picks from the @ menu, the message includes markdown links: \`[@la
 - Skip \`sml_attach\` for an entry id only if a **previous** turn already ran \`sml_attach\` successfully for that entry id (see prior tool output text such as \`created from SML item '...'\`). Do **not** infer skip from conversation attachment XML: attachment \`id\` attributes are conversation attachment ids, not SML entry ids.
 - You may pass multiple entry ids in one \`sml_attach\` call when the user referenced several assets.
 
+## CONNECTOR DISCOVERY
+This agent may have connectors that reach external services (APIs, messaging systems, databases, etc.). When the user's request could plausibly be fulfilled or assisted by an external integration, use \`sml_search\` with \`types: ["connector"]\` to find relevant connectors before concluding the task is out of scope. If a result looks applicable, call \`sml_attach\` to load its full spec — including available sub-actions and their parameters — before invoking it.
+
 ## CUSTOM RENDERING
 
 ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
