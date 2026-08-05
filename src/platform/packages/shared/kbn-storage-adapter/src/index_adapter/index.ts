@@ -182,12 +182,16 @@ export class StorageIndexAdapter<
 
   private readonly logger: Logger;
   private updateMappingsPromise: Promise<void> | undefined;
-  private ensureReadyPromise: Promise<void> | undefined;
   /**
-   * Schema version last successfully bootstrapped. Used so a warm plugin-start
-   * `ensureReady()` skips cold-start work on the next write, while a later
-   * schema-version change (e.g. rolling upgrade within-process tests) still
-   * re-runs bootstrap and updates mappings in place.
+   * In-flight bootstrap shared by concurrent `ensureReady` / write callers.
+   * Cleared when the attempt settles so the write path can re-validate later
+   * (e.g. after an out-of-band index delete).
+   */
+  private bootstrapPromise: Promise<void> | undefined;
+  /**
+   * Schema version last successfully seen by the public `ensureReady()` API.
+   * Does not short-circuit the write path, which still re-validates so
+   * StorageIndexAdapter keeps self-healing if the template/index disappears.
    */
   private lastReadySchemaVersion: string | undefined;
   private serverlessCheck: Promise<boolean | undefined> | undefined;
@@ -397,13 +401,31 @@ export class StorageIndexAdapter<
   }
 
   /**
-   * Ensures the index template and backing write index exist, and that mappings
-   * match the current schema version. Concurrent callers share one in-flight
-   * bootstrap. A successful bootstrap is cached for the current schema version
-   * so a warm plugin-start call removes cold-start work from the first write
-   * (same idea as workflows `createIndexes`). The cache is invalidated when
-   * the schema version changes, on bootstrap failure (so the next call can
-   * retry), and on `clean()`.
+   * Runs bootstrap with in-flight dedupe only. After the attempt settles the
+   * next caller starts a fresh bootstrap, so writes keep self-healing if the
+   * template or write index were removed out-of-band.
+   */
+  private async bootstrapWithDedupe(): Promise<void> {
+    if (!this.bootstrapPromise) {
+      const attempt = this.bootstrapComponents().finally(() => {
+        if (this.bootstrapPromise === attempt) {
+          this.bootstrapPromise = undefined;
+        }
+      });
+      this.bootstrapPromise = attempt;
+    }
+    await this.bootstrapPromise;
+  }
+
+  /**
+   * Public warm-up path: ensures the index template and backing write index
+   * exist, and that mappings match the current schema version. Concurrent
+   * callers share one in-flight bootstrap. Success is cached for the current
+   * schema version so repeated plugin-start calls are cheap. Cleared on
+   * schema-version change, bootstrap failure, and `clean()`.
+   *
+   * This cache does not apply to the write path (`validateComponentsBeforeWriting`),
+   * which still re-validates so out-of-band deletes self-heal on the next write.
    */
   private async ensureReadyInternal(): Promise<void> {
     const expectedSchemaVersion = getSchemaVersion(this.storage);
@@ -411,24 +433,13 @@ export class StorageIndexAdapter<
       return;
     }
 
-    if (!this.ensureReadyPromise) {
-      // Clear the in-flight promise when it settles so a later schema-version
-      // change can start a fresh bootstrap. Only record success after the
-      // attempt resolves so transient failures (e.g. ES unavailable during
-      // startup) do not poison every subsequent call.
-      const attempt = this.bootstrapComponents()
-        .then(() => {
-          this.lastReadySchemaVersion = getSchemaVersion(this.storage);
-        })
-        .finally(() => {
-          if (this.ensureReadyPromise === attempt) {
-            this.ensureReadyPromise = undefined;
-          }
-        });
-      this.ensureReadyPromise = attempt;
+    try {
+      await this.bootstrapWithDedupe();
+      this.lastReadySchemaVersion = getSchemaVersion(this.storage);
+    } catch (error) {
+      this.lastReadySchemaVersion = undefined;
+      throw error;
     }
-
-    await this.ensureReadyPromise;
 
     // Schema version may have changed while we waited on an in-flight attempt.
     if (this.lastReadySchemaVersion !== getSchemaVersion(this.storage)) {
@@ -467,7 +478,7 @@ export class StorageIndexAdapter<
    * - the index has the right version (if not, update it)
    */
   private async validateComponentsBeforeWriting<T>(cb: () => Promise<T>): Promise<T> {
-    await this.ensureReadyInternal();
+    await this.bootstrapWithDedupe();
     return await cb();
   }
 
@@ -650,7 +661,7 @@ export class StorageIndexAdapter<
   private clean: StorageClientClean = async (): Promise<StorageClientCleanResponse> => {
     // Drop cached readiness/mapping work so the next write/read re-bootstraps
     // after indices and templates are removed.
-    this.ensureReadyPromise = undefined;
+    this.bootstrapPromise = undefined;
     this.lastReadySchemaVersion = undefined;
     this.updateMappingsPromise = undefined;
 

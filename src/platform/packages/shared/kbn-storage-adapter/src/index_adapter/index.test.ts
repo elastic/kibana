@@ -399,20 +399,8 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     await client.index({ id: 'doc1', document: { foo: 'bar' } });
     await client.index({ id: 'doc2', document: { foo: 'baz' } });
 
-    // First write bootstraps once (settings attempt + serverless retry); success is cached
-    // so the second write does not put the template again.
-    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
-    expect(esClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        template: expect.not.objectContaining({ settings: expect.anything() }),
-      })
-    );
-
-    await client.clean();
-    await client.index({ id: 'doc3', document: { foo: 'qux' } });
-
-    // isServerless is remembered, so re-bootstrap after clean omits settings on the first try.
+    // Write path re-validates every write: first write does settings attempt +
+    // serverless retry, second write puts without settings (isServerless cached).
     expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
     expect(esClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
       3,
@@ -787,6 +775,17 @@ describe('StorageIndexAdapter - ensureReady', () => {
     await client.ensureReady();
 
     expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+  });
+
+  it('still re-validates on write after a successful ensureReady', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.ensureReady();
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    // ensureReady cache must not short-circuit the write path's self-heal checks.
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
   });
 
   it('re-bootstraps when the schema version changes after a successful ensureReady', async () => {
