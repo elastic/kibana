@@ -31,6 +31,21 @@
       ]
     },
     {
+      "id": "ml",
+      "name": "ML Agent Builder Skills",
+      "slackChannel": "#agent-builder-alerts",
+      "configPath": "x-pack/platform/plugins/shared/ml/evals/playwright.config.ts",
+      "serverConfigSet": "evals_agent_builder",
+      "tags": [
+        "platform",
+        "ml",
+        "agent-builder"
+      ],
+      "ciLabels": [
+        "evals:ml"
+      ]
+    },
+    {
       "id": "alerting-v2",
       "name": "Alerting V2",
       "slackChannel": "#rna-program-notify",
@@ -350,8 +365,13 @@
       "name": "Alert Analysis Workflow",
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow/playwright.config.ts",
-      "tags": ["security", "alert-analysis"],
-      "ciLabels": ["evals:security-alert-analysis-workflow"]
+      "tags": [
+        "security",
+        "alert-analysis"
+      ],
+      "ciLabels": [
+        "evals:security-alert-analysis-workflow"
+      ]
     },
     {
       "id": "skill-selection-benchmark",

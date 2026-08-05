@@ -9186,8 +9186,6 @@
     "uiActions.triggers.onSelectRange.title": "範囲選択",
     "uiActions.triggers.panelBadgeTrigger.description": "パネルに埋め込み可能なファイルが読み込まれるときに、アクションがタイトルバーに表示されます。",
     "uiActions.triggers.panelBadgeTrigger.title": "パネルバッジ",
-    "uiActions.triggers.panelNotificationTrigger.description": "パネルの右上にアクションが表示されます。",
-    "uiActions.triggers.panelNotificationTrigger.title": "パネル通知",
     "uiActions.triggers.updateEsqlQueryTrigger": "ES|QLクエリを更新",
     "uiActions.triggers.updateEsqlQueryTriggerDescription": "ES|QLクエリを新しいクエリで更新",
     "uiActions.triggers.updateFilterReferencesTrigger": "フィルター参照を更新",
