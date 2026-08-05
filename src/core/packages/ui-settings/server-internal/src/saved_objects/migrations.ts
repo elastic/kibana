@@ -139,6 +139,33 @@ export const modelVersions: SavedObjectsModelVersionMap = {
       create: configAttributesSchemaV3,
     },
   },
+  4: {
+    changes: [
+      {
+        // owner: Team:Search (agentBuilder:uiamOAuthClientManagement)
+        // The setting stopped gating anything in a prior release, so removing the
+        // persisted value cannot regress a rollback. Persisted values must be
+        // dropped because `getUserProvided` returns every attribute stored on the
+        // `config` object, registered or not, and the stack_management telemetry
+        // collector forwards them into a payload validated against a schema that
+        // no longer declares this key.
+        //
+        // `data_removal` has no reverse, so the `kbn-check-saved-objects-cli`
+        // rollback test must be seeded with an idempotent fixture: the 10.3.0
+        // fixture list carries both a document with the attribute and one without,
+        // so a document that lost the attribute during upgrade still matches after
+        // rolling back.
+        type: 'data_removal',
+        removedAttributePaths: ['agentBuilder:uiamOAuthClientManagement'],
+      },
+    ],
+    // `config` attributes are open-ended, so the shape is unchanged from model
+    // version 3 and the same schemas apply.
+    schemas: {
+      forwardCompatibility: configAttributesSchemaV3.extends({}, { unknowns: 'ignore' }),
+      create: configAttributesSchemaV3,
+    },
+  },
 };
 
 /**

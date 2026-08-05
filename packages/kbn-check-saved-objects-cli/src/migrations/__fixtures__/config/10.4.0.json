@@ -1,0 +1,19 @@
+{
+  "10.3.0": [
+    {
+      "buildNum": 9007199254740991,
+      "agentBuilder:uiamOAuthClientManagement": true
+    },
+    {
+      "buildNum": 9007199254740991
+    }
+  ],
+  "10.4.0": [
+    {
+      "buildNum": 9007199254740991
+    },
+    {
+      "buildNum": 9007199254740991
+    }
+  ]
+}

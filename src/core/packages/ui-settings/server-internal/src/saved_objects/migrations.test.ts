@@ -9,6 +9,7 @@
 
 import type {
   SavedObjectModelTransformationContext,
+  SavedObjectsModelDataRemovalChange,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import {
@@ -501,6 +502,25 @@ describe('ui_settings model version 3 — mergeTimepickerQuickRangesV3', () => {
     expect(mv3).toBeDefined();
     expect(mv3?.schemas?.forwardCompatibility).toBeDefined();
     expect(mv3?.schemas?.create).toBeDefined();
+  });
+});
+
+describe('ui_settings model version 4', () => {
+  const mv4 = modelVersions[4];
+
+  test('removes the agentBuilder:uiamOAuthClientManagement setting', () => {
+    const removals = (mv4?.changes ?? []).filter(
+      (change): change is SavedObjectsModelDataRemovalChange => change.type === 'data_removal'
+    );
+
+    expect(removals).toHaveLength(1);
+    expect(removals[0].removedAttributePaths).toEqual(['agentBuilder:uiamOAuthClientManagement']);
+  });
+
+  test('defines forwardCompatibility and create schemas (required by the SO check)', () => {
+    expect(mv4).toBeDefined();
+    expect(mv4?.schemas?.forwardCompatibility).toBeDefined();
+    expect(mv4?.schemas?.create).toBeDefined();
   });
 });
 
