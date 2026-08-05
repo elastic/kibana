@@ -186,13 +186,11 @@ export const bucketTermsOperationSchema = z
      */
     includes: z
       .object({
+        // A terms field is either string- or number-typed, so the values are homogeneous: an array of
+        // strings or an array of numbers, never mixed.
         values: z
-          .array(
-            z.string().meta({
-              description: 'Values to include.',
-            })
-          )
-          .max(100),
+          .union([z.array(z.string()).max(100), z.array(z.number()).max(100)])
+          .meta({ description: 'Values to include.' }),
         as_regex: z.boolean().optional().meta({
           description: 'When `true`, treats the values as regular expressions.',
         }),
@@ -205,12 +203,8 @@ export const bucketTermsOperationSchema = z
     excludes: z
       .object({
         values: z
-          .array(
-            z.string().meta({
-              description: 'Values to exclude.',
-            })
-          )
-          .max(100),
+          .union([z.array(z.string()).max(100), z.array(z.number()).max(100)])
+          .meta({ description: 'Values to exclude.' }),
         as_regex: z.boolean().optional().meta({
           description: 'When `true`, treats the values as regular expressions.',
         }),

@@ -71,6 +71,7 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/observability-design',
     'elastic/observability-ui',
     'elastic/obs-sig-events-team',
+    'elastic/obs-signals-logs-team',
     'elastic/obs-signals-metrics-team',
     'elastic/observablt-robots',
     'elastic/streams-program-team',
@@ -79,7 +80,7 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
   security: [
     'elastic/contextual-security-apps',
     'elastic/core-analysis',
-    'elastic/integration-experience',
+    'elastic/cloud-services',
     'elastic/kibana-cases',
     'elastic/kibana-cloud-security-posture',
     'elastic/security-data-analytics',
