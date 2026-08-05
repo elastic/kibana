@@ -116,6 +116,7 @@ toc:
           - file: connectors-kibana/notion-action-type.md
           - file: connectors-kibana/one-drive-action-type.md
           - file: connectors-kibana/one-password-action-type.md
+          - file: connectors-kibana/opensearch-aws-opensearch-service-action-type.md
           - file: connectors-kibana/outlook-action-type.md
           - file: connectors-kibana/pagerduty-mcp-action-type.md
           - file: connectors-kibana/posthog-action-type.md
@@ -134,6 +135,7 @@ toc:
           - file: connectors-kibana/urlvoid-action-type.md
           - file: connectors-kibana/virustotal-action-type.md
           - file: connectors-kibana/workday-action-type.md
+          - file: connectors-kibana/zabbix-action-type.md
           - file: connectors-kibana/zendesk-action-type.md
           - file: connectors-kibana/zoom-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md

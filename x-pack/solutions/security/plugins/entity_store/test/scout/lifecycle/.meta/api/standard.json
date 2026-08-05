@@ -1,0 +1,841 @@
+{
+  "sha1": "dfe48ee6d64518ec5d1261fe7b99f0169c956a0c",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "6ca7a841c6c0566-0d07bebba1374b5",
+      "title": "Entity Store check privileges API Should return full privileges for admin user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/check_privileges.spec.ts",
+        "line": 30,
+        "column": 46
+      }
+    },
+    {
+      "id": "6ca7a841c6c0566-791197e69b48c0e",
+      "title": "Entity Store check privileges API Should deny access for user without securitySolution privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/check_privileges.spec.ts",
+        "line": 50,
+        "column": 27
+      }
+    },
+    {
+      "id": "6ca7a841c6c0566-830cd1dd91a4340",
+      "title": "Entity Store check privileges API Should return no index permissions for user with securitySolution privilege but no index access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/check_privileges.spec.ts",
+        "line": 69,
+        "column": 30
+      }
+    },
+    {
+      "id": "6ca7a841c6c0566-34f8999fb069dee",
+      "title": "Entity Store check privileges API Should return has_read_permissions: false when user has read access to only one of the required indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/check_privileges.spec.ts",
+        "line": 97,
+        "column": 24
+      }
+    },
+    {
+      "id": "6ca7a841c6c0566-550cdaf8582b4e8",
+      "title": "Entity Store check privileges API Should return limited privileges for user with read-only access to entities index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/check_privileges.spec.ts",
+        "line": 137,
+        "column": 4
+      }
+    },
+    {
+      "id": "6ca7a841c6c0566-04a7168fd3eea1d",
+      "title": "Entity Store check privileges API Should report has_read_permissions: true but has_all_required: false when metadata read is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/check_privileges.spec.ts",
+        "line": 193,
+        "column": 38
+      }
+    },
+    {
+      "id": "6ca7a841c6c0566-dc06de8b6f27199",
+      "title": "Entity Store check privileges API Should report has_write_permissions: true but has_all_required: false when only metadata read is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/check_privileges.spec.ts",
+        "line": 239,
+        "column": 24
+      }
+    },
+    {
+      "id": "cef497bed1ff11f-f431fa95054f66d",
+      "title": "Entity Store CRUD API - not installed Should return 400 when creating an entity without Entity Store installed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/crud_not_installed.spec.ts",
+        "line": 24,
+        "column": 10
+      }
+    },
+    {
+      "id": "cef497bed1ff11f-888e02aee89e133",
+      "title": "Entity Store CRUD API - not installed Should return 400 when updating an entity without Entity Store installed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/crud_not_installed.spec.ts",
+        "line": 39,
+        "column": 19
+      }
+    },
+    {
+      "id": "cef497bed1ff11f-a38b5a4568cd545",
+      "title": "Entity Store CRUD API - not installed Should return 400 when bulk updating entities without Entity Store installed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/crud_not_installed.spec.ts",
+        "line": 53,
+        "column": 29
+      }
+    },
+    {
+      "id": "cad2427c9a6bdef-98adb7d54946bea",
+      "title": "Entity Store - privilege checks install - Should fail when user lacks permissions for source index patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
+        "line": 121,
+        "column": 13
+      }
+    },
+    {
+      "id": "cad2427c9a6bdef-8544ac7d13fa2a1",
+      "title": "Entity Store - privilege checks install - Should fail when user lacks permissions for target index patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
+        "line": 147,
+        "column": 42
+      }
+    },
+    {
+      "id": "cad2427c9a6bdef-616e10db6ba79eb",
+      "title": "Entity Store - privilege checks install - Should fail when user lacks permissions for entity store saved object descriptor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
+        "line": 176,
+        "column": 30
+      }
+    },
+    {
+      "id": "cad2427c9a6bdef-3324666d8642cf5",
+      "title": "Entity Store - privilege checks update - Should fail when user lacks permissions for source index patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
+        "line": 193,
+        "column": 33
+      }
+    },
+    {
+      "id": "cad2427c9a6bdef-993c06b666a022e",
+      "title": "Entity Store - privilege checks update - Should fail when user lacks permissions for target index patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
+        "line": 219,
+        "column": 25
+      }
+    },
+    {
+      "id": "cad2427c9a6bdef-1d08b2e42819f2d",
+      "title": "Entity Store - privilege checks update - Should fail when user lacks permissions for entity store saved object descriptor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
+        "line": 245,
+        "column": 4
+      }
+    },
+    {
+      "id": "cad2427c9a6bdef-e8f814791067649",
+      "title": "Entity Store - privilege checks maintainers stop - Should fail when user lacks management privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
+        "line": 265,
+        "column": 4
+      }
+    },
+    {
+      "id": "cad2427c9a6bdef-75def91c035c039",
+      "title": "Entity Store - privilege checks maintainers start - Should fail when user lacks management privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
+        "line": 281,
+        "column": 46
+      }
+    },
+    {
+      "id": "cad2427c9a6bdef-fe5666139dbf577",
+      "title": "Entity Store - privilege checks maintainers run - Should fail when user lacks management privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/entity_store_privileges.spec.ts",
+        "line": 300,
+        "column": 30
+      }
+    },
+    {
+      "id": "d8e6318e9df42ad-c18f4e661235e05",
+      "title": "Entity Store install / update API tests Should install the entity store happy path with feature flag enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
+        "line": 37,
+        "column": 11
+      }
+    },
+    {
+      "id": "d8e6318e9df42ad-79b9321af5a6eda",
+      "title": "Entity Store install / update API tests Should fail with feature flag disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
+        "line": 61,
+        "column": 15
+      }
+    },
+    {
+      "id": "d8e6318e9df42ad-a600fdc9000f15c",
+      "title": "Entity Store install / update API tests logExtraction is not mandatory on install",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
+        "line": 74,
+        "column": 11
+      }
+    },
+    {
+      "id": "d8e6318e9df42ad-a0ba708820e1b70",
+      "title": "Entity Store install / update API tests Update on uninstalled store should return 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
+        "line": 83,
+        "column": 5
+      }
+    },
+    {
+      "id": "d8e6318e9df42ad-1e886910e4426bc",
+      "title": "Entity Store install / update API tests logExtraction is mandatory on update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
+        "line": 100,
+        "column": 69
+      }
+    },
+    {
+      "id": "d8e6318e9df42ad-c42368a614ad4b9",
+      "title": "Entity Store install / update API tests Update should change installed logExtraction params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
+        "line": 115,
+        "column": 11
+      }
+    },
+    {
+      "id": "d8e6318e9df42ad-96e718a66e0f3df",
+      "title": "Entity Store install / update API tests install rejects unknown body keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
+        "line": 145,
+        "column": 27
+      }
+    },
+    {
+      "id": "d8e6318e9df42ad-e1c3c58630a074b",
+      "title": "Entity Store install / update API tests update rejects unknown body keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
+        "line": 152,
+        "column": 21
+      }
+    },
+    {
+      "id": "d8e6318e9df42ad-c25fba38ab357c5",
+      "title": "Entity Store install / update API tests uninstall rejects unknown body keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
+        "line": 163,
+        "column": 7
+      }
+    },
+    {
+      "id": "d8e6318e9df42ad-0d7bd05437a88c9",
+      "title": "Entity Store install / update API tests Update should not change logExtraction properties that were not included in the update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
+        "line": 170,
+        "column": 37
+      }
+    },
+    {
+      "id": "8a61b4d224df434-fbbfd087056a8ba",
+      "title": "metadata datastream is installed by entity store init creates the .entities.v2.metadata.security_default datastream on install",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/metadata_data_stream.spec.ts",
+        "line": 43,
+        "column": 30
+      }
+    },
+    {
+      "id": "8a61b4d224df434-3ad24e91d8ddddc",
+      "title": "metadata datastream is installed by entity store init installs an ingest pipeline that auto-populates event.ingested on indexed docs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/metadata_data_stream.spec.ts",
+        "line": 54,
+        "column": 17
+      }
+    },
+    {
+      "id": "ee76a6a550f71bc-c83e24790d7389e",
+      "title": "Entity Store remove_v1 SO cleanup install removes legacy entity-definition SO documents from .kibana",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/remove_v1.spec.ts",
+        "line": 50,
+        "column": 22
+      }
+    },
+    {
+      "id": "ee76a6a550f71bc-434909608e0054f",
+      "title": "Entity Store remove_v1 SO cleanup install succeeds with no legacy entity-definition SOs present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/remove_v1.spec.ts",
+        "line": 113,
+        "column": 14
+      }
+    },
+    {
+      "id": "4a6d043d6f98fae-e81f4ab7b544efb",
+      "title": "Entity Store stop/start API tests Should stop and start the extract entity task after install",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/start_stop.spec.ts",
+        "line": 29,
+        "column": 31
+      }
+    },
+    {
+      "id": "9db6a74ef1eb70d-0f0bd8bfed24691",
+      "title": "Entity Store Start API tests Should start all engines after stop",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/start.spec.ts",
+        "line": 38,
+        "column": 46
+      }
+    },
+    {
+      "id": "9db6a74ef1eb70d-426cd734cd9962b",
+      "title": "Entity Store Start API tests Should start a single stopped entity type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/start.spec.ts",
+        "line": 53,
+        "column": 12
+      }
+    },
+    {
+      "id": "9db6a74ef1eb70d-0208d1db2a24a7a",
+      "title": "Entity Store Start API tests Should return 200 when starting an entity type that is already started",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/start.spec.ts",
+        "line": 72,
+        "column": 21
+      }
+    },
+    {
+      "id": "9db6a74ef1eb70d-70e4199e65e14f4",
+      "title": "Entity Store Start API tests Should return 200 when starting on an uninstalled store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/start.spec.ts",
+        "line": 87,
+        "column": 33
+      }
+    },
+    {
+      "id": "08ba6f8243f5d12-c5bc8c37cddfe39",
+      "title": "Entity Store Status API tests Should return status \"running\" with all 4 engine types \"started\" after a full install",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
+        "line": 40,
+        "column": 46
+      }
+    },
+    {
+      "id": "08ba6f8243f5d12-1d1c1e9c8f31ccc",
+      "title": "Entity Store Status API tests Should return status \"not_installed\" and an empty engines array when the store is uninstalled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
+        "line": 57,
+        "column": 23
+      }
+    },
+    {
+      "id": "08ba6f8243f5d12-0ad307183e734d5",
+      "title": "Entity Store Status API tests Should return overall status \"running\" when 3 engines are \"started\" and 1 is \"stopped\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
+        "line": 66,
+        "column": 30
+      }
+    },
+    {
+      "id": "08ba6f8243f5d12-d7d0ca0ad16f60f",
+      "title": "Entity Store Status API tests Should return overall status \"stopped\" when all 4 engines are stopped",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
+        "line": 85,
+        "column": 33
+      }
+    },
+    {
+      "id": "28fbeec3b028f79-28713530a997c3b",
+      "title": "Entity Store Stop API tests Should stop all engines when entityTypes is omitted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/stop.spec.ts",
+        "line": 36,
+        "column": 46
+      }
+    },
+    {
+      "id": "28fbeec3b028f79-aa33d601f385a4b",
+      "title": "Entity Store Stop API tests Should stop a single entity type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/stop.spec.ts",
+        "line": 50,
+        "column": 12
+      }
+    },
+    {
+      "id": "28fbeec3b028f79-a0aa63d27758325",
+      "title": "Entity Store Stop API tests Should return 200 when stopping an entity type that is already stopped",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/stop.spec.ts",
+        "line": 70,
+        "column": 22
+      }
+    },
+    {
+      "id": "28fbeec3b028f79-ab6423bd19e4ff9",
+      "title": "Entity Store Stop API tests Should return 200 when stopping on an uninstalled store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/stop.spec.ts",
+        "line": 88,
+        "column": 66
+      }
+    },
+    {
+      "id": "af04c4a12274a13-aa14b0695a8f884",
+      "title": "Entity Store uninstall stops the history snapshot task on uninstall",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
+        "line": 70,
+        "column": 26
+      }
+    },
+    {
+      "id": "af04c4a12274a13-9d0bf9163b755de",
+      "title": "Entity Store uninstall stops the status report task on uninstall",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
+        "line": 75,
+        "column": 72
+      }
+    },
+    {
+      "id": "af04c4a12274a13-f8f7e592f8450da",
+      "title": "Entity Store uninstall stops extract entity tasks on uninstall",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
+        "line": 88,
+        "column": 74
+      }
+    },
+    {
+      "id": "af04c4a12274a13-0d93e1080290d46",
+      "title": "Entity Store uninstall deletes the latest entities index on uninstall",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
+        "line": 108,
+        "column": 67
+      }
+    },
+    {
+      "id": "af04c4a12274a13-f1853024c4df85a",
+      "title": "Entity Store uninstall keeps shared assets when only one of several engines is uninstalled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
+        "line": 122,
+        "column": 32
+      }
+    },
+    {
+      "id": "af04c4a12274a13-aa98491a6bca9fd",
+      "title": "Entity Store uninstall uninstall is a no-op when entity store is not installed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
+        "line": 166,
+        "column": 32
+      }
+    }
+  ]
+}
