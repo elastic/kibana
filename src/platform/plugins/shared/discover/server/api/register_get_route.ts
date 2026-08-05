@@ -9,8 +9,7 @@
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { logRequest, writeErrorHandler } from '@kbn/as-code-utils';
-import { schema } from '@kbn/config-schema';
-import { prettifyError, ZodError } from '@kbn/zod';
+import { prettifyError, z, ZodError } from '@kbn/zod';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -38,13 +37,13 @@ export const registerGetRoute = (
         version: routeVersion,
         validate: {
           request: {
-            params: schema.object({
-              id: schema.string({
-                meta: {
+            params: z
+              .object({
+                id: z.string().meta({
                   description: 'The Discover session ID.',
-                },
-              }),
-            }),
+                }),
+              })
+              .strict(),
           },
           response: {
             200: {
