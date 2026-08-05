@@ -20,7 +20,7 @@ export function getMarkdownCRUResponseBody(
     id: savedObject.id,
     // Route does not apply defaults to response
     // Instead, call validate to ensure defaults are applied to response
-    data: markdownLibraryItemSchema.parse(savedObject.attributes),
+    data: markdownLibraryItemSchema.validate(savedObject.attributes),
     meta: getMeta(savedObject),
   };
 }

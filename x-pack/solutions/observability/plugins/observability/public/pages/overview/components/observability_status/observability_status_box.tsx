@@ -71,7 +71,6 @@ export function CompletedStatusBox({
               color="success"
               className="eui-displayInline eui-alignMiddle"
               style={{ marginRight: 8 }}
-              aria-hidden={true}
             />
             <EuiTitle size="xs" className="eui-displayInline eui-alignMiddle">
               <h2>{title}</h2>
@@ -155,7 +154,6 @@ export function EmptyStatusBox({
               color="warning"
               className="eui-displayInline eui-alignMiddle"
               style={{ marginRight: 8 }}
-              aria-hidden={true}
             />
             <EuiTitle size="xs" className="eui-displayInline eui-alignMiddle">
               <h2>{title}</h2>

@@ -45,7 +45,6 @@ exports[`setupMode SetupModeBadge partially migrated should render each product 
 exports[`setupMode SetupModeBadge should use a text status if internal collection cannot be disabled yet for elasticsearch 1`] = `
 <Fragment>
   <EuiIcon
-    aria-hidden={true}
     type="flag"
   />
    

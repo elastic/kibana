@@ -5,6 +5,15 @@
  * 2.0.
  */
 
+export const ALERTING_NAMESPACE = 'platform.alerting';
+
+const alertingTool = (name: string) => `${ALERTING_NAMESPACE}.${name}`;
+
+export const alertingTools = {
+  manageRule: alertingTool('manage_rule'),
+  manageActionPolicy: alertingTool('manage_action_policy'),
+} as const;
+
 /**
  * Tag automatically applied to every Alerting v2 rule and action policy created
  * or edited through Agent Builder. Used to measure adoption (telemetry) and to

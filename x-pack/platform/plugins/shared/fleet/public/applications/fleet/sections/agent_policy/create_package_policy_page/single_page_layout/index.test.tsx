@@ -100,7 +100,6 @@ jest.mock('../../../../hooks', () => {
         id: 'policy-1',
         inputs: [],
         policy_ids: ['agent-policy-1'],
-        package: { name: 'nginx', version: '1.3.0', title: 'Nginx' },
       },
     }),
     sendCreateAgentPolicy: jest.fn().mockResolvedValue({
@@ -553,15 +552,12 @@ describe('When on the package policy create page', () => {
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID);
       });
 
-      test('should navigate to integration policies page if no route state and no queryParamsPolicyId', async () => {
+      test('should navigate to agent policy if no route state is set', async () => {
         await setupSaveNavigate({});
 
-        expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(
-          INTEGRATIONS_PLUGIN_ID,
-          {
-            path: '/detail/nginx-1.3.0/policies',
-          }
-        );
+        expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
+          path: '/policies/agent-policy-1?openEnrollmentFlyout=true',
+        });
       });
     });
 

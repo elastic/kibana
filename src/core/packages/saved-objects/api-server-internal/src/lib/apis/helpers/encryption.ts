@@ -8,12 +8,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type {
-  SavedObject,
-  SavedObjectErrorResult,
-} from '@kbn/core-saved-objects-common/src/server_types';
-import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-common/src/server_types';
-import type { SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
+import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type {
   AuthorizationTypeMap,
   ISavedObjectsSecurityExtension,
@@ -75,21 +70,20 @@ export class EncryptionHelper {
 
   async optionallyDecryptAndRedactBulkResult<
     T,
-    S extends SavedObject<T> | SavedObjectsUpdateResponse<T>,
-    R extends { saved_objects: Array<S | SavedObjectErrorResult> },
+    R extends { saved_objects: Array<SavedObject<T>> },
     A extends string,
     O extends Array<{ attributes: T }>
   >(response: R, typeMap: AuthorizationTypeMap<A> | undefined, originalObjects?: O) {
     const modifiedObjects = await Promise.all(
       response.saved_objects.map(async (object, index) => {
-        if (isSavedObjectErrorResult(object)) {
+        if (object.error) {
           // If the bulk operation failed, the object will not have an attributes field at all, it will have an error field instead.
           // In this case, don't attempt to decrypt, just return the object.
           return object;
         }
         const originalAttributes = originalObjects?.[index].attributes;
         return await this.optionallyDecryptAndRedactSingleResult(
-          object as SavedObject<T>,
+          object,
           typeMap,
           originalAttributes
         );

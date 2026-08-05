@@ -188,7 +188,7 @@ const getDetailsList = (
                     marginBottom: euiTheme?.size.xs,
                   }}
                 >
-                  <EuiIcon type="maximize" color="primary" aria-hidden={true} />
+                  <EuiIcon type="maximize" color="primary" />
                   <EuiLink href={ruleFlyoutLink} target="_blank" external={false}>
                     {i18n.translate(
                       'xpack.csp.findings.findingsFlyout.overviewTab.showRuleDetails',

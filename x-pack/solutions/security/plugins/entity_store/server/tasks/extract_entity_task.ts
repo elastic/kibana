@@ -9,12 +9,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type {
-  ConcreteTaskInstance,
-  IntervalSchedule,
-  RunContext,
-  RunResult,
-} from '@kbn/task-manager-plugin/server/task';
+import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
 import moment from 'moment';
@@ -25,7 +20,6 @@ import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { createLogsExtractionClient } from './factories';
 import { wrapTaskRun } from '../telemetry/traces';
 import { entityStoreMetrics } from '../monitor/metrics';
-import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 
 function getTaskType(entityType: EntityType): string {
   const config = TasksConfig[EntityStoreTaskType.enum.extractEntity];
@@ -35,20 +29,6 @@ function getTaskType(entityType: EntityType): string {
 export function getExtractEntityTaskId(entityType: EntityType, namespace: string): string {
   return `${getTaskType(entityType)}:${namespace}`;
 }
-
-export const getNewSchedule = (
-  frequency: string,
-  taskInstance: ConcreteTaskInstance
-): { schedule: IntervalSchedule } | undefined => {
-  const currentInterval = taskInstance.schedule?.interval;
-  if (currentInterval !== frequency) {
-    return {
-      schedule: {
-        interval: frequency,
-      },
-    };
-  }
-};
 
 async function runTask({
   taskInstance,
@@ -69,20 +49,6 @@ async function runTask({
   const currentState = taskInstance.state;
   const runs = currentState.runs || 0;
   const namespace = currentState.namespace;
-
-  const [coreStart] = await core.getStartServices();
-  if (
-    await shouldDeleteOrphanedEntityStoreTask({
-      coreStart,
-      namespace,
-      logger,
-    })
-  ) {
-    return {
-      state: currentState,
-      shouldDeleteTask: true,
-    };
-  }
 
   if (!fakeRequest) {
     logger.error(`No fake request found, skipping extract entity task`);
@@ -141,16 +107,8 @@ async function runTask({
       status: 'success',
     };
 
-    let schedule: { schedule: IntervalSchedule } | undefined;
-    try {
-      const config = await logsExtractionClient.globalStateClient.findOrThrow();
-      schedule = getNewSchedule(config.logsExtraction.frequency, taskInstance);
-    } catch (e) {
-      logger.warn(`Error getting new schedule, received ${e.message}`);
-    }
     return {
       state: updatedState,
-      ...schedule,
     };
   } catch (e) {
     logger.error(`Error running extract entity task, received ${e.message}`);

@@ -124,7 +124,7 @@ const SCHEDULED_DISCOVERY_NUMERIC_SETTINGS = {
 
 type ScheduledDiscoveryNumericField = keyof typeof SCHEDULED_DISCOVERY_NUMERIC_SETTINGS;
 
-const putScheduledDiscoverySettingsRoute = createServerRoute({
+export const putScheduledDiscoverySettingsRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/_significant_events/scheduled_discovery/settings',
   options: {
     access: 'internal',

@@ -95,6 +95,8 @@ export interface SavedObject<T = unknown> {
   updated_at?: string;
   /** The ID of the user who last updated this object. */
   updated_by?: string;
+  /** Error associated with this object, populated if an operation failed for this object.  */
+  error?: SavedObjectError;
   /** The data for a Saved Object is stored as an object in the `attributes` property. **/
   attributes: T;
   /** {@inheritdoc SavedObjectReference} */
@@ -166,7 +168,6 @@ export type SavedObjectBulkResult<T = unknown> = SavedObject<T> | SavedObjectErr
  * @public
  */
 export const isSavedObjectErrorResult = (result: {
-  id: string;
   error?: SavedObjectError;
 }): result is SavedObjectErrorResult => result.error !== undefined;
 

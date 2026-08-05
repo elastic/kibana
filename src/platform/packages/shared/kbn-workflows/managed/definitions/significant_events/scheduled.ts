@@ -50,7 +50,7 @@ const renderTemplate = (template: string, values: Record<string, string | number
 
 export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  pluginId: 'significantEvents',
+  pluginId: 'significant_events',
   version: 3,
   billable: false,
   // The change_point agg needs >= 22 buckets, so detectionLookbackMinutes must be an exact
@@ -73,7 +73,7 @@ export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
 
 export const SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
-  pluginId: 'significantEvents',
+  pluginId: 'significant_events',
   version: 3,
   billable: false,
   yamlTemplate: ({ reviewIntervalMinutes, discoveryBatchSize, triageBatchSize, maxReviewPasses }) =>

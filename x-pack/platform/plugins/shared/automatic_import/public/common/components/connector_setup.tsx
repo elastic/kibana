@@ -150,7 +150,6 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = ({ onConnectorCreat
                             size="xl"
                             color="text"
                             type={getIconForActionType(actionType.id)}
-                            aria-hidden={true}
                           />
                         </Suspense>
                       </EuiFlexItem>

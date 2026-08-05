@@ -39,8 +39,7 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/shared-ux-table-persist",
     "@kbn/react-query",
-    "@kbn/shared-ux-utility",
-    "@kbn/ui-callout"
+    "@kbn/shared-ux-utility"
   ],
   "exclude": [
     "target/**/*"

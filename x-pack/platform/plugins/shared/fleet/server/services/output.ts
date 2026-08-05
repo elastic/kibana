@@ -66,6 +66,7 @@ import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
   OutputInvalidError,
   OutputUnauthorizedError,
+  FleetError,
 } from '../errors';
 
 import type { OutputType } from '../types';
@@ -714,8 +715,6 @@ class OutputService {
         data.username = undefined;
         data.password = undefined;
       }
-      // Kafka does not support proxies — clear any proxy_id silently (#267281)
-      data.proxy_id = null;
     }
 
     await remoteSyncIntegrationsCheck(esClient, output);
@@ -879,6 +878,10 @@ class OutputService {
       name: outputSO?.attributes?.name,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
+
+    if (outputSO.error) {
+      throw new FleetError(outputSO.error.message);
+    }
 
     return outputSavedObjectToOutput(outputSO);
   }
@@ -1161,11 +1164,6 @@ class OutputService {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
 
-    // Kafka does not support proxies — clear any proxy_id silently (#267281)
-    if (mergedType === outputType.Kafka) {
-      updateData.proxy_id = null;
-    }
-
     if (
       data.type === outputType.RemoteElasticsearch &&
       updateData.type === outputType.RemoteElasticsearch
@@ -1234,11 +1232,15 @@ class OutputService {
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
-    await this.soClient.update<Nullable<OutputSOAttributes>>(
+    const outputSO = await this.soClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id),
       updateData
     );
+
+    if (outputSO.error) {
+      throw new FleetError(outputSO.error.message);
+    }
 
     if (secretsToDelete.length) {
       try {
@@ -1345,6 +1347,15 @@ class OutputService {
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id)
     );
+
+    if (outputSO.error) {
+      appContextService
+        .getLogger()
+        .debug(
+          `Error getting output ${id} SO, using updated_at:undefined, cause: ${outputSO.error.message}`
+        );
+      return undefined;
+    }
 
     return outputSO.updated_at;
   }

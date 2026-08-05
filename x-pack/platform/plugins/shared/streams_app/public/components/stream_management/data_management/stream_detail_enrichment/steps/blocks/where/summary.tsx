@@ -149,7 +149,7 @@ export const WhereBlockSummary = ({
             >
               <EuiFlexGroup gutterSize="xs" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="check" aria-hidden={true} />
+                  <EuiIcon type="check" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>{conditionMatchPercentage}</EuiFlexItem>
               </EuiFlexGroup>

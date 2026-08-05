@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import React, { Component } from 'react';
 import {
   EuiButtonIcon,
@@ -67,8 +68,7 @@ export class Join extends Component<Props, State> {
 
   componentDidMount() {
     this._isMounted = true;
-    const indexPatternId = this.props.join.right?.indexPatternId;
-    this._loadRightFields(typeof indexPatternId === 'string' ? indexPatternId : undefined);
+    this._loadRightFields(_.get(this.props.join, 'right.indexPatternId'));
   }
 
   componentWillUnmount() {

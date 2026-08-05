@@ -6,7 +6,7 @@
  */
 
 export { generateStreamDescription } from './src/description/generate_description';
-export { overviewDescriptionPrompt } from './src/description/prompt';
+export { descriptionPrompt, overviewDescriptionPrompt } from './src/description/prompt';
 export { partitionStream } from './workflows/partition_stream';
 export {
   suggestProcessingPipeline,
@@ -33,7 +33,6 @@ export {
   createDefaultSignificantEventsToolUsage,
   type SignificantEventsToolUsage,
 } from './src/significant_events/tools/tool_usage';
-export { QUERY_GENERATION_EXCLUDED_FEATURE_TYPES } from './src/significant_events/tools/features_tool';
 export { EMPTY_TOKENS, sumTokens } from './src/helpers/sum_tokens';
 export {
   identifyFeatures,

@@ -107,7 +107,7 @@ export function PreviewPanel() {
             <EuiFlexGroup justifyContent="spaceBetween" wrap>
               <EuiFlexGroup direction="column" gutterSize="xs">
                 <EuiFlexGroup component="span" gutterSize="s">
-                  <EuiIcon type="inspect" aria-hidden={true} />
+                  <EuiIcon type="inspect" />
                   <strong data-test-subj="streamsAppRoutingPreviewPanelHeader">
                     {i18n.translate('xpack.streams.streamDetail.preview.header', {
                       defaultMessage: 'Data Preview',

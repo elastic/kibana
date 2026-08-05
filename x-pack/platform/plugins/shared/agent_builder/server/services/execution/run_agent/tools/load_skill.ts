@@ -53,7 +53,7 @@ The 'skill' parameter accepts the skill name, the full path of the skill's folde
   // greater limit for skill content
   maxResultTokens: 100_000,
   handler: async ({ skill: skillInput }, ctx) => {
-    const { skills, skillsStore, toolProvider, toolManager, request, logger, runContext } = ctx;
+    const { skills, toolProvider, toolManager, request, logger, runContext } = ctx;
 
     const allSkills = await skills.list({ includePlugins: true });
     const resolution = resolveSkill(skillInput, allSkills);
@@ -63,16 +63,6 @@ The 'skill' parameter accepts the skill name, the full path of the skill's folde
     }
 
     const skill = resolution.match;
-
-    if (!skillsStore.has(skill.id)) {
-      return {
-        results: [
-          createErrorResult(
-            `Skill '${skill.name}' is not available for this agent. Only skills configured for this agent can be loaded.`
-          ),
-        ],
-      };
-    }
 
     let loadedToolIds: string[];
     try {

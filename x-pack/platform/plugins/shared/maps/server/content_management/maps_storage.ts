@@ -11,7 +11,6 @@ import type {
   SavedObjectReference,
   SavedObjectsFindOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';
 import Boom from '@hapi/boom';
 import type {
   CreateResult,
@@ -79,10 +78,6 @@ export class MapsStorage {
       alias_target_id: aliasTargetId,
       outcome,
     } = await soClient.resolve<StoredMapAttributes>(MAP_SAVED_OBJECT_TYPE, id);
-
-    if (isSavedObjectErrorResult(savedObject)) {
-      throw Boom.internal(`Invalid response. ${savedObject.error.message}`);
-    }
 
     const item = savedObjectToItem(savedObject, false);
     const response = {

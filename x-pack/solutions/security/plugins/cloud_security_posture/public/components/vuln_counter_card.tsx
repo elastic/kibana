@@ -70,7 +70,6 @@ export const VulnCounterCard = ({
             top: ${euiTheme.size.s};
             right: ${euiTheme.size.s};
           `}
-          aria-hidden={true}
         />
       )}
     </EuiPanel>

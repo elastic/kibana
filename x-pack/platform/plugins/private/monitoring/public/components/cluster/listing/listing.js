@@ -394,7 +394,7 @@ const StandaloneClusterCallout = ({ changeCluster, storage }) => {
               storage.set(STANDALONE_CLUSTER_STORAGE_KEY, true);
             }}
           >
-            <EuiIcon type="cross" aria-hidden={true} />
+            <EuiIcon type="cross" />
             &nbsp;
             <FormattedMessage
               id="xpack.monitoring.cluster.listing.standaloneClusterCallOutDismiss"

@@ -15,7 +15,6 @@ import type { ResolvedConfiguration } from '../types';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import type { ToolCallResultTransformer } from '../utils/tool_summarization';
 import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
-import type { RelevantSkillSelection } from '../utils/relevant_skills/select_relevant_skills';
 
 export interface PromptFactoryParams {
   configuration: ResolvedConfiguration;
@@ -35,14 +34,6 @@ export interface PromptFactoryParams {
   conversationTimestamp: string;
   experimentalFeatures: ExperimentalFeatures;
   renderers: RendererTypeDefinition[];
-  /**
-   * Effective on/off for context-aware skill filtering this run: the `relevantSkills` flag AND a
-   * dedicated fast model being configured. Gates the SKILLS section (static pointer vs full list) and
-   * the `<relevant_skills>` notification — distinct from `experimentalFeatures.relevantSkills`, which
-   * is only the flag.
-   */
-  relevantSkillsEnabled: boolean;
-  relevantSkills?: RelevantSkillSelection;
 }
 
 export interface ResearchAgentPromptRuntimeParams {

@@ -37,11 +37,9 @@ export const episodeActionEnvelopeSchema = z
       .string()
       .min(1)
       .max(256)
-      .nullable()
       .describe(
         i18n.translate('xpack.alertingVTwo.triggers.episodeAction.schema.ruleId', {
-          defaultMessage:
-            'Identifier of the alerting rule the episode belongs to, or null for external-source episodes not tied to a Kibana rule.',
+          defaultMessage: 'Identifier of the alerting rule the episode belongs to.',
         })
       ),
     spaceId: z

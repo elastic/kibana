@@ -18,9 +18,7 @@ import type {
 import {
   SavedObjectsErrorHelpers,
   errorContent,
-  type SavedObjectBulkResult,
-  type SavedObjectErrorResult,
-  isSavedObjectErrorResult,
+  type SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
@@ -134,8 +132,9 @@ export const performBulkGet = async <T>(
   if (validObjects.length === 0) {
     // We only have error results; return early to avoid potentially trying authZ checks for 0 types which would result in an exception.
     return {
-      saved_objects: expectedBulkGetResults.map<SavedObjectErrorResult>(
-        ({ value }) => value as SavedObjectErrorResult
+      // Technically the returned array should only contain SavedObject results, but for errors this is not true (we cast to 'any' below)
+      saved_objects: expectedBulkGetResults.map<SavedObject<T>>(
+        ({ value }) => value as unknown as SavedObject<T>
       ),
     };
   }
@@ -165,11 +164,11 @@ export const performBulkGet = async <T>(
   }
 
   const authObjects: AuthorizeBulkGetObject[] = [];
-  const documents = expectedBulkGetResults.map<SavedObjectBulkResult<T>>((expectedResult) => {
+  const documents = expectedBulkGetResults.map<SavedObject<T>>((expectedResult) => {
     if (isLeft(expectedResult)) {
       const { type, id } = expectedResult.value;
       authObjects.push({ type, id, existingNamespaces: [], error: true });
-      return expectedResult.value;
+      return expectedResult.value as any;
     }
 
     const {
@@ -185,12 +184,12 @@ export const performBulkGet = async <T>(
     // @ts-expect-error MultiGetHit._source is optional
     const docNotFound = !doc?.found || !rawDocExistsInNamespaces(registry, doc, namespaces);
 
-    const savedObject: SavedObjectBulkResult<T> = docNotFound
-      ? {
+    const savedObject = docNotFound
+      ? ({
           id,
           type,
           error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-        }
+        } as any as SavedObject<T>)
       : // @ts-expect-error MultiGetHit._source is optional
         getSavedObjectFromSource(registry, type, id, doc, {
           migrationVersionCompatibility,
@@ -203,9 +202,9 @@ export const performBulkGet = async <T>(
       // @ts-expect-error MultiGetHit._source is optional
       existingNamespaces: doc?._source?.namespaces ?? [],
       error: docNotFound,
-      name: isSavedObjectErrorResult(savedObject)
-        ? undefined
-        : SavedObjectsUtils.getName(registry.getNameAttribute(type), savedObject),
+      name: !docNotFound
+        ? SavedObjectsUtils.getName(registry.getNameAttribute(type), savedObject)
+        : undefined,
     });
 
     return savedObject;
@@ -216,10 +215,10 @@ export const performBulkGet = async <T>(
     objects: authObjects,
   });
 
-  const results: Array<SavedObjectBulkResult<T>> = [];
+  const results: Array<SavedObject<T>> = [];
   for (const doc of documents) {
     results.push(
-      isSavedObjectErrorResult(doc)
+      doc.error
         ? doc
         : await migrationHelper.migrateAndDecryptStorageDocument({
             document: doc,

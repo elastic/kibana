@@ -39,7 +39,7 @@ export const EntityResolutionValidationStep: React.FC<ValidationStepProps> = Rea
           <>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="checkInCircleFilled" color="success" aria-hidden={true} />
+                <EuiIcon type="checkInCircleFilled" color="success" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xxs">
@@ -71,7 +71,7 @@ export const EntityResolutionValidationStep: React.FC<ValidationStepProps> = Rea
           <>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="error" color="danger" aria-hidden={true} />
+                <EuiIcon type="error" color="danger" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xxs">

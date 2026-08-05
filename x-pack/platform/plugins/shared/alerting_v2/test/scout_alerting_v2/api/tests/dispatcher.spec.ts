@@ -22,7 +22,7 @@ import type { AlertAction } from '../../../../server/resources/datastreams/alert
 import { LOOKBACK_WINDOW_MINUTES } from '../../../../server/lib/dispatcher/constants';
 import type { AlertActionsFilter } from '../../common/services';
 import type { AlertingApiServicesFixture } from '../fixtures';
-import { apiTest, buildCreateRuleData, buildExternalAlertEvent, testData } from '../fixtures';
+import { apiTest, buildCreateRuleData, testData } from '../fixtures';
 
 const { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } = testData;
 
@@ -72,7 +72,7 @@ const relativeTime = (secondsAgo: number, base: number = Date.now()): string =>
   new Date(base - secondsAgo * 1000).toISOString();
 
 interface BuildAlertEventInput {
-  ruleId: NonNullable<AlertEvent['rule']>['id'];
+  ruleId: AlertEvent['rule']['id'];
   groupHash: AlertEvent['group_hash'];
   episodeId: NonNullable<AlertEvent['episode']>['id'];
   episodeStatus: NonNullable<AlertEvent['episode']>['status'];
@@ -1843,51 +1843,6 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       });
 
       expect(otherActions).toHaveLength(0);
-    }
-  );
-
-  apiTest(
-    'dispatches external alerts (source-based episodes with no rule_id)',
-    async ({ apiServices }) => {
-      // 1. Build and seed an external episode (no rule)
-      const externalEvent = buildExternalAlertEvent({
-        '@timestamp': new Date().toISOString(),
-        source: 'pagerduty',
-        group_hash: 'pd-group-1',
-        episode: { id: 'pd-ep-1', status: 'active' },
-        space_id: 'default',
-        status: 'breached',
-        type: 'alert',
-      });
-      await apiServices.alertingV2.ruleEvents.seed([externalEvent]);
-
-      // 2. Wait for the dispatcher to process it (two ticks to avoid races)
-      await apiServices.alertingV2.dispatcher.waitForDispatcherTick({ ticks: 2 });
-
-      // 3. Assert fire actions — filter by source since there is no rule_id
-      const fireActions = await expectStableCount(apiServices, 1, {
-        source: 'pagerduty',
-        actionTypes: ['fire'],
-      });
-      expect(fireActions[0]).toMatchObject({
-        source: 'pagerduty',
-        group_hash: 'pd-group-1',
-        space_id: 'default',
-        actor: 'system',
-        action_type: 'fire',
-      });
-
-      // 4. Assert notified actions
-      const notifiedActions = await expectStableCount(apiServices, 1, {
-        source: 'pagerduty',
-        actionTypes: ['notified'],
-      });
-      expect(notifiedActions[0]).toMatchObject({
-        source: 'pagerduty',
-        space_id: 'default',
-        actor: 'system',
-        action_type: 'notified',
-      });
     }
   );
 });

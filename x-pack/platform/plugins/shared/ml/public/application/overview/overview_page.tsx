@@ -141,9 +141,9 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
     () => [
       {
         id: TAB_IDS.OVERVIEW,
-        label: i18n.translate('xpack.ml.overview.overviewTabLabel', {
-          defaultMessage: 'Overview',
-        }),
+        name: (
+          <FormattedMessage id="xpack.ml.overview.overviewTabLabel" defaultMessage="Overview" />
+        ),
         content: (
           <>
             <>
@@ -221,10 +221,13 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
       },
       {
         id: TAB_IDS.NOTIFICATIONS,
-        label: i18n.translate('xpack.ml.overview.notificationsTabLabel', {
-          defaultMessage: 'Notifications',
-        }),
-        badge: errorsAndWarningCount > 0 ? errorsAndWarningCount : undefined,
+        name: (
+          <FormattedMessage
+            id="xpack.ml.overview.notificationsTabLabel"
+            defaultMessage="Notifications"
+          />
+        ),
+        append: errorsAndWarningCount ? true : undefined,
         content: <NotificationsList />,
       },
     ],
@@ -249,10 +252,17 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
         docLink={helpLink}
         tabs={tabs.map((tab) => ({
           id: tab.id,
-          label: tab.label,
+          label:
+            tab.id === TAB_IDS.OVERVIEW
+              ? i18n.translate('xpack.ml.overview.overviewTabLabel', {
+                  defaultMessage: 'Overview',
+                })
+              : i18n.translate('xpack.ml.overview.notificationsTabLabel', {
+                  defaultMessage: 'Notifications',
+                }),
           isSelected: tab.id === selectedTabId,
           onClick: () => setSelectedTabId(tab.id),
-          badge: tab.badge,
+          badge: tab.append ? errorsAndWarningCount : undefined,
           'data-test-subj': `mlManagementOverviewPageTabs ${tab.id}`,
         }))}
       />
@@ -275,6 +285,7 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
         }}
       />
       <UpgradeWarning />
+      <EuiSpacer />
       {tabs.find((tab) => tab.id === selectedTabId)?.content}
       <HelpMenu docLink={helpLink} />
     </div>

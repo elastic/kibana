@@ -19,7 +19,7 @@ export const AlertEpisodeTimelineRelativeTimestamp = ({
   timestamp,
 }: AlertEpisodeTimelineRelativeTimestampProps) => (
   <EuiToolTip content={formatTimestamp(timestamp)}>
-    <span tabIndex={0} data-test-subj="alertingV2TimelineRelativeTimestamp">
+    <span data-test-subj="alertingV2TimelineRelativeTimestamp">
       <FormattedRelative value={timestamp} />
     </span>
   </EuiToolTip>

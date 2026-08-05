@@ -10,12 +10,9 @@ exports[`it renders without crashing 1`] = `
     className="index-privilege-form"
     responsive={false}
   >
-    <EuiFlexItem
-      css="unknown styles"
-    >
+    <EuiFlexItem>
       <EuiPanel
         color="subdued"
-        css="unknown styles"
       >
         <EuiFlexGrid
           css="unknown styles"

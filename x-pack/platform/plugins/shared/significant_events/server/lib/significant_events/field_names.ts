@@ -8,4 +8,5 @@
 export const FIELD_EVENT_UUID = 'event_uuid';
 export const FIELD_DETECTION_ID = 'detection_id';
 export const FIELD_RULE_UUID = 'rule_uuid';
+export const FIELD_DISCOVERY_ID = 'discovery_id';
 export const FIELD_EVENT_ID = 'event_id';

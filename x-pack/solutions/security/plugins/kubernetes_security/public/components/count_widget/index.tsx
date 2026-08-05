@@ -73,7 +73,7 @@ export const CountWidget = ({
         aria-label="Info"
         position="top"
       >
-        <EuiText css={styles.dataInfo} data-test-subj={VALUE_TEST_ID} tabIndex={0}>
+        <EuiText css={styles.dataInfo} data-test-subj={VALUE_TEST_ID}>
           {isLoading ? (
             <EuiLoadingSpinner size="l" data-test-subj={LOADING_TEST_ID} />
           ) : (

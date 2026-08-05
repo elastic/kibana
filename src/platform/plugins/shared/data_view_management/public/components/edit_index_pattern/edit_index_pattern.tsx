@@ -10,13 +10,21 @@
 import React, { useEffect, useState } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { withRouter, useLocation } from 'react-router-dom';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiBadge, EuiCode, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiBadge,
+  EuiCallOut,
+  EuiCode,
+  EuiText,
+  EuiLink,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuntimeField, DataView } from '@kbn/data-views-plugin/public';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/public';
-import { KbnWarningCallout } from '@kbn/ui-callout';
 import { pickBy } from 'lodash';
 import type * as CSS from 'csstype';
 import { RollupDeprecationTooltip } from '@kbn/rollup';
@@ -229,24 +237,26 @@ export const EditIndexPattern = withRouter(
             {fieldConflictCount > 0 && (
               <>
                 <EuiSpacer />
-                <KbnWarningCallout
+                <EuiCallOut
                   announceOnMount={false}
                   title={mappingConflictHeader}
-                  text={mappingConflictLabel}
-                  actionProps={{
-                    primary: {
-                      children: i18n.translate(
-                        'indexPatternManagement.editIndexPattern.viewMappingConflictButton',
-                        {
-                          defaultMessage: 'View conflicts',
-                        }
-                      ),
-                      href: conflictFieldsUrl,
-                      'data-test-subj': 'viewDataViewMappingConflictsButton',
-                    },
-                  }}
+                  color="warning"
+                  iconType="warning"
                   data-test-subj="dataViewMappingConflict"
-                />
+                >
+                  <p>{mappingConflictLabel}</p>
+                  <EuiLink
+                    data-test-subj="viewDataViewMappingConflictsButton"
+                    href={conflictFieldsUrl}
+                  >
+                    {i18n.translate(
+                      'indexPatternManagement.editIndexPattern.viewMappingConflictButton',
+                      {
+                        defaultMessage: 'View conflicts',
+                      }
+                    )}
+                  </EuiLink>
+                </EuiCallOut>
               </>
             )}
           </>

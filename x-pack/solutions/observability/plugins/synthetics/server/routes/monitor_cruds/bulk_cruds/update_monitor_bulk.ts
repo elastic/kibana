@@ -16,7 +16,6 @@ import { schema } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
-import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-common';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { ConfigKey, type MonitorFields } from '../../../../common/runtime_types';
@@ -178,7 +177,7 @@ const classifyId = (
   }
 
   const editedMonitorSO = sync?.editedMonitors?.find((m) => m.id === id);
-  if (editedMonitorSO && isSavedObjectErrorResult(editedMonitorSO)) {
+  if (editedMonitorSO?.error) {
     return { id, updated: false, error: editedMonitorSO.error.message };
   }
   if (editedMonitorSO) {

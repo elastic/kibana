@@ -23,7 +23,6 @@ import type {
 } from '../types';
 import { ACTION_POLICY_EVENT_ACTIONS, type ActionPolicyEventAction } from './constants';
 import { getUnmatchedEpisodes } from './unmatched_episodes';
-import { episodeSubject } from './utils/subject';
 
 const RULE_REF_CAP = 50;
 
@@ -59,12 +58,6 @@ interface PolicySummaryDispatcherFields {
 interface UnmatchedDispatcherFields {
   episode_count: number;
   episode_ids: string[];
-}
-
-interface UnmatchedGroup {
-  episodeIds: Set<string>;
-  space_id: string;
-  ruleId: RuleId | null;
 }
 
 type DispatcherFields = PolicySummaryDispatcherFields | UnmatchedDispatcherFields;
@@ -115,11 +108,11 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       });
     }
 
-    const unmatched = aggregateUnmatchedBySubject(
+    const unmatched = aggregateUnmatchedByRule(
       getUnmatchedEpisodes(dispatchable, dispatch, throttled)
     );
-    for (const group of unmatched) {
-      this.emitUnmatchedSummary({ timestamp, executionUuid, group });
+    for (const [ruleId, episodeIds] of unmatched) {
+      this.emitUnmatchedSummary({ timestamp, executionUuid, ruleId, episodeIds, rules });
     }
 
     return { type: 'continue' };
@@ -174,24 +167,27 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
   private emitUnmatchedSummary({
     timestamp,
     executionUuid,
-    group,
+    ruleId,
+    episodeIds,
+    rules,
   }: {
     timestamp: string;
     executionUuid: string;
-    group: UnmatchedGroup;
+    ruleId: RuleId;
+    episodeIds: Set<string>;
+    rules: Map<RuleId, Rule> | undefined;
   }): void {
-    const savedObjects: SavedObjectRef[] =
-      group.ruleId != null ? [ruleRef({ id: group.ruleId, spaceId: group.space_id })] : [];
+    const rule = rules?.get(ruleId);
     this.eventLogService.logEvent(
       buildEvent({
         timestamp,
         executionUuid,
         action: ACTION_POLICY_EVENT_ACTIONS.UNMATCHED,
-        spaceId: group.space_id,
-        savedObjects,
+        spaceId: rule?.spaceId ?? 'default',
+        savedObjects: [ruleRef({ id: ruleId, spaceId: rule?.spaceId })],
         dispatcherFields: {
-          episode_count: group.episodeIds.size,
-          episode_ids: Array.from(group.episodeIds),
+          episode_count: episodeIds.size,
+          episode_ids: Array.from(episodeIds),
         },
       })
     );
@@ -226,32 +222,25 @@ function aggregateByPolicy(
     }
     for (const episode of group.episodes) {
       summary.episodeIds.add(episode.episode_id);
-      if (episode.rule_id != null) {
-        summary.ruleIds.add(episode.rule_id);
-      }
+      summary.ruleIds.add(episode.rule_id);
     }
   }
   return summaries;
 }
 
-function aggregateUnmatchedBySubject(
+function aggregateUnmatchedByRule(
   unmatched: ReturnType<typeof getUnmatchedEpisodes>
-): UnmatchedGroup[] {
-  const bySubject = new Map<string, UnmatchedGroup>();
+): Map<RuleId, Set<string>> {
+  const byRule = new Map<RuleId, Set<string>>();
   for (const episode of unmatched) {
-    const subject = episodeSubject(episode);
-    let group = bySubject.get(subject);
-    if (!group) {
-      group = {
-        episodeIds: new Set(),
-        space_id: episode.space_id,
-        ruleId: episode.rule_id,
-      };
-      bySubject.set(subject, group);
+    let ids = byRule.get(episode.rule_id);
+    if (!ids) {
+      ids = new Set();
+      byRule.set(episode.rule_id, ids);
     }
-    group.episodeIds.add(episode.episode_id);
+    ids.add(episode.episode_id);
   }
-  return [...bySubject.values()];
+  return byRule;
 }
 
 function ruleRef({ id, spaceId }: { id: string; spaceId: string | undefined }): SavedObjectRef {

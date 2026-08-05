@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   cleanupLogstashOpenInLensDefaults,
@@ -21,7 +21,7 @@ const TIMESTAMP_X_AXIS_DIMENSION = {
 
 spaceTest.describe(
   'Lens open in Lens — agg-based Visualize navigation',
-  { tag: '@local-stateful-classic' },
+  { tag: tags.stateful.classic },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(

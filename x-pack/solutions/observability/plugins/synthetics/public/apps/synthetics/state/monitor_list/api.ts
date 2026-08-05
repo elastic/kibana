@@ -11,7 +11,6 @@ import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common
 import type {
   EncryptedSyntheticsMonitor,
   FetchMonitorManagementListQueryArgs,
-  FieldSuggestionsResult,
   MonitorManagementListResult,
   SyntheticsMonitor,
   MonitorFiltersResult,
@@ -75,8 +74,7 @@ export const fetchDeleteMonitor = async ({
 
 export interface BulkUpdateMonitorRequest {
   id: string;
-  // Request-only; public bulk-update location normalizer reads it with `locations`.
-  attributes: Partial<EncryptedSyntheticsMonitor> & { private_locations?: string[] };
+  attributes: Partial<EncryptedSyntheticsMonitor>;
 }
 
 export interface BulkUpdateMonitorsResult {
@@ -103,25 +101,6 @@ export const fetchBulkUpdateMonitors = async ({
     null,
     { version: INITIAL_REST_VERSION, spaceId }
   );
-};
-
-/**
- * Existing tag values, sourced from the saved-object backed suggestions route
- * (tags are indexed on the monitor saved objects).
- */
-export const fetchTagSuggestions = async (): Promise<string[]> => {
-  const result = await apiService.get<{ tags?: Array<{ label: string }> }>(
-    SYNTHETICS_API_URLS.SUGGESTIONS
-  );
-  return (result.tags ?? []).map(({ label }) => label).filter(Boolean);
-};
-
-/**
- * Existing service names and label keys, sourced from ping documents (these
- * fields are not aggregatable on the monitor saved objects).
- */
-export const fetchFieldSuggestions = async (): Promise<FieldSuggestionsResult> => {
-  return await apiService.get<FieldSuggestionsResult>(SYNTHETICS_API_URLS.FIELD_SUGGESTIONS);
 };
 
 export const fetchUpsertMonitor = async ({

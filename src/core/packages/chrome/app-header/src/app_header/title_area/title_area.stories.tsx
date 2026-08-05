@@ -11,7 +11,7 @@ import React, { useMemo, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { css } from '@emotion/react';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiButtonIcon, EuiPageTemplate, EuiToolTip } from '@elastic/eui';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { createChromeStorybookStart } from '@kbn/core-chrome-browser-mocks';
 import { AppHeaderView } from '../app_header';
@@ -76,10 +76,15 @@ const HeaderWithTitle = ({
             { type: 'text', label: 'Created by: analyst' },
             { type: 'button', label: 'Updated 2 minutes ago', onClick: action('metadata-clicked') },
           ]}
-          favorite={{
-            status: 'unfavorited',
-            onToggle: action('favorite'),
-          }}
+          favorite={
+            <EuiToolTip content="Favorite" disableScreenReaderOutput>
+              <EuiButtonIcon
+                aria-label="Favorite"
+                iconType="starEmpty"
+                onClick={action('favorite')}
+              />
+            </EuiToolTip>
+          }
           sticky={false}
         />
       </div>

@@ -18,6 +18,7 @@ project:
   sourceRoot: src/core/packages/chrome/app-menu/core-chrome-app-menu-components
 dependsOn:
   - '@kbn/i18n'
+  - '@kbn/router-utils'
   - '@kbn/core-chrome-layout-utils'
 tags:
   - shared-browser

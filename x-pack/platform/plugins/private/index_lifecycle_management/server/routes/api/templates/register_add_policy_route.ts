@@ -91,9 +91,9 @@ async function updateIndexTemplate(
 }
 
 const bodySchema = schema.object({
-  templateName: schema.string({ maxLength: 1000 }),
-  policyName: schema.string({ maxLength: 1000 }),
-  aliasName: schema.maybe(schema.string({ maxLength: 1000 })),
+  templateName: schema.string(),
+  policyName: schema.string(),
+  aliasName: schema.maybe(schema.string()),
 });
 
 const querySchema = schema.object({

@@ -84,7 +84,6 @@ dependsOn:
   - '@kbn/deeplinks-shared'
   - '@kbn/deeplinks-workplace-ai'
   - '@kbn/core-user-profile-server'
-  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

@@ -62,17 +62,7 @@ export function ComponentTemplatePanel({
           defaultMessage: 'Mappings',
         }),
         render: (_, record) =>
-          record.component_template?.template.mappings ? (
-            <EuiIcon
-              type="check"
-              aria-label={i18n.translate(
-                'xpack.streams.componentTemplatePanel.mappingsExistAriaLabel',
-                { defaultMessage: 'Has mappings' }
-              )}
-            />
-          ) : (
-            '-'
-          ),
+          record.component_template?.template.mappings ? <EuiIcon type="check" /> : '-',
       },
       {
         field: 'settings',
@@ -80,17 +70,7 @@ export function ComponentTemplatePanel({
           defaultMessage: 'Settings',
         }),
         render: (_, record) =>
-          record.component_template?.template.settings ? (
-            <EuiIcon
-              type="check"
-              aria-label={i18n.translate(
-                'xpack.streams.componentTemplatePanel.settingsExistAriaLabel',
-                { defaultMessage: 'Has settings' }
-              )}
-            />
-          ) : (
-            '-'
-          ),
+          record.component_template?.template.settings ? <EuiIcon type="check" /> : '-',
       },
       {
         field: 'aliases',
@@ -99,17 +79,7 @@ export function ComponentTemplatePanel({
         }),
         render: (_, record) => (
           <span>
-            {record.component_template?.template.aliases ? (
-              <EuiIcon
-                type="check"
-                aria-label={i18n.translate(
-                  'xpack.streams.componentTemplatePanel.aliasesExistAriaLabel',
-                  { defaultMessage: 'Has aliases' }
-                )}
-              />
-            ) : (
-              '-'
-            )}
+            {record.component_template?.template.aliases ? <EuiIcon type="check" /> : '-'}
           </span>
         ),
       },

@@ -15,10 +15,7 @@ import {
   createSeverityCalibrationEvaluator,
   createConfidenceCalibrationEvaluator,
 } from '../common/scores_calibration';
-import {
-  createEvidenceDescriptionEvaluator,
-  JUDGE_EVIDENCE_DESCRIPTION_CRITERIA,
-} from '../common/evidence_quality';
+import { createEvidenceDescriptionEvaluator } from '../common/evidence_quality';
 import { confirmedEvidencesEvaluator } from './evidences/confirmed_evidences';
 import { confirmationAlignmentEvaluator } from './evidences/confirmation_alignment';
 import { createStatusCorrectnessEvaluator } from './status/status_correctness';
@@ -48,10 +45,7 @@ export const createJudgeEvaluators = (
     ...base,
     createStatusCorrectnessEvaluator(criteriaFn),
     createScenarioCriteriaLlmEvaluator({ criteriaFn, criteria }),
-    createEvidenceDescriptionEvaluator({
-      criteriaFn,
-      criteria: JUDGE_EVIDENCE_DESCRIPTION_CRITERIA,
-    }),
+    createEvidenceDescriptionEvaluator({ criteriaFn }),
     createSeverityCalibrationEvaluator({ criteriaFn }),
     createConfidenceCalibrationEvaluator({ criteriaFn }),
   ];

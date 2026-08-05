@@ -27,13 +27,7 @@ export const Title = ({ icon, text, count }: TitleProps) => {
       `}
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon
-          data-test-subj={ICON_TEST_ID}
-          type={icon}
-          size="l"
-          color="text"
-          aria-hidden={true}
-        />
+        <EuiIcon data-test-subj={ICON_TEST_ID} type={icon} size="l" color="text" />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle size="xs">

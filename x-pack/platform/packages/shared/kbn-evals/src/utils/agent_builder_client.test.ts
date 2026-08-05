@@ -83,7 +83,6 @@ describe('createAgentBuilderClient', () => {
       structuredOutput: { foo: 'bar' },
       conversationId: 'conv-2',
       traceId: 'trace-2',
-      prompts: [],
     });
   });
 
@@ -98,47 +97,6 @@ describe('createAgentBuilderClient', () => {
       structuredOutput: undefined,
       conversationId: undefined,
       traceId: undefined,
-      prompts: [],
     });
-  });
-
-  it('sends promptResponses as prompts instead of input when provided', async () => {
-    http.fetch.mockResolvedValue({});
-
-    await client.converse({
-      agentId: 'my-agent',
-      input: 'ignored',
-      conversationId: 'conv-1',
-      promptResponses: { 'ask-1': { answers: [{ custom: 'answer' }] } },
-    });
-
-    const body = lastRequestBody();
-    expect(body.prompts).toEqual({ 'ask-1': { answers: [{ custom: 'answer' }] } });
-    expect(body.input).toBeUndefined();
-  });
-
-  it('returns prompts from the API response', async () => {
-    const agentPrompt = { type: 'ask_user_question', id: 'ask-1', questions: [] };
-    http.fetch.mockResolvedValue({
-      conversation_id: 'conv-1',
-      response: { message: 'What would you like?', prompts: [agentPrompt] },
-    });
-
-    const result = await client.converse({ agentId: 'my-agent', input: 'hello' });
-
-    expect(result.prompts).toEqual([agentPrompt]);
-  });
-
-  it('fetches a conversation by id via getConversation', async () => {
-    const conversation = { id: 'conv-1', rounds: [{ input: 'hi', response: 'hello' }] };
-    http.fetch.mockResolvedValue(conversation);
-
-    const result = await client.getConversation('conv-1');
-
-    expect(http.fetch).toHaveBeenCalledWith('/api/agent_builder/conversations/conv-1', {
-      method: 'GET',
-      version: '2023-10-31',
-    });
-    expect(result).toEqual(conversation);
   });
 });

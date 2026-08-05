@@ -80,6 +80,4 @@ export const sharedValidationSchemas = {
   description: z.string().min(1, { message: sharedI18nMessages.description.requiredError }),
 
   labels: z.array(z.string()),
-
-  confirmation_ask_user: z.optional(z.literal(['never', 'once', 'always'])),
 };

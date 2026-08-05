@@ -28,7 +28,6 @@ import { useLocation } from 'react-router-dom';
 import { isString } from 'lodash/fp';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { InputsModelId } from '../../store/inputs/constants';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
@@ -131,8 +130,7 @@ export const ModalInspectQuery = ({
   const { pathname } = useLocation();
   const sourcererScope = inputId === 'timeline' ? PageScope.timeline : getScopeFromPath(pathname);
 
-  const { dataView } = useDataView(sourcererScope);
-  const selectedPatterns = useSelectedPatterns(dataView);
+  const selectedPatterns = useSelectedPatterns(sourcererScope);
 
   const modalTitleId = useGeneratedHtmlId();
 

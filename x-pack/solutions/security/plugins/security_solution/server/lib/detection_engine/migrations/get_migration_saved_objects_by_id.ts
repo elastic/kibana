@@ -8,11 +8,11 @@
 import { fold } from 'fp-ts/Either';
 import { pipe } from 'fp-ts/pipeable';
 
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import { validateEither } from '@kbn/securitysolution-io-ts-utils';
 import { signalsMigrationSOClient } from './saved_objects_client';
-import type { SignalsMigrationSO, SignalsMigrationSOAttributes } from './saved_objects_schema';
+import type { SignalsMigrationSO } from './saved_objects_schema';
 import { signalsMigrationSOs } from './saved_objects_schema';
 
 class MigrationResponseError extends Error {
@@ -49,13 +49,8 @@ export const getMigrationSavedObjectsById = async ({
     throw new MigrationResponseError(error.message, error.statusCode);
   }
 
-  const validMigrations = migrations.filter(
-    (migration): migration is SavedObject<SignalsMigrationSOAttributes> =>
-      !isSavedObjectErrorResult(migration)
-  );
-
   return pipe(
-    validMigrations,
+    migrations,
     (ms) => validateEither(signalsMigrationSOs, ms),
     fold(
       (e) => Promise.reject(e),

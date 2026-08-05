@@ -9,8 +9,6 @@ jest.mock('../agents', () => ({
   getAvailableVersions: jest
     .fn()
     .mockResolvedValue(['9.3.0', '9.1.0', '8.6.0', '8.9.0', '8.8.0', '7.17.0']),
-  getAgentsByKuery: jest.fn(),
-  reassignAgents: jest.fn(),
 }));
 
 jest.mock('../app_context', () => ({
@@ -18,7 +16,6 @@ jest.mock('../app_context', () => ({
     getKibanaVersion: () => '9.3.0',
     getLogger: () => ({
       debug: jest.fn(),
-      info: jest.fn(),
     }),
   },
 }));
@@ -47,14 +44,9 @@ jest.mock('../agent_policy', () => ({
   },
 }));
 
-import * as AgentService from '../agents';
-
 import {
-  buildVariantAgentsKuery,
-  deleteVersionSpecificFleetServerPolicies,
   getAgentVersionsForVersionSpecificPolicies,
   getVersionSpecificPolicies,
-  reassignAgentsFromVersionSpecificPolicies,
 } from './version_specific_policies';
 
 describe('getAgentVersionsForVersionSpecificPolicies', () => {
@@ -79,7 +71,6 @@ describe('getVersionSpecificPolicies', () => {
     expect(policies).toEqual([
       {
         data: {
-          id: 'policy1#9.3',
           inputs: [
             {
               meta: {
@@ -95,7 +86,6 @@ describe('getVersionSpecificPolicies', () => {
       },
       {
         data: {
-          id: 'policy1#9.2',
           inputs: [],
         },
         policy_id: 'policy1#9.2',
@@ -103,7 +93,6 @@ describe('getVersionSpecificPolicies', () => {
       },
       {
         data: {
-          id: 'policy1#8.9',
           inputs: [],
         },
         policy_id: 'policy1#8.9',
@@ -129,7 +118,6 @@ describe('getVersionSpecificPolicies', () => {
     expect(policies).toEqual([
       {
         data: {
-          id: 'policy1#9.4',
           inputs: [
             {
               meta: {
@@ -145,7 +133,6 @@ describe('getVersionSpecificPolicies', () => {
       },
       {
         data: {
-          id: 'policy1#9.1',
           inputs: [],
         },
         policy_id: 'policy1#9.1',
@@ -162,7 +149,6 @@ describe('getVersionSpecificPolicies', () => {
     expect(policies).toEqual([
       {
         data: {
-          id: 'policy1#9.3',
           inputs: [
             {
               type: 'cel',
@@ -174,7 +160,6 @@ describe('getVersionSpecificPolicies', () => {
       },
       {
         data: {
-          id: 'policy1#9.2',
           inputs: [
             {
               type: 'cel',
@@ -186,7 +171,6 @@ describe('getVersionSpecificPolicies', () => {
       },
       {
         data: {
-          id: 'policy1#8.9',
           inputs: [],
         },
         policy_id: 'policy1#8.9',
@@ -205,7 +189,6 @@ describe('getVersionSpecificPolicies', () => {
     expect(policies).toEqual([
       {
         data: {
-          id: 'policy1#9.4',
           inputs: [
             {
               type: 'cel',
@@ -217,7 +200,6 @@ describe('getVersionSpecificPolicies', () => {
       },
       {
         data: {
-          id: 'policy1#9.1',
           inputs: [
             {
               type: 'cel',
@@ -243,7 +225,6 @@ describe('getVersionSpecificPolicies', () => {
     expect(policies).toEqual([
       {
         data: {
-          id: 'policyBothConditions#9.3',
           inputs: [
             {
               meta: { package: { agentVersion: '>=9.3.0' } },
@@ -258,7 +239,6 @@ describe('getVersionSpecificPolicies', () => {
       },
       {
         data: {
-          id: 'policyBothConditions#9.2',
           inputs: [
             {
               type: 'cel',
@@ -270,94 +250,11 @@ describe('getVersionSpecificPolicies', () => {
       },
       {
         data: {
-          id: 'policyBothConditions#8.9',
           inputs: [],
         },
         policy_id: 'policyBothConditions#8.9',
         policy_base_id: 'policyBothConditions',
       },
     ]);
-  });
-});
-
-describe('reassignAgentsFromVersionSpecificPolicies', () => {
-  const soClient = {} as any;
-  const esClient = { deleteByQuery: jest.fn() } as any;
-  const getAgentsByKueryMock = AgentService.getAgentsByKuery as jest.Mock;
-  const reassignAgentsMock = AgentService.reassignAgents as jest.Mock;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    esClient.deleteByQuery.mockResolvedValue({});
-  });
-
-  const variantKuery = 'policy_base_id:"policy1" and not policy_id:"policy1"';
-
-  it('reassigns agents on variant policies back to the base policy', async () => {
-    getAgentsByKueryMock.mockResolvedValue({ total: 3 });
-
-    await reassignAgentsFromVersionSpecificPolicies(soClient, esClient, 'policy1');
-
-    expect(getAgentsByKueryMock).toHaveBeenCalledWith(esClient, soClient, {
-      kuery: variantKuery,
-      showInactive: false,
-      perPage: 0,
-    });
-    expect(reassignAgentsMock).toHaveBeenCalledWith(
-      soClient,
-      esClient,
-      { kuery: variantKuery, showInactive: false },
-      'policy1'
-    );
-  });
-
-  it('does not reassign when there are no agents on variant policies', async () => {
-    getAgentsByKueryMock.mockResolvedValue({ total: 0 });
-
-    await reassignAgentsFromVersionSpecificPolicies(soClient, esClient, 'policy1');
-
-    expect(reassignAgentsMock).not.toHaveBeenCalled();
-  });
-
-  it('does not delete variant documents (deletion is owned by the periodic sweep)', async () => {
-    getAgentsByKueryMock.mockResolvedValue({ total: 3 });
-
-    await reassignAgentsFromVersionSpecificPolicies(soClient, esClient, 'policy1');
-
-    expect(esClient.deleteByQuery).not.toHaveBeenCalled();
-  });
-});
-
-describe('deleteVersionSpecificFleetServerPolicies', () => {
-  const esClient = { deleteByQuery: jest.fn() } as any;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    esClient.deleteByQuery.mockResolvedValue({});
-  });
-
-  it('deletes only the variant documents via policy_base_id (excluding the base) without forcing a refresh', async () => {
-    await deleteVersionSpecificFleetServerPolicies(esClient, 'policy1');
-
-    expect(esClient.deleteByQuery).toHaveBeenCalledWith(
-      expect.objectContaining({
-        index: '.fleet-policies',
-        query: {
-          bool: {
-            filter: [{ term: { policy_base_id: 'policy1' } }],
-            must_not: [{ term: { policy_id: 'policy1' } }],
-          },
-        },
-        refresh: false,
-      })
-    );
-  });
-});
-
-describe('buildVariantAgentsKuery', () => {
-  it('matches variant assignments via policy_base_id and excludes the base policy (no wildcard)', () => {
-    const kuery = buildVariantAgentsKuery('policy1');
-    expect(kuery).toBe('policy_base_id:"policy1" and not policy_id:"policy1"');
-    expect(kuery).not.toContain('*');
   });
 });

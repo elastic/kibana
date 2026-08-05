@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectErrorResult } from '../..';
 import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
 import type { SavedObjectsUpdateOptions, SavedObjectsUpdateResponse } from './update';
 
@@ -58,6 +57,6 @@ export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
  * @public
  */
 export interface SavedObjectsBulkUpdateResponse<T = unknown> {
-  /** array of {@link SavedObjectsUpdateResponse}, each of which is either a successful result or an error result */
-  saved_objects: Array<SavedObjectsUpdateResponse<T> | SavedObjectErrorResult>;
+  /** array of {@link SavedObjectsUpdateResponse} */
+  saved_objects: Array<SavedObjectsUpdateResponse<T>>;
 }

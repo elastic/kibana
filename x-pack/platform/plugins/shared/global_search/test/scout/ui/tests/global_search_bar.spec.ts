@@ -5,18 +5,15 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { KBN_ARCHIVES } from '../fixtures/constants';
 
 /**
  * IMPORTANT: These tests only work in 'classic' navigation mode. Once https://github.com/elastic/kibana/pull/251436 is merged, we might need to revisit this and make them work in 'solution' navigation as well.
- *
- * Scoped to the local target only: these tests assert on an exact, fully-owned saved-object
- * population, which cloud deployments can't provide (they preinstall managed Fleet dashboards
- * that cleanStandardList() can't remove). Two cloud-tolerant attempts regressed (see #273038).
  */
-test.describe('GlobalSearchBar', { tag: '@local-stateful-classic' }, () => {
+test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
     await kbnClient.importExport.load(KBN_ARCHIVES.SEARCH_SYNTAX);

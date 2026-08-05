@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { useAbortableAsync } from '@kbn/react-hooks';
 import type { Environment } from '../../../../../common/environment_rt';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { getApmInternalServices } from '../../../../plugin';
 
 interface Params {
   serviceName: string;
@@ -24,16 +23,18 @@ export function useServiceHasSystemMetrics({
   rangeTo,
 }: Params): { hasSystemMetrics: boolean | undefined; isLoading: boolean } {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { callApmApi } = getApmInternalServices();
 
-  const { value, loading } = useAbortableAsync(
-    ({ signal }) =>
+  const { data, status } = useFetcher(
+    (callApmApi) =>
       callApmApi('GET /internal/apm/services/{serviceName}/has_system_metrics', {
-        params: { path: { serviceName }, query: { environment, start, end } },
-        signal,
+        params: {
+          path: { serviceName },
+          query: { environment, start, end },
+        },
       }),
-    [callApmApi, serviceName, environment, start, end]
+    [serviceName, environment, start, end],
+    { showToastOnError: false, useLegacyCallApmApi: true }
   );
 
-  return { hasSystemMetrics: value?.hasSystemMetrics, isLoading: loading };
+  return { hasSystemMetrics: data?.hasSystemMetrics, isLoading: isPending(status) };
 }

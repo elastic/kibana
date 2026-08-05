@@ -8,25 +8,14 @@
  */
 
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
-import type {
-  CreatedObject,
-  SavedObject,
-  SavedObjectBulkResult,
-  SavedObjectErrorResult,
-} from '@kbn/core-saved-objects-server';
-import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
+import type { CreatedObject, SavedObject } from '@kbn/core-saved-objects-server';
 import type { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
-
-/** A remapped bulk-create result, which is either a created object or an error result. */
-export type RemappedImportResult<T> =
-  | CreatedObject<T>
-  | (SavedObjectErrorResult & { destinationId?: string });
 
 export function extractErrors(
   // TODO: define saved object type
-  savedObjectResults: Array<RemappedImportResult<unknown>>,
+  savedObjectResults: Array<CreatedObject<unknown>>,
   savedObjectsToImport: Array<SavedObject<any>>,
-  legacyUrlAliasResults: SavedObjectBulkResult[],
+  legacyUrlAliasResults: SavedObject[],
   legacyUrlAliasesToCreate: Map<string, SavedObject<LegacyUrlAlias>>
 ) {
   const errors: SavedObjectsImportFailure[] = [];
@@ -35,7 +24,7 @@ export function extractErrors(
     originalSavedObjectsMap.set(`${savedObject.type}:${savedObject.id}`, savedObject);
   }
   for (const savedObject of savedObjectResults) {
-    if (isSavedObjectErrorResult(savedObject)) {
+    if (savedObject.error) {
       const originalSavedObject = originalSavedObjectsMap.get(
         `${savedObject.type}:${savedObject.id}`
       );
@@ -50,6 +39,7 @@ export function extractErrors(
             type: 'conflict',
             ...(destinationId && { destinationId }),
           },
+          managed: savedObject.managed,
         });
         continue;
       }
@@ -61,12 +51,13 @@ export function extractErrors(
           ...savedObject.error,
           type: 'unknown',
         },
+        managed: savedObject.managed,
       });
     }
   }
 
   for (const legacyUrlAliasResult of legacyUrlAliasResults) {
-    if (!isSavedObjectErrorResult(legacyUrlAliasResult)) {
+    if (!legacyUrlAliasResult.error) {
       continue;
     }
 

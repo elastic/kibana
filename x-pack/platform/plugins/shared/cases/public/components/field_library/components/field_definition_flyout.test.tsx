@@ -99,17 +99,6 @@ describe('FieldDefinitionFlyout — isGlobal checkbox', () => {
     expect(defaultProps.onSave).toHaveBeenCalledWith(expect.objectContaining({ isGlobal: true }));
   });
 
-  it('prevents saving until the YAML defines a valid inline field', () => {
-    renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
-
-    const yamlInput = screen.getByTestId('fieldDefinitionYamlInput');
-    fireEvent.change(yamlInput, { target: { value: 'name: my_field\n$ref: existing_field\n' } });
-
-    expect(screen.getByTestId('fieldDefinitionSaveButton')).toBeDisabled();
-    fireEvent.click(screen.getByTestId('fieldDefinitionSaveButton'));
-    expect(defaultProps.onSave).not.toHaveBeenCalled();
-  });
-
   it('toggles isGlobal when checkbox is clicked', async () => {
     const user = userEvent.setup();
     renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);

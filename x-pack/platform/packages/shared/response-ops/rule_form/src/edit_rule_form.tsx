@@ -31,6 +31,7 @@ import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
 export interface EditRuleFormProps {
   id: string;
   plugins: RuleFormPlugins;
+  showMustacheAutocompleteSwitch?: boolean;
   connectorFeatureId?: string;
   isFlyout?: boolean;
   onCancel?: () => void;
@@ -45,6 +46,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
   const {
     id,
     plugins,
+    showMustacheAutocompleteSwitch = false,
     connectorFeatureId = 'alerting',
     onCancel,
     onSubmit,
@@ -233,6 +235,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
         }).map(({ ruleType: rt }) => rt),
         flappingSettings,
         validConsumers: DEFAULT_VALID_CONSUMERS,
+        showMustacheAutocompleteSwitch,
       }}
     >
       <RuleFormUIComponent

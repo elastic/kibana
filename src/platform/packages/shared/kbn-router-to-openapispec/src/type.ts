@@ -25,17 +25,13 @@ export interface ConvertOptions {
 export interface OpenAPIConverter {
   convertPathParameters(
     schema: unknown,
-    knownPathParameters: KnownParameters,
-    opts?: ConvertOptions
+    knownPathParameters: KnownParameters
   ): {
     params: OpenAPIV3.ParameterObject[];
     shared: { [key: string]: OpenAPIV3.SchemaObject };
   };
 
-  convertQuery(
-    schema: unknown,
-    opts?: ConvertOptions
-  ): {
+  convertQuery(schema: unknown): {
     query: OpenAPIV3.ParameterObject[];
     shared: { [key: string]: OpenAPIV3.SchemaObject };
   };

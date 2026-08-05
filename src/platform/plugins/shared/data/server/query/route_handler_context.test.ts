@@ -14,7 +14,7 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 import type { SavedObject, SavedQueryAttributes } from '../../common';
 import type { InternalSavedQueryAttributes } from './route_handler_context';
 import { registerSavedQueryRouteHandlerContext } from './route_handler_context';
-import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObjectsFindResponse, SavedObjectsUpdateResponse } from '@kbn/core/server';
 
 const mockContext = {
   core: coreMock.createRequestHandlerContext(),
@@ -191,14 +191,19 @@ describe('saved query route handler context', () => {
       expect(timefilter).toEqual(savedQueryAttributesWithFilters.timefilter);
     });
 
-    it('should throw an error when saved objects client throws', async () => {
+    it('should throw an error when saved objects client returns error', async () => {
       mockSavedObjectsClient.find.mockResolvedValue({
         total: 0,
         page: 0,
         per_page: 0,
         saved_objects: [],
       });
-      mockSavedObjectsClient.create.mockRejectedValue(new Error('An Error'));
+      mockSavedObjectsClient.create.mockResolvedValue({
+        error: {
+          error: '123',
+          message: 'An Error',
+        },
+      } as SavedObject);
 
       const response = context.create(savedQueryAttributes);
 
@@ -285,14 +290,19 @@ describe('saved query route handler context', () => {
       });
     });
 
-    it('should throw an error when saved objects client throws', async () => {
+    it('should throw an error when saved objects client returns error', async () => {
       mockSavedObjectsClient.find.mockResolvedValue({
         total: 0,
         page: 0,
         per_page: 0,
         saved_objects: [],
       });
-      mockSavedObjectsClient.update.mockRejectedValue(new Error('An Error'));
+      mockSavedObjectsClient.update.mockResolvedValue({
+        error: {
+          error: '123',
+          message: 'An Error',
+        },
+      } as SavedObjectsUpdateResponse);
 
       const response = context.update('foo', savedQueryAttributes);
 

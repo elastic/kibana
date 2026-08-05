@@ -11,9 +11,9 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { ActionPolicyAttachmentData } from '@kbn/alerting-v2-schemas';
 import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { alertingTools } from '../../common/constants';
 import {
   actionPolicyOperationSchema,
   executeActionPolicyOperations,
@@ -45,7 +45,7 @@ export const manageActionPolicyTool = ({
   getWorkflow,
   getAvailableConnectors,
 }: ManageActionPolicyToolDeps): BuiltinSkillBoundedTool<typeof manageActionPolicySchema> => ({
-  id: ALERTING_TOOL_IDS.manageActionPolicy,
+  id: alertingTools.manageActionPolicy,
   type: ToolType.builtin,
   description: `Create or update an alerting V2 action policy (notification policy) in the conversation.
 

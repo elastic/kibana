@@ -19,7 +19,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 import { useCompositeSloEnabled } from '../../hooks/use_composite_slo_enabled';
-import { useHasSlos } from '../../hooks/use_has_slos';
+import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
@@ -71,7 +71,11 @@ export function SlosPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCompositePath, isCompositeSloEnabled]);
 
-  const { hasSlos, isLoading, isError } = useHasSlos();
+  const {
+    data: { total } = { total: 0 },
+    isLoading,
+    isError,
+  } = useFetchSloDefinitions({ perPage: 0 });
 
   useBreadcrumbs(
     [
@@ -87,14 +91,14 @@ export function SlosPage() {
   );
 
   useEffect(() => {
-    if ((!isLoading && !hasSlos) || hasAtLeast('platinum') === false || isError) {
+    if ((!isLoading && total === 0) || hasAtLeast('platinum') === false || isError) {
       history.replace(SLOS_WELCOME_PATH);
     }
 
     if (permissions?.hasAllReadRequested === false) {
       history.replace(SLOS_WELCOME_PATH);
     }
-  }, [history, basePath, hasAtLeast, isError, isLoading, hasSlos, permissions]);
+  }, [history, basePath, hasAtLeast, isError, isLoading, total, permissions]);
 
   if (isLoading) {
     return <LoadingPage dataTestSubj="sloListPageLoading" />;

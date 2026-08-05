@@ -231,9 +231,9 @@ export const Ccr = (props) => {
                   {index}
                   &nbsp;
                   {expanded ? (
-                    <EuiIcon type="chevronSingleUp" aria-hidden={true} />
+                    <EuiIcon type="chevronSingleUp" />
                   ) : (
-                    <EuiIcon type="chevronSingleDown" aria-hidden={true} />
+                    <EuiIcon type="chevronSingleDown" />
                   )}
                 </EuiLink>
               );

@@ -14,8 +14,6 @@ export type {
   AppHeaderConfig,
   AppHeaderDescription,
   AppHeaderEditableTitle,
-  AppHeaderFavoriteAction,
-  AppHeaderFavoriteStatus,
   AppHeaderMetadataButtonItem,
   AppHeaderMetadataHealthItem,
   AppHeaderMetadataItem,

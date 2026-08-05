@@ -78,10 +78,6 @@ const configSchema = schema.object(
       defaultValue: [],
       validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
     }),
-    media_src: schema.arrayOf(schema.string(), {
-      defaultValue: [],
-      validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
-    }),
     form_action: schema.arrayOf(schema.string(), {
       defaultValue: [],
       validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),

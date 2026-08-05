@@ -72,7 +72,7 @@ describe('Form', () => {
     });
   });
 
-  it('renders bottom bar when a field is changed', async () => {
+  it('renders bottom bar when a field is changed', () => {
     const { getByTestId, queryByTestId } = render(wrap(<Form {...defaultFormParams} />));
 
     expect(queryByTestId(DATA_TEST_SUBJ_SAVE_BUTTON)).not.toBeInTheDocument();
@@ -82,19 +82,19 @@ describe('Form', () => {
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
     fireEvent.change(input, { target: { value: 'test' } });
 
-    await waitFor(() => expect(getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON)).toBeInTheDocument());
+    expect(getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON)).toBeInTheDocument();
     expect(getByTestId(DATA_TEST_SUBJ_CANCEL_BUTTON)).toBeInTheDocument();
   });
 
   it('fires saveChanges when Save button is clicked', async () => {
     const services: FormServices = createFormServicesMock();
-    const { getByTestId, findByTestId } = render(wrap(<Form {...defaultFormParams} />, services));
+    const { getByTestId } = render(wrap(<Form {...defaultFormParams} />, services));
 
     const testFieldType = 'string';
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
     fireEvent.change(input, { target: { value: 'test' } });
 
-    const saveButton = await findByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
+    const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
     act(() => {
       fireEvent.click(saveButton);
     });
@@ -107,13 +107,13 @@ describe('Form', () => {
   });
 
   it('clears changes when Cancel button is clicked', async () => {
-    const { getByTestId, findByTestId } = render(wrap(<Form {...defaultFormParams} />));
+    const { getByTestId } = render(wrap(<Form {...defaultFormParams} />));
 
     const testFieldType = 'string';
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
     fireEvent.change(input, { target: { value: 'test' } });
 
-    const cancelButton = await findByTestId(DATA_TEST_SUBJ_CANCEL_BUTTON);
+    const cancelButton = getByTestId(DATA_TEST_SUBJ_CANCEL_BUTTON);
     act(() => {
       fireEvent.click(cancelButton);
     });
@@ -130,15 +130,13 @@ describe('Form', () => {
     });
     const testServices = { ...services, saveChanges: saveChangesWithError };
 
-    const { getByTestId, findByTestId } = render(
-      wrap(<Form {...defaultFormParams} />, testServices)
-    );
+    const { getByTestId } = render(wrap(<Form {...defaultFormParams} />, testServices));
 
     const testFieldType = 'string';
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
     fireEvent.change(input, { target: { value: 'test' } });
 
-    const saveButton = await findByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
+    const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
     act(() => {
       fireEvent.click(saveButton);
     });
@@ -148,39 +146,6 @@ describe('Form', () => {
     });
   });
 
-  it('does not let a slow validation clobber a change made to another field', async () => {
-    jest.useFakeTimers();
-    const services: FormServices = createFormServicesMock();
-    services.validateChange = jest.fn().mockResolvedValue({
-      successfulValidation: true,
-      valid: false,
-      errorMessage: 'Invalid value',
-    });
-    const { getByTestId } = render(wrap(<Form {...defaultFormParams} />, services));
-
-    // Edit the (debounced, async-validated) string field first: its pending validation
-    // captures the current unsaved-changes snapshot.
-    fireEvent.change(getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-string`), {
-      target: { value: 'new string' },
-    });
-    // Then toggle the boolean field, adding a second unsaved change in the meantime.
-    const booleanSwitch = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-boolean`);
-    expect(booleanSwitch).toBeChecked();
-    fireEvent.click(booleanSwitch);
-    expect(booleanSwitch).not.toBeChecked();
-
-    // Let the string field's debounced validation resolve and report its (invalid) result.
-    await act(async () => {
-      jest.advanceTimersByTime(500);
-    });
-
-    // The string validation result must not overwrite the concurrent boolean change: the
-    // boolean switch still reflects its toggled (unsaved) value rather than reverting.
-    expect(booleanSwitch).not.toBeChecked();
-
-    jest.useRealTimers();
-  });
-
   it('fires showReloadPagePrompt when changing a reloadPageRequired setting', async () => {
     const services: FormServices = createFormServicesMock();
     // Make all settings require a page reload
@@ -188,7 +153,7 @@ describe('Form', () => {
       getSettingsMock(true),
       uiSettingsClientMock
     );
-    const { getByTestId, findByTestId } = render(
+    const { getByTestId } = render(
       wrap(
         <Form
           {...{
@@ -207,7 +172,7 @@ describe('Form', () => {
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${testFieldType}`);
     fireEvent.change(input, { target: { value: 'test' } });
 
-    const saveButton = await findByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
+    const saveButton = getByTestId(DATA_TEST_SUBJ_SAVE_BUTTON);
     act(() => {
       fireEvent.click(saveButton);
     });

@@ -19,7 +19,6 @@ export const transformWorkflowToolToFormData = (
     description: tool.description,
     workflow_id: tool.configuration.workflow_id,
     wait_for_completion: tool.configuration.wait_for_completion ?? true,
-    confirmation_ask_user: tool.confirmation?.askUser ?? 'never',
     labels: tool.tags,
     type: ToolType.workflow,
   };
@@ -39,9 +38,6 @@ export const transformFormDataToWorkflowTool = (
     },
     type: ToolType.workflow,
     tags: data.labels,
-    ...(data.confirmation_ask_user
-      ? { confirmation: { askUser: data.confirmation_ask_user } }
-      : {}),
   };
 };
 

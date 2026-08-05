@@ -6,7 +6,6 @@
  */
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
-import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { resolveRuleSavedObject } from '../../../../rules_client/lib';
@@ -42,9 +41,6 @@ Promise<ResolvedSanitizedRule<Params>> {
         ruleId: id,
       })
   );
-  if (isSavedObjectErrorResult(result)) {
-    throw Boom.boomify(new Error(result.error.message), { statusCode: result.error.statusCode });
-  }
   try {
     await context.authorization.ensureAuthorized({
       ruleTypeId: result.attributes.alertTypeId,

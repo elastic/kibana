@@ -35,7 +35,7 @@ describe('discovery agent types', () => {
       baseConfiguration: {
         enable_elastic_capabilities: false,
         connector_ids: [],
-        skill_ids: ['significant-events-memory'],
+        skill_ids: ['significant-events-ki-grounding', 'significant-events-memory'],
       },
     });
   });

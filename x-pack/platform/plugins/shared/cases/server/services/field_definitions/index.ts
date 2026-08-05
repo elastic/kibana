@@ -5,26 +5,20 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { castArray } from 'lodash';
 import { escapeKuery } from '@kbn/es-query';
-import { parse as parseYaml } from 'yaml';
 import type {
   CreateFieldDefinitionInput,
   FieldDefinition,
   UpdateFieldDefinitionInput,
 } from '../../../common/types/domain/field_definition/v1';
-import { InlineFieldSchema } from '../../../common/types/domain/template/fields';
-import { validateExtendedFieldValueSizes } from '../../../common/types/domain/template/validate_extended_fields';
 import {
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
-  MAX_EXTENDED_FIELD_VALUE_BYTES,
   MAX_FIELD_DEFINITIONS_PER_OWNER,
 } from '../../../common/constants';
 import type { FieldDefinitionsFindResponse } from '../../../common/types/api/field_definition/v1';
-import { getYamlDefaultAsString } from '../../../common/utils';
 
 export class FieldDefinitionsService {
   constructor(
@@ -127,8 +121,6 @@ export class FieldDefinitionsService {
   async createFieldDefinition(
     input: CreateFieldDefinitionInput
   ): Promise<SavedObject<FieldDefinition>> {
-    this.assertFieldDefinitionIsValid(input.definition);
-
     const id = uuidv4();
     const created = await this.dependencies.unsecuredSavedObjectsClient.create<FieldDefinition>(
       CASE_FIELD_DEFINITION_SAVED_OBJECT,
@@ -148,8 +140,6 @@ export class FieldDefinitionsService {
     id: string,
     input: UpdateFieldDefinitionInput
   ): Promise<SavedObject<FieldDefinition>> {
-    this.assertFieldDefinitionIsValid(input.definition);
-
     await this.dependencies.unsecuredSavedObjectsClient.update<FieldDefinition>(
       CASE_FIELD_DEFINITION_SAVED_OBJECT,
       id,
@@ -171,40 +161,5 @@ export class FieldDefinitionsService {
 
     // A removed definition drops its runtime field. Tell v2 to refresh.
     this.dependencies.refreshAnalyticsV2DataView();
-  }
-
-  /**
-   * A field-library default is copied into a case's `extended_fields` when a
-   * template references it. Validate the persisted representation here as the
-   * definition is written, rather than waiting until a case is created.
-   */
-  private assertFieldDefinitionIsValid(definition: string): void {
-    let yamlDefinition: unknown;
-    try {
-      yamlDefinition = parseYaml(definition);
-    } catch {
-      throw Boom.badRequest('Invalid YAML definition');
-    }
-
-    const parsedDefinition = InlineFieldSchema.safeParse(yamlDefinition);
-    if (!parsedDefinition.success) {
-      const validationErrors = parsedDefinition.error.issues
-        .map(({ path, message }) => (path.length > 0 ? `${path.join('.')}: ${message}` : message))
-        .join('; ');
-      throw Boom.badRequest(`Invalid field definition: ${validationErrors}`);
-    }
-
-    const defaultValue = parsedDefinition.data.metadata?.default;
-    if (defaultValue === undefined) {
-      return;
-    }
-
-    const value = getYamlDefaultAsString(defaultValue);
-    const errors = validateExtendedFieldValueSizes({ [parsedDefinition.data.name]: value });
-    if (errors.length > 0) {
-      throw Boom.badRequest(
-        `Field definition "${parsedDefinition.data.name}" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
-      );
-    }
   }
 }

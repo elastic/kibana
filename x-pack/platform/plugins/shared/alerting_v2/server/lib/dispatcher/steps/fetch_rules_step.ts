@@ -29,9 +29,7 @@ export class FetchRulesStep implements DispatcherStep {
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const { dispatchable = [] } = state;
 
-    const uniqueRuleIds = Array.from(
-      new Set(dispatchable.map((ep) => ep.rule_id).filter((id): id is string => id !== null))
-    );
+    const uniqueRuleIds = Array.from(new Set(dispatchable.map((ep) => ep.rule_id)));
     if (uniqueRuleIds.length === 0) {
       return { type: 'continue', data: { rules: new Map() } };
     }

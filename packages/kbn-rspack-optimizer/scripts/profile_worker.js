@@ -10,25 +10,23 @@
 /**
  * Profile worker - runs RSPack build with profiling in a clean process.
  *
- * This script uses a minimal setup that avoids the prototype sealing performed by harden,
- * which conflicts with envinfo (used by RsDoctor). envinfo redefines
- * `Function.prototype.toString` at load time, which throws once `Object.seal(Function.prototype)`
- * has been applied.
+ * This script uses a minimal setup that avoids require-in-the-middle (from harden),
+ * which conflicts with envinfo (used by RsDoctor).
  *
  * Only loads:
  * - source-map-support for stack traces
- * - @kbn/swc-register for TypeScript transpilation
+ * - @kbn/babel-register for TypeScript transpilation
  *
  * Does NOT load:
- * - @kbn/setup-node-env (which includes harden's prototype sealing)
- * - @kbn/security-hardening (which also seals prototypes)
+ * - @kbn/setup-node-env (which includes harden with require-in-the-middle)
+ * - @kbn/security-hardening
  */
 
 /* eslint-disable no-var */
 
 // Minimal setup - just what we need for TypeScript support
 require('source-map-support').install();
-require('@kbn/swc-register').install();
+require('@kbn/babel-register').install();
 
 // Now load the profiler
 var Path = require('path');

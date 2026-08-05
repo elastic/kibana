@@ -74,16 +74,15 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       });
 
       if (savedObjectsData.length > 1) {
-        const failedResult = result.saved_objects.find(isSavedObjectErrorResult);
-        if (failedResult) {
+        const failedResult = result.saved_objects.find((savedObject) =>
+          isSavedObjectErrorResult(savedObject)
+        );
+        if (failedResult?.error) {
           throw Object.assign(new Error(failedResult.error.message), failedResult.error);
         }
-        return result.saved_objects
-          .filter(
-            (savedObject): savedObject is SavedObject<Omit<SyntheticsParamSOAttributes, 'id'>> =>
-              !isSavedObjectErrorResult(savedObject)
-          )
-          .map((savedObject) => toClientResponse(savedObject));
+        return result.saved_objects.map((savedObject) => {
+          return toClientResponse(savedObject);
+        });
       } else {
         const [savedObject] = result.saved_objects;
         if (isSavedObjectErrorResult(savedObject)) {

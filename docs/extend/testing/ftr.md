@@ -65,12 +65,12 @@ The {{kib}} repo contains many FTR config files which use slightly different con
 
 - serverless:
   - `.buildkite/ftr-manifests/ftr_base_serverless_configs.yml`
-  - `.buildkite/ftr-manifests/ftr_observability_serverless_configs.yml`
+  - `.buildkite/ftr-manifests/ftr_oblt_serverless_configs.yml`
   - `.buildkite/ftr-manifests/ftr_security_serverless_configs.yml`
   - `.buildkite/ftr-manifests/ftr_search_serverless_configs.yml`
 - stateful:
   - `.buildkite/ftr-manifests/ftr_platform_stateful_configs.yml`
-  - `.buildkite/ftr-manifests/ftr_observability_stateful_configs.yml`
+  - `.buildkite/ftr-manifests/ftr_oblt_stateful_configs.yml`
   - `.buildkite/ftr-manifests/ftr_security_stateful_configs.yml`
   - `.buildkite/ftr-manifests/ftr_search_stateful_configs.yml`
 

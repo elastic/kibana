@@ -27,9 +27,7 @@ interface Props {
 const TruncatedTextComponent: React.FC<Props> = ({ text }) => {
   return (
     <EuiToolTip content={text} disableScreenReaderOutput display="block">
-      <span css={getTextCss} tabIndex={0}>
-        {text}
-      </span>
+      <span css={getTextCss}>{text}</span>
     </EuiToolTip>
   );
 };

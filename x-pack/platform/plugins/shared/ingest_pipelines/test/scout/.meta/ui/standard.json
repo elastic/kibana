@@ -1,9 +1,5 @@
 {
-  "sha1": "656a5fadcafda657b2569eb072962c5b859994c5",
-  "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
-  ],
+  "sha1": "6ba157dacb608b8a1cd13e6a2d144f3eb9fec4df",
   "tests": [
     {
       "id": "81653fc077ca513-fbd174b45e37209",
@@ -15,8 +11,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 12,
-        "column": 14
+        "line": 13,
+        "column": 7
       }
     },
     {
@@ -35,8 +31,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/home_and_list.spec.ts",
-        "line": 39,
-        "column": 11
+        "line": 42,
+        "column": 7
       }
     },
     {
@@ -55,8 +51,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/home_and_list.spec.ts",
-        "line": 40,
-        "column": 5
+        "line": 48,
+        "column": 7
       }
     },
     {
@@ -75,8 +71,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/home_and_list.spec.ts",
-        "line": 45,
-        "column": 11
+        "line": 59,
+        "column": 7
       }
     },
     {
@@ -89,8 +85,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/manage_processors.spec.ts",
-        "line": 61,
-        "column": 23
+        "line": 67,
+        "column": 7
       }
     },
     {
@@ -103,8 +99,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/manage_processors.spec.ts",
-        "line": 67,
-        "column": 74
+        "line": 79,
+        "column": 7
       }
     },
     {
@@ -123,8 +119,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/pipeline_create.spec.ts",
-        "line": 27,
-        "column": 52
+        "line": 30,
+        "column": 7
       }
     },
     {
@@ -143,8 +139,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/pipeline_create.spec.ts",
-        "line": 34,
-        "column": 24
+        "line": 41,
+        "column": 7
       }
     },
     {
@@ -157,8 +153,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/pipeline_tree.spec.ts",
-        "line": 30,
-        "column": 41
+        "line": 35,
+        "column": 7
       }
     },
     {
@@ -171,8 +167,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/pipeline_tree.spec.ts",
-        "line": 31,
-        "column": 82
+        "line": 43,
+        "column": 7
       }
     },
     {
@@ -185,8 +181,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/pipeline_tree.spec.ts",
-        "line": 35,
-        "column": 8
+        "line": 53,
+        "column": 7
       }
     },
     {
@@ -199,8 +195,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/stateful_create_form_navigation.spec.ts",
-        "line": 16,
-        "column": 41
+        "line": 21,
+        "column": 9
       }
     },
     {
@@ -213,8 +209,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/stateful_list_url_behavior.spec.ts",
-        "line": 23,
-        "column": 23
+        "line": 30,
+        "column": 7
       }
     },
     {
@@ -227,8 +223,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/stateful_list_url_behavior.spec.ts",
-        "line": 27,
-        "column": 36
+        "line": 43,
+        "column": 7
       }
     },
     {
@@ -241,8 +237,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/stateful_list_url_behavior.spec.ts",
-        "line": 32,
-        "column": 5
+        "line": 53,
+        "column": 7
       }
     },
     {
@@ -255,8 +251,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/stateful_list_url_behavior.spec.ts",
-        "line": 43,
-        "column": 80
+        "line": 69,
+        "column": 7
       }
     },
     {
@@ -269,8 +265,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/stateful_pipeline_delete.spec.ts",
-        "line": 24,
-        "column": 23
+        "line": 31,
+        "column": 7
       }
     }
   ]

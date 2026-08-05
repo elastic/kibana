@@ -16,8 +16,8 @@ import {
 import type { RouteDependencies } from '../../../../types';
 
 const paramsSchema = schema.object({
-  watchId: schema.string({ maxLength: 1000 }),
-  actionId: schema.string({ maxLength: 1000 }),
+  watchId: schema.string(),
+  actionId: schema.string(),
 });
 
 function acknowledgeAction(dataClient: IScopedClusterClient, watchId: string, actionId: string) {

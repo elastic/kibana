@@ -1,5 +1,5 @@
 {
-  "sha1": "746690973c40791cd33a78571d11c7eacc1baf78",
+  "sha1": "67cbbb93ee8b1bf8b93fca2ddad29e4426d4a9b4",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -12,8 +12,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
+        "line": 11,
+        "column": 19
       }
     },
     {
@@ -23,8 +23,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/global.setup.ts",
-        "line": 5,
-        "column": 1
+        "line": 11,
+        "column": 16
       }
     },
     {
@@ -39,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
-        "line": 39,
-        "column": 7
+        "line": 38,
+        "column": 12
       }
     },
     {
@@ -55,8 +55,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
-        "line": 212,
-        "column": 15
+        "line": 209,
+        "column": 12
       }
     },
     {
@@ -71,8 +71,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
-        "line": 265,
-        "column": 44
+        "line": 298,
+        "column": 12
       }
     },
     {
@@ -87,8 +87,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
-        "line": 335,
-        "column": 44
+        "line": 372,
+        "column": 12
       }
     },
     {
@@ -103,8 +103,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_and_investigation/memory_crud.spec.ts",
-        "line": 419,
-        "column": 25
+        "line": 435,
+        "column": 12
       }
     },
     {
@@ -119,8 +119,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 21,
-        "column": 44
+        "line": 23,
+        "column": 12
       }
     },
     {
@@ -135,8 +135,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 47,
-        "column": 6
+        "line": 49,
+        "column": 12
       }
     },
     {
@@ -151,8 +151,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 54,
-        "column": 30
+        "line": 61,
+        "column": 12
       }
     },
     {
@@ -168,7 +168,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
         "line": 37,
-        "column": 76
+        "column": 14
       }
     },
     {
@@ -184,7 +184,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
         "line": 37,
-        "column": 76
+        "column": 14
       }
     },
     {
@@ -200,7 +200,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
         "line": 37,
-        "column": 76
+        "column": 14
       }
     },
     {
@@ -216,7 +216,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
         "line": 37,
-        "column": 76
+        "column": 14
       }
     },
     {
@@ -232,7 +232,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
         "line": 37,
-        "column": 76
+        "column": 14
       }
     }
   ]

@@ -43,5 +43,5 @@ Although, starting with [ESLint v2.0.4](https://github.com/microsoft/vscode-esli
 }
 ```
 
-Avoid using the [`Prettier` extension/IDE plugin](https://prettier.io/) while maintaining the {{kib}} project. Formatting and styling roles are set in the multiple `.eslintrc.js` files across the project and some of them use the [NPM version of Prettier](https://www.npmjs.com/package/prettier). Using the IDE extension might cause conflicts, applying the formatting to too many files that shouldn’t be prettier-ized or highlighting errors that are actually OK.
+[`Prettier` extension/IDE plugin](https://prettier.io/) while maintaining the {{kib}} project. Formatting and styling roles are set in the multiple `.eslintrc.js` files across the project and some of them use the [NPM version of Prettier](https://www.npmjs.com/package/prettier). Using the IDE extension might cause conflicts, applying the formatting to too many files that shouldn’t be prettier-ized and/or highlighting errors that are actually OK.
 

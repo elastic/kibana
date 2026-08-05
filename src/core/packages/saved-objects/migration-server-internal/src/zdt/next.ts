@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/logging';
 import type {
   AllActionStates,
   State,
@@ -55,7 +54,7 @@ export type ResponseType<ControlState extends AllActionStates> = Awaited<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
-export const nextActionMap = (context: MigratorContext, logger: Logger) => {
+export const nextActionMap = (context: MigratorContext) => {
   const client = context.elasticsearchClient;
   return {
     INIT: (state: InitState) =>
@@ -163,8 +162,6 @@ export const nextActionMap = (context: MigratorContext, logger: Logger) => {
         index: state.currentIndex,
         operations: state.bulkOperationBatches[state.currentBatch],
         refresh: false,
-        fetchAllocationExplain: state.retryCount === 0,
-        logger,
       }),
     OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: (state: OutdatedDocumentsSearchClosePitState) =>
       Actions.closePit({
@@ -194,8 +191,8 @@ export const nextActionMap = (context: MigratorContext, logger: Logger) => {
   };
 };
 
-export const next = (context: MigratorContext, logger: Logger) => {
-  const map = nextActionMap(context, logger);
+export const next = (context: MigratorContext) => {
+  const map = nextActionMap(context);
 
   return (state: State) => {
     const delay = createDelayFn(state);

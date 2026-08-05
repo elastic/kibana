@@ -87,12 +87,8 @@ export function createCaseError({
   return new CaseError(message, error);
 }
 
-export const isSOError = <T>(so: {
-  id?: string;
-  type?: string;
-  error?: unknown;
-}): so is SOWithErrors<T> =>
-  isSavedObjectErrorResult(so as { id: string; type: string; error?: SavedObjectError });
+export const isSOError = <T>(so: { error?: unknown }): so is SOWithErrors<T> =>
+  isSavedObjectErrorResult(so as { error?: SavedObjectError });
 
 export const isSODecoratedError = (
   error: SavedObjectError | DecoratedError

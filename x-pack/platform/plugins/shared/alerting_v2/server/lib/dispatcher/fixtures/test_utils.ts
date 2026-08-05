@@ -42,8 +42,6 @@ export function createAlertEpisode(overrides: Partial<AlertEpisode> = {}): Alert
   return {
     last_event_timestamp: '2026-01-22T07:10:00.000Z',
     rule_id: 'rule-1',
-    source: 'internal',
-    space_id: 'default',
     group_hash: 'hash-1',
     episode_id: 'episode-1',
     episode_status: 'active',
@@ -56,8 +54,6 @@ export function createAlertEpisodeSuppression(
 ): AlertEpisodeSuppression {
   return {
     rule_id: 'rule-1',
-    source: 'internal',
-    space_id: 'default',
     group_hash: 'hash-1',
     episode_id: 'episode-1',
     should_suppress: false,

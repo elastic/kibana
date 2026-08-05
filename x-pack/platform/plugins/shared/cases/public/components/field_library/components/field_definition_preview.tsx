@@ -11,7 +11,7 @@ import { EuiText } from '@elastic/eui';
 import { parse as parseYaml } from 'yaml';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
-import { InlineFieldSchema } from '../../../../common/types/domain/template/fields';
+import { FieldSchema, isInlineField } from '../../../../common/types/domain/template/fields';
 import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
 import { getFieldSnakeKey } from '../../../../common/utils';
 import { getYamlDefaultAsString } from '../../templates_v2/utils';
@@ -64,8 +64,8 @@ export const FieldDefinitionPreview: FC<FieldDefinitionPreviewProps> = ({
     if (!definition.trim()) return null;
     try {
       const parsed = parseYaml(definition) as unknown;
-      const result = InlineFieldSchema.safeParse(parsed);
-      if (result.success) return result.data;
+      const result = FieldSchema.safeParse(parsed);
+      if (result.success && isInlineField(result.data)) return result.data;
     } catch {
       // fall through to return null
     }

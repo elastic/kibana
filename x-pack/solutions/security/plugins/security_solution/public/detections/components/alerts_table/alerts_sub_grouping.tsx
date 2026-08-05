@@ -157,7 +157,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     services: { uiSettings },
   } = useKibana();
   const { dataView } = useDataView(pageScope);
-  const browserFields = useBrowserFields(dataView);
+  const browserFields = useBrowserFields(pageScope);
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {

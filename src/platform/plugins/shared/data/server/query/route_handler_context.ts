@@ -13,7 +13,6 @@ import type {
   RequestHandlerContext,
   SavedObject,
 } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { escapeKuery, escapeQuotes, isFilters, isOfQueryType } from '@kbn/es-query';
 import { omit } from 'lodash';
 import type { SavedQueryAttributes } from '../../common';
@@ -155,6 +154,9 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
       references,
     });
 
+    // TODO: Handle properly
+    if (savedObject.error) throw internal(savedObject.error.message);
+
     return injectReferences(savedObject);
   };
 
@@ -175,6 +177,9 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
       }
     );
 
+    // TODO: Handle properly
+    if (savedObject.error) throw internal(savedObject.error.message);
+
     return injectReferences({ id, attributes, references, namespaces: savedObject.namespaces });
   };
 
@@ -183,7 +188,7 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
       await soClient.resolve<InternalSavedQueryAttributes>('query', id);
     if (outcome === 'conflict') {
       throw conflict(`Multiple saved queries found with ID: ${id} (legacy URL alias conflict)`);
-    } else if (isSavedObjectErrorResult(savedObject)) {
+    } else if (savedObject.error) {
       throw internal(savedObject.error.message);
     }
     return injectReferences(savedObject);

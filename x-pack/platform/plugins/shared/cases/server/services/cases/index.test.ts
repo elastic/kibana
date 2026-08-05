@@ -27,6 +27,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
   SavedObject,
   SavedObjectReference,
+  SavedObjectsBulkResponse,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
@@ -1230,7 +1231,7 @@ describe('CasesService', () => {
           ],
         });
 
-        const res = (await service.patchCases({
+        const res = await service.patchCases({
           cases: [
             {
               caseId: '1',
@@ -1241,7 +1242,7 @@ describe('CasesService', () => {
               originalCase: {} as CaseSavedObjectTransformed,
             },
           ],
-        })) as { saved_objects: Array<SavedObjectsUpdateResponse<CaseTransformedAttributes>> };
+        });
 
         expect(res.saved_objects[0].attributes.connector).toMatchInlineSnapshot(`
           Object {
@@ -1298,7 +1299,7 @@ describe('CasesService', () => {
           ],
         });
 
-        const res = (await service.patchCases({
+        const res = await service.patchCases({
           cases: [
             {
               caseId: '1',
@@ -1306,7 +1307,7 @@ describe('CasesService', () => {
               originalCase: {} as CaseSavedObjectTransformed,
             },
           ],
-        })) as { saved_objects: Array<SavedObjectsUpdateResponse<CaseTransformedAttributes>> };
+        });
         expect(res.saved_objects[0].attributes.severity).toEqual(CaseSeverity.LOW);
         expect(res.saved_objects[1].attributes.severity).toEqual(CaseSeverity.MEDIUM);
         expect(res.saved_objects[2].attributes.severity).toEqual(CaseSeverity.HIGH);
@@ -1331,7 +1332,7 @@ describe('CasesService', () => {
           ],
         });
 
-        const res = (await service.patchCases({
+        const res = await service.patchCases({
           cases: [
             {
               caseId: '1',
@@ -1339,7 +1340,7 @@ describe('CasesService', () => {
               originalCase: {} as CaseSavedObjectTransformed,
             },
           ],
-        })) as { saved_objects: Array<SavedObjectsUpdateResponse<CaseTransformedAttributes>> };
+        });
         expect(res.saved_objects[0].attributes.status).toEqual(CaseStatuses.open);
         expect(res.saved_objects[1].attributes.status).toEqual(CaseStatuses['in-progress']);
         expect(res.saved_objects[2].attributes.status).toEqual(CaseStatuses.closed);
@@ -1354,7 +1355,7 @@ describe('CasesService', () => {
           ],
         });
 
-        const res = (await service.patchCases({
+        const res = await service.patchCases({
           cases: [
             {
               caseId: '1',
@@ -1362,7 +1363,7 @@ describe('CasesService', () => {
               originalCase: {} as CaseSavedObjectTransformed,
             },
           ],
-        })) as { saved_objects: Array<SavedObjectsUpdateResponse<CaseTransformedAttributes>> };
+        });
 
         expect(res.saved_objects[0].attributes).not.toHaveProperty('total_alerts');
         expect(res.saved_objects[0].attributes).not.toHaveProperty('total_comments');
@@ -1956,7 +1957,7 @@ describe('CasesService', () => {
 
         const res = (await service.getCases({
           caseIds: ['a'],
-        })) as { saved_objects: Array<SavedObject<CaseTransformedAttributes>> };
+        })) as SavedObjectsBulkResponse<CaseTransformedAttributes>;
 
         expect(res.saved_objects[0].attributes.connector.id).toMatchInlineSnapshot(`"1"`);
         expect(
@@ -1993,7 +1994,7 @@ describe('CasesService', () => {
 
         const res = (await service.getCases({
           caseIds: ['a'],
-        })) as { saved_objects: Array<SavedObject<CaseTransformedAttributes>> };
+        })) as SavedObjectsBulkResponse<CaseTransformedAttributes>;
 
         expect(res.saved_objects[0].attributes.severity).toEqual(CaseSeverity.LOW);
         expect(res.saved_objects[1].attributes.severity).toEqual(CaseSeverity.MEDIUM);
@@ -2021,7 +2022,7 @@ describe('CasesService', () => {
 
         const res = (await service.getCases({
           caseIds: ['a'],
-        })) as { saved_objects: Array<SavedObject<CaseTransformedAttributes>> };
+        })) as SavedObjectsBulkResponse<CaseTransformedAttributes>;
 
         expect(res.saved_objects[0].attributes.status).toEqual(CaseStatuses.open);
         expect(res.saved_objects[1].attributes.status).toEqual(CaseStatuses['in-progress']);
@@ -2039,7 +2040,7 @@ describe('CasesService', () => {
 
         const res = (await service.getCases({
           caseIds: ['a'],
-        })) as { saved_objects: Array<SavedObject<CaseTransformedAttributes>> };
+        })) as SavedObjectsBulkResponse<CaseTransformedAttributes>;
 
         expect(res.saved_objects[0].attributes).not.toHaveProperty('total_alerts');
         expect(res.saved_objects[0].attributes).not.toHaveProperty('total_comments');

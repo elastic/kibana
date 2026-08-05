@@ -22,9 +22,7 @@ export interface ActionPolicyDestination {
 
 export interface AlertEpisode {
   last_event_timestamp: string;
-  rule_id: RuleId | null;
-  source: string;
-  space_id: string;
+  rule_id: RuleId;
   group_hash: string;
   episode_id: string;
   episode_status: AlertEpisodeStatus;
@@ -33,9 +31,7 @@ export interface AlertEpisode {
 }
 
 export interface AlertEpisodeSuppression {
-  rule_id: RuleId | null;
-  source: string | null;
-  space_id: string | null;
+  rule_id: RuleId;
   group_hash: string;
   episode_id: string | null;
   should_suppress: boolean;

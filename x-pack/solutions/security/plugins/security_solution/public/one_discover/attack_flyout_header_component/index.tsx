@@ -9,7 +9,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { useDefaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { Header } from '../../flyout_v2/attack/main/header';
@@ -46,7 +46,6 @@ export const AttackFlyoutHeader = ({
   const [store, setStore] = useState<SecurityAppStore | null>(null);
   const isSecurityApp = useIsInSecurityApp();
   const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-  const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
   const attackTitle = useMemo(() => getAttackTitleValue(hit), [hit]);
 
   const openNotesFlyout = useCallback(() => {
@@ -77,7 +76,7 @@ export const AttackFlyoutHeader = ({
         origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
       });
     }
-  }, [attackTitle, defaultToolsFlyoutProperties, history, historyKey, hit, services, store]);
+  }, [attackTitle, history, historyKey, hit, services, store]);
 
   useEffect(() => {
     let isCanceled = false;

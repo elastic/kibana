@@ -4,7 +4,7 @@ navigation_title: Global setup and teardown
 
 # Global setup and teardown [scout-global-setup-hook]
 
-Use the global setup and teardown hooks to run code **once** before any tests start or after all workers finish — even with multiple workers. They are most useful for [parallel suites](./parallelism.md), where shared data/setup must exist before workers begin and suite-wide state may need to be reset afterwards. Both hooks are also supported by non-parallel test suites.
+Use the global setup and teardown hooks to run code **once** before any tests start and/or after all workers finish — even with multiple workers. They are most useful for [parallel suites](./parallelism.md), where shared data/setup must exist before workers begin and suite-wide state may need to be reset afterwards. Both hooks are also supported by non-parallel test suites.
 
 ## Global setup hook [global-setup-hook]
 

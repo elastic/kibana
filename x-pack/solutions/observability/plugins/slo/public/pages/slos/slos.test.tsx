@@ -31,7 +31,6 @@ import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summ
 import { useFetchRulesForSlo } from '../../hooks/use_fetch_rules_for_slo';
 import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
-import { useHasSlos } from '../../hooks/use_has_slos';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
@@ -60,7 +59,6 @@ jest.mock('../../hooks/use_composite_slo_enabled', () => ({
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_slo_list');
 jest.mock('../../hooks/use_fetch_slo_definitions');
-jest.mock('../../hooks/use_has_slos');
 jest.mock('../../hooks/use_create_slo');
 jest.mock('../slo_settings/hooks/use_get_settings');
 jest.mock('../../hooks/use_delete_slo');
@@ -83,7 +81,6 @@ const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
 const useFetchSloListMock = useFetchSloList as jest.Mock;
 const useFetchSloDefinitionsMock = useFetchSloDefinitions as jest.Mock;
-const useHasSlosMock = useHasSlos as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useDeleteSloMock = useDeleteSlo as jest.Mock;
 const useDeleteSloInstanceMock = useDeleteSloInstance as jest.Mock;
@@ -236,7 +233,7 @@ describe('SLOs Page', () => {
         isLoading: false,
         data: emptySloDefinitionList,
       });
-      useHasSlosMock.mockReturnValue({ hasSlos: false, isLoading: false, isError: false });
+      useFetchSloListMock.mockReturnValue({ isLoading: false, sloList: emptySloList });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
@@ -258,11 +255,9 @@ describe('SLOs Page', () => {
   describe('when the correct license is found', () => {
     beforeEach(() => {
       useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
-      useHasSlosMock.mockReturnValue({ hasSlos: true, isLoading: false, isError: false });
     });
 
     it('redirects to the SLOs Welcome Page when the API has finished loading and there are no results', async () => {
-      useHasSlosMock.mockReturnValue({ hasSlos: false, isLoading: false, isError: false });
       useFetchSloDefinitionsMock.mockReturnValue({
         isLoading: false,
         data: emptySloDefinitionList,

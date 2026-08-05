@@ -12,7 +12,6 @@
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
-    "@kbn/actions-plugin",
     "@kbn/core",
     "@kbn/core-http-browser",
     "@kbn/react-query",
@@ -32,14 +31,8 @@
     "@kbn/esql",
     "@kbn/es-query",
     "@kbn/share-plugin",
-    "@kbn/triggers-actions-ui-plugin",
-    "@kbn/connector-specs",
     "@kbn/console-plugin",
-    "@kbn/core-security-server",
     "@kbn/workflows-ui",
-    "@kbn/deeplinks-workflows",
-    "@kbn/deeplinks-management",
-    "@kbn/code-editor",
-    "@kbn/ui-callout"
+    "@kbn/deeplinks-workflows"
   ]
 }

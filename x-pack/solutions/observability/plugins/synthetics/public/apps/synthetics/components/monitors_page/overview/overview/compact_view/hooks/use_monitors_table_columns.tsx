@@ -184,7 +184,6 @@ export const useMonitorsTableColumns = ({
               >
                 <EuiToolTip position="top" content={monitor.urls}>
                   <EuiText
-                    tabIndex={0}
                     size="xs"
                     color="subdued"
                     className="eui-textTruncate"
@@ -259,7 +258,6 @@ export const useMonitorsTableColumns = ({
                     }
                   >
                     <EuiText
-                      tabIndex={0}
                       size="xs"
                       color="danger"
                       data-test-subj="syntheticsLatestErrorCell"

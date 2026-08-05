@@ -33,7 +33,7 @@ export const FieldStatusBadge = ({
         <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center" wrap={false}>
           {uncommitted && (
             <EuiFlexItem grow={false}>
-              <EuiIcon type="clockCounter" size="s" aria-hidden={true} />
+              <EuiIcon type="clockCounter" size="s" />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>{FIELD_STATUS_MAP[displayStatus].label}</EuiFlexItem>

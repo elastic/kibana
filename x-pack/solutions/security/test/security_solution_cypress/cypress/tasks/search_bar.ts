@@ -23,6 +23,11 @@ export const openAddFilterPopover = () => {
   cy.get(GLOBAL_SEARCH_BAR_ADD_FILTER).click();
 };
 
+export const openKqlQueryBar = () => {
+  cy.get(GLOBAL_KQL_INPUT).should('be.visible');
+  cy.get(GLOBAL_KQL_INPUT).click();
+};
+
 export const fillKqlQueryBar = (query: string) => {
   cy.get(GLOBAL_KQL_INPUT).should('be.visible');
   cy.get(GLOBAL_KQL_INPUT).type(query);

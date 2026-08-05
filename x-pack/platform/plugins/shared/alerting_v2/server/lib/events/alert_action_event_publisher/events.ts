@@ -19,8 +19,7 @@ export interface AlertActionEventEnvelope {
   readonly occurredAt: string;
   readonly groupHash: string;
   readonly episodeId: string;
-  /** `null` for external-source episodes that are not tied to a Kibana rule. */
-  readonly ruleId: string | null;
+  readonly ruleId: string;
   readonly spaceId: string;
   /**
    * User-profile uid of the actor who performed the action, or `null`

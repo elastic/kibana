@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,9 +18,7 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
-  EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTextArea,
   EuiTitle,
   EuiToolTip,
@@ -29,7 +27,6 @@ import { parse as parseYaml } from 'yaml';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
 import {
   FieldType,
-  InlineFieldSchema,
   UserPickerDefaultSchema,
 } from '../../../../common/types/domain/template/fields';
 import {
@@ -72,30 +69,36 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
   const [description, setDescription] = useState(fieldDefinition?.description ?? '');
   const [definition, setDefinition] = useState(fieldDefinition?.definition ?? EXAMPLE_FIELD_YAML);
   const [isGlobal, setApplyToAllCases] = useState(fieldDefinition?.isGlobal ?? false);
+  const [definitionError, setDefinitionError] = useState<string | undefined>();
 
   const definitionRef = useRef(definition);
   definitionRef.current = definition;
 
-  const parsedDefinition = useMemo(() => {
+  const parseName = useCallback((yaml: string): string | undefined => {
     try {
-      return InlineFieldSchema.safeParse(parseYaml(definition));
+      const parsed = parseYaml(yaml) as { name?: unknown } | null;
+      const n = parsed?.name;
+      return typeof n === 'string' && n.trim() ? n.trim() : undefined;
     } catch {
-      return null;
+      return undefined;
     }
-  }, [definition]);
+  }, []);
 
-  const isDefinitionValid = parsedDefinition?.success === true;
+  const validate = useCallback((): boolean => {
+    const name = parseName(definition);
+    if (!name) {
+      setDefinitionError(i18n.FIELD_DEFINITION_YAML_MISSING_NAME);
+      return false;
+    }
+    setDefinitionError(undefined);
+    return true;
+  }, [definition, parseName]);
 
   const handleSave = useCallback(() => {
-    if (!parsedDefinition?.success) return;
-
-    onSave({
-      name: parsedDefinition.data.name,
-      description: description.trim(),
-      definition,
-      isGlobal,
-    });
-  }, [parsedDefinition, onSave, description, definition, isGlobal]);
+    if (!validate()) return;
+    const name = parseName(definition) as string;
+    onSave({ name, description: description.trim(), definition, isGlobal });
+  }, [validate, parseName, onSave, description, definition, isGlobal]);
 
   const handleDefaultChange = useCallback((fieldName: string, value: string, control: string) => {
     const trimmedValue = value.trim();
@@ -145,10 +148,6 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
               : i18n.FIELD_DEFINITION_FORM_TITLE_CREATE}
           </h2>
         </EuiTitle>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
-          <p>{i18n.FIELD_DEFINITION_FORM_DESCRIPTION}</p>
-        </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm component="form" data-test-subj="fieldDefinitionForm">
@@ -174,7 +173,8 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
           <EuiSpacer size="l" />
           <EuiFormRow
             label={i18n.FIELD_DEFINITION_YAML_LABEL}
-            helpText={i18n.FIELD_DEFINITION_YAML_HELP_TEXT}
+            isInvalid={!!definitionError}
+            error={definitionError}
             fullWidth
           >
             <FieldDefinitionYamlEditor
@@ -183,14 +183,12 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
               data-test-subj="fieldDefinitionYamlInput"
             />
           </EuiFormRow>
-          <EuiSpacer size="l" />
-          <EuiPanel hasBorder paddingSize="m" color="subdued">
-            <EuiTitle size="xs">
-              <h3>{i18n.FIELD_DEFINITION_PREVIEW_LABEL}</h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <FieldDefinitionPreview definition={definition} onDefaultChange={handleDefaultChange} />
-          </EuiPanel>
+          <EuiSpacer size="m" />
+          <EuiTitle size="xs">
+            <h3>{i18n.FIELD_DEFINITION_PREVIEW_LABEL}</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <FieldDefinitionPreview definition={definition} onDefaultChange={handleDefaultChange} />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -205,7 +203,6 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
               fill
               onClick={handleSave}
               isLoading={isSaving}
-              disabled={!isDefinitionValid}
               data-test-subj="fieldDefinitionSaveButton"
             >
               {i18n.SAVE_FIELD_DEFINITION}

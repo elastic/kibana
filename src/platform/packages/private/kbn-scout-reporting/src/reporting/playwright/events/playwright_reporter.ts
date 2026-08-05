@@ -41,13 +41,11 @@ import {
   ScoutReportEventAction,
   type ScoutTestRunInfo,
   type ScoutFileInfo,
-  type ScoutTestInfo,
   type ScoutReportEvent,
 } from '../../report';
 import { environmentMetadata } from '../../../datasources';
 import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
-import { generateTestRunId } from '../../../helpers';
-import { getTestIdentity } from '../test_identity';
+import { generateTestRunId, computeTestID } from '../../../helpers';
 
 /**
  * Scout Playwright reporter
@@ -60,10 +58,16 @@ export class ScoutPlaywrightReporter implements Reporter {
   private report: ScoutEventsReport;
   private baseTestRunInfo: ScoutTestRunInfo;
   private readonly codeOwnersEntries: CodeOwnersEntry[];
-  /** Root suite captured in `onBegin`; walked in `onEnd` once every attempt is known. */
-  private suite?: Suite;
-  /** CODEOWNERS lookup repeats for every attempt and every test in a file; memoize by path. */
-  private readonly scoutFileInfoCache = new Map<string, ScoutFileInfo>();
+
+  private readonly testStats: {
+    passes: number;
+    failures: number;
+    pending: number;
+  } = {
+    passes: 0,
+    failures: 0,
+    pending: 0,
+  };
 
   constructor(private reporterOptions: ScoutPlaywrightReporterOptions = {}) {
     this.log = new ToolingLog({
@@ -101,21 +105,14 @@ export class ScoutPlaywrightReporter implements Reporter {
   }
 
   private getScoutFileInfoForPath(filePath: string): ScoutFileInfo {
-    const cached = this.scoutFileInfoCache.get(filePath);
-    if (cached) {
-      return cached;
-    }
-
     const fileOwners = this.getFileOwners(filePath);
     const areas = this.getOwnerAreas(fileOwners);
-    const fileInfo: ScoutFileInfo = {
+
+    return {
       path: filePath,
       owner: fileOwners.length > 0 ? fileOwners : 'unknown',
       area: areas.length > 0 ? areas : 'unknown',
     };
-
-    this.scoutFileInfoCache.set(filePath, fileInfo);
-    return fileInfo;
   }
 
   private getScoutConfigInfo(absoluteConfigPath: string): {
@@ -148,15 +145,16 @@ export class ScoutPlaywrightReporter implements Reporter {
     test: TestCase,
     step?: TestStep,
     result?: TestResult
-  ): ScoutTestInfo {
-    const { id, filePath } = getTestIdentity(test);
-    const testProps: ScoutTestInfo = {
-      id,
+  ): ScoutReportEvent['test'] {
+    const fullTestTitle = test.titlePath().slice(3).join(' ');
+    const testFilePath = path.relative(REPO_ROOT, test.location.file);
+    const testProps: ScoutReportEvent['test'] = {
+      id: computeTestID(testFilePath, fullTestTitle),
       title: test.title,
       tags: test.tags,
       annotations: test.annotations,
       expected_status: test.expectedStatus,
-      file: this.getScoutFileInfoForPath(filePath),
+      file: this.getScoutFileInfoForPath(testFilePath),
     };
 
     if (step) {
@@ -169,8 +167,6 @@ export class ScoutPlaywrightReporter implements Reporter {
     if (result) {
       testProps.status = result.status;
       testProps.duration = result.duration;
-      // Zero-based attempt index; 0 is the first run, 1 the first retry.
-      testProps.attempt = result.retry;
       const consoleErrors = result.attachments
         .find((a) => a.name === BROWSER_CONSOLE_ERRORS_ATTACHMENT)
         ?.body?.toString('utf-8');
@@ -195,9 +191,7 @@ export class ScoutPlaywrightReporter implements Reporter {
     return false;
   }
 
-  onBegin(config: FullConfig, suite: Suite) {
-    this.suite = suite;
-
+  onBegin(config: FullConfig, _: Suite) {
     // Enrich base test run info with config file info
     let configInfo: ScoutTestRunInfo['config'];
 
@@ -226,6 +220,23 @@ export class ScoutPlaywrightReporter implements Reporter {
       test_run: this.baseTestRunInfo,
       event: {
         action: ScoutReportEventAction.RUN_BEGIN,
+      },
+    });
+  }
+
+  onTestBegin(test: TestCase, result: TestResult) {
+    this.report.logEvent({
+      '@timestamp': result.startTime,
+      ...environmentMetadata,
+      reporter: {
+        name: this.name,
+        type: 'playwright',
+      },
+      test_run: this.baseTestRunInfo,
+      suite: this.getSuitePropsFromTest(test),
+      test: this.getTestPropsFromTest(test),
+      event: {
+        action: ScoutReportEventAction.TEST_BEGIN,
       },
     });
   }
@@ -272,6 +283,26 @@ export class ScoutPlaywrightReporter implements Reporter {
   }
 
   onTestEnd(test: TestCase, result: TestResult) {
+    switch (result.status) {
+      case 'failed':
+        this.testStats.failures++;
+        break;
+      case 'interrupted':
+        this.testStats.failures++;
+        break;
+      case 'timedOut':
+        this.testStats.failures++;
+        break;
+
+      case 'passed':
+        this.testStats.passes++;
+        break;
+
+      case 'skipped':
+        this.testStats.pending++;
+        break;
+    }
+
     this.report.logEvent({
       ...environmentMetadata,
       reporter: {
@@ -291,63 +322,7 @@ export class ScoutPlaywrightReporter implements Reporter {
     });
   }
 
-  /**
-   * Derived from each test's final `outcome()` rather than accumulated per-attempt in
-   * `onTestEnd`, since a retried test would otherwise be counted as both a failure and a pass.
-   */
-  private deriveTestStats(tests: TestCase[]): NonNullable<ScoutTestRunInfo['tests']> {
-    const stats = { passes: 0, failures: 0, pending: 0, flaky: 0, total: tests.length };
-
-    for (const test of tests) {
-      switch (test.outcome()) {
-        case 'expected':
-          stats.passes++;
-          break;
-        case 'flaky':
-          stats.passes++;
-          stats.flaky++;
-          break;
-        case 'skipped':
-          stats.pending++;
-          break;
-        case 'unexpected':
-          stats.failures++;
-          break;
-      }
-    }
-
-    return stats;
-  }
-
   async onEnd(result: FullResult) {
-    const tests = this.suite?.allTests() ?? [];
-
-    // One `test-outcome` event per test with its final classification, in addition to the
-    // per-attempt `test-end` events already logged by onTestEnd.
-    for (const test of tests) {
-      const attempts = test.results;
-      this.report.logEvent({
-        ...environmentMetadata,
-        reporter: {
-          name: this.name,
-          type: 'playwright',
-        },
-        test_run: this.baseTestRunInfo,
-        suite: this.getSuitePropsFromTest(test),
-        test: {
-          ...this.getTestPropsFromTest(test),
-          // Status of the last attempt
-          status: attempts.at(-1)?.status,
-          outcome: test.outcome(),
-          attempts: attempts.length,
-          duration: attempts.reduce((total, attempt) => total + attempt.duration, 0),
-        },
-        event: {
-          action: ScoutReportEventAction.TEST_OUTCOME,
-        },
-      });
-    }
-
     this.report.logEvent({
       ...environmentMetadata,
       reporter: {
@@ -358,7 +333,12 @@ export class ScoutPlaywrightReporter implements Reporter {
         ...this.baseTestRunInfo,
         status: result.status,
         duration: result.duration,
-        tests: this.deriveTestStats(tests),
+        tests: {
+          failures: this.testStats.failures,
+          passes: this.testStats.passes,
+          pending: this.testStats.pending,
+          total: this.testStats.failures + this.testStats.passes + this.testStats.pending,
+        },
       },
       event: {
         action: ScoutReportEventAction.RUN_END,

@@ -27,28 +27,8 @@ jest.mock('../../../contexts/kibana/kibana_context', () => ({
           ml: { calendars: 'calendars link' },
         },
       },
-      application: {
-        navigateToApp: jest.fn(),
-        getUrlForApp: jest.fn(() => '/app/management/ml/ad_settings/'),
-      },
     },
   }),
-}));
-jest.mock('../../../contexts/kibana', () => ({
-  useMlKibana: () => ({
-    services: {
-      docLinks: {
-        links: {
-          ml: { calendars: 'calendars link' },
-        },
-      },
-      application: {
-        navigateToApp: jest.fn(),
-        getUrlForApp: jest.fn(() => '/app/management/ml/ad_settings/'),
-      },
-    },
-  }),
-  useNavigateToPath: () => jest.fn(),
 }));
 
 describe('CalendarListsHeader', () => {

@@ -202,9 +202,9 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       );
 
       // Rule fields
-      expect(event.rule?.id).toBe(rule.id);
-      expect(Number.isInteger(event.rule?.version)).toBe(true);
-      expect(event.rule?.version).toBeGreaterThan(0);
+      expect(event.rule.id).toBe(rule.id);
+      expect(Number.isInteger(event.rule.version)).toBe(true);
+      expect(event.rule.version).toBeGreaterThan(0);
 
       // Event fields
       expect(typeof event.group_hash).toBe('string');
@@ -1713,9 +1713,8 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
       // Wait until host-a is in the recovered set AND host-b has produced
       // a NEW breach event after the recovery threshold. Strong assertion:
-      // both branches of `ClassifyAbsentGroupsStep`'s recovery classification
-      // (append recovery events for absent groups alongside the run's breaches)
-      // ran for the same execution.
+      // both branches of `CreateRecoveryEventsStep` (append recovery events
+      // to the existing breach batch) ran in the same pipeline tick.
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'recovered' });
       await expect
         .poll(

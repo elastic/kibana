@@ -154,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await header.waitUntilLoadingHasFinished();
         });
         await lens.waitForVisualization();
-        expect(await lens.getDatatableCellText(0, 0)).to.eql('$5,727.31');
+        expect(await lens.getDatatableCellText(0, 0)).to.eql('$5,727.32');
       });
 
       it('should display duration number formatter correctly', async () => {
@@ -180,7 +180,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await header.waitUntilLoadingHasFinished();
         });
         await lens.waitForVisualization();
-        expect(await lens.getDatatableCellText(0, 0)).to.eql('572,731.362%');
+        expect(await lens.getDatatableCellText(0, 0)).to.eql('572,732.21%');
       });
     });
     describe('formatter order', () => {

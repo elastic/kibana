@@ -91,9 +91,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const { title } = await toasts.getErrorByIndex(1, true);
         expect(title).to.be('Timed out');
 
-        // Dismiss the toast so it doesn't cover the callout's action button
-        await toasts.dismissAllWithChecks();
-
         // View cluster details shows timed out
         await testSubjects.click('searchResponseWarningsViewDetails');
         await testSubjects.click('viewDetailsContextMenu');
@@ -155,9 +152,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const { title } = await toasts.getErrorByIndex(1, true);
         expect(title).to.be('Timed out');
 
-        // Dismiss the toast so it doesn't cover the callout's action button
-        await toasts.dismissAllWithChecks();
-
         // View cluster details shows timed out
         await testSubjects.click('searchResponseWarningsViewDetails');
         await testSubjects.click('viewDetailsContextMenu');
@@ -190,9 +184,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Timed out error notification is shown
         const { title } = await toasts.getErrorByIndex(1, true);
         expect(title).to.contain('Timed out');
-
-        // Dismiss the toast so it doesn't cover the callout's action button
-        await toasts.dismissAllWithChecks();
 
         // View cluster details shows timed out
         await testSubjects.click('searchResponseWarningsViewDetails');

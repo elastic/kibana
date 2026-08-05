@@ -8,7 +8,6 @@
 import sinon from 'sinon';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { RequestHandlerContext, SavedObjectReference } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { savedObjectsClientMock, coreMock } from '@kbn/core/server/mocks';
 
 import { CANVAS_TYPE } from '../common/lib/constants';
@@ -181,9 +180,6 @@ describe('workpad route context', () => {
       const { id: ingnoredId, ...expectedAttributes } = runtimeWorkpad;
 
       expect(mockContext.core.savedObjects.client.resolve).toBeCalledWith(CANVAS_TYPE, id);
-      if (isSavedObjectErrorResult(result.saved_object)) {
-        throw new Error('Expected a successful saved object result');
-      }
       expect(result.saved_object.attributes).toEqual(expectedAttributes);
     });
   });

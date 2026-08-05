@@ -11,9 +11,9 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import { RULE_ATTACHMENT_TYPE, getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { alertingTools } from '../../common/constants';
 import {
   ruleOperationSchema,
   executeRuleOperations,
@@ -31,7 +31,7 @@ const manageRuleSchema = z.object({
 });
 
 export const manageRuleTool = (): BuiltinSkillBoundedTool<typeof manageRuleSchema> => ({
-  id: ALERTING_TOOL_IDS.manageRule,
+  id: alertingTools.manageRule,
   type: ToolType.builtin,
   description: `Create or update an alerting V2 rule in the conversation.
 

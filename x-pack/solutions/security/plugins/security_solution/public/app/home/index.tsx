@@ -27,7 +27,6 @@ import { TopValuesPopover } from '../components/top_values_popover/top_values_po
 import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
 import { useRestoreDataViewManagerStateFromURL } from '../../data_view_manager/hooks/use_sync_url_state';
 import { useBrowserFields } from '../../data_view_manager/hooks/use_browser_fields';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useFlyoutV2RestoreFromUrl } from '../../flyout_v2/shared/url_state/use_flyout_v2_restore';
 import {
   FLYOUT_V2_URL_PARAM,
@@ -42,8 +41,7 @@ interface HomePageProps {
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const { pathname } = useLocation();
-  const { dataView } = useDataView(getScopeFromPath(pathname));
-  const browserFields = useBrowserFields(dataView);
+  const browserFields = useBrowserFields(getScopeFromPath(pathname));
 
   useRestoreDataViewManagerStateFromURL(useInitDataViewManager(), getScopeFromPath(pathname));
 

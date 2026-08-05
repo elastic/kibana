@@ -243,7 +243,7 @@ export const SnapshotsSection: React.FC = () => {
                   render: (name: string, item: { icon: string }) => (
                     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type={item.icon} aria-hidden={true} />
+                        <EuiIcon type={item.icon} />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiLink onClick={() => {}}>{name}</EuiLink>
@@ -260,7 +260,7 @@ export const SnapshotsSection: React.FC = () => {
                     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                       {status === 'Sync error' && (
                         <EuiFlexItem grow={false}>
-                          <EuiIcon type="warning" color="danger" aria-hidden={true} />
+                          <EuiIcon type="warning" color="danger" />
                         </EuiFlexItem>
                       )}
                       <EuiFlexItem>

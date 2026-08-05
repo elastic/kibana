@@ -5,48 +5,63 @@
  * 2.0.
  */
 
+import yaml from 'js-yaml';
 import type { ParsedSkillMeta } from '@kbn/agent-builder-common';
-import { splitFrontmatter } from '@kbn/agent-builder-skill-loader';
 
 export interface ParsedSkillFileResult {
   meta: ParsedSkillMeta;
   content: string;
 }
 
+const frontmatterRegex = /^---\s*\r?\n([\s\S]*?)---\s*\r?\n?([\s\S]*)$/;
+
 /**
  * Parses a SKILL.md file content, extracting YAML frontmatter metadata
  * and the markdown body.
  */
 export const parseSkillFile = (rawContent: string): ParsedSkillFileResult => {
-  const { frontmatter, body } = splitFrontmatter(rawContent);
+  const match = rawContent.match(frontmatterRegex);
+  if (!match) {
+    return {
+      meta: {},
+      content: rawContent.trim(),
+    };
+  }
+
+  const [, frontmatterRaw, body] = match;
+  const meta = parseFrontmatter(frontmatterRaw);
 
   return {
-    meta: frontmatter ? toSkillMeta(frontmatter) : {},
-    content: body,
+    meta,
+    content: body.trim(),
   };
 };
 
-const toSkillMeta = (frontmatter: Record<string, unknown>): ParsedSkillMeta => {
-  const {
-    name,
-    description,
-    'disable-model-invocation': disableModelInvocation,
-    'allowed-tools': allowedTools,
-  } = frontmatter;
+const parseFrontmatter = (raw: string): ParsedSkillMeta => {
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = (yaml.load(raw) as Record<string, unknown>) ?? {};
+  } catch {
+    return {};
+  }
+
+  if (typeof parsed !== 'object' || parsed === null) {
+    return {};
+  }
 
   const meta: ParsedSkillMeta = {};
 
-  if (typeof name === 'string') {
-    meta.name = name;
+  if (typeof parsed.name === 'string') {
+    meta.name = parsed.name;
   }
-  if (typeof description === 'string') {
-    meta.description = description;
+  if (typeof parsed.description === 'string') {
+    meta.description = parsed.description;
   }
-  if (typeof disableModelInvocation === 'boolean') {
-    meta.disableModelInvocation = disableModelInvocation;
+  if (typeof parsed['disable-model-invocation'] === 'boolean') {
+    meta.disableModelInvocation = parsed['disable-model-invocation'];
   }
-  if (typeof allowedTools === 'string') {
-    meta.allowedTools = allowedTools
+  if (typeof parsed['allowed-tools'] === 'string') {
+    meta.allowedTools = parsed['allowed-tools']
       .split(',')
       .map((tool) => tool.trim())
       .filter((tool) => tool.length > 0);

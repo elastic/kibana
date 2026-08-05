@@ -8,7 +8,6 @@
 import { uniq, difference } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
-  SavedObject,
   SavedObjectsClientContract,
   ISavedObjectTypeRegistry,
   KibanaRequest,
@@ -135,28 +134,26 @@ export class AssignmentService {
     // if we failed to fetch any object, just halt and throw an error
     const firstObjWithError = objects.find(isSavedObjectErrorResult);
     if (firstObjWithError) {
-      const firstError = firstObjWithError.error;
+      const firstError = firstObjWithError.error!;
       throw new AssignmentError(firstError.message, firstError.statusCode);
     }
 
     const toAssign = new Set(assign.map(getKey));
     const toUnassign = new Set(unassign.map(getKey));
 
-    const updatedObjects = objects
-      .filter((object): object is SavedObject => !isSavedObjectErrorResult(object))
-      .map((object) => {
-        return {
-          id: object.id,
-          type: object.type,
-          // partial update. this will not update any attribute
-          attributes: {},
-          references: updateTagReferences({
-            references: object.references,
-            toAdd: toAssign.has(getKey(object)) ? tags : [],
-            toRemove: toUnassign.has(getKey(object)) ? tags : [],
-          }),
-        };
-      });
+    const updatedObjects = objects.map((object) => {
+      return {
+        id: object.id,
+        type: object.type,
+        // partial update. this will not update any attribute
+        attributes: {},
+        references: updateTagReferences({
+          references: object.references,
+          toAdd: toAssign.has(getKey(object)) ? tags : [],
+          toRemove: toUnassign.has(getKey(object)) ? tags : [],
+        }),
+      };
+    });
 
     await this.soClient.bulkUpdate(updatedObjects, { refresh });
   }

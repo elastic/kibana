@@ -121,9 +121,7 @@ export async function bulkCreateFleetProxies(
   }
 
   logger.debug(`Bulk created ${proxies.length} fleet proxies`);
-  return res.saved_objects
-    .filter((so): so is SavedObject<FleetProxySOAttributes> => !isSavedObjectErrorResult(so))
-    .map(savedObjectToFleetProxy);
+  return res.saved_objects.map(savedObjectToFleetProxy);
 }
 
 export async function getFleetProxy(

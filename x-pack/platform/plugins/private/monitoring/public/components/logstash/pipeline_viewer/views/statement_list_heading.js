@@ -13,7 +13,7 @@ export function StatementListHeading({ iconType, title }) {
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="baseline">
       <EuiFlexItem grow={false}>
-        <EuiIcon type={iconType} aria-hidden={true} />
+        <EuiIcon type={iconType} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiTitle size="s">

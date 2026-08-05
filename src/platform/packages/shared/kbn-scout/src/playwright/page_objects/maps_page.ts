@@ -10,7 +10,7 @@
 import type { ScoutPage } from '..';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
-// Maps first paint regularly exceeds Scout's 10s actionTimeout under parallel load.
+// Increased timeout because new map container is not always loaded within default one
 const DEFAULT_MAP_LOADING_TIMEOUT = 20_000;
 
 export class MapsPage {
@@ -23,8 +23,6 @@ export class MapsPage {
   public readonly importFileButton;
   public readonly returnToOriginSwitch;
   public readonly documentsItem;
-  private readonly mapLayerToc;
-  private readonly layerTocTooltip;
   /** Save modal locators/actions, shared with other apps (e.g. Visualize) via `SavedObjectSaveModal`. */
   public readonly saveModal: SavedObjectSaveModal;
 
@@ -40,8 +38,6 @@ export class MapsPage {
     this.importFileButton = this.page.testSubj.locator('importFileButton');
     this.returnToOriginSwitch = this.page.testSubj.locator('returnToOriginModeSwitch');
     this.documentsItem = this.page.testSubj.locator('documents');
-    this.mapLayerToc = this.page.testSubj.locator('mapLayerTOC');
-    this.layerTocTooltip = this.page.testSubj.locator('layerTocTooltip');
     this.saveModal = new SavedObjectSaveModal(this.page);
   }
 
@@ -95,46 +91,5 @@ export class MapsPage {
     await this.importFileButton.click();
     await this.waitForRenderComplete();
     await this.saveAndReturnButton.click();
-  }
-
-  /** Waits until Map layer TOC has entries and loading indicators are gone (FTR parity). */
-  async waitForLayersToLoad() {
-    await this.mapLayerToc.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
-    // Maps uses EuiLoadingSpinner (role=progressbar) while a layer loads; there is no
-    // dedicated layer-loading data-test-subj, so wait for toggles + no progressbars.
-    await this.page.waitForFunction(
-      () => {
-        const toc = document.querySelector('[data-test-subj="mapLayerTOC"]');
-        if (!toc) {
-          return false;
-        }
-        const layerCount = toc.querySelectorAll(
-          '[data-test-subj^="layerTocActionsPanelToggleButton"]'
-        ).length;
-        const spinnerCount = toc.querySelectorAll('[role="progressbar"]').length;
-        return layerCount > 0 && spinnerCount === 0;
-      },
-      undefined,
-      { timeout: DEFAULT_MAP_LOADING_TIMEOUT }
-    );
-  }
-
-  async getLayerTocTooltipMsg(layerName: string): Promise<string> {
-    await this.getLayerToggleButton(layerName).hover();
-    await this.layerTocTooltip.waitFor({ state: 'visible' });
-    // Normalize whitespace — tooltip lines can include leading spaces from TOC layout.
-    return (await this.layerTocTooltip.innerText())
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .join('\n');
-  }
-
-  /** Reloads the page and dismisses the unsaved-changes browser dialog if present. */
-  async refreshAndClearUnsavedChangesWarning() {
-    this.page.once('dialog', async (dialog) => {
-      await dialog.accept();
-    });
-    await this.page.reload();
   }
 }

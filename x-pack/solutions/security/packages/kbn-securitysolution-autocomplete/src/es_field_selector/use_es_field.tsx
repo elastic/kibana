@@ -192,7 +192,7 @@ export const useEsField = ({
           content={labelTooltipText}
           position="bottom"
         >
-          <span tabIndex={0}>{label}</span>
+          <span>{label}</span>
         </EuiToolTip>
       );
     }

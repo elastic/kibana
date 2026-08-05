@@ -15,8 +15,6 @@ export const createDispatchableAlertEventsResponse = (
     columns: [
       { name: 'last_event_timestamp', type: 'date' },
       { name: 'rule_id', type: 'keyword' },
-      { name: 'source', type: 'keyword' },
-      { name: 'space_id', type: 'keyword' },
       { name: 'group_hash', type: 'keyword' },
       { name: 'episode_id', type: 'keyword' },
       { name: 'episode_status', type: 'keyword' },
@@ -26,8 +24,6 @@ export const createDispatchableAlertEventsResponse = (
     values: alertEpisodes.map((alertEpisode) => [
       alertEpisode.last_event_timestamp,
       alertEpisode.rule_id,
-      alertEpisode.source,
-      alertEpisode.space_id,
       alertEpisode.group_hash,
       alertEpisode.episode_id,
       alertEpisode.episode_status,
@@ -46,22 +42,12 @@ export const createAlertEpisodeSuppressionsResponse = (
       { name: 'group_hash', type: 'keyword' },
       { name: 'episode_id', type: 'keyword' },
       { name: 'should_suppress', type: 'boolean' },
-      { name: 'last_ack_action', type: 'keyword' },
-      { name: 'last_deactivate_action', type: 'keyword' },
-      { name: 'last_snooze_action', type: 'keyword' },
-      { name: 'source', type: 'keyword' },
-      { name: 'space_id', type: 'keyword' },
     ],
     values: suppressions.map((suppression) => [
       suppression.rule_id,
       suppression.group_hash,
       suppression.episode_id,
       suppression.should_suppress,
-      suppression.last_ack_action ?? null,
-      suppression.last_deactivate_action ?? null,
-      suppression.last_snooze_action ?? null,
-      suppression.source,
-      suppression.space_id,
     ]),
   };
 };

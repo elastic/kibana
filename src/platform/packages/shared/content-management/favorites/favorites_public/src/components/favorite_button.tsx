@@ -9,39 +9,70 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FavoriteButton as FavoriteButtonView } from '@kbn/favorite-button';
-import { useFavorite } from '../use_favorite';
+import classNames from 'classnames';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { useAddFavorite, useFavorites, useRemoveFavorite } from '../favorites_query';
+import { useFavoritesClient } from '../favorites_context';
+import { StardustWrapper } from './stardust_wrapper';
 
 export interface FavoriteButtonProps {
   id: string;
   className?: string;
 }
 
-const ADD_LABEL = i18n.translate('contentManagement.favorites.favoriteButtonLabel', {
-  defaultMessage: 'Add to Starred',
-});
-
-const REMOVE_LABEL = i18n.translate('contentManagement.favorites.unfavoriteButtonLabel', {
-  defaultMessage: 'Remove from Starred',
-});
-
 export const FavoriteButton = ({ id, className }: FavoriteButtonProps) => {
-  const favorite = useFavorite({ id });
+  const { data } = useFavorites();
 
-  if (!favorite) {
+  const removeFavorite = useRemoveFavorite();
+  const addFavorite = useAddFavorite();
+
+  const favoritesClient = useFavoritesClient();
+
+  if (!data) {
     return null;
   }
 
-  const isPersistedFavorite = favorite.status === 'favorited' || favorite.status === 'removing';
+  const isFavorite = data.favoriteIds.includes(id);
+  const isFavoriteOptimistic = isFavorite || addFavorite.isLoading;
+
+  const title = isFavoriteOptimistic
+    ? i18n.translate('contentManagement.favorites.unfavoriteButtonLabel', {
+        defaultMessage: 'Remove from Starred',
+      })
+    : i18n.translate('contentManagement.favorites.favoriteButtonLabel', {
+        defaultMessage: 'Add to Starred',
+      });
 
   return (
-    <FavoriteButtonView
-      status={favorite.status}
-      onClick={favorite.onToggle}
-      addLabel={ADD_LABEL}
-      removeLabel={REMOVE_LABEL}
+    <StardustWrapper
       className={className}
-      data-test-subj={isPersistedFavorite ? 'unfavoriteButton' : 'favoriteButton'}
-    />
+      active={(isFavorite && addFavorite.isSuccess) || addFavorite.isLoading}
+    >
+      <EuiToolTip content={title} disableScreenReaderOutput>
+        <EuiButtonIcon
+          isLoading={removeFavorite.isLoading}
+          aria-label={title}
+          iconType={isFavoriteOptimistic ? 'starFill' : 'star'}
+          onClick={() => {
+            if (addFavorite.isLoading || removeFavorite.isLoading) {
+              return;
+            }
+
+            if (isFavorite) {
+              favoritesClient?.reportRemoveFavoriteClick();
+              removeFavorite.mutate({ id });
+            } else {
+              favoritesClient?.reportAddFavoriteClick();
+              addFavorite.mutate({ id });
+            }
+          }}
+          className={classNames('cm-favorite-button', {
+            'cm-favorite-button--active': isFavorite && !removeFavorite.isLoading,
+            'cm-favorite-button--empty': !isFavorite && !addFavorite.isLoading,
+          })}
+          data-test-subj={isFavorite ? 'unfavoriteButton' : 'favoriteButton'}
+        />
+      </EuiToolTip>
+    </StardustWrapper>
   );
 };

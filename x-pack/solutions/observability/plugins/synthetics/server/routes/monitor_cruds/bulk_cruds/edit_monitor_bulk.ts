@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import type { RouteContext } from '../../types';
@@ -115,10 +114,6 @@ export const syncEditedMonitorBulk = async ({
       const editedMonitorSavedObject = editedMonitorSavedObjects?.saved_objects.find(
         (obj) => obj.id === decryptedPreviousMonitor.id
       );
-
-      if (!editedMonitorSavedObject || isSavedObjectErrorResult(editedMonitorSavedObject)) {
-        return;
-      }
 
       sendTelemetryEvents(
         server.logger,

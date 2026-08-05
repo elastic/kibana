@@ -13,7 +13,7 @@ const TOOL_ID_EXECUTE_ESQL = platformCoreTools.executeEsql;
 const {
   searchKnowledgeIndicators: TOOL_ID_KI_SEARCH,
   searchEvent: TOOL_ID_EVENT_SEARCH,
-  eventsWrite: TOOL_ID_EVENTS_WRITE,
+  discoveryWrite: TOOL_ID_DISCOVERY_WRITE,
 } = platformSignificantEventsTools;
 
 const toolCall = (
@@ -34,7 +34,7 @@ const retryCall = (toolId: string): ConverseStep => ({
 });
 
 const retryableWriteCall = (): ConverseStep => ({
-  ...toolCall(TOOL_ID_EVENTS_WRITE),
+  ...toolCall(TOOL_ID_DISCOVERY_WRITE),
   results: [{ data: { results: [{ index: 0, written: false, reason: 'bulk_error' }] } }],
 });
 
@@ -42,7 +42,7 @@ const allExpectedTools: ConverseStep[] = [
   toolCall(TOOL_ID_EVENT_SEARCH, { exclude_unconfirmed_signals: true }),
   toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
   toolCall(TOOL_ID_EXECUTE_ESQL),
-  toolCall(TOOL_ID_EVENTS_WRITE),
+  toolCall(TOOL_ID_DISCOVERY_WRITE),
 ];
 
 describe('scoreToolUsage', () => {
@@ -68,11 +68,11 @@ describe('scoreToolUsage', () => {
     });
   });
 
-  it('scores 0 and labels missing-events_write when events_write is never called', () => {
-    const steps = allExpectedTools.filter((s) => s.tool_id !== TOOL_ID_EVENTS_WRITE);
+  it('scores 0 and labels missing-discovery_write when discovery_write is never called', () => {
+    const steps = allExpectedTools.filter((s) => s.tool_id !== TOOL_ID_DISCOVERY_WRITE);
     const result = scoreToolUsage({ steps, detectionCount: 1 });
     expect(result.score).toBe(0);
-    expect(result.label).toBe(`missing-${TOOL_ID_EVENTS_WRITE}`);
+    expect(result.label).toBe(`missing-${TOOL_ID_DISCOVERY_WRITE}`);
   });
 
   it('gives partial credit when one of the three expected investigation tools is missing', () => {
@@ -98,26 +98,26 @@ describe('scoreToolUsage', () => {
     const steps = [
       toolCall(TOOL_ID_EVENT_SEARCH, { exclude_unconfirmed_signals: true }),
       toolCall(TOOL_ID_KI_SEARCH, { kind: ['feature'] }),
-      toolCall(TOOL_ID_EVENTS_WRITE),
+      toolCall(TOOL_ID_DISCOVERY_WRITE),
     ];
 
     expect(scoreToolUsage({ steps, detectionCount: 1 }).label).toBe('missing-query-ki-search');
   });
 
-  it('penalizes multiple event writes without a partial-failure retry', () => {
+  it('penalizes multiple discovery writes without a partial-failure retry', () => {
     const result = scoreToolUsage({
-      steps: [...allExpectedTools, toolCall(TOOL_ID_EVENTS_WRITE)],
+      steps: [...allExpectedTools, toolCall(TOOL_ID_DISCOVERY_WRITE)],
       detectionCount: 1,
     });
-    expect(result).toMatchObject({ score: 0.75, label: 'multiple-events-write-calls' });
+    expect(result).toMatchObject({ score: 0.75, label: 'multiple-discovery-write-calls' });
   });
 
   it('allows one retry after a discovery bulk item fails', () => {
     const steps = allExpectedTools.map((step) =>
-      step.tool_id === TOOL_ID_EVENTS_WRITE ? retryableWriteCall() : step
+      step.tool_id === TOOL_ID_DISCOVERY_WRITE ? retryableWriteCall() : step
     );
     const result = scoreToolUsage({
-      steps: [...steps, retryCall(TOOL_ID_EVENTS_WRITE)],
+      steps: [...steps, retryCall(TOOL_ID_DISCOVERY_WRITE)],
       detectionCount: 1,
     });
     expect(result).toMatchObject({ score: 1, label: 'correct' });

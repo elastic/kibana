@@ -13,10 +13,6 @@ import { CiStatsClient } from './client';
 const buildkite = new BuildkiteClient();
 const ciStats = new CiStatsClient();
 
-export function isMissingMergeBaseBaselineReport(reportMd: string): boolean {
-  return /ERROR: no builds found for mergeBase sha \[[a-f0-9]{40}\]/i.test(reportMd);
-}
-
 export async function onComplete() {
   if (!process.env.CI_STATS_BUILD_ID) {
     return;
@@ -49,15 +45,11 @@ export async function onComplete() {
       );
     }
 
-    const annotationType = report.success
-      ? 'info'
-      : isMissingMergeBaseBaselineReport(report.md)
-      ? 'warning'
-      : 'error';
+    const annotationType = report?.success ? 'info' : 'error';
     buildkite.setAnnotation('ci-stats-report', annotationType, report.md);
   }
 
-  if (report && !report.success && !isMissingMergeBaseBaselineReport(report.md)) {
+  if (report && !report.success) {
     console.log('+++ CI Stats Report');
     console.error('Failing build due to CI Stats report. See annotation at top of build.');
     process.exit(1);

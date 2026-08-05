@@ -10,13 +10,6 @@ import { render, fireEvent, waitFor } from '@testing-library/react';
 import { WatchlistCsvUpload } from './watchlist_csv_upload';
 import { TestProviders } from '../../../../common/mock';
 
-const mockInvalidateQueries = jest.fn();
-
-jest.mock('@kbn/react-query', () => ({
-  ...jest.requireActual('@kbn/react-query'),
-  useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
-}));
-
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -166,9 +159,6 @@ describe('WatchlistCsvUpload', () => {
 
       await waitFor(() => {
         expect(mockUploadWatchlistCsv).toHaveBeenCalledWith('test-watchlist-id', expect.any(File));
-        expect(mockInvalidateQueries).toHaveBeenCalledWith({
-          queryKey: ['watchlists-management-table'],
-        });
       });
     });
 
@@ -198,7 +188,7 @@ describe('WatchlistCsvUpload', () => {
       fireEvent.click(getByTestId('watchlist-csv-upload-button'));
 
       await waitFor(() => {
-        expect(getByText(/2 rows added to the watchlist/)).toBeInTheDocument();
+        expect(getByText(/2 entities added to the watchlist/)).toBeInTheDocument();
       });
     });
 

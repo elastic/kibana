@@ -92,6 +92,10 @@ class DownloadSourceService {
         id
       );
 
+    if (soResponse.error) {
+      throw new FleetError(soResponse.error.message);
+    }
+
     return savedObjectToDownloadSource(soResponse);
   }
 
@@ -421,12 +425,16 @@ class DownloadSourceService {
       }
     }
 
-    await this.soClient.update<DownloadSourceSOAttributes>(
+    const soResponse = await this.soClient.update<DownloadSourceSOAttributes>(
       DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       id,
       updateData
     );
-    logger.debug(`Updated download source ${id}`);
+    if (soResponse.error) {
+      throw new FleetError(soResponse.error.message);
+    } else {
+      logger.debug(`Updated download source ${id}`);
+    }
   }
 
   public async delete(id: string) {

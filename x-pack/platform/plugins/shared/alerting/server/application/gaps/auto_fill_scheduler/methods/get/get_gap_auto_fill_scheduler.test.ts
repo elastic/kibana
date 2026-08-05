@@ -176,6 +176,20 @@ describe('getGapFillAutoScheduler()', () => {
       );
     });
 
+    test('should throw when saved object has error payload', async () => {
+      const soErrorLike = {
+        id: 'gap-1',
+        type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+        error: { error: 'err', message: 'Unable to get', statusCode: 404 },
+        attributes: { name: 'auto-fill' },
+      } as unknown as SavedObject<GapAutoFillSchedulerSO>;
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(soErrorLike);
+
+      await expect(rulesClient.getGapAutoFillScheduler({ id: 'gap-1' })).rejects.toThrowError(
+        'Unable to get'
+      );
+    });
+
     test('logs 404 errors as info instead of error', async () => {
       const notFoundError = Boom.notFound('gap scheduler not found');
       unsecuredSavedObjectsClient.get.mockRejectedValueOnce(notFoundError);

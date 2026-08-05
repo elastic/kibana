@@ -18,7 +18,6 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import { StepItem } from './step_item';
 import { ToolCallGroup } from './steps/tool_call_group';
-import { ToolCallStep } from './steps/tool_call_step';
 import { groupSteps } from './group_steps';
 
 interface RoundEventsProps {
@@ -46,11 +45,7 @@ export const RoundEvents: React.FC<RoundEventsProps> = ({
             if (item.kind === 'group') {
               return (
                 <EuiFlexItem grow={false} key={`group-${item.steps[0].tool_call_id}`}>
-                  {item.steps.length === 1 ? (
-                    <ToolCallStep step={item.steps[0]} />
-                  ) : (
-                    <ToolCallGroup steps={item.steps} />
-                  )}
+                  <ToolCallGroup steps={item.steps} />
                 </EuiFlexItem>
               );
             }

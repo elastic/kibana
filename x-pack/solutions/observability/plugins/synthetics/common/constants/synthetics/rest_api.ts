@@ -64,7 +64,6 @@ export enum SYNTHETICS_API_URLS {
   ERROR_STATS = '/internal/synthetics/error_stats',
 
   SUGGESTIONS = `/internal/synthetics/suggestions`,
-  FIELD_SUGGESTIONS = `/internal/synthetics/field_suggestions`,
   MAINTENANCE_WINDOWS = `/internal/synthetics/monitors/maintenance_windows`,
 
   // Project monitor public endpoint

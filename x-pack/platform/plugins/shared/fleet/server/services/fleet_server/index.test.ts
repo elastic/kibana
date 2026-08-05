@@ -122,8 +122,8 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
       esClientMock,
       soClientMock,
       expect.objectContaining({
-        // kuery uses policy_base_id term query with policy_id fallback for un-migrated agents
-        kuery: expect.stringContaining('policy_base_id'),
+        // kuery must cover both base and versioned variants (e.g. policy_id:1#*)
+        kuery: expect.stringContaining('policy_id:1#*'),
       })
     );
   });
@@ -204,10 +204,9 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
     );
 
     expect(result).toBe(true);
-    // Kuery uses policy_base_id term query (no expensive prefix/wildcard)
+    // Kuery must include the wildcard variant so versioned agents are found
     const kuery = mockedGetAgentsByKuery.mock.calls[0][2].kuery as string;
-    expect(kuery).toContain('policy_base_id');
-    expect(kuery).toContain('fleet-server-policy');
+    expect(kuery).toContain('fleet-server-policy#*');
   });
 
   it('should return true if a versioned-policy agent is offline but its base policy is managed', async () => {
@@ -441,8 +440,8 @@ describe('hasActiveFleetServersForPolicies', () => {
     });
   });
 
-  describe('kuery uses policy_base_id fallback pattern', () => {
-    it('passes a kuery using policy_base_id term with policy_id fallback for un-migrated agents', async () => {
+  describe('kuery includes versioned policy_id variants', () => {
+    it('passes a kuery matching both the base policy_id and versioned variants', async () => {
       (getAgentStatusForAgentPolicy as jest.Mock).mockResolvedValueOnce({
         other: 0,
         events: 0,
@@ -460,12 +459,39 @@ describe('hasActiveFleetServersForPolicies', () => {
       await hasFleetServersForPolicies(mockEsClient, mockSoClient, [{ id: 'fleet-server-policy' }]);
 
       const kuery = (getAgentStatusForAgentPolicy as jest.Mock).mock.calls.at(-1)![3] as string;
-      // Uses cheap term query on policy_base_id (no prefix/wildcard)
-      expect(kuery).toContain('policy_base_id:"fleet-server-policy"');
-      // Falls back to exact policy_id match for un-migrated agents
+      // Must match the base policy_id exactly
       expect(kuery).toContain('policy_id:"fleet-server-policy"');
-      // No prefix/wildcard queries
-      expect(kuery).not.toContain('#*');
+      // Must also match versioned variants like fleet-server-policy#9.4
+      expect(kuery).toContain('policy_id:fleet-server-policy#*');
+    });
+
+    it('returns true when the Fleet Server agent is on a versioned policy_id', async () => {
+      // Simulate: agent has policy_id "fleet-server-policy#9.4" (no exact-match on base id).
+      // The old exact-match query returned all:0; the new kuery must return all:1.
+      (getAgentStatusForAgentPolicy as jest.Mock).mockImplementationOnce(
+        (_es, _so, _id, kuery: string) => {
+          // Simulate ES matching an agent whose policy_id is "fleet-server-policy#9.4"
+          const agentMatchesVersionedVariant = kuery.includes('fleet-server-policy#*');
+          return Promise.resolve({
+            other: 0,
+            events: 0,
+            total: agentMatchesVersionedVariant ? 1 : 0,
+            all: agentMatchesVersionedVariant ? 1 : 0,
+            active: 0,
+            updating: 0,
+            offline: 0,
+            inactive: 0,
+            unenrolled: 0,
+            online: agentMatchesVersionedVariant ? 1 : 0,
+            error: 0,
+          });
+        }
+      );
+
+      const hasFs = await hasFleetServersForPolicies(mockEsClient, mockSoClient, [
+        { id: 'fleet-server-policy' },
+      ]);
+      expect(hasFs).toBe(true);
     });
   });
 });

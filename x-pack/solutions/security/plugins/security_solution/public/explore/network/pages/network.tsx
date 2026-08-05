@@ -86,7 +86,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     }, [tabName, globalFilters]);
 
     const { dataView, status } = useDataView(PageScope.explore);
-    const selectedPatterns = useSelectedPatterns(dataView);
+    const selectedPatterns = useSelectedPatterns(PageScope.explore);
     const indicesExist = dataView.hasMatchedIndices();
 
     const onSkipFocusBeforeEventsTable = useCallback(() => {

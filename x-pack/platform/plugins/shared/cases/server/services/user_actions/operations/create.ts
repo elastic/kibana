@@ -6,7 +6,6 @@
  */
 
 import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { get, isEmpty, pickBy } from 'lodash';
 import type {
   CaseAssignees,
@@ -540,7 +539,7 @@ export class UserActionPersister {
       // a doc that wasn't actually persisted.
       const successes: Array<SavedObject<UserActionPersistedAttributes>> = [];
       for (const so of response.saved_objects) {
-        if (!isSavedObjectErrorResult(so)) successes.push(so);
+        if (so.error == null) successes.push(so);
       }
       if (successes.length > 0) {
         this.context.analyticsV2ActivityWriter.bulkUpsertActions(successes);

@@ -16,7 +16,7 @@ describe('getDeepLinks', () => {
     expect(deepLinks).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          id: 'list',
+          id: 'workflows',
           visibleIn: ['globalSearch', 'projectSideNav'],
         }),
         expect.objectContaining({
@@ -30,7 +30,7 @@ describe('getDeepLinks', () => {
   it('does not set visibleIn on the workflows deep link when the library is disabled', () => {
     const [workflowsDeepLink] = getDeepLinks({ libraryEnabled: false });
 
-    expect(workflowsDeepLink).toEqual(expect.objectContaining({ id: 'list', path: '/' }));
+    expect(workflowsDeepLink).toEqual(expect.objectContaining({ id: 'workflows', path: '/' }));
     expect(workflowsDeepLink.visibleIn).toBeUndefined();
   });
 });

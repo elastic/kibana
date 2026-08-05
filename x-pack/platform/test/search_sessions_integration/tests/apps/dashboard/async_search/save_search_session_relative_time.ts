@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-/**
- * Migration recommendation: MIGRATE TO SCOUT. Good case to cover.
- */
-
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

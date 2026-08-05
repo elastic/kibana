@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const queryBar = getService('queryBar');
   const log = getService('log');
-  const INITIAL_FIELD_LIST_SUMMARY = '49 available fields. 5 empty fields. 4 meta fields.';
+  const INITIAL_FIELD_LIST_SUMMARY = '48 available fields. 5 empty fields. 4 meta fields.';
 
   const expectFieldListDescription = async (expectedNumber: string) => {
     return await retry.try(async () => {
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('typeFilter-number');
 
         // second update
-        await expectFieldListDescription('11 available fields. 3 empty fields. 4 meta fields.');
+        await expectFieldListDescription('10 available fields. 3 empty fields. 4 meta fields.');
 
         await testSubjects.click('fieldListFiltersFieldTypeFilterClearAll');
 
@@ -124,7 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should be able to search by string', async function () {
         await PageObjects.unifiedFieldList.findFieldByName('i');
 
-        await expectFieldListDescription('29 available fields. 2 empty fields. 3 meta fields.');
+        await expectFieldListDescription('28 available fields. 2 empty fields. 3 meta fields.');
         await PageObjects.unifiedFieldList.findFieldByName('p');
         await expectFieldListDescription('4 available fields. 0 meta fields.');
 
@@ -250,11 +250,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Initial Available fields
         const expectedInitialAvailableFields =
-          '@message, @tags, @timestamp, agent, bytes, clientip, extension, geo.coordinates, geo.dest, geo.src, geo.srcdest, headings, host, index, ip, links, machine.os, machine.ram, machine.ram_range, memory, nestedField.child, phpmemory, referer, relatedContent.article:modified_time, relatedContent.article:published_time, relatedContent.article:section, relatedContent.article:tag, relatedContent.og:description, relatedContent.og:image, relatedContent.og:image:height, relatedContent.og:image:width, relatedContent.og:site_name, relatedContent.og:title, relatedContent.og:type, relatedContent.og:url, relatedContent.twitter:card, relatedContent.twitter:description, relatedContent.twitter:image, relatedContent.twitter:site, relatedContent.twitter:title, relatedContent.url, request, response, runtime_number, spaces, type, url, utc_time, xss';
+          '@message, @tags, @timestamp, agent, bytes, clientip, extension, geo.coordinates, geo.dest, geo.src, geo.srcdest, headings, host, index, ip, links, machine.os, machine.ram, machine.ram_range, memory, nestedField.child, phpmemory, referer, relatedContent.article:modified_time, relatedContent.article:published_time, relatedContent.article:section, relatedContent.article:tag, relatedContent.og:description, relatedContent.og:image, relatedContent.og:image:height, relatedContent.og:image:width, relatedContent.og:site_name, relatedContent.og:title, relatedContent.og:type, relatedContent.og:url, relatedContent.twitter:card, relatedContent.twitter:description, relatedContent.twitter:image, relatedContent.twitter:site, relatedContent.twitter:title, relatedContent.url, request, response, spaces, type, url, utc_time, xss';
         let availableFields = await PageObjects.unifiedFieldList.getSidebarSectionFieldNames(
           'available'
         );
-        expect(availableFields.length).to.be(49);
+        expect(availableFields.length).to.be(48);
         expect(availableFields.join(', ')).to.be(expectedInitialAvailableFields);
 
         // Available fields after scrolling down
@@ -267,7 +267,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           availableFields = await PageObjects.unifiedFieldList.getSidebarSectionFieldNames(
             'available'
           );
-          return availableFields.length === 49;
+          return availableFields.length === 48;
         });
 
         expect(availableFields.join(', ')).to.be(`${expectedInitialAvailableFields}`);
@@ -298,7 +298,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(availableFields.includes('@message')).to.be(true);
 
         await expectFieldListDescription(
-          '2 selected fields. 2 popular fields. 49 available fields. 5 empty fields. 4 meta fields.'
+          '2 selected fields. 2 popular fields. 48 available fields. 5 empty fields. 4 meta fields.'
         );
 
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('@message');
@@ -318,7 +318,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ).to.be('@message, _id, extension');
 
         await expectFieldListDescription(
-          '3 selected fields. 3 popular fields. 49 available fields. 5 empty fields. 4 meta fields.'
+          '3 selected fields. 3 popular fields. 48 available fields. 5 empty fields. 4 meta fields.'
         );
       });
 
@@ -450,7 +450,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return !(await testSubjects.exists('fieldEditor'));
         });
 
-        await expectFieldListDescription('50 available fields. 5 empty fields. 4 meta fields.');
+        await expectFieldListDescription('49 available fields. 5 empty fields. 4 meta fields.');
 
         let allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
         expect(allFields.includes('_bytes-runtimefield')).to.be(true);
@@ -464,7 +464,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return !(await testSubjects.exists('fieldEditor'));
         });
 
-        await expectFieldListDescription('50 available fields. 5 empty fields. 4 meta fields.');
+        await expectFieldListDescription('49 available fields. 5 empty fields. 4 meta fields.');
 
         allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
         expect(allFields.includes('_bytes-runtimefield2')).to.be(true);
@@ -488,7 +488,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.showsErrorCallout();
 
         // check that the sidebar is rendered
-        await expectFieldListDescription('50 available fields. 5 empty fields. 4 meta fields.');
+        await expectFieldListDescription('49 available fields. 5 empty fields. 4 meta fields.');
 
         let allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
         expect(allFields.includes('_invalid-runtimefield')).to.be(true);

@@ -12,7 +12,7 @@ import '@testing-library/jest-dom';
 import '@emotion/jest';
 import { BehaviorSubject } from 'rxjs';
 import { fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
@@ -72,53 +72,18 @@ describe('AppHeaderView', () => {
   });
 
   it('renders when the only content is a favorite action', () => {
-    const onToggle = jest.fn();
     renderAppHeader(
       <AppHeaderView
-        favorite={{
-          status: 'unfavorited',
-          onToggle,
-        }}
+        favorite={
+          <EuiToolTip content="Favorite" disableScreenReaderOutput>
+            <EuiButtonIcon aria-label="Favorite" iconType="starEmpty" onClick={jest.fn()} />
+          </EuiToolTip>
+        }
       />
     );
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.favorite)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Add to Starred' })).toBeInTheDocument();
-  });
-
-  it('renders a favorited state with custom labels and calls onToggle', () => {
-    const onToggle = jest.fn();
-    renderAppHeader(
-      <AppHeaderView
-        favorite={{
-          status: 'favorited',
-          onToggle,
-        }}
-      />
-    );
-
-    const button = screen.getByRole('button', { name: 'Remove from Starred' });
-    expect(button).toHaveAttribute(
-      'data-test-subj',
-      `${APP_HEADER_TEST_SUBJECTS.favoriteButton} unfavoriteButton`
-    );
-    fireEvent.click(button);
-    expect(onToggle).toHaveBeenCalledTimes(1);
-  });
-
-  it('disables the favorite button when isDisabled is set', () => {
-    renderAppHeader(
-      <AppHeaderView
-        favorite={{
-          status: 'unfavorited',
-          onToggle: jest.fn(),
-          isDisabled: true,
-        }}
-      />
-    );
-
-    expect(screen.getByRole('button', { name: 'Add to Starred' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Favorite' })).toBeInTheDocument();
   });
 
   it('renders metadata items as a wrapping row', () => {

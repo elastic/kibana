@@ -64,9 +64,10 @@ test.describe(
         ).toContainText(MOCKED_TITLE);
       }).toPass({ timeout: 120_000 });
 
-      const toolCallStep = page.testSubj.locator('agentBuilderToolCallStep');
-      await expect(toolCallStep).toContainText('tool: platform.core.search', { timeout: 60_000 });
-      await expect(toolCallStep).toContainText('ran.');
+      await expect(page.testSubj.locator('agentBuilderToolCallGroup')).toContainText(
+        '1 tool responded',
+        { timeout: 60_000 }
+      );
 
       await pageObjects.agentBuilder.clickNewConversationButton();
       await expect(async () => {

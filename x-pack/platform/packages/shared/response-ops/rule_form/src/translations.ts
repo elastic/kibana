@@ -785,6 +785,13 @@ export const ACTION_UNABLE_TO_LOAD_CONNECTOR_DESCRIPTION = i18n.translate(
   }
 );
 
+export const ACTION_USE_AAD_TEMPLATE_FIELDS_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleActionsItem.actionUseAadTemplateFieldsLabel',
+  {
+    defaultMessage: 'Use template fields from alerts index',
+  }
+);
+
 export const TECH_PREVIEW_LABEL = i18n.translate('responseOpsRuleForm.technicalPreviewBadgeLabel', {
   defaultMessage: 'Technical preview',
 });

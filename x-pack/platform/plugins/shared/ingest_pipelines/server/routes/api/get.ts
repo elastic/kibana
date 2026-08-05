@@ -13,7 +13,7 @@ import { API_BASE_PATH } from '../../../common/constants';
 import type { RouteDependencies } from '../../types';
 
 const paramsSchema = schema.object({
-  name: schema.string({ maxLength: 1000 }),
+  name: schema.string(),
 });
 
 export const registerGetRoutes = ({ router, lib: { handleEsError } }: RouteDependencies): void => {

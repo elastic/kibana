@@ -115,7 +115,7 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
         let dropdownDisplay = (
           <div>
             <EuiToolTip content={endpointScript.name} disableScreenReaderOutput>
-              <div className="eui-textTruncate" tabIndex={0}>
+              <div className="eui-textTruncate">
                 <strong>{endpointScript.name}</strong>
               </div>
             </EuiToolTip>

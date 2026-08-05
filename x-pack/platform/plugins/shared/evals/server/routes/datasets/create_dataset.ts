@@ -106,8 +106,7 @@ export const registerCreateDatasetRoute = ({
             });
           }
 
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          logger.error(`Failed to create evaluation dataset: ${errorMessage}`);
+          logger.error(`Failed to create evaluation dataset: ${error}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to create evaluation dataset' },

@@ -24,11 +24,9 @@ workflow-authoring,platform,Whenever our checkout service goes down I want the o
 workflow-authoring,platform,Set up an automated response so that when high-severity security events appear they get routed to the right Slack channel,indirect,workflow-authoring,
 workflow-authoring,platform,Set up an automated response so that whenever suspicious PowerShell activity is detected on an endpoint the offending process gets blocked and the host is isolated,distractor,detection-rule-edit,Distractor: automated security response sounds like a workflow but the action (block + isolate on detection) maps to detection-rule-edit response actions not workflow automation
 rule-management,platform,Create an alerting rule that fires when the error rate exceeds 5 percent for more than 10 minutes,direct,rule-management,
-action-policy-management,platform,Update my CPU spike alert rule to notify via PagerDuty instead of email,direct,action-policy-management,
+rule-management,platform,Update my CPU spike alert rule to notify via PagerDuty instead of email,direct,rule-management,
 rule-management,platform,I need to get paged when my database response time stays above 500ms for 5 minutes straight,indirect,rule-management,
 rule-management,platform,Set up a notification so my team knows when disk usage hits 80 percent on any production host,indirect,rule-management,
-action-policy-management,platform,List my action policies and show which ones send Slack notifications,direct,action-policy-management,
-action-policy-management,platform,Create a notification policy that emails oncall when any production alert fires,direct,action-policy-management,
 rule-management,platform,Show me all the detection rules currently enabled in my security environment,distractor,find-security-rules,Distractor: listing rules sounds like rule-management but security detection rules belong to find-rules
 significant-events-memory,streams,Search the significant events knowledge base for what we know about the payments service architecture,direct,significant-events-memory,
 significant-events-memory,streams,Add a knowledge base entry describing the normal traffic patterns of our auth microservice,direct,significant-events-memory,

@@ -19,7 +19,6 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/test-jest-helpers'
-  - '@kbn/ui-callout'
 tags:
   - shared-browser
   - package

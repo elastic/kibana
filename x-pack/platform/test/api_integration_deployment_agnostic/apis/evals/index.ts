@@ -13,7 +13,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./experiments'));
     loadTestFile(require.resolve('./datasets'));
     loadTestFile(require.resolve('./traces'));
-    loadTestFile(require.resolve('./tracing_projects'));
     loadTestFile(require.resolve('./evaluators'));
   });
 }

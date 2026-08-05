@@ -23,9 +23,7 @@ import { getActionGroupWindow } from './alert';
 export function getChartTimeRange(alert: BurnRateAlert): TimeRange {
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const actionGroupWindow = getActionGroupWindow(alert);
-  const windowDurationInMs = actionGroupWindow
-    ? actionGroupWindow.longWindow.value * 60 * 60 * 1000
-    : 0;
+  const windowDurationInMs = actionGroupWindow.longWindow.value * 60 * 60 * 1000;
   return {
     from: new Date(new Date(timeRange.from).getTime() - windowDurationInMs),
     to: timeRange.to ? new Date(timeRange.to) : new Date(),

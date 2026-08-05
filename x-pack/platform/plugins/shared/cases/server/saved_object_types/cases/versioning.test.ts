@@ -197,20 +197,4 @@ describe('caseSavedObjectType model version transformations', () => {
       expect(() => createSchema!.validate(attributes)).not.toThrow();
     });
   });
-
-  describe('Model version 9 to 10', () => {
-    it('does not modify existing assignees when migrating from v9 to v10', () => {
-      const caseObj = createCaseSavedObjectResponse({
-        overrides: { assignees: [{ uid: '123' }] },
-      });
-
-      const migrated = migrator.migrate({
-        document: caseObj,
-        fromVersion: 9,
-        toVersion: 10,
-      });
-
-      expect(migrated.attributes).toEqual(expect.objectContaining({ assignees: [{ uid: '123' }] }));
-    });
-  });
 });

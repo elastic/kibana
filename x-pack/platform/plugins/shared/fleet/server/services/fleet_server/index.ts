@@ -18,8 +18,8 @@ import {
 } from '../../../common/constants';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import {
-  buildPolicyBaseIdWithFallbackKuery,
-  buildPolicyBaseIdsWithFallbackKuery,
+  buildPolicyIdOrVariantsKuery,
+  buildPolicyIdsOrVariantsKuery,
   removeVersionSuffixFromPolicyId,
 } from '../../../common/services/version_specific_policies_utils';
 import { getAgentsByKuery, getAgentStatusById } from '../agents';
@@ -80,7 +80,7 @@ export const hasFleetServersForPolicies = async (
               ? `namespaces:"${spaceIds?.[0]}"`
               : `not namespaces:* or namespaces:"${DEFAULT_SPACE_ID}"`;
 
-          return `(${buildPolicyBaseIdWithFallbackKuery(id)} and (${space}))`;
+          return `(${buildPolicyIdOrVariantsKuery(id)} and (${space}))`;
         })
         .join(' or ')
     );
@@ -144,7 +144,7 @@ export async function checkFleetServerVersionsForSecretsStorage(
     return false;
   }
 
-  const kuery = buildPolicyBaseIdsWithFallbackKuery(Array.from(policyIds));
+  const kuery = buildPolicyIdsOrVariantsKuery(Array.from(policyIds));
 
   const managedAgentPolicies = await agentPolicyService.getAllManagedAgentPolicies(soClient);
   const fleetServerAgents = await getAgentsByKuery(esClient, soClient, {

@@ -8,9 +8,10 @@
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { rowsFromEsql, type AlertEpisode } from '@kbn/alerting-v2-common-queries';
 import { buildEpisodeQuery } from '../queries/episode_query';
 import { QUERY_STALE_TIME } from '../constants';
+import type { AlertEpisode, AlertEpisodeEsqlRow } from '../queries/episodes_query';
+import { esqlResponseToObjectRows } from '../utils/esql_response_to_rows';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { normalizeTags } from '../utils/normalize_tags';
 import { queryKeys } from '../query_keys';
@@ -30,20 +31,17 @@ export const useFetchEpisodeQuery = ({ episodeId, services }: UseFetchEpisodeQue
 
   return useQuery({
     queryKey: queryKeys.episode(spaceId, episodeId ?? ''),
-    queryFn: async ({ signal }) => {
-      const query = buildEpisodeQuery(spaceId, episodeId!);
-      const raw = await runEsqlAsyncSearch({
+    queryFn: ({ signal }) =>
+      runEsqlAsyncSearch({
         data,
         params: {
-          query: query.print('basic'),
+          query: buildEpisodeQuery(spaceId, episodeId!).print('basic'),
           time_zone: 'UTC',
         },
         abortSignal: signal,
-      });
-      return rowsFromEsql(query, raw);
-    },
+      }),
     select: (rows): AlertEpisode | undefined => {
-      const row = rows[0];
+      const row = esqlResponseToObjectRows<AlertEpisodeEsqlRow>(rows)[0];
       if (!row) return undefined;
       return {
         ...row,

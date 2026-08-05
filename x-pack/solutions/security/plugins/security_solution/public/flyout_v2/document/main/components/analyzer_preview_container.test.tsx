@@ -212,9 +212,7 @@ describe('AnalyzerPreviewContainer', () => {
   it('should use the analyzer page scope hooks', () => {
     renderAnalyzerPreview();
 
+    expect(useSelectedPatterns).toHaveBeenCalledWith(PageScope.analyzer);
     expect(useDataView).toHaveBeenCalledWith(PageScope.analyzer);
-    expect(useSelectedPatterns).toHaveBeenCalledWith(
-      expect.objectContaining({ hasMatchedIndices: expect.any(Function) })
-    );
   });
 });

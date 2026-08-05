@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { stringify } from 'yaml';
+import yaml from 'js-yaml';
 import type { DemoManifestGenerator, ManifestOptions } from '../../types';
 
 /**
@@ -464,6 +464,6 @@ export const rustK8sDemoManifests: DemoManifestGenerator = {
       });
     }
 
-    return manifests.map((m) => stringify(m)).join('---\n');
+    return manifests.map((m) => yaml.dump(m)).join('---\n');
   },
 };

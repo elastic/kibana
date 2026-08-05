@@ -43,49 +43,6 @@ describe('createExtendedFieldsUserActionBuilder', () => {
     expect(screen.getByText('set Risk Score to high')).toBeInTheDocument();
   });
 
-  it('resolves a migrated custom field uuid key to its configured label', () => {
-    // Migrated custom fields are stored under `${customFieldKey}_as_<type>`; the camelCased
-    // payload key (testKey1AsKeyword) must map back to the configured label, not startCase(key).
-    const userAction = getUserAction('extended_fields', UserActionActions.update, {
-      type: 'extended_fields',
-      payload: { extendedFields: { testKey1AsKeyword: 'migrated value' } },
-    });
-
-    const builder = createExtendedFieldsUserActionBuilder({
-      ...builderArgs,
-      userAction,
-    });
-
-    const createdUserAction = builder.build();
-    renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
-
-    expect(screen.getByText('set My test label 1 to migrated value')).toBeInTheDocument();
-  });
-
-  it('resolves a non-migrated global/template field key to its enriched label', () => {
-    // A natively-authored field (name: new_field, label: "My Field") is not in the customFields
-    // config; its label must come from the case's server-enriched extendedFieldsLabels
-    // (keyed by snake storage key `new_field_as_keyword`), not startCase("newField") → "New Field".
-    const userAction = getUserAction('extended_fields', UserActionActions.update, {
-      type: 'extended_fields',
-      payload: { extendedFields: { newFieldAsKeyword: 'yo' } },
-    });
-
-    const builder = createExtendedFieldsUserActionBuilder({
-      ...builderArgs,
-      caseData: {
-        ...builderArgs.caseData,
-        extendedFieldsLabels: { new_field_as_keyword: 'My Field' },
-      },
-      userAction,
-    });
-
-    const createdUserAction = builder.build();
-    renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
-
-    expect(screen.getByText('set My Field to yo')).toBeInTheDocument();
-  });
-
   it('renders generic label when multiple fields are updated at once', () => {
     const userAction = getUserAction('extended_fields', UserActionActions.update, {
       type: 'extended_fields',

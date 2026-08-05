@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { encode } from '@kbn/rison';
 import * as E from 'fp-ts/Either';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
@@ -74,10 +74,12 @@ const toggleOptionsConfig = {
 
 export const usePrivilegedUserActivityParams = (
   selectedToggleOption: VisualizationToggleOptions,
-  indexPattern: string,
-  fields: DataViewFieldMap
+  sourcererDataView: DataViewSpec
 ) => {
   const spaceId = useSpaceId();
+
+  const indexPattern = sourcererDataView?.title ?? '';
+  const fields = sourcererDataView?.fields;
 
   const esqlSource = useMemo(
     () =>

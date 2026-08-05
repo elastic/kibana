@@ -10,12 +10,9 @@ import { CASE_INDEX_NAME } from '../constants';
 import { CASE_INDEX_MAPPING } from '../mappings/case';
 
 /**
- * Idempotently creates `.cases` if it doesn't already exist, or applies an
- * additive mapping sync when it does (new CASE_INDEX_MAPPING fields must reach
- * already-created indices before writers emit them; the strict mapping rejects
- * unmapped fields otherwise). Safe to call from multiple Kibana nodes
- * concurrently — the create loser hits an `already_exists` exception and
- * short-circuits; the putMapping is idempotent for already-present fields.
+ * Idempotently creates `.cases` if it doesn't already exist. Safe to call
+ * from multiple Kibana nodes concurrently — the second caller hits an
+ * `already_exists` exception and short-circuits.
  *
  * Settings:
  *   - `index.hidden: true` — not surfaced by default in `_cat/indices`
@@ -57,18 +54,7 @@ export async function ensureCaseIndex({
   try {
     const exists = await esClient.indices.exists({ index: CASE_INDEX_NAME });
     if (exists) {
-      // `indices.create` only runs on first bootstrap, so fields later added to
-      // CASE_INDEX_MAPPING never reach an already-created `.cases`. The index is
-      // `dynamic: 'strict'`, so a doc carrying an unmapped field is rejected
-      // with `mapper_parsing_exception` (silently swallowed by the writer).
-      // Apply an additive, idempotent mapping sync so new fields exist before
-      // any writer emits them.
-      await esClient.indices.putMapping({
-        index: CASE_INDEX_NAME,
-        properties: CASE_INDEX_MAPPING.properties,
-        dynamic_templates: CASE_INDEX_MAPPING.dynamic_templates,
-      });
-      logger.debug(`${CASE_INDEX_NAME} already exists; applied additive mapping sync`);
+      logger.debug(`${CASE_INDEX_NAME} already exists; skipping bootstrap`);
       return;
     }
 

@@ -38,7 +38,7 @@ const lspvDetailDrawerSparklineContainerStyle = css`
 `;
 
 function renderIcon(vertex) {
-  return <EuiIcon type={vertex.iconType} aria-hidden={true} />;
+  return <EuiIcon type={vertex.iconType} />;
 }
 
 function renderPluginBasicStats(vertex, timeseriesTooltipXValueFormatter) {

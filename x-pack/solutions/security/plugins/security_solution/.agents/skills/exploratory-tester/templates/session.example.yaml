@@ -13,13 +13,6 @@ area: Entity Analytics
 # requires knowledge/<area-slug>.md to be populated from a prior session.
 mode: single
 
-# [optional] legacy (default) or shadow. Experimental — leave unset unless you
-# have read scripts/action-scoped-collector.md and run its one-time capability
-# spike (scripts/action-scoped-collector-spike.md) against your own MCP setup.
-# shadow mode never changes which findings get logged; it only records where
-# an experimental collector's classification would have differed, for review.
-# collector_mode: legacy
-
 # Flows to exercise. Each flow needs at minimum a name.
 flows:
   - name: Happy path — <short description>
