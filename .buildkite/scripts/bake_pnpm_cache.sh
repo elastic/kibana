@@ -7,14 +7,15 @@ set -x
 # Pre-populates the pnpm cache that the CI agent image bakes into ~/.kibana, so a
 # fresh checkout on an agent bootstraps from a warm store instead of the network.
 #
-# It produces two directories under $KBN_PNPM_CACHE_DIR (default ~/.kibana):
+# It produces three directories under $KBN_PNPM_CACHE_DIR (default ~/.kibana):
 #   pnpm-store/    the content-addressable pnpm store
 #   node_modules/  a fully installed, hoisted node_modules linked to that store
+#   Cypress/       the cypress browser binary (normally in ~/.cache/Cypress)
 #
-# .buildkite/scripts/bootstrap.sh consumes them by moving both into the workspace
-# (see the "Using ~/.kibana/... as a starting point" block). Both are moved as a
-# pair so the hardlinks between node_modules and the store survive intact — build
-# them together here and bake them together on the image.
+# .buildkite/scripts/bootstrap.sh consumes them (see the "Using ~/.kibana/... as a
+# starting point" block). node_modules and the store are moved as a pair so the
+# hardlinks between them survive intact — build them together here and bake them
+# together on the image.
 #
 # Run this in the image build (other repo) from a clean Kibana checkout at the ref
 # you are baking:  .buildkite/scripts/bake_pnpm_cache.sh
@@ -51,10 +52,19 @@ if [[ "$KIBANA_DIR" != "$CACHE_DIR" ]]; then
   mv "$KIBANA_DIR/node_modules" "$CACHE_DIR/node_modules"
 fi
 
+# Stage the cypress binary the postinstall above downloaded, so agents restore it
+# instead of re-downloading (and re-running cypress's flaky cold-install postinstall).
+CYPRESS_CACHE_SRC="${CYPRESS_CACHE_FOLDER:-$HOME/.cache/Cypress}"
+if [[ -d "$CYPRESS_CACHE_SRC" ]]; then
+  rm -rf "$CACHE_DIR/Cypress"
+  mv "$CYPRESS_CACHE_SRC" "$CACHE_DIR/Cypress"
+fi
+
 echo "--- pnpm cache ready"
-du -sh "$CACHE_DIR/pnpm-store" "$CACHE_DIR/node_modules" 2>/dev/null || true
+du -sh "$CACHE_DIR/pnpm-store" "$CACHE_DIR/node_modules" "$CACHE_DIR/Cypress" 2>/dev/null || true
 echo "Bake these into the agent image so they land at:"
 echo "  $CACHE_DIR/pnpm-store"
 echo "  $CACHE_DIR/node_modules"
+echo "  $CACHE_DIR/Cypress"
 
 set +x

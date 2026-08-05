@@ -45,6 +45,14 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
   fi
 fi
 
+# Restore the baked cypress binary to its default cache location so cypress's
+# postinstall skips the download. HOME-local, so not gated on workspace disk type.
+if [[ -d ~/.kibana/Cypress && ! -d ~/.cache/Cypress ]]; then
+  echo "Using ~/.kibana/Cypress as the Cypress binary cache"
+  mkdir -p ~/.cache
+  mv ~/.kibana/Cypress ~/.cache/Cypress
+fi
+
 # TODO: revisit the double bootstrap per attempt after removing Bazel and changing package manager.
 if ! (pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}" || pnpm kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"); then
   echo "bootstrap failed, trying again in 15 seconds"
