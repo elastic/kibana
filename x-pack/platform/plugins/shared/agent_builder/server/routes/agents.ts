@@ -72,6 +72,16 @@ const CONNECTORS_SCHEMA = schema.arrayOf(
   }
 );
 
+const AI_INDICES_SCHEMA = schema.arrayOf(
+  schema.string({
+    meta: { description: 'AI indices to associate with the agent.' },
+  }),
+  {
+    maxSize: 100,
+    meta: { description: 'Array of AI indices to associate with the agent.' },
+  }
+);
+
 const ACCESS_CONTROL_MODE_SCHEMA = schema.oneOf(
   [
     schema.literal(AgentAccessControlMode.Public),
@@ -292,6 +302,7 @@ export function registerAgentRoutes({
                   ),
                   plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                   connector_ids: schema.maybe(CONNECTORS_SCHEMA),
+                  ai_indices: schema.maybe(AI_INDICES_SCHEMA),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -422,6 +433,7 @@ export function registerAgentRoutes({
                     ),
                     plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                     connector_ids: schema.maybe(CONNECTORS_SCHEMA),
+                    ai_indices: schema.maybe(AI_INDICES_SCHEMA),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },
