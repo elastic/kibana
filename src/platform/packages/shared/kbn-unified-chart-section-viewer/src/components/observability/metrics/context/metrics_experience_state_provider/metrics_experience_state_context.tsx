@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { createContext } from 'react';
 import { METRICS_GRID_SETTINGS_DEFAULTS, type MetricsGridSettings } from '@kbn/discover-utils';
 import type { Dimension, MetricsSort, UnifiedMetricsGridProps } from '../../../../../types';
@@ -51,7 +51,7 @@ export function MetricsExperienceStateProvider({
   profileId,
   gridSettings = METRICS_GRID_SETTINGS_DEFAULTS,
   onGridSettingsChange,
-  metricsSort,
+  metricsSort = DEFAULT_METRICS_SORT,
   onMetricsSortChange,
   getRecentlyExploredMetrics,
   onMetricExplored,
@@ -78,19 +78,10 @@ export function MetricsExperienceStateProvider({
     FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_SORTING_ENABLED]
   );
 
-  // Sort is controlled when the host provides `onMetricsSortChange` (e.g.
-  // Discover's persistent profile state). Without it, fall back to internal
-  // state so standalone hosts still get a working sort control.
-  const isSortControlled = onMetricsSortChange !== undefined;
-  const [uncontrolledSort, setUncontrolledSort] = useState<MetricsSort>(
-    metricsSort ?? DEFAULT_METRICS_SORT
-  );
-  const hostSort = isSortControlled ? metricsSort ?? DEFAULT_METRICS_SORT : uncontrolledSort;
-
   // When sorting is disabled, ignore any host-provided sort (e.g. state
   // persisted or shared while the flag was on) and swallow change requests so
   // no sorting behavior runs and no new sort state is written while it is off.
-  const effectiveMetricsSort = isSortingEnabled ? hostSort : DEFAULT_METRICS_SORT;
+  const effectiveMetricsSort = isSortingEnabled ? metricsSort : DEFAULT_METRICS_SORT;
 
   const recentlyExploredMetrics = useRecentlyExploredMetrics({
     getRecentlyExploredMetrics,
@@ -139,13 +130,9 @@ export function MetricsExperienceStateProvider({
         setCurrentPage(0);
       }
 
-      if (isSortControlled) {
-        onMetricsSortChange(nextSort);
-      } else {
-        setUncontrolledSort(nextSort);
-      }
+      onMetricsSortChange?.(nextSort);
     },
-    [effectiveMetricsSort, isSortControlled, isSortingEnabled, onMetricsSortChange, setCurrentPage]
+    [effectiveMetricsSort, isSortingEnabled, onMetricsSortChange, setCurrentPage]
   );
 
   const onToggleFullscreen = useCallback(() => {
