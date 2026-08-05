@@ -115,7 +115,7 @@ import {
 import { updatePackage, reviewUpgrade } from '../../services/epm/packages/update';
 import {
   runNamespacePreflightCheck,
-  logNamespaceConflictWarnings,
+  runAndLogNamespacePreflightCheck,
 } from '../../services/epm/packages/namespace_datastream_templates';
 import { scheduleSyncNamespaceTemplatesTask } from '../../tasks/sync_namespace_templates_task';
 import { scheduleSyncIlmPolicyTask } from '../../tasks/sync_ilm_policy_task';
@@ -421,30 +421,15 @@ export const updatePackageHandler: FleetRequestHandler<
 
   let warnings: UpdatePackageResponse['warnings'];
   if (namespaceCustomizationDiff.addedNamespaces.length > 0) {
-    try {
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-      const detected = await runNamespacePreflightCheck({
-        esClient,
-        soClient: savedObjectsClient,
-        packageName: pkgName,
-        namespaces: namespaceCustomizationDiff.addedNamespaces,
-      });
-      if (detected.length > 0) {
-        warnings = detected;
-        logNamespaceConflictWarnings(
-          appContextService.getLogger(),
-          'updatePackageHandler',
-          detected
-        );
-      }
-    } catch (err) {
-      // Fail open: a failed pre-flight check must never block the operation.
-      appContextService
-        .getLogger()
-        .debug(
-          `[updatePackageHandler] Pre-flight check failed for ${pkgName}: ${(err as Error).message}`
-        );
-    }
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const detected = await runAndLogNamespacePreflightCheck({
+      esClient,
+      soClient: savedObjectsClient,
+      packageName: pkgName,
+      namespaces: namespaceCustomizationDiff.addedNamespaces,
+      handlerName: 'updatePackageHandler',
+    });
+    if (detected.length > 0) warnings = detected;
   }
 
   if (

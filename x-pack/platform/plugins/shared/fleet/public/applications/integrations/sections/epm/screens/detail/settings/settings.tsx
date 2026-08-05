@@ -245,10 +245,10 @@ export const SettingsPage: React.FC<Props> = memo(
     const namespaceCustomizationSettings = installationInfo?.namespace_customization_settings;
 
     // State for the pre-flight conflict confirmation modal.
-    const [pendingNamespaces, setPendingNamespaces] = useState<string[] | null>(null);
-    const [preflightConflicts, setPreflightConflicts] = useState<NamespaceConflictWarning[] | null>(
-      null
-    );
+    const [preflightModal, setPreflightModal] = useState<{
+      pendingNamespaces: string[];
+      conflicts: NamespaceConflictWarning[];
+    } | null>(null);
 
     const saveNamespaceCustomization = useCallback(
       (next: string[]) => {
@@ -311,8 +311,7 @@ export const SettingsPage: React.FC<Props> = memo(
               namespaces: addedNamespaces,
             });
             if (result.warnings.length > 0) {
-              setPendingNamespaces(next);
-              setPreflightConflicts(result.warnings);
+              setPreflightModal({ pendingNamespaces: next, conflicts: result.warnings });
               return;
             }
           } catch {
@@ -340,16 +339,14 @@ export const SettingsPage: React.FC<Props> = memo(
     );
 
     const handleConflictConfirm = useCallback(() => {
-      if (pendingNamespaces !== null) {
-        saveNamespaceCustomization(pendingNamespaces);
+      if (preflightModal !== null) {
+        saveNamespaceCustomization(preflightModal.pendingNamespaces);
       }
-      setPendingNamespaces(null);
-      setPreflightConflicts(null);
-    }, [pendingNamespaces, saveNamespaceCustomization]);
+      setPreflightModal(null);
+    }, [preflightModal, saveNamespaceCustomization]);
 
     const handleConflictCancel = useCallback(() => {
-      setPendingNamespaces(null);
-      setPreflightConflicts(null);
+      setPreflightModal(null);
     }, []);
 
     const shouldShowKeepPoliciesUpToDateSwitch = useMemo(() => {
@@ -815,9 +812,9 @@ export const SettingsPage: React.FC<Props> = memo(
             onClose={() => setIsBreakingChangesFlyoutOpen(false)}
           />
         )}
-        {preflightConflicts && preflightConflicts.length > 0 && (
+        {preflightModal && preflightModal.conflicts.length > 0 && (
           <NamespaceConflictModal
-            conflicts={preflightConflicts}
+            conflicts={preflightModal.conflicts}
             onConfirm={handleConflictConfirm}
             onCancel={handleConflictCancel}
           />

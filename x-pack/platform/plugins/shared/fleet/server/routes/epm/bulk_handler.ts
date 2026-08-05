@@ -21,10 +21,7 @@ import type {
   GetOneBulkOperationPackagesRequestSchema,
 } from '../../types';
 import { updatePackage } from '../../services/epm/packages/update';
-import {
-  runNamespacePreflightCheck,
-  logNamespaceConflictWarnings,
-} from '../../services/epm/packages/namespace_datastream_templates';
+import { runAndLogNamespacePreflightCheck } from '../../services/epm/packages/namespace_datastream_templates';
 import { scheduleSyncNamespaceTemplatesTask } from '../../tasks/sync_namespace_templates_task';
 import {
   getAllowedNamespacePrefixesForSpace,
@@ -269,30 +266,15 @@ export const postBulkNamespaceCustomizationHandler: FleetRequestHandler<
 
         let warnings;
         if (namespaceCustomizationDiff.addedNamespaces.length > 0) {
-          try {
-            const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-            const detected = await runNamespacePreflightCheck({
-              esClient,
-              soClient: savedObjectsClient,
-              packageName,
-              namespaces: namespaceCustomizationDiff.addedNamespaces,
-            });
-            if (detected.length > 0) {
-              warnings = detected;
-              logNamespaceConflictWarnings(
-                appContextService.getLogger(),
-                'postBulkNamespaceCustomizationHandler',
-                detected
-              );
-            }
-          } catch (err) {
-            appContextService
-              .getLogger()
-              .debug(
-                `[postBulkNamespaceCustomizationHandler] Pre-flight check failed for ` +
-                  `${packageName}: ${(err as Error).message}`
-              );
-          }
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const detected = await runAndLogNamespacePreflightCheck({
+            esClient,
+            soClient: savedObjectsClient,
+            packageName,
+            namespaces: namespaceCustomizationDiff.addedNamespaces,
+            handlerName: 'postBulkNamespaceCustomizationHandler',
+          });
+          if (detected.length > 0) warnings = detected;
         }
 
         if (

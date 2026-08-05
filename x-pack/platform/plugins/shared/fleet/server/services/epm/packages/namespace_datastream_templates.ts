@@ -612,3 +612,42 @@ export async function runNamespacePreflightCheck({
 
   return conflicts;
 }
+
+/**
+ * Convenience wrapper: runs the namespace pre-flight check, logs any detected warnings,
+ * and returns them. Errors are caught and debug-logged so callers are never blocked
+ * (fail-open). Returns an empty array when there are no conflicts or the check fails.
+ */
+export async function runAndLogNamespacePreflightCheck({
+  esClient,
+  soClient,
+  packageName,
+  namespaces,
+  handlerName,
+}: {
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  packageName: string;
+  namespaces: string[];
+  handlerName: string;
+}): Promise<NamespaceConflictWarning[]> {
+  try {
+    const detected = await runNamespacePreflightCheck({
+      esClient,
+      soClient,
+      packageName,
+      namespaces,
+    });
+    if (detected.length > 0) {
+      logNamespaceConflictWarnings(appContextService.getLogger(), handlerName, detected);
+    }
+    return detected;
+  } catch (err) {
+    appContextService
+      .getLogger()
+      .debug(
+        `[${handlerName}] Pre-flight check failed for ${packageName}: ${(err as Error).message}`
+      );
+    return [];
+  }
+}
