@@ -229,30 +229,6 @@ const FlyoutWrapper: React.FC<{ children: React.ReactNode; title: string }> = ({
   </EuiFlyout>
 );
 
-type Story = StoryObj<typeof InfoBlocks>;
-
-const GalleryDemo: React.FC = () => (
-  <FlyoutWrapper title="Info blocks gallery">
-    <EuiTitle size="s">
-      <h3>Sample set</h3>
-    </EuiTitle>
-    <EuiSpacer size="m" />
-    <InfoBlocks items={[...SAMPLE_ITEMS, ...ACTIONABLE_ITEMS]} />
-
-    <EuiSpacer size="xl" />
-    <EuiTitle size="s">
-      <h3>Big number</h3>
-    </EuiTitle>
-    <EuiSpacer size="m" />
-    <InfoBlocks items={BIG_NUMBER_ITEMS} />
-  </FlyoutWrapper>
-);
-
-export const Gallery: Story = {
-  parameters: { controls: { hideNoControlsWarning: true } },
-  render: () => <GalleryDemo />,
-};
-
 // Tall content sets the row height.
 const TALL_SVG = (
   <svg
@@ -273,24 +249,41 @@ const TALL_SVG = (
   </svg>
 );
 
-export const InlineSvg: StoryObj<DefaultArgs> = {
+const ALL_SAMPLE_ITEMS = [...SAMPLE_ITEMS, ...ACTIONABLE_ITEMS];
+
+export const Default: StoryObj<DefaultArgs> = {
+  name: 'InfoBlocks',
   argTypes: {
     numberOfItems: {
-      description: 'Number of additional info blocks to render',
-      control: { type: 'range', min: 0, max: SAMPLE_ITEMS.length, step: 1 },
+      description: 'Number of items in each panel',
+      control: { type: 'range', min: 1, max: ALL_SAMPLE_ITEMS.length, step: 1 },
     },
   },
   args: {
-    numberOfItems: SAMPLE_ITEMS.length,
+    numberOfItems: ALL_SAMPLE_ITEMS.length,
   },
   render: ({ numberOfItems }) => (
-    <FlyoutWrapper title="Inline SVG">
+    <FlyoutWrapper title="Info blocks gallery">
+      <EuiTitle size="s">
+        <h3>Sample set</h3>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <InfoBlocks items={ALL_SAMPLE_ITEMS.slice(0, numberOfItems)} />
+
+      <EuiSpacer size="xl" />
+      <EuiTitle size="s">
+        <h3>Big number</h3>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <InfoBlocks items={BIG_NUMBER_ITEMS.slice(0, numberOfItems)} />
+
+      <EuiSpacer size="xl" />
+      <EuiTitle size="s">
+        <h3>Inline SVG</h3>
+      </EuiTitle>
+      <EuiSpacer size="m" />
       <InfoBlocks
-        items={[
-          // non-hideable item
-          { title: 'Trend', value: TALL_SVG },
-          ...SAMPLE_ITEMS.slice(0, numberOfItems),
-        ]}
+        items={[{ title: 'Trend', value: TALL_SVG }, ...SAMPLE_ITEMS].slice(0, numberOfItems)}
       />
     </FlyoutWrapper>
   ),
