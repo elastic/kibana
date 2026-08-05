@@ -11,18 +11,21 @@ import type {
   AttachmentResolveContext,
 } from '@kbn/agent-builder-server/attachments';
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { buildEpisodeQuery, type AlertEpisodeEsqlRow } from '@kbn/alerting-v2-common-queries';
 import {
   EPISODE_ATTACHMENT_TYPE,
   episodeAttachmentDataSchema,
+  type AlertEpisode,
   type EpisodeAttachmentData,
 } from '@kbn/alerting-v2-schemas';
+import { normalizeTags } from '@kbn/alerting-v2-utils';
 import type { Logger } from '@kbn/core/server';
 import { alertEpisodeToEpisodeAttachment } from '../../../common/agent_builder/episode_mappers';
-import type { EpisodesClient } from '../../lib/episodes_client';
+import type { QueryServiceContract } from '../../lib/services/query_service/query_service';
 
 interface CreateEpisodeAttachmentTypeOptions {
   logger: Logger;
-  getEpisodesClient: (context: AttachmentFormatContext) => EpisodesClient;
+  getQueryService: (context: AttachmentFormatContext) => QueryServiceContract;
 }
 
 const formatEpisodeDescription = (attachmentId: string, data: EpisodeAttachmentData): string => {
@@ -61,9 +64,34 @@ const formatEpisodeDescription = (attachmentId: string, data: EpisodeAttachmentD
   return lines.join('\n');
 };
 
+/**
+ * Returns the aggregated row for a single episode in the given space, or
+ * `undefined` when no such episode exists.
+ */
+const fetchEpisode = async ({
+  queryService,
+  spaceId,
+  episodeId,
+}: {
+  queryService: QueryServiceContract;
+  spaceId: string;
+  episodeId: string;
+}): Promise<AlertEpisode | undefined> => {
+  const rows = await queryService.executeQueryRows<AlertEpisodeEsqlRow>({
+    query: buildEpisodeQuery(spaceId, episodeId).print('basic'),
+  });
+
+  const [row] = rows;
+  if (!row) {
+    return undefined;
+  }
+
+  return { ...row, last_tags: normalizeTags(row.last_tags) };
+};
+
 export const createEpisodeAttachmentType = ({
   logger,
-  getEpisodesClient,
+  getQueryService,
 }: CreateEpisodeAttachmentTypeOptions): AttachmentTypeDefinition<
   typeof EPISODE_ATTACHMENT_TYPE,
   EpisodeAttachmentData
@@ -83,8 +111,11 @@ export const createEpisodeAttachmentType = ({
     context: AttachmentResolveContext
   ): Promise<EpisodeAttachmentData | undefined> => {
     try {
-      const client = getEpisodesClient(context);
-      const episode = await client.get(episodeId);
+      const episode = await fetchEpisode({
+        queryService: getQueryService(context),
+        spaceId: context.spaceId,
+        episodeId,
+      });
       if (!episode) {
         return undefined;
       }
@@ -103,8 +134,11 @@ export const createEpisodeAttachmentType = ({
       return false;
     }
     try {
-      const client = getEpisodesClient(context);
-      const episode = await client.get(attachment.origin);
+      const episode = await fetchEpisode({
+        queryService: getQueryService(context),
+        spaceId: context.spaceId,
+        episodeId: attachment.origin,
+      });
       if (!episode) {
         return false;
       }
