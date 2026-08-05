@@ -39,12 +39,12 @@ const baseParams = {
   includeTimeseries: false as const,
 };
 
-type MetricBucket = {
+interface MetricBucket {
   avg: { value: number | null };
   timeseries?: {
     buckets: Array<{ key: number; avg: { value: number | null } }>;
   };
-};
+}
 
 function emptyAvg(): MetricBucket {
   return { avg: { value: null } };
@@ -298,14 +298,15 @@ describe('getServiceInstancesSystemMetricStatistics', () => {
         apmEventClient,
       });
 
-      expect(getSearchParams(search).aggs['service.node.name'].aggs.cpu_usage_otel_system.aggs)
-        .toEqual(
-          expect.objectContaining({
-            timeseries: expect.objectContaining({
-              date_histogram: expect.any(Object),
-            }),
-          })
-        );
+      expect(
+        getSearchParams(search).aggs['service.node.name'].aggs.cpu_usage_otel_system.aggs
+      ).toEqual(
+        expect.objectContaining({
+          timeseries: expect.objectContaining({
+            date_histogram: expect.any(Object),
+          }),
+        })
+      );
 
       expect(result).toEqual([
         {
