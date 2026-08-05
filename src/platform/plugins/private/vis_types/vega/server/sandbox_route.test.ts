@@ -85,7 +85,7 @@ describe('registerSandboxRoute', () => {
     } as any;
 
     const responseFactory = { ok: jest.fn((args) => args) } as any;
-    await handler({}, request, responseFactory);
+    const handlerResult = await handler({}, request, responseFactory);
 
     const toolkit = { next: jest.fn((args) => args ?? { type: 'next' }) } as any;
     const result = onPreResponse(request, {} as any, toolkit);
@@ -96,6 +96,39 @@ describe('registerSandboxRoute', () => {
     expect(result?.headers?.['Content-Security-Policy']).toContain('https://kibana.example.com');
     expect(result?.headers?.['Content-Security-Policy']).toContain('https://static.example.com');
     expect(result?.headers?.['Content-Security-Policy']).toContain('https://*.static.example.com');
+
+    // The sandbox document must load the bundle URL derived from staticAssets, which is CDN-aware.
+    expect(handlerResult?.body).toContain('/bundles/kbn-vega-sandbox/');
+  });
+
+  test('uses staticAssets.prependPublicUrl for the sandbox bundle script src (CDN-aware)', async () => {
+    const router = { get: jest.fn() };
+    const registerOnPreResponse = jest.fn();
+    const core = {
+      http: {
+        createRouter: () => router,
+        registerOnPreResponse,
+        staticAssets: {
+          prependPublicUrl: (path: string) => `https://cdn.example.com${path}`,
+        },
+        basePath: { publicBaseUrl: 'https://kibana.example.com/base' },
+        externalUrl: { policy: [] },
+      },
+    } as any;
+
+    registerSandboxRoute(core);
+    const handler = router.get.mock.calls[0][1];
+
+    const request = {
+      uuid: 'request-uuid',
+      route: { path: VEGA_SANDBOX_ROUTE_PATH },
+      url: new URL('https://kibana.example.com/base/internal/vis_type_vega/sandbox'),
+    } as any;
+
+    const responseFactory = { ok: jest.fn((args) => args) } as any;
+    const handlerResult = await handler({}, request, responseFactory);
+
+    expect(handlerResult?.body).toContain('https://cdn.example.com/bundles/kbn-vega-sandbox/');
   });
 
   test('does not modify responses for other routes', () => {
