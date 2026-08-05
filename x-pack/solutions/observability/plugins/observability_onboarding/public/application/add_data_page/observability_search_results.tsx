@@ -33,9 +33,7 @@ const LoadedResults = ({
       searchTerm={searchTerm}
       items={items}
       isLoading={isLoading}
-      // The error state wins over partial quickstart-only results (decision,
-      // 2026-07-30). Data errors reuse the module retry, page-level retry is
-      // acceptable for now.
+      // The error state wins over partial quickstart-only results.
       isError={Boolean(error)}
       onRetry={onRetry}
       renderCard={renderResultCard}
@@ -58,9 +56,8 @@ export const ObservabilitySearchResults = ({ searchTerm }: Props) => {
     if (!asyncLoading) retryAsyncLoad();
   };
 
-  // `useAsyncRetry` keeps the previous error while the retry is in flight, so
-  // loading has to be checked first. Otherwise a retry leaves the error state
-  // on screen with an enabled button that silently does nothing.
+  // `useAsyncRetry` keeps the previous error while retrying, so loading has to
+  // be checked first or Retry leaves an enabled button that does nothing.
   if (errorLoading && !asyncLoading) {
     return (
       <AddDataSearchResults

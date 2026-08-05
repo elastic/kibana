@@ -9,18 +9,8 @@ import { readdirSync, readFileSync } from 'fs';
 import { join, relative, resolve } from 'path';
 
 /**
- * `add_data_grid/` mirrors the `src/` of a future shared package, so it may only
- * depend on things that package could depend on. This test is the enforcement:
- * without it the rule is a convention that a single convenient import erases.
- *
- * It lives outside `add_data_grid/` on purpose. A checker that reads the
- * filesystem needs `fs` and `path`, which the rule below forbids, and it would
- * otherwise have to exempt itself from its own scan.
- *
- * The provider rule falls out of the same allowlist: a test cannot wrap a
- * component in `KibanaContextProvider` or `MemoryRouter` without importing
- * `@kbn/kibana-react-plugin/public` or `react-router-dom`, and neither is
- * allowed here.
+ * Enforces the package boundary documented in `add_data_grid/README.md`. Lives
+ * outside that directory because it needs `fs`/`path`, which the rule forbids.
  */
 const GRID_ROOT = resolve(__dirname, 'add_data_grid');
 
@@ -102,8 +92,7 @@ describe('add_data_grid import boundary', () => {
   );
 
   it('is only reached through its public entry point', () => {
-    // The other half of the package contract. A deep import into a subdirectory
-    // works fine today and breaks the moment the directory becomes a package,
+    // A deep import works today and breaks the moment this becomes a package,
     // because packages expose one entry point and no subpaths.
     const deepImports = hostFiles.flatMap((filePath) =>
       collectSpecifiers(filePath)

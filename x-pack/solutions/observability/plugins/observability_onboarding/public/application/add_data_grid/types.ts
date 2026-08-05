@@ -8,14 +8,8 @@
 import type { MouseEventHandler, ReactElement } from 'react';
 
 /**
- * View-model for a curated integration tile. Built entirely by the host:
- * `icon` arrives already rendered (the o11y host uses its LogoIcon), and
- * `href`/`onClick` are built with the host's own navigation (router,
- * navigateToApp, or nothing for a non-interactive tile).
- *
- * `icon` is a single ReactElement (not ReactNode) on purpose: EuiCard clones
- * the icon element to attach its `euiCard__icon` styling, so a fragment or
- * string here would silently lose that styling.
+ * Host-built view-model for a curated tile. `icon` is a ReactElement, not a
+ * ReactNode: EuiCard clones it to attach its `euiCard__icon` styling.
  */
 export interface CuratedTile {
   id: string;

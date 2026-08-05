@@ -13,9 +13,8 @@ import { CuratedTileCard } from './curated_tile';
 
 export interface CuratedGridProps {
   /**
-   * Optional heading block. The o11y Variant B host renders its own persistent
-   * heading outside this component (it must stay visible while search results
-   * replace the grid), so it does not pass these. Other hosts can.
+   * Optional heading block. The o11y host renders its own heading outside this
+   * component so it stays visible while results replace the grid.
    */
   title?: string;
   subtitle?: string;

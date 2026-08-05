@@ -22,12 +22,8 @@ export type SearchItemsMatcher = <TItem extends SearchableItem>(
 const FIELDS_TO_SEARCH = ['name', 'title', 'description'];
 
 /**
- * Interim text matcher with the same semantics as Fleet's internal
- * `useLocalSearch` (js-search with a prefix index over `name`, `title` and
- * `description`, keyed by `id`) and the same ordering behavior as Fleet's
- * grid (matches filter the input list, so input order is preserved).
- * Replace with Fleet's `useLocalSearch` once it is exported from
- * `@kbn/fleet-plugin/public`.
+ * Mirrors Fleet's non-exported `useLocalSearch` (prefix index over `name`,
+ * `title`, `description`, input order kept). Drop once Fleet exports it.
  */
 export const matchSearchItems: SearchItemsMatcher = (items, searchTerm) => {
   const term = searchTerm.trim();

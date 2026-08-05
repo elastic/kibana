@@ -14,18 +14,8 @@ import { matchSearchItems, type SearchItemsMatcher } from './match_search_items'
 const ALLOWED_CATEGORIES = new Set(['observability', 'os_system']);
 
 /**
- * The o11y item pipeline feeding AddDataSearchResults: Fleet package list
- * (already loaded by the caller-provided hook), category filter, curated
+ * The o11y item pipeline feeding AddDataSearchResults: category filter, curated
  * quickstart cards, text match, onboarding return-path URL rewrite.
- * `useAvailablePackages` arrives as an argument because the Fleet module is
- * loaded async by the container component (hooks cannot be called
- * conditionally, so the caller mounts this only after the module resolves).
- *
- * `allCards`, not `filteredCards`: `filteredCards` is pre-filtered by Fleet's
- * own router-derived category state, which is empty on the onboarding route
- * today but wrong the moment this pipeline runs embedded on Integrations
- * routes. `allCards` also skips the agentless preference filter, which is a
- * no-op on this page with default settings.
  */
 export function useAddDataResultItems({
   searchTerm,
@@ -37,6 +27,8 @@ export function useAddDataResultItems({
   matchItems?: SearchItemsMatcher;
 }): { items: IntegrationCardItem[]; isLoading: boolean; error?: Error } {
   const customCards = useIntegrationTiles();
+  // `allCards`, not `filteredCards`: the latter is pre-filtered by Fleet's own
+  // router-derived category state, which is wrong outside the onboarding route.
   const { allCards, isLoading, eprPackageLoadingError } = useAvailablePackages({
     prereleaseIntegrationsEnabled: true,
   });

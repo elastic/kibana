@@ -9,20 +9,16 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 
 /**
- * Owns the raw search input value for the Add Data page and mirrors the
- * trimmed value into the `?search=` URL param (replace-style, param removed
- * when empty, unrelated params preserved). URL sync is a host concern: the
- * shared-shaped grid components receive the value via props and never read
- * the router. The URL write happens in the change handler. The effect only
- * reconciles inbound URL changes (back/forward, navigation), where the URL
- * wins unless it already equals the trimmed local value, which keeps raw
- * input (for example trailing spaces) intact while the user types.
+ * Owns the raw search input value and mirrors the trimmed value into the
+ * `?search=` param (replace-style, dropped when empty, other params kept).
  */
 export function useAddDataSearchUrlSync(): [string, (value: string) => void] {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTerm = searchParams.get('search') ?? '';
   const [searchValue, setSearchValue] = useState<string>(urlTerm);
 
+  // Reconciles inbound URL changes (back/forward) only. A trim-match leaves the
+  // local value alone, so raw input like trailing spaces survives typing.
   useEffect(() => {
     setSearchValue((value) => (value.trim() === urlTerm ? value : urlTerm));
   }, [urlTerm]);

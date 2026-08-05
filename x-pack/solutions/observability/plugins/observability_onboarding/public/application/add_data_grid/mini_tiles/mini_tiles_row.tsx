@@ -14,7 +14,6 @@ import { MiniTileCard } from './mini_tile_card';
 export interface MiniTilesRowProps {
   label: string;
   tiles: readonly MiniTile[];
-  /** Host-built trailing tile (the o11y host passes its Browse all tile). */
   browseAllTile?: React.ReactNode;
 }
 

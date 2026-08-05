@@ -54,10 +54,8 @@ export function AddDataSearchResults<TItem extends { id: string }>({
   const [previousSearchTerm, setPreviousSearchTerm] = useState(searchTerm);
   const [previousPageSize, setPreviousPageSize] = useState(pageSize);
 
-  // Adjusted during render, not in an effect. An effect resets one commit too
-  // late, so an expanded page of cards mounts under the new query before being
-  // cut back: a visible flash, and host cards may report a usage-tracking
-  // impression on mount (Fleet's do), which would count results nobody saw.
+  // Adjusted during render, not in an effect: an effect resets one commit too
+  // late, so extra cards flash and can log usage impressions on mount.
   if (searchTerm !== previousSearchTerm || pageSize !== previousPageSize) {
     setPreviousSearchTerm(searchTerm);
     setPreviousPageSize(pageSize);
@@ -130,9 +128,8 @@ export function AddDataSearchResults<TItem extends { id: string }>({
   );
   const visibleItems = items.slice(0, visibleCount);
 
-  // The live region sits outside the branch so it stays mounted across the
-  // empty/results swap: a region that mounts already holding its text is not
-  // reliably announced.
+  // The live region stays mounted across the empty/results swap: a region that
+  // mounts already holding its text is not reliably announced.
   return (
     <>
       <EuiScreenReaderLive>{isEmpty ? emptyLabel : countLabel}</EuiScreenReaderLive>

@@ -15,10 +15,8 @@ import { INTEGRATION_TILES } from './integration_tiles';
 import { INTEGRATION_MINI_TILES } from './integration_mini_tiles';
 
 /**
- * The o11y "flavor" of the Add Data grid: turns the plugin's curated tile
- * content into the host-agnostic view-models the add_data_grid components
- * consume. Everything plugin-specific (router navigation, LogoIcon asset
- * resolution, test subjects) is resolved here, never inside add_data_grid.
+ * The o11y flavor of the Add Data grid: plugin tile content plus everything
+ * plugin-specific (navigation, icons, test subjects) mapped into view-models.
  */
 export const useObservabilityCuratedCategories = (): CuratedCategory[] => {
   const history = useHistory();

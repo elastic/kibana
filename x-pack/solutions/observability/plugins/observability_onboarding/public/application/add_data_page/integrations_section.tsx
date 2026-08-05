@@ -22,10 +22,8 @@ interface Props {
 }
 
 /**
- * The o11y host composition of the Add Data grid (current Variant B layout:
- * results replace the curated grid inside the panel). Slice 4 replaces this
- * with the approved Variant A page-level composition after the designer
- * meeting.
+ * The o11y host composition of the Add Data grid, in the current Variant B
+ * layout (results replace the curated grid inside the panel).
  */
 export const ObservabilityIntegrationsSection = ({ searchValue, onSearchChange }: Props) => {
   const titleId = useGeneratedHtmlId({ prefix: 'integrationsGridTitle' });
