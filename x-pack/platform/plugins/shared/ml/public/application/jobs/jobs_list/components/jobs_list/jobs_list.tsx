@@ -296,7 +296,7 @@ export const JobsList: FC<JobsListProps> = ({
         'data-test-subj': 'mlTableColumnSpaces',
         truncateText: true,
         align: 'right',
-        width: '70px',
+        width: '80px',
         render: (item: MlSummaryJobWithSpaces) => (
           <MLSavedObjectsSpacesList
             disabled={!application?.capabilities?.savedObjectsManagement?.shareIntoSpace}
