@@ -10,7 +10,6 @@ import type {
   SubFeatureConfig,
   SubFeaturePrivilegeConfig,
 } from '@kbn/features-plugin/common';
-import { ApiPrivileges } from '@kbn/core-security-server';
 import {
   ALERTING_V2_ACTION_POLICIES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
@@ -24,32 +23,21 @@ type NestedValueOf<T extends Record<string, Record<string, string>>> = ValueOf<{
   [K in keyof T]: ValueOf<T[K]>;
 }>;
 
-/**
- * Single source of truth for alerting_v2 feature ids, API privilege strings,
- * UI capability keys, and future sub-feature definitions.
- *
- * Add all new alerting_v2 privilege strings here and derive from this file.
- *
- * Values use the `ApiPrivileges` format (`operation_subject`) so that both the
- * feature privilege builder and runtime privilege checks produce the same
- * fully-qualified action string without relying on the deprecated single-arg
- * `actions.api.get(subject)` overload.
- */
 export const ALERTING_V2_API_PRIVILEGES = {
   rules: {
-    read: ApiPrivileges.read('alerting-v2-rules'),
-    write: ApiPrivileges.manage('alerting-v2-rules'),
+    read: 'read_alerting-v2-rules',
+    write: 'manage_alerting-v2-rules',
   },
   alerts: {
-    read: ApiPrivileges.read('alerting-v2-alerts'),
-    write: ApiPrivileges.manage('alerting-v2-alerts'),
+    read: 'read_alerting-v2-alerts',
+    write: 'manage_alerting-v2-alerts',
   },
   actionPolicies: {
-    read: ApiPrivileges.read('alerting-v2-action-policies'),
-    write: ApiPrivileges.manage('alerting-v2-action-policies'),
+    read: 'read_alerting-v2-action-policies',
+    write: 'manage_alerting-v2-action-policies',
   },
   executionHistory: {
-    read: ApiPrivileges.read('alerting-v2-execution-history'),
+    read: 'read_alerting-v2-execution-history',
   },
 } as const;
 

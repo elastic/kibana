@@ -6,90 +6,297 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { ALERTING_V2_API_PRIVILEGES } from '../../../../common/feature_privileges';
 import { PrivilegeChecker } from './privilege_checker';
 
-const request = {} as KibanaRequest;
 const spaceId = 'default';
 
-const createSecurityMock = (hasAllRequested: boolean) => {
-  const atSpace = jest.fn().mockResolvedValue({ hasAllRequested });
-  const checkPrivilegesWithRequest = jest.fn().mockReturnValue({ atSpace });
-  const actionFromRouteTag = jest.fn((tag: string) => `api:${tag}`);
+// securityMock auto-mocks ApiActions via jest.mock, so we must use
+// jest.requireActual to get the real implementation for actionFromRouteTag.
+const { ApiActions } = jest.requireActual(
+  '@kbn/security-authorization-core/src/actions/api'
+) as typeof import('@kbn/security-authorization-core/src/actions/api');
+const apiActions = new ApiActions();
 
-  const security = {
-    authz: {
-      actions: { api: { actionFromRouteTag } },
-      checkPrivilegesWithRequest,
-    },
-  } as unknown as SecurityPluginStart;
+/**
+ * Resolve the fully-qualified action string for a privilege tag using the real
+ * `ApiActions` implementation — same code path the production security plugin
+ * uses to convert `operation_subject` route tags to action strings.
+ */
+const actionFor = (privilege: string) => apiActions.actionFromRouteTag(privilege);
 
-  return { security, atSpace, actionFromRouteTag };
+/**
+ * Create a `KibanaRequest` mock that represents a user with a specific set of
+ * granted API privileges. Returns the request and its pre-resolved action
+ * strings so they can be registered with the shared security mock.
+ */
+const createRequestMock = (grantedPrivileges: string[]) => {
+  const request = httpServerMock.createKibanaRequest();
+  const grantedActions = grantedPrivileges.map(actionFor);
+  return { request, grantedActions };
+};
+
+/**
+ * Build a `SecurityPluginStart` mock backed by `securityMock.createStart()`
+ * that evaluates privilege checks against a per-request privilege mapping.
+ * The real `ApiActions` class handles `actionFromRouteTag` so the test
+ * exercises the actual `operation_subject` parsing logic.
+ */
+const createSecurity = (privilegesByRequest: Map<KibanaRequest, string[]>) => {
+  const security = securityMock.createStart();
+
+  jest
+    .mocked(security.authz.actions.api.actionFromRouteTag)
+    .mockImplementation((tag: string) => apiActions.actionFromRouteTag(tag));
+
+  security.authz.checkPrivilegesWithRequest.mockImplementation((req: KibanaRequest) => ({
+    globally: jest.fn(),
+    atSpace: jest.fn().mockImplementation((_sid: string, { kibana }: { kibana: string[] }) => {
+      const granted = privilegesByRequest.get(req) ?? [];
+      const hasAllRequested = kibana.every((action) => granted.includes(action));
+      return Promise.resolve({ hasAllRequested });
+    }),
+    atSpaces: jest.fn(),
+  }));
+
+  return security;
 };
 
 describe('PrivilegeChecker', () => {
-  describe('canRead', () => {
-    it('checks the read API privilege for the given feature', async () => {
-      const { security, atSpace, actionFromRouteTag } = createSecurityMock(true);
-      const checker = new PrivilegeChecker(request, spaceId, security);
+  const rulesAll = createRequestMock([
+    ALERTING_V2_API_PRIVILEGES.rules.read,
+    ALERTING_V2_API_PRIVILEGES.rules.write,
+  ]);
+  const rulesRead = createRequestMock([ALERTING_V2_API_PRIVILEGES.rules.read]);
+  const actionPoliciesAll = createRequestMock([
+    ALERTING_V2_API_PRIVILEGES.actionPolicies.read,
+    ALERTING_V2_API_PRIVILEGES.actionPolicies.write,
+  ]);
+  const actionPoliciesRead = createRequestMock([ALERTING_V2_API_PRIVILEGES.actionPolicies.read]);
+  const alertsAll = createRequestMock([
+    ALERTING_V2_API_PRIVILEGES.alerts.read,
+    ALERTING_V2_API_PRIVILEGES.alerts.write,
+  ]);
+  const alertsRead = createRequestMock([ALERTING_V2_API_PRIVILEGES.alerts.read]);
+  const execHistoryAll = createRequestMock([ALERTING_V2_API_PRIVILEGES.executionHistory.read]);
+  const execHistoryRead = createRequestMock([ALERTING_V2_API_PRIVILEGES.executionHistory.read]);
+  const noAccess = createRequestMock([]);
 
+  const security = createSecurity(
+    new Map([
+      [rulesAll.request, rulesAll.grantedActions],
+      [rulesRead.request, rulesRead.grantedActions],
+      [actionPoliciesAll.request, actionPoliciesAll.grantedActions],
+      [actionPoliciesRead.request, actionPoliciesRead.grantedActions],
+      [alertsAll.request, alertsAll.grantedActions],
+      [alertsRead.request, alertsRead.grantedActions],
+      [execHistoryAll.request, execHistoryAll.grantedActions],
+      [execHistoryRead.request, execHistoryRead.grantedActions],
+      [noAccess.request, noAccess.grantedActions],
+    ])
+  );
+
+  describe('rules:all user', () => {
+    const checker = new PrivilegeChecker(rulesAll.request, spaceId, security);
+
+    it('can read rules', async () => {
       await expect(checker.canRead('rules')).resolves.toBe(true);
-
-      expect(actionFromRouteTag).toHaveBeenCalledWith(ALERTING_V2_API_PRIVILEGES.rules.read);
-      expect(atSpace).toHaveBeenCalledWith(spaceId, {
-        kibana: [`api:${ALERTING_V2_API_PRIVILEGES.rules.read}`],
-      });
     });
 
-    it('returns false when the user lacks the read privilege', async () => {
-      const { security } = createSecurityMock(false);
-      const checker = new PrivilegeChecker(request, spaceId, security);
-
-      await expect(checker.canRead('rules')).resolves.toBe(false);
+    it('can write rules', async () => {
+      await expect(checker.canWrite('rules')).resolves.toBe(true);
     });
 
-    it('checks the correct privilege for action policies', async () => {
-      const { security, actionFromRouteTag } = createSecurityMock(true);
-      const checker = new PrivilegeChecker(request, spaceId, security);
+    it('cannot read action policies', async () => {
+      await expect(checker.canRead('actionPolicies')).resolves.toBe(false);
+    });
 
-      await checker.canRead('actionPolicies');
+    it('cannot write action policies', async () => {
+      await expect(checker.canWrite('actionPolicies')).resolves.toBe(false);
+    });
 
-      expect(actionFromRouteTag).toHaveBeenCalledWith(
-        ALERTING_V2_API_PRIVILEGES.actionPolicies.read
-      );
+    it('cannot read alerts', async () => {
+      await expect(checker.canRead('alerts')).resolves.toBe(false);
+    });
+
+    it('cannot read execution history', async () => {
+      await expect(checker.canRead('executionHistory')).resolves.toBe(false);
     });
   });
 
-  describe('canWrite', () => {
-    it('checks the write API privilege for the given feature', async () => {
-      const { security, atSpace, actionFromRouteTag } = createSecurityMock(true);
-      const checker = new PrivilegeChecker(request, spaceId, security);
+  describe('rules:read user', () => {
+    const checker = new PrivilegeChecker(rulesRead.request, spaceId, security);
 
-      await expect(checker.canWrite('rules')).resolves.toBe(true);
-
-      expect(actionFromRouteTag).toHaveBeenCalledWith(ALERTING_V2_API_PRIVILEGES.rules.write);
-      expect(atSpace).toHaveBeenCalledWith(spaceId, {
-        kibana: [`api:${ALERTING_V2_API_PRIVILEGES.rules.write}`],
-      });
+    it('can read rules', async () => {
+      await expect(checker.canRead('rules')).resolves.toBe(true);
     });
 
-    it('returns false when the user lacks the write privilege', async () => {
-      const { security } = createSecurityMock(false);
-      const checker = new PrivilegeChecker(request, spaceId, security);
-
+    it('cannot write rules', async () => {
       await expect(checker.canWrite('rules')).resolves.toBe(false);
     });
 
-    it('checks the correct privilege for action policies', async () => {
-      const { security, actionFromRouteTag } = createSecurityMock(true);
-      const checker = new PrivilegeChecker(request, spaceId, security);
+    it('cannot read action policies', async () => {
+      await expect(checker.canRead('actionPolicies')).resolves.toBe(false);
+    });
+  });
 
-      await checker.canWrite('actionPolicies');
+  describe('action_policies:all user', () => {
+    const checker = new PrivilegeChecker(actionPoliciesAll.request, spaceId, security);
 
-      expect(actionFromRouteTag).toHaveBeenCalledWith(
-        ALERTING_V2_API_PRIVILEGES.actionPolicies.write
+    it('can read action policies', async () => {
+      await expect(checker.canRead('actionPolicies')).resolves.toBe(true);
+    });
+
+    it('can write action policies', async () => {
+      await expect(checker.canWrite('actionPolicies')).resolves.toBe(true);
+    });
+
+    it('cannot read rules', async () => {
+      await expect(checker.canRead('rules')).resolves.toBe(false);
+    });
+
+    it('cannot write rules', async () => {
+      await expect(checker.canWrite('rules')).resolves.toBe(false);
+    });
+
+    it('cannot read alerts', async () => {
+      await expect(checker.canRead('alerts')).resolves.toBe(false);
+    });
+
+    it('cannot read execution history', async () => {
+      await expect(checker.canRead('executionHistory')).resolves.toBe(false);
+    });
+  });
+
+  describe('action_policies:read user', () => {
+    const checker = new PrivilegeChecker(actionPoliciesRead.request, spaceId, security);
+
+    it('can read action policies', async () => {
+      await expect(checker.canRead('actionPolicies')).resolves.toBe(true);
+    });
+
+    it('cannot write action policies', async () => {
+      await expect(checker.canWrite('actionPolicies')).resolves.toBe(false);
+    });
+
+    it('cannot read rules', async () => {
+      await expect(checker.canRead('rules')).resolves.toBe(false);
+    });
+  });
+
+  describe('alerts:all user', () => {
+    const checker = new PrivilegeChecker(alertsAll.request, spaceId, security);
+
+    it('can read alerts', async () => {
+      await expect(checker.canRead('alerts')).resolves.toBe(true);
+    });
+
+    it('cannot read rules', async () => {
+      await expect(checker.canRead('rules')).resolves.toBe(false);
+    });
+
+    it('cannot read action policies', async () => {
+      await expect(checker.canRead('actionPolicies')).resolves.toBe(false);
+    });
+
+    it('cannot read execution history', async () => {
+      await expect(checker.canRead('executionHistory')).resolves.toBe(false);
+    });
+  });
+
+  describe('alerts:read user', () => {
+    const checker = new PrivilegeChecker(alertsRead.request, spaceId, security);
+
+    it('can read alerts', async () => {
+      await expect(checker.canRead('alerts')).resolves.toBe(true);
+    });
+
+    it('cannot read rules', async () => {
+      await expect(checker.canRead('rules')).resolves.toBe(false);
+    });
+  });
+
+  describe('execution_history:all user', () => {
+    const checker = new PrivilegeChecker(execHistoryAll.request, spaceId, security);
+
+    it('can read execution history', async () => {
+      await expect(checker.canRead('executionHistory')).resolves.toBe(true);
+    });
+
+    it('cannot read rules', async () => {
+      await expect(checker.canRead('rules')).resolves.toBe(false);
+    });
+
+    it('cannot read action policies', async () => {
+      await expect(checker.canRead('actionPolicies')).resolves.toBe(false);
+    });
+
+    it('cannot read alerts', async () => {
+      await expect(checker.canRead('alerts')).resolves.toBe(false);
+    });
+  });
+
+  describe('execution_history:read user', () => {
+    const checker = new PrivilegeChecker(execHistoryRead.request, spaceId, security);
+
+    it('can read execution history', async () => {
+      await expect(checker.canRead('executionHistory')).resolves.toBe(true);
+    });
+
+    it('cannot read rules', async () => {
+      await expect(checker.canRead('rules')).resolves.toBe(false);
+    });
+  });
+
+  describe('no-access user', () => {
+    const checker = new PrivilegeChecker(noAccess.request, spaceId, security);
+
+    it('cannot read rules', async () => {
+      await expect(checker.canRead('rules')).resolves.toBe(false);
+    });
+
+    it('cannot write rules', async () => {
+      await expect(checker.canWrite('rules')).resolves.toBe(false);
+    });
+
+    it('cannot read action policies', async () => {
+      await expect(checker.canRead('actionPolicies')).resolves.toBe(false);
+    });
+
+    it('cannot write action policies', async () => {
+      await expect(checker.canWrite('actionPolicies')).resolves.toBe(false);
+    });
+
+    it('cannot read alerts', async () => {
+      await expect(checker.canRead('alerts')).resolves.toBe(false);
+    });
+
+    it('cannot read execution history', async () => {
+      await expect(checker.canRead('executionHistory')).resolves.toBe(false);
+    });
+  });
+
+  describe('plumbing', () => {
+    it('passes the correct request to checkPrivilegesWithRequest', async () => {
+      const checker = new PrivilegeChecker(rulesAll.request, spaceId, security);
+      await checker.canRead('rules');
+
+      expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalledWith(rulesAll.request);
+    });
+
+    it('passes the spaceId to atSpace', async () => {
+      const testRequest = createRequestMock([ALERTING_V2_API_PRIVILEGES.rules.read]);
+      const testSecurity = createSecurity(
+        new Map([[testRequest.request, testRequest.grantedActions]])
       );
+      const checker = new PrivilegeChecker(testRequest.request, spaceId, testSecurity);
+      await checker.canRead('rules');
+
+      const atSpace =
+        testSecurity.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpace;
+      expect(atSpace).toHaveBeenCalledWith(spaceId, expect.any(Object));
     });
   });
 });
