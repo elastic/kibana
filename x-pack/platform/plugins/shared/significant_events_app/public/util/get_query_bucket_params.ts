@@ -18,15 +18,20 @@ export interface QueryBucketParams {
 /**
  * Derives ISO from/to and an auto bucket size (~50 buckets) for query-occurrence
  * histogram requests. Returns undefined when bounds or bucket size cannot be computed.
+ *
+ * Pass the timefilter instance (not a detached `calculateBounds` method). The
+ * instance method reads `this.nowProvider`.
  */
 export function getQueryBucketParams(
-  calculateBounds: (range: { from: string; to: string }) => TimeRangeBounds,
+  timefilter: {
+    calculateBounds: (range: { from: string; to: string }) => TimeRangeBounds;
+  },
   timeState: { start: number; end: number }
 ): QueryBucketParams | undefined {
   const from = new Date(timeState.start).toISOString();
   const to = new Date(timeState.end).toISOString();
 
-  const { min, max } = calculateBounds({ from, to });
+  const { min, max } = timefilter.calculateBounds({ from, to });
   if (!min || !max) {
     return undefined;
   }

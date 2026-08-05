@@ -25,16 +25,16 @@ export interface SignificantEventsAppSetupDependencies {
 }
 
 export interface SignificantEventsAppStartDependencies {
+  agentBuilder?: AgentBuilderPluginStart;
   charts: ChartsPluginStart;
+  cloud?: CloudStart;
   data: DataPublicPluginStart;
   licensing: LicensingPluginStart;
   share: SharePluginStart;
   significantEvents: SignificantEventsPublicPluginStart;
+  spaces?: SpacesPluginStart;
   streams: StreamsPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
-  agentBuilder?: AgentBuilderPluginStart;
-  cloud?: CloudStart;
-  spaces?: SpacesPluginStart;
 }
 
 /* eslint-disable-next-line @typescript-eslint/no-empty-interface */

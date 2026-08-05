@@ -39,10 +39,7 @@ export const useFetchDiscoveryQueriesOccurrences = (
   const fetchDiscoveryQueriesOccurrences = async ({
     signal,
   }: QueryFunctionContext): Promise<DiscoveryQueriesOccurrencesFetchResult | undefined> => {
-    const bucketParams = getQueryBucketParams(
-      data.query.timefilter.timefilter.calculateBounds,
-      timeState
-    );
+    const bucketParams = getQueryBucketParams(data.query.timefilter.timefilter, timeState);
     if (!bucketParams) {
       return undefined;
     }

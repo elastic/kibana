@@ -42,10 +42,7 @@ export const useFetchQueryOccurrenceStats = (
   const fetchQueryOccurrenceStats = async ({
     signal,
   }: QueryFunctionContext): Promise<SignificantEventsStatsFetchResult> => {
-    const bucketParams = getQueryBucketParams(
-      data.query.timefilter.timefilter.calculateBounds,
-      timeState
-    );
+    const bucketParams = getQueryBucketParams(data.query.timefilter.timefilter, timeState);
     if (!bucketParams) {
       return undefined;
     }
