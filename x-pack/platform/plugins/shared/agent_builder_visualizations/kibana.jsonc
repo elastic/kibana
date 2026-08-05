@@ -18,6 +18,9 @@
       "uiActions",
       "unifiedSearch",
       "embeddable"
+    ],
+    "requiredBundles": [
+      "presentationUtil"
     ]
   }
 }
