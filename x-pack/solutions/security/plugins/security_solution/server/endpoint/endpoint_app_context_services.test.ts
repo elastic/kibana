@@ -163,4 +163,44 @@ describe('test endpoint app context services', () => {
       });
     });
   });
+
+  describe('asScoped', () => {
+    let service: EndpointAppContextService;
+    let startContract: ReturnType<typeof createMockEndpointAppContextServiceStartContract>;
+    const request = httpServerMock.createKibanaRequest();
+
+    const startService = (cpsEnabled: boolean) => {
+      startContract = { ...createMockEndpointAppContextServiceStartContract(), cpsEnabled };
+      service.setup(createMockEndpointAppContextServiceSetupContract());
+      service.start(startContract);
+    };
+
+    beforeEach(() => {
+      service = new EndpointAppContextService();
+    });
+
+    afterEach(() => {
+      service.stop();
+    });
+
+    it('isCpsRead() returns false when the flag is off', () => {
+      startService(false);
+
+      expect(service.asScoped(request).isCpsRead()).toBe(false);
+    });
+
+    it('isCpsRead() returns true when the flag is on and a request is present', () => {
+      startService(true);
+
+      expect(service.asScoped(request).isCpsRead()).toBe(true);
+    });
+
+    it('getEsClient() returns a different client than the internal one when the flag is on', () => {
+      startService(true);
+
+      const scoped = service.asScoped(request);
+
+      expect(scoped.getEsClient()).not.toBe(startContract.esClient);
+    });
+  });
 });

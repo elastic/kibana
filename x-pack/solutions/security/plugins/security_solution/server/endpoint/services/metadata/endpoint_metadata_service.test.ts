@@ -406,7 +406,7 @@ describe('EndpointMetadataService', () => {
       it('should read as the request user so the list can fan out to linked projects', async () => {
         await metadataService.getHostMetadataList(
           { page: 0, pageSize: 10, kuery: '', hostStatuses: [] },
-          request
+          testMockedContext.endpointAppContextService.asScoped(request)
         );
 
         expect(testMockedContext.endpointAppContextService.getReadEsClient).toHaveBeenCalledWith(
@@ -440,7 +440,7 @@ describe('EndpointMetadataService', () => {
 
         await metadataService.getHostMetadataList(
           { page: 0, pageSize: 10, kuery: '', hostStatuses: [] },
-          request
+          testMockedContext.endpointAppContextService.asScoped(request)
         );
 
         expect(testMockedContext.fleetServices.agentPolicy.getByIds).toHaveBeenCalledWith(
@@ -490,7 +490,7 @@ describe('EndpointMetadataService', () => {
 
         const result = await metadataService.getHostMetadataList(
           { page: 0, pageSize: 10, kuery: '', hostStatuses: [] },
-          request
+          testMockedContext.endpointAppContextService.asScoped(request)
         );
 
         expect(result.data).toHaveLength(1);
@@ -524,7 +524,10 @@ describe('EndpointMetadataService', () => {
         );
 
         await expect(
-          metadataService.getHostMetadata(endpointMetadataDoc.agent.id, request)
+          metadataService.getHostMetadata(
+            endpointMetadataDoc.agent.id,
+            testMockedContext.endpointAppContextService.asScoped(request)
+          )
         ).rejects.toThrow();
       });
 
@@ -556,7 +559,10 @@ describe('EndpointMetadataService', () => {
         (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([]);
 
         await expect(
-          metadataService.getHostMetadata(endpointMetadataDoc.agent.id, request)
+          metadataService.getHostMetadata(
+            endpointMetadataDoc.agent.id,
+            testMockedContext.endpointAppContextService.asScoped(request)
+          )
         ).resolves.toBeDefined();
       });
 
@@ -592,7 +598,10 @@ describe('EndpointMetadataService', () => {
         ]);
 
         await expect(
-          metadataService.getHostMetadata(endpointMetadataDoc.agent.id, request)
+          metadataService.getHostMetadata(
+            endpointMetadataDoc.agent.id,
+            testMockedContext.endpointAppContextService.asScoped(request)
+          )
         ).rejects.toThrow();
       });
     });

@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { KibanaRequest } from '@kbn/core/server';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { estypes } from '@elastic/elasticsearch';
 import type {
@@ -18,7 +17,10 @@ import { ACTIONS_SEARCH_PAGE_SIZE } from '../constants';
 import { catchAndWrapError } from '../../../utils';
 import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../../common/endpoint/constants';
 import { prefixIndexPatternsWithCcs } from '../../../utils/ccs_utils';
-import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../../endpoint_app_context_services';
 
 /** @internal */
 const buildSearchQuery = (
@@ -42,7 +44,7 @@ interface FetchActionResponsesOptions {
   esClient: ElasticsearchClient;
   endpointService: EndpointAppContextService;
   /** Required for the Endpoint index read to fan out under CPS. The Fleet index read never fans out */
-  request?: KibanaRequest;
+  scoped?: ScopedEndpointServices;
   /** List of specific action ids to filter for */
   actionIds?: string[];
   /** List of specific agent ids to filter for */
@@ -95,15 +97,15 @@ export const fetchEndpointActionResponses = async <
 >({
   esClient,
   endpointService,
-  request,
+  scoped,
   actionIds,
   agentIds,
 }: FetchActionResponsesOptions): Promise<
   Array<LogsEndpointActionResponse<TOutputContent, TResponseMeta>>
 > => {
   const ccsEnabled = await endpointService.isCcsEnabled();
-  const cpsRead = endpointService.isCpsRead(request);
-  const readEsClient = cpsRead ? endpointService.getReadEsClient(request) : esClient;
+  const cpsRead = scoped?.isCpsRead() ?? false;
+  const readEsClient = cpsRead && scoped ? scoped.getEsClient() : esClient;
   const searchResponse = await readEsClient
     .search<LogsEndpointActionResponse<TOutputContent, TResponseMeta>>(
       {

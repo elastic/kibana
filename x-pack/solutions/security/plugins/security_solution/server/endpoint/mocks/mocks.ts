@@ -139,6 +139,13 @@ export const createMockEndpointAppContextService = (
   const telemetryServiceMock = analyticsServiceMock.createAnalyticsServiceSetup();
   const scriptsClient = ScriptsLibraryMock.getMockedClient();
   const isCpsEnabled = jest.fn().mockReturnValue(false);
+  // Hoisted so `asScoped` can delegate to the same mocks the service exposes directly. A test that
+  // overrides one of these changes what the scoped instance answers too, so the two cannot disagree.
+  const getReadEsClient = jest.fn().mockReturnValue(esClient);
+  const getScopedSearchClient = jest.fn((request: KibanaRequest) =>
+    dataStart.search.asScoped(request)
+  );
+  const getActiveSpaceId = jest.fn().mockReturnValue(DEFAULT_SPACE_ID);
 
   return {
     start: jest.fn(),
@@ -173,14 +180,20 @@ export const createMockEndpointAppContextService = (
     isCpsRead: jest.fn((request?: KibanaRequest) => isCpsEnabled() && request != null),
     getInternalEsClient: jest.fn().mockReturnValue(esClient),
     // Matches the flag-off branch; fan-out tests override this along with `isCpsEnabled`
-    getReadEsClient: jest.fn().mockReturnValue(esClient),
-    getScopedSearchClient: jest.fn((request) => dataStart.search.asScoped(request)),
+    getReadEsClient,
+    getScopedSearchClient,
+    asScoped: jest.fn((request: KibanaRequest) => ({
+      isCpsRead: () => isCpsEnabled() && request != null,
+      getEsClient: () => getReadEsClient(request),
+      getSearchClient: () => getScopedSearchClient(request),
+      getSpaceId: () => getActiveSpaceId(request),
+    })),
     getActiveSpace: jest.fn(async (_) => ({
       id: DEFAULT_SPACE_ID,
       name: 'default',
       disabledFeatures: [],
     })),
-    getActiveSpaceId: jest.fn().mockReturnValue(DEFAULT_SPACE_ID),
+    getActiveSpaceId,
     getAccessibleSpaces: jest.fn(async (_) => [
       {
         id: DEFAULT_SPACE_ID,

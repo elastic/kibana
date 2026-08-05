@@ -118,6 +118,7 @@ describe('Policy Response Services', () => {
 
     describe('and CPS is enabled', () => {
       let readEsClientMock: ElasticsearchClientMock;
+      let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
       const mockPolicyResponseFrom = (index: string) => {
         applyEsClientSearchMock({
@@ -138,13 +139,14 @@ describe('Policy Response Services', () => {
 
         endpointServiceMock.isCpsEnabled.mockReturnValue(true);
         endpointServiceMock.getReadEsClient.mockReturnValue(readEsClientMock);
-        fetchOptions.request = httpServerMock.createKibanaRequest();
+        request = httpServerMock.createKibanaRequest();
+        fetchOptions.scoped = endpointServiceMock.asScoped(request);
       });
 
       it('should read as the request user so the search can fan out to linked projects', async () => {
         await getPolicyResponseByAgentId(fetchOptions);
 
-        expect(endpointServiceMock.getReadEsClient).toHaveBeenCalledWith(fetchOptions.request);
+        expect(endpointServiceMock.getReadEsClient).toHaveBeenCalledWith(request);
         expect(readEsClientMock.search).toHaveBeenCalled();
         expect(esClientMock.search).not.toHaveBeenCalled();
       });

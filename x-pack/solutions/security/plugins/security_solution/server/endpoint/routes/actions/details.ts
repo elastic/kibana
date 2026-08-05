@@ -64,6 +64,7 @@ export const getActionDetailsRequestHandler = (
   return async (context, req, res) => {
     try {
       const activeSpaceId = (await context.securitySolution).getSpaceId();
+      const scoped = endpointContext.service.asScoped(req);
 
       return res.ok({
         body: {
@@ -71,7 +72,7 @@ export const getActionDetailsRequestHandler = (
             endpointContext.service,
             activeSpaceId,
             req.params.action_id,
-            { request: req }
+            { scoped }
           ),
         },
       });

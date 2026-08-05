@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ISearchRequestParams } from '@kbn/search-types';
 import type { EndpointFleetServicesInterface } from '../../services/fleet';
 import { policyIndexPattern } from '../../../../common/endpoint/constants';
@@ -14,7 +14,10 @@ import { INITIAL_POLICY_ID } from '.';
 import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
 import { isFannedInHit } from '../../utils/cps_read_routing';
-import type { EndpointAppContextService } from '../../endpoint_app_context_services';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../endpoint_app_context_services';
 
 export const getESQueryPolicyResponseByAgentID = (
   agentID: string,
@@ -54,7 +57,7 @@ export interface GetPolicyResponseByAgentIdOptions {
   fleetServices: EndpointFleetServicesInterface;
   ccsEnabled: boolean;
   /** Required for the read to fan out under CPS; without it the read is origin-only */
-  request?: KibanaRequest;
+  scoped?: ScopedEndpointServices;
 }
 
 export async function getPolicyResponseByAgentId({
@@ -63,9 +66,9 @@ export async function getPolicyResponseByAgentId({
   endpointService,
   fleetServices,
   ccsEnabled,
-  request,
+  scoped,
 }: GetPolicyResponseByAgentIdOptions): Promise<GetHostPolicyResponse | undefined> {
-  const cpsRead = endpointService.isCpsRead(request);
+  const cpsRead = scoped?.isCpsRead() ?? false;
   // CCS remote outputs and CPS fan-in both prefix a hit's `_index` with an alias, and the visibility
   // check below can only read one meaning out of that colon. Under CPS the policy read therefore
   // gives up searching CCS remote outputs — deliberate, since the two topologies are not meant to be
@@ -74,7 +77,7 @@ export async function getPolicyResponseByAgentId({
     agentID,
     prefixIndexPatternsWithCcs(policyIndexPattern, ccsEnabled && !cpsRead)
   );
-  const response = await (cpsRead ? endpointService.getReadEsClient(request) : esClient)
+  const response = await (cpsRead && scoped ? scoped.getEsClient() : esClient)
     .search<HostPolicyResponse>(query)
     .catch(catchAndWrapError);
 

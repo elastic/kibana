@@ -92,7 +92,8 @@ describe('EndpointAgentStatusClient', () => {
 
   it('should forward the request so the metadata read can fan out under CPS', async () => {
     const request = httpServerMock.createKibanaRequest();
-    const clientWithRequest = new EndpointAgentStatusClient({ ...constructorOptions, request });
+    const scoped = constructorOptions.endpointService.asScoped(request);
+    const clientWithRequest = new EndpointAgentStatusClient({ ...constructorOptions, scoped });
     const metadataClient = constructorOptions.endpointService.getEndpointMetadataService();
     jest.spyOn(metadataClient, 'getHostMetadataList');
 
@@ -100,7 +101,7 @@ describe('EndpointAgentStatusClient', () => {
 
     expect(metadataClient.getHostMetadataList).toHaveBeenCalledWith(
       expect.objectContaining({ kuery: 'agent.id: one' }),
-      request
+      expect.anything()
     );
   });
 

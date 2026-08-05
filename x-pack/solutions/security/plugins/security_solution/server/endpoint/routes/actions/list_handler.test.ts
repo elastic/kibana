@@ -129,7 +129,7 @@ describe('Action List Handler', () => {
           statuses: ['failed'],
           userIds: ['userX'],
           // without it the read cannot fan out and silently returns origin-only results
-          request: mockRequest,
+          scoped: expect.anything(),
         })
       );
     });
@@ -164,7 +164,7 @@ describe('Action List Handler', () => {
           elasticAgentIds: ['agentX'],
           userIds: ['userX'],
           // without it the read cannot fan out and silently returns origin-only results
-          request: mockRequest,
+          scoped: expect.anything(),
         })
       );
     });

@@ -167,7 +167,7 @@ describe('fetchActionResponses()', () => {
     await fetchActionResponses({
       esClient: esClientMock,
       endpointService: endpointServiceMock,
-      request: httpServerMock.createKibanaRequest(),
+      scoped: endpointServiceMock.asScoped(httpServerMock.createKibanaRequest()),
     });
 
     expect(scopedEsClient.search).toHaveBeenCalledWith(
@@ -277,7 +277,7 @@ describe('fetchActionResponses()', () => {
       await fetchActionResponses({
         esClient: esClientMock,
         endpointService: endpointServiceMock,
-        request,
+        scoped: endpointServiceMock.asScoped(request),
         actionIds: ['a'],
       });
 
@@ -292,7 +292,7 @@ describe('fetchActionResponses()', () => {
       await fetchActionResponses({
         esClient: esClientMock,
         endpointService: endpointServiceMock,
-        request,
+        scoped: endpointServiceMock.asScoped(request),
         actionIds: ['a'],
       });
 
@@ -310,7 +310,7 @@ describe('fetchActionResponses()', () => {
       await fetchActionResponses({
         esClient: esClientMock,
         endpointService: endpointServiceMock,
-        request,
+        scoped: endpointServiceMock.asScoped(request),
         actionIds: ['a'],
       });
 

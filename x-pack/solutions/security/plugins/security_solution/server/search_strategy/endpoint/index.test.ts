@@ -48,6 +48,12 @@ describe('endpointSearchStrategyProvider', () => {
         isCpsRead: jest.fn((req) => cpsEnabled && req != null),
         getActiveSpaceId: jest.fn().mockReturnValue('default'),
         getScopedSearchClient: jest.fn().mockReturnValue({ search: scopedSearch }),
+        asScoped: jest.fn((req) => ({
+          isCpsRead: () => cpsEnabled && req != null,
+          getEsClient: () => { throw new Error('not used in search strategy tests'); },
+          getSearchClient: () => ({ search: scopedSearch }),
+          getSpaceId: () => 'default',
+        })),
       },
     } as unknown as EndpointAppContext;
 
@@ -215,6 +221,12 @@ describe('endpointSearchStrategyProvider', () => {
       const service = {
         isCpsRead: jest.fn().mockReturnValue(true),
         getScopedSearchClient: jest.fn().mockReturnValue({ cancel }),
+        asScoped: jest.fn(() => ({
+          isCpsRead: () => true,
+          getEsClient: () => { throw new Error('not used'); },
+          getSearchClient: () => ({ cancel }),
+          getSpaceId: () => 'default',
+        })),
       };
       const provider = endpointSearchStrategyProvider(
         {
@@ -249,7 +261,7 @@ describe('endpointSearchStrategyProvider', () => {
           expect.anything(),
           'default',
           'action-1',
-          { request: deps.request }
+          { scoped: expect.anything() }
         );
         expect(scopedSearch).toHaveBeenCalledTimes(1);
       });

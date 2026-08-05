@@ -128,6 +128,24 @@ export interface EndpointAppContextServiceStartContract {
 }
 
 /**
+ * The request-bound half of the CPS primitives, handed out by `EndpointAppContextService.asScoped()`.
+ *
+ * Services take this rather than a `KibanaRequest` so that they stay independent of the HTTP routing
+ * layer. Holding one means the caller had a request identity, which is the precondition for a read to
+ * fan out; a service that receives none reads origin-only, exactly as before CPS.
+ */
+export interface ScopedEndpointServices {
+  /** `true` when reads made through this instance fan out across linked projects */
+  isCpsRead: () => boolean;
+  /** The client for reads against Defend-owned indices. Fleet-owned ones stay on the internal client */
+  getEsClient: () => ElasticsearchClient;
+  /** The search client the Defend search strategies dispatch through */
+  getSearchClient: () => IScopedSearchClient;
+  /** The active space, which is also what bounds the set of projects a fanned-out read reaches */
+  getSpaceId: () => string;
+}
+
+/**
  * A singleton that holds shared services that are initialized during the start up phase
  * of the plugin lifecycle. And stop during the stop phase, if needed.
  */
@@ -388,6 +406,25 @@ export class EndpointAppContextService {
     return this.isCpsEnabled()
       ? dataStart.search.asScoped(request, { projectRouting: 'space' })
       : dataStart.search.asScoped(request);
+  }
+
+  /**
+   * A request-bound view of the three CPS primitives above, so the services that need them do not
+   * have to take a `KibanaRequest` of their own. The server-side services are deliberately detached
+   * from the HTTP routing layer; handing them this instead keeps that separation while still making
+   * "this read can fan out" visible in their signatures. A service that receives no scoped instance
+   * cannot fan out, which is the same rule `isCpsRead` applies to a missing request.
+   *
+   * Modelled on `getScopedEndpointArtifactClient()`, which hands out a request-scoped service object
+   * in the same way.
+   */
+  public asScoped(request: KibanaRequest): ScopedEndpointServices {
+    return {
+      isCpsRead: () => this.isCpsRead(request),
+      getEsClient: () => this.getReadEsClient(request),
+      getSearchClient: () => this.getScopedSearchClient(request),
+      getSpaceId: () => this.getActiveSpaceId(request),
+    };
   }
 
   public getAgentBuilder(): AgentBuilderPluginStart {

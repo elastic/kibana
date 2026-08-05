@@ -77,13 +77,14 @@ export const getAgentStatusRouteHandler = (
         spaceId,
       });
       const connectorActionsClient = actionsPlugin.getActionsClient();
+      const scoped = endpointContext.service.asScoped(request);
       const agentStatusClient = getAgentStatusClient(agentType, {
         esClient,
         soClient,
         spaceId,
         connectorActionsClient,
         endpointService: endpointContext.service,
-        request,
+        scoped,
       });
       const data = await agentStatusClient.getAgentStatuses(agentIds);
 

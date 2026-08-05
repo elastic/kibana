@@ -29,6 +29,7 @@ export const getHostPolicyResponseHandler = function (
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const fleetServices = endpointAppContextServices.getInternalFleetServices(spaceId);
     const ccsEnabled = await endpointAppContextServices.isCcsEnabled();
+    const scoped = endpointAppContextServices.asScoped(request);
 
     try {
       const agentId = request.query.agentId;
@@ -38,7 +39,7 @@ export const getHostPolicyResponseHandler = function (
         endpointService: endpointAppContextServices,
         fleetServices,
         ccsEnabled,
-        request,
+        scoped,
       });
 
       if (doc) {

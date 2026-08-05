@@ -5,12 +5,7 @@
  * 2.0.
  */
 import { uniq } from 'lodash';
-import type {
-  ElasticsearchClient,
-  KibanaRequest,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -58,7 +53,10 @@ import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/end
 import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import type { EndpointFleetServicesInterface } from '../fleet/endpoint_fleet_services_factory';
-import type { EndpointAppContextService } from '../../endpoint_app_context_services';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../endpoint_app_context_services';
 
 type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
   package_policies: PackagePolicy[];
@@ -196,16 +194,16 @@ export class EndpointMetadataService {
    *
    * @throws
    */
-  async getHostMetadata(endpointId: string, request?: KibanaRequest): Promise<HostMetadata> {
-    const cpsRead = this.endpointContext.isCpsRead(request);
+  async getHostMetadata(
+    endpointId: string,
+    scoped?: ScopedEndpointServices
+  ): Promise<HostMetadata> {
+    const cpsRead = scoped?.isCpsRead() ?? false;
     const ccsEnabled = await this.endpointContext.isCcsEnabled();
     // A fanned-in hit's `_index` carries the project prefix and the space check below reads it, so a
     // CCS prefix on top of it would be ambiguous
     const query = getESQueryHostMetadataByID(endpointId, ccsEnabled && !cpsRead);
-    const queryResult = await (cpsRead
-      ? this.endpointContext.getReadEsClient(request)
-      : this.esClient
-    )
+    const queryResult = await (cpsRead && scoped ? scoped.getEsClient() : this.esClient)
       .search<HostMetadata>(query)
       .catch(catchAndWrapError);
 
@@ -246,8 +244,11 @@ export class EndpointMetadataService {
    *
    * @throws
    */
-  async getEnrichedHostMetadata(endpointId: string, request?: KibanaRequest): Promise<HostInfo> {
-    const endpointMetadata = await this.getHostMetadata(endpointId, request);
+  async getEnrichedHostMetadata(
+    endpointId: string,
+    scoped?: ScopedEndpointServices
+  ): Promise<HostInfo> {
+    const endpointMetadata = await this.getHostMetadata(endpointId, scoped);
 
     let fleetAgentId = endpointMetadata.elastic.agent.id;
     let fleetAgent: Agent | undefined;
@@ -456,12 +457,12 @@ export class EndpointMetadataService {
    */
   async getHostMetadataList(
     queryOptions: GetMetadataListRequestQuery,
-    request?: KibanaRequest
+    scoped?: ScopedEndpointServices
   ): Promise<Pick<MetadataListResponse, 'data' | 'total'>> {
     const logger = this.logger.get('getHostMetadataList()');
     logger.debug(() => `Retrieving host metadata list using: ${stringify(queryOptions)}`);
 
-    const cpsRead = this.endpointContext.isCpsRead(request);
+    const cpsRead = scoped?.isCpsRead() ?? false;
     const ccsEnabled = await this.endpointContext.isCcsEnabled();
     const endpointPolicies = await this.getAllEndpointPackagePolicies();
     const endpointPolicyIds = uniq(endpointPolicies.flatMap((policy) => policy.policy_ids));
@@ -478,10 +479,7 @@ export class EndpointMetadataService {
     logger.debug(() => `Executing query: ${stringify(unitedIndexQuery, 15)}`);
 
     try {
-      unitedMetadataQueryResponse = await (cpsRead
-        ? this.endpointContext.getReadEsClient(request)
-        : this.esClient
-      )
+      unitedMetadataQueryResponse = await (cpsRead && scoped ? scoped.getEsClient() : this.esClient)
         .search<UnitedAgentMetadataPersistedData>(unitedIndexQuery)
         .then(this.adjustUnitedIndexSearchResultHits.bind(this));
 
