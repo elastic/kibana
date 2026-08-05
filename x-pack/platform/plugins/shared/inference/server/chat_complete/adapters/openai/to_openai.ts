@@ -136,7 +136,10 @@ export function messagesToOpenAI({
       case MessageRole.Assistant:
         const assistantMessage: ChatCompletionAssistantMessageParam = {
           role: 'assistant',
-          content: message.content || null,
+          // Elasticsearch's UnifiedCompletionRequest parser rejects `content: null`
+          // (unlike the OpenAI API, which allows it when `tool_calls` is set), so an
+          // empty string is sent instead when there is no text content.
+          content: message.content || '',
           tool_calls: message.toolCalls?.map((toolCall) => {
             return {
               function: {
@@ -215,8 +218,9 @@ function mergeConsecutiveMessages(
       } else if (message.role === 'assistant' && previous.role === 'assistant') {
         const prevContent = (previous as ChatCompletionAssistantMessageParam).content ?? '';
         const curContent = (message as ChatCompletionAssistantMessageParam).content ?? '';
-        (previous as ChatCompletionAssistantMessageParam).content =
-          [prevContent, curContent].filter(Boolean).join('\n') || null;
+        (previous as ChatCompletionAssistantMessageParam).content = [prevContent, curContent]
+          .filter(Boolean)
+          .join('\n');
         const prevCalls = (previous as ChatCompletionAssistantMessageParam).tool_calls;
         const curCalls = (message as ChatCompletionAssistantMessageParam).tool_calls;
         if (curCalls?.length) {

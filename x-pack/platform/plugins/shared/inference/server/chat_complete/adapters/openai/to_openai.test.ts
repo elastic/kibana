@@ -190,7 +190,9 @@ describe('messagesToOpenAI', () => {
     ]);
   });
 
-  it('converts an assistant tool call', () => {
+  it('converts an assistant tool call, using an empty string for null content', () => {
+    // Elasticsearch's UnifiedCompletionRequest parser rejects `content: null`, so
+    // a null/absent text content must be serialized as an empty string instead.
     expect(
       messagesToOpenAI({
         messages: [
@@ -212,7 +214,7 @@ describe('messagesToOpenAI', () => {
     ).toEqual([
       {
         role: 'assistant',
-        content: null,
+        content: '',
         tool_calls: [
           {
             function: {
@@ -358,6 +360,35 @@ describe('messagesToOpenAI', () => {
       });
 
       expect(result).toHaveLength(3);
+    });
+
+    it('merges consecutive assistant messages with null content into an empty string, not null', () => {
+      const result = messagesToOpenAI({
+        messages: [
+          {
+            role: MessageRole.Assistant,
+            content: null,
+            toolCalls: [
+              { toolCallId: 'call-1', function: { name: 'tool_a', arguments: { x: 1 } } },
+            ],
+          },
+          {
+            role: MessageRole.Assistant,
+            content: null,
+            toolCalls: [
+              { toolCallId: 'call-2', function: { name: 'tool_b', arguments: { y: 2 } } },
+            ],
+          },
+        ],
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          role: 'assistant',
+          content: '',
+        })
+      );
     });
   });
 });
