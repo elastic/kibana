@@ -97,10 +97,7 @@ export const createSmlSearchTool = ({
   },
   handler: async ({ query, size, types, tags }, context) => {
     const agentBuilderSml = getAgentBuilderSml();
-    const { spaceId, esClient, request, agentConfiguration, logger } = context;
-
-    // TODO: remove before committing
-    logger?.info(`sml_search ai_indices: ${JSON.stringify(agentConfiguration?.ai_indices)}`);
+    const { spaceId, esClient, request, agentConfiguration } = context;
 
     // Runtime-imposed scoping: the connector allow-list comes from the
     // resolved agent configuration. The LLM has no say in this — it's part
