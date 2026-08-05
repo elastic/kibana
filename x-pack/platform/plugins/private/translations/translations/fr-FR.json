@@ -36958,7 +36958,6 @@
     "xpack.observability.metricWithSparkline.nATextColorLabel": "N/A",
     "xpack.observability.news.readFullStory": "Lire toute l'histoire",
     "xpack.observability.news.title": "Nouveautés",
-    "xpack.observability.nightshiftLinkTitle": "Service de nuit",
     "xpack.observability.noFindingsStates.unprivileged.unprivilegedDescription": "Pour afficher les données d'annotations d'observabilité, vous devez mettre à jour les privilèges. Pour en savoir plus, contactez votre administrateur Kibana.",
     "xpack.observability.noFindingsStates.unprivileged.unprivilegedFooterMarkdown": "Privilège d'index Elasticsearch \"read\" requis pour les index suivants :",
     "xpack.observability.noFindingsStates.unprivileged.unprivilegedTitle": "Privilèges requis",
