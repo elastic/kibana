@@ -14,15 +14,13 @@ import { createMetricAggregation, createTimeBucketAggregation } from './create_a
 import { firstNonNullable } from '../first_null_nullable';
 import type { ParsedMetricItem } from '../../../types';
 
-// Metric-specific streams can omit fields referenced by filters inherited from the parent query.
-const UNMAPPED_FIELDS_NULLIFY_SET_COMMAND = 'SET unmapped_fields="NULLIFY";';
-
 /**
  * Formats a single-line ES|QL query into a multi-line format where each
- * pipe command is on its own line with `  | ` indentation.
+ * pipe command is on its own line with `  | ` indentation. SET directives
+ * from the composer stay on their own leading line.
  */
 function formatQuery(basicQuery: string): string {
-  return basicQuery.replace(/ \| /g, '\n  | ');
+  return basicQuery.replace(/ \| /g, '\n  | ').replace(/^(SET .+?;)\s*/, '$1\n');
 }
 
 interface CreateESQLQueryParams {
@@ -74,7 +72,9 @@ export function createESQLQuery({
     return '';
   }
 
+  // Metric-specific streams can omit fields referenced by filters inherited from the parent query.
   const query = esql.ts(index);
+  query.addSetCommand('unmapped_fields', 'NULLIFY');
   const timeBucketAggregation = createTimeBucketAggregation({});
   const splitAccessorsClause =
     splitAccessors.length > 0
@@ -92,5 +92,5 @@ export function createESQLQuery({
   // TODO rename instrument to match metrics_info response
   query.pipe(statsClause);
 
-  return `${UNMAPPED_FIELDS_NULLIFY_SET_COMMAND}\n${formatQuery(query.print('basic'))}`;
+  return formatQuery(query.print('basic'));
 }
