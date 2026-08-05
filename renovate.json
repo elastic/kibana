@@ -513,7 +513,7 @@
     },
     {
       "groupName": "@elastic/contextual-security-apps dependencies",
-      "matchDepNames": ["@mswjs/http-middleware", "@types/byte-size", "byte-size", "msw", "xterm"],
+      "matchDepNames": ["@mswjs/http-middleware", "@types/byte-size", "byte-size", "msw", "@xterm/xterm"],
       "reviewers": ["team:contextual-security-apps"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
