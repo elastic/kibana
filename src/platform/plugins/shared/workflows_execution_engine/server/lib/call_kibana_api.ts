@@ -8,13 +8,17 @@
  */
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
-import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
+import {
+  HTTPAuthorizationHeader,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 import { applySpacePrefix } from '@kbn/workflows';
 import {
   getOutboundEventChainHeaders,
   KibanaApiCallError,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/workflows-extensions/server';
+import { getInternalUiamCallerAttestationHeaders } from './get_internal_uiam_caller_attestation_headers';
 import { isTextContentType, readResponseStream } from '../utils/http_response';
 
 export { KibanaApiCallError } from '@kbn/workflows-extensions/server';
@@ -104,6 +108,7 @@ const RESERVED_HEADER_NAMES = new Set([
   'authorization',
   'content-type',
   'kbn-xsrf',
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST.toLowerCase(),
   'x-kibana-event-chain-depth',
   'x-kibana-event-chain-source-execution-id',
@@ -197,9 +202,8 @@ const stringifyErrorBodyForMessage = (body: unknown): string => {
  * and it additionally exposes the parsed `status`, `headers`, and `body` so callers can recover
  * a structured partial-success response via `try/catch` + `instanceof KibanaApiCallError`.
  *
- * This helper backs both the `kibana.request` YAML step (for its JSON-body / connector-definition
- * branches) and the `callKibanaApi` tool exposed to custom step handlers. Behavior is intentionally
- * kept narrow (no multipart, no fetcher options, no streaming).
+ * This helper backs the `callKibanaApi` tool exposed to custom step handlers. Behavior is
+ * intentionally kept narrow (no multipart, no fetcher options, no streaming).
  *
  * Transport is Core's HTTP self client (`coreStart.http.selfClient`): it owns URL resolution,
  * forwarding the scoped request's `authorization`, and stamping `x-elastic-internal-origin` /
@@ -225,24 +229,8 @@ export async function callKibanaApi<T = unknown>(
   const outboundHeaders: Record<string, string> = {
     ...stripReservedHeaders(params.headers),
     ...getOutboundEventChainHeaders(fakeRequest, workflowRunId),
+    ...getInternalUiamCallerAttestationHeaders(coreStart, fakeRequest),
   };
-
-  // Internal UIAM (essu_) keys need the shared secret attached once this loopback request re-enters
-  // Kibana. We must never hold the secret here, so instead we present a non-reversible attestation
-  // of it, bound to this very credential, fetched right before the call and never stored, to
-  // authorize Kibana to attach the secret on our behalf. Spread last, so a step author cannot
-  // override it.
-  // Stamping for any essu_ credential is safe because the workflow identity is always an internal
-  // granted key. If the engine ever proxies an *external* UIAM key over a loopback, gate this on an
-  // explicit internal flag: Elasticsearch rejects an external key presented with the shared secret.
-  if (isUiamCredential(authorizationHeader)) {
-    Object.assign(
-      outboundHeaders,
-      coreStart.security.authc.apiKeys.uiam?.getInternalCallerAttestationHeaders(
-        authorizationHeader
-      )
-    );
-  }
 
   // The workflow's fake request carries no space, so the space has to be encoded in the path.
   const path = applySpacePrefix(params.path, spaceId);

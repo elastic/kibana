@@ -8,6 +8,8 @@
 import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiSelectable,
   EuiSkeletonText,
@@ -21,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import type { DataConnector } from '../../hooks/use_data_connectors';
+import { ConnectorTypeIcon } from '../connector_type_icon';
 
 const CONNECTORS_DEEP_LINK_ID: LinkId = 'triggersActionsConnectors';
 
@@ -51,6 +54,7 @@ export const ConnectorsTab = ({
         key: connector.id,
         label: connector.name,
         checked: selectedIds.has(connector.id) ? 'on' : undefined,
+        prepend: <ConnectorTypeIcon actionTypeId={connector.actionTypeId} />,
         'data-test-subj': `contextConnectorOption-${connector.id}`,
       })),
     [connectors, selectedIds]
@@ -81,7 +85,7 @@ export const ConnectorsTab = ({
     >
       <FormattedMessage
         id="xpack.contextEngine.sourcePicker.connectors.createButton"
-        defaultMessage="Create a connector"
+        defaultMessage="Create connector"
       />
     </EuiButtonEmpty>
   );
@@ -153,7 +157,7 @@ export const ConnectorsTab = ({
         options={options}
         onChange={handleChange}
         height={240}
-        listProps={{ bordered: true, isVirtualized: false, onFocusBadge: false }}
+        listProps={{ bordered: true, onFocusBadge: false }}
         data-test-subj="contextConnectorsSelectable"
       >
         {(list, search) => (
@@ -165,7 +169,9 @@ export const ConnectorsTab = ({
         )}
       </EuiSelectable>
       <EuiHorizontalRule margin="m" />
-      {createConnectorButton}
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+        <EuiFlexItem grow={false}>{createConnectorButton}</EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };
