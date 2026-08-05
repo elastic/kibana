@@ -38,7 +38,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Fleet config fans the pack-level schedule onto each query that doesn't have
    * its own override. Requires osquerybeat with RRULE support.
    */
-  rruleScheduling: false,
+  rruleScheduling: true,
   /**
    * Enables Agent Builder tool registration in the osquery plugin. When enabled,
    * the plugin registers read-only Osquery inline tools (check_integration,
