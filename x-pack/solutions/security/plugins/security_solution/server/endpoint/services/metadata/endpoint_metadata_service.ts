@@ -70,36 +70,6 @@ const isAgentPolicyWithPackagePolicies = (
   return agentPolicy.package_policies ? true : false;
 };
 
-/**
- * Matches the offline threshold in Fleet's agent status runtime script, which is 12 missed check-in
- * intervals of 30 seconds (`MISSED_INTERVALS_BEFORE_OFFLINE * AGENT_POLLING_THRESHOLD_MS` in
- * `fleet/server/services/agents/build_status_runtime_field.ts`). Kept as a literal because Fleet does
- * not export either constant from its public entry point.
- */
-const MS_BEFORE_OFFLINE = 12 * 30_000;
-
-/**
- * Host status for a document whose `status` runtime field produced no value.
- *
- * That script reads doc values, and a hit fanned in from a linked project under CPS does not expose
- * them, so a healthy host would otherwise resolve to offline. `_source` survives fan-in intact, so
- * the status is derived from it using the same threshold the script applies.
- */
-const statusFromSource = ({
-  last_checkin: lastCheckin,
-  last_checkin_status: lastCheckinStatus,
-}: Pick<Agent, 'last_checkin' | 'last_checkin_status'>): Agent['status'] => {
-  if (!lastCheckin) {
-    return undefined;
-  }
-
-  if (Date.now() - new Date(lastCheckin).getTime() > MS_BEFORE_OFFLINE) {
-    return 'offline';
-  }
-
-  return lastCheckinStatus?.toLowerCase() === 'degraded' ? 'degraded' : 'online';
-};
-
 export class EndpointMetadataService {
   private readonly esClient: ElasticsearchClient;
   private readonly soClient: SavedObjectsClientContract;
@@ -581,8 +551,8 @@ export class EndpointMetadataService {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const endpointPolicy = endpointPoliciesMap[_agent.policy_id!];
         const runtimeFields: Partial<typeof _agent> = {
-          status: doc?.fields?.status?.[0] ?? statusFromSource(_agent),
-          last_checkin: doc?.fields?.last_checkin?.[0] ?? _agent.last_checkin,
+          status: doc?.fields?.status?.[0],
+          last_checkin: doc?.fields?.last_checkin?.[0],
         };
         const agent: typeof _agent = {
           ..._agent,

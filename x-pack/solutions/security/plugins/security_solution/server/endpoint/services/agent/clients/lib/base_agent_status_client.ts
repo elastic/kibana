@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -21,6 +22,8 @@ export interface AgentStatusClientOptions {
   soClient: SavedObjectsClientContract;
   spaceId: string;
   connectorActionsClient?: ActionsClient;
+  /** Required for reads made on the caller's behalf to fan out under CPS; without it they are origin-only */
+  request?: KibanaRequest;
 }
 
 export abstract class AgentStatusClient implements AgentStatusClientInterface {
