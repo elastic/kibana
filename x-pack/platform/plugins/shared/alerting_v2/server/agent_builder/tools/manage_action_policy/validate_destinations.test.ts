@@ -8,7 +8,7 @@
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { ActionPolicyOperationValidationError } from './operations';
-import { validateDestinations } from './validate_destinations';
+import { validateDestinations, type WorkflowSummary } from './validate_destinations';
 
 const createMockAttachments = (
   active: Array<{
@@ -21,9 +21,7 @@ const createMockAttachments = (
     getActive: jest.fn().mockReturnValue(active),
   } as unknown as AttachmentStateManager);
 
-const createMockWorkflowLookup = (
-  workflows: Map<string, { id: string; name?: string }> = new Map()
-) => ({
+const createMockWorkflowLookup = (workflows: Map<string, WorkflowSummary> = new Map()) => ({
   getWorkflow: jest.fn(async (id: string) => workflows.get(id) ?? null),
 });
 
@@ -62,7 +60,7 @@ describe('validateDestinations', () => {
     ).rejects.toThrow(/is a workflow attachment ID, not a workflow ID/);
   });
 
-  it('passes when destination matches an in-memory workflow attachment by workflowId', async () => {
+  it('resolves the attachment YAML when destination matches an in-memory workflow attachment by workflowId', async () => {
     const attachments = createMockAttachments([
       {
         id: 'att-workflow-1',
@@ -78,12 +76,57 @@ describe('validateDestinations', () => {
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
       })
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual([
+      { destinationId: 'wf-saved-1', source: 'attachment', yaml: 'version: 1' },
+    ]);
   });
 
-  it('passes when destination matches a persisted workflow', async () => {
+  it('resolves the latest attachment version when a workflow attachment was revised', async () => {
+    const attachments = createMockAttachments([
+      {
+        id: 'att-workflow-1',
+        type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+        versions: [
+          { data: { yaml: 'name: first', workflowId: 'wf-1' } },
+          { data: { yaml: 'name: second', workflowId: 'wf-1' } },
+        ],
+      },
+    ]);
+
+    const resolved = await validateDestinations([{ type: 'workflow', id: 'wf-1' }], {
+      attachments,
+      workflowLookup: createMockWorkflowLookup(),
+      connectorLookup: createMockConnectorLookup(),
+      spaceId: 'default',
+    });
+
+    expect(resolved[0].yaml).toBe('name: second');
+  });
+
+  it('leaves yaml undefined when the workflow attachment carries none', async () => {
+    const attachments = createMockAttachments([
+      {
+        id: 'att-workflow-1',
+        type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+        versions: [{ data: { workflowId: 'wf-1' } }],
+      },
+    ]);
+
+    await expect(
+      validateDestinations([{ type: 'workflow', id: 'wf-1' }], {
+        attachments,
+        workflowLookup: createMockWorkflowLookup(),
+        connectorLookup: createMockConnectorLookup(),
+        spaceId: 'default',
+      })
+    ).resolves.toEqual([{ destinationId: 'wf-1', source: 'attachment', yaml: undefined }]);
+  });
+
+  it('resolves the YAML and enabled flag when destination matches a persisted workflow', async () => {
     const workflowLookup = createMockWorkflowLookup(
-      new Map([['persisted-wf-1', { id: 'persisted-wf-1' }]])
+      new Map([
+        ['persisted-wf-1', { id: 'persisted-wf-1', yaml: 'name: saved', enabled: false }],
+      ])
     );
 
     await expect(
@@ -93,9 +136,47 @@ describe('validateDestinations', () => {
         connectorLookup: createMockConnectorLookup(),
         spaceId: 'default',
       })
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual([
+      {
+        destinationId: 'persisted-wf-1',
+        source: 'persisted',
+        yaml: 'name: saved',
+        enabled: false,
+      },
+    ]);
 
     expect(workflowLookup.getWorkflow).toHaveBeenCalledWith('persisted-wf-1', 'default');
+  });
+
+  it('resolves every destination on a multi-destination policy', async () => {
+    const attachments = createMockAttachments([
+      {
+        id: 'att-wf',
+        type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+        versions: [{ data: { yaml: 'name: attached', workflowId: 'wf-attached' } }],
+      },
+    ]);
+    const workflowLookup = createMockWorkflowLookup(
+      new Map([['wf-persisted', { id: 'wf-persisted', yaml: 'name: persisted', enabled: true }]])
+    );
+
+    const resolved = await validateDestinations(
+      [
+        { type: 'workflow', id: 'wf-attached' },
+        { type: 'workflow', id: 'wf-persisted' },
+      ],
+      {
+        attachments,
+        workflowLookup,
+        connectorLookup: createMockConnectorLookup(),
+        spaceId: 'default',
+      }
+    );
+
+    expect(resolved.map(({ destinationId, source }) => ({ destinationId, source }))).toEqual([
+      { destinationId: 'wf-attached', source: 'attachment' },
+      { destinationId: 'wf-persisted', source: 'persisted' },
+    ]);
   });
 
   it('throws a specific error when the destination ID is a connector', async () => {

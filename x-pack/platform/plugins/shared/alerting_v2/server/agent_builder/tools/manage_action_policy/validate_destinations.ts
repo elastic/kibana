@@ -10,8 +10,20 @@ import type { ActionPolicyDestination } from '@kbn/alerting-v2-schemas';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { ActionPolicyOperationValidationError } from './operations';
 
+/**
+ * The subset of a workflow this tool needs. Structurally satisfied by
+ * `WorkflowDetailDto` from the workflows plugin, and by the `workflow.yaml`
+ * conversation attachment data.
+ */
+export interface WorkflowSummary {
+  id: string;
+  name?: string;
+  yaml?: string;
+  enabled?: boolean;
+}
+
 export interface WorkflowLookup {
-  getWorkflow: (id: string, spaceId: string) => Promise<{ id: string; name?: string } | null>;
+  getWorkflow: (id: string, spaceId: string) => Promise<WorkflowSummary | null>;
 }
 
 export interface ConnectorLookup {
@@ -26,31 +38,50 @@ export interface ValidateDestinationsDeps {
 }
 
 /**
- * Validates that every destination references a valid workflow.
+ * A destination whose workflow was located, along with the workflow definition we
+ * found. `yaml` is absent when the source didn't carry one, in which case callers
+ * must skip content-level validation rather than treat it as a failure.
+ */
+export interface ResolvedWorkflowDestination {
+  destinationId: string;
+  /** Whether the workflow came from this conversation or from the space. */
+  source: 'attachment' | 'persisted';
+  yaml?: string;
+  enabled?: boolean;
+}
+
+/**
+ * Validates that every destination references a valid workflow, and returns the
+ * workflow definition behind each one so callers can validate its content.
+ *
  * Throws {@link ActionPolicyOperationValidationError} for invalid destinations
  * (bare attachment IDs, connector IDs, or unknown IDs).
  */
 export async function validateDestinations(
   destinations: ActionPolicyDestination[],
   { attachments, workflowLookup, connectorLookup, spaceId }: ValidateDestinationsDeps
-): Promise<void> {
+): Promise<ResolvedWorkflowDestination[]> {
   const activeAttachments = attachments.getActive();
 
-  const workflowIds = new Set<string>();
+  const attachedWorkflows = new Map<string, WorkflowSummary>();
   const attachmentToWorkflowId = new Map<string, string | undefined>();
 
   for (const att of activeAttachments) {
     if (att.type !== WORKFLOW_YAML_ATTACHMENT_TYPE) continue;
     const latestVersion = att.versions.at(-1);
-    const data = latestVersion?.data as { workflowId?: string } | undefined;
+    const data = latestVersion?.data as { workflowId?: string; yaml?: string } | undefined;
     if (data?.workflowId) {
-      workflowIds.add(data.workflowId);
+      attachedWorkflows.set(data.workflowId, { id: data.workflowId, yaml: data.yaml });
     }
     attachmentToWorkflowId.set(att.id, data?.workflowId);
   }
 
+  const resolved: ResolvedWorkflowDestination[] = [];
+
   for (const dest of destinations) {
-    if (workflowIds.has(dest.id)) {
+    const attached = attachedWorkflows.get(dest.id);
+    if (attached) {
+      resolved.push({ destinationId: dest.id, source: 'attachment', yaml: attached.yaml });
       continue;
     }
 
@@ -68,6 +99,12 @@ export async function validateDestinations(
 
     const workflow = await workflowLookup.getWorkflow(dest.id, spaceId);
     if (workflow) {
+      resolved.push({
+        destinationId: dest.id,
+        source: 'persisted',
+        yaml: workflow.yaml,
+        enabled: workflow.enabled,
+      });
       continue;
     }
 
@@ -89,4 +126,6 @@ export async function validateDestinations(
         `then use that \`workflowId\` as the destination.`
     );
   }
+
+  return resolved;
 }

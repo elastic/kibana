@@ -55,3 +55,14 @@ export type { FindActionPoliciesArgs } from './lib/action_policy_client';
  */
 export { ALERTING_V2_ERROR_CODES } from './lib/errors/error_codes';
 export type { AlertingV2ErrorCode } from './lib/errors/error_codes';
+
+/**
+ * The dispatch-compatibility contract for destination workflows. Exposed so the
+ * eval suite asserts generated workflows against the same rules the
+ * `manage_action_policy` tool enforces at runtime.
+ */
+export { validateActionPolicyWorkflow } from './agent_builder/tools/manage_action_policy/validate_workflow_compatibility';
+export type {
+  WorkflowCompatibilityDiagnostic,
+  WorkflowCompatibilityDiagnosticCode,
+} from './agent_builder/tools/manage_action_policy/validate_workflow_compatibility';

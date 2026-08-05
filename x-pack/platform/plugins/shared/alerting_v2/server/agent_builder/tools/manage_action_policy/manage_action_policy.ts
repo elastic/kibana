@@ -20,6 +20,8 @@ import {
   ActionPolicyOperationValidationError,
 } from './operations';
 import { validateDestinations } from './validate_destinations';
+import type { ResolvedWorkflowDestination, WorkflowSummary } from './validate_destinations';
+import { validateActionPolicyWorkflow } from './validate_workflow_compatibility';
 
 const manageActionPolicySchema = z.object({
   actionPolicyAttachmentId: z
@@ -32,7 +34,7 @@ const manageActionPolicySchema = z.object({
 });
 
 export interface ManageActionPolicyToolDeps {
-  getWorkflow: (id: string, spaceId: string) => Promise<{ id: string; name?: string } | null>;
+  getWorkflow: (id: string, spaceId: string) => Promise<WorkflowSummary | null>;
   getAvailableConnectors: (
     spaceId: string,
     request: import('@kbn/core/server').KibanaRequest
@@ -40,6 +42,31 @@ export interface ManageActionPolicyToolDeps {
     connectorTypes: Record<string, { instances: Array<{ id: string; name: string }> }>;
   }>;
 }
+
+/**
+ * Runs the Alerting V2 compatibility checks over every destination we could resolve a
+ * workflow definition for. Destinations without a definition are skipped: a policy
+ * should never be blocked because we could not read the workflow.
+ */
+const collectWorkflowCompatibilityDiagnostics = (
+  resolvedDestinations: ResolvedWorkflowDestination[]
+): { errors: string[]; warnings: string[] } => {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  for (const { destinationId, yaml, enabled } of resolvedDestinations) {
+    if (!yaml) {
+      continue;
+    }
+    for (const diagnostic of validateActionPolicyWorkflow(yaml, { enabled })) {
+      // Prefixed so the agent can tell which workflow to fix on a multi-destination policy.
+      const message = `Destination workflow "${destinationId}": ${diagnostic.message}`;
+      (diagnostic.severity === 'error' ? errors : warnings).push(message);
+    }
+  }
+
+  return { errors, warnings };
+};
 
 export const manageActionPolicyTool = ({
   getWorkflow,
@@ -59,7 +86,11 @@ Use operations[] to:
 3. set_matcher — set a KQL query to filter alert episodes, or null for catch-all. To scope a policy to a single rule, use \`rule.id: "<ruleId>"\`.
 4. set_grouping — set groupingMode (per_episode | all | per_field) and groupBy fields
 5. set_throttle — set throttle strategy and optional interval
-6. validate — validate the accumulated policy against the API request schema; throws if not ready to save`,
+6. validate — validate the accumulated policy against the API request schema; throws if not ready to save
+
+Destination workflows are also checked for compatibility with notification dispatch.
+On a new policy an incompatible workflow fails the call; on an edit the issues come
+back as \`warnings\` in the result.`,
   schema: manageActionPolicySchema,
   handler: async (
     { actionPolicyAttachmentId: previousAttachmentId, operations },
@@ -84,6 +115,8 @@ Use operations[] to:
         updatedData.id = uuidv4();
       }
 
+      let workflowWarnings: string[] = [];
+
       if (updatedData.destinations?.length) {
         const findConnectorById = async (
           id: string
@@ -100,12 +133,27 @@ Use operations[] to:
           return null;
         };
 
-        await validateDestinations(updatedData.destinations, {
+        const resolvedDestinations = await validateDestinations(updatedData.destinations, {
           attachments,
           workflowLookup: { getWorkflow },
           connectorLookup: { findConnectorById },
           spaceId,
         });
+
+        const { errors, warnings } = collectWorkflowCompatibilityDiagnostics(resolvedDestinations);
+
+        // A new policy is blocked so the agent regenerates the workflow before anything
+        // is shown to the user. An edit still applies, because refusing it would strand
+        // the change the user asked for over a problem in a pre-existing workflow.
+        if (isNew && errors.length > 0) {
+          throw new ActionPolicyOperationValidationError(
+            `Destination workflow is not compatible with alert notification dispatch:\n${errors.join(
+              '\n'
+            )}\nRegenerate the workflow with \`platform.core.generate_workflow\` (reusing the same \`workflowId\`), then retry.`
+          );
+        }
+
+        workflowWarnings = [...errors, ...warnings];
       }
 
       const attachmentInput = {
@@ -146,6 +194,7 @@ Use operations[] to:
                 groupingMode: updatedData.groupingMode,
                 throttle: updatedData.throttle,
               },
+              ...(workflowWarnings.length > 0 ? { warnings: workflowWarnings } : {}),
             },
           },
         ],
