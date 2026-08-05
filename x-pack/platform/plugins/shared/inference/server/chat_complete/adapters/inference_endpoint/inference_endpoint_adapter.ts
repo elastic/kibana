@@ -87,8 +87,8 @@ export const inferenceEndpointAdapter = {
       })
     ).pipe(
       switchMap((stream) => eventSourceStreamIntoObservable(stream)),
-      processOpenAIStream(),
-      emitTokenCountEstimateIfMissing({ request }),
+      processOpenAIStream({ allowNullObjectWithChoices: true }),
+      emitTokenCountEstimateIfMissing({ request, logger }),
       useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
   },
