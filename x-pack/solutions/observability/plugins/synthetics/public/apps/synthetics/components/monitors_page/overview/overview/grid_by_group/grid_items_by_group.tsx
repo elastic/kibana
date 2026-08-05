@@ -200,7 +200,10 @@ export const GridItemsByGroup = ({
           allConfigs?.filter((monitor) => {
             // A "Heartbeat" bucket appears under both the Monitor source and the
             // Remote cluster groupings; match it by origin regardless of key.
-            if (groupItem.label === HEARTBEAT_MONITORS_LABEL) {
+            if (
+              (selectedGroup.key === 'origin' || selectedGroup.key === 'remote.remoteName') &&
+              groupItem.label === HEARTBEAT_MONITORS_LABEL
+            ) {
               return monitor.origin === 'heartbeat';
             }
             if (selectedGroup.key === 'origin') {
