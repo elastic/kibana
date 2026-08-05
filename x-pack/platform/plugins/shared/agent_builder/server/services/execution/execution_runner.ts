@@ -27,6 +27,7 @@ import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
+  isConversationCreatedEvent,
   isAgentBuilderError,
   AgentBuilderErrorCode,
   AgentExecutionMode,
@@ -58,6 +59,7 @@ import {
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { withConverseSpan } from '../../tracing';
+import { USER_ID_ATTR, USER_NAME_ATTR } from '../../tracing/agent_builder_context';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
@@ -232,8 +234,6 @@ const handleConversationExecution = async ({
       : undefined;
 
   const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
-  const userId = author?.id ?? conversation.user.id;
-  const userName = author?.username ?? conversation.user.username;
 
   return withConverseSpan(
     {
@@ -242,11 +242,25 @@ const handleConversationExecution = async ({
       providerName: connectorProvider,
       conversationId: conversation.id,
       spaceId,
-      userId,
-      userName,
       opikHeaders,
     },
     (span) => {
+      const setUserAttributes = (user: { id?: string; username?: string }) => {
+        if (user.id) {
+          span?.setAttribute(USER_ID_ATTR, user.id);
+        }
+        if (user.username) {
+          span?.setAttribute(USER_NAME_ATTR, user.username);
+        }
+      };
+
+      if (author || conversation.operation !== 'CREATE') {
+        setUserAttributes({
+          id: author?.id ?? conversation.user.id,
+          username: author?.username ?? conversation.user.username,
+        });
+      }
+
       const titleAttr$ = storeConversation
         ? title$.pipe(
             tap((title) => {
@@ -259,6 +273,13 @@ const handleConversationExecution = async ({
       return merge(conversationIdEvent$, agentEvents$, persistenceEvents$, titleAttr$).pipe(
         handleCancellation(abortSignal),
         tap((event) => {
+          if (isConversationCreatedEvent(event)) {
+            setUserAttributes({
+              id: author?.id ?? event.data.user.id,
+              username: author?.username ?? event.data.user.username,
+            });
+          }
+
           try {
             if (isRoundCompleteEvent(event)) {
               const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;

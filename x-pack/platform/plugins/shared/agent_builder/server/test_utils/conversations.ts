@@ -55,7 +55,6 @@ export const createRound = (parts: Partial<ConversationRound>): ConversationRoun
 
 export const createConversationClientMock = (): ConversationClientMock => {
   return {
-    user: { id: 'user-1', username: 'test_user' },
     get: jest.fn(),
     exists: jest.fn(),
     getByOrigin: jest.fn(),
