@@ -6,9 +6,41 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import { getKBUserFilter } from './utils';
+import type { KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-common';
+import { getKBUserFilter, isGlobalEntry } from './utils';
 
 describe('Utils', () => {
+  describe('isGlobalEntry', () => {
+    it('returns true when global is true', () => {
+      expect(
+        isGlobalEntry({ global: true, users: [{ id: 'u1', name: 'user' }] } as KnowledgeBaseEntryCreateProps)
+      ).toEqual(true);
+    });
+
+    it('returns false when global is false and users is undefined', () => {
+      expect(isGlobalEntry({ global: false } as KnowledgeBaseEntryCreateProps)).toEqual(false);
+    });
+
+    it('returns true when global is false but users is an empty array', () => {
+      expect(isGlobalEntry({ global: false, users: [] } as KnowledgeBaseEntryCreateProps)).toEqual(
+        true
+      );
+    });
+
+    it('returns true when global is missing and users is an empty array', () => {
+      expect(isGlobalEntry({ users: [] } as KnowledgeBaseEntryCreateProps)).toEqual(true);
+    });
+
+    it('returns false when global is false and users has an owner', () => {
+      expect(
+        isGlobalEntry({
+          global: false,
+          users: [{ id: 'u1', name: 'user' }],
+        } as KnowledgeBaseEntryCreateProps)
+      ).toEqual(false);
+    });
+  });
+
   describe('getKBUserFilter', () => {
     it('should return global filter when user is null', () => {
       const filter = getKBUserFilter(null);
