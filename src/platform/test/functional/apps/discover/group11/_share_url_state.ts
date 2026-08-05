@@ -8,7 +8,7 @@
  */
 
 /**
- * Migration recommendation: MIGRATE TO SCOUT — add to src/platform/test/functional/apps/discover/group11/_share_url_state.ts
+ * Migration recommendation: MIGRATE TO SCOUT — add to src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links.spec.ts
  */
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
