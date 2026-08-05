@@ -75,6 +75,7 @@ export {
   isWorkflowExecutionError,
   isAgentExecutionError,
   isContextLengthExceededAgentError,
+  isConnectorAgentError,
   createAgentBuilderError,
   createInternalError,
   createForbiddenError,
