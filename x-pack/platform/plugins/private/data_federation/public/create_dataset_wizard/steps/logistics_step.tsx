@@ -11,7 +11,6 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -22,6 +21,7 @@ import { useController } from 'react-hook-form';
 import type { DataSource } from '../../../common';
 import { DATA_SOURCE_TYPES_TO_HELP_TEXT } from '../../../common';
 import { DataSourceSuperSelect } from '../data_source_super_select';
+import { RegionSuperSelect } from '../region_super_select';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { validateResourceForDataSource } from '../validate_dataset_resource';
@@ -30,13 +30,6 @@ const trimRequired =
   (message: string) =>
   (value: string): true | string =>
     value?.trim() ? true : message;
-
-const PROTOTYPE_REGION_OPTIONS = [
-  { value: 'us-east-1', text: 'US East (N. Virginia)' },
-  { value: 'us-west-2', text: 'US West (Oregon)' },
-  { value: 'eu-west-1', text: 'Europe (Ireland)' },
-  { value: 'ap-southeast-1', text: 'Asia Pacific (Singapore)' },
-];
 
 export interface LogisticsStepProps {
   control: Control<DatasetWizardFormValues>;
@@ -100,19 +93,6 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
       dataSourceField.onChange(selectedValue);
     },
     [dataSourceField]
-  );
-
-  const regionOptions = useMemo(
-    () => [
-      {
-        value: '',
-        text: datasetWizardStrings.regionPlaceholder(),
-        disabled: true,
-        hidden: true,
-      },
-      ...PROTOTYPE_REGION_OPTIONS,
-    ],
-    []
   );
 
   const resourceHelpText = useMemo(() => {
@@ -214,17 +194,17 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
           isInvalid={Boolean(regionFieldState.error)}
           error={regionFieldState.error?.message}
         >
-          <EuiSelect
-            options={regionOptions}
+          <RegionSuperSelect
             data-test-subj="datasetWizardRegion"
             fullWidth
             aria-label={datasetWizardStrings.regionLabel()}
+            placeholder={datasetWizardStrings.regionPlaceholder()}
             isInvalid={Boolean(regionFieldState.error)}
-            value={regionField.value || ''}
-            onChange={(event) => regionField.onChange(event.target.value)}
+            value={regionField.value || undefined}
+            onChange={regionField.onChange}
             onBlur={regionField.onBlur}
             name={regionField.name}
-            inputRef={regionField.ref}
+            buttonRef={regionField.ref}
           />
         </EuiFormRow>
       </EuiForm>

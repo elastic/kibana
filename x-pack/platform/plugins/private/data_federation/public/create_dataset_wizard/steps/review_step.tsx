@@ -7,6 +7,7 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiCodeBlock,
@@ -19,6 +20,7 @@ import {
   EuiTabbedContent,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import type { DataSource } from '../../../common';
@@ -33,6 +35,8 @@ import {
   type ReviewSettingBadge,
   type ReviewSummaryRow,
 } from '../review_step_utils';
+
+const REVIEW_TAB_MAX_HEIGHT_PX = 500;
 
 export interface ReviewStepProps {
   values: DatasetWizardFormValues;
@@ -55,7 +59,7 @@ const SummaryDescriptionList = ({
   testSubj,
 }: {
   rows: ReviewSummaryRow[];
-  testSubj: string;
+  testSubj?: string;
 }) => (
   <EuiDescriptionList textStyle="reverse" compressed data-test-subj={testSubj}>
     {rows.map((row) => (
@@ -75,7 +79,80 @@ const SummaryDescriptionList = ({
   </EuiDescriptionList>
 );
 
+const REVIEW_SETTINGS_TWO_COLUMN_THRESHOLD = 10;
+
+const splitSummaryRows = (rows: ReviewSummaryRow[]): [ReviewSummaryRow[], ReviewSummaryRow[]] => {
+  const midpoint = Math.ceil(rows.length / 2);
+
+  return [rows.slice(0, midpoint), rows.slice(midpoint)];
+};
+
+const SettingsSummarySection = ({ rows }: { rows: ReviewSummaryRow[] }) => {
+  if (rows.length === 0) {
+    return (
+      <EuiText size="s" color="subdued" data-test-subj="datasetWizardReviewSettingsEmpty">
+        {datasetWizardStrings.reviewNoSettingsValue()}
+      </EuiText>
+    );
+  }
+
+  if (rows.length < REVIEW_SETTINGS_TWO_COLUMN_THRESHOLD) {
+    return <SummaryDescriptionList rows={rows} testSubj="datasetWizardReviewSettings" />;
+  }
+
+  const [settingsRowsLeft, settingsRowsRight] = splitSummaryRows(rows);
+
+  return (
+    <EuiFlexGroup
+      alignItems="flexStart"
+      gutterSize="l"
+      data-test-subj="datasetWizardReviewSettingsTwoColumn"
+    >
+      <EuiFlexItem grow={1}>
+        <SummaryDescriptionList rows={settingsRowsLeft} testSubj="datasetWizardReviewSettingsLeft" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={1}>
+        <SummaryDescriptionList rows={settingsRowsRight} testSubj="datasetWizardReviewSettingsRight" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 export const ReviewStep: FunctionComponent<ReviewStepProps> = ({ values, dataSources }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const reviewTabPanelStyles = useMemo(
+    () => css`
+      max-height: ${REVIEW_TAB_MAX_HEIGHT_PX}px;
+      height: ${REVIEW_TAB_MAX_HEIGHT_PX}px;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    `,
+    []
+  );
+
+  const reviewTabScrollAreaStyles = useMemo(
+    () => css`
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
+      padding-right: ${euiTheme.size.xs};
+    `,
+    [euiTheme.size.xs]
+  );
+
+  const reviewCodeBlockAreaStyles = useMemo(
+    () => css`
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    `,
+    []
+  );
+
   const logisticsRows = useMemo(
     () => getReviewLogisticsRows(values, dataSources),
     [dataSources, values]
@@ -85,6 +162,7 @@ export const ReviewStep: FunctionComponent<ReviewStepProps> = ({ values, dataSou
     [values.resource, values.settings]
   );
   const schemaMappingRows = useMemo(() => getReviewSchemaMappingRows(values), [values]);
+  const useTwoColumnSettings = settingsRows.length >= REVIEW_SETTINGS_TWO_COLUMN_THRESHOLD;
 
   const requestText = useMemo(() => buildDatasetRequestText(values), [values]);
   const previewPayload = useMemo(() => buildDatasetPayloadFromWizardValues(values), [values]);
@@ -93,70 +171,76 @@ export const ReviewStep: FunctionComponent<ReviewStepProps> = ({ values, dataSou
   const requestLanguage = requestText.length < 60000 ? 'json' : undefined;
 
   const SummaryTab = () => (
-    <div data-test-subj="datasetWizardReviewSummaryTab">
+    <div css={reviewTabPanelStyles} data-test-subj="datasetWizardReviewSummaryTab">
       <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h4>{datasetWizardStrings.reviewLogisticsSectionTitle()}</h4>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <SummaryDescriptionList rows={logisticsRows} testSubj="datasetWizardReviewLogistics" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h4>{datasetWizardStrings.reviewSettingsSectionTitle()}</h4>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          {settingsRows.length > 0 ? (
-            <SummaryDescriptionList rows={settingsRows} testSubj="datasetWizardReviewSettings" />
-          ) : (
-            <EuiText size="s" color="subdued" data-test-subj="datasetWizardReviewSettingsEmpty">
-              {datasetWizardStrings.reviewNoSettingsValue()}
-            </EuiText>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h4>{datasetWizardStrings.reviewSchemaMappingsSectionTitle()}</h4>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <SummaryDescriptionList
-            rows={schemaMappingRows}
-            testSubj="datasetWizardReviewSchemaMappings"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <div css={reviewTabScrollAreaStyles} data-test-subj="datasetWizardReviewSummaryScroll">
+        <EuiFlexGroup alignItems="flexStart">
+          <EuiFlexItem grow={1}>
+            <EuiTitle size="xxs">
+              <h4>{datasetWizardStrings.reviewLogisticsSectionTitle()}</h4>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <SummaryDescriptionList rows={logisticsRows} testSubj="datasetWizardReviewLogistics" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={useTwoColumnSettings ? 2 : 1}>
+            <EuiTitle size="xxs">
+              <h4>{datasetWizardStrings.reviewSettingsSectionTitle()}</h4>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <SettingsSummarySection rows={settingsRows} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <EuiTitle size="xxs">
+              <h4>{datasetWizardStrings.reviewSchemaMappingsSectionTitle()}</h4>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <SummaryDescriptionList
+              rows={schemaMappingRows}
+              testSubj="datasetWizardReviewSchemaMappings"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
     </div>
   );
 
   const PreviewTab = () => (
-    <div data-test-subj="datasetWizardReviewPreviewTab">
+    <div css={reviewTabPanelStyles} data-test-subj="datasetWizardReviewPreviewTab">
       <EuiSpacer size="m" />
       <EuiText size="s">
         <p>{datasetWizardStrings.reviewPreviewDescription()}</p>
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiCodeBlock language="json" isCopyable data-test-subj="datasetWizardReviewPreviewCode">
-        {previewJson}
-      </EuiCodeBlock>
+      <div css={reviewCodeBlockAreaStyles} data-test-subj="datasetWizardReviewPreviewCodeScroll">
+        <EuiCodeBlock
+          language="json"
+          isCopyable
+          overflowHeight="100%"
+          data-test-subj="datasetWizardReviewPreviewCode"
+        >
+          {previewJson}
+        </EuiCodeBlock>
+      </div>
     </div>
   );
 
   const RequestTab = () => (
-    <div data-test-subj="datasetWizardReviewRequestTab">
+    <div css={reviewTabPanelStyles} data-test-subj="datasetWizardReviewRequestTab">
       <EuiSpacer size="m" />
       <EuiText size="s">
         <p>{datasetWizardStrings.reviewRequestDescription()}</p>
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiCodeBlock
-        language={requestLanguage}
-        isCopyable
-        data-test-subj="datasetWizardReviewRequestCode"
-      >
-        {requestText}
-      </EuiCodeBlock>
+      <div css={reviewCodeBlockAreaStyles} data-test-subj="datasetWizardReviewRequestCodeScroll">
+        <EuiCodeBlock
+          language={requestLanguage}
+          isCopyable
+          overflowHeight="100%"
+          data-test-subj="datasetWizardReviewRequestCode"
+        >
+          {requestText}
+        </EuiCodeBlock>
+      </div>
     </div>
   );
 

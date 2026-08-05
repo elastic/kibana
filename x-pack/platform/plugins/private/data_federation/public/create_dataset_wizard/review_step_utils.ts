@@ -35,6 +35,7 @@ import {
   isFieldVisibleForErrorMode,
   isFieldVisibleForFormat,
 } from '../create_dataset_flyout/dataset_settings_visibility';
+import { getAwsRegionLabel } from './aws_regions';
 import { datasetWizardStrings } from './dataset_wizard_i18n';
 import type { DatasetWizardFormValues, SchemaMappingMode } from './dataset_wizard_form_state';
 import { inferFormatFromResource } from './infer_format_from_resource';
@@ -46,13 +47,6 @@ export interface ReviewSummaryRow {
   displayValue: string;
   badge?: ReviewSettingBadge;
 }
-
-const REGION_LABELS: Record<string, string> = {
-  'us-east-1': 'US East (N. Virginia)',
-  'us-west-2': 'US West (Oregon)',
-  'eu-west-1': 'Europe (Ireland)',
-  'ap-southeast-1': 'Asia Pacific (Singapore)',
-};
 
 const omitEmptySettingsFields = (settings: object): Record<string, unknown> =>
   omitBy(settings as Record<string, unknown>, (value) => {
@@ -272,7 +266,7 @@ export const getReviewLogisticsRows = (
   if (values.region.trim()) {
     rows.push({
       label: datasetWizardStrings.regionLabel(),
-      displayValue: REGION_LABELS[values.region] ?? values.region,
+      displayValue: getAwsRegionLabel(values.region),
     });
   }
 

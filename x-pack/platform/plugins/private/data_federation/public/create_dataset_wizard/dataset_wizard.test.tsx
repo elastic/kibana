@@ -65,6 +65,15 @@ describe('DatasetWizard step navigation', () => {
     return { ...view, history };
   };
 
+  const selectWizardRegion = (
+    getByRole: ReturnType<typeof render>['getByRole'],
+    getByTestId: ReturnType<typeof render>['getByTestId'],
+    regionLabel: string
+  ) => {
+    fireEvent.click(getByTestId('datasetWizardRegion'));
+    fireEvent.click(getByRole('option', { name: new RegExp(regionLabel) }));
+  };
+
   const fillLogisticsStep = (getByRole: ReturnType<typeof render>['getByRole'], getByTestId: ReturnType<typeof render>['getByTestId']) => {
     fireEvent.click(getByTestId('datasetWizardDataSource'));
     fireEvent.click(getByRole('option', { name: 'source-1' }));
@@ -74,9 +83,7 @@ describe('DatasetWizard step navigation', () => {
     fireEvent.change(getByTestId('datasetWizardResource'), {
       target: { value: 's3://bucket/data.csv' },
     });
-    fireEvent.change(getByTestId('datasetWizardRegion'), {
-      target: { value: 'us-west-2' },
-    });
+    selectWizardRegion(getByRole, getByTestId, 'US West \\(Oregon\\)');
   };
 
   it('shows additional settings step after completing logistics', async () => {
@@ -246,7 +253,7 @@ describe('DatasetWizard step navigation', () => {
     fireEvent.click(getByTestId('datasetWizardNext'));
 
     await waitFor(() => {
-      expect(getByTestId('datasetWizardRegion')).toBeInvalid();
+      expect(getByTestId('datasetWizardRegion')).toHaveClass('euiSuperSelectControl-isInvalid');
     });
 
     expect(getByTestId('datasetWizardAdditionalSettingsStep')).not.toBeVisible();
@@ -264,9 +271,7 @@ describe('DatasetWizard step navigation', () => {
     fireEvent.change(getByTestId('datasetWizardResource'), {
       target: { value: 'sfr' },
     });
-    fireEvent.change(getByTestId('datasetWizardRegion'), {
-      target: { value: 'us-west-2' },
-    });
+    selectWizardRegion(getByRole, getByTestId, 'US West \\(Oregon\\)');
 
     fireEvent.click(getByTestId('datasetWizardNext'));
 

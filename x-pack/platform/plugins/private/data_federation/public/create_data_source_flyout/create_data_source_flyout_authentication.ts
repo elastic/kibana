@@ -205,6 +205,7 @@ export const applyAuthenticationModeToDataSource = (
         role_session_name: _roleSessionName,
         sts_endpoint: _stsEndpoint,
         sts_region: _stsRegion,
+        region: _region,
         auth: _auth,
         ...rest
       } = data.settings;

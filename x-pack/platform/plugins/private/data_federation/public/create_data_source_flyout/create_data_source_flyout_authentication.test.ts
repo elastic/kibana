@@ -96,7 +96,6 @@ describe('create_data_source_flyout_authentication', () => {
       const applied = applyAuthenticationModeToDataSource(data, 'access_and_secret_keys');
       expect(applied.settings).toEqual(
         expect.objectContaining({
-          region: 'us-east-1',
           access_key: 'AKIA',
           secret_key: 'SECRET',
           auth: 'static_credentials',
@@ -126,7 +125,6 @@ describe('create_data_source_flyout_authentication', () => {
       const applied = applyAuthenticationModeToDataSource(data, 'federated_identity');
       expect(applied.settings).toEqual(
         expect.objectContaining({
-          region: 'us-east-1',
           role_arn: 'role',
           jwt_audience: 'aud',
           role_session_name: 'session',
@@ -154,9 +152,7 @@ describe('create_data_source_flyout_authentication', () => {
       };
 
       const applied = applyAuthenticationModeToDataSource(data, 'anonymous');
-      expect(applied.settings).toEqual(
-        expect.objectContaining({ region: 'us-east-1', auth: 'anonymous' })
-      );
+      expect(applied.settings).toEqual(expect.objectContaining({ auth: 'anonymous' }));
       expect(applied.settings).not.toHaveProperty('access_key');
       expect(applied.settings).not.toHaveProperty('secret_key');
       expect(applied.settings).not.toHaveProperty('role_arn');
