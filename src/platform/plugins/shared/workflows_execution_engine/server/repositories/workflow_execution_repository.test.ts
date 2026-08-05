@@ -784,7 +784,25 @@ describe('WorkflowExecutionRepository', () => {
       expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
     });
 
-    it('delegates bulk updates to the DAL without checking bulk errors', async () => {
+    it('resolves when all items succeed', async () => {
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
+        asBulkResponse({
+          errors: false,
+          items: [{ id: 'exec-1' }, { id: 'exec-2' }],
+        })
+      );
+
+      await expect(
+        repository.bulkUpdateWorkflowExecutions([
+          { id: 'exec-1', status: ExecutionStatus.CANCELLED },
+          { id: 'exec-2', status: ExecutionStatus.CANCELLED },
+        ])
+      ).resolves.toBeUndefined();
+
+      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalled();
+    });
+
+    it('throws when the bulk response contains errors', async () => {
       workflowExecutionsDataClient.bulk.mockResolvedValue(
         asBulkResponse({
           errors: true,
@@ -800,18 +818,10 @@ describe('WorkflowExecutionRepository', () => {
 
       await expect(
         repository.bulkUpdateWorkflowExecutions([
-          {
-            id: 'exec-1',
-            status: ExecutionStatus.CANCELLED,
-          },
-          {
-            id: 'exec-2',
-            status: ExecutionStatus.CANCELLED,
-          },
+          { id: 'exec-1', status: ExecutionStatus.CANCELLED },
+          { id: 'exec-2', status: ExecutionStatus.CANCELLED },
         ])
-      ).resolves.toBeUndefined();
-
-      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalled();
+      ).rejects.toThrow('Bulk update failed for 1 of 2 workflow executions');
     });
   });
 

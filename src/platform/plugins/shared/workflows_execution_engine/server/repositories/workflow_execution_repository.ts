@@ -166,13 +166,19 @@ export class WorkflowExecutionRepository {
       }
     });
 
-    await this.workflowExecutionsDataClient.bulk({
+    const response = await this.workflowExecutionsDataClient.bulk({
       items: updates.map((update) => ({
         operation: 'update',
         document: update as Partial<EsWorkflowExecution> & { id: string },
       })),
       refresh: true,
     });
+    if (response.errors) {
+      const errorCount = response.items.filter((item) => item.error).length;
+      throw new Error(
+        `Bulk update failed for ${errorCount} of ${updates.length} workflow executions`
+      );
+    }
   }
 
   /**

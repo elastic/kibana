@@ -77,7 +77,13 @@ export class StepExecutionRepository {
       sourceIncludes,
       sourceExcludes,
     });
-    return items.map(({ document }) => document);
+    const shouldNormalizeOutput = sourceIncludes?.includes('output');
+    return items.map(({ document }) => {
+      if (shouldNormalizeOutput && document.output === undefined) {
+        return { ...document, output: null };
+      }
+      return document;
+    });
   }
 
   /**

@@ -17,7 +17,7 @@ export const createMockGetExecutionsByIdsResponse = <TExecution extends { id: st
   documents: TExecution[],
   options: {
     index?: string;
-    missing?: (string | { id: string; index: string })[];
+    missing?: string[];
   } = {}
 ): GetExecutionsByIdsResponse<TExecution> => ({
   items: documents.map((document) => ({
