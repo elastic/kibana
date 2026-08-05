@@ -94797,8 +94797,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The effective ceiling is the `histogram:maxBars` advanced setting (default 1000).
               minimum: 1
               type: number
             - enum:
