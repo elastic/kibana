@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PresentationUtilPluginStart } from './types';
 import { setStubKibanaServices } from './services/mocks';
 
 export * from './__stories__/fixtures/flights';
