@@ -72,9 +72,6 @@ export function getEdotCollectorConfig({
         flush: {
           interval: '1s',
         },
-        tls: {
-          insecure_skip_verify: true,
-        },
       },
     },
     service: {
