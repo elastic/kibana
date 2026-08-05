@@ -31,11 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const sendRequest = async (request: string) => {
       await PageObjects.console.enterText(request);
-      // Typing opens Monaco's autocomplete widget, which can sit over the send
-      // button and swallow the click; dismiss it, then wait for the output to
-      // actually render rather than for the header spinner (which clears
-      // immediately when no request was dispatched).
-      await PageObjects.console.pressEscape();
       await PageObjects.console.clickPlayAndWaitForResults();
     };
 
@@ -43,7 +38,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await asyncForEach(requests, async (request) => {
         await PageObjects.console.enterText(request);
       });
-      await PageObjects.console.pressEscape();
       await PageObjects.console.selectAllRequests();
       await PageObjects.console.clickPlayAndWaitForResults();
     };
