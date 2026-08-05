@@ -2700,6 +2700,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/grafana/** @elastic/n
 src/platform/packages/shared/kbn-connector-specs/src/specs/rootly/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/sentry/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/dynatrace/** @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/specs/zabbix/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/datadog/** @elastic/workflows-eng
 
 
