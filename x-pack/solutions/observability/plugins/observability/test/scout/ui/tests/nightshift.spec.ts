@@ -59,7 +59,7 @@ test.describe(
       await expect(nightshiftButton).toBeVisible({ timeout: 60_000 });
       await nightshiftButton.click();
 
-      await expect(page).toHaveURL(/\/app\/observability\/nightshift/, { timeout: 60_000 });
+      await expect(page).toHaveURL(/\/app\/nightshift/, { timeout: 60_000 });
       await expect(page.testSubj.locator('nightshiftPage')).toBeVisible({ timeout: 60_000 });
 
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.root)).toHaveCount(1);
