@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
 import type { AgentProfileStorage, AgentProperties } from './client/storage';
 import type { AgentRef } from '../../../../common/http_api/tools';
 import type { AgentsUsingToolsResult } from './types';
@@ -88,6 +89,7 @@ export async function runPluginRefCleanup({
         currentProps: source,
         update: { configuration: { plugin_ids: newPluginIds } },
         updateDate: now,
+        user: { username: SYSTEM_USER_ID },
       });
       bulkOperations.push({
         index: { _id: String(hit._id), document: updated },
