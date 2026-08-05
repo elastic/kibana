@@ -36311,8 +36311,6 @@
     "xpack.monitoring.updateLicenseButtonLabel": "ライセンスを更新",
     "xpack.monitoring.updateLicenseTitle": "ライセンスの更新",
     "xpack.monitoring.useAvailableLicenseDescription": "すでに新しいライセンスがある場合は、今すぐアップロードしてください。",
-    "xpack.nightshift.emptyState.comingSoon": "まもなくリリース",
-    "xpack.nightshift.emptyState.title": "ナイトシフト",
     "xpack.observability_onboarding.addDataPageV2.subtitle": "システムを接続し、ログ、メトリクス、トレースの状況を網羅的に確認できます。",
     "xpack.observability_onboarding.apiEndpoints.apiKeyLabel": "APIキー",
     "xpack.observability_onboarding.apiEndpoints.apiKeyPlaceholder": "APIキーはまだありません",

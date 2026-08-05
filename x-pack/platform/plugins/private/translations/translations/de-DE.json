@@ -36200,8 +36200,6 @@
     "xpack.monitoring.updateLicenseButtonLabel": "Lizenz aktualisieren",
     "xpack.monitoring.updateLicenseTitle": "Aktualisieren Sie Ihre Lizenz",
     "xpack.monitoring.useAvailableLicenseDescription": "Wenn Sie bereits eine neue Lizenz besitzen, laden Sie sie jetzt hoch.",
-    "xpack.nightshift.emptyState.comingSoon": "Demnächst verfügbar",
-    "xpack.nightshift.emptyState.title": "Nachtschicht",
     "xpack.observability_onboarding.addDataPageV2.subtitle": "Verbinden Sie Ihre Systeme und erhalten Sie vollen Einblick in Logs, Metriken und Traces.",
     "xpack.observability_onboarding.apiEndpoints.apiKeyLabel": "API-Schlüssel",
     "xpack.observability_onboarding.apiEndpoints.apiKeyPlaceholder": "Noch kein API-Schlüssel vorhanden",

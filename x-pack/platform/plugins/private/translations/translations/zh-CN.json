@@ -36319,8 +36319,6 @@
     "xpack.monitoring.updateLicenseButtonLabel": "更新许可证",
     "xpack.monitoring.updateLicenseTitle": "更新您的许可证",
     "xpack.monitoring.useAvailableLicenseDescription": "如果您已经持有新的许可证，请立即上传。",
-    "xpack.nightshift.emptyState.comingSoon": "即将推出",
-    "xpack.nightshift.emptyState.title": "夜班",
     "xpack.observability_onboarding.addDataPageV2.subtitle": "连接您的系统，全面了解日志、指标和跟踪。",
     "xpack.observability_onboarding.apiEndpoints.apiKeyLabel": "API 密钥",
     "xpack.observability_onboarding.apiEndpoints.apiKeyPlaceholder": "暂无 API 密钥",
