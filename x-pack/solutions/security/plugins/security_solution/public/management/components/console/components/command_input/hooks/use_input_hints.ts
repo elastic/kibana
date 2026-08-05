@@ -28,7 +28,10 @@ const NO_ARGUMENTS_HINT = i18n.translate('xpack.securitySolution.useInputHints.n
 
 export const UP_ARROW_ACCESS_HISTORY_HINT = i18n.translate(
   'xpack.securitySolution.useInputHints.viewInputHistory',
-  { defaultMessage: 'Press the up arrow key to access previously entered commands' }
+  {
+    defaultMessage:
+      'Press [ALT][SPACE] for list of commands or arguments for a command. Press [UP] arrow key for previously entered commands',
+  }
 );
 
 /**
