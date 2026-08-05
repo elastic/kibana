@@ -69,6 +69,37 @@ describe('getGenAiDetailFieldNames', () => {
   });
 });
 
+describe('summary fields in the details table', () => {
+  it('resolves operation name, request model and provider so they are filterable', () => {
+    expect(
+      getGenAiDetailFieldNames({
+        'attributes.gen_ai.operation.name': ['chat'],
+        'attributes.gen_ai.request.model': ['gpt-4o'],
+        'attributes.gen_ai.provider.name': ['openai'],
+      })
+    ).toEqual([
+      'attributes.gen_ai.operation.name',
+      'attributes.gen_ai.request.model',
+      'attributes.gen_ai.provider.name',
+    ]);
+  });
+
+  it('falls back to gen_ai.system when the provider field is absent', () => {
+    expect(getGenAiDetailFieldNames({ 'attributes.gen_ai.system': ['openai'] })).toEqual([
+      'attributes.gen_ai.system',
+    ]);
+  });
+
+  it('hides gen_ai.system when the provider field is present (single Provider row)', () => {
+    expect(
+      getGenAiDetailFieldNames({
+        'attributes.gen_ai.provider.name': ['openai'],
+        'attributes.gen_ai.system': ['openai'],
+      })
+    ).toEqual(['attributes.gen_ai.provider.name']);
+  });
+});
+
 describe('hasGenAiDetailFields', () => {
   it('returns true when a detail field is present in any shape', () => {
     expect(hasGenAiDetailFields({ 'attributes.gen_ai.response.model': ['gpt-4o'] })).toBe(true);

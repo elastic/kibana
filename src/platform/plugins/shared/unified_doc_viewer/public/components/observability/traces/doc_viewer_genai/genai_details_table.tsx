@@ -9,7 +9,10 @@
 
 import {
   ATTRIBUTE_GEN_AI_CONVERSATION_ID,
+  ATTRIBUTE_GEN_AI_OPERATION_NAME,
+  ATTRIBUTE_GEN_AI_PROVIDER_NAME,
   ATTRIBUTE_GEN_AI_REQUEST_MAX_TOKENS,
+  ATTRIBUTE_GEN_AI_REQUEST_MODEL,
   ATTRIBUTE_GEN_AI_REQUEST_SEED,
   ATTRIBUTE_GEN_AI_REQUEST_TEMPERATURE,
   ATTRIBUTE_GEN_AI_REQUEST_TOP_K,
@@ -17,6 +20,7 @@ import {
   ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS,
   ATTRIBUTE_GEN_AI_RESPONSE_ID,
   ATTRIBUTE_GEN_AI_RESPONSE_MODEL,
+  ATTRIBUTE_GEN_AI_SYSTEM,
 } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -37,7 +41,27 @@ const fallbackShapes = (attributeName: string): string[] => {
   return [attributeName, bare, `labels.${bare.replace(/\./g, '_')}`];
 };
 
+const PROVIDER_TITLE = i18n.translate(
+  'unifiedDocViewer.observability.traces.genAi.details.provider',
+  { defaultMessage: 'Provider' }
+);
+
 const DETAIL_FIELD_TITLES: Record<string, string> = {
+  // The first three also appear as Summary pills; they are repeated here so
+  // Discover users get the field-table filter actions for them (the pills
+  // stay the glanceable summary, this table is the actionable surface).
+  [ATTRIBUTE_GEN_AI_OPERATION_NAME]: i18n.translate(
+    'unifiedDocViewer.observability.traces.genAi.details.operationName',
+    { defaultMessage: 'Operation' }
+  ),
+  [ATTRIBUTE_GEN_AI_REQUEST_MODEL]: i18n.translate(
+    'unifiedDocViewer.observability.traces.genAi.details.requestModel',
+    { defaultMessage: 'Request model' }
+  ),
+  [ATTRIBUTE_GEN_AI_PROVIDER_NAME]: PROVIDER_TITLE,
+  // Deprecated predecessor of gen_ai.provider.name — shown only when the
+  // provider field is absent (see getGenAiDetailFieldNames).
+  [ATTRIBUTE_GEN_AI_SYSTEM]: PROVIDER_TITLE,
   [ATTRIBUTE_GEN_AI_RESPONSE_MODEL]: i18n.translate(
     'unifiedDocViewer.observability.traces.genAi.details.responseModel',
     { defaultMessage: 'Response model' }
@@ -89,11 +113,24 @@ export type GenAiDetailsTableProps = Pick<
  * `gen_ai.*` field alongside the mapped `attributes.gen_ai.*` one) — without
  * this de-duplication every present shape would render as its own row.
  */
+// Discover records can carry null-valued (or [null]) keys for absent fields —
+// mirror the value-aware presence check of `hasGenAiData`.
+const hasValue = (value: unknown): boolean =>
+  value != null && (!Array.isArray(value) || value.some((element) => element != null));
+
 export function getGenAiDetailFieldNames(flattened: Record<string, unknown>): string[] {
+  const isPresent = (attributeName: string) =>
+    fallbackShapes(attributeName).find((fieldName) => hasValue(flattened[fieldName]));
+
   return Object.keys(DETAIL_FIELD_TITLES)
-    .map((attributeName) =>
-      fallbackShapes(attributeName).find((fieldName) => flattened[fieldName] != null)
+    .filter(
+      // gen_ai.system is only the fallback for the provider (mirrors the
+      // `provider ?? system` alias in get_genai_fields.ts) — hide it when the
+      // provider field is present to avoid two "Provider" rows.
+      (attributeName) =>
+        attributeName !== ATTRIBUTE_GEN_AI_SYSTEM || !isPresent(ATTRIBUTE_GEN_AI_PROVIDER_NAME)
     )
+    .map(isPresent)
     .filter((fieldName): fieldName is string => fieldName != null);
 }
 

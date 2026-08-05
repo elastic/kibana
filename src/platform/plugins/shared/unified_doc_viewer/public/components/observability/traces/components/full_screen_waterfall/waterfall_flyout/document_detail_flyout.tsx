@@ -10,7 +10,6 @@
 import { EuiCallOut, type EuiFlyoutProps } from '@elastic/eui';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React from 'react';
-import type { GenAiEbtHost } from '@kbn/apm-ui-shared';
 import { WaterfallFlyout } from '.';
 import type { TraceOverviewSections } from '../../../doc_viewer_overview/overview';
 import { SpanFlyoutContent } from './span_flyout';
@@ -67,8 +66,6 @@ export interface DocumentDetailFlyoutProps {
   activeSection?: TraceOverviewSections;
   skipNextEventReport?: boolean;
   size?: EuiFlyoutProps['size'];
-  /** Host app discriminator used as `detail` in the flyout tab click EBT events. */
-  ebtHost?: GenAiEbtHost;
 }
 
 export function DocumentDetailFlyout({
@@ -83,7 +80,6 @@ export function DocumentDetailFlyout({
   activeSection,
   skipNextEventReport,
   size,
-  ebtHost,
 }: DocumentDetailFlyoutProps) {
   const data = useDocumentFlyoutData({ type, docId, traceId, docIndex });
 
@@ -102,7 +98,6 @@ export function DocumentDetailFlyout({
       flyoutContentId={flyoutConfig.contentId}
       skipNextEventReport={skipNextEventReport}
       size={size}
-      ebtHost={ebtHost}
     >
       {data.error && <EuiCallOut announceOnMount title={data.error} color="danger" />}
       {flyoutConfig.render({ data, dataView, activeSection })}

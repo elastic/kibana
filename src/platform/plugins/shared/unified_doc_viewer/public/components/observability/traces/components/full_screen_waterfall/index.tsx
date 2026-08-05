@@ -17,7 +17,6 @@ import {
   type EuiFlyoutProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GENAI_EBT_HOSTS } from '@kbn/apm-ui-shared';
 import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo } from 'react';
@@ -171,7 +170,6 @@ export const FullScreenWaterfall = ({
           onCloseFlyout={onCloseFlyout}
           activeSection={activeSection}
           skipNextEventReport={skipNextEventReport}
-          ebtHost={GENAI_EBT_HOSTS.DISCOVER}
         />
       ) : null}
     </EuiFlyout>

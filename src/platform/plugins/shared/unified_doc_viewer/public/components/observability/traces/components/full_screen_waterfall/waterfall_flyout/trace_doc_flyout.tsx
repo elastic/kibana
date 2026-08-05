@@ -9,7 +9,6 @@
 
 import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import React from 'react';
-import { GENAI_EBT_HOSTS } from '@kbn/apm-ui-shared';
 import { DataSourcesProvider } from '../../../../../../hooks/use_data_sources';
 import { DocViewerExtensionActionsProvider } from '../../../../../../hooks/use_doc_viewer_extension_actions';
 import { DocumentDetailFlyout, type DocumentDetailFlyoutProps } from './document_detail_flyout';
@@ -26,7 +25,7 @@ export function TraceDocFlyout({ indexes, ...rest }: TraceDocFlyoutProps) {
     // we might want to pass it as prop and reuse the concept
     <DataSourcesProvider indexes={indexes} profileId="null">
       <DocViewerExtensionActionsProvider>
-        <DocumentDetailFlyout {...rest} ebtHost={GENAI_EBT_HOSTS.APM} />
+        <DocumentDetailFlyout {...rest} />
       </DocViewerExtensionActionsProvider>
     </DataSourcesProvider>
   );

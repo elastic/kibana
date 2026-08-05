@@ -144,11 +144,7 @@ describe('tracesDocumentProfileProvider', () => {
       docViewer.docViewsRegistry(registry);
 
       const genAiDocView = registry.getAll().find(({ id }) => id === 'doc_view_obs_traces_genai');
-      expect(genAiDocView?.ebt).toEqual({
-        action: 'viewGenAi',
-        element: 'docViewerTabs',
-        detail: 'discover',
-      });
+      expect(genAiDocView?.ebt).toEqual({ action: 'viewGenAi', element: 'docViewerTabs' });
     });
   });
 

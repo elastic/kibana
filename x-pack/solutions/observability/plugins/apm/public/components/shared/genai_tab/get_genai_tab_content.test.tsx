@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GenAiFields } from '@kbn/apm-ui-shared';
+import { GENAI_EBT_CLICK_ACTIONS, type GenAiFields } from '@kbn/apm-ui-shared';
 import { getGenAiTabContent } from './get_genai_tab_content';
 
 const genAi: GenAiFields = {
@@ -35,9 +35,8 @@ describe('getGenAiTabContent', () => {
     expect(tab).toMatchObject({
       id: 'genai',
       'data-test-subj': 'genAiTab',
-      'data-ebt-action': 'viewGenAi',
+      'data-ebt-action': GENAI_EBT_CLICK_ACTIONS.VIEW_GENAI,
       'data-ebt-element': 'spanFlyoutTabs',
-      'data-ebt-detail': 'apm',
     });
   });
 });

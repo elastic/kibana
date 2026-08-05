@@ -11,6 +11,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { GenAiMessages } from './genai_messages';
+import { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';
 
 jest.mock('@kbn/shared-ux-markdown', () => ({
   Markdown: ({ children }: { children: string }) => (
@@ -132,7 +133,7 @@ describe('GenAiMessages — copy buttons', () => {
       </EuiThemeProvider>
     );
     const copyBtn = screen.getByTestId('genAiMessageCopy-0');
-    expect(copyBtn).toHaveAttribute('data-ebt-action', 'copyGenAiMessage');
+    expect(copyBtn).toHaveAttribute('data-ebt-action', GENAI_EBT_CLICK_ACTIONS.COPY_MESSAGE);
     expect(copyBtn).toHaveAttribute('data-ebt-element', 'docViewerGenAiTab');
     expect(copyBtn).toHaveAttribute('data-ebt-detail', 'user');
   });

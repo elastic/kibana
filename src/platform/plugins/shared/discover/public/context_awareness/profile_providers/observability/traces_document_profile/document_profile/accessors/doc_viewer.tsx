@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import {
   GenAiTechnicalPreviewBadge,
   GENAI_EBT_CLICK_ACTIONS,
-  GENAI_EBT_HOSTS,
   hasGenAiData,
 } from '@kbn/apm-ui-shared';
 import {
@@ -64,7 +63,6 @@ export const createGetDocViewer =
             ebt: {
               action: GENAI_EBT_CLICK_ACTIONS.VIEW_GENAI,
               element: TRACES_DOC_VIEWER_EBT_ELEMENTS.TABS,
-              detail: GENAI_EBT_HOSTS.DISCOVER,
             },
             render: (props) => <UnifiedDocViewerObservabilityTracesGenAi {...props} />,
           });

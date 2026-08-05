@@ -64,6 +64,48 @@ describe('useGenAiData', () => {
     expect(mockSearch).not.toHaveBeenCalled();
   });
 
+  it('handles null-valued gen_ai fields without crashing or fetching (Discover null-padded records)', () => {
+    // Regression for the doc viewer crash: Discover records carry null for
+    // absent fields; message parsing must not throw and no _source fetch
+    // should be triggered (nothing was ignored, the fields are just absent).
+    const { result } = renderHook(() =>
+      useGenAiData({
+        hit: buildHit({
+          flattened: {
+            [INPUT_MESSAGES_FIELD]: null,
+            'attributes.gen_ai.output.messages': null,
+            'attributes.gen_ai.system_instructions': null,
+            'attributes.gen_ai.operation.name': ['chat'],
+            'attributes.gen_ai.request.model': ['gpt-4o'],
+            'attributes.gen_ai.usage.input_tokens': [1100],
+            'attributes.gen_ai.usage.output_tokens': [420],
+          },
+        }),
+      })
+    );
+
+    expect(result.current.isGenAiSpan).toBe(true);
+    expect(result.current.genAi?.inputMessages).toEqual([]);
+    expect(result.current.genAi?.outputMessages).toEqual([]);
+    expect(result.current.genAi?.inputTokens).toBe(1100);
+    expect(result.current.loading).toBe(false);
+    expect(mockSearch).not.toHaveBeenCalled();
+  });
+
+  it('returns no GenAI data when all gen_ai keys are null-valued', () => {
+    const { result } = renderHook(() =>
+      useGenAiData({
+        hit: buildHit({
+          flattened: { [INPUT_MESSAGES_FIELD]: null, 'attributes.gen_ai.request.model': null },
+        }),
+      })
+    );
+
+    expect(result.current.isGenAiSpan).toBe(false);
+    expect(result.current.genAi).toBeUndefined();
+    expect(mockSearch).not.toHaveBeenCalled();
+  });
+
   it('derives fields from flattened values without fetching when nothing was ignored', () => {
     const { result } = renderHook(() =>
       useGenAiData({

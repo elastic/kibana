@@ -16,6 +16,8 @@ import { FlyoutContentId } from '../../../common/constants';
 import { setUnifiedDocViewerServices } from '../../../../../../plugin';
 import { mockUnifiedDocViewerServices } from '../../../../../../__mocks__';
 import { OriginDocTypeContext } from '../../../../../doc_viewer_flyout/origin_doc_type_context';
+import { GENAI_EBT_CLICK_ACTIONS } from '@kbn/apm-ui-shared';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS } from '../../../ebt_constants';
 
 setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
@@ -189,21 +191,14 @@ describe('WaterfallFlyout', () => {
       expect(screen.queryByTestId('customChildren')).not.toBeInTheDocument();
     });
 
-    it('adds the viewGenAi EBT click attributes with the host app as detail', () => {
-      render(<WaterfallFlyout {...defaultProps} hit={genAiHit} ebtHost="apm" />);
-
-      const genAiTab = screen.getByTestId('unifiedDocViewerTracesGenAiTab');
-      expect(genAiTab).toHaveAttribute('data-ebt-action', 'viewGenAi');
-      expect(genAiTab).toHaveAttribute('data-ebt-element', 'docViewerFlyoutTabs');
-      expect(genAiTab).toHaveAttribute('data-ebt-detail', 'apm');
-    });
-
-    it('defaults the EBT detail to the discover host', () => {
+    it('adds the viewGenAi EBT click attributes to the GenAI tab', () => {
       render(<WaterfallFlyout {...defaultProps} hit={genAiHit} />);
 
-      expect(screen.getByTestId('unifiedDocViewerTracesGenAiTab')).toHaveAttribute(
-        'data-ebt-detail',
-        'discover'
+      const genAiTab = screen.getByTestId('unifiedDocViewerTracesGenAiTab');
+      expect(genAiTab).toHaveAttribute('data-ebt-action', GENAI_EBT_CLICK_ACTIONS.VIEW_GENAI);
+      expect(genAiTab).toHaveAttribute(
+        'data-ebt-element',
+        TRACES_DOC_VIEWER_EBT_ELEMENTS.FLYOUT_TABS
       );
     });
 

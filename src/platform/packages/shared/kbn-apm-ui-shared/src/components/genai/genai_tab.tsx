@@ -19,11 +19,11 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { EbtClickAttrsElementOnly } from '@kbn/ebt-click';
 import { asInteger } from '../../utils';
 import type { GenAiFields } from './get_genai_fields';
 import { GenAiFieldValue } from './genai_field_value';
 import { GenAiMessages } from './genai_messages';
-import type { GenAiEbtProps } from './ebt_constants';
 import { GenAiSection } from './genai_section';
 
 interface PillProps {
@@ -84,7 +84,7 @@ const DETAIL_COLUMNS: Array<EuiBasicTableColumn<DetailRow>> = [
 interface Props {
   genAi: GenAiFields;
   /** When provided, copy-button clicks are tracked via `data-ebt-*` attributes. */
-  ebt?: GenAiEbtProps;
+  ebt?: EbtClickAttrsElementOnly;
   /**
    * When provided, replaces the built-in Details table — e.g. with the doc
    * viewer's field table that offers filter actions in the Discover context.

@@ -18,13 +18,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { getEbtProps } from '@kbn/ebt-click';
+import { getEbtProps, type EbtClickAttrsElementOnly } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { GenAiMessage } from './get_genai_fields';
 import { getMessageCopyText } from './get_genai_fields';
 import { GenAiMessageContent } from './genai_message_content';
-import { GENAI_EBT_CLICK_ACTIONS, type GenAiEbtProps } from './ebt_constants';
+import { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';
 
 /**
  * Fixed-size role avatar using EUI semantic background tokens so the circle
@@ -53,7 +53,7 @@ interface Props {
   outputMessages: GenAiMessage[];
   systemInstructions?: string;
   /** When provided, copy-button clicks are tracked via `data-ebt-*` attributes. */
-  ebt?: GenAiEbtProps;
+  ebt?: EbtClickAttrsElementOnly;
 }
 
 // Base style applied to every comment: smooth background transition, plus

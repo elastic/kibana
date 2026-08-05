@@ -16,9 +16,4 @@ export {
   type GenAiMessage,
 } from './get_genai_fields';
 export { getFieldFromSource, GEN_AI_LONG_MESSAGE_FIELDS } from './get_field_from_source';
-export {
-  GENAI_EBT_CLICK_ACTIONS,
-  GENAI_EBT_HOSTS,
-  type GenAiEbtHost,
-  type GenAiEbtProps,
-} from './ebt_constants';
+export { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';

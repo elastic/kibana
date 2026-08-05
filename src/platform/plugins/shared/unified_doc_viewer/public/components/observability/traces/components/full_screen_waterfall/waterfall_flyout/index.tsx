@@ -25,9 +25,7 @@ import { css } from '@emotion/react';
 import {
   GenAiTechnicalPreviewBadge,
   GENAI_EBT_CLICK_ACTIONS,
-  GENAI_EBT_HOSTS,
   hasGenAiData,
-  type GenAiEbtHost,
 } from '@kbn/apm-ui-shared';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
@@ -58,13 +56,7 @@ interface FlyoutTab {
   ebt?: EbtClickAttrs;
 }
 
-const getTabs = ({
-  showGenAi,
-  ebtHost,
-}: {
-  showGenAi: boolean;
-  ebtHost: GenAiEbtHost;
-}): FlyoutTab[] => [
+const getTabs = ({ showGenAi }: { showGenAi: boolean }): FlyoutTab[] => [
   {
     id: tabIds.OVERVIEW,
     name: i18n.translate(
@@ -89,7 +81,6 @@ const getTabs = ({
           ebt: {
             action: GENAI_EBT_CLICK_ACTIONS.VIEW_GENAI,
             element: TRACES_DOC_VIEWER_EBT_ELEMENTS.FLYOUT_TABS,
-            detail: ebtHost,
           },
         },
       ]
@@ -183,8 +174,6 @@ export interface Props {
   children: React.ReactNode;
   skipNextEventReport?: boolean;
   size?: EuiFlyoutProps['size'];
-  /** Host app discriminator used as `detail` in the flyout tab click EBT events. */
-  ebtHost?: GenAiEbtHost;
 }
 
 export function WaterfallFlyout({
@@ -200,7 +189,6 @@ export function WaterfallFlyout({
   flyoutContentId,
   skipNextEventReport,
   size = 's',
-  ebtHost = GENAI_EBT_HOSTS.DISCOVER,
 }: Props) {
   const { analytics } = getUnifiedDocViewerServices();
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
@@ -209,8 +197,8 @@ export function WaterfallFlyout({
   const originDocType = useOriginDocType();
 
   const tabs = useMemo(
-    () => getTabs({ showGenAi: hit != null && hasGenAiData(hit.flattened), ebtHost }),
-    [hit, ebtHost]
+    () => getTabs({ showGenAi: hit != null && hasGenAiData(hit.flattened) }),
+    [hit]
   );
 
   // The GenAI tab is conditional: when switching to a document without GenAI

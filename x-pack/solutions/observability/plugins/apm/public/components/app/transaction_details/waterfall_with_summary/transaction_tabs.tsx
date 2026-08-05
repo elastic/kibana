@@ -17,10 +17,8 @@ import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useDiscoverHref } from '../../../shared/links/discover_links/use_discover_href';
-import {
-  getGenAiTabContent,
-  getGenAiTabEbt,
-} from '../../../shared/genai_tab/get_genai_tab_content';
+import { getGenAiTabContent } from '../../../shared/genai_tab/get_genai_tab_content';
+import { getGenAiTabEbt } from '../../../shared/genai_tab/ebt_constants';
 import { useGenAiData } from '../../../shared/genai_tab/use_genai_data';
 import { TransactionMetadata } from '../../../shared/metadata_table/transaction_metadata';
 import { UnifiedWaterfallContainer } from './waterfall_container/unified_waterfall_container';
