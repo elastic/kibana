@@ -59,9 +59,9 @@ export function getEsqlQuery({
   if (type?.value !== undefined && type?.fieldName) {
     const typeColumn = esqlColumn(type.fieldName);
     if (Array.isArray(type.value)) {
-      type.value.forEach((val) => {
-        conditions.push(esql.exp`MATCH(${typeColumn}, ${esql.str(String(val))})`);
-      });
+      conditions.push(
+        ...type.value.map((val) => esql.exp`MATCH(${typeColumn}, ${esql.str(String(val))})`)
+      );
     } else {
       conditions.push(esql.exp`${typeColumn} == ${esql.str(type.value)}`);
     }
