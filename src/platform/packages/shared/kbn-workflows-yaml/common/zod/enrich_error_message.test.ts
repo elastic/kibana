@@ -138,11 +138,18 @@ describe('enrichErrorMessage', () => {
         enrichErrorMessage(['steps', 1000 + i], `# warm ${i}`, 'unknown', { schema });
       }
 
-      // Calibrate per-call cost on the current machine. The loop below should
-      // stay close to `iterations * baselineMs` once caches are warm.
-      const baselineStart = performance.now();
-      enrichErrorMessage(['steps', 2000], 'baseline.', 'unknown', { schema });
-      const baselineMs = Math.max(0.1, performance.now() - baselineStart);
+      // Calibrate per-call cost from the median of several samples, not a lone
+      // one: a single baseline can land anomalously fast, which makes the
+      // relative ceiling below too tight and flakes at the boundary. The loop
+      // below should stay close to `iterations * baselineMs` once caches are warm.
+      const baselineSamples: number[] = [];
+      for (let i = 0; i < 7; i++) {
+        const baselineStart = performance.now();
+        enrichErrorMessage(['steps', 2000 + i], 'baseline.', 'unknown', { schema });
+        baselineSamples.push(performance.now() - baselineStart);
+      }
+      baselineSamples.sort((a, b) => a - b);
+      const baselineMs = Math.max(0.1, baselineSamples[Math.floor(baselineSamples.length / 2)]);
 
       const iterations = 50;
       const start = performance.now();
