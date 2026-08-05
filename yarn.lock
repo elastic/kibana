@@ -15484,10 +15484,10 @@
   dependencies:
     undici-types "~7.16.0"
 
-"@types/nodemailer@8.0.0":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@types/nodemailer/-/nodemailer-8.0.0.tgz#ea189a9c151c04cc65c8a2a4c668c65d952a24e2"
-  integrity sha512-fyf8jWULsCo0d0BuoQ75i6IeoHs47qcqxWc7yUdUcV0pOZGjUTTOvwdG1PRXUDqN/8A64yQdQdnA2pZgcdi+cA==
+"@types/nodemailer@8.0.1":
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/@types/nodemailer/-/nodemailer-8.0.1.tgz#4ef2b4e62c819225a0b8a6384bf750c0c664d465"
+  integrity sha512-PxpaInm8V1JQDd4j0ds5HfvWQk8JupS1C0Picb96QJsrrRDjBH+DlK7L4ZdNSqNULhiZRQHc40nLVShaGxXAMw==
   dependencies:
     "@types/node" "*"
 
@@ -28163,10 +28163,10 @@ node-stdlib-browser@1.3.1:
     util "^0.12.4"
     vm-browserify "^1.0.1"
 
-nodemailer@8.0.7:
-  version "8.0.7"
-  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-8.0.7.tgz#538729a79444e538331bca8a6fc3e5c034eaebc6"
-  integrity sha512-pkjE4mkBzQjdJT4/UmlKl3pX0rC9fZmjh7c6C9o7lv66Ac6w9WCnzPzhbPNxwZAzlF4mdq4CSWB5+FbK6FWCow==
+nodemailer@9.0.4:
+  version "9.0.4"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-9.0.4.tgz#c60694827361820fc9921da6f3346eef75b894cf"
+  integrity sha512-LmJNRVRtfSCULxcZpy0Cpg4WWenlUZ9+zbmTO+S7v9wD6XreYLjXRFtDjtV/4F0HT5p1GyZfA0Ux/myxHb18CQ==
 
 nopt@^4.0.1:
   version "4.0.3"
