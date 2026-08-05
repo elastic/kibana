@@ -36111,8 +36111,6 @@
     "xpack.monitoring.updateLicenseButtonLabel": "Mettre à jour la licence",
     "xpack.monitoring.updateLicenseTitle": "Mettre à jour votre licence",
     "xpack.monitoring.useAvailableLicenseDescription": "Si vous avez déjà une nouvelle licence, chargez-la maintenant.",
-    "xpack.nightshift.emptyState.comingSoon": "Bientôt disponible",
-    "xpack.nightshift.emptyState.title": "Service de nuit",
     "xpack.observability_onboarding.addDataPageV2.subtitle": "Connectez vos systèmes et bénéficiez d'une visibilité complète sur les logs, les indicateurs et les traces.",
     "xpack.observability_onboarding.apiEndpoints.apiKeyLabel": "Clé API",
     "xpack.observability_onboarding.apiEndpoints.apiKeyPlaceholder": "Aucune clé API pour l'instant",
