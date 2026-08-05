@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useMemo } from 'react';
@@ -29,8 +22,7 @@ import { RoundMetadataPopover } from './round_metadata_popover';
 import { RoundTraceButton } from './round_trace_button';
 import { useFeedback } from './feedback_controls/use_feedback';
 import { ThumbButton } from './feedback_controls/thumb_button';
-import { ChipRow } from './feedback_controls/chip_row';
-import { CommentBox } from './feedback_controls/comment_box';
+import { FeedbackModal } from './feedback_controls/feedback_modal';
 import { UpInvite } from './feedback_controls/up_invite';
 import { FeedbackSubmitted } from './feedback_controls/feedback_submitted';
 
@@ -43,12 +35,6 @@ const labels = {
   }),
   regenerate: i18n.translate('xpack.agentBuilder.roundResponseActions.regenerate', {
     defaultMessage: 'Regenerate response',
-  }),
-  submit: i18n.translate('xpack.agentBuilder.roundResponseActions.feedbackSubmit', {
-    defaultMessage: 'Submit',
-  }),
-  cancel: i18n.translate('xpack.agentBuilder.roundResponseActions.feedbackCancel', {
-    defaultMessage: 'Cancel',
   }),
 };
 
@@ -77,16 +63,16 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
     vote,
     chips,
     comment,
-    commentOpen,
+    modalOpen,
     inviteVisible,
     submitted,
     isSubmitting,
     setVote,
     toggleChip,
     setComment,
-    openComment,
+    openModal,
+    closeModal,
     dismissInvite,
-    cancel,
     submit,
   } = useFeedback(rawRound?.id ?? '');
 
@@ -131,8 +117,6 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   const showTraceButton = isTracingEnabled && Boolean(traceId);
   const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction !== null;
   const showFeedback = Boolean(rawRound);
-
-  const showDetailForm = vote !== null && !submitted && (vote === 'down' || commentOpen);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
@@ -241,44 +225,21 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
 
       {showFeedback && vote === 'up' && inviteVisible && !submitted && (
         <EuiFlexItem grow={false}>
-          <UpInvite onTellUsMore={openComment} onDismiss={dismissInvite} />
+          <UpInvite onTellUsMore={openModal} onDismiss={dismissInvite} />
         </EuiFlexItem>
       )}
 
-      {showFeedback && showDetailForm && (
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <ChipRow vote={vote!} selected={chips} onToggle={toggleChip} />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <CommentBox value={comment} onChange={setComment} />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty size="s" onClick={cancel} isDisabled={isSubmitting}>
-                    {labels.cancel}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    size="s"
-                    fill
-                    isLoading={isSubmitting}
-                    isDisabled={isSubmitting}
-                    onClick={submit}
-                    data-test-subj="roundFeedbackSubmitButton"
-                  >
-                    {labels.submit}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+      {showFeedback && vote !== null && modalOpen && (
+        <FeedbackModal
+          vote={vote}
+          chips={chips}
+          comment={comment}
+          isSubmitting={isSubmitting}
+          onToggleChip={toggleChip}
+          onCommentChange={setComment}
+          onSubmit={submit}
+          onClose={closeModal}
+        />
       )}
     </EuiFlexGroup>
   );
