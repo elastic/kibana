@@ -1,5 +1,5 @@
 {
-  "sha1": "f7b3c7db1620b6596817bca688160d86124b6287",
+  "sha1": "fd0e313ad63046f5c898c438579728568716e40e",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -681,22 +681,6 @@
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/esql_landing.spec.ts",
         "line": 58,
         "column": 10
-      }
-    },
-    {
-      "id": "b997ef31f0ad15f-9c9263c28e45920",
-      "title": "Nightshift navigation from Significant Events Discovery navigates between Significant Events, Nightshift, and settings",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/nightshift.spec.ts",
-        "line": 46,
-        "column": 9
       }
     }
   ]
