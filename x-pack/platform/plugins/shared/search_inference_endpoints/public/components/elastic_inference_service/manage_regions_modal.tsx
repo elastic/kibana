@@ -151,7 +151,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
             <p>
               <FormattedMessage
                 id="xpack.searchInferenceEndpoints.manageRegions.description"
-                defaultMessage="Restrict where inference traffic can reside by specifying only those Geographies or Regions you prefer."
+                defaultMessage="Choose which locations can receive inference traffic: by geography or by region."
               />
             </p>
           </EuiText>
