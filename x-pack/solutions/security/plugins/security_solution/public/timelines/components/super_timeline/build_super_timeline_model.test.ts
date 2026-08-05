@@ -12,11 +12,8 @@ import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import type { DataProvider } from '../../../../common/types';
 import type { TimelineModel } from '../../store/model';
 import { timelineDefaults } from '../../store/defaults';
-import {
-  buildSuperTimelineModel,
-  SUPER_TIMELINE_TITLE,
-  SUPER_TIMELINE_QUERY_ALIAS,
-} from './build_super_timeline_model';
+import { buildSuperTimelineModel } from './build_super_timeline_model';
+import { SUPER_TIMELINE_TITLE, SUPER_TIMELINE_QUERY_ALIAS } from './translations';
 import * as kuery from '../../../common/lib/kuery';
 
 const mockDataView = createStubDataView({ spec: { id: 'mock-data-view' } });

@@ -16,7 +16,6 @@ import type { TimelineModel } from '../../store/model';
 import { timelineDefaults } from '../../store/defaults';
 import { combineQueries } from '../../../common/lib/kuery';
 import { SUPER_TIMELINE_TITLE, SUPER_TIMELINE_QUERY_ALIAS } from './translations';
-export { SUPER_TIMELINE_TITLE, SUPER_TIMELINE_QUERY_ALIAS };
 
 export type SkippedQueryReason = 'eql' | 'esql' | 'unknown';
 
