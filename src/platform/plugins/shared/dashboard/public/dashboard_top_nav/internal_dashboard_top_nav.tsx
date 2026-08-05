@@ -36,14 +36,12 @@ import {
   type PublishesEsqlUsage,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
 import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
 import { useFavorite } from '@kbn/content-management-favorites-public';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useChromeStyle, useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
-import { UI_SETTINGS } from '../../common/constants';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -80,8 +78,6 @@ export interface InternalDashboardTopNavProps {
   showBorderBottom?: boolean;
   showResetChange?: boolean;
 }
-
-const LabsFlyout = withSuspense(LazyLabsFlyout, null);
 
 interface DashboardChromeNextHeaderProps {
   headerMode: 'inline' | 'registered';
@@ -158,7 +154,6 @@ export function InternalDashboardTopNav({
   const isAppHeaderActive = useIsNextChrome() && chromeStyle === 'project';
   const headerMode = !isAppHeaderActive ? 'legacy' : isEmbedded ? 'registered' : 'inline';
 
-  const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
   const { onAppLeave } = useDashboardMountContext();
 
   const dashboardApi = useDashboardApi();
@@ -544,9 +539,6 @@ export function InternalDashboardTopNav({
           }}
         />
       )}
-      {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
-        <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
-      ) : null}
 
       {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
 

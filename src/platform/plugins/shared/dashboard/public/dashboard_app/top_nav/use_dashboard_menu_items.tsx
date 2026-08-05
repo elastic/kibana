@@ -24,7 +24,6 @@ import type {
 } from '@kbn/core-chrome-app-menu-components';
 import { useDashboardExportItems } from './share/use_dashboard_export_items';
 import { getAccessControlClient } from '../../services/access_control_service';
-import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
@@ -415,15 +414,6 @@ export const useDashboardMenuItems = ({
           showNotificationIndicator: hasUnsavedChanges,
         },
       } as AppMenuPrimaryActionItem,
-
-      // Labs item
-      labs: {
-        order: 7,
-        label: topNavStrings.labs.label,
-        id: 'labs',
-        testId: 'dashboardLabs',
-        run: () => setIsLabsShown(!isLabsShown),
-      } as AppMenuItemType,
     };
   }, [
     disableTopNav,
@@ -452,8 +442,6 @@ export const useDashboardMenuItems = ({
   /**
    * Build ordered menus for view and edit mode.
    */
-  const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
-
   const viewModeTopNavConfig = useMemo(() => {
     const { showWriteControls, storeSearchSession } = getDashboardCapabilities();
 
@@ -479,10 +467,6 @@ export const useDashboardMenuItems = ({
       items.push(menuItems.backgroundSearch);
     }
 
-    if (isLabsEnabled) {
-      items.push(menuItems.labs);
-    }
-
     const viewModeConfig: AppMenuConfig = {
       items,
     };
@@ -499,11 +483,9 @@ export const useDashboardMenuItems = ({
     menuItems.share,
     menuItems.edit,
     menuItems.backgroundSearch,
-    menuItems.labs,
     resetChangesMenuItem,
     dashboardApi.isManaged,
     showResetChange,
-    isLabsEnabled,
     hasExportMenuItems,
   ]);
 
@@ -528,10 +510,6 @@ export const useDashboardMenuItems = ({
       items.push(menuItems.backgroundSearch);
     }
 
-    if (isLabsEnabled) {
-      items.push(menuItems.labs);
-    }
-
     const editModeConfig: AppMenuConfig = {
       items,
       primaryActionItem: menuItems.save,
@@ -545,10 +523,8 @@ export const useDashboardMenuItems = ({
     menuItems.settings,
     menuItems.backgroundSearch,
     menuItems.save,
-    menuItems.labs,
     menuItems.add,
     hasExportMenuItems,
-    isLabsEnabled,
   ]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };

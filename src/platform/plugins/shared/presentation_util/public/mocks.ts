@@ -11,15 +11,7 @@ import type { PresentationUtilPluginStart } from './types';
 import { setStubKibanaServices } from './services/mocks';
 
 const createStartContract = (): PresentationUtilPluginStart => {
-  const startContract: PresentationUtilPluginStart = {
-    labsService: {
-      getProjects: jest.fn(),
-      getProject: jest.fn(),
-      isProjectEnabled: jest.fn(),
-      reset: jest.fn(),
-      setProjectStatus: jest.fn(),
-    },
-  };
+  const startContract: PresentationUtilPluginStart = {};
   return startContract;
 };
 
