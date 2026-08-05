@@ -22,7 +22,6 @@ import type { KqlPluginStart } from '@kbn/kql/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public/plugin';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -48,7 +47,6 @@ export interface PluginsDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
-  contentManagement: ContentManagementPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
 }
 

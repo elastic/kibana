@@ -7,16 +7,15 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
-import type { TypeOf } from '@kbn/config-schema';
-
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import {
   LENS_INTERNAL_VIS_API_PATH,
   LENS_INTERNAL_API_VERSION,
 } from '../../../../../common/constants';
-import type { LensSavedObject } from '../../../../content_management';
+import type { LensSavedObject } from '../../../../content_management/zod';
 import type { CMItemResultMeta, RegisterAPIRouteFn } from '../../../types';
 import { lensGetRequestParamsSchema, lensGetResponseBodySchema } from './schema';
+import type { ExtendedLensResponseItem } from './utils';
 import { getLensInternalResponseItem } from './utils';
 
 export const registerLensInternalVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
@@ -89,7 +88,7 @@ export const registerLensInternalVisualizationsGetAPIRoute: RegisterAPIRouteFn =
         const resultMeta: CMItemResultMeta = result.meta;
         const responseItem = getLensInternalResponseItem(builder, result.item, resultMeta);
 
-        return res.ok<TypeOf<typeof lensGetResponseBodySchema>>({
+        return res.ok<ExtendedLensResponseItem>({
           body: responseItem,
         });
       } catch (error) {

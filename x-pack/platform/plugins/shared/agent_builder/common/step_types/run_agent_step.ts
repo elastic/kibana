@@ -89,6 +89,42 @@ export const InputSchema = z.object({
     .describe(
       'Optional key-value tags stored with the underlying agent execution and searchable via findExecutions. Callers that need to discover the execution id before this step completes (e.g. to follow it live) can tag it with a value they already know and look it up by that tag.'
     ),
+  /**
+   * Optional runtime overrides for the agent configuration. These replace the corresponding
+   * fields in the stored agent configuration for this step execution only.
+   */
+  configuration_overrides: z
+    .object({
+      instructions: z
+        .string()
+        .max(2048)
+        .optional()
+        .describe('Custom instructions for the agent, replacing the stored instructions.'),
+      tools: z
+        .array(
+          z.object({
+            tool_ids: z.array(z.string().max(100)).describe('Tool IDs to enable.'),
+          })
+        )
+        .max(50)
+        .optional()
+        .describe('Tool selection to enable for this execution, replacing the stored tool list.'),
+      skill_ids: z
+        .array(z.string().max(100))
+        .max(50)
+        .optional()
+        .describe(
+          'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+        ),
+      enable_elastic_capabilities: z
+        .boolean()
+        .optional()
+        .describe('Whether to enable built-in Elastic skills for this execution.'),
+    })
+    .optional()
+    .describe(
+      'Runtime configuration overrides applied to this step execution only. Each provided field replaces the corresponding field in the stored agent configuration.'
+    ),
 });
 
 /**
@@ -186,6 +222,17 @@ export const ConfigSchema = z
       .boolean()
       .optional()
       .describe('When true, creates a conversation for the step.'),
+    /**
+     * When true, newly created conversations are public so other users who can use the
+     * underlying agent can list, view, and continue them. Ignored when continuing an
+     * existing conversation. Defaults to private.
+     */
+    'public-conversation': z
+      .boolean()
+      .optional()
+      .describe(
+        'When true, newly created conversations are public to users who can use the agent. Defaults to private. Ignored when continuing an existing conversation.'
+      ),
     /**
      * Connector telemetry feature id used to attribute this step's LLM calls for billing
      * (sets `metadata.connectorTelemetry.pluginId`). When omitted, the default Agent Builder
@@ -306,7 +353,7 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
 \`\`\`yaml
 - name: investigate
   type: ${RunAgentStepTypeId}
-  agent-id: "platform.sig_events.investigation"
+  agent-id: "significantEvents.investigation"
   connector-id-by-feature: "significant_events_investigation"
   with:
     message: "Investigate the significant events in this stream."
@@ -328,6 +375,20 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
     conversation_id: "{{ steps.initial_analysis.output.conversation_id }}"
     message: "Continue from the previous analysis and complete any missing steps."
 \`\`\``,
+
+      `## Create a public conversation
+\`\`\`yaml
+- name: shared_analysis
+  type: ${RunAgentStepTypeId}
+  agent-id: "my-custom-agent"
+  create-conversation: true
+  public-conversation: true
+  with:
+    message: "Analyze the event and share findings with the team. {{ event | json }}"
+\`\`\`
+
+Public conversations are visible to other users who can use the underlying agent.
+This setting only applies when the step creates a new conversation.`,
 
       `## Get structured output using a JSON schema
 \`\`\`yaml
@@ -382,6 +443,24 @@ When a schema is provided, the agent's response will be available in \`output.st
       required:
         - sentiment
         - confidence
+\`\`\``,
+
+      `## Override agent configuration for this step
+\`\`\`yaml
+- name: investigate
+  type: ${RunAgentStepTypeId}
+  agent-id: "my-custom-agent"
+  with:
+    message: "Investigate the root cause of the issue."
+    configuration_overrides:
+      instructions: "Focus only on the security implications."
+      enable_elastic_capabilities: false
+      skill_ids:
+        - "security-analysis-skill"
+      tools:
+        - tool_ids:
+            - "get_logs"
+            - "search_alerts"
 \`\`\``,
 
       `## Follow the agent execution live while the step is still running

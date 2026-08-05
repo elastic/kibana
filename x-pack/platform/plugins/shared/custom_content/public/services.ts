@@ -6,15 +6,23 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import type { ISearchGeneric } from '@kbn/search-types';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 
 interface Services {
   core: CoreStart;
+  search: ISearchGeneric;
+  agentBuilder: AgentBuilderPluginStart | undefined;
 }
 
 let services: Services | undefined;
 
-export const setServices = (core: CoreStart) => {
-  services = { core };
+export const setServices = (
+  core: CoreStart,
+  search: ISearchGeneric,
+  agentBuilder: AgentBuilderPluginStart | undefined
+) => {
+  services = { core, search, agentBuilder };
 };
 
 export const getServices = (): Services => {
