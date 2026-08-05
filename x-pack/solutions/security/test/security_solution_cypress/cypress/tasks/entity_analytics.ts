@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { RISK_ENGINE_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
+import {
+  RISK_ENGINE_STATUS_URL,
+  RISK_ENGINE_PRIVILEGES_URL,
+} from '@kbn/security-solution-plugin/common/constants';
 import { BASIC_TABLE_LOADING } from '../screens/common';
 import {
   ANOMALIES_TABLE_ROWS,
@@ -50,13 +53,29 @@ export const navigateToNextPage = () => {
 };
 
 export const mockRiskEngineEnabled = () => {
-  // mock the risk engine status
   cy.intercept('GET', RISK_ENGINE_STATUS_URL, {
     statusCode: 200,
     body: {
       risk_engine_status: 'ENABLED',
     },
   }).as('riskEngineStatus');
+};
+
+export const mockRiskEnginePrivileges = () => {
+  cy.intercept('GET', RISK_ENGINE_PRIVILEGES_URL, {
+    statusCode: 200,
+    body: {
+      has_all_required: true,
+      has_read_permissions: true,
+      has_write_permissions: true,
+      privileges: {
+        elasticsearch: {
+          cluster: {},
+          index: {},
+        },
+      },
+    },
+  }).as('riskEnginePrivileges');
 };
 
 const ENTITY_STORE_ENTITIES_URL = '/api/security/entity_store/entities*';
