@@ -42,7 +42,7 @@ import { FlyoutMetadataCard } from '../../flyout_components/flyout_metadata_card
 import { FlyoutToolbarHeader } from '../../flyout_components/flyout_toolbar_header';
 import { SeverityBadge } from '../../../pages/significant_events/components/severity_badge/severity_badge';
 import { useStreamKnowledgeIndicatorsBulkDelete } from '../hooks/use_stream_knowledge_indicators_bulk_delete';
-import { useRulesDemote } from '../hooks/use_queries_bulk_delete';
+import { useRulesDemote } from '../hooks/use_rules_demote';
 import {
   useKnowledgeIndicatorActions,
   DELETE_LABEL,

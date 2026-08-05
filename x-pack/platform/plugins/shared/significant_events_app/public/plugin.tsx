@@ -11,7 +11,6 @@ import {
   type CoreSetup,
   type CoreStart,
   type Plugin,
-  type PluginInitializerContext,
 } from '@kbn/core/public';
 import {
   SIGNIFICANT_EVENTS_APP_ID,
@@ -53,8 +52,6 @@ export class SignificantEventsAppPlugin
   private cleanupSignificantEventAttachment?: () => void;
   private stopped = false;
   private knowledgeIndicatorsPanel?: KnowledgeIndicatorsPanelComponent;
-
-  constructor(private readonly context: PluginInitializerContext) {}
 
   setup(
     coreSetup: CoreSetup<SignificantEventsAppStartDependencies>,
@@ -151,7 +148,6 @@ export class SignificantEventsAppPlugin
           services,
           coreStart,
           pluginsStart,
-          isServerless: this.context.env.packageInfo.buildFlavor === 'serverless',
         });
       },
     });
@@ -209,7 +205,6 @@ export class SignificantEventsAppPlugin
       availability$: this.availability$,
       focusedSignificantEventService: this.focusedSignificantEventService,
     };
-    const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
 
     return {
       availability$: this.availability$,
@@ -223,7 +218,6 @@ export class SignificantEventsAppPlugin
                 coreStart,
                 pluginsStart,
                 services,
-                isServerless,
               }),
             }))
           );
