@@ -56,7 +56,12 @@ describe('warm-start memory report', () => {
 
   it('collects artifact context from CI environment', () => {
     const originalEnv = process.env;
-    process.env = { ...originalEnv, GITHUB_PR_MERGE_BASE: 'baseline', BUILDKITE_COMMIT: 'target' };
+    process.env = {
+      ...originalEnv,
+      GITHUB_PR_MERGE_BASE: 'baseline',
+      BUILDKITE_COMMIT: 'target',
+      BUILDKITE_BUILD_ID: undefined,
+    };
 
     try {
       expect(getWarmStartMemoryRegressionReportContextFromEnv()).toEqual({
