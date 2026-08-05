@@ -38,6 +38,8 @@ import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { registerAccessControl } from '@kbn/content-management-access-control-server';
 import { once } from 'lodash';
+import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
@@ -54,8 +56,6 @@ import { setKibanaServices } from './kibana_services';
 import { scanDashboards } from './scan_dashboards';
 import { registerDashboardDrilldown } from './dashboard_drilldown/register_dashboard_drilldown';
 import { getDashboardStateSchema } from './api/dashboard_state_schemas';
-import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 
 export const DEFER_BELOW_FOLD = `labs:dashboard:deferBelowFold` as const;
 
