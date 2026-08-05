@@ -68,7 +68,7 @@ export const useMaintenanceStatus = () => {
   const {
     dependencies: {
       start: {
-        significant_events: { significantEventsRepositoryClient },
+        significantEvents: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();
@@ -120,7 +120,7 @@ export const useSignificantEventsMaintenanceActions = () => {
     },
     dependencies: {
       start: {
-        significant_events: { significantEventsRepositoryClient },
+        significantEvents: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();
