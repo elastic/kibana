@@ -229,6 +229,7 @@ describe('score_base_entities', () => {
       expect(summary.scoresWrittenEntityStore).toBe(0);
       expect(summary.scoresCalculated).toBe(2);
       expect(summary.scoresDroppedNotInStore).toBe(1);
+      expect(summary.scoresMissingFromStore).toBe(1);
       expect(summary.scoresFailed).toBe(0);
       expect(summary.entitiesCreated).toBe(0);
       expect(summary.entitiesCreateRejected).toBe(0);
@@ -264,6 +265,7 @@ describe('score_base_entities', () => {
       expect(summary.scoresWrittenEntityStore).toBe(0);
       expect(summary.scoresCalculated).toBe(2);
       expect(summary.scoresDroppedNotInStore).toBe(2);
+      expect(summary.scoresMissingFromStore).toBe(2);
       expect(summary.scoresFailed).toBe(0);
       expect(summary.entitiesCreated).toBe(0);
       expect(summary.entitiesCreateRejected).toBe(0);
@@ -338,6 +340,8 @@ describe('score_base_entities', () => {
       expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
 
       expect(summary.scoresWrittenRiskIndex).toBe(1);
+      expect(summary.scoresMissingFromStore).toBe(1);
+      expect(summary.scoresDroppedNotInStore).toBe(0);
       expect(summary.entitiesCreated).toBe(1);
       expect(summary.entitiesCreateRejected).toBe(0);
     });
@@ -381,6 +385,8 @@ describe('score_base_entities', () => {
       expect(writtenScores).toHaveLength(1);
       expect(crudClient.bulkUpdateEntity).toHaveBeenCalledTimes(1);
 
+      expect(summary.scoresMissingFromStore).toBe(1);
+      expect(summary.scoresDroppedNotInStore).toBe(0);
       expect(summary.entitiesCreated).toBe(0);
       expect(summary.entitiesCreateRejected).toBe(0);
     });
@@ -422,6 +428,8 @@ describe('score_base_entities', () => {
 
       const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
       expect(writtenScores).toHaveLength(0);
+      expect(summary.scoresMissingFromStore).toBe(1);
+      expect(summary.scoresDroppedNotInStore).toBe(1);
       expect(summary.entitiesCreated).toBe(0);
       expect(summary.entitiesCreateRejected).toBe(1);
     });
@@ -449,6 +457,8 @@ describe('score_base_entities', () => {
       expect(crudClient.createEntitiesFromSource).not.toHaveBeenCalled();
       const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
       expect(writtenScores).toHaveLength(0);
+      expect(summary.scoresMissingFromStore).toBe(1);
+      expect(summary.scoresDroppedNotInStore).toBe(1);
       expect(summary.entitiesCreated).toBe(0);
       expect(summary.entitiesCreateRejected).toBe(0);
     });

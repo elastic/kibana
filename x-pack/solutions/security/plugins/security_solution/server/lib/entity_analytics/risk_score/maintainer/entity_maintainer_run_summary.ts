@@ -95,15 +95,15 @@ export const buildRiskScorePhase0EntityMaintainerRunSummary = ({
  * Funnel is the base-scoring entity-store path only
  * - stages[] = base / resolution / reset_to_zero applied + status/duration
  *
- * TODO - after #280948 (create-if-missing):
- * - scanned           = scores calculated from alerts          (unchanged)
- * - applied           = scores written (updates only)
- *                     → scores written (update or create)
- * - droppedNotInStore = absent → hard drop
- *                     → absent at lookup (before create)
- * - skipped           = (unset)
- *                     → absent + policy rejected (score not written)
- * - optional breakdown for skip/create reasons (e.g. created, skip_host_name_only)
+ * With the create-if-missing path (#280948):
+ * - scanned           = scores calculated from alerts
+ * - qualified         = scanned minus the final skip count, i.e. entities that were either
+ *                       already in the store or successfully created/raced
+ * - applied           = scores written to the entity store, via update or create
+ * - droppedNotInStore = absent at lookup, before any create-if-missing attempt (informational;
+ *                       a superset of `skipped` once creation recovers some of them)
+ * - skipped           = of the above, scores never recovered (no representative alert document,
+ *                       policy-rejected, or bulk-create failure)
  */
 export const buildRiskScoreEntityMaintainerRunSummary = ({
   entityType,
@@ -114,7 +114,9 @@ export const buildRiskScoreEntityMaintainerRunSummary = ({
   metrics: RunMetrics;
   stages: RiskScoreFrameworkStageSummary[];
 }): EntityMaintainerRunSummary => {
-  const qualifiedBase = metrics.scoresCalculatedBase - metrics.scoresDroppedNotInStore;
+  const skipped = metrics.scoresDroppedNotInStore;
+  const qualifiedBase = metrics.scoresCalculatedBase - skipped;
+  const appliedBase = metrics.scoresWrittenEntityStoreBase + metrics.entitiesCreated;
 
   return {
     scope: { kind: 'entity_type', value: entityType },
@@ -122,8 +124,9 @@ export const buildRiskScoreEntityMaintainerRunSummary = ({
     funnel: {
       scanned: metrics.scoresCalculatedBase,
       qualified: qualifiedBase,
-      applied: metrics.scoresWrittenEntityStoreBase,
-      droppedNotInStore: metrics.scoresDroppedNotInStore,
+      applied: appliedBase,
+      droppedNotInStore: metrics.scoresMissingFromStoreBase,
+      skipped,
       failed: metrics.scoresFailedBase,
     },
     stages,

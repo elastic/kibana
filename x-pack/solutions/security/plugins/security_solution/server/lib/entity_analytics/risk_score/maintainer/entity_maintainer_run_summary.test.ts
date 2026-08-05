@@ -21,6 +21,7 @@ const emptyMetrics = (overrides: Partial<RunMetrics> = {}): RunMetrics => ({
   scoresWrittenEntityStoreResetToZero: 0,
   scoresCalculatedBase: 0,
   scoresDroppedNotInStore: 0,
+  scoresMissingFromStoreBase: 0,
   scoresFailedBase: 0,
   scoresFailedResolution: 0,
   scoresFailedResetToZero: 0,
@@ -136,7 +137,7 @@ describe('buildRiskScorePhase0EntityMaintainerRunSummary', () => {
 });
 
 describe('buildRiskScoreEntityMaintainerRunSummary', () => {
-  it('builds funnel from base-scoring metrics with qualified = scanned - droppedNotInStore', () => {
+  it('builds funnel from base-scoring metrics with qualified = scanned - skipped', () => {
     const stages = [
       { name: 'base' as const, status: 'success' as const, durationMs: 10, applied: 7 },
       { name: 'resolution' as const, status: 'success' as const, durationMs: 4, applied: 2 },
@@ -149,6 +150,7 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
         metrics: emptyMetrics({
           scoresCalculatedBase: 12,
           scoresDroppedNotInStore: 3,
+          scoresMissingFromStoreBase: 3,
           scoresWrittenRiskIndexBase: 7,
           scoresWrittenEntityStoreBase: 7,
           scoresFailedBase: 2,
@@ -164,6 +166,7 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
         qualified: 9,
         applied: 7,
         droppedNotInStore: 3,
+        skipped: 3,
         failed: 2,
       },
       stages,
@@ -188,6 +191,36 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
       qualified: 5,
       applied: 0,
       droppedNotInStore: 0,
+      skipped: 0,
+      failed: 0,
+    });
+  });
+
+  it('folds create-if-missing recoveries into applied/qualified, keeping skipped narrower than the raw miss count', () => {
+    expect(
+      buildRiskScoreEntityMaintainerRunSummary({
+        entityType: 'host',
+        metrics: emptyMetrics({
+          scoresCalculatedBase: 10,
+          // 5 EUIDs were absent from the store at lookup; 3 got created and 2 were
+          // policy-rejected, so only the 2 rejected ones remain in the final skip count.
+          scoresMissingFromStoreBase: 5,
+          entitiesCreated: 3,
+          entitiesCreateRejected: 2,
+          scoresDroppedNotInStore: 2,
+          scoresWrittenRiskIndexBase: 8,
+          scoresWrittenEntityStoreBase: 5,
+          scoresFailedBase: 0,
+          pagesProcessed: 2,
+        }),
+        stages: [],
+      }).funnel
+    ).toEqual({
+      scanned: 10,
+      qualified: 8,
+      applied: 8,
+      droppedNotInStore: 5,
+      skipped: 2,
       failed: 0,
     });
   });

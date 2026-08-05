@@ -59,8 +59,20 @@ export interface Phase1BaseScoringSummary extends StepResult {
   pagesProcessed: number;
   scoresWrittenRiskIndex: number;
   scoresCalculated: number;
+  /**
+   * Final drop count: not_in_store scores never recovered by the create-if-missing path (no
+   * representative alert document, the creation policy rejected the candidate, or the bulk
+   * create itself failed). Equals `scoresMissingFromStore` when `createMissingEntities` is false,
+   * since nothing is recovered without evaluating a policy in that case.
+   */
   scoresDroppedNotInStore: number;
   scores: Record<string, number>;
+  /**
+   * Scores whose entity_id was absent from the entity store at lookup time, before any
+   * create-if-missing attempt. A superset of `entitiesCreateRejected` (and, when creation is
+   * enabled, includes recovered created/raced scores that are not otherwise dropped).
+   */
+  scoresMissingFromStore: number;
   /** EUID-valid scores whose entity was created via the create-if-missing path. */
   entitiesCreated: number;
   /**
@@ -174,6 +186,7 @@ export const scoreBaseEntities = async ({
   let scoresWrittenEntityStore = 0;
   let scoresCalculated = 0;
   let scoresDroppedNotInStore = 0;
+  let scoresMissingFromStore = 0;
   let scoresFailed = 0;
   let entitiesCreated = 0;
   let entitiesCreateRejected = 0;
@@ -194,6 +207,7 @@ export const scoreBaseEntities = async ({
     // document and creates it instead of dropping the score.
     const inStoreScores = page.scores.filter((score) => page.entities.has(score.id_value));
     const missingScores = page.scores.filter((score) => !page.entities.has(score.id_value));
+    scoresMissingFromStore += missingScores.length;
 
     let riskIndexScores = inStoreScores;
     let entityStoreScores = inStoreScores;
@@ -266,6 +280,7 @@ export const scoreBaseEntities = async ({
     scoresWrittenEntityStore,
     scoresCalculated,
     scoresDroppedNotInStore,
+    scoresMissingFromStore,
     scoresFailed,
     scores: newScores,
     entitiesCreated,

@@ -17,8 +17,11 @@ export interface RunMetrics {
   scoresWrittenEntityStoreResetToZero: number;
   // Phase 1 scores calculated from alerts before the not_in_store filter
   scoresCalculatedBase: number;
-  // Phase 1 scores for EUIDs absent from the entity store
+  // Phase 1 scores for EUIDs absent from the entity store, never recovered by create-if-missing
   scoresDroppedNotInStore: number;
+  // Phase 1 scores for EUIDs absent from the entity store at lookup time, before any
+  // create-if-missing attempt (a superset of scoresDroppedNotInStore)
+  scoresMissingFromStoreBase: number;
   scoresFailedBase: number;
   scoresFailedResolution: number;
   scoresFailedResetToZero: number;
@@ -39,6 +42,7 @@ const METRIC_KEYS: ReadonlyArray<keyof RunMetrics> = [
   'scoresWrittenEntityStoreResetToZero',
   'scoresCalculatedBase',
   'scoresDroppedNotInStore',
+  'scoresMissingFromStoreBase',
   'scoresFailedBase',
   'scoresFailedResolution',
   'scoresFailedResetToZero',
@@ -57,6 +61,7 @@ const emptyMetrics = (): RunMetrics => ({
   scoresWrittenEntityStoreResetToZero: 0,
   scoresCalculatedBase: 0,
   scoresDroppedNotInStore: 0,
+  scoresMissingFromStoreBase: 0,
   scoresFailedBase: 0,
   scoresFailedResolution: 0,
   scoresFailedResetToZero: 0,
@@ -104,6 +109,7 @@ export const createRunMetricsTracker = () => {
         scoresWrittenEntityStore: number;
         scoresCalculated: number;
         scoresDroppedNotInStore: number;
+        scoresMissingFromStore: number;
         scoresFailed: number;
         pagesProcessed: number;
         entitiesCreated: number;
@@ -114,6 +120,7 @@ export const createRunMetricsTracker = () => {
       target.scoresWrittenEntityStoreBase = summary.scoresWrittenEntityStore;
       target.scoresCalculatedBase = summary.scoresCalculated;
       target.scoresDroppedNotInStore = summary.scoresDroppedNotInStore;
+      target.scoresMissingFromStoreBase = summary.scoresMissingFromStore;
       target.scoresFailedBase = summary.scoresFailed;
       target.pagesProcessed = summary.pagesProcessed;
       target.entitiesCreated = summary.entitiesCreated;

@@ -544,7 +544,7 @@ const executeEntityTypeRun = async ({
       name: 'base',
       status: 'success',
       durationMs: Date.now() - baseStartedAtMs,
-      applied: baseSummary.scoresWrittenEntityStore,
+      applied: baseSummary.scoresWrittenEntityStore + baseSummary.entitiesCreated,
     });
   } catch (error) {
     const errorMessage = telemetryReporter.getErrorMessage(error);
