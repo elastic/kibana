@@ -39,11 +39,37 @@ const baseParams = {
   includeTimeseries: false as const,
 };
 
-function emptyAvg() {
+type MetricBucket = {
+  avg: { value: number | null };
+  timeseries?: {
+    buckets: Array<{ key: number; avg: { value: number | null } }>;
+  };
+};
+
+function emptyAvg(): MetricBucket {
   return { avg: { value: null } };
 }
 
-function aggregationResponse(overrides: Record<string, { avg: { value: number | null } }> = {}) {
+function timeseriesBucket(points: Array<{ x: number; y: number | null }>): MetricBucket {
+  return {
+    avg: { value: points.find((point) => point.y !== null)?.y ?? null },
+    timeseries: {
+      buckets: points.map((point) => ({
+        key: point.x,
+        avg: { value: point.y },
+      })),
+    },
+  };
+}
+
+function emptyTimeseries(): MetricBucket {
+  return timeseriesBucket([
+    { x: start, y: null },
+    { x: start + 60_000, y: null },
+  ]);
+}
+
+function aggregationResponse(overrides: Record<string, MetricBucket> = {}) {
   return {
     aggregations: {
       'service.node.name': {
@@ -232,5 +258,99 @@ describe('getServiceInstancesSystemMetricStatistics', () => {
         memoryUsage: 0.55,
       },
     ]);
+  });
+
+  describe('with includeTimeseries', () => {
+    const timeseriesParams = {
+      ...baseParams,
+      includeTimeseries: true as const,
+      numBuckets: 2,
+    };
+
+    it('prefers a host SemConv timeseries with non-null points', async () => {
+      const preferredCpu = [
+        { x: start, y: 0.31 },
+        { x: start + 60_000, y: 0.35 },
+      ];
+      const preferredMemory = [
+        { x: start, y: 0.67 },
+        { x: start + 60_000, y: 0.7 },
+      ];
+
+      const search: SearchMock = jest.fn().mockResolvedValueOnce(
+        aggregationResponse({
+          cpu_usage_otel_system: timeseriesBucket(preferredCpu),
+          cpu_usage_jvm_stable: timeseriesBucket([
+            { x: start, y: 0.9 },
+            { x: start + 60_000, y: 0.91 },
+          ]),
+          memory_usage_otel_system: timeseriesBucket(preferredMemory),
+          memory_usage_jvm_stable_heap: timeseriesBucket([
+            { x: start, y: 0.2 },
+            { x: start + 60_000, y: 0.21 },
+          ]),
+        })
+      );
+      const apmEventClient = { search } as unknown as APMEventClient;
+
+      const result = await getServiceInstancesSystemMetricStatistics({
+        ...timeseriesParams,
+        apmEventClient,
+      });
+
+      expect(getSearchParams(search).aggs['service.node.name'].aggs.cpu_usage_otel_system.aggs)
+        .toEqual(
+          expect.objectContaining({
+            timeseries: expect.objectContaining({
+              date_histogram: expect.any(Object),
+            }),
+          })
+        );
+
+      expect(result).toEqual([
+        {
+          serviceNodeName: 'instance-1',
+          cpuUsage: preferredCpu,
+          memoryUsage: preferredMemory,
+        },
+      ]);
+    });
+
+    it('skips an all-null preferred timeseries in favor of a lower-preference series', async () => {
+      const fallbackCpu = [
+        { x: start, y: 0.26 },
+        { x: start + 60_000, y: 0.28 },
+      ];
+      const fallbackMemory = [
+        { x: start, y: 0.334 },
+        { x: start + 60_000, y: 0.34 },
+      ];
+
+      const search: SearchMock = jest.fn().mockResolvedValueOnce(
+        aggregationResponse({
+          cpu_usage_otel_system: emptyTimeseries(),
+          cpu_usage_jvm_system: emptyTimeseries(),
+          cpu_usage_jvm_process: emptyTimeseries(),
+          cpu_usage_jvm_stable: timeseriesBucket(fallbackCpu),
+          memory_usage_otel_system: emptyTimeseries(),
+          memory_usage_jvm_heap: emptyTimeseries(),
+          memory_usage_jvm_stable_heap: timeseriesBucket(fallbackMemory),
+        })
+      );
+      const apmEventClient = { search } as unknown as APMEventClient;
+
+      const result = await getServiceInstancesSystemMetricStatistics({
+        ...timeseriesParams,
+        apmEventClient,
+      });
+
+      expect(result).toEqual([
+        {
+          serviceNodeName: 'instance-1',
+          cpuUsage: fallbackCpu,
+          memoryUsage: fallbackMemory,
+        },
+      ]);
+    });
   });
 });

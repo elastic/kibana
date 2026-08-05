@@ -114,11 +114,10 @@ function getAvgOrTimeseries(metricBucket: AvgMetricBucket): number | null | Coor
 function firstAvailableMetric(...metricBuckets: AvgMetricBucket[]): number | null | Coordinate[] {
   for (const metricBucket of metricBuckets) {
     const value = getAvgOrTimeseries(metricBucket);
-    if (Array.isArray(value)) {
-      if (value.some((coordinate) => coordinate.y !== null)) {
-        return value;
-      }
-    } else if (value !== null) {
+    const isAvailable = Array.isArray(value)
+      ? value.some((coordinate) => coordinate.y !== null)
+      : value !== null;
+    if (isAvailable) {
       return value;
     }
   }
