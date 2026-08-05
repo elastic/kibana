@@ -16,9 +16,9 @@ import type {
 } from '@kbn/lists-plugin/server';
 import type { ExperimentalFeatures } from '../../../../common';
 import type { Mutable } from 'utility-types';
-import { validateYaraRule } from '../../../endpoint/lib/libyara';
+import { validateYaraRule } from '../../../../common/endpoint/libyara';
 
-jest.mock('../../../endpoint/lib/libyara', () => ({
+jest.mock('../../../../common/endpoint/libyara', () => ({
   validateYaraRule: jest.fn(async () => ({ errors: [], warnings: [] })),
 }));
 

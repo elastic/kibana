@@ -38,11 +38,13 @@ See versions here: https://github.com/VirusTotal/yara/releases
 Requires Docker with the Emscripten SDK image:
 
 ```bash
-cd x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/libyara/wasm
+cd x-pack/solutions/security/plugins/security_solution/common/endpoint/libyara/wasm
 # Clean prior build intermediates when changing patches/flags:
 rm -rf .build
 docker run --rm -v "$PWD":/src -w /src emscripten/emsdk:3.1.74 bash ./build.sh
 ```
 
-Artifacts land in `wasm/dist/` (`validate_yara.js`, `validate_yara.wasm`, `ENGINE.md`).
+Artifacts land in `wasm/dist/` (`validate_yara.js`, `validate_yara.cjs`, `validate_yara.wasm`, `yara_wasm_binary.ts`, `ENGINE.md`).
+
+> **Note:** Runtime loads `validate_yara.cjs` (not `.js`). Kibana's optimizer runs babel on `*.js` and breaks Emscripten's UMD exports. `yara_wasm_binary.ts` inlines the `.wasm` for browser use.
 

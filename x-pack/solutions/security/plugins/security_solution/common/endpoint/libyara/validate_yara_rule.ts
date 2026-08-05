@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { createRequire } from 'module';
-import path from 'path';
+import createYaraValidateModule from './create_yara_validate_module.cjs';
 import type { YaraDiagnostic, YaraValidateResult } from './types';
+import type { CreateYaraValidateModule, YaraValidateModule } from './validate_yara_module';
+import { loadYaraWasmBinary } from './wasm/dist/yara_wasm_binary';
 
 /**
  * Compile-check a YARA rule source string with classic libyara (WASM).
- * Lazy-inits the WASM module once per process; frees per-call allocations.
+ * Lazy-inits the WASM module once; frees per-call allocations.
  * Reloads the module if a WASM trap leaves it unusable.
+ *
+ * Browser-safe: no Node builtins; WASM is inlined (see wasm/dist/yara_wasm_binary.ts).
+ * Emscripten glue is loaded via `.cjs` so babel-loader does not rewrite it.
  */
 export const validateYaraRule = async (source: string): Promise<YaraValidateResult> => {
   const mod = await loadModule();
@@ -24,8 +28,8 @@ export const validateYaraRule = async (source: string): Promise<YaraValidateResu
     return parseResult(json);
   } catch (error) {
     // WASM traps (signature mismatch, OOB, abort) can leave linear memory /
-    // the function table unusable for the rest of the process. Drop the
-    // singleton so the next call instantiates a fresh module.
+    // the function table unusable. Drop the singleton so the next call
+    // instantiates a fresh module.
     if (isWasmTrap(error)) {
       modulePromise = undefined;
     }
@@ -43,23 +47,10 @@ export const validateYaraRule = async (source: string): Promise<YaraValidateResu
   }
 };
 
-/**
- * Emscripten MODULARIZE=1 factory shape for our compile-only wrapper.
- * Generated JS lives next to this package under wasm/dist/.
- */
-interface YaraValidateModule {
-  ccall: <T>(ident: string, returnType: string | null, argTypes: string[], args: unknown[]) => T;
-  UTF8ToString: (ptr: number) => string;
-}
-
-type CreateYaraValidateModule = (opts?: {
-  locateFile?: (file: string) => string;
-}) => Promise<YaraValidateModule>;
-
 let modulePromise: Promise<YaraValidateModule> | undefined;
 
 /**
- * Checks if the error is a WASM trap, which means the WASM module is unusable for the rest of the process.
+ * Checks if the error is a WASM trap, which means the WASM module is unusable.
  */
 const isWasmTrap = (error: unknown): boolean =>
   error instanceof WebAssembly.RuntimeError ||
@@ -67,17 +58,49 @@ const isWasmTrap = (error: unknown): boolean =>
     (/memory access out of bounds|function signature mismatch|Aborted\(/i.test(error.message) ||
       error.name === 'RuntimeError'));
 
+/**
+ * Emscripten sets both `module.exports = fn` and `module.exports.default = fn`.
+ * Webpack ESM interop can wrap that as `{ default: fn }` or `{ default: { default: fn } }`.
+ */
+const resolveFactory = (mod: unknown): CreateYaraValidateModule => {
+  let current: unknown = mod;
+
+  for (let i = 0; i < 4; i++) {
+    if (typeof current === 'function') {
+      return current as CreateYaraValidateModule;
+    }
+
+    if (!current || typeof current !== 'object') {
+      break;
+    }
+
+    const record = current as {
+      default?: unknown;
+      createYaraValidateModule?: unknown;
+    };
+
+    if (typeof record.createYaraValidateModule === 'function') {
+      return record.createYaraValidateModule as CreateYaraValidateModule;
+    }
+
+    if (!('default' in record)) {
+      break;
+    }
+
+    current = record.default;
+  }
+
+  const keys = mod && typeof mod === 'object' ? Object.keys(mod as object).join(',') : typeof mod;
+  throw new Error(`YARA WASM factory export not found (got: ${keys})`);
+};
+
 const loadModule = async (): Promise<YaraValidateModule> => {
   if (!modulePromise) {
     modulePromise = (async () => {
-      // CJS Emscripten output — load via createRequire from this ESM/CJS boundary.
-      const require = createRequire(__filename);
-      const distDir = path.join(__dirname, 'wasm', 'dist');
-      const factory = require(path.join(distDir, 'validate_yara.js')) as CreateYaraValidateModule;
-
-      return factory({
-        locateFile: (file: string) => path.join(distDir, file),
-      });
+      const factory = resolveFactory(createYaraValidateModule);
+      // Always pass an inlined binary — avoids Node fs vs browser fetch differences
+      // and means no separate .wasm network request in the browser.
+      return factory({ wasmBinary: loadYaraWasmBinary() });
     })().catch((err) => {
       modulePromise = undefined;
       throw err;

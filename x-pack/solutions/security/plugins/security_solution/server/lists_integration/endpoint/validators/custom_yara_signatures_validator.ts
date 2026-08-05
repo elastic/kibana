@@ -14,7 +14,7 @@ import type {
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { validateYaraRule } from '../../../endpoint/lib/libyara';
+import { validateYaraRule } from '../../../../common/endpoint/libyara';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../common/endpoint/service/artifacts/constants';
 import { BaseValidator } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
