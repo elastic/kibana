@@ -201,7 +201,7 @@ Use exact terms from the user's request and queried endpoint evidence when calli
     name: NAME,
     basePath: BASE_PATH,
     description:
-      "Troubleshoot Elastic Defend endpoint health, degraded hosts, policy response failures, protection updates, artifacts, endpoint exceptions, trusted apps, blocklists, Elastic Defend's own endpoint output/event-shipping failures (endpoint Logstash/Kafka/Elasticsearch output errors or dropped endpoint events), etc.",
+      "Troubleshoot Elastic Defend endpoint health, degraded hosts, policy response failures, protection updates, artifacts, endpoint exceptions, trusted apps, blocklists, conflicting/incompatible antivirus or security software on a host, Elastic Defend's own endpoint output/event-shipping failures (endpoint Logstash/Kafka/Elasticsearch output errors or dropped endpoint events), etc.",
     content: systemInstructions,
     referencedContent: [
       {
