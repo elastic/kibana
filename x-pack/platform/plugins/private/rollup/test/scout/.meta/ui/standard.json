@@ -1,0 +1,51 @@
+{
+  "sha1": "f0679f24e37ba4656211a08ba96a9c9c137b96c9",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "a5dc581b971cba4-fda1f94441bc0cf",
+      "title": "Rollup jobs - hybrid data view creates a rollup data view over regular + rollup indices with the Rollup badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/rollup/test/scout/ui/tests/hybrid_data_view.spec.ts",
+        "line": 46,
+        "column": 55
+      }
+    },
+    {
+      "id": "9e3d555ee740da5-1be76d2db4e531e",
+      "title": "Rollup jobs - create wizard walks the create-job wizard and lists the new job, accessible at each step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/rollup/test/scout/ui/tests/rollup_jobs_wizard.spec.ts",
+        "line": 32,
+        "column": 13
+      }
+    },
+    {
+      "id": "a7e15e4675376cb-9ea795554e8093c",
+      "title": "Rollup jobs - TSVB integration renders a TSVB Metric panel reading a rollup index by name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/rollup/test/scout/ui/tests/tsvb.spec.ts",
+        "line": 45,
+        "column": 10
+      }
+    }
+  ]
+}

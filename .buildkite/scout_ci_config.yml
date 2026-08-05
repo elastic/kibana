@@ -61,6 +61,7 @@ plugins:
     - osquery
     - painless_lab
     - profiling
+    - rollup
     - saved_objects_management
     - saved_objects_tagging
     - search_getting_started
