@@ -54,9 +54,7 @@ export const apiClientFixture = coreWorkerFixtures.extend<{}, { apiClient: ApiCl
   apiClient: [
     async ({ config, log }, use) => {
       const kibanaServerUrl = formatUrl(config.hosts.kibana);
-      const kibanaUrl = new URL(kibanaServerUrl);
-      const basePath = kibanaUrl.pathname.replace(/\/$/, '');
-      const testAgent = supertest(kibanaUrl.origin, config.http2 ? { http2: true } : {});
+      const testAgent = supertest(kibanaServerUrl, config.http2 ? { http2: true } : {});
 
       // Map method names to agent functions
       const methodMap: Record<keyof ApiClientFixture, (url: string) => supertest.Test> = {
@@ -74,8 +72,7 @@ export const apiClientFixture = coreWorkerFixtures.extend<{}, { apiClient: ApiCl
           if (!fn) {
             throw new Error(`Unsupported HTTP method: ${method}`);
           }
-          const requestPath = `${basePath}/${normalizePathSlashes(url).replace(/^\/+/, '')}`;
-          let req = fn(requestPath);
+          let req = fn(normalizePathSlashes(url));
 
           // Apply headers
           if (options.headers) {

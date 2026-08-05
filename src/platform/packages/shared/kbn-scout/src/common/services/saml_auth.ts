@@ -38,7 +38,6 @@ const createKibanaHostOptions = (config: ScoutTestConfig): HostOptions => {
     protocol: kibanaUrl.protocol.replace(':', '') as Protocol,
     hostname: kibanaUrl.hostname,
     port: Number(kibanaUrl.port),
-    pathname: kibanaUrl.pathname,
     username: kibanaUrl.username,
     password: kibanaUrl.password,
   };
