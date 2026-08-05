@@ -1,5 +1,9 @@
 {
-  "sha1": "10bd26ce719c5ede89ab66c5fa660c801ad0e031",
+  "sha1": "b0bb4864ea7965b5c8f1e919e12f9e2f2d3d8a1a",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -612,8 +616,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 101,
-        "column": 9
+        "line": 105,
+        "column": 24
       }
     },
     {
@@ -628,8 +632,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 111,
-        "column": 9
+        "line": 115,
+        "column": 24
       }
     },
     {
@@ -644,8 +648,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 128,
-        "column": 9
+        "line": 132,
+        "column": 24
       }
     },
     {
@@ -660,8 +664,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 136,
-        "column": 9
+        "line": 140,
+        "column": 24
       }
     },
     {
@@ -676,8 +680,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 151,
-        "column": 9
+        "line": 155,
+        "column": 24
       }
     },
     {
@@ -692,8 +696,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 159,
-        "column": 9
+        "line": 163,
+        "column": 24
       }
     },
     {
@@ -708,8 +712,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/outdated_documents.spec.ts",
-        "line": 173,
-        "column": 9
+        "line": 177,
+        "column": 24
       }
     },
     {
