@@ -96,6 +96,7 @@ describe('Execution Routes', () => {
       testWorkflow: jest.fn(),
       testStep: jest.fn(),
       getWorkflowExecutions: jest.fn(),
+      searchExecutionsView: jest.fn(),
       searchStepExecutions: jest.fn(),
       getWorkflowExecution: jest.fn(),
       getWorkflowExecutionLogs: jest.fn(),
@@ -335,6 +336,97 @@ describe('Execution Routes', () => {
         'default',
         request
       );
+    });
+  });
+
+  describe('GET /api/workflows/workflow/executions (search_executions)', () => {
+    const path = '/api/workflows/workflow/executions';
+
+    it('should register the route handler', () => {
+      expect(handler('GET', path)).toBeDefined();
+    });
+
+    it('should call api.searchExecutionsView with converted kql and structured sort', async () => {
+      mockApi.searchExecutionsView.mockResolvedValue({
+        results: [],
+        page: 1,
+        size: 25,
+        total: 0,
+      });
+      const h = handler('GET', path)!;
+      const request = {
+        query: {
+          kql: 'status: completed',
+          sortField: 'startedAt',
+          sortOrder: 'desc',
+          page: 2,
+          size: 25,
+          trackTotalHits: true,
+        },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.searchExecutionsView).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({ bool: expect.any(Object) }),
+          sortField: 'startedAt',
+          sortOrder: 'desc',
+          page: 2,
+          size: 25,
+          trackTotalHits: true,
+        }),
+        'default'
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: { results: [], page: 1, size: 25, total: 0 },
+      });
+    });
+
+    it('should call api.searchExecutionsView without query when kql is omitted', async () => {
+      mockApi.searchExecutionsView.mockResolvedValue({
+        results: [],
+        page: 1,
+        size: 25,
+        total: 0,
+      });
+      const h = handler('GET', path)!;
+      await h(mockContext, { query: { page: 1, size: 25 } } as any, mockResponse as any);
+
+      expect(mockApi.searchExecutionsView).toHaveBeenCalledWith(
+        expect.objectContaining({ query: undefined, sortField: undefined, sortOrder: undefined }),
+        'default'
+      );
+    });
+
+    it('should return bad request for invalid KQL syntax', async () => {
+      const h = handler('GET', path)!;
+      const request = {
+        query: {
+          kql: 'status:',
+        },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining('Invalid KQL') },
+      });
+      expect(mockApi.searchExecutionsView).not.toHaveBeenCalled();
+    });
+
+    it('should return bad request when searchExecutionsView throws a query validation error', async () => {
+      mockApi.searchExecutionsView.mockRejectedValue(
+        Object.assign(new Error('failed to create query: For input string: "2s"'), {
+          statusCode: 400,
+        })
+      );
+      const h = handler('GET', path)!;
+      await h(mockContext, { query: {} } as any, mockResponse as any);
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: 'failed to create query: For input string: "2s"' },
+      });
     });
   });
 
