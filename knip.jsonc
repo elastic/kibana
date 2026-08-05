@@ -56,7 +56,11 @@
     "@types/http-proxy",
     // typescript-7 is invoked via resolveTypeCheckCompiler() in kbn-ts-type-check-cli;
     // knip can't trace dynamic require.resolve() calls.
-    "typescript-7"
+    "typescript-7",
+    // Owned by @kbn/connector-specs (which declares its own graphql) and referenced
+    // as a dynamic string by @kbn/evals-phoenix-executor's codegen script; the root
+    // declaration backs that untraceable usage, so knip's partial graph flags it.
+    "graphql"
   ],
   "workspaces": {
     ".": {
