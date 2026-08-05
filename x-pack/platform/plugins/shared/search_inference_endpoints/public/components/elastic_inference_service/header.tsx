@@ -11,7 +11,7 @@ import { EuiButton, EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
-import { useInferencePreferencesEnabled } from '../../feature_flag';
+import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities';
 
 interface ElasticInferenceServiceModelsHeaderProps {
   onManageRegions: () => void;
@@ -23,8 +23,9 @@ export const ElasticInferenceServiceModelsHeader = ({
   const {
     services: { cloud },
   } = useKibana();
+  const { canManage } = useInferenceCapabilities();
 
-  const showManageRegions = useInferencePreferencesEnabled();
+  const showManageRegions = canManage;
 
   const [billingUrl, setBillingUrl] = useState<string>();
 

@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/apm-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-signals-traces'
+  defaultOwner: '@elastic/obs-signals-traces-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/apm-plugin'
   description: Moon project for @kbn/apm-plugin
   channel: ''
-  owner: '@elastic/obs-signals-traces'
+  owner: '@elastic/obs-signals-traces-team'
   sourceRoot: x-pack/solutions/observability/plugins/apm
 dependsOn:
   - '@kbn/synthtrace'
@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/fleet-plugin'
   - '@kbn/i18n'
   - '@kbn/es-query'
+  - '@kbn/ui-callout'
   - '@kbn/ui-theme'
   - '@kbn/synthtrace-client'
   - '@kbn/lens-plugin'
@@ -72,7 +73,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/field-types'
-  - '@kbn/babel-register'
+  - '@kbn/swc-register'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/safer-lodash-set'
   - '@kbn/shared-ux-router'
@@ -142,6 +143,7 @@ dependsOn:
   - '@kbn/cases-plugin'
   - '@kbn/apm-ui-shared'
   - '@kbn/shared-ux-error-boundary'
+  - '@kbn/react-hooks'
   - '@kbn/react-kibana-mount'
   - '@kbn/licensing-types'
   - '@kbn/discover-shared-plugin'

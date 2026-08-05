@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
 import { createPath } from 'history';

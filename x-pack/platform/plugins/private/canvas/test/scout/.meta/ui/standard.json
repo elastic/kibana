@@ -1,5 +1,9 @@
 {
-  "sha1": "836b13057f8884c9852a87ed07f11ce0a77062a7",
+  "sha1": "f6099bcca2c4ed7515039250b995a8ee39916dcc",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "bfb8ac80f27f146-bee78e25e125aa4",
@@ -10,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/custom_elements.spec.ts",
-        "line": 55,
-        "column": 7
+        "line": 45,
+        "column": 54
       }
     },
     {
@@ -23,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/datasource.spec.ts",
-        "line": 46,
-        "column": 7
+        "line": 35,
+        "column": 56
       }
     },
     {
@@ -36,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/lens.spec.ts",
-        "line": 62,
-        "column": 7
+        "line": 49,
+        "column": 8
       }
     },
     {
@@ -49,8 +53,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/lens.spec.ts",
-        "line": 88,
-        "column": 7
+        "line": 64,
+        "column": 26
       }
     },
     {
@@ -62,8 +66,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/lens.spec.ts",
-        "line": 106,
-        "column": 7
+        "line": 75,
+        "column": 18
       }
     },
     {
@@ -75,8 +79,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/maps.spec.ts",
-        "line": 45,
-        "column": 7
+        "line": 34,
+        "column": 63
       }
     },
     {
@@ -88,8 +92,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/saved_search.spec.ts",
-        "line": 44,
-        "column": 7
+        "line": 33,
+        "column": 54
       }
     },
     {
@@ -101,8 +105,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/saved_search.spec.ts",
-        "line": 53,
-        "column": 7
+        "line": 36,
+        "column": 18
       }
     },
     {
@@ -114,8 +118,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/visualization.spec.ts",
-        "line": 46,
-        "column": 7
+        "line": 35,
+        "column": 54
       }
     },
     {
@@ -127,8 +131,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/embeddables/visualization.spec.ts",
-        "line": 55,
-        "column": 7
+        "line": 38,
+        "column": 18
       }
     },
     {
@@ -140,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/expression_editor.spec.ts",
-        "line": 46,
-        "column": 7
+        "line": 36,
+        "column": 54
       }
     },
     {
@@ -153,8 +157,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/security_canvas_all.spec.ts",
-        "line": 42,
-        "column": 9
+        "line": 34,
+        "column": 10
       }
     },
     {
@@ -166,8 +170,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/security_canvas_all.spec.ts",
-        "line": 55,
-        "column": 9
+        "line": 40,
+        "column": 7
       }
     },
     {
@@ -179,8 +183,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/security_canvas_all.spec.ts",
-        "line": 72,
-        "column": 9
+        "line": 52,
+        "column": 13
       }
     },
     {
@@ -192,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/security_canvas_read.spec.ts",
-        "line": 43,
-        "column": 9
+        "line": 35,
+        "column": 10
       }
     },
     {
@@ -205,8 +209,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/security_canvas_read.spec.ts",
-        "line": 56,
-        "column": 9
+        "line": 41,
+        "column": 7
       }
     },
     {
@@ -218,8 +222,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/security_canvas_read.spec.ts",
-        "line": 69,
-        "column": 9
+        "line": 50,
+        "column": 26
       }
     },
     {
@@ -231,8 +235,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/security_canvas_read.spec.ts",
-        "line": 79,
-        "column": 9
+        "line": 56,
+        "column": 57
       }
     },
     {
@@ -244,8 +248,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/spaces_canvas_disabled.spec.ts",
-        "line": 48,
-        "column": 9
+        "line": 41,
+        "column": 25
       }
     },
     {
@@ -257,8 +261,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/spaces_canvas_enabled.spec.ts",
-        "line": 63,
-        "column": 9
+        "line": 52,
+        "column": 7
       }
     },
     {
@@ -270,8 +274,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/spaces_canvas_enabled.spec.ts",
-        "line": 76,
-        "column": 9
+        "line": 58,
+        "column": 57
       }
     },
     {
@@ -283,8 +287,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/feature_controls/spaces_canvas_enabled.spec.ts",
-        "line": 89,
-        "column": 9
+        "line": 67,
+        "column": 23
       }
     },
     {
@@ -296,8 +300,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/filters.spec.ts",
-        "line": 41,
-        "column": 7
+        "line": 31,
+        "column": 56
       }
     },
     {
@@ -309,8 +313,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/filters.spec.ts",
-        "line": 67,
-        "column": 7
+        "line": 46,
+        "column": 11
       }
     },
     {
@@ -322,8 +326,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/reports_share_menu.spec.ts",
-        "line": 35,
-        "column": 7
+        "line": 25,
+        "column": 56
       }
     },
     {
@@ -335,8 +339,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/saved_object_resolve.spec.ts",
-        "line": 103,
-        "column": 7
+        "line": 91,
+        "column": 9
       }
     },
     {
@@ -348,8 +352,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/saved_object_resolve.spec.ts",
-        "line": 127,
-        "column": 7
+        "line": 108,
+        "column": 20
       }
     },
     {
@@ -361,8 +365,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/canvas/test/scout/ui/tests/smoke.spec.ts",
-        "line": 40,
-        "column": 7
+        "line": 32,
+        "column": 8
       }
     }
   ]

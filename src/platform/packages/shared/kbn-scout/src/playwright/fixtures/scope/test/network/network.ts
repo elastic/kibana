@@ -12,7 +12,10 @@ import type { ScoutPage } from '../scout_page';
 export class Network {
   constructor(private readonly page: ScoutPage) {}
 
-  async countMatchingRequests(endpoint: string, action: () => Promise<void>): Promise<number> {
+  async trackMatchingRequests(
+    endpoint: string,
+    action: (getCount: () => number) => Promise<void>
+  ): Promise<number> {
     let count = 0;
     const listener = (request: { url: () => string }) => {
       if (request.url().includes(endpoint)) {
@@ -22,11 +25,16 @@ export class Network {
 
     this.page.on('request', listener);
     try {
-      await action();
+      await action(() => count);
+      return count;
     } finally {
       this.page.off('request', listener);
     }
+  }
 
-    return count;
+  async countMatchingRequests(endpoint: string, action: () => Promise<void>): Promise<number> {
+    return this.trackMatchingRequests(endpoint, async () => {
+      await action();
+    });
   }
 }

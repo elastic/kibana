@@ -22,8 +22,6 @@ import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
 import type { FormValues } from '../../../form/types';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
-import { isCommittedQueryValid } from '../validation/committed_query_validation';
-import { isNotificationsStepValid } from '../validation/notifications_validation';
 import { ModeSelect } from '../../../form/fields/mode_select';
 import { AlertDelayField } from '../../../form/fields/alert_delay_field';
 import { NoDataStrategySelect } from '../../../form/fields/no_data_strategy_select';
@@ -36,6 +34,7 @@ import { DetailsAndArtifactsStep } from './details_and_artifacts_step';
 import { NotificationsStep } from './notifications_step';
 import { LinkedActionPoliciesStep } from './linked_action_policies_step';
 import { CentralizedActionPoliciesPanel } from './centralized_action_policies_panel';
+import { QueryFieldRules } from './query_field_rules';
 
 interface Props {
   state: ComposeDiscoverState;
@@ -46,7 +45,6 @@ interface Props {
   isEditing: boolean;
   ruleId?: string;
   builderType?: string;
-  onManualSplit?: () => void;
 }
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -61,17 +59,10 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         dispatch={props.dispatch}
         services={props.services}
         isEditing={props.isEditing}
-        onManualSplit={props.onManualSplit}
       />
     ),
     fields: ['query'],
     meetsPrecondition: (s) => s.queryCommitted,
-    validate: (methods, s) =>
-      isCommittedQueryValid(
-        methods.getValues('query'),
-        methods.getValues('kind'),
-        s.queryCommitted
-      ),
   },
   builderCondition: {
     id: 'builderCondition',
@@ -117,7 +108,6 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       </>
     ),
     fields: ['notifications'],
-    validate: (methods) => isNotificationsStepValid(methods.getValues('notifications')),
   },
 };
 
@@ -133,13 +123,15 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
   const steps = ids.map((id) => {
     const base = STEP_REGISTRY[id];
     if (id === 'builderCondition' && definition) {
+      // Discard any ES|QL registry keys if the stub ever gains them.
       const {
         meetsPrecondition: _meetsPrecondition,
         validate: _validate,
         fields: _fields,
         ...builderBase
       } = base;
-      const step: StepDefinition = {
+      const builderValidate = definition.validate;
+      const builderStep: StepDefinition = {
         ...builderBase,
         title: definition.stepTitle,
         render: (props) =>
@@ -148,12 +140,13 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
             dispatch: props.dispatch,
             services: props.services,
           }),
-        validate: undefined,
+        ...(builderValidate
+          ? {
+              validate: (_methods, s, _services, bs) => builderValidate(s, bs),
+            }
+          : {}),
       };
-      if (definition.validate) {
-        step.validate = (_methods, s, _services, bs) => definition.validate!(s, bs);
-      }
-      return step;
+      return builderStep;
     }
     return base;
   });
@@ -172,11 +165,12 @@ export const ComposeDiscoverForm = ({
   isEditing,
   ruleId,
   builderType,
-  onManualSplit,
 }: Props) => {
   const { setValue } = useFormContext<FormValues>();
   const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const noDataStrategy = useWatch<FormValues, 'noDataStrategy'>({ name: 'noDataStrategy' });
+  const query = useWatch<FormValues, 'query'>({ name: 'query' });
+  const isQueryStandalone = query.format === 'standalone';
   const { steps, renderCustomRecovery } = useMemo(
     () => getSteps(isAlert, builderType),
     [isAlert, builderType]
@@ -192,59 +186,67 @@ export const ComposeDiscoverForm = ({
     isEditing,
     ruleId,
     renderCustomRecovery,
-    onManualSplit,
   });
-
-  if (!isAlertConditionStep) {
-    return stepContent;
-  }
 
   return (
     <>
-      <ModeSelect
-        value={isAlert ? 'alert' : 'signal'}
-        onChange={onKindChange}
-        disabled={(!builderType && !state.queryCommitted) || isEditing || state.childOpen}
-        compressed
-        data-test-subj="composeDiscoverModeSelect"
-      />
-      <EuiSpacer size="m" />
-      {stepContent}
-      {isAlert && (
+      {/* Keep query rules mounted across steps so trigger(['query']) cannot no-op. */}
+      {!builderType && <QueryFieldRules queryCommitted={state.queryCommitted} />}
+      {!isAlertConditionStep ? (
+        stepContent
+      ) : (
         <>
+          <ModeSelect
+            value={isAlert ? 'alert' : 'signal'}
+            onChange={onKindChange}
+            disabled={(!builderType && !state.queryCommitted) || isEditing || state.childOpen}
+            compressed
+            data-test-subj="composeDiscoverModeSelect"
+          />
+          <EuiSpacer size="m" />
+          {stepContent}
+          {isAlert && (
+            <>
+              <EuiHorizontalRule margin="m" />
+              <EuiTitle size="xs">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.alertingV2.composeDiscover.alertCondition.alertConditionsTitle"
+                    defaultMessage="Alert conditions"
+                  />
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <AlertDelayField />
+              <EuiSpacer size="m" />
+              <NoDataStrategySelect
+                value={noDataStrategy ?? 'none'}
+                onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
+                disabled={isQueryStandalone}
+                disabledReason={i18n.translate(
+                  'xpack.alertingV2.composeDiscover.alertCondition.noDataDisabledReason',
+                  { defaultMessage: 'An alert condition is required to act on no data.' }
+                )}
+                compressed
+                data-test-subj="composeDiscoverNoDataStrategy"
+              />
+            </>
+          )}
           <EuiHorizontalRule margin="m" />
           <EuiTitle size="xs">
             <h3>
               <FormattedMessage
-                id="xpack.alertingV2.composeDiscover.alertCondition.alertConditionsTitle"
-                defaultMessage="Alert conditions"
+                id="xpack.alertingV2.composeDiscover.alertCondition.ruleExecutionTitle"
+                defaultMessage="Rule execution"
               />
             </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <AlertDelayField />
+          <ScheduleField />
           <EuiSpacer size="m" />
-          <NoDataStrategySelect
-            value={noDataStrategy ?? 'none'}
-            onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
-            compressed
-            data-test-subj="composeDiscoverNoDataStrategy"
-          />
+          <LookbackWindowField />
         </>
       )}
-      <EuiHorizontalRule margin="m" />
-      <EuiTitle size="xs">
-        <h3>
-          <FormattedMessage
-            id="xpack.alertingV2.composeDiscover.alertCondition.ruleExecutionTitle"
-            defaultMessage="Rule execution"
-          />
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <ScheduleField />
-      <EuiSpacer size="m" />
-      <LookbackWindowField />
     </>
   );
 };

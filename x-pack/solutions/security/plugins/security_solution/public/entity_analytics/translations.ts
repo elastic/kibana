@@ -140,10 +140,10 @@ export const ERROR_PANEL_TITLE = i18n.translate(
 );
 
 export const ERROR_PANEL_MESSAGE = i18n.translate(
-  'xpack.securitySolution.riskScore.errorPanel.message',
+  'xpack.securitySolution.entityAnalytics.errorPanel.message',
   {
     defaultMessage:
-      'The risk score maintainer status could not be changed. Fix the following and try again:',
+      'Entity Analytics status could not be changed. Fix the following and try again:',
   }
 );
 
@@ -303,6 +303,13 @@ export const APPLIED_TO_RISK_SCORES_OF = i18n.translate(
 export const REMOVE_FILTER = i18n.translate('xpack.securitySolution.riskScore.removeFilter', {
   defaultMessage: 'Remove filter',
 });
+
+export const FILTER_DETAILS_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.riskScore.filterDetailsAriaLabel',
+  {
+    defaultMessage: 'Alert filter details',
+  }
+);
 
 export const SAVE_FILTERS = i18n.translate('xpack.securitySolution.riskScore.saveFilters', {
   defaultMessage: 'Save changes',

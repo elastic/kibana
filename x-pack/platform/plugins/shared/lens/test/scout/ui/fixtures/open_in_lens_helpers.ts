@@ -5,20 +5,11 @@
  * 2.0.
  */
 
-import type { DebugState } from '@elastic/charts';
-import type { PageObjects, ScoutPage } from '@kbn/scout';
+import type { PageObjects } from '@kbn/scout';
 
 import { DATA_TEST_SUBJECTS, LOGSTASH_IN_RANGE_DATES, DATA_VIEW_ID } from './constants';
-
-interface ElasticChartDebugContext {
-  addInitScript: (script: () => void) => Promise<{ dispose: () => Promise<void> }>;
-}
-
-export interface ImportedSavedObject {
-  id: string;
-  type: string;
-  title: string;
-}
+import { getImportedDashboardId, type ImportedSavedObject } from './saved_object_helpers';
+import { enableElasticChartDebug, type ElasticChartDebugContext } from './helpers';
 
 interface LogstashOpenInLensSetupContext {
   savedObjects?: {
@@ -49,6 +40,16 @@ export async function setupLogstashOpenInLensDefaults({
   await uiSettings.setDefaultIndex(DATA_VIEW_ID.LOGSTASH);
   await uiSettings.setDefaultTime(LOGSTASH_IN_RANGE_DATES);
   await uiSettings.set({ 'dateFormat:tz': 'UTC' });
+}
+
+/** Unsets UI settings applied by `setupLogstashOpenInLensDefaults`. */
+export async function cleanupLogstashOpenInLensDefaults({
+  uiSettings,
+}: LogstashOpenInLensSetupContext): Promise<void> {
+  if (!uiSettings.unset) {
+    throw new Error('scoutSpace.uiSettings.unset is required');
+  }
+  await uiSettings.unset(...OPEN_IN_LENS_UI_SETTINGS);
 }
 
 export function createOpenInLensSuiteSetup({
@@ -99,28 +100,14 @@ export function createOpenInLensSuiteSetup({
   };
 
   const afterAll = async ({ scoutSpace }: { scoutSpace: LogstashOpenInLensSetupContext }) => {
-    if (!scoutSpace.savedObjects || !scoutSpace.uiSettings.unset) {
-      throw new Error('scoutSpace saved object cleanup and uiSettings.unset are required');
+    if (!scoutSpace.savedObjects) {
+      throw new Error('scoutSpace.savedObjects is required to clean up Open in Lens fixtures');
     }
-    await scoutSpace.uiSettings.unset(...OPEN_IN_LENS_UI_SETTINGS);
+    await cleanupLogstashOpenInLensDefaults(scoutSpace);
     await scoutSpace.savedObjects.cleanStandardList();
   };
 
   return { getDashboardId, beforeAll, beforeEach, afterAll };
-}
-
-/** Resolves a dashboard id after `scoutSpace.savedObjects.load()` (createNewCopies assigns new ids). */
-export function getImportedDashboardId(
-  imported: ImportedSavedObject[],
-  dashboardTitle: string
-): string {
-  const dashboard = imported.find(
-    (savedObject) => savedObject.type === 'dashboard' && savedObject.title === dashboardTitle
-  );
-  if (!dashboard?.id) {
-    throw new Error(`Dashboard "${dashboardTitle}" was not imported`);
-  }
-  return dashboard.id;
 }
 
 /** Clicks the "Open in Lens" panel action for the panel with the given title. */
@@ -140,32 +127,4 @@ export async function canConvertToLensByTitle(
   panelTitle: string
 ): Promise<boolean> {
   return dashboard.panelHasAction(DATA_TEST_SUBJECTS.OPEN_IN_LENS_ACTION, panelTitle);
-}
-
-/** Enables elastic-charts debug state for subsequent page loads in this browser context. */
-export async function enableElasticChartDebug(context: ElasticChartDebugContext): Promise<void> {
-  await context.addInitScript(() => {
-    (window as unknown as { _echDebugStateFlag?: boolean })._echDebugStateFlag = true;
-  });
-}
-
-/** Reads `@elastic/charts` debug state from a rendered chart test subject. */
-export async function getChartDebugData(
-  page: ScoutPage,
-  chartTestSubj: string
-): Promise<DebugState> {
-  const chart = page.testSubj.locator('lnsWorkspace').getByTestId(chartTestSubj);
-  await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
-    state: 'attached',
-    timeout: 30_000,
-  });
-
-  const debugJson = await chart.locator('.echChartStatus').getAttribute('data-ech-debug-state');
-  if (!debugJson) {
-    throw new Error(
-      'Elastic charts debugState not found — call enableElasticChartDebug() before navigation'
-    );
-  }
-
-  return JSON.parse(debugJson) as DebugState;
 }

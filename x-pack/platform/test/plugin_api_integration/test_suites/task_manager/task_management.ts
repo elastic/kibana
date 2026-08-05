@@ -828,10 +828,11 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
 
-        expect(response.hits.hits.length).to.eql(1);
-        expect((response.hits?.hits?.[0]._source as any).api_key_to_invalidate?.apiKeyId).to.eql(
-          result.userScope?.apiKeyId
-        );
+        expect(
+          response.hits?.hits?.filter((hit: any) => {
+            return hit._source.api_key_to_invalidate?.apiKeyId === result.userScope?.apiKeyId;
+          }).length
+        ).to.eql(1);
       });
 
       // wait for the api_key_to_invalidate saved object to be older than the invalidation removalDelay (1s)
@@ -1878,6 +1879,63 @@ export default function ({ getService }: FtrProviderContext) {
         expect(scheduledTask.status).to.be('idle');
         expect(scheduledTask.startedAt).to.be(null);
         expect(scheduledTask.retryAt).to.be(null);
+      });
+    });
+
+    it('does not surface a framework error when a non-cancellable recurring task overruns its retryAt and is reclaimed', async () => {
+      const task = await scheduleTask(supertest, {
+        taskType: 'sampleRecurringTaskWhichOverrunsRetryAt',
+        schedule: { interval: '5s' },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const docs = await historyDocs(task.id);
+        expect(docs.length).to.be.greaterThan(1);
+      });
+
+      await retry.try(async () => {
+        const response = await es.search({
+          index: '.kibana-event-log*',
+          size: 100,
+          query: {
+            bool: {
+              filter: [
+                { term: { 'event.provider': 'taskManager' } },
+                { term: { 'event.action': 'task-run' } },
+                { term: { 'kibana.task.id': task.id } },
+              ],
+            },
+          },
+        });
+        expect(response.hits.hits.length).to.be.greaterThan(1);
+      });
+
+      // none of the completed runs should have failed with a version conflict.
+      const failures = await es.search({
+        index: '.kibana-event-log*',
+        size: 100,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'event.provider': 'taskManager' } },
+              { term: { 'event.action': 'task-run' } },
+              { term: { 'kibana.task.id': task.id } },
+              { term: { 'event.outcome': 'failure' } },
+            ],
+          },
+        },
+      });
+      const conflictFailures = failures.hits.hits.filter((hit) =>
+        ((hit._source as Record<string, any>)?.error?.message ?? '').includes('version conflict')
+      );
+      expect(conflictFailures.length).to.eql(0);
+
+      // clean up the event log entries for this task
+      await es.deleteByQuery({
+        index: '.kibana-event-log*',
+        query: { bool: { filter: [{ term: { 'kibana.task.id': task.id } }] } },
+        conflicts: 'proceed',
       });
     });
 

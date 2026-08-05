@@ -9,7 +9,7 @@ import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData, convertToLensByTitle, createOpenInLensSuiteSetup } from '../../../fixtures';
 
-spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.deploymentAgnostic }, () => {
   const openInLensSuite = createOpenInLensSuiteSetup({
     archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.GOAL,
     dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.GOAL,
@@ -35,7 +35,7 @@ spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.stateful.
         title: 'Count',
         subtitle: undefined,
         extraText: '',
-        value: '140.05%',
+        value: '140.04%',
         color: 'rgba(255, 255, 255, 1)',
         trendlineColor: undefined,
         showingBar: true,
@@ -165,16 +165,6 @@ spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.stateful.
           subtitle: 'Average machine.ram',
           extraText: '',
           value: '13,009,497,206.823',
-          color: 'rgba(255, 255, 255, 1)',
-          trendlineColor: undefined,
-          showingBar: true,
-          showingTrendline: false,
-        },
-        {
-          title: undefined,
-          subtitle: undefined,
-          extraText: undefined,
-          value: undefined,
           color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingBar: true,

@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
@@ -21,16 +22,15 @@ import type {
   ChromeBreadcrumbsBadge,
   ChromeNext,
   GlobalHeaderAiButton,
-  ChromeProjectNavigationNode,
-  ChromeSetProjectBreadcrumbsParams,
   ChromeUserBanner,
   GlobalSearchConfig,
-  AppDeepLinkId,
   NavigationCustomization,
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
   CloudURLs,
   SolutionId,
+  ChromeProjectNavigationNode,
+  ChromeSetProjectBreadcrumbsParams,
 } from '@kbn/core-chrome-browser';
 
 /** @internal */
@@ -45,6 +45,7 @@ export interface InternalChromeStart extends ChromeStart {
   componentDeps: {
     readonly basePath: IBasePath;
     readonly legacyActionMenu$: Observable<MountPoint | undefined>;
+    readonly capabilities: Capabilities;
   };
 
   sideNav: ChromeStart['sideNav'] & {
@@ -94,13 +95,9 @@ export interface InternalChromeStart extends ChromeStart {
     setKibanaName(kibanaName: string): void;
 
     /** Initialise project navigation from a definition tree. */
-    initNavigation<
-      LinkId extends AppDeepLinkId = AppDeepLinkId,
-      Id extends string = string,
-      ChildrenId extends string = Id
-    >(
+    initNavigation<TTree extends NavigationTreeDefinition>(
       id: SolutionId,
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
+      navigationTree$: Observable<TTree>
     ): void;
 
     /** Get an observable of the resolved project navigation tree and active nodes. */
@@ -157,6 +154,9 @@ export interface InternalChromeNext extends ChromeNext {
     get$(): Observable<GlobalHeaderAiButton[]>;
   };
   contextSwitcher: ChromeNext['contextSwitcher'] & {
+    get$(): Observable<ReactNode>;
+  };
+  projectPicker: ChromeNext['projectPicker'] & {
     get$(): Observable<ReactNode>;
   };
   globalSearch: ChromeNext['globalSearch'] & {

@@ -9,7 +9,7 @@
 
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import type { monaco } from '@kbn/monaco';
 import { useFocusedStepDecoration } from './use_focused_step_decoration';
 import { createMockStore } from '../../../../entities/workflows/store/__mocks__/store.mock';

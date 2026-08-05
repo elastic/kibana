@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { AnyAction, Store } from 'redux';
+import type { AnyAction, Store } from 'redux-v4';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import type { History as HistoryPackageHistoryInterface } from 'history';

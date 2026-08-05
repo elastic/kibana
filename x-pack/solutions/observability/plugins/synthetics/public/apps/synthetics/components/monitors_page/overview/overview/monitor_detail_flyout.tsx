@@ -27,11 +27,12 @@ import {
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
 import { createRemoteMonitorDetailUrl } from '../../../../utils/remote/remote_monitor_urls';
 import type { ClientPluginsStart } from '../../../../../../plugin';
@@ -396,8 +397,11 @@ export function MonitorDetailFlyout(props: Props) {
 
   const [selectedTab, setSelectedTab] = useState<FlyoutTabId>('overview');
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
     <EuiFlyout
+      aria-labelledby={flyoutTitleId}
       size="m"
       maxWidth={1000}
       type={isPush ? 'push' : 'overlay'}
@@ -420,7 +424,7 @@ export function MonitorDetailFlyout(props: Props) {
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
             <EuiFlexItem grow>
               <EuiTitle size="s">
-                <h2>{displayName}</h2>
+                <h2 id={flyoutTitleId}>{displayName}</h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
