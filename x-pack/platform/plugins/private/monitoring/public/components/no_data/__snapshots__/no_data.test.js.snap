@@ -27,10 +27,8 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
           class="css-wlziyu-body"
         >
           <span
-            aria-hidden="true"
-            class="css-1cmanx3-icon-l-icon"
-            color="#0B64DD"
-            data-euiicon-type="info"
+            class="css-1qkppnb-icon"
+            data-euiicon-type="infoFill"
           />
           <div
             class="css-ak2bmi-content"
@@ -54,8 +52,8 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
               />
             </button>
             <div
-              class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
-              data-test-subj="autoOpsPromotionCallout__content"
+              class="euiText euiCallOut__text emotion-euiText-s-euiTextColor-default"
+              data-test-subj="autoOpsPromotionCallout__message"
             >
               <p>
                 Unlock advanced monitoring of ECE, ECK, and self-managed clusters with AutoOps, now available for free across all license types. Set it up today using 
@@ -202,10 +200,8 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
           class="css-wlziyu-body"
         >
           <span
-            aria-hidden="true"
-            class="css-1cmanx3-icon-l-icon"
-            color="#0B64DD"
-            data-euiicon-type="info"
+            class="css-1qkppnb-icon"
+            data-euiicon-type="infoFill"
           />
           <div
             class="css-ak2bmi-content"
@@ -229,8 +225,8 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
               />
             </button>
             <div
-              class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
-              data-test-subj="autoOpsPromotionCallout__content"
+              class="euiText euiCallOut__text emotion-euiText-s-euiTextColor-default"
+              data-test-subj="autoOpsPromotionCallout__message"
             >
               <p>
                 Unlock advanced monitoring of ECE, ECK, and self-managed clusters with AutoOps, now available for free across all license types. Set it up today using 

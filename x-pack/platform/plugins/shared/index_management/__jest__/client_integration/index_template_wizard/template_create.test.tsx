@@ -510,7 +510,7 @@ describe('<TemplateCreate />', () => {
       expect(descriptions.length).toBeGreaterThan(0);
       for (const description of descriptions) {
         expect(description).toHaveTextContent(
-          'All new indices that you create will use this template. Edit index patterns.'
+          'All new indices that you create will use this template.'
         );
       }
     }, 20000);
