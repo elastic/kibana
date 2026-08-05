@@ -253,11 +253,9 @@ export type AlertingV2UICapabilityFor<F extends AlertingV2Feature> =
   | TopLevelUiOf<F>
   | SubFeatureUiOf<F>;
 
-type AlertingV2PrivilegeLevel = 'read' | 'all';
-
 export const getAlertingPrivilegeDisplayName = (
   feature: AlertingV2Feature,
-  level: AlertingV2PrivilegeLevel
+  level: 'read' | 'all'
 ): string => {
   const { name } = ALERTING_V2_FEATURES[feature];
   const levelLabel = level === 'all' ? 'All' : 'Read';

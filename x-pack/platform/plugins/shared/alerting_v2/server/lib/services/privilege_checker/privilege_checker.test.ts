@@ -13,37 +13,21 @@ import { PrivilegeChecker } from './privilege_checker';
 
 const spaceId = 'default';
 
-// securityMock auto-mocks ApiActions via jest.mock, so we must use
-// jest.requireActual to get the real implementation for actionFromRouteTag.
+// securityMock stubs ApiActions, so pull the real class for actionFromRouteTag.
 const { ApiActions } = jest.requireActual(
   '@kbn/security-authorization-core/src/actions/api'
 ) as typeof import('@kbn/security-authorization-core/src/actions/api');
 const apiActions = new ApiActions();
 
-/**
- * Resolve the fully-qualified action string for a privilege tag using the real
- * `ApiActions` implementation — same code path the production security plugin
- * uses to convert `operation_subject` route tags to action strings.
- */
 const actionFor = (privilege: string) => apiActions.actionFromRouteTag(privilege);
 
-/**
- * Create a `KibanaRequest` mock that represents a user with a specific set of
- * granted API privileges. Returns the request and its pre-resolved action
- * strings so they can be registered with the shared security mock.
- */
 const createRequestMock = (grantedPrivileges: string[]) => {
   const request = httpServerMock.createKibanaRequest();
   const grantedActions = grantedPrivileges.map(actionFor);
   return { request, grantedActions };
 };
 
-/**
- * Build a `SecurityPluginStart` mock backed by `securityMock.createStart()`
- * that evaluates privilege checks against a per-request privilege mapping.
- * The real `ApiActions` class handles `actionFromRouteTag` so the test
- * exercises the actual `operation_subject` parsing logic.
- */
+// securityMock has no privilege-check mock implementation, so map granted actions per request.
 const createSecurity = (privilegesByRequest: Map<KibanaRequest, string[]>) => {
   const security = securityMock.createStart();
 
