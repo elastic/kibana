@@ -10,22 +10,14 @@ import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 import { EuiIcon, euiFontSize } from '@elastic/eui';
 import { unit } from '@kbn/apm-common';
-import { tint } from 'polished';
 
-function getIconColor(type, theme) {
-  switch (type) {
-    case 'field':
-      return theme.euiTheme.colors.vis.euiColorVis7;
-    case 'value':
-      return theme.euiTheme.colors.vis.euiColorVis0;
-    case 'operator':
-      return theme.euiTheme.colors.vis.euiColorVis1;
-    case 'conjunction':
-      return theme.euiTheme.colors.vis.euiColorVis3;
-    case 'recentSearch':
-      return theme.euiTheme.colors.mediumShade;
-  }
-}
+const typeColors = {
+  field: { base: 'backgroundBaseWarning', text: 'textWarning' },
+  value: { base: 'backgroundBaseSuccess', text: 'textSuccess' },
+  operator: { base: 'backgroundBasePrimary', text: 'textPrimary' },
+  conjunction: { base: 'backgroundBaseSubdued', text: 'textSubdued' },
+  recentSearch: { base: 'backgroundBaseSubdued', text: 'textSubdued' },
+};
 
 const Description = styled.div`
   color: ${({ theme }) => theme.euiTheme.colors.darkShade};
@@ -57,8 +49,10 @@ const ListItem = styled.li`
 
 const Icon = styled.div`
   flex: 0 0 ${({ theme }) => theme.euiTheme.size.xl};
-  background: ${({ type, theme }) => tint(0.9, getIconColor(type, theme))};
-  color: ${({ type, theme }) => getIconColor(type, theme)};
+  background: ${({ type, theme }) =>
+    theme.euiTheme.colors[(typeColors[type] ?? typeColors.recentSearch).base]};
+  color: ${({ type, theme }) =>
+    theme.euiTheme.colors[(typeColors[type] ?? typeColors.recentSearch).text]};
   width: 100%;
   height: 100%;
   text-align: center;
