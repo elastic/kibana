@@ -42,6 +42,7 @@ dependsOn:
   - '@kbn/deeplinks-workflows'
   - '@kbn/data-views-plugin'
   - '@kbn/navigation-plugin'
+  - '@kbn/announcement-banner'
 tags:
   - plugin
   - prod
