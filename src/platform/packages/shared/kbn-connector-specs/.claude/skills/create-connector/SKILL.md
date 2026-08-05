@@ -242,6 +242,14 @@ labels (a brand-new connector only ever lands on `main`, so it doesn't need back
 the PR yourself, add them with `gh pr create --label "release_note:feature" --label "Feature:Actions/ConnectorTypes" --label "backport:skip" ...`
 (or `gh pr edit <number> --add-label ...` afterward). If a human opens the PR, remind them to add all three.
 
+Before that final gate, merge (or rebase onto) the latest `main` once — don't wait for the PR to be
+opened and GitHub to report a conflict after the fact. See "Merge main in once, deliberately" below;
+this is that one deliberate sync, done now rather than reactively. If it conflicts, follow "Handling
+merge conflicts" below: regenerate `all_specs.ts` / `connector_icons_map.ts` / CODEOWNERS instead of
+hand-resolving them, and hand-resolve `toc.yml` / the docs snippet list by keeping both sides' entries
+in alphabetical order. Run `node scripts/eslint --fix <file>` and the type check on anything you
+hand-resolved before continuing.
+
 Finally, before the PR is opened (or before pushing, if it already exists), run the repo's
 `branch-readiness-checks` skill (in `.agents/skills/`; its `disable-model-invocation` flag only blocks
 *spontaneous* invocation — an explicit instruction like this one is the intended path) plus
@@ -250,7 +258,7 @@ earlier in this skill don't: `check_changes`, type errors in downstream dependen
 `@kbn/connector-specs` (other packages consume `all_specs.ts`), and CODEOWNERS/moon drift. Run it once
 as a final gate — its coverage and repo-wide lint steps cost minutes — and fix findings before pushing;
 note coverage numbers but don't chase the 80% threshold with filler tests. If this skill was invoked by
-`build-connector`, skip this here — its Task 12 runs the same gate.
+`build-connector`, skip both of the above here — its Task 12 runs the same sync and gate.
 
 ## Handling merge conflicts
 
@@ -291,9 +299,10 @@ CI runs. Two practices cut most of that cost:
   one commit instead of N review round-trips. Open the rest as a pipelined sequence (each PR opened after
   the previous one is approved or merged), not as a simultaneous wave.
 - **Merge main in once, deliberately.** Update a connector branch from `main` when (a) it has a real
-  conflict, or (b) it's approved and about to merge. Don't reflexively sync every open PR after every
-  sibling merges — each sync is a full CI run, and the generated hotspot files make the next sync cheap
-  anyway (regenerate, don't hand-resolve).
+  conflict, (b) its PR is about to be opened (see "If this connector's PR hasn't been opened yet" above —
+  this catches most conflicts pre-emptively, before they cost a CI round-trip), or (c) it's approved and
+  about to merge. Don't reflexively sync every open PR after every sibling merges — each sync is a full
+  CI run, and the generated hotspot files make the next sync cheap anyway (regenerate, don't hand-resolve).
 
 ## Important Notes
 

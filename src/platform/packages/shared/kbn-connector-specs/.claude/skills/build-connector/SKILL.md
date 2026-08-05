@@ -377,6 +377,26 @@ under a `## Validated` heading in the PR description when this connector's PR is
 happens later in this same session or by a human afterward. If a PR already exists for this connector,
 add or update the `## Validated` section in its description now rather than waiting.
 
+### Sync with upstream main before opening the PR
+
+Merge (or rebase onto) the latest `main` now, once, as the final step before the PR is opened — don't
+wait for the PR to be opened and GitHub to report a conflict after the fact. This is the deliberate
+one-time sync described in "Merge main in once, deliberately" (`create-connector/SKILL.md`'s merge-
+conflict guidance), not a reflex to repeat on every later push.
+
+```bash
+git fetch origin main
+git merge origin/main
+```
+
+If this produces conflicts, follow `create-connector/SKILL.md`'s "Handling merge conflicts" section:
+regenerate `all_specs.ts` / `connector_icons_map.ts` / the CODEOWNERS block (`node scripts/generate
+connector-registries`) rather than hand-resolving their conflict markers, and hand-resolve `toc.yml` and
+the docs snippet list by keeping both sides' new entries and reinserting them alphabetically. Run
+`node scripts/eslint --fix <file>` and the type check on any file you hand-resolved before continuing —
+the branch-readiness gate below re-validates the whole branch, but a bad merge resolution is faster to
+catch here than to debug from a failing check.
+
 ### Run the branch-readiness gate
 
 Before marking this task complete, run the repo's `branch-readiness-checks` skill (in
