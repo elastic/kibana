@@ -50,4 +50,11 @@ export const dataFederationConfig: ScoutServerConfig = {
       `cluster.state.encryption.password.${CLUSTER_STATE_ENCRYPTION_PASSWORD_ID}=${clusterStateEncryptionPasswordFile}`,
     ],
   },
+  kbnTestServer: {
+    ...defaultConfig.kbnTestServer,
+    serverArgs: [
+      ...defaultConfig.kbnTestServer.serverArgs,
+      '--xpack.dataFederation.enabled=true',
+    ],
+  },
 };
