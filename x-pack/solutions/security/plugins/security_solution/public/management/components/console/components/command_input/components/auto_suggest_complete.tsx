@@ -29,73 +29,79 @@ export interface AutoSuggestCompleteProps {
 export const AutoSuggestComplete = memo<AutoSuggestCompleteProps>(
   ({ 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const { fullTextEntered, leftOfCursorText, rightOfCursorText, enteredCommand } =
-      useWithInputTextEntered();
+    const { leftOfCursorText, rightOfCursorText, enteredCommand } = useWithInputTextEntered();
     const { value: suggestionValue } = useInputSuggestion();
     const dispatch = useConsoleStateDispatch();
     const commandDefinitions = useWithCommandList();
     const { euiTheme } = useEuiTheme();
 
     useEffect(() => {
-      // If user has not entered anything, or the text to the left of the cursor is not a space, then reset the suggestion (if any)
-      if (fullTextEntered.length === 0 || (leftOfCursorText.endsWith(' ') && suggestionValue)) {
-        dispatch({
-          type: 'updateInputSuggestionState',
-          payload: {
-            suggestion: { value: '' },
-          },
-        });
+      if (
+        // If user has not entered anything that we can trigger suggestions from,
+        leftOfCursorText.length === 0 ||
+        // - or -
+        // the text to the left of the cursor a space,
+        leftOfCursorText.endsWith(' ') ||
+        // - or -
+        // the text to the right of the cursor does not start with a space (cursor possibly in-between word)
+        (rightOfCursorText && !rightOfCursorText.startsWith(' '))
+      ) {
+        // Reset suggestion if one is currently defined
+        if (suggestionValue) {
+          dispatch({
+            type: 'updateInputSuggestionState',
+            payload: {
+              suggestion: { value: '' },
+            },
+          });
+        }
 
         return;
       }
 
-      // To provide suggestions, the text to the right of the cursor must be empty or start with a space.
-      // This ensure we are not suggesting values when user's cursor is between full words.
-      if (!rightOfCursorText || rightOfCursorText.startsWith(' ')) {
-        // If we don't know the command yet, then let's see if we can suggest one now
-        if (!enteredCommand) {
-          const commandNameSuggestion = commandDefinitions.find(
-            (command) =>
-              command.name !== leftOfCursorText && command.name.startsWith(leftOfCursorText)
-          );
+      // If we don't know the command yet, then let's see if we can suggest one now
+      if (!enteredCommand) {
+        const commandNameSuggestion = commandDefinitions.find(
+          (command) =>
+            command.name !== leftOfCursorText && command.name.startsWith(leftOfCursorText)
+        );
 
-          const newSuggestionValue = (commandNameSuggestion?.name ?? '').replace(
-            leftOfCursorText,
-            ''
-          );
+        const newSuggestionValue = (commandNameSuggestion?.name ?? '').replace(
+          leftOfCursorText,
+          ''
+        );
 
-          if (newSuggestionValue !== suggestionValue) {
-            dispatch({
-              type: 'updateInputSuggestionState',
-              payload: {
-                suggestion: { value: newSuggestionValue },
-              },
-            });
-          }
-
-          return;
+        if (newSuggestionValue !== suggestionValue) {
+          dispatch({
+            type: 'updateInputSuggestionState',
+            payload: {
+              suggestion: { value: newSuggestionValue },
+            },
+          });
         }
 
-        // Suggest argument names
-        if (/(--\S+)$/.test(leftOfCursorText)) {
-          const partialArgName = leftOfCursorText.substring(leftOfCursorText.lastIndexOf('--') + 2);
-          const newSuggestionValue = (
-            Object.keys(enteredCommand?.commandDefinition?.args ?? {}).find(
-              (argName) => argName !== partialArgName && argName.startsWith(partialArgName)
-            ) || ''
-          ).replace(partialArgName, '');
+        return;
+      }
 
-          if (newSuggestionValue !== suggestionValue) {
-            dispatch({
-              type: 'updateInputSuggestionState',
-              payload: {
-                suggestion: { value: newSuggestionValue },
-              },
-            });
-          }
+      // Suggest argument names
+      if (/(--\S+)$/.test(leftOfCursorText)) {
+        const partialArgName = leftOfCursorText.substring(leftOfCursorText.lastIndexOf('--') + 2);
+        const newSuggestionValue = (
+          Object.keys(enteredCommand?.commandDefinition?.args ?? {}).find(
+            (argName) => argName !== partialArgName && argName.startsWith(partialArgName)
+          ) || ''
+        ).replace(partialArgName, '');
 
-          return;
+        if (newSuggestionValue !== suggestionValue) {
+          dispatch({
+            type: 'updateInputSuggestionState',
+            payload: {
+              suggestion: { value: newSuggestionValue },
+            },
+          });
         }
+
+        return;
       }
 
       // Nothing to suggest - ensure no suggestion is stored in state
@@ -111,7 +117,6 @@ export const AutoSuggestComplete = memo<AutoSuggestCompleteProps>(
       dispatch,
       commandDefinitions,
       suggestionValue,
-      fullTextEntered,
       leftOfCursorText,
       rightOfCursorText,
       enteredCommand,
