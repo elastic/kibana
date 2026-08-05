@@ -9,6 +9,7 @@ import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
+import { ConsoleInfo } from './components/console_info';
 import { ConsoleFooter } from './components/console_footer';
 import { ConsoleHeader } from './components/console_header';
 import type { CommandInputProps } from './components/command_input';
@@ -193,6 +194,7 @@ export const Console = memo<ConsoleProps>(
                               { defaultMessage: 'Command output history' }
                             )}
                           >
+                            <ConsoleInfo />
                             <HistoryOutput />
                           </div>
                         </EuiFlexItem>

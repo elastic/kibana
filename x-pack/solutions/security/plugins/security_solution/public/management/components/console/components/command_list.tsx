@@ -24,6 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { sortBy } from 'lodash';
+import { consoleTranslations } from './translations';
 import type { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
@@ -303,22 +304,10 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
 
   if (display === 'table') {
     const calloutItems = [
-      <FormattedMessage
-        id="xpack.securitySolution.console.commandList.callout.escapeDoubleDashes"
-        defaultMessage="Escape values with double dashes (--) as \-\-, unless they are command arguments; otherwise the console interprets them as arguments."
-      />,
-      <FormattedMessage
-        id="xpack.securitySolution.console.commandList.callout.keyTabToCompleteSuggestion"
-        defaultMessage="Pressing the [TAB] key while a completion suggestion is displayed will complete the entered value with the suggestion."
-      />,
-      <FormattedMessage
-        id="xpack.securitySolution.console.commandList.callout.keyPressInputHistory"
-        defaultMessage="Pressing the [UP] arrow key while in the command input field will show the list of last entered command."
-      />,
-      <FormattedMessage
-        id="xpack.securitySolution.console.commandList.callout.keyAvailbleAutoCompleteValues"
-        defaultMessage="Pressing [ALT][SPACE] keys while in the command input field will show list of available commands or list of available command arguments, if a command has alredy been entered."
-      />,
+      consoleTranslations.escapeDoubleDashesInfo,
+      consoleTranslations.keyTabInfo,
+      consoleTranslations.keyUpArrowInfo,
+      consoleTranslations.keyAltSpaceInfo,
       <FormattedMessage
         id="xpack.securitySolution.console.commandList.callout.multipleResponses"
         defaultMessage="You can enter consecutive response actions — no need to wait for previous actions to complete."
