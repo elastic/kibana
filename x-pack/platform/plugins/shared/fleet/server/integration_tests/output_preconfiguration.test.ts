@@ -157,6 +157,7 @@ describe('Fleet preconfigured outputs', () => {
           hosts: ['kafka:9092'],
           topic: 'test',
           auth_type: 'none',
+          connection_type: 'plaintext',
           proxy_id: 'non-existent-proxy',
         },
       ];

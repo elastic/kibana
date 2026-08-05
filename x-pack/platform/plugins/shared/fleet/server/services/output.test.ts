@@ -1901,7 +1901,6 @@ describe('Output Service', () => {
         partition: 'hash',
         timeout: 30,
         version: '1.0.0',
-        write_to_logs_streams: null,
         proxy_id: null,
       });
     });
