@@ -146,10 +146,9 @@ describe('When using PageOverlay component', () => {
     expect(overlay.classList.contains('scrolling')).toBe(false);
   });
 
-  it('should swallow Escape (without calling `onHide`) so it cannot reach underlying window-level handlers', () => {
+  it('should call `onHide` on Escape and stop it from reaching underlying window-level handlers', () => {
     // Mirrors an underlying layer (e.g. EuiFlyout) that closes itself via a window-level keydown
-    // listener. While the overlay is visible, Escape must be a no-op: it must neither close the
-    // overlay nor reach that handler (which would silently close a flyout behind the overlay).
+    // listener. While the overlay is visible, its Escape must not reach that handler.
     const underlyingWindowHandler = jest.fn();
     window.addEventListener('keydown', underlyingWindowHandler);
 
@@ -158,7 +157,7 @@ describe('When using PageOverlay component', () => {
 
       fireEvent.keyDown(renderResult.getByTestId('test-body'), { key: 'Escape' });
 
-      expect(renderProps.onHide).not.toHaveBeenCalled();
+      expect(renderProps.onHide).toHaveBeenCalledTimes(1);
       expect(underlyingWindowHandler).not.toHaveBeenCalled();
     } finally {
       window.removeEventListener('keydown', underlyingWindowHandler);
@@ -182,30 +181,19 @@ describe('When using PageOverlay component', () => {
     }
   });
 
-  it('should still swallow an Escape that an inner widget only `preventDefault`-ed (so it cannot reach window)', () => {
-    // An inner widget that only calls `preventDefault()` (without `stopPropagation()`) still lets the
-    // event bubble up to us. We must keep swallowing it so it never reaches a window-level handler and
-    // silently closes a flyout behind the overlay.
-    const underlyingWindowHandler = jest.fn();
-    window.addEventListener('keydown', underlyingWindowHandler);
+  it('should ignore an Escape that was already handled (defaultPrevented) by an inner widget', () => {
+    render();
 
-    try {
-      render();
+    const event = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    });
+    event.preventDefault(); // simulate an inner widget (e.g. a popover) having handled it
 
-      const event = new KeyboardEvent('keydown', {
-        key: 'Escape',
-        bubbles: true,
-        cancelable: true,
-      });
-      event.preventDefault(); // simulate an inner widget (e.g. a popover) having handled it
+    renderResult.getByTestId('test-body').dispatchEvent(event);
 
-      renderResult.getByTestId('test-body').dispatchEvent(event);
-
-      expect(renderProps.onHide).not.toHaveBeenCalled();
-      expect(underlyingWindowHandler).not.toHaveBeenCalled();
-    } finally {
-      window.removeEventListener('keydown', underlyingWindowHandler);
-    }
+    expect(renderProps.onHide).not.toHaveBeenCalled();
   });
 
   it.each`

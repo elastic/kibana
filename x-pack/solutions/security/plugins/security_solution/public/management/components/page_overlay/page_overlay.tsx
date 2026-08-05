@@ -321,26 +321,27 @@ export const PageOverlay = memo<PageOverlayProps>(
       });
     }, []);
 
-    // While the overlay is visible, intercept Escape and intentionally do nothing: we neither close
-    // the overlay (users close it via the Back/close button) nor let the event reach window-level
-    // handlers - notably `EuiFlyout` (via `EuiWindowEvent`) - so a flyout sitting *behind* the overlay
-    // is never silently closed. The listener is attached to `document`, which sits below `window` in
-    // the DOM bubble path, so `stopPropagation()` keeps Escape from reaching those window-level
-    // handlers regardless of which layer mounted first. Inner widgets that handle Escape at the
-    // element level (e.g. the console's input popover via `EuiPopover`, or `EuiSuperDatePicker`) act
-    // before the event bubbles to `document`, so they still close as expected.
+    // Close the overlay on Escape, revealing whatever is behind it (e.g. a flyout).
+    // The listener is attached to `document`, which sits below `window` in the DOM bubble path, so
+    // `stopPropagation()` prevents the Escape from reaching the window-level `keydown` handlers of
+    // underlying layers - notably `EuiFlyout` (via `EuiWindowEvent`), which would otherwise close the
+    // flyout instead. Because we stop the event below `window`, this works regardless of which layer
+    // mounted first. Inner widgets that handle Escape themselves (e.g. the console's input popover,
+    // via `EuiPopover`) call `stopPropagation()` before the event bubbles to `document`, so they keep
+    // precedence. Only active while the overlay is actually visible.
     useEffect(() => {
       if (isHidden) {
         return;
       }
 
       const onKeyDown = (ev: KeyboardEvent) => {
-        if (ev.key !== 'Escape') {
+        if (ev.key !== 'Escape' || ev.defaultPrevented) {
           return;
         }
 
         ev.stopPropagation();
         ev.preventDefault();
+        onHide();
       };
 
       document.addEventListener('keydown', onKeyDown);
@@ -348,7 +349,7 @@ export const PageOverlay = memo<PageOverlayProps>(
       return () => {
         document.removeEventListener('keydown', onKeyDown);
       };
-    }, [isHidden]);
+    }, [isHidden, onHide]);
 
     return (
       <EuiPortal portalRef={setPortalEleRef}>
