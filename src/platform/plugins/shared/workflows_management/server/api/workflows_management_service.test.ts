@@ -70,21 +70,29 @@ const spyPrototype = <T extends object>(
 
 const makeEsClient = (): jest.Mocked<ElasticsearchClient> =>
   ({
+    info: jest.fn().mockResolvedValue({ version: { build_flavor: 'default' } }),
     indices: {
-      exists: jest.fn().mockResolvedValue(true),
-      create: jest.fn(),
+      // Default to cold start so init warm-up exercises template + index creation.
+      exists: jest.fn().mockResolvedValue(false),
+      create: jest.fn().mockResolvedValue({}),
       putMapping: jest.fn(),
-      getIndexTemplate: jest.fn().mockResolvedValue({}),
-      putIndexTemplate: jest.fn(),
+      getIndexTemplate: jest.fn().mockResolvedValue({ index_templates: [] }),
+      putIndexTemplate: jest.fn().mockResolvedValue({}),
       getAlias: jest.fn().mockResolvedValue({}),
       putAlias: jest.fn(),
       get: jest.fn().mockResolvedValue({}),
       simulateIndexTemplate: jest.fn().mockResolvedValue({ template: { mappings: {} } }),
     },
-    search: jest.fn(),
-    index: jest.fn(),
+    search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+    index: jest.fn().mockResolvedValue({
+      _id: 'doc1',
+      _index: 'test',
+      _seq_no: 0,
+      _primary_term: 1,
+      result: 'created',
+    }),
     bulk: jest.fn(),
-    delete: jest.fn(),
+    delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
     deleteByQuery: jest.fn(),
   } as unknown as jest.Mocked<ElasticsearchClient>);
 
@@ -232,6 +240,23 @@ describe('WorkflowsService (facade)', () => {
         elasticsearchClient: esClient,
         authService: coreStart.security!.authc,
       });
+    });
+
+    it('bootstraps workflows storage index at startup', async () => {
+      const esClient = makeEsClient();
+      const coreStart = makeCoreStart(esClient);
+      const startServices = jest.fn().mockResolvedValue([coreStart, makePluginsStart()]);
+      const service = new WorkflowsService(
+        makeCoreSetup(startServices),
+        makePluginsSetup(),
+        loggerMock.create(),
+        '9.0.0'
+      );
+
+      await service.getWorkflow('wf-1', 'default');
+
+      expect(esClient.indices.putIndexTemplate).toHaveBeenCalled();
+      expect(esClient.indices.create).toHaveBeenCalled();
     });
 
     it('awaits initPromise before delegating to a sub-service', async () => {

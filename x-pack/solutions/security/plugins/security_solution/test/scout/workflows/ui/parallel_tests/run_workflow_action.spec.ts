@@ -8,8 +8,7 @@
 import { spaceTest, tags, CUSTOM_QUERY_RULE, FULL_KIBANA_SECURITY_ROLE } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
-// Failing: See https://github.com/elastic/kibana/issues/261392
-spaceTest.describe.skip('Run workflow alert action', { tag: [...tags.stateful.classic] }, () => {
+spaceTest.describe('Run workflow alert action', { tag: [...tags.stateful.classic] }, () => {
   let ruleName: string;
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {

@@ -111,3 +111,44 @@ export const createStorage = ({
     storageSettings
   );
 };
+
+/**
+ * Ensures the workflows write index exists before the first user request.
+ *
+ * StorageIndexAdapter installs its template and backing index lazily on write.
+ * Warming it at plugin start keeps the first create under Scout's request budget
+ * without extending the shared storage-adapter API.
+ */
+export async function ensureWorkflowStorageReady(storage: WorkflowStorage): Promise<void> {
+  const client = storage.getClient();
+
+  if (await client.existsIndex()) {
+    await client.reconcileMappings();
+    return;
+  }
+
+  const now = new Date().toISOString();
+  const warmupId = '__workflows_storage_warmup__';
+
+  await client.index({
+    id: warmupId,
+    document: {
+      name: warmupId,
+      enabled: false,
+      tags: [],
+      triggerTypes: [],
+      yaml: '# storage warmup',
+      definition: null,
+      createdBy: 'system',
+      lastUpdatedBy: 'system',
+      spaceId: 'default',
+      deleted_at: null,
+      valid: false,
+      created_at: now,
+      updated_at: now,
+    },
+    refresh: false,
+  });
+
+  await client.delete({ id: warmupId, refresh: false });
+}
