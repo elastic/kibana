@@ -321,15 +321,31 @@ run_benchmark() {
   fi
 
   rm -f "${REPORT_PATH}"
+  set +e
   node scripts/bench.js \
     --config "${BENCH_CONFIG_PATH}" \
     --config-from-cwd \
     --left-build-dir "${LEFT_BUILD_DIR}" \
     --right-build-dir "${RIGHT_BUILD_DIR}"
+  local benchmark_status=$?
+  set -e
 
   if [[ ! -f "${REPORT_PATH}" ]]; then
     echo "Warm-start calibration report missing at ${REPORT_PATH}" >&2
     exit 1
+  fi
+
+  if [[ "${benchmark_status}" -ne 0 ]]; then
+    local report_outcome
+    report_outcome="$(node -e "const report = JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8')); process.stdout.write(report.outcome || '')" "${REPORT_PATH}")" || {
+      echo "Warm-start calibration report is invalid at ${REPORT_PATH}" >&2
+      exit 1
+    }
+    if [[ "${ORIENTATION}" != "ab" && "${ORIENTATION}" != "ba" ]] || [[ "${report_outcome}" != "regression" ]]; then
+      echo "Warm-start calibration benchmark failed (exit ${benchmark_status})" >&2
+      exit "${benchmark_status}"
+    fi
+    echo "Expected warm-start regression produced report; preserving artifacts"
   fi
 }
 

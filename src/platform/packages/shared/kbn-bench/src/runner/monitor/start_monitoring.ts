@@ -102,8 +102,8 @@ const forcedGcResultSchema = z.object({
     .record(z.string(), z.unknown())
     .refine((value) => Object.keys(value).length > 0, { message: 'must not be empty' }),
   postForcedGcHeapSpaceStatistics: z
-    .array(z.record(z.string(), z.unknown()))
-    .min(1, { message: 'must not be empty' }),
+    .record(z.string(), z.record(z.string(), z.unknown()))
+    .refine((value) => Object.keys(value).length > 0, { message: 'must not be empty' }),
 });
 
 const validateForcedGcResult = (result: ForcedGcHeapStats, request: ForcedGcRequest): string[] => {
@@ -228,6 +228,15 @@ export const requestForcedGcHeapStats = async ({
   );
 };
 
+const isProcessAlive = (pid: number): boolean => {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return (error as NodeJS.ErrnoException).code === 'EPERM';
+  }
+};
+
 const readNaturalStats = async ({
   monitorDir,
   log,
@@ -314,7 +323,8 @@ export async function startMonitoring({
         .catch(() => []);
       const expectedPids = naturalFiles
         .map((file) => Number.parseInt(file, 10))
-        .filter((pid) => pid !== process.pid);
+        .filter((pid) => pid !== process.pid)
+        .filter(isProcessAlive);
       let forcedGcHeapStats: ForcedGcHeapStats[] | undefined;
 
       if (options.collectForcedGcHeapStats) {

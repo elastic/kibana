@@ -89,6 +89,7 @@ describe('forced-GC monitor control', () => {
 
   beforeEach(async () => {
     tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'kbn-bench-monitor-'));
+    jest.spyOn(process, 'kill').mockImplementation(() => true);
   });
 
   afterEach(async () => {
@@ -196,6 +197,26 @@ describe('forced-GC monitor control', () => {
     expect(process.env.KBN_BENCH_MONITOR_DIR).toBeUndefined();
     expect(process.env.KBN_BENCH_MONITOR_INTERVAL).toBeUndefined();
     expect(process.env.NODE_OPTIONS).not.toContain('init_monitoring.js');
+  });
+
+  it('excludes monitored processes that exited before forced-GC collection', async () => {
+    jest.spyOn(process, 'kill').mockImplementation(() => {
+      throw Object.assign(new Error('process exited'), { code: 'ESRCH' });
+    });
+    const stopMonitoring = await startMonitoring({ dir: tempDir, log });
+    const monitorDir = process.env.KBN_BENCH_MONITOR_DIR!;
+    const pid = 12345;
+    await fs.promises.writeFile(
+      path.join(monitorDir, `${pid}.ndjson`),
+      `${JSON.stringify(makeSample(pid))}\n`,
+      'utf8'
+    );
+
+    const result = await stopMonitoring({ collectForcedGcHeapStats: true });
+
+    expect(result.forcedGcHeapStats?.[0].error).toEqual(
+      expect.objectContaining({ name: 'ForcedGcHeapStatsNoProcessesError' })
+    );
   });
 
   it('leaves forced-GC collection disabled unless stop explicitly requests it', async () => {

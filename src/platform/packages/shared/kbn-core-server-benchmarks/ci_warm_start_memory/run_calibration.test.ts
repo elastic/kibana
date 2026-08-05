@@ -56,4 +56,14 @@ describe('run_calibration.sh metadata', () => {
       );
     }
   });
+
+  it('preserves reports for the expected B regression but fails other benchmark errors', () => {
+    const script = readFileSync(RUN_CALIBRATION_SH, 'utf8');
+
+    expect(script).toContain(
+      'Expected warm-start regression produced report; preserving artifacts'
+    );
+    expect(script).toContain('[[ "${ORIENTATION}" != "ab" && "${ORIENTATION}" != "ba" ]]');
+    expect(script).toContain('exit "${benchmark_status}"');
+  });
 });
