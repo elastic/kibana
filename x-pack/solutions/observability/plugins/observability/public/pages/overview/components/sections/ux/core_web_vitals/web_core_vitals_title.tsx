@@ -94,6 +94,10 @@ export function WebCoreVitalsTitle({
               />
 
               <EuiPopover
+                aria-label={i18n.translate(
+                  'xpack.observability.ux.dashboard.webCoreVitals.browserSupportPopoverAriaLabel',
+                  { defaultMessage: 'Browser support for core web vitals' }
+                )}
                 isOpen={isBrowserPopoverOpen}
                 button={
                   <EuiToolTip content={helpAriaLabel} disableScreenReaderOutput>
