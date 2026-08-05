@@ -839,9 +839,6 @@ class OutputService {
         }
       } else if (isOtlpOutput(output)) {
         const otlpData = data as OutputSoOtlpAttributes;
-        if (!output.api_key && output.secrets?.api_key) {
-          otlpData.api_key = output.secrets.api_key as string;
-        }
         const otlpExporterSecrets = output.secrets?.otlp_exporter;
         if (!output.otlp_exporter.tls?.key_pem && otlpExporterSecrets?.tls?.key_pem) {
           otlpData.otlp_exporter = {
@@ -1306,7 +1303,6 @@ class OutputService {
       if (isOtlpOutput(originalOutput)) {
         // clear OTLP-only fields when leaving OTLP; secrets cleaned up via getOutputSecretPaths
         (updateSoData as Nullable<OutputSoOtlpAttributes>).otlp_exporter = null;
-        (updateSoData as Nullable<OutputSoOtlpAttributes>).api_key = null;
       }
 
       if (isOtlpOutput(updateSoData)) {
@@ -1444,9 +1440,6 @@ class OutputService {
       } else if (isOtlpOutput(updateSoData)) {
         const otlpUpdateData = updateSoData as OutputSoOtlpAttributes;
         const domainData = data as Partial<NewOtlpOutput>;
-        if (!otlpUpdateData.api_key && domainData.secrets?.api_key) {
-          otlpUpdateData.api_key = domainData.secrets.api_key as string;
-        }
         const otlpExporterSecrets = domainData.secrets?.otlp_exporter;
         if (!otlpUpdateData.otlp_exporter?.tls?.key_pem && otlpExporterSecrets?.tls?.key_pem) {
           otlpUpdateData.otlp_exporter = {

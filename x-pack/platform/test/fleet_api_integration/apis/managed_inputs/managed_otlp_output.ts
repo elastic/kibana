@@ -15,7 +15,7 @@
  *
  * Coverage:
  *   - Create: grpc happy path, http/protobuf with optional fields, protocol-validation 400s,
- *     secret round-trip (top-level api_key + otlp_exporter.tls.key_pem via .fleet-secrets).
+ *     secret round-trip (otlp_exporter.tls.key_pem via .fleet-secrets).
  *   - Update: otlp_exporter update, ES→OTLP type change, OTLP→ES type change.
  *   - Delete: ESO secret is removed when the output is deleted.
  *   - Policy gating: pure-OTel policy accepted, mixed OTel+beats policy rejected.
@@ -116,7 +116,7 @@ export default function (providerContext: FtrProviderContext) {
         // Exercises every optional sub-block that is valid for http/protobuf in one payload.
         // grpc-only compression values (snappy, zstd) are excluded — the schema only allows
         // gzip/none for http/protobuf (OtlpHttpExporterSchema).
-        // api_key is exercised in the dedicated secrets test below.
+        // tls.key_pem is exercised in the dedicated secrets test below.
         const name = `otlp-http-full-${uuidv4()}`;
         const otlpExporter = {
           endpoint: 'https://otlp.example.com:4318',
@@ -211,7 +211,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.message).to.contain('[request body.otlp_exporter.compression]');
       });
 
-      it('stores api_key and tls.key_pem as ESO secrets and returns secret refs', async () => {
+      it('stores tls.key_pem as an ESO secret and returns a secret ref', async () => {
         const { body } = await supertest
           .post('/api/fleet/outputs')
           .set('kbn-xsrf', 'xxxx')
@@ -223,7 +223,6 @@ export default function (providerContext: FtrProviderContext) {
               protocol: 'grpc',
             },
             secrets: {
-              api_key: 'test-api-key-value',
               otlp_exporter: {
                 tls: { key_pem: 'test-tls-key-pem-value' },
               },
@@ -232,14 +231,9 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         const { item } = body;
-        const apiKeySecretId: string = item.secrets?.api_key?.id;
         const tlsKeyPemSecretId: string = item.secrets?.otlp_exporter?.tls?.key_pem?.id;
 
-        expect(apiKeySecretId).to.be.a('string');
         expect(tlsKeyPemSecretId).to.be.a('string');
-
-        const apiKeySecret = await getSecretById(apiKeySecretId);
-        expect((apiKeySecret._source as Record<string, string>).value).to.be('test-api-key-value');
 
         const tlsKeyPemSecret = await getSecretById(tlsKeyPemSecretId);
         expect((tlsKeyPemSecret._source as Record<string, string>).value).to.be(
@@ -339,12 +333,12 @@ export default function (providerContext: FtrProviderContext) {
             name: `otlp-delete-secrets-${uuidv4()}`,
             type: 'otlp',
             otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
-            secrets: { api_key: 'to-be-deleted-key' },
+            secrets: { otlp_exporter: { tls: { key_pem: 'to-be-deleted-key' } } },
           })
           .expect(200);
 
         const { id } = createBody.item;
-        const secretId: string = createBody.item.secrets?.api_key?.id;
+        const secretId: string = createBody.item.secrets?.otlp_exporter?.tls?.key_pem?.id;
         expect(secretId).to.be.a('string');
 
         // Secret exists before delete
