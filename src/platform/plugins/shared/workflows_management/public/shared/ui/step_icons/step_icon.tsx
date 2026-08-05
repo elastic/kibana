@@ -16,6 +16,7 @@ import {
   getStepIconType,
   getTriggerTypeIconType,
   HardcodedIcons,
+  isMaskableIcon,
   resolveRegisteredStepIcon,
 } from '@kbn/workflows-ui';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -94,7 +95,7 @@ export const StepIcon = React.memo(
       iconType = getStepIconType(stepType);
     }
 
-    if (typeof iconType === 'string' && iconType.startsWith('data:')) {
+    if (isMaskableIcon(iconType)) {
       const statusColor = shouldApplyColorToIcon
         ? getExecutionStatusColors(euiTheme, executionStatus).color
         : undefined;

@@ -8,8 +8,7 @@
  */
 import React from 'react';
 
-import { EuiIcon, useEuiTheme } from '@elastic/eui';
-import type { ConnectorIconProps } from '../../../types';
+import { createBrandIcon } from '../../../brand_icon';
 
 const GithubIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" {...props}>
@@ -17,10 +16,5 @@ const GithubIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export default (props: ConnectorIconProps) => {
-  const { colorMode } = useEuiTheme();
-  // Brand guidelines ask for pure white or black, not the themed text color:
-  // https://brand.github.com/foundations/logo
-  const fill = colorMode === 'DARK' ? '#FFFFFF' : '#181717';
-  return <EuiIcon type={(iconProps) => <GithubIcon fill={fill} {...iconProps} />} {...props} />;
-};
+// https://brand.github.com/foundations/logo — Invertocat in black or white.
+export default createBrandIcon(GithubIcon, '#181717');

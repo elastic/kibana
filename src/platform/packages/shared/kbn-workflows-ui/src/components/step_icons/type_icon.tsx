@@ -14,6 +14,7 @@ import React, { Suspense, useMemo } from 'react';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 import { getStepIconType } from './get_step_icon_type';
 import { HardcodedIcons } from './hardcoded_icons';
+import { isMaskableIcon } from './is_maskable_icon';
 import { resolveRegisteredStepIcon } from './resolve_registered_step_icon';
 import { useWorkflowsUiServices } from '../../context';
 
@@ -82,29 +83,28 @@ export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, ...rest 
 
   const label = title ?? type;
 
-  const icon =
-    typeof iconType === 'string' && iconType.startsWith('data:') ? (
-      <span
-        css={css`
-          display: inline-block;
-          width: 16px;
-          height: 16px;
-          mask-image: url('${iconType}');
-          mask-size: contain;
-          mask-repeat: no-repeat;
-          mask-position: center;
-          background-color: ${euiTheme.colors.textParagraph};
-        `}
-        aria-hidden={true}
-        data-test-subj="workflowTypeIconDataUrl"
-      />
-    ) : typeof iconType === 'string' ? (
+  const icon = isMaskableIcon(iconType) ? (
+    <span
+      css={css`
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        mask-image: url('${iconType}');
+        mask-size: contain;
+        mask-repeat: no-repeat;
+        mask-position: center;
+        background-color: ${euiTheme.colors.textParagraph};
+      `}
+      aria-hidden={true}
+      data-test-subj="workflowTypeIconDataUrl"
+    />
+  ) : typeof iconType === 'string' ? (
+    <EuiIcon type={iconType} size="m" {...rest} />
+  ) : (
+    <Suspense fallback={<EuiLoadingSpinner size="s" />}>
       <EuiIcon type={iconType} size="m" {...rest} />
-    ) : (
-      <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-        <EuiIcon type={iconType} size="m" {...rest} />
-      </Suspense>
-    );
+    </Suspense>
+  );
 
   return (
     <EuiToolTip content={label} anchorProps={{ css: css({ display: 'inline-flex' }) }}>
