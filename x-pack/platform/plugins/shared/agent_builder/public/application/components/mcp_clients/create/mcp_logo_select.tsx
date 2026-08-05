@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiBadge, EuiComboBox, EuiFormPrepend, EuiIcon } from '@elastic/eui';
+import { EuiComboBox, EuiFormPrepend, EuiIcon } from '@elastic/eui';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { useFormContext } from 'react-hook-form';
 import { labels } from '../../../utils/i18n';
@@ -57,9 +57,6 @@ export const McpLogoSelect = ({ value, onChange }: McpLogoSelectProps) => {
           value: id,
           label: option.label,
           prepend: iconUrl ? <EuiIcon type={iconUrl} size="m" aria-hidden /> : undefined,
-          append: option.isDefault ? (
-            <EuiBadge color="hollow">{labels.tools.mcpClients.form.defaultLogoBadge}</EuiBadge>
-          ) : undefined,
         };
       }),
     [iconUrls]
