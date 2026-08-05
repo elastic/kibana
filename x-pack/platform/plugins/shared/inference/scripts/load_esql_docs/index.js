@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-require('@kbn/swc-register').install();
+require('@kbn/babel-register').install();
 
 require('./generate_esql_docs');

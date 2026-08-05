@@ -16,7 +16,7 @@ import { rangeSliderControlSchema } from './range_slider_schema';
 describe('data control schema legacy compatibility', () => {
   it('defaults missing values_source to field for dataControlSchema', () => {
     expect(
-      dataControlSchema.parse({
+      dataControlSchema.validate({
         data_view_id: 'my-data-view',
         field_name: 'host.name',
       })
@@ -31,7 +31,7 @@ describe('data control schema legacy compatibility', () => {
 
   it('defaults missing values_source to field for optionsListDSLControlSchema', () => {
     expect(
-      optionsListDSLControlSchema.parse({
+      optionsListDSLControlSchema.validate({
         data_view_id: 'my-data-view',
         field_name: 'host.name',
       })
@@ -44,7 +44,7 @@ describe('data control schema legacy compatibility', () => {
 
   it('defaults missing values_source to field for rangeSliderControlSchema', () => {
     expect(
-      rangeSliderControlSchema.parse({
+      rangeSliderControlSchema.validate({
         data_view_id: 'my-data-view',
         field_name: 'host.name',
       })
@@ -57,7 +57,7 @@ describe('data control schema legacy compatibility', () => {
 
   it('still validates esql values_source explicitly', () => {
     expect(
-      dataControlSchema.parse({
+      dataControlSchema.validate({
         values_source: ControlValuesSource.ESQL,
         esql_query: 'FROM logs',
       })

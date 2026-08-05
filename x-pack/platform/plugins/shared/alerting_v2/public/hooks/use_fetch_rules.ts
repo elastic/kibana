@@ -8,39 +8,9 @@
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import type { FindRulesRequest, FindRulesSortField } from '@kbn/alerting-v2-schemas';
+import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
 import { RulesApi } from '../services/rules_api';
-import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 import { ruleKeys } from './query_key_factory';
-
-export interface FindRulesUiParams {
-  page?: number;
-  perPage?: number;
-  filter?: string;
-  search?: string;
-  sortField?: FindRulesSortField;
-  sortOrder?: 'asc' | 'desc';
-}
-
-export const toFindRulesRequest = ({
-  page,
-  perPage,
-  filter,
-  search,
-  sortField,
-  sortOrder,
-  ...rest
-}: FindRulesUiParams): Complete<FindRulesRequest> => {
-  assertAllFieldsMapped(rest);
-  return {
-    page,
-    per_page: perPage,
-    filter,
-    search,
-    sort_field: sortField,
-    sort_order: sortOrder,
-  };
-};
 
 export const useFetchRules = ({
   page,
@@ -64,10 +34,7 @@ export const useFetchRules = ({
 
   return useQuery({
     queryKey: ruleKeys.list({ page, perPage, filter, search, sortField, sortOrder }),
-    queryFn: () =>
-      rulesApi.listRules(
-        toFindRulesRequest({ page, perPage, filter, search, sortField, sortOrder })
-      ),
+    queryFn: () => rulesApi.listRules({ page, perPage, filter, search, sortField, sortOrder }),
     onError: () => {
       toasts.addDanger(
         i18n.translate('xpack.alertingV2.hooks.useFetchRules.errorMessage', {

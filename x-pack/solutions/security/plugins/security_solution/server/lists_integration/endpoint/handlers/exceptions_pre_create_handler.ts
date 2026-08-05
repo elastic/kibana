@@ -19,7 +19,6 @@ import {
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
   TrustedDeviceValidator,
-  CustomYaraSignaturesValidator,
 } from '../validators';
 import {
   hasGlobalOrPerPolicyTag,
@@ -82,18 +81,6 @@ export const getExceptionsPreCreateItemHandler = (
       const blocklistValidator = new BlocklistValidator(endpointAppContext, request);
       validatedItem = await blocklistValidator.validatePreCreateItem(data);
       blocklistValidator.notifyFeatureUsage(data, 'BLOCKLIST_BY_POLICY');
-    }
-
-    // Validate YARA signatures
-    if (CustomYaraSignaturesValidator.isCustomYaraSignature(data)) {
-      isEndpointArtifact = true;
-      const customYaraSignaturesValidator = new CustomYaraSignaturesValidator(
-        endpointAppContext,
-        request
-      );
-      validatedItem = await customYaraSignaturesValidator.validatePreCreateItem(data);
-      customYaraSignaturesValidator.notifyFeatureUsage(data, 'CUSTOM_YARA_SIGNATURE');
-      customYaraSignaturesValidator.notifyFeatureUsage(data, 'CUSTOM_YARA_SIGNATURE_BY_POLICY');
     }
 
     // validate endpoint exceptions

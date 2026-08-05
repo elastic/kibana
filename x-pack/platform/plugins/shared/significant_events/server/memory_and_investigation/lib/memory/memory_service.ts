@@ -354,6 +354,30 @@ export class MemoryServiceImpl implements MemoryService {
     await this._writeHistory(tombstone, 'delete', `Deleted entry "${current.name}"`, user);
   }
 
+  async rename({
+    id,
+    newName,
+    user,
+  }: {
+    id: string;
+    newName: string;
+    user: string;
+  }): Promise<MemoryEntry> {
+    const current = await this._getById(id);
+    if (!current) throw notFound(`Memory entry with id '${id}' not found`);
+    const existing = await this._getByName(newName);
+    if (existing && existing.id !== id) {
+      throw badRequest(`Memory entry with name '${newName}' already exists`);
+    }
+    const oldName = current.name;
+    return this.update({
+      id,
+      name: newName,
+      user,
+      changeSummary: `Renamed from "${oldName}" to "${newName}"`,
+    });
+  }
+
   // ── Categories ──
 
   async addCategory({

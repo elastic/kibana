@@ -38,7 +38,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Fleet config fans the pack-level schedule onto each query that doesn't have
    * its own override. Requires osquerybeat with RRULE support.
    */
-  rruleScheduling: true,
+  rruleScheduling: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

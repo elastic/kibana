@@ -6,7 +6,8 @@
  */
 
 import { escapeStringValue } from '@kbn/esql-utils/src/utils/append_to_query/utils';
-import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { ALERT_ACTIONS_DATA_STREAM } from '../constants';
+
 export const ALERT_ACTION_TAG_SUGGESTIONS_LIMIT = 20;
 
 export const buildAlertActionTagSuggestionsQuery = (spaceId: string): string =>

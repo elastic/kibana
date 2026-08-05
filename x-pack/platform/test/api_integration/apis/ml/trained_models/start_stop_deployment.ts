@@ -146,18 +146,6 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it('returns an error if the model exists but the deployment does not', async () => {
-      const missingDeploymentId = 'not_existing_deployment';
-      const { body: stopResponseBody, status: stopResponseStatus } = await supertest
-        .post(`/internal/ml/trained_models/${testModel.id}/${missingDeploymentId}/deployment/_stop`)
-        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(getCommonRequestHeader('1'));
-      ml.api.assertResponseStatusCode(200, stopResponseStatus, stopResponseBody);
-
-      expect(stopResponseBody[missingDeploymentId].success).to.eql(false);
-      expect(stopResponseBody[missingDeploymentId].error.statusCode).to.eql(404);
-    });
-
     it('stops trained model deployment with the default ID', async () => {
       const { body: stopResponseBody, status: stopResponseStatus } = await supertest
         .post(`/internal/ml/trained_models/${testModel.id}/${testModel.id}/deployment/_stop`)

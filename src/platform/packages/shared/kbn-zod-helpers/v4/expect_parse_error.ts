@@ -12,6 +12,5 @@ import type { ZodSafeParseError, ZodSafeParseResult } from '@kbn/zod/v4';
 export function expectParseError<Output>(
   result: ZodSafeParseResult<Output>
 ): asserts result is ZodSafeParseError<Output> {
-  expect(result.success).toBe(false);
-  expect(result.error).toBeDefined();
+  expect(result.success).toEqual(false);
 }

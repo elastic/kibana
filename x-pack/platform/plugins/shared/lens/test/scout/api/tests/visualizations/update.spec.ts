@@ -77,7 +77,9 @@ apiTest.describe('lens visualizations - update', { tag: tags.deploymentAgnostic 
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toContain('ID must contain');
+    expect(response.body.message).toBe(
+      'ID must contain only lowercase letters, numbers, hyphens, and underscores.'
+    );
   });
 
   apiTest('validation - returns 400 when body is empty', async ({ apiClient }) => {

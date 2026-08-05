@@ -1,38 +1,10 @@
 {
-  "sha1": "d956ecf8421347b0787bf646ad60225dfae8c5bd",
+  "sha1": "930ba9869f3f02ec13419b63ee4966c09f10cdba",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
   ],
   "tests": [
-    {
-      "id": "4189aabe6643ea7-8cf1f3cf6c6d663",
-      "title": "Action Policies - create and edit creates a policy from the form and persists what was typed",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/action_policies_crud.spec.ts",
-        "line": 42,
-        "column": 44
-      }
-    },
-    {
-      "id": "4189aabe6643ea7-a0554bccd589a70",
-      "title": "Action Policies - create and edit edits an existing policy without dropping untouched fields",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/action_policies_crud.spec.ts",
-        "line": 83,
-        "column": 23
-      }
-    },
     {
       "id": "a3812d69333baa9-c6dcf15528a3e01",
       "title": "Action Policies - read/write privileges editor sees every write affordance",
@@ -42,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/action_policies_privileges.spec.ts",
-        "line": 36,
-        "column": 23
+        "line": 44,
+        "column": 7
       }
     },
     {
@@ -55,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/action_policies_privileges.spec.ts",
-        "line": 47,
-        "column": 11
+        "line": 63,
+        "column": 7
       }
     },
     {
@@ -68,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/action_policies_privileges.spec.ts",
-        "line": 65,
-        "column": 13
+        "line": 85,
+        "column": 7
       }
     },
     {
@@ -81,8 +53,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/alerts_privileges.spec.ts",
-        "line": 41,
-        "column": 5
+        "line": 47,
+        "column": 7
       }
     },
     {
@@ -94,8 +66,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/alerts_privileges.spec.ts",
-        "line": 47,
-        "column": 77
+        "line": 56,
+        "column": 7
       }
     },
     {
@@ -107,8 +79,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 131,
-        "column": 71
+        "line": 103,
+        "column": 9
       }
     },
     {
@@ -120,8 +92,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 207,
-        "column": 23
+        "line": 188,
+        "column": 9
       }
     },
     {
@@ -133,8 +105,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 273,
-        "column": 26
+        "line": 253,
+        "column": 9
       }
     },
     {
@@ -146,21 +118,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 324,
-        "column": 15
-      }
-    },
-    {
-      "id": "a3a9f820a79c452-fa08c7c1ae41791",
-      "title": "ComposeDiscoverFlyout — create and edit flows create flow: manually selected sandbox time field holds and persists (#281806)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 380,
-        "column": 15
+        "line": 311,
+        "column": 9
       }
     },
     {
@@ -172,8 +131,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 431,
-        "column": 26
+        "line": 367,
+        "column": 9
       }
     },
     {
@@ -185,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 457,
-        "column": 15
+        "line": 406,
+        "column": 9
       }
     },
     {
@@ -198,8 +157,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 504,
-        "column": 26
+        "line": 449,
+        "column": 9
       }
     },
     {
@@ -211,8 +170,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 560,
-        "column": 13
+        "line": 513,
+        "column": 9
       }
     },
     {
@@ -224,21 +183,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 586,
+        "line": 543,
         "column": 9
       }
     },
     {
-      "id": "a3a9f820a79c452-d6c6f21c4c52f22",
-      "title": "ComposeDiscoverFlyout — create and edit flows alert condition validation: base-only query shows the no-alert-condition callout and keeps Next enabled",
+      "id": "a3a9f820a79c452-69d20993f3d1ca1",
+      "title": "ComposeDiscoverFlyout — create and edit flows alert condition validation: base-only query shows the no-alert-condition callout and disables Next",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 604,
-        "column": 15
+        "line": 564,
+        "column": 9
       }
     },
     {
@@ -250,8 +209,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 627,
-        "column": 7
+        "line": 593,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-d40f526988a4922",
+      "title": "ComposeDiscoverFlyout — create and edit flows alert condition validation: a base-only query keeps the user on the Alert Condition step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 615,
+        "column": 9
       }
     },
     {
@@ -263,8 +235,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/discover_alerts_menu.spec.ts",
-        "line": 30,
-        "column": 25
+        "line": 42,
+        "column": 9
       }
     },
     {
@@ -276,21 +248,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/discover_query_sync.spec.ts",
-        "line": 42,
-        "column": 26
-      }
-    },
-    {
-      "id": "cb7694bb7388506-9b8bdbc9e8d75a4",
-      "title": "Episode details — action policy history tab mounts the episode-scoped policy history tab from the details route",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/episode_action_policy_history.spec.ts",
-        "line": 39,
-        "column": 48
+        "line": 46,
+        "column": 7
       }
     },
     {
@@ -303,8 +262,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/esql_rule_flyout_validation.spec.ts",
-        "line": 25,
-        "column": 41
+        "line": 34,
+        "column": 7
       }
     },
     {
@@ -317,8 +276,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/esql_rule_flyout_validation.spec.ts",
-        "line": 38,
-        "column": 24
+        "line": 58,
+        "column": 7
       }
     },
     {
@@ -330,8 +289,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/execution_history_smoke.spec.ts",
-        "line": 22,
-        "column": 5
+        "line": 32,
+        "column": 7
       }
     },
     {
@@ -341,66 +300,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 57,
-        "column": 14
-      }
-    },
-    {
-      "id": "7f96a53ae822170-b7f047f4a779368",
-      "title": "Management pages - required privileges user with read-only access can view every management page",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 57,
-        "column": 69
-      }
-    },
-    {
-      "id": "7f96a53ae822170-568f55e8c7b81e1",
-      "title": "Management pages - required privileges user without alerting_v2 access is redirected to the management landing on every page",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 57,
-        "column": 97
-      }
-    },
-    {
-      "id": "7f96a53ae822170-8801b6e0b64b580",
-      "title": "Management pages - required privileges user with rules read-only role can only view the Rules page",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -411,7 +316,85 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
         "line": 58,
-        "column": 8
+        "column": 7
+      }
+    },
+    {
+      "id": "7f96a53ae822170-b7f047f4a779368",
+      "title": "Management pages - required privileges user with read-only access can view every management page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
+        "line": 60,
+        "column": 7
+      }
+    },
+    {
+      "id": "7f96a53ae822170-568f55e8c7b81e1",
+      "title": "Management pages - required privileges user without alerting_v2 access is redirected to the management landing on every page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
+        "line": 65,
+        "column": 7
+      }
+    },
+    {
+      "id": "7f96a53ae822170-8801b6e0b64b580",
+      "title": "Management pages - required privileges user with rules read-only role can only view the Rules page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
+        "line": 70,
+        "column": 7
       }
     },
     {
@@ -421,6 +404,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -430,8 +419,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 71,
-        "column": 5
+        "line": 75,
+        "column": 7
       }
     },
     {
@@ -441,6 +430,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -450,8 +445,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 86,
-        "column": 5
+        "line": 80,
+        "column": 7
       }
     },
     {
@@ -461,6 +456,12 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -470,8 +471,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 51,
-        "column": 24
+        "line": 85,
+        "column": 7
       }
     },
     {
@@ -483,8 +484,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 54,
-        "column": 38
+        "line": 59,
+        "column": 9
       }
     },
     {
@@ -496,8 +497,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 115,
-        "column": 13
+        "line": 130,
+        "column": 9
       }
     },
     {
@@ -509,8 +510,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 169,
-        "column": 26
+        "line": 189,
+        "column": 9
       }
     },
     {
@@ -522,8 +523,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
-        "line": 44,
-        "column": 41
+        "line": 48,
+        "column": 7
       }
     },
     {
@@ -535,8 +536,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
-        "line": 48,
-        "column": 8
+        "line": 57,
+        "column": 7
       }
     },
     {
@@ -548,8 +549,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
-        "line": 58,
-        "column": 5
+        "line": 71,
+        "column": 7
       }
     },
     {
@@ -561,8 +562,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rules_list_bulk_respects_filters.spec.ts",
-        "line": 43,
-        "column": 28
+        "line": 47,
+        "column": 9
       }
     },
     {
@@ -574,8 +575,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rules_list_privileges.spec.ts",
-        "line": 31,
-        "column": 6
+        "line": 39,
+        "column": 7
       }
     },
     {
@@ -587,8 +588,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rules_list_privileges.spec.ts",
-        "line": 37,
-        "column": 5
+        "line": 48,
+        "column": 7
       }
     }
   ]

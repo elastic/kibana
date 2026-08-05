@@ -35,8 +35,6 @@ export function fromRemoteSummaryDocumentToSloDefinition(
       frequency: '1m',
       // added in 8.15.0
       preventInitialBackfill: false,
-      // added in 9.5.0
-      preventCrossProjectSearch: false,
     },
     revision: summaryDoc.slo.revision,
     enabled: true,

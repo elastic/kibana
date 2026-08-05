@@ -16,7 +16,7 @@ export interface GetTransformsAuditMessagesResponseSchema {
 }
 
 export const getTransformAuditMessagesQuerySchema = schema.object({
-  sortField: schema.string({ maxLength: 1000 }),
+  sortField: schema.string(),
   sortDirection: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
 });
 

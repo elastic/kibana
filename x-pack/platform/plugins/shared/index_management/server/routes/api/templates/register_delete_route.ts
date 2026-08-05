@@ -16,9 +16,9 @@ import type { TemplateDeserialized } from '../../../../common';
 const bodySchema = schema.object({
   templates: schema.arrayOf(
     schema.object({
-      name: schema.string({ maxLength: 1000 }),
+      name: schema.string(),
       isLegacy: schema.maybe(schema.boolean()),
-      type: schema.maybe(schema.string({ maxLength: 1000 })),
+      type: schema.maybe(schema.string()),
     }),
     { maxSize: 1000 }
   ),

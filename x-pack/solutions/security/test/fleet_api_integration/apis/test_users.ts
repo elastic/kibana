@@ -254,16 +254,6 @@ export const testUsers = {
     username: 'endpoint_integr_read_policy_for_endpoint_exceptions',
     password: 'changeme',
   },
-  endpoint_integr_read_policy_for_custom_yara_signatures: {
-    permissions: {
-      feature: {
-        [SECURITY_FEATURE_ID]: ['minimal_read', 'custom_yara_signatures_read'],
-      },
-      spaces: ['*'],
-    },
-    username: 'endpoint_integr_read_policy_for_custom_yara_signatures',
-    password: 'changeme',
-  },
 
   // for package_policy update API
   endpoint_integr_write_policy: {
@@ -340,7 +330,6 @@ export const endpointIntegrationTestUsers: Record<
   hostIsolationExceptions: 'endpoint_integr_read_policy_for_host_isolation_exceptions',
   blocklists: 'endpoint_integr_read_policy_for_blocklist',
   endpointExceptions: 'endpoint_integr_read_policy_for_endpoint_exceptions',
-  customYaraSignatures: 'endpoint_integr_read_policy_for_custom_yara_signatures',
 };
 
 export const setupTestUsers = async (security: SecurityService, spaceAwarenessEnabled = false) => {

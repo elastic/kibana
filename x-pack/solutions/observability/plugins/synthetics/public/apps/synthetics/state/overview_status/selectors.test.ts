@@ -192,7 +192,6 @@ describe('selectOverviewStatus', () => {
       loading: false,
       loaded: true,
       error: null,
-      settled: true,
       isInitialLoad: false,
       status: makeStatus({
         downConfigs: { multi: multiLocMonitor },

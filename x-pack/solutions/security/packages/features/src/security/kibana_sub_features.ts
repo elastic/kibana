@@ -485,32 +485,19 @@ export const customYaraSignaturesSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          api: [
-            'lists-all',
-            EXCEPTIONS_API_READ,
-            EXCEPTIONS_API_ALL,
-            'lists-read',
-            'lists-summary',
-            `${APP_ID}-writeCustomYaraSignatures`,
-            `${APP_ID}-readCustomYaraSignatures`,
-          ],
+          api: [`${APP_ID}-writeCustomYaraSignatures`, `${APP_ID}-readCustomYaraSignatures`],
           id: 'custom_yara_signatures_all',
           includeIn: 'none',
           excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
-            all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
+            all: [],
             read: [],
           },
           ui: ['writeCustomYaraSignatures', 'readCustomYaraSignatures'],
         },
         {
-          api: [
-            'lists-read',
-            EXCEPTIONS_API_READ,
-            'lists-summary',
-            `${APP_ID}-readCustomYaraSignatures`,
-          ],
+          api: [`${APP_ID}-readCustomYaraSignatures`],
           id: 'custom_yara_signatures_read',
           includeIn: 'none',
           excludeFromBasePrivileges: true,

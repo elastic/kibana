@@ -25,13 +25,13 @@ describe('markdownPanelConfigSchema parity with the embeddable by-value state', 
   ])('produces embeddable-valid by-value state for %j', (input) => {
     const parsed = markdownPanelConfigSchema.parse(input);
 
-    expect(() => markdownByValueStateSchema.parse(parsed)).not.toThrow();
+    expect(() => markdownByValueStateSchema.validate(parsed)).not.toThrow();
   });
 
   it('relies on the embeddable to default open_links_in_new_tab to true when settings is omitted', () => {
     const parsed = markdownPanelConfigSchema.parse({ content: 'hello' });
 
-    expect(markdownByValueStateSchema.parse(parsed)).toEqual({
+    expect(markdownByValueStateSchema.validate(parsed)).toEqual({
       content: 'hello',
       settings: { open_links_in_new_tab: true },
     });

@@ -9,7 +9,6 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { arrayHighlightStyles } from '../field_format_styles';
 
 /**
  * Formats an array value as React nodes with bracket/comma notation.
@@ -54,7 +53,7 @@ export function formatReactArray(
 }
 
 const withArrayStyles = (text: string, key?: string) => (
-  <span css={arrayHighlightStyles} key={key ?? text}>
+  <span key={key ?? text} className="ffArray__highlight">
     {text}
   </span>
 );

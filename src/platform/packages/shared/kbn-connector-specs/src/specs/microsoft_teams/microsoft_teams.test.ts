@@ -61,9 +61,8 @@ describe('MicrosoftTeams', () => {
       expect(MicrosoftTeams.metadata.minimumLicense).toBe('enterprise');
     });
 
-    it('should support workflows and contextEngine features', () => {
+    it('should support workflows feature', () => {
       expect(MicrosoftTeams.metadata.supportedFeatureIds).toContain('workflows');
-      expect(MicrosoftTeams.metadata.supportedFeatureIds).toContain('contextEngine');
     });
   });
 

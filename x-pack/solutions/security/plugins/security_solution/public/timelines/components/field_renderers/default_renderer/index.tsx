@@ -7,7 +7,6 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Spacer } from '../../../../common/components/page';
 import { CellActionsRenderer } from '../../../../common/components/cell_actions/cell_actions_renderer';
@@ -136,12 +135,6 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
         {rowItems.length > overflowIndexStart && (
           <EuiPopover
             id="popover"
-            aria-label={i18n.translate(
-              'xpack.securitySolution.fieldRenderers.moreValuesPopoverAriaLabel',
-              {
-                defaultMessage: 'Additional field values',
-              }
-            )}
             button={button}
             isOpen={isOpen}
             closePopover={togglePopover}

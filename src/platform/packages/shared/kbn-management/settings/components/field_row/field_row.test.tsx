@@ -481,7 +481,7 @@ describe('Field', () => {
     });
   });
 
-  it('should fire onFieldChange when input changes', async () => {
+  it('should fire onFieldChange when input changes', () => {
     const setting = settings.string;
     const field = getFieldDefinition({ id: setting.name || setting.type, setting });
 
@@ -491,13 +491,10 @@ describe('Field', () => {
 
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${field.id}`);
     fireEvent.change(input, { target: { value: 'new value' } });
-
-    await waitFor(() =>
-      expect(handleChange).toHaveBeenCalledWith(field.id, {
-        type: 'string',
-        unsavedValue: 'new value',
-      })
-    );
+    expect(handleChange).toHaveBeenCalledWith(field.id, {
+      type: 'string',
+      unsavedValue: 'new value',
+    });
   });
 
   it('should fire onFieldChange with an error when input changes with invalid value', () => {
@@ -550,7 +547,7 @@ describe('Field', () => {
     );
   });
 
-  it('should clear the unsaved value if the new value matches the saved value', async () => {
+  it('should clear the unsaved value if the new value matches the saved value', () => {
     const setting = settings.string;
     const field = getFieldDefinition({
       id: setting.name || setting.type,
@@ -577,8 +574,7 @@ describe('Field', () => {
 
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${field.id}`);
     fireEvent.change(input, { target: { value: field.savedValue } });
-
-    await waitFor(() => expect(handleChange).toHaveBeenCalledWith(field.id, undefined));
+    expect(handleChange).toHaveBeenCalledWith(field.id, undefined);
   });
 
   it('should clear the current image when Change Image is clicked', () => {

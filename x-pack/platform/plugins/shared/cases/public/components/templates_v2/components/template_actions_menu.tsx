@@ -411,7 +411,6 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
       })}
     >
       <EuiPopover
-        aria-label={i18n.ACTIONS_MENU_ROOT_TITLE}
         isOpen={isOpen}
         closePopover={() => setIsOpen(false)}
         panelPaddingSize="none"

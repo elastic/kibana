@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/alerting-v2-common-queries",
-  "owner": "@elastic/rna-project-team",
-  "group": "platform",
-  "visibility": "shared"
-}

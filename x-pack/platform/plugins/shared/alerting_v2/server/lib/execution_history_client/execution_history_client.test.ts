@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { GetRuleExecutionsQuery } from '@kbn/alerting-v2-schemas';
 import type { EventLogService } from '../services/event_log_service/event_log_service';
 import { createEventLogService } from '../services/event_log_service/event_log_service.mock';
 import { ExecutionHistoryClient } from './execution_history_client';
-import type { ListRuleExecutionsArgs } from './types';
 
-const baseArgs = (overrides: Partial<ListRuleExecutionsArgs> = {}): ListRuleExecutionsArgs => ({
+const baseQuery = (overrides: Partial<GetRuleExecutionsQuery> = {}): GetRuleExecutionsQuery => ({
   sort: 'startedAt',
   sortOrder: 'desc',
   page: 1,
@@ -36,18 +36,18 @@ const createMocks = (spaceId = 'default'): Mocks => {
 };
 
 describe('ExecutionHistoryClient', () => {
-  describe('listRuleExecutions', () => {
+  describe('getRuleExecutions', () => {
     it('passes the request space id to the underlying event log service', async () => {
       const { client, findRuleExecutions } = createMocks('space-A');
-      await client.listRuleExecutions(baseArgs());
+      await client.getRuleExecutions(baseQuery());
       expect(findRuleExecutions).toHaveBeenCalledWith(
         expect.objectContaining({ spaceId: 'space-A' })
       );
     });
 
-    it('forwards the ruleIds filter to the service call', async () => {
+    it('renames the schema ruleId (singular, REST convention) to ruleIds for the service call', async () => {
       const { client, findRuleExecutions } = createMocks();
-      await client.listRuleExecutions(baseArgs({ ruleIds: ['rule-x'] }));
+      await client.getRuleExecutions(baseQuery({ ruleId: ['rule-x'] }));
       expect(findRuleExecutions).toHaveBeenCalledWith(
         expect.objectContaining({ ruleIds: ['rule-x'] })
       );
@@ -55,7 +55,7 @@ describe('ExecutionHistoryClient', () => {
 
     it('supports filtering on multiple rule ids', async () => {
       const { client, findRuleExecutions } = createMocks();
-      await client.listRuleExecutions(baseArgs({ ruleIds: ['rule-x', 'rule-y', 'rule-z'] }));
+      await client.getRuleExecutions(baseQuery({ ruleId: ['rule-x', 'rule-y', 'rule-z'] }));
       expect(findRuleExecutions).toHaveBeenCalledWith(
         expect.objectContaining({ ruleIds: ['rule-x', 'rule-y', 'rule-z'] })
       );
@@ -63,13 +63,15 @@ describe('ExecutionHistoryClient', () => {
 
     it('omits ruleIds when no rule filter is provided', async () => {
       const { client, findRuleExecutions } = createMocks();
-      await client.listRuleExecutions(baseArgs());
-      expect(findRuleExecutions.mock.calls[0][0]).not.toHaveProperty('ruleIds');
+      await client.getRuleExecutions(baseQuery());
+      expect(findRuleExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ ruleIds: undefined })
+      );
     });
 
     it('renames the schema outcome (singular, REST convention) to outcomes for the service call', async () => {
       const { client, findRuleExecutions } = createMocks();
-      await client.listRuleExecutions(baseArgs({ outcomes: ['success', 'failure'] }));
+      await client.getRuleExecutions(baseQuery({ outcome: ['success', 'failure'] }));
       expect(findRuleExecutions).toHaveBeenCalledWith(
         expect.objectContaining({ outcomes: ['success', 'failure'] })
       );
@@ -77,8 +79,8 @@ describe('ExecutionHistoryClient', () => {
 
     it('passes through sort, sortOrder, from, to, paging unchanged', async () => {
       const { client, findRuleExecutions } = createMocks();
-      await client.listRuleExecutions(
-        baseArgs({
+      await client.getRuleExecutions(
+        baseQuery({
           sort: 'duration',
           sortOrder: 'asc',
           from: '2026-06-01T00:00:00Z',
@@ -107,7 +109,7 @@ describe('ExecutionHistoryClient', () => {
         page: 5,
         perPage: 25,
       });
-      const result = await client.listRuleExecutions(baseArgs({ page: 5, perPage: 25 }));
+      const result = await client.getRuleExecutions(baseQuery({ page: 5, perPage: 25 }));
       expect(result).toEqual({ total: 137, page: 5, perPage: 25, items: [] });
     });
   });

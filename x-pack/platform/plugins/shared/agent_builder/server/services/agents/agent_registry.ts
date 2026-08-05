@@ -153,14 +153,10 @@ class AgentRegistryImpl implements AgentRegistry {
   }
 
   async getIds(opts: AgentListOptions = {}): Promise<string[]> {
-    // Same availability filter as `list` / `get` for both providers. Unlike `list`, this does not
-    // apply display visibility (`isVisibleAgent`): getIds scopes access (e.g. conversations), so
-    // managed agents that are available still appear even when hidden from the picker.
-    const availableAgents = await Promise.all(
-      this.orderedProviders.map((provider) => this.getAvailableAgents(provider, opts))
-    );
+    const builtinAgents = await this.getAvailableAgents(this.builtinProvider, opts);
+    const persistedAgentIds = await this.persistedProvider.getIds(opts);
 
-    return availableAgents.flat().map(({ id }) => id);
+    return [...builtinAgents.map(({ id }) => id), ...persistedAgentIds];
   }
 
   async create(createRequest: AgentCreateRequest): Promise<InternalAgentDefinition> {

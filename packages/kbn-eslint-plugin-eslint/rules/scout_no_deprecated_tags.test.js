@@ -65,13 +65,6 @@ ruleTester.run('@kbn/eslint/scout_no_deprecated_tags', rule, {
         });
       `,
     },
-    {
-      code: dedent`
-        test.describe('my test suite', { tag: ['@local-stateful-classic', '@local-serverless-search'] }, () => {
-          test('should work', () => {});
-        });
-      `,
-    },
   ],
 
   invalid: [
@@ -106,30 +99,6 @@ ruleTester.run('@kbn/eslint/scout_no_deprecated_tags', rule, {
         });
       `,
       errors: [{ messageId: 'deprecatedTag' }],
-    },
-    {
-      code: dedent`
-        test.describe('my test suite', { tag: ['@local-stateful-classic', '@local-stateful-search'] }, () => {
-          test('should work', () => {});
-        });
-      `,
-      errors: [{ messageId: 'unsupportedTag' }],
-    },
-    {
-      code: dedent`
-        test.describe('my test suite', { tag: ['@local-stateful-observability_complete'] }, () => {
-          test('should work', () => {});
-        });
-      `,
-      errors: [{ messageId: 'unsupportedTag' }],
-    },
-    {
-      code: dedent`
-        spaceTest.describe('space test', { tag: ['@cloud-stateful-security_complete'] }, () => {
-          spaceTest('should work', () => {});
-        });
-      `,
-      errors: [{ messageId: 'unsupportedTag' }],
     },
   ],
 });

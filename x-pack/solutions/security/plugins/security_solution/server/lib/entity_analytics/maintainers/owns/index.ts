@@ -52,7 +52,6 @@ export const ownsMaintainer: RegisterEntityMaintainerConfig = {
       crudClient,
       entityMetadataClient,
       integrations: buildOwnsConfigs(lastProcessedTimestamp),
-      maintainerName: 'owns',
       signal,
       telemetryCollector: collector,
     });

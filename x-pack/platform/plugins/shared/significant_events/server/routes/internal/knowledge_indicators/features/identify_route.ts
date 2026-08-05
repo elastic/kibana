@@ -116,7 +116,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
     const scopedClients = await getScopedClients({ request });
     const {
       scopedClusterClient,
-      streamDataEsClient,
       streamsClient,
       inferenceClient,
       soClient,
@@ -163,7 +162,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
     try {
       const result = await identifyInferredFeatures({
         esClient: scopedClusterClient.asCurrentUser,
-        samplingEsClient: streamDataEsClient,
         kiClient,
         soClient,
         inferenceClient: inferenceClient.bindTo({
@@ -280,7 +278,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
     const scopedClients = await getScopedClients({ request });
-    const { streamDataEsClient, streamsClient, licensing } = scopedClients;
+    const { scopedClusterClient, streamsClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -307,7 +305,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
         streamName,
         start,
         end,
-        esClient: streamDataEsClient,
+        esClient: scopedClusterClient.asCurrentUser,
         kiClient,
         logger: routeLogger,
         runId,

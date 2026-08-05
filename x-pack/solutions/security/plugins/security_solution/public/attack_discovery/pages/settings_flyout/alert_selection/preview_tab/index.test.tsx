@@ -13,6 +13,8 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
 
+const mockDispatch = jest.fn();
+
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('react-router-dom', () => ({
@@ -21,6 +23,10 @@ jest.mock('react-router-dom', () => ({
     search: '',
   }),
   withRouter: jest.fn(),
+}));
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
+  useDispatch: () => mockDispatch,
 }));
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -152,6 +158,24 @@ describe('PreviewTab', () => {
     );
 
     expect(container.firstChild).toBeNull();
+  });
+
+  it('limits the fields in the StackByComboBox to the fields in the signal index', () => {
+    render(
+      <TestProviders>
+        <PreviewTab {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      payload: {
+        id: 'alerts',
+        selectedDataViewId: 'mock-signal-index',
+        selectedPatterns: ['mock-signal-index'],
+        shouldValidateSelectedPatterns: false,
+      },
+      type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
+    });
   });
 
   it('passes esqlQuery to getPreviewEsqlQuery when provided', () => {

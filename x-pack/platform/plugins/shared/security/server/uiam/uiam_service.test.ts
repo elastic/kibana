@@ -9,11 +9,7 @@ import fs from 'fs';
 import undici from 'undici';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import {
-  deriveInternalCallerAttestation,
-  HTTPAuthorizationHeader,
-  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
-} from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 import {
   type GrantUiamApiKeyRequestBody,
@@ -319,30 +315,6 @@ describe('UiamService', () => {
     });
   });
 
-  describe('#getInternalCallerAttestationHeaders', () => {
-    it('carries the attestation derived from the shared secret, and never the secret itself', () => {
-      const credential = new HTTPAuthorizationHeader('Bearer', 'essu_one');
-      expect(uiamService.getInternalCallerAttestationHeaders(credential)).toEqual({
-        [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-          'secret',
-          credential
-        ),
-      });
-    });
-
-    it('binds the attestation to the credential', () => {
-      expect(
-        uiamService.getInternalCallerAttestationHeaders(
-          new HTTPAuthorizationHeader('Bearer', 'essu_one')
-        )
-      ).not.toEqual(
-        uiamService.getInternalCallerAttestationHeaders(
-          new HTTPAuthorizationHeader('Bearer', 'essu_two')
-        )
-      );
-    });
-  });
-
   describe('#refreshSessionTokens', () => {
     it('properly calls UIAM service to refresh the tokens', async () => {
       fetchSpy.mockResolvedValue({
@@ -504,7 +476,7 @@ describe('UiamService', () => {
       );
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
-        { outcome: 'failure', errorType: 'KIBANA.AUDIENCE_MISMATCH' }
+        { outcome: 'failure' }
       );
     });
 
@@ -519,30 +491,7 @@ describe('UiamService', () => {
       await expect(uiamService.exchangeOAuthToken('essu_invalid_token')).rejects.toThrow();
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
-        { outcome: 'failure', errorType: 'UNKNOWN' }
-      );
-    });
-
-    it('records the UIAM error type when the exchange fails with a classified error', async () => {
-      fetchSpy.mockResolvedValue({
-        ok: false,
-        status: 401,
-        json: async () => ({
-          request_id: '2f26103be7be5483ef70f099ca9d5567',
-          error: {
-            message: 'Authentication failed',
-            type: 'AUTHENTICATION.TOKEN',
-            resource: 'ba6ab8be-9c98-43ec-a5f9-7b163af9e432',
-            code: '0x7E0116',
-          },
-        }),
-        headers: new Headers(),
-      });
-
-      await expect(uiamService.exchangeOAuthToken('essu_expired_token')).rejects.toThrow();
-      expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
-        expect.any(Number),
-        { outcome: 'failure', errorType: 'AUTHENTICATION.TOKEN' }
+        { outcome: 'failure' }
       );
     });
   });
@@ -1338,34 +1287,11 @@ describe('UiamService', () => {
         json: async () => ({ connections: [] }),
       });
 
-      await uiamService.listOAuthConnections('access-token', 'cid', 'conn-id', 'my-project-id');
+      await uiamService.listOAuthConnections('access-token', 'cid', 'conn-id');
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith(
-        'https://uiam.service/uiam/api/v1/oauth/connections?client_id=cid&connection_id=conn-id&project_id=my-project-id',
-        {
-          method: 'GET',
-          headers: {
-            'User-Agent': 'Kibana/9.0.0',
-            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
-            Authorization: 'Bearer access-token',
-          },
-          dispatcher: AGENT_MOCK,
-        }
-      );
-    });
-
-    it('includes project_id query parameter when provided', async () => {
-      fetchSpy.mockResolvedValue({
-        ok: true,
-        json: async () => ({ connections: [] }),
-      });
-
-      await uiamService.listOAuthConnections('access-token', undefined, undefined, 'my-project-id');
-
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
-      expect(fetchSpy).toHaveBeenCalledWith(
-        'https://uiam.service/uiam/api/v1/oauth/connections?project_id=my-project-id',
+        'https://uiam.service/uiam/api/v1/oauth/connections?client_id=cid&connection_id=conn-id',
         {
           method: 'GET',
           headers: {

@@ -50,7 +50,6 @@ export const ConversationSidePanelContextMenu = ({
 
   return (
     <EuiPopover
-      aria-label={i18n.CONVERSATION_CONTEXT_MENU}
       panelPaddingSize="none"
       button={
         <EuiToolTip content={i18n.CONVERSATION_CONTEXT_MENU} disableScreenReaderOutput>

@@ -6,8 +6,8 @@
  */
 
 import { handleActions } from 'redux-actions';
+import { set, del } from 'object-path-immutable';
 import { get } from 'lodash';
-import { set, del } from '../../../common/lib/object_path_immutable';
 import { prepend } from '../../lib/modify_path';
 import * as actions from '../actions/resolved_args';
 

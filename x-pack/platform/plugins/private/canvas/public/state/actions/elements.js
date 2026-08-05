@@ -6,9 +6,9 @@
  */
 
 import { createAction } from 'redux-actions';
+import { set, del } from 'object-path-immutable';
 import { get, pick, cloneDeep, without, last } from 'lodash';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter';
-import { set, del } from '../../../common/lib/object_path_immutable';
 import { createThunk } from '../../lib/create_thunk';
 import { isGroupId } from '../../lib/workpad';
 import {

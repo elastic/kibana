@@ -1,55 +1,151 @@
-# Significant Events - Scout API Tests
+# Streams - Scout API Tests
 
-Scout API tests for the Significant Events plugin. These exercise server-side API functionality
-without browser interaction, giving fast and reliable coverage of the route repository.
+This directory contains Scout API tests for the Streams plugin. These tests focus on server-side API functionality without browser interaction, providing fast and reliable test coverage.
 
-## Directory structure
+## Why API Tests?
+
+API tests complement UI tests by:
+- **Running faster** - No browser overhead, tests execute in milliseconds
+- **Being more reliable** - No timing issues from UI rendering
+- **Testing edge cases** - Easier to test error scenarios and validation
+- **Reducing flakiness** - Deterministic API responses vs. async UI updates
+
+## Directory Structure
 
 ```
 api/
-├── playwright.config.ts                        # Scout API test configuration
+├── playwright.config.ts          # Scout API test configuration
+├── constants.ts                  # Common headers and constants
 ├── fixtures/
-│   ├── index.ts                                # `significantEventsApiTest`, extending apiTest
-│   └── constants.ts                            # Role definitions and API headers
+│   ├── index.ts                 # Test fixtures extending apiTest
+│   └── constants.ts             # User roles and API headers
 ├── services/
-│   └── significant_events_api_service.ts       # Typed helper over the route repository
+│   └── streams_api_service.ts   # Streams API helper service
 └── tests/
-    ├── global.setup.ts                         # Enables Streams + the availability feature flag
-    ├── global.teardown.ts                      # Reverts the flag, disables Streams
-    ├── memory_and_investigation/memory_crud.spec.ts
-    ├── significant_events/onboarding_bulk_status.spec.ts
-    └── workflows/managed_workflows.spec.ts
+    ├── global.setup.ts          # Global setup (enables Streams)
+    ├── processing_simulate.spec.ts
+    ├── routing_fork_stream.spec.ts
+    ├── schema_field_mapping.spec.ts
+    └── lifecycle_retention.spec.ts
 ```
 
-## Running
+## Running Tests
+
+### Prerequisites
+
+1. Start Elasticsearch and Kibana servers:
+   ```bash
+   node scripts/scout run-servers --arch stateful --domain classic
+   ```
+
+2. Run the API tests:
+   ```bash
+   node scripts/playwright test --config x-pack/platform/plugins/shared/streams/test/scout/api/playwright.config.ts
+   ```
+
+### Running Specific Tests
 
 ```bash
-node scripts/scout run-tests --arch stateful --domain classic \
-  --config x-pack/platform/plugins/shared/significant_events/test/scout/api/playwright.config.ts
+# Run only routing tests
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams/test/scout/api/playwright.config.ts -g "routing"
+
+# Run only processing tests
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams/test/scout/api/playwright.config.ts -g "processing"
 ```
 
-Significant events is gated behind the `streams.significantEventsAvailable` feature flag, which
-defaults to false. `global.setup.ts` forces it on for the run and `global.teardown.ts` reverts it —
-without that, every route returns a 403.
+## Test Coverage
 
-## Writing new tests
+### Processing Tests (`processing/simulate_processing.spec.ts`)
+- Grok pattern simulation
+- Dissect pattern simulation
+- Multiple processing steps
+- Invalid pattern handling
+- Error scenarios
 
-```typescript
-import { significantEventsApiTest as apiTest } from '../../fixtures';
-import { COMMON_API_HEADERS } from '../../fixtures/constants';
+### Routing Tests (`routing/fork_stream.spec.ts`)
+- Create child streams via fork API
+- Disabled routing rules
+- Nested child streams
+- Delete streams
+- Complex conditions (AND/OR)
+- Duplicate stream names
+- Invalid conditions
 
-apiTest.beforeAll(async ({ samlAuth }) => {
-  const credentials = await samlAuth.asStreamsAdmin();
-  adminCookieHeader = credentials.cookieHeader;
-});
+### Schema Tests (`schema/field_mapping.spec.ts`)
+- Get unmapped fields
+- Simulate field mappings with various types:
+  - keyword, long, boolean, double, ip, date, geo_point
+- Invalid field types
+- Nested field names
+- Multiple field definitions
+
+### Lifecycle Tests (`lifecycle/retention.spec.ts`)
+- Get lifecycle stats
+- Get lifecycle explain
+- Update retention settings
+- Inheritance from parent
+- Different time units (hours, days)
+- Clear custom retention
+
+## Writing New Tests
+
+1. **Import the test fixture:**
+   ```typescript
+   import { streamsApiTest as apiTest } from '../../fixtures';
+   import { COMMON_API_HEADERS } from '../../fixtures/constants';
+   ```
+
+2. **Set up authentication in beforeAll:**
+   ```typescript
+   apiTest.beforeAll(async ({ samlAuth }) => {
+     const credentials = await samlAuth.asStreamsAdmin();
+     adminCookieHeader = credentials.cookieHeader;
+   });
+   ```
+
+3. **Use apiClient for HTTP requests:**
+   ```typescript
+   apiTest('should do something', async ({ apiClient }) => {
+     const { statusCode, body } = await apiClient.post('api/streams/...', {
+       headers: { ...COMMON_API_HEADERS, ...adminCookieHeader },
+       body: { ... },
+       responseType: 'json',
+     });
+     expect(statusCode).toBe(200);
+   });
+   ```
+
+4. **Clean up test data in afterEach:**
+   ```typescript
+   apiTest.afterEach(async ({ apiServices }) => {
+     await apiServices.streamsTest.cleanupTestStreams('logs.my-prefix');
+   });
+   ```
+
+## Migration from UI Tests
+
+When moving functionality from UI tests to API tests:
+
+1. **Keep UI tests for:**
+   - Critical user journeys
+   - Visual/UX verification
+   - Component interactions
+
+2. **Move to API tests:**
+   - CRUD operations
+   - Data validation
+   - Error handling
+   - Edge cases
+   - Business logic verification
+
+## Debugging
+
+Enable verbose logging:
+```bash
+DEBUG=scout:* node scripts/playwright test --config ...
 ```
 
-## Related suites
-
-Significant-events API coverage is split across three places; several routes are reachable only
-from the second:
-
-- **this suite** — memory CRUD, KI onboarding bulk status, managed workflows
-- `x-pack/platform/test/api_integration_deployment_agnostic/apis/significant_events/` — FTR
-  deployment-agnostic tests, run behind the significant-events feature-flag configs
-- `x-pack/platform/packages/shared/kbn-evals-suite-significant-events/` — LLM evaluation suites
+View test artifacts:
+```bash
+ls -la x-pack/platform/plugins/shared/streams/test/scout/api/.scout/
+```

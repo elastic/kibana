@@ -6,7 +6,6 @@
  */
 
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { PROJECT_ROUTING_ORIGIN } from '@kbn/cps-server-utils';
 import type { SLODefinition } from '../../domain/models';
 import { generateSummaryTransformForOccurrences } from './generators/occurrences';
 import { generateSummaryTransformForTimeslicesAndCalendarAligned } from './generators/timeslices_calendar_aligned';
@@ -17,28 +16,15 @@ export interface SummaryTransformGenerator {
 }
 
 export class DefaultSummaryTransformGenerator implements SummaryTransformGenerator {
-  constructor(
-    private readonly isServerless: boolean,
-    private readonly isCpsEnabled: boolean = false
-  ) {}
-
   public generate(slo: SLODefinition): TransformPutTransformRequest {
-    let result: TransformPutTransformRequest;
-
     if (slo.budgetingMethod === 'occurrences') {
-      result = generateSummaryTransformForOccurrences(slo);
+      return generateSummaryTransformForOccurrences(slo);
     } else if (slo.budgetingMethod === 'timeslices' && slo.timeWindow.type === 'rolling') {
-      result = generateSummaryTransformForTimeslicesAndRolling(slo);
+      return generateSummaryTransformForTimeslicesAndRolling(slo);
     } else if (slo.budgetingMethod === 'timeslices' && slo.timeWindow.type === 'calendarAligned') {
-      result = generateSummaryTransformForTimeslicesAndCalendarAligned(slo);
-    } else {
-      throw new Error('Not supported SLO');
+      return generateSummaryTransformForTimeslicesAndCalendarAligned(slo);
     }
 
-    if (this.isServerless && this.isCpsEnabled) {
-      result = { ...result, source: { ...result.source, project_routing: PROJECT_ROUTING_ORIGIN } };
-    }
-
-    return result;
+    throw new Error('Not supported SLO');
   }
 }

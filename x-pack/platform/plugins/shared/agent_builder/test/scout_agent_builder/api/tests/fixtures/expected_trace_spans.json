@@ -1,8 +1,7 @@
 [
   {
     "attributes": {
-      "elastic.conversation.title": "[CONVERSATION_TITLE]",
-      "elastic.inference.span.kind": "CHAIN",
+      "elastic.inference.span.kind": "AGENT",
       "gen_ai.agent.id": "[AGENT_ID]",
       "gen_ai.agent.name": "test_agent",
       "gen_ai.conversation.id": "[CONVERSATION_ID]",
@@ -14,7 +13,7 @@
   },
   {
     "attributes": {
-      "elastic.inference.span.kind": "AGENT",
+      "elastic.inference.span.kind": "CHAIN",
       "gen_ai.agent.id": "[AGENT_ID]",
       "gen_ai.agent.name": "test_agent",
       "gen_ai.conversation.id": "[CONVERSATION_ID]",

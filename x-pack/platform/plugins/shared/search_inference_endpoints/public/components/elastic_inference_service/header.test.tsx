@@ -7,12 +7,19 @@
 
 import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { ElasticInferenceServiceModelsHeader } from './header';
 import { useKibana } from '../../hooks/use_kibana';
 import { docLinks } from '../../../common/doc_links';
+import { INFERENCE_PREFERENCES_FEATURE_FLAG_ID } from '../../../common/constants';
 
 jest.mock('../../hooks/use_kibana');
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useUiSetting: jest.fn((key: string, defaultValue?: unknown) => defaultValue),
+}));
 
+const mockUseUiSetting = useUiSetting as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 
 const mockKibanaReturn = (options?: { manage?: boolean; cloud?: Record<string, unknown> }) => {
@@ -36,6 +43,10 @@ describe('ElasticInferenceServiceModelsHeader', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseUiSetting.mockImplementation((key: string, defaultValue?: unknown) => {
+      if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return false;
+      return defaultValue;
+    });
     mockUseKibana.mockReturnValue(mockKibanaReturn());
   });
 
@@ -60,14 +71,29 @@ describe('ElasticInferenceServiceModelsHeader', () => {
   });
 
   describe('Manage regions button', () => {
-    it('shows when manage capability is true', () => {
+    it('shows when inference preferences FF is enabled', () => {
+      mockUseUiSetting.mockImplementation((key: string, defaultValue?: unknown) => {
+        if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return true;
+        return defaultValue;
+      });
       const { getByTestId } = render(
         <ElasticInferenceServiceModelsHeader onManageRegions={onManageRegions} />
       );
       expect(getByTestId('eisManageRegionsButton')).toBeInTheDocument();
     });
 
+    it('hidden when inference preferences FF is disabled', () => {
+      const { queryByTestId } = render(
+        <ElasticInferenceServiceModelsHeader onManageRegions={onManageRegions} />
+      );
+      expect(queryByTestId('eisManageRegionsButton')).not.toBeInTheDocument();
+    });
+
     it('hidden when manage capability is false', () => {
+      mockUseUiSetting.mockImplementation((key: string, defaultValue?: unknown) => {
+        if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return true;
+        return defaultValue;
+      });
       mockUseKibana.mockReturnValue(mockKibanaReturn({ manage: false }));
       const { queryByTestId } = render(
         <ElasticInferenceServiceModelsHeader onManageRegions={onManageRegions} />
@@ -76,6 +102,10 @@ describe('ElasticInferenceServiceModelsHeader', () => {
     });
 
     it('calls onManageRegions when button is clicked', () => {
+      mockUseUiSetting.mockImplementation((key: string, defaultValue?: unknown) => {
+        if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return true;
+        return defaultValue;
+      });
       const { getByTestId } = render(
         <ElasticInferenceServiceModelsHeader onManageRegions={onManageRegions} />
       );

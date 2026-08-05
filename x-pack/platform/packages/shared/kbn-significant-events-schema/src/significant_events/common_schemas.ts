@@ -14,7 +14,6 @@ import {
   MAX_TEXT_LENGTH,
   NO_RAW_SENSITIVE_VALUES_RULE,
   MAX_ARRAY_LENGTH,
-  MAX_SIGNAL_DESCRIPTION_LENGTH,
 } from './constants';
 import { detectionSchema } from './detections';
 
@@ -135,13 +134,9 @@ const signalBaseSchema = z.object({
     .max(MAX_TEXT_LENGTH)
     .describe(
       dedent`
-        Compact verification account for detection signals — do not use alternative shapes. Max ${MAX_SIGNAL_DESCRIPTION_LENGTH} chars; shorten Found before omitting Impact on confirms.
-
-        Confirms: "Found: [signature, target, or endpoint from the row]. Impact: [who/what is blocked or degraded]. Verdict: confirms."
-        Refutes/inconclusive: "Found: [signature or absence]. Impact: [none or why inconclusive]. Verdict: refutes | inconclusive."
-        Omit Impact only for zero-row refutes: "Found: no match. Verdict: refutes."
-
-        Do not name dependency chains, upstream causes, or topology here — use causal_features and blast_radius for that.
+        Human-readable account of what was observed and what it means. Required format for detection signals — do not use alternative shapes: 
+        
+        "Testing: [hypothesis]. Expected if true: [pattern]. Found: [N rows — failing upstream target/endpoint from the row, e.g. service, host:port, or DNS name]. Why: [causal link visible in the row — name the failing upstream and how it is failing, e.g. "api-service cannot reach db-primary:5432 — connection refused"; do not infer beyond what the row shows]. Verdict: confirms | refutes | inconclusive — who/what is blocked."
         ${NO_RAW_SENSITIVE_VALUES_RULE}
       `
     ),
@@ -149,7 +144,7 @@ const signalBaseSchema = z.object({
     .boolean()
     .optional()
     .describe(
-      "Whether verified evidence supports this record's failure, material degradation, sensitive-data exposure, or evidenced cascade. True means aligned incident evidence; false means verified healthy, positive, non-confirming, or unrelated evidence; omission means unverified."
+      'Whether verified evidence supports this record’s failure, material degradation, sensitive-data exposure, or evidenced cascade. True means aligned incident evidence; false means verified healthy, positive, non-confirming, or unrelated evidence; omission means unverified.'
     ),
   collected_at: z.iso
     .datetime({ offset: true })
@@ -163,24 +158,18 @@ const signalBaseSchema = z.object({
     ),
 });
 
-const detectionSignalMetadataSchema = detectionSchema
-  .omit({
+const detectionSignalSchema = signalBaseSchema.extend({
+  type: z.literal('detection'),
+  metadata: detectionSchema.omit({
     '@timestamp': true,
     alert_index: true,
     workflow_execution_id: true,
     processed: true,
     stream_name: true,
-  })
-  .describe(
-    'Immutable detection identity and alert metadata. Copy the complete metadata object verbatim from the matching input detection; do not reconstruct or alter its fields.'
-  );
-
-const detectionSignalSchema = signalBaseSchema.extend({
-  type: z.literal('detection'),
-  metadata: detectionSignalMetadataSchema,
+  }),
 });
 
-/** Extensible discriminated union of signal sources accepted from agents. */
+/** Extensible discriminated union of signal sources. Only `detection` is implemented for now. */
 export const signalEntrySchema = z.discriminatedUnion('type', [detectionSignalSchema]);
 export type SignalEntry = z.infer<typeof signalEntrySchema>;
 
@@ -277,7 +266,7 @@ export const significantEventBaseSchema = z.object({
     .min(0)
     .max(1)
     .describe(
-      'symptom_hypothesis correctness 0.0–1.0 float. Higher values reflect stronger evidence grounding and more corroboration. ' +
+      'Symptom-hypothesis correctness 0.0–1.0 float. Higher values reflect stronger evidence grounding and more corroboration. ' +
         'causal_features ceiling: cap at 0.65 when causal_features is empty (applies to open status only).'
     ),
   stream_names: z
@@ -315,7 +304,7 @@ export const significantEventBaseSchema = z.object({
     .max(MAX_ID_LENGTH)
     .optional()
     .describe(
-      'ID of the workflow execution that produced this specific version, e.g. the triage run that wrote it or the investigation run that changed its severity; omit when the write did not originate from a workflow execution.'
+      'ID of the workflow execution that produced this write; omit when the write did not originate from a workflow execution.'
     ),
   conversation_id: z
     .string()
@@ -323,3 +312,5 @@ export const significantEventBaseSchema = z.object({
     .optional()
     .describe('ID of the agent chat conversation this write originated from.'),
 });
+
+export type SigEventBase = z.infer<typeof significantEventBaseSchema>;

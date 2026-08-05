@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { OPEN_DASHBOARD_CHAT_ACTION_ID } from '@kbn/dashboard-plugin/public';
 import type {
   AgentBuilderDashboardsPluginPublicSetup,
   AgentBuilderDashboardsPluginPublicStart,
@@ -52,15 +51,6 @@ export class AgentBuilderDashboardsPlugin
       data: plugins.data,
       dashboardPlugin: plugins.dashboard,
     });
-
-    if (core.application.capabilities.agentBuilder?.show === true) {
-      plugins.uiActions.registerActionAsync(OPEN_DASHBOARD_CHAT_ACTION_ID, async () => {
-        const { createOpenDashboardChatAction } = await import(
-          './dashboard_empty_screen/open_dashboard_chat_action'
-        );
-        return createOpenDashboardChatAction(plugins.agentBuilder.openChat);
-      });
-    }
 
     return {};
   }

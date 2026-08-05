@@ -6,8 +6,10 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import type { AlertAction } from '../../../resources/datastreams/alert_actions';
+import {
+  ALERT_ACTIONS_DATA_STREAM,
+  type AlertAction,
+} from '../../../resources/datastreams/alert_actions';
 import type {
   AlertEpisode,
   DispatcherStep,

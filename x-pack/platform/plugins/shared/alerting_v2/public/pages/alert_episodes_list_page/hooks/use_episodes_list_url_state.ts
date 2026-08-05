@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import type { TimeRange } from '@kbn/es-query';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';

@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiCallOut, EuiTitle } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
-import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import type { AlertEpisodesKibanaServices } from '../../../../episodes_kibana_services';
 import {
   EPISODES_KPIS_ACKNOWLEDGED,

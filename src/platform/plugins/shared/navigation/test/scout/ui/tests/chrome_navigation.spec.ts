@@ -12,7 +12,7 @@ import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
 /**
- * Solution-agnostic chrome navigation mechanics: side-nav rendering
+ * Solution-agnostic chrome navigation mechanics: side-nav rendering, breadcrumb
  * updates on navigation, and logo-click-to-home.
  */
 
@@ -50,11 +50,11 @@ test.describe('chrome navigation mechanics', { tag: tags.stateful.classic }, () 
     await browserAuth.loginAsViewer();
     await page.goto(kbnUrl.app('discover', { space: SPACE.id }));
 
-    await expect(pageObjects.chrome.layoutNavigation).toBeVisible();
-    await expect(pageObjects.chrome.primaryNavigation).toBeVisible();
+    await expect(pageObjects.navigation.getSidenav()).toBeVisible();
+    await expect(page.testSubj.locator('kbnChromeNav-primaryNavigation')).toBeVisible();
   });
 
-  test('navigation updates the URL and the logo navigates home', async ({
+  test('breadcrumbs update on navigation and the logo navigates home', async ({
     browserAuth,
     pageObjects,
     kbnUrl,
@@ -63,11 +63,14 @@ test.describe('chrome navigation mechanics', { tag: tags.stateful.classic }, () 
     await browserAuth.loginAsViewer();
     await page.goto(kbnUrl.app('discover', { space: SPACE.id }));
 
+    await expect(page.testSubj.locator('breadcrumbs')).toBeVisible();
+    await expect(pageObjects.navigation.getBreadcrumbByText('Discover')).toBeVisible();
+
     await pageObjects.collapsibleNav.clickNavItemByDeepLinkId('dashboards');
-    await expect(page).toHaveURL(/\/app\/dashboards/);
+    await expect(pageObjects.navigation.getBreadcrumbByText('Dashboards')).toBeVisible();
 
     const dashboardsUrl = page.url();
-    await pageObjects.chrome.clickLogo();
+    await pageObjects.navigation.clickLogo();
     await expect(page).not.toHaveURL(dashboardsUrl);
   });
 });

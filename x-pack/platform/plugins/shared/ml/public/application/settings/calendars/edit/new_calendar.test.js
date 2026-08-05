@@ -84,10 +84,6 @@ jest.mock('./utils', () => ({
 const mockAddDanger = jest.fn();
 const mockKibanaContext = {
   services: {
-    application: {
-      navigateToApp: jest.fn(),
-      getUrlForApp: jest.fn(() => '/app/management/ml/ad_settings/calendars_list'),
-    },
     docLinks: { links: { ml: { calendars: 'test' } } },
     notifications: { toasts: { addDanger: mockAddDanger, addError: jest.fn() } },
     mlServices: {
@@ -110,8 +106,6 @@ const mockKibanaContext = {
 
 const mockReact = React;
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  __esModule: true,
-  useKibana: () => mockKibanaContext,
   withKibana: (type) => {
     const EnhancedType = (props) => {
       return mockReact.createElement(type, {
@@ -121,11 +115,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
     };
     return EnhancedType;
   },
-}));
-
-jest.mock('../../../contexts/kibana', () => ({
-  useMlKibana: () => mockKibanaContext,
-  useNavigateToPath: () => jest.fn(),
 }));
 
 import { NewCalendar } from './new_calendar';

@@ -128,6 +128,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       const panelProps = {
         showBadges: true,
         showBorder,
+        showNotifications: true,
         showShadow: false,
         setDragHandles,
       };

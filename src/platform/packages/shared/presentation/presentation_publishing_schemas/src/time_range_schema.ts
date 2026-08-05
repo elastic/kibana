@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 import { timeRangeSchema } from '@kbn/es-query-server';
 
-export const serializedTimeRangeSchema = z
-  .object({
-    time_range: timeRangeSchema.optional(),
-  })
-  .strict();
+export const serializedTimeRangeSchema = schema.object({
+  time_range: schema.maybe(timeRangeSchema),
+});

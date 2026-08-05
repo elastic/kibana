@@ -60,7 +60,6 @@ export const AddDataSourcesContextMenu = () => {
     <EuiPopover
       data-test-subj="streamsAppProcessingAddDataSourcesContextMenu"
       id="data-sources-menu"
-      aria-label={DATA_SOURCES_I18N.contextMenu.addDataSource}
       button={
         <EuiButton size="s" iconType="chevronSingleDown" iconSide="right" onClick={toggleMenu}>
           {DATA_SOURCES_I18N.contextMenu.addDataSource}

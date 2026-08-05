@@ -95,10 +95,7 @@ jest.mock('../../helper_hooks', () => ({
 jest.mock('../components/asset_criticality/use_asset_criticality', () => ({
   useAssetCriticalityPrivileges: () => ({
     isLoading: false,
-    data: {
-      has_write_permissions: true,
-      privileges: { elasticsearch: { index: {} } },
-    },
+    data: { has_write_permissions: true },
   }),
 }));
 

@@ -1,10 +1,7 @@
 .mapAttributionControl {
+  @include mapOverlayIsTextOnly;
   @include euiTextBreakWord;
   pointer-events: all;
-  // background-color is applied reactively via Emotion (withEuiTheme) so it
-  // follows reload-less light/dark theme switches.
-  padding-left: $euiSizeXS;
-  padding-right: $euiSizeXS;
 }
 
 .mapAttributionControl__fullScreen {

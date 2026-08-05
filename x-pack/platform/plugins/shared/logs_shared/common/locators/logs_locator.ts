@@ -6,8 +6,7 @@
  */
 
 import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { getAllLogsDataViewSpec } from '@kbn/discover-utils/src';
-import type { TimeRange } from '@kbn/es-query';
+import { ALL_LOGS_DATA_VIEW_ID } from '@kbn/discover-utils/src';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { LocatorDefinition } from '@kbn/share-plugin/common';
 import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
@@ -18,7 +17,7 @@ import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 export const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
 
 /**
- * Accepts the same parameters as `DiscoverAppLocatorParams`, but automatically sets the data view to all log sources.
+ * Accepts the same parameters as `DiscoverAppLocatorParams`, but automatically sets the `dataViewId` param to all log sources.
  */
 export type LogsLocatorParams = DiscoverAppLocatorParams;
 
@@ -33,13 +32,6 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
     }
   ) {}
 
-  public readonly getTimeRange = (params: LogsLocatorParams) => params.timeRange;
-
-  public readonly setTimeRange = (params: LogsLocatorParams, timeRange?: TimeRange) => ({
-    ...params,
-    timeRange,
-  });
-
   public readonly getLocation = async (params: LogsLocatorParams) => {
     const discoverAppLocator =
       this.deps.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
@@ -47,7 +39,8 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
     const isEsqlDefault = await this.deps.getIsEsqlDefault();
 
     if (isEsqlDefault && !params.query) {
-      const flattenedLogSources = await this.getFlattenedLogSources();
+      const logSourcesService = await this.deps.getLogSourcesService();
+      const flattenedLogSources = await logSourcesService.getFlattenedLogSources();
 
       return discoverAppLocator.getLocation({
         ...params,
@@ -55,21 +48,9 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
       });
     }
 
-    // Respect a caller-provided data view (e.g. onboarding wired streams).
-    if (params.dataViewId || params.dataViewSpec) {
-      return discoverAppLocator.getLocation(params);
-    }
-
-    const flattenedLogSources = await this.getFlattenedLogSources();
-
     return discoverAppLocator.getLocation({
-      dataViewSpec: getAllLogsDataViewSpec({ allLogsIndexPattern: flattenedLogSources }),
+      dataViewId: ALL_LOGS_DATA_VIEW_ID,
       ...params,
     });
   };
-
-  private async getFlattenedLogSources() {
-    const logSourcesService = await this.deps.getLogSourcesService();
-    return logSourcesService.getFlattenedLogSources();
-  }
 }

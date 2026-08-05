@@ -13,7 +13,6 @@ import type {
   BulkResponse,
   CreateActionPolicyData,
   ActionPolicyResponse,
-  FindActionPoliciesRequest,
   UpdateActionPolicyBody,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
@@ -47,16 +46,24 @@ export class ActionPoliciesApi {
     return this.http.get<ActionPolicyResponse>(buildActionPolicyPath(id));
   }
 
-  public async listActionPolicies(params: FindActionPoliciesRequest = {}) {
+  public async listActionPolicies(params: {
+    page?: number;
+    perPage?: number;
+    search?: string;
+    tags?: string[];
+    enabled?: boolean;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) {
     return this.http.get<FindActionPoliciesResponse>(ALERTING_V2_ACTION_POLICY_API_PATH, {
       query: {
         page: params.page,
-        per_page: params.per_page,
+        perPage: params.perPage,
         search: params.search || undefined,
         tags: params.tags && params.tags.length > 0 ? params.tags : undefined,
         enabled: params.enabled,
-        sort_field: params.sort_field,
-        sort_order: params.sort_order,
+        sortField: params.sortField,
+        sortOrder: params.sortOrder,
       },
     });
   }

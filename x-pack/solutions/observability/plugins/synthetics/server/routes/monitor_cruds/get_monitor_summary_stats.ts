@@ -11,7 +11,6 @@ import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
 } from '../../../common/constants/client_defaults';
-import { getHeartbeatLocationFilter } from '../../../common/lib';
 import { getSyntheticsScopedIndex } from '../../../common/get_synthetics_indices';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 
@@ -55,7 +54,7 @@ export const getMonitorSummaryStatsRoute: SyntheticsRestApiRouteFactory<
             FINAL_SUMMARY_FILTER,
             EXCLUDE_RUN_ONCE_FILTER,
             { term: { 'monitor.id': monitorId } },
-            ...getHeartbeatLocationFilter({ field: 'observer.geo.name', value: locationLabel }),
+            { term: { 'observer.geo.name': locationLabel } },
             { range: { '@timestamp': { gte: from, lte: to } } },
           ],
         },
