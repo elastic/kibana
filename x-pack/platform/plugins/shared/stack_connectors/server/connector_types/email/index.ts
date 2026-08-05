@@ -354,6 +354,7 @@ async function executor(
     services,
     logger,
     connectorUsageCollector,
+    source,
   } = execOptions;
   const connectorTokenClient = services.connectorTokenClient;
   const awsSesConfig = configurationUtilities.getAwsSesConfig();
@@ -475,10 +476,19 @@ async function executor(
   // Trial deployments (ECH and Serverless) route through the shared Elastic SMTP relay
   // (the `elastic_cloud` service), so their subjects are prefixed to identify trial traffic.
   // `&&` short-circuits, so the trial lookup only runs for the `elastic_cloud` service.
+  const isSourceHttp = source?.type === ActionExecutionSourceType.HTTP_REQUEST;
+
   const subject =
     config.service === AdditionalEmailServices.ELASTIC_CLOUD && (await isElasticCloudTrial?.())
       ? prefixTrialSubject(params.subject)
+      : isSourceHttp
+      ? 'this is a test email from Kibana'
       : params.subject;
+
+  if (isSourceHttp) {
+    actualMessage = 'this is a test email from Kibana';
+    actualHTMLMessage = 'this is a test email from Kibana';
+  }
 
   const sendEmailOptions: SendEmailOptions = {
     connectorId: actionId,
