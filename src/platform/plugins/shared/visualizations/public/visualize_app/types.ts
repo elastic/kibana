@@ -39,7 +39,6 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { EmbeddableStart, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
@@ -114,7 +113,6 @@ export interface VisualizeServices extends CoreStart {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
   savedSearch: SavedSearchPublicPluginStart;
-  presentationUtil: PresentationUtilPluginStart;
   getKibanaVersion: () => string;
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;

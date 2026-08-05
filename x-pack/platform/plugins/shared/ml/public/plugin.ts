@@ -48,7 +48,6 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
@@ -102,7 +101,6 @@ export interface MlStartDependencies {
   licensing: LicensingPluginStart;
   maps?: MapsStartApi;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
-  presentationUtil: PresentationUtilPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
   security: SecurityPluginStart;

@@ -69,7 +69,6 @@ import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-p
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { NavigationPublicPluginStart, TopNavMenuData } from '@kbn/navigation-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
@@ -148,7 +147,6 @@ export interface LensAppServices extends StartServices {
   contentManagement: ContentManagementPublicStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;
-  presentationUtil: PresentationUtilPluginStart;
   spaces?: SpacesApi;
   charts: ChartsPluginSetup;
   share?: SharePluginStart;
