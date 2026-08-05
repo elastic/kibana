@@ -17,6 +17,7 @@ import { createCaseError } from '../../../common/error';
 import { SingleCaseAggregationHandler } from '../single_case_aggregation_handler';
 import type { AggregationBuilder, SingleCaseBaseHandlerCommonOptions } from '../types';
 import { AlertHosts, AlertUsers } from './aggregations';
+import type { KnownAlertNames } from './entity_associated';
 import {
   collectEntityAssociatedNames,
   mergeAlertMetricsWithEntityNames,
@@ -53,6 +54,7 @@ export class AlertDetails extends SingleCaseAggregationHandler {
 
       let metrics: SingleCaseMetricsResponse =
         this.formatResponse<SingleCaseMetricsResponse>(undefined);
+      let knownAlertNames: KnownAlertNames = { userNames: new Set(), hostNames: new Set() };
 
       if (alerts.length > 0) {
         const aggregationsResponse = await alertsService.executeAggregations({
@@ -60,6 +62,10 @@ export class AlertDetails extends SingleCaseAggregationHandler {
           alerts,
         });
         metrics = this.formatResponse<SingleCaseMetricsResponse>(aggregationsResponse);
+        knownAlertNames = {
+          userNames: new Set(AlertUsers.getAllNames(aggregationsResponse)),
+          hostNames: new Set(AlertHosts.getAllNames(aggregationsResponse)),
+        };
       }
 
       // Entity attachments only live on cases-attachments. Use an owners filter for that
@@ -80,7 +86,8 @@ export class AlertDetails extends SingleCaseAggregationHandler {
 
       return mergeAlertMetricsWithEntityNames(
         metrics,
-        collectEntityAssociatedNames(entityAttachments)
+        collectEntityAssociatedNames(entityAttachments),
+        knownAlertNames
       );
     } catch (error) {
       throw createCaseError({

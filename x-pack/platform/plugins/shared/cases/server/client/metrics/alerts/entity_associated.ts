@@ -66,12 +66,26 @@ export const collectEntityAssociatedNames = (
 };
 
 /**
+ * Every unique alert-derived display name for a case, independent of the top-N `values`
+ * shown in the response. Required to exactly dedupe entity attachment names against alert
+ * identities: the response's `values` array is capped for display, so checking membership
+ * against it alone could either double-count an entity name that is actually one of the
+ * alert identities that fell outside that cap, or skip a genuinely new one.
+ */
+export interface KnownAlertNames {
+  userNames: Set<string>;
+  hostNames: Set<string>;
+}
+
+/**
  * Unions alert-derived associated users/hosts with entity attachment display names.
- * `total` accounts for alert cardinalities that may exceed the top-N `values` list.
+ * `knownAlertNames` must contain every alert-derived name (not just the displayed top-N)
+ * so overlap with entity names can be determined exactly, without double- or under-counting.
  */
 export const mergeAlertMetricsWithEntityNames = (
   metrics: SingleCaseMetricsResponse,
-  entityNames: EntityAssociatedNames
+  entityNames: EntityAssociatedNames,
+  knownAlertNames: KnownAlertNames
 ): SingleCaseMetricsResponse => {
   const { userNames, hostsByName } = entityNames;
   if (userNames.size === 0 && hostsByName.size === 0) {
@@ -85,7 +99,7 @@ export const mergeAlertMetricsWithEntityNames = (
       ...result,
       alerts: {
         ...result.alerts,
-        users: mergeUsers(metrics.alerts.users, userNames),
+        users: mergeUsers(metrics.alerts.users, userNames, knownAlertNames.userNames),
       },
     };
   }
@@ -95,7 +109,7 @@ export const mergeAlertMetricsWithEntityNames = (
       ...result,
       alerts: {
         ...result.alerts,
-        hosts: mergeHosts(metrics.alerts.hosts, hostsByName),
+        hosts: mergeHosts(metrics.alerts.hosts, hostsByName, knownAlertNames.hostNames),
       },
     };
   }
@@ -105,14 +119,13 @@ export const mergeAlertMetricsWithEntityNames = (
 
 const mergeUsers = (
   users: NonNullable<NonNullable<SingleCaseMetricsResponse['alerts']>['users']>,
-  entityUserNames: Set<string>
+  entityUserNames: Set<string>,
+  allAlertUserNames: Set<string>
 ): NonNullable<NonNullable<SingleCaseMetricsResponse['alerts']>['users']> => {
-  const knownNames = new Set(users.values.map((value) => value.name));
-  const unknownAlertCount = Math.max(0, users.total - knownNames.size);
-  const newNames = [...entityUserNames].filter((name) => !knownNames.has(name));
+  const newNames = [...entityUserNames].filter((name) => !allAlertUserNames.has(name));
 
   return {
-    total: knownNames.size + unknownAlertCount + newNames.length,
+    total: users.total + newNames.length,
     values: [
       ...users.values,
       ...newNames.map((name) => ({
@@ -125,25 +138,15 @@ const mergeUsers = (
 
 const mergeHosts = (
   hosts: NonNullable<NonNullable<SingleCaseMetricsResponse['alerts']>['hosts']>,
-  entityHostsByName: Map<string, string>
+  entityHostsByName: Map<string, string>,
+  allAlertHostNames: Set<string>
 ): NonNullable<NonNullable<SingleCaseMetricsResponse['alerts']>['hosts']> => {
-  const knownNames = new Set<string>();
-  let hostsWithoutName = 0;
-
-  for (const value of hosts.values) {
-    if (typeof value.name === 'string' && value.name.length > 0) {
-      knownNames.add(value.name);
-    } else {
-      hostsWithoutName += 1;
-    }
-  }
-
-  const knownCount = knownNames.size + hostsWithoutName;
-  const unknownAlertCount = Math.max(0, hosts.total - knownCount);
-  const newHosts = [...entityHostsByName.entries()].filter(([name]) => !knownNames.has(name));
+  const newHosts = [...entityHostsByName.entries()].filter(
+    ([name]) => !allAlertHostNames.has(name)
+  );
 
   return {
-    total: knownCount + unknownAlertCount + newHosts.length,
+    total: hosts.total + newHosts.length,
     values: [
       ...hosts.values,
       ...newHosts.map(([name, id]) => ({

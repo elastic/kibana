@@ -114,7 +114,8 @@ describe('mergeAlertMetricsWithEntityNames', () => {
       {
         userNames: new Set(['alice', 'bob']),
         hostsByName: new Map(),
-      }
+      },
+      { userNames: new Set(['alice']), hostNames: new Set() }
     );
 
     expect(merged.alerts?.users).toEqual({
@@ -126,7 +127,11 @@ describe('mergeAlertMetricsWithEntityNames', () => {
     });
   });
 
-  it('preserves unknown alert user cardinality beyond top-N values', () => {
+  it('does not double count an entity name that matches an alert identity hidden beyond the displayed top-N', () => {
+    // Alert total is 5, but only 1 name ("alice") is in the displayed top-N `values`.
+    // "bob" is one of the other 4 alert-derived identities that ISN'T displayed — the
+    // exhaustive `knownAlertNames.userNames` set is what lets us recognize that and avoid
+    // double-counting it.
     const merged = mergeAlertMetricsWithEntityNames(
       {
         alerts: {
@@ -139,7 +144,28 @@ describe('mergeAlertMetricsWithEntityNames', () => {
       {
         userNames: new Set(['bob']),
         hostsByName: new Map(),
-      }
+      },
+      { userNames: new Set(['alice', 'bob', 'carol', 'dave', 'erin']), hostNames: new Set() }
+    );
+
+    expect(merged.alerts?.users?.total).toBe(5);
+  });
+
+  it('adds an entity name that is genuinely absent from all alert-derived identities', () => {
+    const merged = mergeAlertMetricsWithEntityNames(
+      {
+        alerts: {
+          users: {
+            total: 5,
+            values: [{ name: 'alice', count: 1 }],
+          },
+        },
+      },
+      {
+        userNames: new Set(['frank']),
+        hostsByName: new Map(),
+      },
+      { userNames: new Set(['alice', 'bob', 'carol', 'dave', 'erin']), hostNames: new Set() }
     );
 
     expect(merged.alerts?.users?.total).toBe(6);
@@ -161,7 +187,8 @@ describe('mergeAlertMetricsWithEntityNames', () => {
           ['web01', 'host:web01@default'],
           ['db01', 'host:db01@default'],
         ]),
-      }
+      },
+      { userNames: new Set(), hostNames: new Set(['web01']) }
     );
 
     expect(merged.alerts?.hosts).toEqual({
@@ -181,10 +208,14 @@ describe('mergeAlertMetricsWithEntityNames', () => {
     };
 
     expect(
-      mergeAlertMetricsWithEntityNames(metrics, {
-        userNames: new Set(),
-        hostsByName: new Map(),
-      })
+      mergeAlertMetricsWithEntityNames(
+        metrics,
+        {
+          userNames: new Set(),
+          hostsByName: new Map(),
+        },
+        { userNames: new Set(['alice']), hostNames: new Set() }
+      )
     ).toBe(metrics);
   });
 });
