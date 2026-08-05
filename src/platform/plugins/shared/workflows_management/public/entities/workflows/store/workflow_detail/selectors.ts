@@ -124,6 +124,11 @@ export const selectIsExecutionsTab = createSelector(
   selectActiveTab,
   (activeTab): activeTab is 'executions' => activeTab === 'executions'
 );
+export const selectIsWorkflowEditorReadOnly = createSelector(
+  selectIsExecutionsTab,
+  selectWorkflow,
+  (isExecutionsTab, workflow): boolean => isExecutionsTab || workflow?.managed === true
+);
 export const selectIsWorkflowTab = createSelector(
   selectActiveTab,
   (activeTab): activeTab is 'workflow' => activeTab === 'workflow'

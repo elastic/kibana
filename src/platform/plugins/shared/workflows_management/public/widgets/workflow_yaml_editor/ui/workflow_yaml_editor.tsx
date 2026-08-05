@@ -60,6 +60,7 @@ import {
   selectHighlightedStepId,
   selectIsExecutionsTab,
   selectIsSavingYaml,
+  selectIsWorkflowEditorReadOnly,
   selectStepExecutions,
   selectWorkflow,
   selectWorkflowDefinition,
@@ -193,8 +194,7 @@ export const WorkflowYAMLEditor = ({
   const dispatch = useDispatch();
   const workflow = useSelector(selectWorkflow);
   const isExecutionYaml = useSelector(selectIsExecutionsTab);
-  const isManagedWorkflow = workflow?.managed === true;
-  const isReadOnlyYaml = isExecutionYaml || isManagedWorkflow;
+  const isReadOnlyYaml = useSelector(selectIsWorkflowEditorReadOnly);
   const isReadOnlyYamlRef = useRef(isReadOnlyYaml);
   isReadOnlyYamlRef.current = isReadOnlyYaml;
   const onChange = useCallback(

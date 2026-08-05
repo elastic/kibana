@@ -9,12 +9,14 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiToolTip,
+  useEuiShadow,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { Viewport } from '@xyflow/react';
@@ -44,6 +46,7 @@ import {
   selectFocusedTriggerId,
   selectIsExecutionsTab,
   selectIsSavingYaml,
+  selectIsWorkflowEditorReadOnly,
   selectIsYamlSyntaxValid,
   selectWorkflowId,
   selectYamlString,
@@ -79,6 +82,7 @@ interface WorkflowDetailEditorProps {
 
 export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ highlightDiff }) => {
   const styles = useMemoCss(componentStyles);
+  const readOnlyBadgeShadow = useEuiShadow('xl');
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const openActionsRef = useRef<(() => void) | null>(null);
   // Saved graph viewport — survives the YAML↔graph remount because this
@@ -105,6 +109,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   const workflowYaml = useSelector(selectYamlString) ?? '';
   const workflowId = useSelector(selectWorkflowId);
   const isExecutionsTab = useSelector(selectIsExecutionsTab);
+  const isReadOnly = useSelector(selectIsWorkflowEditorReadOnly);
   const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
   const isSaving = useSelector(selectIsSavingYaml);
   const getContextOverrideData = useContextOverrideData();
@@ -384,6 +389,17 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
               </React.Suspense>
             </div>
           )}
+          {isReadOnly && (
+            <EuiBadge
+              color="warning"
+              css={[styles.readOnlyBadge, css(readOnlyBadgeShadow)]}
+              data-test-subj="workflowEditorReadOnlyBadge"
+            >
+              {i18n.translate('workflows.workflowDetailEditor.readOnlyBadge', {
+                defaultMessage: 'Read only',
+              })}
+            </EuiBadge>
+          )}
           {isVisualEditorEnabled && (
             <WorkflowDetailBottomBar
               editorView={editorView}
@@ -440,6 +456,15 @@ const componentStyles = {
     transform: 'scale(0.985)',
     pointerEvents: 'none',
   }),
+  readOnlyBadge: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      insetBlockStart: euiTheme.size.base,
+      insetInlineStart: '50%',
+      transform: 'translateX(-50%)',
+      zIndex: 2,
+      paddingInline: euiTheme.size.l,
+    }),
   visualEditor: ({ euiTheme }: UseEuiTheme) =>
     css({
       flex: 1,
