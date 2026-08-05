@@ -111,9 +111,11 @@ export interface OpenDocumentFlyoutParams {
   origin?: FlyoutOrigin;
   /**
    * Flyout-history title to use for this open, when already known synchronously by the caller
-   * (e.g. `getDocumentHistoryTitle(hit)`). For `openDocumentFlyoutFromIndex`, omitted means no
-   * title. For `openDocumentFlyoutFromIndexAsChild`, omitted falls back to the bare "Alert" title,
-   * since the full document isn't loaded yet at open time.
+   * (e.g. `getDocumentHistoryTitle(hit)`).
+   * - `openDocumentFlyoutFromIndex` — omitted means no title.
+   * - `openDocumentFlyoutFromIndexAsChild` / `openDocumentFlyoutFromPattern` — omitted falls back
+   *   to the bare "Alert" label so EUI's managed flyout never shows "Unknown Flyout" in its
+   *   navigation history. Supply a richer title (e.g. `"Alert: <rule name>"`) when available.
    */
   title?: string;
 }

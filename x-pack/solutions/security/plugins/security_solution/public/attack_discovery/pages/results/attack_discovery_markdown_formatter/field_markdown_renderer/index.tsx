@@ -56,22 +56,29 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
 
   // Detect whether the chip label is visually truncated so the full-value tooltip is only shown
   // when needed — avoids a redundant tooltip for short values that already fit in the chip.
+  // Re-run whenever `value` or `disableActions` changes: a different value changes the text width,
+  // and a different `disableActions` switches the render path (attaching `chipLabelRef` to a
+  // different DOM node), so the measurement needs to be refreshed in both cases.
   const chipLabelRef = useRef<HTMLSpanElement>(null);
   const [isValueTruncated, setIsValueTruncated] = useState(false);
 
   useLayoutEffect(() => {
     const el = chipLabelRef.current;
     setIsValueTruncated(el != null && el.scrollWidth > el.clientWidth);
-  }, []);
+  }, [value, disableActions]);
 
   const stringValue = typeof value === 'string' ? value : undefined;
+
+  // Build a Set for O(1) membership checks — alertIds may have O(100) entries and this component
+  // renders once per chip in the markdown, so a linear `includes` scan adds up.
+  const alertIdSet = useMemo(() => new Set(alertIds ?? []), [alertIds]);
 
   // Alert-id chips are clickable only when the value is a known alert id for this attack.
   const isClickableAlertId =
     ALERT_ID_FIELDS.has(name) &&
     !disableActions &&
     stringValue != null &&
-    (alertIds?.includes(stringValue) ?? false);
+    alertIdSet.has(stringValue);
 
   const onAlertIdClick = useCallback(() => {
     if (stringValue == null) return;
@@ -172,7 +179,9 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
             iconType={icon}
             tabIndex={0}
           >
-            <span ref={chipLabelRef} css={chipLabelCss}>{value}</span>
+            <span ref={chipLabelRef} css={chipLabelCss}>
+              {value}
+            </span>
           </EuiBadge>
         </EuiToolTip>
       </span>
@@ -203,7 +212,9 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
             onClick={onAlertIdClick}
             size="xs"
           >
-            <span ref={chipLabelRef} css={chipLabelCss}>{stringValue}</span>
+            <span ref={chipLabelRef} css={chipLabelCss}>
+              {stringValue}
+            </span>
           </EuiButtonEmpty>
         </DraggableBadge>
       </span>
@@ -220,10 +231,19 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
         iconType={icon}
         isAggregatable={false}
         field={name}
-        tooltipContent={isValueTruncated && value != null && value !== '' ? `${name}: ${value}` : undefined}
+        tooltipContent={
+          isValueTruncated && value != null && value !== '' ? `${name}: ${value}` : undefined
+        }
         value={value}
       >
-        {entityButton ?? (value !== '' && value != null ? <span ref={chipLabelRef} css={chipLabelCss}>{value}</span> : undefined)}
+        {/* Entity buttons (host/user) render the full value untruncated — entity names are short
+            and meaningful context. For all other fields the label is constrained to chipLabelCss. */}
+        {entityButton ??
+          (value !== '' && value != null ? (
+            <span ref={chipLabelRef} css={chipLabelCss}>
+              {value}
+            </span>
+          ) : undefined)}
       </DraggableBadge>
     </span>
   );
