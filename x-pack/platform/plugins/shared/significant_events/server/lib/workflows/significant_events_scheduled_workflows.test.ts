@@ -171,7 +171,7 @@ describe('scheduled Significant Events managed workflows', () => {
     const drainLoop = findStep(parsed.steps, 'run_review_until_drained');
     expect(drainLoop?.type).toBe('while');
     expect(drainLoop?.['max-iterations']).toBe(6);
-    expect(drainLoop?.['iteration-timeout']).toBe('45m');
+    expect(drainLoop?.['iteration-timeout']).toBe('50m');
     expect(drainLoop?.condition).toBe('${{ steps.discover.output.hasWork == true }}');
 
     const discover = findStep(drainLoop?.steps ?? [], 'discover');
