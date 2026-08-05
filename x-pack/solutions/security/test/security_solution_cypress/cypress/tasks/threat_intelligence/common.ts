@@ -92,15 +92,25 @@ export const navigateToFlyoutJsonTab = () => {
  * underlying data exists (see #239929, #246404, #246405, and #246885). Rather than passively
  * polling the DOM for the whole timeout budget, click the query bar's refresh button every so
  * often to re-trigger the search — this reliably recovers the view instead of a single wait.
+ *
+ * When the KQL bar itself is absent (the page stalled during initialisation before the search
+ * bar mounted), a hard reload is the only recovery — a missing bar means the data view
+ * bootstrap never completed and clicking elsewhere on the page does nothing.
  */
 export const waitForViewToBeLoaded = () => {
   recurse(
     () => {
-      cy.get(REFRESH_BUTTON).should('exist').click();
-      return cy.get('body').then(($body) => $body.find(INDICATORS_TABLE).length > 0);
+      return cy.get('body').then(($body) => {
+        if ($body.find(REFRESH_BUTTON).length === 0) {
+          cy.reload();
+        } else {
+          cy.get(REFRESH_BUTTON).click();
+        }
+        return $body.find(INDICATORS_TABLE).length > 0;
+      });
     },
     (isTableVisible) => isTableVisible === true,
-    { delay: 1000 }
+    { delay: 2000, timeout: 180000 }
   );
 
   cy.get(INDICATORS_TABLE).should('exist');
