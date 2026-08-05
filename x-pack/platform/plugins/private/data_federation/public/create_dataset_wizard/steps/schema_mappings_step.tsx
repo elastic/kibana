@@ -15,14 +15,11 @@ import { useController } from 'react-hook-form';
 import type { DataSource } from '../../../common';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import type { DatasetWizardFormValues, SchemaMappingMode } from '../dataset_wizard_form_state';
+import { AwsGlueTableSchemaMappingsEditor } from './aws_glue_table_schema_mappings_editor';
 import { ManualSchemaMappingsEditor } from './manual_schema_mappings_editor';
 
-const SCHEMA_MAPPING_MODE_DESCRIPTIONS: Record<
-  Exclude<SchemaMappingMode, 'manual'>,
-  () => string
-> = {
+const SCHEMA_MAPPING_MODE_DESCRIPTIONS: Record<'automatic', () => string> = {
   automatic: datasetWizardStrings.schemaMappingAutomaticDescription,
-  aws_glue_table: datasetWizardStrings.schemaMappingAwsGlueTableDescription,
 };
 
 export const isAwsGlueTableSchemaMappingSupported = (
@@ -34,12 +31,14 @@ export interface SchemaMappingsStepProps {
   control: Control<DatasetWizardFormValues>;
   dataSources: readonly DataSource[];
   dataSource: string;
+  dataSourceRegion: string;
 }
 
 export const SchemaMappingsStep: FunctionComponent<SchemaMappingsStepProps> = ({
   control,
   dataSources,
   dataSource,
+  dataSourceRegion,
 }) => {
   const { field } = useController({
     control,
@@ -109,6 +108,11 @@ export const SchemaMappingsStep: FunctionComponent<SchemaMappingsStepProps> = ({
       <EuiSpacer size="l" />
       {selectedMode === 'manual' ? (
         <ManualSchemaMappingsEditor control={control} />
+      ) : selectedMode === 'aws_glue_table' ? (
+        <AwsGlueTableSchemaMappingsEditor
+          control={control}
+          dataSourceRegion={dataSourceRegion}
+        />
       ) : (
         <EuiText size="s" data-test-subj="datasetWizardSchemaMappingModeDescription">
           <p>{SCHEMA_MAPPING_MODE_DESCRIPTIONS[selectedMode]()}</p>

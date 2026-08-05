@@ -31,6 +31,8 @@ import {
   type DatasetSchemaResolutionFormValue,
 } from './create_dataset_flyout_form_state';
 import { applySettingsForFormat } from './dataset_settings_defaults';
+import { DATETIME_FORMAT_PRESETS } from './dataset_settings_options';
+import { SettingsPresetComboBox } from './settings_preset_combo_box';
 
 // ---------------------------------------------------------------------------
 // Module-level option factories — shared across components so each select
@@ -386,10 +388,6 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
   const { field: escapeField } = useController({ name: 'settings.escape', control });
   const { field: commentField } = useController({ name: 'settings.comment', control });
   const { field: columnPrefixField } = useController({ name: 'settings.column_prefix', control });
-  const { field: datetimeFormatField } = useController({
-    name: 'settings.datetime_format',
-    control,
-  });
   const { field: multiValueSyntaxField } = useController({
     name: 'settings.multi_value_syntax',
     control,
@@ -516,20 +514,15 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
           inputRef={columnPrefixField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow
+      <SettingsPresetComboBox
+        control={control}
+        name="settings.datetime_format"
         label={createDatasetFlyoutStrings.settingsDatetimeFormatLabel()}
         helpText={createDatasetFlyoutStrings.settingsDatetimeFormatHelp()}
-        fullWidth
-      >
-        <EuiFieldText
-          data-test-subj="createDatasetFlyoutSettingsDatetimeFormat"
-          fullWidth
-          value={datetimeFormatField.value}
-          onChange={(e) => datetimeFormatField.onChange(e.target.value)}
-          name={datetimeFormatField.name}
-          inputRef={datetimeFormatField.ref}
-        />
-      </EuiFormRow>
+        placeholder={createDatasetFlyoutStrings.settingsDatetimeFormatPlaceholder()}
+        presets={DATETIME_FORMAT_PRESETS()}
+        data-test-subj="createDatasetFlyoutSettingsDatetimeFormat"
+      />
       <EuiFormRow label={createDatasetFlyoutStrings.settingsMultiValueSyntaxLabel()} fullWidth>
         <EuiSelect
           options={MULTI_VALUE_SYNTAX_OPTIONS()}
@@ -630,10 +623,6 @@ function NdjsonSettings({ control }: { control: Control<CreateDatasetFormValues>
     control,
     rules: { validate: validateSchemaSampleSize },
   });
-  const { field: datetimeFormatField } = useController({
-    name: 'settings.datetime_format',
-    control,
-  });
 
   return (
     <>
@@ -656,20 +645,15 @@ function NdjsonSettings({ control }: { control: Control<CreateDatasetFormValues>
           inputRef={schemaSampleSizeField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow
+      <SettingsPresetComboBox
+        control={control}
+        name="settings.datetime_format"
         label={createDatasetFlyoutStrings.settingsDatetimeFormatLabel()}
         helpText={createDatasetFlyoutStrings.settingsDatetimeFormatHelp()}
-        fullWidth
-      >
-        <EuiFieldText
-          data-test-subj="createDatasetFlyoutSettingsDatetimeFormat"
-          fullWidth
-          value={datetimeFormatField.value}
-          onChange={(e) => datetimeFormatField.onChange(e.target.value)}
-          name={datetimeFormatField.name}
-          inputRef={datetimeFormatField.ref}
-        />
-      </EuiFormRow>
+        placeholder={createDatasetFlyoutStrings.settingsDatetimeFormatPlaceholder()}
+        presets={DATETIME_FORMAT_PRESETS()}
+        data-test-subj="createDatasetFlyoutSettingsDatetimeFormat"
+      />
     </>
   );
 }

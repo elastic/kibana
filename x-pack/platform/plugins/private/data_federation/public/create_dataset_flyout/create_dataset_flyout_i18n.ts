@@ -274,7 +274,8 @@ export const createDatasetFlyoutStrings = {
 
   settingsPartitionPathHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsPartitionPathHelp', {
-      defaultMessage: 'Explicit path template for partition detection.',
+      defaultMessage:
+        'Explicit path template for partition detection. If your partition path is not available, create a custom one.',
     }),
 
   settingsPartitionPathPlaceholder: () =>
@@ -309,7 +310,8 @@ export const createDatasetFlyoutStrings = {
 
   settingsDelimiterHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDelimiterHelp', {
-      defaultMessage: 'The character that separates fields.',
+      defaultMessage:
+        'The character that separates fields. If your delimiter is not available, create a custom one.',
     }),
 
   settingsDelimiterPlaceholder: () =>
@@ -389,7 +391,8 @@ export const createDatasetFlyoutStrings = {
 
   settingsNullValueHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsNullValueHelp', {
-      defaultMessage: 'The string treated as null, for example NULL or NA.',
+      defaultMessage:
+        'The string treated as null, for example NULL or NA. If your null value is not available, create a custom one.',
     }),
 
   settingsNullValuePlaceholder: () =>
@@ -404,7 +407,8 @@ export const createDatasetFlyoutStrings = {
 
   settingsEncodingHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsEncodingHelp', {
-      defaultMessage: 'Character encoding of the file.',
+      defaultMessage:
+        'Character encoding of the file. If your encoding is not available, create a custom one.',
     }),
 
   settingsEncodingPlaceholder: () =>
@@ -459,7 +463,13 @@ export const createDatasetFlyoutStrings = {
 
   settingsDatetimeFormatHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDatetimeFormatHelp', {
-      defaultMessage: 'Pattern used to parse date and time values.',
+      defaultMessage:
+        'Pattern used to parse date and time values. If your datetime format is not available, create a custom one.',
+    }),
+
+  settingsDatetimeFormatPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDatetimeFormatPlaceholder', {
+      defaultMessage: 'Select datetime format',
     }),
 
   settingsMultiValueSyntaxLabel: () =>
@@ -489,7 +499,7 @@ export const createDatasetFlyoutStrings = {
 
   settingsMaxFieldSizeHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMaxFieldSizeHelp', {
-      defaultMessage: 'Maximum size of a single field in bytes. 0 means unlimited.',
+      defaultMessage: 'Maximum size of a single field in bytes. Default is 10 MB (10485760). 0 means unlimited.',
     }),
 
   settingsMaxFieldSizeInvalid: () =>

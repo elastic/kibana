@@ -39,6 +39,15 @@ export const isDatasetWizardFormValues = (value: unknown): value is DatasetWizar
   }
 
   if (
+    typeof candidate.glue_database !== 'string' ||
+    typeof candidate.glue_table_name !== 'string' ||
+    typeof candidate.glue_catalog_region !== 'string' ||
+    typeof candidate.glue_aws_account_id !== 'string'
+  ) {
+    return false;
+  }
+
+  if (
     candidate.schema_mapping_mode !== 'automatic' &&
     candidate.schema_mapping_mode !== 'aws_glue_table' &&
     candidate.schema_mapping_mode !== 'manual'

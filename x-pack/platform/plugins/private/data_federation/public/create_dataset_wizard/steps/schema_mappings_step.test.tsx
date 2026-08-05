@@ -38,10 +38,12 @@ const gcsDataSource: DataSource = {
 const TestHarness = ({
   dataSources = [gcsDataSource],
   dataSource = 'gcs-source',
+  dataSourceRegion = '',
   defaultValues = emptyDatasetWizardFormValues(),
 }: {
   dataSources?: DataSource[];
   dataSource?: string;
+  dataSourceRegion?: string;
   defaultValues?: DatasetWizardFormValues;
 }) => {
   const { control } = useForm<DatasetWizardFormValues>({
@@ -57,6 +59,7 @@ const TestHarness = ({
         control={control}
         dataSources={dataSources}
         dataSource={dataSource}
+        dataSourceRegion={dataSourceRegion}
       />
     </EuiProvider>
   );
@@ -98,9 +101,8 @@ describe('SchemaMappingsStep', () => {
     );
 
     fireEvent.click(getByTestId('datasetWizardSchemaMappingModeAwsGlueTable'));
-    expect(getByTestId('datasetWizardSchemaMappingModeDescription')).toHaveTextContent(
-      'Use an AWS Glue table schema to define column names and types.'
-    );
+    expect(getByTestId('datasetWizardAwsGlueTableSchemaMappings')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardAwsGlueCallout')).toBeInTheDocument();
 
     fireEvent.click(getByTestId('datasetWizardSchemaMappingModeManual'));
     expect(queryByTestId('datasetWizardSchemaMappingModeDescription')).toBeNull();
@@ -123,6 +125,7 @@ describe('SchemaMappingsStep', () => {
             control={control}
             dataSources={[s3DataSource, gcsDataSource]}
             dataSource={dataSource}
+            dataSourceRegion=""
           />
           <span data-test-subj="schemaMappingModeValue">{watch('schema_mapping_mode')}</span>
         </EuiProvider>

@@ -90,7 +90,6 @@ export const SettingsPresetComboBox: FunctionComponent<SettingsPresetComboBoxPro
       label={label}
       helpText={helpText}
       fullWidth
-      display="rowCompressed"
       isInvalid={Boolean(fieldState.error)}
       error={fieldState.error?.message}
     >

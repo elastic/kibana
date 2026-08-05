@@ -12,6 +12,7 @@ import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiInputPopover,
   EuiLink,
   EuiPopoverFooter,
@@ -19,7 +20,20 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import type { DataSource } from '../../common';
+import { DATA_SOURCE_TYPES_TO_ICONS, type DataSource } from '../../common';
+
+const DataSourceOptionDisplay: FunctionComponent<{ dataSource: DataSource }> = ({ dataSource }) => {
+  const iconType = DATA_SOURCE_TYPES_TO_ICONS[dataSource.type];
+
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={iconType} size="m" aria-hidden />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{dataSource.name}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export interface DataSourceSuperSelectProps {
   dataSources: DataSource[];
@@ -57,7 +71,7 @@ export const DataSourceSuperSelect: FunctionComponent<DataSourceSuperSelectProps
     (): Array<EuiSuperSelectOption<string>> =>
       dataSources.map((ds) => ({
         value: ds.name,
-        inputDisplay: ds.name,
+        inputDisplay: <DataSourceOptionDisplay dataSource={ds} />,
       })),
     [dataSources]
   );
@@ -154,7 +168,7 @@ export const DataSourceSuperSelect: FunctionComponent<DataSourceSuperSelectProps
             onClick={() => handleSelect(ds.name)}
             aria-selected={value === ds.name}
           >
-            {ds.name}
+            <DataSourceOptionDisplay dataSource={ds} />
           </button>
         ))}
       </div>

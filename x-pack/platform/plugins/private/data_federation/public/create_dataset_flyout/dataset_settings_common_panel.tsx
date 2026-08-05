@@ -11,7 +11,8 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 
 import type { CreateDatasetFormValues, DatasetFormatFormValue } from './create_dataset_flyout_form_state';
-import { DatasetSettingsField } from './dataset_settings_field';
+import type { DatasetSettingsFieldId } from './dataset_settings_visibility';
+import { DatasetSettingsFieldsLayout } from './dataset_settings_fields_layout';
 
 export interface DatasetSettingsCommonPanelProps {
   control: Control<CreateDatasetFormValues>;
@@ -29,7 +30,17 @@ export const DatasetSettingsCommonPanel: FunctionComponent<DatasetSettingsCommon
   const isCsvOrTsv = format === 'csv' || format === 'tsv';
   const showDatetimeFormat = isCsvOrTsv || format === 'ndjson';
 
-  if (!isCsvOrTsv && !showDatetimeFormat) {
+  const commonFields: DatasetSettingsFieldId[] = [];
+
+  if (isCsvOrTsv) {
+    commonFields.push('delimiter');
+  }
+
+  if (showDatetimeFormat) {
+    commonFields.push('datetime_format');
+  }
+
+  if (commonFields.length === 0) {
     return null;
   }
 
@@ -47,21 +58,12 @@ export const DatasetSettingsCommonPanel: FunctionComponent<DatasetSettingsCommon
         </EuiTitle>
         <EuiSpacer size="m" />
 
-        {isCsvOrTsv ? (
-          <DatasetSettingsField
-            control={control}
-            fieldId="delimiter"
-            testSubjPrefix={testSubjPrefix}
-          />
-        ) : null}
-
-        {showDatetimeFormat ? (
-          <DatasetSettingsField
-            control={control}
-            fieldId="datetime_format"
-            testSubjPrefix={testSubjPrefix}
-          />
-        ) : null}
+        <DatasetSettingsFieldsLayout
+          control={control}
+          fields={commonFields}
+          testSubjPrefix={testSubjPrefix}
+          columns={2}
+        />
       </EuiPanel>
     </>
   );

@@ -59,11 +59,7 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
 
   const applyFormatDefaultsToForm = useCallback(
     (nextFormat: Exclude<DatasetFormatFormValue, ''>) => {
-      const currentSettings = getValues('settings');
-      const withDefaults = applySettingsForFormat(
-        { ...currentSettings, format: nextFormat },
-        nextFormat
-      );
+      const withDefaults = applySettingsForFormat(getValues('settings'), nextFormat);
       setValue('settings', withDefaults, { shouldDirty: true, shouldValidate: true });
     },
     [getValues, setValue]

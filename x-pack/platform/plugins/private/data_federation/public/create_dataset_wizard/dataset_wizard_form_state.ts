@@ -23,6 +23,14 @@ export interface DatasetWizardFormValues extends CreateDatasetFormValues {
   schema_mapping_mode: SchemaMappingMode;
   /** Prototype-only field; not persisted to the API yet. */
   manual_mappings: Record<string, object>;
+  /** Prototype-only field; not persisted to the API yet. */
+  glue_database: string;
+  /** Prototype-only field; not persisted to the API yet. */
+  glue_table_name: string;
+  /** Prototype-only field; not persisted to the API yet. */
+  glue_catalog_region: string;
+  /** Prototype-only field; not persisted to the API yet. */
+  glue_aws_account_id: string;
 }
 
 export const emptyDatasetWizardFormValues = (): DatasetWizardFormValues => ({
@@ -30,6 +38,10 @@ export const emptyDatasetWizardFormValues = (): DatasetWizardFormValues => ({
   region: '',
   schema_mapping_mode: 'automatic',
   manual_mappings: {},
+  glue_database: '',
+  glue_table_name: '',
+  glue_catalog_region: '',
+  glue_aws_account_id: '',
 });
 
 export const dataSetToWizardFormValues = (data: DataSetWithName): DatasetWizardFormValues => ({
@@ -37,4 +49,8 @@ export const dataSetToWizardFormValues = (data: DataSetWithName): DatasetWizardF
   region: '',
   schema_mapping_mode: 'automatic',
   manual_mappings: {},
+  glue_database: '',
+  glue_table_name: '',
+  glue_catalog_region: '',
+  glue_aws_account_id: '',
 });

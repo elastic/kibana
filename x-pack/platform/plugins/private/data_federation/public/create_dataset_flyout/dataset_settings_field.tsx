@@ -15,6 +15,7 @@ import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
 import type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
 import {
   DELIMITER_PRESETS,
+  DATETIME_FORMAT_PRESETS,
   ENCODING_PRESETS,
   ERROR_MODE_SUPER_SELECT_OPTIONS,
   HEADER_ROW_SUPER_SELECT_OPTIONS,
@@ -197,12 +198,14 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
       );
     case 'datetime_format':
       return (
-        <TextSettingsField
+        <SettingsPresetComboBox
           control={control}
           name="settings.datetime_format"
           label={createDatasetFlyoutStrings.settingsDatetimeFormatLabel()}
           helpText={createDatasetFlyoutStrings.settingsDatetimeFormatHelp()}
-          testSubj={`${testSubjPrefix}SettingsDatetimeFormat`}
+          placeholder={createDatasetFlyoutStrings.settingsDatetimeFormatPlaceholder()}
+          presets={DATETIME_FORMAT_PRESETS()}
+          data-test-subj={`${testSubjPrefix}SettingsDatetimeFormat`}
         />
       );
     case 'multi_value_syntax':
@@ -319,7 +322,6 @@ const SchemaSampleSizeField: FunctionComponent<{
       label={createDatasetFlyoutStrings.settingsSchemaSampleSizeLabel()}
       helpText={createDatasetFlyoutStrings.settingsSchemaSampleSizeHelp()}
       fullWidth
-      display="rowCompressed"
       isInvalid={Boolean(fieldState.error)}
       error={fieldState.error?.message}
     >
@@ -349,7 +351,7 @@ const TextSettingsField: FunctionComponent<{
   const { field } = useController({ name, control });
 
   return (
-    <EuiFormRow label={label} helpText={helpText} fullWidth display="rowCompressed">
+    <EuiFormRow label={label} helpText={helpText} fullWidth>
       <EuiFieldText
         data-test-subj={testSubj}
         fullWidth
@@ -381,7 +383,6 @@ const NumberSettingsField: FunctionComponent<{
       label={label}
       helpText={helpText}
       fullWidth
-      display="rowCompressed"
       isInvalid={Boolean(fieldState.error)}
       error={fieldState.error?.message}
     >

@@ -17,7 +17,7 @@ import type {
   DatasetErrorModeFormValue,
   DatasetFormatFormValue,
 } from './create_dataset_flyout_form_state';
-import { DatasetSettingsField } from './dataset_settings_field';
+import { DatasetSettingsFieldsLayout } from './dataset_settings_fields_layout';
 import type { DatasetSettingsAccordionId, DatasetSettingsFieldId } from './dataset_settings_visibility';
 import {
   getVisibleAccordionsForFormat,
@@ -106,6 +106,7 @@ interface DatasetSettingsAccordionItemProps {
   control: Control<CreateDatasetFormValues>;
   fields: DatasetSettingsFieldId[];
   testSubjPrefix: string;
+  columns?: number;
 }
 
 const DatasetSettingsAccordionItem: FunctionComponent<DatasetSettingsAccordionItemProps> = ({
@@ -115,6 +116,7 @@ const DatasetSettingsAccordionItem: FunctionComponent<DatasetSettingsAccordionIt
   control,
   fields,
   testSubjPrefix,
+  columns,
 }) => {
   const accordionRef = useRef<HTMLDivElement>(null);
 
@@ -144,14 +146,12 @@ const DatasetSettingsAccordionItem: FunctionComponent<DatasetSettingsAccordionIt
         onToggle={handleToggle}
       >
         <EuiPanel color="subdued" paddingSize="m" hasShadow={false}>
-          {fields.map((fieldId) => (
-            <DatasetSettingsField
-              key={fieldId}
-              control={control}
-              fieldId={fieldId}
-              testSubjPrefix={testSubjPrefix}
-            />
-          ))}
+          <DatasetSettingsFieldsLayout
+            control={control}
+            fields={fields}
+            testSubjPrefix={testSubjPrefix}
+            columns={columns}
+          />
         </EuiPanel>
       </EuiAccordion>
     </div>
@@ -180,6 +180,12 @@ const ACCORDION_ID_PREFIX: Record<DatasetSettingsAccordionId, string> = {
   columns: 'datasetSettingsColumnsAccordion',
   errorHandling: 'datasetSettingsErrorHandlingAccordion',
   limits: 'datasetSettingsLimitsAccordion',
+};
+
+const ACCORDION_COLUMNS: Partial<Record<DatasetSettingsAccordionId, number>> = {
+  structure: 3,
+  textParsing: 3,
+  columns: 2,
 };
 
 export interface DatasetSettingsAccordionsProps {
@@ -231,6 +237,7 @@ export const DatasetSettingsAccordions: FunctionComponent<DatasetSettingsAccordi
             control={control}
             fields={getVisibleFieldsForAccordion(accordionId, format, errorMode)}
             testSubjPrefix={testSubjPrefix}
+            columns={ACCORDION_COLUMNS[accordionId]}
           />
         ))}
       </div>

@@ -120,6 +120,11 @@ export const datasetWizardStrings = {
       defaultMessage: 'Select region',
     }),
 
+  regionRequired: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.regionRequired', {
+      defaultMessage: 'Region is required.',
+    }),
+
   placeholderStepDescription: (stepTitle: string) =>
     i18n.translate('xpack.dataFederation.datasetWizard.placeholderStepDescription', {
       defaultMessage: '{stepTitle} will be implemented in a follow-up step.',
@@ -169,6 +174,32 @@ export const datasetWizardStrings = {
   resourceRequired: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.resourceRequired', {
       defaultMessage: 'Resource is required.',
+    }),
+
+  resourceInvalidS3: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.resourceInvalidS3', {
+      defaultMessage:
+        'Resource must use one of the supported URI schemes: s3://, s3a://, or s3n://.',
+    }),
+
+  resourceInvalidGcs: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.resourceInvalidGcs', {
+      defaultMessage: 'Resource must use the gs:// URI scheme.',
+    }),
+
+  resourceInvalidAzure: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.resourceInvalidAzure', {
+      defaultMessage: 'Resource must use the https:// URI scheme.',
+    }),
+
+  glueDatabaseRequired: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.glueDatabaseRequired', {
+      defaultMessage: 'Glue database is required.',
+    }),
+
+  glueTableNameRequired: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.glueTableNameRequired', {
+      defaultMessage: 'Glue table name is required.',
     }),
 
   additionalSettingsTitle: () =>
@@ -280,12 +311,232 @@ export const datasetWizardStrings = {
   schemaMappingAwsGlueTableDescription: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingAwsGlueTableDescription', {
       defaultMessage:
-        'Use an AWS Glue table schema to define column names and types. This option will be available in a follow-up step.',
+        'Use an AWS Glue table schema to define column names and types from the AWS Glue Data Catalog.',
+    }),
+
+  schemaMappingAwsGlueCalloutTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingAwsGlueCalloutTitle', {
+      defaultMessage: 'Schema from Glue',
+    }),
+
+  schemaMappingAwsGlueCalloutDescription: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingAwsGlueCalloutDescription', {
+      defaultMessage:
+        'Column names, types, and partition keys are read from the AWS Glue Data Catalog instead of sampling the files. Ensures consistent typing and enables partition pruning on queries.',
+    }),
+
+  glueDatabaseLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.glueDatabaseLabel', {
+      defaultMessage: 'Glue database',
+    }),
+
+  glueDatabasePlaceholder: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.glueDatabasePlaceholder', {
+      defaultMessage: 'e.g. security_logs',
+    }),
+
+  glueDatabaseHelp: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.glueDatabaseHelp', {
+      defaultMessage: 'The Glue catalog database that contains the table',
+    }),
+
+  glueTableNameLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.glueTableNameLabel', {
+      defaultMessage: 'Glue table name',
+    }),
+
+  glueTableNamePlaceholder: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.glueTableNamePlaceholder', {
+      defaultMessage: 'e.g. cloudtrail_events',
+    }),
+
+  glueTableNameHelp: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.glueTableNameHelp', {
+      defaultMessage: 'Must point to the same S3 path as the resource path above',
+    }),
+
+  glueCatalogRegionLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.glueCatalogRegionLabel', {
+      defaultMessage: 'Glue catalog region',
+    }),
+
+  glueCatalogRegionPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.glueCatalogRegionPlaceholder', {
+      defaultMessage: 'Same as data source region',
+    }),
+
+  glueCatalogRegionHelp: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.glueCatalogRegionHelp', {
+      defaultMessage: 'Override only if the Glue catalog is in a different region from the S3 bucket',
+    }),
+
+  glueAwsAccountIdLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.glueAwsAccountIdLabel', {
+      defaultMessage: 'AWS account ID (optional)',
+    }),
+
+  glueAwsAccountIdPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.glueAwsAccountIdPlaceholder', {
+      defaultMessage: 'e.g. 112233445566',
+    }),
+
+  glueAwsAccountIdHelp: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.glueAwsAccountIdHelp', {
+      defaultMessage: 'Leave blank to use the same account as the data source credentials',
+    }),
+
+  gluePermissionsAccordionTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.gluePermissionsAccordionTitle', {
+      defaultMessage: 'Required Glue permissions',
+    }),
+
+  gluePermissionsAccordionDescription: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.gluePermissionsAccordionDescription', {
+      defaultMessage: 'Add to your IAM policy or role',
+    }),
+
+  gluePermissionsIntro: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.gluePermissionsIntro', {
+      defaultMessage: 'Add these to the IAM policy created in the data source setup.',
+    }),
+
+  reviewGlueDatabaseLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewGlueDatabaseLabel', {
+      defaultMessage: 'Glue database',
+    }),
+
+  reviewGlueTableNameLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewGlueTableNameLabel', {
+      defaultMessage: 'Glue table name',
+    }),
+
+  reviewGlueCatalogRegionLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewGlueCatalogRegionLabel', {
+      defaultMessage: 'Glue catalog region',
+    }),
+
+  reviewGlueAwsAccountIdLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewGlueAwsAccountIdLabel', {
+      defaultMessage: 'AWS account ID',
     }),
 
   schemaMappingManualDescription: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingManualDescription', {
       defaultMessage:
         'Manually define column names and types for your dataset. This option will be available in a follow-up step.',
+    }),
+
+  reviewTitle: (datasetName: string) =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewTitle', {
+      defaultMessage: 'Review configuration for {datasetName}',
+      values: { datasetName },
+    }),
+
+  reviewUntitledDataset: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewUntitledDataset', {
+      defaultMessage: 'your dataset',
+    }),
+
+  reviewSummaryTabTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewSummaryTabTitle', {
+      defaultMessage: 'Summary',
+    }),
+
+  reviewPreviewTabTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewPreviewTabTitle', {
+      defaultMessage: 'Preview',
+    }),
+
+  reviewRequestTabTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewRequestTabTitle', {
+      defaultMessage: 'Request',
+    }),
+
+  reviewLogisticsSectionTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewLogisticsSectionTitle', {
+      defaultMessage: 'Logistics',
+    }),
+
+  reviewSettingsSectionTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewSettingsSectionTitle', {
+      defaultMessage: 'Additional settings',
+    }),
+
+  reviewSchemaMappingsSectionTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewSchemaMappingsSectionTitle', {
+      defaultMessage: 'Schema mappings',
+    }),
+
+  reviewDataSourceTypeLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewDataSourceTypeLabel', {
+      defaultMessage: 'Type',
+    }),
+
+  reviewNoneValue: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewNoneValue', {
+      defaultMessage: 'None',
+    }),
+
+  reviewNoSettingsValue: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewNoSettingsValue', {
+      defaultMessage: 'No additional settings configured.',
+    }),
+
+  reviewDefaultBadge: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewDefaultBadge', {
+      defaultMessage: 'Default',
+    }),
+
+  reviewModifiedBadge: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewModifiedBadge', {
+      defaultMessage: 'Modified',
+    }),
+
+  reviewManualMappingsLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewManualMappingsLabel', {
+      defaultMessage: 'Mapped fields',
+    }),
+
+  reviewManualMappingsCount: (count: number) =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewManualMappingsCount', {
+      defaultMessage: '{count, plural, one {# field} other {# fields}}',
+      values: { count },
+    }),
+
+  reviewPreviewDescription: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewPreviewDescription', {
+      defaultMessage: 'This is the resolved dataset configuration that will be saved.',
+    }),
+
+  reviewRequestDescription: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewRequestDescription', {
+      defaultMessage: 'This request will create or update the dataset.',
+    }),
+
+  testConfigurationButton: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.testConfigurationButton', {
+      defaultMessage: 'Test configuration',
+    }),
+
+  testConfigurationPreviewTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.testConfigurationPreviewTitle', {
+      defaultMessage: 'Preview results',
+    }),
+
+  testConfigurationPreviewDescription: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.testConfigurationPreviewDescription', {
+      defaultMessage:
+        'Shows the first 10 rows read from your dataset using the current configuration.',
+    }),
+
+  testConfigurationPreviewTableCaption: (rowCount: number) =>
+    i18n.translate('xpack.dataFederation.datasetWizard.testConfigurationPreviewTableCaption', {
+      defaultMessage: 'First {rowCount} rows',
+      values: { rowCount },
+    }),
+
+  testConfigurationPreviewCloseAriaLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.testConfigurationPreviewCloseAriaLabel', {
+      defaultMessage: 'Close preview',
     }),
 };

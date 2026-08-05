@@ -7,14 +7,16 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 
 import type { DataSource } from '../../common';
-import { ADDITIONAL_SETTINGS_STEP } from './dataset_wizard_constants';
+import { ADDITIONAL_SETTINGS_STEP, REVIEW_STEP, SCHEMA_MAPPINGS_STEP } from './dataset_wizard_constants';
 import { DatasetWizard } from './dataset_wizard';
 import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
+import { applySettingsForFormat } from '../create_dataset_flyout/dataset_settings_defaults';
+import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_flyout/create_dataset_flyout_form_state';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
@@ -63,11 +65,7 @@ describe('DatasetWizard step navigation', () => {
     return { ...view, history };
   };
 
-  it('shows additional settings step after completing logistics', async () => {
-    const { getByRole, getByTestId, queryByTestId, history } = renderWizard();
-
-    expect(queryByTestId('datasetWizardSettingsFormat')).toBeNull();
-
+  const fillLogisticsStep = (getByRole: ReturnType<typeof render>['getByRole'], getByTestId: ReturnType<typeof render>['getByTestId']) => {
     fireEvent.click(getByTestId('datasetWizardDataSource'));
     fireEvent.click(getByRole('option', { name: 'source-1' }));
     fireEvent.change(getByTestId('datasetWizardName'), {
@@ -76,6 +74,17 @@ describe('DatasetWizard step navigation', () => {
     fireEvent.change(getByTestId('datasetWizardResource'), {
       target: { value: 's3://bucket/data.csv' },
     });
+    fireEvent.change(getByTestId('datasetWizardRegion'), {
+      target: { value: 'us-west-2' },
+    });
+  };
+
+  it('shows additional settings step after completing logistics', async () => {
+    const { getByRole, getByTestId, history } = renderWizard();
+
+    expect(getByTestId('datasetWizardSettingsFormat')).not.toBeVisible();
+
+    fillLogisticsStep(getByRole, getByTestId);
 
     expect(getByTestId('datasetWizardNext')).toBeInTheDocument();
     fireEvent.click(getByTestId('datasetWizardNext'));
@@ -87,10 +96,30 @@ describe('DatasetWizard step navigation', () => {
     });
   });
 
-  it('restores the wizard step from the URL on load', () => {
-    const { getByTestId, container } = renderWizard(`/create?step=${ADDITIONAL_SETTINGS_STEP}`);
+  it('does not show additional settings content on the logistics step', () => {
+    const { getByTestId } = renderWizard();
 
-    expect(getByTestId('datasetWizardAdditionalSettingsStep')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardSettingsFormat')).not.toBeVisible();
+  });
+
+  it('restores the wizard step from the URL on load when logistics are valid', async () => {
+    const draft = {
+      ...emptyDatasetWizardFormValues(),
+      data_source: 'source-1',
+      name: 'my-dataset',
+      resource: 's3://bucket/data.csv',
+      region: 'us-west-2',
+      settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'csv'),
+    };
+
+    const { getByTestId, container } = renderWizard(
+      `/create?step=${ADDITIONAL_SETTINGS_STEP}`,
+      draft
+    );
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardAdditionalSettingsStep')).toBeVisible();
+    });
 
     const currentStepIndicator = container.querySelector('[data-step-status="current"]');
     expect(currentStepIndicator).toHaveTextContent('Additional settings');
@@ -108,5 +137,155 @@ describe('DatasetWizard step navigation', () => {
 
     expect(getByTestId('datasetWizardName')).toHaveValue('my-dataset');
     expect(getByTestId('datasetWizardResource')).toHaveValue('s3://bucket/data.csv');
+  });
+
+  const testConfigurationDraft = {
+    ...emptyDatasetWizardFormValues(),
+    data_source: 'source-1',
+    name: 'my-dataset',
+    resource: 's3://bucket/data.parquet',
+    region: 'us-west-2',
+    settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
+  };
+
+  it('runs the mocked test configuration preview on the schema mappings step', async () => {
+    jest.useFakeTimers();
+
+    const { getByTestId, queryByTestId } = renderWizard(
+      `/create?step=${SCHEMA_MAPPINGS_STEP}`,
+      testConfigurationDraft
+    );
+
+    expect(getByTestId('datasetWizardTestConfiguration')).toBeInTheDocument();
+    expect(queryByTestId('datasetWizardTestConfigurationPreview')).toBeNull();
+
+    fireEvent.click(getByTestId('datasetWizardTestConfiguration'));
+    expect(getByTestId('datasetWizardTestConfigurationPreview')).toBeInTheDocument();
+
+    jest.useRealTimers();
+  });
+
+  it('runs the mocked test configuration preview on the review step', async () => {
+    jest.useFakeTimers();
+
+    const { getByTestId, queryByTestId } = renderWizard(
+      `/create?step=${REVIEW_STEP}`,
+      testConfigurationDraft
+    );
+
+    expect(queryByTestId('datasetWizardTestConfigurationPreview')).toBeNull();
+
+    fireEvent.click(getByTestId('datasetWizardTestConfiguration'));
+    expect(getByTestId('datasetWizardTestConfigurationPreview')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardTestConfigurationLoading')).toBeInTheDocument();
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    await waitFor(() => {
+      expect(queryByTestId('datasetWizardTestConfigurationLoading')).toBeNull();
+      expect(getByTestId('datasetWizardTestConfigurationTable')).toBeInTheDocument();
+    });
+
+    fireEvent.click(getByTestId('datasetWizardTestConfigurationClose'));
+    expect(queryByTestId('datasetWizardTestConfigurationPreview')).toBeNull();
+
+    fireEvent.click(getByTestId('datasetWizardTestConfiguration'));
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardTestConfigurationTable')).toBeInTheDocument();
+    });
+
+    jest.useRealTimers();
+  });
+
+  it('closes the test configuration preview when navigating to another step', async () => {
+    jest.useFakeTimers();
+
+    const { getByTestId, queryByTestId, history } = renderWizard(
+      `/create?step=${SCHEMA_MAPPINGS_STEP}`,
+      testConfigurationDraft
+    );
+
+    fireEvent.click(getByTestId('datasetWizardTestConfiguration'));
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardTestConfigurationTable')).toBeInTheDocument();
+    });
+
+    history.replace(`/create?step=${REVIEW_STEP}`);
+
+    await waitFor(() => {
+      expect(queryByTestId('datasetWizardTestConfigurationPreview')).toBeNull();
+    });
+
+    jest.useRealTimers();
+  });
+
+  it('blocks advancing from logistics when region is not selected', async () => {
+    const { getByRole, getByTestId, history } = renderWizard();
+
+    fireEvent.click(getByTestId('datasetWizardDataSource'));
+    fireEvent.click(getByRole('option', { name: 'source-1' }));
+    fireEvent.change(getByTestId('datasetWizardName'), {
+      target: { value: 'my-dataset' },
+    });
+    fireEvent.change(getByTestId('datasetWizardResource'), {
+      target: { value: 's3://bucket/data.csv' },
+    });
+
+    fireEvent.click(getByTestId('datasetWizardNext'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardRegion')).toBeInvalid();
+    });
+
+    expect(getByTestId('datasetWizardAdditionalSettingsStep')).not.toBeVisible();
+    expect(history.location.search).toBe('');
+  });
+
+  it('blocks advancing from logistics when the resource URI is invalid', async () => {
+    const { getByRole, getByTestId, history } = renderWizard();
+
+    fireEvent.click(getByTestId('datasetWizardDataSource'));
+    fireEvent.click(getByRole('option', { name: 'source-1' }));
+    fireEvent.change(getByTestId('datasetWizardName'), {
+      target: { value: 'my-dataset' },
+    });
+    fireEvent.change(getByTestId('datasetWizardResource'), {
+      target: { value: 'sfr' },
+    });
+    fireEvent.change(getByTestId('datasetWizardRegion'), {
+      target: { value: 'us-west-2' },
+    });
+
+    fireEvent.click(getByTestId('datasetWizardNext'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardResource')).toBeInvalid();
+    });
+
+    expect(getByTestId('datasetWizardAdditionalSettingsStep')).not.toBeVisible();
+    expect(history.location.search).toBe('');
+  });
+
+  it('redirects invalid deep links back to logistics', async () => {
+    const { getByTestId, history } = renderWizard(`/create?step=${REVIEW_STEP}`);
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardName')).toBeVisible();
+      expect(getByTestId('datasetWizardAdditionalSettingsStep')).not.toBeVisible();
+    });
+
+    expect(history.location.search).toBe('');
   });
 });

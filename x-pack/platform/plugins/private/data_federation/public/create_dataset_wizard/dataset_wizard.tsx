@@ -25,7 +25,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataSetWithName, DataSource, DataSourceWithSecrets } from '../../common';
 import { validateIndexNameRules } from '../../common';
 import { CreateDataSourceFlyout } from '../create_data_source_flyout';
-import { buildDatasetSettingsFromFormValues } from '../create_dataset_flyout/create_dataset_flyout_form_state';
+import { buildDatasetPayloadFromWizardValues } from './review_step_utils';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../types';
 import {
@@ -47,10 +47,16 @@ import {
   getWizardFormDraftStorageKey,
   saveWizardFormDraft,
 } from './dataset_wizard_form_persistence';
+import { findFirstInvalidWizardStep, getWizardStepFields } from './dataset_wizard_step_validation';
+import { validateResourceForDataSource } from './validate_dataset_resource';
 import { LogisticsStep } from './steps/logistics_step';
 import { AdditionalSettingsStep } from './steps/additional_settings_step';
-import { PlaceholderStep } from './steps/placeholder_step';
 import { SchemaMappingsStep } from './steps/schema_mappings_step';
+import { ReviewStep } from './steps/review_step';
+import { TestConfigurationPreview } from './test_configuration_preview';
+
+const TEST_CONFIGURATION_LOADING_MS = 600;
+const TEST_CONFIGURATION_STEPS: DatasetWizardStep[] = [SCHEMA_MAPPINGS_STEP, REVIEW_STEP];
 
 export interface DatasetWizardProps {
   isEditMode: boolean;
@@ -90,6 +96,9 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   const [saveError, setSaveError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
   const [isCreateDataSourceFlyoutOpen, setIsCreateDataSourceFlyoutOpen] = useState(false);
+  const [isTestConfigPanelOpen, setIsTestConfigPanelOpen] = useState(false);
+  const [isTestConfigLoading, setIsTestConfigLoading] = useState(false);
+  const testConfigLoadingTimeoutRef = useRef<number | undefined>(undefined);
   const additionalSettingsSyncedResourceRef = useRef<string | null>(null);
 
   const {
@@ -98,7 +107,6 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     setValue,
     trigger,
     watch,
-    formState: { errors },
   } = useForm<DatasetWizardFormValues>({
     defaultValues,
     mode: 'onChange',
@@ -108,6 +116,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   const watchedDataSource = watch('data_source');
   const watchedName = watch('name');
   const watchedResource = watch('resource');
+  const watchedRegion = watch('region');
 
   useEffect(() => {
     const subscription = watch((values) => {
@@ -182,18 +191,100 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     const dataSource = watchedDataSource?.trim() ?? '';
     const name = watchedName?.trim() ?? '';
     const resource = watchedResource?.trim() ?? '';
+    const region = watchedRegion?.trim() ?? '';
 
-    if (!dataSource || !name || !resource) {
+    if (!dataSource || !name || !resource || !region) {
       return false;
     }
 
-    return validateName(name) === true;
-  }, [validateName, watchedDataSource, watchedName, watchedResource]);
+    if (validateName(name) !== true) {
+      return false;
+    }
+
+    return validateResourceForDataSource(resource, dataSource, dataSources) === true;
+  }, [dataSources, validateName, watchedDataSource, watchedName, watchedRegion, watchedResource]);
 
   useEffect(() => {
     const stepFromUrl = parseWizardStepFromSearch(location.search) ?? LOGISTICS_STEP;
-    setCurrentStep((previousStep) => (previousStep === stepFromUrl ? previousStep : stepFromUrl));
-  }, [location.search]);
+
+    if (stepFromUrl === LOGISTICS_STEP) {
+      setCurrentStep(LOGISTICS_STEP);
+      return;
+    }
+
+    let isCancelled = false;
+
+    const syncStepFromUrl = async () => {
+      const values = getValues();
+      const firstInvalidStep = await findFirstInvalidWizardStep({
+        targetStep: stepFromUrl,
+        values,
+        trigger,
+      });
+
+      if (isCancelled) {
+        return;
+      }
+
+      const nextStep = firstInvalidStep ?? stepFromUrl;
+      setCurrentStep(nextStep);
+
+      if (nextStep !== stepFromUrl) {
+        history.replace({
+          pathname: location.pathname,
+          search: buildWizardStepSearch(location.search, nextStep),
+        });
+      }
+    };
+
+    void syncStepFromUrl();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [getValues, history, location.pathname, location.search, trigger]);
+
+  useEffect(() => {
+    setIsTestConfigPanelOpen(false);
+    setIsTestConfigLoading(false);
+    if (testConfigLoadingTimeoutRef.current !== undefined) {
+      window.clearTimeout(testConfigLoadingTimeoutRef.current);
+      testConfigLoadingTimeoutRef.current = undefined;
+    }
+  }, [currentStep]);
+
+  useEffect(
+    () => () => {
+      if (testConfigLoadingTimeoutRef.current !== undefined) {
+        window.clearTimeout(testConfigLoadingTimeoutRef.current);
+      }
+    },
+    []
+  );
+
+  const clearTestConfigLoadingTimeout = useCallback(() => {
+    if (testConfigLoadingTimeoutRef.current !== undefined) {
+      window.clearTimeout(testConfigLoadingTimeoutRef.current);
+      testConfigLoadingTimeoutRef.current = undefined;
+    }
+  }, []);
+
+  const handleCloseTestConfiguration = useCallback(() => {
+    setIsTestConfigPanelOpen(false);
+    setIsTestConfigLoading(false);
+    clearTestConfigLoadingTimeout();
+  }, [clearTestConfigLoadingTimeout]);
+
+  const handleTestConfiguration = useCallback(() => {
+    setIsTestConfigPanelOpen(true);
+    setIsTestConfigLoading(true);
+    clearTestConfigLoadingTimeout();
+
+    testConfigLoadingTimeoutRef.current = window.setTimeout(() => {
+      setIsTestConfigLoading(false);
+      testConfigLoadingTimeoutRef.current = undefined;
+    }, TEST_CONFIGURATION_LOADING_MS);
+  }, [clearTestConfigLoadingTimeout]);
 
   const isStepDisabled = useCallback(
     (step: DatasetWizardStep) => !logisticsStepComplete && currentStep < step,
@@ -211,6 +302,32 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     [history, location.pathname, location.search]
   );
 
+  const attemptGoToStep = useCallback(
+    async (targetStep: DatasetWizardStep) => {
+      setSaveError(undefined);
+
+      if (targetStep <= currentStep) {
+        goToStep(targetStep);
+        return;
+      }
+
+      const values = getValues();
+      const firstInvalidStep = await findFirstInvalidWizardStep({
+        targetStep,
+        values,
+        trigger,
+      });
+
+      if (firstInvalidStep !== undefined) {
+        goToStep(firstInvalidStep);
+        return;
+      }
+
+      goToStep(targetStep);
+    },
+    [currentStep, getValues, goToStep, trigger]
+  );
+
   const stepDefinitions = useMemo(
     () => [
       {
@@ -221,7 +338,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           : logisticsStepComplete
             ? 'complete'
             : 'incomplete') as EuiStepStatus,
-        onClick: () => goToStep(LOGISTICS_STEP),
+        onClick: () => void attemptGoToStep(LOGISTICS_STEP),
       },
       {
         step: ADDITIONAL_SETTINGS_STEP,
@@ -232,7 +349,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           : currentStep > ADDITIONAL_SETTINGS_STEP
             ? 'complete'
             : 'incomplete') as EuiStepStatus,
-        onClick: () => goToStep(ADDITIONAL_SETTINGS_STEP),
+        onClick: () => void attemptGoToStep(ADDITIONAL_SETTINGS_STEP),
       },
       {
         step: SCHEMA_MAPPINGS_STEP,
@@ -243,25 +360,31 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           : currentStep > SCHEMA_MAPPINGS_STEP
             ? 'complete'
             : 'incomplete') as EuiStepStatus,
-        onClick: () => goToStep(SCHEMA_MAPPINGS_STEP),
+        onClick: () => void attemptGoToStep(SCHEMA_MAPPINGS_STEP),
       },
       {
         step: REVIEW_STEP,
         title: datasetWizardStrings.stepReview(),
         disabled: isStepDisabled(REVIEW_STEP),
         status: (currentStep === REVIEW_STEP ? 'current' : 'incomplete') as EuiStepStatus,
-        onClick: () => goToStep(REVIEW_STEP),
+        onClick: () => void attemptGoToStep(REVIEW_STEP),
       },
     ],
-    [currentStep, goToStep, isStepDisabled, logisticsStepComplete]
+    [attemptGoToStep, currentStep, isStepDisabled, logisticsStepComplete]
   );
 
   const handleNext = async () => {
+    setSaveError(undefined);
+
+    const values = getValues();
+    const fields = getWizardStepFields(currentStep, values);
+    const isValid = await trigger(fields, { shouldFocus: true });
+
+    if (!isValid) {
+      return;
+    }
+
     if (currentStep === LOGISTICS_STEP) {
-      const isValid = await trigger(['data_source', 'name', 'resource']);
-      if (!isValid) {
-        return;
-      }
       goToStep(ADDITIONAL_SETTINGS_STEP);
       return;
     }
@@ -292,18 +415,22 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
   const handleSubmit = async () => {
     setSaveError(undefined);
+
+    const values = getValues();
+    const firstInvalidStep = await findFirstInvalidWizardStep({
+      targetStep: REVIEW_STEP,
+      values,
+      trigger,
+    });
+
+    if (firstInvalidStep !== undefined) {
+      goToStep(firstInvalidStep);
+      return;
+    }
+
     setIsSaving(true);
     try {
-      const values = getValues();
-      const desc = values.description?.trim();
-      const settings = buildDatasetSettingsFromFormValues(values.settings);
-      const payload: DataSetWithName = {
-        name: values.name.trim(),
-        data_source: values.data_source.trim(),
-        resource: values.resource.trim(),
-        ...(desc ? { description: desc } : {}),
-        ...(settings ? { settings } : {}),
-      };
+      const payload = buildDatasetPayloadFromWizardValues(values);
       const message = await onSave(payload, initialDataSet?.name);
       if (message) {
         setSaveError(message);
@@ -317,44 +444,41 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
   const showBackButton = currentStep > LOGISTICS_STEP;
   const isLastStep = currentStep === REVIEW_STEP;
+  const showTestConfiguration = TEST_CONFIGURATION_STEPS.includes(currentStep);
 
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case LOGISTICS_STEP:
-        return (
-          <LogisticsStep
-            control={control}
-            errors={errors}
-            dataSources={dataSources}
-            onConnectNewDataSource={openCreateDataSourceFlyout}
-            validateName={validateName}
-          />
-        );
-      case ADDITIONAL_SETTINGS_STEP:
-        return (
-          <AdditionalSettingsStep
-            control={control}
-            getValues={getValues}
-            setValue={setValue}
-            resource={watchedResource ?? ''}
-            syncedResourceRef={additionalSettingsSyncedResourceRef}
-            isEditMode={isEditMode}
-          />
-        );
-      case SCHEMA_MAPPINGS_STEP:
-        return (
-          <SchemaMappingsStep
-            control={control}
-            dataSources={dataSources}
-            dataSource={watchedDataSource ?? ''}
-          />
-        );
-      case REVIEW_STEP:
-        return <PlaceholderStep stepTitle={datasetWizardStrings.stepReview()} />;
-      default:
-        return null;
-    }
-  };
+  const renderStepContent = () => (
+    <>
+      <div hidden={currentStep !== LOGISTICS_STEP}>
+        <LogisticsStep
+          control={control}
+          dataSources={dataSources}
+          onConnectNewDataSource={openCreateDataSourceFlyout}
+          validateName={validateName}
+        />
+      </div>
+      <div hidden={currentStep !== ADDITIONAL_SETTINGS_STEP}>
+        <AdditionalSettingsStep
+          control={control}
+          getValues={getValues}
+          setValue={setValue}
+          resource={watchedResource ?? ''}
+          syncedResourceRef={additionalSettingsSyncedResourceRef}
+          isEditMode={isEditMode}
+        />
+      </div>
+      <div hidden={currentStep !== SCHEMA_MAPPINGS_STEP}>
+        <SchemaMappingsStep
+          control={control}
+          dataSources={dataSources}
+          dataSource={watchedDataSource ?? ''}
+          dataSourceRegion={watchedRegion ?? ''}
+        />
+      </div>
+      <div hidden={currentStep !== REVIEW_STEP}>
+        <ReviewStep values={getValues()} dataSources={dataSources} />
+      </div>
+    </>
+  );
 
   return (
     <>
@@ -373,6 +497,17 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
         <div data-test-subj="datasetWizardStepContent">{renderStepContent()}</div>
 
+        {showTestConfiguration && isTestConfigPanelOpen ? (
+          <>
+            <EuiSpacer size="l" />
+            <TestConfigurationPreview
+              values={getValues()}
+              isLoading={isTestConfigLoading}
+              onClose={handleCloseTestConfiguration}
+            />
+          </>
+        ) : null}
+
       <EuiSpacer size="xl" />
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -387,6 +522,17 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
                 <EuiButtonEmpty data-test-subj="datasetWizardBack" onClick={handleBack}>
                   {datasetWizardStrings.backButton()}
                 </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : null}
+            {showTestConfiguration ? (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="datasetWizardTestConfiguration"
+                  isLoading={isTestConfigLoading}
+                  onClick={handleTestConfiguration}
+                >
+                  {datasetWizardStrings.testConfigurationButton()}
+                </EuiButton>
               </EuiFlexItem>
             ) : null}
             <EuiFlexItem grow={false}>

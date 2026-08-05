@@ -146,8 +146,17 @@ export const DELIMITER_PRESETS = () => [
 
 export const ENCODING_PRESETS = () => [
   { value: 'UTF-8', label: 'UTF-8' },
-  { value: 'ISO-8859-1', label: 'ISO-8859-1' },
   { value: 'UTF-16', label: 'UTF-16' },
+  { value: 'ISO-8859-1', label: 'ISO-8859-1' },
+  { value: 'US-ASCII', label: 'US-ASCII' },
+  { value: 'windows-1252', label: 'windows-1252' },
+];
+
+export const DATETIME_FORMAT_PRESETS = () => [
+  { value: 'ISO-8601', label: 'ISO-8601' },
+  { value: 'strict_date_optional_time', label: 'strict_date_optional_time' },
+  { value: 'yyyy-MM-dd', label: 'yyyy-MM-dd' },
+  { value: 'yyyy-MM-dd HH:mm:ss', label: 'yyyy-MM-dd HH:mm:ss' },
 ];
 
 export const NULL_VALUE_EMPTY_STRING_PRESET = '__empty_string__';

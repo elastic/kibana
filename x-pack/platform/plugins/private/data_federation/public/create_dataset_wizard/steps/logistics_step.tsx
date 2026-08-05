@@ -16,7 +16,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { Control, FieldErrors, Validate } from 'react-hook-form';
+import type { Control, Validate } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
 import type { DataSource } from '../../../common';
@@ -24,6 +24,7 @@ import { DATA_SOURCE_TYPES_TO_HELP_TEXT } from '../../../common';
 import { DataSourceSuperSelect } from '../data_source_super_select';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
+import { validateResourceForDataSource } from '../validate_dataset_resource';
 
 const trimRequired =
   (message: string) =>
@@ -39,7 +40,6 @@ const PROTOTYPE_REGION_OPTIONS = [
 
 export interface LogisticsStepProps {
   control: Control<DatasetWizardFormValues>;
-  errors: FieldErrors<DatasetWizardFormValues>;
   dataSources: DataSource[];
   onConnectNewDataSource: () => void;
   validateName: Validate<string, DatasetWizardFormValues>;
@@ -47,12 +47,11 @@ export interface LogisticsStepProps {
 
 export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
   control,
-  errors,
   dataSources,
   onConnectNewDataSource,
   validateName,
 }) => {
-  const { field: dataSourceField } = useController({
+  const { field: dataSourceField, fieldState: dataSourceFieldState } = useController({
     name: 'data_source',
     control,
     rules: {
@@ -60,7 +59,7 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
     },
   });
 
-  const { field: nameField } = useController({
+  const { field: nameField, fieldState: nameFieldState } = useController({
     name: 'name',
     control,
     rules: {
@@ -73,17 +72,27 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
     control,
   });
 
-  const { field: resourceField } = useController({
+  const { field: resourceField, fieldState: resourceFieldState } = useController({
     name: 'resource',
     control,
     rules: {
-      validate: trimRequired(datasetWizardStrings.resourceRequired()),
+      validate: (value, formValues) => {
+        const requiredResult = trimRequired(datasetWizardStrings.resourceRequired())(value);
+        if (requiredResult !== true) {
+          return requiredResult;
+        }
+
+        return validateResourceForDataSource(value, formValues.data_source, dataSources);
+      },
     },
   });
 
-  const { field: regionField } = useController({
+  const { field: regionField, fieldState: regionFieldState } = useController({
     name: 'region',
     control,
+    rules: {
+      validate: trimRequired(datasetWizardStrings.regionRequired()),
+    },
   });
 
   const onDataSourceChange = useCallback(
@@ -95,7 +104,12 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
 
   const regionOptions = useMemo(
     () => [
-      { value: '', text: datasetWizardStrings.regionPlaceholder() },
+      {
+        value: '',
+        text: datasetWizardStrings.regionPlaceholder(),
+        disabled: true,
+        hidden: true,
+      },
       ...PROTOTYPE_REGION_OPTIONS,
     ],
     []
@@ -124,8 +138,8 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
         <EuiFormRow
           label={datasetWizardStrings.dataSourceLabel()}
           fullWidth
-          isInvalid={Boolean(errors.data_source)}
-          error={errors.data_source?.message}
+          isInvalid={Boolean(dataSourceFieldState.error)}
+          error={dataSourceFieldState.error?.message}
         >
           <DataSourceSuperSelect
             dataSources={dataSources}
@@ -139,7 +153,7 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
             onConnectNewDataSource={onConnectNewDataSource}
             name={dataSourceField.name}
             buttonRef={dataSourceField.ref}
-            isInvalid={Boolean(errors.data_source)}
+            isInvalid={Boolean(dataSourceFieldState.error)}
           />
         </EuiFormRow>
 
@@ -147,14 +161,14 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
           label={datasetWizardStrings.datasetNameLabel()}
           helpText={datasetWizardStrings.datasetNameHelp()}
           fullWidth
-          isInvalid={Boolean(errors.name)}
-          error={errors.name?.message}
+          isInvalid={Boolean(nameFieldState.error)}
+          error={nameFieldState.error?.message}
         >
           <EuiFieldText
             data-test-subj="datasetWizardName"
             fullWidth
             placeholder={datasetWizardStrings.datasetNamePlaceholder()}
-            isInvalid={Boolean(errors.name)}
+            isInvalid={Boolean(nameFieldState.error)}
             value={nameField.value}
             onChange={(e) => nameField.onChange(e.target.value)}
             name={nameField.name}
@@ -178,15 +192,15 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
           label={datasetWizardStrings.resourceLabel()}
           helpText={resourceHelpText}
           fullWidth
-          isInvalid={Boolean(errors.resource)}
-          error={errors.resource?.message}
+          isInvalid={Boolean(resourceFieldState.error)}
+          error={resourceFieldState.error?.message}
         >
           <EuiFieldText
             data-test-subj="datasetWizardResource"
             fullWidth
             placeholder={datasetWizardStrings.resourcePlaceholder()}
             autoComplete="off"
-            isInvalid={Boolean(errors.resource)}
+            isInvalid={Boolean(resourceFieldState.error)}
             value={resourceField.value}
             onChange={(e) => resourceField.onChange(e.target.value)}
             name={resourceField.name}
@@ -194,14 +208,21 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
           />
         </EuiFormRow>
 
-        <EuiFormRow label={datasetWizardStrings.regionLabel()} fullWidth>
+        <EuiFormRow
+          label={datasetWizardStrings.regionLabel()}
+          fullWidth
+          isInvalid={Boolean(regionFieldState.error)}
+          error={regionFieldState.error?.message}
+        >
           <EuiSelect
             options={regionOptions}
             data-test-subj="datasetWizardRegion"
             fullWidth
             aria-label={datasetWizardStrings.regionLabel()}
-            value={regionField.value}
-            onChange={(e) => regionField.onChange(e.target.value)}
+            isInvalid={Boolean(regionFieldState.error)}
+            value={regionField.value || ''}
+            onChange={(event) => regionField.onChange(event.target.value)}
+            onBlur={regionField.onBlur}
             name={regionField.name}
             inputRef={regionField.ref}
           />
