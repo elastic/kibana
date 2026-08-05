@@ -49919,8 +49919,6 @@
     "xpack.securitySolution.siemReadiness.visibility.retention.title": "保持",
     "xpack.securitySolution.some_page.flyoutCreateSubmitSuccess": "\"{name}\"が追加されました。",
     "xpack.securitySolution.source.destination.packetsLabel": "パケット",
-    "xpack.securitySolution.sourcerer.error.title": "セキュリティデータビューの更新エラー",
-    "xpack.securitySolution.sourcerer.error.toastMessage": "ページを更新",
     "xpack.securitySolution.stepDefineRule.lastDay": "昨日",
     "xpack.securitySolution.stepDefineRule.lastHour": "過去1時間",
     "xpack.securitySolution.stepDefineRule.lastMonth": "先月",
