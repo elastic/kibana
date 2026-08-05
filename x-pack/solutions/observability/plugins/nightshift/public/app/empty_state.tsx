@@ -20,19 +20,19 @@ interface NightshiftEmptyStateProps {
 const processingSteps = [
   {
     icon: 'productStreamsWired',
-    label: i18n.translate('xpack.observability.nightshift.emptyState.streamsStepLabel', {
+    label: i18n.translate('xpack.nightshift.emptyState.streamsStepLabel', {
       defaultMessage: 'Streams',
     }),
   },
   {
     icon: 'analyzeEvent',
-    label: i18n.translate('xpack.observability.nightshift.emptyState.entitiesStepLabel', {
+    label: i18n.translate('xpack.nightshift.emptyState.entitiesStepLabel', {
       defaultMessage: 'Entities',
     }),
   },
   {
     icon: 'radar',
-    label: i18n.translate('xpack.observability.nightshift.emptyState.detectionsStepLabel', {
+    label: i18n.translate('xpack.nightshift.emptyState.detectionsStepLabel', {
       defaultMessage: 'Detections',
     }),
   },
@@ -121,10 +121,10 @@ export function NightshiftEmptyState({
         aria-busy={isProcessing}
         aria-label={
           isProcessing
-            ? i18n.translate('xpack.observability.nightshift.emptyState.processingStepsAriaLabel', {
+            ? i18n.translate('xpack.nightshift.emptyState.processingStepsAriaLabel', {
                 defaultMessage: 'Checking streams, entities, and detections',
               })
-            : i18n.translate('xpack.observability.nightshift.emptyState.completedStepsAriaLabel', {
+            : i18n.translate('xpack.nightshift.emptyState.completedStepsAriaLabel', {
                 defaultMessage: 'Streams, entities, and detections checked',
               })
         }
@@ -194,7 +194,7 @@ export function NightshiftEmptyState({
           element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
         })}
       >
-        {i18n.translate('xpack.observability.nightshift.emptyState.logsLinkLabel', {
+        {i18n.translate('xpack.nightshift.emptyState.logsLinkLabel', {
           defaultMessage: 'What do we know about your logs?',
         })}
       </EuiButtonEmpty>

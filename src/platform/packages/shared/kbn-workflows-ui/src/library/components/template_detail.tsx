@@ -9,7 +9,6 @@
 
 import {
   EuiBadge,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFocusTrap,
@@ -23,6 +22,7 @@ import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { stringify } from 'yaml';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   getStepByNameFromNestedSteps,
   transformWorkflowToGraph,
@@ -44,11 +44,18 @@ import {
   type WorkflowVisualEditorFlyoutTarget,
 } from '../../components';
 import { useTemplate } from '../hooks/use_template';
+import { getCategoryLabel } from '../lib/category_labels';
 import { getWorkflowTypes } from '../lib/get_workflow_types';
-import { humanizeCategoryId } from '../lib/humanize_category_id';
 
 export interface TemplateDetailProps {
-  slug: string;
+  /** Catalog slug to fetch. Ignored when `template` is provided. */
+  slug?: string;
+  /**
+   * A pre-loaded template to render directly instead of fetching by slug —
+   * e.g. a client-side parsed file from the "Install template from file" flow.
+   * When set, no request is made and `installMode` should be `'custom'`.
+   */
+  template?: TemplateBody;
   /** Called once the template body has loaded — e.g. to set breadcrumbs. */
   onLoaded?: (template: TemplateBody) => void;
   /**
@@ -59,6 +66,11 @@ export interface TemplateDetailProps {
   backButton?: React.ReactNode;
   /** Enables the graph/YAML preview toggle. Defaults to YAML-only when false. */
   showGraphPreview?: boolean;
+  /**
+   * How the install action creates the workflow: `'catalog'` (default) by slug,
+   * `'custom'` from the template's raw YAML. Forwarded to the install section.
+   */
+  installMode?: 'catalog' | 'custom';
 }
 
 /** App icons for the known solutions; unknown solutions render without one. */
@@ -84,11 +96,17 @@ const capitalize = (value: string): string =>
  */
 export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateDetail({
   slug,
+  template,
   onLoaded,
   backButton,
   showGraphPreview = false,
+  installMode = 'catalog',
 }) {
-  const { data, isLoading, isError } = useTemplate(slug);
+  // A pre-loaded template short-circuits the fetch; the query stays disabled.
+  const query = useTemplate(template ? undefined : slug);
+  const data = template ?? query.data;
+  const isLoading = template ? false : query.isLoading;
+  const isError = template ? false : query.isError;
   const { euiTheme } = useEuiTheme();
   const previewShadow = useEuiShadow('xl');
   const [previewView, setPreviewView] = useState<WorkflowDetailBottomBarView>('graph');
@@ -100,10 +118,14 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
   // sees the workflow that Install would create. Unset fields fall back to
   // the form defaults / `<name>` placeholders inside `renderTemplate`.
   const [previewValues, setPreviewValues] = useState<Record<string, unknown>>({});
+
+  // Values belong to a single template; drop them when the source changes
+  // (catalog slug or the identity of a pre-loaded/custom template).
+  const resetKey = slug ?? template?.metadata.slug;
   useEffect(() => {
-    // Values belong to a single template; drop them when the slug changes.
     setPreviewValues({});
-  }, [slug]);
+  }, [resetKey]);
+
   const previewYaml = useMemo(
     () => (data ? renderTemplate({ template: data, values: previewValues }) : ''),
     [data, previewValues]
@@ -194,14 +216,11 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
 
   if (isError || !data) {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         data-test-subj="workflowLibraryTemplateDetail-error"
-        color="danger"
-        iconType="warning"
         title={i18n.translate('workflows.library.templateDetail.errorTitle', {
           defaultMessage: 'Unable to load this template',
         })}
-        announceOnMount
       />
     );
   }
@@ -385,7 +404,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                               >
                                 {metadata.categories.map((category) => (
                                   <EuiBadge key={`tag-${category}`} color="hollow">
-                                    {humanizeCategoryId(category)}
+                                    {getCategoryLabel(category)}
                                   </EuiBadge>
                                 ))}
                               </div>
@@ -465,6 +484,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
                 template={data}
                 onPreviewValuesChange={setPreviewValues}
                 previewYaml={previewYaml}
+                installMode={installMode}
               />
             </EuiFlexGroup>
           </EuiFlexItem>
