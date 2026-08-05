@@ -99,21 +99,21 @@ export type InvestigationFlyoutTabId = 'recommendations' | 'blindSpots' | 'hypot
 type CompletedTabId = InvestigationFlyoutTabId;
 
 const recommendationChatTooltip = i18n.translate(
-  'xpack.observability.nightshift.investigation.recommendationChatTooltip',
+  'xpack.nightshift.investigation.recommendationChatTooltip',
   {
     defaultMessage: 'Ask agent about this recommendation',
   }
 );
 
 const hypothesisChatTooltip = i18n.translate(
-  'xpack.observability.nightshift.investigation.hypothesisChatTooltip',
+  'xpack.nightshift.investigation.hypothesisChatTooltip',
   {
     defaultMessage: 'Ask agent about this hypothesis',
   }
 );
 
 const hypothesisConfirmedAriaLabel = i18n.translate(
-  'xpack.observability.nightshift.investigation.hypothesisConfirmedAriaLabel',
+  'xpack.nightshift.investigation.hypothesisConfirmedAriaLabel',
   {
     defaultMessage: 'Hypothesis confirmed',
   }
@@ -189,10 +189,10 @@ function InvestigationFlyoutRow({
   const canToggle = isExpandable && !isToggleDisabled;
   const shouldShowToggle = (showToggle ?? isExpandable) && canToggle;
   const expandRowLabel = isOpen
-    ? i18n.translate('xpack.observability.nightshift.investigation.collapseRow', {
+    ? i18n.translate('xpack.nightshift.investigation.collapseRow', {
         defaultMessage: 'Collapse row',
       })
-    : i18n.translate('xpack.observability.nightshift.investigation.expandRow', {
+    : i18n.translate('xpack.nightshift.investigation.expandRow', {
         defaultMessage: 'Expand row',
       });
 
@@ -371,7 +371,7 @@ function RecommendationRow({
           <EuiFlexItem grow={false}>
             <EuiBadge color={recommendation.confidence >= 0.9 ? 'success' : 'hollow'}>
               <FormattedMessage
-                id="xpack.observability.nightshift.investigation.recommendationConfidence"
+                id="xpack.nightshift.investigation.recommendationConfidence"
                 defaultMessage="{confidence, number, percent}"
                 values={{ confidence: recommendation.confidence }}
               />
@@ -518,7 +518,7 @@ function HypothesisRow({
         <EuiFlexItem grow={false}>
           <EuiBadge color={isConfidenceWinner ? 'success' : 'default'}>
             <FormattedMessage
-              id="xpack.observability.nightshift.investigation.hypothesisConfidence"
+              id="xpack.nightshift.investigation.hypothesisConfidence"
               defaultMessage="{confidence, number, percent}"
               values={{ confidence }}
             />
@@ -592,18 +592,15 @@ export function InvestigationFlyout({
   }, [agentBuilder, conversationId]);
 
   const investigationChatUnavailableLabel = i18n.translate(
-    'xpack.observability.nightshift.flyout.openInChatInvestigationUnavailable',
+    'xpack.nightshift.flyout.openInChatInvestigationUnavailable',
     {
       defaultMessage: 'Investigation chat is still loading',
     }
   );
 
-  const openInChatLabel = i18n.translate(
-    'xpack.observability.nightshift.flyout.openInChatButtonLabel',
-    {
-      defaultMessage: 'Open in chat',
-    }
-  );
+  const openInChatLabel = i18n.translate('xpack.nightshift.flyout.openInChatButtonLabel', {
+    defaultMessage: 'Open in chat',
+  });
 
   const openRecommendationInChat = useCallback(
     (recommendation: InvestigationRecommendation, index: number) => {
@@ -626,21 +623,21 @@ export function InvestigationFlyout({
   const tabs = [
     {
       id: 'recommendations' as const,
-      name: i18n.translate('xpack.observability.nightshift.investigation.recommendationsTab', {
+      name: i18n.translate('xpack.nightshift.investigation.recommendationsTab', {
         defaultMessage: 'Recommendations',
       }),
       count: recommendations.length,
     },
     {
       id: 'blindSpots' as const,
-      name: i18n.translate('xpack.observability.nightshift.investigation.blindSpotsTab', {
+      name: i18n.translate('xpack.nightshift.investigation.blindSpotsTab', {
         defaultMessage: 'Blind spots',
       }),
       count: blindSpots.length,
     },
     {
       id: 'hypotheses' as const,
-      name: i18n.translate('xpack.observability.nightshift.investigation.hypothesesTab', {
+      name: i18n.translate('xpack.nightshift.investigation.hypothesesTab', {
         defaultMessage: 'Hypotheses',
       }),
       count: hypotheses.length,
@@ -672,7 +669,7 @@ export function InvestigationFlyout({
         <EuiSpacer size="s" />
         <EuiBadgeGroup gutterSize="xs">
           <EuiBadge color="default" data-test-subj="nightshiftInvestigationFlyoutTypeBadge">
-            {i18n.translate('xpack.observability.nightshift.investigation.flyoutBadge', {
+            {i18n.translate('xpack.nightshift.investigation.flyoutBadge', {
               defaultMessage: 'Investigation',
             })}
           </EuiBadge>
@@ -688,7 +685,7 @@ export function InvestigationFlyout({
         {isRunning ? (
           <>
             <FlyoutSectionTitle>
-              {i18n.translate('xpack.observability.nightshift.investigation.goalTitle', {
+              {i18n.translate('xpack.nightshift.investigation.goalTitle', {
                 defaultMessage: 'Goal',
               })}
             </FlyoutSectionTitle>
@@ -698,7 +695,7 @@ export function InvestigationFlyout({
               <>
                 <EuiSpacer size="l" />
                 <FlyoutSectionTitle>
-                  {i18n.translate('xpack.observability.nightshift.investigation.hypothesesTitle', {
+                  {i18n.translate('xpack.nightshift.investigation.hypothesesTitle', {
                     defaultMessage: 'Hypotheses',
                   })}
                 </FlyoutSectionTitle>
@@ -728,7 +725,7 @@ export function InvestigationFlyout({
         ) : (
           <>
             <FlyoutSectionTitle>
-              {i18n.translate('xpack.observability.nightshift.investigation.conclusionTitle', {
+              {i18n.translate('xpack.nightshift.investigation.conclusionTitle', {
                 defaultMessage: 'Conclusion',
               })}
             </FlyoutSectionTitle>
@@ -788,7 +785,7 @@ export function InvestigationFlyout({
                   <EuiFlexItem grow={false}>
                     <EuiText color="subdued" css={flyoutBodyTextCss}>
                       {i18n.translate(
-                        'xpack.observability.nightshift.investigation.flyout.emptyRecommendations',
+                        'xpack.nightshift.investigation.flyout.emptyRecommendations',
                         {
                           defaultMessage:
                             'No recommendations were produced for this investigation.',
@@ -809,12 +806,9 @@ export function InvestigationFlyout({
                 />
               ) : (
                 <EuiText color="subdued" css={flyoutBodyTextCss}>
-                  {i18n.translate(
-                    'xpack.observability.nightshift.investigation.flyout.emptyBlindSpots',
-                    {
-                      defaultMessage: 'No blind spots were identified for this investigation.',
-                    }
-                  )}
+                  {i18n.translate('xpack.nightshift.investigation.flyout.emptyBlindSpots', {
+                    defaultMessage: 'No blind spots were identified for this investigation.',
+                  })}
                 </EuiText>
               ))}
             {selectedTab === 'hypotheses' && (
@@ -843,12 +837,9 @@ export function InvestigationFlyout({
                 {hypotheses.length === 0 && (
                   <EuiFlexItem grow={false}>
                     <EuiText color="subdued" css={flyoutBodyTextCss}>
-                      {i18n.translate(
-                        'xpack.observability.nightshift.investigation.flyout.emptyHypotheses',
-                        {
-                          defaultMessage: 'No hypotheses were recorded for this investigation.',
-                        }
-                      )}
+                      {i18n.translate('xpack.nightshift.investigation.flyout.emptyHypotheses', {
+                        defaultMessage: 'No hypotheses were recorded for this investigation.',
+                      })}
                     </EuiText>
                   </EuiFlexItem>
                 )}
