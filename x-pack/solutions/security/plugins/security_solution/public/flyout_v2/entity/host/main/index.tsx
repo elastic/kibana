@@ -277,7 +277,6 @@ export const Host: FC<HostProps> = memo(function Host({
         entityId: params.entityId,
         entityName: params.entityName,
         scopeId,
-        title: params.entityName ?? params.entityId,
         origin,
       }),
     [openEntityDetailsAsChild, scopeId]
@@ -311,6 +310,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityId: entityStoreEntityId,
             onShowEntity: onShowHost,
             title: hostName,
+            subTab: path.subTab as RiskScoreLeftPanelSubTab | undefined,
             origin:
               path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
                 ? FLYOUT_ORIGIN.RISK_SUMMARY_RESOLUTION

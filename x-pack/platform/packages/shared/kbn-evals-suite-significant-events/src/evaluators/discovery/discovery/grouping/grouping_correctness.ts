@@ -40,46 +40,37 @@ export const groupingCorrectnessEvaluator: DiscoveryEvaluator = {
   name: 'grouping_correctness',
   kind: 'CODE',
   evaluate: ({ output, expected }) => {
-    // Derive the expected grouping from the canonical expected_discoveries: each discovery's
+    // Derive the expected grouping from the canonical expected_significant_events: each event's
     // detection signals form one group, keyed by rule_uuid from signal metadata.
-    const expectedGroups = expected?.expected_discoveries?.map((discovery) =>
-      (discovery.signals ?? []).map((s) => detectionKey(s.metadata ?? {})).filter(Boolean)
+    const expectedGroups = expected?.expected_significant_events?.map((event) =>
+      (event.signals ?? []).map((s) => detectionKey(s.metadata ?? {})).filter(Boolean)
     );
     if (!expectedGroups || expectedGroups.length === 0) {
       return Promise.resolve({
         score: null,
         label: 'unavailable',
-        explanation: 'No expected_discoveries declared for this scenario',
+        explanation: 'No expected_significant_events declared for this scenario',
       });
     }
 
-    const discoveries = output?.discoveries ?? [];
-    if (discoveries.length === 0) {
+    const events = output?.significantEvents ?? [];
+    if (events.length === 0) {
       return Promise.resolve({
-        score: null,
-        label: 'unavailable',
-        explanation: 'Agent emitted zero discoveries — no grouping signal to evaluate',
+        score: 0,
+        label: 'missing-all-rule-assignments',
+        explanation: 'Agent emitted zero significant events — every expected rule is missing',
       });
     }
-    const actualGroups = discoveries.map((discovery) => {
-      const signals = discovery.signals ?? [];
+    const actualGroups = events.map((event) => {
+      const signals = event.signals ?? [];
       return signals.map((s) => detectionKey(s.metadata ?? {})).filter(Boolean);
     });
 
-    const totalRules = new Set(expectedGroups.flat()).size;
-    if (totalRules < 2) {
-      return Promise.resolve({
-        score: null,
-        label: 'unavailable',
-        explanation: 'Fewer than two detections to group — grouping is trivial',
-      });
-    }
-
-    // Guard: if the actual and expected rule universes are completely disjoint (e.g. snapshot run
-    // against a different detection catalog) the F1 score is trivially 0 for the wrong reason —
-    // there is no meaningful signal to surface. Return null so the harness marks it unavailable.
     const expectedUniverse = new Set(expectedGroups.flat());
     const actualUniverse = new Set(actualGroups.flat());
+
+    // Guard: if the actual and expected rule universes are completely disjoint (e.g. snapshot run
+    // against a different detection catalog) the score is trivially 0 for the wrong reason.
     const hasOverlap = [...actualUniverse].some((key) => expectedUniverse.has(key));
     if (!hasOverlap && actualUniverse.size > 0) {
       return Promise.resolve({
@@ -87,6 +78,51 @@ export const groupingCorrectnessEvaluator: DiscoveryEvaluator = {
         label: 'unavailable',
         explanation:
           'Actual rule universe is disjoint from expected universe — catalog mismatch, grouping cannot be scored',
+      });
+    }
+
+    const assignmentCounts = new Map<string, number>();
+    actualGroups
+      .flat()
+      .forEach((ruleUuid) =>
+        assignmentCounts.set(ruleUuid, (assignmentCounts.get(ruleUuid) ?? 0) + 1)
+      );
+    const duplicateAssignments = [...assignmentCounts.entries()]
+      .filter(([, count]) => count > 1)
+      .map(([ruleUuid]) => ruleUuid)
+      .sort();
+    if (duplicateAssignments.length > 0) {
+      return Promise.resolve({
+        score: 0,
+        label: 'duplicate-rule-assignment',
+        explanation: `Rule UUIDs assigned to multiple discoveries: ${duplicateAssignments.join(
+          ', '
+        )}`,
+      });
+    }
+
+    const missingAssignments = [...expectedUniverse]
+      .filter((ruleUuid) => !actualUniverse.has(ruleUuid))
+      .sort();
+    const unexpectedAssignments = [...actualUniverse]
+      .filter((ruleUuid) => !expectedUniverse.has(ruleUuid))
+      .sort();
+    if (missingAssignments.length > 0 || unexpectedAssignments.length > 0) {
+      return Promise.resolve({
+        score: 0,
+        label: 'incomplete-rule-assignment',
+        explanation: `Rule assignment mismatch: missing [${missingAssignments.join(
+          ', '
+        )}], unexpected [${unexpectedAssignments.join(', ')}]`,
+      });
+    }
+
+    const totalRules = new Set(expectedGroups.flat()).size;
+    if (totalRules < 2) {
+      return Promise.resolve({
+        score: null,
+        label: 'unavailable',
+        explanation: 'Fewer than two detections to group — grouping is trivial',
       });
     }
 
