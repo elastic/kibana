@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { Context } from 'react';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { History } from 'history';
-// Optional history access: this hook can run outside a router (e.g. modal views).
-import { __RouterContext as RouterContext } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import deepEqual from 'react-fast-compare';
 import { isEmpty } from 'lodash';
 
@@ -118,11 +116,9 @@ export function useAllCasesState(isModalView: boolean = false): UseAllCasesState
 const useAllCasesUrlState = (
   isModalView: boolean
 ): [AllCasesURLState, (updated: AllCasesTableState, mode?: 'push' | 'replace') => void] => {
-  // Prefer optional context access over useHistory(), which throws outside a router.
-  const routeContext = useContext(
-    RouterContext as unknown as Context<{ history?: History } | undefined>
-  );
-  const history = routeContext?.history;
+  // react-router@5.3 returns undefined outside a <Router>; keep that optional behavior
+  // for modal / non-routed hosts instead of assuming a navigation context exists.
+  const history = useHistory() as History | undefined;
 
   const {
     data: { customFields: customFieldsConfiguration },

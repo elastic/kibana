@@ -27,44 +27,21 @@ import { useGetCaseConfiguration } from '../../containers/configure/use_get_case
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 
-jest.mock('react-router', () => ({
-  ...(() => {
-    const ReactActual = jest.requireActual('react');
-    const mockLocation = { search: '' };
-    const mockPush = jest.fn();
-    const mockReplace = jest.fn();
-    const mockRouteContextValue: { history?: unknown } = {
-      history: {
-        replace: mockReplace,
-        push: mockPush,
-        location: mockLocation,
-      },
-    };
-    const mockedRouterModule = {
-      ...jest.requireActual('react-router'),
-      __mockLocation: mockLocation,
-      __mockPush: mockPush,
-      __mockReplace: mockReplace,
-      __mockRouteContextValue: mockRouteContextValue,
-    };
-    mockedRouterModule.__RouterContext = ReactActual.createContext(mockRouteContextValue);
+const mockLocation = { search: '' };
+const mockPush = jest.fn();
+const mockReplace = jest.fn();
+let mockHistory: unknown = {
+  replace: mockReplace,
+  push: mockPush,
+  location: mockLocation,
+};
 
-    return mockedRouterModule;
-  })(),
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => mockHistory,
 }));
 
 const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
-const {
-  __mockLocation: mockLocation,
-  __mockPush: mockPush,
-  __mockReplace: mockReplace,
-  __mockRouteContextValue: mockRouteContextValue,
-} = jest.requireMock('react-router') as {
-  __mockLocation: { search: string };
-  __mockPush: jest.Mock;
-  __mockReplace: jest.Mock;
-  __mockRouteContextValue: { history?: unknown };
-};
 
 const LS_KEY = 'securitySolution.cases.list.state';
 
@@ -72,7 +49,7 @@ describe('useAllCasesQueryParams', () => {
   beforeEach(() => {
     localStorage.clear();
     mockLocation.search = '';
-    mockRouteContextValue.history = {
+    mockHistory = {
       replace: mockReplace,
       push: mockPush,
       location: mockLocation,
@@ -741,7 +718,7 @@ describe('useAllCasesQueryParams', () => {
 
   describe('Modal', () => {
     it('does not require router context', () => {
-      mockRouteContextValue.history = undefined;
+      mockHistory = undefined;
 
       const { result } = renderHook(() => useAllCasesState(true), {
         wrapper: ({ children }: React.PropsWithChildren<{}>) => (
