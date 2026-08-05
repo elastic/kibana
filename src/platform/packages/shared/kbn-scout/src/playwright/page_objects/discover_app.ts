@@ -411,20 +411,6 @@ export class DiscoverApp {
     await fieldEditor.waitFor({ state: 'hidden' });
   }
 
-  async deleteRuntimeField(fieldName: string) {
-    await this.searchFieldInSidebar(fieldName);
-    const field = this.page.testSubj
-      .locator('fieldListGroupedAvailableFields')
-      .locator(`[data-test-subj="field-${fieldName}"]`);
-    await field.waitFor({ state: 'visible' });
-    await field.click();
-    const deleteButton = this.page.testSubj.locator(`discoverFieldListPanelDelete-${fieldName}`);
-    await deleteButton.click();
-    await this.page.testSubj.fill('deleteModalConfirmText', 'REMOVE');
-    await this.page.testSubj.click('confirmModalConfirmButton');
-    await this.waitUntilTabIsLoaded();
-  }
-
   async clickAppMenuItem(
     testId: string,
     { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}

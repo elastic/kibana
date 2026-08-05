@@ -172,18 +172,11 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
           await dataGrid.openColumnMenuByField('_bytes-runtimefield');
           await page.testSubj.click('gridEditFieldButton');
 
-          const fieldEditor = page.getByRole('dialog', { name: /Edit .* field/ });
-          await fieldEditor.waitFor({ state: 'visible' });
-          await fieldEditor
+          await page
+            .getByRole('dialog', { name: /Edit .* field/ })
             .getByRole('textbox', { name: 'Name field' })
             .fill('_bytes-runtimefield-edited');
-          await page.testSubj.click('fieldSaveButton');
-          const saveConfirmModal = page.testSubj.locator('runtimeFieldSaveConfirmModal');
-          await saveConfirmModal.waitFor({ state: 'visible' });
-          await page.testSubj.typeWithDelay('saveModalConfirmText', 'change');
-          await page.testSubj.click('confirmModalConfirmButton');
-          await fieldEditor.waitFor({ state: 'hidden' });
-          await discover.waitUntilTabIsLoaded();
+          await discover.saveOpenFieldEditor({ confirmChange: true });
 
           const newId = await discover.getCurrentDataViewId();
           expect(newId).not.toBe(prevId);
