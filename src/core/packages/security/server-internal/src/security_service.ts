@@ -19,7 +19,6 @@ import type {
 } from './internal_contracts';
 import type { SecurityServiceConfigType, PKCS12ConfigType } from './utils';
 import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
-import { createCoreUiamService } from './uiam';
 
 export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
@@ -84,7 +83,7 @@ export class SecurityService
         isEnabled: () => isFipsEnabled(securityConfig),
       },
       uiam: securityConfig?.uiam?.enabled
-        ? createCoreUiamService(securityConfig.uiam.sharedSecret)
+        ? Object.freeze({ sharedSecret: securityConfig.uiam.sharedSecret })
         : null,
     };
   }

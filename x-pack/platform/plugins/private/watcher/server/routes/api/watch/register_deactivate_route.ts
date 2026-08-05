@@ -15,7 +15,7 @@ import {
 } from '../../../models/watch_status_model';
 
 const paramsSchema = schema.object({
-  watchId: schema.string({ maxLength: 1000 }),
+  watchId: schema.string(),
 });
 
 function deactivateWatch(dataClient: IScopedClusterClient, watchId: string) {

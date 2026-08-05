@@ -145,8 +145,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.asInternalUser.security.getToken).toHaveBeenCalledWith({
-        grant_type: '_kerberos',
-        kerberos_ticket: 'spnego',
+        body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' },
       });
 
       expect(request.headers.authorization).toBe('negotiate spnego');
@@ -182,8 +181,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.asInternalUser.security.getToken).toHaveBeenCalledWith({
-        grant_type: '_kerberos',
-        kerberos_ticket: 'spnego',
+        body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' },
       });
 
       expect(request.headers.authorization).toBe('negotiate spnego');
@@ -209,8 +207,7 @@ describe('KerberosAuthenticationProvider', () => {
       );
 
       expect(mockOptions.client.asInternalUser.security.getToken).toHaveBeenCalledWith({
-        grant_type: '_kerberos',
-        kerberos_ticket: 'spnego',
+        body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' },
       });
 
       expect(request.headers.authorization).toBe('negotiate spnego');
@@ -236,8 +233,7 @@ describe('KerberosAuthenticationProvider', () => {
       );
 
       expect(mockOptions.client.asInternalUser.security.getToken).toHaveBeenCalledWith({
-        grant_type: '_kerberos',
-        kerberos_ticket: 'spnego',
+        body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' },
       });
 
       expect(request.headers.authorization).toBe('negotiate spnego');
@@ -256,8 +252,7 @@ describe('KerberosAuthenticationProvider', () => {
       await expect(operation(request)).resolves.toEqual(AuthenticationResult.failed(failureReason));
 
       expect(mockOptions.client.asInternalUser.security.getToken).toHaveBeenCalledWith({
-        grant_type: '_kerberos',
-        kerberos_ticket: 'spnego',
+        body: { grant_type: '_kerberos', kerberos_ticket: 'spnego' },
       });
 
       expect(request.headers.authorization).toBe('negotiate spnego');

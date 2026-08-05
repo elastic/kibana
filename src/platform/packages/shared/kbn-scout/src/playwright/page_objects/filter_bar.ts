@@ -9,7 +9,6 @@
 
 import type { ScoutPage } from '..';
 import { expect } from '..';
-import { KibanaCodeEditorWrapper } from '../ui_components';
 
 interface FilterCreationOptions {
   field: string;
@@ -39,11 +38,7 @@ interface FilterStateOptions {
 }
 
 export class FilterBar {
-  private readonly codeEditor: KibanaCodeEditorWrapper;
-
-  constructor(private readonly page: ScoutPage) {
-    this.codeEditor = new KibanaCodeEditorWrapper(page);
-  }
+  constructor(private readonly page: ScoutPage) {}
 
   async addFilter(options: FilterCreationOptions) {
     const previousCount = await this.getFilterCount();
@@ -76,18 +71,6 @@ export class FilterBar {
     await expect
       .poll(() => this.getFilterCount(), { message: 'New filter badge should be displayed' })
       .toBeGreaterThan(previousCount);
-  }
-
-  async addDslFilter(value: string) {
-    await this.page.testSubj.click('addFilter');
-    await this.page.testSubj.click('editQueryDSL');
-    await this.codeEditor.waitCodeEditorReady('addFilterPopover');
-    await this.codeEditor.setCodeEditorValue(value);
-    const saveButton = this.page.testSubj.locator('saveFilter');
-    await saveButton.scrollIntoViewIfNeeded();
-    await saveButton.click();
-    await this.page.testSubj.locator('addFilterPopover').waitFor({ state: 'hidden' });
-    await this.page.testSubj.locator('^filter-badge').waitFor({ state: 'visible' });
   }
 
   private async fillFilterValue(value: FilterCreationOptions['value']) {

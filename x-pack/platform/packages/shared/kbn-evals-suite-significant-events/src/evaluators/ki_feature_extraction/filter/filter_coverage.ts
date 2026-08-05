@@ -40,7 +40,7 @@ export const filterCoverageEvaluator = {
               entities.length
             } entity feature(s) lack a filter: ${withoutFilter.map((f) => `"${f.id}"`).join(', ')}`
           : `All ${entities.length} entity feature(s) include a filter`,
-      metadata: {
+      details: {
         totalEntities: entities.length,
         withFilter: withFilter.length,
         withoutFilter: withoutFilter.map((f) => f.id),

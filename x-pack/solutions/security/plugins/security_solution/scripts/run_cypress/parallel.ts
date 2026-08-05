@@ -148,7 +148,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       if (grepFilterSpecs && isGrepReturnedSpecPattern) {
         log.info('No tests found - all tests could have been skipped via Cypress tags');
-        return;
+        // eslint-disable-next-line no-process-exit
+        return process.exit(0);
       }
 
       const concreteFilePaths = isGrepReturnedFilePaths
@@ -206,7 +207,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       if (!files?.length) {
         log.info('No tests found');
-        return;
+        // eslint-disable-next-line no-process-exit
+        return process.exit(0);
       }
 
       const esPorts: number[] = [9200, 9220];

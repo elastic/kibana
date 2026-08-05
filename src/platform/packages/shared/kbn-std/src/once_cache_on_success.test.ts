@@ -79,7 +79,8 @@ describe('onceCacheOnSuccess', () => {
         const results = Array.from({ length: callCount }, () => memoized());
 
         expect(factory).toHaveBeenCalledTimes(1);
-        expect(results.every((r) => Object.is(r, results[0]))).toBe(true);
+        // All results are the same reference
+        expect(results.every((r) => r === results[0])).toBe(true);
       })
     );
   });

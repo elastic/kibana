@@ -60,9 +60,7 @@ const getOrgSlug = (ctx: ActionContext): string => {
       'Sentry connector is missing the required organizationSlug configuration field.'
     );
   }
-  // Encode once here so every call site gets a URL-safe org slug without
-  // having to remember to do it themselves.
-  return encodeURIComponent(orgSlug);
+  return orgSlug;
 };
 
 function formatSentryError(action: string, error: unknown): Error {
@@ -122,7 +120,7 @@ export const Sentry: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.sentry.auth.bearer.token.helpText',
                 {
                   defaultMessage:
-                    'A Sentry auth token with org:read, project:read, event:read, and event:write scopes (add alerts:write if you plan to provision issue alert rules, and event:admin if you plan to use deleteIssue). Create one as an internal integration (Settings > Developer Settings) or a personal auth token.',
+                    'A Sentry auth token with org:read, project:read, event:read, and event:write scopes (add event:admin too if you plan to use deleteIssue). Create one as an internal integration (Settings > Developer Settings) or a personal auth token.',
                 }
               ),
             },
@@ -191,7 +189,7 @@ export const Sentry: ConnectorSpec = {
 
         const baseUrl = buildBaseUrl(ctx);
         const url = input.project
-          ? `${baseUrl}/projects/${orgSlug}/${encodeURIComponent(input.project)}/issues/`
+          ? `${baseUrl}/projects/${orgSlug}/${input.project}/issues/`
           : `${baseUrl}/organizations/${orgSlug}/issues/`;
 
         try {
@@ -211,7 +209,7 @@ export const Sentry: ConnectorSpec = {
       handler: async (ctx, input: SentryGetIssueInput) => {
         try {
           const response = await ctx.client.get<SentryIssue>(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/`
+            `${buildBaseUrl(ctx)}/issues/${input.issueId}/`
           );
           return projectIssue(response.data);
         } catch (error) {
@@ -231,7 +229,7 @@ export const Sentry: ConnectorSpec = {
           : { status: 'resolved' };
         try {
           const response = await ctx.client.put<SentryIssue>(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/`,
+            `${buildBaseUrl(ctx)}/issues/${input.issueId}/`,
             body
           );
           return projectIssue(response.data);
@@ -253,7 +251,7 @@ export const Sentry: ConnectorSpec = {
         }
         try {
           const response = await ctx.client.put<SentryIssue>(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/`,
+            `${buildBaseUrl(ctx)}/issues/${input.issueId}/`,
             body
           );
           return projectIssue(response.data);
@@ -271,7 +269,7 @@ export const Sentry: ConnectorSpec = {
       handler: async (ctx, input: SentryUnresolveIssueInput) => {
         try {
           const response = await ctx.client.put<SentryIssue>(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/`,
+            `${buildBaseUrl(ctx)}/issues/${input.issueId}/`,
             { status: 'unresolved' }
           );
           return projectIssue(response.data);
@@ -289,7 +287,7 @@ export const Sentry: ConnectorSpec = {
       handler: async (ctx, input: SentryAssignIssueInput) => {
         try {
           const response = await ctx.client.put<SentryIssue>(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/`,
+            `${buildBaseUrl(ctx)}/issues/${input.issueId}/`,
             { assignedTo: input.assignedTo }
           );
           return projectIssue(response.data);
@@ -310,7 +308,7 @@ export const Sentry: ConnectorSpec = {
         if (input.full !== undefined) params.full = input.full;
         try {
           const response = await ctx.client.get(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/events/`,
+            `${buildBaseUrl(ctx)}/issues/${input.issueId}/events/`,
             { params }
           );
           return { events: response.data };
@@ -329,9 +327,7 @@ export const Sentry: ConnectorSpec = {
         const orgSlug = getOrgSlug(ctx);
         try {
           const response = await ctx.client.get(
-            `${buildBaseUrl(ctx)}/projects/${orgSlug}/${encodeURIComponent(
-              input.project
-            )}/events/${encodeURIComponent(input.eventId)}/`
+            `${buildBaseUrl(ctx)}/projects/${orgSlug}/${input.project}/events/${input.eventId}/`
           );
           return response.data;
         } catch (error) {
@@ -353,7 +349,7 @@ export const Sentry: ConnectorSpec = {
 
         try {
           const response = await ctx.client.put(
-            `${buildBaseUrl(ctx)}/projects/${orgSlug}/${encodeURIComponent(input.project)}/issues/`,
+            `${buildBaseUrl(ctx)}/projects/${orgSlug}/${input.project}/issues/`,
             body,
             {
               params: { id: input.issueIds },
@@ -376,9 +372,7 @@ export const Sentry: ConnectorSpec = {
       input: SentryDeleteIssueInputSchema,
       handler: async (ctx, input: SentryDeleteIssueInput) => {
         try {
-          await ctx.client.delete(
-            `${buildBaseUrl(ctx)}/issues/${encodeURIComponent(input.issueId)}/`
-          );
+          await ctx.client.delete(`${buildBaseUrl(ctx)}/issues/${input.issueId}/`);
           return { deleted: true, issueId: input.issueId };
         } catch (error) {
           throw formatSentryError('deleteIssue', error);
@@ -426,7 +420,7 @@ export const Sentry: ConnectorSpec = {
         if (input.cursor) params.cursor = input.cursor;
         try {
           const response = await ctx.client.get(
-            `${buildBaseUrl(ctx)}/projects/${orgSlug}/${encodeURIComponent(input.project)}/rules/`,
+            `${buildBaseUrl(ctx)}/projects/${orgSlug}/${input.project}/rules/`,
             { params }
           );
           return { rules: response.data };
@@ -445,7 +439,7 @@ export const Sentry: ConnectorSpec = {
         const orgSlug = getOrgSlug(ctx);
         try {
           const response = await ctx.client.post(
-            `${buildBaseUrl(ctx)}/projects/${orgSlug}/${encodeURIComponent(input.project)}/rules/`,
+            `${buildBaseUrl(ctx)}/projects/${orgSlug}/${input.project}/rules/`,
             {
               name: input.name,
               actionMatch: input.actionMatch,
@@ -468,9 +462,9 @@ export const Sentry: ConnectorSpec = {
       input: SentryUpdateIssueAlertRuleInputSchema,
       handler: async (ctx, input: SentryUpdateIssueAlertRuleInput) => {
         const orgSlug = getOrgSlug(ctx);
-        const ruleUrl = `${buildBaseUrl(ctx)}/projects/${orgSlug}/${encodeURIComponent(
-          input.project
-        )}/rules/${encodeURIComponent(input.ruleId)}/`;
+        const ruleUrl = `${buildBaseUrl(ctx)}/projects/${orgSlug}/${input.project}/rules/${
+          input.ruleId
+        }/`;
 
         try {
           // Sentry's rule-update endpoint replaces the whole rule rather than

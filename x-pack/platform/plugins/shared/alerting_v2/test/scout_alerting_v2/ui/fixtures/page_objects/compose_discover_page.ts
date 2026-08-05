@@ -130,14 +130,6 @@ export class ComposeDiscoverPage {
   }
 
   /**
-   * Opens the query sandbox from the Alert Condition step (alert mode).
-   */
-  async openSandbox() {
-    await this.alertSummaryEditorButton.click();
-    await this.sandboxApplyButton.waitFor({ state: 'visible' });
-  }
-
-  /**
    * Types an ES|QL query into the sandbox's single unified code editor (Monaco
    * index 0). In the create flow the editor holds the whole pipeline (base +
    * alert condition); the heuristic split runs on Apply.

@@ -126,7 +126,6 @@ export function RulePage() {
       <ObservabilityPageTemplate data-test-subj="rulePage">
         <HeaderMenu />
         <EuiCallOut
-          announceOnMount
           title={i18n.translate('xpack.observability.ruleForm.templateError.title', {
             defaultMessage: 'Error loading rule template',
           })}

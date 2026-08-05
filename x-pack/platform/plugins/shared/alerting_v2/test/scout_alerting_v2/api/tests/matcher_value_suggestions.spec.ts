@@ -62,7 +62,6 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
       );
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 

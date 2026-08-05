@@ -31,7 +31,7 @@ import {
   DetailsStep,
   ValidationStepWrapper,
 } from './components';
-import { MlAppHeader, useDataFrameAnalyticsJobsBack } from '../../../components/ml_app_header';
+import { MlAppHeader } from '../../../components/ml_app_header';
 
 export enum ANALYTICS_STEPS {
   CONFIGURATION,
@@ -47,7 +47,6 @@ interface Props {
 
 export const Page: FC<Props> = ({ jobId }) => {
   const mlApi = useMlApi();
-  const dataFrameAnalyticsJobsBack = useDataFrameAnalyticsJobsBack();
   const [currentStep, setCurrentStep] = useState<ANALYTICS_STEPS>(ANALYTICS_STEPS.CONFIGURATION);
   const [activatedSteps, setActivatedSteps] = useState<boolean[]>([
     true,
@@ -180,7 +179,6 @@ export const Page: FC<Props> = ({ jobId }) => {
                 values: { jobId },
               })
         }
-        back={dataFrameAnalyticsJobsBack}
       />
       <EuiPageBody restrictWidth={1200}>
         <EuiFlexGroup>

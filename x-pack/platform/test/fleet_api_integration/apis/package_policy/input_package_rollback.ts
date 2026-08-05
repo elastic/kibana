@@ -130,7 +130,12 @@ export default function (providerContext: FtrProviderContext) {
 
       await retry.tryForTime(10000, async () => {
         const installation = await getInstallationInfo(supertest, PACKAGE_NAME, START_VERSION);
-        expectIdArraysEqual(installation.installed_es, []);
+        expectIdArraysEqual(installation.installed_es, [
+          {
+            id: 'input_package_upgrade-README.md',
+            type: 'knowledge_base',
+          },
+        ]);
       });
 
       await uninstallPackage(PACKAGE_NAME, START_VERSION);

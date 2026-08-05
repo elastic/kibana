@@ -6,16 +6,15 @@
  */
 
 import Mustache from 'mustache';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { Discovery } from '@kbn/significant-events-schema';
 import judgeUserPrompt from './user_prompt.text';
 
 export interface DiscoveryJudgeInputParams {
   /** The unreviewed discoveries (and clearances) to assess. */
-  discoveries: Array<Partial<SignificantEvent>>;
+  discoveries: Array<Partial<Discovery>>;
 }
 
 /** Build the discovery judge agent's user message. */
 export function buildDiscoveryJudgeInput({ discoveries }: DiscoveryJudgeInputParams): string {
-  const eventIds = discoveries.map((discovery) => discovery.event_id);
-  return Mustache.render(judgeUserPrompt, { event_ids: JSON.stringify(eventIds) }).trim();
+  return Mustache.render(judgeUserPrompt, { discoveries: JSON.stringify(discoveries) }).trim();
 }

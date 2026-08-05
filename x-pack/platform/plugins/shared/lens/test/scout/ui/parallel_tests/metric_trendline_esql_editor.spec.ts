@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest, KibanaCodeEditorWrapper } from '@kbn/scout';
+import { spaceTest, tags, KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
@@ -16,7 +16,7 @@ import {
 
 spaceTest.describe(
   'Lens ES|QL metric trendline editor interactions',
-  { tag: '@local-stateful-classic' },
+  { tag: tags.stateful.classic },
   () => {
     let dashboardId: string;
     let panelId: string;

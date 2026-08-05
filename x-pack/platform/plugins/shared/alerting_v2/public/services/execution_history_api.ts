@@ -9,8 +9,10 @@ import { inject, injectable } from 'inversify';
 import type { HttpStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core-di-browser';
 import type {
-  ListRuleExecutionsRequest,
-  ListRuleExecutionsResponse,
+  CountPolicyExecutionEventsRequest,
+  CountPolicyExecutionEventsResponse,
+  GetRuleExecutionsRequest,
+  GetRuleExecutionsResponse,
   ListPolicyExecutionHistoryRequest,
   ListPolicyExecutionHistoryResponse,
   PolicyExecutionHistoryItem,
@@ -18,20 +20,17 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
+  ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
   ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH,
 } from '../constants';
 
-export type {
-  ListRuleExecutionsResponse,
-  PolicyExecutionHistoryItem,
-  PolicyExecutionOutcomeFilter,
-};
+export type { GetRuleExecutionsResponse, PolicyExecutionHistoryItem, PolicyExecutionOutcomeFilter };
 
 @injectable()
 export class ExecutionHistoryApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
-  public async listActionPolicyExecutions(params: ListPolicyExecutionHistoryRequest = {}) {
+  public async listExecutionHistory(params: ListPolicyExecutionHistoryRequest = {}) {
     return this.http.get<ListPolicyExecutionHistoryResponse>(
       ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
       {
@@ -48,8 +47,22 @@ export class ExecutionHistoryApi {
     );
   }
 
-  public async listRuleExecutions(params: Partial<ListRuleExecutionsRequest>) {
-    return this.http.get<ListRuleExecutionsResponse>(ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH, {
+  public async countNewSince(params: CountPolicyExecutionEventsRequest) {
+    return this.http.get<CountPolicyExecutionEventsResponse>(
+      ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
+      {
+        query: {
+          since: params.since,
+          search: params.search,
+          rule_ids: params.rule_ids,
+          outcome: params.outcome,
+        },
+      }
+    );
+  }
+
+  public async getRuleExecutions(params: Partial<GetRuleExecutionsRequest>) {
+    return this.http.get<GetRuleExecutionsResponse>(ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH, {
       query: params,
     });
   }

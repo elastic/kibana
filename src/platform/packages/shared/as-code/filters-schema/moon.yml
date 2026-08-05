@@ -17,7 +17,8 @@ project:
   owner: '@elastic/kibana-presentation'
   sourceRoot: src/platform/packages/shared/as-code/filters-schema
 dependsOn:
-  - '@kbn/zod'
+  - '@kbn/config-schema'
+  - '@kbn/utility-types'
   - '@kbn/as-code-filters-constants'
 tags:
   - shared-common

@@ -9,7 +9,7 @@
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { writeErrorHandler } from '@kbn/as-code-utils';
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -40,11 +40,13 @@ export function registerUpdateRoute(
       },
       validate: {
         request: {
-          params: z.object({
+          params: schema.object({
             // Can not validate id at route level
             // existing links panels may have invalid "as code" ids
-            id: z.string().meta({
-              description: 'The unique ID of the links library item to be created or updated',
+            id: schema.string({
+              meta: {
+                description: 'The unique ID of the links library item to be created or updated',
+              },
             }),
           }),
           body: updateRequestBodySchema,

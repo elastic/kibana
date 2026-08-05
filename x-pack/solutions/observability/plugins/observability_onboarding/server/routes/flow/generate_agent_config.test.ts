@@ -9,7 +9,7 @@ import * as tar from 'tar';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { parse as parseYaml } from 'yaml';
+import { load as loadYaml } from 'js-yaml';
 import type { Output } from '@kbn/fleet-plugin/common/types';
 import { generateAgentConfigTar } from './generate_agent_config';
 import type { InstalledIntegration } from '../types';
@@ -100,7 +100,7 @@ describe('generateAgentConfigTar', () => {
     const contents = extractTarContents(tarBuffer);
 
     const agentConfig = contents.get('elastic-agent.yml')!;
-    const parsed = parseYaml(agentConfig) as { outputs: { default: Record<string, unknown> } };
+    const parsed = loadYaml(agentConfig) as { outputs: { default: Record<string, unknown> } };
 
     expect(parsed.outputs.default._write_to_logs_streams).toBeUndefined();
   });
@@ -110,7 +110,7 @@ describe('generateAgentConfigTar', () => {
     const contents = extractTarContents(tarBuffer);
 
     const agentConfig = contents.get('elastic-agent.yml')!;
-    const parsed = parseYaml(agentConfig) as { outputs: { default: Record<string, unknown> } };
+    const parsed = loadYaml(agentConfig) as { outputs: { default: Record<string, unknown> } };
 
     expect(parsed.outputs.default._write_to_logs_streams).toBeUndefined();
   });
@@ -120,7 +120,7 @@ describe('generateAgentConfigTar', () => {
     const contents = extractTarContents(tarBuffer);
 
     const agentConfig = contents.get('elastic-agent.yml')!;
-    const parsed = parseYaml(agentConfig) as { outputs: { default: Record<string, unknown> } };
+    const parsed = loadYaml(agentConfig) as { outputs: { default: Record<string, unknown> } };
 
     expect(parsed.outputs.default._write_to_logs_streams).toBe(true);
   });
@@ -130,7 +130,7 @@ describe('generateAgentConfigTar', () => {
     const contents = extractTarContents(tarBuffer);
 
     const agentConfig = contents.get('elastic-agent.yml')!;
-    const parsed = parseYaml(agentConfig) as { outputs: { default: Record<string, unknown> } };
+    const parsed = loadYaml(agentConfig) as { outputs: { default: Record<string, unknown> } };
 
     expect(parsed.outputs.default.type).toBe('elasticsearch');
     expect(parsed.outputs.default.hosts).toEqual(['https://elasticsearch.example.com:9200']);
@@ -275,7 +275,7 @@ describe('shouldWriteToLogsStreams conditional logic', () => {
       .write(tarBuffer);
 
     const agentConfig = contents.get('elastic-agent.yml')!;
-    const parsed = parseYaml(agentConfig) as { outputs: { default: Record<string, unknown> } };
+    const parsed = loadYaml(agentConfig) as { outputs: { default: Record<string, unknown> } };
     expect(parsed.outputs.default._write_to_logs_streams).toBeUndefined();
 
     fs.rmSync(tempDir, { recursive: true, force: true });
@@ -306,7 +306,7 @@ describe('shouldWriteToLogsStreams conditional logic', () => {
       .write(tarBuffer);
 
     const agentConfig = contents.get('elastic-agent.yml')!;
-    const parsed = parseYaml(agentConfig) as { outputs: { default: Record<string, unknown> } };
+    const parsed = loadYaml(agentConfig) as { outputs: { default: Record<string, unknown> } };
     expect(parsed.outputs.default._write_to_logs_streams).toBe(true);
 
     fs.rmSync(tempDir, { recursive: true, force: true });
@@ -342,7 +342,7 @@ describe('wired streams routing processor in integration configs', () => {
     };
 
     // Parse the config to verify the routing processor is present
-    const parsedConfig = parseYaml(customIntegrationWithRouting.config) as {
+    const parsedConfig = loadYaml(customIntegrationWithRouting.config) as {
       inputs: Array<{
         streams: Array<{
           processors: Array<{ add_fields: { target: string; fields: { raw_index: string } } }>;
@@ -372,7 +372,7 @@ describe('wired streams routing processor in integration configs', () => {
       kibanaAssets: [{ type: 'dashboard', id: 'apache-dashboard' }],
     };
 
-    const parsedConfig = parseYaml(registryIntegration.config) as {
+    const parsedConfig = loadYaml(registryIntegration.config) as {
       inputs: Array<{
         streams?: Array<{
           processors?: Array<{ add_fields?: { target: string; fields: { raw_index: string } } }>;

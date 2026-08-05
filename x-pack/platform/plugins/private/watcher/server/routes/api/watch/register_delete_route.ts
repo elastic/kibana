@@ -10,7 +10,7 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import type { RouteDependencies } from '../../../types';
 
 const paramsSchema = schema.object({
-  watchId: schema.string({ maxLength: 1000 }),
+  watchId: schema.string(),
 });
 
 function deleteWatch(dataClient: IScopedClusterClient, watchId: string) {

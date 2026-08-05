@@ -16,8 +16,6 @@ import { mockUnifiedDocViewerServices } from '../../../../../__mocks__';
 import { merge } from 'lodash';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 
-const NULLIFY_HEADER = 'SET unmapped_fields="NULLIFY";';
-
 const mockUseDataSourcesContext = jest.fn(() => ({
   indexes: { logs: 'logs-*', apm: {} },
   profileId: 'test-profile',
@@ -108,7 +106,6 @@ describe('SimilarErrorsOccurrencesChart', () => {
     const lensConfig = buildCall[0];
     const esqlQuery = lensConfig.dataset.esql;
 
-    expect(esqlQuery.startsWith(NULLIFY_HEADER)).toBe(true);
     expect(esqlQuery).toContain('FROM logs-*');
     expect(esqlQuery).toContain('STATS');
     expect(esqlQuery).toContain('occurrences = COUNT(*)');

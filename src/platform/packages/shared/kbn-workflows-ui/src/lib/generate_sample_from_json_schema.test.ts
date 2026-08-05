@@ -173,57 +173,6 @@ describe('generateSampleFromJsonSchema', () => {
     });
   });
 
-  describe('nullable union types (array form)', () => {
-    it('returns string sample for ["string", "null"]', () => {
-      expect(generateSampleFromJsonSchema({ type: ['string', 'null'] })).toBe(
-        INPUT_STRING_PLACEHOLDER
-      );
-    });
-
-    it('returns string sample for ["null", "string"] (null-first order)', () => {
-      expect(generateSampleFromJsonSchema({ type: ['null', 'string'] })).toBe(
-        INPUT_STRING_PLACEHOLDER
-      );
-    });
-
-    it('returns 0 for ["integer", "null"]', () => {
-      expect(generateSampleFromJsonSchema({ type: ['integer', 'null'] })).toBe(0);
-    });
-
-    it('returns false for ["boolean", "null"]', () => {
-      expect(generateSampleFromJsonSchema({ type: ['boolean', 'null'] })).toBe(false);
-    });
-
-    it('returns array sample for ["array", "null"]', () => {
-      expect(
-        generateSampleFromJsonSchema({ type: ['array', 'null'], items: { type: 'string' } })
-      ).toEqual([INPUT_STRING_PLACEHOLDER]);
-    });
-
-    it('returns object sample for ["object", "null"]', () => {
-      expect(
-        generateSampleFromJsonSchema({
-          type: ['object', 'null'],
-          properties: { name: { type: 'string' } },
-          required: ['name'],
-        })
-      ).toEqual({ name: INPUT_STRING_PLACEHOLDER });
-    });
-
-    it('returns undefined for ["null"] with no properties', () => {
-      expect(generateSampleFromJsonSchema({ type: ['null'] })).toBeUndefined();
-    });
-
-    it('returns undefined for ["null"] with properties, consistent with string "null"', () => {
-      const schema: Omit<JSONSchema7, 'type'> = {
-        properties: { name: { type: 'string' } },
-        required: ['name'],
-      };
-      expect(generateSampleFromJsonSchema({ type: 'null', ...schema })).toBeUndefined();
-      expect(generateSampleFromJsonSchema({ type: ['null'], ...schema })).toBeUndefined();
-    });
-  });
-
   describe('$ref resolution (inputs root)', () => {
     it('resolves local #/definitions when inputs root is provided', () => {
       const inputsRoot = {

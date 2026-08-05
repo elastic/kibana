@@ -31,15 +31,6 @@ jest.mock('@kbn/esql/public', () => ({
   ),
 }));
 
-jest.mock('../hooks/use_data_connectors', () => ({
-  useDataConnectors: () => ({
-    connectors: [],
-    connectorNameById: new Map(),
-    connectorActionTypeById: new Map(),
-    isLoading: false,
-  }),
-}));
-
 const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(

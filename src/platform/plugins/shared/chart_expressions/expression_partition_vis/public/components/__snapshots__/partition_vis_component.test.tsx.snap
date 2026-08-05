@@ -329,8 +329,6 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                     "visible": true,
                   },
                 },
-                "maxExtent": "100%",
-                "minExtent": 0,
                 "tickLabel": Object {
                   "alignment": Object {
                     "horizontal": "near",
@@ -340,8 +338,6 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                   "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 10,
                   "fontStyle": "normal",
-                  "lineHeight": 1.2,
-                  "minLength": 12,
                   "offset": Object {
                     "reference": "local",
                     "x": 0,
@@ -352,9 +348,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                     "outer": 8,
                   },
                   "rotation": 0,
-                  "truncate": false,
                   "visible": true,
-                  "wrapLines": 1,
                 },
                 "tickLine": Object {
                   "padding": 10,
@@ -705,7 +699,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                 "extraTextAlign": "right",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
-                "minHeight": 80,
+                "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
                 "spacing": "small",
@@ -1290,8 +1284,6 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                     "visible": true,
                   },
                 },
-                "maxExtent": "100%",
-                "minExtent": 0,
                 "tickLabel": Object {
                   "alignment": Object {
                     "horizontal": "near",
@@ -1301,8 +1293,6 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                   "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 10,
                   "fontStyle": "normal",
-                  "lineHeight": 1.2,
-                  "minLength": 12,
                   "offset": Object {
                     "reference": "local",
                     "x": 0,
@@ -1313,9 +1303,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                     "outer": 8,
                   },
                   "rotation": 0,
-                  "truncate": false,
                   "visible": true,
-                  "wrapLines": 1,
                 },
                 "tickLine": Object {
                   "padding": 10,
@@ -1666,7 +1654,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                 "extraTextAlign": "right",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
-                "minHeight": 80,
+                "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
                 "spacing": "small",
@@ -2311,8 +2299,6 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                     "visible": true,
                   },
                 },
-                "maxExtent": "100%",
-                "minExtent": 0,
                 "tickLabel": Object {
                   "alignment": Object {
                     "horizontal": "near",
@@ -2322,8 +2308,6 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                   "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 10,
                   "fontStyle": "normal",
-                  "lineHeight": 1.2,
-                  "minLength": 12,
                   "offset": Object {
                     "reference": "local",
                     "x": 0,
@@ -2334,9 +2318,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                     "outer": 8,
                   },
                   "rotation": 0,
-                  "truncate": false,
                   "visible": true,
-                  "wrapLines": 1,
                 },
                 "tickLine": Object {
                   "padding": 10,
@@ -2687,7 +2669,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                 "extraTextAlign": "right",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
-                "minHeight": 80,
+                "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
                 "spacing": "small",
@@ -3334,8 +3316,6 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                     "visible": true,
                   },
                 },
-                "maxExtent": "100%",
-                "minExtent": 0,
                 "tickLabel": Object {
                   "alignment": Object {
                     "horizontal": "near",
@@ -3345,8 +3325,6 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                   "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 10,
                   "fontStyle": "normal",
-                  "lineHeight": 1.2,
-                  "minLength": 12,
                   "offset": Object {
                     "reference": "local",
                     "x": 0,
@@ -3357,9 +3335,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                     "outer": 8,
                   },
                   "rotation": 0,
-                  "truncate": false,
                   "visible": true,
-                  "wrapLines": 1,
                 },
                 "tickLine": Object {
                   "padding": 10,
@@ -3710,7 +3686,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                 "extraTextAlign": "right",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
-                "minHeight": 80,
+                "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
                 "spacing": "small",
@@ -4295,8 +4271,6 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                     "visible": true,
                   },
                 },
-                "maxExtent": "100%",
-                "minExtent": 0,
                 "tickLabel": Object {
                   "alignment": Object {
                     "horizontal": "near",
@@ -4306,8 +4280,6 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                   "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 10,
                   "fontStyle": "normal",
-                  "lineHeight": 1.2,
-                  "minLength": 12,
                   "offset": Object {
                     "reference": "local",
                     "x": 0,
@@ -4318,9 +4290,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                     "outer": 8,
                   },
                   "rotation": 0,
-                  "truncate": false,
                   "visible": true,
-                  "wrapLines": 1,
                 },
                 "tickLine": Object {
                   "padding": 10,
@@ -4671,7 +4641,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                 "extraTextAlign": "right",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
-                "minHeight": 80,
+                "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
                 "spacing": "small",
@@ -5211,8 +5181,6 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                     "visible": true,
                   },
                 },
-                "maxExtent": "100%",
-                "minExtent": 0,
                 "tickLabel": Object {
                   "alignment": Object {
                     "horizontal": "near",
@@ -5222,8 +5190,6 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                   "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                   "fontSize": 10,
                   "fontStyle": "normal",
-                  "lineHeight": 1.2,
-                  "minLength": 12,
                   "offset": Object {
                     "reference": "local",
                     "x": 0,
@@ -5234,9 +5200,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                     "outer": 8,
                   },
                   "rotation": 0,
-                  "truncate": false,
                   "visible": true,
-                  "wrapLines": 1,
                 },
                 "tickLine": Object {
                   "padding": 10,
@@ -5587,7 +5551,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                 "extraTextAlign": "right",
                 "fontFamily": "Inter, BlinkMacSystemFont, Helvetica, Arial, sans-serif",
                 "iconAlign": "right",
-                "minHeight": 80,
+                "minHeight": 64,
                 "minValueFontSize": 12,
                 "nonFiniteText": "N/A",
                 "spacing": "small",

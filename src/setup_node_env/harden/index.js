@@ -7,46 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+var ritm = require('require-in-the-middle');
 var lodashPatch = require('./lodash_template');
 var patchChildProcess = require('./child_process');
 var hardenPrototypes = require('./prototype');
 
-// We harden a fixed set of modules (`child_process` and lodash's `template`) against
-// prototype-pollution style attacks. Previously this was done by intercepting `require`
-// via `require-in-the-middle`. Instead, because this file runs before any application code, we eagerly
-// load each target module and mutate its exports in place / replace its cache entry. Any
-// later `require()` of these modules resolves to the hardened version, which matches the
-// semantics of the previous approach (which also only affected loads after installation).
-
-// `child_process` is a builtin, so its exports object is a shared singleton. Mutating its
-// methods in place (as `patchChildProcess` does) hardens every later requirer, including
-// `require('node:child_process')`.
-patchChildProcess(require('child_process'));
-
-// `lodash` and `lodash/fp` export objects, so we can reassign their `template` property in
-// place on the cached exports object.
-var lodashModule = require('lodash');
-lodashModule.template = lodashPatch.createProxy(lodashModule.template);
-
-var lodashFpModule = require('lodash/fp');
-lodashFpModule.template = lodashPatch.createFpProxy(lodashFpModule.template);
-
-// `lodash/template` and `lodash/fp/template` export the template function directly, so we
-// cannot mutate them in place. Instead we replace the cached exports entry with the proxy so
-// future `require()` calls receive the hardened function.
-replaceCachedExports('lodash/template', lodashPatch.createProxy(require('lodash/template')));
-replaceCachedExports(
-  'lodash/fp/template',
-  lodashPatch.createFpProxy(require('lodash/fp/template'))
-);
-
-function replaceCachedExports(request, patchedExports) {
-  var resolved = require.resolve(request);
-  var cached = require.cache[resolved];
-  if (cached) {
-    cached.exports = patchedExports;
+// the performance cost of using require-in-the-middle is atm directly related to the number of
+// registered hooks (as require is patched once for EACH hook)
+// This is why we are defining a single hook delegating for each of the patches we need to apply
+new ritm.Hook(
+  ['child_process', 'lodash', 'lodash/template', 'lodash/fp', 'lodash/fp/template'],
+  function (module, name) {
+    switch (name) {
+      case 'child_process': {
+        return patchChildProcess(module);
+      }
+      case 'lodash': {
+        module.template = lodashPatch.createProxy(module.template);
+        return module;
+      }
+      case 'lodash/template': {
+        return lodashPatch.createProxy(module);
+      }
+      case 'lodash/fp': {
+        module.template = lodashPatch.createFpProxy(module.template);
+        return module;
+      }
+      case 'lodash/fp/template': {
+        lodashPatch.createFpProxy(module);
+        return module;
+      }
+    }
+    return module;
   }
-}
+);
 
 // Use of the `KBN_UNSAFE_DISABLE_PROTOTYPE_HARDENING` environment variable is discouraged, and should only be set to facilitate testing
 // specific scenarios. This should never be set in production.

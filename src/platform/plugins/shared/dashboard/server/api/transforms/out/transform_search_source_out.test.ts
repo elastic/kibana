@@ -30,10 +30,6 @@ jest.mock('../../../kibana_services', () => ({
 }));
 
 describe('transformSearchSourceOut', () => {
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
   const references = [
     {
       name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
@@ -92,21 +88,12 @@ describe('transformSearchSourceOut', () => {
         {
           type: 'dropped_property',
           key: 'filters',
-          message: expect.any(String),
+          message:
+            'Unexpected error transforming filter state on read. Errors: [[filters.1]: "type" property is required, [filters.2]: "type" property is required]',
           value: [{ invalidFilter: true }, { anotherInvalidFilter: 'yup' }],
         },
       ],
     });
-
-    expect(result.warnings[0].message).toMatchInlineSnapshot(`
-      "Unexpected error transforming filter state on read.
-
-      [filters.1]: ✖ Invalid discriminator value. Expected 'condition' | 'group' | 'dsl' | 'spatial'
-        → at type
-
-      [filters.2]: ✖ Invalid discriminator value. Expected 'condition' | 'group' | 'dsl' | 'spatial'
-        → at type"
-    `);
 
     spy.mockRestore();
   });
@@ -157,17 +144,11 @@ describe('transformSearchSourceOut', () => {
         {
           type: 'dropped_property',
           key: 'query',
-          message: expect.any(String),
+          message:
+            "Unexpected error transforming query state on read. Error: [query.query]: Additional properties are not allowed ('query' was unexpected)",
           value: { language: 'lucene', query: { query: { invalid: true } } },
         },
       ],
     });
-    expect(result.warnings[0].message).toMatchInlineSnapshot(`
-      "Unexpected error transforming query state on read.
-
-      ✖ Unrecognized key: \\"query\\"
-      ✖ Invalid input: expected string, received undefined
-        → at expression"
-    `);
   });
 });

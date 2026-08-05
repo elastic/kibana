@@ -8,15 +8,15 @@
 import { useQuery } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
 import type {
-  ListRuleExecutionsRequest,
-  ListRuleExecutionsResponse,
+  GetRuleExecutionsRequest,
+  GetRuleExecutionsResponse,
   RuleExecutionOutcome,
 } from '@kbn/alerting-v2-schemas';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
 import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 import { ruleExecutionKeys } from './query_key_factory';
 
-export interface ListRuleExecutionsUiParams {
+export interface GetRuleExecutionsUiParams {
   page?: number;
   perPage?: number;
   ruleIds?: string[];
@@ -27,7 +27,7 @@ export interface ListRuleExecutionsUiParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-export const toListRuleExecutionsRequest = ({
+export const toGetRuleExecutionsRequest = ({
   page,
   perPage,
   ruleIds,
@@ -37,12 +37,12 @@ export const toListRuleExecutionsRequest = ({
   sort,
   sortOrder,
   ...rest
-}: ListRuleExecutionsUiParams): Complete<Partial<ListRuleExecutionsRequest>> => {
+}: GetRuleExecutionsUiParams): Complete<Partial<GetRuleExecutionsRequest>> => {
   assertAllFieldsMapped(rest);
   return {
     page,
     per_page: perPage,
-    rule_ids: ruleIds,
+    rule_id: ruleIds,
     outcome,
     from,
     to,
@@ -51,12 +51,12 @@ export const toListRuleExecutionsRequest = ({
   };
 };
 
-export const useFetchRuleExecutions = (params: ListRuleExecutionsUiParams) => {
+export const useFetchRuleExecutions = (params: GetRuleExecutionsUiParams) => {
   const api = useService(ExecutionHistoryApi);
 
-  return useQuery<ListRuleExecutionsResponse, Error>({
+  return useQuery<GetRuleExecutionsResponse, Error>({
     queryKey: ruleExecutionKeys.list(params),
-    queryFn: () => api.listRuleExecutions(toListRuleExecutionsRequest(params)),
+    queryFn: () => api.getRuleExecutions(toGetRuleExecutionsRequest(params)),
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });

@@ -78,7 +78,6 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
       body: {},
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects empty episode_id with 400', async ({ apiClient }) => {
@@ -87,7 +86,6 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
       body: { episode_id: '' },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects episode_id over 150 chars with 400', async ({ apiClient }) => {
@@ -96,7 +94,6 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
       body: { episode_id: 'a'.repeat(151) },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
@@ -105,7 +102,6 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
       body: { episode_id: 'some-episode', extra: 'nope' },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects group_hash over 256 chars with 400', async ({ apiClient }) => {
@@ -114,7 +110,6 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
       body: { episode_id: 'some-episode' },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('returns 404 when group_hash matches no events', async ({ apiClient }) => {

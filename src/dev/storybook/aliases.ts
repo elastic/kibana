@@ -8,7 +8,6 @@
  */
 
 export const storybookAliases = {
-  agent_builder: 'x-pack/platform/plugins/shared/agent_builder/.storybook',
   ai_assistant: 'x-pack/platform/packages/shared/kbn-ai-assistant/.storybook',
   alerting_v2: 'x-pack/platform/plugins/shared/alerting_v2/.storybook',
   alerting_v2_rule_form:
@@ -58,6 +57,7 @@ export const storybookAliases = {
   lists: 'x-pack/solutions/security/plugins/lists/.storybook',
   management: 'src/platform/packages/shared/kbn-management/storybook/config',
   metrics_data_access: 'x-pack/solutions/observability/plugins/metrics_data_access/.storybook',
+  nightshift: 'x-pack/solutions/observability/packages/kbn-nightshift/.storybook',
   observability_ai_assistant_app:
     'x-pack/solutions/observability/plugins/observability_ai_assistant_app/.storybook',
   observability_ai_assistant:

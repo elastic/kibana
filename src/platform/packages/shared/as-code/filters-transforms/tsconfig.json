@@ -11,7 +11,8 @@
     "@kbn/es-query",
     "@kbn/es-query-constants",
     "@kbn/logging",
-    "@kbn/as-code-filters-constants",
-    "@kbn/zod"
+    "@kbn/utility-types",
+    "@kbn/config-schema",
+    "@kbn/as-code-filters-constants"
   ]
 }

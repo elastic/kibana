@@ -57,22 +57,4 @@ describe('computeRouteValidate', () => {
 
     expect(validate.request).toEqual({});
   });
-
-  it('passes the onRequestValidationError handler through when declared', () => {
-    const onRequestValidationError = jest.fn();
-    const validate = computeRouteValidate({
-      request: { body: z.object({ name: z.string() }) },
-      onRequestValidationError,
-    }) as ComputedValidate;
-
-    expect(validate.onRequestValidationError).toBe(onRequestValidationError);
-  });
-
-  it('omits onRequestValidationError when it is not declared', () => {
-    const validate = computeRouteValidate({
-      request: { body: z.object({ name: z.string() }) },
-    }) as ComputedValidate;
-
-    expect(validate.onRequestValidationError).toBeUndefined();
-  });
 });

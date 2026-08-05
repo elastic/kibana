@@ -44,7 +44,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.experimentalFeatures=${JSON.stringify({
           enableAgentStatusAlerting: false,
           enableSloTemplates: false,
-          installIntegrationsKnowledge: false,
         })}`,
 
         `--logging.loggers=${JSON.stringify([

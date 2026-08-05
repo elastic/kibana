@@ -20,7 +20,11 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { TEST_SUBJ_DATA_GRID, TEST_SUBJ_EMPTY_STATE } from './constants';
+import {
+  TEST_SUBJ_DATA_GRID,
+  TEST_SUBJ_EMPTY_STATE,
+  DEFAULT_VISIBLE_ROWS_PER_PAGE,
+} from './constants';
 
 const mockUseFetchGridData = jest.mocked(useFetchGridData);
 const mockUseInvestigateInTimeline = jest.mocked(useInvestigateInTimeline);
@@ -262,6 +266,7 @@ describe('EntitiesDataTable', () => {
         query: { bool: { filter: [{ term: { test: true } }], must: [], must_not: [], should: [] } },
         sort: [['entity.name', 'asc']],
         enabled: true,
+        pageSize: DEFAULT_VISIBLE_ROWS_PER_PAGE,
       })
     );
   });

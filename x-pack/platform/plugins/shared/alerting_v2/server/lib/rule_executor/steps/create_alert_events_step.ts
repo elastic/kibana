@@ -37,7 +37,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
           spaceId: state.input.spaceId,
           ruleAttributes: state.rule,
           scheduledTimestamp: state.input.scheduledAt,
-          ruleVersion: state.rule.metadata.version,
+          ruleVersion: 1,
           type: eventType,
         });
 

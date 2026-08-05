@@ -702,6 +702,8 @@ describe('resolveEsArgs()', () => {
         "--env",
         "xpack.security.authc.realms.saml.cloud-saml-kibana.private_attributes=http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token,http://saml.elastic-cloud.com/attributes/uiam/authentication/access_token_expires_at,http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token,http://saml.elastic-cloud.com/attributes/uiam/authentication/refresh_token_expires_at",
         "--env",
+        "serverless.organization_id=org1234567890",
+        "--env",
         "serverless.project_type=elasticsearch_general_purpose",
         "--env",
         "serverless.project_id=abcdef12345678901234567890123456",
@@ -731,6 +733,7 @@ describe('resolveEsArgs()', () => {
     );
 
     expect(findEnvValue(esArgs, 'serverless.project_id')).toBe(overrideId);
+    expect(findEnvValue(esArgs, 'serverless.organization_id')).toBeDefined();
     expect(findEnvValue(esArgs, 'serverless.universal_iam_service.enabled')).toBe('true');
   });
 
@@ -901,9 +904,6 @@ describe('setupServerlessVolumes()', () => {
     expect(readStringSecretsMock).toHaveBeenCalledWith(SERVERLESS_SECRETS_PATH);
     const settings = JSON.parse(
       await Fsp.readFile(join(SERVERLESS_OPERATOR_PATH, 'settings.json'), 'utf-8')
-    );
-    expect(settings.state.project.tags).toEqual(
-      expect.objectContaining({ _csp: 'aws', _region: 'eu-west-1' })
     );
     expect(settings.state.cluster_secrets.string_secrets).toEqual(stringSecretsFixture);
   });

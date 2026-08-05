@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
@@ -13,16 +14,16 @@ import {
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
 } from '../../common/constants';
 
-export const customContentStateSchema = z.object({
-  prompt: z.string().max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH).optional(),
-  esqlQuery: z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH).optional(),
-  template: z.string().max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH).optional(),
+export const customContentStateSchema = schema.object({
+  prompt: schema.maybe(schema.string({ maxLength: CUSTOM_CONTENT_MAX_PROMPT_LENGTH })),
+  esqlQuery: schema.maybe(schema.string({ maxLength: CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH })),
+  template: schema.maybe(schema.string({ maxLength: CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH })),
 });
 
-export const customContentEmbeddableSchema = z.object({
-  ...customContentStateSchema.shape,
-  ...serializedTitlesSchema.shape,
-});
+export const customContentEmbeddableSchema = schema.allOf([
+  customContentStateSchema,
+  serializedTitlesSchema,
+]);
 
-export type CustomContentState = z.output<typeof customContentStateSchema>;
-export type CustomContentEmbeddableState = z.output<typeof customContentEmbeddableSchema>;
+export type CustomContentState = TypeOf<typeof customContentStateSchema>;
+export type CustomContentEmbeddableState = TypeOf<typeof customContentEmbeddableSchema>;

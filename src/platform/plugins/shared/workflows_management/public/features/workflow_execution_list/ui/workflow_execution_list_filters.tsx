@@ -25,16 +25,11 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { getStatusLabel } from '../../../shared/translations';
-
-export interface ExecutedByFilterOption {
-  label: string;
-  value: string;
-}
 
 export interface ExecutionListFiltersProps {
   filters: {
@@ -47,7 +42,7 @@ export interface ExecutionListFiltersProps {
     executionTypes: ExecutionType[];
     executedBy: string[];
   }) => void;
-  availableExecutedByOptions?: ExecutedByFilterOption[];
+  availableExecutedByOptions?: string[];
   showExecutor?: boolean;
 }
 
@@ -110,16 +105,6 @@ export function ExecutionListFilters({
     },
   ]);
 
-  const availableExecutedByOptionsByValue = useMemo(
-    () => new Map(availableExecutedByOptions.map(({ label, value }) => [value, label])),
-    [availableExecutedByOptions]
-  );
-
-  const getExecutedByOption = (value: string): EuiComboBoxOptionOption<string> => ({
-    label: availableExecutedByOptionsByValue.get(value) ?? value,
-    value,
-  });
-
   const handleSelectableOptionsChange = (
     newOptions: EuiSelectableOption<ExecutionListFiltersItem>[]
   ) => {
@@ -136,7 +121,7 @@ export function ExecutionListFilters({
   };
 
   const handleExecutedByChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-    const executedByValues = selectedOptions.map((option) => option.value ?? option.label);
+    const executedByValues = selectedOptions.map((option) => option.label);
     onFiltersChange({
       statuses: filters.statuses,
       executionTypes: filters.executionTypes,
@@ -252,16 +237,17 @@ export function ExecutionListFilters({
               placeholder={i18n.translate(
                 'workflows.workflowExecutionList.filterIconButton.executedByPlaceholder',
                 {
-                  defaultMessage: 'Filter by user',
+                  defaultMessage: 'Filter by username',
                 }
               )}
-              options={availableExecutedByOptions.map(({ label, value }) => ({ label, value }))}
-              selectedOptions={filters.executedBy.map(getExecutedByOption)}
+              options={availableExecutedByOptions.map((user) => ({ label: user }))}
+              selectedOptions={filters.executedBy.map((user) => ({ label: user }))}
               onChange={handleExecutedByChange}
               onCreateOption={(searchValue) => {
+                const newOption = { label: searchValue };
                 handleExecutedByChange([
-                  ...filters.executedBy.map(getExecutedByOption),
-                  { label: searchValue, value: searchValue },
+                  ...filters.executedBy.map((user) => ({ label: user })),
+                  newOption,
                 ]);
               }}
               isClearable={true}

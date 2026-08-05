@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const { inspect } = require('util');
 const Path = require('path');
 
 const { readPackageJson } = require('./parse_package_json');
@@ -153,6 +154,7 @@ class Package {
 
   /**
    * Does this package expose a plugin, is it of one of the plugin types?
+   * @readonly
    * @returns {this is import('./types').PluginPackage}
    */
   isPlugin() {
@@ -161,6 +163,7 @@ class Package {
 
   /**
    * Returns the group to which this package belongs
+   * @readonly
    * @returns {import('@kbn/projects-solutions-groups').ModuleGroup}
    */
   getGroup() {
@@ -169,6 +172,7 @@ class Package {
 
   /**
    * Returns the package visibility, i.e. whether it can be accessed by everybody or only packages in the same group
+   * @readonly
    * @returns {import('@kbn/projects-solutions-groups').ModuleVisibility}
    */
   getVisibility() {
@@ -256,9 +260,11 @@ class Package {
   /**
    * Custom inspect handler
    */
-  [Symbol.for('nodejs.util.inspect.custom')]() {
+  [inspect.custom]() {
     return `${this.isPlugin() ? `PluginPackage` : `Package`}<${this.normalizedRepoRelativeDir}>`;
   }
 }
 
-exports.Package = Package;
+module.exports = {
+  Package,
+};

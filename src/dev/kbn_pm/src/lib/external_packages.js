@@ -16,22 +16,22 @@ module.exports = {
   },
 
   ['@kbn/ci-stats-reporter']() {
-    require('@kbn/swc-register').install();
+    require('@kbn/babel-register').install();
     return require('@kbn/ci-stats-reporter');
   },
 
   ['@kbn/yarn-lock-validator']() {
-    require('@kbn/swc-register').install();
+    require('@kbn/babel-register').install();
     return require('@kbn/yarn-lock-validator');
   },
 
   ['@kbn/sort-package-json']() {
-    require('@kbn/swc-register').install();
+    require('@kbn/babel-register').install();
     return require('@kbn/sort-package-json');
   },
 
   ['@kbn/get-repo-files']() {
-    require('@kbn/swc-register').install();
+    require('@kbn/babel-register').install();
     return require('@kbn/get-repo-files');
   },
 };

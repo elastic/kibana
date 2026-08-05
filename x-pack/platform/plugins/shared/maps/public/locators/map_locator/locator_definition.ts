@@ -6,7 +6,6 @@
  */
 
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
 import type { MapsAppLocatorDependencies, MapsAppLocatorParams } from './types';
 
 export const MAPS_APP_LOCATOR = 'MAPS_APP_LOCATOR' as const;
@@ -15,13 +14,6 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
   public readonly id = MAPS_APP_LOCATOR;
 
   constructor(protected readonly deps: MapsAppLocatorDependencies) {}
-
-  public readonly getTimeRange = (params: MapsAppLocatorParams) => params.timeRange;
-
-  public readonly setTimeRange = (params: MapsAppLocatorParams, timeRange?: TimeRange) => ({
-    ...params,
-    timeRange,
-  });
 
   public readonly getLocation = async (params: MapsAppLocatorParams) => {
     const { getLocation } = await import('./get_location');

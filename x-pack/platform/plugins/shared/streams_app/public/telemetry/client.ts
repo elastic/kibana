@@ -21,6 +21,8 @@ import type {
   StreamsChildStreamCreatedProps,
   StreamsProcessingSavedProps,
   StreamsSchemaUpdatedProps,
+  StreamsSignificantEventsCreatedProps,
+  StreamsSignificantEventsSuggestionsGeneratedEventProps,
   WiredStreamsStatusChangedProps,
   StreamsFeatureIdentificationSavedProps,
   StreamsFeatureIdentificationDeletedProps,
@@ -43,6 +45,8 @@ import {
   STREAMS_PROCESSING_SAVED_EVENT_TYPE,
   STREAMS_RETENTION_CHANGED_EVENT_TYPE,
   STREAMS_SCHEMA_UPDATED_EVENT_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE,
   STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
@@ -108,6 +112,16 @@ export class StreamsTelemetryClient {
 
   public trackSchemaUpdated(props: StreamsSchemaUpdatedProps) {
     this.analytics.reportEvent(STREAMS_SCHEMA_UPDATED_EVENT_TYPE, props);
+  }
+
+  public trackSignificantEventsSuggestionsGenerate(
+    params: StreamsSignificantEventsSuggestionsGeneratedEventProps
+  ) {
+    this.analytics.reportEvent(STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE, params);
+  }
+
+  public trackSignificantEventsCreated(params: StreamsSignificantEventsCreatedProps) {
+    this.analytics.reportEvent(STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE, params);
   }
 
   public trackFeaturesSaved(params: StreamsFeatureIdentificationSavedProps) {
