@@ -9,6 +9,7 @@ import type { z } from '@kbn/zod';
 import type {
   notificationWriteSchema,
   notificationReadSchema,
+  notificationQueryParamsSchema,
   ctaSchema,
 } from './notification_schema';
 import type {
@@ -73,3 +74,13 @@ export type NotificationDocument = z.output<typeof notificationWriteSchema> & {
 export type Severity = Notification['severity'];
 
 export type Cta = z.infer<typeof ctaSchema>;
+
+/** Read-path query params; validated by `notificationQueryParamsSchema`. */
+export type NotificationQueryParams = z.input<typeof notificationQueryParamsSchema>;
+
+/** The full collapsed, filtered notification set the client paginates over. */
+export interface NotificationQueryResult {
+  items: Notification[];
+  /** Ensure the client knows if the query hit the result limit and older matches are omitted. */
+  truncated: boolean;
+}
