@@ -113415,7 +113415,7 @@ components:
                     docsCountPercentage:
                       default: null
                       maximum: 100
-                      minimum: 1
+                      minimum: 0
                       nullable: true
                       type: number
                     enabled:
