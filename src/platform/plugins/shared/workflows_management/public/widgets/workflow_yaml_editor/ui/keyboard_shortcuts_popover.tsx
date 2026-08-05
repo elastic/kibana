@@ -20,6 +20,7 @@ import { isMac } from '@kbn/shared-ux-utility';
 import { useWorkflowBottomBarState } from '@kbn/workflows-ui';
 
 const COMMAND_KEY = isMac ? '⌘' : 'Ctrl';
+const ALT_KEY = isMac ? '⌥' : 'Alt';
 
 const shortcuts: Array<{ label: string; keys: string[] }> = [
   {
@@ -53,10 +54,22 @@ const shortcuts: Array<{ label: string; keys: string[] }> = [
     keys: [COMMAND_KEY, 'K'],
   },
   {
-    label: i18n.translate('workflows.yamlEditor.shortcuts.find', {
-      defaultMessage: 'Find',
+    label: i18n.translate('workflows.yamlEditor.shortcuts.findAndReplace', {
+      defaultMessage: 'Find & replace',
     }),
-    keys: [COMMAND_KEY, 'F'],
+    keys: [COMMAND_KEY, 'Shift', 'F'],
+  },
+  {
+    label: i18n.translate('workflows.yamlEditor.shortcuts.moveStepUp', {
+      defaultMessage: 'Move step up',
+    }),
+    keys: [COMMAND_KEY, ALT_KEY, 'Shift', '↑'],
+  },
+  {
+    label: i18n.translate('workflows.yamlEditor.shortcuts.moveStepDown', {
+      defaultMessage: 'Move step down',
+    }),
+    keys: [COMMAND_KEY, ALT_KEY, 'Shift', '↓'],
   },
 ];
 

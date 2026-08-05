@@ -15,12 +15,26 @@ export interface EditorCommand {
   label: string;
   iconType: IconType;
   description?: string;
+  shortcut?: string[];
 }
+
+export interface ActionSelectionOptions {
+  withParams?: Record<string, unknown>;
+}
+
+export type IconVariant =
+  | 'trigger'
+  | 'platform'
+  | 'external'
+  | 'flowControl'
+  | 'neutral'
+  | 'dataTransformation';
 
 export interface JumpToStepEntry {
   id: string;
   label: string;
   lineStart: number;
+  yaml?: string;
 }
 
 export type MenuItemData =
@@ -56,6 +70,7 @@ interface ActionBase {
   description?: string;
   instancesLabel?: string;
   iconColor?: string;
+  iconVariant?: IconVariant;
   stability?: StabilityLevel;
   /**
    * Ids from the root menu down through this row (for groups: path to open this group).

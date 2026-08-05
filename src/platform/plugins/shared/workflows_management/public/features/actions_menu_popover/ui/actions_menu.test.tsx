@@ -15,6 +15,10 @@ import type { ActionGroup, ActionOption, ActionOptionData } from '../types';
 
 jest.mock('../../../hooks/use_kibana');
 
+jest.mock('../../validate_workflow_yaml/model/use_workflow_json_schema', () => ({
+  useWorkflowJsonSchema: () => ({ jsonSchema: {}, uri: null }),
+}));
+
 const mockLeafOption: ActionOption = {
   id: 'manual',
   label: 'Manual',
@@ -52,6 +56,7 @@ const mockOptions: ActionOptionData[] = [mockGroup, mockFlowControlOption];
 
 jest.mock('../lib/get_action_options', () => ({
   getActionOptions: jest.fn(() => mockOptions),
+  usesInverseIconColor: jest.fn(() => false),
   flattenOptions: jest.fn((options: ActionOptionData[]) => {
     const flat: ActionOptionData[] = [];
     const flatten = (items: ActionOptionData[]) => {
@@ -124,21 +129,22 @@ describe('ActionsMenu', () => {
     // Should now show the child options
     expect(screen.getByText('Manual')).toBeInTheDocument();
     expect(screen.getByText('Alert')).toBeInTheDocument();
-    // Should show a Back button
-    expect(screen.getByText('Back')).toBeInTheDocument();
+    // Should show breadcrumbs
+    expect(screen.getByText('All actions')).toBeInTheDocument();
+    expect(screen.getByText('Triggers')).toBeInTheDocument();
   });
 
-  it('navigates back from a group when Back button is clicked', () => {
+  it('navigates back from a group when All actions breadcrumb is clicked', () => {
     renderComponent();
 
     // Navigate into the group
     const options = screen.getAllByRole('option');
     const triggersOption = options.find((opt) => opt.textContent?.includes('Triggers'));
     fireEvent.click(triggersOption!);
-    expect(screen.getByText('Back')).toBeInTheDocument();
+    expect(screen.getByText('All actions')).toBeInTheDocument();
 
-    // Click Back
-    fireEvent.click(screen.getByText('Back'));
+    // Click All actions breadcrumb
+    fireEvent.click(screen.getByText('All actions'));
 
     // Should show top-level options again
     expect(screen.getByText('Actions menu')).toBeInTheDocument();
@@ -168,7 +174,7 @@ describe('ActionsMenu', () => {
 
   it('renders a search input', () => {
     renderComponent();
-    const searchInput = screen.getByRole('searchbox');
+    const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
     expect(searchInput).toBeInTheDocument();
   });
 });

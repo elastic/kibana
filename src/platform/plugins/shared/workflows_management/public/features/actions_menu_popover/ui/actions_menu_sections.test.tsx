@@ -14,12 +14,18 @@ import { I18nProvider } from '@kbn/i18n-react';
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
+      http: { basePath: { prepend: (path: string) => path } },
+      notifications: { toasts: { addError: jest.fn() } },
       workflowsExtensions: {
         getStepDefinition: jest.fn(),
         getRegisteredSteps: jest.fn().mockReturnValue([]),
       },
     },
   }),
+}));
+
+jest.mock('../../validate_workflow_yaml/model/use_workflow_json_schema', () => ({
+  useWorkflowJsonSchema: () => ({ jsonSchema: {}, uri: null }),
 }));
 
 jest.mock('../../../shared/ui/step_icons/step_icon', () => ({
@@ -39,6 +45,7 @@ jest.mock('../../../../common/schema', () => ({
 jest.mock('../lib/get_action_options', () => ({
   getActionOptions: jest.fn().mockReturnValue([]),
   flattenOptions: jest.fn().mockReturnValue([]),
+  usesInverseIconColor: jest.fn().mockReturnValue(false),
 }));
 
 import { ActionsMenu } from './actions_menu';
@@ -47,7 +54,12 @@ import type { EditorCommand, JumpToStepEntry } from '../types';
 const mockCommands: EditorCommand[] = [
   { id: 'foldAll', label: 'Collapse all', iconType: 'minusInCircle' },
   { id: 'unfoldAll', label: 'Expand all', iconType: 'plusInCircle' },
-  { id: 'find', label: 'Find and Replace', iconType: 'search' },
+  {
+    id: 'find',
+    label: 'Find & replace',
+    iconType: 'merge',
+    shortcut: ['Ctrl', 'Shift', 'F'],
+  },
 ];
 
 const mockSteps: JumpToStepEntry[] = [
@@ -116,7 +128,7 @@ describe('ActionsMenu - Commands and Jump to Step sections', () => {
 
     expect(screen.queryByText('Jump to a step')).not.toBeInTheDocument();
 
-    const searchInput = screen.getByRole('searchbox');
+    const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
     fireEvent.change(searchInput, { target: { value: 'step' } });
 
     expect(screen.getByText('Jump to a step')).toBeInTheDocument();
@@ -136,7 +148,7 @@ describe('ActionsMenu - Commands and Jump to Step sections', () => {
       { wrapper: Wrapper }
     );
 
-    const searchInput = screen.getByRole('searchbox');
+    const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
     fireEvent.change(searchInput, { target: { value: '#' } });
 
     expect(screen.getByText('Jump to a step')).toBeInTheDocument();
@@ -159,7 +171,7 @@ describe('ActionsMenu - Commands and Jump to Step sections', () => {
       { wrapper: Wrapper }
     );
 
-    const searchInput = screen.getByRole('searchbox');
+    const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
     fireEvent.change(searchInput, { target: { value: '#alert' } });
 
     expect(screen.getByTitle('#alert_step')).toBeInTheDocument();
@@ -179,7 +191,7 @@ describe('ActionsMenu - Commands and Jump to Step sections', () => {
       { wrapper: Wrapper }
     );
 
-    const searchInput = screen.getByRole('searchbox');
+    const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
     fireEvent.change(searchInput, { target: { value: '#step' } });
 
     fireEvent.click(screen.getByTitle('#step_two'));
@@ -205,7 +217,7 @@ describe('ActionsMenu - Commands and Jump to Step sections', () => {
       { wrapper: Wrapper }
     );
 
-    const searchInput = screen.getByRole('searchbox');
+    const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
     fireEvent.change(searchInput, { target: { value: 'alert' } });
 
     expect(screen.getByTitle('#alert_step')).toBeInTheDocument();
@@ -224,7 +236,7 @@ describe('ActionsMenu - Commands and Jump to Step sections', () => {
       { wrapper: Wrapper }
     );
 
-    const searchInput = screen.getByRole('searchbox');
+    const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
     fireEvent.change(searchInput, { target: { value: 'step' } });
 
     expect(screen.queryByTitle('View all existing steps')).not.toBeInTheDocument();
@@ -242,7 +254,7 @@ describe('ActionsMenu - Commands and Jump to Step sections', () => {
       { wrapper: Wrapper }
     );
 
-    const searchInput = screen.getByRole('searchbox');
+    const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
     fireEvent.change(searchInput, { target: { value: 'alert' } });
 
     fireEvent.click(screen.getByTitle('View all existing steps'));

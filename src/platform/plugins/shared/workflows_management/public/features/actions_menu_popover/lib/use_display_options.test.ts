@@ -7,13 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildDisplayOptions, MAX_VISIBLE_STEPS, STEPS_PREFIX } from './use_display_options';
-import type { EditorCommand, JumpToStepEntry, MenuSelectableOption } from '../types';
+import { buildDisplayOptions, STEPS_PREFIX } from './use_display_options';
+import type {
+  ActionOptionData,
+  EditorCommand,
+  JumpToStepEntry,
+  MenuSelectableOption,
+} from '../types';
 
-const makeAction = (id: string, label: string) => ({
+const makeAction = (id: string, label: string, description?: string): ActionOptionData => ({
+  id,
+  label,
+  description,
+  iconType: 'empty' as const,
+});
+
+const makeGroup = (id: string, label: string, options: ActionOptionData[]): ActionOptionData => ({
   id,
   label,
   iconType: 'empty' as const,
+  options,
 });
 
 const mockCommands: EditorCommand[] = [
@@ -35,39 +48,23 @@ const groupLabels = (result: MenuSelectableOption[]) =>
 
 describe('buildDisplayOptions', () => {
   const base = {
-    options: [] as ReturnType<typeof makeAction>[],
+    options: [] as ActionOptionData[],
     searchTerm: '',
     commands: mockCommands,
     jumpToStepEntries: mockJumps,
     currentPath: [] as string[],
   };
 
-  it('shows Add step + Commands sections when no search is active', () => {
-    const result = buildDisplayOptions({ ...base, options: [makeAction('a', 'A')] });
-    expect(groupLabels(result)).toEqual(['Add step', 'Commands']);
-    expect(dataKinds(result)).toEqual(['action', 'command', 'command']);
+  it('shows Add trigger or step + Commands sections when no search is active', () => {
+    const result = buildDisplayOptions(base);
+    expect(groupLabels(result)).toEqual(['Add trigger or step', 'Commands']);
+    expect(dataKinds(result)).toEqual(['command', 'command']);
   });
 
-  it('hides Add step section when no actions match the search', () => {
-    const result = buildDisplayOptions({ ...base, options: [], searchTerm: 'zzz' });
-    expect(groupLabels(result)).not.toContain('Add step');
-  });
-
-  it('hides Add step section in Steps: mode when no actions match', () => {
-    const result = buildDisplayOptions({
-      ...base,
-      options: [],
-      searchTerm: `${STEPS_PREFIX}zzz`,
-    });
-    expect(groupLabels(result)).not.toContain('Add step');
-    expect(result).toHaveLength(0);
-  });
-
-  it('returns action items directly when inside a sub-group', () => {
-    const options = [makeAction('a', 'A')];
+  it('returns action items alphabetically when inside a sub-group', () => {
+    const options = [makeAction('z', 'Zulu'), makeAction('a', 'Alpha'), makeAction('m', 'Mike')];
     const result = buildDisplayOptions({ ...base, options, currentPath: ['group1'] });
-    expect(result).toHaveLength(1);
-    expect(result[0].data?.menuItem).toEqual({ kind: 'action', action: options[0] });
+    expect(result.map((o) => o.label)).toEqual(['Alpha', 'Mike', 'Zulu']);
   });
 
   describe('hash mode (#)', () => {
@@ -84,10 +81,10 @@ describe('buildDisplayOptions', () => {
       expect(jumps[0].label).toBe('#alert_step');
     });
 
-    it('excludes Commands and Add step sections', () => {
+    it('excludes Commands and Add trigger or step sections', () => {
       const result = buildDisplayOptions({ ...base, searchTerm: '#' });
       expect(groupLabels(result)).not.toContain('Commands');
-      expect(groupLabels(result)).not.toContain('Add step');
+      expect(groupLabels(result)).not.toContain('Add trigger or step');
     });
   });
 
@@ -111,30 +108,114 @@ describe('buildDisplayOptions', () => {
         options: [makeAction('a', 'A')],
         searchTerm: `${STEPS_PREFIX}a`,
       });
-      expect(groupLabels(result)).toEqual(['Add step']);
+      expect(groupLabels(result)).toEqual([]);
     });
   });
 
   describe('normal search mode', () => {
-    it('limits step options to MAX_VISIBLE_STEPS and adds viewAll nav', () => {
-      const manyActions = Array.from({ length: 15 }, (_, i) =>
-        makeAction(`act${i}`, `Action ${i}`)
-      );
+    const external = makeGroup('external', 'External systems & apps', [
+      makeGroup('shodan', 'Shodan', [
+        makeAction('shodan.count', 'Count results', 'Count matching hosts'),
+        makeAction('shodan.search', 'Search hosts', 'Search the Shodan database'),
+      ]),
+      makeGroup('virustotal', 'Virustotal', [
+        makeAction('vt.analysis', 'Get analysis results', 'Retrieve analysis'),
+      ]),
+    ]);
+    const data = makeGroup('data', 'Data transformation', [
+      makeAction('rerank', 'Rerank results', 'Reorder documents by relevance'),
+    ]);
+    const categoryTree = [external, data];
+
+    it('does not show Add trigger or step label during search', () => {
       const result = buildDisplayOptions({
         ...base,
-        options: manyActions,
-        searchTerm: 'act',
+        categoryTree,
+        options: categoryTree,
+        searchTerm: 'results',
+      });
+      expect(groupLabels(result)).not.toContain('Add trigger or step');
+    });
+
+    it('sections matching items under their root category headers', () => {
+      const result = buildDisplayOptions({
+        ...base,
+        categoryTree,
+        options: categoryTree,
+        searchTerm: 'results',
+        commands: [],
+        jumpToStepEntries: [],
+      });
+
+      expect(groupLabels(result)).toEqual(['External systems & apps', 'Data transformation']);
+
+      const actions = result.filter((o) => o.data?.menuItem?.kind === 'action');
+      expect(actions.map((a) => a.label)).toEqual([
+        'Count results',
+        'Get analysis results',
+        'Rerank results',
+      ]);
+    });
+
+    it('enriches nested match descriptions with parent label', () => {
+      const result = buildDisplayOptions({
+        ...base,
+        categoryTree,
+        options: categoryTree,
+        searchTerm: 'count',
+        commands: [],
+        jumpToStepEntries: [],
+      });
+
+      const action = result.find((o) => o.label === 'Count results');
+      const menuItem = action?.data?.menuItem;
+      expect(menuItem?.kind).toBe('action');
+      if (menuItem?.kind === 'action') {
+        expect(menuItem.action.description).toBe('Shodan - Count results');
+      }
+    });
+
+    it('omits categories with no matches', () => {
+      const result = buildDisplayOptions({
+        ...base,
+        categoryTree,
+        options: categoryTree,
+        searchTerm: 'rerank',
+        commands: [],
+        jumpToStepEntries: [],
+      });
+
+      expect(groupLabels(result)).toEqual(['Data transformation']);
+      expect(groupLabels(result)).not.toContain('External systems & apps');
+    });
+
+    it('does not limit results or show viewAll nav', () => {
+      const manyLeaves = Array.from({ length: 15 }, (_, i) =>
+        makeAction(`act${i}`, `Result action ${i}`)
+      );
+      const tree = [makeGroup('cat', 'Category', manyLeaves)];
+      const result = buildDisplayOptions({
+        ...base,
+        categoryTree: tree,
+        options: tree,
+        searchTerm: 'result',
+        commands: [],
+        jumpToStepEntries: [],
       });
       const actions = result.filter((o) => o.data?.menuItem?.kind === 'action');
-      expect(actions).toHaveLength(MAX_VISIBLE_STEPS);
+      expect(actions).toHaveLength(15);
       const nav = result.find(
         (o) => o.data?.menuItem?.kind === 'nav' && o.data.menuItem.target === 'viewAll'
       );
-      expect(nav).toBeDefined();
+      expect(nav).toBeUndefined();
     });
 
     it('shows matching commands', () => {
-      const result = buildDisplayOptions({ ...base, searchTerm: 'collapse' });
+      const result = buildDisplayOptions({
+        ...base,
+        categoryTree: [],
+        searchTerm: 'collapse',
+      });
       const cmds = result.filter((o) => o.data?.menuItem?.kind === 'command');
       expect(cmds).toHaveLength(1);
       expect(cmds[0].label).toBe('Collapse all');
@@ -157,13 +238,21 @@ describe('buildDisplayOptions', () => {
     });
 
     it('shows jump entries when search matches step names', () => {
-      const result = buildDisplayOptions({ ...base, searchTerm: 'step' });
+      const result = buildDisplayOptions({
+        ...base,
+        categoryTree: [],
+        searchTerm: 'step',
+      });
       const jumps = result.filter((o) => o.data?.menuItem?.kind === 'jump');
       expect(jumps).toHaveLength(3);
     });
 
     it('shows viewExisting nav when some but not all jump entries match', () => {
-      const result = buildDisplayOptions({ ...base, searchTerm: 'alert' });
+      const result = buildDisplayOptions({
+        ...base,
+        categoryTree: [],
+        searchTerm: 'alert',
+      });
       const nav = result.find(
         (o) => o.data?.menuItem?.kind === 'nav' && o.data.menuItem.target === 'viewExisting'
       );
@@ -171,7 +260,11 @@ describe('buildDisplayOptions', () => {
     });
 
     it('does not show viewExisting when all jump entries match', () => {
-      const result = buildDisplayOptions({ ...base, searchTerm: 'step' });
+      const result = buildDisplayOptions({
+        ...base,
+        categoryTree: [],
+        searchTerm: 'step',
+      });
       const nav = result.find(
         (o) => o.data?.menuItem?.kind === 'nav' && o.data.menuItem.target === 'viewExisting'
       );
@@ -179,7 +272,11 @@ describe('buildDisplayOptions', () => {
     });
 
     it('does not show jump section when no entries match', () => {
-      const result = buildDisplayOptions({ ...base, searchTerm: 'zzz' });
+      const result = buildDisplayOptions({
+        ...base,
+        categoryTree: [],
+        searchTerm: 'zzz',
+      });
       expect(groupLabels(result)).not.toContain('Jump to a step');
     });
   });

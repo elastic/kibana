@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
 import throttle from 'lodash/throttle';
@@ -18,11 +18,13 @@ import type YAML from 'yaml';
 import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isMac } from '@kbn/shared-ux-utility';
 import { isTriggerType, WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsMonacoTheme, WORKFLOW_MONACO_LAYOUT_OPTIONS } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
 import {
+  type StepLineRange,
   useAlertTriggerDecorations,
   useConnectorTypeDecorations,
   useFocusedStepDecoration,
@@ -105,6 +107,7 @@ import {
 import { registerWorkflowDefinitionProvider } from '../lib/monaco_providers/workflow_definition_provider';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
+import { getStepMoveState, reorderStep } from '../lib/snippets/reorder_step';
 import { useRegisterHoverCommands } from '../lib/use_register_hover_commands';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 import { navigateToErrorPosition } from '../lib/utils';
@@ -280,6 +283,8 @@ export const WorkflowYAMLEditor = ({
 
   // Lifecycle
   const [isEditorMounted, setIsEditorMounted] = useState(false);
+  // Temporary highlight range after inserting a step from the actions menu
+  const [insertedStepRange, setInsertedStepRange] = useState<StepLineRange | null>(null);
 
   // Initialize monkey-patch to intercept monaco-yaml's provider BEFORE it loads
   useEffect(() => {
@@ -378,23 +383,53 @@ export const WorkflowYAMLEditor = ({
   // handlers for the keyboard commands, passed only the first time the component is mounted
   // they should not have any dependencies, so they are not affected by the changes in the component
   const keyboardHandlers = useMemo(
-    () => ({
-      save: () => {
-        if (isSavingRef.current || isReadOnlyYamlRef.current) {
+    () => {
+      const moveFocusedStep = (direction: 'up' | 'down') => {
+        const editor = editorRef.current;
+        const model = editor?.getModel();
+        const stepInfo = focusedStepInfoRef.current;
+        const doc = yamlDocumentRef.current;
+        if (!editor || !model || !stepInfo || !doc || isReadOnlyYamlRef.current) {
           return;
         }
-        saveYaml();
-      },
-      run: () => dispatch(setIsTestModalOpen(true)),
-      saveAndRun: () => {
-        if (isSavingRef.current || isReadOnlyYamlRef.current) {
+        const result = reorderStep(model, doc, stepInfo.stepId, direction, editor);
+        if (!result) {
           return;
         }
-        saveYaml().then(() => dispatch(setIsTestModalOpen(true)));
-      },
-    }),
+        setInsertedStepRange(result);
+        editor.setPosition({ lineNumber: result.lineStart, column: 1 });
+        editor.revealLineInCenter(result.lineStart);
+        editor.focus();
+      };
+
+      return {
+        save: () => {
+          if (isSavingRef.current || isReadOnlyYamlRef.current) {
+            return;
+          }
+          saveYaml();
+        },
+        run: () => dispatch(setIsTestModalOpen(true)),
+        saveAndRun: () => {
+          if (isSavingRef.current || isReadOnlyYamlRef.current) {
+            return;
+          }
+          saveYaml().then(() => dispatch(setIsTestModalOpen(true)));
+        },
+        moveStepUp: () => moveFocusedStep('up'),
+        moveStepDown: () => moveFocusedStep('down'),
+      };
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
+  );
+
+  const stepMoveState = useMemo(
+    () =>
+      focusedStepInfo
+        ? getStepMoveState(yamlDocument, focusedStepInfo.stepId)
+        : { canMoveUp: false, canMoveDown: false },
+    [focusedStepInfo, yamlDocument]
   );
 
   const completionProvider = useWorkflowYamlCompletionProvider();
@@ -506,7 +541,21 @@ export const WorkflowYAMLEditor = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useFocusedStepDecoration(editorRef.current);
+  useFocusedStepDecoration(editorRef.current, insertedStepRange);
+
+  // Keep the post-insert highlight briefly so users can find the new step, then
+  // hand off to the normal focused-step decoration (cursor is already in the step).
+  useEffect(() => {
+    if (!insertedStepRange) {
+      return;
+    }
+    const timeoutId = window.setTimeout(() => {
+      setInsertedStepRange(null);
+    }, 3000);
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [insertedStepRange]);
 
   // Decorations
   useTriggerTypeDecorations({
@@ -638,7 +687,7 @@ export const WorkflowYAMLEditor = ({
     }
   }, [openActionsRef, openActionsPopover]);
   const onActionSelected = useCallback(
-    (action: ActionOptionData) => {
+    (action: ActionOptionData, options?: { withParams?: Record<string, unknown> }) => {
       if (isReadOnlyYaml) {
         return;
       }
@@ -659,7 +708,20 @@ export const WorkflowYAMLEditor = ({
           triggerDefinition?.snippets?.condition
         );
       } else {
-        insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
+        const insertedRange = insertStepSnippet(
+          model,
+          yamlDocumentCurrent,
+          action.id,
+          cursorPosition,
+          editor,
+          options?.withParams
+        );
+        if (insertedRange) {
+          setInsertedStepRange(insertedRange);
+          editor.revealLineInCenter(insertedRange.lineStart);
+          editor.setPosition({ lineNumber: insertedRange.lineStart, column: 1 });
+          editor.focus();
+        }
       }
       closeActionsPopover();
     },
@@ -673,21 +735,31 @@ export const WorkflowYAMLEditor = ({
         label: i18n.translate('workflows.yamlEditor.commands.collapseAll', {
           defaultMessage: 'Collapse all',
         }),
-        iconType: 'minusInCircle',
+        description: i18n.translate('workflows.yamlEditor.commands.collapseAllDescription', {
+          defaultMessage: 'Collapse all expanded steps in the workflow',
+        }),
+        iconType: 'arrowUp',
       },
       {
         id: 'unfoldAll',
         label: i18n.translate('workflows.yamlEditor.commands.expandAll', {
           defaultMessage: 'Expand all',
         }),
-        iconType: 'plusInCircle',
+        description: i18n.translate('workflows.yamlEditor.commands.expandAllDescription', {
+          defaultMessage: 'Expand all collapsed steps in the workflow',
+        }),
+        iconType: 'arrowDown',
       },
       {
         id: 'find',
-        label: i18n.translate('workflows.yamlEditor.commands.findReplace', {
-          defaultMessage: 'Find and Replace',
+        label: i18n.translate('workflows.yamlEditor.commands.findAndReplace', {
+          defaultMessage: 'Find & replace',
         }),
-        iconType: 'search',
+        description: i18n.translate('workflows.yamlEditor.commands.findAndReplaceDescription', {
+          defaultMessage: 'Search for a value across steps and replace it.',
+        }),
+        iconType: 'merge',
+        shortcut: [isMac ? '⌘' : 'Ctrl', 'Shift', 'F'],
       },
     ];
     if (isVisualEditorEnabled && onToggleEditorMode) {
@@ -707,12 +779,14 @@ export const WorkflowYAMLEditor = ({
 
   const jumpToStepEntries: JumpToStepEntry[] = useMemo(() => {
     if (!workflowLookup) return [];
+    const yamlLines = workflowYaml.split('\n');
     return Object.entries(workflowLookup.steps).map(([stepId, stepInfo]) => ({
       id: stepId,
       label: `#${stepId}`,
       lineStart: stepInfo.lineStart,
+      yaml: yamlLines.slice(stepInfo.lineStart - 1, stepInfo.lineEnd).join('\n'),
     }));
-  }, [workflowLookup]);
+  }, [workflowLookup, workflowYaml]);
 
   const handleCommandSelected = useCallback(
     (commandId: string) => {
@@ -829,13 +903,6 @@ export const WorkflowYAMLEditor = ({
     [extraActions, isReadOnlyYaml]
   );
 
-  const actionsMenuPanelProps = useMemo(() => {
-    return {
-      Button: <EuiButton iconType="plusCircle" css={styles.hiddenButtonCss} />,
-      css: { css: styles.actionsMenuPopoverPanel },
-    };
-  }, [styles.actionsMenuPopoverPanel, styles.hiddenButtonCss]);
-
   const editorWrapperCss = useMemo(
     () => css([styles.container, stepExecutionStyles]),
     [styles.container, stepExecutionStyles]
@@ -851,14 +918,9 @@ export const WorkflowYAMLEditor = ({
     >
       <GlobalWorkflowEditorStyles />
       <ActionsMenuPopover
-        anchorPosition="upCenter"
-        offset={32}
-        button={actionsMenuPanelProps.Button}
-        container={containerRef.current instanceof HTMLElement ? containerRef.current : undefined}
         closePopover={closeActionsPopover}
         onActionSelected={onActionSelected}
         isOpen={actionsPopoverOpen}
-        panelProps={actionsMenuPanelProps.css}
         commands={editorCommands}
         jumpToStepEntries={jumpToStepEntries}
         onCommandSelected={handleCommandSelected}
@@ -874,7 +936,13 @@ export const WorkflowYAMLEditor = ({
           style={positionStyles ?? {}}
           data-test-subj={`workflowStepActionsContainer-${focusedStepInfo?.stepId}`}
         >
-          <StepActions onStepRun={onStepRun} />
+          <StepActions
+            onStepRun={onStepRun}
+            onMoveStepUp={keyboardHandlers.moveStepUp}
+            onMoveStepDown={keyboardHandlers.moveStepDown}
+            canMoveUp={stepMoveState.canMoveUp}
+            canMoveDown={stepMoveState.canMoveDown}
+          />
         </div>
       )}
       {(isAgentBuilderAvailable || isDevelopment) && !isReadOnlyYaml ? (

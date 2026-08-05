@@ -78,7 +78,8 @@ const renderHookWithProviders = (
   editor: monaco.editor.IStandaloneCodeEditor | null,
   stepInfos: Record<string, StepInfo> = {
     'step-1': createStepInfo({ stepId: 'step-1', lineStart: 5, lineEnd: 10 }),
-  }
+  },
+  overrideRange?: { lineStart: number; lineEnd: number } | null
 ) => {
   const store = createMockStore();
 
@@ -96,7 +97,7 @@ const renderHookWithProviders = (
   };
 
   return {
-    ...renderHook(() => useFocusedStepDecoration(editor), { wrapper }),
+    ...renderHook(() => useFocusedStepDecoration(editor, overrideRange), { wrapper }),
     store,
   };
 };
@@ -165,6 +166,32 @@ describe('useFocusedStepDecoration', () => {
     });
     expect(decoration.options.blockClassName).toBe('mock-block-class-name');
     expect(decoration.options.isWholeLine).toBe(true);
+  });
+
+  it('should prefer overrideRange over the focused step', () => {
+    const { editor, decorationsCollection } = createMockEditor();
+    const { store } = renderHookWithProviders(
+      editor,
+      {
+        'step-1': createStepInfo({ stepId: 'step-1', lineStart: 5, lineEnd: 10 }),
+      },
+      {
+        lineStart: 20,
+        lineEnd: 25,
+      }
+    );
+
+    act(() => {
+      store.dispatch(setCursorPosition({ lineNumber: 7, column: 1 }));
+    });
+
+    const decorations = decorationsCollection.set.mock.calls.at(-1)?.[0];
+    expect(decorations[0].range).toEqual({
+      startLineNumber: 20,
+      startColumn: 1,
+      endLineNumber: 25,
+      endColumn: 1,
+    });
   });
 
   it('should clear decorations on unmount', () => {

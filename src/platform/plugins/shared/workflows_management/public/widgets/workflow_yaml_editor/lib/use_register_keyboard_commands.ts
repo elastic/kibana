@@ -17,6 +17,8 @@ interface RegisterKeyboardCommandsParams {
   save: () => void;
   run: () => void;
   saveAndRun: () => void;
+  moveStepUp: () => void;
+  moveStepDown: () => void;
 }
 
 interface UseRegisterKeyboardCommandsReturn {
@@ -35,7 +37,8 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
     (params: RegisterKeyboardCommandsParams) => {
       unregisterKeyboardCommands();
 
-      const { editor, openActionsPopover, save, run, saveAndRun } = params;
+      const { editor, openActionsPopover, save, run, saveAndRun, moveStepUp, moveStepDown } =
+        params;
 
       /**
        * Helper function to wrap action handlers with read-only check
@@ -120,6 +123,52 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
           keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter],
           run: withReadOnlyCheck(() => {
             saveAndRun();
+          }),
+        }),
+
+        // Find & replace
+        editor.addAction({
+          id: 'workflows.editor.action.findAndReplace',
+          label: i18n.translate('workflows.workflowDetail.yamlEditor.action.findAndReplace', {
+            defaultMessage: 'Find & replace',
+          }),
+          // eslint-disable-next-line no-bitwise
+          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyF],
+          run: withReadOnlyCheck((ed) => {
+            ed.trigger('keyboard', 'editor.action.startFindReplaceAction', null);
+          }),
+        }),
+
+        // Move focused step up
+        editor.addAction({
+          id: 'workflows.editor.action.moveStepUp',
+          label: i18n.translate('workflows.workflowDetail.yamlEditor.action.moveStepUp', {
+            defaultMessage: 'Move step up',
+          }),
+          // eslint-disable-next-line no-bitwise
+          keybindings: [
+            monaco.KeyMod.CtrlCmd | monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.UpArrow,
+          ],
+          run: withReadOnlyCheck(() => {
+            moveStepUp();
+          }),
+        }),
+
+        // Move focused step down
+        editor.addAction({
+          id: 'workflows.editor.action.moveStepDown',
+          label: i18n.translate('workflows.workflowDetail.yamlEditor.action.moveStepDown', {
+            defaultMessage: 'Move step down',
+          }),
+          // eslint-disable-next-line no-bitwise
+          keybindings: [
+            monaco.KeyMod.CtrlCmd |
+              monaco.KeyMod.Alt |
+              monaco.KeyMod.Shift |
+              monaco.KeyCode.DownArrow,
+          ],
+          run: withReadOnlyCheck(() => {
+            moveStepDown();
           }),
         }),
       ];

@@ -21,6 +21,7 @@ import { monaco } from '@kbn/monaco';
 import { isBuiltInStepType } from '@kbn/workflows';
 import { generateBuiltInStepSnippet } from './generate_builtin_step_snippet';
 import { generateConnectorSnippet } from './generate_connector_snippet';
+import { getLineRangeForEdit, type InsertedLineRange } from './get_line_range_for_edit';
 import {
   createReplacementRange,
   findFirstEmptyItem,
@@ -453,13 +454,14 @@ export function insertStepSnippet(
   yamlDocument: Document | null,
   stepType: string,
   cursorPosition?: monaco.Position | null,
-  editor?: monaco.editor.IStandaloneCodeEditor
-) {
+  editor?: monaco.editor.IStandaloneCodeEditor,
+  withParams?: Record<string, unknown>
+): InsertedLineRange | undefined {
   let document: Document;
   try {
     document = yamlDocument || parseDocument(model.getValue());
   } catch (error) {
-    return;
+    return undefined;
   }
 
   const stepsPair = getStepsPair(document);
@@ -468,8 +470,8 @@ export function insertStepSnippet(
   if (!stepsPair) {
     const lineCount = model.getLineCount();
     const insertText = isBuiltInStepType(stepType)
-      ? generateBuiltInStepSnippet(stepType, { full: true, withStepsSection: true })
-      : generateConnectorSnippet(stepType, { full: true, withStepsSection: true });
+      ? generateBuiltInStepSnippet(stepType, { full: true, withStepsSection: true, withParams })
+      : generateConnectorSnippet(stepType, { full: true, withStepsSection: true, withParams });
 
     if (editor) editor.pushUndoStop();
 
@@ -487,12 +489,12 @@ export function insertStepSnippet(
       editor.pushUndoStop();
     }
 
-    return;
+    return getLineRangeForEdit(range, text);
   }
 
   const sectionInfo = getSectionKeyInfo(model, stepsPair);
   if (!sectionInfo.range) {
-    return;
+    return undefined;
   }
   const stepsKeyRange = sectionInfo.range;
   const expectedIndent = sectionInfo.indentLevel;
@@ -552,8 +554,8 @@ export function insertStepSnippet(
   }
 
   const snippetText = isBuiltInStepType(stepType)
-    ? generateBuiltInStepSnippet(stepType, { full: true, withStepsSection: false })
-    : generateConnectorSnippet(stepType, { full: true, withStepsSection: false });
+    ? generateBuiltInStepSnippet(stepType, { full: true, withStepsSection: false, withParams })
+    : generateConnectorSnippet(stepType, { full: true, withStepsSection: false, withParams });
 
   if (editor) editor.pushUndoStop();
 
@@ -630,4 +632,6 @@ export function insertStepSnippet(
   if (editor) {
     editor.pushUndoStop();
   }
+
+  return getLineRangeForEdit(range, text);
 }
