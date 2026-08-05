@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
@@ -29,7 +29,7 @@ const expectMetricPanelHasNotCrashed = async (page: import('@kbn/scout').ScoutPa
 
 spaceTest.describe(
   'Lens ES|QL table to metric trendline editing',
-  { tag: tags.stateful.classic },
+  { tag: '@local-stateful-classic' },
   () => {
     let dashboardId: string;
     let panelId: string;

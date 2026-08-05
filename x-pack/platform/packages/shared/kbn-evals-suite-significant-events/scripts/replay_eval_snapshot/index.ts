@@ -7,7 +7,7 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { Client } from '@elastic/elasticsearch';
-import type { Discovery, Feature } from '@kbn/significant-events-schema';
+import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
   replayIntoManagedStream,
@@ -81,9 +81,9 @@ const formatFeature = (feature: Feature): string[] => {
   return lines;
 };
 
-const formatDiscovery = (discovery: Discovery): string[] => {
+const formatDiscovery = (discovery: SignificantEvent): string[] => {
   const lines: string[] = [];
-  lines.push(`  [${discovery.kind}] ${discovery.event_id} — ${discovery.title ?? '(untitled)'}`);
+  lines.push(`  [${discovery.status}] ${discovery.event_id} — ${discovery.title ?? '(untitled)'}`);
   lines.push(`    summary: ${discovery.summary}`);
 
   if (discovery.signals?.length) {

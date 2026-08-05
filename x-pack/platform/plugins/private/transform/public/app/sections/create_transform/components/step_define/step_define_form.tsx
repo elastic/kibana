@@ -12,7 +12,10 @@ import { merge } from 'rxjs';
 import {
   EuiButton,
   EuiButtonIcon,
+  EuiComboBox,
   EuiCopy,
+  EuiFieldSearch,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -22,7 +25,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -43,7 +45,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
 import type { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
-import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
+import { TRANSFORM_FUNCTION, type TransformFunction } from '../../../../../../common/constants';
 import {
   TRANSFORM_FROZEN_TIER_PREFERENCE,
   type TransformStorageKey,
@@ -76,7 +78,6 @@ import { AdvancedRuntimeMappingsSettings } from '../advanced_runtime_mappings_se
 
 import type { StepDefineExposedState } from './common';
 import { useStepDefineForm } from './hooks/use_step_define_form';
-import { TransformFunctionSelector } from './transform_function_selector';
 import { LatestFunctionForm } from './latest_function_form';
 import { PivotFunctionForm } from './pivot_function_form';
 
@@ -102,6 +103,135 @@ export interface StepDefineFormProps {
   onChange(s: StepDefineExposedState): void;
   searchItems: SearchItems;
 }
+
+interface EmptyStepDefineFormProps {
+  dataViewPicker: JSX.Element;
+  transformFunction: TransformFunction;
+}
+
+// Render the configuration shell before a data view is selected. Source previews stay hidden
+// until the real data view-backed form can load field metadata and documents.
+export const EmptyStepDefineForm: FC<EmptyStepDefineFormProps> = ({
+  dataViewPicker,
+  transformFunction,
+}) => (
+  <div data-test-subj="transformStepDefineEmptyForm">
+    <EuiForm>
+      {dataViewPicker}
+
+      <ConfigSectionTitle title="Source data" />
+
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate('xpack.transform.stepDefineForm.datePickerLabel', {
+          defaultMessage: 'Time range',
+        })}
+      >
+        <EuiFieldText disabled fullWidth data-test-subj="transformEmptyTimeRangeInput" />
+      </EuiFormRow>
+
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate('xpack.transform.stepDefineForm.searchFilterLabel', {
+          defaultMessage: 'Search filter',
+        })}
+      >
+        <EuiFieldSearch disabled fullWidth data-test-subj="transformEmptySearchFilterInput" />
+      </EuiFormRow>
+    </EuiForm>
+
+    <ConfigSectionTitle title="Transform configuration" />
+
+    <EuiForm>
+      {transformFunction === TRANSFORM_FUNCTION.PIVOT ? (
+        <>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('xpack.transform.stepDefineForm.groupByLabel', {
+              defaultMessage: 'Group by',
+            })}
+          >
+            <EuiComboBox
+              isDisabled
+              fullWidth
+              placeholder={i18n.translate('xpack.transform.stepDefineForm.groupByPlaceholder', {
+                defaultMessage: 'Add a group by field ...',
+              })}
+              options={[]}
+              selectedOptions={[]}
+              data-test-subj="transformEmptyGroupBySelection"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('xpack.transform.stepDefineForm.aggregationsLabel', {
+              defaultMessage: 'Aggregations',
+            })}
+          >
+            <EuiComboBox
+              isDisabled
+              fullWidth
+              placeholder={i18n.translate(
+                'xpack.transform.stepDefineForm.aggregationsPlaceholder',
+                {
+                  defaultMessage: 'Add an aggregation ...',
+                }
+              )}
+              options={[]}
+              selectedOptions={[]}
+              data-test-subj="transformEmptyAggregationSelection"
+            />
+          </EuiFormRow>
+        </>
+      ) : (
+        <>
+          <EuiFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.transform.stepDefineForm.uniqueKeysLabel"
+                defaultMessage="Unique keys"
+              />
+            }
+          >
+            <EuiComboBox
+              isDisabled
+              fullWidth
+              placeholder={i18n.translate('xpack.transform.stepDefineForm.uniqueKeysPlaceholder', {
+                defaultMessage: 'Add unique keys ...',
+              })}
+              options={[]}
+              selectedOptions={[]}
+              data-test-subj="transformEmptyUniqueKeysSelector"
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.transform.stepDefineForm.sortLabel"
+                defaultMessage="Sort field"
+              />
+            }
+          >
+            <EuiComboBox
+              isDisabled
+              fullWidth
+              placeholder={i18n.translate('xpack.transform.stepDefineForm.sortPlaceholder', {
+                defaultMessage: 'Add a date field ...',
+              })}
+              options={[]}
+              selectedOptions={[]}
+              data-test-subj="transformEmptySortFieldSelector"
+            />
+          </EuiFormRow>
+        </>
+      )}
+    </EuiForm>
+  </div>
+);
 
 export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -173,7 +303,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     transformConfigQuery,
     requestPayload,
     runtimeMappings,
-    isDatePickerApplyEnabled ? timeRangeMs : undefined
+    isDatePickerApplyEnabled ? timeRangeMs : undefined,
+    props.overrides?.projectRouting
   );
 
   const copyToClipboardPivot = getTransformPreviewDevConsoleStatement(
@@ -193,7 +324,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       validationStatus,
       requestPayload,
       runtimeMappings,
-      timeRangeMs
+      timeRangeMs,
+      props.overrides?.projectRouting
     ),
     dataTestSubj: 'transformPivotPreview',
     toastNotifications,
@@ -308,24 +440,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   return (
     <div data-test-subj="transformStepDefineForm">
       <EuiForm>
-        <EuiFormRow fullWidth>
-          <TransformFunctionSelector
-            selectedFunction={stepDefineForm.transformFunction}
-            onChange={stepDefineForm.setTransformFunction}
-          />
-        </EuiFormRow>
-
         <ConfigSectionTitle title="Source data" />
-
-        {searchItems.savedSearch === undefined && (
-          <EuiFormRow
-            label={i18n.translate('xpack.transform.stepDefineForm.dataViewLabel', {
-              defaultMessage: 'Data view',
-            })}
-          >
-            <span>{indexPattern}</span>
-          </EuiFormRow>
-        )}
 
         {hasValidTimeField && (
           <EuiFormRow
@@ -426,16 +541,12 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                           tooltipProps={{ disableScreenReaderOutput: true }}
                         >
                           {(copy: () => void) => (
-                            <EuiToolTip
-                              content={copyToClipboardSourceDescription}
-                              disableScreenReaderOutput
-                            >
-                              <EuiButtonIcon
-                                onClick={copy}
-                                iconType="copy"
-                                aria-label={copyToClipboardSourceDescription}
-                              />
-                            </EuiToolTip>
+                            /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
+                            <EuiButtonIcon
+                              onClick={copy}
+                              iconType="copy"
+                              aria-label={copyToClipboardSourceDescription}
+                            />
                           )}
                         </EuiCopy>
                       </EuiFlexItem>

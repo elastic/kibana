@@ -1,5 +1,5 @@
 {
-  "sha1": "3ba55add8f0035d74164662a23dd94b141433d5a",
+  "sha1": "f7b3c7db1620b6596817bca688160d86124b6287",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -15,8 +15,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alert_controls.spec.ts",
-        "line": 33,
-        "column": 9
+        "line": 28,
+        "column": 41
       }
     },
     {
@@ -29,8 +29,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alert_summary_widget.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 23,
+        "column": 39
       }
     },
     {
@@ -43,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_actions.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 21,
+        "column": 59
       }
     },
     {
@@ -57,8 +57,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_flyout.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 23,
+        "column": 39
       }
     },
     {
@@ -71,8 +71,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_flyout.spec.ts",
-        "line": 39,
-        "column": 7
+        "line": 28,
+        "column": 72
       }
     },
     {
@@ -85,8 +85,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_pagination.spec.ts",
-        "line": 29,
-        "column": 7
+        "line": 24,
+        "column": 8
       }
     },
     {
@@ -99,8 +99,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_pagination.spec.ts",
-        "line": 48,
-        "column": 7
+        "line": 34,
+        "column": 13
       }
     },
     {
@@ -113,8 +113,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_state_sync.spec.ts",
-        "line": 34,
-        "column": 9
+        "line": 30,
+        "column": 10
       }
     },
     {
@@ -127,8 +127,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_state_sync.spec.ts",
-        "line": 53,
-        "column": 9
+        "line": 39,
+        "column": 14
       }
     },
     {
@@ -141,8 +141,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
-        "line": 97,
-        "column": 9
+        "line": 122,
+        "column": 10
       }
     },
     {
@@ -155,8 +155,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
-        "line": 115,
-        "column": 9
+        "line": 139,
+        "column": 7
       }
     },
     {
@@ -169,8 +169,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
-        "line": 122,
-        "column": 9
+        "line": 143,
+        "column": 13
       }
     },
     {
@@ -183,8 +183,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
-        "line": 127,
-        "column": 9
+        "line": 145,
+        "column": 13
       }
     },
     {
@@ -197,8 +197,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
-        "line": 142,
-        "column": 9
+        "line": 159,
+        "column": 13
       }
     },
     {
@@ -211,8 +211,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table_configuration.spec.ts",
-        "line": 153,
-        "column": 9
+        "line": 162,
+        "column": 24
       }
     },
     {
@@ -225,8 +225,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table.spec.ts",
-        "line": 36,
-        "column": 9
+        "line": 29,
+        "column": 25
       }
     },
     {
@@ -239,8 +239,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table.spec.ts",
-        "line": 41,
-        "column": 9
+        "line": 33,
+        "column": 25
       }
     },
     {
@@ -253,8 +253,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table.spec.ts",
-        "line": 48,
-        "column": 9
+        "line": 36,
+        "column": 82
       }
     },
     {
@@ -267,8 +267,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table.spec.ts",
-        "line": 53,
-        "column": 9
+        "line": 41,
+        "column": 10
       }
     },
     {
@@ -281,8 +281,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alerts_table.spec.ts",
-        "line": 60,
-        "column": 9
+        "line": 48,
+        "column": 10
       }
     },
     {
@@ -297,8 +297,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/embeddable_alerts_consumer_visibility.spec.ts",
-        "line": 75,
-        "column": 13
+        "line": 73,
+        "column": 23
       }
     },
     {
@@ -313,8 +313,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/embeddable_alerts_consumer_visibility.spec.ts",
-        "line": 75,
-        "column": 13
+        "line": 73,
+        "column": 23
       }
     },
     {
@@ -329,8 +329,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/embeddable_alerts_consumer_visibility.spec.ts",
-        "line": 107,
-        "column": 13
+        "line": 98,
+        "column": 20
       }
     },
     {
@@ -345,8 +345,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/embeddable_alerts_consumer_visibility.spec.ts",
-        "line": 75,
-        "column": 13
+        "line": 73,
+        "column": 23
       }
     },
     {
@@ -361,8 +361,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/embeddable_alerts_consumer_visibility.spec.ts",
-        "line": 75,
-        "column": 13
+        "line": 73,
+        "column": 23
       }
     },
     {
@@ -377,8 +377,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/embeddable_alerts_consumer_visibility.spec.ts",
-        "line": 107,
-        "column": 13
+        "line": 98,
+        "column": 20
       }
     },
     {
@@ -393,8 +393,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/embeddable_alerts_table.spec.ts",
-        "line": 60,
-        "column": 11
+        "line": 56,
+        "column": 67
       }
     },
     {
@@ -409,8 +409,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/embeddable_alerts_table.spec.ts",
-        "line": 60,
-        "column": 11
+        "line": 56,
+        "column": 67
       }
     },
     {
@@ -425,8 +425,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/mute_unmute.spec.ts",
-        "line": 150,
-        "column": 9
+        "line": 159,
+        "column": 13
       }
     },
     {
@@ -441,8 +441,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/mute_unmute.spec.ts",
-        "line": 229,
-        "column": 9
+        "line": 235,
+        "column": 46
       }
     },
     {
@@ -455,8 +455,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/overview_alert_table.spec.ts",
-        "line": 39,
-        "column": 9
+        "line": 32,
+        "column": 25
       }
     },
     {
@@ -469,8 +469,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/overview_alert_table.spec.ts",
-        "line": 64,
-        "column": 9
+        "line": 51,
+        "column": 96
       }
     },
     {
@@ -483,50 +483,50 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/rule_stats.spec.ts",
-        "line": 39,
-        "column": 7
+        "line": 44,
+        "column": 24
       }
     },
     {
       "id": "3d30f1f27e8f75f-13c366bfc2c5cd4",
       "title": "Observability alerts - add to case (all privileges) renders the case options in the row actions menu",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/add_to_case.all.spec.ts",
-        "line": 35,
-        "column": 9
+        "line": 26,
+        "column": 25
       }
     },
     {
       "id": "3d30f1f27e8f75f-92c49a4a4bc87de",
       "title": "Observability alerts - add to case (all privileges) opens the create-case flyout from \"Add to new case\"",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/add_to_case.all.spec.ts",
-        "line": 43,
-        "column": 9
+        "line": 32,
+        "column": 7
       }
     },
     {
       "id": "3d30f1f27e8f75f-329e97db5764fcf",
       "title": "Observability alerts - add to case (all privileges) opens the existing-cases modal from \"Add to existing case\"",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/add_to_case.all.spec.ts",
-        "line": 51,
-        "column": 9
+        "line": 36,
+        "column": 13
       }
     },
     {
@@ -539,8 +539,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/add_to_case.read.spec.ts",
-        "line": 30,
-        "column": 9
+        "line": 25,
+        "column": 41
       }
     },
     {
@@ -553,8 +553,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/case_details_rule_link.spec.ts",
-        "line": 57,
-        "column": 9
+        "line": 49,
+        "column": 10
       }
     },
     {
@@ -567,8 +567,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.all.spec.ts",
-        "line": 39,
-        "column": 7
+        "line": 31,
+        "column": 28
       }
     },
     {
@@ -581,8 +581,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.all.spec.ts",
-        "line": 50,
-        "column": 7
+        "line": 37,
+        "column": 5
       }
     },
     {
@@ -595,8 +595,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.all.spec.ts",
-        "line": 57,
-        "column": 7
+        "line": 42,
+        "column": 38
       }
     },
     {
@@ -609,8 +609,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.none.spec.ts",
-        "line": 21,
-        "column": 7
+        "line": 17,
+        "column": 46
       }
     },
     {
@@ -623,8 +623,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.read.spec.ts",
-        "line": 43,
-        "column": 9
+        "line": 35,
+        "column": 30
       }
     },
     {
@@ -637,8 +637,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.read.spec.ts",
-        "line": 53,
-        "column": 9
+        "line": 40,
+        "column": 25
       }
     },
     {
@@ -651,8 +651,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.read.spec.ts",
-        "line": 64,
-        "column": 9
+        "line": 49,
+        "column": 13
       }
     },
     {
@@ -665,8 +665,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/esql_landing.spec.ts",
-        "line": 58,
-        "column": 9
+        "line": 46,
+        "column": 7
       }
     },
     {
@@ -679,13 +679,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/esql_landing.spec.ts",
-        "line": 77,
-        "column": 9
+        "line": 58,
+        "column": 10
       }
     },
     {
-      "id": "b997ef31f0ad15f-e93e7fc15d6406a",
-      "title": "Nightshift navigation from Significant Events Discovery navigates to Nightshift page from Streams discovery",
+      "id": "b997ef31f0ad15f-9c9263c28e45920",
+      "title": "Nightshift navigation from Significant Events Discovery navigates between Significant Events, Nightshift, and settings",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -695,7 +695,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/nightshift.spec.ts",
-        "line": 54,
+        "line": 46,
         "column": 9
       }
     }

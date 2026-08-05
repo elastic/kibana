@@ -136,7 +136,7 @@ export function messagesToOpenAI({
       case MessageRole.Assistant:
         const assistantMessage: ChatCompletionAssistantMessageParam = {
           role: 'assistant',
-          content: message.content ?? '',
+          content: message.content || null,
           tool_calls: message.toolCalls?.map((toolCall) => {
             return {
               function: {
@@ -215,9 +215,8 @@ function mergeConsecutiveMessages(
       } else if (message.role === 'assistant' && previous.role === 'assistant') {
         const prevContent = (previous as ChatCompletionAssistantMessageParam).content ?? '';
         const curContent = (message as ChatCompletionAssistantMessageParam).content ?? '';
-        (previous as ChatCompletionAssistantMessageParam).content = [prevContent, curContent]
-          .filter(Boolean)
-          .join('\n');
+        (previous as ChatCompletionAssistantMessageParam).content =
+          [prevContent, curContent].filter(Boolean).join('\n') || null;
         const prevCalls = (previous as ChatCompletionAssistantMessageParam).tool_calls;
         const curCalls = (message as ChatCompletionAssistantMessageParam).tool_calls;
         if (curCalls?.length) {

@@ -21,6 +21,9 @@ export const SORT_BY_LABELS: Record<MetricsSortBy, string> = {
       defaultMessage: 'Alphabetically',
     }
   ),
+  [METRICS_SORT_BY.recency]: i18n.translate('metricsExperience.sortSelector.recency', {
+    defaultMessage: 'Recently explored',
+  }),
 };
 
 const directionLegend = i18n.translate('metricsExperience.sortSelector.directionLegend', {
@@ -48,10 +51,15 @@ const directionOptions = [
 
 interface SortDirectionToggleProps {
   direction: MetricsSortDirection;
+  isDisabled: boolean;
   onChange: (direction: MetricsSortDirection) => void;
 }
 
-export const SortDirectionToggle = ({ direction, onChange }: SortDirectionToggleProps) => (
+export const SortDirectionToggle = ({
+  direction,
+  isDisabled,
+  onChange,
+}: SortDirectionToggleProps) => (
   <EuiButtonGroup
     isIconOnly
     buttonSize="compressed"
@@ -59,5 +67,6 @@ export const SortDirectionToggle = ({ direction, onChange }: SortDirectionToggle
     options={directionOptions}
     idSelected={direction}
     onChange={(id) => onChange(id as MetricsSortDirection)}
+    isDisabled={isDisabled}
   />
 );
