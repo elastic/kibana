@@ -11,6 +11,7 @@ import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   SignificantEvent,
+  SignificantEventResponse,
   Severity,
   SignificantEventStatus,
 } from '@kbn/significant-events-schema';
@@ -191,13 +192,13 @@ export class EventClient {
 
   async findLatestPaginated(
     options: EventsPaginatedSearchOptions = {}
-  ): Promise<PaginatedResponse<SignificantEvent>> {
+  ): Promise<PaginatedResponse<SignificantEventResponse>> {
     return this.findLatestByCurrentStatePaginated(options);
   }
 
   async findLatestByCurrentStatePaginated(
     options: EventsPaginatedSearchOptions
-  ): Promise<PaginatedResponse<SignificantEvent>> {
+  ): Promise<PaginatedResponse<SignificantEventResponse>> {
     const page = options.page ?? 1;
     const perPage = options.perPage ?? 25;
 
@@ -213,12 +214,14 @@ export class EventClient {
     const topologyWhere = topologyFeatureFilter(options.topologyFeatureIds);
 
     const buildBaseQuery = (): ComposerQuery => {
-      const query = applyTimeRange({
-        query: fromIndexForSpace({
-          index: EVENTS_DATA_STREAM,
-          space: this.clients.space,
-          columns: ['_id', '_source'],
-        }),
+      let query = fromIndexForSpace({
+        index: EVENTS_DATA_STREAM,
+        space: this.clients.space,
+        columns: ['_id', '_source'],
+      }).pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(FIELD_EVENT_ID)}`;
+
+      query = applyTimeRange({
+        query,
         from: options.from,
         to: options.to,
       });
@@ -254,14 +257,18 @@ export class EventClient {
     };
 
     const dataQuery = buildBaseQuery()
-      .sort(['@timestamp', 'DESC'])
+      .sort(['created_at', 'DESC'], ['_id', 'ASC'])
       .limit(page * perPage)
-      .keep('_source');
+      .keep('_source', 'created_at');
     const countQuery = buildBaseQuery().pipe`STATS total = COUNT(*)`.keep('total');
 
     const [total, hits] = await Promise.all([
       executeCountQuery({ esClient: this.clients.esClient, query: countQuery }),
-      executeEsqlQuery<SignificantEvent>({ esClient: this.clients.esClient, query: dataQuery }),
+      executeEsqlQuery<SignificantEventResponse>({
+        esClient: this.clients.esClient,
+        query: dataQuery,
+        fields: ['created_at'],
+      }),
     ]);
 
     const start = (page - 1) * perPage;

@@ -39,10 +39,13 @@ const createClient = (response: BulkResponse) => {
   };
 };
 
-const sourceResponse = (docs: SignificantEvent[]): ESQLSearchResponse =>
+const sourceResponse = (docs: SignificantEvent[], createdAt?: string): ESQLSearchResponse =>
   ({
-    columns: [{ name: '_source', type: 'object' }],
-    values: docs.map((doc) => [doc]),
+    columns: [
+      { name: '_source', type: 'object' },
+      ...(createdAt === undefined ? [] : [{ name: 'created_at', type: 'date' }]),
+    ],
+    values: docs.map((doc) => [doc, ...(createdAt === undefined ? [] : [createdAt])]),
   } as unknown as ESQLSearchResponse);
 
 const countResponse = (total: number): ESQLSearchResponse =>
@@ -51,13 +54,21 @@ const countResponse = (total: number): ESQLSearchResponse =>
     values: [[total]],
   } as unknown as ESQLSearchResponse);
 
-const createSearchClient = ({ hits, total }: { hits: SignificantEvent[]; total: number }) => {
+const createSearchClient = ({
+  hits,
+  total,
+  createdAt,
+}: {
+  hits: SignificantEvent[];
+  total: number;
+  createdAt?: string;
+}) => {
   const query = jest.fn(async (request: { query: string }) => {
     const { query: q } = request;
     if (q.includes('STATS total')) {
       return countResponse(total);
     }
-    return sourceResponse(hits);
+    return sourceResponse(hits, createdAt);
   });
 
   return {
@@ -159,6 +170,42 @@ describe('EventClient', () => {
       expect(dataQuery!.indexOf('INLINE STATS latest_ts')).toBeLessThan(
         dataQuery!.indexOf('event_id IN')
       );
+    });
+
+    it('returns the lineage creation timestamp before time and current-state filtering', async () => {
+      const createdAt = '2026-01-01T00:00:00.000Z';
+      const latest = {
+        ...createEvent(),
+        '@timestamp': '2026-01-03T00:00:00.000Z',
+        status: 'closed' as const,
+      };
+      const { client, query } = createSearchClient({ hits: [latest], total: 1, createdAt });
+
+      const result = await client.findLatestByCurrentStatePaginated({
+        from: '2026-01-02T00:00:00.000Z',
+        to: '2026-01-04T00:00:00.000Z',
+        status: ['closed'],
+        stream: ['logs.test'],
+      });
+
+      expect(result).toEqual({
+        hits: [{ ...latest, created_at: createdAt }],
+        page: 1,
+        perPage: 25,
+        total: 1,
+      });
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('INLINE STATS created_at = MIN(@timestamp) BY event_id');
+      expect(dataQuery!.indexOf('INLINE STATS created_at')).toBeLessThan(
+        dataQuery!.indexOf('@timestamp >= TO_DATETIME')
+      );
+      expect(dataQuery!.indexOf('INLINE STATS created_at')).toBeLessThan(
+        dataQuery!.indexOf('status IN')
+      );
+      expect(dataQuery).toContain('SORT created_at DESC, _id ASC');
     });
 
     it('filters open state after latest-per-slug reduction', async () => {

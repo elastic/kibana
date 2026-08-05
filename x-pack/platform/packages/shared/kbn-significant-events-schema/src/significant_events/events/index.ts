@@ -67,7 +67,7 @@ export const significantEventSchema = significantEventBaseSchema.extend({
     .describe(
       dedent`
         Free-text note from the analyst or agent that assessed this event. Use to capture investigation rationale, ambiguities, or caveats not covered by other fields.
-        
+
         ${NO_RAW_SENSITIVE_VALUES_RULE}
       `
     ),
@@ -75,3 +75,11 @@ export const significantEventSchema = significantEventBaseSchema.extend({
 });
 
 export type SignificantEvent = z.infer<typeof significantEventSchema>;
+
+/**
+ * API-only event representation. `created_at` is calculated from the complete retained event
+ * lineage and is intentionally not part of the stored Significant Event schema.
+ */
+export interface SignificantEventResponse extends SignificantEvent {
+  created_at: string;
+}

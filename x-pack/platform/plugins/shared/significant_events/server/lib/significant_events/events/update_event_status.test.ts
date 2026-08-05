@@ -79,6 +79,7 @@ describe('updateSignificantEventStatus', () => {
     expect(written.status).toBe('closed');
     expect(written.previous_event_uuid).toBe('event-1');
     expect(written.event_uuid).not.toBe('event-1');
+    expect(written).not.toHaveProperty('created_at');
     // Written with `refresh: 'wait_for'` so an immediate re-read (e.g. the UI's post-mutation
     // refetch) sees this version rather than resurfacing the previous one.
     expect(callArg.refresh).toBe('wait_for');

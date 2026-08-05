@@ -31,6 +31,7 @@ import {
 } from '@kbn/significant-events-schema';
 import type {
   SignificantEvent,
+  SignificantEventResponse,
   SignificantEventStatus,
   Severity,
 } from '@kbn/significant-events-schema';
@@ -148,9 +149,9 @@ const LOADING_MESSAGE = i18n.translate(
 const EMPTY_MESSAGE = i18n.translate('xpack.significantEventsApp.significantEventsTab.emptyBody', {
   defaultMessage: 'No significant events found.',
 });
-const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
+export const significantEventTableColumns: Array<EuiBasicTableColumn<SignificantEventResponse>> = [
   {
-    field: '@timestamp',
+    field: 'created_at',
     name: i18n.translate('xpack.significantEventsApp.significantEventsTab.timestampColumn', {
       defaultMessage: 'Timestamp',
     }),
@@ -481,11 +482,11 @@ export const SignificantEventsTab = () => {
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiBasicTable<SignificantEvent>
+        <EuiBasicTable<SignificantEventResponse>
           tableLayout="fixed"
           tableCaption={TABLE_CAPTION}
           items={data?.hits ?? []}
-          columns={columns}
+          columns={significantEventTableColumns}
           pagination={{
             pageIndex: pagination.page - 1,
             pageSize: pagination.perPage,

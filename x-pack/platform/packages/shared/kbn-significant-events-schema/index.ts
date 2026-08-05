@@ -78,6 +78,7 @@ export {
   CHANGE_POINT_TYPES,
   type KnowledgeIndicator,
   type SignificantEvent,
+  type SignificantEventResponse,
   type SignificantEventStatus,
   type SignificantEventsTuningConfig,
   type TuningConfigFieldBounds,

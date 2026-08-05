@@ -15,6 +15,7 @@ import {
   type ChangePointType,
   type Detection,
   type SignificantEvent,
+  type SignificantEventResponse,
   type LifecycleDetection,
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
@@ -109,7 +110,7 @@ const eventsSearchRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-  }): Promise<PaginatedResponse<SignificantEvent>> => {
+  }): Promise<PaginatedResponse<SignificantEventResponse>> => {
     const { getEventClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
@@ -160,8 +161,10 @@ const eventsLifecycleRoute = createServerRoute({
     }
 
     const { event_id: eventId } = initialHits[0];
-
     const { hits: events } = await getEventClient().findByEventId(eventId);
+    if (events.length === 0) {
+      return { detections: [], events: [] };
+    }
 
     const embedded = collectEmbeddedDetections(events);
     const { hits: allDetectionHits } = await getDetectionClient().findByIds(
@@ -196,7 +199,14 @@ const eventsLifecycleRoute = createServerRoute({
       }
     );
 
-    return { detections, events };
+    const createdAt = events.reduce(
+      (earliest, event) =>
+        Date.parse(event['@timestamp']) < Date.parse(earliest) ? event['@timestamp'] : earliest,
+      events[0]['@timestamp']
+    );
+    const lifecycleEvents = events.map((event) => ({ ...event, created_at: createdAt }));
+
+    return { detections, events: lifecycleEvents };
   },
 });
 
