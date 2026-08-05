@@ -50,7 +50,9 @@ describe('endpointSearchStrategyProvider', () => {
         getScopedSearchClient: jest.fn().mockReturnValue({ search: scopedSearch }),
         asScoped: jest.fn((req) => ({
           isCpsRead: () => cpsEnabled && req != null,
-          getEsClient: () => { throw new Error('not used in search strategy tests'); },
+          getEsClient: () => {
+            throw new Error('not used in search strategy tests');
+          },
           getSearchClient: () => ({ search: scopedSearch }),
           getSpaceId: () => 'default',
         })),
@@ -223,7 +225,9 @@ describe('endpointSearchStrategyProvider', () => {
         getScopedSearchClient: jest.fn().mockReturnValue({ cancel }),
         asScoped: jest.fn(() => ({
           isCpsRead: () => true,
-          getEsClient: () => { throw new Error('not used'); },
+          getEsClient: () => {
+            throw new Error('not used');
+          },
           getSearchClient: () => ({ cancel }),
           getSpaceId: () => 'default',
         })),

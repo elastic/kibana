@@ -145,14 +145,18 @@ describe('fetchActionRequestById() utility', () => {
     });
 
     it('should read as the request user so the search can fan out to linked projects', async () => {
-      await fetchActionRequestById(endpointServiceMock, 'default', '123', { scoped: endpointServiceMock.asScoped(request) });
+      await fetchActionRequestById(endpointServiceMock, 'default', '123', {
+        scoped: endpointServiceMock.asScoped(request),
+      });
 
       expect(endpointServiceMock.getReadEsClient).toHaveBeenCalledWith(request);
       expect(readEsClientMock.search).toHaveBeenCalled();
     });
 
     it('should validate visibility against originSpaceId rather than through Fleet', async () => {
-      await fetchActionRequestById(endpointServiceMock, 'default', '123', { scoped: endpointServiceMock.asScoped(request) });
+      await fetchActionRequestById(endpointServiceMock, 'default', '123', {
+        scoped: endpointServiceMock.asScoped(request),
+      });
 
       expect(
         endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
@@ -161,7 +165,9 @@ describe('fetchActionRequestById() utility', () => {
 
     it('should error if the action belongs to another space', async () => {
       await expect(
-        fetchActionRequestById(endpointServiceMock, 'foo', '123', { scoped: endpointServiceMock.asScoped(request) })
+        fetchActionRequestById(endpointServiceMock, 'foo', '123', {
+          scoped: endpointServiceMock.asScoped(request),
+        })
       ).rejects.toThrow('Action [123] not found');
     });
 
@@ -177,7 +183,9 @@ describe('fetchActionRequestById() utility', () => {
       });
 
       await expect(
-        fetchActionRequestById(endpointServiceMock, 'default', '123', { scoped: endpointServiceMock.asScoped(request) })
+        fetchActionRequestById(endpointServiceMock, 'default', '123', {
+          scoped: endpointServiceMock.asScoped(request),
+        })
       ).rejects.toThrow('Action [123] not found');
     });
 
@@ -201,7 +209,9 @@ describe('fetchActionRequestById() utility', () => {
       );
 
       await expect(
-        fetchActionRequestById(endpointServiceMock, 'foo', '123', { scoped: endpointServiceMock.asScoped(request) })
+        fetchActionRequestById(endpointServiceMock, 'foo', '123', {
+          scoped: endpointServiceMock.asScoped(request),
+        })
       ).resolves.toEqual(
         expect.objectContaining({
           tags: [ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted],
