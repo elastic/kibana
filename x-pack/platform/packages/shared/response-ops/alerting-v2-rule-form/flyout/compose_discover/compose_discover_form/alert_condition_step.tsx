@@ -35,7 +35,6 @@ interface AlertConditionStepProps {
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
   isEditing: boolean;
-  onManualSplit?: () => void;
 }
 
 export function AlertConditionStep({
@@ -43,7 +42,6 @@ export function AlertConditionStep({
   dispatch,
   services,
   isEditing,
-  onManualSplit,
 }: AlertConditionStepProps) {
   const { setValue, watch } = useFormContext<FormValues>();
   // Rules are registered by always-mounted QueryFieldRules in ComposeDiscoverForm.
@@ -136,7 +134,6 @@ export function AlertConditionStep({
           queryCommitted={state.queryCommitted}
           isEditorOpen={state.childOpen}
           onOpenEditor={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
-          onManualSplit={onManualSplit}
         />
       ) : !state.queryCommitted ? (
         <>
