@@ -1,5 +1,5 @@
 {
-  "sha1": "6e995fce5faed9a8d2f5fc012aa32947d3d23740",
+  "sha1": "8a0f024b3250b6c21f47169efee34979d9d0060b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -156,7 +156,7 @@
       }
     },
     {
-      "id": "21848310afc801a-e01fb638ca0f6e9",
+      "id": "cf67417434c65bf-e01fb638ca0f6e9",
       "title": "Significant Events plugin hard-disable (Logs Essentials) public significant events API returns 404 when the plugin is unloaded",
       "expectedStatus": "passed",
       "tags": [
@@ -164,13 +164,13 @@
         "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/plugin_availability.spec.ts",
-        "line": 24,
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/plugin_hard_disabled.spec.ts",
+        "line": 22,
         "column": 17
       }
     },
     {
-      "id": "21848310afc801a-5c3eced8e270bba",
+      "id": "cf67417434c65bf-5c3eced8e270bba",
       "title": "Significant Events plugin hard-disable (Logs Essentials) availability API returns 404 when the plugin is unloaded",
       "expectedStatus": "passed",
       "tags": [
@@ -178,13 +178,13 @@
         "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/plugin_availability.spec.ts",
-        "line": 34,
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/plugin_hard_disabled.spec.ts",
+        "line": 32,
         "column": 20
       }
     },
     {
-      "id": "21848310afc801a-5f6e05f92b17cee",
+      "id": "b1abf6ccaccb508-5f6e05f92b17cee",
       "title": "Significant Events plugin loaded (Complete / classic) availability API is registered when the plugin is enabled",
       "expectedStatus": "passed",
       "tags": [
@@ -194,9 +194,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/plugin_availability.spec.ts",
-        "line": 48,
-        "column": 48
+        "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events/plugin_loaded.spec.ts",
+        "line": 22,
+        "column": 37
       }
     },
     {
