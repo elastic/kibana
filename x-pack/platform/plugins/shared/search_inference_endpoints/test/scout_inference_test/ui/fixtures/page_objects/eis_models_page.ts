@@ -10,7 +10,6 @@ import type { ScoutPage, Locator } from '@kbn/scout';
 export class EisModelsPage {
   // Header
   readonly pageHeader: Locator;
-  readonly documentationLink: Locator;
 
   // Search and Filters
   readonly searchBar: Locator;
@@ -61,8 +60,7 @@ export class EisModelsPage {
 
   constructor(private readonly page: ScoutPage) {
     // Header
-    this.pageHeader = this.page.testSubj.locator('eisModelsPageHeader');
-    this.documentationLink = this.page.testSubj.locator('eis_documentation');
+    this.pageHeader = this.page.testSubj.locator('appHeaderTitle');
 
     // Search and Filters
     this.searchBar = this.page.testSubj.locator('eisModelsSearchBar');
@@ -120,7 +118,7 @@ export class EisModelsPage {
 
   public async goto() {
     await this.page.gotoApp('management/modelManagement/elastic_inference_service');
-    await this.page.testSubj.waitForSelector('eisModelsPageHeader', { state: 'visible' });
+    await this.page.testSubj.waitForSelector('appHeaderTitle', { state: 'visible' });
   }
 
   // --- Parameterized Locators ---

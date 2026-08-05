@@ -60,6 +60,7 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/es-errors'
   - '@kbn/app-header'
+  - '@kbn/core-chrome-browser-context-mocks'
 tags:
   - plugin
   - prod
