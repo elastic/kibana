@@ -104,10 +104,10 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
     subscription.unsubscribe();
   }, 10000);
 
-  it('forwards the parent CPS project routing into the fetch request body', async () => {
+  it('refetches when the parent CPS project routing changes', async () => {
     const filters$ = new BehaviorSubject<unknown>([]);
     const parentQuery$ = new BehaviorSubject<unknown>(undefined);
-    const projectRouting$ = new BehaviorSubject<string | undefined>('_alias:*');
+    const projectRouting$ = new BehaviorSubject<string | undefined>('_alias:_origin');
     const api = buildApi({ filters$, parentQuery$, projectRouting$ });
 
     const requestSize$ = new BehaviorSubject<number>(10);
@@ -128,8 +128,15 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
     await new Promise((resolve) => setTimeout(resolve, 200));
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
-    const body = JSON.parse(fetchSpy.mock.calls[0][1].body);
-    expect(body.projectRouting).toBe('_alias:*');
+    const firstBody = JSON.parse(fetchSpy.mock.calls[0][1].body);
+    expect(firstBody.projectRouting).toBe('_alias:_origin');
+
+    projectRouting$.next('_alias:*');
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    const secondBody = JSON.parse(fetchSpy.mock.calls[1][1].body);
+    expect(secondBody.projectRouting).toBe('_alias:*');
 
     subscription.unsubscribe();
   }, 10000);

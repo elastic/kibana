@@ -17,10 +17,8 @@ import { FilterStateStore } from '@kbn/es-query-constants';
 import styled from '@emotion/styled';
 import { useControlPanels } from '@kbn/observability-shared-plugin/public';
 import type { DataControlApi } from '@kbn/controls-plugin/public';
-import type { CPSPluginStart } from '@kbn/cps/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
-import { Subscription, skip } from 'rxjs';
+import { Subscription } from 'rxjs';
 import {
   DATASTREAM_DATASET,
   findInventoryModel,
@@ -34,6 +32,7 @@ import { getControlPanelConfigs } from './control_panels_config';
 import { ControlTitle } from './controls_title';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { isPending } from '../../../../../hooks/use_fetcher';
+import { useInfraCpsProjectRouting } from '../../../../../hooks/use_infra_cps_project_routing';
 
 interface Props {
   dataView: DataView | undefined;
@@ -89,8 +88,7 @@ export const ControlsContent = ({
   const subscriptions = useRef<Subscription>(new Subscription());
   const { onPreferredSchemaChange } = useUnifiedSearchContext();
   const { status } = useTimeRangeMetadataContext();
-  const { services } = useKibana<{ cps?: CPSPluginStart }>();
-  const cpsManager = services.cps?.cpsManager;
+  const projectRouting$ = useInfraCpsProjectRouting();
 
   const isLoading = isPending(status);
 
@@ -137,19 +135,8 @@ export const ControlsContent = ({
           .getInput$()
           .subscribe(({ initialChildControlState }) => setControlPanels(initialChildControlState))
       );
-
-      // The control group already refetches suggestions from `projectRouting$`; reloading here also
-      // refreshes any open popover when the Cross-Project Search picker changes.
-      if (cpsManager) {
-        subscriptions.current.add(
-          cpsManager
-            .getProjectRouting$()
-            .pipe(skip(1))
-            .subscribe(() => controlGroup.reload())
-        );
-      }
     },
-    [onFiltersChange, setControlPanels, cpsManager]
+    [onFiltersChange, setControlPanels]
   );
 
   useEffect(() => {
@@ -171,6 +158,7 @@ export const ControlsContent = ({
         timeRange={timeRange}
         query={query}
         filters={[...filters, ...schemaFilters]}
+        projectRouting$={projectRouting$}
       />
       <SchemaSelector
         onChange={onPreferredSchemaChange}

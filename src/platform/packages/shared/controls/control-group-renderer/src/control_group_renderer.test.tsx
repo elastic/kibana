@@ -175,7 +175,7 @@ describe('control group renderer', () => {
     expect(api.timeRange$?.getValue()).toEqual(updatedTime);
   });
 
-  test('does not publish projectRouting$ when neither prop nor CPS is available', async () => {
+  test('does not publish projectRouting$ when the prop is unavailable', async () => {
     const { api } = await mountControlGroupRenderer({});
     expect(api.projectRouting$).toBeUndefined();
   });

@@ -34,7 +34,6 @@ import type {
   ControlPanelsState,
 } from './types';
 import { useChildrenApi } from './use_children_api';
-import { useCpsProjectRoutingApi } from './use_cps_project_routing';
 import { useInitialControlGroupState } from './use_initial_control_group_state';
 import { useLayoutApi } from './use_layout_api';
 import { usePropsApi } from './use_props_api';
@@ -53,9 +52,7 @@ export interface ControlGroupRendererProps {
   dataLoading?: boolean;
   compressed?: boolean;
   /**
-   * Cross-Project Search routing published to data controls (e.g. options list suggestions). When
-   * omitted, routing is auto-wired from the CPS plugin if it is available; provide this to override
-   * that behavior (for example in tests).
+   * Cross-Project Search routing published to data controls (e.g. options list suggestions).
    */
   projectRouting$?: PublishingSubject<ProjectRouting | undefined>;
 }
@@ -101,11 +98,9 @@ export const ControlGroupRenderer = ({
   });
   const propsApi = usePropsApi({ dataLoading, viewMode, compressed });
 
-  /** Cross-Project Search routing, auto-wired from CPS unless provided via props */
-  const cpsProjectRoutingApi = useCpsProjectRoutingApi();
   const projectRoutingApi = useMemo<PublishesProjectRouting | undefined>(
-    () => (projectRouting$ ? { projectRouting$ } : cpsProjectRoutingApi),
-    [projectRouting$, cpsProjectRoutingApi]
+    () => (projectRouting$ ? { projectRouting$ } : undefined),
+    [projectRouting$]
   );
 
   const parentApi = useMemo(() => {

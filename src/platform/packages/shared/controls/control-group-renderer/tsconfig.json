@@ -12,7 +12,6 @@
     "@kbn/i18n",
     "@kbn/ui-actions-plugin",
     "@kbn/controls-renderer",
-    "@kbn/cps",
     "@kbn/data-views-plugin",
     "@kbn/esql-types",
     "@kbn/presentation-publishing",

@@ -102,6 +102,8 @@ export const useSourceFetcher = ({ sourceId }: { sourceId: string }) => {
   }, [loadSource, sourceId]);
 
   useEffect(() => {
+    // The CPS routing observable replays its current value on subscribe, so skip it to avoid
+    // reloading the source immediately after the initial load above.
     const subscription = (cpsManager?.getProjectRouting$() ?? EMPTY).pipe(skip(1)).subscribe(() => {
       loadSource();
     });
