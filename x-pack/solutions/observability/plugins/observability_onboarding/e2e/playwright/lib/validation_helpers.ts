@@ -36,38 +36,7 @@ export async function assertStreamHasData(
       await streamsValidation.waitForStreamsToLoad();
       await streamsValidation.assertStreamDocCountGreaterThanZero(streamName);
     }).toPass({ timeout });
-  } catch (err) {
-    const diag = await fetchStreamsStateDiag(page, streamName);
-    throw new Error(`${err instanceof Error ? err.message : String(err)}\n\n${diag}`);
   } finally {
     await streamsPage.close();
-  }
-}
-
-async function fetchStreamsStateDiag(page: Page, streamName: string): Promise<string> {
-  const base = process.env.KIBANA_BASE_URL;
-  const headers = { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' };
-  try {
-    const [listResp, countsResp] = await Promise.all([
-      page.request.get(`${base}/api/streams`, { headers }),
-      page.request.get(`${base}/internal/streams/doc_counts/total`, { headers }),
-    ]);
-    const streamDefs: Array<{ name: string }> = listResp.ok()
-      ? (await listResp.json()).streams ?? []
-      : [];
-    const docCounts: Array<{ stream: string; count: number }> = countsResp.ok()
-      ? await countsResp.json()
-      : [];
-
-    const logsOnly = (name: string) => name.startsWith('logs');
-    return (
-      `Diagnostic state after ${streamName} timeout:\n` +
-      `  stream definitions (logs.*): ${JSON.stringify(
-        streamDefs.filter((s) => logsOnly(s.name)).map((s) => s.name)
-      )}\n` +
-      `  doc counts (logs.*): ${JSON.stringify(docCounts.filter((s) => logsOnly(s.stream)))}`
-    );
-  } catch (diagErr) {
-    return `(could not fetch diagnostic state: ${diagErr})`;
   }
 }
