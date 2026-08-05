@@ -140,6 +140,38 @@ describe('searchEventsToolHandler', () => {
     ]);
   });
 
+  it('drops an event when its only rule-matching signal is unconfirmed', async () => {
+    // The data query matched this event via 'unconfirmed-rule-uuid', but that signal
+    // is confirmed: false. After stripping unconfirmed signals the event has no
+    // visible signal for the requested rule, so hasRequestedRule returns false and
+    // the event must be dropped entirely.
+    const eventWithOnlyUnconfirmedMatch = {
+      ...event,
+      signals: [
+        {
+          stream_name: 'logs.checkout',
+          confirmed: false,
+          description: 'Unconfirmed signal',
+          collected_at: '2026-07-20T08:00:00.000Z',
+          metadata: { rule_uuid: 'unconfirmed-rule-uuid', rule_name: 'Unconfirmed rule' },
+          evidence: { result: 'found', esql_query: 'FROM logs.checkout' },
+        },
+      ],
+    };
+    const eventClient = makeClient([eventWithOnlyUnconfirmedMatch]);
+
+    const result = await searchEventsToolHandler({
+      eventClient: eventClient as never,
+      params: {
+        rule_uuids: ['unconfirmed-rule-uuid'],
+        exclude_unconfirmed_signals: true,
+      },
+    });
+
+    expect(result.events).toHaveLength(0);
+    expect(result.returned).toBe(0);
+  });
+
   it('caps compact signals to the most recent entries', async () => {
     const manySignals = Array.from({ length: 16 }, (_, i) => ({
       stream_name: 'logs.checkout',

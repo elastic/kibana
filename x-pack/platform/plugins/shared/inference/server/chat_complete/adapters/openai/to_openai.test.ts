@@ -212,7 +212,7 @@ describe('messagesToOpenAI', () => {
     ).toEqual([
       {
         role: 'assistant',
-        content: null,
+        content: '',
         tool_calls: [
           {
             function: {
