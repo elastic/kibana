@@ -234,6 +234,28 @@ describe('callKibanaApi', () => {
     }
   });
 
+  it('allows encoded route parameters while rejecting malformed and authority paths', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+    for (const path of ['/api/items/foo%20bar', '/api/items/%E2%9C%93']) {
+      await callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path }
+      );
+    }
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '/api/%' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '//victim/api' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
+  });
+
   it('prefixes the path with /s/{spaceId} for a non-default space', async () => {
     mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
 

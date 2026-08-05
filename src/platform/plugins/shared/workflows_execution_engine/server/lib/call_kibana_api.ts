@@ -205,15 +205,19 @@ const stringifyErrorBodyForMessage = (body: unknown): string => {
 };
 
 const validateSpaceRelativePath = (path: string): void => {
-  let decodedPath: string;
-  try {
-    decodedPath = decodeURIComponent(path);
-  } catch {
+  if (!path.startsWith('/') || path.startsWith('//') || path.includes('\\')) {
     throw new Error(`Invalid Kibana API path "${path}".`);
   }
-  const normalizedPath = new URL(decodedPath, 'http://kibana.local').pathname;
-  if (!path.startsWith('/') || normalizedPath !== decodedPath || decodedPath.includes('\\')) {
-    throw new Error(`Invalid Kibana API path "${path}".`);
+  for (const segment of path.split('/')) {
+    let decodedSegment: string;
+    try {
+      decodedSegment = decodeURIComponent(segment);
+    } catch {
+      throw new Error(`Invalid Kibana API path "${path}".`);
+    }
+    if (decodedSegment === '.' || decodedSegment === '..' || decodedSegment.includes('\\')) {
+      throw new Error(`Invalid Kibana API path "${path}".`);
+    }
   }
 };
 

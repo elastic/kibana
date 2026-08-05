@@ -99,7 +99,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
 
     const fetchOptions = { ...options, path };
     const request = this.createRequest(path, options);
-    this.logAttempt(request.method);
+    this.logAttempt(request.method, options.target);
     const cleanup: Array<() => void> = [];
 
     try {
@@ -136,8 +136,8 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     }
   }
 
-  private logAttempt(targetMethod: string): void {
-    const targetMode = this.getEffectiveTarget() === 'local' ? 'local' : 'public';
+  private logAttempt(targetMethod: string, target?: 'local'): void {
+    const targetMode = this.getEffectiveTarget(target) === 'local' ? 'local' : 'public';
 
     this.params.log.debug(() => 'Kibana scoped self HTTP call attempted', {
       labels: {

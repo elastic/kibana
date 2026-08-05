@@ -171,6 +171,14 @@ describe('InternalHttpSelfScopedClient', () => {
     setTimeoutSpy.mockRestore();
   });
 
+  it('logs the effective local target for a per-call local override', async () => {
+    const { log, self } = createClient({ publicBaseUrl: 'https://public.example.com/base' });
+    await self.asScoped(createRequest()).fetch('/api/status', { target: 'local' });
+    expect(log.debug).toHaveBeenCalledWith(expect.any(Function), {
+      labels: expect.objectContaining({ self_http_target_mode: 'local' }),
+    });
+  });
+
   it('logs only the source route template and methods plus the target mode', async () => {
     const { log, self } = createClient();
 
