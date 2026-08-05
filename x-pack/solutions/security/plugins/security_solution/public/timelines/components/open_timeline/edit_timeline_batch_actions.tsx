@@ -12,22 +12,11 @@ import React, { useCallback, useMemo } from 'react';
 import { type TimelineType, TimelineTypeEnum } from '../../../../common/api/timeline';
 
 import * as i18n from './translations';
-import {
-  SUPER_TIMELINE_TOO_FEW,
-  SUPER_TIMELINE_TOO_MANY,
-  SUPER_TIMELINE_UNSUPPORTED_QUERY_TYPES,
-  ESQL_QUERY_TYPE_LABEL,
-  EQL_QUERY_TYPE_LABEL,
-} from '../super_timeline/translations';
 import type { DeleteTimelines, OpenTimelineResult } from './types';
 import { EditTimelineActions } from './export_timeline';
 import { useEditTimelineActions } from './edit_timeline_actions';
 import { getSelectedTimelineIdsAndSearchIds, getRequestIds } from '.';
-import {
-  MAX_SUPER_TIMELINE_COUNT,
-  useOpenSuperTimeline,
-} from '../super_timeline/use_open_super_timeline';
-import { getUnmergeableSelections } from '../super_timeline/get_unmergeable_selections';
+import { useSuperTimelineGate } from './use_super_timeline_gate';
 
 export const useEditTimelineBatchActions = ({
   deleteTimelines,
@@ -53,7 +42,11 @@ export const useEditTimelineBatchActions = ({
     onCloseDeleteTimelineModal,
   } = useEditTimelineActions();
 
-  const { openSuperTimeline, isLoading: isSuperTimelineLoading } = useOpenSuperTimeline();
+  const {
+    isEnabled: isSuperTimelineActionEnabled,
+    tooltip: superTimelineTooltip,
+    handleOpen: handleOpenSuperTimeline,
+  } = useSuperTimelineGate({ selectedItems, searchResults });
 
   const onCompleteBatchActions = useCallback(
     (closePopover?: () => void) => {
@@ -83,60 +76,6 @@ export const useEditTimelineBatchActions = ({
   const handleOnOpenDeleteTimelineModal = useCallback(
     () => onOpenDeleteTimelineModal(),
     [onOpenDeleteTimelineModal]
-  );
-
-  const selectedSavedObjectIds = useMemo(
-    () =>
-      (selectedItems ?? [])
-        .map((item) => item.savedObjectId)
-        .filter((id): id is string => id != null),
-    [selectedItems]
-  );
-
-  const unmergeableSelections = useMemo(() => {
-    const items = selectedItems ?? [];
-    if (!searchResults || searchResults.length === 0) {
-      return getUnmergeableSelections(items);
-    }
-    const byId = new Map(searchResults.map((r) => [r.savedObjectId, r]));
-    const freshItems = items.map((item) => byId.get(item.savedObjectId ?? '') ?? item);
-    return getUnmergeableSelections(freshItems);
-  }, [selectedItems, searchResults]);
-
-  const isSuperTimelineActionEnabled = useMemo(
-    () =>
-      selectedSavedObjectIds.length >= 2 &&
-      selectedSavedObjectIds.length <= MAX_SUPER_TIMELINE_COUNT &&
-      unmergeableSelections.length === 0 &&
-      !isSuperTimelineLoading,
-    [selectedSavedObjectIds, unmergeableSelections, isSuperTimelineLoading]
-  );
-
-  const superTimelineTooltip = useMemo(() => {
-    if (unmergeableSelections.length > 0) {
-      const formattedTitles = unmergeableSelections
-        .map(
-          (s) =>
-            `${s.title} (${s.reason === 'esql' ? ESQL_QUERY_TYPE_LABEL : EQL_QUERY_TYPE_LABEL})`
-        )
-        .join(', ');
-      return SUPER_TIMELINE_UNSUPPORTED_QUERY_TYPES(formattedTitles);
-    }
-    if (selectedSavedObjectIds.length < 2) {
-      return SUPER_TIMELINE_TOO_FEW;
-    }
-    if (selectedSavedObjectIds.length > MAX_SUPER_TIMELINE_COUNT) {
-      return SUPER_TIMELINE_TOO_MANY(MAX_SUPER_TIMELINE_COUNT);
-    }
-    return undefined;
-  }, [unmergeableSelections, selectedSavedObjectIds]);
-
-  const handleOpenSuperTimeline = useCallback(
-    (closePopover: () => void) => {
-      closePopover();
-      openSuperTimeline(selectedSavedObjectIds);
-    },
-    [openSuperTimeline, selectedSavedObjectIds]
   );
 
   const getBatchItemsPopoverContent = useCallback(
