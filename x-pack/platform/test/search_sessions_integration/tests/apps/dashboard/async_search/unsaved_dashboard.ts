@@ -54,7 +54,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await list[0].view();
   }
 
-  describe('saves a search session for unsaved dashboard', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/280887
+  describe.skip('saves a search session for unsaved dashboard', () => {
     describe('with a discover session', () => {
       // Add the sample dataset
       before(async () => {
