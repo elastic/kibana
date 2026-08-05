@@ -1,0 +1,23 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "14e974fce970238-76560b416d87b10",
+      "title": "PrivateLocationsSettings manages private locations lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/ui/tests/private_locations.spec.ts",
+        "line": 23,
+        "column": 8
+      }
+    }
+  ]
+}
