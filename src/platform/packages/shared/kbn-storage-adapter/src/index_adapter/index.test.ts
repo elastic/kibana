@@ -691,3 +691,74 @@ describe('StorageIndexAdapter - esql method', () => {
     expect(esqlQuery).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('StorageIndexAdapter - ensureReady', () => {
+  let esClient: jest.Mocked<ElasticsearchClient>;
+  let loggerMock: jest.Mocked<Logger>;
+
+  beforeEach(() => {
+    esClient = createMockEsClient();
+    loggerMock = createLoggerMock();
+  });
+
+  it('creates the index template and write index when missing', async () => {
+    (esClient.indices.getAlias as jest.Mock).mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 404,
+        body: {},
+        headers: {},
+        warnings: [],
+        meta: {} as TransportResult['meta'],
+      } as TransportResult)
+    );
+    (esClient.indices.get as jest.Mock).mockResolvedValue({});
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    await adapter.getClient().ensureReady();
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('dedupes concurrent ensureReady callers into one bootstrap', async () => {
+    let releaseCreate: () => void = () => undefined;
+    const createGate = new Promise<void>((resolve) => {
+      releaseCreate = resolve;
+    });
+
+    (esClient.indices.getAlias as jest.Mock).mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 404,
+        body: {},
+        headers: {},
+        warnings: [],
+        meta: {} as TransportResult['meta'],
+      } as TransportResult)
+    );
+    (esClient.indices.get as jest.Mock).mockResolvedValue({});
+    (esClient.indices.create as jest.Mock).mockImplementation(async () => {
+      await createGate;
+      return {};
+    });
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    const first = client.ensureReady();
+    const second = client.ensureReady();
+
+    releaseCreate();
+    await Promise.all([first, second]);
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips create when the write index already exists', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    await adapter.getClient().ensureReady();
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.create).not.toHaveBeenCalled();
+  });
+});

@@ -217,6 +217,12 @@ export interface InternalIStorageClient<TDocumentType extends { _id?: string } =
    * Throws if the schema has incompatible structural changes that require a full rebuild.
    */
   reconcileMappings: () => Promise<void>;
+  /**
+   * Ensures the index template and backing write index exist (and mappings are
+   * up-to-date). Safe to call at plugin start so the first user write does not
+   * pay cold-start latency. Concurrent callers share one in-flight bootstrap.
+   */
+  ensureReady: () => Promise<void>;
 }
 
 type UnionKeys<T> = T extends T ? keyof T : never;

@@ -98,11 +98,7 @@ import type {
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
 import { WorkflowSearchService } from '../services/workflow_search_service';
 import { WorkflowValidationService } from '../services/workflow_validation_service';
-import {
-  createStorage,
-  ensureWorkflowStorageReady,
-  type WorkflowStorage,
-} from '../storage/workflow_storage';
+import { createStorage, type WorkflowStorage } from '../storage/workflow_storage';
 import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginSetupDeps, WorkflowsServerPluginStartDeps } from '../types';
 
@@ -239,9 +235,9 @@ export class WorkflowsService {
 
     // Bootstrap the workflows index at start so the first create/update request
     // does not pay StorageIndexAdapter cold-start latency (template + write index).
-    // Failures are non-fatal: the next write path retries the same lazy install.
+    // Failures are non-fatal: the next write path retries via ensureReady.
     try {
-      await ensureWorkflowStorageReady(this.workflowStorage);
+      await this.workflowStorage.getClient().ensureReady();
     } catch (error) {
       this.logger.warn(
         'Workflows Management: Failed to bootstrap workflows storage index; will retry on first write',

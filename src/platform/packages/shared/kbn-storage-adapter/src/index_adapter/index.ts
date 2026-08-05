@@ -182,6 +182,7 @@ export class StorageIndexAdapter<
 
   private readonly logger: Logger;
   private updateMappingsPromise: Promise<void> | undefined;
+  private ensureReadyPromise: Promise<void> | undefined;
   private serverlessCheck: Promise<boolean | undefined> | undefined;
   private isServerless: boolean | undefined;
 
@@ -389,13 +390,26 @@ export class StorageIndexAdapter<
   }
 
   /**
-   * Validates whether:
-   * - an index template exists
-   * - the index template has the right version (if not, update it)
-   * - the index exists (if it doesn't, create it)
-   * - the index has the right version (if not, update it)
+   * Ensures the index template and backing write index exist, and that mappings
+   * match the current schema version. Concurrent callers share one in-flight
+   * bootstrap; the cache is cleared when that bootstrap settles so later writes
+   * still re-check (e.g. after an external delete), while overlapping callers
+   * do not stampede ES.
    */
-  private async validateComponentsBeforeWriting<T>(cb: () => Promise<T>): Promise<T> {
+  private async ensureReadyInternal(): Promise<void> {
+    if (!this.ensureReadyPromise) {
+      this.ensureReadyPromise = this.bootstrapComponents().finally(() => {
+        this.ensureReadyPromise = undefined;
+      });
+    }
+    await this.ensureReadyPromise;
+  }
+
+  /**
+   * Creates/updates the index template, creates the write index when missing,
+   * and reconciles mappings when the schema version has changed.
+   */
+  private async bootstrapComponents(): Promise<void> {
     const expectedSchemaVersion = getSchemaVersion(this.storage);
     await this.createOrUpdateIndexTemplate();
 
@@ -403,15 +417,26 @@ export class StorageIndexAdapter<
     if (!writeIndex) {
       this.logger.debug(`Creating index`);
       await this.createIndex();
-    } else {
-      if (writeIndex.state.mappings?._meta?.version !== expectedSchemaVersion) {
-        this.logger.debug(`Updating mappings of existing index due to schema version mismatch`);
-        await this.updateMappingsOfExistingIndex({
-          name: writeIndex.name,
-        });
-      }
+      return;
     }
 
+    if (writeIndex.state.mappings?._meta?.version !== expectedSchemaVersion) {
+      this.logger.debug(`Updating mappings of existing index due to schema version mismatch`);
+      await this.updateMappingsOfExistingIndex({
+        name: writeIndex.name,
+      });
+    }
+  }
+
+  /**
+   * Validates whether:
+   * - an index template exists
+   * - the index template has the right version (if not, update it)
+   * - the index exists (if it doesn't, create it)
+   * - the index has the right version (if not, update it)
+   */
+  private async validateComponentsBeforeWriting<T>(cb: () => Promise<T>): Promise<T> {
+    await this.ensureReadyInternal();
     return await cb();
   }
 
@@ -825,6 +850,7 @@ export class StorageIndexAdapter<
       existsIndex: this.existsIndex,
       esql: this.esql,
       reconcileMappings: () => this.updateMappingsIfNeeded(),
+      ensureReady: () => this.ensureReadyInternal(),
     };
   }
 }
