@@ -21,6 +21,7 @@ resources:
   - prefetch-pr-context.yml
 imports:
   - .github/agents/scout-reviewer.md
+  - .github/workflows/shared/app-dex-agents-otel.md
 engine:
   id: claude
   version: '2.1.111'
