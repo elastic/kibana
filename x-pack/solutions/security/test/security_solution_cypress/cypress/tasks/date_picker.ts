@@ -38,15 +38,17 @@ const retypeRangeOnNewPicker = (
   container: string,
   pickFromCurrent: (current: { start: string; end: string }) => { start: string; end: string }
 ) => {
-  cy.get(`${container} ${NEW_PICKER_CONTROL}`).then(($btn) => {
-    const [currentStart = '', currentEnd = ''] = ($btn.attr('data-date-range') ?? '')
-      .split(' to ')
-      .map((s) => s.trim());
-    const next = pickFromCurrent({ start: currentStart, end: currentEnd });
-    cy.wrap($btn).click();
-    cy.get(DATE_RANGE_PICKER_INPUT).clear();
-    cy.get(DATE_RANGE_PICKER_INPUT).type(`${next.start} to ${next.end}{enter}`);
-  });
+  cy.get(`${container} ${NEW_PICKER_CONTROL}`)
+    .invoke('attr', 'data-date-range')
+    .then((dateRange) => {
+      const [currentStart = '', currentEnd = ''] = (dateRange ?? '')
+        .split(' to ')
+        .map((s) => s.trim());
+      const next = pickFromCurrent({ start: currentStart, end: currentEnd });
+      cy.get(`${container} ${NEW_PICKER_CONTROL}`).click();
+      cy.get(DATE_RANGE_PICKER_INPUT).clear();
+      cy.get(DATE_RANGE_PICKER_INPUT).type(`${next.start} to ${next.end}{enter}`);
+    });
 };
 
 const usingNewPicker = (
