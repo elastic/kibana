@@ -885,7 +885,7 @@
     },
     {
       "groupName": "typescript",
-      "matchDepNames": ["typescript"],
+      "matchDepNames": ["typescript", "typescript-7"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1737,7 +1737,7 @@
     },
     {
       "groupName": "adm-zip",
-      "matchDepNames": ["adm-zip", "@types/adm-zip"],
+      "matchDepNames": ["adm-zip"],
       "reviewers": ["team:security-solution"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team: SecuritySolution"],
@@ -2156,7 +2156,8 @@
         "@aws-sdk/client-bedrock-agent-runtime",
         "@aws-sdk/client-bedrock-runtime",
         "@aws-sdk/client-kendra",
-        "@aws-sdk/credential-provider-node"
+        "@aws-sdk/credential-provider-node",
+        "google-auth-library"
       ],
       "reviewers": ["team:security-generative-ai"],
       "matchBaseBranches": ["main"],
@@ -2345,7 +2346,6 @@
       "matchDepNames": [
         "@types/http-proxy",
         "get-port",
-        "google-auth-library",
         "http-proxy",
         "http-proxy-agent",
         "https-proxy-agent",

@@ -9,7 +9,7 @@ import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
-import { renderWithTestingProviders } from '../../common/mock';
+import { noCasesSettingsPermission, renderWithTestingProviders } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
 import { customFieldsConfigurationMock } from '../../containers/mock';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
@@ -429,12 +429,54 @@ describe('CaseFormFields', () => {
       expect(
         await screen.findByTestId('legacy-custom-fields-deprecated-badge')
       ).toBeInTheDocument();
+      const callout = await screen.findByTestId('legacy-custom-fields-deprecation-callout');
+      expect(callout).toBeInTheDocument();
+      // announceOnMount can duplicate content into a live region with the same test subjects,
+      // so take the first (visible) match.
       expect(
-        await screen.findByTestId('legacy-custom-fields-deprecation-callout')
+        within(callout).getAllByTestId('legacy-custom-fields-view-new-link')[0]
       ).toBeInTheDocument();
-      expect(screen.getByTestId('legacy-custom-fields-view-new-link')).toBeInTheDocument();
-      expect(screen.getByTestId('legacy-custom-fields-view-settings-link')).toBeInTheDocument();
+      expect(
+        within(callout).getAllByTestId('legacy-custom-fields-view-settings-link')[0]
+      ).toBeInTheDocument();
       expect(screen.getByTestId('legacy-custom-fields-divider')).toBeInTheDocument();
+    });
+
+    it('shows the administrator message in the deprecation callout when the user lacks settings permission', async () => {
+      jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+      localStorage.setItem('securitySolution.cases.showLegacyCustomFields', 'true');
+
+      renderWithTestingProviders(
+        <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+          <CaseFormFields
+            isLoading={false}
+            configurationCustomFields={customFieldsConfigurationMock}
+          />
+        </FormTestComponent>,
+        {
+          wrapperProps: { permissions: noCasesSettingsPermission() },
+        }
+      );
+
+      const callout = await screen.findByTestId('legacy-custom-fields-deprecation-callout');
+      expect(callout).toBeInTheDocument();
+      expect(
+        within(callout).queryByTestId('legacy-custom-fields-view-new-link')
+      ).not.toBeInTheDocument();
+      expect(
+        within(callout).queryByTestId('legacy-custom-fields-view-settings-link')
+      ).not.toBeInTheDocument();
+      // announceOnMount can duplicate content into a live region with the same text,
+      // so take the first (visible) match.
+      expect(
+        within(callout).getAllByText(
+          /Contact your administrator to confirm the fields have been migrated/i
+        )[0]
+      ).toBeInTheDocument();
     });
 
     it('forces legacy custom fields visible when required fields lack defaults', async () => {
