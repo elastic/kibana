@@ -54,7 +54,7 @@ interface NodeRowViewProps extends FocusableRowProps {
   onActivate: () => void;
   formatValue?: FormatValue;
 }
-export const NodeRowView = function NodeRowView({
+export const NodeRowView = memo(function NodeRowView({
   row,
   isActive,
   rowRef,
@@ -93,14 +93,14 @@ export const NodeRowView = function NodeRowView({
       <NodeLabel row={row} formatValue={formatValue} />
     </div>
   );
-};
+});
 
 interface PagerRowViewProps extends FocusableRowProps {
   row: PagerRow;
   onShowMore: () => void;
   onShowFewer: () => void;
 }
-export const PagerRowView = function PagerRowView({
+export const PagerRowView = memo(function PagerRowView({
   row,
   isActive,
   rowRef,
@@ -114,10 +114,18 @@ export const PagerRowView = function PagerRowView({
   const showMore = row.hiddenCount > 0;
 
   // The primary control shows more while items remain, otherwise it collapses back ("show fewer").
-  const onPrimary = showMore ? onShowMore : onShowFewer;
   const primaryLabel = showMore
     ? showMoreLabel(row.collectionType, Math.min(CHILDREN_INCREMENT, row.hiddenCount))
     : showFewerLabel(row.collectionType);
+
+  // "Show fewer" unmounts the focused button — move focus to the pager row first so it isn't lost.
+  const clickShowFewer = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    const pager = event.currentTarget.closest<HTMLElement>('[role="treeitem"]');
+    onShowFewer();
+    pager?.focus();
+  };
+
   return (
     <div
       ref={rowRef}
@@ -134,11 +142,16 @@ export const PagerRowView = function PagerRowView({
       <EuiButtonEmpty
         color="text"
         size="xs"
+        css={styles.pagerButton}
         iconType={showMore ? 'plus' : 'minus'}
-        onClick={(event: React.MouseEvent) => {
-          event.stopPropagation();
-          onPrimary();
-        }}
+        onClick={
+          showMore
+            ? (event: React.MouseEvent) => {
+                event.stopPropagation();
+                onShowMore();
+              }
+            : clickShowFewer
+        }
         onKeyDown={pagerButtonKeyDown}
         data-test-subj={
           showMore
@@ -152,11 +165,9 @@ export const PagerRowView = function PagerRowView({
         <EuiButtonEmpty
           color="text"
           size="xs"
+          css={styles.pagerButton}
           iconType="minus"
-          onClick={(event: React.MouseEvent) => {
-            event.stopPropagation();
-            onShowFewer();
-          }}
+          onClick={clickShowFewer}
           onKeyDown={pagerButtonKeyDown}
           data-test-subj={`jsonTreeViewerFewer-${row.collectionId}`}
         >
@@ -165,7 +176,7 @@ export const PagerRowView = function PagerRowView({
       )}
     </div>
   );
-};
+});
 
 export const ClosingBracketRow = memo(function ClosingBracketRow({ row }: { row: ClosingRow }) {
   const styles = useMemoCss(treeStyles);
@@ -327,13 +338,15 @@ const NodeLabel = memo(function NodeLabel({
   if (node.kind === 'leaf') {
     return (
       <span css={styles.label}>
-        <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
-        <PrimitiveValue
-          primitiveType={node.primitiveType}
-          value={node.value}
-          formatted={formatValue?.({ value: node.value, path: node.path })}
-        />
-        {trailingComma && <Comma />}
+        <span css={styles.labelText}>
+          <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
+          <PrimitiveValue
+            primitiveType={node.primitiveType}
+            value={node.value}
+            formatted={formatValue?.({ value: node.value, path: node.path })}
+          />
+          {trailingComma && <Comma />}
+        </span>
         <ValueCopyButton nodeId={node.id} value={node.value} />
       </span>
     );
@@ -346,9 +359,11 @@ const NodeLabel = memo(function NodeLabel({
   if (!hasChildren) {
     return (
       <span css={styles.label}>
-        <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
-        <span css={styles.bracket}>{`${open}${close}`}</span>
-        {trailingComma && <Comma />}
+        <span css={styles.labelText}>
+          <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
+          <span css={styles.bracket}>{`${open}${close}`}</span>
+          {trailingComma && <Comma />}
+        </span>
       </span>
     );
   }
@@ -358,8 +373,10 @@ const NodeLabel = memo(function NodeLabel({
   if (isExpanded) {
     return (
       <span css={styles.label}>
-        <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
-        <span css={styles.bracket}>{open}</span>
+        <span css={styles.labelText}>
+          <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
+          <span css={styles.bracket}>{open}</span>
+        </span>
         <SubtreeCopyButton node={node} />
       </span>
     );
@@ -368,11 +385,13 @@ const NodeLabel = memo(function NodeLabel({
   // Collapsed: a one-line preview, e.g. `"user": { 2 fields }`.
   return (
     <span css={styles.label}>
-      <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
-      <span css={styles.bracket}>{open}</span>
-      <span css={styles.count}>{collectionCountLabel(node)}</span>
-      <span css={styles.bracket}>{close}</span>
-      {trailingComma && <Comma />}
+      <span css={styles.labelText}>
+        <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
+        <span css={styles.bracket}>{open}</span>
+        <span css={styles.count}>{collectionCountLabel(node)}</span>
+        <span css={styles.bracket}>{close}</span>
+        {trailingComma && <Comma />}
+      </span>
       <SubtreeCopyButton node={node} />
     </span>
   );
@@ -454,7 +473,7 @@ const treeStyles = {
       display: 'flex',
       alignItems: 'center',
       gap: euiTheme.size.xs,
-      minHeight: euiTheme.size.l,
+      minHeight: euiTheme.size.base,
       paddingInlineEnd: euiTheme.size.xs,
       borderRadius: euiTheme.border.radius.small,
       cursor: 'default',
@@ -471,12 +490,18 @@ const treeStyles = {
     }),
   expandableRow: () => css({ cursor: 'pointer' }),
   pagerRow: () => css({ '&:hover': { backgroundColor: 'transparent' } }),
+  pagerButton: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      blockSize: euiTheme.size.base,
+      minBlockSize: euiTheme.size.base,
+      margin: `${euiTheme.size.xs} 0`,
+    }),
   closingRow: ({ euiTheme }: UseEuiTheme) =>
     css({
       display: 'flex',
       alignItems: 'center',
       gap: euiTheme.size.xs,
-      minHeight: euiTheme.size.l,
+      minHeight: euiTheme.size.base,
     }),
   caret: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -486,14 +511,22 @@ const treeStyles = {
       justifyContent: 'center',
       color: euiTheme.colors.textSubdued,
     }),
-  label: () => css({ minWidth: 0 }),
+  label: () => css({ display: 'flex', alignItems: 'center', minWidth: 0 }),
+  labelText: () => css({ minWidth: 0 }),
   key: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textPrimary }),
   punctuation: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textSubdued }),
   bracket: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textParagraph }),
   count: ({ euiTheme }: UseEuiTheme) =>
     css({ color: euiTheme.colors.textSubdued, marginInline: euiTheme.size.xs }),
   copyButton: ({ euiTheme }: UseEuiTheme) =>
-    css({ opacity: 0, marginInlineStart: euiTheme.size.xs, '&:focus-visible': { opacity: 1 } }),
+    css({
+      blockSize: euiTheme.size.base,
+      inlineSize: euiTheme.size.base,
+      flexShrink: 0,
+      opacity: 0,
+      marginInlineStart: euiTheme.size.xs,
+      '&:focus-visible': { opacity: 1 },
+    }),
   value: () => css({ minWidth: 0, overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }),
   valueString: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textDanger }),
   valueScalar: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textAccent }),
