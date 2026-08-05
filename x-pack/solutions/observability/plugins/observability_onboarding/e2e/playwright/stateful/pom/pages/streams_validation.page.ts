@@ -20,7 +20,8 @@ export class StreamsValidationPage {
 
   async assertStreamDocCountGreaterThanZero(streamName: string): Promise<void> {
     const docCount = this.page.locator(`[data-test-subj="streamsDocCount-${streamName}"]`);
-    await docCount.waitFor({ state: 'visible', timeout: 60000 });
+    // Kept short: assertStreamHasData polls this, so don't stall the retry loop.
+    await expect(docCount).toBeVisible({ timeout: 15000 });
 
     const docCountText = (await docCount.textContent()) ?? '';
     const match = docCountText.match(/[\d,]+/);

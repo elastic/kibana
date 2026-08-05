@@ -55,18 +55,6 @@ test('Auto-detect logs and metrics', async ({
   }
 
   /**
-   * Host Details page sometime shows "No Data"
-   * even when we've detected data during
-   * the onboarding flow. This is most prominent
-   * in a test script which click on the "Explore Data"
-   * CTA immediately. Having a timeout before going
-   * to the Host Details page "solves" the issue.
-   * 2 minutes is generous and should be more then enough
-   * for the data to propagate everywhere.
-   */
-  await page.waitForTimeout(2 * 60000);
-
-  /**
    * Wired streams only reroutes logs (to logs.ecs); metrics are unaffected.
    * So for wired streams we validate log delivery via Discover and the Streams
    * page, and intentionally skip the Host Details dashboard check. Dashboard
@@ -76,12 +64,26 @@ test('Auto-detect logs and metrics', async ({
    * single branch because the validation path is identical for both.
    */
   if (useWiredStreams) {
+    // First, so data is confirmed in logs.ecs before the Explore-logs check below.
+    await assertStreamHasData(page, 'logs.ecs');
+
     if (await autoDetectFlowPage.hasCustomLogsExploreButtons()) {
       const popupPage = await autoDetectFlowPage.clickCustomLogsExploreInPopup();
       await assertDiscoverHasData(popupPage, { assertHitCount: true });
     }
-    await assertStreamHasData(page, 'logs.ecs');
   } else {
+    /**
+     * Host Details page sometime shows "No Data"
+     * even when we've detected data during
+     * the onboarding flow. This is most prominent
+     * in a test script which click on the "Explore Data"
+     * CTA immediately. Having a timeout before going
+     * to the Host Details page "solves" the issue.
+     * 2 minutes is generous and should be more then enough
+     * for the data to propagate everywhere.
+     */
+    await page.waitForTimeout(2 * 60000);
+
     await autoDetectFlowPage.clickAutoDetectSystemIntegrationCTA();
 
     /**

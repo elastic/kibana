@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import { DiscoverValidationPage } from '../stateful/pom/pages/discover_validation.page';
 import { StreamsValidationPage } from '../stateful/pom/pages/streams_validation.page';
 
@@ -21,9 +21,22 @@ export async function assertDiscoverHasData(
   }
 }
 
-export async function assertStreamHasData(page: Page, streamName: string): Promise<void> {
-  await page.goto(`${process.env.KIBANA_BASE_URL}/app/streams`);
-  const streamsValidation = new StreamsValidationPage(page);
-  await streamsValidation.waitForStreamsToLoad();
-  await streamsValidation.assertStreamDocCountGreaterThanZero(streamName);
+export async function assertStreamHasData(
+  page: Page,
+  streamName: string,
+  { timeout = 4 * 60000 }: { timeout?: number } = {}
+): Promise<void> {
+  // logs.ecs materializes lazily on first ingest, so poll until data lands rather than assume a
+  // fixed delay. Separate page keeps the caller's onboarding page intact for later checks.
+  const streamsPage = await page.context().newPage();
+  try {
+    await expect(async () => {
+      await streamsPage.goto(`${process.env.KIBANA_BASE_URL}/app/streams`);
+      const streamsValidation = new StreamsValidationPage(streamsPage);
+      await streamsValidation.waitForStreamsToLoad();
+      await streamsValidation.assertStreamDocCountGreaterThanZero(streamName);
+    }).toPass({ timeout });
+  } finally {
+    await streamsPage.close();
+  }
 }
