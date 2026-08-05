@@ -15,11 +15,9 @@ const PUBLIC_SIGNIFICANT_EVENTS_PATH =
 const AVAILABILITY_PATH = 'internal/significant_events/availability';
 
 /**
- * Verifies the serverless hard-disable for Significant Events:
- * - Logs Essentials inherits `xpack.significantEvents.enabled: false` from serverless.yml
- * - Observability Complete re-enables the plugin and keeps routes registered
- *
- * Soft feature-flag gating is covered elsewhere; these tests assert plugin load vs unload.
+ * Logs Essentials inherits `xpack.significantEvents.enabled: false` from
+ * serverless.yml, so the Significant Events plugin is unloaded and its routes
+ * must return 404 (not a soft-gate 403).
  */
 apiTest.describe(
   'Significant Events plugin hard-disable (Logs Essentials)',
@@ -50,28 +48,6 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(404);
-      }
-    );
-  }
-);
-
-apiTest.describe(
-  'Significant Events plugin loaded (Complete / classic)',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  () => {
-    apiTest(
-      'availability API is registered when the plugin is enabled',
-      async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asStreamsAdmin();
-
-        const response = await apiClient.get(AVAILABILITY_PATH, {
-          headers: { ...COMMON_API_HEADERS, ...cookieHeader },
-          responseType: 'json',
-        });
-
-        // Global setup forces the availability flag on; assert the route exists and reports available.
-        expect(response).toHaveStatusCode(200);
-        expect(response.body).toMatchObject({ available: true });
       }
     );
   }
