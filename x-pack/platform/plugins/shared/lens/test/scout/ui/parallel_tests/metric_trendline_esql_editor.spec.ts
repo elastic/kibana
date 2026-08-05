@@ -153,7 +153,7 @@ spaceTest.describe(
         );
 
         // Wait for the apply button to become enabled after the query finishes
-        await expect(lens.getApplyFlyoutButton()).toBeEnabled({ timeout: 30000 });
+        await expect(lens.applyFlyoutButton).toBeEnabled({ timeout: 30000 });
         await applyLensInlineEditorAndWaitClosed({ lens });
       }
     );

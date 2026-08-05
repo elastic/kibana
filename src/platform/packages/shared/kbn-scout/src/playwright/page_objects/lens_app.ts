@@ -31,8 +31,11 @@ export class LensApp {
    * Note: `lnsFormulaWidget` is the overflow/suggest portal on `document.body`, not the editor.
    */
   readonly formulaEditorTextarea;
+  readonly applyFlyoutButton;
+  readonly cancelFlyoutButton;
+  protected readonly codeEditor: KibanaCodeEditorWrapper;
 
-  constructor(public readonly page: ScoutPage) {
+  constructor(protected readonly page: ScoutPage) {
     this.lensApp = this.page.testSubj.locator('lnsApp');
     this.chartSwitchPopover = this.page.testSubj.locator('lnsChartSwitchPopover');
     this.chartSwitchList = this.page.testSubj.locator('lnsChartSwitchList');
@@ -47,11 +50,9 @@ export class LensApp {
     this.formulaEditorTextarea = this.page.locator(
       '.lnsFormula__editorContent .monaco-editor textarea'
     );
-  }
-
-  /** Lazily wraps the formula/annotation Monaco editors; stateless, so a getter avoids ctor churn. */
-  public get codeEditor(): KibanaCodeEditorWrapper {
-    return new KibanaCodeEditorWrapper(this.page);
+    this.applyFlyoutButton = this.page.getByTestId('applyFlyoutButton');
+    this.cancelFlyoutButton = this.page.getByTestId('cancelFlyoutButton');
+    this.codeEditor = new KibanaCodeEditorWrapper(this.page);
   }
 
   async waitForLensApp() {
@@ -138,23 +139,14 @@ export class LensApp {
     await this.saveModal.waitFor({ state: 'hidden' });
   }
 
-  getApplyFlyoutButton() {
-    return this.page.getByTestId('applyFlyoutButton');
-  }
-
   async applyFlyoutChanges() {
-    const applyFlyoutButton = this.getApplyFlyoutButton();
-    await applyFlyoutButton.scrollIntoViewIfNeeded();
-    await applyFlyoutButton.click();
+    await this.applyFlyoutButton.scrollIntoViewIfNeeded();
+    await this.applyFlyoutButton.click();
     await this.page.testSubj.locator('lnsWorkspace').waitFor({ state: 'hidden' });
   }
 
-  getCancelFlyoutButton() {
-    return this.page.getByTestId('cancelFlyoutButton');
-  }
-
   async cancelFlyoutChanges() {
-    await this.getCancelFlyoutButton().click();
+    await this.cancelFlyoutButton.click();
     await this.page.testSubj.locator('lnsWorkspace').waitFor({ state: 'hidden' });
   }
 
@@ -350,6 +342,14 @@ export class LensApp {
     if ((await paletteModeToggle.getAttribute('aria-checked')) !== targetValue) {
       await paletteModeToggle.click();
     }
+    // Match `setEuiSwitch`: wait for the controlled toggle to commit before picking a palette.
+    await this.page.waitForFunction(
+      ([subj, expected]) =>
+        document.querySelector(`[data-test-subj="${subj}"]`)?.getAttribute('aria-checked') ===
+        expected,
+      ['lns_colorMappingOrLegacyPalette_switch', targetValue] as const,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
 
     if (isLegacy) {
       await this.page.testSubj.click('lns-palettePicker');
@@ -540,43 +540,51 @@ export class LensApp {
     await container.waitFor({ state: 'visible' });
 
     const afterCount = options?.afterCount;
-    await this.page.waitForFunction(
-      ({ subj, minExclusive }) => {
-        const workspaceEl = document.querySelector('[data-test-subj="lnsWorkspace"]');
-        const el = workspaceEl?.querySelector(`[data-test-subj="${subj}"]`);
-        if (!el) {
-          return false;
-        }
-        const chartStatus = el.querySelector('.echChartStatus');
-        const count =
-          el.getAttribute('data-rendering-count') ??
-          (chartStatus?.getAttribute('data-ech-render-complete') === 'true'
-            ? chartStatus.getAttribute('data-ech-render-count')
-            : null);
-        if (count === null) {
-          // Not an Elastic Charts visualization (e.g. a data table): nothing left to poll.
-          return !chartStatus;
-        }
-        if (count === '0') {
-          delete (window as unknown as { __lensScoutPrevRenderCount?: string })
-            .__lensScoutPrevRenderCount;
-          return false;
-        }
-        if (minExclusive != null && Number(count) <= minExclusive) {
-          return false;
-        }
-        const win = window as unknown as { __lensScoutPrevRenderCount?: string };
-        const prev = win.__lensScoutPrevRenderCount;
-        win.__lensScoutPrevRenderCount = count;
-        return prev === count;
-      },
-      { subj: chartSubj, minExclusive: afterCount ?? null },
-      // Chart data + render-count settle often exceeds the 10s actionTimeout; keep below the 60s test timeout.
-      { polling: 500, timeout: 30_000 }
-    );
-    await this.page.evaluate(() => {
-      delete (window as unknown as { __lensScoutPrevRenderCount?: string })
-        .__lensScoutPrevRenderCount;
-    });
+    const clearPrevRenderCount = async () => {
+      await this.page.evaluate(() => {
+        delete (window as unknown as { __lensScoutPrevRenderCount?: string })
+          .__lensScoutPrevRenderCount;
+      });
+    };
+    await clearPrevRenderCount();
+    try {
+      await this.page.waitForFunction(
+        ({ subj, minExclusive }) => {
+          const workspaceEl = document.querySelector('[data-test-subj="lnsWorkspace"]');
+          const el = workspaceEl?.querySelector(`[data-test-subj="${subj}"]`);
+          if (!el) {
+            return false;
+          }
+          const chartStatus = el.querySelector('.echChartStatus');
+          const count =
+            el.getAttribute('data-rendering-count') ??
+            (chartStatus?.getAttribute('data-ech-render-complete') === 'true'
+              ? chartStatus.getAttribute('data-ech-render-count')
+              : null);
+          if (count === null) {
+            // Not an Elastic Charts visualization (e.g. a data table): nothing left to poll.
+            return !chartStatus;
+          }
+          if (count === '0') {
+            delete (window as unknown as { __lensScoutPrevRenderCount?: string })
+              .__lensScoutPrevRenderCount;
+            return false;
+          }
+          if (minExclusive != null && Number(count) <= minExclusive) {
+            return false;
+          }
+          const win = window as unknown as { __lensScoutPrevRenderCount?: string };
+          const prev = win.__lensScoutPrevRenderCount;
+          win.__lensScoutPrevRenderCount = count;
+          return prev === count;
+        },
+        { subj: chartSubj, minExclusive: afterCount ?? null },
+        // Chart data + render-count settle often exceeds the 10s actionTimeout; keep below the 60s test timeout.
+        { polling: 500, timeout: 30_000 }
+      );
+    } finally {
+      // Clear even on timeout so a leftover prev===count can't false-settle the next call.
+      await clearPrevRenderCount();
+    }
   }
 }

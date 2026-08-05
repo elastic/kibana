@@ -81,14 +81,17 @@ export class LensEditorApp extends LensApp {
   /**
    * Ensures the layer tab at `index` is active, tolerating the single-layer case where the
    * tabs row isn't rendered at all (the lone layer's panel is already showing). Unlike
-   * `activateLayerTab`, this is a no-op both when the tab is already selected and when there's
-   * no tab bar to select from.
+   * `activateLayerTab`, this is a no-op when there's no tab bar to select from, and when
+   * the tab is already selected.
    */
   async ensureLayerTabIsActive(index = 0) {
     const tabs = await this.layerTabsLocator.all();
+    if (tabs.length === 0) {
+      return;
+    }
     const tab = tabs[index];
     if (!tab) {
-      return;
+      throw new Error(`Layer tab not found at index ${index}`);
     }
     if ((await tab.getAttribute('aria-selected')) === 'true') {
       return;
@@ -111,10 +114,20 @@ export class LensEditorApp extends LensApp {
     await this.page.testSubj.click(testSubject);
   }
 
-  /** Hovers the layer tab at `index`, if the tabs row is rendered (hidden for a single layer). */
+  /**
+   * Hovers the layer tab at `index` when the tabs row is rendered (hidden for a single layer).
+   * Throws if tabs exist but `index` is out of range — a wrong index must not silently no-op.
+   */
   private async hoverLayerTab(index: number) {
     const tabs = await this.layerTabsLocator.all();
-    await tabs[index]?.hover();
+    if (tabs.length === 0) {
+      return;
+    }
+    const tab = tabs[index];
+    if (!tab) {
+      throw new Error(`Layer tab not found at index ${index}`);
+    }
+    await tab.hover();
   }
 
   /** Returns the number of layers in the Lens editor (unified-tabs row is hidden for a single layer). */
@@ -162,8 +175,12 @@ export class LensEditorApp extends LensApp {
    * Removes the layer at `index` (FTR `removeLayer`). With a single layer this clears the viz
    * instead of dropping a tab. Returns once the removal is reflected in the config panel, so
    * callers can read the layer count / build a new chart right after.
+   *
+   * Lens shows `lnsLayerRemoveModal` for clear/delete unless the user previously checked
+   * "Don't ask me again". Default `confirm: true` matches a fresh browser context; pass
+   * `confirm: false` only when that skip preference is already set.
    */
-  async removeLayer(index = 0) {
+  async removeLayer(index = 0, options: { confirm?: boolean } = { confirm: true }) {
     const tabsBefore = await this.layerTabsLocator.count();
     await this.hoverLayerTab(index);
 
@@ -179,7 +196,12 @@ export class LensEditorApp extends LensApp {
     }
     await removeButton.click();
 
-    await this.confirmLayerRemovalIfPrompted();
+    if (options.confirm !== false) {
+      const removeModal = this.page.testSubj.locator('lnsLayerRemoveModal');
+      await removeModal.waitFor({ state: 'visible' });
+      await this.page.testSubj.click('lnsLayerRemoveConfirmButton');
+      await removeModal.waitFor({ state: 'hidden' });
+    }
 
     if (tabsBefore > 0) {
       // waitForFunction has no Scout default (unlike expect/actionTimeout).
@@ -195,24 +217,6 @@ export class LensEditorApp extends LensApp {
         state: 'detached',
       });
     }
-  }
-
-  /**
-   * Confirms the modal Lens shows when removing a layer would discard child state it owns
-   * (e.g. a library-linked annotation group). The modal mounts asynchronously, so give it a
-   * bounded window to appear instead of a one-shot visibility read.
-   */
-  private async confirmLayerRemovalIfPrompted() {
-    const removeModal = this.page.testSubj.locator('lnsLayerRemoveModal');
-    const isPrompted = await removeModal.waitFor({ state: 'visible', timeout: 2_500 }).then(
-      () => true,
-      () => false
-    );
-    if (!isPrompted) {
-      return;
-    }
-    await this.page.testSubj.click('lnsLayerRemoveConfirmButton');
-    await removeModal.waitFor({ state: 'hidden' });
   }
 
   // ---------------------------------------------------------------------------
@@ -692,43 +696,47 @@ export class LensEditorApp extends LensApp {
     });
     // Palette stops can take several debounce cycles to stabilize after edits.
     // waitForFunction has no Scout default (unlike expect/actionTimeout).
-    await this.page.waitForFunction(
-      ({ expectedCount }) => {
-        const panel = document.querySelector('[data-test-subj="lns-palettePanelFlyout"]');
-        if (!panel) {
+    try {
+      await this.page.waitForFunction(
+        ({ expectedCount }) => {
+          const panel = document.querySelector('[data-test-subj="lns-palettePanelFlyout"]');
+          if (!panel) {
+            return false;
+          }
+          const stopInputs = panel.querySelectorAll(
+            '[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]'
+          );
+          if (expectedCount != null && stopInputs.length !== expectedCount) {
+            return false;
+          }
+          if (stopInputs.length === 0) {
+            return false;
+          }
+          const colorAnchors = panel.querySelectorAll('[data-test-subj="euiColorPickerAnchor"]');
+          const colorStops = Array.from(stopInputs).map((input, i) => {
+            const anchor = colorAnchors[i] as HTMLElement | undefined;
+            return {
+              stop: (input as HTMLInputElement).getAttribute('value'),
+              color: anchor ? getComputedStyle(anchor).backgroundColor : undefined,
+            };
+          });
+          const colorStopsJson = JSON.stringify(colorStops);
+          const win = window as unknown as { __lensPaletteStopsPrev?: string };
+          if (win.__lensPaletteStopsPrev === colorStopsJson) {
+            return true;
+          }
+          win.__lensPaletteStopsPrev = colorStopsJson;
           return false;
-        }
-        const stopInputs = panel.querySelectorAll(
-          '[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]'
-        );
-        if (expectedCount != null && stopInputs.length !== expectedCount) {
-          return false;
-        }
-        if (stopInputs.length === 0) {
-          return false;
-        }
-        const colorAnchors = panel.querySelectorAll('[data-test-subj="euiColorPickerAnchor"]');
-        const colorStops = Array.from(stopInputs).map((input, i) => {
-          const anchor = colorAnchors[i] as HTMLElement | undefined;
-          return {
-            stop: (input as HTMLInputElement).getAttribute('value'),
-            color: anchor ? getComputedStyle(anchor).backgroundColor : undefined,
-          };
-        });
-        const colorStopsJson = JSON.stringify(colorStops);
-        const win = window as unknown as { __lensPaletteStopsPrev?: string };
-        if (win.__lensPaletteStopsPrev === colorStopsJson) {
-          return true;
-        }
-        win.__lensPaletteStopsPrev = colorStopsJson;
-        return false;
-      },
-      { expectedCount: expectedStopsCount ?? null },
-      { polling: 500, timeout: 20_000 }
-    );
-    await this.page.evaluate(() => {
-      delete (window as unknown as { __lensPaletteStopsPrev?: string }).__lensPaletteStopsPrev;
-    });
+        },
+        { expectedCount: expectedStopsCount ?? null },
+        { polling: 500, timeout: 20_000 }
+      );
+    } finally {
+      // Clear even on timeout so a leftover prev===next can't false-settle the next call.
+      await this.page.evaluate(() => {
+        delete (window as unknown as { __lensPaletteStopsPrev?: string }).__lensPaletteStopsPrev;
+      });
+    }
 
     return readColorStops();
   }
@@ -1151,6 +1159,8 @@ export class LensEditorApp extends LensApp {
   /**
    * Reorders dimensions within a group (1-based indices, FTR `reorderDimensions`).
    * The reorderable drop layer only mounts after dragstart, so the full DnD runs in-page.
+   * Waits for the drop layer to become an active droppable (same signal as `html5DragAndDrop`)
+   * instead of a fixed sleep.
    */
   async reorderDimensions(dimension: string, startIndex: number, endIndex: number) {
     await this.page.waitForFunction(
@@ -1184,10 +1194,31 @@ export class LensEditorApp extends LensApp {
           return event;
         }
 
+        function getReorderDropTarget(): Element | null {
+          const panels = Array.from(document.querySelectorAll(`[data-test-subj="${panelSubj}"]`));
+          return (
+            panels[endIdx - 1]?.querySelector(
+              `[data-test-subj="lnsDragDrop-reorderableDropLayer"]`
+            ) ?? null
+          );
+        }
+
+        async function waitForReorderDropTarget(timeout: number) {
+          // Reorder drop layers mount after dragstart; they don't always pick up
+          // `domDroppable--active` the way group-to-group drops do — wait for mount.
+          const deadline = Date.now() + timeout;
+          while (Date.now() < deadline) {
+            const element = getReorderDropTarget();
+            if (element) {
+              return element;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          }
+          return null;
+        }
+
         const panels = Array.from(document.querySelectorAll(`[data-test-subj="${panelSubj}"]`));
-        const startPanel = panels[startIdx - 1];
-        const endPanel = panels[endIdx - 1];
-        const origin = startPanel?.querySelector('.domDraggable');
+        const origin = panels[startIdx - 1]?.querySelector('.domDraggable');
         if (!origin) {
           throw new Error(
             `reorderDimensions: missing origin for ${panelSubj} index ${startIdx} (found ${panels.length} panels)`
@@ -1195,13 +1226,11 @@ export class LensEditorApp extends LensApp {
         }
         const dragStartEvent = createEvent('dragstart');
         origin.dispatchEvent(dragStartEvent);
-        await new Promise((resolve) => setTimeout(resolve, 100));
 
-        const target =
-          endPanel?.querySelector(`[data-test-subj="lnsDragDrop-reorderableDropLayer"]`) ?? null;
+        const target = await waitForReorderDropTarget(2_000);
         if (!target) {
           throw new Error(
-            `reorderDimensions: drop layer not found for ${panelSubj} index ${endIdx}`
+            `reorderDimensions: drop layer never mounted for ${panelSubj} index ${endIdx}`
           );
         }
         const dropEvent = createEvent('drop');
@@ -1218,7 +1247,8 @@ export class LensEditorApp extends LensApp {
 
   /**
    * Drags over a dimension group and drops on an extra target (duplicate/swap/combine).
-   * Mirrors FTR `dragEnterDrop` with timed dragenter → drop.
+   * Waits for droppable active/hover readiness (same pattern as `html5DragAndDrop`) instead
+   * of fixed sleeps.
    */
   private async dragEnterDrop(dragging: string, draggedOver: string, dropTarget: string) {
     await this.page.evaluate(
@@ -1263,6 +1293,30 @@ export class LensEditorApp extends LensApp {
           return nodes[0] ?? null;
         }
 
+        async function waitForTargetWithClass(chain: string, className: string, timeout: number) {
+          const deadline = Date.now() + timeout;
+          while (Date.now() < deadline) {
+            const element = queryChain(chain);
+            if (element?.closest('.domDroppable')?.classList.contains(className)) {
+              return element;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          }
+          return null;
+        }
+
+        async function waitForElement(chain: string, timeout: number) {
+          const deadline = Date.now() + timeout;
+          while (Date.now() < deadline) {
+            const element = queryChain(chain);
+            if (element) {
+              return element;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          }
+          return null;
+        }
+
         const origin = queryChain(fromSel);
         if (!origin) {
           throw new Error(`dragEnterDrop: origin not found for ${fromSel}`);
@@ -1270,11 +1324,9 @@ export class LensEditorApp extends LensApp {
         const dragStartEvent = createEvent('dragstart');
         origin.dispatchEvent(dragStartEvent);
 
-        await new Promise((resolve) => setTimeout(resolve, 200));
-
-        const over = queryChain(overSel);
+        const over = await waitForTargetWithClass(overSel, 'domDroppable--active', 2_000);
         if (!over) {
-          throw new Error(`dragEnterDrop: draggedOver not found for ${overSel}`);
+          throw new Error(`dragEnterDrop: draggedOver never became active for ${overSel}`);
         }
         const dragenter = createEvent('dragenter');
         dragenter.dataTransfer = dragStartEvent.dataTransfer;
@@ -1283,9 +1335,9 @@ export class LensEditorApp extends LensApp {
         dragover.dataTransfer = dragStartEvent.dataTransfer;
         over.dispatchEvent(dragover);
 
-        await new Promise((resolve) => setTimeout(resolve, 200));
-
-        const target = queryChain(dropSel);
+        // Extra drop targets (duplicate/swap/combine) mount after the hover; wait for them
+        // rather than sleeping a fixed interval.
+        const target = await waitForElement(dropSel, 5_000);
         if (!target) {
           throw new Error(`dragEnterDrop: dropTarget not found for ${dropSel}`);
         }
@@ -1505,9 +1557,8 @@ export class LensEditorApp extends LensApp {
   readonly convertToEsqlButton = this.page.getByRole('button', { name: 'Convert to ES|QL' });
   readonly convertToEsqlModal = this.page.getByTestId('lnsConvertToEsqlModal');
   readonly convertToEsqlModalConfirmButton = this.page.getByTestId('confirmModalConfirmButton');
-  readonly secondaryFlyoutBackButton = this.page.getByTestId(
-    'lns-indexPattern-dimensionContainerClose'
-  );
+  /** Same control as `closeDimensionEditorButton` — kept under this name for flyout-back call sites. */
+  readonly secondaryFlyoutBackButton = this.closeDimensionEditorButton;
   readonly inlineEditor = this.page.getByTestId('customizeLens');
   readonly editInLensButton = this.page.getByTestId('navigateToLensEditorLink');
   readonly discardChangesModal = this.page.testSubj.locator('lnsApp_discardChangesModalOrigin');

@@ -8,7 +8,7 @@
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { ContentListWrapper } from '@kbn/scout';
-import type { Locator, PageObjects, ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 import type { LensPageObjects } from './page_objects';
 import {
   DATA_VIEW_ID,
@@ -132,7 +132,7 @@ export async function completeLensCsvExport(page: ScoutPage): Promise<void> {
 // Uses Lens-editor-only methods (e.g. `inlineEditor`, `convertToEsqlButton`), so this is
 // typed against the Lens plugin's rich page object, not the shared `@kbn/scout` `PageObjects`.
 type DashboardAndLens = Pick<LensPageObjects, 'dashboard' | 'lens'>;
-type VisualizeAndLens = Pick<PageObjects, 'visualize' | 'lens'>;
+type VisualizeAndLens = Pick<LensPageObjects, 'visualize' | 'lens'>;
 
 /**
  * Builds a fresh Lens Metric visualization directly from the editor UI, with a primary and a
@@ -198,7 +198,7 @@ interface LogstashLensEditorBeforeEachContext {
   browserAuth: { loginAsPrivilegedUser: () => Promise<void> };
   context: ElasticChartDebugContext;
   page: { setViewportSize: (size: { width: number; height: number }) => Promise<void> };
-  pageObjects: Pick<PageObjects, 'visualize' | 'lens'>;
+  pageObjects: Pick<LensPageObjects, 'visualize' | 'lens'>;
 }
 
 /** Matches FTR lens group5 `browser.setWindowSize(1280, 1200)`. */
@@ -306,7 +306,7 @@ export function createLogstashLensEditorSuiteSetup(options?: {
 
 /** Opens a fresh empty Lens editor (URL navigation resets stale Visualize/Lens state). */
 export async function openEmptyLensEditor(
-  pageObjects: Pick<PageObjects, 'visualize' | 'lens'>
+  pageObjects: Pick<LensPageObjects, 'visualize' | 'lens'>
 ): Promise<void> {
   await pageObjects.visualize.goto();
   await pageObjects.visualize.openNewVisualizationWizard();
@@ -336,12 +336,12 @@ export async function openInlineEditorAndWaitVisible(
 }
 
 export async function applyLensInlineEditorAndWaitClosed({ lens }: Pick<LensPageObjects, 'lens'>) {
-  await lens.getApplyFlyoutButton().click();
+  await lens.applyFlyoutButton.click();
   await expect(lens.inlineEditor).toBeHidden();
 }
 
 export async function cancelLensInlineEditorAndWaitClosed({ lens }: Pick<LensPageObjects, 'lens'>) {
-  await lens.getCancelFlyoutButton().click();
+  await lens.cancelFlyoutButton.click();
   await expect(lens.inlineEditor).toBeHidden();
 }
 
