@@ -15,7 +15,8 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import { buildDataTableRecord, type DataTableColumnsMeta } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { EsqlSource } from '@kbn/data-source';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -40,11 +41,11 @@ jest.mock('../../../../components/discover_grid_flyout', () => ({
 const discoverGridMock = jest.mocked(DiscoverGrid);
 const discoverGridFlyoutMock = jest.mocked(DiscoverGridFlyout);
 const singleEsHit = esHitsMock.slice(0, 1);
-const cascadedColumnsMeta: DataTableColumnsMeta = {
-  bytes: {
-    type: 'number',
-  },
-};
+const createCascadedDataSource = () =>
+  EsqlSource.create({
+    query: 'FROM logs',
+    resultColumns: [{ id: 'bytes', name: 'bytes', meta: { type: 'number' } }],
+  });
 
 const setup = async ({ services }: { services?: DiscoverServices } = {}) => {
   const toolkit = getDiscoverInternalStateMock({ services });
@@ -291,12 +292,14 @@ describe('Discover documents layout', () => {
         })
       );
 
+      const cascadedDataSource = await createCascadedDataSource();
+
       toolkit.internalState.dispatch(
         internalStateActions.setCascadedDocumentsState({
           tabId,
           cascadedDocumentsState: {
             ...toolkit.getCurrentTab().cascadedDocumentsState,
-            columnsMeta: cascadedColumnsMeta,
+            dataSource: cascadedDataSource,
           },
         })
       );
@@ -335,7 +338,7 @@ describe('Discover documents layout', () => {
       expect(flyoutProps.hit).toEqual(expandedDoc);
       expect(flyoutProps.hits).toEqual([expandedDoc, nextExpandedDoc]);
       expect(flyoutProps.columns).toEqual(['bytes']);
-      expect(flyoutProps.columnsMeta).toEqual(cascadedColumnsMeta);
+      expect(flyoutProps.dataSource).toEqual(cascadedDataSource);
 
       act(() => {
         flyoutProps.setExpandedDoc(nextExpandedDoc);

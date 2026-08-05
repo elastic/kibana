@@ -177,6 +177,7 @@ describe('sparklineDataSourceProfileProvider', () => {
         toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       return getCellRenderers({
+        actions: { addFilter: jest.fn() },
         rowHeight: 1,
         dataView: {} as DataView,
         density: undefined,
@@ -205,6 +206,7 @@ describe('sparklineDataSourceProfileProvider', () => {
         toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       const params = {
+        actions: { addFilter: jest.fn() },
         rowHeight: 1,
         dataView: {} as DataView,
         density: undefined,
@@ -226,6 +228,7 @@ describe('sparklineDataSourceProfileProvider', () => {
         }
       );
       const renderers = getCellRenderers({
+        actions: { addFilter: jest.fn() },
         rowHeight: 1,
         dataView: {} as DataView,
         density: undefined,
@@ -247,6 +250,7 @@ describe('sparklineDataSourceProfileProvider', () => {
         }
       );
       const renderers = getCellRenderers({
+        actions: { addFilter: jest.fn() },
         rowHeight: 1,
         dataView: {} as DataView,
         density: undefined,

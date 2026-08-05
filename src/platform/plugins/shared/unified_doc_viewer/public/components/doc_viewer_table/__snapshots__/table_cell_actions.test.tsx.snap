@@ -8,7 +8,7 @@ Array [
     onToggleColumn={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
+        "dataSource": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -36,9 +36,13 @@ Array [
 ]
 `;
 
-exports[`TableActions getFieldCellActions should render correctly for undefined functions 2`] = `Array []`;
+exports[
+  `TableActions getFieldCellActions should render correctly for undefined functions 2`
+] = `Array []`;
 
-exports[`TableActions getFieldCellActions should render the panels correctly for defined onFilter function 1`] = `
+exports[
+  `TableActions getFieldCellActions should render the panels correctly for defined onFilter function 1`
+] = `
 Array [
   <FilterExist
     Component={[Function]}
@@ -46,7 +50,7 @@ Array [
     onFilter={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
+        "dataSource": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -77,7 +81,7 @@ Array [
     onToggleColumn={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
+        "dataSource": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -105,7 +109,9 @@ Array [
 ]
 `;
 
-exports[`TableActions getFieldValueCellActions should render correctly for hideFilteringOnComputedColumns set to true 1`] = `
+exports[
+  `TableActions getFieldValueCellActions should render correctly for hideFilteringOnComputedColumns set to true 1`
+] = `
 Array [
   <FilterIn
     Component={[Function]}
@@ -114,7 +120,7 @@ Array [
     onFilter={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
+        "dataSource": undefined,
         "dataViewField": Object {
           "isComputedColumn": true,
           "kbnFieldType": KbnFieldType {
@@ -154,7 +160,7 @@ Array [
     onFilter={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
+        "dataSource": undefined,
         "dataViewField": Object {
           "isComputedColumn": true,
           "kbnFieldType": KbnFieldType {
@@ -191,7 +197,7 @@ Array [
     Component={[Function]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
+        "dataSource": undefined,
         "dataViewField": Object {
           "isComputedColumn": true,
           "kbnFieldType": KbnFieldType {
@@ -239,13 +245,15 @@ Array [
 ]
 `;
 
-exports[`TableActions getFieldValueCellActions should render correctly for undefined functions 1`] = `
+exports[
+  `TableActions getFieldValueCellActions should render correctly for undefined functions 1`
+] = `
 Array [
   <Copy
     Component={[Function]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
+        "dataSource": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -285,7 +293,9 @@ Array [
 ]
 `;
 
-exports[`TableActions getFieldValueCellActions should render the panels correctly for defined onFilter function 1`] = `
+exports[
+  `TableActions getFieldValueCellActions should render the panels correctly for defined onFilter function 1`
+] = `
 Array [
   <FilterIn
     Component={[Function]}
@@ -293,7 +303,7 @@ Array [
     onFilter={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
+        "dataSource": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -324,7 +334,7 @@ Array [
     onFilter={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
+        "dataSource": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -353,7 +363,7 @@ Array [
     Component={[Function]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
+        "dataSource": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,

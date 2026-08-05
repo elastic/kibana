@@ -183,6 +183,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
         toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       return getCellRenderers({
+        actions: { addFilter: jest.fn() },
         rowHeight: 1,
         dataView: {} as DataView,
         density: undefined,
@@ -203,6 +204,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
         toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       const renderers = getCellRenderers({
+        actions: { addFilter: jest.fn() },
         rowHeight: 1,
         dataView: {} as DataView,
         density: undefined,

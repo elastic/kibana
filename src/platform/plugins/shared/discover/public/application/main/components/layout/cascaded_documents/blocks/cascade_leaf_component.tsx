@@ -9,7 +9,6 @@
 
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { EuiText, type EuiDataGridCustomBodyProps, useEuiTheme } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   getRenderCustomToolbarWithElements,
   UnifiedDataTable,
@@ -21,7 +20,6 @@ import {
   type DataCascadeRowCellProps,
   useConnectedChildVirtualizer,
 } from '@kbn/shared-ux-document-data-cascade';
-import { IndexPatternSource } from '@kbn/data-source';
 import type { DataTableRecord, SortOrder } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
@@ -43,7 +41,6 @@ interface ESQLDataCascadeLeafCellProps
       Parameters<DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']>[0],
       'virtualizerController'
     > {
-  dataView?: DataView;
   cellData: DataTableRecord[];
   cellId: string;
   rowIndex: number;
@@ -163,19 +160,14 @@ export const ESQLDataCascadeLeafCell = React.memo(
     cellId,
     dataGridDensityState,
     showTimeCol,
-    dataView,
     externalCustomRenderers,
     virtualizerController,
     rowIndex,
     onUpdateDataGridDensity,
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
-    const dataSource = useMemo(
-      () => (dataView ? new IndexPatternSource(dataView) : undefined),
-      [dataView]
-    );
     const {
-      cascadedColumnsMeta,
+      cascadedDataSource,
       expandedDoc$,
       expandedDocOwner$,
       getExpandedDocSetter,
@@ -275,7 +267,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
     return (
       <UnifiedDataTable
         isPlainRecord
-        dataSource={dataSource}
+        dataSource={cascadedDataSource}
         showTimeCol={showTimeCol}
         services={services}
         sort={EMPTY_SORT}
@@ -286,7 +278,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
         rows={cellData}
         loadingState={DataLoadingState.loaded}
         columns={selectedColumns}
-        columnsMeta={cascadedColumnsMeta}
         onSetColumns={setSelectedColumns}
         renderCustomToolbar={renderCustomToolbarWithElements}
         expandedDoc={expandedDocOwner === cellId ? expandedDoc : undefined}

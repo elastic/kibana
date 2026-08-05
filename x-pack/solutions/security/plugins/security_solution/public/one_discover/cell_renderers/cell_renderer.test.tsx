@@ -70,7 +70,7 @@ describe('getCellRendererForGivenRecord', () => {
       colIndex: 0,
       fieldFormats: fieldFormatsMock,
       closePopover: jest.fn(),
-      columnsMeta: undefined,
+      dataSource: undefined,
     };
     const CellRenderer = cellRenderer as React.FC<DataGridCellValueElementProps>;
     const { getByTestId } = render(<CellRenderer {...props} />);

@@ -11,11 +11,7 @@ import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { UseComparisonFieldsProps } from './use_comparison_fields';
 import { MAX_COMPARISON_FIELDS, useComparisonFields } from './use_comparison_fields';
-import {
-  buildDataViewMock,
-  columnsMetaWithCustomField,
-  generateEsHits,
-} from '@kbn/discover-utils/src/__mocks__';
+import { buildDataViewMock, generateEsHits } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { fieldList } from '@kbn/data-views-plugin/common';
@@ -52,7 +48,6 @@ const renderFields = ({
   } = renderHook(() =>
     useComparisonFields({
       dataView,
-      columnsMeta: undefined,
       selectedFieldNames: ['message', 'extension', 'bytes'],
       selectedDocIds: ['0', '1', '2'],
       showAllFields: true,
@@ -154,8 +149,49 @@ describe('useComparisonFields', () => {
   });
 
   it('should display computed fields from ES|QL querys (EVALS, RENAMES, etc.)', () => {
+    // `useComparisonFields` derives `showAllFields` output purely from `dataView.fields` (no
+    // separate columnsMeta/dataSource input), so a computed ES|QL field must be modeled as a
+    // field on the data view itself.
+    const dataViewWithComputedField = buildDataViewMock({
+      name: 'index-pattern-with-timefield',
+      fields: fieldList([
+        { name: '_index', type: 'string', scripted: false, searchable: true, aggregatable: false },
+        { name: 'timestamp', type: 'date', scripted: false, searchable: true, aggregatable: true },
+        {
+          name: 'message',
+          type: 'string',
+          scripted: false,
+          searchable: false,
+          aggregatable: false,
+        },
+        {
+          name: 'extension',
+          type: 'string',
+          scripted: false,
+          searchable: true,
+          aggregatable: true,
+        },
+        { name: 'bytes', type: 'number', scripted: false, searchable: true, aggregatable: true },
+        {
+          name: 'scripted',
+          type: 'number',
+          scripted: true,
+          searchable: false,
+          aggregatable: false,
+        },
+        {
+          name: 'custom_esql_field',
+          type: 'number',
+          scripted: false,
+          searchable: true,
+          aggregatable: true,
+        },
+      ]),
+      timeFieldName: 'timestamp',
+    });
+
     const { comparisonFields, totalFields } = renderFields({
-      props: { columnsMeta: columnsMetaWithCustomField },
+      props: { dataView: dataViewWithComputedField },
       transformHit: (hit) => {
         hit.fields!.custom_esql_field = 'test';
         return hit;

@@ -36,6 +36,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
 import { internalStateActions } from '../../state_management/redux';
 import { nextTick } from '@kbn/test-jest-helpers';
+import { EsqlSource } from '@kbn/data-source';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 // There are some flaky tests in this file because they render a big DOM tree, which can take some time to run the tests.
 const EXTENDED_TIMEOUT = 60_000;
@@ -549,19 +551,25 @@ describe('discover responsive sidebar', function () {
   });
 
   it('should render correctly in the ES|QL mode', async () => {
+    const esqlQueryColumns: DatatableColumn[] = [
+      { id: '1', name: 'extension', meta: { type: 'string' } },
+      { id: '2', name: 'bytes', meta: { type: 'number' } },
+      { id: '3', name: '@timestamp', meta: { type: 'date' } },
+    ];
+    const dataSource = await EsqlSource.create({
+      query: 'FROM `index`',
+      resultColumns: esqlQueryColumns,
+    });
     const propsWithEsqlMode = {
       ...props,
       columns: ['extension', 'bytes'],
       onAddFilter: undefined,
-      documents$: new BehaviorSubject({
+      documents$: new BehaviorSubject<DataDocuments$['value']>({
         fetchStatus: FetchStatus.COMPLETE,
         result: getDataTableRecords(stubLogstashDataView),
-        esqlQueryColumns: [
-          { id: '1', name: 'extension', meta: { type: 'text' } },
-          { id: '2', name: 'bytes', meta: { type: 'number' } },
-          { id: '3', name: '@timestamp', meta: { type: 'date' } },
-        ],
-      }) as DataDocuments$,
+        esqlQueryColumns,
+        dataSource,
+      }),
     };
     await renderComponent(
       propsWithEsqlMode,

@@ -50,7 +50,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     dataView,
     ...props
   }) => {
-    const { setExpandedDoc, renderDocumentView } = props;
     const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
     const getRowIndicator = useMemo(() => {
       if (!dataView) return undefined;

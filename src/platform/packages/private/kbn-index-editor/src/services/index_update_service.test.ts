@@ -13,6 +13,7 @@ import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { EsqlSource } from '@kbn/data-source';
 import { ROW_PLACEHOLDER_PREFIX } from '../constants';
 import { IndexUpdateService } from './index_update_service';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -179,8 +180,12 @@ describe('IndexUpdateService', () => {
   describe('updateDoc value parsing', () => {
     it('keeps the raw text for string-typed fields so object-like values are not coerced', async () => {
       const rows = await firstValueFrom(service.rows$);
+      const dataSource = await EsqlSource.create({
+        query: 'FROM test-index',
+        resultColumns: [{ id: 'asd4', name: 'asd4', meta: { type: 'string', esType: 'text' } }],
+      });
 
-      service.updateDoc(rows[0].id, { asd4: '{}' }, { asd4: { type: 'string', esType: 'text' } });
+      service.updateDoc(rows[0].id, { asd4: '{}' }, dataSource);
 
       const rowsAfterEdition = await firstValueFrom(service.rows$);
       expect(rowsAfterEdition[0].raw).toEqual({ asd4: '{}' });

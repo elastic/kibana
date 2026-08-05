@@ -16,6 +16,7 @@ import { EuiCallOut, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { memo } from 'react';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import type { DataSource } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataGridDensity } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -24,7 +25,6 @@ import {
   type CustomCellRenderer,
   type CustomGridColumnsConfiguration,
   DataLoadingState,
-  type DataTableColumnsMeta,
   SELECT_ROW,
   type SortOrder,
   UnifiedDataTable,
@@ -48,7 +48,7 @@ export interface WorkflowExecuteUnifiedDataTableProps {
   dataView: DataView | null;
   getNoCellActions: UiActionsStart['getTriggerCompatibleActions'];
   visibleTableColumns: string[];
-  columnsMeta: DataTableColumnsMeta;
+  dataSource: DataSource | undefined;
   dataTableRows: DataTableRecord[];
   rowsLength: number;
   unifiedDataTableServices: React.ComponentProps<typeof UnifiedDataTable>['services'];
@@ -87,7 +87,7 @@ export const WorkflowExecuteUnifiedDataTable = memo(function WorkflowExecuteUnif
   dataView,
   getNoCellActions,
   visibleTableColumns,
-  columnsMeta,
+  dataSource,
   dataTableRows,
   rowsLength,
   unifiedDataTableServices,
@@ -243,9 +243,8 @@ export const WorkflowExecuteUnifiedDataTable = memo(function WorkflowExecuteUnif
                     <UnifiedDataTable
                       ariaLabelledBy={ariaLabelledBy ?? dataTestSubj}
                       columns={visibleTableColumns}
-                      columnsMeta={columnsMeta}
                       rows={dataTableRows}
-                      dataView={dataView}
+                      dataSource={dataSource}
                       loadingState={tableLoadingState}
                       sampleSizeState={rowsLength}
                       services={unifiedDataTableServices}

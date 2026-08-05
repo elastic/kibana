@@ -9,13 +9,13 @@
 
 import type { EuiDataGridCellPopoverElementProps, euiFontSize } from '@elastic/eui';
 import type * as React from 'react';
+import type { DataSource } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type {
   CustomCellRenderer,
   CustomGridColumnsConfiguration,
-  DataTableColumnsMeta,
   SortOrder,
   UnifiedDataTable,
   UnifiedDataTableRenderCustomToolbar,
@@ -39,7 +39,7 @@ export interface UseTriggerEventTableConfigResult {
   showTimeColumn: boolean;
   sort: SortOrder[];
   dataTableRows: DataTableRecord[];
-  columnsMeta: DataTableColumnsMeta;
+  dataSource: DataSource | undefined;
   externalCustomRenderers: CustomCellRenderer;
   customGridColumnsConfiguration: CustomGridColumnsConfiguration;
   unifiedDataTableServices: React.ComponentProps<typeof UnifiedDataTable>['services'];

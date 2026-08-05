@@ -50,6 +50,7 @@
     "@kbn/logging-mocks",
     "@kbn/discover-utils",
     "@kbn/unified-data-table",
+    "@kbn/data-source",
     "@kbn/cell-actions",
     "@kbn/ui-actions-plugin",
     "@kbn/storybook",

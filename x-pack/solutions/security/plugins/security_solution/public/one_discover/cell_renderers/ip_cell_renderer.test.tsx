@@ -96,7 +96,7 @@ const baseProps: DataGridCellValueElementProps = {
   colIndex: 0,
   fieldFormats: fieldFormatsMock,
   closePopover: jest.fn(),
-  columnsMeta: undefined,
+  dataSource: undefined,
 };
 
 describe('IpCellRenderer', () => {

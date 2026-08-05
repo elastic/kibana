@@ -214,6 +214,7 @@ describe('logsDataSourceProfileProvider', () => {
         { context: RESOLUTION_MATCH.context, toolkit }
       );
       const getCellRenderersParams = {
+        actions: { addFilter: jest.fn() },
         dataView: dataViewWithTimefieldMock,
         density: DataGridDensity.COMPACT,
         rowHeight: 0,

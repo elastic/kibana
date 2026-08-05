@@ -96,7 +96,6 @@ export function DiscoverGridFlyout({
       query={query}
       initialTabId={initialTabId}
       docViewerRef={docViewerRef}
-      docViewerExtensionActions={docViewerExtensionActions}
       onFilter={onFilter}
       onClose={onClose}
       onRemoveColumn={onRemoveColumn}
@@ -121,7 +120,6 @@ function DiscoverGridFlyoutContent({
   query,
   initialTabId,
   docViewerRef,
-  docViewerExtensionActions,
   onFilter,
   onClose,
   onRemoveColumn,

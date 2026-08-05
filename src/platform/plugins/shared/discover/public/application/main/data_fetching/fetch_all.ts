@@ -11,7 +11,15 @@ import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { BehaviorSubject } from 'rxjs';
-import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
+import {
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  firstValueFrom,
+  race,
+  shareReplay,
+  switchMap,
+} from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
@@ -133,7 +141,13 @@ export function fetchAll(
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
       .then(
-        ({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning, dataSource }) => {
+        ({
+          records,
+          esqlQueryColumns,
+          interceptedWarnings = [],
+          esqlHeaderWarning,
+          dataSource,
+        }) => {
           fetchAllRequestsOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
 
           if (isEsqlQuery) {
@@ -197,16 +211,30 @@ export function fetchAll(
         sendErrorMsg(dataSubjects.main$, e);
       });
 
+    const documentsComplete$ = isComplete(dataSubjects.documents$).pipe(
+      switchMap(async () => onFetchRecordsComplete?.()),
+      shareReplay(1)
+    );
+
+    // For DSL queries, `noResultsFound` winning intentionally skips `onFetchRecordsComplete` (some
+    // of its post-fetch state logic assumes it only ever runs when records were found — calling it
+    // unconditionally there is a separate, pre-existing issue, out of scope here).
+    //
+    // ES|QL is different: `documents$` only reaches a terminal status once `esqlFetchSubscribe`
+    // (a separate, async subscriber — see `build_esql_fetch_subscribe.ts`) re-emits it as COMPLETE.
+    // That extra async hop can lose the race to `noResultsFound` for a 0-record ES|QL query, which
+    // resolves almost synchronously — silently skipping `onFetchRecordsComplete`'s state cleanup
+    // (e.g. clearing `fieldsToReset`). Requiring `documentsComplete$` in both race branches only for
+    // ES|QL closes that gap without changing existing DSL behavior.
+    const noResultsFoundBranch = isEsqlQuery
+      ? combineLatest([documentsComplete$, noResultsFound(dataSubjects.main$)])
+      : noResultsFound(dataSubjects.main$);
+
     // Return a promise that will resolve once all the requests have finished or failed, or no results are found
     return firstValueFrom(
       race(
-        combineLatest([
-          isComplete(dataSubjects.documents$).pipe(
-            switchMap(async () => onFetchRecordsComplete?.())
-          ),
-          isComplete(dataSubjects.totalHits$),
-        ]),
-        noResultsFound(dataSubjects.main$)
+        combineLatest([documentsComplete$, isComplete(dataSubjects.totalHits$)]),
+        noResultsFoundBranch
       )
     ).then(() => {
       // Send a complete message to main$ once all queries are done and if main$

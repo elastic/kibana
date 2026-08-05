@@ -18,6 +18,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import { IndexPatternSource } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
@@ -125,6 +126,8 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       () => buildDataTableRecordList({ records: hits, dataView }),
       [hits, dataView]
     );
+
+    const dataSource = useMemo(() => new IndexPatternSource(dataView), [dataView]);
 
     const services = useMemo(
       () => ({
@@ -244,7 +247,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
               canDragAndDropColumns
               columns={visibleColumns}
               consumer="workflows"
-              dataView={dataView}
+              dataSource={dataSource}
               expandedDoc={expandedDoc}
               gridStyleOverride={gridStyleOverride}
               isPaginationEnabled={false}

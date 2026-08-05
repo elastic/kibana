@@ -34,7 +34,7 @@ const baseCellProps = {
   setCellProps: jest.fn(),
   rowIndex: 0,
   colIndex: 0,
-  columnsMeta: undefined,
+  dataSource: undefined,
   isDetails: false,
   isExpanded: false,
   isExpandable: false,

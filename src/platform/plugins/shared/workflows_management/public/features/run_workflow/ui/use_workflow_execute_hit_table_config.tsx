@@ -10,10 +10,10 @@
 import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import { EuiText, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import { IndexPatternSource } from '@kbn/data-source';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import type {
-  DataTableColumnsMeta,
   UnifiedDataTableRenderCustomToolbar,
   UnifiedDataTableRenderCustomToolbarProps,
 } from '@kbn/unified-data-table';
@@ -35,12 +35,6 @@ export type {
   UseWorkflowExecuteHitTableConfigOptions,
   UseWorkflowExecuteHitTableConfigResult,
 } from './use_workflow_execute_hit_table_config_types';
-
-const buildColumnsMetaFromFieldNames = (fieldNames: readonly string[]): DataTableColumnsMeta =>
-  fieldNames.reduce<DataTableColumnsMeta>((meta, fieldName) => {
-    meta[fieldName] = { type: 'string' };
-    return meta;
-  }, {});
 
 export function useWorkflowExecuteHitTableConfig(
   options: UseWorkflowExecuteHitTableConfigOptions
@@ -97,9 +91,9 @@ export function useWorkflowExecuteHitTableConfig(
     onTableSortChange,
   });
 
-  const columnsMeta = useMemo(
-    () => buildColumnsMetaFromFieldNames(defaultColumnsList),
-    [defaultColumnsList]
+  const dataSource = useMemo(
+    () => (dataView ? new IndexPatternSource(dataView) : undefined),
+    [dataView]
   );
 
   const unifiedDataTableServices = useMemo(
@@ -156,7 +150,7 @@ export function useWorkflowExecuteHitTableConfig(
     showTimeColumn,
     sort,
     dataTableRows,
-    columnsMeta,
+    dataSource,
     externalCustomRenderers: externalCustomRenderers ?? {},
     customGridColumnsConfiguration,
     unifiedDataTableServices,

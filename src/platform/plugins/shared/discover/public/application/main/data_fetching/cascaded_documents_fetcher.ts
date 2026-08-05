@@ -12,10 +12,9 @@ import type { TimeRange } from '@kbn/es-query';
 import type { CascadeQueryArgs } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import { apm } from '@elastic/apm-rum';
 import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataSource } from '@kbn/data-source';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
-import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { ScopedProfilesManager } from '../../../context_awareness';
@@ -29,9 +28,9 @@ export interface FetchCascadedDocumentsParams extends CascadeQueryArgs {
 export interface CascadedDocumentsStateManager {
   getIsActiveInstance(): boolean;
   getCascadedDocuments(nodeId: string): DataTableRecord[] | undefined;
-  getColumnsMeta(): DataTableColumnsMeta;
+  getDataSource(): DataSource | undefined;
   setCascadedDocuments(nodeId: string, records: DataTableRecord[]): void;
-  setColumnsMeta(columnsMeta: DataTableColumnsMeta): void;
+  setDataSource(dataSource: DataSource | undefined): void;
 }
 
 export class CascadedDocumentsFetcher {
@@ -89,7 +88,7 @@ export class CascadedDocumentsFetcher {
         return [];
       }
 
-      const { esqlQueryColumns, records: fetchedRecords } = await fetchEsql({
+      const { records: fetchedRecords, dataSource } = await fetchEsql({
         query: cascadeQuery,
         esqlVariables,
         dataView,
@@ -114,10 +113,8 @@ export class CascadedDocumentsFetcher {
       records = fetchedRecords;
       this.stateManager.setCascadedDocuments(nodeId, records);
 
-      const columnsMeta = esqlQueryColumns ? getTextBasedColumnsMeta(esqlQueryColumns) : {};
-      const previousColumnsMeta = this.stateManager.getColumnsMeta();
-      if (!isEqual(previousColumnsMeta, columnsMeta)) {
-        this.stateManager.setColumnsMeta(columnsMeta);
+      if (dataSource) {
+        this.stateManager.setDataSource(dataSource);
       }
     } finally {
       this.abortControllers.delete(nodeId);

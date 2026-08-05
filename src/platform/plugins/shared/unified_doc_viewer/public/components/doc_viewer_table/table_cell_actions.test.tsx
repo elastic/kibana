@@ -55,7 +55,7 @@ describe('TableActions', () => {
       dataView: dataViewMockWithTimeField,
       fieldFormats: {} as FieldFormatsStart,
       isPinned: false,
-      columnsMeta: undefined,
+      dataSource: undefined,
     }),
   ];
 

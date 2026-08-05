@@ -118,14 +118,13 @@ const ESQLDataCascade = React.memo(
       ({ data: cellData, cellId, virtualizerController, rowIndex }) => (
         <ESQLDataCascadeLeafCell
           {...props}
-          dataView={dataView}
           cellData={cellData!}
           cellId={cellId}
           virtualizerController={virtualizerController}
           rowIndex={rowIndex}
         />
       ),
-      [dataView, props]
+      [props]
     );
 
     const dataCascadeUiState = useMemo<DataCascadeRestorableState | undefined>(
