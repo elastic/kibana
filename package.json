@@ -85,6 +85,7 @@
     "**/@hello-pangea/dnd": "18.0.1",
     "**/@langchain/core": "1.1.31",
     "**/@langchain/google-common": "2.1.24",
+    "**/monaco-marker-data-provider": "1.2.5",
     "**/@types/node": "24.10.13",
     "**/@types/prop-types": "15.7.5",
     "**/@typescript-eslint/utils": "8.60.0",
