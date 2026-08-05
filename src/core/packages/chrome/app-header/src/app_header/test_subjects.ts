@@ -19,6 +19,7 @@ export const APP_HEADER_TEST_SUBJECTS = {
   titleError: 'appHeaderTitleError',
   titleButton: 'appHeaderTitleButton',
   titleActions: 'appHeaderTitleActions',
+  badge: 'appHeaderBadge',
   sharePrefix: 'appHeaderShare',
   /** Stable share control id for FTR / Scout (title action). */
   shareButton: 'shareTopNavButton',

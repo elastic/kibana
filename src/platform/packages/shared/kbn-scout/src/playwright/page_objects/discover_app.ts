@@ -97,7 +97,10 @@ export class DiscoverApp {
 
   async selectDataView(
     name: string,
-    { waitForFieldList = true }: { waitForFieldList?: boolean } = {}
+    {
+      createAdHocIfMissing = true,
+      waitForFieldList = true,
+    }: { createAdHocIfMissing?: boolean; waitForFieldList?: boolean } = {}
   ) {
     const dataViewSwitch = await this.getVisibleDataViewSwitch();
     const currentValue = await dataViewSwitch.innerText();
@@ -110,7 +113,11 @@ export class DiscoverApp {
     await switcher.waitFor({ state: 'visible' });
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
     const matchingDataViewLocator = switcher.locator(`[data-test-subj="dataView-${name}"]`);
-    if (await matchingDataViewLocator.isVisible()) {
+    if (!createAdHocIfMissing) {
+      // Let Playwright wait for the filtered option to render instead of checking visibility
+      // immediately after the final keystroke.
+      await matchingDataViewLocator.click();
+    } else if (await matchingDataViewLocator.isVisible()) {
       await matchingDataViewLocator.click();
     } else {
       await this.page.testSubj.locator('explore-matching-indices-button').click();
