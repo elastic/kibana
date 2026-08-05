@@ -47,4 +47,12 @@ export interface BrowserApiToolMetadata {
    * return value is discarded (fire-and-forget).
    */
   returns_result?: boolean;
+
+  /**
+   * Declared shape of the handler's return value. Only meaningful with `returns_result: true`.
+   * `'image'` results are extracted server-side into a hidden `image` attachment on resume;
+   * the model receives `{ image_attachment_id }` instead of the raw payload.
+   * Defaults to `'json'` (result handed to the model verbatim).
+   */
+  result_type?: 'json' | 'image';
 }

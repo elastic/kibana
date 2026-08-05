@@ -18,8 +18,13 @@ import type {
  */
 const HANDLER_TIMEOUT_MS = 30_000;
 
-/** Keep in sync with the `result` bound of the converse route's prompt response schema. */
+/**
+ * Ordinary (json) results stay small; image results carry a data URL and are bounded by the
+ * converse route's `result` schema cap (3.1M chars) instead. Keep the image bound in sync with
+ * that schema.
+ */
 const MAX_RESULT_LENGTH = 50_000;
+const MAX_IMAGE_RESULT_LENGTH = 3_100_000;
 
 export interface BrowserToolCallPromptProps {
   prompt: BrowserToolCallPromptRequest;
@@ -67,9 +72,10 @@ export const BrowserToolCallPrompt = ({ prompt, tool, onComplete }: BrowserToolC
         if (encoded === undefined) {
           return { error: 'Result is not JSON-serializable.' };
         }
-        if (encoded.length > MAX_RESULT_LENGTH) {
+        const maxLength = tool.resultType === 'image' ? MAX_IMAGE_RESULT_LENGTH : MAX_RESULT_LENGTH;
+        if (encoded.length > maxLength) {
           return {
-            error: `Result is too large (${encoded.length} characters, limit is ${MAX_RESULT_LENGTH}).`,
+            error: `Result is too large (${encoded.length} characters, limit is ${maxLength}).`,
           };
         }
         return { result: encoded };

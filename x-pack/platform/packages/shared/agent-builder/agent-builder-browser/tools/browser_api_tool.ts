@@ -60,6 +60,17 @@ export interface BrowserApiToolDefinition<TParams = unknown> {
    * immediate acknowledgement and does not wait for the handler.
    */
   returnsResult?: boolean;
+
+  /**
+   * Declares the shape of the handler's return value. Only meaningful with `returnsResult: true`.
+   *
+   * - `'json'` (default): the JSON-serialized return value is handed to the model verbatim.
+   * - `'image'`: the return value must be `{ content: <data URL>, mime_type, filename?, image_attachment_key?, ... }`.
+   *   The server extracts the image into a hidden `image` attachment and hands the model
+   *   `{ image_attachment_id, ...other fields }` instead, so base64 never enters the model context.
+   *   Image results are exempt from the ordinary result size limit (bounded by the route's body cap).
+   */
+  resultType?: 'json' | 'image';
 }
 
 export function toToolMetadata<TParams>(
@@ -76,5 +87,6 @@ export function toToolMetadata<TParams>(
       return jsonSchema;
     })(),
     returns_result: tool.returnsResult,
+    result_type: tool.resultType,
   };
 }

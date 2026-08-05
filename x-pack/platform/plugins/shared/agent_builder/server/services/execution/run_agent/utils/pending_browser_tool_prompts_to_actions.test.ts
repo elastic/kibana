@@ -6,19 +6,29 @@
  */
 
 import { ConversationRoundStatus, type ConversationRound } from '@kbn/agent-builder-common';
+import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import {
   AgentPromptType,
   type PromptRequest,
   type PromptStorageState,
 } from '@kbn/agent-builder-common/agents/prompts';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { pendingBrowserToolPromptsToActions } from './pending_browser_tool_prompts_to_actions';
 import { AgentActionType } from '../actions';
 
-const browserToolPrompt = (id: string, toolId = 'get_time_range'): PromptRequest => ({
+const BLUE_PIXEL_PNG =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+
+const browserToolPrompt = (
+  id: string,
+  toolId = 'get_time_range',
+  resultType?: 'json' | 'image'
+): PromptRequest => ({
   type: AgentPromptType.browser_tool_call,
   id,
   tool_id: toolId,
   params: { verbose: true },
+  ...(resultType ? { result_type: resultType } : {}),
 });
 
 const makeRound = (...pendingPrompts: PromptRequest[]): ConversationRound =>
@@ -34,8 +44,24 @@ const makeRound = (...pendingPrompts: PromptRequest[]): ConversationRound =>
     pending_prompts: pendingPrompts,
   } as unknown as ConversationRound);
 
+const createMockAttachmentStateManager = () => {
+  return {
+    getAttachmentRecord: jest.fn().mockReturnValue(undefined),
+    add: jest.fn().mockImplementation(async (input: { id?: string }) => ({
+      id: input.id ?? 'generated-attachment-id',
+    })),
+    update: jest.fn().mockResolvedValue({ id: 'updated' }),
+  } as unknown as jest.Mocked<AttachmentStateManager>;
+};
+
 describe('pendingBrowserToolPromptsToActions', () => {
-  it('emits a toolCall + executeTool action pair carrying the result the browser reported', () => {
+  let attachmentStateManager: jest.Mocked<AttachmentStateManager>;
+
+  beforeEach(() => {
+    attachmentStateManager = createMockAttachmentStateManager();
+  });
+
+  it('emits a toolCall + executeTool action pair carrying the result the browser reported', async () => {
     const round = makeRound(browserToolPrompt('p1'));
     const promptState: PromptStorageState = {
       responses: {
@@ -46,7 +72,11 @@ describe('pendingBrowserToolPromptsToActions', () => {
       },
     };
 
-    const result = pendingBrowserToolPromptsToActions({ round, promptState });
+    const result = await pendingBrowserToolPromptsToActions({
+      round,
+      promptState,
+      attachmentStateManager,
+    });
 
     expect(result.actions).toHaveLength(2);
     const [toolCallAction, executeToolAction] = result.actions as any[];
@@ -61,7 +91,7 @@ describe('pendingBrowserToolPromptsToActions', () => {
     expect(result.consumedPromptIds).toEqual(['p1']);
   });
 
-  it('surfaces the failure to the model when the browser reported an error', () => {
+  it('surfaces the failure to the model when the browser reported an error', async () => {
     const round = makeRound(browserToolPrompt('p1'));
     const promptState: PromptStorageState = {
       responses: {
@@ -72,7 +102,11 @@ describe('pendingBrowserToolPromptsToActions', () => {
       },
     };
 
-    const result = pendingBrowserToolPromptsToActions({ round, promptState });
+    const result = await pendingBrowserToolPromptsToActions({
+      round,
+      promptState,
+      attachmentStateManager,
+    });
 
     const [, executeToolAction] = result.actions as any[];
     expect(executeToolAction.tool_results[0].content).toBe(
@@ -80,7 +114,7 @@ describe('pendingBrowserToolPromptsToActions', () => {
     );
   });
 
-  it('handles one pair per pending prompt', () => {
+  it('handles one pair per pending prompt', async () => {
     const round = makeRound(browserToolPrompt('p1', 'tool_a'), browserToolPrompt('p2', 'tool_b'));
     const promptState: PromptStorageState = {
       responses: {
@@ -89,7 +123,11 @@ describe('pendingBrowserToolPromptsToActions', () => {
       },
     };
 
-    const result = pendingBrowserToolPromptsToActions({ round, promptState });
+    const result = await pendingBrowserToolPromptsToActions({
+      round,
+      promptState,
+      attachmentStateManager,
+    });
 
     expect(result.actions).toHaveLength(4);
     expect(result.consumedPromptIds).toEqual(['p1', 'p2']);
@@ -103,32 +141,223 @@ describe('pendingBrowserToolPromptsToActions', () => {
     ]);
   });
 
-  it('ignores prompts of other types', () => {
+  it('ignores prompts of other types', async () => {
     const round = makeRound({
       type: AgentPromptType.confirmation,
       id: 'c1',
     } as PromptRequest);
 
-    const result = pendingBrowserToolPromptsToActions({ round, promptState: { responses: {} } });
+    const result = await pendingBrowserToolPromptsToActions({
+      round,
+      promptState: { responses: {} },
+      attachmentStateManager,
+    });
 
     expect(result.actions).toEqual([]);
     expect(result.consumedPromptIds).toEqual([]);
   });
 
-  it('returns nothing when the round has no pending prompts', () => {
-    const result = pendingBrowserToolPromptsToActions({
+  it('returns nothing when the round has no pending prompts', async () => {
+    const result = await pendingBrowserToolPromptsToActions({
       round: makeRound(),
       promptState: { responses: {} },
+      attachmentStateManager,
     });
 
     expect(result.actions).toEqual([]);
   });
 
-  it('throws when no response was submitted for a pending prompt', () => {
+  it('throws when no response was submitted for a pending prompt', async () => {
     const round = makeRound(browserToolPrompt('p1'));
 
-    expect(() =>
-      pendingBrowserToolPromptsToActions({ round, promptState: { responses: {} } })
-    ).toThrow(/No browser_tool_call response found in prompt state for prompt_id p1/);
+    await expect(
+      pendingBrowserToolPromptsToActions({
+        round,
+        promptState: { responses: {} },
+        attachmentStateManager,
+      })
+    ).rejects.toThrow(/No browser_tool_call response found in prompt state for prompt_id p1/);
+  });
+
+  describe('image results', () => {
+    const imageResult = (extra: Record<string, unknown> = {}) =>
+      JSON.stringify({
+        content: BLUE_PIXEL_PNG,
+        mime_type: 'image/png',
+        filename: 'dashboard.png',
+        ...extra,
+      });
+
+    const imagePromptState = (result: string): PromptStorageState => ({
+      responses: {
+        p1: { type: AgentPromptType.browser_tool_call, response: { result } },
+      },
+    });
+
+    it('persists the image as a hidden attachment and substitutes the tool result content', async () => {
+      const round = makeRound(browserToolPrompt('p1', 'capture_screenshot', 'image'));
+
+      const result = await pendingBrowserToolPromptsToActions({
+        round,
+        promptState: imagePromptState(imageResult()),
+        attachmentStateManager,
+      });
+
+      expect(attachmentStateManager.add).toHaveBeenCalledWith({
+        id: undefined,
+        type: AttachmentType.image,
+        data: { content: BLUE_PIXEL_PNG, mime_type: 'image/png', filename: 'dashboard.png' },
+        hidden: true,
+        description: "Image returned by browser tool 'capture_screenshot'",
+      });
+
+      const [, executeToolAction] = result.actions as any[];
+      const content = JSON.parse(executeToolAction.tool_results[0].content);
+      expect(content).toEqual({ image_attachment_id: 'generated-attachment-id' });
+      expect(executeToolAction.tool_results[0].content).not.toContain('base64');
+    });
+
+    it('passes extra non-image fields through to the substituted content', async () => {
+      const round = makeRound(browserToolPrompt('p1', 'capture_screenshot', 'image'));
+
+      const result = await pendingBrowserToolPromptsToActions({
+        round,
+        promptState: imagePromptState(imageResult({ panel_count: 4 })),
+        attachmentStateManager,
+      });
+
+      const [, executeToolAction] = result.actions as any[];
+      expect(JSON.parse(executeToolAction.tool_results[0].content)).toEqual({
+        image_attachment_id: 'generated-attachment-id',
+        panel_count: 4,
+      });
+    });
+
+    it('creates the attachment under the stable key the tool supplied', async () => {
+      const round = makeRound(browserToolPrompt('p1', 'capture_screenshot', 'image'));
+
+      const result = await pendingBrowserToolPromptsToActions({
+        round,
+        promptState: imagePromptState(imageResult({ image_attachment_key: 'screenshot:dash-1' })),
+        attachmentStateManager,
+      });
+
+      expect(attachmentStateManager.add).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'screenshot:dash-1' })
+      );
+      const [, executeToolAction] = result.actions as any[];
+      expect(JSON.parse(executeToolAction.tool_results[0].content)).toEqual({
+        image_attachment_id: 'screenshot:dash-1',
+      });
+    });
+
+    it('updates the existing attachment in place when the stable key already exists', async () => {
+      attachmentStateManager.getAttachmentRecord.mockReturnValue({
+        id: 'screenshot:dash-1',
+        type: AttachmentType.image,
+      } as any);
+      const round = makeRound(browserToolPrompt('p1', 'capture_screenshot', 'image'));
+
+      const result = await pendingBrowserToolPromptsToActions({
+        round,
+        promptState: imagePromptState(imageResult({ image_attachment_key: 'screenshot:dash-1' })),
+        attachmentStateManager,
+      });
+
+      expect(attachmentStateManager.add).not.toHaveBeenCalled();
+      expect(attachmentStateManager.update).toHaveBeenCalledWith('screenshot:dash-1', {
+        data: { content: BLUE_PIXEL_PNG, mime_type: 'image/png', filename: 'dashboard.png' },
+      });
+      const [, executeToolAction] = result.actions as any[];
+      expect(JSON.parse(executeToolAction.tool_results[0].content)).toEqual({
+        image_attachment_id: 'screenshot:dash-1',
+      });
+    });
+
+    it('rejects a stable key that belongs to a non-image attachment', async () => {
+      attachmentStateManager.getAttachmentRecord.mockReturnValue({
+        id: 'screenshot:dash-1',
+        type: AttachmentType.text,
+      } as any);
+      const round = makeRound(browserToolPrompt('p1', 'capture_screenshot', 'image'));
+
+      const result = await pendingBrowserToolPromptsToActions({
+        round,
+        promptState: imagePromptState(imageResult({ image_attachment_key: 'screenshot:dash-1' })),
+        attachmentStateManager,
+      });
+
+      expect(attachmentStateManager.add).not.toHaveBeenCalled();
+      expect(attachmentStateManager.update).not.toHaveBeenCalled();
+      const [, executeToolAction] = result.actions as any[];
+      expect(JSON.parse(executeToolAction.tool_results[0].content)).toEqual({
+        error: expect.stringContaining('conflicts with an existing'),
+      });
+    });
+
+    it('reports an error to the model when the result is not JSON', async () => {
+      const round = makeRound(browserToolPrompt('p1', 'capture_screenshot', 'image'));
+
+      const result = await pendingBrowserToolPromptsToActions({
+        round,
+        promptState: imagePromptState('not json'),
+        attachmentStateManager,
+      });
+
+      expect(attachmentStateManager.add).not.toHaveBeenCalled();
+      const [, executeToolAction] = result.actions as any[];
+      expect(JSON.parse(executeToolAction.tool_results[0].content)).toEqual({
+        error: expect.stringContaining('non-JSON image result'),
+      });
+    });
+
+    it('reports an error to the model when the payload is not a valid image', async () => {
+      const round = makeRound(browserToolPrompt('p1', 'capture_screenshot', 'image'));
+
+      const result = await pendingBrowserToolPromptsToActions({
+        round,
+        promptState: imagePromptState(
+          JSON.stringify({ content: 'https://not-a-data-url', mime_type: 'image/png' })
+        ),
+        attachmentStateManager,
+      });
+
+      expect(attachmentStateManager.add).not.toHaveBeenCalled();
+      const [, executeToolAction] = result.actions as any[];
+      expect(JSON.parse(executeToolAction.tool_results[0].content)).toEqual({
+        error: expect.stringContaining('invalid image result'),
+      });
+    });
+
+    it('reports an error to the model when persisting the attachment fails', async () => {
+      (attachmentStateManager.add as jest.Mock).mockRejectedValue(new Error('validation failed'));
+      const round = makeRound(browserToolPrompt('p1', 'capture_screenshot', 'image'));
+
+      const result = await pendingBrowserToolPromptsToActions({
+        round,
+        promptState: imagePromptState(imageResult()),
+        attachmentStateManager,
+      });
+
+      const [, executeToolAction] = result.actions as any[];
+      expect(JSON.parse(executeToolAction.tool_results[0].content)).toEqual({
+        error: expect.stringContaining('validation failed'),
+      });
+    });
+
+    it('hands json-typed results to the model verbatim even when they look like images', async () => {
+      const round = makeRound(browserToolPrompt('p1', 'some_tool'));
+      const raw = imageResult();
+
+      const result = await pendingBrowserToolPromptsToActions({
+        round,
+        promptState: imagePromptState(raw),
+        attachmentStateManager,
+      });
+
+      expect(attachmentStateManager.add).not.toHaveBeenCalled();
+      const [, executeToolAction] = result.actions as any[];
+      expect(executeToolAction.tool_results[0].content).toBe(raw);
+    });
   });
 });

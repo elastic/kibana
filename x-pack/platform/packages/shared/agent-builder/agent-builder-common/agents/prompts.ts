@@ -111,6 +111,11 @@ export interface BrowserToolCallPromptDefinition {
   tool_id: string;
   /** Parameters the agent called the tool with. */
   params: Record<string, unknown>;
+  /**
+   * Declared result shape, copied from the tool metadata so the resume path knows how to
+   * process the response. `'image'` results are extracted into a hidden `image` attachment.
+   */
+  result_type?: 'json' | 'image';
 }
 
 export interface ConfirmationPromptResponse {

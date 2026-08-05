@@ -26,6 +26,7 @@ import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
 import type { ToolManager, TodoStateManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ProcessedConversation } from './utils/prepare_conversation';
 import { createResultTransformer } from './utils/create_result_transformer';
 import {
@@ -330,12 +331,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
 
   const eventStream = agentGraph.streamEvents(
-    createInitializerCommand({
+    await createInitializerCommand({
       conversation: processedConversation,
       agentBuilderToLangchainIdMap: reverseMap(toolManager.getToolIdMapping()),
       cycleLimit: CYCLE_LIMIT,
       promptManager,
       eventEmitter,
+      attachmentStateManager: context.attachmentStateManager,
     }),
     {
       version: 'v2',
@@ -451,19 +453,21 @@ const getConversationState = ({
   };
 };
 
-const createInitializerCommand = ({
+const createInitializerCommand = async ({
   conversation,
   cycleLimit,
   agentBuilderToLangchainIdMap,
   promptManager,
   eventEmitter,
+  attachmentStateManager,
 }: {
   conversation: ProcessedConversation;
   cycleLimit: number;
   agentBuilderToLangchainIdMap: ToolIdMapping;
   promptManager: PromptManager;
   eventEmitter: AgentEventEmitterFn;
-}): Command => {
+  attachmentStateManager: AttachmentStateManager;
+}): Promise<Command> => {
   const initialState: Partial<StateType> = { cycleLimit };
   let startAt = steps.init;
 
@@ -472,11 +476,12 @@ const createInitializerCommand = ({
     : undefined;
 
   if (lastRound?.status === ConversationRoundStatus.awaitingPrompt) {
-    const { actions, consumedPromptIds } = buildPendingRoundActions({
+    const { actions, consumedPromptIds } = await buildPendingRoundActions({
       round: lastRound,
       promptState: promptManager.dump(),
       toolIdMapping: agentBuilderToLangchainIdMap,
       eventEmitter,
+      attachmentStateManager,
     });
     initialState.mainActions = actions;
     // on-resume cleanup: ask_user_question responses are consumed once per round.

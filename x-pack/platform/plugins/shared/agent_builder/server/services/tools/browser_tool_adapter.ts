@@ -29,6 +29,9 @@ export function createBrowserToolAdapter({ browserTool }: { browserTool: Browser
             id: uuidv4(),
             tool_id: browserTool.id,
             params,
+            // Persisted on the prompt so the resume path knows how to process the response
+            // (browser tool metadata is no longer available at that point).
+            result_type: browserTool.result_type,
           },
         };
 

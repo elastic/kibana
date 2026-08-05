@@ -74,7 +74,9 @@ export const promptResponseEntrySchema = schema.oneOf([
     }
   ),
   schema.object(
-    { result: schema.string({ maxLength: 50_000 }) },
+    // Sized for `result_type: 'image'` tools: a ~3M-char data URL plus its JSON envelope.
+    // Ordinary tools are still bounded to 50k client-side (`browser_tool_call_prompt.tsx`).
+    { result: schema.string({ maxLength: 3_100_000 }) },
     {
       meta: {
         availability: { stability: 'tech_preview' },
@@ -278,6 +280,14 @@ export const conversePayloadSchema = schema.object({
             meta: {
               description:
                 'When true, the agent pauses on the tool call and resumes with the result the browser reports back. Defaults to false (fire-and-forget).',
+            },
+          })
+        ),
+        result_type: schema.maybe(
+          schema.oneOf([schema.literal('json'), schema.literal('image')], {
+            meta: {
+              description:
+                "Declared shape of the tool result. 'image' results are extracted server-side into a hidden image attachment. Defaults to 'json'.",
             },
           })
         ),
@@ -567,6 +577,10 @@ export function registerChatRoutes({
         availability: {
           since: '9.2.0',
         },
+        // Fits an image-typed browser tool result (~3M-char data URL) in the resume payload.
+        body: {
+          maxBytes: 4 * 1024 * 1024,
+        },
       },
     })
     .addVersion(
@@ -615,6 +629,10 @@ export function registerChatRoutes({
         tags: ['oas-tag:agent builder'],
         availability: {
           since: '9.2.0',
+        },
+        // Fits an image-typed browser tool result (~3M-char data URL) in the resume payload.
+        body: {
+          maxBytes: 4 * 1024 * 1024,
         },
       },
     })
