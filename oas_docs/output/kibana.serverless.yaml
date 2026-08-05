@@ -8846,6 +8846,20 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                invalidRequest:
+                  summary: Indicates an invalid schema or parameters.
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        errors: []
+                        properties:
+                          page:
+                            errors:
+                              - 'Too small: expected number to be >=1'
+                    error: Bad Request
+                    message: 'page: Too small: expected number to be >=1'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates the request failed schema validation.
@@ -8980,6 +8994,20 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                invalidRequest:
+                  summary: Indicates an invalid schema or parameters.
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        errors: []
+                        properties:
+                          page:
+                            errors:
+                              - 'Too small: expected number to be >=1'
+                    error: Bad Request
+                    message: 'page: Too small: expected number to be >=1'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates the request failed schema validation.
@@ -9528,6 +9556,20 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                invalidRequest:
+                  summary: Indicates an invalid schema or parameters.
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        errors: []
+                        properties:
+                          page:
+                            errors:
+                              - 'Too small: expected number to be >=1'
+                    error: Bad Request
+                    message: 'page: Too small: expected number to be >=1'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates the request failed schema validation.
@@ -9685,6 +9727,20 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                invalidRequest:
+                  summary: Indicates an invalid schema or parameters.
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        errors: []
+                        properties:
+                          page:
+                            errors:
+                              - 'Too small: expected number to be >=1'
+                    error: Bad Request
+                    message: 'page: Too small: expected number to be >=1'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates the request failed schema validation.
@@ -10023,6 +10079,20 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                invalidRequest:
+                  summary: Indicates an invalid schema or parameters.
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        errors: []
+                        properties:
+                          page:
+                            errors:
+                              - 'Too small: expected number to be >=1'
+                    error: Bad Request
+                    message: 'page: Too small: expected number to be >=1'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates the request failed schema validation.
@@ -10148,6 +10218,20 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                invalidRequest:
+                  summary: Indicates an invalid schema or parameters.
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        errors: []
+                        properties:
+                          page:
+                            errors:
+                              - 'Too small: expected number to be >=1'
+                    error: Bad Request
+                    message: 'page: Too small: expected number to be >=1'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates the request failed schema validation.
@@ -10378,6 +10462,17 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createAlertEventRequest:
+                summary: Create an alert event from Datadog
+                value:
+                  data:
+                    monitor_id: mon-1
+                    rule_name: CPU high
+                  fingerprint: fp-1
+                  severity: high
+                  source: datadog
+                  timestamp: '2026-07-29T12:00:00.000Z'
             schema:
               additionalProperties: false
               type: object
@@ -10430,6 +10525,12 @@ paths:
         '201':
           content:
             application/json:
+              examples:
+                createAlertEventResponse:
+                  summary: Created alert event identifiers
+                  value:
+                    episode_id: episode-1
+                    group_hash: group-hash-1
               schema:
                 additionalProperties: false
                 type: object
@@ -10445,6 +10546,20 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                invalidRequest:
+                  summary: Indicates an invalid schema or parameters.
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        errors: []
+                        properties:
+                          fingerprint:
+                            errors:
+                              - one of fingerprint, fingerprint_fields, or rule_id is required to establish a stable series identity
+                    error: Bad Request
+                    message: 'fingerprint: one of fingerprint, fingerprint_fields, or rule_id is required to establish a stable series identity'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates an invalid schema or parameters.
@@ -11710,7 +11825,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The external source system that produced the alert event (for example, "datadog"). Cannot start with "elastic".
+          in: path
           name: source
           required: true
           schema:
@@ -11720,6 +11836,16 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createAlertEventBySourceRequest:
+                summary: Create an alert event with source in the path
+                value:
+                  data:
+                    monitor_id: mon-1
+                    rule_name: CPU high
+                  fingerprint: fp-1
+                  severity: high
+                  timestamp: '2026-07-29T12:00:00.000Z'
             schema:
               additionalProperties: false
               type: object
@@ -11766,6 +11892,12 @@ paths:
         '201':
           content:
             application/json:
+              examples:
+                createAlertEventBySourceResponse:
+                  summary: Created alert event identifiers
+                  value:
+                    episode_id: episode-1
+                    group_hash: group-hash-1
               schema:
                 additionalProperties: false
                 type: object
@@ -11781,6 +11913,20 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                invalidRequest:
+                  summary: Indicates an invalid schema or parameters.
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        errors: []
+                        properties:
+                          fingerprint:
+                            errors:
+                              - one of fingerprint, fingerprint_fields, or rule_id is required to establish a stable series identity
+                    error: Bad Request
+                    message: 'fingerprint: one of fingerprint, fingerprint_fields, or rule_id is required to establish a stable series identity'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates an invalid schema or parameters.
@@ -12336,15 +12482,18 @@ paths:
             application/json:
               examples:
                 invalidRequest:
-                  summary: List query uses an invalid page number
+                  summary: Indicates an invalid schema or parameters.
                   value:
                     code: BAD_REQUEST
                     details:
                       errors:
-                        page:
-                          - Number must be greater than or equal to 1
+                        errors: []
+                        properties:
+                          page:
+                            errors:
+                              - 'Too small: expected number to be >=1'
                     error: Bad Request
-                    message: 'page: Number must be greater than or equal to 1'
+                    message: 'page: Too small: expected number to be >=1'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates an invalid schema or parameters.
@@ -13604,6 +13753,20 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                invalidRequest:
+                  summary: Indicates an invalid schema or parameters.
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        errors: []
+                        properties:
+                          page:
+                            errors:
+                              - 'Too small: expected number to be >=1'
+                    error: Bad Request
+                    message: 'page: Too small: expected number to be >=1'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates the request failed schema validation.
@@ -13744,6 +13907,20 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                invalidRequest:
+                  summary: Indicates an invalid schema or parameters.
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        errors: []
+                        properties:
+                          page:
+                            errors:
+                              - 'Too small: expected number to be >=1'
+                    error: Bad Request
+                    message: 'page: Too small: expected number to be >=1'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates the request failed schema validation.
@@ -13964,7 +14141,7 @@ paths:
             application/json:
               examples:
                 ruleVersionConflict:
-                  summary: Rule was updated by another caller
+                  summary: Indicates the rule was concurrently updated by another caller.
                   value:
                     code: RULE_VERSION_CONFLICT
                     details:
@@ -14282,12 +14459,60 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                disableRuleResponse:
+                  summary: Disabled host CPU threshold rule
+                  value:
+                    createdAt: '2026-01-15T12:00:00.000Z'
+                    createdBy: elastic
+                    enabled: false
+                    grouping:
+                      fields:
+                        - host.name
+                    id: rule-1
+                    kind: alert
+                    metadata:
+                      description: Alerts when average CPU usage exceeds a threshold.
+                      name: Host CPU high
+                      tags:
+                        - production
+                        - infra
+                      version: 1
+                    query:
+                      breach:
+                        query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
+                      format: standalone
+                    recovery_strategy: no_breach
+                    schedule:
+                      every: 1m
+                      lookback: 5m
+                    state_transition:
+                      pending_count: 1
+                      recovering_count: 1
+                    time_field: '@timestamp'
+                    updatedAt: '2026-01-15T12:00:00.000Z'
+                    updatedBy: elastic
+                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_response'
           description: Returns the disabled rule.
         '400':
           content:
             application/json:
+              examples:
+                invalidRequest:
+                  summary: Indicates an invalid schema or parameters.
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        errors: []
+                        properties:
+                          page:
+                            errors:
+                              - 'Too small: expected number to be >=1'
+                    error: Bad Request
+                    message: 'page: Too small: expected number to be >=1'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates the request failed schema validation.
@@ -14320,12 +14545,30 @@ paths:
         '404':
           content:
             application/json:
+              examples:
+                ruleNotFound:
+                  summary: No rule exists for the given ID
+                  value:
+                    code: RULE_NOT_FOUND
+                    details:
+                      rule_id: rule-1
+                    error: Not Found
+                    message: Rule with id "rule-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates a rule with the given ID does not exist.
         '409':
           content:
             application/json:
+              examples:
+                ruleVersionConflict:
+                  summary: Indicates the rule was concurrently updated by another caller.
+                  value:
+                    code: RULE_VERSION_CONFLICT
+                    details:
+                      rule_id: rule-1
+                    error: Conflict
+                    message: Rule with id "rule-1" has already been updated by another user
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates the rule was concurrently updated by another caller.
@@ -14393,12 +14636,56 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                enableRuleResponse:
+                  summary: Enabled host CPU threshold rule
+                  value:
+                    createdAt: '2026-01-15T12:00:00.000Z'
+                    createdBy: elastic
+                    enabled: true
+                    grouping:
+                      fields:
+                        - host.name
+                    id: rule-1
+                    kind: alert
+                    metadata:
+                      description: Alerts when average CPU usage exceeds a threshold.
+                      name: Host CPU high
+                      tags:
+                        - production
+                        - infra
+                      version: 1
+                    query:
+                      breach:
+                        query: FROM metrics-* | WHERE host.cpu.usage > 0.9 | STATS avg_cpu = AVG(host.cpu.usage) BY host.name
+                      format: standalone
+                    recovery_strategy: no_breach
+                    schedule:
+                      every: 1m
+                      lookback: 5m
+                    state_transition:
+                      pending_count: 1
+                      recovering_count: 1
+                    time_field: '@timestamp'
+                    updatedAt: '2026-01-15T12:00:00.000Z'
+                    updatedBy: elastic
+                    version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_rule_response'
           description: Returns the enabled rule.
         '400':
           content:
             application/json:
+              examples:
+                maxSchedulesPerMinuteExceeded:
+                  summary: Indicates the request is invalid, for example enabling the rule would exceed the configured schedule limit.
+                  value:
+                    code: MAX_SCHEDULES_PER_MINUTE_EXCEEDED
+                    details:
+                      interval: 1m
+                      maxScheduledPerMinute: 400
+                    error: Bad Request
+                    message: Rule schedule of "1m" would exceed the limit of 400 rule runs per minute
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates the request is invalid, for example enabling the rule would exceed the configured schedule limit.
@@ -14431,12 +14718,30 @@ paths:
         '404':
           content:
             application/json:
+              examples:
+                ruleNotFound:
+                  summary: No rule exists for the given ID
+                  value:
+                    code: RULE_NOT_FOUND
+                    details:
+                      rule_id: rule-1
+                    error: Not Found
+                    message: Rule with id "rule-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates a rule with the given ID does not exist.
         '409':
           content:
             application/json:
+              examples:
+                ruleVersionConflict:
+                  summary: Indicates the rule was concurrently updated by another caller.
+                  value:
+                    code: RULE_VERSION_CONFLICT
+                    details:
+                      rule_id: rule-1
+                    error: Conflict
+                    message: Rule with id "rule-1" has already been updated by another user
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates the rule was concurrently updated by another caller.
@@ -14506,6 +14811,15 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                ruleDisabled:
+                  summary: Indicates the rule is disabled and cannot be run.
+                  value:
+                    code: RULE_DISABLED
+                    details:
+                      rule_id: rule-1
+                    error: Bad Request
+                    message: Rule with id "rule-1" is disabled and cannot be run
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates the rule is disabled and cannot be run.
@@ -14538,12 +14852,30 @@ paths:
         '404':
           content:
             application/json:
+              examples:
+                ruleNotFound:
+                  summary: No rule exists for the given ID
+                  value:
+                    code: RULE_NOT_FOUND
+                    details:
+                      rule_id: rule-1
+                    error: Not Found
+                    message: Rule with id "rule-1" not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates a rule with the given ID does not exist.
         '409':
           content:
             application/json:
+              examples:
+                ruleAlreadyRunning:
+                  summary: Indicates the rule is already running or the run request conflicted.
+                  value:
+                    code: RULE_ALREADY_RUNNING
+                    details:
+                      rule_id: rule-1
+                    error: Conflict
+                    message: Rule with id "rule-1" is already running
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_v2_error_response'
           description: Indicates the rule is already running or the run request conflicted.
