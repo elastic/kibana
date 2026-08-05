@@ -96,8 +96,10 @@ test.describe('ES|QL Data Federation — data sources CRUD', { tag: tags.statefu
       await row.locator('[data-test-subj="dataSetsDeleteIconButton"]').click();
 
       const modal = page.getByRole('alertdialog');
+      await expect(modal).toBeVisible();
 
-      await modal.getByRole('button', { name: 'Delete' }).click();
+      await modal.locator('[data-test-subj="confirmModalConfirmButton"]').click();
+      await expect(modal).toBeHidden();
       await expect(row).toBeHidden();
     });
   });
