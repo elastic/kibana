@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LocationAgentStats } from '../../../../../server/routes/settings/private_locations/get_agent_stats';
+import type { LocationAgentStats } from '../../../../../common/types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { apiService } from '../../../../utils/api_service/api_service';
 

@@ -8,10 +8,7 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import { LocationAgentDetails } from './location_agent_details';
-import type {
-  AgentStat,
-  LocationAgentStats,
-} from '../../../../../../server/routes/settings/private_locations/get_agent_stats';
+import type { AgentStat, LocationAgentStats } from '../../../../../../common/types';
 
 jest.mock('../../../contexts', () => ({
   useSyntheticsSettingsContext: () => ({ basePath: '' }),

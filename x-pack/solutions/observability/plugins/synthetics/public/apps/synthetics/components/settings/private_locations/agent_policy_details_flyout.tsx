@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFleetPermissions } from '../../../hooks';
 import { selectAgentPolicies } from '../../../state/agent_policies';
-import type { LocationAgentStats } from '../../../../../../server/routes/settings/private_locations/get_agent_stats';
+import type { LocationAgentStats } from '../../../../../../common/types';
 
 export const AgentPolicyDetailsFlyout = ({
   agentPolicyId,

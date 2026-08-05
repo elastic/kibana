@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
@@ -20,7 +20,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useDispatch } from 'react-redux-v7';
 import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -36,6 +36,7 @@ import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useLocationMonitors } from './hooks/use_location_monitors';
 import { useAgentStats } from './hooks/use_agent_stats';
 import { LocationAgentDetails } from './location_agent_details';
+import { RelativeTimestamp } from './relative_timestamp';
 import { PolicyName } from './policy_name';
 import { LOCATION_NAME_LABEL } from './location_form';
 import { setIsPrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
@@ -90,13 +91,6 @@ export const PrivateLocationsTable = ({
       }
       return next;
     });
-
-  // Re-render periodically so the "Updated … ago" caption stays current between refreshes.
-  const [nowTick, setNowTick] = useState(() => Date.now());
-  useEffect(() => {
-    const id = setInterval(() => setNowTick(Date.now()), 30_000);
-    return () => clearInterval(id);
-  }, []);
 
   const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
 
@@ -328,7 +322,11 @@ export const PrivateLocationsTable = ({
       <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued" className="eui-textNoWrap">
-            {LAST_UPDATED_LABEL(moment(lastRefresh).from(nowTick))}
+            <FormattedMessage
+              id="xpack.synthetics.monitorManagement.lastUpdated"
+              defaultMessage="Updated {time}"
+              values={{ time: <RelativeTimestamp timestamp={lastRefresh} /> }}
+            />
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -426,12 +424,6 @@ const COLLAPSE_ROW_LABEL = i18n.translate('xpack.synthetics.monitorManagement.co
 const REFRESH_LABEL = i18n.translate('xpack.synthetics.monitorManagement.refresh', {
   defaultMessage: 'Refresh',
 });
-
-const LAST_UPDATED_LABEL = (time: string) =>
-  i18n.translate('xpack.synthetics.monitorManagement.lastUpdated', {
-    defaultMessage: 'Updated {time}',
-    values: { time },
-  });
 
 const DELETE_LOCATION = i18n.translate(
   'xpack.synthetics.settingsRoute.privateLocations.deleteLabel',

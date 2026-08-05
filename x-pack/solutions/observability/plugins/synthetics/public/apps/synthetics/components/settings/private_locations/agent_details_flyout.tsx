@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFleetPermissions } from '../../../hooks';
-import type { AgentStat } from '../../../../../../server/routes/settings/private_locations/get_agent_stats';
+import type { AgentStat } from '../../../../../../common/types';
 
 const formatRam = (mib: number): string =>
   mib >= 1024 ? `${(mib / 1024).toFixed(1)} GB` : `${mib} MB`;

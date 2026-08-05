@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LocationAgentStats } from '../../../../../server/routes/settings/private_locations/get_agent_stats';
+import type { LocationAgentStats } from '../../../../../common/types';
 import { createAsyncAction } from '../utils/actions';
 
 export const getAgentStatsAction = createAsyncAction<void, LocationAgentStats[]>(

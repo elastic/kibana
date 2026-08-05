@@ -30,10 +30,7 @@ import { useHistory } from 'react-router-dom';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFleetPermissions } from '../../../hooks';
 import { AgentDetailsFlyout } from './agent_details_flyout';
-import type {
-  AgentStat,
-  LocationAgentStats,
-} from '../../../../../../server/routes/settings/private_locations/get_agent_stats';
+import type { AgentStat, LocationAgentStats } from '../../../../../../common/types';
 
 /** Used-memory fraction at/above which an agent is flagged as memory-constrained. */
 const MEMORY_PRESSURE_PCT = 0.85;

@@ -10,50 +10,9 @@ import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import type { SyntheticsServerSetup } from '../../../types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import type { AgentStat, LocationAgentStats } from '../../../../common/types';
 
 const BYTES_PER_MIB = 1024 * 1024;
-
-export interface AgentStat {
-  /** Agent `host.name` (lowercased). */
-  host: string;
-  lastCheckin: number | null;
-  /** Whether Fleet reports the agent as online. */
-  healthy: boolean;
-  /**
-   * Total host RAM (MiB), from agent metadata (`host.memory`) or, as a fallback,
-   * `system.memory.total` in `metrics-system.memory-*`. Null when neither source
-   * is available (UI shows "N/A").
-   */
-  totalMemoryMib: number | null;
-  /**
-   * Used host RAM (MiB) and fraction used (0..1), from `system.memory.actual.used.*`
-   * in `metrics-system.memory-*` (System integration only). Null when unavailable.
-   */
-  usedMemoryMib: number | null;
-  usedMemoryPct: number | null;
-  /**
-   * Normalized host CPU usage (0..1) from `system.cpu.total.norm.pct` in
-   * `metrics-system.cpu-*` (System integration only). Null when unavailable.
-   */
-  cpuPct: number | null;
-  /** Fleet agent identity/metadata for the freshest agent on this host, powering the flyout. */
-  agentId: string | null;
-  agentVersion: string | null;
-  agentStatus: string | null;
-  policyRevision: number | null;
-  lastCheckinMessage: string | null;
-  platform: string | null;
-  tags: string[];
-}
-
-export interface LocationAgentStats {
-  locationId: string;
-  locationLabel: string;
-  agentPolicyId: string;
-  /** Agent policy display name, or the id when the policy can't be resolved. */
-  agentPolicyName: string;
-  agents: AgentStat[];
-}
 
 interface AgentHostMeta {
   /**

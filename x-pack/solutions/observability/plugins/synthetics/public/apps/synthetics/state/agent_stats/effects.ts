@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { takeLeading } from 'redux-saga/effects';
+import { takeLatest } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import { fetchPrivateLocationAgentStats } from './api';
 import { getAgentStatsAction } from './actions';
 
 export function* fetchAgentStatsEffect() {
-  yield takeLeading(
+  // takeLatest (not takeLeading): a Refresh dispatched mid-fetch cancels the
+  // in-flight request and restarts, so an explicit refresh always wins.
+  yield takeLatest(
     getAgentStatsAction.get,
     fetchEffectFactory(
       fetchPrivateLocationAgentStats,
