@@ -8,6 +8,7 @@
 import type { DatasetSettings, DatasetSettingsFile } from '../../common/dataset_types';
 
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
+import { mapNullValueToApi } from './dataset_settings_options';
 
 export type DatasetFormatFormValue = '' | 'parquet' | 'csv' | 'tsv' | 'ndjson' | 'orc';
 export type DatasetErrorModeFormValue = '' | 'fail_fast' | 'skip_row' | 'null_field';
@@ -176,7 +177,8 @@ export const buildDatasetSettingsFromFormValues = (
     const headerRow = parseBooleanFormValue(settings.header_row);
     if (headerRow !== undefined) applied.header_row = headerRow;
 
-    if (settings.null_value) applied.null_value = settings.null_value;
+    const nullValue = mapNullValueToApi(settings.null_value);
+    if (nullValue !== undefined) applied.null_value = nullValue;
     if (settings.encoding) applied.encoding = settings.encoding;
     if (settings.quote) applied.quote = settings.quote;
     if (settings.escape) applied.escape = settings.escape;

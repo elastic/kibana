@@ -10,6 +10,7 @@ import {
   type CreateDatasetSettingsFormValues,
 } from './create_dataset_flyout_form_state';
 import { applySettingsForFormat } from './dataset_settings_defaults';
+import { NULL_VALUE_EMPTY_STRING_PRESET } from './dataset_settings_options';
 
 describe('applySettingsForFormat', () => {
   it('applies csv defaults to an empty form', () => {
@@ -19,6 +20,7 @@ describe('applySettingsForFormat', () => {
       delimiter: ',',
       encoding: 'UTF-8',
       column_prefix: 'col',
+      null_value: NULL_VALUE_EMPTY_STRING_PRESET,
       schema_sample_size: '20000',
       max_error_ratio: '0.0',
     });
@@ -29,6 +31,7 @@ describe('applySettingsForFormat', () => {
       format: 'tsv',
       delimiter: '\t',
       encoding: 'UTF-8',
+      null_value: NULL_VALUE_EMPTY_STRING_PRESET,
       schema_sample_size: '20000',
     });
   });
@@ -40,6 +43,7 @@ describe('applySettingsForFormat', () => {
       format: 'tsv',
       delimiter: '\t',
       encoding: 'UTF-8',
+      null_value: NULL_VALUE_EMPTY_STRING_PRESET,
       schema_sample_size: '20000',
     });
   });

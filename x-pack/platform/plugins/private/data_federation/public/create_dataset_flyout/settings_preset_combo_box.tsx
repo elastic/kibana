@@ -28,19 +28,10 @@ export interface SettingsPresetComboBoxProps {
 
 const buildSelectedOptions = (
   value: string,
-  presets: Array<{ value: string; label: string }>,
   comboBoxOptions: Array<EuiComboBoxOptionOption<string>>
 ): Array<EuiComboBoxOptionOption<string>> => {
-  const presetValues = presets.map((preset) => preset.value);
-  const hasEmptyStringPreset = presetValues.includes('');
-
-  if (value === '' && !hasEmptyStringPreset) {
+  if (!value) {
     return [];
-  }
-
-  if (value === '' && hasEmptyStringPreset) {
-    const emptyPreset = presets.find((preset) => preset.value === '');
-    return emptyPreset ? [{ label: emptyPreset.label, value: '' }] : [];
   }
 
   const matchingOption = comboBoxOptions.find((option) => option.value === value);
@@ -73,8 +64,8 @@ export const SettingsPresetComboBox: FunctionComponent<SettingsPresetComboBoxPro
   );
 
   const selectedOptions = useMemo(
-    () => buildSelectedOptions(field.value, presets, comboBoxOptions),
-    [comboBoxOptions, field.value, presets]
+    () => buildSelectedOptions(field.value, comboBoxOptions),
+    [comboBoxOptions, field.value]
   );
 
   const handleSelectionChange = useCallback(

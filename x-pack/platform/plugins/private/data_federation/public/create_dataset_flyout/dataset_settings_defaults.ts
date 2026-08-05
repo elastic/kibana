@@ -14,10 +14,12 @@ import {
   DATASET_SETTINGS_FIELD_IDS,
   isFieldVisibleForFormat,
 } from './dataset_settings_visibility';
+import { NULL_VALUE_EMPTY_STRING_PRESET } from './dataset_settings_options';
 
 const CSV_TSV_DEFAULTS: Partial<CreateDatasetSettingsFormValues> = {
   encoding: 'UTF-8',
   column_prefix: 'col',
+  null_value: NULL_VALUE_EMPTY_STRING_PRESET,
   schema_sample_size: '20000',
   max_error_ratio: '0.0',
 };

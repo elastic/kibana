@@ -22,6 +22,7 @@ import {
   type DatasetPartitionDetectionFormValue,
   type DatasetSchemaResolutionFormValue,
 } from './create_dataset_flyout_form_state';
+import { mapNullValueToForm } from './dataset_settings_options';
 
 export const emptyDatasetFlyoutFormValues = (): CreateDatasetFormValues => ({
   name: '',
@@ -68,7 +69,7 @@ const settingsToFlyoutFormValues = (
     mode: (s.mode ?? '') as DatasetModeFormValue,
     header_row: boolToFormValue(s.header_row),
     // CSV/TSV advanced
-    null_value: s.null_value ?? '',
+    null_value: mapNullValueToForm(s.null_value),
     encoding: s.encoding ?? '',
     quote: s.quote ?? '',
     escape: s.escape ?? '',

@@ -11,6 +11,7 @@ import {
   dataSetToFlyoutFormValues,
   emptyDatasetFlyoutFormValues,
 } from './dataset_flyout_initial_values';
+import { NULL_VALUE_EMPTY_STRING_PRESET } from './dataset_settings_options';
 
 describe('dataset_flyout_initial_values', () => {
   it('creates empty flyout form values', () => {
@@ -106,5 +107,18 @@ describe('dataset_flyout_initial_values', () => {
     expect(result.settings.schema_resolution).toBe('union_by_name');
     expect(result.settings.partition_path).toBe('/year={year}/');
     expect(result.settings.hive_partitioning).toBe('false');
+  });
+
+  it('maps API empty string null_value to the internal preset', () => {
+    const result = dataSetToFlyoutFormValues({
+      name: 'id',
+      data_source: 'source',
+      resource: 'r',
+      settings: {
+        null_value: '',
+      },
+    });
+
+    expect(result.settings.null_value).toBe(NULL_VALUE_EMPTY_STRING_PRESET);
   });
 });

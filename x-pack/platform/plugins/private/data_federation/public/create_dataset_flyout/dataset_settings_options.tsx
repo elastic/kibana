@@ -150,10 +150,36 @@ export const ENCODING_PRESETS = () => [
   { value: 'UTF-16', label: 'UTF-16' },
 ];
 
+export const NULL_VALUE_EMPTY_STRING_PRESET = '__empty_string__';
+
+export const mapNullValueToForm = (nullValue: string | undefined): string => {
+  if (nullValue === undefined) {
+    return '';
+  }
+
+  if (nullValue === '') {
+    return NULL_VALUE_EMPTY_STRING_PRESET;
+  }
+
+  return nullValue;
+};
+
+export const mapNullValueToApi = (formValue: string): string | undefined => {
+  if (!formValue) {
+    return undefined;
+  }
+
+  if (formValue === NULL_VALUE_EMPTY_STRING_PRESET) {
+    return '';
+  }
+
+  return formValue;
+};
+
 export const NULL_VALUE_PRESETS = () => [
   { value: 'NULL', label: 'NULL' },
   { value: 'NA', label: 'NA' },
-  { value: '', label: '(empty string)' },
+  { value: NULL_VALUE_EMPTY_STRING_PRESET, label: '(empty string)' },
 ];
 
 export const PARTITION_PATH_PRESETS = () => [

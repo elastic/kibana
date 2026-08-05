@@ -30,6 +30,75 @@ const accordionButtonCss = css`
   }
 `;
 
+const APP_MAIN_SCROLL_ID = 'app-main-scroll';
+
+const getAccordionScrollTarget = (accordionRoot: HTMLElement): HTMLElement => {
+  const accordionButton = accordionRoot.querySelector('.euiAccordion__button');
+  if (accordionButton instanceof HTMLElement) {
+    return accordionButton;
+  }
+
+  return accordionRoot;
+};
+
+const scrollIntoViewportCenter = (element: HTMLElement) => {
+  const scrollContainer = document.getElementById(APP_MAIN_SCROLL_ID);
+
+  if (scrollContainer) {
+    const elementRect = element.getBoundingClientRect();
+    const containerRect = scrollContainer.getBoundingClientRect();
+    const targetScrollTop =
+      scrollContainer.scrollTop +
+      elementRect.top -
+      containerRect.top -
+      (containerRect.height - elementRect.height) / 2;
+
+    scrollContainer.scrollTo({
+      top: Math.max(0, targetScrollTop),
+      behavior: 'auto',
+    });
+    return;
+  }
+
+  element.scrollIntoView({ block: 'center' });
+};
+
+const scheduleScrollAfterAccordionOpen = (accordionRoot: HTMLElement) => {
+  const scrollTarget = getAccordionScrollTarget(accordionRoot);
+  let hasScrolled = false;
+
+  const scroll = () => {
+    if (hasScrolled) {
+      return;
+    }
+
+    hasScrolled = true;
+    scrollIntoViewportCenter(scrollTarget);
+  };
+
+  const childWrapper = accordionRoot.querySelector('.euiAccordion__childWrapper');
+  if (!(childWrapper instanceof HTMLElement)) {
+    scroll();
+    return;
+  }
+
+  const onTransitionEnd = (event: TransitionEvent) => {
+    if (event.target !== childWrapper) {
+      return;
+    }
+
+    if (event.propertyName !== 'height' && event.propertyName !== 'block-size') {
+      return;
+    }
+
+    childWrapper.removeEventListener('transitionend', onTransitionEnd);
+    scroll();
+  };
+
+  childWrapper.addEventListener('transitionend', onTransitionEnd);
+  window.setTimeout(scroll, 350);
+};
+
 interface DatasetSettingsAccordionItemProps {
   accordionDomId: string;
   testSubj: string;
@@ -54,11 +123,7 @@ const DatasetSettingsAccordionItem: FunctionComponent<DatasetSettingsAccordionIt
       return;
     }
 
-    const element = accordionRef.current;
-
-    window.requestAnimationFrame(() => {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
+    scheduleScrollAfterAccordionOpen(accordionRef.current);
   }, []);
 
   return (

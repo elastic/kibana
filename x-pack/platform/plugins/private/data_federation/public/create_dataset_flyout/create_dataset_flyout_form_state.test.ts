@@ -9,6 +9,7 @@ import {
   buildDatasetSettingsFromFormValues,
   emptyCreateDatasetSettingsFormValues,
 } from './create_dataset_flyout_form_state';
+import { NULL_VALUE_EMPTY_STRING_PRESET } from './dataset_settings_options';
 
 const empty = () => emptyCreateDatasetSettingsFormValues();
 
@@ -148,6 +149,16 @@ describe('create_dataset_flyout_form_state', () => {
           max_error_ratio: '0.5',
         })
       ).toEqual({ format: 'csv', error_mode: 'fail_fast' });
+    });
+
+    it('maps empty string null_value preset to an empty API value', () => {
+      expect(
+        buildDatasetSettingsFromFormValues({
+          ...empty(),
+          format: 'csv',
+          null_value: NULL_VALUE_EMPTY_STRING_PRESET,
+        })
+      ).toEqual({ format: 'csv', null_value: '' });
     });
 
     it('includes format and CSV fields together', () => {
