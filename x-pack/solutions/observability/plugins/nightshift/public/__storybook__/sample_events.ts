@@ -17,6 +17,7 @@ import type {
 
 export const checkoutEvent: SignificantEvent = {
   '@timestamp': '2026-07-24T09:42:00.000Z',
+  created_at: '2026-07-24T09:42:00.000Z',
   event_id: 'checkout-latency',
   event_uuid: 'checkout-latency-v1',
   status: 'open',

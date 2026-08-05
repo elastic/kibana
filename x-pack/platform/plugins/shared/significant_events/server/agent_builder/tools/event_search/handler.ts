@@ -237,11 +237,13 @@ export async function searchEventsToolHandler<V extends EventSearchView = 'compa
     next_page: response.page * response.perPage < response.total ? response.page + 1 : null,
   };
 
-  return view === 'full'
-    ? ({ ...envelope, view, events } as Extract<EventSearchResponse, { view: V }>)
-    : ({
-        ...envelope,
-        view,
-        events: events.map((event) => toCompactEvent(event, params)),
-      } as Extract<EventSearchResponse, { view: V }>);
+  const result: EventSearchResponse =
+    view === 'full'
+      ? { ...envelope, view, events }
+      : {
+          ...envelope,
+          view,
+          events: events.map((event) => toCompactEvent(event, params)),
+        };
+  return result as Extract<EventSearchResponse, { view: V }>;
 }
