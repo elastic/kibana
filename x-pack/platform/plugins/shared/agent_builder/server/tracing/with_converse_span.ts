@@ -12,7 +12,6 @@ import {
   withActiveInferenceSpan,
   ElasticGenAIAttributes,
   GenAISemanticConventions,
-  UserAttributes,
 } from '@kbn/inference-tracing';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import {
@@ -27,8 +26,6 @@ interface WithConverseSpanOptions {
   providerName: string;
   conversationId: string | undefined;
   spaceId: string;
-  userId?: string;
-  userName?: string;
   opikHeaders?: OpikDistributedTraceHeaders;
 }
 
@@ -39,8 +36,6 @@ export function withConverseSpan(
     providerName,
     conversationId,
     spaceId,
-    userId,
-    userName,
     opikHeaders,
   }: WithConverseSpanOptions,
   cb: (span?: Span) => Observable<ChatEvent>
@@ -58,8 +53,6 @@ export function withConverseSpan(
             [GenAISemanticConventions.GenAIAgentName]: agentName,
             [GenAISemanticConventions.GenAIProviderName]: providerName,
             [GenAISemanticConventions.GenAIConversationId]: conversationId,
-            ...(userId ? { [UserAttributes.UserId]: userId } : {}),
-            ...(userName ? { [UserAttributes.UserName]: userName } : {}),
           },
         },
         (span) => {

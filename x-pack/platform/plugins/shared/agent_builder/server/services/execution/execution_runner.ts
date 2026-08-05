@@ -272,10 +272,10 @@ const handleConversationExecution = async ({
       return merge(conversationIdEvent$, agentEvents$, persistenceEvents$, titleAttr$).pipe(
         handleCancellation(abortSignal),
         tap((event) => {
-          if (isConversationCreatedEvent(event)) {
+          if (isConversationCreatedEvent(event) && !author) {
             setUserAttributes({
-              id: author?.id ?? event.data.user.id,
-              username: author?.username ?? event.data.user.username,
+              id: event.data.user.id,
+              username: event.data.user.username,
             });
           }
 
