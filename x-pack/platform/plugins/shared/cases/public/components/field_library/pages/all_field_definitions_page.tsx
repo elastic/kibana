@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { parse as parseYaml } from 'yaml';
 import type { Owner } from '../../../../common/bundled-types.gen';
@@ -67,6 +68,7 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [editingFieldDef, setEditingFieldDef] = useState<FieldDefinition | undefined>(undefined);
   const [deletingFieldDef, setDeletingFieldDef] = useState<FieldDefinition | undefined>(undefined);
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   const { data, isLoading } = useGetFieldDefinitions({ owner });
   const { mutate: createFieldDef, isLoading: isCreating } = useCreateFieldDefinition({
@@ -374,7 +376,9 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
 
         {deletingFieldDef && (
           <EuiConfirmModal
+            aria-labelledby={confirmModalTitleId}
             title={i18n.DELETE_CONFIRM_TITLE}
+            titleProps={{ id: confirmModalTitleId }}
             onCancel={() => setDeletingFieldDef(undefined)}
             onConfirm={handleConfirmDelete}
             cancelButtonText={i18n.CANCEL}
