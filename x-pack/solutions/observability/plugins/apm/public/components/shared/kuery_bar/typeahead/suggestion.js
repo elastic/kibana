@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
-import { EuiIcon, useEuiFontSize } from '@elastic/eui';
+import { EuiIcon, euiFontSize } from '@elastic/eui';
 import { unit } from '@kbn/apm-common';
 import { tint } from 'polished';
 
@@ -38,12 +38,14 @@ const Description = styled.div`
       color: ${({ theme }) => theme.euiTheme.colors.fullShade};
       padding: 0 ${({ theme }) => theme.euiTheme.size.xs};
       display: inline-block;
+      background: ${({ selected, theme }) =>
+        selected ? theme.euiTheme.colors.emptyShade : theme.euiTheme.colors.lightestShade};
     }
   }
 `;
 
 const ListItem = styled.li`
-  font-size: ${() => useEuiFontSize('xs').fontSize};
+  font-size: ${({ theme }) => euiFontSize(theme, 'xs').fontSize};
   height: ${({ theme }) => theme.euiTheme.size.xl};
   align-items: center;
   display: flex;
@@ -51,13 +53,6 @@ const ListItem = styled.li`
     selected ? theme.euiTheme.colors.lightestShade : 'initial'};
   cursor: pointer;
   border-radius: ${({ theme }) => theme.euiTheme.border.radius.small};
-
-  ${Description} {
-    p span {
-      background: ${({ selected, theme }) =>
-        selected ? theme.euiTheme.colors.emptyShade : theme.euiTheme.colors.lightestShade};
-    }
-  }
 `;
 
 const Icon = styled.div`
@@ -105,7 +100,7 @@ function Suggestion(props) {
         <EuiIcon type={getEuiIconType(props.suggestion.type)} aria-hidden={true} />
       </Icon>
       <TextValue>{props.suggestion.text}</TextValue>
-      <Description>{props.suggestion.description}</Description>
+      <Description selected={props.selected}>{props.suggestion.description}</Description>
     </ListItem>
   );
 }
