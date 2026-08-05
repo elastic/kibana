@@ -70,3 +70,4 @@ export * from './specs/aws_x_ray/aws_x_ray';
 export * from './specs/prometheus/prometheus';
 export * from './specs/google_cloud_monitoring/google_cloud_monitoring';
 export * from './specs/opensearch_aws_opensearch_service/opensearch_aws_opensearch_service';
+export * from './specs/zabbix/zabbix';
