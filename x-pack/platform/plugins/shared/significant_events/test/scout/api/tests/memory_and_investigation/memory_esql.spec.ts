@@ -29,11 +29,8 @@ apiTest.describe(
     ];
     const entryIds: string[] = [];
 
-    apiTest.beforeAll(async ({ apiServices }) => {
-      await apiServices.significantEventsTest.enableMemory();
-    });
-
-    apiTest.afterAll(async ({ apiClient, apiServices, samlAuth }) => {
+    // Availability is owned by global.setup.ts / global.teardown.ts for the whole run.
+    apiTest.afterAll(async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
       const headers = { ...COMMON_API_HEADERS, ...cookieHeader };
 
@@ -43,7 +40,6 @@ apiTest.describe(
           responseType: 'json',
         });
       }
-      await apiServices.significantEventsTest.disableMemory();
     });
 
     apiTest(
