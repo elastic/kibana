@@ -86,7 +86,7 @@ export const ConfirmDeleteRegionPolicyModal: React.FC<ConfirmDeleteRegionPolicyM
         data-test-subj="confirmDeleteRegionPolicyAcknowledge"
         label={i18n.translate(
           'xpack.searchInferenceEndpoints.manageRegions.deleteConfirm.acknowledgeLabel',
-          { defaultMessage: 'I understand this resets my preferences' }
+          { defaultMessage: 'I understand this resets my region preferences' }
         )}
       />
     </EuiConfirmModal>
