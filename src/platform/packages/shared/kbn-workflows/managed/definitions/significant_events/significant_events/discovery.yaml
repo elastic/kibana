@@ -157,8 +157,8 @@ steps:
                   description: 'true when events_write appended the event version.'
                 reason:
                   type: string
-                  enum: [bulk_error]
-                  description: 'Failure reason when written is false.'
+                  enum: [bulk_error, duplicate_within_window]
+                  description: 'Failure or skip reason when written is false.'
               required: [event_id, severity, status, written]
         required: [written_rule_uuids, significant_events]
     on-failure:

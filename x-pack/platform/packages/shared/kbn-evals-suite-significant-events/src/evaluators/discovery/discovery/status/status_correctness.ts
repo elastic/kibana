@@ -16,8 +16,8 @@ const STATUS_DECISION_RUBRIC = [
   'Status gates:',
   '- `open`: a current failure, material degradation, or sensitive-data exposure is confirmed, or a verification gap leaves one of those conditions plausible.',
   '- `status: "dismissed"`: the proposed incident is a false alarm, benign/positive change, unrelated finding, or non-confirming finding (`confirmedSignalCount == 0`), with no plausible failure, degradation, or exposure left unverified.',
-  '- `closed` is a recovery state, not the disposition for a healthy or positive predicate. For an active or ambiguous failure shape it requires recovery-lens grounding with no active failure rows.',
-  '- `closed` for a settled episode requires every signal to be settled/downward. Carried settled signals are trusted; each fresh settled signal requires recovery-lens grounding with no active failure rows. Shape alone is insufficient.',
+  '- `closed` is a recovery state, not the disposition for a healthy or positive predicate. For an active or ambiguous failure shape it requires recovery-lens grounding with verified healthy or opposite rows.',
+  '- `closed` for a settled episode requires every signal to be settled/downward. Carried settled signals are trusted; each fresh settled signal requires recovery-lens grounding with verified healthy or opposite rows. Shape alone is insufficient.',
   '',
   'Hard constraints: a matching healthy or positive row is verified but does not confirm an incident; mark it rejected and dismiss when no failure, degradation, or exposure remains. A query error or telemetry gap is not recovery and requires `open` only when one of those conditions remains plausible. A `dip` alone establishes neither active failure nor recovery.',
 ].join('\n');

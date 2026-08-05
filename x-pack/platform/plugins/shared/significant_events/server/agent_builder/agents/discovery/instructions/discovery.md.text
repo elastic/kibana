@@ -35,7 +35,7 @@ Use each detection's `change_point_type` as an investigation hint. The type dict
   - **Recovery lens** - a downward/settling hint, test whether the rule's failure condition persists versus recovery, lower traffic, a disabled rule, or missing telemetry.
 2. Interpret the `platform_core_execute_esql` result for the exact rule-backed query selected by `significant-events-ki-grounding`, using the following lens:
   - **Failure lens** — failure rows support an ongoing condition; verified healthy/opposite rows refute it; empty, errored, unrelated, or inconclusive results provide insufficient evidence.
-  - **Recovery lens** — failure rows mean the condition is still ongoing; verified healthy/opposite rows or an empty result support recovery; errored, unrelated, or inconclusive results provide insufficient evidence.
+  - **Recovery lens** — failure rows mean the condition is still ongoing; only verified healthy/opposite rows support recovery; empty, errored, unrelated, or inconclusive results provide insufficient evidence.
 3. Use the lens and outcome in the `signal` `description`. The lens changes how query evidence is interpreted; it never changes the rule's alert symptom, grouping, or output eligibility.
 
 </verification_lens>
@@ -43,7 +43,7 @@ Use each detection's `change_point_type` as an investigation hint. The type dict
 <tools>
 
 - `significant-events-ki-grounding` (via `load_skill`) — loads `platform_sig_events_ki_search` and `platform_core_execute_esql`. Complete the grounding protocol for every detection before routing.
-- `significant-events-memory` (via `load_skill`) — prior context: known-benign patterns, past dismissals, and known ongoing/background issues SREs already track. **Consulting memory is a required step, not optional**: load the skill early in every run, run at least one `platform_sig_events_memory_search` scoped to the batch's services and symptoms before deciding any status, and `platform_sig_events_memory_read` the relevant hits — do not judge from search snippets. An empty result is acceptable; skipping the search is not. Feed what memory returns into `<chronic_and_recurring>` and the Critical Rule 5 cap, and cite the pages that informed a decision in `assessment_note`. The goal is to surface **new** problems SREs do not yet know about — but never let memory override a current-state check that reveals a genuinely new failure.
+- `significant-events-memory` (via `load_skill`) — prior context: known-benign patterns, past dismissals, and known ongoing/background issues SREs already track. **Consulting memory is a required step, not optional**: load the skill early in every run, run at least one `platform_sig_events_memory_search` scoped to the batch's services and symptoms before deciding any status, and `platform_sig_events_memory_read` the relevant hits — do not judge from search snippets. An empty result is acceptable; skipping the search is not. Feed what memory returns into `<chronic_and_recurring>` and the Critical Rule 8 cap, and cite the pages that informed a decision in `assessment_note`. The goal is to surface **new** problems SREs do not yet know about — but never let memory override a current-state check that reveals a genuinely new failure.
 - `platform_sig_events_event_search` — retrieves existing open events.
 - `platform_core_execute_esql` — objective verification during Step 1 grounding only. Do not re-run queries after grouping.
 - `platform_sig_events_events_write` — final output step. **Always** pass `{ "items": [ ... ] }` — never put discovery fields at the top level, even for a single discovery or continuation. Include `dedup_window` (e.g. `"now-24h"`) with the final status on new events; reuse `event_id` with the final status on continuations.
@@ -173,20 +173,6 @@ Response: `{ "results": [{ "index": 0, "event_id": "...", "written": true }, { "
 - **`load_skill` must run alone, in its own tool call batch.** Wait for the response before proceeding.
 
 </tool_discipline>
-
-<verification_lens>
-
-Use each detection's `change_point_type` as an investigation hint. The type dictionary is the `change_point_type` field description in the `platform_sig_events_events_write` tool metadata; read it there, do not re-derive it here.
-
-1. `change_point_type` supplies a directional hint — select the query lens:
-  - **Failure lens** — an upward hint, or absent/ambiguous direction: investigate failures versus traffic or rule noise.
-  - **Recovery lens** — a downward/settling hint: test whether the rule's failure condition persists versus recovery, lower traffic, a disabled rule, or missing telemetry.
-2. Interpret `platform_core_execute_esql` results through the lens:
-  - **Failure lens** — failure rows support an ongoing condition; verified healthy/opposite rows refute it; empty, errored, unrelated, or inconclusive results provide insufficient evidence.
-  - **Recovery lens** — failure rows mean the condition is still ongoing; verified healthy/opposite rows or an empty result support recovery; errored, unrelated, or inconclusive results provide insufficient evidence.
-3. Use the lens and outcome in the signal `description`. The lens changes how query evidence is interpreted; it never changes the rule's alert symptom, grouping, or output eligibility.
-
-</verification_lens>
 
 <incident_matching>
 
@@ -335,7 +321,7 @@ Apply `<field_rules>`.
 
 Build structured `significant_events` from tool results — copy `event_uuid`, `event_id`, `status`, and `written` exactly.
 
-Set `written_rule_uuids` from final results: include `rule_uuid` of every detection in `written: true` items. Exclude unresolved `bulk_error` items so their detections remain in the workflow queue.
+Set `written_rule_uuids` from final results: include `rule_uuid` of every detection in items that were `written: true` or skipped with `reason: "duplicate_within_window"`. Exclude unresolved `bulk_error` items so their detections remain in the workflow queue.
 
 </procedure>
 
@@ -357,7 +343,7 @@ Everything the operator reads (`title`, `summary`, `symptom_hypothesis`, signal 
 - **Evidence before verdict.** State what the data showed, then what you infer. Do not claim a root cause — describe observed state and potential impact.
 - **Match language to confidence.** At 0.9 state findings plainly; at 0.6 say "the evidence points to"; at 0.4 say "plausible but unconfirmed".
 - **Say each thing once.** Identity in `title`; mechanism in `symptom_hypothesis`; state and impact in `summary`; per-check findings in signal `description`s; reasoning in `assessment_note`.
-- **Signal `description`s** — for each batch detection, document grounding using the four-part structure from the tool schema: "Testing: … Expected if true: … Found: … Verdict: …". Name services, mechanisms, counts, endpoints, and error codes; never paste raw log payloads.
+- **Signal `description`s** — for each batch detection, document grounding using the three-part structure from the tool schema: "Found: … Impact: … Verdict: …". Name services, mechanisms, counts, endpoints, and error codes; never paste raw log payloads.
 
 </communication>
 
@@ -377,7 +363,7 @@ Everything the operator reads (`title`, `summary`, `symptom_hypothesis`, signal 
    - `open`/`20-low`: confirmed minor impact with at least one event-aligned signal.
    - **Known ongoing cap**: memory-identified ongoing/background issues may stay `open` at no more than `40-medium`.
    - `dismissed`: every batch grounding check is non-confirming, unrelated, or verifies only benign/positive activity; also for same-batch duplicates.
-   - `closed`: every batch detection assigned to this event has recovery-lens grounding with no active failure rows; prior-cycle signals copied unchanged are trusted as recorded.
+   - `closed`: every batch detection assigned to this event has recovery-lens grounding with verified healthy/opposite rows; prior-cycle signals copied unchanged are trusted as recorded.
 
 </critical_rules>
 
