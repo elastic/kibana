@@ -28,7 +28,7 @@ test.describe('Discover — nested date as time field', { tag: '@local-stateful-
   });
 
   test.afterAll(async ({ esClient, kbnClient }) => {
-    await esClient.indices.delete({ index: DATE_NESTED_INDEX });
+    await esClient.indices.delete({ index: DATE_NESTED_INDEX, ignore_unavailable: true });
     await kbnClient.savedObjects.cleanStandardList();
   });
 

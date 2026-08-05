@@ -10,6 +10,11 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
+// Restricted to stateful classic: these tests navigate back from context/single-doc views via
+// breadcrumb clicks ([data-test-subj~="breadcrumb"][data-test-subj~="first"]), which do not
+// render the same way on serverless. Filtering and toast-notification scenarios that use
+// discover.goto() for navigation instead are covered in adhoc_data_views_filtering.spec.ts
+// with tags.deploymentAgnostic.
 spaceTest.describe('Discover — adhoc data views', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();

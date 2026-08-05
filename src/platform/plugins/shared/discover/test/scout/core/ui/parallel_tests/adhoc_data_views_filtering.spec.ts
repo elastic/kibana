@@ -139,10 +139,7 @@ spaceTest.describe(
           expect(newId).not.toBe(prevId);
 
           // Close any toasts from the data view ID update before navigating back
-          const toastCloseButtons = await page.testSubj.locator('toastCloseButton').all();
-          for (const btn of toastCloseButtons) {
-            await btn.click();
-          }
+          await toasts.closeAll();
         });
 
         await spaceTest.step(
