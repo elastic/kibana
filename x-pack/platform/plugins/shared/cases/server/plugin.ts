@@ -216,7 +216,13 @@ export class CasePlugin
         this.templatesMigrationTaskManager = new TemplatesMigrationTaskManager(
           plugins.taskManager,
           this.logger,
-          plugins.usageCollection
+          plugins.usageCollection,
+          // When the existing-case `extended_fields` backfill finishes, ask cases-analytics v2 to run
+          // a one-time full reconciliation. The backfill bumps only the SO-framework `updated_at`,
+          // which analytics-v2's incremental cursor (keyed on `attributes.updated_at`) never sees —
+          // so without this nudge the backfilled `extended_fields` would be permanently absent from
+          // `.cases`. The callback resolves the service at run time and no-ops when v2 is disabled.
+          () => this.casesAnalyticsV2Service?.triggerBackfillReconciliation()
         );
       }
     }

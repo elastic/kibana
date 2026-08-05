@@ -17,10 +17,16 @@ import type { ComposeDiscoverState } from '../types';
 import type { FormValues, RuleQuery } from '../../../form/types';
 import { AlertConditionStep } from './alert_condition_step';
 import { QueryFieldRules } from './query_field_rules';
-import { ComposeDiscoverTimeFieldContextProvider } from '../compose_discover_time_field_context';
 
 jest.mock('@kbn/esql-utils', () => ({
   getEsqlColumns: jest.fn(async () => []),
+}));
+
+jest.mock('../use_compose_discover_time_field', () => ({
+  useComposeDiscoverTimeField: () => ({
+    timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
+    isTimeFieldResolved: true,
+  }),
 }));
 
 const BASE_QUERY = 'FROM logs-*';
@@ -67,15 +73,8 @@ const createComposeFormWrapper = (
         <QueryClientProvider client={queryClient}>
           <FormProvider {...form}>
             <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
-              <ComposeDiscoverTimeFieldContextProvider
-                value={{
-                  timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
-                  isTimeFieldResolved: true,
-                }}
-              >
-                <QueryFieldRules queryCommitted={queryCommitted} />
-                {children}
-              </ComposeDiscoverTimeFieldContextProvider>
+              <QueryFieldRules queryCommitted={queryCommitted} />
+              {children}
             </RuleFormProvider>
           </FormProvider>
         </QueryClientProvider>
@@ -171,16 +170,14 @@ describe('AlertConditionStep', () => {
       expect(screen.getByTestId('esqlSummaryOpenEditor')).toBeInTheDocument();
     });
 
-    it('shows split-failed callout when base query is empty', () => {
+    it('shows split-failed state (no callout) when base query is empty', () => {
       renderStep(
         { queryCommitted: true },
         { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY_EMPTY_BASE } }
       );
 
       expect(screen.getByTestId('esqlQuerySummarySection-split_failed')).toBeInTheDocument();
-      expect(
-        screen.getByText(/Couldn't automatically separate base query from alert condition/)
-      ).toBeInTheDocument();
+      expect(screen.getByText('Review your query or separate it manually')).toBeInTheDocument();
     });
 
     it('shows the no-alert-condition callout when base is present but alert condition is empty', () => {
@@ -369,7 +366,7 @@ describe('AlertConditionStep', () => {
   });
 
   describe('query field validation', () => {
-    it('surfaces an inline error when trigger fails for an incomplete alert query', async () => {
+    it('passes trigger for a composed alert with base but no breach segment (conditionless rule)', async () => {
       const { formRef } = renderStep(
         { queryCommitted: true },
         {
@@ -384,17 +381,13 @@ describe('AlertConditionStep', () => {
         }
       );
 
-      let valid = true;
+      let valid = false;
       await act(async () => {
         valid = await formRef.current!.trigger('query');
       });
 
-      expect(valid).toBe(false);
-      await waitFor(() => {
-        expect(screen.getByTestId('composeDiscoverQueryFieldError')).toHaveTextContent(
-          'Add an alert condition to the query before continuing'
-        );
-      });
+      expect(valid).toBe(true);
+      expect(screen.queryByTestId('composeDiscoverQueryFieldError')).not.toBeInTheDocument();
     });
 
     it('passes trigger for a valid composed alert query', async () => {
@@ -412,7 +405,7 @@ describe('AlertConditionStep', () => {
       expect(screen.queryByTestId('composeDiscoverQueryFieldError')).not.toBeInTheDocument();
     });
 
-    it('fails trigger for a standalone alert query (no separate alert condition)', async () => {
+    it('passes trigger for a standalone alert query without a WHERE clause (conditionless rule)', async () => {
       const { formRef } = renderStep(
         { queryCommitted: true },
         {
@@ -423,15 +416,13 @@ describe('AlertConditionStep', () => {
         }
       );
 
-      let valid = true;
+      let valid = false;
       await act(async () => {
         valid = await formRef.current!.trigger('query');
       });
 
-      expect(valid).toBe(false);
-      await waitFor(() => {
-        expect(screen.getByTestId('composeDiscoverQueryFieldError')).toBeInTheDocument();
-      });
+      expect(valid).toBe(true);
+      expect(screen.queryByTestId('composeDiscoverQueryFieldError')).not.toBeInTheDocument();
     });
   });
 });

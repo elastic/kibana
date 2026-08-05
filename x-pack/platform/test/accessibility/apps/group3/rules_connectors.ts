@@ -16,8 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/145452
-  describe.skip('Kibana Alerts - rules tab accessibility tests', () => {
+  describe('Kibana Alerts - rules tab accessibility tests', () => {
     before(async () => {
       await PageObjects.settings.navigateTo();
       await testSubjects.click('triggersActions');

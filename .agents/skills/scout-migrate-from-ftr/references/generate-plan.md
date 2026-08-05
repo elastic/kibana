@@ -46,6 +46,11 @@ Also read thoroughly:
 - The FTR config(s): capture every `kbnTestServer.serverArgs`, `esTestCluster.serverArgs`, `security.roles`, `security.defaultRoles`, `apps`, `testFiles`, and any `services`/`pageObjects` registrations. Note config inheritance chains (which base config does it extend?).
 - Every `index.ts` file that uses `loadTestFile`: capture shared `before`/`after` hooks and their setup logic. Note what state they create and whether downstream tests depend on it.
 - Every FTR service and page object referenced: note which files use them, what they do, and whether they contain hidden assertions (`existOrFail`, `missingOrFail`, `expect` inside helpers).
+- **Mirror-suite discovery (mandatory):** search outside the provided source directory for duplicate stateful/serverless variants before planning coverage removal or retagging. Search by:
+  - exact basename (`_url_state.ts`, `url_state.ts`, etc.)
+  - distinctive test titles / `describe` names
+  - matching `loadTestFile(require.resolve(...))` entries in sibling stateful/serverless `index.ts` files and configs.
+  Include likely mirrors under `x-pack/platform/test/serverless/functional/test_suites/**`, `x-pack/solutions/*/test/**/serverless/**`, and any corresponding stateful FTR roots. If no mirrors are found, state that explicitly in the plan.
 
 ### 2. Triage (what should exist, what should change)
 
@@ -125,12 +130,16 @@ For each test group, answer all four:
    - **Platform tests** (`src/platform/**`, `x-pack/platform/**`): use `tags.deploymentAgnostic` when the original intent was "run everywhere."
    - **Solution tests** (`x-pack/solutions/observability|security|search/...`): use explicit `tags.stateful.*` + `tags.serverless.<solution>.*` rather than `tags.deploymentAgnostic`.
    - Flag tests that currently run in only one environment but could run in both.
-3. **Can they run on Cloud out-of-the-box?** Flag any blockers:
+3. **Are there stateful/serverless mirror FTR files?** List each duplicate or near-duplicate found by the mirror-suite discovery step. Decide whether to:
+   - merge them into one Scout spec with tags covering both deployment targets,
+   - keep separate Scout specs because the flows genuinely diverge, or
+   - delete only one side because coverage already exists elsewhere.
+4. **Can they run on Cloud out-of-the-box?** Flag any blockers:
    - Hardcoded `localhost` URLs or local file paths
    - Node topology assumptions (single-node, specific port)
    - Cluster settings unavailable on Elastic Cloud
    - Custom server args / feature flags set in FTR configs (these need to become runtime settings or move to a Scout server config set)
-4. **Custom servers config or default?** Default to Scout's default test servers config (see step 8 for why); only call for a [custom servers config](../../../../docs/extend/testing/feature-flags.md#scout-feature-flags-custom-servers) when a server arg must apply at Kibana boot. If custom, list which args force the choice and whether a matching config set already exists.
+5. **Custom servers config or default?** Default to Scout's default test servers config (see step 8 for why); only call for a [custom servers config](../../../../docs/extend/testing/feature-flags.md#scout-feature-flags-custom-servers) when a server arg must apply at Kibana boot. If custom, list which args force the choice and whether a matching config set already exists.
 
 ### 10. FTR test smells
 

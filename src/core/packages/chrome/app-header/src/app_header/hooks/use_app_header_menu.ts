@@ -14,7 +14,7 @@ import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 import { i18n } from '@kbn/i18n';
 
-import { useBasePath } from './chrome';
+import { useBasePath, useCanAccessIntegrations } from './chrome';
 import { APP_HEADER_TEST_SUBJECTS } from '../test_subjects';
 
 const createIntegrationsMenuItem = (href: string): AppMenuStaticItem => ({
@@ -61,6 +61,7 @@ export const useAppHeaderStaticItems = ({
 }): AppMenuStaticItem[] => {
   const chrome = useChromeService();
   const basePath = useBasePath();
+  const canAccessIntegrations = useCanAccessIntegrations();
   const feedbackHandler = useObservable(chrome.next.getFeedbackHandler$(), undefined);
   const helpExtension = useObservable(chrome.getHelpExtension$(), undefined);
 
@@ -82,13 +83,19 @@ export const useAppHeaderStaticItems = ({
       staticItems.push(createDocumentationMenuItem(docLink));
     }
 
-    if (showAddIntegrations) {
-      // FIXME: https://github.com/elastic/kibana/issues/271295 - handle edge case where fleet is not enabled or user doesn't have permissions to view it
+    if (showAddIntegrations && canAccessIntegrations) {
       staticItems.push(createIntegrationsMenuItem(basePath.prepend('/app/integrations/browse')));
     }
 
     return staticItems;
-  }, [basePath, explicitDocLink, helpExtension, showAddIntegrations, feedbackHandler]);
+  }, [
+    basePath,
+    canAccessIntegrations,
+    explicitDocLink,
+    helpExtension,
+    showAddIntegrations,
+    feedbackHandler,
+  ]);
 };
 
 export interface ShareAction {

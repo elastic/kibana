@@ -6,15 +6,18 @@
  */
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { RefObject } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { TableId } from '@kbn/securitysolution-data-table';
 import {
-  casesCellActionRenderer,
-  cellActionRenderer,
-} from '../../../../flyout_v2/shared/components/cell_actions';
+  SECURITY_CELL_ACTIONS_CASE_EVENTS,
+  SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
+import { createCellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useKibana } from '../../../lib/kibana';
@@ -30,7 +33,7 @@ import type {
 } from '../../../../../common/types';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { type ColumnHeaderOptions, type OnRowSelected } from '../../../../../common/types/timeline';
-import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
+import { DocumentEventTypes, FLYOUT_ORIGIN, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
 import { getDocumentHistoryTitle } from '../../../../flyout_v2/document/main/utils/get_header_title';
@@ -54,6 +57,11 @@ export type RowActionProps = EuiDataGridCellValueElementProps & {
   showCheckboxes: boolean;
   tabType?: string;
   tableId: string;
+  /**
+   * Handle to the alerts table this row belongs to. Provided by the alerts table so the document
+   * flyout's "Toggle column in table" action can add/remove columns on it. Absent for other tables.
+   */
+  alertsTableRef?: RefObject<AlertsTableImperativeApi>;
   width: number;
 };
 
@@ -77,6 +85,7 @@ const RowActionComponent = ({
   showCheckboxes,
   tabType,
   tableId,
+  alertsTableRef,
   width,
 }: RowActionProps) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
@@ -116,14 +125,37 @@ const RowActionComponent = ({
     refetch?.();
   }, [refetch]);
 
+  // Cell action renderer for the new document details flyout opened from this table.
+  // The table scope is always bound and the details-flyout trigger is used — that trigger is the
+  // only one that registers the "Toggle column in table" action, and binding the scope makes the
+  // action compatible for both Timeline/table scopes. How the column toggle is applied depends on
+  // the table:
+  // - Alerts tables forward their `alertsTableRef` so the toggle targets the imperatively-controlled
+  //   table.
+  // - Event tables (e.g. the Explore host/user pages) have no ref; the toggle dispatches to the
+  //   Redux data table store keyed by the bound scope instead.
+  // - The alerts table on the Cases page uses the case-events trigger.
+  const documentFlyoutCellActionRenderer = useMemo(
+    () =>
+      createCellActionRenderer(tableId, {
+        triggerId:
+          tableId === TableId.alertsOnCasePage
+            ? SECURITY_CELL_ACTIONS_CASE_EVENTS
+            : SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+        visibleCellActions: 6,
+        alertsTableRef,
+      }),
+    [tableId, alertsTableRef]
+  );
+
   const handleOnEventDetailPanelOpened = useCallback(() => {
     if (enableNewFlyout && hit) {
       openDocumentFlyoutFromIndex({
         documentId: eventId,
         indexName: indexName ?? undefined,
-        renderCellActions:
-          tableId === TableId.alertsOnCasePage ? casesCellActionRenderer : cellActionRenderer,
+        renderCellActions: documentFlyoutCellActionRenderer,
         onAlertUpdated: handleAlertUpdated,
+        origin: FLYOUT_ORIGIN.ALERTS_TABLE,
         title: getDocumentHistoryTitle(hit),
       });
     } else {
@@ -146,6 +178,7 @@ const RowActionComponent = ({
     enableNewFlyout,
     hit,
     openDocumentFlyoutFromIndex,
+    documentFlyoutCellActionRenderer,
     eventId,
     indexName,
     handleAlertUpdated,
@@ -156,7 +189,7 @@ const RowActionComponent = ({
 
   const toggleShowNotes = useCallback(() => {
     if (enableNewFlyout && hit) {
-      openNotes({ hit });
+      openNotes({ hit, origin: FLYOUT_ORIGIN.ALERTS_TABLE });
     } else {
       openFlyout({
         right: {

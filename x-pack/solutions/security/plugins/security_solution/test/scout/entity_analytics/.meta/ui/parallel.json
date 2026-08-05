@@ -1,5 +1,9 @@
 {
-  "sha1": "13856acd307e1b5c02db8beefaa9eea9285e460e",
+  "sha1": "3d5669640d13a373992360f234fa52891b61d133",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "2bb84514b03b333-1054e603e578b92",
@@ -8,8 +12,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/global.setup.ts",
-        "line": 10,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -24,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/asset_criticality_management.spec.ts",
-        "line": 32,
-        "column": 14
+        "line": 38,
+        "column": 38
       }
     },
     {
@@ -40,8 +44,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/asset_criticality_management.spec.ts",
-        "line": 49,
-        "column": 14
+        "line": 51,
+        "column": 47
       }
     },
     {
@@ -56,8 +60,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/engine_status_management.spec.ts",
-        "line": 24,
-        "column": 14
+        "line": 20,
+        "column": 15
       }
     },
     {
@@ -72,13 +76,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/engine_status_management.spec.ts",
-        "line": 37,
-        "column": 14
+        "line": 27,
+        "column": 32
       }
     },
     {
-      "id": "2cb41e0daf4ee37-56821f8e3bcf968",
-      "title": "Entity attachment cases – flyout add-to-case actions and Entities tab adds a host entity to a new case and the Entities tab shows the attached entity",
+      "id": "2cb41e0daf4ee37-cd814a171131ef1",
+      "title": "Entity attachment cases – flyout add-to-case actions and Entities accordion adds a host entity to a new case and the Entities accordion shows the attached entity",
       "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
@@ -86,13 +90,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_cases.spec.ts",
-        "line": 92,
-        "column": 14
+        "line": 78,
+        "column": 25
       }
     },
     {
-      "id": "2cb41e0daf4ee37-fa57af88a08f22e",
-      "title": "Entity attachment cases – flyout add-to-case actions and Entities tab Entities tab renders the entity table when attachments were added via API",
+      "id": "2cb41e0daf4ee37-a37741bc64b3f83",
+      "title": "Entity attachment cases – flyout add-to-case actions and Entities accordion Entities accordion renders when entity attachments were added via API",
       "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
@@ -100,13 +104,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_cases.spec.ts",
-        "line": 121,
-        "column": 14
+        "line": 93,
+        "column": 26
       }
     },
     {
-      "id": "2cb41e0daf4ee37-45a5507cb509b37",
-      "title": "Entity attachment cases – flyout add-to-case actions and Entities tab Entities tab renders the empty state when a case has no entity attachments",
+      "id": "2cb41e0daf4ee37-3cf8d4a6f282359",
+      "title": "Entity attachment cases – flyout add-to-case actions and Entities accordion renders no Entities accordion when a case has no entity attachments",
       "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
@@ -114,8 +118,168 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_cases.spec.ts",
-        "line": 158,
-        "column": 14
+        "line": 110,
+        "column": 31
+      }
+    },
+    {
+      "id": "27a03cda1136b49-270f2e5421375ae",
+      "title": "Entity flyout anomalies host right panel shows anomalies section when the entity has anomalies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 119,
+        "column": 22
+      }
+    },
+    {
+      "id": "27a03cda1136b49-c63ba58eadef6aa",
+      "title": "Entity flyout anomalies host right panel shows anomalies section with an empty state when the entity has no anomalies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 134,
+        "column": 6
+      }
+    },
+    {
+      "id": "27a03cda1136b49-fffe57646af677c",
+      "title": "Entity flyout anomalies host entity details left panel shows anomalies tab and tab content when the entity has anomalies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 147,
+        "column": 27
+      }
+    },
+    {
+      "id": "27a03cda1136b49-71eadf7c9f15422",
+      "title": "Entity flyout anomalies host right panel shows an error state in the anomalies section when the anomaly overview API returns an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 178,
+        "column": 27
+      }
+    },
+    {
+      "id": "27a03cda1136b49-c80864d1ff26932",
+      "title": "Entity flyout anomalies host entity details left panel shows anomalies tab with an empty state when the entity has no anomalies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 193,
+        "column": 85
+      }
+    },
+    {
+      "id": "27a03cda1136b49-19bedfea7a40829",
+      "title": "Entity flyout anomalies host entity details left panel anomalies tab shows table but not attack chain when entity has no tactic associations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 224,
+        "column": 28
+      }
+    },
+    {
+      "id": "27a03cda1136b49-d5e7903499b19c2",
+      "title": "Entity flyout anomalies clicking the anomalies count link in the right panel opens the entity details left panel on the anomalies tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 251,
+        "column": 26
+      }
+    },
+    {
+      "id": "27a03cda1136b49-ed6f6c2aead2f28",
+      "title": "Entity flyout anomalies anomalies table row actions menu exposes investigation actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 273,
+        "column": 40
+      }
+    },
+    {
+      "id": "27a03cda1136b49-2985f25d1c114a2",
+      "title": "Entity flyout anomalies Add to timeline row action opens timeline scoped to the anomaly influencers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 298,
+        "column": 40
+      }
+    },
+    {
+      "id": "27a03cda1136b49-5f89e68fa3275d4",
+      "title": "Entity flyout anomalies selecting and clearing a MITRE tactic on the Anomalies tab filters and restores anomaly results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
+        "line": 386,
+        "column": 60
       }
     },
     {
@@ -130,8 +294,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 41,
-        "column": 14
+        "line": 36,
+        "column": 15
       }
     },
     {
@@ -146,8 +310,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 48,
-        "column": 14
+        "line": 41,
+        "column": 46
       }
     },
     {
@@ -162,8 +326,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 57,
-        "column": 14
+        "line": 46,
+        "column": 7
       }
     },
     {
@@ -178,8 +342,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 94,
-        "column": 14
+        "line": 80,
+        "column": 13
       }
     },
     {
@@ -194,8 +358,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 105,
-        "column": 14
+        "line": 88,
+        "column": 22
       }
     },
     {
@@ -210,8 +374,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 116,
-        "column": 14
+        "line": 97,
+        "column": 32
       }
     },
     {
@@ -224,8 +388,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/privileges_management.spec.ts",
-        "line": 37,
-        "column": 14
+        "line": 42,
+        "column": 27
       }
     },
     {
@@ -238,8 +402,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/privileges_management.spec.ts",
-        "line": 50,
-        "column": 14
+        "line": 52,
+        "column": 29
       }
     },
     {
@@ -254,8 +418,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 42,
-        "column": 14
+        "line": 35,
+        "column": 7
       }
     },
     {
@@ -270,8 +434,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 50,
-        "column": 14
+        "line": 40,
+        "column": 7
       }
     },
     {
@@ -286,8 +450,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 71,
-        "column": 14
+        "line": 56,
+        "column": 24
       }
     },
     {
@@ -302,8 +466,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 89,
-        "column": 14
+        "line": 72,
+        "column": 7
       }
     },
     {
@@ -318,8 +482,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 107,
-        "column": 14
+        "line": 85,
+        "column": 81
       }
     },
     {
@@ -334,8 +498,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 130,
-        "column": 14
+        "line": 105,
+        "column": 6
       }
     }
   ]

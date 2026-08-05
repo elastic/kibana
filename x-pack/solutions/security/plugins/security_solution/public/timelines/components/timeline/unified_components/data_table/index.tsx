@@ -20,8 +20,11 @@ import type {
   EuiDataGridProps,
 } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { cellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
+import {
+  SECURITY_CELL_ACTIONS_DEFAULT,
+  SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { createCellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
@@ -53,7 +56,7 @@ import { transformTimelineItemToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
-import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
+import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry/types';
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
 import { getDocumentHistoryTitle } from '../../../../../flyout_v2/document/main/utils/get_header_title';
@@ -181,6 +184,19 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [events, dataView]
     );
 
+    // The new document details flyout opened from Timeline must render alert/event field cell actions
+    // on the details-flyout trigger so the "Toggle column in table" action is available (it is not
+    // registered on the default trigger). The scope is bound to `timelineId`, so the action toggles
+    // columns on this Timeline via the Redux store; no alerts table ref is needed here.
+    const timelineCellActionRenderer = useMemo(
+      () =>
+        createCellActionRenderer(timelineId, {
+          triggerId: SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+          visibleCellActions: 6,
+        }),
+      [timelineId]
+    );
+
     const handleOnEventDetailPanelOpened = useCallback(
       (eventData: DataTableRecord & TimelineItem) => {
         if (enableNewFlyout) {
@@ -190,14 +206,16 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               attackId: eventData._id,
               indexName: eventData.ecs._index ?? '',
               onAttackUpdated: refetch,
+              origin: FLYOUT_ORIGIN.TIMELINE,
               attackTitle: getAttackTitleValue(eventData),
             });
           } else {
             openDocumentFlyoutFromIndex({
               documentId: eventData._id,
               indexName: eventData.ecs._index,
-              renderCellActions: cellActionRenderer,
+              renderCellActions: timelineCellActionRenderer,
               onAlertUpdated: refetch,
+              origin: FLYOUT_ORIGIN.TIMELINE,
               title: getDocumentHistoryTitle(eventData),
             });
           }
@@ -233,6 +251,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         enableNewFlyout,
         openAttackFlyout,
         openDocumentFlyoutFromIndex,
+        timelineCellActionRenderer,
         refetch,
         timelineId,
         openFlyout,
