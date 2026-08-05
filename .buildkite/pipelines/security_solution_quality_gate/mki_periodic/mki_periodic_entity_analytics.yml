@@ -9,7 +9,7 @@ steps:
           BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -25,7 +25,7 @@ steps:
           BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -41,7 +41,7 @@ steps:
           BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -57,7 +57,7 @@ steps:
           BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -73,7 +73,7 @@ steps:
           BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -89,7 +89,7 @@ steps:
           BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -105,7 +105,7 @@ steps:
           BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -121,7 +121,7 @@ steps:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -137,7 +137,7 @@ steps:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -153,7 +153,7 @@ steps:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -169,7 +169,7 @@ steps:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -186,7 +186,7 @@ steps:
         key: entity_analytics:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -202,7 +202,7 @@ steps:
         key: entity_analytics:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -218,7 +218,7 @@ steps:
         key: entity_analytics:entity_details:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -234,7 +234,7 @@ steps:
         key: entity_analytics:monitoring:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -250,7 +250,7 @@ steps:
         key: entity_analytics:risk_score:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -266,7 +266,7 @@ steps:
         key: explore:hosts:runner:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -282,7 +282,7 @@ steps:
         key: explore:network:runner:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -298,7 +298,7 @@ steps:
         key: explore:users:runner:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120

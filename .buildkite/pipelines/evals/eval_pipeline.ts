@@ -197,7 +197,7 @@ function buildEvalsYaml({
         `        timeout_in_minutes: 60`,
         `        agents:`,
         `          image: family/kibana-ubuntu-2404`,
-        `          imageProject: elastic-images-prod`,
+        `          imageProject: elastic-images-qa`,
         `          provider: gcp`,
         `          machineType: n2-standard-8`,
         ...(preemptible ? [`          preemptible: true`] : []),
@@ -293,7 +293,7 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
 
   const resolveModelGroups = (suite: EvalsSuiteMetadataEntry): string[] => {
     const weeklyModels = useWeeklyEisModels
-      ? suite.weeklyEisModelGroups ?? DEFAULT_WEEKLY_EIS_MODELS
+      ? (suite.weeklyEisModelGroups ?? DEFAULT_WEEKLY_EIS_MODELS)
       : [];
     const resolved = [...new Set([...explicitModelGroups, ...weeklyModels])];
     if (resolved.length > 0) {
@@ -379,7 +379,7 @@ export function getEvalTriggerStep(githubPrLabels: string): string | null {
     `    soft_fail: true`,
     `    agents:`,
     `      image: family/kibana-ubuntu-2404`,
-    `      imageProject: elastic-images-prod`,
+    `      imageProject: elastic-images-qa`,
     `      provider: gcp`,
     `      machineType: n2-standard-2`,
     `    retry:`,

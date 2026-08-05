@@ -6,7 +6,7 @@ steps:
     command: .buildkite/scripts/lifecycle/pre_build.sh
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
 
@@ -21,7 +21,7 @@ steps:
       FTR_EIS_CCM: '1'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
     retry:
@@ -36,7 +36,7 @@ steps:
     soft_fail: true
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-highcpu-8
       diskSizeGb: 130
@@ -45,7 +45,7 @@ steps:
     command: .buildkite/scripts/steps/build_kibana.sh
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-8
     key: build
@@ -78,7 +78,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -100,7 +100,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -123,7 +123,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -145,7 +145,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -167,7 +167,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -191,7 +191,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -213,7 +213,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -234,7 +234,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -256,7 +256,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -279,7 +279,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -302,7 +302,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -325,7 +325,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -347,7 +347,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -369,7 +369,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -392,7 +392,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -414,7 +414,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -436,7 +436,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -458,7 +458,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -481,7 +481,7 @@ steps:
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
@@ -503,7 +503,7 @@ steps:
         timeout_in_minutes: 120
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
           preemptible: true

@@ -7,7 +7,7 @@ steps:
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
     retry:
@@ -25,7 +25,7 @@ steps:
       - terrazzo-initial-pipeline-upload
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-highcpu-8
       diskSizeGb: 130
@@ -34,7 +34,7 @@ steps:
     label: Build Kibana Distribution
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: c4d-standard-16
       diskType: hyperdisk-balanced
@@ -51,7 +51,7 @@ steps:
     label: 'Quick Checks'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2d-standard-8
       preemptible: true
@@ -68,7 +68,7 @@ steps:
     label: 'Checks'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2d-standard-2
       preemptible: true
@@ -85,7 +85,7 @@ steps:
     label: 'Linting'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n4-standard-16
       diskType: hyperdisk-balanced
@@ -103,7 +103,7 @@ steps:
     label: 'Linting (with types)'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n4-standard-32
       diskType: hyperdisk-balanced
@@ -121,7 +121,7 @@ steps:
     label: 'Linting (with oxlint)'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n4-standard-4
       diskType: hyperdisk-balanced
@@ -139,7 +139,7 @@ steps:
     label: 'Check Types'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n4-highcpu-32
       diskType: hyperdisk-balanced
@@ -159,7 +159,7 @@ steps:
     label: 'Check OAS Snapshot'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2d-highmem-4
       preemptible: true
@@ -176,7 +176,7 @@ steps:
   #    label: 'Check API Contracts'
   #    agents:
   #      image: family/kibana-ubuntu-2404
-  #      imageProject: elastic-images-prod
+  #      imageProject: elastic-images-qa
   #      provider: gcp
   #      machineType: n2d-standard-2
   #      preemptible: true
@@ -194,7 +194,7 @@ steps:
     key: report_package_metrics
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
       diskSizeGb: 130
@@ -210,7 +210,7 @@ steps:
     label: Mark CI Stats as ready
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
       diskSizeGb: 130
@@ -227,7 +227,7 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
       diskSizeGb: 130
@@ -246,7 +246,7 @@ steps:
     label: 'Scout Test Run Builder'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2d-standard-8
       diskSizeGb: 130
@@ -268,7 +268,7 @@ steps:
     command: buildkite-agent pipeline upload .buildkite/pipelines/on_merge_fanout.yml
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
     timeout_in_minutes: 10
@@ -281,7 +281,7 @@ steps:
     label: 'Build Storybooks'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n4-standard-16
       diskType: hyperdisk-balanced
@@ -301,7 +301,7 @@ steps:
     label: 'Publish OAS docs to bump.sh'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
@@ -319,7 +319,7 @@ steps:
     label: 'Extract Saved Object migration plugin types'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -341,7 +341,7 @@ steps:
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
 
@@ -352,7 +352,7 @@ steps:
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
     retry:

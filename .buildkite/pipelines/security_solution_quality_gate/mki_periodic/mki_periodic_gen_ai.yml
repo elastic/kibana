@@ -6,7 +6,7 @@ steps:
       BK_TEST_SUITE_KEY: "serverless-cypress-gen-ai"
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
     # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -23,7 +23,7 @@ steps:
         key: genai_ad_privileges:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -40,7 +40,7 @@ steps:
         key: genai_ad_privileges:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -56,7 +56,7 @@ steps:
         key: genai_ad_schedules:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -72,7 +72,7 @@ steps:
         key: genai_ad_schedules:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -88,7 +88,7 @@ steps:
         key: genai_conversations:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -104,7 +104,7 @@ steps:
         key: genai_kb_entries:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -120,7 +120,7 @@ steps:
         key: genai_startup:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -136,7 +136,7 @@ steps:
         key: nlp_cleanup_task:complete:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -152,7 +152,7 @@ steps:
         key: nlp_cleanup_task:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120

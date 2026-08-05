@@ -7,7 +7,7 @@ steps:
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -27,7 +27,7 @@ steps:
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -47,7 +47,7 @@ steps:
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       diskSizeGb: 130
@@ -68,7 +68,7 @@ steps:
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       diskSizeGb: 130
@@ -89,7 +89,7 @@ steps:
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -109,7 +109,7 @@ steps:
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -129,7 +129,7 @@ steps:
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -149,7 +149,7 @@ steps:
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -168,7 +168,7 @@ steps:
     label: 'Rule Management - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -187,7 +187,7 @@ steps:
     label: 'Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -206,7 +206,7 @@ steps:
     label: 'Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -225,7 +225,7 @@ steps:
     label: 'Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -244,7 +244,7 @@ steps:
     label: 'Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -264,7 +264,7 @@ steps:
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -284,7 +284,7 @@ steps:
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -303,7 +303,7 @@ steps:
     label: 'Detection Engine - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -322,7 +322,7 @@ steps:
     label: 'Detection Engine - Exceptions - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -342,7 +342,7 @@ steps:
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -361,7 +361,7 @@ steps:
     label: 'AI Assistant - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -380,7 +380,7 @@ steps:
     label: 'Entity Analytics - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -399,7 +399,7 @@ steps:
     label: 'Explore - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -418,7 +418,7 @@ steps:
     label: 'Investigations - Security Solution Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       diskSizeGb: 130
@@ -438,7 +438,7 @@ steps:
     label: 'Osquery Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-highmem-4
       diskSizeGb: 130
@@ -459,7 +459,7 @@ steps:
     branches: main
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-highmem-4
       diskSizeGb: 130
@@ -481,7 +481,7 @@ steps:
       CLEAR_YARN_CACHE: '1'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-highmem-4
@@ -505,7 +505,7 @@ steps:
       CLEAR_YARN_CACHE: '1'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-highmem-4

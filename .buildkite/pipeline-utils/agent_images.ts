@@ -14,7 +14,7 @@ import { FIPS_VERSION, prHasFIPSLabel } from './pr_labels';
 
 export const ELASTIC_IMAGES_QA_PROJECT = 'elastic-images-qa';
 export const USE_QA_IMAGE_GH_LABEL = 'ci:use-qa-image';
-export const ELASTIC_IMAGES_PROD_PROJECT = 'elastic-images-prod';
+export const ELASTIC_IMAGES_PROD_PROJECT = 'elastic-images-qa';
 export const FIPS_140_3_IMAGE = 'family/kibana-fips-140-3-ubuntu-2404';
 export const FIPS_140_2_IMAGE = 'family/kibana-fips-140-2-ubuntu-2404';
 

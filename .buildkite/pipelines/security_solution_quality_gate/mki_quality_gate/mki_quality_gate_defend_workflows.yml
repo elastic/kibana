@@ -6,7 +6,7 @@ steps:
       CLEAR_YARN_CACHE: '1'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4

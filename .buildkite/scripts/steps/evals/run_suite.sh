@@ -209,7 +209,7 @@ EOF
         concurrency: ${EVAL_FANOUT_CONCURRENCY}
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
 EOF
@@ -280,7 +280,7 @@ EOF
         soft_fail: true
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-2
           preemptible: true
@@ -312,7 +312,7 @@ EOF
         allow_dependency_failure: true
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-2
           preemptible: true
@@ -370,7 +370,7 @@ EOF
         allow_dependency_failure: true
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
+          imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-2
           preemptible: true

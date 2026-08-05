@@ -52,7 +52,7 @@ for raw_suite in "${requested_suites[@]}"; do
     timeout_in_minutes: ${EVAL_STEP_TIMEOUT_IN_MINUTES:-120}
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-8
       preemptible: true

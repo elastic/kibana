@@ -9,7 +9,7 @@ steps:
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
 
@@ -19,7 +19,7 @@ steps:
     label: Build Kibana Distribution
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-8
       preemptible: true
@@ -35,7 +35,7 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
     timeout_in_minutes: 15
@@ -53,7 +53,7 @@ steps:
     label: 'Scout Test Run Builder'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
     key: build_scout_tests
@@ -73,7 +73,7 @@ steps:
       CLEAR_YARN_CACHE: '1'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-highmem-4
@@ -93,7 +93,7 @@ steps:
       CLEAR_YARN_CACHE: '1'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-highmem-4
@@ -111,7 +111,7 @@ steps:
     label: 'Osquery Cypress Tests'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-highmem-4
       diskSizeGb: 130
@@ -128,7 +128,7 @@ steps:
     label: 'Osquery Cypress Tests on Serverless'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-highmem-4
       diskSizeGb: 130
@@ -148,7 +148,7 @@ steps:
     key: promote-epr-to-temp
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
     depends_on:
@@ -182,7 +182,7 @@ steps:
     key: promote-epr-image
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
     depends_on:
@@ -201,6 +201,6 @@ steps:
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
