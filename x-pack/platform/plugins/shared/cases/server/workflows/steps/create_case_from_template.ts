@@ -84,11 +84,17 @@ export const createCaseFromTemplateStepDefinition = (
             seededDefaults.description = parsed.definition.description;
           }
 
-          // `title` is wire-required (non-empty). Unlike the other case defaults, expansion never
-          // fills it in, so a template with no default `name` needs a caller-supplied overwrite.
+          // `title` and `description` are both wire-required (non-empty). Unlike the other case
+          // defaults, expansion never fills either in, so a template missing a default `name` /
+          // `description` needs the matching caller-supplied overwrite.
           if (!seededDefaults.title && !normalizedOverwrites.title) {
             throw new Error(
               `Case template "${case_template_id}" has no default title; provide "overwrites.title"`
+            );
+          }
+          if (!seededDefaults.description && !normalizedOverwrites.description) {
+            throw new Error(
+              `Case template "${case_template_id}" has no default description; provide "overwrites.description"`
             );
           }
 

@@ -557,6 +557,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
       const getTemplate = jest.fn().mockResolvedValue(
         buildTemplateSO({
           name: 'Triage default title',
+          description: 'Triage default description',
           settings: { syncAlerts: false },
           fields: [],
         })
@@ -584,6 +585,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
       const getTemplate = jest.fn().mockResolvedValue(
         buildTemplateSO({
           name: 'Triage default title',
+          description: 'Triage default description',
           fields: [],
         })
       );
@@ -638,6 +640,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
       const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
       const getTemplate = jest.fn().mockResolvedValue(
         buildTemplateSO({
+          description: 'Triage default description',
           fields: [],
         })
       );
@@ -658,6 +661,65 @@ describe('createCaseFromTemplateStepDefinition', () => {
 
       expect(create).toHaveBeenCalledWith(
         expect.objectContaining({ title: 'Caller-supplied title' })
+      );
+      expect(result.error).toBeUndefined();
+    });
+
+    it('fails with a clear message when the template has no default description and no description overwrite is provided', async () => {
+      const create = jest.fn();
+      const getTemplate = jest.fn().mockResolvedValue(
+        buildTemplateSO({
+          name: 'Triage default title',
+          // No `description` in the definition, i.e. no default description.
+          fields: [],
+        })
+      );
+      const getCasesClient = jest.fn().mockResolvedValue({
+        templates: { getTemplate },
+        configure: { get: jest.fn() },
+        cases: { create },
+      } as unknown as CasesClient);
+
+      const definition = createCaseFromTemplateStepDefinition(getCasesClient, true);
+      const result = await definition.handler(
+        createContext({
+          owner: 'securitySolution',
+          case_template_id: 'triage_template',
+        })
+      );
+
+      expect(create).not.toHaveBeenCalled();
+      expect(result.error).toBeInstanceOf(Error);
+      expect(result.error?.message).toBe(
+        'Case template "triage_template" has no default description; provide "overwrites.description"'
+      );
+    });
+
+    it('does not require a template default description when the caller provides a description overwrite', async () => {
+      const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
+      const getTemplate = jest.fn().mockResolvedValue(
+        buildTemplateSO({
+          name: 'Triage default title',
+          fields: [],
+        })
+      );
+      const getCasesClient = jest.fn().mockResolvedValue({
+        templates: { getTemplate },
+        configure: { get: jest.fn() },
+        cases: { create },
+      } as unknown as CasesClient);
+
+      const definition = createCaseFromTemplateStepDefinition(getCasesClient, true);
+      const result = await definition.handler(
+        createContext({
+          owner: 'securitySolution',
+          case_template_id: 'triage_template',
+          overwrites: { description: 'Caller-supplied description' },
+        })
+      );
+
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({ description: 'Caller-supplied description' })
       );
       expect(result.error).toBeUndefined();
     });
