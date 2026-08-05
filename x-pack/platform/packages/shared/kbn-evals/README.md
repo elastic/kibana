@@ -480,7 +480,7 @@ node scripts/evals dataplex sync --dry-run   # Preview changes
 - **Weekly** -- the weekly LLM evals pipeline includes a label sync step
 - **On demand** -- add `ci:sync-model-labels` label to any PR
 
-Stale labels are renamed to `deprecated:models:*` (kept for historical record).
+Stale labels are renamed to `deprecated:models:*` (kept for historical record), and renamed back if the model returns. Names that would exceed GitHub's 50-character limit once prefixed can't be renamed, so those keep their name and are greyed out with a `DEPRECATED` description instead. Deprecation is skipped whenever a label write fails or a model source is unavailable, so stale labels can linger for a run rather than a live model losing its label.
 
 ### CI ops
 
@@ -489,6 +489,7 @@ Update all model + judge labels:
 ```bash
 ./scripts/create_models_labels.sh --repo elastic/kibana --update-all-labels
 ./scripts/create_models_labels.sh --repo elastic/kibana --update-all-labels --prune  # also deprecate stale
+./scripts/create_models_labels.sh --repo elastic/kibana --update-all-labels --prune --dry-run  # preview
 ```
 
 Update Vault config:
