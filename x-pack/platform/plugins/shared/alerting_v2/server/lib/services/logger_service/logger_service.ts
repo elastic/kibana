@@ -11,7 +11,7 @@ import type { Logger, LogMessageSource } from '@kbn/logging';
 import { createToken, Logger as BaseLogger } from '@kbn/core-di';
 import type { EcsError } from '@elastic/ecs';
 import type {
-  AlertingV2SubsystemName,
+  AlertingSubsystemName,
   DebugParams,
   ErrorParams,
   InfoParams,
@@ -25,7 +25,7 @@ export interface LoggerServiceContract {
   error(params: ErrorParams): void;
 
   /** Return a child logger scoped to a subsystem name. */
-  forSubsystem(name: AlertingV2SubsystemName): LoggerServiceContract;
+  forSubsystem(name: AlertingSubsystemName): LoggerServiceContract;
 }
 
 export const LoggerServiceToken = createToken<LoggerServiceContract>('alerting_v2.LoggerService');
@@ -44,7 +44,7 @@ const buildEcsError = (error: Error, message?: string): EcsError => ({
 
 @injectable()
 export class LoggerService implements LoggerServiceContract {
-  private readonly subsystems = new Map<AlertingV2SubsystemName, LoggerServiceContract>();
+  private readonly subsystems = new Map<AlertingSubsystemName, LoggerServiceContract>();
 
   constructor(@inject(BaseLogger) private readonly logger: Logger) {}
 
@@ -84,7 +84,7 @@ export class LoggerService implements LoggerServiceContract {
     });
   }
 
-  public forSubsystem(name: AlertingV2SubsystemName): LoggerServiceContract {
+  public forSubsystem(name: AlertingSubsystemName): LoggerServiceContract {
     const subsystem = this.subsystems.get(name) ?? new LoggerService(this.logger.get(name));
     this.subsystems.set(name, subsystem);
 

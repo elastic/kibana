@@ -13,7 +13,7 @@ import type { AlertingV2LogCode } from '../../errors/error_codes';
  * are keyword-indexed, so they must stay low-cardinality identifiers — never
  * names, user input, counts, or durations.
  */
-export type AlertingV2Labels = Partial<{
+export type AlertingLabels = Partial<{
   rule_id: string;
   rule_kind: 'alert' | 'signal';
   space_id: string;
@@ -33,7 +33,7 @@ export type AlertingV2Labels = Partial<{
  * value `plugins.alertingV2.<name>`, which is the primary axis an operator
  * filters on.
  */
-export type AlertingV2SubsystemName =
+export type AlertingSubsystemName =
   | 'routes'
   | 'rulesClient'
   | 'actionPolicyClient'
@@ -49,24 +49,24 @@ export type AlertingV2SubsystemName =
 
 export interface DebugParams {
   message: LogMessageSource;
-  labels?: AlertingV2Labels;
+  labels?: AlertingLabels;
 }
 
 export interface InfoParams {
   message: LogMessageSource;
-  labels?: AlertingV2Labels;
+  labels?: AlertingLabels;
 }
 
 export interface WarnParams {
   message: LogMessageSource;
   error?: unknown;
   code: AlertingV2LogCode;
-  labels?: AlertingV2Labels;
+  labels?: AlertingLabels;
 }
 
 export interface ErrorParams {
   message?: LogMessageSource;
   error: unknown;
   code: AlertingV2LogCode;
-  labels?: AlertingV2Labels;
+  labels?: AlertingLabels;
 }

@@ -12,7 +12,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import type { AlertingV2Labels } from '../../services/logger_service/types';
+import type { AlertingLabels } from '../../services/logger_service/types';
 import type {
   DomainEvent,
   EventBus,
@@ -161,7 +161,7 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
     };
   }
 
-  #logError(error: unknown, code: EventBusErrorCode, labels?: AlertingV2Labels): void {
+  #logError(error: unknown, code: EventBusErrorCode, labels?: AlertingLabels): void {
     this.logger.error({ error, code, labels });
   }
 }

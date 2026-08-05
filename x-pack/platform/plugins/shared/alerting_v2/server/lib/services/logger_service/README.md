@@ -21,7 +21,7 @@ logger.forSubsystem(name); // → LoggerServiceContract
 | ----- | ----- |
 | `message` | `string` or `() => string`. Use the lazy form for `debug` in hot paths; it costs nothing when the level is disabled. Optional on `error`, where it defaults to the error's own message. |
 | `code` | Required on `warn` / `error`. Must come from `ALERTING_V2_LOG_CODES` (`../../errors/error_codes.ts`). Emitted as ECS `labels.code`. |
-| `labels` | Optional entity identifiers from `AlertingV2Labels`. IDs only — never names, user input, counts, or durations. |
+| `labels` | Optional entity identifiers from `AlertingLabels`. IDs only — never names, user input, counts, or durations. |
 | `error` | `unknown`. Non-`Error` values are wrapped internally, so `catch (err)` blocks pass `err` straight through. Emitted as ECS `error.{message,type,stack_trace}`, with `type` taken from the exception's constructor name. |
 
 ## What goes where
@@ -88,6 +88,6 @@ Adding a code, a label, or a subsystem is a deliberate one-line type change:
 - **Code** — add an entry to `ALERTING_V2_LOG_CODES` (`../../errors/error_codes.ts`)
   with a JSDoc describing when it fires and what degraded. Renaming or removing
   one is a breaking change for log-based monitoring.
-- **Label** — add a key to `AlertingV2Labels` (`types.ts`). Keys are snake_case;
+- **Label** — add a key to `AlertingLabels` (`types.ts`). Keys are snake_case;
   values must be low-cardinality identifiers.
-- **Subsystem** — add a name to `AlertingV2SubsystemName` (`types.ts`).
+- **Subsystem** — add a name to `AlertingSubsystemName` (`types.ts`).
