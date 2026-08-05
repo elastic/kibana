@@ -11,7 +11,7 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
 import { createAlertEventDataSchema } from '@kbn/alerting-v2-schemas';
 
-export const CREATE_ALERT_EVENT_STEP_ID = 'alerting_v2.create_alert' as const;
+export const CREATE_ALERT_EVENT_STEP_ID = 'alerting.create_alert' as const;
 
 export const createAlertEventOutputSchema = z.object({
   group_hash: z.string(),
