@@ -14,9 +14,9 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
-import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
@@ -28,7 +28,6 @@ import type { StreamsClient } from './lib/streams/client';
 import type { StreamsConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
-  STREAMS_CONSUMER,
   STREAMS_FEATURE_ID,
   STREAMS_SETTINGS_DOCUMENT_ID,
   STREAMS_TIERED_FEATURES,
@@ -49,7 +48,6 @@ import type {
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
-import { TaskService } from './lib/tasks/task_service';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
@@ -132,11 +130,6 @@ export class StreamsPlugin
       plugins.usageCollection
     );
 
-    const alertingFeatures = STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
-      ruleTypeId,
-      consumers: [STREAMS_CONSUMER],
-    }));
-
     registerSuggestionsInferenceFeatures(
       plugins.searchInferenceEndpoints,
       this.logger.get('inference-features')
@@ -147,7 +140,6 @@ export class StreamsPlugin
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     this.streamsService = streamsService;
     const contentService = new ContentService(core, this.logger);
-    const taskService = new TaskService(plugins.taskManager);
 
     this.streamsGetScopedClients = async ({
       request,
@@ -167,12 +159,6 @@ export class StreamsPlugin
       const inferenceClient = pluginsStart.inference.getClient({ request });
       const licensing = pluginsStart.licensing;
       const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
-      const taskClient = await taskService.getClient(
-        coreStart,
-        pluginsStart.taskManager,
-        this.logger
-      );
-
       const [attachmentClient, contentClient] = await Promise.all([
         attachmentService.getClient({
           soClient,
@@ -221,7 +207,6 @@ export class StreamsPlugin
         licensing,
         uiSettingsClient,
         globalUiSettingsClient,
-        taskClient,
         streamsSettingsStorageClient,
         isSecurityEnabled,
       };
@@ -251,21 +236,6 @@ export class StreamsPlugin
 
     plugins.workflowsExtensions?.registerManagedWorkflowOwner(STREAMS_MANAGED_WORKFLOW_OWNER);
 
-    taskService.registerTasks({
-      getScopedClients: this.streamsGetScopedClients,
-      logger: this.logger,
-      telemetry: telemetryClient,
-      getInternalEsClient: () => this.server!.core.elasticsearch.client.asInternalUser,
-      getConversationsClient: async (request) => {
-        const [, startPlugins] = await core.getStartServices();
-        if (!startPlugins.agentBuilder) {
-          return undefined;
-        }
-        return startPlugins.agentBuilder.conversations.getScopedClient({ request });
-      },
-      server: this.server,
-    });
-
     plugins.features.registerKibanaFeature({
       id: STREAMS_FEATURE_ID,
       name: i18n.translate('xpack.streams.featureRegistry.streamsFeatureName', {
@@ -273,42 +243,22 @@ export class StreamsPlugin
       }),
       order: 600,
       category: DEFAULT_APP_CATEGORIES.management,
-      app: [STREAMS_FEATURE_ID],
-      alerting: alertingFeatures,
+      app: [STREAMS_FEATURE_ID, SIGNIFICANT_EVENTS_APP_ID],
       privileges: {
         all: {
-          app: [STREAMS_FEATURE_ID],
+          app: [STREAMS_FEATURE_ID, SIGNIFICANT_EVENTS_APP_ID],
           savedObject: {
             all: [],
             read: [],
-          },
-          alerting: {
-            rule: {
-              all: alertingFeatures,
-              enable: alertingFeatures,
-              manual_run: alertingFeatures,
-              manage_rule_settings: alertingFeatures,
-            },
-            alert: {
-              all: alertingFeatures,
-            },
           },
           api: [STREAMS_API_PRIVILEGES.read, STREAMS_API_PRIVILEGES.manage],
           ui: [STREAMS_UI_PRIVILEGES.show, STREAMS_UI_PRIVILEGES.manage],
         },
         read: {
-          app: [STREAMS_FEATURE_ID],
+          app: [STREAMS_FEATURE_ID, SIGNIFICANT_EVENTS_APP_ID],
           savedObject: {
             all: [],
             read: [],
-          },
-          alerting: {
-            rule: {
-              read: alertingFeatures,
-            },
-            alert: {
-              read: alertingFeatures,
-            },
           },
           api: [STREAMS_API_PRIVILEGES.read],
           ui: [STREAMS_UI_PRIVILEGES.show],
@@ -513,7 +463,6 @@ export class StreamsPlugin
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
       this.server.inference = plugins.inference;
       this.server.licensing = plugins.licensing;
-      this.server.taskManager = plugins.taskManager;
       this.server.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
       this.server.spaces = plugins.spaces;
       this.server.workflowsExtensions = plugins.workflowsExtensions;

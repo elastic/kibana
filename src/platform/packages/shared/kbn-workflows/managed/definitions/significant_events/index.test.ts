@@ -15,6 +15,7 @@ interface WorkflowStep {
   condition?: string;
   steps?: WorkflowStep[];
   with?: Record<string, string>;
+  foreach?: string;
 }
 
 interface ParsedWorkflow {
@@ -40,8 +41,8 @@ const triage = parse(SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW.yaml) as ParsedWorkflow;
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(12);
-    expect(SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW.version).toBe(13);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(13);
+    expect(SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW.version).toBe(15);
   });
 
   it('stamps discovery detections only from confirmed write outcomes', () => {
@@ -53,12 +54,12 @@ describe('significant events persistence workflow contracts', () => {
     );
   });
 
-  it('gates triage stamping and investigations on confirmed event writes', () => {
-    expect(requireStep(triage, 'compute_written_event_ids').with?.written_event_ids).toContain(
+  it('gates triage investigations on confirmed event writes', () => {
+    expect(requireStep(triage, 'count_open_events').with?.openCount).toContain(
       "reject: 'written', false"
     );
-    expect(requireStep(triage, 'check_event_written').condition).toContain(
-      'variables.written_event_ids contains'
+    expect(requireStep(triage, 'foreach_significant_event').foreach).toContain(
+      "reject: 'written', false"
     );
     expect(requireStep(triage, 'gate_investigatable_severity').condition).toContain(
       'foreach.item.event_uuid != null'

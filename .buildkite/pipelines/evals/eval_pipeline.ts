@@ -105,6 +105,13 @@ const DEFAULT_WEEKLY_EIS_MODELS: string[] = [
 const WEEKLY_EIS_MODELS_ALIAS = 'weekly-eis-models';
 
 /**
+ * `evals:skip-<suite-id>` drops a suite even when its `evals:<suite-id>` label is present. Needed
+ * because `.github/paths-labeller.yml` auto-applies `evals:smoke-tests` and re-adds it on every
+ * push, so removing that label by hand doesn't stick.
+ */
+const EVALS_SKIP_LABEL_PREFIX = 'evals:skip-';
+
+/**
  * Model-group aliases: one `models:<alias>` label expands to several model groups for the fanout.
  * `weekly-eis-models` is handled separately (resolved per-suite; see above).
  */
@@ -230,21 +237,35 @@ interface EvalSelection {
 function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   const parsedLabels = parseGithubPrLabels(githubPrLabels);
 
+  const skippedSuiteIds = new Set(
+    parsedLabels
+      .filter((label) => label.startsWith(EVALS_SKIP_LABEL_PREFIX))
+      .map((label) => label.slice(EVALS_SKIP_LABEL_PREFIX.length).trim())
+      .filter(Boolean)
+  );
+
   // Most PRs carry no eval labels; bail before reading suite metadata so we don't spawn a
   // `git ls-tree` per suite on every kibana-pull-request pipeline generation.
-  if (!parsedLabels.some((label) => label.startsWith('evals:') || label.startsWith('models:'))) {
+  const hasSelectionLabel = parsedLabels.some(
+    (label) =>
+      (label.startsWith('evals:') && !label.startsWith(EVALS_SKIP_LABEL_PREFIX)) ||
+      label.startsWith('models:')
+  );
+  if (!hasSelectionLabel) {
     return null;
   }
 
   // Run eval suite(s) when their GH label(s) are present (see `evals.suites.json`).
   const evalSuites = readEvalsSuiteMetadata();
   const runAllEvals = parsedLabels.includes('evals:all');
-  const selectedEvalSuites = runAllEvals
-    ? evalSuites
-    : evalSuites.filter((suite) => {
-        const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
-        return labels.some((label) => parsedLabels.includes(label));
-      });
+  const selectedEvalSuites = (
+    runAllEvals
+      ? evalSuites
+      : evalSuites.filter((suite) => {
+          const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
+          return labels.some((label) => parsedLabels.includes(label));
+        })
+  ).filter((suite) => !skippedSuiteIds.has(suite.id));
   // Model filtering (models:* labels): none => skip (explicit selection required);
   // `models:<group>` => run those groups; aliases (e.g. `models:weekly-eis-models`) expand.
   const rawEvaluationConnectorId = parsedLabels

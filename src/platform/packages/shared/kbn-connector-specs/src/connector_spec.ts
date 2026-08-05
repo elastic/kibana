@@ -76,6 +76,7 @@ export interface ConnectorMetadata {
     | 'endpointSecurity'
     | 'workflows'
     | 'agentBuilder'
+    | 'contextEngine'
   >;
 }
 
@@ -128,13 +129,16 @@ export interface AuthContext {
 
 export type AuthMode = 'per-user' | 'shared';
 
-export interface AuthTypeSpec<T extends Record<string, unknown>> {
+export interface AuthTypeDefinition {
   id: string;
   schema: z.ZodObject<Record<string, z.ZodType>>;
   normalizeSchema?: (defaults?: Record<string, unknown>) => z.ZodObject<Record<string, z.ZodType>>;
-  configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
   authMode?: AuthMode;
   getAuthHeaders?(ctx: AuthContext, secret: T): Promise<Record<string, string>>;
+}
+
+export interface AuthTypeSpec<T extends Record<string, unknown>> extends AuthTypeDefinition {
+  configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
