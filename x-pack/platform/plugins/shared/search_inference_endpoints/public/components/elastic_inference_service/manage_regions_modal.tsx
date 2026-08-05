@@ -165,7 +165,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
             disabled={isLoading || isSaving || isDeleting}
             label={i18n.translate(
               'xpack.searchInferenceEndpoints.manageRegions.customPolicyToggleLabel',
-              { defaultMessage: 'Use a custom policy for this project' }
+              { defaultMessage: 'Restrict inference to specific locations' }
             )}
             data-test-subj="manageRegionsCustomPolicyToggle"
           />
