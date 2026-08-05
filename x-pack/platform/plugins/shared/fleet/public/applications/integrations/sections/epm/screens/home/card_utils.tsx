@@ -52,6 +52,8 @@ export interface IntegrationCardItem {
   installStatus?: EpmPackageInstallStatus;
   integration: string;
   isCollectionCard?: boolean;
+  groupMembers?: IntegrationCardItem[];
+  searchableContent?: string;
   isQuickstart?: boolean;
   isReauthorizationRequired?: boolean;
   isUnverified?: boolean;

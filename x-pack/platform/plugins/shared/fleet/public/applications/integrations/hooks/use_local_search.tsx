@@ -11,10 +11,14 @@ import { useMemo } from 'react';
 import type { PackageListItem } from '../types';
 
 export const searchIdField = 'id';
-export const fieldsToSearch = ['name', 'title', 'description'];
+export const fieldsToSearch = ['name', 'title', 'description', 'searchableContent'];
 
 export function useLocalSearch(
-  packageList: Array<Pick<PackageListItem, 'id' | 'name' | 'title' | 'description'>>,
+  packageList: Array<
+    Pick<PackageListItem, 'id' | 'name' | 'title' | 'description'> & {
+      searchableContent?: string;
+    }
+  >,
   isInitialLoading: boolean
 ) {
   return useMemo(() => {

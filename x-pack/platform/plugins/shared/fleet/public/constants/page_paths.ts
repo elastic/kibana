@@ -56,7 +56,8 @@ export type DynamicPage =
   | 'settings_edit_outputs'
   | 'settings_edit_download_sources'
   | 'settings_edit_fleet_server_hosts'
-  | 'settings_edit_fleet_proxy';
+  | 'settings_edit_fleet_proxy'
+  | 'integration_collection';
 
 export type Page = StaticPage | DynamicPage;
 
@@ -123,6 +124,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_policy_copy: '/copy-integration/:packagePolicyId',
   integration_policy_upgrade: '/edit-integration/:packagePolicyId',
   add_integration_to_policy: '/detail/:pkgkey/add-integration/:integration?',
+  integration_collection: '/collection/:groupId',
 };
 
 export const pagePathGetters: {
@@ -341,4 +343,5 @@ export const pagePathGetters: {
     FLEET_ROUTING_PATHS.settings_create_download_sources,
   ],
   debug: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.debug],
+  integration_collection: ({ groupId }) => [INTEGRATIONS_BASE_PATH, `/collection/${groupId}`],
 };
