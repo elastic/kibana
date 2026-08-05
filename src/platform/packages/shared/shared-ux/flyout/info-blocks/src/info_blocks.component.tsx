@@ -17,10 +17,53 @@ import type { InfoBlocksProps } from './types';
 
 const CONTAINER_NAME = 'infoBlocks';
 
+/**
+ * Grid and divider rules for a state that renders `columns` per row. `:nth-child(n)` resets every
+ * cell at the same specificity as the column-specific rules, so the exceptions below it win on
+ * source order. At one column `1n` matches every cell, which drops all column dividers.
+ */
+const columnState = (columns: number) => `
+  grid-template-columns: repeat(${columns}, minmax(0, 1fr));
+
+  & > :nth-child(n)::before {
+    display: block;
+  }
+  & > :nth-child(${columns}n)::before {
+    display: none;
+  }
+
+  & > :nth-child(n)::after {
+    display: none;
+  }
+  & > :nth-child(${columns}n + 1)::after {
+    display: block;
+  }
+  & > :nth-child(1)::after {
+    display: none;
+  }
+`;
+
+/**
+ * Widest state first, then a query per step down. Container queries carry equal specificity, so the
+ * narrowest matching one must come last to win.
+ */
+const responsiveGrid = (maxColumns: number) => {
+  let steps = '';
+  for (let columns = maxColumns - 1; columns >= 1; columns--) {
+    // A state needs `columns * FLYOUT_MIN_CELL_WIDTH`; below that the next one down takes over.
+    steps += `
+      @container ${CONTAINER_NAME} (width < ${(columns + 1) * FLYOUT_MIN_CELL_WIDTH}px) {
+        ${columnState(columns)}
+      }
+    `;
+  }
+  return css`
+    ${columnState(maxColumns)}
+    ${steps}
+  `;
+};
+
 const styles = ({ euiTheme }: UseEuiTheme) => {
-  const threeColumnBelow = FLYOUT_MAX_GRID_COLUMNS * FLYOUT_MIN_CELL_WIDTH; // 560
-  const twoColumnBelow = 3 * FLYOUT_MIN_CELL_WIDTH; // 420
-  const oneColumnBelow = 2 * FLYOUT_MIN_CELL_WIDTH; // 280
   const color = euiTheme.border.color;
   const thickness = euiTheme.border.width.thin;
   // Keeps dividers clear of the panel's rounded corners.
@@ -36,7 +79,6 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
 
     panel: css`
       display: grid;
-      grid-template-columns: repeat(${FLYOUT_MAX_GRID_COLUMNS}, minmax(0, 1fr));
 
       & > * {
         position: relative;
@@ -65,78 +107,14 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
         background-color: ${color};
         display: none;
       }
-
-      /* ── 4-column state (default) ── */
-      & > :nth-child(4n)::before {
-        display: none;
-      }
-      & > :nth-child(4n + 1)::after {
-        display: block;
-      }
-      & > :nth-child(1)::after {
-        display: none;
-      }
-
-      /* ── 3-column state ── */
-      @container ${CONTAINER_NAME} (width < ${threeColumnBelow}px) {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-
-        /* :nth-child(n) resets every cell at equal specificity; the exceptions below win on order. */
-        & > :nth-child(n)::before {
-          display: block;
-        }
-        & > :nth-child(3n)::before {
-          display: none;
-        }
-
-        & > :nth-child(n)::after {
-          display: none;
-        }
-        & > :nth-child(3n + 1)::after {
-          display: block;
-        }
-        & > :nth-child(1)::after {
-          display: none;
-        }
-      }
-
-      /* ── 2-column state ── */
-      @container ${CONTAINER_NAME} (width < ${twoColumnBelow}px) {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-
-        & > :nth-child(n)::before {
-          display: block;
-        }
-        & > :nth-child(2n)::before {
-          display: none;
-        }
-
-        & > :nth-child(n)::after {
-          display: none;
-        }
-        & > :nth-child(2n + 1)::after {
-          display: block;
-        }
-        & > :nth-child(1)::after {
-          display: none;
-        }
-      }
-
-      /* ── 1-column state ── */
-      @container ${CONTAINER_NAME} (width < ${oneColumnBelow}px) {
-        grid-template-columns: minmax(0, 1fr);
-
-        & > :nth-child(n)::before {
-          display: none;
-        }
-        & > :nth-child(n)::after {
-          display: block;
-        }
-        & > :nth-child(1)::after {
-          display: none;
-        }
-      }
     `,
+
+    /** One variant per supported cap, since each has its own breakpoint ladder. */
+    grids: {
+      2: responsiveGrid(2),
+      3: responsiveGrid(3),
+      4: responsiveGrid(FLYOUT_MAX_GRID_COLUMNS),
+    },
 
     cell: css`
       padding: ${euiTheme.size.m};
@@ -145,7 +123,11 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
 };
 
 /** Responsive card for a small set of labeled values. */
-export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, ...rest }) => {
+export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({
+  items,
+  maxColumns = 3,
+  ...rest
+}) => {
   const memoized = useEuiMemoizedStyles(styles);
 
   return (
@@ -154,7 +136,7 @@ export const InfoBlocks: FunctionComponent<InfoBlocksProps> = ({ items, ...rest 
         paddingSize="none"
         hasShadow={false}
         hasBorder
-        css={memoized.panel}
+        css={[memoized.panel, memoized.grids[maxColumns]]}
         data-test-subj={rest['data-test-subj'] ?? 'infoBlocks'}
       >
         {items.map((item, index) => (

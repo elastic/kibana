@@ -29,7 +29,7 @@ import {
   EuiFlyoutBody,
 } from '@elastic/eui';
 import { InfoBlocks } from './info_blocks.component';
-import type { InfoBlockItem } from './types';
+import type { InfoBlockItem, InfoBlocksMaxColumns } from './types';
 
 const meta: Meta<typeof InfoBlocks> = {
   title: 'Flyout Template/Info Blocks',
@@ -43,7 +43,41 @@ export default meta;
 
 interface DefaultArgs {
   numberOfItems: number;
+  maxColumns: InfoBlocksMaxColumns;
 }
+
+// A truncating link with a trailing copy action.
+const RESOURCE_LINK = (
+  <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+    <EuiFlexItem
+      grow={true}
+      css={css`
+        min-width: 0;
+      `}
+    >
+      <EuiLink
+        href="#"
+        className="eui-textTruncate"
+        css={css`
+          display: block;
+        `}
+      >
+        etcd-cspm-control-plane-8fO2b-1a2b3c4d5e6f7g8h9i0j-kube-system
+      </EuiLink>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiToolTip content="Copy resource identifier" disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="copyClipboard"
+          color="text"
+          size="xs"
+          aria-label="Copy resource identifier"
+          onClick={action('Copy resource identifier clicked')}
+        />
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 const SAMPLE_ITEMS: InfoBlockItem[] = [
   { title: 'Owner', value: 'Platform' },
@@ -86,43 +120,6 @@ const SAMPLE_ITEMS: InfoBlockItem[] = [
   { title: 'Environment', value: 'production' },
   { title: 'Error rate', value: <EuiHealth color="warning">0.4%</EuiHealth> },
   { title: 'Version', value: 'v8.19.0' },
-];
-
-// A truncating link with a trailing copy action.
-const RESOURCE_LINK = (
-  <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-    <EuiFlexItem
-      grow={true}
-      css={css`
-        min-width: 0;
-      `}
-    >
-      <EuiLink
-        href="#"
-        className="eui-textTruncate"
-        css={css`
-          display: block;
-        `}
-      >
-        etcd-cspm-control-plane-8fO2b-1a2b3c4d5e6f7g8h9i0j-kube-system
-      </EuiLink>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiToolTip content="Copy resource identifier" disableScreenReaderOutput>
-        <EuiButtonIcon
-          iconType="copyClipboard"
-          color="text"
-          size="xs"
-          aria-label="Copy resource identifier"
-          onClick={action('Copy resource identifier clicked')}
-        />
-      </EuiToolTip>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
-
-// Examples of custom value content.
-const ACTIONABLE_ITEMS: InfoBlockItem[] = [
   {
     title: 'Assigned',
     value: (
@@ -200,13 +197,6 @@ const ACTIONABLE_ITEMS: InfoBlockItem[] = [
   },
 ];
 
-// A mix of large and regular values.
-const BIG_NUMBER_ITEMS: InfoBlockItem[] = [
-  { title: 'Risk score', value: '90', size: 'xl' },
-  ...SAMPLE_ITEMS.slice(0, 3),
-  { title: 'Healthy', value: '5', size: 'xl', color: 'success' },
-];
-
 const FlyoutWrapper: React.FC<{ children: React.ReactNode; title: string }> = ({
   children,
   title,
@@ -249,33 +239,43 @@ const TALL_SVG = (
   </svg>
 );
 
-const ALL_SAMPLE_ITEMS = [...SAMPLE_ITEMS, ...ACTIONABLE_ITEMS];
-
 export const Default: StoryObj<DefaultArgs> = {
   name: 'InfoBlocks',
   argTypes: {
     numberOfItems: {
       description: 'Number of items in each panel',
-      control: { type: 'range', min: 1, max: ALL_SAMPLE_ITEMS.length, step: 1 },
+      control: { type: 'range', min: 1, max: SAMPLE_ITEMS.length, step: 1 },
+    },
+    maxColumns: {
+      description: 'Widest column count; resize the flyout to see it step down',
+      control: { type: 'inline-radio' },
+      options: [2, 3, 4],
     },
   },
   args: {
-    numberOfItems: ALL_SAMPLE_ITEMS.length,
+    numberOfItems: SAMPLE_ITEMS.length,
+    maxColumns: 3,
   },
-  render: ({ numberOfItems }) => (
+  render: ({ numberOfItems, maxColumns }) => (
     <FlyoutWrapper title="Info blocks gallery">
       <EuiTitle size="s">
         <h3>Sample set</h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <InfoBlocks items={ALL_SAMPLE_ITEMS.slice(0, numberOfItems)} />
+      <InfoBlocks items={SAMPLE_ITEMS.slice(0, numberOfItems)} maxColumns={maxColumns} />
 
       <EuiSpacer size="xl" />
       <EuiTitle size="s">
         <h3>Big number</h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <InfoBlocks items={BIG_NUMBER_ITEMS.slice(0, numberOfItems)} />
+      <InfoBlocks
+        items={[{ title: 'Risk score', value: '90', size: 'xl' as const }, ...SAMPLE_ITEMS].slice(
+          0,
+          numberOfItems
+        )}
+        maxColumns={maxColumns}
+      />
 
       <EuiSpacer size="xl" />
       <EuiTitle size="s">
@@ -284,6 +284,7 @@ export const Default: StoryObj<DefaultArgs> = {
       <EuiSpacer size="m" />
       <InfoBlocks
         items={[{ title: 'Trend', value: TALL_SVG }, ...SAMPLE_ITEMS].slice(0, numberOfItems)}
+        maxColumns={maxColumns}
       />
     </FlyoutWrapper>
   ),
