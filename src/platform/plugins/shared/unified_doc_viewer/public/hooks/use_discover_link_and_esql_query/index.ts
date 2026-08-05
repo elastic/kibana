@@ -10,7 +10,10 @@
 import { esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import { useGetGenerateDiscoverLink } from '../use_generate_discover_link';
-import { withUnmappedFields, type UnmappedFieldsPolicy } from '../../utils/esql_unmapped_fields';
+import {
+  applyUnmappedFieldsPolicy,
+  type UnmappedFieldsPolicy,
+} from '../../utils/esql_unmapped_fields';
 
 export interface UseDiscoverLinkAndEsqlQueryParams {
   indexPattern?: string;
@@ -35,7 +38,7 @@ export function useDiscoverLinkAndEsqlQuery({
   // Build a fresh query per call because `ComposerQuery.where` mutates in place.
   const query = esql.from(indexPattern);
   if (unmappedFieldsPolicy) {
-    withUnmappedFields(query, { policy: unmappedFieldsPolicy });
+    applyUnmappedFieldsPolicy(query, unmappedFieldsPolicy);
   }
   query.where`${whereClause}`;
   const esqlQueryString = query.print('pipe-multiline');

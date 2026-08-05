@@ -9,16 +9,13 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__/data_view';
+import { apmSharedMock } from '@kbn/apm-shared/public/mocks';
 import type { TraceWaterfallRestorableState } from '.';
 import { TraceWaterfall } from '.';
-// Imported after the component so `@kbn/discover-utils` finishes initializing its
-// barrel exports (e.g. TRACE_ID_FIELD) before this deep `__mocks__` entry pulls in
-// the same package via a different path.
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import type { UnifiedDocViewerServices } from '../../../../../types';
 import type { FullScreenWaterfallProps } from '../full_screen_waterfall';
-import { apmSharedMock } from '@kbn/apm-shared/public/mocks';
 
 jest.mock('../../../../../hooks/use_data_sources', () => ({
   useDataSourcesContext: () => ({

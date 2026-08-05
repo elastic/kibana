@@ -10,7 +10,10 @@ import { esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import { castArray } from 'lodash';
 import { getUnifiedDocViewerServices } from '../../plugin';
-import { withUnmappedFields, type UnmappedFieldsPolicy } from '../../utils/esql_unmapped_fields';
+import {
+  applyUnmappedFieldsPolicy,
+  type UnmappedFieldsPolicy,
+} from '../../utils/esql_unmapped_fields';
 
 export type GenerateDiscoverLink = (whereClause?: ESQLAstExpression) => string | undefined;
 
@@ -39,7 +42,7 @@ export function useGetGenerateDiscoverLink({
     // Build a fresh query per call because `ComposerQuery.where` mutates in place.
     const query = esql.from(indices.join());
     if (unmappedFieldsPolicy) {
-      withUnmappedFields(query, { policy: unmappedFieldsPolicy });
+      applyUnmappedFieldsPolicy(query, unmappedFieldsPolicy);
     }
     if (whereClause) {
       query.where`${whereClause}`;

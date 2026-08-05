@@ -25,7 +25,7 @@ import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { ContentFrameworkChart } from '../../../../content_framework/chart';
 import { esqlColumn } from '../../../../../utils/esql_column';
-import { withUnmappedFields } from '../../../../../utils/esql_unmapped_fields';
+import { applyUnmappedFieldsPolicy } from '../../../../../utils/esql_unmapped_fields';
 
 const chartTitle = i18n.translate(
   'unifiedDocViewer.docViewerLogsOverview.subComponents.similarErrors.occurrences.title',
@@ -121,7 +121,7 @@ export function SimilarErrorsOccurrencesChart({
 
     const timestamp = esqlColumn(fieldConstants.TIMESTAMP_FIELD);
     const query = esql.from(indexes.logs);
-    withUnmappedFields(query);
+    applyUnmappedFieldsPolicy(query, 'NULLIFY');
     query.where`${baseEsqlQuery}`;
     query.pipe`STATS occurrences = COUNT(*) BY ${timestamp} = BUCKET(${timestamp}, 100, ?_tstart, ?_tend)`;
     query.sort(fieldConstants.TIMESTAMP_FIELD);

@@ -13,20 +13,17 @@ const UNMAPPED_FIELDS_SETTING = 'unmapped_fields';
 
 export type UnmappedFieldsPolicy = 'NULLIFY' | 'LOAD';
 
-interface WithUnmappedFieldsOptions {
-  policy?: UnmappedFieldsPolicy;
-}
-
 /**
- * Nullifies columns missing from the resolved index pattern instead of failing
- * ES|QL verification. See https://github.com/elastic/kibana/issues/281060.
+ * Mutates `query` in place, like the `ComposerQuery` methods it wraps.
+ *
+ * `NULLIFY` makes columns missing from the resolved index pattern resolve to
+ * null instead of failing ES|QL verification. See
+ * https://github.com/elastic/kibana/issues/281060.
  */
-export const withUnmappedFields = (
+export const applyUnmappedFieldsPolicy = (
   query: ComposerQuery,
-  { policy = 'NULLIFY' }: WithUnmappedFieldsOptions = {}
-): ComposerQuery => {
+  policy: UnmappedFieldsPolicy
+): void => {
   // `addSetCommand` appends unconditionally, so drop any previous policy first.
-  query.removeSetCommand(UNMAPPED_FIELDS_SETTING);
-  query.addSetCommand(UNMAPPED_FIELDS_SETTING, policy);
-  return query;
+  query.removeSetCommand(UNMAPPED_FIELDS_SETTING).addSetCommand(UNMAPPED_FIELDS_SETTING, policy);
 };

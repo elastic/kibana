@@ -75,9 +75,7 @@ export const createTraceContextWhereClauseForErrors = ({
     `${OTEL_EVENT_NAME}: "error" `,
   ];
 
-  // The KQL conditions are trusted, static field/value pairs, so they are parsed
-  // as a raw ES|QL expression to preserve the triple-quoted literal form.
-  const kqlFilter = esql.exp(`KQL("""${conditions.join(' OR ')}""")`);
+  const kqlFilter = esql.exp`KQL(${esql.str(conditions.join(' OR '))})`;
 
   return Builder.expression.func.binary('and', [traceContext, kqlFilter]);
 };

@@ -234,7 +234,14 @@ export function getIncomingSpanLinksESQL(traceId: string, docId: string): ESQLAs
   return esql.exp`QSTR(${esql.str(otelQuery)}) OR QSTR(${esql.str(spanLinksQuery)})`;
 }
 
-export function getOutgoingSpanLinksESQL(spanLinks: SpanLinkDetails[]): ESQLAstExpression {
+export function getOutgoingSpanLinksESQL(
+  spanLinks: SpanLinkDetails[]
+): ESQLAstExpression | undefined {
+  // `IN ()` is not valid ES|QL, so there is no clause to build without links.
+  if (!spanLinks.length) {
+    return undefined;
+  }
+
   const traceIds: string[] = [];
   const spanIds: string[] = [];
 
