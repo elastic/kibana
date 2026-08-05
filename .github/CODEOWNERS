@@ -2649,6 +2649,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/bigquery/** @elastic/
 src/platform/packages/shared/kbn-connector-specs/src/specs/box/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/buildkite/** @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/specs/censys/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/databricks/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/dropbox/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/figma/** @elastic/workchat-eng
@@ -2700,6 +2701,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/grafana/** @elastic/n
 src/platform/packages/shared/kbn-connector-specs/src/specs/rootly/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/sentry/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/dynatrace/** @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/specs/zabbix/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/datadog/** @elastic/workflows-eng
 
 

@@ -19,13 +19,10 @@ export const buildBlindSpotChatOptions = (
 ): OpenSignificantEventChatOptions => ({
   newConversation: true,
   autoSendInitialMessage: true,
-  initialMessage: i18n.translate(
-    'xpack.observability.nightshift.investigation.blindSpotChatPrompt',
-    {
-      defaultMessage: 'Tell me about this blind spot: {title}',
-      values: { title: blindSpot.title },
-    }
-  ),
+  initialMessage: i18n.translate('xpack.nightshift.investigation.blindSpotChatPrompt', {
+    defaultMessage: 'Tell me about this blind spot: {title}',
+    values: { title: blindSpot.title },
+  }),
   attachments: [
     {
       id: attachmentId,
@@ -44,13 +41,10 @@ export const buildHypothesisChatOptions = (
 ): OpenSignificantEventChatOptions => ({
   newConversation: true,
   autoSendInitialMessage: true,
-  initialMessage: i18n.translate(
-    'xpack.observability.nightshift.investigation.hypothesisChatPrompt',
-    {
-      defaultMessage: 'Tell me about this hypothesis: {candidate}',
-      values: { candidate: hypothesis.candidate },
-    }
-  ),
+  initialMessage: i18n.translate('xpack.nightshift.investigation.hypothesisChatPrompt', {
+    defaultMessage: 'Tell me about this hypothesis: {candidate}',
+    values: { candidate: hypothesis.candidate },
+  }),
   attachments: [
     {
       id: attachmentId,
@@ -69,13 +63,10 @@ export const buildRecommendationChatOptions = (
 ): OpenSignificantEventChatOptions => ({
   newConversation: true,
   autoSendInitialMessage: true,
-  initialMessage: i18n.translate(
-    'xpack.observability.nightshift.investigation.recommendationChatPrompt',
-    {
-      defaultMessage: 'Tell me about this recommendation: {title}',
-      values: { title: recommendation.title },
-    }
-  ),
+  initialMessage: i18n.translate('xpack.nightshift.investigation.recommendationChatPrompt', {
+    defaultMessage: 'Tell me about this recommendation: {title}',
+    values: { title: recommendation.title },
+  }),
   attachments: [
     {
       id: attachmentId,

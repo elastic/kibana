@@ -10,10 +10,10 @@ import type { InvestigationStatus } from '@kbn/investigation-output';
 
 export const getInvestigationProgressStatusLabel = (isInvestigated: boolean): string =>
   isInvestigated
-    ? i18n.translate('xpack.observability.nightshift.investigation.progressInvestigated', {
+    ? i18n.translate('xpack.nightshift.investigation.progressInvestigated', {
         defaultMessage: 'Investigated',
       })
-    : i18n.translate('xpack.observability.nightshift.investigation.progressInvestigating', {
+    : i18n.translate('xpack.nightshift.investigation.progressInvestigating', {
         defaultMessage: 'Investigating',
       });
 
@@ -31,15 +31,15 @@ export const getInvestigationWorkflowStatusLabel = (status: InvestigationStatus)
 
   switch (status) {
     case 'failed':
-      return i18n.translate('xpack.observability.nightshift.investigation.statusFailed', {
+      return i18n.translate('xpack.nightshift.investigation.statusFailed', {
         defaultMessage: 'Investigation failed',
       });
     case 'unavailable':
-      return i18n.translate('xpack.observability.nightshift.investigation.statusUnavailable', {
+      return i18n.translate('xpack.nightshift.investigation.statusUnavailable', {
         defaultMessage: 'Investigation unavailable',
       });
     case 'loading':
-      return i18n.translate('xpack.observability.nightshift.investigation.statusLoading', {
+      return i18n.translate('xpack.nightshift.investigation.statusLoading', {
         defaultMessage: 'Loading investigation',
       });
     default:
