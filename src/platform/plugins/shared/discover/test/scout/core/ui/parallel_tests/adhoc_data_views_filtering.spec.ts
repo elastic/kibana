@@ -58,7 +58,7 @@ spaceTest.describe(
         await queryBar.setQuery('test');
         await page.keyboard.press('Enter');
         await discover.waitUntilSearchingHasFinished();
-        expect(Number(await discover.getHitCount())).toBeGreaterThan(0);
+        expect(await discover.getHitCount()).toBe('22');
 
         await queryBar.clearQuery();
         await page.keyboard.press('Enter');
