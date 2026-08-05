@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiAccordion, EuiSpacer, EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
 
@@ -39,13 +39,27 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   accountType = ORGANIZATION_ACCOUNT,
   iacTemplateUrl,
 }) => {
+  // The rendered template must cover every policy template the user enabled
+  // in this policy — not just the first enabled input's.
+  const enabledPolicyTemplates = useMemo(
+    () => [
+      ...new Set(
+        newPolicy?.inputs
+          ?.filter((input) => input.enabled)
+          .map((input) => input.policy_template)
+          .filter((policyTemplate): policyTemplate is string => Boolean(policyTemplate)) ?? []
+      ),
+    ],
+    [newPolicy?.inputs]
+  );
+
   const { launchButtonProps, isDisabled, isGeneratingTemplate, templateGenerationError } =
     useCloudConnectorTemplate({
       cloud,
       accountType,
       iacTemplateUrl,
       packageName: packageInfo?.name,
-      policyTemplate: newPolicy?.inputs?.find((input) => input.enabled)?.policy_template,
+      policyTemplates: enabledPolicyTemplates,
     });
 
   // Use accessor to get vars from the correct location (package-level or input-level)

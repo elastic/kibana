@@ -39,7 +39,7 @@ const HOOK_PARAMS = {
   accountType: 'single-account' as const,
   iacTemplateUrl: IAC_TEMPLATE_URL,
   packageName: 'cloud_security_posture',
-  policyTemplate: 'cspm',
+  policyTemplates: ['cspm'],
 };
 
 describe('useCloudConnectorTemplate', () => {
@@ -128,15 +128,12 @@ describe('useCloudConnectorTemplate', () => {
       const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
       await launch(result);
 
-      // cloud_security_posture/cspm is in security_audit_policy_group which also
-      // includes cloud_asset_inventory/asset_inventory — the whole group is sent.
+      // Exactly the enabled policy templates are sent — nothing is inferred
+      // from connector-sharing policy groups.
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
         provider: 'aws',
         flow: 'cloud_connector',
-        integrations: [
-          { name: 'cloud_security_posture', policyTemplates: ['cspm'] },
-          { name: 'cloud_asset_inventory', policyTemplates: ['asset_inventory'] },
-        ],
+        integrations: [{ name: 'cloud_security_posture', policyTemplates: ['cspm'] }],
       });
       // The tab opens blank within the click gesture, then gets navigated.
       expect(windowOpenSpy).toHaveBeenCalledWith('', '_blank');
@@ -148,19 +145,18 @@ describe('useCloudConnectorTemplate', () => {
       expect(openedUrl).toContain('param_ElasticResourceId=kibana-component-id');
     });
 
-    it('merges same-package policy group entries into one integration', async () => {
+    it('sends every enabled policy template of the package', async () => {
       mockedSendRenderIacTemplate.mockResolvedValue({
         data: { artifactUrl: 'https://s3.example/rendered', expiresAt: '2026-07-28T12:00:00Z' },
         error: null,
       } as any);
 
-      // aws/guardduty is in aws_global_policy_group together with aws/s3 —
-      // one EPR package, so one integration carrying both policy templates.
+      // The aws package exposes many policy templates; the user enabled two.
       const { result } = renderHook(() =>
         useCloudConnectorTemplate({
           ...HOOK_PARAMS,
           packageName: 'aws',
-          policyTemplate: 'guardduty',
+          policyTemplates: ['guardduty', 's3'],
         })
       );
       await launch(result);
@@ -172,25 +168,18 @@ describe('useCloudConnectorTemplate', () => {
       });
     });
 
-    it('sends a single integration when the package is not in any policy group', async () => {
-      mockedSendRenderIacTemplate.mockResolvedValue({
-        data: { artifactUrl: 'https://s3.example/rendered', expiresAt: '2026-07-28T12:00:00Z' },
-        error: null,
-      } as any);
-
+    it('falls back to the static URL without rendering when no policy template is enabled', async () => {
       const { result } = renderHook(() =>
-        useCloudConnectorTemplate({
-          ...HOOK_PARAMS,
-          packageName: 'some_package',
-          policyTemplate: 'some_template',
-        })
+        useCloudConnectorTemplate({ ...HOOK_PARAMS, policyTemplates: [] })
       );
       await launch(result);
 
-      expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
-        provider: 'aws',
+      expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
+      const openedUrl = windowOpenSpy.mock.calls[0][0] as string;
+      expect(openedUrl).toContain('static.example');
+      expect(reportEvent).toHaveBeenCalledWith('iac_provider_render_fallback', {
         flow: 'cloud_connector',
-        integrations: [{ name: 'some_package', policyTemplates: ['some_template'] }],
+        reason: 'missing_render_context',
       });
     });
 

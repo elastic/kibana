@@ -13,9 +13,9 @@ export interface RenderIacTemplateIntegration {
   name: string;
   /**
    * Policy template names whose inputs should be included in the rendered
-   * template. Multiple values are used when the same package appears in more
-   * than one entry of a policy group (e.g. `guardduty` + `s3` in the AWS
-   * global connector group both live in the `aws` package).
+   * template — the templates the user actually enabled. A package exposing
+   * several policy templates (e.g. `guardduty` and `s3` in the `aws` package)
+   * sends one entry listing every enabled template.
    */
   policyTemplates: string[];
 }

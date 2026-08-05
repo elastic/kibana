@@ -16,59 +16,23 @@ import {
   IAC_PROVIDER_FALLBACK_REASON_RENDER_FAILED,
   IAC_PROVIDER_RENDER_FALLBACK_EVENT,
 } from '../../../../common/telemetry/iac_provider_events';
-import {
-  CLOUD_CONNECTOR_PERMISSION_ALLOWLIST,
-  getPolicyGroupForIntegration,
-} from '../../../../common/constants/cloud_connector';
 import { AWS_CLOUD_PROVIDER } from '../../../../common/types/models/cloud_connector';
-import type { RenderIacTemplateIntegration } from '../../../../common/types/rest_spec/iac_provider';
 import type { AccountType } from '../../../types';
 import type { CloudSetupForCloudConnector } from '../types';
 import { getCloudConnectorRemoteRoleTemplate } from '../utils';
 
 const TEMPLATE_URL_PARAM_REGEX = /templateURL=[^&]+/;
 
-/**
- * Builds the `integrations` payload for the render request.
- *
- * A cloud connector is shared by every integration in its policy group, so
- * the rendered template must grant the whole group's permissions — not just
- * the integration currently being set up (Decision D1). An integration that
- * belongs to no group is rendered on its own.
- *
- * Group entries can live in the same EPR package (`guardduty` and `s3` are
- * both policy templates of the `aws` package); those are merged into a single
- * integration listing both policy templates, because the render request must
- * not repeat a package name.
- */
-const getIntegrationsToRender = (
-  packageName: string,
-  policyTemplate: string
-): RenderIacTemplateIntegration[] => {
-  const policyGroup = getPolicyGroupForIntegration(packageName, policyTemplate);
-  const groupEntries = policyGroup
-    ? CLOUD_CONNECTOR_PERMISSION_ALLOWLIST[policyGroup].filter(
-        (e) => e.provider === AWS_CLOUD_PROVIDER
-      )
-    : [{ package: packageName, policyTemplate }];
-
-  const templatesByPackage = new Map<string, string[]>();
-  for (const entry of groupEntries) {
-    templatesByPackage.set(entry.package, [
-      ...(templatesByPackage.get(entry.package) ?? []),
-      entry.policyTemplate,
-    ]);
-  }
-
-  return Array.from(templatesByPackage, ([name, policyTemplates]) => ({ name, policyTemplates }));
-};
-
 export interface UseCloudConnectorTemplateParams {
   cloud?: CloudSetupForCloudConnector;
   accountType: AccountType;
   iacTemplateUrl?: string;
   packageName?: string;
-  policyTemplate?: string;
+  /**
+   * Policy templates the user has enabled in the policy being configured.
+   * The rendered template grants permissions for exactly these — no more.
+   */
+  policyTemplates?: string[];
 }
 
 export type CloudConnectorLaunchButtonProps =
@@ -96,7 +60,7 @@ export const useCloudConnectorTemplate = ({
   accountType,
   iacTemplateUrl,
   packageName,
-  policyTemplate,
+  policyTemplates,
 }: UseCloudConnectorTemplateParams): UseCloudConnectorTemplateResult => {
   const { isIacProviderEnabled } = useIacProvider();
   const { analytics } = useStartServices();
@@ -128,7 +92,7 @@ export const useCloudConnectorTemplate = ({
     // non-matching URL would silently discard the render.
     if (
       !packageName ||
-      !policyTemplate ||
+      !policyTemplates?.length ||
       !staticTemplateUrl ||
       !TEMPLATE_URL_PARAM_REGEX.test(staticTemplateUrl)
     ) {
@@ -165,7 +129,7 @@ export const useCloudConnectorTemplate = ({
       const { data, error } = await sendRenderIacTemplate({
         provider: AWS_CLOUD_PROVIDER,
         flow: CLOUD_CONNECTOR_RENDER_FLOW,
-        integrations: getIntegrationsToRender(packageName, policyTemplate),
+        integrations: [{ name: packageName, policyTemplates }],
       });
 
       if (error || !data) {
@@ -194,7 +158,7 @@ export const useCloudConnectorTemplate = ({
     } finally {
       setIsGeneratingTemplate(false);
     }
-  }, [analytics, packageName, policyTemplate, staticTemplateUrl]);
+  }, [analytics, packageName, policyTemplates, staticTemplateUrl]);
 
   if (!isIacProviderEnabled) {
     return {

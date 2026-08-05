@@ -28,15 +28,14 @@ export const RenderIacTemplateRequestSchema = {
         policyTemplates: schema.arrayOf(schema.string({ minLength: 1, maxLength: 255 }), {
           minSize: 1,
           meta: {
-            description:
-              'Policy template names whose inputs to include. Multiple values merge same-package entries.',
+            description: 'Policy template names whose inputs to include in the rendered template.',
           },
         }),
       }),
       {
         minSize: 1,
-        // Each entry costs a registry fetch; policy groups are small (2-3
-        // integrations), so this cap only exists to bound abuse.
+        // Each entry costs a registry fetch; known flows send a single
+        // integration, so this cap only exists to bound abuse.
         maxSize: 10,
         meta: { description: 'Integrations to render the template for.' },
       }
