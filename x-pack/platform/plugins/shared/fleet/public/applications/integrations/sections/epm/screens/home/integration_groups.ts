@@ -58,7 +58,7 @@ export const INTEGRATION_GROUPS: Record<string, IntegrationGroup> = {
     }),
     description: i18n.translate('xpack.fleet.integrationGroups.mysql.description', {
       defaultMessage:
-        'Collect logs and metrics from MySQL databases using Elastic Agent. Choose from ECS-based or OTel-based collection.',
+        'Collect logs and metrics from MySQL using Elastic Agent. Choose from MySQL, MySQL Enterprise, or OTel-based collection.',
     }),
     icons: [],
   },
@@ -68,7 +68,7 @@ export const INTEGRATION_GROUPS: Record<string, IntegrationGroup> = {
     }),
     description: i18n.translate('xpack.fleet.integrationGroups.kafka.description', {
       defaultMessage:
-        'Collect logs and metrics from Apache Kafka using Elastic Agent. Choose from ECS-based or OTel-based collection.',
+        'Collect logs and metrics from Apache Kafka using Elastic Agent. Choose from ECS-based, OTel-based, Kafka Connect, or log consumer collection.',
     }),
     icons: [],
   },
@@ -94,11 +94,11 @@ export const INTEGRATION_GROUPS: Record<string, IntegrationGroup> = {
   },
   apache: {
     title: i18n.translate('xpack.fleet.integrationGroups.apache.title', {
-      defaultMessage: 'Apache HTTP Server',
+      defaultMessage: 'Apache',
     }),
     description: i18n.translate('xpack.fleet.integrationGroups.apache.description', {
       defaultMessage:
-        'Collect logs and metrics from Apache HTTP Server using Elastic Agent. Choose from ECS-based or OTel-based collection.',
+        'Collect logs and metrics from Apache technologies using Elastic Agent. Choose from Apache HTTP Server, Apache Tomcat, or Apache Spark collection.',
     }),
     icons: [],
   },
