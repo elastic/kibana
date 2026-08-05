@@ -94,7 +94,7 @@ mime-types@2.1.35
 mini-css-extract-plugin@2.9.1
 monaco-editor@0.44.0
 monaco-languageserver-types@0.4.1
-monaco-marker-data-provider@1.1.1
+monaco-marker-data-provider@1.2.5
 monaco-types@0.1.0
 monaco-worker-manager@2.0.1
 monaco-yaml@5.5.0
