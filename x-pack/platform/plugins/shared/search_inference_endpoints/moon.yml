@@ -59,6 +59,7 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/core-http-browser'
   - '@kbn/es-errors'
+  - '@kbn/app-header'
 tags:
   - plugin
   - prod
