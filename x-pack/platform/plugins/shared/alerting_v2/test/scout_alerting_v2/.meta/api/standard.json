@@ -1,5 +1,5 @@
 {
-  "sha1": "3b42f349f443d6b787de835dcbceda34f3b8fcf6",
+  "sha1": "085a1e536a5578e3b78b55731b9c81231531a219",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -685,8 +685,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 338,
-        "column": 31
+        "line": 354,
+        "column": 16
       }
     },
     {
@@ -699,7 +699,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 346,
+        "line": 359,
         "column": 6
       }
     },
@@ -713,7 +713,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 352,
+        "line": 365,
         "column": 11
       }
     },
@@ -727,8 +727,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 359,
-        "column": 16
+        "line": 371,
+        "column": 27
       }
     },
     {
@@ -741,8 +741,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 367,
-        "column": 6
+        "line": 376,
+        "column": 31
       }
     },
     {
@@ -755,7 +755,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 371,
+        "line": 384,
         "column": 7
       }
     },
@@ -769,8 +769,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 380,
-        "column": 7
+        "line": 393,
+        "column": 6
       }
     },
     {
@@ -783,8 +783,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 383,
-        "column": 11
+        "line": 397,
+        "column": 31
       }
     },
     {
@@ -797,7 +797,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 393,
+        "line": 406,
         "column": 16
       }
     },
@@ -811,8 +811,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 398,
-        "column": 6
+        "line": 411,
+        "column": 11
       }
     },
     {
@@ -825,8 +825,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 407,
-        "column": 11
+        "line": 419,
+        "column": 16
       }
     },
     {
@@ -839,7 +839,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 415,
+        "line": 428,
         "column": 16
       }
     },
@@ -853,7 +853,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 429,
+        "line": 442,
         "column": 11
       }
     },
@@ -867,7 +867,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 438,
+        "line": 451,
         "column": 11
       }
     },
@@ -881,8 +881,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 455,
-        "column": 5
+        "line": 469,
+        "column": 6
       }
     },
     {
@@ -895,8 +895,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 468,
-        "column": 7
+        "line": 489,
+        "column": 6
       }
     },
     {
@@ -909,7 +909,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 492,
+        "line": 505,
         "column": 11
       }
     },
@@ -923,8 +923,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 499,
-        "column": 16
+        "line": 514,
+        "column": 7
       }
     },
     {
@@ -937,7 +937,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 507,
+        "line": 520,
         "column": 6
       }
     },
@@ -951,7 +951,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/implicit_index_privileges.spec.ts",
-        "line": 511,
+        "line": 524,
         "column": 31
       }
     },
@@ -8530,7 +8530,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 79,
+        "line": 82,
         "column": 11
       }
     },
@@ -8543,7 +8543,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 102,
+        "line": 105,
         "column": 4
       }
     },
@@ -8556,7 +8556,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 124,
+        "line": 127,
         "column": 14
       }
     },
@@ -8569,7 +8569,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 138,
+        "line": 141,
         "column": 30
       }
     },
@@ -8582,7 +8582,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 155,
+        "line": 158,
         "column": 22
       }
     },
@@ -8595,7 +8595,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 166,
+        "line": 169,
         "column": 14
       }
     },
@@ -8608,7 +8608,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 175,
+        "line": 178,
         "column": 4
       }
     },
@@ -8621,7 +8621,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 186,
+        "line": 189,
         "column": 23
       }
     },
