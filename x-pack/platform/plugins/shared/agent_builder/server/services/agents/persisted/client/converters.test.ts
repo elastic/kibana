@@ -61,6 +61,7 @@ describe('fromEs', () => {
             tool_ids: ['id_1', 'id_2'],
           },
         ],
+        ai_indices: [],
       },
       description: 'description',
       labels: ['foo', 'bar'],
@@ -93,6 +94,7 @@ describe('fromEs', () => {
             tool_ids: ['legacy_id_1', 'legacy_id_2'],
           },
         ],
+        ai_indices: [],
       },
       description: 'description',
       labels: ['foo', 'bar'],
@@ -167,29 +169,19 @@ describe('fromEs', () => {
     expect(definition.configuration.ai_indices).toEqual(['ai-index-1']);
   });
 
-  it('leaves ai_indices undefined when the config does not set it', () => {
+  it('defaults ai_indices to [] when the config does not set it', () => {
     const definition = fromEs(getSampleDoc());
 
-    expect(definition.configuration.ai_indices).toBeUndefined();
+    expect(definition.configuration.ai_indices).toEqual([]);
   });
 
-  it('defaults ai_indices to [] for the default agent when missing', () => {
+  it('defaults ai_indices to [] for the default agent as well', () => {
     const document = getSampleDoc();
     document._source!.id = agentBuilderDefaultAgentId;
 
     const definition = fromEs(document);
 
     expect(definition.configuration.ai_indices).toEqual([]);
-  });
-
-  it('keeps stored ai_indices for the default agent', () => {
-    const document = getSampleDoc();
-    document._source!.id = agentBuilderDefaultAgentId;
-    document._source!.config!.ai_indices = ['ai-index-1'];
-
-    const definition = fromEs(document);
-
-    expect(definition.configuration.ai_indices).toEqual(['ai-index-1']);
   });
 
   it('defaults enable_elastic_capabilities to true for default agent when missing', () => {
