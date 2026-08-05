@@ -311,6 +311,8 @@ describe('getEntityRiskScoreHistoryTool', () => {
           includeContributions: false,
           entries: HISTORY_ENTRIES,
           renderTag: expect.stringMatching(/^<render_attachment id=".+" version="1" \/>$/),
+          attachmentId: expect.any(String),
+          version: 1,
         })
       );
 

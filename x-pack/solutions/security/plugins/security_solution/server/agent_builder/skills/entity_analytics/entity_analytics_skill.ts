@@ -205,8 +205,9 @@ Render the \`renderTag\`. Summarize the top tier(s) and recommend follow-ups.
 User: Has Cielo39's risk score changed significantly?
 
 1. \`security.get_entity_risk_score_history\` for Cielo39, \`from: 'now-30d'\`, \`to: 'now'\`.
-2. Render the \`renderTag\`. Use \`entries\` and \`bucketInterval\` from the result to determine trend direction and whether the change exceeds ${ENTITY_RISK_SCORE_SIGNIFICANT_CHANGE_THRESHOLD} points (entries are peak-per-bucket, not every scoring run).
-3. 1–3 prose sentences: trend, significance, what to investigate next. Do not dump all data points.
+2. Render the \`renderTag\` verbatim from the tool result.
+3. Use \`entries\` and \`bucketInterval\` from the result to determine trend direction and whether the change exceeds ${ENTITY_RISK_SCORE_SIGNIFICANT_CHANGE_THRESHOLD} points (entries are peak-per-bucket, not every scoring run).
+4. 1–3 prose sentences: trend, significance, what to investigate next. Do not dump all data points.
 
 ### Example 5: Single-entity card vs. entities table vs. graph
 
@@ -361,7 +362,7 @@ export const getEntityAnalyticsSkill = (ctx: EntityAnalyticsSkillsContext) =>
     basePath: 'skills/security/entities',
     description:
       'Security entity investigations (hosts, users, services, generic): entity store search/get_entity, get_entity_risk_score_history (risk-over-time chart), list watchlists (discover watchlist names/ids and find members), risk and criticality. ' +
-      'Rich attachments: `security.entity` (emitted automatically by search_entities/get_entity — renders as a single-entity card for 1 entity and as an entities table for 2+ entities); `security.entity_risk_score_history` (emitted by get_entity_risk_score_history); `security.entity_analytics_dashboard` (explicit attachments.add — only when the user asks to show/open/view the Entity Analytics home/overview product page). After each tool result that emits a rich attachment, output `<render_attachment id=… version=… />` in markdown (required for Preview/Canvas UI). ' +
+      'Rich attachments: `security.entity` (emitted automatically by search_entities/get_entity — renders as a single-entity card for 1 entity and as an entities table for 2+ entities); `security.entity_risk_score_history` (emitted by get_entity_risk_score_history); `security.entity_analytics_dashboard` (explicit attachments.add — only when the user asks to show/open/view the Entity Analytics home/overview product page). After each tool result that emits a rich attachment, paste its `renderTag` verbatim in markdown (required for Preview/Canvas UI). ' +
       'Risk history, alert contributions, watchlists, behaviors, discovering risky entities.',
     content: `
 # Entity Analysis Guide

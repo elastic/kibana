@@ -166,11 +166,11 @@ export const getEntityRiskScoreHistoryTool = (
 
 ONLY use when the user explicitly asks about risk score over time — e.g. trend, history, timeline, chart, "has the score changed", "why did it spike". Do NOT use for generic investigate / profile / details / "tell me about this entity" asks — those are security.get_entity only. Prefer this over get_entity's profile_history for risk-score trends (profile_history is entity-store attribute snapshots).
 
-This tool resolves the entity, then returns time-ordered score entries plus a \`security.entity_risk_score_history\` attachment. Copy \`renderTag\` from the \`other\` result VERBATIM onto its own line before prose — do not assemble the tag, and do not dump every history point as a markdown table.
+This tool resolves the entity, then stores a \`security.entity_risk_score_history\` attachment (creating new or updating existing) and returns an \`other\` result containing a pre-formatted \`renderTag\` string. To show the chart inline, copy that \`renderTag\` string VERBATIM onto its own line in your reply, followed by a blank line, before your prose. Do NOT assemble the tag yourself from \`attachmentId\` and \`version\`, and do NOT substitute the id with anything derived from the entity name, EUID, or attachment type name.
 
 When the id/name resolves to multiple candidate entities, no attachment is stored, no \`renderTag\` is returned, and you must NOT emit a render tag — instead ask the user to supply the exact entity id (EUID) from the returned candidates.
 
-IMPORTANT — entries are aggregated, not every scoring run: the series is a date_histogram. The result's \`bucketInterval\` field is the histogram bucket size (e.g. "1d" for ~90 days, down to "1h" for short ranges) — not the lookback window (\`from\`/\`to\`). Each entry is the highest calculated_score_norm in that bucket. Multiple scoring runs in the same bucket (e.g. two scores on the same day with bucketInterval "1d") collapse to ONE point. A short \`entries\` array means few buckets had data — not that only that many scoring runs ever existed. Narrow \`from\`/\`to\` (e.g. now-24h) for finer buckets. Full interactive history is in the entity flyout via the attachment.
+IMPORTANT — entries are aggregated, not every scoring run: the series is a date_histogram. The result's \`bucketInterval\` field is the histogram bucket size (e.g. "1d" for ~90 days, down to "1h" for short ranges) — not the lookback window (\`from\`/\`to\`). Each entry is the highest calculated_score_norm in that bucket. Multiple scoring runs in the same bucket (e.g. two scores on the same day with bucketInterval "1d") collapse to ONE point. A short \`entries\` array means few buckets had data — not that only that many scoring runs ever existed. Narrow \`from\`/\`to\` (e.g. now-24h) for finer buckets. Full interactive history is in the entity flyout via the attachment. Do not dump every history point as a markdown table — the chart attachment shows the series.
 
 Time range via optional \`from\`/\`to\` date-math (default last 90 days). Defaults to the entity's \`base\` score series; pass \`scoreType: "resolution"\` for resolution-group trends. Pass \`includeContributions: true\` only when explaining *why* a score changed. For fleet-level "who increased the most", use security.search_entities with riskScoreChangeInterval first, then drill in with this tool.`,
     schema,
@@ -306,7 +306,7 @@ Time range via optional \`from\`/\`to\` date-math (default last 90 days). Defaul
         });
 
         // 3 - Build the tool output
-        const toolOutput: Record<string, unknown> = {
+        const dataOutput = {
           entityId: entityStoreId,
           entityType: identifierType,
           from,
@@ -316,12 +316,15 @@ Time range via optional \`from\`/\`to\` date-math (default last 90 days). Defaul
           includeContributions,
           entries,
         };
-
-        if (attachmentResult) {
-          toolOutput.attachmentId = attachmentResult.attachmentId;
-          toolOutput.version = attachmentResult.version;
-          toolOutput.renderTag = buildRenderAttachmentTag(attachmentResult);
-        }
+        // Put renderTag first so the model sees the pre-formatted tag before fields it might misuse to invent an id.
+        const toolOutput: Record<string, unknown> = attachmentResult
+          ? {
+              renderTag: buildRenderAttachmentTag(attachmentResult),
+              attachmentId: attachmentResult.attachmentId,
+              version: attachmentResult.version,
+              ...dataOutput,
+            }
+          : dataOutput;
 
         return {
           results: [

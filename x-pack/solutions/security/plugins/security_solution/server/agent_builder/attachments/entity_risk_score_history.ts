@@ -78,7 +78,10 @@ export const createEntityRiskScoreHistoryAttachmentType = (): AttachmentTypeDefi
     }),
     getTools: () => [SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID],
     getAgentDescription: () => {
-      return `A ${SecurityAgentBuilderAttachments.entityRiskScoreHistory} attachment renders the risk score history chart for a single security entity inline in chat. It is emitted only by \`${SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID}\` — paste that tool's \`renderTag\` (see tool description / skill rendering rules); do not call \`attachments.add\` for this type.
+      return `A ${SecurityAgentBuilderAttachments.entityRiskScoreHistory} attachment renders the risk score history chart for a single security entity inline in chat.
+
+## INLINE RENDERING (REQUIRED)
+This attachment is emitted by the \`${SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID}\` tool, whose \`other\` result includes a pre-formatted \`renderTag\` string. To show the chart, copy that \`renderTag\` string VERBATIM onto its own line — byte-for-byte, including the quoting — with a blank line before and after it, and BEFORE your prose. Do NOT assemble the tag yourself from \`attachmentId\` and \`version\`, and never derive the id from the entity name, EUID, or attachment type name.
 
 Rules:
 - The chart IS the visualization — do not restate every history point as a markdown table. Keep prose to a short trend summary (increasing / decreasing / stable, significant jumps, what to investigate next).
