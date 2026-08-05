@@ -2422,10 +2422,13 @@ groups:
         id: "workflows:ui:enabled"
         description: |
           Enables Elastic Workflows and related experiences.
+        note: |
+          :applies_to: stack: ga 9.0-9.3
+          In these versions, the default is `false`.
         datatype: bool
-        default: false
+        default: true
         applies_to:
-          stack: preview 9.3
+          stack: ga 9.4+, preview =9.3
           ech: ga
           ece: ga
           eck: ga
