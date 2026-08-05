@@ -125,6 +125,54 @@ describe('lazySchema', () => {
     });
   });
 
+  describe('z.toJSONSchema compatibility', () => {
+    it('produces a JSON schema from a top-level lazy schema', () => {
+      const Schema = lazySchema(() => z.object({ id: z.string(), count: z.number() }));
+
+      expect(() => z.toJSONSchema(Schema)).not.toThrow();
+      expect(z.toJSONSchema(Schema)).toMatchObject({
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          count: { type: 'number' },
+        },
+      });
+    });
+
+    // Mirrors the crash from metricStylingSchema / metricConfigSchemaESQL: a lazy
+    // schema stored as a field inside another lazy schema's factory. The ctx.seen
+    // identity mismatch (proxy !== real) used to throw:
+    //   TypeError: Cannot set properties of undefined (setting 'ref')
+    it('produces a JSON schema when a lazy schema is nested inside another lazy schema', () => {
+      const Inner = lazySchema(() => z.object({ value: z.number() }));
+      const Outer = lazySchema(() => z.object({ inner: Inner, tag: z.string() }));
+
+      expect(() => z.toJSONSchema(Outer)).not.toThrow();
+      expect(z.toJSONSchema(Outer)).toMatchObject({
+        type: 'object',
+        properties: {
+          inner: { type: 'object', properties: { value: { type: 'number' } } },
+          tag: { type: 'string' },
+        },
+      });
+    });
+
+    // Verifies that the Object.create wrapper preserves non-enumerable _zod
+    // internals (e.g. propValues) so that parse still works after toJSONSchema.
+    it('still parses correctly after z.toJSONSchema is called', () => {
+      const Inner = lazySchema(() => z.object({ value: z.number() }));
+      const Outer = lazySchema(() => z.object({ inner: Inner, tag: z.string() }));
+
+      z.toJSONSchema(Outer);
+
+      expect(Outer.parse({ inner: { value: 1 }, tag: 't' })).toEqual({
+        inner: { value: 1 },
+        tag: 't',
+      });
+      expect(Outer.safeParse({ inner: { value: 'bad' }, tag: 't' }).success).toBe(false);
+    });
+  });
+
   describe('setLazySchemaDisabled', () => {
     // Always restore the default after each test — the toggle is a module-level
     // singleton and would otherwise leak across test files.
