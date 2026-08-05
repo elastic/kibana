@@ -93,7 +93,6 @@ export const App: FC<AppProps> = ({
       licenseManagement: deps.licenseManagement,
       maps: deps.maps,
       observabilityAIAssistant: deps.observabilityAIAssistant,
-      presentationUtil: deps.presentationUtil,
       savedObjectsManagement: deps.savedObjectsManagement,
       savedSearch: deps.savedSearch,
       security: deps.security,

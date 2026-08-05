@@ -10,15 +10,6 @@
 import type { PresentationUtilPluginStart } from './types';
 import { setStubKibanaServices } from './services/mocks';
 
-const createStartContract = (): PresentationUtilPluginStart => {
-  const startContract: PresentationUtilPluginStart = {};
-  return startContract;
-};
-
-export const presentationUtilPluginMock = {
-  createStartContract,
-};
-
 export * from './__stories__/fixtures/flights';
 export const setMockedPresentationUtilServices = () => {
   setStubKibanaServices();

@@ -431,7 +431,6 @@ export class VisualizationsPlugin
           setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
           savedSearch: pluginsStart.savedSearch,
-          presentationUtil: pluginsStart.presentationUtil,
           getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
           spaces: pluginsStart.spaces,
           visEditorsRegistry,

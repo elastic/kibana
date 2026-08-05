@@ -154,7 +154,6 @@ export function registerManagementSections(
             licensing: pluginsStart.licensing,
             maps: pluginsStart.maps,
             observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
-            presentationUtil: pluginsStart.presentationUtil,
             savedObjectsManagement: pluginsStart.savedObjectsManagement,
             savedSearch: pluginsStart.savedSearch,
             security: pluginsStart.security,
