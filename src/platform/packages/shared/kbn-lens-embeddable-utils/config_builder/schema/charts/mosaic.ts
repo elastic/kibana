@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
@@ -23,60 +24,66 @@ import { legendNestedSchema, valueDisplaySchema } from './partition_shared';
 import {
   legendSizeSchema,
   legendVisibilitySchemaWithAuto,
-  getBucketsWithChartDimensionSchema,
-  getMetricsWithChartDimensionSchemaWithRefBasedOps,
+  mergeAllBucketsWithChartDimensionSchema,
+  mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { objectUnion } from './utils/object_union';
 import { groupIsNotCollapsed } from '../../utils';
 
-const mosaicConfigSharedShape = {
-  legend: z
-    .object({
-      nested: legendNestedSchema,
-      truncate_after_lines: legendTruncateAfterLinesSchema,
-      visibility: legendVisibilitySchemaWithAuto,
-      size: legendSizeSchema,
-      position: legendPositionSchema,
-    })
-    .strict()
-    .optional()
-    .meta({
-      id: 'mosaicLegend',
-      title: 'Legend',
-      description: 'Legend configuration for mosaic chart appearance and behavior',
-    }),
+const mosaicConfigSharedSchema = {
+  legend: schema.maybe(
+    schema.object(
+      {
+        nested: legendNestedSchema,
+        truncate_after_lines: legendTruncateAfterLinesSchema,
+        visibility: legendVisibilitySchemaWithAuto,
+        size: legendSizeSchema,
+        position: legendPositionSchema,
+      },
+      {
+        meta: {
+          id: 'mosaicLegend',
+          title: 'Legend',
+          description: 'Legend configuration for mosaic chart appearance and behavior',
+        },
+      }
+    )
+  ),
 };
 
-const mosaicStylingSchema = z
-  .object({
+const mosaicStylingSchema = schema.object(
+  {
     values: valueDisplaySchema,
-  })
-  .strict()
-  .meta({
-    id: 'mosaicStyling',
-    title: 'Mosaic styling',
-    description: 'Visual chart styling options',
-  });
+  },
+  {
+    meta: {
+      id: 'mosaicStyling',
+      title: 'Mosaic styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
 
-const partitionConfigBreakdownByOptionsSchema = z
-  .object({
-    /**
-     * Color configuration: color mapping
-     */
-    color: colorMappingSchema.optional(),
-    /**
-     * Collapse by function. This parameter is used to collapse the
-     * metric chart when the number of columns is bigger than the
-     * number of columns specified in the columns parameter.
-     * Possible values:
-     * - 'avg': Collapse by average
-     * - 'sum': Collapse by sum
-     * - 'max': Collapse by max
-     * - 'min': Collapse by min
-     * - 'none': Do not collapse
-     */
-    collapse_by: collapseBySchema.optional(),
-  })
-  .strict();
+const partitionConfigPrimaryMetricOptionsSchema = {};
+
+const partitionConfigBreakdownByOptionsSchema = {
+  /**
+   * Color configuration: color mapping
+   */
+  color: schema.maybe(colorMappingSchema),
+  /**
+   * Collapse by function. This parameter is used to collapse the
+   * metric chart when the number of columns is bigger than the
+   * number of columns specified in the columns parameter.
+   * Possible values:
+   * - 'avg': Collapse by average
+   * - 'sum': Collapse by sum
+   * - 'max': Collapse by max
+   * - 'min': Collapse by min
+   * - 'none': Do not collapse
+   */
+  collapse_by: schema.maybe(collapseBySchema),
+};
 
 function validateMosaicGroupings({
   group_by,
@@ -100,112 +107,120 @@ function validateMosaicGroupings({
   return;
 }
 
-export const mosaicConfigSchemaNoESQL = z
-  .object({
-    type: z.literal('mosaic'),
-    ...sharedPanelInfoSchema.shape,
-    ...layerSettingsSchema.shape,
-    ...dataSourceSchema.shape,
-    ...dslOnlyPanelInfoSchema.shape,
-    ...mosaicConfigSharedShape,
-    styling: mosaicStylingSchema.optional(),
+export const mosaicConfigSchemaNoESQL = schema.object(
+  {
+    type: schema.literal('mosaic'),
+    ...sharedPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...dataSourceSchema,
+    ...dslOnlyPanelInfoSchema,
+    ...mosaicConfigSharedSchema,
+    styling: schema.maybe(mosaicStylingSchema),
     /**
      * Primary value configuration, must define operation. Supports field-based operations (count, unique count, metrics, sum, last value, percentile, percentile ranks), reference-based operations (differences, moving average, cumulative sum, counter rate), and formula-like operations (static value, formula).
      */
-    metric: getMetricsWithChartDimensionSchemaWithRefBasedOps('mosaicMetric'),
-    group_by: z
-      .array(
-        getBucketsWithChartDimensionSchema('mosaicGroupBy').and(
-          partitionConfigBreakdownByOptionsSchema
-        )
+    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+      partitionConfigPrimaryMetricOptionsSchema,
+      'mosaicMetric'
+    ),
+    group_by: schema.maybe(
+      schema.arrayOf(
+        mergeAllBucketsWithChartDimensionSchema(
+          partitionConfigBreakdownByOptionsSchema,
+          'mosaicGroupBy'
+        ),
+        {
+          minSize: 1,
+          maxSize: 100,
+          meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+        }
       )
-      .min(1)
-      .max(100)
-      .optional()
-      .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
+    ),
     /**
      * Unfortunately due to the collapsed feature, it is necessary to distinct between primary and secondary groups
      * at the api level as well.  Secondary groups are rendered inside the primary groups.
      * If no primary group is defined then the entire set is the primary group.
      */
-    group_breakdown_by: z
-      .array(
-        getBucketsWithChartDimensionSchema('mosaicGroupBreakdownBy').and(
-          z.object({
-            collapse_by: collapseBySchema.optional(),
-          })
-        )
+    group_breakdown_by: schema.maybe(
+      schema.arrayOf(
+        mergeAllBucketsWithChartDimensionSchema(
+          { collapse_by: schema.maybe(collapseBySchema) },
+          'mosaicGroupBreakdownBy'
+        ),
+        {
+          minSize: 1,
+          maxSize: 100,
+          meta: { description: 'Array of group breakdown dimensions (minimum 1)' },
+        }
       )
-      .min(1)
-      .max(100)
-      .optional()
-      .meta({ description: 'Array of group breakdown dimensions (minimum 1)' }),
-  })
-  .superRefine((data, ctx) => {
-    const msg = validateMosaicGroupings(data);
-    if (msg) {
-      ctx.addIssue({ code: 'custom', message: msg });
-    }
-  })
-  .meta({
-    id: 'mosaicNoESQL',
-    title: 'Mosaic Chart (DSL)',
-    description:
-      'Mosaic chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
-  });
+    ),
+  },
+  {
+    meta: {
+      id: 'mosaicNoESQL',
+      title: 'Mosaic Chart (DSL)',
+      description:
+        'Mosaic chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
+    },
+    validate: validateMosaicGroupings,
+  }
+);
 
-export const mosaicConfigSchemaESQL = z
-  .object({
-    type: z.literal('mosaic'),
-    ...sharedPanelInfoSchema.shape,
-    ...layerSettingsSchema.shape,
-    ...dataSourceEsqlTableSchema.shape,
-    ...mosaicConfigSharedShape,
-    styling: mosaicStylingSchema.optional(),
+export const mosaicConfigSchemaESQL = schema.object(
+  {
+    type: schema.literal('mosaic'),
+    ...sharedPanelInfoSchema,
+    ...layerSettingsSchema,
+    ...dataSourceEsqlTableSchema,
+    ...mosaicConfigSharedSchema,
+    styling: schema.maybe(mosaicStylingSchema),
     /**
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
      */
-    metric: esqlColumnWithFormatSchema.meta({
-      description:
-        'Metric configuration for ES|QL mode, combining generic options, primary metric options, and column selection',
+    metric: esqlColumnWithFormatSchema.extends(partitionConfigPrimaryMetricOptionsSchema, {
+      meta: {
+        description:
+          'Metric configuration for ES|QL mode, combining generic options, primary metric options, and column selection',
+      },
     }),
     /**
      * Configure how to break down the metric (e.g. show one metric per term). In ES|QL mode, uses column-based configuration.
      */
-    group_by: z
-      .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsSchema.shape))
-      .min(1)
-      .max(100)
-      .optional()
-      .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
-    group_breakdown_by: z
-      .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsSchema.shape))
-      .min(1)
-      .max(100)
+    group_by: schema.maybe(
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionConfigBreakdownByOptionsSchema), {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+      })
+    ),
+    group_breakdown_by: schema.maybe(
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionConfigBreakdownByOptionsSchema), {
+        minSize: 1,
+        maxSize: 100,
+        meta: { description: 'Array of group breakdown dimensions (minimum 1)' },
+      })
+    ),
+  },
+  {
+    meta: {
+      id: 'mosaicESQL',
+      title: 'Mosaic Chart (ES|QL)',
+      description:
+        'Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
+    },
+    validate: validateMosaicGroupings,
+  }
+);
 
-      .optional()
-      .meta({ description: 'Array of group breakdown dimensions (minimum 1)' }),
-  })
-  .superRefine((data, ctx) => {
-    const msg = validateMosaicGroupings(data);
-    if (msg) {
-      ctx.addIssue({ code: 'custom', message: msg });
-    }
-  })
-  .meta({
-    id: 'mosaicESQL',
-    title: 'Mosaic Chart (ES|QL)',
+export const mosaicConfigSchema = objectUnion([mosaicConfigSchemaNoESQL, mosaicConfigSchemaESQL], {
+  meta: {
+    id: 'mosaicChart',
+    title: 'Mosaic Chart',
     description:
-      'Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
-  });
-
-export const mosaicConfigSchema = z.union([mosaicConfigSchemaNoESQL, mosaicConfigSchemaESQL]).meta({
-  id: 'mosaicChart',
-  title: 'Mosaic Chart',
-  description:
-    'Mosaic chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',
+      'Mosaic chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',
+  },
 });
 
-export type MosaicConfig = z.output<typeof mosaicConfigSchema>;
-export type MosaicConfigNoESQL = z.output<typeof mosaicConfigSchemaNoESQL>;
-export type MosaicConfigESQL = z.output<typeof mosaicConfigSchemaESQL>;
+export type MosaicConfig = TypeOf<typeof mosaicConfigSchema>;
+export type MosaicConfigNoESQL = TypeOf<typeof mosaicConfigSchemaNoESQL>;
+export type MosaicConfigESQL = TypeOf<typeof mosaicConfigSchemaESQL>;

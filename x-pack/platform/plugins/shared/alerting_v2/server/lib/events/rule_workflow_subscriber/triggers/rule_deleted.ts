@@ -17,9 +17,8 @@ export { RuleDeletedTriggerId } from '../../../../../common/workflows/triggers';
 
 /**
  * Binding from the bus `rule.deleted` event to the `alerting.ruleDeleted`
- * workflow trigger. The internal event payload also carries the full domain
- * rule; `toPayload` projects only the rule ref so that state never reaches
- * workflows.
+ * workflow trigger. The publisher already shapes the payload, so the
+ * subscriber forwards it unchanged.
  */
 export const ruleDeletedTrigger: RuleWorkflowTriggerBinding<
   RuleDeletedEvent,
@@ -28,7 +27,5 @@ export const ruleDeletedTrigger: RuleWorkflowTriggerBinding<
   eventType: RULE_DELETED_EVENT_TYPE,
   triggerId: RuleDeletedTriggerId,
   definition: ruleDeletedTriggerCommonDefinition,
-  toPayload: (event) => ({
-    rule: { ruleId: event.payload.ruleId, spaceId: event.payload.spaceId },
-  }),
+  toPayload: (event) => event.payload,
 };

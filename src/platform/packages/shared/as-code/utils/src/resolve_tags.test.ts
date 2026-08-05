@@ -49,34 +49,6 @@ describe('findWithTagFilter', () => {
     expect(response).toEqual({ saved_objects: [], total: 0, page: 1, per_page: 20 });
   });
 
-  it('passes through findOptions to the entity find call', async () => {
-    const soClient = savedObjectsClientMock.create();
-    soClient.find.mockResolvedValue({
-      saved_objects: [],
-      total: 0,
-      page: 1,
-      per_page: 10,
-    });
-
-    const findOptions = {
-      type: 'dashboard',
-      page: 3,
-      perPage: 10,
-      fields: ['title'],
-      sortField: 'updated_at',
-      sortOrder: 'desc' as const,
-    };
-
-    await findWithTagFilter(soClient, findOptions, { tags: 'id1' });
-
-    expect(entityFindArgs(soClient)).toEqual(
-      expect.objectContaining({
-        ...findOptions,
-        hasReference: [{ id: 'id1', type: 'tag' }],
-      })
-    );
-  });
-
   it('skips the entity query when tag_names is a comma-separated string (one literal name)', async () => {
     const soClient = makeSoClient([
       { id: 'id1', name: 'foo' },

@@ -9,7 +9,7 @@
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { MAX_ID_LENGTH } from '@kbn/as-code-shared-schemas';
 import { logRequest } from '@kbn/as-code-utils';
-import { z } from '@kbn/zod';
+import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -39,9 +39,12 @@ export function registerDeleteRoute(
       },
       validate: {
         request: {
-          params: z.object({
-            id: z.string().max(MAX_ID_LENGTH).meta({
-              description: LINKS_ID_DESCRIPTION,
+          params: schema.object({
+            id: schema.string({
+              maxLength: MAX_ID_LENGTH,
+              meta: {
+                description: LINKS_ID_DESCRIPTION,
+              },
             }),
           }),
         },

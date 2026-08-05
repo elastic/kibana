@@ -325,8 +325,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-type StateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
-const connector = connect<StateProps, {}, TimelineTabCommonProps, State>(makeMapStateToProps);
+const connector = connect(makeMapStateToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

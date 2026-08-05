@@ -27,7 +27,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,
@@ -79,7 +78,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,
@@ -113,7 +111,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,
@@ -159,7 +156,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,
@@ -195,7 +191,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,
@@ -229,7 +224,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,
@@ -238,40 +232,6 @@ Object {
   "timeWindow": Object {
     "duration": "1M",
     "type": "calendarAligned",
-  },
-}
-`;
-
-exports[`Transform partial URL state into form state settings handles 'preventCrossProjectSearch: true' URL state 1`] = `
-Object {
-  "budgetingMethod": "occurrences",
-  "description": "",
-  "groupBy": "*",
-  "indicator": Object {
-    "params": Object {
-      "filter": "",
-      "good": "",
-      "index": "",
-      "timestampField": "",
-      "total": "",
-    },
-    "type": "sli.kql.custom",
-  },
-  "name": "",
-  "objective": Object {
-    "target": 99,
-  },
-  "settings": Object {
-    "frequency": 1,
-    "preventCrossProjectSearch": true,
-    "preventInitialBackfill": false,
-    "syncDelay": 1,
-    "syncField": null,
-  },
-  "tags": Array [],
-  "timeWindow": Object {
-    "duration": "30d",
-    "type": "rolling",
   },
 }
 `;
@@ -297,7 +257,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": "override-field",
@@ -331,7 +290,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 12,
     "syncField": null,
@@ -365,7 +323,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": true,
     "syncDelay": 180,
     "syncField": null,
@@ -400,7 +357,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,
@@ -436,7 +392,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,
@@ -470,7 +425,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,
@@ -504,7 +458,6 @@ Object {
   },
   "settings": Object {
     "frequency": 1,
-    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": 1,
     "syncField": null,

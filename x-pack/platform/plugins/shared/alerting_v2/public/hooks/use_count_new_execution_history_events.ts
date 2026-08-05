@@ -1,0 +1,72 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useQuery } from '@kbn/react-query';
+import { useService } from '@kbn/core-di-browser';
+import type {
+  CountPolicyExecutionEventsRequest,
+  CountPolicyExecutionEventsResponse,
+  PolicyExecutionOutcomeFilter,
+} from '@kbn/alerting-v2-schemas';
+import { ExecutionHistoryApi } from '../services/execution_history_api';
+import { assertAllFieldsMapped, type Complete } from '../mapper_types';
+import { executionHistoryKeys } from './query_key_factory';
+
+const POLL_INTERVAL_MS = 10_000;
+
+export interface CountNewExecutionEventsUiParams {
+  since: string;
+  search?: string;
+  ruleIds?: string[];
+  outcome?: PolicyExecutionOutcomeFilter;
+}
+
+export const toCountNewExecutionEventsRequest = ({
+  since,
+  search,
+  ruleIds,
+  outcome,
+  ...rest
+}: CountNewExecutionEventsUiParams): Complete<CountPolicyExecutionEventsRequest> => {
+  assertAllFieldsMapped(rest);
+  return {
+    since,
+    search,
+    rule_ids: ruleIds,
+    outcome,
+  };
+};
+
+interface UseCountNewExecutionHistoryEventsParams {
+  since: string;
+  search?: string;
+  ruleIds?: string[];
+  outcome?: PolicyExecutionOutcomeFilter;
+  enabled?: boolean;
+}
+
+export const useCountNewExecutionHistoryEvents = ({
+  since,
+  search,
+  ruleIds,
+  outcome,
+  enabled = true,
+}: UseCountNewExecutionHistoryEventsParams) => {
+  const executionHistoryApi = useService(ExecutionHistoryApi);
+
+  return useQuery<CountPolicyExecutionEventsResponse, Error>({
+    queryKey: executionHistoryKeys.countSince(since, { search, ruleIds, outcome }),
+    queryFn: () =>
+      executionHistoryApi.countNewSince(
+        toCountNewExecutionEventsRequest({ since, search, ruleIds, outcome })
+      ),
+    refetchOnWindowFocus: true,
+    refetchInterval: POLL_INTERVAL_MS,
+    refetchIntervalInBackground: false,
+    enabled,
+  });
+};

@@ -6,10 +6,10 @@
  */
 
 import type { MappingsDefinition } from '@kbn/es-mappings';
-import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { z } from '@kbn/zod/v4';
 import type { ResourceDefinition } from './types';
 
+export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
 export const ALERT_ACTIONS_DATA_STREAM_VERSION = 4;
 export const ALERT_ACTIONS_BACKING_INDEX = '.ds-.alert-actions-*';
 

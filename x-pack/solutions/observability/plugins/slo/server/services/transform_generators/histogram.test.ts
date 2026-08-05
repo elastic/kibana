@@ -177,7 +177,6 @@ describe('Histogram Transform Generator', () => {
         frequency: twoMinute(),
         syncDelay: twoMinute(),
         preventInitialBackfill: true,
-        preventCrossProjectSearch: false,
       },
     });
 

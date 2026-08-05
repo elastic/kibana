@@ -9,7 +9,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
-import { stringify } from 'yaml';
+import yaml from 'js-yaml';
 import type { ModuleDiscoveryInfo } from './types';
 
 jest.mock('@kbn/repo-info', () => ({
@@ -18,6 +18,7 @@ jest.mock('@kbn/repo-info', () => ({
 
 jest.mock('fs');
 jest.mock('fast-glob');
+jest.mock('js-yaml');
 
 import { filterModulesByScoutCiConfig } from './search_configs';
 
@@ -37,7 +38,8 @@ describe('filterModulesByScoutCiConfig', () => {
   beforeEach(() => {
     mockLog = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
     jest.spyOn(mockLog, 'warning').mockImplementation(jest.fn());
-    (fs.readFileSync as jest.Mock).mockReturnValue(stringify(mockScoutCiConfig));
+    (fs.readFileSync as jest.Mock).mockReturnValue('mock yaml content');
+    (yaml.load as jest.Mock).mockReturnValue(mockScoutCiConfig);
   });
 
   afterEach(() => {

@@ -9,9 +9,21 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('InfraOps App', function () {
+    loadTestFile(require.resolve('./feature_controls'));
+    loadTestFile(require.resolve('./page_not_found'));
+    loadTestFile(require.resolve('./rules'));
+
+    describe('Metrics UI', function () {
+      loadTestFile(require.resolve('./metrics_anomalies'));
+      loadTestFile(require.resolve('./metrics_explorer'));
+      // keep this test last as it can potentially break other tests
+      loadTestFile(require.resolve('./metrics_source_configuration'));
+    });
+
     describe('Logs UI', function () {
       loadTestFile(require.resolve('./logs/log_entry_categories_tab'));
       loadTestFile(require.resolve('./logs/log_entry_rate_tab'));
+      loadTestFile(require.resolve('./logs/link_to'));
       loadTestFile(require.resolve('./logs/ml_job_id_formats/tests'));
     });
   });

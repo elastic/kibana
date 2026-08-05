@@ -8,63 +8,31 @@
 import type { StepResult } from '../steps/pipeline_types';
 
 export interface RunMetrics {
-  scoresWrittenRiskIndexBase: number;
-  scoresWrittenRiskIndexResolution: number;
-  scoresWrittenRiskIndexResetToZero: number;
-  // Entity-store successful writes (0 when dual-write disabled)
-  scoresWrittenEntityStoreBase: number;
-  scoresWrittenEntityStoreResolution: number;
-  scoresWrittenEntityStoreResetToZero: number;
-  // Phase 1 scores calculated from alerts before the not_in_store filter
-  scoresCalculatedBase: number;
-  // Phase 1 scores for EUIDs absent from the entity store
-  scoresDroppedNotInStore: number;
-  scoresFailedBase: number;
-  scoresFailedResolution: number;
-  scoresFailedResetToZero: number;
+  scoresWrittenBase: number;
+  scoresWrittenResolution: number;
+  scoresWrittenResetToZero: number;
   pagesProcessed: number;
   lookupPrunedDocs: number;
 }
 
 const METRIC_KEYS: ReadonlyArray<keyof RunMetrics> = [
-  'scoresWrittenRiskIndexBase',
-  'scoresWrittenRiskIndexResolution',
-  'scoresWrittenRiskIndexResetToZero',
-  'scoresWrittenEntityStoreBase',
-  'scoresWrittenEntityStoreResolution',
-  'scoresWrittenEntityStoreResetToZero',
-  'scoresCalculatedBase',
-  'scoresDroppedNotInStore',
-  'scoresFailedBase',
-  'scoresFailedResolution',
-  'scoresFailedResetToZero',
+  'scoresWrittenBase',
+  'scoresWrittenResolution',
+  'scoresWrittenResetToZero',
   'pagesProcessed',
   'lookupPrunedDocs',
 ];
 
 const emptyMetrics = (): RunMetrics => ({
-  scoresWrittenRiskIndexBase: 0,
-  scoresWrittenRiskIndexResolution: 0,
-  scoresWrittenRiskIndexResetToZero: 0,
-  scoresWrittenEntityStoreBase: 0,
-  scoresWrittenEntityStoreResolution: 0,
-  scoresWrittenEntityStoreResetToZero: 0,
-  scoresCalculatedBase: 0,
-  scoresDroppedNotInStore: 0,
-  scoresFailedBase: 0,
-  scoresFailedResolution: 0,
-  scoresFailedResetToZero: 0,
+  scoresWrittenBase: 0,
+  scoresWrittenResolution: 0,
+  scoresWrittenResetToZero: 0,
   pagesProcessed: 0,
   lookupPrunedDocs: 0,
 });
 
-const scoresWrittenRiskIndexTotal = (metrics: RunMetrics): number =>
-  metrics.scoresWrittenRiskIndexBase +
-  metrics.scoresWrittenRiskIndexResolution +
-  metrics.scoresWrittenRiskIndexResetToZero;
-
-const scoresFailedTotal = (metrics: RunMetrics): number =>
-  metrics.scoresFailedBase + metrics.scoresFailedResolution + metrics.scoresFailedResetToZero;
+const scoresWrittenTotal = (metrics: RunMetrics): number =>
+  metrics.scoresWrittenBase + metrics.scoresWrittenResolution + metrics.scoresWrittenResetToZero;
 
 interface SummaryContext {
   namespace: string;
@@ -92,32 +60,20 @@ export const createRunMetricsTracker = () => {
     recordBase: (
       target: RunMetrics,
       summary: {
-        scoresWrittenRiskIndex: number;
-        scoresWrittenEntityStore: number;
-        scoresCalculated: number;
-        scoresDroppedNotInStore: number;
-        scoresFailed: number;
+        scoresWritten: number;
         pagesProcessed: number;
       }
     ) => {
-      target.scoresWrittenRiskIndexBase = summary.scoresWrittenRiskIndex;
-      target.scoresWrittenEntityStoreBase = summary.scoresWrittenEntityStore;
-      target.scoresCalculatedBase = summary.scoresCalculated;
-      target.scoresDroppedNotInStore = summary.scoresDroppedNotInStore;
-      target.scoresFailedBase = summary.scoresFailed;
+      target.scoresWrittenBase = summary.scoresWritten;
       target.pagesProcessed = summary.pagesProcessed;
     },
 
     recordResolution: (target: RunMetrics, result: StepResult) => {
-      target.scoresWrittenRiskIndexResolution = result.scoresWrittenRiskIndex;
-      target.scoresWrittenEntityStoreResolution = result.scoresWrittenEntityStore;
-      target.scoresFailedResolution = result.scoresFailed;
+      target.scoresWrittenResolution = result.scoresWritten;
     },
 
     recordResetToZero: (target: RunMetrics, result: StepResult) => {
-      target.scoresWrittenRiskIndexResetToZero = result.scoresWrittenRiskIndex;
-      target.scoresWrittenEntityStoreResetToZero = result.scoresWrittenEntityStore;
-      target.scoresFailedResetToZero = result.scoresFailed;
+      target.scoresWrittenResetToZero = result.scoresWritten;
     },
 
     recordPrune: (target: RunMetrics, prunedDocs: number) => {
@@ -132,15 +88,13 @@ export const createRunMetricsTracker = () => {
 
     toRunSummary: (runMetrics: RunMetrics, context: RunSummaryContext) => ({
       ...context,
-      scoresWrittenRiskIndexTotal: scoresWrittenRiskIndexTotal(runMetrics),
-      scoresFailedTotal: scoresFailedTotal(runMetrics),
+      scoresWrittenTotal: scoresWrittenTotal(runMetrics),
       ...runMetrics,
     }),
 
     toAggregateSummary: (context: AggregateSummaryContext) => ({
       ...context,
-      scoresWrittenRiskIndexTotal: scoresWrittenRiskIndexTotal(aggregate),
-      scoresFailedTotal: scoresFailedTotal(aggregate),
+      scoresWrittenTotal: scoresWrittenTotal(aggregate),
       ...aggregate,
     }),
   };

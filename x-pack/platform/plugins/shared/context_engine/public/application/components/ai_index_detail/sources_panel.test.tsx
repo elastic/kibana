@@ -6,9 +6,6 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { coreMock } from '@kbn/core/public/mocks';
-import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
@@ -21,9 +18,8 @@ import { SourcesPanel } from './sources_panel';
 
 const mockUseDataConnectors = jest.fn(
   (_options?: UseDataConnectorsOptions): UseDataConnectorsResult => ({
-    connectors: [{ id: 'connector-gdrive', name: 'Google Drive', actionTypeId: '.google_drive' }],
+    connectors: [{ id: 'connector-gdrive', name: 'Google Drive' }],
     connectorNameById: new Map([['connector-gdrive', 'Google Drive']]),
-    connectorActionTypeById: new Map([['connector-gdrive', '.google_drive']]),
     isLoading: false,
     isError: false,
     error: undefined,
@@ -37,16 +33,7 @@ jest.mock('../../hooks/use_data_connectors', () => ({
 const renderWithProviders = (ui: React.ReactElement) =>
   render(
     <I18nProvider>
-      <EuiProvider>
-        <KibanaContextProvider
-          services={{
-            ...coreMock.createStart(),
-            triggersActionsUi: triggersActionsUiMock.createStart(),
-          }}
-        >
-          {ui}
-        </KibanaContextProvider>
-      </EuiProvider>
+      <EuiProvider>{ui}</EuiProvider>
     </I18nProvider>
   );
 

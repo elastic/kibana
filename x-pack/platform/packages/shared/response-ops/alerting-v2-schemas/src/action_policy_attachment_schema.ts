@@ -8,8 +8,7 @@
 import type { z } from '@kbn/zod/v4';
 import { actionPolicyResponseSchema } from './action_policy_response_schema';
 
-/** Namespaced to match `ALERTING_NAMESPACE` in `@kbn/alerting-v2-constants`. */
-export const ACTION_POLICY_ATTACHMENT_TYPE = 'platform.alerting.action_policy' as const;
+export const ACTION_POLICY_ATTACHMENT_TYPE = 'action_policy' as const;
 export const ACTION_POLICY_SML_TYPE = 'alerting_v2_action_policy' as const;
 
 /**

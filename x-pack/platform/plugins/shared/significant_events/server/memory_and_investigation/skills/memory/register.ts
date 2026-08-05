@@ -8,7 +8,6 @@
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import type { MemoryToolsOptions } from '../../tools/memory';
-import { gateInlineTools } from '../../../agent_builder/skills/register_skills';
 import { createSignificantEventsMemorySkill } from './significant_events_memory_skill';
 import { createMemorySynthesisSkill } from './memory_synthesis_skill';
 import { createMemoryConsolidationSkill } from './memory_consolidation_skill';
@@ -45,9 +44,7 @@ export const registerStreamsMemoryAgentBuilder = async ({
     }
 
     const results = await Promise.allSettled(
-      pending.map(({ create }) =>
-        agentBuilder.skills.register(gateInlineTools(create(memoryToolsOptions), isAvailable))
-      )
+      pending.map(({ create }) => agentBuilder.skills.register(create(memoryToolsOptions)))
     );
 
     const registered: string[] = [];

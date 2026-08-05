@@ -11,6 +11,7 @@ import {
   TSDB_SCENARIO_DOCUMENT_COUNT,
   createTsdbScenarioTimeRange,
   enableElasticChartDebug,
+  getChartDebugData,
   offsetPickerTime,
   sumFirstNValues,
   test,
@@ -94,7 +95,7 @@ const runScenario = async (
     });
 
     await pageObjects.lens.waitForVisualization('xyVisChart');
-    const chartData = await pageObjects.lens.getCurrentChartDebugState('xyVisChart');
+    const chartData = await getChartDebugData(page, 'xyVisChart');
     const chartBars = chartData.bars?.[0]?.bars ?? [];
     expect(chartBars.length).toBeGreaterThan(0);
     return chartBars;
@@ -120,7 +121,7 @@ const runScenario = async (
 
       await pageObjects.lens.waitForVisualization('xyVisChart');
       const barsBeforeDowngrade =
-        (await pageObjects.lens.getCurrentChartDebugState('xyVisChart')).bars?.[0]?.bars ?? [];
+        (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars ?? [];
 
       await pageObjects.datePicker.setAbsoluteRange({
         from: offsetPickerTime(TIME_RANGE.afterRollover, ONE_SECOND),
@@ -128,7 +129,7 @@ const runScenario = async (
       });
       await pageObjects.lens.waitForVisualization('xyVisChart');
       const barsAfterDowngrade =
-        (await pageObjects.lens.getCurrentChartDebugState('xyVisChart')).bars?.[0]?.bars ?? [];
+        (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars ?? [];
 
       return {
         hasDataBeforeDowngrade: barsBeforeDowngrade.some(({ y }) => y > 0),

@@ -49,9 +49,6 @@ const SUPPORTED_LOGOS = [
   'confluence',
   'salesforce',
   'splunk',
-  'supabase',
-  'vercel_black',
-  'vercel_white',
 ] as const;
 
 export type SupportedLogo = (typeof SUPPORTED_LOGOS)[number];

@@ -31,12 +31,6 @@ import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifact
 import { LOCAL_CACHE_ROOT } from './src/archive/constants';
 import { isCiEnvironment } from './src/archive/utils';
 import { formatPathForLog } from './src/normalize_project_path';
-import { resolveTypeCheckCompiler } from './src/resolve_compiler';
-import {
-  buildConcurrencyArgs,
-  resolveMemoryLimit,
-  resolveTypeCheckConcurrency,
-} from './src/resolve_concurrency';
 
 export const TSC_LABEL = 'tsc';
 
@@ -312,22 +306,17 @@ export const executeTypeCheckValidation = async ({
         ].sort((left, right) => left.localeCompare(right));
 
     if (buildTargets.length > 0) {
-      const concurrency = resolveTypeCheckConcurrency();
-      log.info(
-        `tsgo build concurrency: --builders ${concurrency.builders} --checkers ${concurrency.checkers}`
-      );
       await procRunner.run(TSC_LABEL, {
-        cmd: Path.relative(REPO_ROOT, resolveTypeCheckCompiler()),
+        cmd: Path.relative(REPO_ROOT, require.resolve('typescript/bin/tsc')),
         args: [
           '-b',
           ...buildTargets,
-          ...buildConcurrencyArgs(concurrency),
           ...(pretty ? ['--pretty'] : []),
           ...(verbose ? ['--verbose'] : []),
           ...(extendedDiagnostics ? ['--extendedDiagnostics'] : []),
         ],
         env: {
-          GOMEMLIMIT: resolveMemoryLimit(),
+          NODE_OPTIONS: '--max-old-space-size=12288',
         },
         cwd: REPO_ROOT,
         wait: true,

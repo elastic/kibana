@@ -7,13 +7,3 @@
 
 export { MlAppHeader } from './ml_app_header';
 export type { MlAppHeaderProps } from './ml_app_header';
-export {
-  useMlAppHeaderBack,
-  useMlManagementAppHeaderBack,
-  useDataVisualizerBack,
-  useAnomalyDetectionJobsBack,
-  useDataFrameAnalyticsJobsBack,
-  useAnomalyDetectionSettingsBack,
-  useCalendarManagementBack,
-  useFilterListsBack,
-} from './use_ml_app_header_back';

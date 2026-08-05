@@ -14,20 +14,6 @@ describe('shortenDottedString', () => {
     expect(shortenDottedString('dot.notated.string')).toBe('d.n.string');
   });
 
-  test('should keep single-character path segments intact', () => {
-    expect(shortenDottedString('a.b.c')).toBe('a.b.c');
-    expect(shortenDottedString('x.ab.c')).toBe('x.a.c');
-    expect(shortenDottedString('a.b')).toBe('a.b');
-    expect(shortenDottedString('no_dots')).toBe('no_dots');
-  });
-
-  test('should preserve empty segments from consecutive, leading, or trailing dots', () => {
-    expect(shortenDottedString('a..b')).toBe('a..b');
-    expect(shortenDottedString('.a.b')).toBe('.a.b');
-    expect(shortenDottedString('a.b.')).toBe('a.b.');
-    expect(shortenDottedString("abcdefg..Next time won't you sing with me?..")).toBe('a..N..');
-  });
-
   test('should ignore non-string values', () => {
     const obj = { key: 'val' };
 

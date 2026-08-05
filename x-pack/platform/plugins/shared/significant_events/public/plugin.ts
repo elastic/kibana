@@ -6,38 +6,20 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { SignificantEventsPublicSetupDependencies } from './types';
-import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers';
-import type { SignificantEventsRepositoryClient } from './api';
-import { createSignificantEventsRepositoryClient } from './api';
 
 export type SignificantEventsPublicPluginSetup = Record<string, never>;
-
-export interface SignificantEventsPublicPluginStart {
-  significantEventsRepositoryClient: SignificantEventsRepositoryClient;
-}
+export type SignificantEventsPublicPluginStart = Record<string, never>;
 
 export class SignificantEventsPublicPlugin
-  implements
-    Plugin<
-      SignificantEventsPublicPluginSetup,
-      SignificantEventsPublicPluginStart,
-      SignificantEventsPublicSetupDependencies
-    >
+  implements Plugin<SignificantEventsPublicPluginSetup, SignificantEventsPublicPluginStart>
 {
   constructor(_ctx: PluginInitializerContext) {}
 
-  setup(
-    _core: CoreSetup,
-    plugins: SignificantEventsPublicSetupDependencies
-  ): SignificantEventsPublicPluginSetup {
-    registerSignificantEventsWorkflowTriggers(plugins.workflowsExtensions);
+  setup(_core: CoreSetup): SignificantEventsPublicPluginSetup {
     return {};
   }
 
-  start(core: CoreStart): SignificantEventsPublicPluginStart {
-    return {
-      significantEventsRepositoryClient: createSignificantEventsRepositoryClient(core),
-    };
+  start(_core: CoreStart): SignificantEventsPublicPluginStart {
+    return {};
   }
 }

@@ -327,12 +327,13 @@ export const navigateToCaseFromSuccessToaster = () => {
   cy.get(VIEW_CASE_TOASTER_LINK).click();
 };
 
-/**
- * Retry until the timeline overlay mask is hidden. When the overlay is still open,
- * click the close button so concurrent React re-renders (e.g. from markAsFavorite's
- * timelines refresh) can settle before the next attempt.
- */
-export const ensureTimelineOverlayHidden = () => {
+export const closeTimeline = () => {
+  // Retry closing the timeline until the overlay mask gets the --hidden class.
+  // Each iteration first checks whether the overlay is already hidden to avoid
+  // clicking a button that is no longer in the visible portal. When the overlay is
+  // still open, .should('be.visible') retries until the close button is actionable,
+  // letting any concurrent React re-renders (e.g. from markAsFavorite's Redux
+  // dispatches) settle before the click is issued.
   recurse(
     () => {
       return cy.get(TIMELINE_WRAPPER).then(($wrapper) => {
@@ -346,21 +347,19 @@ export const ensureTimelineOverlayHidden = () => {
   );
 };
 
-export const closeTimeline = () => {
-  ensureTimelineOverlayHidden();
-};
-
 export const createNewTimeline = () => {
   openCreateTimelineOptionsPopover();
   cy.get(CREATE_NEW_TIMELINE).click();
 };
 
 export const openCreateTimelineOptionsPopover = () => {
-  // NEW_TIMELINE_ACTION toggles the popover, so click it once and wait on the
-  // menu item instead of re-clicking in a retry loop, which would re-toggle the
-  // popover shut and detach CREATE_NEW_TIMELINE mid-click.
-  cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
-  cy.get(CREATE_NEW_TIMELINE).should('be.visible');
+  recurse(
+    () => {
+      cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
+      return cy.get(CREATE_NEW_TIMELINE);
+    },
+    (sub) => sub.is(':visible')
+  );
 };
 
 export const createTimelineFromBottomBar = () => {

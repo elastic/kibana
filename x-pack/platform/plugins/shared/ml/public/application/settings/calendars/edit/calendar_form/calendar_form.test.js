@@ -16,17 +16,6 @@ jest.mock('../../../../contexts/kibana/use_create_url', () => ({
 jest.mock('../../../../capabilities/check_capabilities', () => ({
   usePermissionCheck: () => [true, true],
 }));
-jest.mock('../../../../contexts/kibana', () => ({
-  useMlKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: jest.fn(),
-        getUrlForApp: jest.fn(() => '/app/management/ml/ad_settings/calendars_list'),
-      },
-    },
-  }),
-  useNavigateToPath: () => jest.fn(),
-}));
 
 const testProps = {
   calendarId: '',

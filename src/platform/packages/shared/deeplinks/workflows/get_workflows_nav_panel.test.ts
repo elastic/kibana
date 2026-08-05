@@ -12,31 +12,23 @@ import { WorkflowsPageName } from './deep_links';
 import { getWorkflowsNavPanel, type WorkflowsNavPanelCore } from './get_workflows_nav_panel';
 
 const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = 'workflowsManagement:library:enabled';
-const WORKFLOWS_EXECUTIONS_VIEW_ENABLED_SETTING_ID =
-  'workflowsManagement:globalExecutionsView:enabled';
 
-const createCore = ({
-  libraryEnabled = false,
-  executionsViewEnabled = false,
-} = {}): WorkflowsNavPanelCore => ({
+const createCore = (libraryEnabled: boolean): WorkflowsNavPanelCore => ({
   settings: {
     globalClient: {
-      get: <T>(key: string, defaultValue: T) => {
-        if (key === WORKFLOWS_LIBRARY_ENABLED_SETTING_ID) return libraryEnabled as T;
-        if (key === WORKFLOWS_EXECUTIONS_VIEW_ENABLED_SETTING_ID) return executionsViewEnabled as T;
-        return defaultValue;
-      },
+      get: <T>(key: string, defaultValue: T) =>
+        key === WORKFLOWS_LIBRARY_ENABLED_SETTING_ID ? (libraryEnabled as T) : defaultValue,
     },
   },
 });
 
 describe('getWorkflowsNavPanel', () => {
-  it('returns a single workflows link when both features are disabled', () => {
-    expect(getWorkflowsNavPanel(createCore())).toEqual([{ link: WORKFLOWS_APP_ID }]);
+  it('returns a single workflows link when the library is disabled', () => {
+    expect(getWorkflowsNavPanel(createCore(false))).toEqual([{ link: WORKFLOWS_APP_ID }]);
   });
 
-  it('returns a panel opener with list and library children when only library is enabled', () => {
-    expect(getWorkflowsNavPanel(createCore({ libraryEnabled: true }))).toEqual([
+  it('returns a panel opener with list and library children when the library is enabled', () => {
+    expect(getWorkflowsNavPanel(createCore(true))).toEqual([
       {
         id: WORKFLOWS_APP_ID,
         link: WORKFLOWS_APP_ID,
@@ -44,43 +36,6 @@ describe('getWorkflowsNavPanel', () => {
         children: [
           { link: `${WORKFLOWS_APP_ID}:${WorkflowsPageName.list}`, breadcrumbStatus: 'hidden' },
           { link: `${WORKFLOWS_APP_ID}:${WorkflowsPageName.library}`, breadcrumbStatus: 'hidden' },
-        ],
-      },
-    ]);
-  });
-
-  it('returns a panel opener with list and executions children when only executions view is enabled', () => {
-    expect(getWorkflowsNavPanel(createCore({ executionsViewEnabled: true }))).toEqual([
-      {
-        id: WORKFLOWS_APP_ID,
-        link: WORKFLOWS_APP_ID,
-        renderAs: 'panelOpener',
-        children: [
-          { link: `${WORKFLOWS_APP_ID}:${WorkflowsPageName.list}`, breadcrumbStatus: 'hidden' },
-          {
-            link: `${WORKFLOWS_APP_ID}:${WorkflowsPageName.executions}`,
-            breadcrumbStatus: 'hidden',
-          },
-        ],
-      },
-    ]);
-  });
-
-  it('returns a panel opener with list, library, and executions children when both are enabled', () => {
-    expect(
-      getWorkflowsNavPanel(createCore({ libraryEnabled: true, executionsViewEnabled: true }))
-    ).toEqual([
-      {
-        id: WORKFLOWS_APP_ID,
-        link: WORKFLOWS_APP_ID,
-        renderAs: 'panelOpener',
-        children: [
-          { link: `${WORKFLOWS_APP_ID}:${WorkflowsPageName.list}`, breadcrumbStatus: 'hidden' },
-          { link: `${WORKFLOWS_APP_ID}:${WorkflowsPageName.library}`, breadcrumbStatus: 'hidden' },
-          {
-            link: `${WORKFLOWS_APP_ID}:${WorkflowsPageName.executions}`,
-            breadcrumbStatus: 'hidden',
-          },
         ],
       },
     ]);

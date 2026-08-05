@@ -504,7 +504,7 @@ describe('UiamService', () => {
       );
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
-        { outcome: 'failure', errorType: 'KIBANA.AUDIENCE_MISMATCH' }
+        { outcome: 'failure' }
       );
     });
 
@@ -519,30 +519,7 @@ describe('UiamService', () => {
       await expect(uiamService.exchangeOAuthToken('essu_invalid_token')).rejects.toThrow();
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
-        { outcome: 'failure', errorType: 'UNKNOWN' }
-      );
-    });
-
-    it('records the UIAM error type when the exchange fails with a classified error', async () => {
-      fetchSpy.mockResolvedValue({
-        ok: false,
-        status: 401,
-        json: async () => ({
-          request_id: '2f26103be7be5483ef70f099ca9d5567',
-          error: {
-            message: 'Authentication failed',
-            type: 'AUTHENTICATION.TOKEN',
-            resource: 'ba6ab8be-9c98-43ec-a5f9-7b163af9e432',
-            code: '0x7E0116',
-          },
-        }),
-        headers: new Headers(),
-      });
-
-      await expect(uiamService.exchangeOAuthToken('essu_expired_token')).rejects.toThrow();
-      expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
-        expect.any(Number),
-        { outcome: 'failure', errorType: 'AUTHENTICATION.TOKEN' }
+        { outcome: 'failure' }
       );
     });
   });

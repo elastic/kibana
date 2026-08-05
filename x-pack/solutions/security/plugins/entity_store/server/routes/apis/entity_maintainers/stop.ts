@@ -11,7 +11,6 @@ import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { enforceEntityStorePrivileges } from '../utils/check_entity_store_privileges';
 import { maintainerIdParamsSchema } from './utils/validator';
 
 export function registerStopMaintainer(router: EntityStorePluginRouter) {
@@ -37,13 +36,10 @@ export function registerStopMaintainer(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManagerClient, entityMaintainersClient } = entityStoreCtx;
+        const { logger, entityMaintainersClient } = entityStoreCtx;
         const { id } = req.params;
 
         logger.debug(`Stop maintainer API invoked for id: ${id}`);
-
-        const forbidden = await enforceEntityStorePrivileges(assetManagerClient, req, res);
-        if (forbidden) return forbidden;
 
         await entityMaintainersClient.stop(id, req);
 

@@ -51,7 +51,7 @@ export const JiraConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   auth: {
     types: [

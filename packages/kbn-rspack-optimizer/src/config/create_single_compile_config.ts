@@ -471,8 +471,7 @@ export async function createSingleCompileConfig(
           ]
         : []),
 
-      // RsDoctor profiling - only works in the profile worker (which skips harden's prototype
-      // sealing; envinfo, used by RsDoctor, breaks once Function.prototype is sealed)
+      // RsDoctor profiling - only works in the profile worker (avoids require-in-the-middle conflict)
       // Skip if profileStatsOnly is enabled (faster builds when only stats.json is needed)
       ...(profile && !profileStatsOnly
         ? (() => {
@@ -491,8 +490,8 @@ export async function createSingleCompileConfig(
                 }),
               ];
             } catch (e: any) {
-              // RsDoctor's envinfo dependency breaks when Function.prototype is sealed by harden.
-              // This should only happen if running outside the profile worker (which skips sealing).
+              // RsDoctor's envinfo dependency conflicts with require-in-the-middle (from harden)
+              // This should only happen if running outside the profile worker
               log?.warning(`RsDoctor not available: ${e.message}`);
               log?.info('Use stats.json with https://statoscope.tech for bundle analysis');
               return [];

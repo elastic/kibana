@@ -53,7 +53,6 @@ import type {
   RestoreWorkflowVersionResponseDto,
   ResumeExecutionParams,
   RunWorkflowOptions,
-  SearchExecutionsParams,
   SearchTriggerEventLogParams,
   SearchTriggerEventLogResult,
   TestWorkflowParams,
@@ -233,13 +232,6 @@ export class WorkflowApi {
   async testStep(params: RunStepCommand): Promise<TestWorkflowResponseDto> {
     return this.http.post(`${BASE}/step/test`, {
       body: JSON.stringify(params),
-      version: API_VERSION,
-    });
-  }
-
-  async searchExecutions(params?: SearchExecutionsParams): Promise<WorkflowExecutionListDto> {
-    return this.http.get(`${BASE}/workflow/executions`, {
-      query: params as HttpFetchQuery,
       version: API_VERSION,
     });
   }

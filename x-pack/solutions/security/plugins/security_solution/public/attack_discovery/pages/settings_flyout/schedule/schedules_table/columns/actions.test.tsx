@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
 
@@ -107,7 +106,8 @@ describe('Actions Column', () => {
     it('should render missing privileges tooltip', async () => {
       renderComponent();
 
-      await userEvent.hover(screen.getByTestId('missingPrivilegesTooltipAnchor'));
+      const deleteButton = screen.getByTestId('deleteButton');
+      fireEvent.mouseOver(deleteButton.parentElement as Node);
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent('Missing privileges');

@@ -11,7 +11,7 @@ import { API_BASE_PATH } from '../../../common/constants';
 import type { RouteDependencies } from '../../types';
 import { handleEsError } from '../../shared_imports';
 
-const bodySchema = schema.string({ maxLength: 100000 });
+const bodySchema = schema.string();
 
 export function registerExecuteRoute({ router, license }: RouteDependencies) {
   router.post(

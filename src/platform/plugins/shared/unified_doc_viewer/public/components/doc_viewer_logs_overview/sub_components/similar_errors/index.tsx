@@ -171,7 +171,6 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
   const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
     indexPattern: indexes.logs,
     whereClause: esqlQueryWhereClause,
-    unmappedFieldsPolicy: 'NULLIFY',
   });
 
   const openInDiscoverSectionAction = useOpenInDiscoverSectionAction({

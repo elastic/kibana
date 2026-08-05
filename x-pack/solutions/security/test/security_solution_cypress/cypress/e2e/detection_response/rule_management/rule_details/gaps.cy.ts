@@ -115,9 +115,6 @@ describe('Rule gaps', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
 
     // Test filling gaps with disabled rule
     cy.get(RULE_SWITCH).click();
-    // Wait for the rule-disabled state to propagate to the button before hovering,
-    // otherwise `EuiToolTip` won't render when content is still empty.
-    cy.get(RULE_GAPS_FILL_BUTTON).first().should('be.disabled');
     cy.get(RULE_GAPS_FILL_BUTTON).first().realHover();
     cy.get(TOOLTIP).contains('Rule should be enabled to fill gaps');
 

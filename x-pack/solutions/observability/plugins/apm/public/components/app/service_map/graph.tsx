@@ -88,7 +88,7 @@ import {
 } from '../../../../common/service_map';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { ServiceFlyout } from '../../shared/service_flyout';
-import { SERVICE_FLYOUT_SOURCE_SERVICE_MAP } from '../../shared/service_flyout/constants';
+import { SERVICE_FLYOUT_SOURCES } from '../../shared/service_flyout/constants';
 import type { ServiceFlyoutOptions } from '../../shared/service_flyout/types';
 import { useServiceMapFlyoutProps } from './use_service_map_flyout_props';
 import { ServiceMapDiagnosticButton } from './service_map_diagnostic_button';
@@ -487,7 +487,14 @@ function GraphInner({
     setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
   }, [setNodes, setEdges, applyEdgeHighlighting]);
 
-  const flyoutSource = SERVICE_FLYOUT_SOURCE_SERVICE_MAP;
+  const flyoutSource = flyoutOptions?.source ?? SERVICE_FLYOUT_SOURCES.serviceMap;
+
+  const handleServiceFlyoutView = useCallback(
+    ({ tabId }: { tabId: string }) => {
+      telemetry.reportServiceFlyoutViewed({ tabId, source: flyoutSource });
+    },
+    [telemetry, flyoutSource]
+  );
 
   useEffect(() => {
     if (selectedNodeId && nodesAfterFilters.some((n) => n.id === selectedNodeId && n.hidden)) {
@@ -948,7 +955,7 @@ function GraphInner({
               service={flyoutProps.service}
               deps={{ core, share, lens, dataViews, alerting: plugins.alerting }}
               filters={flyoutProps.filters}
-              telemetry={{ client: telemetry, source: flyoutSource }}
+              onView={handleServiceFlyoutView}
               onClose={handlePopoverClose}
             />
           )}

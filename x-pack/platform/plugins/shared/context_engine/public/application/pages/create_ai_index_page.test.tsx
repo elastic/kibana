@@ -35,7 +35,6 @@ jest.mock('../hooks/use_data_connectors', () => ({
   useDataConnectors: () => ({
     connectors: [],
     connectorNameById: new Map(),
-    connectorActionTypeById: new Map(),
     isLoading: false,
   }),
 }));

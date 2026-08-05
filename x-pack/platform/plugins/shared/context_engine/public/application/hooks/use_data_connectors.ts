@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { BASE_ACTION_API_PATH, ContextEngineConnectorFeatureId } from '@kbn/actions-plugin/common';
-import type {
-  GetAllConnectorsResponse,
-  GetAllConnectorTypesResponseV1 as GetAllConnectorTypesResponse,
-} from '@kbn/actions-plugin/common/routes/connector/response';
+import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
+import type { GetAllConnectorsResponse } from '@kbn/actions-plugin/common/routes/connector/response';
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
+import { isDataConnectorType } from '../../../common/data_connectors';
 import { contextEngineQueryKeys } from './query_keys';
 import { useKibana } from './use_kibana';
 
 export interface DataConnector {
   id: string;
   name: string;
-  actionTypeId: string;
 }
 
 export interface UseDataConnectorsOptions {
@@ -28,14 +25,13 @@ export interface UseDataConnectorsOptions {
 export interface UseDataConnectorsResult {
   connectors: DataConnector[];
   connectorNameById: Map<string, string>;
-  connectorActionTypeById: Map<string, string>;
   isLoading: boolean;
   isError: boolean;
   error: Error | undefined;
 }
 
 /**
- * Lists the connectors whose type declares the `contextEngine` feature id.
+ * Lists connectors filtered by a specific subset of data connector.
  */
 export const useDataConnectors = ({
   enabled = true,
@@ -44,30 +40,7 @@ export const useDataConnectors = ({
     services: { http },
   } = useKibana();
 
-  const {
-    data: types,
-    isLoading: isTypesLoading,
-    isError: isTypesError,
-    error: typesError,
-  } = useQuery<GetAllConnectorTypesResponse, Error>({
-    queryKey: contextEngineQueryKeys.connectors.types(),
-    queryFn: ({ signal }) =>
-      http.get<GetAllConnectorTypesResponse>(`${BASE_ACTION_API_PATH}/connector_types`, {
-        query: { feature_id: ContextEngineConnectorFeatureId },
-        signal,
-      }),
-    refetchOnWindowFocus: false,
-    enabled,
-  });
-
-  const supportedTypeIds = useMemo(() => new Set((types ?? []).map((type) => type.id)), [types]);
-
-  const {
-    data: connectorsResponse,
-    isLoading: isConnectorsLoading,
-    isError: isConnectorsError,
-    error: connectorsError,
-  } = useQuery<GetAllConnectorsResponse, Error>({
+  const { data, isLoading, isError, error } = useQuery<GetAllConnectorsResponse, Error>({
     queryKey: contextEngineQueryKeys.connectors.list(),
     queryFn: ({ signal }) =>
       http.get<GetAllConnectorsResponse>(`${BASE_ACTION_API_PATH}/connectors`, { signal }),
@@ -77,14 +50,10 @@ export const useDataConnectors = ({
 
   const connectors = useMemo<DataConnector[]>(
     () =>
-      (connectorsResponse ?? [])
-        .filter((connector) => supportedTypeIds.has(connector.connector_type_id))
-        .map((connector) => ({
-          id: connector.id,
-          name: connector.name || connector.id,
-          actionTypeId: connector.connector_type_id,
-        })),
-    [connectorsResponse, supportedTypeIds]
+      (data ?? [])
+        .filter((connector) => isDataConnectorType(connector.connector_type_id))
+        .map((connector) => ({ id: connector.id, name: connector.name || connector.id })),
+    [data]
   );
 
   const connectorNameById = useMemo(
@@ -92,21 +61,11 @@ export const useDataConnectors = ({
     [connectors]
   );
 
-  const connectorActionTypeById = useMemo(
-    () => new Map(connectors.map((connector) => [connector.id, connector.actionTypeId])),
-    [connectors]
-  );
-
-  const isLoading = enabled && (isTypesLoading || isConnectorsLoading);
-  const isError = enabled && (isTypesError || isConnectorsError);
-  const error = enabled ? typesError ?? connectorsError ?? undefined : undefined;
-
   return {
     connectors,
     connectorNameById,
-    connectorActionTypeById,
-    isLoading,
-    isError,
-    error,
+    isLoading: enabled && isLoading,
+    isError: enabled && isError,
+    error: enabled ? error ?? undefined : undefined,
   };
 };

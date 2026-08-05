@@ -39,9 +39,7 @@ export class VisualizeApp {
 
   async goto() {
     await this.page.gotoApp('visualize');
-    // Kibana bootstrap ("Loading Elastic") regularly exceeds the default 10s expect
-    // timeout under parallel Scout load — wait for the listing shell instead.
-    await expect(this.landingPage).toBeVisible({ timeout: 30_000 });
+    await expect(this.landingPage).toBeVisible();
   }
 
   async openNewVisualizationWizard() {
@@ -69,7 +67,6 @@ export class VisualizeApp {
   }
 
   async waitForVisualizationLoaded() {
-    // Agg-based / legacy visualizations can exceed the 10s expect timeout while rendering.
     await expect(this.visualizationLoader).toHaveAttribute('data-render-complete', 'true', {
       timeout: 30_000,
     });
@@ -79,13 +76,9 @@ export class VisualizeApp {
     await this.page.testSubj.click(`visListingTitleLink-${title.split(' ').join('-')}`);
   }
 
-  async openSavedVisualization(title: string, options?: { waitFor?: 'agg' | 'lens' }) {
+  async openSavedVisualization(title: string) {
     await this.clickSavedVisualization(title);
-    if (options?.waitFor === 'lens') {
-      await this.page.testSubj.locator('lnsApp').waitFor({ state: 'visible' });
-    } else {
-      await this.waitForVisualizationLoaded();
-    }
+    await this.waitForVisualizationLoaded();
   }
 
   async openSaveModal() {

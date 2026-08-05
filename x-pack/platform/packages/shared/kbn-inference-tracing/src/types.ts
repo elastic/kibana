@@ -39,7 +39,6 @@ export enum GenAISemanticConventions {
 export enum ElasticGenAIAttributes {
   InferenceSpanKind = 'elastic.inference.span.kind',
   ToolChoice = 'elastic.llm.toolChoice',
-  ConversationTitle = 'elastic.conversation.title',
 }
 
 export interface GenAISemConvAttributes {
@@ -73,7 +72,6 @@ export interface GenAISemConvAttributes {
   [GenAISemanticConventions.GenAIWorkflowName]?: string;
   [ElasticGenAIAttributes.InferenceSpanKind]?: 'CHAIN' | 'AGENT' | 'LLM' | 'TOOL';
   [ElasticGenAIAttributes.ToolChoice]?: string;
-  [ElasticGenAIAttributes.ConversationTitle]?: string;
 }
 
 /**

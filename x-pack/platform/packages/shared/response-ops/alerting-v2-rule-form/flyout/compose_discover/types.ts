@@ -42,6 +42,8 @@ export interface StepRenderProps {
   isEditing: boolean;
   ruleId?: string;
   renderCustomRecovery?: (props: CustomRecoveryRenderProps) => React.ReactNode;
+  /** Opts the user into manual split mode from the form (e.g. split-failed CTA). */
+  onManualSplit?: () => void;
 }
 
 export interface StepDefinition {

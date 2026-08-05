@@ -120,34 +120,6 @@ describe('buildStreamVars', () => {
     );
     expect(vars.region).toBe('eu-west-1');
   });
-
-  it('does not emit regions when not explicitly set (optional field, package default applies)', () => {
-    const service = makeService({ requiredConfig: [], optionalConfig: ['regions'] });
-    const vars = buildStreamVars(service, { trigger: null, vars: {} }, 'us-east-1');
-    expect(vars).not.toHaveProperty('regions');
-  });
-
-  it('emits explicitly set regions as a string array (split on comma)', () => {
-    const service = makeService({ requiredConfig: [], optionalConfig: ['regions'] });
-    const vars = buildStreamVars(
-      service,
-      { trigger: null, vars: { regions: 'us-east-1,eu-west-1' } },
-      'ap-southeast-1'
-    );
-    expect(vars.regions).toEqual(['us-east-1', 'eu-west-1']);
-  });
-
-  it('does not emit regions when optionalConfig is absent', () => {
-    const service = makeService({ requiredConfig: ['region'] });
-    const vars = buildStreamVars(service, { trigger: 'aws-s3', vars: {} }, 'us-east-1');
-    expect(vars).not.toHaveProperty('regions');
-  });
-
-  it('does not emit metrics when not stored in vars', () => {
-    const service = makeService({ requiredConfig: [], optionalConfig: ['regions', 'metrics'] });
-    const vars = buildStreamVars(service, { trigger: null, vars: {} }, 'us-east-1');
-    expect(vars).not.toHaveProperty('metrics');
-  });
 });
 
 // ─── buildPackageInputs ──────────────────────────────────────────────────────
