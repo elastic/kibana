@@ -24,6 +24,7 @@ import { screenContextAttachmentDefinition } from './screen_context_attachment';
 import { graphAttachmentDefinition } from './graph_attachment/graph_attachment';
 import { createSkillAttachmentDefinition } from './skill_attachment/skill_attachment';
 import { createConnectorSetupAttachmentDefinition } from './connector_setup/connector_setup_attachment';
+import { imageAttachmentDefinition } from './image_attachment';
 
 export const registerAttachmentUiDefinitions = ({
   attachments,
@@ -38,6 +39,7 @@ export const registerAttachmentUiDefinitions = ({
   core: CoreStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }) => {
+  attachments.addAttachmentType(AttachmentType.image, imageAttachmentDefinition);
   attachments.addAttachmentType(AttachmentType.text, textAttachmentDefinition);
   attachments.addAttachmentType(AttachmentType.screenContext, screenContextAttachmentDefinition);
   attachments.addAttachmentType(AttachmentType.esql, createEsqlAttachmentDefinition({ locators }));
