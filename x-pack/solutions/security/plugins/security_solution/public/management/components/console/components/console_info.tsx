@@ -37,7 +37,7 @@ export const ConsoleInfo = memo<ConsoleInfoProps>(({ 'data-test-subj': dataTestS
           data-test-subj={getTestId()}
           css={css`
             max-width: 50vw;
-            opacity: 0.7;
+            opacity: 0.6;
           `}
         >
           <EuiText size="s" color="subdued">

@@ -23,7 +23,7 @@ export const consoleTranslations = Object.freeze({
     }
   ),
   keyUpArrowInfo: i18n.translate('xpack.securitySolution.management.console.keyPressInputHistory', {
-    defaultMessage: 'Pressing the [UP] arrow key will show the list of last entered command.',
+    defaultMessage: 'Pressing the [UP ARROW] key will show the list of last entered command.',
   }),
   keyAltSpaceInfo: i18n.translate(
     'xpack.securitySolution.management.console.keyAvailbleAutoCompleteValues',
