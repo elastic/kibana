@@ -21,6 +21,17 @@ pipeline:
   syncProjectDependencies: false
   syncProjects: false
 
+# https://moonrepo.dev/docs/config/workspace#experiments
+experiments:
+  asyncAffectedTracking: true
+  asyncGraphBuilding: true
+  nativeFileHashing: true
+  casOutputsCache: true
+
+# Keeps workspace graph warm between CLI invocations (local-dev).
+# https://moonrepo.dev/docs/guides/daemon
+unstable_daemon: true
+
 # https://moonrepo.dev/docs/guides/remote-cache
 # Auth credentials will be missing on local environments, but that's OK.
 remote:
