@@ -10,7 +10,10 @@
 import type { ReactNode } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
 
-/** EUI font-scale keys, mirrored so this API does not depend on an EUI internal. */
+/**
+ * EUI font-scale keys, mirrored so this API does not depend on an EUI internal.
+ * Replace this if EUI publicly exports a type for the `scale` prop of `EuiText`.
+ */
 export type InfoBlockSize = 'xxxs' | 'xxs' | 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
 
 export interface InfoBlockItem {
@@ -18,11 +21,11 @@ export interface InfoBlockItem {
   title: string;
   /** Arbitrary content rendered as the block value. */
   value: ReactNode;
-  /** Optional font scale for the value. */
-  size?: InfoBlockSize;
   /** Color for the value text, passed through to `EuiText` (e.g. `'success'`). */
   color?: EuiTextProps['color'];
   'data-test-subj'?: string;
+  /** Optional EUI font scale for the value. */
+  size?: InfoBlockSize;
 }
 
 /** Column count the grid uses at its widest. */
