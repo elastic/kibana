@@ -43,6 +43,24 @@ export function errorCauseMentionsInference(cause: ErrorCause): boolean {
   return false;
 }
 
+/**
+ * Returns `true` for a *thrown* rejection that should be handled like a
+ * response-level inference error: a transport `TimeoutError` (a cold inference
+ * endpoint can exceed the client's request timeout while its model allocates)
+ * or any rejection whose name or message mentions "inference". Acts as a type
+ * guard so callers can read `error.message` after narrowing.
+ */
+export function isRetryableInferenceRejection(error: unknown): error is Error {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+  return (
+    error.name === 'TimeoutError' ||
+    INFERENCE_RE.test(error.name) ||
+    INFERENCE_RE.test(error.message)
+  );
+}
+
 interface InferenceErrorCounts {
   inference: number;
   other: number;
@@ -97,7 +115,34 @@ export async function bulkCreateWithInferenceFallback(
   attempt: (opts: { includeEmbedding: boolean }) => Promise<BulkResponse>
 ): Promise<BulkResponse> {
   for (let attemptNumber = 1; attemptNumber <= MAX_INFERENCE_ATTEMPTS; attemptNumber++) {
-    const response = await attempt({ includeEmbedding: true });
+    const isLastAttempt = attemptNumber === MAX_INFERENCE_ATTEMPTS;
+
+    let response: BulkResponse;
+    try {
+      response = await attempt({ includeEmbedding: true });
+    } catch (error) {
+      // A transport-level rejection (e.g. a `TimeoutError` thrown while a cold
+      // inference endpoint is still allocating its model) never yields a
+      // `BulkResponse`, so the inspection below cannot see it. Funnel a
+      // timeout/inference rejection into the same retry-then-fallback path used
+      // for response-level inference errors so the graceful degradation this
+      // function documents still applies; rethrow anything else unchanged.
+      if (!isRetryableInferenceRejection(error)) {
+        throw error;
+      }
+      if (isLastAttempt) {
+        logger.warn(
+          `Bulk write threw an inference/timeout error ("${error.message}") after ${attemptNumber} attempts -- falling back to writing without semantic_text embedding`
+        );
+        break;
+      }
+      const delayMs = Math.pow(2, attemptNumber - 1) * BASE_BACKOFF_MS;
+      logger.warn(
+        `Bulk write threw an inference/timeout error ("${error.message}") -- retrying in ${delayMs}ms (attempt ${attemptNumber}/${MAX_INFERENCE_ATTEMPTS})`
+      );
+      await setTimeout(delayMs);
+      continue;
+    }
 
     if (!response.errors) {
       return response;
@@ -118,7 +163,6 @@ export async function bulkCreateWithInferenceFallback(
       );
     }
 
-    const isLastAttempt = attemptNumber === MAX_INFERENCE_ATTEMPTS;
     if (isLastAttempt) {
       logger.warn(
         `Bulk write failed due to inference error (${inference}/${total} items) after ${attemptNumber} attempts -- falling back to writing without semantic_text embedding`

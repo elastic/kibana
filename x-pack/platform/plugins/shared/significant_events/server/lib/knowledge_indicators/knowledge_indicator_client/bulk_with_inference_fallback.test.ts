@@ -17,6 +17,7 @@ import {
   bulkCreateWithInferenceFallback,
   countRawBulkInferenceErrors,
   errorCauseMentionsInference,
+  isRetryableInferenceRejection,
 } from './bulk_with_inference_fallback';
 
 const createLogger = (): Logger =>
@@ -45,6 +46,9 @@ const inferenceErrorResponse = (): BulkResponse => ({
     },
   ],
 });
+
+const timeoutError = (): Error =>
+  Object.assign(new Error('Request timed out'), { name: 'TimeoutError' });
 
 const otherErrorResponse = (): BulkResponse => ({
   errors: true,
@@ -75,6 +79,24 @@ describe('errorCauseMentionsInference', () => {
     expect(errorCauseMentionsInference({ type: 'mapper_parsing_exception', reason: 'bad' })).toBe(
       false
     );
+  });
+});
+
+describe('isRetryableInferenceRejection', () => {
+  it('matches a transport TimeoutError by name', () => {
+    expect(isRetryableInferenceRejection(timeoutError())).toBe(true);
+  });
+
+  it('matches a rejection whose message mentions inference', () => {
+    expect(isRetryableInferenceRejection(new Error('inference endpoint not ready'))).toBe(true);
+  });
+
+  it('does not match an unrelated rejection', () => {
+    expect(isRetryableInferenceRejection(new Error('mapping conflict'))).toBe(false);
+  });
+
+  it('does not match a non-Error value', () => {
+    expect(isRetryableInferenceRejection('boom')).toBe(false);
   });
 });
 
@@ -155,6 +177,43 @@ describe('bulkCreateWithInferenceFallback', () => {
     expect(response.errors).toBe(false);
     expect(attempt).toHaveBeenCalledTimes(4);
     expect(attempt).toHaveBeenLastCalledWith({ includeEmbedding: false });
+  });
+
+  it('retries a thrown TimeoutError and returns when a later attempt succeeds', async () => {
+    const attempt = jest
+      .fn()
+      .mockRejectedValueOnce(timeoutError())
+      .mockResolvedValueOnce(okResponse());
+
+    const response = await bulkCreateWithInferenceFallback(createLogger(), attempt);
+
+    expect(response.errors).toBe(false);
+    expect(attempt).toHaveBeenCalledTimes(2);
+    expect(attempt).toHaveBeenNthCalledWith(2, { includeEmbedding: true });
+  });
+
+  it('falls back to writing without embedding when every attempt throws a TimeoutError', async () => {
+    const attempt = jest
+      .fn()
+      .mockRejectedValueOnce(timeoutError())
+      .mockRejectedValueOnce(timeoutError())
+      .mockRejectedValueOnce(timeoutError())
+      .mockResolvedValueOnce(okResponse());
+
+    const response = await bulkCreateWithInferenceFallback(createLogger(), attempt);
+
+    expect(response.errors).toBe(false);
+    expect(attempt).toHaveBeenCalledTimes(4);
+    expect(attempt).toHaveBeenLastCalledWith({ includeEmbedding: false });
+  });
+
+  it('rethrows a non-inference rejection without retrying or falling back', async () => {
+    const attempt = jest.fn().mockRejectedValue(new Error('mapping conflict'));
+
+    await expect(bulkCreateWithInferenceFallback(createLogger(), attempt)).rejects.toThrow(
+      /mapping conflict/
+    );
+    expect(attempt).toHaveBeenCalledTimes(1);
   });
 
   it('throws when the embedding-stripped fallback also fails', async () => {
