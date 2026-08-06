@@ -116,6 +116,54 @@ const validateToggleValue = (label: string, value: string, errors: string[]): vo
   }
 };
 
+const normalizeKeyPart = (value: string): string => value.toLowerCase().replace(/[\s-]+/g, '_');
+
+/**
+ * Maps a rejected key back to the field the caller most likely meant: the field's
+ * name or label sent as-is, or the right name with the wrong `_as_<type>` suffix.
+ */
+const findFieldForUnknownKey = (key: string, fields: InlineField[]): InlineField | undefined => {
+  const base = normalizeKeyPart(key).replace(/_as_[a-z0-9]+$/, '');
+  return fields.find(
+    (field) =>
+      normalizeKeyPart(field.name) === base ||
+      (field.label != null && normalizeKeyPart(field.label) === base)
+  );
+};
+
+const describeAvailableKeys = (fields: InlineField[]): string =>
+  fields
+    .map((field) => `"${getFieldSnakeKey(field.name, field.type)}" (${field.label ?? field.name})`)
+    .join(', ');
+
+const buildUnknownKeyError = (
+  key: string,
+  inlineFields: InlineField[],
+  displayOnlyFields: InlineField[]
+): string => {
+  const problem = `Unknown extended field key: "${key}"`;
+
+  const match = findFieldForUnknownKey(key, inlineFields);
+  if (match) {
+    return `${problem}. To set the "${
+      match.label ?? match.name
+    }" field, use its key "${getFieldSnakeKey(match.name, match.type)}"`;
+  }
+
+  const displayOnlyMatch = findFieldForUnknownKey(key, displayOnlyFields);
+  if (displayOnlyMatch) {
+    return `${problem}. The "${
+      displayOnlyMatch.label ?? displayOnlyMatch.name
+    }" field is display-only and cannot hold a value`;
+  }
+
+  if (inlineFields.length > 0) {
+    return `${problem}. Available keys: ${describeAvailableKeys(inlineFields)}`;
+  }
+
+  return `${problem}. No fields are available for this case`;
+};
+
 const validateField = (field: InlineField, value: string, errors: string[]): void => {
   const label = field.label ?? field.name;
 
@@ -166,11 +214,21 @@ export const validateExtendedFields = (
 ): string[] => {
   let errors: string[] = [];
   // Display-only fields (e.g. MARKDOWN) hold no value and are excluded from a case's stored
-  // `extended_fields`, so they take no part in value/required validation.
+  // `extended_fields`, so they take no part in value/required validation. Dropping them here also
+  // ensures their snake key is treated as an unknown key if it is ever submitted.
   const inlineFields = fields.filter(isInlineField).filter((f) => !isDisplayOnlyField(f));
+  const displayOnlyFields = fields.filter(isInlineField).filter(isDisplayOnlyField);
 
-  // 1. Value-size backstop (skipped in requiredOnly mode — see option docs above)
+  // 1. Build valid key set
+  const validKeys = new Set(inlineFields.map((f) => getFieldSnakeKey(f.name, f.type)));
+
+  // 2. Unknown keys + value-size backstop (skipped in requiredOnly mode — see option docs above)
   if (!requiredOnly) {
+    for (const key of Object.keys(extendedFields)) {
+      if (!validKeys.has(key)) {
+        errors.push(buildUnknownKeyError(key, inlineFields, displayOnlyFields));
+      }
+    }
     errors = errors.concat(validateExtendedFieldValueSizes(extendedFields));
   }
 

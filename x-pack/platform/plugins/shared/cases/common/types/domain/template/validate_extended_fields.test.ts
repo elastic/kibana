@@ -146,6 +146,9 @@ describe('validateExtendedFields', () => {
       );
 
       expect(errors).toContain(
+        'Unknown extended field key: "rogue_as_keyword". Available keys: "summary_as_keyword" (Summary)'
+      );
+      expect(errors).toContain(
         `Extended field "rogue_as_keyword" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
       );
     });
@@ -164,19 +167,46 @@ describe('validateExtendedFields', () => {
   });
 
   describe('unknown keys', () => {
-    it('silently ignores an unknown key', () => {
-      const fields: FieldSchemaType[] = [makeInputTextField()];
+    it('lists the available keys and labels for an unknown key', () => {
+      const fields: FieldSchemaType[] = [makeInputTextField(), makeSelectField()];
       const extendedFields = { unknown_as_keyword: 'value' };
       const errors = validateExtendedFields(extendedFields, fields);
-      expect(errors).toEqual([]);
+      expect(errors).toContain(
+        'Unknown extended field key: "unknown_as_keyword". Available keys: "summary_as_keyword" (Summary), "priority_as_keyword" (Priority)'
+      );
     });
 
-    it('silently ignores a key with mismatched type suffix', () => {
+    it('suggests the exact key when the type suffix is wrong', () => {
       const fields: FieldSchemaType[] = [makeInputTextField()];
       // the key uses wrong type suffix
       const extendedFields = { summary_as_long: 'value' };
       const errors = validateExtendedFields(extendedFields, fields);
-      expect(errors).toEqual([]);
+      expect(errors).toContain(
+        'Unknown extended field key: "summary_as_long". To set the "Summary" field, use its key "summary_as_keyword"'
+      );
+    });
+
+    it('suggests the exact key when the field name is sent without a suffix', () => {
+      const fields: FieldSchemaType[] = [makeSelectField()];
+      const errors = validateExtendedFields({ priority: 'high' }, fields);
+      expect(errors).toContain(
+        'Unknown extended field key: "priority". To set the "Priority" field, use its key "priority_as_keyword"'
+      );
+    });
+
+    it('suggests the exact key when the field label is sent instead of the key', () => {
+      const fields: FieldSchemaType[] = [makeToggleField()];
+      const errors = validateExtendedFields({ 'Requires escalation': 'true' }, fields);
+      expect(errors).toContain(
+        'Unknown extended field key: "Requires escalation". To set the "Requires escalation" field, use its key "requires_escalation_as_boolean"'
+      );
+    });
+
+    it('reports that no fields are available when none are configured', () => {
+      const errors = validateExtendedFields({ rogue_as_keyword: 'value' }, []);
+      expect(errors).toContain(
+        'Unknown extended field key: "rogue_as_keyword". No fields are available for this case'
+      );
     });
   });
 
@@ -223,10 +253,12 @@ describe('validateExtendedFields', () => {
       expect(errors).toEqual([]);
     });
 
-    it('silently ignores a value submitted for a display-only field', () => {
+    it('treats a value submitted for a display-only field as an unknown key', () => {
       const fields: FieldSchemaType[] = [makeMarkdownField()];
       const errors = validateExtendedFields({ instructions_as_keyword: 'value' }, fields);
-      expect(errors).toEqual([]);
+      expect(errors).toContain(
+        'Unknown extended field key: "instructions_as_keyword". The "Instructions" field is display-only and cannot hold a value'
+      );
     });
   });
 
