@@ -108,6 +108,7 @@ export const matchExistingTargetIds = async (
  * - `droppedTargets`: target EUIDs removed because they had no matching entity
  *   document in the store at write time (dangling-ID prevention).
  */
+/** Accumulated metrics from a writeEntityIds call — safe to sum across pages. */
 export interface WriteEntityIdsResult {
   updated: number;
   notFound: number;
@@ -122,6 +123,10 @@ export interface WriteEntityIdsResult {
    * EUID, so we hash each entityId to match against the failed-hash set.
    */
   relationshipTypeApplied: Record<string, number>;
+}
+
+/** Per-call state returned alongside WriteEntityIdsResult — not meaningful to accumulate across pages. */
+export interface WriteEntityIdsPageState {
   /**
    * Set of target EUIDs confirmed to exist in the entity store. Only populated
    * when `validateTargetIds` was true. Callers can use this to filter downstream
@@ -164,7 +169,7 @@ function pruneNonExistingTargets(
   return dropped;
 }
 
-const EMPTY_RESULT: WriteEntityIdsResult = {
+const EMPTY_RESULT: WriteEntityIdsResult & WriteEntityIdsPageState = {
   updated: 0,
   notFound: 0,
   errors: 0,
@@ -180,7 +185,7 @@ export const writeEntityIds = async (
   esClient: ElasticsearchClient,
   namespace: string,
   validateTargetIds = false
-): Promise<WriteEntityIdsResult> => {
+): Promise<WriteEntityIdsResult & WriteEntityIdsPageState> => {
   if (records.length === 0) return EMPTY_RESULT;
 
   const valid = filterValid(records);
@@ -244,7 +249,7 @@ export const writeEntityIds = async (
       droppedTargets,
       relationshipTypeApplied: {},
       validTargetIds,
-      succeededEntityIds: new Set(),
+      succeededEntityIds: new Set<string>(),
     };
 
   logger.info(`Writing relationship ids for ${objects.length} entity records`);

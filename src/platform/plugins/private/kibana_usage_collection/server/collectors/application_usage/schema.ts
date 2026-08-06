@@ -163,6 +163,7 @@ export const applicationUsageSchema = {
   maps: commonSchema,
   ml: commonSchema,
   monitoring: commonSchema,
+  nightshift: commonSchema,
   'observability-log-explorer': commonSchema,
   'observability-logs-explorer': commonSchema,
   'observability-overview': commonSchema,
