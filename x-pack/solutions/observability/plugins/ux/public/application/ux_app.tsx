@@ -51,9 +51,9 @@ export const uxRoutes: RouteDefinition[] = [
   },
 ];
 
-// No hrefs: the dashboard is the only route, so a linked crumb would render a back button pointing
-// at the current page.
-const UX_BREADCRUMBS: ChromeBreadcrumb[] = [
+// No hrefs: the dashboard is the only route, and Chrome Next turns the last linked crumb into the
+// header back button, so a link here would render a back button pointing at the current page.
+export const UX_BREADCRUMBS: ChromeBreadcrumb[] = [
   {
     text: i18n.translate('xpack.ux.breadcrumbs.root', {
       defaultMessage: 'User Experience',
