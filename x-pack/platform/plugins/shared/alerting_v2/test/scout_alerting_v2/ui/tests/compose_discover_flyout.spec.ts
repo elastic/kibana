@@ -32,15 +32,13 @@ const NO_TIME_FIELD_QUERY = 'FROM logs-* | LIMIT 10';
  * kibana_sample_data_flights for standalone time-field resolution.
  */
 const TIMESTAMP_ONLY_INDEX = 'test-compose-discover-timestamp-only';
-const TIMESTAMP_ONLY_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | STATS count = COUNT(*) BY Carrier | WHERE count > 100`;
-/**
- * STATS with no WHERE — heuristic cannot isolate an alert condition, so Apply
- * commits alert + standalone (no_alert_condition).
- */
-const NO_ALERT_CONDITION_TIMESTAMP_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | STATS count = COUNT(*) BY Carrier`;
+const TIMESTAMP_ONLY_BASE_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | STATS count = COUNT(*) BY Carrier`;
+const TIMESTAMP_ONLY_BREACH_SEGMENT = 'WHERE count > 100';
 const CREATE_SIGNAL_TIMESTAMP_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | WHERE Carrier == "ES-Air" | LIMIT 10`;
 const BROKEN_TIME_FIELD_RULE_NAME = 'scout-compose-discover-broken-time-field';
 const CREATE_SIGNAL_TIMESTAMP_RULE_NAME = 'scout-compose-discover-standalone-time-field';
+const CONDITIONLESS_SAVE_RULE_NAME = 'scout-compose-discover-conditionless-save';
+const YAML_ONLY_STANDALONE_RULE_NAME = 'scout-compose-discover-yaml-only-standalone';
 const RUNBOOK_TEXT = 'Investigate failed transactions';
 /**
  * Index with a valid `@timestamp` (so it auto-detects) plus a second date
@@ -341,19 +339,20 @@ test.describe(
       });
     });
 
-    test('edit flow (sad path): broken standalone alert can select timestamp and save', async ({
+    test('edit flow (sad path): broken composed alert can select timestamp and save', async ({
       pageObjects,
       apiServices,
     }) => {
       let ruleId: string;
 
-      await test.step('seed a standalone alert with an invalid stored time field', async () => {
+      await test.step('seed a composed alert with an invalid stored time field', async () => {
         const rule = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
             kind: 'alert',
             query: {
-              format: 'standalone',
-              breach: { query: TIMESTAMP_ONLY_QUERY },
+              format: 'composed',
+              base: TIMESTAMP_ONLY_BASE_QUERY,
+              breach: { segment: TIMESTAMP_ONLY_BREACH_SEGMENT },
             },
             // Intentionally wrong — index only has `timestamp`.
             time_field: '@timestamp',
@@ -371,18 +370,17 @@ test.describe(
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
       });
 
-      await test.step('opens in form mode (not YAML); select the correct time field', async () => {
-        // Breach-only standalone rules are now representable — no YAML mode.
+      await test.step('opens in form mode; select the correct time field', async () => {
+        // Composed alerts stay in the form. The stored @timestamp is not in the
+        // index options; wait for options to load then pick the correct field.
         await expect(pageObjects.composeDiscover.yamlSubmitButton).toBeHidden();
-        // The stored @timestamp is not in the index options; wait for options to load
-        // then explicitly select the correct field so it persists on save.
         await pageObjects.composeDiscover.selectTimeField('timestamp');
         await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveValue('timestamp');
         await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
       });
 
       await test.step('proceed through steps, save, and verify persisted time field', async () => {
-        await pageObjects.composeDiscover.clickNext(); // Recovery Condition
+        await pageObjects.composeDiscover.clickNext(); // Outcome
         await pageObjects.composeDiscover.clickNext(); // Details
         await pageObjects.composeDiscover.clickNext(); // Actions
         await pageObjects.composeDiscover.clickSubmit();
@@ -393,6 +391,39 @@ test.describe(
             timeout: 30_000,
           })
           .toBe('timestamp');
+      });
+    });
+
+    test('edit flow: alert + standalone opens YAML-only', async ({ pageObjects, apiServices }) => {
+      let ruleId: string;
+
+      await test.step('seed an alert + standalone rule via API', async () => {
+        const rule = await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            kind: 'alert',
+            query: {
+              format: 'standalone',
+              breach: { query: `${TIMESTAMP_ONLY_BASE_QUERY} | ${TIMESTAMP_ONLY_BREACH_SEGMENT}` },
+            },
+            time_field: 'timestamp',
+            grouping: { fields: ['Carrier'] },
+            metadata: { name: YAML_ONLY_STANDALONE_RULE_NAME },
+          })
+        );
+        ruleId = rule.id;
+      });
+
+      await test.step('refresh the rules list and open the edit flyout', async () => {
+        await pageObjects.rulesList.goto();
+        await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
+        await pageObjects.composeDiscover.openEditFlyout(ruleId!);
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
+      });
+
+      await test.step('YAML save is the only submit path', async () => {
+        await expect(pageObjects.composeDiscover.yamlSubmitButton).toBeVisible();
+        await expect(pageObjects.composeDiscover.submitButton).toBeHidden();
+        await expect(pageObjects.composeDiscover.nextButton).toBeHidden();
       });
     });
 
@@ -426,7 +457,7 @@ test.describe(
       });
 
       await test.step('name the rule and submit', async () => {
-        await pageObjects.composeDiscover.clickNext(); // Recovery Condition
+        await pageObjects.composeDiscover.clickNext(); // Outcome
         await pageObjects.composeDiscover.clickNext(); // Details
         await pageObjects.composeDiscover.setRuleName(TWO_DATE_FIELDS_RULE_NAME);
         await pageObjects.composeDiscover.clickNext(); // Actions
@@ -449,43 +480,44 @@ test.describe(
       });
     });
 
-    test('create flow (sad path): time field populates when base and alert condition cannot be determined', async ({
+    test('create flow: conditionless alert save 400s and Review query returns to step 0', async ({
+      page,
       pageObjects,
     }) => {
-      await test.step('open create flyout in alert mode and apply a no-alert-condition query', async () => {
+      await test.step('open create flyout and apply a base-only query', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
         await pageObjects.composeDiscover.openSandbox();
-
-        // Create starts as composed + empty base. Typing fills base until Apply;
-        // a STATS-only pipeline then commits as alert + standalone.
-        await pageObjects.composeDiscover.setSandboxQuery(NO_ALERT_CONDITION_TIMESTAMP_QUERY);
-        await pageObjects.composeDiscover.clickApply();
+        await pageObjects.composeDiscover.applySandboxBaseQueryOnly(BASE_QUERY);
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
+        await expect(
+          pageObjects.composeDiscover.summarySection('no_alert_condition')
+        ).toBeVisible();
+        await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
       });
 
-      await test.step('summary shows no alert condition (standalone breach query) and Next is enabled', async () => {
+      await test.step('advance through Outcome and Details, then submit', async () => {
+        await pageObjects.composeDiscover.clickNext(); // Outcome
+        await pageObjects.composeDiscover.clickNext(); // Details
+        await pageObjects.composeDiscover.setRuleName(CONDITIONLESS_SAVE_RULE_NAME);
+        await pageObjects.composeDiscover.clickNext(); // Actions
+        await pageObjects.composeDiscover.clickSubmit();
+      });
+
+      await test.step('400 toast offers Review query; flyout stays open', async () => {
+        const reviewQuery = page.testSubj.locator('composeDiscoverReviewQueryToastAction');
+        await expect(reviewQuery).toBeVisible({ timeout: 30_000 });
+        await expect(page.getByText('Rule not created')).toBeVisible();
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
+        await reviewQuery.click();
+      });
+
+      await test.step('Review query returns to the Alert Condition step', async () => {
         await expect(
           pageObjects.composeDiscover.summarySection('no_alert_condition')
         ).toBeVisible();
         await expect(pageObjects.composeDiscover.noAlertConditionCallout).toBeVisible();
-        // Conditionless rules are valid — Next is not blocked.
-        await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
-      });
-
-      await test.step('form Time field still resolves from the standalone breach query', async () => {
-        // Regression: alert mode used to resolve only from composed `base`, so
-        // options stayed empty after Apply left format: standalone.
-        await pageObjects.composeDiscover.waitForTimeFieldOption(
-          pageObjects.composeDiscover.timeFieldSelector,
-          'timestamp'
-        );
-        await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveValue('timestamp');
-        await expect(pageObjects.composeDiscover.timeFieldSelector).not.toHaveAttribute(
-          'aria-invalid',
-          'true'
-        );
-        await expect(pageObjects.composeDiscover.timeFieldError).toBeHidden();
+        await expect(pageObjects.composeDiscover.timeFieldSelector).toBeVisible();
       });
     });
 
@@ -558,9 +590,9 @@ test.describe(
         await pageObjects.composeDiscover.clickApply();
       });
 
-      await test.step('Next is now enabled; advance through Recovery to the Details step', async () => {
+      await test.step('Next is now enabled; advance through Outcome to the Details step', async () => {
         await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
-        await pageObjects.composeDiscover.clickNext(); // Recovery Condition
+        await pageObjects.composeDiscover.clickNext(); // Outcome
         await pageObjects.composeDiscover.clickNext(); // Details
       });
 
@@ -586,8 +618,8 @@ test.describe(
         await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
       });
 
-      await test.step('Back returns through Recovery to the Alert Condition step', async () => {
-        await pageObjects.composeDiscover.backButton.click(); // Recovery Condition
+      await test.step('Back returns through Outcome to the Alert Condition step', async () => {
+        await pageObjects.composeDiscover.backButton.click(); // Outcome
         await pageObjects.composeDiscover.backButton.click(); // Alert Condition
         // Query was committed in alert mode (default) and split successfully, so the
         // read-only base + alert condition summary is shown.
@@ -672,7 +704,7 @@ test.describe(
         );
       });
 
-      await test.step('Next button is enabled — conditionless rules are valid', async () => {
+      await test.step('Next stays enabled — form progression is not gated on a condition', async () => {
         await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
       });
     });

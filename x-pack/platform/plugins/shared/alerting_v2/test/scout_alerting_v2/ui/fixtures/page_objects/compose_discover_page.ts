@@ -13,7 +13,7 @@ export class ComposeDiscoverPage {
   public readonly nextButton: Locator;
   public readonly backButton: Locator;
   public readonly submitButton: Locator;
-  /** YAML-mode save button (non-representable rules such as alert + standalone). */
+  /** YAML-mode save button (non-representable rules — every alert + standalone). */
   public readonly yamlSubmitButton: Locator;
   /**
    * @deprecated Use {@link alertSummaryEditorButton}. Both alert and signal now
