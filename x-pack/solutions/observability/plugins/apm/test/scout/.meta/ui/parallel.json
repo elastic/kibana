@@ -1,5 +1,5 @@
 {
-  "sha1": "6dcaccd5666b44cbefcc77a3b35e40fdbdf6b4fd",
+  "sha1": "7d5b5b9d255fd56d821a72345826885129735ff5",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -782,7 +782,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_security.spec.ts",
         "line": 60,
-        "column": 22
+        "column": 20
       }
     },
     {
@@ -797,7 +797,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_security.spec.ts",
-        "line": 65,
+        "line": 63,
         "column": 13
       }
     },
@@ -813,8 +813,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_security.spec.ts",
-        "line": 73,
-        "column": 18
+        "line": 68,
+        "column": 10
       }
     },
     {
@@ -829,8 +829,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_security.spec.ts",
-        "line": 81,
-        "column": 32
+        "line": 74,
+        "column": 13
       }
     },
     {
@@ -2589,8 +2589,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 192,
-        "column": 10
+        "line": 194,
+        "column": 20
       }
     },
     {

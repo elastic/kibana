@@ -279,11 +279,12 @@ export class ExecutionPlan {
       return;
     }
 
-    const { getKnowledgeIndicatorClient } = this.dependencies;
+    const { getKnowledgeIndicatorClient, logger } = this.dependencies;
     if (!getKnowledgeIndicatorClient) {
-      throw new Error(
-        'knowledgeIndicatorClient is required for deleteQueries but was not provided'
+      logger.debug(
+        'Skipping deleteQueries: Knowledge Indicator client is not available (significant events disabled)'
       );
+      return;
     }
     const kiClient = await getKnowledgeIndicatorClient();
     return Promise.all(
@@ -316,11 +317,12 @@ export class ExecutionPlan {
       return;
     }
 
-    const { getKnowledgeIndicatorClient } = this.dependencies;
+    const { getKnowledgeIndicatorClient, logger } = this.dependencies;
     if (!getKnowledgeIndicatorClient) {
-      throw new Error(
-        'knowledgeIndicatorClient is required for unlinkFeatures but was not provided'
+      logger.debug(
+        'Skipping unlinkFeatures: Knowledge Indicator client is not available (significant events disabled)'
       );
+      return;
     }
     const kiClient = await getKnowledgeIndicatorClient();
     return Promise.all(
