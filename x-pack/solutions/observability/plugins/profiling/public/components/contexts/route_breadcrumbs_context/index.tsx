@@ -24,6 +24,16 @@ interface BreadcrumbApi {
 
 export const RouteBreadcrumbsContext = createContext<BreadcrumbApi | undefined>(undefined);
 
+/**
+ * Under project navigation, these routes should keep the Chrome Next back button.
+ * Breadcrumbs for them keep their hrefs.
+ */
+const ROUTES_WITH_BACK_BUTTON = new Set([
+  '/settings',
+  '/add-data-instructions',
+  '/storage-explorer',
+]);
+
 export function RouteBreadcrumbsContextProvider({ children }: { children: React.ReactElement }) {
   const [, forceUpdate] = useState({});
 
@@ -32,6 +42,7 @@ export function RouteBreadcrumbsContextProvider({ children }: { children: React.
   }, []);
 
   const matches: RouteMatch[] = useMatchRoutes();
+  const currentRoute = matches[matches.length - 1]?.match.path ?? '';
 
   const api = useMemo<BreadcrumbApi>(
     () => ({
@@ -67,7 +78,15 @@ export function RouteBreadcrumbsContextProvider({ children }: { children: React.
     };
   });
 
-  useBreadcrumbs(formattedBreadcrumbs);
+  const projectStyleBreadcrumbs = ROUTES_WITH_BACK_BUTTON.has(currentRoute)
+    ? formattedBreadcrumbs
+    : formattedBreadcrumbs.map((breadcrumb) => ({
+        ...breadcrumb,
+        href: undefined,
+      }));
+
+  useBreadcrumbs(projectStyleBreadcrumbs);
+  useBreadcrumbs(formattedBreadcrumbs, { classicOnly: true });
 
   return (
     <RouteBreadcrumbsContext.Provider value={api}>{children}</RouteBreadcrumbsContext.Provider>
