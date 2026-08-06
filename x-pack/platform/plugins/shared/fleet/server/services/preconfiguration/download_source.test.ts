@@ -309,4 +309,34 @@ describe('ensurePreconfiguredDownloadSources', () => {
     );
     expect(mockedDownloadSourceService.delete).not.toHaveBeenCalled();
   });
+
+  it('should unmark a removed default preconfigured source instead of deleting it', async () => {
+    const existingSource = {
+      id: 'ds-default',
+      name: 'Default Source',
+      host: 'https://default.example.com',
+      is_default: true,
+      is_preconfigured: true,
+    };
+    mockedDownloadSourceService.list.mockResolvedValue({
+      items: [existingSource],
+      total: 1,
+      page: 1,
+      perPage: 10,
+    });
+    mockedAgentPolicyService.agentPoliciesExistForDownloadSourceId.mockResolvedValue(false);
+    mockedDownloadSourceService.update.mockResolvedValue(undefined as any);
+
+    await ensurePreconfiguredDownloadSources(soClient, esClient, []);
+
+    expect(mockedDownloadSourceService.update).toHaveBeenCalledWith(
+      soClient,
+      esClient,
+      'ds-default',
+      {
+        is_preconfigured: false,
+      }
+    );
+    expect(mockedDownloadSourceService.delete).not.toHaveBeenCalled();
+  });
 });

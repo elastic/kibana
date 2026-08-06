@@ -80,8 +80,10 @@ async function cleanPreconfiguredDownloadSources(
     }
 
     const isInUse = await agentPolicyService.agentPoliciesExistForDownloadSourceId(existing.id);
-    if (isInUse) {
-      // Keep the source but unmark it so users can manage it freely
+    if (isInUse || existing.is_default) {
+      // Keep the source but unmark it so users can manage it freely.
+      // Default sources are never deleted here because delete() blocks them unconditionally;
+      // a new default must be established before the old one can be removed.
       await downloadSourceService.update(soClient, esClient, existing.id, {
         is_preconfigured: false,
       });
