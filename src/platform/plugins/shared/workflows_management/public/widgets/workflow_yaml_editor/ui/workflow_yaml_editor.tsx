@@ -189,6 +189,12 @@ export interface WorkflowYAMLEditorProps {
    * execution. The proposal shows once the parent opens the Workflow tab.
    */
   onAgentProposalHeld?: () => void;
+  /**
+   * Optional prompt to hand off to the Agent Builder chat when the editor
+   * auto-opens on `/workflows/create`. Used by the agentic-first landing to
+   * carry the user's typed message into the workflow-scoped chat session.
+   */
+  initialAgentMessage?: string;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -201,6 +207,7 @@ export const WorkflowYAMLEditor = ({
   hideEditorTools = false,
   onValidationPanelHeightChange,
   onAgentProposalHeld,
+  initialAgentMessage,
 }: WorkflowYAMLEditorProps) => {
   const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
     WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -391,6 +398,7 @@ export const WorkflowYAMLEditor = ({
     canApplyProposals: !isReadOnlyYaml && !isExecutionYaml,
     onProposalDeferred: readOnlyReason === 'executions_tab' ? onAgentProposalHeld : undefined,
     workflowTabYaml,
+    initialAgentMessage,
   });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
