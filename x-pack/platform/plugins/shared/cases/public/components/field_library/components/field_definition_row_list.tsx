@@ -30,29 +30,31 @@ export const FieldDefinitionRowList: React.FC<FieldDefinitionRowListProps> = ({
   emptyMessage,
   dataTestSubj,
 }) => {
-  if (fieldDefinitions.length === 0) {
-    // An empty list shell reads as "something failed to load"; a sentence reads as "there is
-    // nothing here yet", which is the actual state.
-    return (
-      <EuiText size="s" color="subdued" data-test-subj={`${dataTestSubj}Empty`}>
-        <p>{emptyMessage}</p>
-      </EuiText>
-    );
-  }
-
+  // The wrapper (and its test subject) renders in both states so consumers — including FTR
+  // tests waiting on an empty library — have a stable marker that the list mounted.
   return (
     <div data-test-subj={dataTestSubj}>
-      <FieldDefinitionRowHeader />
-      {fieldDefinitions.map((fieldDefinition, index) => (
-        <FieldDefinitionRow
-          key={fieldDefinition.fieldDefinitionId}
-          fieldDefinition={fieldDefinition}
-          inlineField={parseInlineField(fieldDefinition.definition)}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          isFirst={index === 0}
-        />
-      ))}
+      {fieldDefinitions.length === 0 ? (
+        // An empty list shell reads as "something failed to load"; a sentence reads as "there is
+        // nothing here yet", which is the actual state.
+        <EuiText size="s" color="subdued" data-test-subj={`${dataTestSubj}Empty`}>
+          <p>{emptyMessage}</p>
+        </EuiText>
+      ) : (
+        <>
+          <FieldDefinitionRowHeader />
+          {fieldDefinitions.map((fieldDefinition, index) => (
+            <FieldDefinitionRow
+              key={fieldDefinition.fieldDefinitionId}
+              fieldDefinition={fieldDefinition}
+              inlineField={parseInlineField(fieldDefinition.definition)}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              isFirst={index === 0}
+            />
+          ))}
+        </>
+      )}
     </div>
   );
 };
