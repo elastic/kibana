@@ -7,11 +7,10 @@
 
 import type { DebugState } from '@elastic/charts';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { spaceTest } from '@kbn/scout';
 import type { ApiServicesFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
-import { testData } from '../fixtures';
+import { spaceTest, testData } from '../fixtures';
 
 const LOGSTASH_ABSOLUTE_RANGE = {
   from: '2015-09-19T06:31:44.000Z',

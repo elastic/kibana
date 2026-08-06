@@ -37,7 +37,6 @@ const PresentationPanelChrome = <
   showShadow,
   showBorder,
   showBadges,
-  showNotifications,
   getActions,
   actionPredicate,
   titleHighlight,
@@ -106,7 +105,6 @@ const PresentationPanelChrome = <
         getActions,
         actionPredicate,
         viewMode,
-        showNotifications,
         showBorder,
       }}
       setDragHandle={setDragHandle}
@@ -132,7 +130,6 @@ const PresentationPanelChrome = <
             hideTitle={hideTitle}
             showBadges={showBadges}
             getActions={getActions}
-            showNotifications={showNotifications}
             panelTitle={panelTitle ?? defaultPanelTitle}
             panelDescription={panelDescription ?? defaultPanelDescription}
             titleHighlight={titleHighlight}

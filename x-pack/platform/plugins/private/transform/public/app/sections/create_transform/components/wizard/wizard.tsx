@@ -9,7 +9,13 @@ import React, { createContext, type FC, useCallback, useEffect, useMemo, useStat
 import { pick } from 'lodash';
 
 import type { EuiStepStatus } from '@elastic/eui';
-import { EuiConfirmModal, EuiFormRow, EuiSteps, EuiToolTip } from '@elastic/eui';
+import {
+  EuiConfirmModal,
+  EuiFormRow,
+  EuiSteps,
+  EuiToolTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
@@ -114,6 +120,7 @@ export const Wizard: FC<WizardProps> = React.memo(
     const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
     const [savedDataViews, setSavedDataViews] = useState<DataViewListItem[]>([]);
     const [pendingDataViewId, setPendingDataViewId] = useState<string>();
+    const changeDataViewModalTitleId = useGeneratedHtmlId();
 
     const resetWizardState = useCallback(
       (nextSearchItems: SearchItems, transformFunction: TransformFunction) => {
@@ -356,6 +363,8 @@ export const Wizard: FC<WizardProps> = React.memo(
               <EuiSteps css={styles.steps} steps={stepsConfig} />
               {pendingDataViewId ? (
                 <EuiConfirmModal
+                  aria-labelledby={changeDataViewModalTitleId}
+                  titleProps={{ id: changeDataViewModalTitleId }}
                   title={i18n.translate(
                     'xpack.transform.transformsWizard.changeDataViewConfirmModalTitle',
                     {

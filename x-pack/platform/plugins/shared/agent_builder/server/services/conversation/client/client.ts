@@ -6,12 +6,16 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { ConversationOrigin, ConversationWithoutRounds } from '@kbn/agent-builder-common';
 import {
   type UserIdAndName,
   type Conversation,
+  createBadRequestError,
   createConversationNotFoundError,
+  createConversationWriteConflictError,
+  createInternalError,
   isAgentNotFoundError,
   isAgentUnavailableError,
   isConversationNotFoundError,
@@ -24,14 +28,19 @@ import {
   type ConversationAccess,
 } from '../access_control';
 import type {
+  AddAttachmentsToLastRoundRequest,
   ConversationCreateRequest,
+  ConversationUpdatableFields,
   ConversationUpdateRequest,
   ConversationListOptions,
+  UpsertRoundRequest,
 } from './types';
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
+import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
+import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import {
   fromEs,
   fromEsWithoutRounds,
@@ -39,6 +48,7 @@ import {
   createRequestToEs,
   updateConversation,
   type Document,
+  type VersionedDocument,
 } from './converters';
 
 export interface ConversationClient {
@@ -48,6 +58,14 @@ export interface ConversationClient {
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
   update(
     conversation: ConversationUpdateRequest,
+    options?: { access: ConversationAccess; retryOnConflict?: boolean }
+  ): Promise<Conversation>;
+  addAttachmentsToLastRound(
+    request: AddAttachmentsToLastRoundRequest,
+    options?: { access: ConversationAccess }
+  ): Promise<Conversation>;
+  upsertRound(
+    request: UpsertRoundRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
@@ -68,7 +86,7 @@ export const createClient = ({
   agentRegistry: AgentRegistry;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
-  return new ConversationClientImpl({ storage, user, space, agentRegistry });
+  return new ConversationClientImpl({ storage, user, space, agentRegistry, logger });
 };
 
 class ConversationClientImpl implements ConversationClient {
@@ -76,22 +94,26 @@ class ConversationClientImpl implements ConversationClient {
   private readonly storage: ConversationStorage;
   private readonly user: UserIdAndName;
   private readonly agentRegistry: AgentRegistry;
+  private readonly logger: Logger;
 
   constructor({
     storage,
     user,
     space,
     agentRegistry,
+    logger,
   }: {
     storage: ConversationStorage;
     user: UserIdAndName;
     space: string;
     agentRegistry: AgentRegistry;
+    logger: Logger;
   }) {
     this.storage = storage;
     this.user = user;
     this.space = space;
     this.agentRegistry = agentRegistry;
+    this.logger = logger;
   }
 
   async list(options: ConversationListOptions = {}): Promise<ConversationWithoutRounds[]> {
@@ -140,7 +162,7 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async exists(conversationId: string): Promise<boolean> {
-    const document = await this._get(conversationId);
+    const document = await this.getDocument(conversationId);
 
     return document !== undefined;
   }
@@ -161,6 +183,7 @@ class ConversationClientImpl implements ConversationClient {
     });
 
     const hit = response.hits.hits[0] as Document | undefined;
+
     if (!hit || !hit._id) {
       return undefined;
     }
@@ -207,31 +230,76 @@ class ConversationClientImpl implements ConversationClient {
 
   async update(
     conversationUpdate: ConversationUpdateRequest,
+    options: { access: ConversationAccess; retryOnConflict?: boolean } = { access: 'owner' }
+  ): Promise<Conversation> {
+    const { id: conversationId, ...fields } = conversationUpdate;
+    const { access, retryOnConflict = false } = options;
+
+    return this.writeConversation({
+      conversationId,
+      access,
+      ...(retryOnConflict ? {} : { maxRetries: 0 }),
+      fields: () => fields,
+    });
+  }
+
+  async addAttachmentsToLastRound(
+    request: AddAttachmentsToLastRoundRequest,
     options: { access: ConversationAccess } = { access: 'owner' }
   ): Promise<Conversation> {
-    const { id: conversationId } = conversationUpdate;
+    const { id: conversationId, refs, attachments } = request;
     const { access } = options;
-    const now = new Date();
-    const document = await this.getDocumentWithAccess({ conversationId, access });
 
-    const storedConversation = fromEs(document);
-    const updatedConversation = updateConversation({
-      conversation: storedConversation,
-      update: conversationUpdate,
-      updateDate: now,
-      space: this.space,
+    return this.writeConversation({
+      conversationId,
+      access,
+      fields: (current) => {
+        if (current.rounds.length === 0) {
+          throw createBadRequestError(`Conversation ${conversationId} has no rounds to attach to`);
+        }
+
+        return {
+          rounds: applyAttachmentRefsToRounds(
+            current.rounds,
+            new Map([[current.rounds.length - 1, refs]])
+          ),
+          attachments: reconcileAttachments({
+            snapshot: attachments.snapshot,
+            stored: current.attachments ?? [],
+            produced: attachments.produced,
+          }),
+        };
+      },
     });
-    const attributes = toEs(updatedConversation, this.space);
+  }
 
-    await this.storage.getClient().index({
-      id: conversationUpdate.id,
-      document: attributes,
-      // use optimistic concurrency control to prevent concurrent update conflicts
-      if_seq_no: document._seq_no,
-      if_primary_term: document._primary_term,
+  async upsertRound(
+    request: UpsertRoundRequest,
+    options: { access: ConversationAccess } = { access: 'converse' }
+  ): Promise<Conversation> {
+    const { id: conversationId, round, replacesRoundId, state, attachments, workspaceId } = request;
+    const { access } = options;
+
+    return this.writeConversation({
+      conversationId,
+      access,
+      fields: (current) => ({
+        rounds: upsertRoundInList(current.rounds, round, replacesRoundId),
+        status: round.status,
+        ...(state ? { state } : {}),
+        ...(attachments
+          ? {
+              attachments: reconcileAttachments({
+                snapshot: attachments.snapshot,
+                stored: current.attachments ?? [],
+                produced: attachments.produced,
+              }),
+            }
+          : {}),
+        ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
+        read: false,
+      }),
     });
-
-    return updatedConversation;
   }
 
   async delete(conversationId: string): Promise<boolean> {
@@ -248,22 +316,32 @@ class ConversationClientImpl implements ConversationClient {
     }
   }
 
-  private async _get(conversationId: string): Promise<Document | undefined> {
+  private async getDocument(conversationId: string): Promise<VersionedDocument | undefined> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
+      seq_no_primary_term: true,
       query: {
         bool: {
           filter: [createSpaceDslFilter(this.space), { term: { _id: conversationId } }],
         },
       },
     });
-    if (response.hits.hits.length === 0) {
+
+    const hit = response.hits.hits[0];
+
+    if (!hit) {
       return undefined;
-    } else {
-      return response.hits.hits[0] as Document;
     }
+
+    const { _seq_no: seqNo, _primary_term: primaryTerm } = hit;
+
+    if (seqNo === undefined || primaryTerm === undefined) {
+      throw createInternalError(`Conversation ${conversationId} was read without version metadata`);
+    }
+
+    return { ...(hit as Document), _seq_no: seqNo, _primary_term: primaryTerm };
   }
 
   /**
@@ -278,8 +356,8 @@ class ConversationClientImpl implements ConversationClient {
   }: {
     conversationId: string;
     access: ConversationAccess;
-  }): Promise<Document> {
-    const document = await this._get(conversationId);
+  }): Promise<VersionedDocument> {
+    const document = await this.getDocument(conversationId);
 
     if (!document) {
       throw createConversationNotFoundError({ conversationId });
@@ -318,5 +396,84 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     return document;
+  }
+
+  /**
+   * Read-modify-write against the stored conversation, retrying on conflict.
+   * `fields` is replayed per attempt against the freshly read conversation, so
+   * it must be free of side effects.
+   */
+  private async writeConversation({
+    conversationId,
+    access,
+    fields,
+    maxRetries = 5,
+  }: {
+    conversationId: string;
+    access: ConversationAccess;
+    fields: (current: Conversation) => Omit<ConversationUpdatableFields, 'id'>;
+    maxRetries?: number;
+  }): Promise<Conversation> {
+    const writer = this.createWriter({ access, maxRetries });
+
+    try {
+      const { document } = await writer.readModifyWrite({
+        id: conversationId,
+        mutate: (current) =>
+          updateConversation({
+            conversation: current,
+            update: { id: conversationId, ...fields(current) },
+            updateDate: new Date(),
+            space: this.space,
+          }),
+      });
+
+      return document;
+    } catch (error) {
+      // retries are exhausted
+      if (isElasticsearchWriteConflict(error)) {
+        this.logger.warn(
+          `Conflicting writes to conversation ${conversationId} could not be reconciled`
+        );
+
+        throw createConversationWriteConflictError({ conversationId });
+      }
+
+      throw error;
+    }
+  }
+
+  private createWriter({
+    access,
+    maxRetries,
+  }: {
+    access: ConversationAccess;
+    maxRetries: number;
+  }): OccWriter<Conversation> {
+    return new OccWriter<Conversation>({
+      get: async (id) => {
+        const document = await this.getDocumentWithAccess({ conversationId: id, access });
+
+        return {
+          id,
+          source: fromEs(document),
+          occ: { seqNo: document._seq_no, primaryTerm: document._primary_term },
+        };
+      },
+      index: async ({ id, document, ifSeqNo, ifPrimaryTerm }) => {
+        const response = await this.storage.getClient().index({
+          id,
+          document: toEs(document, this.space),
+          ...(ifSeqNo != null && ifPrimaryTerm != null
+            ? { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm }
+            : {}),
+        });
+
+        return { seqNo: response._seq_no!, primaryTerm: response._primary_term! };
+      },
+      logger: this.logger,
+      maxRetries,
+      retryDelayMs: 400,
+    });
   }
 }

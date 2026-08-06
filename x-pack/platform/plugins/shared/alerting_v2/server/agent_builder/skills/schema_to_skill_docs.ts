@@ -6,8 +6,17 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { createRuleDataBaseSchema, createActionPolicyDataSchema } from '@kbn/alerting-v2-schemas';
+import {
+  createRuleDataBaseSchema,
+  createActionPolicyDataSchema,
+  alertEventSeveritySchema,
+} from '@kbn/alerting-v2-schemas';
+import {
+  ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
+  builtinWorkflowInputDefinitions,
+} from '@kbn/workflows';
 import { ruleOperationSchema } from '../tools/manage_rule/operations';
+import { actionPolicyOperationSchema } from '../tools/manage_action_policy/operations';
 
 const LARGE_ENUM_THRESHOLD = 20;
 
@@ -68,7 +77,8 @@ interface FieldInfo {
   constraints: string;
 }
 
-function extractConstraints(prop: JsonSchemaNode): string {
+/** Builds the parenthetical constraint text for a field-table Description cell. */
+function formatFieldConstraintsSummary(prop: JsonSchemaNode): string {
   const parts: string[] = [];
   if (prop.minLength !== undefined) parts.push(`min length: ${prop.minLength}`);
   if (prop.maxLength !== undefined) parts.push(`max length: ${prop.maxLength}`);
@@ -84,18 +94,26 @@ function extractConstraints(prop: JsonSchemaNode): string {
   return parts.join(', ');
 }
 
+/**
+ * JSON Schema `type` may be a union array — nullable fields are emitted as
+ * `['string', 'null']` rather than as an `anyOf`.
+ */
+function formatTypeKeyword(type: unknown): string {
+  if (Array.isArray(type)) {
+    return (type as string[]).join(' | ');
+  }
+  return (type as string) ?? 'unknown';
+}
+
 function resolveType(prop: JsonSchemaNode): string {
+  if (prop.const !== undefined) {
+    return `"${prop.const}"`;
+  }
   if (prop.enum !== undefined && Array.isArray(prop.enum)) {
     return (prop.enum as string[]).map((v) => `"${v}"`).join(' | ');
   }
   if (prop.anyOf !== undefined && Array.isArray(prop.anyOf)) {
-    return (prop.anyOf as JsonSchemaNode[])
-      .map((variant) => {
-        if (variant.enum) return (variant.enum as string[]).map((v) => `"${v}"`).join(' | ');
-        if (variant.const !== undefined) return `"${variant.const}"`;
-        return (variant.type as string) ?? 'unknown';
-      })
-      .join(' | ');
+    return (prop.anyOf as JsonSchemaNode[]).map(resolveType).join(' | ');
   }
   if (prop.oneOf !== undefined && Array.isArray(prop.oneOf)) {
     return (prop.oneOf as JsonSchemaNode[])
@@ -110,12 +128,13 @@ function resolveType(prop: JsonSchemaNode): string {
       })
       .join(' | ');
   }
-  if (prop.type === 'array') {
+  const types = Array.isArray(prop.type) ? (prop.type as string[]) : [prop.type as string];
+  if (types.includes('array')) {
     const items = prop.items as JsonSchemaNode | undefined;
     const itemType = items ? resolveType(items) : 'unknown';
-    return `${itemType}[]`;
+    return [`${itemType}[]`, ...types.filter((t) => t !== 'array')].join(' | ');
   }
-  return (prop.type as string) ?? 'unknown';
+  return formatTypeKeyword(prop.type);
 }
 
 function jsonSchemaToFieldTable(jsonSchema: unknown): FieldInfo[] {
@@ -132,19 +151,29 @@ function jsonSchemaToFieldTable(jsonSchema: unknown): FieldInfo[] {
       type: resolveType(prop),
       required: required.has(name),
       description: (prop.description as string) ?? '',
-      constraints: extractConstraints(prop),
+      constraints: formatFieldConstraintsSummary(prop),
     };
   });
 }
 
+/**
+ * Type unions and enum lists contain `|`, which would otherwise split the cell into extra columns.
+ * Backslashes are escaped first so a literal `\` before a pipe cannot consume the escape we add.
+ */
+function escapeTableCell(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/\|/g, '\\|');
+}
+
 function formatFieldTable(fields: FieldInfo[]): string {
   if (fields.length === 0) return '';
-  const rows = fields.map(
-    (f) =>
-      `| \`${f.name}\` | ${f.type} | ${f.required ? 'required' : 'optional'} | ${f.description}${
-        f.constraints ? ` (${f.constraints})` : ''
-      } |`
-  );
+  const rows = fields.map((f) => {
+    const description = escapeTableCell(
+      `${f.description}${f.constraints ? ` (${f.constraints})` : ''}`
+    );
+    return `| \`${f.name}\` | ${escapeTableCell(f.type)} | ${
+      f.required ? 'required' : 'optional'
+    } | ${description} |`;
+  });
   return ['| Field | Type | Required | Description |', '|---|---|---|---|', ...rows].join('\n');
 }
 
@@ -181,70 +210,155 @@ function formatVariantSchemas(jsonSchema: unknown): string {
   return sections.join('\n\n');
 }
 
-/**
- * Generates concise markdown documentation from the create-rule Zod schema.
- * Intended for embedding in the skill's `referencedContent`.
- */
-export const generateRuleSchemaDoc = (): string => {
-  const jsonSchema = zodToJsonSchema(createRuleDataBaseSchema);
-  const fields = jsonSchemaToFieldTable(jsonSchema);
-  const fieldTable = formatFieldTable(fields);
+const DEFAULT_API_SCHEMA_SOURCE =
+  '`@kbn/alerting-v2-schemas`. This is the source of truth for field names, types, and constraints.';
 
-  let queryVariants = '';
-  if (jsonSchema && typeof jsonSchema === 'object') {
-    const schema = jsonSchema as JsonSchemaNode;
-    const props = schema.properties as JsonSchemaNode | undefined;
-    if (props?.query) {
-      queryVariants = formatVariantSchemas(props.query as JsonSchemaNode);
-    }
-  }
+/**
+ * Generates markdown for a create/update API Zod schema (top-level field table,
+ * plus optional extra sections such as query format variants).
+ */
+export const generateApiSchemaDoc = ({
+  title,
+  source = DEFAULT_API_SCHEMA_SOURCE,
+  schema,
+  extraSections,
+}: {
+  title: string;
+  source?: string;
+  schema: z.ZodType;
+  extraSections?: (jsonSchema: unknown) => Array<{ heading: string; content: string }> | undefined;
+}): string => {
+  const jsonSchema = zodToJsonSchema(schema);
+  const fieldTable = formatFieldTable(jsonSchemaToFieldTable(jsonSchema));
 
   const sections = [
-    '# Rule API Schema Reference',
+    `# ${title}`,
     '',
-    'Auto-generated from `@kbn/alerting-v2-schemas`. This is the source of truth for field names, types, and constraints.',
+    `Auto-generated from ${source}`,
     '',
     '## Top-Level Fields',
     '',
     fieldTable,
   ];
 
-  if (queryVariants) {
-    sections.push('', '## Query Formats', '', queryVariants);
+  for (const extra of extraSections?.(jsonSchema) ?? []) {
+    if (extra.content) {
+      sections.push('', `## ${extra.heading}`, '', extra.content);
+    }
   }
 
   return sections.join('\n');
 };
 
 /**
+ * Generates concise markdown documentation from the create-rule Zod schema.
+ * Intended for embedding in the skill's `referencedContent`.
+ */
+export const generateRuleSchemaDoc = (): string =>
+  generateApiSchemaDoc({
+    title: 'Rule API Schema Reference',
+    schema: createRuleDataBaseSchema,
+    extraSections: (jsonSchema) => {
+      const props = (jsonSchema as JsonSchemaNode).properties as JsonSchemaNode | undefined;
+      if (!props?.query) {
+        return undefined;
+      }
+      const queryVariants = formatVariantSchemas(props.query as JsonSchemaNode);
+      return queryVariants ? [{ heading: 'Query Formats', content: queryVariants }] : undefined;
+    },
+  });
+
+/**
+ * Generates markdown for a discriminated-union tool operations schema
+ * (e.g. `manage_rule` / `manage_action_policy`).
+ */
+export const generateOperationsDoc = ({
+  title,
+  source,
+  schema,
+}: {
+  title: string;
+  source: string;
+  schema: z.ZodType;
+}): string => {
+  const variants = formatVariantSchemas(zodToJsonSchema(schema));
+
+  return [`# ${title}`, '', `Auto-generated from ${source}.`, '', variants].join('\n');
+};
+
+/**
  * Generates concise markdown documentation for the manage_rule tool operations.
  */
-export const generateRuleOperationsDoc = (): string => {
-  const jsonSchema = zodToJsonSchema(ruleOperationSchema);
-  const variants = formatVariantSchemas(jsonSchema);
+export const generateRuleOperationsDoc = (): string =>
+  generateOperationsDoc({
+    title: 'Rule Operations Schema Reference',
+    source: 'the `manage_rule` tool Zod schemas',
+    schema: ruleOperationSchema,
+  });
 
-  return [
-    '# Rule Operations Schema Reference',
-    '',
-    'Auto-generated from the `manage_rule` tool Zod schemas.',
-    '',
-    variants,
-  ].join('\n');
-};
+export const getSeverityValues = (): string[] => alertEventSeveritySchema.options;
 
 /**
  * Generates concise markdown documentation from the create-action-policy Zod schema.
  */
-export const generateActionPolicySchemaDoc = (): string => {
-  const jsonSchema = zodToJsonSchema(createActionPolicyDataSchema);
-  const fields = jsonSchemaToFieldTable(jsonSchema);
-  const fieldTable = formatFieldTable(fields);
+export const generateActionPolicySchemaDoc = (): string =>
+  generateApiSchemaDoc({
+    title: 'Action Policy API Schema Reference',
+    schema: createActionPolicyDataSchema,
+  });
 
-  return [
-    '# Action Policy API Schema Reference',
+/**
+ * Generates concise markdown documentation for the manage_action_policy tool operations.
+ */
+export const generateActionPolicyOperationsDoc = (): string =>
+  generateOperationsDoc({
+    title: 'Action Policy Operations Schema Reference',
+    source: 'the `manage_action_policy` tool Zod schemas',
+    schema: actionPolicyOperationSchema,
+  });
+
+/**
+ * Generates concise markdown documentation for the action-policy → workflow dispatch payload.
+ * Sourced from the `alertingV2NotificationGroup` built-in workflow input definition, which
+ * mirrors `ActionPolicyWorkflowPayload` / `AlertEpisode` in `server/lib/dispatcher/types.ts`.
+ *
+ * At workflow render time the dispatcher schedules with `{ payload }`, so Liquid templates
+ * access these fields as `{{ inputs.payload.<field> }}`.
+ */
+export const generateActionPolicyWorkflowPayloadDoc = (): string => {
+  const jsonSchema =
+    builtinWorkflowInputDefinitions[ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID];
+  if (!jsonSchema) {
+    throw new SchemaTranslationError(
+      `Missing built-in workflow input definition "${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}"`
+    );
+  }
+
+  const topLevelFields = jsonSchemaToFieldTable(jsonSchema);
+  const topLevelTable = formatFieldTable(topLevelFields);
+
+  const properties = (jsonSchema as JsonSchemaNode).properties as JsonSchemaNode | undefined;
+  const episodesProp = properties?.episodes as JsonSchemaNode | undefined;
+  const episodeItems = episodesProp?.items as JsonSchemaNode | undefined;
+  const episodeFields = episodeItems ? jsonSchemaToFieldTable(episodeItems) : [];
+  const episodeTable = formatFieldTable(episodeFields);
+
+  const sections = [
+    '# Action Policy Workflow Dispatch Payload',
     '',
-    'Auto-generated from `@kbn/alerting-v2-schemas`. This is the source of truth for field names, types, and constraints.',
+    'Access pattern: `{{ inputs.payload.<field> }}` (e.g. `{{ inputs.payload.policyId }}`,',
+    '`{{ inputs.payload.episodes }}`). For episode fields use',
+    '`{% for ep in inputs.payload.episodes %}{{ ep.<field> }}{% endfor %}`.',
+    'Rule names: `{{ inputs.payload.rules[ep.rule_id].name }}`.',
     '',
-    fieldTable,
-  ].join('\n');
+    '## Top-Level Fields (`inputs.payload`)',
+    '',
+    topLevelTable,
+  ];
+
+  if (episodeTable) {
+    sections.push('', '## Episode Fields (`inputs.payload.episodes[]`)', '', episodeTable);
+  }
+
+  return sections.join('\n');
 };

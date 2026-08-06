@@ -522,10 +522,8 @@ describe('Sentry', () => {
     it('should succeed when projects can be listed', async () => {
       mockClient.get.mockResolvedValue({ data: [{ id: '1' }, { id: '2' }] });
 
-      if (!Sentry.test) throw new Error('Test handler not defined');
       const result = await Sentry.test.handler(mockContext);
 
-      expect(result.ok).toBe(true);
       expect(result.message).toContain('my-org');
       expect(result.message).toContain('2');
     });
