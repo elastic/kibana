@@ -71,12 +71,26 @@ export interface SuspendProcessActionOutputContent {
   entity_id?: string;
 }
 
+/** A single killed process descendant. Only for Endpoint starting with v9.6 */
+export interface KilledProcessDescendant {
+  pid?: number;
+  parent_pid?: number;
+  entity_id?: string;
+  parent_entity_id?: string;
+  command?: string;
+  was_killed?: boolean;
+  error?: string;
+}
+
 export interface KillProcessActionOutputContent {
   code: string;
   command?: string;
   pid?: number;
   entity_id?: string;
+  /** Process Name is currently a SentinelOne only property */
   process_name?: string;
+  /** Killed process descendants. Only for Endpoint starting with v9.6 */
+  descendants?: KilledProcessDescendant[];
 }
 
 export interface ResponseActionGetFileOutputContent {

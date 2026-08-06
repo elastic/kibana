@@ -6,6 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/logging';
 import type { InternalIStorageClient } from '@kbn/storage-adapter';
 import type { DatasetExampleStorageProperties } from './examples_storage';
 import type { DatasetStorageProperties } from './datasets_storage';
@@ -45,52 +46,136 @@ const projectSource = <TDoc extends object>(source: TDoc, sourceParam: unknown):
   return source;
 };
 
-const createDatasetStorageClient = () => {
+interface MockRow {
+  _id: string;
+  _source: DatasetStorageDocument;
+}
+
+type MockQuery = Record<string, any>;
+
+/**
+ * Applies the subset of query clauses `DatasetClient` builds. Kept as one
+ * recursive matcher so the `bool.must` + `bool.filter` shape used by a filtered
+ * list is evaluated the same way as a bare search query nested inside it.
+ */
+const matchesQuery = (row: MockRow, query: MockQuery | undefined): boolean => {
+  if (!query || query.match_all) {
+    return true;
+  }
+
+  if (query.term) {
+    const [[field, value]] = Object.entries(query.term) as Array<[string, string]>;
+    if (field === '_id') {
+      return row._id === value;
+    }
+    if (field === 'tags') {
+      return (row._source.tags ?? []).includes(value);
+    }
+    return (row._source as unknown as Record<string, unknown>)[field] === value;
+  }
+
+  if (query.terms) {
+    const [[field, values]] = Object.entries(query.terms) as Array<[string, string[]]>;
+    const actual = (row._source as unknown as Record<string, unknown>)[field];
+    return typeof actual === 'string' && values.includes(actual);
+  }
+
+  if (query.exists) {
+    return (
+      (row._source as unknown as Record<string, unknown>)[query.exists.field as string] !==
+      undefined
+    );
+  }
+
+  if (query.wildcard?.name) {
+    // Only the `*needle*` form the client builds is supported.
+    const needle = String(query.wildcard.name.value).replace(/^\*/, '').replace(/\*$/, '');
+    return row._source.name.toLowerCase().includes(needle.toLowerCase());
+  }
+
+  if (query.match?.description) {
+    return row._source.description
+      .toLowerCase()
+      .includes(String(query.match.description).toLowerCase());
+  }
+
+  if (query.bool) {
+    const { must = [], filter = [], should = [], must_not: mustNot = [] } = query.bool;
+    const clauses = [...must, ...filter];
+
+    return (
+      clauses.every((clause: MockQuery) => matchesQuery(row, clause)) &&
+      mustNot.every((clause: MockQuery) => !matchesQuery(row, clause)) &&
+      (should.length === 0 || should.some((clause: MockQuery) => matchesQuery(row, clause)))
+    );
+  }
+
+  throw new Error(`Unsupported mock query clause: ${JSON.stringify(query)}`);
+};
+
+const termsBuckets = (rows: MockRow[], field: 'tags' | 'maturity') => {
+  const counts = new Map<string, number>();
+
+  for (const row of rows) {
+    const value = row._source[field];
+    for (const key of Array.isArray(value) ? value : value ? [value] : []) {
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+  }
+
+  return Array.from(counts.entries())
+    .sort(([leftKey, leftCount], [rightKey, rightCount]) =>
+      leftCount === rightCount ? leftKey.localeCompare(rightKey) : rightCount - leftCount
+    )
+    .map(([key, count]) => ({ key, doc_count: count }));
+};
+
+/**
+ * Mirrors the `global` → `filter` → `terms` aggregation the dataset list uses to
+ * keep facet counts independent of the tag and maturity filters: `global`
+ * escapes the request query (hence `allRows`) and the `filter` sub-aggregation
+ * re-applies only the search clause.
+ */
+const buildAggregations = (aggs: MockQuery | undefined, allRows: MockRow[]) => {
+  if (!aggs?.facets) {
+    return {};
+  }
+
+  const scopedFilter = aggs.facets.aggs?.scoped?.filter as MockQuery | undefined;
+  const scopedRows = allRows.filter((row) => matchesQuery(row, scopedFilter));
+
+  return {
+    aggregations: {
+      facets: {
+        doc_count: allRows.length,
+        scoped: {
+          doc_count: scopedRows.length,
+          tags: { buckets: termsBuckets(scopedRows, 'tags') },
+          maturity: { buckets: termsBuckets(scopedRows, 'maturity') },
+        },
+      },
+    },
+  };
+};
+
+const createDatasetStorageClient = ({ onReadForWrite }: { onReadForWrite?: () => void } = {}) => {
   const docs = new Map<string, DatasetStorageDocument>();
+  const seqNos = new Map<string, number>();
+  const PRIMARY_TERM = 1;
+
+  const nextSeqNo = (id: string) => {
+    const seqNo = (seqNos.get(id) ?? -1) + 1;
+    seqNos.set(id, seqNo);
+    return seqNo;
+  };
 
   const search = jest.fn(async (params: Record<string, unknown>) => {
-    const query = (params.query ?? {}) as {
-      term?: Record<string, string>;
-      bool?: {
-        should?: Array<Record<string, any>>;
-        must_not?: Array<Record<string, any>>;
-      };
-    };
-    const termQuery = query.term;
-    const boolQuery = query.bool;
-    let rows = Array.from(docs.entries()).map(([id, document]) => ({ _id: id, _source: document }));
-
-    if (termQuery?.name) {
-      rows = rows.filter((row) => row._source.name === termQuery.name);
-    } else if (termQuery?._id) {
-      rows = rows.filter((row) => row._id === termQuery._id);
-    } else if (boolQuery) {
-      // Backfill query: datasets missing the denormalized count.
-      for (const clause of boolQuery.must_not ?? []) {
-        if (clause.exists?.field === 'examples_count') {
-          rows = rows.filter((row) => row._source.examples_count === undefined);
-        }
-      }
-
-      // Search query: wildcard on name (keyword) OR match on description (text).
-      const shouldClauses = boolQuery.should;
-      if (shouldClauses && shouldClauses.length > 0) {
-        const wildcardValue = shouldClauses
-          .map((clause) => clause.wildcard?.name?.value as string | undefined)
-          .find((value): value is string => typeof value === 'string');
-        const matchValue = shouldClauses
-          .map((clause) => clause.match?.description as string | undefined)
-          .find((value): value is string => typeof value === 'string');
-        const needle = (wildcardValue ?? '').replace(/^\*/, '').replace(/\*$/, '').toLowerCase();
-        rows = rows.filter((row) => {
-          const nameMatch = needle ? row._source.name.toLowerCase().includes(needle) : false;
-          const descMatch = matchValue
-            ? row._source.description.toLowerCase().includes(matchValue.toLowerCase())
-            : false;
-          return nameMatch || descMatch;
-        });
-      }
-    }
+    const query = params.query as MockQuery | undefined;
+    const allRows: MockRow[] = Array.from(docs.entries()).map(([id, document]) => ({
+      _id: id,
+      _source: document,
+    }));
+    const rows = allRows.filter((row) => matchesQuery(row, query));
 
     const sortClause = (
       params.sort as Array<Record<string, { order?: 'asc' | 'desc' }>> | undefined
@@ -100,48 +185,84 @@ const createDatasetStorageClient = () => {
       rows.sort((left, right) => {
         const leftVal = (left._source as unknown as Record<string, unknown>)[field];
         const rightVal = (right._source as unknown as Record<string, unknown>)[field];
-        let comparison: number;
-        if (typeof leftVal === 'number' && typeof rightVal === 'number') {
-          comparison = leftVal - rightVal;
-        } else {
-          comparison = String(leftVal ?? '').localeCompare(String(rightVal ?? ''));
+
+        const leftMissing = leftVal === undefined || leftVal === null;
+        const rightMissing = rightVal === undefined || rightVal === null;
+        if (leftMissing || rightMissing) {
+          if (leftMissing && rightMissing) {
+            return 0;
+          }
+          return leftMissing ? 1 : -1;
         }
+
+        const comparison =
+          typeof leftVal === 'number' && typeof rightVal === 'number'
+            ? leftVal - rightVal
+            : String(leftVal).localeCompare(String(rightVal));
         return order === 'desc' ? -comparison : comparison;
       });
     }
 
     const from = (params.from as number | undefined) ?? 0;
     const size = (params.size as number | undefined) ?? rows.length;
+    const withVersion = params.seq_no_primary_term === true;
     const paged = rows.slice(from, from + size).map((row) => ({
       _id: row._id,
       _source: projectSource(row._source, params._source),
+      ...(withVersion ? { _seq_no: seqNos.get(row._id) ?? 0, _primary_term: PRIMARY_TERM } : {}),
     }));
+
+    if (withVersion) {
+      onReadForWrite?.();
+    }
 
     return {
       hits: {
         hits: paged,
         total: { value: rows.length },
       },
+      ...buildAggregations(params.aggs as MockQuery | undefined, allRows),
     };
   });
 
-  const index = jest.fn(async ({ id, op_type: opType, document }: Record<string, unknown>) => {
-    if (opType === 'create' && docs.has(id as string)) {
-      throw new errors.ResponseError({
-        statusCode: 409,
-        body: {},
-        headers: {},
-        warnings: [],
-        meta: {} as any,
-      });
-    }
+  const conflict = () =>
+    new errors.ResponseError({
+      statusCode: 409,
+      body: {},
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+    });
 
-    docs.set(id as string, document as DatasetStorageDocument);
-    return { result: 'created' };
-  });
+  const index = jest.fn(
+    async ({
+      id,
+      op_type: opType,
+      document,
+      if_seq_no: ifSeqNo,
+      if_primary_term: ifPrimaryTerm,
+    }: Record<string, unknown>) => {
+      const docId = id as string;
+
+      if (opType === 'create' && docs.has(docId)) {
+        throw conflict();
+      }
+
+      if (ifSeqNo !== undefined || ifPrimaryTerm !== undefined) {
+        const currentSeqNo = seqNos.get(docId);
+        if (!docs.has(docId) || ifSeqNo !== currentSeqNo || ifPrimaryTerm !== PRIMARY_TERM) {
+          throw conflict();
+        }
+      }
+
+      docs.set(docId, document as DatasetStorageDocument);
+      return { result: 'created', _seq_no: nextSeqNo(docId), _primary_term: PRIMARY_TERM };
+    }
+  );
 
   const remove = jest.fn(async ({ id }: Record<string, unknown>) => {
     const deleted = docs.delete(id as string);
+    seqNos.delete(id as string);
     return { result: deleted ? 'deleted' : 'not_found' };
   });
 
@@ -160,12 +281,14 @@ const createDatasetStorageClient = () => {
         if (operation.index) {
           // ES `index` action overwrites (no 409), matching the storage adapter.
           docs.set(operation.index._id, operation.index.document);
+          nextSeqNo(operation.index._id);
           items.push({ index: { status: 200 } });
           continue;
         }
 
         if (operation.delete) {
           docs.delete(operation.delete._id);
+          seqNos.delete(operation.delete._id);
           items.push({ delete: { status: 200 } });
         }
       }
@@ -181,7 +304,7 @@ const createDatasetStorageClient = () => {
     bulk,
   } as unknown as InternalIStorageClient<DatasetStorageDocument>;
 
-  return { docs, client };
+  return { docs, seqNos, client };
 };
 
 const createExamplesStorageClient = () => {
@@ -310,8 +433,8 @@ const createExamplesStorageClient = () => {
   return { docs, client };
 };
 
-const createClient = () => {
-  const datasetsStorage = createDatasetStorageClient();
+const createClient = ({ onReadForWrite }: { onReadForWrite?: () => void } = {}) => {
+  const datasetsStorage = createDatasetStorageClient({ onReadForWrite });
   const examplesStorage = createExamplesStorageClient();
 
   const datasetsStorageAdapter = {
@@ -321,12 +444,15 @@ const createClient = () => {
     getClient: () => examplesStorage.client,
   } as unknown as DatasetExamplesStorageAdapter;
 
+  const logger = { warn: jest.fn(), debug: jest.fn() } as unknown as Logger;
+
   const client = new DatasetClient({
     datasetsStorageAdapter,
     examplesStorageAdapter,
+    logger,
   });
 
-  return { client, datasetsStorage, examplesStorage };
+  return { client, datasetsStorage, examplesStorage, logger };
 };
 
 describe('DatasetClient', () => {
@@ -349,7 +475,11 @@ describe('DatasetClient', () => {
   it('creates and lists datasets with example counts', async () => {
     const { client } = createClient();
 
-    const created = await client.create('dataset-1', 'A dataset', [baseExampleA, baseExampleB]);
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA, baseExampleB],
+    });
     const listing = await client.list({ page: 1, perPage: 10 });
     const fetched = await client.get(created.id);
 
@@ -368,7 +498,11 @@ describe('DatasetClient', () => {
   it('updates dataset description without changing the ID', async () => {
     const { client } = createClient();
 
-    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA],
+    });
     const updated = await client.update(created.id, {
       description: 'Updated description',
     });
@@ -383,7 +517,11 @@ describe('DatasetClient', () => {
   it('deletes dataset and all associated examples', async () => {
     const { client } = createClient();
 
-    const created = await client.create('dataset-1', 'A dataset', [baseExampleA, baseExampleB]);
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA, baseExampleB],
+    });
     const deleted = await client.delete(created.id);
     const fetched = await client.get(created.id);
 
@@ -394,7 +532,11 @@ describe('DatasetClient', () => {
   it('returns true for datasetExists when the dataset exists', async () => {
     const { client, datasetsStorage } = createClient();
 
-    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA],
+    });
 
     await expect(client.datasetExists(created.id)).resolves.toBe(true);
     expect(datasetsStorage.client.search).toHaveBeenLastCalledWith(
@@ -411,7 +553,11 @@ describe('DatasetClient', () => {
   it('deletes a single example and preserves remaining examples', async () => {
     const { client, examplesStorage } = createClient();
 
-    const created = await client.create('dataset-1', 'A dataset', [baseExampleA, baseExampleB]);
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA, baseExampleB],
+    });
     const exampleToDelete = created.examples[0];
 
     await client.deleteExample(exampleToDelete.id, created.id);
@@ -427,7 +573,11 @@ describe('DatasetClient', () => {
   it('throws ExampleNotFoundError when deleting a non-existent example', async () => {
     const { client } = createClient();
 
-    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA],
+    });
 
     await expect(client.deleteExample('non-existent-example-id', created.id)).rejects.toThrow(
       ExampleNotFoundError
@@ -437,7 +587,11 @@ describe('DatasetClient', () => {
   it('deletes an example when expectedDatasetId matches', async () => {
     const { client } = createClient();
 
-    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA],
+    });
     const exampleToDelete = created.examples[0];
 
     await client.deleteExample(exampleToDelete.id, created.id);
@@ -449,7 +603,11 @@ describe('DatasetClient', () => {
   it('throws ExampleNotFoundError when expectedDatasetId does not match', async () => {
     const { client } = createClient();
 
-    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA],
+    });
     const exampleToDelete = created.examples[0];
 
     await expect(client.deleteExample(exampleToDelete.id, 'wrong-dataset-id')).rejects.toThrow(
@@ -463,7 +621,11 @@ describe('DatasetClient', () => {
   it('updates an example when expectedDatasetId matches', async () => {
     const { client } = createClient();
 
-    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA],
+    });
     const exampleToUpdate = created.examples[0];
 
     const updated = await client.updateExample(
@@ -479,7 +641,11 @@ describe('DatasetClient', () => {
   it('throws ExampleNotFoundError when updating with non-matching expectedDatasetId', async () => {
     const { client } = createClient();
 
-    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA],
+    });
     const exampleToUpdate = created.examples[0];
 
     await expect(
@@ -497,7 +663,11 @@ describe('DatasetClient', () => {
   it('deleteExamplesByDatasetId removes all examples for a dataset', async () => {
     const { client, examplesStorage } = createClient();
 
-    const created = await client.create('dataset-1', 'A dataset', [baseExampleA, baseExampleB]);
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA, baseExampleB],
+    });
     const result = await client.deleteExamplesByDatasetId(created.id);
 
     expect(result).toEqual({ deleted: 2 });
@@ -515,7 +685,7 @@ describe('DatasetClient', () => {
   it('deleteExamplesByDatasetId returns zero when dataset has no examples', async () => {
     const { client } = createClient();
 
-    const created = await client.create('dataset-1', 'A dataset');
+    const created = await client.create({ name: 'dataset-1', description: 'A dataset' });
     const result = await client.deleteExamplesByDatasetId(created.id);
 
     expect(result).toEqual({ deleted: 0 });
@@ -524,8 +694,8 @@ describe('DatasetClient', () => {
   it('throws DatasetAlreadyExistsError when creating a dataset with a duplicate name', async () => {
     const { client } = createClient();
 
-    await client.create('dataset-1', 'A dataset');
-    await expect(client.create('dataset-1', 'Duplicate')).rejects.toThrow(
+    await client.create({ name: 'dataset-1', description: 'A dataset' });
+    await expect(client.create({ name: 'dataset-1', description: 'Duplicate' })).rejects.toThrow(
       DatasetAlreadyExistsError
     );
   });
@@ -533,11 +703,16 @@ describe('DatasetClient', () => {
   it('upsert diffs examples and reports added removed unchanged', async () => {
     const { client } = createClient();
 
-    await client.create('dataset-1', 'A dataset', [baseExampleA, baseExampleB]);
-    const result = await client.upsert('dataset-1', 'Updated description', [
-      baseExampleB,
-      baseExampleC,
-    ]);
+    await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA, baseExampleB],
+    });
+    const result = await client.upsert({
+      name: 'dataset-1',
+      description: 'Updated description',
+      examples: [baseExampleB, baseExampleC],
+    });
     const dataset = await client.get(result.dataset_id);
 
     expect(result).toEqual({
@@ -557,7 +732,11 @@ describe('DatasetClient', () => {
   it('throws ExampleAlreadyExistsError when updating an example to match another existing example', async () => {
     const { client } = createClient();
 
-    const created = await client.create('dataset-1', 'A dataset', [baseExampleA, baseExampleB]);
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA, baseExampleB],
+    });
     const exampleToUpdate = created.examples[0];
 
     await expect(
@@ -579,7 +758,11 @@ describe('DatasetClient', () => {
   it('throws ExampleAlreadyExistsError when adding a duplicate example', async () => {
     const { client } = createClient();
 
-    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA],
+    });
 
     await expect(client.addExamples(created.id, [baseExampleA])).rejects.toThrow(
       ExampleAlreadyExistsError
@@ -592,8 +775,16 @@ describe('DatasetClient', () => {
   it('filters datasets by name via search', async () => {
     const { client } = createClient();
 
-    await client.create('kibana-dataset', 'About dashboards', [baseExampleA]);
-    await client.create('elasticsearch-dataset', 'About queries', [baseExampleB]);
+    await client.create({
+      name: 'kibana-dataset',
+      description: 'About dashboards',
+      examples: [baseExampleA],
+    });
+    await client.create({
+      name: 'elasticsearch-dataset',
+      description: 'About queries',
+      examples: [baseExampleB],
+    });
 
     const result = await client.list({ search: 'kibana' });
 
@@ -604,8 +795,16 @@ describe('DatasetClient', () => {
   it('filters datasets by description via search', async () => {
     const { client } = createClient();
 
-    await client.create('dataset-a', 'covers dashboards', [baseExampleA]);
-    await client.create('dataset-b', 'covers ingest pipelines', [baseExampleB]);
+    await client.create({
+      name: 'dataset-a',
+      description: 'covers dashboards',
+      examples: [baseExampleA],
+    });
+    await client.create({
+      name: 'dataset-b',
+      description: 'covers ingest pipelines',
+      examples: [baseExampleB],
+    });
 
     const result = await client.list({ search: 'ingest' });
 
@@ -616,8 +815,12 @@ describe('DatasetClient', () => {
   it('sorts datasets by example count', async () => {
     const { client } = createClient();
 
-    await client.create('few', 'A dataset', [baseExampleA]);
-    await client.create('many', 'A dataset', [baseExampleA, baseExampleB, baseExampleC]);
+    await client.create({ name: 'few', description: 'A dataset', examples: [baseExampleA] });
+    await client.create({
+      name: 'many',
+      description: 'A dataset',
+      examples: [baseExampleA, baseExampleB, baseExampleC],
+    });
 
     const ascending = await client.list({ sortField: 'examples_count', sortOrder: 'asc' });
     expect(ascending.datasets.map((dataset) => dataset.name)).toEqual(['few', 'many']);
@@ -629,7 +832,11 @@ describe('DatasetClient', () => {
   it('maintains examples_count as examples are added and removed', async () => {
     const { client } = createClient();
 
-    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA],
+    });
     expect((await client.list()).datasets[0].examples_count).toBe(1);
 
     await client.addExamples(created.id, [baseExampleB]);
@@ -642,7 +849,11 @@ describe('DatasetClient', () => {
   it('backfills examples_count for datasets missing it and is idempotent', async () => {
     const { client, datasetsStorage } = createClient();
 
-    const created = await client.create('legacy', 'legacy dataset', [baseExampleA, baseExampleB]);
+    const created = await client.create({
+      name: 'legacy',
+      description: 'legacy dataset',
+      examples: [baseExampleA, baseExampleB],
+    });
 
     // Simulate a dataset written before examples_count existed.
     const stored = datasetsStorage.docs.get(created.id);
@@ -658,5 +869,358 @@ describe('DatasetClient', () => {
 
     const secondRun = await client.backfillDatasetCounts();
     expect(secondRun.updated).toBe(0);
+  });
+
+  describe('tags and maturity', () => {
+    it('normalizes tags on create and stores maturity', async () => {
+      const { client } = createClient();
+
+      const created = await client.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        tags: ['  Golden  ', 'golden', 'Regression-Suite', ''],
+        maturity: 'golden',
+      });
+
+      expect(created.tags).toEqual(['golden', 'regression-suite']);
+      expect(created.maturity).toBe('golden');
+    });
+
+    it('leaves untagged datasets without tag fields', async () => {
+      const { client, datasetsStorage } = createClient();
+
+      const created = await client.create({ name: 'dataset-1', description: 'A dataset' });
+
+      expect(created.tags).toBeUndefined();
+      expect(created.maturity).toBeUndefined();
+      expect(datasetsStorage.docs.get(created.id)).not.toHaveProperty('tags');
+      expect(datasetsStorage.docs.get(created.id)).not.toHaveProperty('maturity');
+    });
+
+    it('updates tags and maturity independently of the description', async () => {
+      const { client } = createClient();
+
+      const created = await client.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        tags: ['raw-capture'],
+        maturity: 'raw',
+      });
+
+      const withNewTags = await client.update(created.id, { tags: ['cleaned-up'] });
+      expect(withNewTags?.tags).toEqual(['cleaned-up']);
+      expect(withNewTags?.maturity).toBe('raw');
+      expect(withNewTags?.description).toBe('A dataset');
+
+      const withNewDescription = await client.update(created.id, { description: 'Updated' });
+      expect(withNewDescription?.description).toBe('Updated');
+      expect(withNewDescription?.tags).toEqual(['cleaned-up']);
+      expect(withNewDescription?.maturity).toBe('raw');
+    });
+
+    it('clears tags with an empty array and maturity with null', async () => {
+      const { client } = createClient();
+
+      const created = await client.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        tags: ['golden'],
+        maturity: 'golden',
+      });
+
+      const cleared = await client.update(created.id, { tags: [], maturity: null });
+
+      expect(cleared?.tags).toBeUndefined();
+      expect(cleared?.maturity).toBeUndefined();
+    });
+
+    // Dataset documents are rewritten wholesale on every example change, so a
+    // regression here silently wipes curation metadata.
+    it('preserves tags and maturity when examples change', async () => {
+      const { client } = createClient();
+
+      const created = await client.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        tags: ['golden'],
+        maturity: 'golden',
+        examples: [baseExampleA],
+      });
+      expect(created.tags).toEqual(['golden']);
+
+      await client.addExamples(created.id, [baseExampleB]);
+      const afterAdd = await client.get(created.id);
+      expect(afterAdd?.tags).toEqual(['golden']);
+      expect(afterAdd?.maturity).toBe('golden');
+      expect(afterAdd?.examples_count).toBe(2);
+
+      await client.deleteExample(created.examples[0].id, created.id);
+      const afterDelete = await client.get(created.id);
+      expect(afterDelete?.tags).toEqual(['golden']);
+      expect(afterDelete?.maturity).toBe('golden');
+    });
+
+    // Omitting tags from a write is one way to lose them; the other is timing.
+    // A suite adding examples reads the dataset, then writes it back, and a tag
+    // edit landing in that gap must not be rolled back by the stale copy.
+    it('keeps tags saved concurrently with an example write', async () => {
+      let raceNextRead: (() => void) | undefined;
+      const { client, datasetsStorage } = createClient({
+        onReadForWrite: () => raceNextRead?.(),
+      });
+
+      const created = await client.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        tags: ['stale'],
+      });
+
+      raceNextRead = () => {
+        // One-shot: the retry must see the competing write, not another race.
+        raceNextRead = undefined;
+        const current = datasetsStorage.docs.get(created.id)!;
+        datasetsStorage.docs.set(created.id, { ...current, tags: ['curated'], maturity: 'golden' });
+        datasetsStorage.seqNos.set(created.id, (datasetsStorage.seqNos.get(created.id) ?? 0) + 1);
+      };
+
+      await client.addExamples(created.id, [baseExampleA]);
+
+      const afterRace = await client.get(created.id);
+      expect(afterRace?.tags).toEqual(['curated']);
+      expect(afterRace?.maturity).toBe('golden');
+      // The retry still lands the count it was asked to write.
+      expect(afterRace?.examples_count).toBe(1);
+    });
+
+    it('reports an update as a miss when the dataset is deleted mid-write', async () => {
+      const harness: { current?: () => void } = {};
+      const { client, datasetsStorage } = createClient({
+        onReadForWrite: () => harness.current?.(),
+      });
+
+      const created = await client.create({ name: 'dataset-1', description: 'A dataset' });
+
+      harness.current = () => {
+        harness.current = undefined;
+        datasetsStorage.docs.delete(created.id);
+        datasetsStorage.seqNos.delete(created.id);
+      };
+
+      await expect(client.update(created.id, { tags: ['golden'] })).resolves.toBeUndefined();
+    });
+
+    // Under sustained contention the retries run out. What happens then depends on
+    // what the write was carrying, because only one of the two is recoverable.
+    describe('when conflicts outlast the retries', () => {
+      const withoutRetryDelays = async <T>(run: () => Promise<T>): Promise<T> => {
+        jest.useFakeTimers();
+        try {
+          const settled = run().then(
+            (value) => () => value,
+            (error) => () => {
+              throw error;
+            }
+          );
+          await jest.advanceTimersByTimeAsync(10_000);
+          return (await settled)();
+        } finally {
+          jest.useRealTimers();
+        }
+      };
+
+      // Never disarmed, so every attempt reads a version that is stale by the time
+      // it writes.
+      const raceEveryRead =
+        (storage: { docs: Map<string, DatasetStorageDocument>; seqNos: Map<string, number> }) =>
+        () => {
+          for (const [id, document] of storage.docs) {
+            storage.docs.set(id, { ...document, description: `touched-${Date.now()}` });
+            storage.seqNos.set(id, (storage.seqNos.get(id) ?? 0) + 1);
+          }
+        };
+
+      it('lets an example write through, leaving the count to self-correct', async () => {
+        const harness: { current?: () => void } = {};
+        const { client, datasetsStorage, logger } = createClient({
+          onReadForWrite: () => harness.current?.(),
+        });
+
+        const created = await client.create({ name: 'dataset-1', description: 'A dataset' });
+        harness.current = raceEveryRead(datasetsStorage);
+
+        // The examples themselves are written before the dataset is touched, so
+        // failing here would report an error for work that already succeeded.
+        await expect(
+          withoutRetryDelays(() => client.addExamples(created.id, [baseExampleA]))
+        ).resolves.toEqual({ added: 1 });
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(created.id));
+      });
+
+      it('surfaces a metadata edit that could not be applied', async () => {
+        const harness: { current?: () => void } = {};
+        const { client, datasetsStorage } = createClient({
+          onReadForWrite: () => harness.current?.(),
+        });
+
+        const created = await client.create({ name: 'dataset-1', description: 'A dataset' });
+        harness.current = raceEveryRead(datasetsStorage);
+
+        await expect(
+          withoutRetryDelays(() => client.update(created.id, { tags: ['golden'] }))
+        ).rejects.toThrow(/conflict/i);
+      });
+    });
+
+    it('preserves tags and maturity when backfilling example counts', async () => {
+      const { client, datasetsStorage } = createClient();
+
+      const created = await client.create({
+        name: 'legacy',
+        description: 'legacy dataset',
+        tags: ['golden'],
+        maturity: 'golden',
+        examples: [baseExampleA],
+      });
+      delete (datasetsStorage.docs.get(created.id) as { examples_count?: number }).examples_count;
+
+      await client.backfillDatasetCounts();
+
+      expect(datasetsStorage.docs.get(created.id)).toMatchObject({
+        tags: ['golden'],
+        maturity: 'golden',
+        examples_count: 1,
+      });
+    });
+
+    it('applies declared tags on upsert and keeps undeclared ones', async () => {
+      const { client } = createClient();
+
+      const created = await client.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        tags: ['golden'],
+        maturity: 'golden',
+        examples: [baseExampleA],
+      });
+
+      // A suite that doesn't mention tags must not wipe tags set in the UI.
+      await client.upsert({
+        name: 'dataset-1',
+        description: 'A dataset',
+        examples: [baseExampleA, baseExampleB],
+      });
+      expect((await client.get(created.id))?.tags).toEqual(['golden']);
+
+      await client.upsert({
+        name: 'dataset-1',
+        description: 'A dataset',
+        tags: ['cleaned-up'],
+        maturity: 'cleaned',
+        examples: [baseExampleA, baseExampleB],
+      });
+      const upserted = await client.get(created.id);
+      expect(upserted?.tags).toEqual(['cleaned-up']);
+      expect(upserted?.maturity).toBe('cleaned');
+    });
+
+    it('requires every filter tag to be present and matches case-insensitively', async () => {
+      const { client } = createClient();
+
+      await client.create({
+        name: 'both',
+        description: 'A dataset',
+        tags: ['golden', 'esql'],
+      });
+      await client.create({ name: 'one', description: 'A dataset', tags: ['golden'] });
+      await client.create({ name: 'none', description: 'A dataset' });
+
+      const singleTag = await client.list({ tags: ['golden'] });
+      expect(singleTag.datasets.map(({ name }) => name).sort()).toEqual(['both', 'one']);
+
+      const bothTags = await client.list({ tags: ['GOLDEN', 'esql'] });
+      expect(bothTags.total).toBe(1);
+      expect(bothTags.datasets.map(({ name }) => name)).toEqual(['both']);
+    });
+
+    it('filters by any of the requested maturity levels', async () => {
+      const { client } = createClient();
+
+      await client.create({ name: 'raw-one', description: 'A dataset', maturity: 'raw' });
+      await client.create({ name: 'cleaned-one', description: 'A dataset', maturity: 'cleaned' });
+      await client.create({ name: 'golden-one', description: 'A dataset', maturity: 'golden' });
+
+      const result = await client.list({ maturity: ['raw', 'golden'] });
+
+      expect(result.total).toBe(2);
+      expect(result.datasets.map(({ name }) => name).sort()).toEqual(['golden-one', 'raw-one']);
+    });
+
+    it('sorts by maturity alphabetically, leaving datasets without one last', async () => {
+      const { client } = createClient();
+
+      await client.create({ name: 'raw-one', description: 'A dataset', maturity: 'raw' });
+      await client.create({ name: 'unset', description: 'A dataset' });
+      await client.create({ name: 'golden-one', description: 'A dataset', maturity: 'golden' });
+      await client.create({ name: 'cleaned-one', description: 'A dataset', maturity: 'cleaned' });
+
+      const ascending = await client.list({ sortField: 'maturity', sortOrder: 'asc' });
+      expect(ascending.datasets.map(({ name }) => name)).toEqual([
+        'cleaned-one',
+        'golden-one',
+        'raw-one',
+        'unset',
+      ]);
+
+      // Reversing the order flips the levels but keeps the unset dataset last.
+      const descending = await client.list({ sortField: 'maturity', sortOrder: 'desc' });
+      expect(descending.datasets.map(({ name }) => name)).toEqual([
+        'raw-one',
+        'golden-one',
+        'cleaned-one',
+        'unset',
+      ]);
+    });
+
+    it('reports facet counts that ignore the active filters but honour the search term', async () => {
+      const { client } = createClient();
+
+      await client.create({
+        name: 'kibana-golden',
+        description: 'A dataset',
+        tags: ['golden'],
+        maturity: 'golden',
+      });
+      await client.create({
+        name: 'kibana-raw',
+        description: 'A dataset',
+        tags: ['raw-capture'],
+        maturity: 'raw',
+      });
+      await client.create({
+        name: 'other',
+        description: 'Unrelated',
+        tags: ['golden'],
+        maturity: 'golden',
+      });
+
+      // Filtering to one tag must still offer the others as options.
+      const filtered = await client.list({ tags: ['golden'] });
+      expect(filtered.total).toBe(2);
+      expect(filtered.facets.tags).toEqual([
+        { value: 'golden', count: 2 },
+        { value: 'raw-capture', count: 1 },
+      ]);
+      expect(filtered.facets.maturity).toEqual([
+        { value: 'golden', count: 2 },
+        { value: 'raw', count: 1 },
+      ]);
+
+      // Searching does narrow the facets, since it narrows what's on the page.
+      const searched = await client.list({ search: 'kibana' });
+      expect(searched.facets.tags).toEqual([
+        { value: 'golden', count: 1 },
+        { value: 'raw-capture', count: 1 },
+      ]);
+    });
   });
 });

@@ -223,6 +223,15 @@ export const getAxiosInstanceWithAuth = ({
         return Promise.reject(error);
       });
 
+      // Registered after authType.configure so it survives SSL/PFX interceptor clearing.
+      // Validates every initial request target (including relative URLs resolved against baseURL)
+      // against the Actions allowedHosts policy before any network dispatch.
+      configuredAxiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+        const resolvedUrl = configuredAxiosInstance.getUri(config);
+        configurationUtilities.ensureUriAllowed(resolvedUrl);
+        return config;
+      });
+
       return configuredAxiosInstance;
     } catch (err) {
       logger.error(
