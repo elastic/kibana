@@ -370,7 +370,7 @@
     "x-pack/platform/packages/shared/kbn-sample-parser/parsers/Zookeeper": "'Zookeeper' should be snake_case",
     "x-pack/platform/plugins/shared/dataset_quality/public/components/dataset_quality_details/quality_issue_flyout/degraded_field/possible_mitigations/field_character_limit/Increase_field_character_limit.tsx": "'Increase_field_character_limit.tsx' should be snake_case"
   },
-  "@elastic/obs-presentation-team": {
+  "@elastic/obs-signals-traces": {
     "x-pack/solutions/observability/plugins/apm/test/scout/ui/fixtures/diagnostics/apm-diagnostics-8.8.0-1687436214804.json": "'apm-diagnostics-8.8.0-1687436214804.json' should be snake_case",
     "x-pack/solutions/observability/plugins/apm/public/components/app/metrics/static_dashboard/dashboards/otel_native-edot-java.json": "'otel_native-edot-java.json' should be snake_case",
     "x-pack/solutions/observability/plugins/apm/public/components/app/metrics/static_dashboard/dashboards/otel_native-edot-nodejs.json": "'otel_native-edot-nodejs.json' should be snake_case",
