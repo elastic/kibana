@@ -186,6 +186,18 @@ safe-outputs:
     protected-files: fallback-to-issue
     patch-format: am
     max: 1
+  # Used together with a pushed revision, and only when that revision invalidates
+  # the PR's title/body (see "Pushing a revised fix"). `replace` because the body
+  # is rewritten in the fixer's format rather than appended to; `footer: false`
+  # because the carried-over body already ends with its own attribution footer.
+  # No `required-labels` guard: gh-aw 0.81.6 silently drops it for this output
+  # (the update-entity parser never reads it); the `flaky-test-fixer` label gate
+  # in the activation rules is what scopes this workflow to fixer PRs.
+  update-pull-request:
+    operation: replace
+    footer: false
+    target: '*'
+    max: 1
   # Custom safe-job: take the draft fix PR out of draft once verification is done.
   jobs:
     mark-pr-ready:
@@ -418,6 +430,7 @@ When you iterate, you are editing a PR you did not open. This is allowed because
 - Check out the PR head branch (e.g. `gh pr checkout ${{ env.PR_NUMBER }}`), make the minimal edit, and commit it.
 - Emit a single `push-to-pull-request-branch` safe output targeting PR #${{ env.PR_NUMBER }}.
 - Keep the change minimal and focused on the root cause. Re-running `/flaky` after the push validates the new commit, since the runner builds from the updated PR head.
+- **Keep the PR title/body honest.** The PR description must always describe the fix that is actually on the branch. Compare the title and body (in `pr-metadata.json`) against the branch as it stands after your push: if your revision invalidated them — it changed the approach, the root cause, or what the patch does — also emit one `update-pull-request` safe output with the corrected text. Keep the fixer's format: the `[<Plugin name>] <concise summary of the fix>` title shape, and the body's `Fixes #…` first line, section structure, and trailing footer — carry everything still-true over unchanged (the body is replaced wholesale) and rewrite only what your revision made stale. If the title and body still describe the fix accurately, emit nothing.
 - Don't add explanatory code comments to the patch by default — a good test-side fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it to 1–2 sentences; a simple change like a timeout bump never warrants a comment.
 
 ## Guardrails
