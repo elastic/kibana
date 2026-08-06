@@ -790,6 +790,83 @@ describe('DispatcherService', () => {
         }),
       ]);
     });
+
+    it('only matches episodes whose hydrated data satisfies a KQL matcher', async () => {
+      mockNpFindAllDecrypted(mockFindAllDecrypted, ['policy_456'], {
+        matcher: 'data.severity: "critical"',
+      });
+
+      const alertEpisodes: AlertEpisode[] = [
+        {
+          last_event_timestamp: '2026-01-22T07:10:00.000Z',
+          rule_id: 'rule-1',
+          source: 'internal',
+          space_id: 'default',
+          group_hash: 'hash-1',
+          episode_id: 'episode-critical',
+          episode_status: 'active',
+        },
+        {
+          last_event_timestamp: '2026-01-22T07:10:00.000Z',
+          rule_id: 'rule-1',
+          source: 'internal',
+          space_id: 'default',
+          group_hash: 'hash-2',
+          episode_id: 'episode-low',
+          episode_status: 'active',
+        },
+      ];
+
+      const suppressions: AlertEpisodeSuppression[] = [
+        {
+          rule_id: 'rule-1',
+          source: 'internal',
+          space_id: 'default',
+          group_hash: 'hash-1',
+          episode_id: 'episode-critical',
+          should_suppress: false,
+        },
+        {
+          rule_id: 'rule-1',
+          source: 'internal',
+          space_id: 'default',
+          group_hash: 'hash-2',
+          episode_id: 'episode-low',
+          should_suppress: false,
+        },
+      ];
+
+      queryEsClient.esql.query
+        .mockResolvedValueOnce(createDispatchableAlertEventsResponse(alertEpisodes))
+        .mockResolvedValueOnce(createAlertEpisodeSuppressionsResponse(suppressions))
+        .mockResolvedValueOnce(
+          createEpisodeDataResponse([
+            { episode_id: 'episode-critical', data_json: JSON.stringify({ severity: 'critical' }) },
+            { episode_id: 'episode-low', data_json: JSON.stringify({ severity: 'low' }) },
+          ])
+        )
+        .mockResolvedValueOnce(createLastNotifiedTimestampsResponse());
+
+      storageEsClient.bulk.mockResolvedValue({
+        items: [{ create: { _id: '1', status: 201 } }],
+        errors: false,
+      } as BulkResponse);
+
+      await dispatcherService.run({ previousStartedAt: new Date('2026-01-22T07:30:00.000Z') });
+
+      const [{ operations }] = storageEsClient.bulk.mock.calls[0];
+      const docs = (operations ?? []).filter((_, index) => index % 2 === 1) as AlertAction[];
+
+      const fireActions = docs.filter((d: any) => d.action_type === 'fire');
+      expect(fireActions).toHaveLength(1);
+      expect(fireActions[0]).toEqual(
+        expect.objectContaining({ group_hash: 'hash-1', rule_id: 'rule-1' })
+      );
+
+      const unmatchedActions = docs.filter((d: any) => d.action_type === 'unmatched');
+      expect(unmatchedActions).toHaveLength(1);
+      expect(unmatchedActions[0]).toEqual(expect.objectContaining({ group_hash: 'hash-2' }));
+    });
   });
 
   describe('executionUuid', () => {
