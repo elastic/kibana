@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { readdirSync } from 'fs';
 import { mkdtemp, mkdir, readFile, rm, stat, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
-import { join } from 'path';
+import { dirname, join } from 'path';
 import {
   buildDocsAssets,
   buildDocsArchive,
@@ -380,6 +381,39 @@ describe('createInlineRegistryWebpackConfig', () => {
     expect(config.experiments).toMatchObject({
       outputModule: true,
     });
+  });
+
+  it('shakes the docs entry and test runtime out of the @storybook/react chunks', () => {
+    const config = createInlineRegistryWebpackConfig({
+      entryPath: '/storybook-docs/shared_ux/registry_entry.js',
+      docsDir: '/storybook-docs/shared_ux',
+    });
+
+    const rule = config.module?.rules?.find(
+      (candidate) =>
+        typeof candidate === 'object' && candidate !== null && candidate.sideEffects === false
+    );
+
+    expect(rule).toEqual(
+      expect.objectContaining({
+        test: expect.any(RegExp),
+        sideEffects: false,
+        // Scoped to the rule, not the whole config, so stories keep their own `@storybook/test`.
+        resolve: { alias: { '@storybook/test': false } },
+      })
+    );
+
+    const { test: pattern } = rule as { test: RegExp };
+    const distDir = dirname(require.resolve('@storybook/react/package.json'));
+    const chunks = readdirSync(join(distDir, 'dist')).filter(
+      (file) => file.startsWith('chunk-') && file.endsWith('.mjs')
+    );
+
+    // Asserted against the installed copy so a Storybook upgrade that renames the hashed chunks
+    // fails here rather than silently regrowing the bundle by ~360KB.
+    expect(chunks).not.toHaveLength(0);
+    expect(chunks.filter((file) => pattern.test(join(distDir, 'dist', file)))).toEqual(chunks);
+    expect(pattern.test(join(distDir, 'dist', 'index.mjs'))).toBe(false);
   });
 });
 
