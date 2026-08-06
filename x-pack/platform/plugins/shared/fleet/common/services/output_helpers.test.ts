@@ -31,12 +31,11 @@ describe('getAllowedOutputTypesForAgentPolicy', () => {
       ],
     } as any);
 
-    expect(res).toHaveLength(5);
+    expect(res).toHaveLength(4);
     expect(res).toContain(outputType.Elasticsearch);
     expect(res).toContain(outputType.Logstash);
     expect(res).toContain(outputType.Kafka);
     expect(res).toContain(outputType.RemoteElasticsearch);
-    expect(res).toContain(outputType.Otlp);
   });
 
   it('should return only elasticsearch for an agent policy with APM', () => {
@@ -117,10 +116,9 @@ describe('getAllowedOutputTypesForAgentPolicy', () => {
       ],
     } as any);
 
-    expect(res).toHaveLength(5);
+    expect(res).toHaveLength(4);
     expect(res).toContain(outputType.Logstash);
     expect(res).toContain(outputType.Kafka);
-    expect(res).toContain(outputType.Otlp);
   });
 
   it('should still return only elasticsearch for fleet server even when an OTel input is also present', () => {
@@ -207,12 +205,11 @@ describe('getAllowedOutputTypesForPackagePolicy', () => {
       inputs: [{ type: 'log', streams: [], enabled: true }],
     } as any);
 
-    expect(res).toHaveLength(5);
+    expect(res).toHaveLength(4);
     expect(res).toContain(outputType.Elasticsearch);
     expect(res).toContain(outputType.Logstash);
     expect(res).toContain(outputType.Kafka);
     expect(res).toContain(outputType.RemoteElasticsearch);
-    expect(res).toContain(outputType.Otlp);
   });
 
   it('should return only elasticsearch for a package policy with agentless support', () => {
@@ -259,9 +256,8 @@ describe('getAllowedOutputTypesForPackagePolicy', () => {
       supports_agentless: false,
     } as any);
 
-    expect(res).toHaveLength(5);
+    expect(res).toHaveLength(4);
     expect(res).toContain(outputType.Elasticsearch);
-    expect(res).toContain(outputType.Otlp);
     expect(res).toContain(outputType.Logstash);
     expect(res).toContain(outputType.Kafka);
     expect(res).toContain(outputType.RemoteElasticsearch);
