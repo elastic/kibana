@@ -30,10 +30,7 @@ import { useHistory } from 'react-router-dom';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFleetPermissions } from '../../../hooks';
 import { AgentDetailsFlyout } from './agent_details_flyout';
-import type {
-  AgentStat,
-  LocationAgentStats,
-} from '../../../../../../server/routes/settings/private_locations/get_agent_stats';
+import type { AgentStat, LocationAgentStats } from '../../../../../../common/types';
 
 /** Used-memory fraction at/above which an agent is flagged as memory-constrained. */
 const MEMORY_PRESSURE_PCT = 0.85;
@@ -112,7 +109,7 @@ export const LocationAgentDetails = ({
       render: (host: string, agent: AgentStat) => (
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="node" size="s" />
+            <EuiIcon type="node" size="s" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiLink
@@ -277,6 +274,7 @@ export const LocationAgentDetails = ({
                 <EuiIcon
                   type="cluster"
                   size="m"
+                  aria-hidden={true}
                   css={{ marginInlineEnd: 6, verticalAlign: 'text-bottom' }}
                 />
                 {OVERVIEW_TITLE}
@@ -374,6 +372,7 @@ export const LocationAgentDetails = ({
           <>
             <EuiSpacer size="m" />
             <EuiCallOut
+              announceOnMount
               size="s"
               color={calloutColor}
               iconType="warning"

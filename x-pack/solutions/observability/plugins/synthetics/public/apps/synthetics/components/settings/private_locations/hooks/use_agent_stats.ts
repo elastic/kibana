@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import type { LocationAgentStats } from '../../../../../../../server/routes/settings/private_locations/get_agent_stats';
+import type { LocationAgentStats } from '../../../../../../../common/types';
 import { getPrivateLocationAgentStats } from '../../../../state/private_locations/api';
 import { useSyntheticsRefreshContext } from '../../../../contexts';
 

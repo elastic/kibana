@@ -6,7 +6,7 @@
  */
 
 import type { EditPrivateLocationAttributes } from '../../../../../server/routes/settings/private_locations/edit_private_location';
-import type { LocationAgentStats } from '../../../../../server/routes/settings/private_locations/get_agent_stats';
+import type { LocationAgentStats } from '../../../../../common/types';
 import type { MonitorAgentAssignment } from '../../../../../server/routes/settings/private_locations/get_monitor_agent_assignment';
 import type { NewLocation } from '../../components/settings/private_locations/add_or_edit_location_flyout';
 import type { AgentPolicyInfo } from '../../../../../common/types';

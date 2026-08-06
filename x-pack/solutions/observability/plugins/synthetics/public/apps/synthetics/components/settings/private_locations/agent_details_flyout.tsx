@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFleetPermissions } from '../../../hooks';
-import type { AgentStat } from '../../../../../../server/routes/settings/private_locations/get_agent_stats';
+import type { AgentStat } from '../../../../../../common/types';
 
 const formatRam = (mib: number): string =>
   mib >= 1024 ? `${(mib / 1024).toFixed(1)} GB` : `${mib} MB`;
@@ -141,7 +141,12 @@ export const AgentDetailsFlyout = ({
   ];
 
   return (
-    <EuiFlyout onClose={onClose} size="s" data-test-subj="syntheticsAgentDetailsFlyout">
+    <EuiFlyout
+      aria-label={AGENT_DETAILS_FLYOUT_ARIA_LABEL}
+      onClose={onClose}
+      size="s"
+      data-test-subj="syntheticsAgentDetailsFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2>{agent.host}</h2>
@@ -204,6 +209,13 @@ export const AgentDetailsFlyout = ({
 const SHARDING_SECTION = i18n.translate('xpack.synthetics.agentFlyout.shardingSection', {
   defaultMessage: 'Sharding',
 });
+
+const AGENT_DETAILS_FLYOUT_ARIA_LABEL = i18n.translate(
+  'xpack.synthetics.agentFlyout.agentDetailsAriaLabel',
+  {
+    defaultMessage: 'Agent details',
+  }
+);
 
 const AGENT_SECTION = i18n.translate('xpack.synthetics.agentFlyout.agentSection', {
   defaultMessage: 'Agent',

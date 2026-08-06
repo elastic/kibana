@@ -862,7 +862,7 @@ describe('SyntheticsPrivateLocation', () => {
       []
     );
 
-    expect(test.formattedPolicy.inputs[3].streams[1]).toStrictEqual({
+    expect(test.formattedPolicy.inputs[0].streams[1]).toStrictEqual({
       data_stream: {
         dataset: 'browser',
         type: 'synthetics',
@@ -966,7 +966,7 @@ describe('SyntheticsPrivateLocation', () => {
       []
     );
 
-    expect(test.formattedPolicy.inputs[3].streams[1].vars?.timeout).toStrictEqual({
+    expect(test.formattedPolicy.inputs[0].streams[1].vars?.timeout).toStrictEqual({
       type: 'text',
       value: '30s',
     });

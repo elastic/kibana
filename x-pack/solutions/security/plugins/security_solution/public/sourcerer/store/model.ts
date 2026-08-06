@@ -9,7 +9,7 @@ import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import { EMPTY_BROWSER_FIELDS } from '@kbn/timelines-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
-import { PageScope } from '../../data_view_manager/constants';
+import type { PageScope } from '../../data_view_manager/constants';
 
 /**
  * Data related to each sourcerer scope
@@ -108,17 +108,6 @@ export interface SourcererModel {
   sourcererScopes: SourcererScopeById;
 }
 
-/**
- * The shape of the sourcerer data views returned by the initialization
- * endpoint and dispatched via setSourcererDataViews.
- */
-export interface SecurityDataView {
-  defaultDataView: KibanaDataView;
-  alertDataView: KibanaDataView;
-  attackDataView?: KibanaDataView;
-  kibanaDataViews: Array<Omit<KibanaDataView, 'fields'>>;
-}
-
 export type SourcererUrlState = Partial<{
   [id in PageScope]: {
     id: string;
@@ -140,39 +129,4 @@ export const initDataView: SourcererDataView & { id: string; error?: unknown } =
   patternList: [],
   title: '',
   dataView: undefined,
-};
-
-export const initialSourcererState: SourcererModel = {
-  defaultDataView: initDataView,
-  alertDataView: initDataView,
-  attackDataView: initDataView,
-  kibanaDataViews: [],
-  signalIndexName: null,
-  signalIndexMappingOutdated: null,
-  sourcererScopes: {
-    [PageScope.default]: {
-      ...initSourcererScope,
-      id: PageScope.default,
-    },
-    [PageScope.alerts]: {
-      ...initSourcererScope,
-      id: PageScope.alerts,
-    },
-    [PageScope.attacks]: {
-      ...initSourcererScope,
-      id: PageScope.attacks,
-    },
-    [PageScope.timeline]: {
-      ...initSourcererScope,
-      id: PageScope.timeline,
-    },
-    [PageScope.analyzer]: {
-      ...initSourcererScope,
-      id: PageScope.analyzer,
-    },
-    [PageScope.explore]: {
-      ...initSourcererScope,
-      id: PageScope.explore,
-    },
-  },
 };

@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFleetPermissions } from '../../../hooks';
 import { selectAgentPolicies } from '../../../state/agent_policies';
-import type { LocationAgentStats } from '../../../../../../server/routes/settings/private_locations/get_agent_stats';
+import type { LocationAgentStats } from '../../../../../../common/types';
 
 export const AgentPolicyDetailsFlyout = ({
   agentPolicyId,
@@ -72,7 +72,12 @@ export const AgentPolicyDetailsFlyout = ({
   const healthyAgents = agents.filter((a) => a.healthy).length;
 
   return (
-    <EuiFlyout onClose={onClose} size="s" data-test-subj="syntheticsAgentPolicyDetailsFlyout">
+    <EuiFlyout
+      aria-label={AGENT_POLICY_DETAILS_FLYOUT_ARIA_LABEL}
+      onClose={onClose}
+      size="s"
+      data-test-subj="syntheticsAgentPolicyDetailsFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2>{policy?.name ?? agentPolicyId}</h2>
@@ -81,7 +86,13 @@ export const AgentPolicyDetailsFlyout = ({
       <EuiFlyoutBody>
         {!policy && (
           <>
-            <EuiCallOut size="s" color="warning" title={POLICY_NOT_FOUND} iconType="warning" />
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="warning"
+              title={POLICY_NOT_FOUND}
+              iconType="warning"
+            />
             <EuiSpacer size="m" />
           </>
         )}
@@ -152,6 +163,13 @@ export const AgentPolicyDetailsFlyout = ({
 const OVERVIEW_SECTION = i18n.translate('xpack.synthetics.policyFlyout.overviewSection', {
   defaultMessage: 'Overview',
 });
+
+const AGENT_POLICY_DETAILS_FLYOUT_ARIA_LABEL = i18n.translate(
+  'xpack.synthetics.policyFlyout.agentPolicyDetailsAriaLabel',
+  {
+    defaultMessage: 'Agent policy details',
+  }
+);
 
 const SHARDING_SECTION = i18n.translate('xpack.synthetics.policyFlyout.shardingSection', {
   defaultMessage: 'Sharding',

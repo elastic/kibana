@@ -16,59 +16,11 @@ import { STALE_CHECKIN_MS } from '../../../tasks/rebalance_private_location_shar
 import type { SyntheticsServerSetup } from '../../../types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import type { AgentStat, LocationAgentStats } from '../../../../common/types';
+
+export type { AgentStat, LocationAgentStats };
 
 const BYTES_PER_MIB = 1024 * 1024;
-
-export interface AgentStat {
-  /** Agent `host.name` (the condition shard key), lowercased. */
-  host: string;
-  /** Monitors currently pinned to this host via its package-policy condition. */
-  monitors: number;
-  lastCheckin: number | null;
-  healthy: boolean;
-  /** Whether the host is still an enrolled agent on the location's policy. */
-  enrolled: boolean;
-  /**
-   * Total host RAM (MiB), from agent metadata (`host.memory`) or, as a fallback,
-   * `system.memory.total` in `metrics-system.memory-*`. Null when neither source
-   * is available (UI shows "N/A"). Sharding weights hosts by this where known.
-   */
-  totalMemoryMib: number | null;
-  /**
-   * Used host RAM (MiB) and fraction used (0..1), from `system.memory.actual.used.*`
-   * in `metrics-system.memory-*` (System integration only). Null when unavailable.
-   */
-  usedMemoryMib: number | null;
-  usedMemoryPct: number | null;
-  /**
-   * Normalized host CPU usage (0..1) from `system.cpu.total.norm.pct` in
-   * `metrics-system.cpu-*` (System integration only). Null when unavailable.
-   */
-  cpuPct: number | null;
-  /**
-   * Fleet agent identity/metadata for the freshest enrolled agent on this host,
-   * powering the in-app agent flyout. Null when the host is no longer enrolled.
-   */
-  agentId: string | null;
-  agentVersion: string | null;
-  agentStatus: string | null;
-  policyRevision: number | null;
-  lastCheckinMessage: string | null;
-  platform: string | null;
-  tags: string[];
-}
-
-export interface LocationAgentStats {
-  locationId: string;
-  agents: AgentStat[];
-  /**
-   * Monitors not pinned to a specific enrolled host (e.g. created before any
-   * agent enrolled, or their pinned agent left). They carry the never-match
-   * UNASSIGNED sentinel condition and so run on NO agent until a rebalance
-   * assigns them — surfaced separately rather than hidden.
-   */
-  unassignedMonitors: number;
-}
 
 interface AgentHostMeta {
   lastCheckin: number | null;
@@ -260,12 +212,12 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATION_AGENT_STATS,
   validate: {},
   handler: async ({ server, context, savedObjectsClient, syntheticsMonitorClient }) => {
-    const { locations } = await getPrivateLocationsAndAgentPolicies(
+    const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(
       savedObjectsClient,
-      syntheticsMonitorClient,
-      true
+      syntheticsMonitorClient
     );
 
+    const policyNameById = new Map(agentPolicies.map((p) => [p.id, p.name]));
     const scalableLocations = locations.filter(isConditionShardedLocation);
     const packagePolicyService = new PackagePolicyService(server);
     // Host RAM lives in `metrics-system.memory-*`, which the internal user can't
@@ -330,7 +282,14 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
           })
           .sort((a, b) => a.host.localeCompare(b.host));
 
-        return { locationId: location.id, agents, unassignedMonitors };
+        return {
+          locationId: location.id,
+          locationLabel: location.label,
+          agentPolicyId: location.agentPolicyId,
+          agentPolicyName: policyNameById.get(location.agentPolicyId) ?? location.agentPolicyId,
+          agents,
+          unassignedMonitors,
+        };
       })
     );
   },
