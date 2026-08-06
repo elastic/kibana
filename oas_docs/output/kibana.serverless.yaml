@@ -29761,6 +29761,12 @@ paths:
           required: false
           schema:
             type: number
+        - description: Return only actions whose start_time is in the future
+          in: query
+          name: scheduledOnly
+          required: false
+          schema:
+            type: boolean
         - description: Number of error details to include per action
           in: query
           name: errorSize
