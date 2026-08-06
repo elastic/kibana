@@ -472,6 +472,7 @@ module.exports = {
     '@elastic/eui/tooltip-button-icon-wrap': 'error',
     '@elastic/eui/tooltip-focusable-anchor': 'error',
     '@elastic/eui/no-unnamed-radio-group': 'error',
+    '@elastic/eui/require-aria-label-for-modals': 'error',
   },
 
   overrides: [

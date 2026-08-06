@@ -5,6 +5,61 @@ info:
 paths: {}
 components:
   schemas:
+    DatasetTags:
+      type: array
+      maxItems: 20
+      items:
+        type: string
+        minLength: 1
+        maxLength: 64
+        pattern: '^[a-zA-Z0-9][a-zA-Z0-9:._-]*$'
+      description: >-
+        Free-form labels used to organize datasets. Tags are lowercased and
+        deduplicated on write, so `Golden` and `golden` are the same tag.
+        Commas are not allowed because tag filters are comma-separated.
+        Tags describe what a dataset is about; they never affect who can see it.
+
+    DatasetMaturity:
+      type: string
+      enum:
+        - raw
+        - cleaned
+        - golden
+      description: >-
+        How curated the dataset is, from raw captures through cleaned data to
+        "golden" reference datasets. Absent when a dataset has no maturity set.
+
+    DatasetFacetBucket:
+      type: object
+      properties:
+        value:
+          type: string
+          maxLength: 64
+        count:
+          type: integer
+      required:
+        - value
+        - count
+
+    DatasetFacets:
+      type: object
+      description: >-
+        Values available to filter on, with the number of datasets carrying
+        each. Counts reflect the current search term but ignore the tag and
+        maturity filters, so they stay stable while filters are toggled.
+      properties:
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatasetFacetBucket'
+        maturity:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatasetFacetBucket'
+      required:
+        - tags
+        - maturity
+
     Model:
       type: object
       properties:
