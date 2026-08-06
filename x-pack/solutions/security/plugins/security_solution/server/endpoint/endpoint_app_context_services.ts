@@ -143,6 +143,8 @@ export interface ScopedEndpointServices {
   getSearchClient: () => IScopedSearchClient;
   /** The active space, which is also what bounds the set of projects a fanned-out read reaches */
   getSpaceId: () => string;
+  /** Resolves the active space, rejecting when it does not exist on this project */
+  getSpace: () => Promise<Space>;
 }
 
 /**
@@ -424,6 +426,7 @@ export class EndpointAppContextService {
       getEsClient: () => this.getReadEsClient(request),
       getSearchClient: () => this.getScopedSearchClient(request),
       getSpaceId: () => this.getActiveSpaceId(request),
+      getSpace: () => this.getActiveSpace(request),
     };
   }
 

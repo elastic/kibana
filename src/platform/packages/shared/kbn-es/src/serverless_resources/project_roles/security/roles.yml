@@ -8,12 +8,6 @@ viewer:
     - 'read_project_routing'
   indices:
     - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
-      privileges:
-        - read
-      allow_restricted_indices: false
-    - names:
         - '.siem-signals*'
         - '.lists-*'
         - '.items-*'
@@ -92,22 +86,6 @@ editor:
   cluster:
     - 'read_project_routing'
   indices:
-    - names:
-        - metrics-endpoint.metadata_current_*
-      privileges:
-        - read
-    - names:
-        - .logs-endpoint.actions-*
-        - .logs-endpoint.action.responses-*
-      privileges:
-        - read
-      allow_restricted_indices: false
-    - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
-      privileges:
-        - read
-      allow_restricted_indices: false
     - names:
         - '.siem-signals*'
         - '.lists-*'
@@ -218,12 +196,6 @@ t1_analyst:
     - 'read_project_routing'
   indices:
     - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
-      privileges:
-        - read
-      allow_restricted_indices: false
-    - names:
         - '.alerts-security*'
         - '.siem-signals-*'
       privileges:
@@ -300,12 +272,6 @@ t2_analyst:
   cluster:
     - 'read_project_routing'
   indices:
-    - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
-      privileges:
-        - read
-      allow_restricted_indices: false
     - names:
         - .alerts-security*
         - .siem-signals-*
@@ -387,18 +353,6 @@ t3_analyst:
   cluster:
     - 'read_project_routing'
   indices:
-    - names:
-        - .logs-endpoint.actions-*
-        - .logs-endpoint.action.responses-*
-      privileges:
-        - read
-      allow_restricted_indices: false
-    - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
-      privileges:
-        - read
-      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -500,12 +454,6 @@ threat_intelligence_analyst:
     - 'read_project_routing'
   indices:
     - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
-      privileges:
-        - read
-      allow_restricted_indices: false
-    - names:
         - apm-*-transaction*
         - traces-apm*
         - auditbeat-*
@@ -594,18 +542,6 @@ rule_author:
   cluster:
     - 'read_project_routing'
   indices:
-    - names:
-        - .logs-endpoint.actions-*
-        - .logs-endpoint.action.responses-*
-      privileges:
-        - read
-      allow_restricted_indices: false
-    - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
-      privileges:
-        - read
-      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -698,18 +634,6 @@ soc_manager:
   cluster:
     - 'read_project_routing'
   indices:
-    - names:
-        - .logs-endpoint.actions-*
-        - .logs-endpoint.action.responses-*
-      privileges:
-        - read
-      allow_restricted_indices: false
-    - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
-      privileges:
-        - read
-      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -886,24 +810,7 @@ platform_engineer:
     reserved: true
   cluster:
     - manage
-    - 'read_project_routing'
   indices:
-    - names:
-        - metrics-endpoint.metadata_current_*
-      privileges:
-        - read
-    - names:
-        - .logs-endpoint.actions-*
-        - .logs-endpoint.action.responses-*
-      privileges:
-        - read
-      allow_restricted_indices: false
-    - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
-      privileges:
-        - read
-      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -990,18 +897,6 @@ endpoint_operations_analyst:
   cluster:
     - 'read_project_routing'
   indices:
-    - names:
-        - .logs-endpoint.actions-*
-        - .logs-endpoint.action.responses-*
-      privileges:
-        - read
-      allow_restricted_indices: false
-    - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
-      privileges:
-        - read
-      allow_restricted_indices: false
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
@@ -1106,12 +1001,6 @@ endpoint_policy_manager:
   cluster:
     - 'read_project_routing'
   indices:
-    - names:
-        - .metrics-endpoint.metadata_united_default*
-        - metrics-endpoint.policy-*
-      privileges:
-        - read
-      allow_restricted_indices: false
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*

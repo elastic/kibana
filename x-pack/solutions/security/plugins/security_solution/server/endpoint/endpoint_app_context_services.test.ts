@@ -202,5 +202,16 @@ describe('test endpoint app context services', () => {
 
       expect(scoped.getEsClient()).not.toBe(startContract.esClient);
     });
+
+    it('getSpace() delegates to getActiveSpace', async () => {
+      startService(true);
+      const expectedSpace = { id: 'some-space', name: 'Some Space', disabledFeatures: [] };
+      jest.spyOn(service, 'getActiveSpace').mockResolvedValue(expectedSpace);
+
+      const result = await service.asScoped(request).getSpace();
+
+      expect(result).toBe(expectedSpace);
+      expect(service.getActiveSpace).toHaveBeenCalledWith(request);
+    });
   });
 });

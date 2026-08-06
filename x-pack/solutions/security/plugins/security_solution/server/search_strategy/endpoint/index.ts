@@ -96,7 +96,7 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
             ...('alertIds' in request ? { alertIds: request.alertIds } : {}),
             ...('agentId' in request ? { agentId: request.agentId } : {}),
             ...('expiration' in request ? { expiration: request.expiration } : {}),
-            ...(actionId ? { actionId } : {}),
+            ...('actionId' in request ? { actionId: request.actionId } : {}),
             ...('agents' in request ? { agents: request.agents } : {}),
           } as EndpointStrategyRequestType<T>;
           const dsl = queryFactory.buildDsl(strictRequest, { authz });
@@ -166,7 +166,14 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
       // search this id belongs to went out on the scoped client.
       const scoped = endpointContext.service.asScoped(deps.request);
       if (scoped.isCpsRead()) {
-        return scoped.getSearchClient().cancel(id, options);
+        // `options.strategy` names this strategy; forwarding it unchanged would cause the scoped
+        // client to dispatch straight back into this cancel, producing infinite recursion. Override
+        // it the same way the search path does. `projectRouting` is also dropped so the routing
+        // remains the one the scoped client derives from the active space.
+        return scoped.getSearchClient().cancel(id, {
+          ...omit(options, 'projectRouting'),
+          strategy: ENHANCED_ES_SEARCH_STRATEGY,
+        });
       }
 
       if (es.cancel) {

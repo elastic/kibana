@@ -733,6 +733,65 @@ describe('EndpointMetadataService', () => {
         ).rejects.toThrow();
       });
 
+      it('should throw when the active space does not exist on this project, even if the united document would have matched', async () => {
+        const endpointMetadataDoc = endpointDocGenerator.generateHostMetadata();
+        readEsClientMock.search.mockResolvedValue({
+          took: 0,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            total: { value: 1, relation: 'eq' },
+            max_score: null,
+            hits: [
+              {
+                _index: 'remote-project:metrics-endpoint.metadata-default',
+                _id: 'fanned-in-hit-id',
+                _score: null,
+                _source: endpointMetadataDoc,
+                sort: [0],
+              },
+            ],
+          },
+        } as unknown as Awaited<ReturnType<typeof readEsClientMock.search>>);
+        // The united-index check would match — but the space check must fire first
+        applyEsClientSearchMock({
+          esClientMock: readEsClientMock,
+          index: METADATA_UNITED_INDEX,
+          response: {
+            took: 1,
+            timed_out: false,
+            _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+            hits: {
+              total: { value: 1, relation: 'eq' },
+              max_score: 1.0,
+              hits: [
+                {
+                  _index: METADATA_UNITED_INDEX,
+                  _id: endpointMetadataDoc.agent.id,
+                  _score: 1.0,
+                  fields: { 'united.endpoint.agent.id': [endpointMetadataDoc.agent.id] },
+                },
+              ],
+            },
+          },
+        });
+        testMockedContext.fleetServices.ensureInCurrentSpace.mockRejectedValue(
+          new Error('agent is not visible in this space')
+        );
+        (testMockedContext.fleetServices.fetchAgentsById as jest.Mock).mockResolvedValue([]);
+
+        // Build a scoped object where getSpace rejects — the space does not exist on this project
+        const scoped = testMockedContext.endpointAppContextService.asScoped(request);
+        const scopedWithInvalidSpace = {
+          ...scoped,
+          getSpace: () => Promise.reject(new Error('Saved object [space/only-there] not found')),
+        };
+
+        await expect(
+          metadataService.getHostMetadata(endpointMetadataDoc.agent.id, scopedWithInvalidSpace)
+        ).rejects.toThrow();
+      });
+
       it('should reject when the space check fails, the hit is from a linked project, but the agent IS enrolled locally', async () => {
         const endpointMetadataDoc = endpointDocGenerator.generateHostMetadata();
         readEsClientMock.search.mockResolvedValue({

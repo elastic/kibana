@@ -187,6 +187,7 @@ export const createMockEndpointAppContextService = (
       getEsClient: () => getReadEsClient(request),
       getSearchClient: () => getScopedSearchClient(request),
       getSpaceId: () => getActiveSpaceId(request),
+      getSpace: () => Promise.resolve({ id: DEFAULT_SPACE_ID, name: 'default', disabledFeatures: [] }),
     })),
     getActiveSpace: jest.fn(async (_) => ({
       id: DEFAULT_SPACE_ID,

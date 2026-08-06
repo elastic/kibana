@@ -142,6 +142,18 @@ const ensureAgentVisibleInCurrentSpace = async ({
       throw err;
     }
 
+    // The active space id is parsed from the URL and never validated for API routes, so a linked
+    // project's namespace could otherwise vouch for a space that does not exist here. Resolve the
+    // space on this project first; a linked document must never be the evidence that it exists.
+    const activeSpaceExists = await (scoped?.getSpace().then(
+      () => true,
+      () => false
+    ) ?? Promise.resolve(false));
+
+    if (!activeSpaceExists) {
+      throw err;
+    }
+
     // Provenance alone does not bound a fanned-in read: a space with no routing expression fans
     // out to every project, so the document must also match the active space on the one field it
     // carries. This applies the same rule the endpoint list uses via buildCpsMetadataFilter.

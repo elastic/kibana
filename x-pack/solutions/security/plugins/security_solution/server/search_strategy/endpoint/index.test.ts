@@ -241,7 +241,41 @@ describe('endpointSearchStrategyProvider', () => {
 
       await provider.cancel?.('search-id', options, deps);
 
-      expect(cancel).toHaveBeenCalledWith('search-id', options);
+      expect(cancel).toHaveBeenCalledWith('search-id', { strategy: 'ese' });
+    });
+
+    it('overrides the strategy name and drops projectRouting when cancelling through the scoped client', async () => {
+      const cancel = jest.fn();
+      const service = {
+        isCpsRead: jest.fn().mockReturnValue(true),
+        getScopedSearchClient: jest.fn().mockReturnValue({ cancel }),
+        asScoped: jest.fn(() => ({
+          isCpsRead: () => true,
+          getEsClient: () => {
+            throw new Error('not used');
+          },
+          getSearchClient: () => ({ cancel }),
+          getSpaceId: () => 'default',
+        })),
+      };
+      const provider = endpointSearchStrategyProvider(
+        {
+          search: { searchAsInternalUser: { search: jest.fn(), cancel: jest.fn() } },
+        } as unknown as PluginStart,
+        { service } as unknown as EndpointAppContext
+      );
+
+      await provider.cancel?.(
+        'search-id',
+        { strategy: 'endpointResponseActions', projectRouting: 'something' } as unknown as SearchArgs[1],
+        deps
+      );
+
+      expect(cancel).toHaveBeenCalledWith(
+        'search-id',
+        expect.objectContaining({ strategy: 'ese' })
+      );
+      expect(cancel.mock.calls[0][1]).not.toHaveProperty('projectRouting');
     });
 
     describe('and the query is keyed on a caller-supplied action id', () => {
