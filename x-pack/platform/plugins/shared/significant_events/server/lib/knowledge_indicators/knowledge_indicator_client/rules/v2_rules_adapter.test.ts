@@ -8,7 +8,10 @@
 import Boom from '@hapi/boom';
 import { ALERTING_V2_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { RulesAdapterV2 } from './v2_rules_adapter';
-import type { SignificantEventsRuleDefinition } from './rules_management_client';
+import {
+  STREAMS_RULE_STREAM_TAG_PREFIX,
+  type SignificantEventsRuleDefinition,
+} from './rules_management_client';
 import {
   METRIC_SERIES_EVERY,
   METRIC_SERIES_LIMIT,
@@ -306,7 +309,10 @@ describe('RulesAdapterV2', () => {
       const streamNames = await adapter.findStreamNamesWithOwnedRules();
 
       expect(new Set(streamNames)).toEqual(new Set(['logs.nginx', 'logs.apache']));
-      expect(mock.getTags).toHaveBeenCalledTimes(1);
+      expect(mock.getTags).toHaveBeenCalledWith({
+        search: STREAMS_RULE_STREAM_TAG_PREFIX,
+        kind: 'signal',
+      });
     });
   });
 });

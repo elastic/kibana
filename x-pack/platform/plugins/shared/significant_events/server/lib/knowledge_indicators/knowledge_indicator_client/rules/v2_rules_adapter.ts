@@ -85,8 +85,10 @@ export class RulesAdapterV2 implements IRulesManagementClient {
 
   async findStreamNamesWithOwnedRules(): Promise<string[]> {
     // Filters rules, not tags: matched rules return all their tags, so drop non-ownership ones below.
-    const escapedPrefix = STREAMS_RULE_STREAM_TAG_PREFIX.replace(/[\\:]/g, '\\$&');
-    const tags = await this.rulesClient.getTags({ filter: `metadata.tags: ${escapedPrefix}*` });
+    const tags = await this.rulesClient.getTags({
+      search: STREAMS_RULE_STREAM_TAG_PREFIX,
+      kind: 'signal',
+    });
     const streamNames = new Set<string>();
     for (const tag of tags) {
       const streamName = streamNameFromTag(tag);
