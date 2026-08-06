@@ -117,7 +117,7 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
 
   describe('actor existence gate', () => {
     it('captures actors that carry owns raw_identifiers under host.id', () => {
-      const config = buildOwnsConfigs()[0];
+      const config = oktaConfig;
       const filters = config.compositeAggAdditionalFilters ?? [];
       const existenceGate = filters.find((f) =>
         JSON.stringify(f).includes('raw_identifiers.host.id')
@@ -132,14 +132,14 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
 
   describe('entity.source filter', () => {
     it('Step 1 composite agg filters include an entity.source term for entityanalytics_okta', () => {
-      const config = buildOwnsConfigs()[0];
+      const config = oktaConfig;
       const filters = config.compositeAggAdditionalFilters ?? [];
       const sourceFilter = filters.find((f) => JSON.stringify(f).includes('entity.source'));
       expect(sourceFilter).toEqual({ term: { 'entity.source': 'entityanalytics_okta' } });
     });
 
     it('Step 2 ES|QL override filters on entity.source == "entityanalytics_okta"', () => {
-      const config = buildOwnsConfigs()[0] as OverrideRelationshipIntegrationConfig;
+      const config = oktaConfig;
       const query = config.esqlQueryOverride('default');
       expect(query).toContain('entity.source == "entityanalytics_okta"');
     });
@@ -149,14 +149,16 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     const WATERMARK_FIELD = 'entity.lifecycle.last_seen';
 
     it('with no watermark: query does NOT contain a last_seen filter', () => {
-      const config = buildOwnsConfigs()[0] as OverrideRelationshipIntegrationConfig;
+      const config = oktaConfig;
       const query = config.esqlQueryOverride('default');
       expect(query).not.toContain(`${WATERMARK_FIELD} >`);
     });
 
     it('with watermark: query filters on entity.lifecycle.last_seen after the watermark value', () => {
       const ts = '2026-06-01T00:00:00.000Z';
-      const config = buildOwnsConfigs(ts)[0] as OverrideRelationshipIntegrationConfig;
+      const config = buildOwnsConfigs(ts).find(
+        (c): c is OverrideRelationshipIntegrationConfig => c.id === OKTA_ID
+      )!;
       const query = config.esqlQueryOverride('default');
       expect(query).toContain(`${WATERMARK_FIELD} > "${ts}"`);
       // The entity index @timestamp must NOT be used as the incremental signal.
@@ -165,7 +167,9 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
 
     it('with watermark: composite agg filters include an entity.lifecycle.last_seen range', () => {
       const ts = '2026-06-01T00:00:00.000Z';
-      const config = buildOwnsConfigs(ts)[0];
+      const config = buildOwnsConfigs(ts).find(
+        (c): c is OverrideRelationshipIntegrationConfig => c.id === OKTA_ID
+      )!;
       const filters = config.compositeAggAdditionalFilters ?? [];
       const rangeFilters = filters.filter((f) => JSON.stringify(f).includes(WATERMARK_FIELD));
       expect(rangeFilters.length).toBe(1);
@@ -176,7 +180,7 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     });
 
     it('with no watermark: composite agg filters do NOT include a last_seen range', () => {
-      const config = buildOwnsConfigs()[0];
+      const config = oktaConfig;
       const filters = config.compositeAggAdditionalFilters ?? [];
       const rangeFilters = filters.filter((f) => JSON.stringify(f).includes(WATERMARK_FIELD));
       expect(rangeFilters.length).toBe(0);
@@ -194,7 +198,9 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     it('entityanalytics_okta: targets-per-actor ES|QL with watermark is locked', () => {
       const config = buildOwnsConfigs(
         '2026-06-01T00:00:00.000Z'
-      )[0] as OverrideRelationshipIntegrationConfig;
+      ).find(
+        (c): c is OverrideRelationshipIntegrationConfig => c.id === OKTA_ID
+      )!;
       expect(config.esqlQueryOverride('__namespace__')).toMatchSnapshot();
     });
   });
