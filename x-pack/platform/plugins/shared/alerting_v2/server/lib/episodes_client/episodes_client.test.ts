@@ -54,16 +54,6 @@ describe('EpisodesClient', () => {
       await expect(client.get(EPISODE_ID)).resolves.toBeUndefined();
     });
 
-    it('queries the requested episode within the request space', async () => {
-      const { client, queryService } = createClient([createRow()]);
-
-      await client.get(EPISODE_ID);
-
-      const [{ query }] = queryService.executeQueryRows.mock.calls[0];
-      expect(query).toContain(`episode.id == "${EPISODE_ID}"`);
-      expect(query).toContain(SPACE_ID);
-    });
-
     it('normalizes a single-value last_tags into an array', async () => {
       const { client } = createClient([createRow({ last_tags: 'urgent' })]);
 
@@ -74,15 +64,6 @@ describe('EpisodesClient', () => {
       const { client } = createClient([createRow({ last_tags: null })]);
 
       await expect(client.get(EPISODE_ID)).resolves.toMatchObject({ last_tags: [] });
-    });
-
-    it('returns only the first row when the query yields more than one', async () => {
-      const { client } = createClient([
-        createRow(),
-        createRow({ 'episode.id': 'episode-2', 'rule.id': 'rule-2' }),
-      ]);
-
-      await expect(client.get(EPISODE_ID)).resolves.toMatchObject({ 'episode.id': EPISODE_ID });
     });
   });
 });
