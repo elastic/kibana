@@ -17,7 +17,7 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import type { AlertEpisode } from '../queries/episodes_query';
+import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
 import type { EpisodeAction } from '../actions/types';
 import { EPISODE_ACTIONS_BAR_MORE_ACTIONS } from './translations';
 

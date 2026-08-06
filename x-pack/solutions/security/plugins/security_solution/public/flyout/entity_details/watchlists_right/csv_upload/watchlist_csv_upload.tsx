@@ -216,8 +216,7 @@ const UploadResult: React.FC<{
     title = i18n.translate(
       'xpack.securitySolution.entityAnalytics.watchlists.flyout.csv.result.allSuccess',
       {
-        defaultMessage:
-          '{count} {count, plural, one {entity} other {entities}} added to the watchlist.',
+        defaultMessage: '{count} {count, plural, one {row} other {rows}} added to the watchlist.',
         values: { count: successful },
       }
     );

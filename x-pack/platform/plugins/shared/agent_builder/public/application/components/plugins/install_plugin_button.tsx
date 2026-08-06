@@ -45,6 +45,7 @@ export const InstallPluginButton: React.FC = () => {
   return (
     <>
       <EuiPopover
+        aria-label={labels.plugins.installPluginButton}
         button={
           <EuiButton
             fill

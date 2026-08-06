@@ -18,6 +18,7 @@ import {
   EuiDataGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiScreenReaderOnly,
   EuiToolTip,
   euiScreenReaderOnly,
   useEuiTheme,
@@ -331,7 +332,16 @@ export function PreviewTable({
       {
         id: 'selection',
         width: 36,
-        headerCellRender: () => null,
+        headerCellRender: () => (
+          <EuiScreenReaderOnly>
+            <span>
+              {i18n.translate(
+                'xpack.streams.resultPanel.euiDataGrid.preview.rowSelectionColumnHeader',
+                { defaultMessage: 'Row selection' }
+              )}
+            </span>
+          </EuiScreenReaderOnly>
+        ),
         rowCellRender: ({ rowIndex, setCellProps }) => (
           <RowSelectionCell
             rowIndex={rowIndex}

@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -51,6 +52,7 @@ const AlertRetrievalWorkflowsInfoComponent: React.FC<AlertRetrievalWorkflowsInfo
 
   const [isOpen, setIsOpen] = useState(false);
   const [spaceId, setSpaceId] = useState<string | undefined>(undefined);
+  const popoverTitleId = useGeneratedHtmlId();
 
   const createWorkflowUrl = useMemo(() => {
     try {
@@ -120,12 +122,15 @@ const AlertRetrievalWorkflowsInfoComponent: React.FC<AlertRetrievalWorkflowsInfo
   return (
     <EuiPopover
       anchorPosition="rightUp"
+      aria-labelledby={popoverTitleId}
       button={button}
       closePopover={closePopover}
       data-test-subj="alertRetrievalWorkflowsInfoPopover"
       isOpen={isOpen}
     >
-      <EuiPopoverTitle>{ALERT_RETRIEVAL_WORKFLOWS_POPOVER_HEADLINE}</EuiPopoverTitle>
+      <EuiPopoverTitle id={popoverTitleId}>
+        {ALERT_RETRIEVAL_WORKFLOWS_POPOVER_HEADLINE}
+      </EuiPopoverTitle>
 
       <div
         css={css`

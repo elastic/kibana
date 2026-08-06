@@ -152,8 +152,6 @@ export interface OpenDocumentCorrelationsParams {
   hit: DataTableRecord;
   /** Scope id for the document. */
   scopeId: string;
-  /** Whether the document is being displayed in a rule preview. */
-  isRulePreview: boolean;
   /** Callback to open one of the correlated alerts. */
   onShowAlert: (id: string, indexName: string, title?: string) => void;
   /** Optional callback to open a correlated attack; when omitted the attack column is hidden. */
@@ -253,10 +251,6 @@ export interface DocumentFlyoutApi {
  * (`flyoutProviders` + `overlays.openSystemFlyout`, via `useOpenFlyout`) and the per-tool flyout
  * properties so call sites don't have to repeat them. `useOpenFlyout` also reports open/close
  * telemetry for every method below.
- *
- * This API only ever opens the NEW flyout. It does not know about the legacy expandable flyout:
- * callers remain responsible for gating on `useIsNewFlyoutEnabled()` and falling back to the
- * legacy flyout when it is off.
  *
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
@@ -543,21 +537,13 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
   );
 
   const openDocumentCorrelations = useCallback(
-    ({
-      hit,
-      scopeId,
-      isRulePreview,
-      onShowAlert,
-      onShowAttack,
-      origin,
-    }: OpenDocumentCorrelationsParams) => {
+    ({ hit, scopeId, onShowAlert, onShowAttack, origin }: OpenDocumentCorrelationsParams) => {
       const { documentId, indexName } = documentIdsFromHit(hit);
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.documentCorrelations,
         documentId,
         indexName,
         scopeId,
-        isRulePreview,
       });
       // A tool flyout opens with session:'start' — it is a root, not a child of the document, and
       // the document is not persisted alongside it. Closing the tool therefore clears the param
@@ -567,7 +553,6 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         <CorrelationsDetails
           hit={hit}
           scopeId={scopeId}
-          isRulePreview={isRulePreview}
           onShowAlert={onShowAlert}
           onShowAttack={onShowAttack}
         />,
