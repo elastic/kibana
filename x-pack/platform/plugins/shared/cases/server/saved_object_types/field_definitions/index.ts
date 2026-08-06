@@ -36,9 +36,6 @@ const mappings = {
     isGlobal: {
       type: 'boolean',
     },
-    displayOrder: {
-      type: 'integer',
-    },
   },
 } as const;
 
@@ -63,5 +60,7 @@ export const caseFieldDefinitionSavedObjectType: SavedObjectsType = {
   },
 };
 
-// NOTE: maintain type "connection" with Domain Schema
-mappings.properties satisfies Record<keyof FieldDefinition, unknown>;
+// NOTE: maintain type "connection" with Domain Schema. Mapped fields must exist on the
+// domain type; not every domain field is mapped (`displayOrder` is intentionally unmapped
+// because it is only read from `_source` and sorted in application code).
+mappings.properties satisfies Partial<Record<keyof FieldDefinition, unknown>>;

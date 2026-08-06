@@ -14,14 +14,10 @@ export const fieldDefinitionSchemaV2 = fieldDefinitionSchema.extends({
 });
 
 export const modelVersion2: SavedObjectsModelVersion = {
-  changes: [
-    {
-      type: 'mappings_addition',
-      addedMappings: {
-        displayOrder: { type: 'integer' },
-      },
-    },
-  ],
+  // `displayOrder` is intentionally left unmapped: it is only read from `_source` and
+  // sorted in application code. A `mappings_addition` can be introduced later if ES-side
+  // querying or sorting is ever needed.
+  changes: [],
   schemas: {
     create: fieldDefinitionSchemaV2,
     forwardCompatibility: fieldDefinitionSchemaV2.extends({}, { unknowns: 'ignore' }),
