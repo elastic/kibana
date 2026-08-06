@@ -1728,21 +1728,42 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     /** resets visualization/layer or removes a layer */
     async removeLayer(index: number = 0) {
+      const tabsBefore = (await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000))
+        .length;
+
       await retry.try(async () => {
         // Hover over the tab to make the layer actions button visible
         const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
         if (tabs[index]) {
           await tabs[index].moveMouseTo();
         }
+        // A layer with more than one action hides "remove" behind a split-button popover;
+        // a single-action layer (e.g. the only remaining layer) exposes it directly.
         if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
           await testSubjects.click(`lnsLayerSplitButton--${index}`);
         }
         await testSubjects.click(`lnsLayerRemove--${index}`);
         if (await testSubjects.exists('lnsLayerRemoveModal')) {
-          await testSubjects.exists('lnsLayerRemoveConfirmButton');
           await testSubjects.click('lnsLayerRemoveConfirmButton');
         }
       });
+
+      // Wait for the removal to actually land before returning, so a back-to-back
+      // removeLayer() never observes the tab bar mid-teardown.
+      if (tabsBefore > 0) {
+        await retry.waitFor('layer tab to be removed', async () => {
+          const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+          return tabs.length < tabsBefore;
+        });
+      } else {
+        // Clearing the only layer keeps its (now empty) panel, so wait for its dimensions to go.
+        await retry.waitFor('cleared layer dimensions to be removed', async () => {
+          return !(await testSubjects.exists(`lns-layerPanel-${index} > lns-dimensionTrigger`, {
+            timeout: 1000,
+          }));
+        });
+      }
+      await header.waitUntilLoadingHasFinished();
     },
 
     async ensureLayerTabIsActive(index: number = 0) {
