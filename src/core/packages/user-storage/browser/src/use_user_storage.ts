@@ -74,18 +74,14 @@ export function useUserStorage<T = unknown>(
   const stableDefault = defaultValueRef.current;
 
   const value$: Observable<T | undefined> = useMemo(
-    () =>
-      stableDefault !== undefined ? client.get$<T>(key, stableDefault) : client.get$<T>(key),
+    () => (stableDefault !== undefined ? client.get$<T>(key, stableDefault) : client.get$<T>(key)),
     [client, key, stableDefault]
   );
 
   // peek() is side-effect-free, so it's safe to read during render under concurrent mode.
   // It supplies the pre-subscription value; a preloaded key is already correct on first render.
   const cached = client.peek<T>(key);
-  const value = useObservable<T | undefined>(
-    value$,
-    cached !== undefined ? cached : stableDefault
-  );
+  const value = useObservable<T | undefined>(value$, cached !== undefined ? cached : stableDefault);
 
   const set = useCallback<UserStorageSetter<T>>(
     (newValue) => client.set<T>(key, newValue),
