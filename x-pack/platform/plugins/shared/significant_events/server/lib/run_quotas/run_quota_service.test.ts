@@ -93,14 +93,16 @@ describe('resolveSettings', () => {
       },
     });
 
-    expect(timezone).toBe('Europe/Zurich');
+    // Timezone is always UTC regardless of any stored value (not configurable).
+    expect(timezone).toBe('UTC');
     expect(limits.memory).toEqual({ enabled: false, max: 4 });
     expect(limits.detection).toEqual({ enabled: true, max: DEFAULT_RUN_LIMITS.detection });
     expect(limits).not.toHaveProperty('from_a_newer_version');
   });
 
-  it('ignores a stored time zone that is not a real zone', () => {
+  it('always returns UTC regardless of stored timezone', () => {
     expect(resolveSettings({ timezone: 'Mars/Olympus', limits: {} }).timezone).toBe('UTC');
+    expect(resolveSettings({ timezone: 'Europe/Zurich', limits: {} }).timezone).toBe('UTC');
   });
 });
 
@@ -194,13 +196,15 @@ describe('createRunQuotaService', () => {
     expect(onSettingsChanged).toHaveBeenCalledWith(next);
   });
 
-  it('rejects an unknown time zone before writing anything', async () => {
-    const { service, create } = createHarness();
+  it('ignores timezone in updateSettings and always writes UTC', async () => {
+    const { service } = createHarness();
 
-    await expect(
-      service.updateSettings({ request, update: { timezone: 'Mars/Olympus' } })
-    ).rejects.toThrow('Unknown time zone "Mars/Olympus"');
-    expect(create).not.toHaveBeenCalled();
+    // Timezone is not configurable; any supplied value is silently dropped.
+    const result = await service.updateSettings({
+      request,
+      update: { timezone: 'Europe/Zurich' },
+    });
+    expect(result.timezone).toBe('UTC');
   });
 
   it('keeps the saved limits when the reinstall fails, since a later install picks them up', async () => {

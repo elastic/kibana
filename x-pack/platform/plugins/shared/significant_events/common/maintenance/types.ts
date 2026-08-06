@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RunQuotaEngineId } from '../run_quotas/types';
 import type { SignificantEventsMaintenanceState } from './state_machine';
 
 /** A single target that could not be processed during a state transition. */
@@ -45,6 +46,17 @@ export interface SignificantEventsMaintenanceFeatureSettings {
   scheduledDiscoveryEnabled: boolean;
 }
 
+/** The reason an engine was paused — distinguishes quota-triggered from user-initiated. */
+export type EngineMaintenanceReason = 'user' | 'run_quota';
+
+/** Per-engine pause state persisted and surfaced in the status response. */
+export interface EngineMaintenanceEntry {
+  state: 'enabled' | 'paused';
+  reason?: EngineMaintenanceReason;
+  /** ISO timestamp of when the engine entered the current state. */
+  pausedAt?: string;
+}
+
 /** Persisted, UI-facing maintenance state. */
 export interface SignificantEventsMaintenanceStatus {
   state: SignificantEventsMaintenanceState;
@@ -60,4 +72,9 @@ export interface SignificantEventsMaintenanceStatus {
    * treat a missing `featureSettings` as "still enabled".
    */
   featureSettingsUnavailable?: boolean;
+  /**
+   * Per-engine pause state. Only present when at least one engine has been
+   * paused individually (global pause does not populate this map).
+   */
+  engines?: Partial<Record<RunQuotaEngineId, EngineMaintenanceEntry>>;
 }

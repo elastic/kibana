@@ -21,9 +21,12 @@ import {
   SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_RUN_QUOTA_ENFORCE_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_RUN_QUOTA_RESET_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
+import type { RunQuotaEngineId } from '../../../common/run_quotas/types';
 import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
 
 /**
@@ -41,6 +44,15 @@ export const GLOBAL_CORE_WORKFLOW_IDS = [
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
+] as const;
+
+/**
+ * Quota lifecycle workflows: installed globally, but never disabled by pause —
+ * otherwise a paused deployment could never auto-resume at the daily reset.
+ */
+export const RUN_QUOTA_LIFECYCLE_WORKFLOW_IDS = [
+  SIGNIFICANT_EVENTS_RUN_QUOTA_RESET_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_RUN_QUOTA_ENFORCE_WORKFLOW_ID,
 ] as const;
 
 /** Memory workflows installed at the global scope when the memory flag is on. */
@@ -62,6 +74,8 @@ export const GLOBAL_MAINTENANCE_WORKFLOW_IDS = [
   ...GLOBAL_CORE_WORKFLOW_IDS,
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
   ...MEMORY_WORKFLOW_IDS,
+  // Installed with the core set, but excluded from buildDisableTargets below.
+  ...RUN_QUOTA_LIFECYCLE_WORKFLOW_IDS,
 ] as const;
 
 /** Workflows installed in the default space (continuous onboarding, KI sync, legacy). */
@@ -82,6 +96,7 @@ export const ALL_INSTALLABLE_WORKFLOW_IDS = [
   SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
   ...MEMORY_WORKFLOW_IDS,
   ...SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
+  ...RUN_QUOTA_LIFECYCLE_WORKFLOW_IDS,
 ] as const;
 
 export interface MaintenanceWorkflowTarget {
@@ -90,12 +105,17 @@ export interface MaintenanceWorkflowTarget {
   spaceId: string;
 }
 
+const isRunQuotaLifecycleWorkflow = (id: string): boolean =>
+  (RUN_QUOTA_LIFECYCLE_WORKFLOW_IDS as readonly string[]).includes(id);
+
 /** Targets whose `enabled` flag is toggled by pause/resume. */
 export const buildDisableTargets = (spaceIds: string[]): MaintenanceWorkflowTarget[] => [
-  ...GLOBAL_MAINTENANCE_WORKFLOW_IDS.map((id) => ({
-    id,
-    spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-  })),
+  ...GLOBAL_MAINTENANCE_WORKFLOW_IDS.filter((id) => !isRunQuotaLifecycleWorkflow(id)).map(
+    (id) => ({
+      id,
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    })
+  ),
   ...DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS.map((id) => ({
     id,
     spaceId: DEFAULT_SPACE_ID,
@@ -114,7 +134,12 @@ export const buildDisableTargets = (spaceIds: string[]): MaintenanceWorkflowTarg
  * space, so cancellation sweeps every space for those ids.
  */
 export const buildCancelTargets = (spaceIds: string[]): MaintenanceWorkflowTarget[] => [
-  ...spaceIds.flatMap((spaceId) => GLOBAL_MAINTENANCE_WORKFLOW_IDS.map((id) => ({ id, spaceId }))),
+  ...spaceIds.flatMap((spaceId) =>
+    GLOBAL_MAINTENANCE_WORKFLOW_IDS.filter((id) => !isRunQuotaLifecycleWorkflow(id)).map((id) => ({
+      id,
+      spaceId,
+    }))
+  ),
   ...DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS.map((id) => ({
     id,
     spaceId: DEFAULT_SPACE_ID,
@@ -126,3 +151,71 @@ export const buildCancelTargets = (spaceIds: string[]): MaintenanceWorkflowTarge
     }))
   ),
 ];
+
+/**
+ * Per-engine automation disable targets for engine-scoped pause.
+ *
+ * These stop *automation only* — the workflows listed here are scheduled or
+ * continuous triggers, not user-callable leaves. Human-initiated workflows
+ * (e.g. ki-onboarding leaf, memory-synthesis, investigation) are deliberately
+ * excluded so manual runs always remain available.
+ *
+ * | Engine      | Stopped automation                                              |
+ * |-------------|-----------------------------------------------------------------|
+ * | context     | continuous-onboarding, ki-sync, legacy-continuous-KI,          |
+ * |             | memory-consolidation, conversation-scraper, gap-detection       |
+ * | detection   | orchestrator, scheduled-detection-*, scheduled-review-*         |
+ * | investigation | nothing (the in-workflow quota gate refuses automated runs)   |
+ */
+export const buildEngineDisableTargets = (
+  engine: RunQuotaEngineId,
+  spaceIds: string[]
+): MaintenanceWorkflowTarget[] => {
+  switch (engine) {
+    case 'context':
+      return [
+        // Default-space automation workflows
+        { id: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID, spaceId: DEFAULT_SPACE_ID },
+        { id: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID, spaceId: DEFAULT_SPACE_ID },
+        { id: LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID, spaceId: DEFAULT_SPACE_ID },
+        // Global-scope memory automation (NOT memory synthesis — user-triggered)
+        {
+          id: SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        },
+        {
+          id: SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        },
+        {
+          id: SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        },
+      ];
+
+    case 'detection':
+      return [
+        // Orchestrator drives detection; discovery is kept so "run now" still works
+        { id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID, spaceId: GLOBAL_WORKFLOW_SPACE_ID },
+        // Per-space scheduled workflows
+        ...spaceIds.flatMap((spaceId) => [
+          { id: `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-${spaceId}`, spaceId },
+          { id: `${SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID}-${spaceId}`, spaceId },
+        ]),
+      ];
+
+    case 'investigation':
+      // The in-workflow quota gate refuses automated runs; no separate disable needed.
+      return [];
+  }
+};
+
+/**
+ * Build engine disable targets for a set of engines. Order within each engine
+ * group is preserved; engines are processed in the order given.
+ */
+export const buildEngineDisableTargetsForEngines = (
+  engines: readonly RunQuotaEngineId[],
+  spaceIds: string[]
+): MaintenanceWorkflowTarget[] =>
+  engines.flatMap((engine) => buildEngineDisableTargets(engine, spaceIds));

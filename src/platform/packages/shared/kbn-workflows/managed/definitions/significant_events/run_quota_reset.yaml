@@ -1,0 +1,43 @@
+version: "1"
+name: "Significant Events Run Quota Reset"
+description: >
+  Daily reset workflow that resumes any engine paused because its daily run quota
+  was exhausted. Runs just after midnight UTC (00:05) so calendars day-rolls cleanly
+  before engines are un-paused.
+enabled: true
+settings:
+  timeout: "5m"
+  concurrency:
+    key: "significant-events-run-quota-reset"
+    strategy: drop
+    max: 1
+tags:
+  - observability
+  - streams
+  - significant-events
+  - run-quota
+  - system
+
+triggers:
+  - type: scheduled
+    with:
+      cron: "5 0 * * *"
+  - type: manual
+
+steps:
+  - name: resume_quota_paused_engines
+    type: kibana.request
+    with:
+      method: POST
+      path: '/internal/significant_events/maintenance/_resume'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        engines:
+          - 'context'
+          - 'detection'
+          - 'investigation'
+        reasons:
+          - 'run_quota'
+    on-failure:
+      continue: true

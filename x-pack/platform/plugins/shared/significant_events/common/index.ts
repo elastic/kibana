@@ -72,6 +72,8 @@ export type {
 } from './slack_app/types';
 
 export type {
+  EngineMaintenanceEntry,
+  EngineMaintenanceReason,
   SignificantEventsMaintenanceFailure,
   SignificantEventsMaintenanceSummary,
   SignificantEventsMaintenanceStatus,

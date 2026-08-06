@@ -125,6 +125,23 @@ steps:
     on-failure:
       continue: true
 
+  # When the quota is exhausted, pause the engine so further automation stops
+  # immediately. The daily reset workflow resumes it after midnight UTC.
+  - name: quota_pause_engine
+    type: kibana.request
+    if: '${{ steps.quota_decide.output.quotaRefused }}'
+    with:
+      method: POST
+      path: '/internal/significant_events/maintenance/_pause'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        engines:
+          - '{{ consts.RUN_ENGINE }}'
+        reason: 'run_quota'
+    on-failure:
+      continue: true
+
   # Exits before `attach_pending_to_significant_event`, so a refused run leaves
   # no half-open investigation spinning in the UI.
   - name: quota_stop_if_exhausted

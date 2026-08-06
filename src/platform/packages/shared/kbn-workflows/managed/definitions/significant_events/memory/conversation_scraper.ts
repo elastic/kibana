@@ -22,7 +22,7 @@ export const SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID =
 export const SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 5,
+  version: 6,
   billable: false,
   yamlTemplate: (values) => renderRunQuotaGate(CONVERSATION_SCRAPER_YAML, values),
   management: {

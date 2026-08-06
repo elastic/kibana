@@ -19,7 +19,10 @@ import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/type
 import type { RunQuotaSettings } from '../../../../common';
 import { installMemoryWorkflows } from '../../../memory_and_investigation/lib/memory/install_managed_workflows';
 import { isGatedWorkflowId, runQuotaValuesFor } from '../../run_quotas/budget_groups';
-import { GLOBAL_CORE_WORKFLOW_IDS } from '../../maintenance/managed_workflow_targets';
+import {
+  GLOBAL_CORE_WORKFLOW_IDS,
+  RUN_QUOTA_LIFECYCLE_WORKFLOW_IDS,
+} from '../../maintenance/managed_workflow_targets';
 
 // Groupings come from `managed_workflow_targets.ts` so install and pause stay in sync.
 // Discovery and KI onboarding carry the daily run-quota gate, so they are installed
@@ -35,6 +38,12 @@ const WORKFLOWS_TO_INSTALL: Array<{
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     })
   ),
+  // Quota enforce/reset — installed globally, never disabled by pause (see
+  // RUN_QUOTA_LIFECYCLE_WORKFLOW_IDS / buildDisableTargets).
+  ...RUN_QUOTA_LIFECYCLE_WORKFLOW_IDS.map((workflowId) => ({
+    workflowId: workflowId as Exclude<ManagedWorkflowId, TemplatedManagedWorkflowId>,
+    spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+  })),
   // Installed in the default space (not global) so its scheduled executions
   // are stored alongside the onboarding executions it triggers.
   {

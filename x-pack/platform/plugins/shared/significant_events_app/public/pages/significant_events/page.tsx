@@ -17,6 +17,7 @@ import { useSignificantEventsAppRouter } from '../../hooks/use_significant_event
 import { useSignificantEventsPrivileges } from '../../hooks/use_significant_events_privileges';
 import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
 import { useBlocksNewActivity } from '../../hooks/use_significant_events_maintenance';
+import { useRunQuotas } from '../../hooks/use_significant_events_run_quotas';
 import { RedirectTo } from '../../components/redirect_to';
 import { SignificantEventsNotEnabledPrompt } from '../../components/not_enabled_prompt';
 import {
@@ -82,6 +83,8 @@ export function SignificantEventsPage() {
     isError: isMaintenanceStatusError,
     status: maintenanceStatus,
   } = useBlocksNewActivity();
+  const { data: runQuotasData } = useRunQuotas();
+  const exhaustedGroups = (runQuotasData?.groups ?? []).filter((g) => g.exhausted);
   const showMaintenanceBanners = tab !== 'settings';
 
   const onOnboardingFailed = useCallback(
@@ -345,6 +348,55 @@ export function SignificantEventsPage() {
                       {i18n.translate('xpack.significantEventsApp.pausedBannerSettingsButton', {
                         defaultMessage: 'Go to Settings',
                       })}
+                    </EuiButton>
+                  )}
+                </EuiCallOut>
+                <EuiSpacer />
+              </>
+            )}
+            {showMaintenanceBanners && exhaustedGroups.length > 0 && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  color="warning"
+                  iconType="clock"
+                  data-test-subj="significantEventsRunQuotaExhaustedBanner"
+                  title={i18n.translate(
+                    'xpack.significantEventsApp.runQuotaExhaustedBannerTitle',
+                    {
+                      defaultMessage:
+                        '{count, plural, one {# engine} other {# engines}} reached the daily run limit',
+                      values: { count: exhaustedGroups.length },
+                    }
+                  )}
+                >
+                  <p>
+                    {i18n.translate('xpack.significantEventsApp.runQuotaExhaustedBannerBody', {
+                      defaultMessage:
+                        'Automated runs are stopped for: {groups}. Runs you start yourself still work. Counters reset at {resetsAt} UTC.',
+                      values: {
+                        groups: exhaustedGroups.map((g) => g.group).join(', '),
+                        resetsAt: runQuotasData?.window.resetsAt
+                          ? new Date(runQuotasData.window.resetsAt).toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              timeZone: 'UTC',
+                            })
+                          : '00:00',
+                      },
+                    })}
+                  </p>
+                  {canManageStreams && (
+                    <EuiButton
+                      href={router.link('/{tab}', { path: { tab: 'settings' } })}
+                      color="warning"
+                      size="s"
+                      data-test-subj="significantEventsRunQuotaExhaustedBannerSettingsLink"
+                    >
+                      {i18n.translate(
+                        'xpack.significantEventsApp.runQuotaExhaustedBannerSettingsButton',
+                        { defaultMessage: 'Go to Settings' }
+                      )}
                     </EuiButton>
                   )}
                 </EuiCallOut>

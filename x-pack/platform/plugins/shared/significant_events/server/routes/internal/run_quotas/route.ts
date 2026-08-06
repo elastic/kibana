@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { badRequest } from '@hapi/boom';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import {
   MAX_RUN_LIMIT,
@@ -67,8 +66,9 @@ const updateRunQuotasRoute = createServerRoute({
     },
   },
   params: z.object({
+    // timezone is intentionally absent: the daily window is always UTC and
+    // is not configurable (settled product decision 2026-08-06).
     body: z.object({
-      timezone: z.string().max(64).optional(),
       limits: z.partialRecord(budgetGroupSchema, runLimitSchema).optional(),
     }),
   }),
@@ -83,19 +83,11 @@ const updateRunQuotasRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
-    try {
-      return await runQuotaService.updateSettings({
-        request,
-        update: params.body,
-        updatedBy,
-      });
-    } catch (error) {
-      // An unknown time zone is caller error, not a server fault.
-      if (error instanceof Error && error.message.startsWith('Unknown time zone')) {
-        throw badRequest(error.message);
-      }
-      throw error;
-    }
+    return runQuotaService.updateSettings({
+      request,
+      update: params.body,
+      updatedBy,
+    });
   },
 });
 

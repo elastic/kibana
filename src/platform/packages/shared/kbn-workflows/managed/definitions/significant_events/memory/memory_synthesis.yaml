@@ -100,6 +100,21 @@ steps:
     on-failure:
       continue: true
 
+  - name: quota_pause_engine
+    type: kibana.request
+    if: '${{ steps.quota_decide.output.quotaRefused }}'
+    with:
+      method: POST
+      path: '/internal/significant_events/maintenance/_pause'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        engines:
+          - '{{ consts.RUN_ENGINE }}'
+        reason: 'run_quota'
+    on-failure:
+      continue: true
+
   - name: quota_stop_if_exhausted
     type: workflow.output
     if: "${{ steps.quota_decide.output.quotaRefused }}"

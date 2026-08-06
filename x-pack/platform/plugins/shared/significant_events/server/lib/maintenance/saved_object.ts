@@ -74,8 +74,27 @@ const maintenanceStateAttributesV1 = schema.object({
   pausedSettings: schema.maybe(pausedFeatureSettingsSchemaV1),
 });
 
+const engineMaintenanceEntrySchemaV2 = schema.object({
+  state: schema.string(),
+  reason: schema.maybe(schema.string()),
+  pausedAt: schema.maybe(schema.string()),
+});
+
+/**
+ * v2 adds an optional `engines` map for per-engine pause state.
+ * All fields from v1 are carried forward without changes.
+ */
+const maintenanceStateAttributesV2 = maintenanceStateAttributesV1.extends({
+  engines: schema.maybe(
+    schema.recordOf(
+      schema.string({ maxLength: 64 }),
+      engineMaintenanceEntrySchemaV2
+    )
+  ),
+});
+
 export type SignificantEventsMaintenanceStateAttributes = TypeOf<
-  typeof maintenanceStateAttributesV1
+  typeof maintenanceStateAttributesV2
 >;
 
 export const getSignificantEventsMaintenanceStateSavedObjectType = (): SavedObjectsType => ({
@@ -99,5 +118,18 @@ export const getSignificantEventsMaintenanceStateSavedObjectType = (): SavedObje
         create: maintenanceStateAttributesV1,
       },
     },
+    '2': {
+      changes: [
+        {
+          type: 'mappings_addition' as const,
+          addedMappings: {},
+        },
+      ],
+      schemas: {
+        forwardCompatibility: maintenanceStateAttributesV2.extends({}, { unknowns: 'ignore' }),
+        create: maintenanceStateAttributesV2,
+      },
+    },
   },
 });
+

@@ -66,7 +66,6 @@ export const useRunQuotas = () => {
 };
 
 export interface RunQuotasUpdate {
-  timezone?: string;
   limits?: Partial<Record<RunBudgetGroupId, RunLimit>>;
 }
 

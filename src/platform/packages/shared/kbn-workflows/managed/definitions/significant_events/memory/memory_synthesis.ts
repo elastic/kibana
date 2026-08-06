@@ -22,7 +22,7 @@ export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID =
 export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 5,
+  version: 6,
   billable: false,
   yamlTemplate: (values) => renderRunQuotaGate(MEMORY_SYNTHESIS_YAML, values),
   management: {

@@ -26,10 +26,14 @@ import {
   RUN_QUOTA_SETTINGS_SO_TYPE,
   type RunQuotaSettingsAttributes,
 } from './saved_object';
-import { isValidTimeZone, resolveDailyWindow } from './window';
+import { resolveDailyWindow } from './window';
 
-/** Partial update: omitted groups keep their stored value. */
+/**
+ * Partial update — only `limits` is accepted. `timezone` is kept for
+ * backwards-compatible callers but is ignored: the daily window is always UTC.
+ */
 export interface RunQuotaSettingsUpdate {
+  /** @deprecated ignored — timezone is always UTC */
   timezone?: string;
   limits?: Partial<Record<RunBudgetGroupId, RunLimit>>;
 }
@@ -52,14 +56,13 @@ export interface RunQuotaService {
 /**
  * Fills every known group from the defaults and drops groups this node does not
  * know about, so a document written by a different version still reads cleanly.
+ * Timezone is always UTC regardless of any stored value (not configurable).
  */
 export const resolveSettings = (
   attributes: RunQuotaSettingsAttributes | undefined
 ): RunQuotaSettings => {
-  const timezone =
-    attributes?.timezone && isValidTimeZone(attributes.timezone)
-      ? attributes.timezone
-      : DEFAULT_RUN_QUOTA_SETTINGS.timezone;
+  // Timezone is always UTC — not user-configurable. Ignore any stored value.
+  const timezone = DEFAULT_RUN_QUOTA_SETTINGS.timezone;
 
   const limits = Object.fromEntries(
     RUN_BUDGET_GROUP_IDS.map((group) => {
@@ -232,17 +235,14 @@ export const createRunQuotaService = ({
     getSettings,
 
     async updateSettings({ request, update, updatedBy }) {
-      if (update.timezone !== undefined && !isValidTimeZone(update.timezone)) {
-        throw new Error(`Unknown time zone "${update.timezone}"`);
-      }
-
+      // Timezone is always UTC; any value supplied by the caller is silently ignored.
       const soClient = server.core.savedObjects.getScopedClient(request, {
         includedHiddenTypes: [RUN_QUOTA_SETTINGS_SO_TYPE],
       });
       const current = resolveSettings(await readAttributes(soClient));
 
       const next: RunQuotaSettings = {
-        timezone: update.timezone ?? current.timezone,
+        timezone: DEFAULT_RUN_QUOTA_SETTINGS.timezone,
         limits: { ...current.limits, ...update.limits },
       };
 

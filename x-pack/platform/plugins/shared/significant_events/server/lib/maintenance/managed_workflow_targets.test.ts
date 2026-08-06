@@ -8,6 +8,8 @@
 import {
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_RUN_QUOTA_ENFORCE_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_RUN_QUOTA_RESET_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
   ALL_INSTALLABLE_WORKFLOW_IDS,
@@ -15,7 +17,10 @@ import {
   GLOBAL_CORE_WORKFLOW_IDS,
   GLOBAL_MAINTENANCE_WORKFLOW_IDS,
   MEMORY_WORKFLOW_IDS,
+  RUN_QUOTA_LIFECYCLE_WORKFLOW_IDS,
   SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
+  buildCancelTargets,
+  buildDisableTargets,
 } from './managed_workflow_targets';
 
 describe('managed_workflow_targets registry', () => {
@@ -31,12 +36,24 @@ describe('managed_workflow_targets registry', () => {
     }
   });
 
-  it('keeps core + investigation + memory as the global maintenance set', () => {
+  it('keeps core + investigation + memory + quota lifecycle as the global maintenance set', () => {
     expect(GLOBAL_MAINTENANCE_WORKFLOW_IDS).toEqual([
       ...GLOBAL_CORE_WORKFLOW_IDS,
       SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
       ...MEMORY_WORKFLOW_IDS,
+      ...RUN_QUOTA_LIFECYCLE_WORKFLOW_IDS,
     ]);
+  });
+
+  it('never disables or cancels quota lifecycle workflows on pause', () => {
+    const spaceIds = ['default', 'space-a'];
+    const disableIds = new Set(buildDisableTargets(spaceIds).map(({ id }) => id));
+    const cancelIds = new Set(buildCancelTargets(spaceIds).map(({ id }) => id));
+
+    expect(disableIds.has(SIGNIFICANT_EVENTS_RUN_QUOTA_RESET_WORKFLOW_ID)).toBe(false);
+    expect(disableIds.has(SIGNIFICANT_EVENTS_RUN_QUOTA_ENFORCE_WORKFLOW_ID)).toBe(false);
+    expect(cancelIds.has(SIGNIFICANT_EVENTS_RUN_QUOTA_RESET_WORKFLOW_ID)).toBe(false);
+    expect(cancelIds.has(SIGNIFICANT_EVENTS_RUN_QUOTA_ENFORCE_WORKFLOW_ID)).toBe(false);
   });
 
   it('keeps continuous onboarding in the default-space set (not memory)', () => {

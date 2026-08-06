@@ -48,15 +48,15 @@ export const RUN_BUDGET_GROUPS_BY_ENGINE: Readonly<
 };
 
 /**
- * Defaults are sized to catch runaway configuration rather than to shape
- * day-to-day behaviour: each is comfortably above the cadence the shipped
- * schedules produce.
+ * Defaults cap day-to-day automation at 20 runs per group. This is the
+ * settled product decision (2026-08-06); adjusted after observing real
+ * customer-0 cluster run rates.
  */
 export const DEFAULT_RUN_LIMITS: Readonly<Record<RunBudgetGroupId, number>> = {
-  ki_extraction: 5,
-  memory: 10,
+  ki_extraction: 20,
+  memory: 20,
   detection: 20,
-  investigation: 10,
+  investigation: 20,
 };
 
 export const MIN_RUN_LIMIT = 1;

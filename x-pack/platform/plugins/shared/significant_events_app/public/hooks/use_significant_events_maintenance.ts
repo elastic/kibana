@@ -10,6 +10,8 @@ import type { QueryFunctionContext } from '@kbn/react-query';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import {
   stateBlocksNewActivity,
+  type EngineMaintenanceReason,
+  type RunQuotaEngineId,
   type SignificantEventsMaintenanceStatus,
   type SignificantEventsMaintenanceSummary,
 } from '@kbn/significant-events-plugin/common';
@@ -49,6 +51,16 @@ const RESUME_WARNINGS_TOAST_TITLE = i18n.translate(
   { defaultMessage: 'Resumed Significant Events activity with warnings' }
 );
 
+const ENGINE_PAUSE_SUCCESS_TOAST_TITLE = i18n.translate(
+  'xpack.significantEventsApp.maintenance.enginePauseSuccessToastTitle',
+  { defaultMessage: 'Paused engine automation' }
+);
+
+const ENGINE_RESUME_SUCCESS_TOAST_TITLE = i18n.translate(
+  'xpack.significantEventsApp.maintenance.engineResumeSuccessToastTitle',
+  { defaultMessage: 'Resumed engine automation' }
+);
+
 const partialFailuresText = (count: number) =>
   i18n.translate('xpack.significantEventsApp.maintenance.partialFailuresText', {
     defaultMessage:
@@ -60,6 +72,16 @@ const partialFailuresText = (count: number) =>
 // space, or user, so poll periodically and on window focus to avoid acting on a
 // stale status.
 const MAINTENANCE_STATUS_REFETCH_INTERVAL_MS = 30_000;
+
+export interface PauseMaintenanceParams {
+  engines?: RunQuotaEngineId[];
+  reason?: EngineMaintenanceReason;
+}
+
+export interface ResumeMaintenanceParams {
+  engines?: RunQuotaEngineId[];
+  reasons?: EngineMaintenanceReason[];
+}
 
 /** Reads the persisted maintenance state. Cached under a shared key so every
  * consumer (settings control, discovery callout, toggles) sees a single source
@@ -129,22 +151,40 @@ export const useSignificantEventsMaintenanceActions = () => {
   const invalidateStatus = () =>
     queryClient.invalidateQueries({ queryKey: MAINTENANCE_STATUS_QUERY_KEY });
 
-  const pauseMutation = useMutation<SignificantEventsMaintenanceSummary, Error, void>({
-    mutationFn: () =>
+  const pauseMutation = useMutation<
+    SignificantEventsMaintenanceSummary,
+    Error,
+    PauseMaintenanceParams | void
+  >({
+    mutationFn: (params) =>
       significantEventsRepositoryClient.fetch(
         'POST /internal/significant_events/maintenance/_pause',
         {
           signal: null,
+          ...(params
+            ? {
+                params: {
+                  body: {
+                    engines: params.engines,
+                    reason: params.reason,
+                  },
+                },
+              }
+            : {}),
         }
       ),
-    onSuccess: (summary) => {
+    onSuccess: (summary, params) => {
       if (summary.partialFailures.length > 0) {
         toasts.addWarning({
           title: PAUSE_PARTIAL_TOAST_TITLE,
           text: partialFailuresText(summary.partialFailures.length),
         });
       } else {
-        toasts.addSuccess({ title: PAUSE_SUCCESS_TOAST_TITLE });
+        toasts.addSuccess({
+          title: params?.engines?.length
+            ? ENGINE_PAUSE_SUCCESS_TOAST_TITLE
+            : PAUSE_SUCCESS_TOAST_TITLE,
+        });
       }
     },
     onError: (error) => {
@@ -153,15 +193,29 @@ export const useSignificantEventsMaintenanceActions = () => {
     onSettled: invalidateStatus,
   });
 
-  const resumeMutation = useMutation<SignificantEventsMaintenanceSummary, Error, void>({
-    mutationFn: () =>
+  const resumeMutation = useMutation<
+    SignificantEventsMaintenanceSummary,
+    Error,
+    ResumeMaintenanceParams | void
+  >({
+    mutationFn: (params) =>
       significantEventsRepositoryClient.fetch(
         'POST /internal/significant_events/maintenance/_resume',
         {
           signal: null,
+          ...(params
+            ? {
+                params: {
+                  body: {
+                    engines: params.engines,
+                    reasons: params.reasons,
+                  },
+                },
+              }
+            : {}),
         }
       ),
-    onSuccess: (summary) => {
+    onSuccess: (summary, params) => {
       // Resume always flips the control plane to enabled (or throws). Partial
       // re-enable failures are warnings, not a lingering paused state.
       if (summary.partialFailures.length > 0) {
@@ -170,7 +224,11 @@ export const useSignificantEventsMaintenanceActions = () => {
           text: partialFailuresText(summary.partialFailures.length),
         });
       } else {
-        toasts.addSuccess({ title: RESUME_SUCCESS_TOAST_TITLE });
+        toasts.addSuccess({
+          title: params?.engines?.length
+            ? ENGINE_RESUME_SUCCESS_TOAST_TITLE
+            : RESUME_SUCCESS_TOAST_TITLE,
+        });
       }
     },
     onError: (error) => {
@@ -180,8 +238,8 @@ export const useSignificantEventsMaintenanceActions = () => {
   });
 
   return {
-    pause: () => pauseMutation.mutate(),
-    resume: () => resumeMutation.mutate(),
+    pause: (params?: PauseMaintenanceParams) => pauseMutation.mutate(params),
+    resume: (params?: ResumeMaintenanceParams) => resumeMutation.mutate(params),
     isPausing: pauseMutation.isLoading,
     isResuming: resumeMutation.isLoading,
   };

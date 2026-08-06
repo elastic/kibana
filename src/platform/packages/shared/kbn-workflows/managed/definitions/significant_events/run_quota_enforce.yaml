@@ -1,0 +1,59 @@
+version: "1"
+name: "Significant Events Run Quota Enforce"
+description: >
+  Backup sweep that pauses any engine whose daily run quota is already exhausted.
+  The gated workflows pause their engine on refuse; this scheduled pass catches
+  engines that were left running after a failed pause call or a race.
+enabled: true
+settings:
+  timeout: "5m"
+  concurrency:
+    key: "significant-events-run-quota-enforce"
+    strategy: drop
+    max: 1
+tags:
+  - observability
+  - streams
+  - significant-events
+  - run-quota
+  - system
+
+triggers:
+  - type: scheduled
+    with:
+      every: "15m"
+  - type: manual
+
+steps:
+  - name: fetch_quotas
+    type: kibana.request
+    with:
+      method: GET
+      path: '/internal/significant_events/run_quotas'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    on-failure:
+      continue: false
+
+  # One pause call per exhausted group. Pausing the same engine twice is
+  # idempotent; context may fire twice (ki_extraction + memory) and that is fine.
+  - name: pause_exhausted_engines
+    type: foreach
+    foreach: '${{ steps.fetch_quotas.output.groups | default: [] }}'
+    iteration-on-failure:
+      continue: true
+    steps:
+      - name: pause_engine
+        type: kibana.request
+        if: '${{ foreach.item.exhausted == true }}'
+        with:
+          method: POST
+          path: '/internal/significant_events/maintenance/_pause'
+          headers:
+            x-elastic-internal-origin: 'kibana'
+          body:
+            engines:
+              - '{{ foreach.item.engine }}'
+            reason: 'run_quota'
+        on-failure:
+          continue: true

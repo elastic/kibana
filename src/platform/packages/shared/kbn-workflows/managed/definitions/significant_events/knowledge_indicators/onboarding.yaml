@@ -159,6 +159,22 @@ steps:
     on-failure:
       continue: true
 
+  # When the quota is exhausted, pause the context engine so further automation stops.
+  - name: quota_pause_engine
+    type: kibana.request
+    if: "${{ steps.quota_decide.output.quotaRefused }}"
+    with:
+      method: POST
+      path: '/internal/significant_events/maintenance/_pause'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        engines:
+          - '{{ consts.RUN_ENGINE }}'
+        reason: 'run_quota'
+    on-failure:
+      continue: true
+
   # Reads as "everything was skipped", which is exactly what happened, so the
   # `/onboarding/_status` poll in continuous onboarding terminates normally.
   - name: quota_stop_if_exhausted

@@ -18,6 +18,14 @@ export {
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './scheduled';
+export {
+  SIGNIFICANT_EVENTS_RUN_QUOTA_RESET_WORKFLOW,
+  SIGNIFICANT_EVENTS_RUN_QUOTA_RESET_WORKFLOW_ID,
+} from './run_quota_reset';
+export {
+  SIGNIFICANT_EVENTS_RUN_QUOTA_ENFORCE_WORKFLOW,
+  SIGNIFICANT_EVENTS_RUN_QUOTA_ENFORCE_WORKFLOW_ID,
+} from './run_quota_enforce';
 
 export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID = 'system-significant-events-detection';
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID = 'system-significant-events-discovery';
@@ -47,7 +55,7 @@ export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW = {
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 14,
+  version: 15,
   billable: false,
   yamlTemplate: (values) => renderRunQuotaGate(DISCOVERY_YAML, values),
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,

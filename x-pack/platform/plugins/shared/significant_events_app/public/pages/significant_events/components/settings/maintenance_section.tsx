@@ -6,10 +6,25 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButton, EuiCallOut, EuiConfirmModal, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SignificantEventsMaintenanceStatus } from '@kbn/significant-events-plugin/common';
+import {
+  RUN_QUOTA_ENGINE_IDS,
+  type RunQuotaEngineId,
+  type SignificantEventsMaintenanceStatus,
+} from '@kbn/significant-events-plugin/common';
 import {
   useMaintenanceStatus,
   useSignificantEventsMaintenanceActions,
@@ -26,6 +41,32 @@ const SECTION_DESCRIPTION = i18n.translate(
       'Pause all Significant Events activity across the entire deployment (every Kibana space), not only this space: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Existing data is kept. Resume restores managed workflows and rules that Pause disabled, and turns scheduled discovery / continuous onboarding back on only if they were enabled before pause.',
   }
 );
+
+const ENGINE_SECTION_TITLE = i18n.translate(
+  'xpack.significantEventsApp.settings.maintenance.enginesTitle',
+  { defaultMessage: 'Per-engine automation' }
+);
+
+const ENGINE_SECTION_DESCRIPTION = i18n.translate(
+  'xpack.significantEventsApp.settings.maintenance.enginesDescription',
+  {
+    defaultMessage:
+      'Pause automation for one engine without stopping the whole deployment. Manual runs (onboarding, investigation, memory synthesis) stay available. Engines paused by a daily run limit resume automatically after midnight UTC.',
+  }
+);
+
+const ENGINE_LABELS: Record<RunQuotaEngineId, string> = {
+  context: i18n.translate('xpack.significantEventsApp.settings.maintenance.engine.context', {
+    defaultMessage: 'Context',
+  }),
+  detection: i18n.translate('xpack.significantEventsApp.settings.maintenance.engine.detection', {
+    defaultMessage: 'Detection',
+  }),
+  investigation: i18n.translate(
+    'xpack.significantEventsApp.settings.maintenance.engine.investigation',
+    { defaultMessage: 'Investigation' }
+  ),
+};
 
 function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus }) {
   const { updatedBy, lastSummary } = status;
@@ -73,6 +114,26 @@ function PausedCallout({ status }: { status: SignificantEventsMaintenanceStatus 
       )}
     </EuiCallOut>
   );
+}
+
+function engineStatusLabel(
+  status: SignificantEventsMaintenanceStatus | undefined,
+  engine: RunQuotaEngineId
+): string {
+  const entry = status?.engines?.[engine];
+  if (!entry || entry.state !== 'paused') {
+    return i18n.translate('xpack.significantEventsApp.settings.maintenance.engineRunning', {
+      defaultMessage: 'Automation running',
+    });
+  }
+  if (entry.reason === 'run_quota') {
+    return i18n.translate('xpack.significantEventsApp.settings.maintenance.enginePausedQuota', {
+      defaultMessage: 'Paused — daily run limit reached',
+    });
+  }
+  return i18n.translate('xpack.significantEventsApp.settings.maintenance.enginePausedUser', {
+    defaultMessage: 'Paused',
+  });
 }
 
 export function MaintenanceSection({ canManage }: { canManage: boolean }) {
@@ -212,6 +273,66 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
                 defaultMessage: 'Pause Significant Events activity',
               })}
         </EuiButton>
+
+        <EuiHorizontalRule margin="l" />
+
+        <EuiText size="s">
+          <h4>{ENGINE_SECTION_TITLE}</h4>
+          <p>{ENGINE_SECTION_DESCRIPTION}</p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {RUN_QUOTA_ENGINE_IDS.map((engine) => {
+            const enginePaused = status?.engines?.[engine]?.state === 'paused';
+            return (
+              <EuiFlexItem key={engine} grow={false}>
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
+                  <EuiFlexItem>
+                    <EuiText size="s">
+                      <strong>{ENGINE_LABELS[engine]}</strong>
+                      <br />
+                      <span data-test-subj={`significantEventsEngineStatus-${engine}`}>
+                        {engineStatusLabel(status, engine)}
+                      </span>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {enginePaused ? (
+                      <EuiButtonEmpty
+                        size="s"
+                        iconType="play"
+                        isDisabled={!canManage || !statusReady || isMutating || paused}
+                        isLoading={isMutating}
+                        data-test-subj={`significantEventsEngineResume-${engine}`}
+                        onClick={() => resume({ engines: [engine] })}
+                      >
+                        {i18n.translate(
+                          'xpack.significantEventsApp.settings.maintenance.engineResume',
+                          { defaultMessage: 'Resume' }
+                        )}
+                      </EuiButtonEmpty>
+                    ) : (
+                      <EuiButtonEmpty
+                        size="s"
+                        iconType="pause"
+                        color="warning"
+                        isDisabled={!canManage || !statusReady || isMutating || paused}
+                        isLoading={isMutating}
+                        data-test-subj={`significantEventsEnginePause-${engine}`}
+                        onClick={() => pause({ engines: [engine], reason: 'user' })}
+                      >
+                        {i18n.translate(
+                          'xpack.significantEventsApp.settings.maintenance.enginePause',
+                          { defaultMessage: 'Pause automation' }
+                        )}
+                      </EuiButtonEmpty>
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGroup>
       </EuiPanel>
 
       {isModalOpen && statusReady && (

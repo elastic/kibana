@@ -7,12 +7,17 @@
 
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { RUN_QUOTA_ENGINE_IDS } from '../../../../common/run_quotas/types';
 import type {
+  EngineMaintenanceReason,
   SignificantEventsMaintenanceStatus,
   SignificantEventsMaintenanceSummary,
 } from '../../../../common/maintenance/types';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+
+const engineIdSchema = z.enum(RUN_QUOTA_ENGINE_IDS);
+const engineReasonSchema = z.enum(['user', 'run_quota'] as const);
 
 const pauseRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/maintenance/_pause',
@@ -20,16 +25,27 @@ const pauseRoute = createServerRoute({
     access: 'internal',
     summary: 'Pause Significant Events activity',
     description:
-      'Disables all Significant Events managed workflows across every Kibana space, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries. Existing data is kept. Idempotent while paused. ' +
-      'This is a deployment-wide control (agnostic saved object), not per-space. Authorization uses the caller’s space-scoped streams.manage privilege; there is no separate cluster-level privilege today — treat manage as sufficient to pause the whole deployment.',
+      'With no body: disables all managed workflows/rules (global pause). ' +
+      'With engines: stops automation workflows for the listed engines only — manual runs stay available. ' +
+      'Idempotent while paused. Deployment-wide control gated by streams.manage.',
   },
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({}),
+  params: z.object({
+    body: z
+      .object({
+        /** Engines to pause. Empty / absent = global pause. */
+        engines: z.array(engineIdSchema).max(RUN_QUOTA_ENGINE_IDS.length).optional(),
+        /** Reason to record on the engine entry (default `user`). */
+        reason: engineReasonSchema.optional(),
+      })
+      .optional(),
+  }),
   handler: async ({
+    params,
     request,
     server,
     getScopedClients,
@@ -39,7 +55,12 @@ const pauseRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
-    return maintenanceService.pause({ request, updatedBy });
+    return maintenanceService.pause({
+      request,
+      updatedBy,
+      engines: params?.body?.engines as Array<(typeof RUN_QUOTA_ENGINE_IDS)[number]> | undefined,
+      reason: params?.body?.reason as EngineMaintenanceReason | undefined,
+    });
   },
 });
 
@@ -49,16 +70,27 @@ const resumeRoute = createServerRoute({
     access: 'internal',
     summary: 'Resume Significant Events activity',
     description:
-      'Re-enables the managed workflows and alerting rules that Pause disabled across the deployment. Does not restart cancelled executions. Idempotent while enabled. ' +
-      'Deployment-wide (same privilege model as Pause): space-scoped streams.manage gates the call.',
+      'With no body: re-enables all recorded workflows/rules (global resume). ' +
+      'With engines + reasons: only resumes engines whose pause reason matches. ' +
+      'Deployment-wide, gated by streams.manage.',
   },
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({}),
+  params: z.object({
+    body: z
+      .object({
+        /** Engines to resume. Empty / absent = global resume. */
+        engines: z.array(engineIdSchema).max(RUN_QUOTA_ENGINE_IDS.length).optional(),
+        /** Only resume engines paused for one of these reasons. */
+        reasons: z.array(engineReasonSchema).max(2).optional(),
+      })
+      .optional(),
+  }),
   handler: async ({
+    params,
     request,
     server,
     getScopedClients,
@@ -68,7 +100,12 @@ const resumeRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
-    return maintenanceService.resume({ request, updatedBy });
+    return maintenanceService.resume({
+      request,
+      updatedBy,
+      engines: params?.body?.engines as Array<(typeof RUN_QUOTA_ENGINE_IDS)[number]> | undefined,
+      reasons: params?.body?.reasons as EngineMaintenanceReason[] | undefined,
+    });
   },
 });
 

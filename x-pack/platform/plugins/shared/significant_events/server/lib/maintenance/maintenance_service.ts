@@ -13,6 +13,8 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { ALERTING_V2_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type {
+  EngineMaintenanceEntry,
+  EngineMaintenanceReason,
   SignificantEventsMaintenanceFailure,
   SignificantEventsMaintenanceStatus,
   SignificantEventsMaintenanceSummary,
@@ -22,6 +24,8 @@ import {
   isMaintenanceState,
   type SignificantEventsMaintenanceState,
 } from '../../../common/maintenance/state_machine';
+import type { RunQuotaEngineId } from '../../../common/run_quotas/types';
+import { RUN_QUOTA_ENGINE_IDS } from '../../../common/run_quotas/types';
 import type { GetScopedClients } from '../../routes/types';
 import {
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
@@ -36,6 +40,7 @@ import {
 import {
   buildCancelTargets,
   buildDisableTargets,
+  buildEngineDisableTargets,
   type MaintenanceWorkflowTarget,
 } from './managed_workflow_targets';
 
@@ -58,26 +63,45 @@ export interface SignificantEventsMaintenanceService {
   /** Read only the persisted maintenance state (no feature-settings I/O). */
   getState(params: { request: KibanaRequest }): Promise<SignificantEventsMaintenanceState>;
   /**
-   * Disable every managed workflow across spaces, cancel their in-flight
-   * executions, turn off continuous/scheduled Settings toggles (recording which
-   * were on), and disable the alerting rules backing knowledge indicator
-   * queries. Resume restores only previously-enabled settings and their
-   * workflows. Safe to call again while already paused: retries failed targets.
+   * Disable managed workflows across spaces, cancel their in-flight executions,
+   * and optionally turn off continuous/scheduled Settings toggles.
+   *
+   * - No `engines`: global pause — disables every managed workflow/rule and flips
+   *   the control plane to `paused`. Retries failed targets when called again
+   *   while already paused.
+   * - With `engines`: per-engine automation pause — disables only the scheduled /
+   *   continuous automation workflows for the listed engines, records the pause in
+   *   the `engines` map, and does NOT change the top-level `state` or rules.
+   *   Manual runs always remain available.
    */
   pause(params: {
     request: KibanaRequest;
     updatedBy?: string;
+    /** Engines to pause. Empty / undefined = global pause (all engines). */
+    engines?: RunQuotaEngineId[];
+    /** Reason to record against each paused engine (default `'user'`). */
+    reason?: EngineMaintenanceReason;
   }): Promise<SignificantEventsMaintenanceSummary>;
   /**
-   * Re-enable workflows/rules pause recorded, and restore only the Settings
-   * toggles that were enabled before pause. Always flips the control plane to
-   * `enabled` (best-effort; no compensating rollback). Targets that fail to
-   * re-enable stay in the disabled snapshot so a later Resume can retry them
-   * even after the deployment is already reported as enabled.
+   * Re-enable workflows/rules that pause recorded, and restore only the Settings
+   * toggles that were enabled before pause.
+   *
+   * - No `engines`/`reasons`: global resume — re-enables every recorded
+   *   workflow/rule, restores settings, and flips the control plane to `enabled`.
+   * - With `reasons: ['run_quota']`: resume only engines whose `engines[id].reason`
+   *   matches — re-enables automation workflows for those engines and clears their
+   *   entry from the `engines` map. Does not touch the top-level `state`.
    */
   resume(params: {
     request: KibanaRequest;
     updatedBy?: string;
+    /** Engines to resume. Empty / undefined = global resume (all engines). */
+    engines?: RunQuotaEngineId[];
+    /**
+     * Only resume engines whose pause reason matches one of these values.
+     * Ignored when `engines` is not provided (global resume resumes everything).
+     */
+    reasons?: EngineMaintenanceReason[];
   }): Promise<SignificantEventsMaintenanceSummary>;
   /**
    * After a managed-workflow install/reinstall (e.g. feature-flag flip), if the
@@ -641,7 +665,74 @@ export const createSignificantEventsMaintenanceService = ({
       return normalizeState((await readState(getSoClient(request)))?.state);
     },
 
-    async pause({ request, updatedBy }) {
+    async pause({ request, updatedBy, engines, reason }) {
+      // Engine-scoped pause: stop automation workflows for the listed engines without
+      // touching the global state or disabling rules.
+      if (engines && engines.length > 0) {
+        return withTransitionLock(async () => {
+          const soClient = getSoClient(request);
+          const existing = await readState(soClient);
+          const failures: SignificantEventsMaintenanceFailure[] = [];
+          const mgmt = server.workflowsManagement?.management;
+          const spaceIds = await getAllSpaceIds(request, failures);
+          const pauseReason: EngineMaintenanceReason = reason ?? 'user';
+          const now = new Date().toISOString();
+
+          let workflowsDisabledThisSweep = 0;
+          if (mgmt) {
+            for (const engine of engines) {
+              const targets = buildEngineDisableTargets(engine, spaceIds);
+              for (const target of targets) {
+                if (await disableWorkflow(mgmt, target, request, failures)) {
+                  workflowsDisabledThisSweep++;
+                }
+              }
+            }
+          } else {
+            failures.push({
+              target: 'workflows',
+              error: 'Workflows management plugin is not available',
+            });
+          }
+
+          const prevEngines: Partial<Record<RunQuotaEngineId, EngineMaintenanceEntry>> =
+            (existing?.engines as Partial<Record<RunQuotaEngineId, EngineMaintenanceEntry>>) ?? {};
+          const nextEngines: Partial<Record<RunQuotaEngineId, EngineMaintenanceEntry>> = {
+            ...prevEngines,
+          };
+          for (const engine of engines) {
+            nextEngines[engine] = { state: 'paused', reason: pauseReason, pausedAt: now };
+          }
+
+          const summary: SignificantEventsMaintenanceSummary = {
+            state: normalizeState(existing?.state),
+            executionsCancelled: 0,
+            workflowsDisabled: workflowsDisabledThisSweep,
+            rulesDisabled: 0,
+            partialFailures: failures,
+          };
+
+          await writeState(soClient, {
+            ...existing,
+            state: existing?.state ?? DEFAULT_MAINTENANCE_STATE,
+            disabledWorkflows: existing?.disabledWorkflows ?? [],
+            disabledRuleIds: existing?.disabledRuleIds ?? [],
+            engines: nextEngines as Record<string, { state: string; reason?: string; pausedAt?: string }>,
+            updatedAt: now,
+            updatedBy,
+            lastSummary: summary,
+          });
+
+          logFailures(
+            log,
+            `Significant Events engine pause (${engines.join(',')}): disabled ${workflowsDisabledThisSweep} workflow(s), reason=${pauseReason}, ${failures.length} failure(s)`,
+            failures
+          );
+          return summary;
+        });
+      }
+
+      // Global pause (existing behavior)
       return withTransitionLock(async () => {
         const soClient = getSoClient(request);
         const existing = await readState(soClient);
@@ -662,7 +753,81 @@ export const createSignificantEventsMaintenanceService = ({
       });
     },
 
-    async resume({ request, updatedBy }) {
+    async resume({ request, updatedBy, engines, reasons }) {
+      // Engine-scoped resume: re-enable automation workflows for engines matching
+      // the given reason filter. Does not touch global state or rules.
+      if (engines && engines.length > 0) {
+        return withTransitionLock(async () => {
+          const soClient = getSoClient(request);
+          const existing = await readState(soClient);
+          const failures: SignificantEventsMaintenanceFailure[] = [];
+          const mgmt = server.workflowsManagement?.management;
+          const spaceIds = await getAllSpaceIds(request, failures);
+
+          const prevEngines: Partial<Record<RunQuotaEngineId, EngineMaintenanceEntry>> =
+            (existing?.engines as Partial<Record<RunQuotaEngineId, EngineMaintenanceEntry>>) ?? {};
+          const nextEngines: Partial<Record<RunQuotaEngineId, EngineMaintenanceEntry>> = {
+            ...prevEngines,
+          };
+
+          // Never re-enable automation while the deployment is globally paused —
+          // midnight quota reset must clear run_quota markers without fighting Pause.
+          const globallyPaused = normalizeState(existing?.state) === 'paused';
+
+          let workflowsToggled = 0;
+          for (const engine of engines) {
+            const entry = prevEngines[engine];
+            // Skip if reason filter doesn't match
+            if (
+              reasons &&
+              reasons.length > 0 &&
+              entry &&
+              !reasons.includes(entry.reason as EngineMaintenanceReason)
+            ) {
+              continue;
+            }
+            if (mgmt && !globallyPaused) {
+              const targets = buildEngineDisableTargets(engine, spaceIds);
+              for (const target of targets) {
+                const outcome = await reEnableWorkflow(mgmt, target, request, failures);
+                if (outcome === 'toggled') workflowsToggled++;
+              }
+            }
+            delete nextEngines[engine];
+          }
+
+          const summary: SignificantEventsMaintenanceSummary = {
+            state: normalizeState(existing?.state),
+            executionsCancelled: 0,
+            workflowsDisabled: workflowsToggled,
+            rulesDisabled: 0,
+            partialFailures: failures,
+          };
+
+          const enginesHasEntries = Object.keys(nextEngines).length > 0;
+          await writeState(soClient, {
+            ...existing,
+            state: existing?.state ?? DEFAULT_MAINTENANCE_STATE,
+            disabledWorkflows: existing?.disabledWorkflows ?? [],
+            disabledRuleIds: existing?.disabledRuleIds ?? [],
+            engines: enginesHasEntries
+              ? (nextEngines as Record<string, { state: string; reason?: string; pausedAt?: string }>)
+              : undefined,
+            updatedAt: new Date().toISOString(),
+            updatedBy,
+            lastSummary: summary,
+          });
+
+          logFailures(
+            log,
+            `Significant Events engine resume (${engines.join(',')}, reasons=${reasons?.join(',') ?? '*'}): toggled ${workflowsToggled} workflow(s), ${failures.length} failure(s)`,
+            failures
+          );
+          return summary;
+        });
+      }
+
+      // Global resume (existing behavior)
       return withTransitionLock(async () => {
         const soClient = getSoClient(request);
         const existing = await readState(soClient);
@@ -819,6 +984,25 @@ export const createSignificantEventsMaintenanceService = ({
           };
         }
       }
+      // Normalize the engines map from the SO (free-form values) to typed entries.
+      const normalizeEngines = (
+        raw: SignificantEventsMaintenanceStateAttributes['engines']
+      ): Partial<Record<RunQuotaEngineId, EngineMaintenanceEntry>> | undefined => {
+        if (!raw) return undefined;
+        const result: Partial<Record<RunQuotaEngineId, EngineMaintenanceEntry>> = {};
+        for (const id of RUN_QUOTA_ENGINE_IDS) {
+          const entry = raw[id];
+          if (entry) {
+            result[id] = {
+              state: entry.state === 'paused' ? 'paused' : 'enabled',
+              ...(entry.reason ? { reason: entry.reason as EngineMaintenanceReason } : {}),
+              ...(entry.pausedAt ? { pausedAt: entry.pausedAt } : {}),
+            };
+          }
+        }
+        return Object.keys(result).length > 0 ? result : undefined;
+      };
+
       if (!existing) {
         return {
           state: DEFAULT_MAINTENANCE_STATE,
@@ -826,6 +1010,7 @@ export const createSignificantEventsMaintenanceService = ({
           ...(featureSettingsUnavailable ? { featureSettingsUnavailable: true } : {}),
         };
       }
+      const engines = normalizeEngines(existing.engines);
       return {
         state,
         updatedAt: existing.updatedAt,
@@ -833,6 +1018,7 @@ export const createSignificantEventsMaintenanceService = ({
         lastSummary: normalizeSummary(existing.lastSummary),
         ...(featureSettingsStatus ? { featureSettings: featureSettingsStatus } : {}),
         ...(featureSettingsUnavailable ? { featureSettingsUnavailable: true } : {}),
+        ...(engines ? { engines } : {}),
       };
     },
   };
