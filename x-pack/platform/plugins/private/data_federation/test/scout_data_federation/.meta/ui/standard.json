@@ -43,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_management.spec.ts",
-        "line": 12,
-        "column": 14
+        "line": 13,
+        "column": 7
       }
     }
   ]
