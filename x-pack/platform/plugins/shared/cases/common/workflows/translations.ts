@@ -45,7 +45,7 @@ export const CREATE_CASE_FROM_TEMPLATE_STEP_DOCUMENTATION_DETAILS = i18n.transla
   'xpack.cases.workflowSteps.createCaseFromTemplate.documentation.details',
   {
     defaultMessage:
-      'This step resolves a case template from the securitySolution case configuration and creates a new case. You can optionally specify overwrite fields to customize the created case.',
+      'This step resolves a case template — from the case templates feature when enabled, otherwise from the per-space case configuration — and creates a new case. You can optionally specify overwrite fields to customize the created case. When the case templates feature is enabled, the calling user additionally needs the "getTemplate" privilege, unlike creating a case from a template through the Cases API directly. The resolved template must have a default title and description, or you must provide "overwrites.title" / "overwrites.description".',
   }
 );
 
@@ -109,6 +109,32 @@ export const SET_CUSTOM_FIELD_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   {
     defaultMessage:
       'This step updates one custom field on a case by field name. Use `field_name` to select the field key and `value` to set the new value.',
+  }
+);
+
+export const SET_EXTENDED_FIELDS_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.setExtendedFields.label',
+  {
+    defaultMessage: 'Cases - Set extended fields',
+  }
+);
+
+export const SET_EXTENDED_FIELDS_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.setExtendedFields.description',
+  {
+    defaultMessage: 'Sets one or more extended field values on an existing case',
+  }
+);
+
+export const SET_EXTENDED_FIELDS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.setExtendedFields.documentation.details',
+  {
+    defaultMessage:
+      'This step writes one or more extended fields on a case in a single request. Provide `fields` as a map of storage key to value (for example `priority_as_keyword: "high"`). Storage keys follow the {storageKeyConvention} convention; discover the keys a case accepts with `GET /api/cases/{caseIdPath}/fields`. Values are strings in canonical storage format — for multi-value controls such as `checkbox_group` or `user_picker`, pass a JSON-encoded array string. Provided fields are merged into the case\'s existing extended fields; unlisted fields are left unchanged. Server-side validation rejects unknown keys and values that do not match the field definition.',
+    values: {
+      storageKeyConvention: '<name>_as_<type>',
+      caseIdPath: '{case_id}',
+    },
   }
 );
 

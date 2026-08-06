@@ -45,4 +45,22 @@ globalSetupHook('Setup Discover core tests data', async ({ esArchiver, log }) =>
     'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
   );
   log.debug('[setup:kibana_sample_data_flights] kibana_sample_data_flights ES data ready');
+
+  // TSDB logs data for default_columns tests.
+  log.debug(
+    '[setup:kibana_sample_data_logs_tsdb] loading kibana_sample_data_logs_tsdb ES data (only if it does not exist)...'
+  );
+  await esArchiver.loadIfNeeded(
+    'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb'
+  );
+  log.debug('[setup:kibana_sample_data_logs_tsdb] kibana_sample_data_logs_tsdb ES data ready');
+
+  // Long window logstash data for request_counts tests.
+  log.debug(
+    '[setup:long_window_logstash] loading long_window_logstash ES data (only if it does not exist)...'
+  );
+  await esArchiver.loadIfNeeded(
+    'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
+  );
+  log.debug('[setup:long_window_logstash] long_window_logstash ES data ready');
 });

@@ -37,14 +37,12 @@ import { waitToNavigateAwayFrom } from '../../../tasks/kibana_navigation';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { kqlSearch } from '../../../tasks/security_header';
-import { createNewTimeline } from '../../../tasks/timeline';
 import { ALERTS_URL, DASHBOARDS_URL, DETECTION_AND_RESPONSE_URL } from '../../../urls/navigation';
 
 const TEST_USER_NAME = 'test';
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 
-// Failing: See https://github.com/elastic/kibana/issues/276804
-describe.skip('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
+describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });
@@ -91,10 +89,6 @@ describe.skip('Detection response view', { tags: ['@ess', '@serverless'] }, () =
   });
 
   context('Open in timeline', () => {
-    afterEach(() => {
-      createNewTimeline();
-    });
-
     it(`opens timeline with correct query count for hosts by alert severity table`, () => {
       cy.get(HOST_TABLE_ROW_TOTAL_ALERTS)
         .first()

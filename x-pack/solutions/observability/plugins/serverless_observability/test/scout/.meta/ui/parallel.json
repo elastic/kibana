@@ -1,5 +1,5 @@
 {
-  "sha1": "469d470d4d8277dfb537e9b8b7224687a72831d1",
+  "sha1": "3085303e9281d4b9a17646eee53f8aeae17b5c93",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -15,13 +15,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 22,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
-      "id": "08c621ad2871856-a09fd1e365d7489",
-      "title": "Serverless Observability Navigation - Complete tier body clicking body nav items sets the active link, updates breadcrumbs, and navigates",
+      "id": "08c621ad2871856-913984dcecec931",
+      "title": "Serverless Observability Navigation - Complete tier body clicking body nav items sets the active link and navigates",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete",
@@ -29,8 +29,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 66,
-        "column": 9
+        "line": 76,
+        "column": 19
       }
     },
     {
@@ -43,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 149,
-        "column": 9
+        "line": 151,
+        "column": 99
       }
     },
     {
@@ -57,8 +57,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 213,
-        "column": 9
+        "line": 211,
+        "column": 11
       }
     },
     {
@@ -71,8 +71,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 222,
-        "column": 9
+        "line": 217,
+        "column": 26
       }
     },
     {
@@ -87,8 +87,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_footer.spec.ts",
-        "line": 22,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -103,8 +103,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_footer.spec.ts",
-        "line": 46,
-        "column": 9
+        "line": 38,
+        "column": 15
       }
     },
     {
@@ -119,8 +119,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_footer.spec.ts",
-        "line": 73,
-        "column": 9
+        "line": 62,
+        "column": 13
       }
     },
     {
@@ -133,8 +133,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 23,
-        "column": 9
+        "line": 17,
+        "column": 61
       }
     },
     {
@@ -147,8 +147,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 53,
-        "column": 9
+        "line": 55,
+        "column": 17
       }
     },
     {
@@ -161,8 +161,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 87,
-        "column": 9
+        "line": 106,
+        "column": 15
       }
     },
     {
@@ -175,8 +175,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 117,
-        "column": 9
+        "line": 126,
+        "column": 45
       }
     },
     {
@@ -189,8 +189,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 124,
-        "column": 9
+        "line": 132,
+        "column": 11
       }
     }
   ]
