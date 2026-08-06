@@ -63,7 +63,7 @@ export class WorkflowExecutionRepository {
       throw new Error('Workflow execution ID is required for creation');
     }
 
-    await this.workflowExecutionsDataClient.bulk({
+    const response = await this.workflowExecutionsDataClient.bulk({
       items: [
         {
           operation: 'create',
@@ -72,6 +72,15 @@ export class WorkflowExecutionRepository {
       ],
       refresh: options.refresh ?? false,
     });
+
+    const itemError = response.items[0]?.error;
+    if (itemError) {
+      throw new Error(
+        `Failed to create workflow execution ${workflowExecution.id}: ${
+          itemError.reason ?? JSON.stringify(itemError)
+        }`
+      );
+    }
   }
 
   /**

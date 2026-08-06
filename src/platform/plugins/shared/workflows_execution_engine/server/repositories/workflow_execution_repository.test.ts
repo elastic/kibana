@@ -35,6 +35,10 @@ describe('WorkflowExecutionRepository', () => {
   beforeEach(() => {
     workflowExecutionsDataClient = createMockWorkflowDataClient();
     repository = new WorkflowExecutionRepository(workflowExecutionsDataClient);
+    // Default success response; tests that need specific items override this.
+    workflowExecutionsDataClient.bulk.mockResolvedValue(
+      asBulkResponse({ errors: false, items: [] })
+    );
   });
 
   describe('createWorkflowExecution', () => {
@@ -51,6 +55,27 @@ describe('WorkflowExecutionRepository', () => {
       await expect(repository.createWorkflowExecution({})).rejects.toThrow(
         'Workflow execution ID is required for creation'
       );
+    });
+
+    it('should throw when the bulk response contains an item-level error', async () => {
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
+        asBulkResponse({
+          errors: true,
+          items: [
+            {
+              id: '1',
+              error: {
+                type: 'version_conflict_engine_exception',
+                reason: 'document already exists',
+              },
+            },
+          ],
+        })
+      );
+
+      await expect(
+        repository.createWorkflowExecution({ id: '1', workflowId: 'wf', spaceId: 'default' })
+      ).rejects.toThrow('Failed to create workflow execution 1: document already exists');
     });
   });
 
