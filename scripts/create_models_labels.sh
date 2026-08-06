@@ -4,12 +4,11 @@ set -euo pipefail
 # Create `models:*` GitHub labels for Kibana.
 #
 # Usage:
-#   ./scripts/create_models_labels.sh models:all \
-#     models:llm-gateway/gpt-5.1 \
-#     models:llm-gateway/gpt-5.1-chat
+#   ./scripts/create_models_labels.sh models:llm-gateway/gpt-5.1 \
+#     models:eis/openai-gpt-5.4
 #
 # Or pass raw model group names (it will prefix `models:` automatically):
-#   ./scripts/create_models_labels.sh llm-gateway/gpt-5.1 llm-gateway/gpt-5.1-chat ...
+#   ./scripts/create_models_labels.sh llm-gateway/gpt-5.1 eis/openai-gpt-5.4 ...
 #
 # Generate labels from discovery artifacts:
 #   ./scripts/create_models_labels.sh --repo elastic/kibana \
@@ -416,8 +415,6 @@ fi
 
 load_label_cache
 
-# Static group labels — curated model sets that expand to multiple models in eval_pipeline.ts.
-# Keep in sync with MODEL_GROUP_ALIASES in .buildkite/pipelines/evals/eval_pipeline.ts.
 create_or_update_label "models:weekly-eis-models" "Run evals against the weekly EIS model set (see eval_pipeline.ts)" "$MODELS_COLOR"
 
 generate_litellm_connectors_json_from_vault_config() {

@@ -159,13 +159,26 @@ run(
 
         models = endpoints
           .filter((ep) => ep.task_type === 'chat_completion' && ep.service === 'elastic')
-          .map((ep) => ({
-            inferenceId: ep.inference_id,
-            modelId: ep.service_settings?.model_id || 'unknown',
-            metadata: ep.metadata
-              ? { heuristics: { properties: ep.metadata.heuristics?.properties } }
-              : undefined,
-          }));
+          .flatMap((ep) => {
+            const modelId = ep.service_settings?.model_id;
+
+            // Consumers key GitHub labels and connector ids off the model id, so an endpoint
+            // without one has to be dropped rather than given a placeholder.
+            if (!modelId) {
+              log.warning(`Skipping EIS endpoint without a model id: ${ep.inference_id}`);
+              return [];
+            }
+
+            return [
+              {
+                inferenceId: ep.inference_id,
+                modelId,
+                metadata: ep.metadata
+                  ? { heuristics: { properties: ep.metadata.heuristics?.properties } }
+                  : undefined,
+              },
+            ];
+          });
 
         if (models.length > 0) {
           log.info(`Found ${models.length} EIS models on attempt ${attempt}`);
