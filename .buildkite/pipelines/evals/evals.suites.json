@@ -104,8 +104,12 @@
           "grep": "KI query generation|Significant Events Discovery"
         },
         {
-          "id": "features",
-          "grepInvert": "KI query generation|Significant Events Discovery"
+          "id": "feature-extraction",
+          "grep": "KI feature extraction"
+        },
+        {
+          "id": "feature-dedup-and-exclusion",
+          "grepInvert": "KI query generation|Significant Events Discovery|KI feature extraction"
         }
       ],
       "weeklyEisModelGroups": [
