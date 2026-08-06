@@ -134,15 +134,7 @@ const buildNode = ({
   };
 };
 
-// ---- Flatten visible rows (drives rendering order and keyboard navigation) ----
-//
-// An expanded collection also emits a `closing` row after its children '}' or ']', so the tree
-// reads like formatted JSON. Closing rows are presentational (`aria-hidden`, no role, not
-// focusable) and are excluded from keyboard navigation.
-//
-// Every collection is capped at its reveal budget; when a list is truncated a `more` row is
-// emitted at the children's depth (before the closing bracket). `more` rows are real,
-// focusable treeitems so they stay in the tabindex order.
+// ---- Flatten visible rows, decides what to show and what not ----
 
 export interface NodeRow {
   kind: 'node';
