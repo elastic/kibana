@@ -22,6 +22,7 @@ export const IGNORED_WATCH_PATTERNS: RegExp[] = [
   /[\\/]node_modules[\\/]/,
   /[\\/]target[\\/]/,
   /\.tsbuildinfo$/,
+  /(^|[\\/])tsconfig[^\\/]*\.type_check\.json$/,
   /\.test\.[jt]sx?$/,
   /\.spec\.[jt]sx?$/,
   /\.stories\.[jt]sx?$/,
@@ -480,17 +481,9 @@ function processStats(
       assets: false,
       modules: false,
     });
-    const lines = warningOutput
-      .split('\n')
-      .filter(
-        (line) => !line.includes('rspack.persistentCache') && !line.includes('BuildDependencies')
-      )
-      .slice(0, 20);
-    if (lines.length > 0) {
-      log.warning('Build warnings (first 20):');
-      for (const line of lines) {
-        log.warning(line);
-      }
+
+    if (warningOutput.trim()) {
+      log.warning(warningOutput);
     }
   }
 

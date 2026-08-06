@@ -28,16 +28,19 @@ export function createPlaywrightEvalsConfig({
   repetitions,
   timeout,
   runGlobalSetup,
+  workers,
 }: {
   testDir: string;
   testIgnore?: PlaywrightTestConfig['testIgnore'];
   repetitions?: number;
   timeout?: number;
   runGlobalSetup?: boolean;
+  workers?: 1 | 2 | 3;
 }): PlaywrightTestConfig<{}, EvaluationTestOptions> {
   const { reporter, use, outputDir, projects, ...config } = createPlaywrightConfig({
     testDir,
     runGlobalSetup,
+    workers,
   });
 
   // gets the connectors from either the env variable or kibana.yml/kibana.dev.yml
@@ -118,11 +121,11 @@ export function createPlaywrightEvalsConfig({
     // Playwright 1.61 on Node >=23.5 registers a synchronous `module.registerHooks` load hook
     // that transforms all first-party TypeScript (anything not in node_modules) with its own
     // bundled Babel. Workspace `@kbn/*` symlinks resolve to real paths outside node_modules, so
-    // they are captured by Playwright's hook BEFORE `@kbn/babel-register` (pirates) can run.
+    // they are captured by Playwright's hook BEFORE `@kbn/swc-register` (pirates) can run.
     // Playwright's bundled Babel does not handle TypeScript namespace `export import` syntax
     // correctly and produces invalid CJS output, causing a SyntaxError at load time.
     //
-    // Defer all first-party Kibana TypeScript to `@kbn/babel-register`; Playwright already
+    // Defer all first-party Kibana TypeScript to `@kbn/swc-register`; Playwright already
     // skips node_modules itself. `x-pack/` covers plugins and packages; `src/` covers core.
     build: {
       external: ['**/x-pack/**', '**/src/**'],
