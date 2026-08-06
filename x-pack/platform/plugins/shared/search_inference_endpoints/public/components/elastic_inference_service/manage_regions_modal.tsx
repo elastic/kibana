@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -21,6 +20,7 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UseEuiTheme } from '@elastic/eui';
@@ -111,23 +111,21 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
 
         <EuiModalBody>
           {isError && (
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount={false}
               title={i18n.translate(
                 'xpack.searchInferenceEndpoints.manageRegions.errorCallout.title',
                 { defaultMessage: 'Failed to load region data' }
               )}
-              color="danger"
-              iconType="error"
               data-test-subj="manageRegionsErrorCallout"
-            >
-              <p>
-                {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.errorCallout.body', {
+              text={i18n.translate(
+                'xpack.searchInferenceEndpoints.manageRegions.errorCallout.body',
+                {
                   defaultMessage:
                     'An error occurred while fetching region or policy data. To try again, close and reopen this panel.',
-                })}
-              </p>
-            </EuiCallOut>
+                }
+              )}
+            />
           )}
           {isError && <EuiSpacer size="m" />}
 
@@ -143,23 +141,18 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           <EuiSpacer size="m" />
 
           {!isCallOutDismissed && (
-            <EuiCallOut
+            <KbnInfoCallout
               title={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.callout.title', {
                 defaultMessage: "Some models aren't available in every region.",
               })}
-              color="primary"
-              iconType="info"
               announceOnMount={false}
               onDismiss={handleDismissCallOut}
               data-test-subj="manageRegionsCallout"
-            >
-              <p>
-                {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.callout.body', {
-                  defaultMessage:
-                    "Some models are only available in specific regions. Restricting regions might make those models unavailable. Check each model's details to verify its supported regions.",
-                })}
-              </p>
-            </EuiCallOut>
+              text={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.callout.body', {
+                defaultMessage:
+                  "Some models are only available in specific regions. Restricting regions might make those models unavailable. Check each model's details to verify its supported regions.",
+              })}
+            />
           )}
           {!isCallOutDismissed && <EuiSpacer size="m" />}
 

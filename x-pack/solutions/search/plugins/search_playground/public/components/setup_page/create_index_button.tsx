@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCallOut } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
@@ -32,13 +33,12 @@ export const CreateIndexButton: React.FC = () => {
       />
     </EuiButton>
   ) : (
-    <EuiCallOut
+    <KbnWarningCallout
       announceOnMount
       title={i18n.translate('xpack.searchPlayground.createIndexCallout', {
         defaultMessage: 'You need to create an index first',
       })}
       size="s"
-      color="warning"
       data-test-subj="createIndexCallout"
     />
   );

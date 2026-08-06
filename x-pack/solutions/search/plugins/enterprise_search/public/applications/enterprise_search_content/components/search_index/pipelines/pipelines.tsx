@@ -12,8 +12,6 @@ import { useActions, useValues } from 'kea';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiButton,
-  EuiCallOut,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,6 +23,8 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { Status } from '../../../../../../common/types/api';
 import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
@@ -135,35 +135,33 @@ export const SearchIndexPipelines: React.FC = () => {
     <>
       {showMissingPipelineCallout && (
         <>
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
-            color="danger"
-            iconType="error"
             title={i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.missingPipeline.title',
               {
                 defaultMessage: 'Custom pipeline missing',
               }
             )}
-          >
-            <p>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.missingPipeline.description',
-                {
-                  defaultMessage:
-                    'The custom pipeline for this index has been deleted. This may affect connector data ingestion. Its configuration will need to be reverted to the default pipeline settings.',
-                }
-              )}
-            </p>
-            <EuiButton color="danger" fill onClick={() => revertPipeline({ indexName })}>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.missingPipeline.buttonLabel',
-                {
-                  defaultMessage: 'Revert pipeline to default',
-                }
-              )}
-            </EuiButton>
-          </EuiCallOut>
+            text={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.pipelines.missingPipeline.description',
+              {
+                defaultMessage:
+                  'The custom pipeline for this index has been deleted. This may affect connector data ingestion. Its configuration will need to be reverted to the default pipeline settings.',
+              }
+            )}
+            actionProps={{
+              primary: {
+                onClick: () => revertPipeline({ indexName }),
+                children: i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.pipelines.missingPipeline.buttonLabel',
+                  {
+                    defaultMessage: 'Revert pipeline to default',
+                  }
+                ),
+              },
+            }}
+          />
           <EuiSpacer />
         </>
       )}

@@ -9,12 +9,12 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
   EuiPageTemplate,
   EuiSpacer,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import type { Location } from 'history';
 import { useHistory } from 'react-router-dom';
@@ -259,15 +259,13 @@ export const ModelSettings: React.FC = () => {
       >
         {!hasAdvancedSettingsSavePermission && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               title={i18n.translate(
                 'xpack.searchInferenceEndpoints.settings.noAdvancedSettingsPermission.title',
                 {
                   defaultMessage: 'Advanced Settings permission required',
                 }
               )}
-              color="warning"
-              iconType="lock"
               data-test-subj="noAdvancedSettingsPermissionCallout"
               announceOnMount={false}
             >
@@ -280,37 +278,32 @@ export const ModelSettings: React.FC = () => {
                   }
                 )}
               </p>
-            </EuiCallOut>
+            </KbnWarningCallout>
             <EuiSpacer size="l" />
           </>
         )}
         {showFeatureSections && invalidEndpointIds.size > 0 && (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               title={i18n.translate(
                 'xpack.searchInferenceEndpoints.settings.invalidEndpoints.title',
                 {
                   defaultMessage: 'Some assigned inference endpoints are no longer available',
                 }
               )}
-              color="danger"
-              iconType="warning"
               data-test-subj="invalidEndpointsCallout"
               announceOnMount
-            >
-              <p>
-                {i18n.translate(
-                  'xpack.searchInferenceEndpoints.settings.invalidEndpoints.description',
-                  {
-                    defaultMessage:
-                      'The following endpoints could not be found: {endpointList}. Features using these endpoints may not work as expected.',
-                    values: {
-                      endpointList: [...invalidEndpointIds].join(', '),
-                    },
-                  }
-                )}
-              </p>
-            </EuiCallOut>
+              text={i18n.translate(
+                'xpack.searchInferenceEndpoints.settings.invalidEndpoints.description',
+                {
+                  defaultMessage:
+                    'The following endpoints could not be found: {endpointList}. Features using these endpoints may not work as expected.',
+                  values: {
+                    endpointList: [...invalidEndpointIds].join(', '),
+                  },
+                }
+              )}
+            />
             <EuiSpacer size="l" />
           </>
         )}
