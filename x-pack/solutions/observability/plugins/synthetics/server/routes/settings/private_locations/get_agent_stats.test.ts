@@ -116,6 +116,7 @@ describe('getPrivateLocationAgentStats route', () => {
     expect(agentStat.agentId).toBe('agent-1');
     expect(agentStat.usedMemoryPct).toBe(0.25);
     expect(agentStat.cpuPct).toBe(0.1);
+    expect(listAgents).toHaveBeenCalledWith(expect.objectContaining({ showInactive: true }));
 
     const query = search.mock.calls[0][0].query;
     const termsFilter = query.bool.filter.find((f: any) => f.terms?.['host.name']);

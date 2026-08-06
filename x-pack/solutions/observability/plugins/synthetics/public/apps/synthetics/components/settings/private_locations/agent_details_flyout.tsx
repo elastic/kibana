@@ -140,7 +140,12 @@ export const AgentDetailsFlyout = ({
   ];
 
   return (
-    <EuiFlyout onClose={onClose} size="s" data-test-subj="syntheticsAgentDetailsFlyout">
+    <EuiFlyout
+      aria-label={AGENT_DETAILS_FLYOUT_ARIA_LABEL}
+      onClose={onClose}
+      size="s"
+      data-test-subj="syntheticsAgentDetailsFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2>{agent.host || agent.agentId || '—'}</h2>
@@ -200,6 +205,13 @@ export const AgentDetailsFlyout = ({
 const CAPACITY_SECTION = i18n.translate('xpack.synthetics.agentFlyout.capacitySection', {
   defaultMessage: 'Health & capacity',
 });
+
+const AGENT_DETAILS_FLYOUT_ARIA_LABEL = i18n.translate(
+  'xpack.synthetics.agentFlyout.agentDetailsAriaLabel',
+  {
+    defaultMessage: 'Agent details',
+  }
+);
 
 const AGENT_SECTION = i18n.translate('xpack.synthetics.agentFlyout.agentSection', {
   defaultMessage: 'Agent',

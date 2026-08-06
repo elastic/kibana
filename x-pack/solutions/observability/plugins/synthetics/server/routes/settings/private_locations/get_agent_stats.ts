@@ -60,7 +60,7 @@ const getEnrolledAgents = async (
   while (fetched < total && page <= MAX_PAGES) {
     const { agents, total: totalAgents } =
       await server.fleet.agentService.asInternalUser.listAgents({
-        showInactive: false,
+        showInactive: true,
         perPage,
         page,
         kuery: `policy_id:"${agentPolicyId}"`,

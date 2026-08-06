@@ -71,7 +71,12 @@ export const AgentPolicyDetailsFlyout = ({
   const healthyAgents = agents.filter((a) => a.healthy).length;
 
   return (
-    <EuiFlyout onClose={onClose} size="s" data-test-subj="syntheticsAgentPolicyDetailsFlyout">
+    <EuiFlyout
+      aria-label={AGENT_POLICY_DETAILS_FLYOUT_ARIA_LABEL}
+      onClose={onClose}
+      size="s"
+      data-test-subj="syntheticsAgentPolicyDetailsFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2>{policy?.name ?? agentPolicyId}</h2>
@@ -152,6 +157,13 @@ export const AgentPolicyDetailsFlyout = ({
 const OVERVIEW_SECTION = i18n.translate('xpack.synthetics.policyFlyout.overviewSection', {
   defaultMessage: 'Overview',
 });
+
+const AGENT_POLICY_DETAILS_FLYOUT_ARIA_LABEL = i18n.translate(
+  'xpack.synthetics.policyFlyout.agentPolicyDetailsAriaLabel',
+  {
+    defaultMessage: 'Agent policy details',
+  }
+);
 
 const HEALTH_SECTION = i18n.translate('xpack.synthetics.policyFlyout.healthSection', {
   defaultMessage: 'Agent health',
