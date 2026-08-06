@@ -16,7 +16,8 @@
       "definition": "name: priority\nlabel: Priority\ncontrol: INPUT_TEXT\ntype: keyword\n",
       "owner": "securitySolution",
       "description": "Priority level for the case",
-      "isGlobal": false
+      "isGlobal": false,
+      "legacyKey": "my_priority_key"
     }
   ]
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { stringify } from 'yaml';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { deleteAllCaseItems, getSpaceUrlPrefix } from '../../../../common/lib/api';

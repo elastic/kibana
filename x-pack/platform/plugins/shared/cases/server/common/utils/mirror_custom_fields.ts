@@ -52,9 +52,10 @@ export const loadFieldLinkIndexes = async (
 
 /**
  * Definition-resolved counterpart of `mergeCustomFieldsIntoExtendedFields`
- * (common/utils/template_fields.ts): every storage key comes from the linked
- * definition's immutable `name` + parsed YAML `type` — never derived from the
- * raw v1 key. Merge semantics are unchanged (customFields-win; a null value
+ * (common/utils/template_fields.ts): every storage key is `${v1Key}_as_${type}`,
+ * derived from the raw v1 custom-field key and the linked definition's parsed
+ * YAML `type` — stable regardless of the definition's friendly `name`. Merge
+ * semantics are unchanged (customFields-win; a null value
  * clears the mirror key), but:
  *
  * - a field with no or an ambiguous linked definition is skipped entirely
