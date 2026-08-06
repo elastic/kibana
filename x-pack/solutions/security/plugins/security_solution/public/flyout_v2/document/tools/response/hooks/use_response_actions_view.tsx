@@ -7,7 +7,7 @@
 
 import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import type { Ecs } from '@kbn/cases-plugin/common';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,7 +16,6 @@ import { ResponseActionsEmptyPrompt as ResponseActionsPrivilegeRequiredCallout }
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
   RESPONSE_ACTIONS_VIEW_WRAPPER_TEST_ID,
-  RESPONSE_ERROR_TEST_ID,
   RESPONSE_NO_DATA_TEST_ID,
 } from '../components/test_ids';
 import type { ResponseActionTypesEnum } from '../../../../../../common/types/response_actions';
@@ -55,28 +54,6 @@ const EmptyResponseActions = () => {
         }}
       />
     </div>
-  );
-};
-
-const FailedResponseActions = () => {
-  return (
-    <EuiCallOut
-      announceOnMount
-      color="danger"
-      iconType="warning"
-      data-test-subj={RESPONSE_ERROR_TEST_ID}
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.response.errorTitle"
-          defaultMessage="Unable to load response actions"
-        />
-      }
-    >
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.response.errorDescription"
-        defaultMessage="Try refreshing the page."
-      />
-    </EuiCallOut>
   );
 };
 
@@ -127,11 +104,7 @@ export const useResponseActionsView = ({ hit }: UseResponseActionsViewParams): R
 
   const [isLive, setIsLive] = useState(false);
 
-  const {
-    data: automatedList,
-    isFetched,
-    isError,
-  } = useGetAutomatedActionList(
+  const { data: automatedList, isFetched } = useGetAutomatedActionList(
     {
       alertIds: alertId ? [alertId] : [],
     },
@@ -143,9 +116,8 @@ export const useResponseActionsView = ({ hit }: UseResponseActionsViewParams): R
     canAccessEndpointActionsLogManagement && isFetched && !!automatedList?.items?.length;
 
   useEffect(() => {
-    // A failed fetch leaves the list empty, which would otherwise keep polling behind the callout
-    setIsLive(!isError && !!responseActions?.length && !automatedList?.items?.length);
-  }, [automatedList?.items?.length, isError, responseActions?.length]);
+    setIsLive(!!responseActions?.length && !automatedList?.items?.length);
+  }, [automatedList?.items?.length, responseActions?.length]);
 
   if (!hasAlertId) {
     return <EmptyResponseActions />;
@@ -159,8 +131,6 @@ export const useResponseActionsView = ({ hit }: UseResponseActionsViewParams): R
       <div css={tabContentWrapperCss} data-test-subj={RESPONSE_ACTIONS_VIEW_WRAPPER_TEST_ID}>
         {!canAccessEndpointActionsLogManagement ? (
           <ResponseActionsPrivilegeRequiredCallout type="endpoint" />
-        ) : isError ? (
-          <FailedResponseActions />
         ) : showResponseActions ? (
           <ResponseActionsResults
             actions={automatedListItems}

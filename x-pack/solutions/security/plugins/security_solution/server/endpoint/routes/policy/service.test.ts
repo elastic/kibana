@@ -299,6 +299,48 @@ describe('Policy Response Services', () => {
 
         await expect(getPolicyResponseByAgentId(fetchOptions)).rejects.toThrow(spaceError);
       });
+
+      it('should throw when the active space does not exist on this project, even if the united document would have matched', async () => {
+        mockPolicyResponseFrom('linked:.ds-metrics-endpoint.policy-default-000001');
+        // The united-index check would match — but the space check must fire first
+        applyEsClientSearchMock({
+          esClientMock: readEsClientMock,
+          index: METADATA_UNITED_INDEX,
+          response: {
+            took: 1,
+            timed_out: false,
+            _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+            hits: {
+              total: { value: 1, relation: 'eq' },
+              max_score: 1.0,
+              hits: [
+                {
+                  _index: METADATA_UNITED_INDEX,
+                  _id: '1-2-3',
+                  _score: 1.0,
+                  fields: { 'united.endpoint.agent.id': ['1-2-3'] },
+                },
+              ],
+            },
+          },
+        });
+        fleetServicesMock.ensureInCurrentSpace.mockRejectedValue(
+          new Error('Agent ID(s) not found: [1-2-3]')
+        );
+        (
+          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as jest.Mock
+        ).mockResolvedValue([]);
+
+        // Build a scoped object where getSpace rejects — the space does not exist on this project
+        const scoped = endpointServiceMock.asScoped(request);
+        const scopedWithInvalidSpace = {
+          ...scoped,
+          getSpace: () => Promise.reject(new Error('Saved object [space/only-there] not found')),
+        };
+        fetchOptions.scoped = scopedWithInvalidSpace;
+
+        await expect(getPolicyResponseByAgentId(fetchOptions)).rejects.toThrow();
+      });
     });
   });
 });
