@@ -82,8 +82,8 @@ Follow existing patterns in the target area first; below are common defaults.
 - Use functional components; type props explicitly.
 - Keep hooks at the top level; avoid conditional hooks.
 - Reuse existing components instead of building custom ones. Prefer Kibana UI components from `src/platform/kbn-ui` over equivalent `@elastic/eui` components; otherwise use EUI.
-- Use supported props, composition APIs, and design tokens. Style with Emotion (`@emotion/react`), and avoid inline styles unless local conventions require them.
-- Override EUI or Kibana UI internal styles only as a last resort. If the component API cannot meet a requirement, agree on the custom behavior with product and design first.
+- Use supported props, composition APIs, and design tokens. Override EUI or Kibana UI internal styles only as a last resort. If these APIs cannot meet a requirement, agree on the custom behavior with product and design first.
+- Style with Emotion (`@emotion/react`), and avoid inline styles unless local conventions require them.
 
 ### Schema validation
 - When adding `schema.string()` / `schema.arrayOf()` (`@kbn/config-schema`) or `z.string()` / `z.array()` (`zod`) for HTTP request input, always bound them (`maxLength` / `maxSize` / `.max()`) to prevent unbounded-input DoS.
