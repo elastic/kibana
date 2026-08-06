@@ -47,6 +47,15 @@ jest.mock('../../../common/navigation', () => ({
   }),
 }));
 
+// The create flyout embeds the Monaco-based YAML editor, which cannot mount in jsdom.
+jest.mock('../components/field_definition_yaml_editor', () => ({
+  FieldDefinitionYamlEditor: () => <textarea data-test-subj="fieldDefinitionYamlInput" />,
+}));
+
+jest.mock('../components/field_definition_preview', () => ({
+  FieldDefinitionPreview: () => <div data-test-subj="fieldDefinitionPreview" />,
+}));
+
 const buildFieldDefinition = (overrides: Partial<FieldDefinition>): FieldDefinition => ({
   fieldDefinitionId: 'id-1',
   name: 'my_field',
@@ -180,6 +189,65 @@ describe('AllFieldDefinitionsPage', () => {
     // Every track definition must be content-independent, so all rows resolve to the same columns.
     expect(new Set(tracks).size).toBe(1);
     expect(tracks[0]).not.toContain('auto');
+  });
+
+  it('opens the create flyout from the global fields empty state link', async () => {
+    renderWithTestingProviders(<AllFieldDefinitionsPage />);
+
+    expect(screen.getByTestId('globalFieldDefinitionsEmpty')).toHaveTextContent(
+      'No global fields yet. Enable the Global field setting when you create or edit a field definition.'
+    );
+
+    await userEvent.click(screen.getByTestId('globalFieldDefinitionsEmptyCreateLink'));
+
+    expect(await screen.findByTestId('fieldDefinitionFlyout')).toBeInTheDocument();
+  });
+
+  it('opens the create flyout from the reusable fields empty state link', async () => {
+    renderWithTestingProviders(<AllFieldDefinitionsPage />);
+
+    expect(screen.getByTestId('fieldDefinitionsTableEmpty')).toHaveTextContent(
+      'No reusable fields yet. Create a field definition to add fields to your templates.'
+    );
+
+    await userEvent.click(screen.getByTestId('templateFieldDefinitionsEmptyCreateLink'));
+
+    expect(await screen.findByTestId('fieldDefinitionFlyout')).toBeInTheDocument();
+  });
+
+  it('shows Label, Name (field key), Description, and Control type column headers', () => {
+    mockGetFieldDefinitions.mockReturnValue({
+      data: {
+        fieldDefinitions: [
+          buildFieldDefinition({
+            fieldDefinitionId: 'labeled',
+            name: 'summary',
+            description: 'A short summary',
+            definition: 'name: summary\nlabel: Summary\ncontrol: INPUT_TEXT\ntype: keyword\n',
+          }),
+        ],
+      },
+      isLoading: false,
+    });
+
+    renderWithTestingProviders(<AllFieldDefinitionsPage />);
+
+    const [header] = screen.getAllByTestId('fieldDefinitionRowHeader');
+    expect(within(header).getByText('Label')).toBeInTheDocument();
+    expect(within(header).getByText('Name (field key)')).toBeInTheDocument();
+    expect(within(header).getByText('Description')).toBeInTheDocument();
+    expect(within(header).getByText('Control type')).toBeInTheDocument();
+
+    // Label and name are separate columns: the label from the definition YAML leads the row and
+    // the permanent snake_case name sits in its own cell, with the description alongside.
+    const row = screen.getByTestId('fieldDefinitionRow-summary');
+    expect(within(row).getByTestId('fieldDefinitionRowButton-summary')).toHaveTextContent(
+      'Summary'
+    );
+    expect(within(row).getByTestId('fieldDefinitionName')).toHaveTextContent('summary');
+    expect(within(row).getByTestId('fieldDefinitionDescription')).toHaveTextContent(
+      'A short summary'
+    );
   });
 
   it("shows the field's label parsed from its definition YAML", () => {

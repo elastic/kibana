@@ -11,6 +11,7 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
   EuiNotificationBadge,
   EuiPanel,
@@ -20,6 +21,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { parse as parseYaml } from 'yaml';
 import type { Owner } from '../../../../common/bundled-types.gen';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
@@ -321,6 +323,7 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
                   onReorder={handleReorderGlobalFields}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
+                  onCreateFieldDefinition={handleCreate}
                   hasReorderFailed={hasReorderFailed}
                 />
               )}
@@ -351,9 +354,24 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 emptyMessage={
-                  searchQuery.trim()
-                    ? i18n.NO_MATCHING_FIELD_DEFINITIONS
-                    : i18n.TEMPLATE_FIELDS_SECTION_EMPTY
+                  searchQuery.trim() ? (
+                    i18n.NO_MATCHING_FIELD_DEFINITIONS
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.cases.fieldLibrary.templateFieldsSectionEmpty"
+                      defaultMessage="No reusable fields yet. {createFieldDefinitionLink} to add fields to your templates."
+                      values={{
+                        createFieldDefinitionLink: (
+                          <EuiLink
+                            onClick={handleCreate}
+                            data-test-subj="templateFieldDefinitionsEmptyCreateLink"
+                          >
+                            {i18n.TEMPLATE_FIELDS_SECTION_EMPTY_LINK}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  )
                 }
                 dataTestSubj="fieldDefinitionsTable"
               />

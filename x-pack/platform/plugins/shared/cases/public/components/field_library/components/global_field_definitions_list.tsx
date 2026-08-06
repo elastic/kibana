@@ -10,11 +10,13 @@ import {
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
+  EuiLink,
   EuiScreenReaderOnly,
   EuiText,
   euiDragDropReorder,
 } from '@elastic/eui';
 import type { DropResult } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
 import { FieldDefinitionRow } from './field_definition_row';
@@ -27,6 +29,8 @@ interface GlobalFieldDefinitionsListProps {
   onReorder: (fieldDefinitions: FieldDefinition[]) => void;
   onEdit: (fieldDefinition: FieldDefinition) => void;
   onDelete: (fieldDefinition: FieldDefinition) => void;
+  /** Opens the create field definition flyout; the empty state links to it. */
+  onCreateFieldDefinition: () => void;
   /** True once a reorder write has failed, so the optimistic order can roll back to the server's. */
   hasReorderFailed: boolean;
 }
@@ -37,6 +41,7 @@ export const GlobalFieldDefinitionsList: React.FC<GlobalFieldDefinitionsListProp
   onReorder,
   onEdit,
   onDelete,
+  onCreateFieldDefinition,
   hasReorderFailed,
 }) => {
   const [announcement, setAnnouncement] = useState('');
@@ -85,7 +90,22 @@ export const GlobalFieldDefinitionsList: React.FC<GlobalFieldDefinitionsListProp
   if (orderedFieldDefinitions.length === 0) {
     return (
       <EuiText size="s" color="subdued" data-test-subj="globalFieldDefinitionsEmpty">
-        <p>{i18n.GLOBAL_FIELDS_SECTION_EMPTY}</p>
+        <p>
+          <FormattedMessage
+            id="xpack.cases.fieldLibrary.globalFieldsSectionEmpty"
+            defaultMessage="No global fields yet. Enable the Global field setting when you {createOrEditLink}."
+            values={{
+              createOrEditLink: (
+                <EuiLink
+                  onClick={onCreateFieldDefinition}
+                  data-test-subj="globalFieldDefinitionsEmptyCreateLink"
+                >
+                  {i18n.GLOBAL_FIELDS_SECTION_EMPTY_LINK}
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
       </EuiText>
     );
   }

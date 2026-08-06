@@ -52,7 +52,7 @@ export const FIELD_LIBRARY_TITLE = i18n.translate('xpack.cases.fieldLibrary.titl
 });
 
 export const FIELD_LIBRARY_DESCRIPTION = i18n.translate('xpack.cases.fieldLibrary.description', {
-  defaultMessage: 'Define a field once, then apply it to every case or add it to any template.',
+  defaultMessage: 'Define a field once, then show it on every case or add it to any template.',
 });
 
 export const CREATE_FIELD_DEFINITION = i18n.translate(
@@ -114,16 +114,20 @@ export const FIELD_ALREADY_EXISTS_ERROR = (fieldName: string) =>
     values: { fieldName },
   });
 
-export const FIELD_COLUMN = i18n.translate('xpack.cases.fieldLibrary.fieldColumn', {
-  defaultMessage: 'Field',
+export const LABEL_COLUMN = i18n.translate('xpack.cases.fieldLibrary.labelColumn', {
+  defaultMessage: 'Label',
 });
 
-export const DETAILS_COLUMN = i18n.translate('xpack.cases.fieldLibrary.detailsColumn', {
-  defaultMessage: 'Details',
+export const NAME_COLUMN = i18n.translate('xpack.cases.fieldLibrary.nameColumn', {
+  defaultMessage: 'Name (field key)',
 });
 
-export const TYPE_COLUMN = i18n.translate('xpack.cases.fieldLibrary.typeColumn', {
-  defaultMessage: 'Type',
+export const DESCRIPTION_COLUMN = i18n.translate('xpack.cases.fieldLibrary.descriptionColumn', {
+  defaultMessage: 'Description',
+});
+
+export const CONTROL_TYPE_COLUMN = i18n.translate('xpack.cases.fieldLibrary.controlTypeColumn', {
+  defaultMessage: 'Control type',
 });
 
 export const REQUIRED_BADGE = i18n.translate('xpack.cases.fieldLibrary.requiredBadge', {
@@ -236,15 +240,13 @@ export const GLOBAL_FIELDS_SECTION_DESCRIPTION = i18n.translate(
   'xpack.cases.fieldLibrary.globalFieldsSectionDescription',
   {
     defaultMessage:
-      'Appear on every case, whether or not a template is applied. When a template is applied, these come first — drag to change their order.',
+      "These fields appear on every case, even when no template is applied. On a case, they're listed before the template's fields — drag to reorder them.",
   }
 );
 
-export const GLOBAL_FIELDS_SECTION_EMPTY = i18n.translate(
-  'xpack.cases.fieldLibrary.globalFieldsSectionEmpty',
-  {
-    defaultMessage: 'No global fields yet. Edit a reusable field and turn on Global field.',
-  }
+export const GLOBAL_FIELDS_SECTION_EMPTY_LINK = i18n.translate(
+  'xpack.cases.fieldLibrary.globalFieldsSectionEmptyLink',
+  { defaultMessage: 'create or edit a field definition' }
 );
 
 export const TEMPLATE_FIELDS_SECTION_TITLE = i18n.translate(
@@ -256,13 +258,13 @@ export const TEMPLATE_FIELDS_SECTION_DESCRIPTION = i18n.translate(
   'xpack.cases.fieldLibrary.templateFieldsSectionDescription',
   {
     defaultMessage:
-      'Available to any template. Appear on a case only when a template that uses them is applied.',
+      'Add these fields to any template. They appear on a case only when that template is applied.',
   }
 );
 
-export const TEMPLATE_FIELDS_SECTION_EMPTY = i18n.translate(
-  'xpack.cases.fieldLibrary.templateFieldsSectionEmpty',
-  { defaultMessage: 'No reusable fields yet.' }
+export const TEMPLATE_FIELDS_SECTION_EMPTY_LINK = i18n.translate(
+  'xpack.cases.fieldLibrary.templateFieldsSectionEmptyLink',
+  { defaultMessage: 'Create a field definition' }
 );
 
 export const REORDER_DISABLED_WHILE_SEARCHING = i18n.translate(

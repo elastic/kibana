@@ -42,13 +42,16 @@ export const FieldDefinitionRowHeader: React.FC = () => {
     <div css={styles.header} data-test-subj="fieldDefinitionRowHeader">
       <span />
       <EuiText size="xs" color="subdued" css={styles.label}>
-        {i18n.FIELD_COLUMN}
+        {i18n.LABEL_COLUMN}
       </EuiText>
       <EuiText size="xs" color="subdued" css={styles.label}>
-        {i18n.DETAILS_COLUMN}
+        {i18n.NAME_COLUMN}
       </EuiText>
       <EuiText size="xs" color="subdued" css={styles.label}>
-        {i18n.TYPE_COLUMN}
+        {i18n.DESCRIPTION_COLUMN}
+      </EuiText>
+      <EuiText size="xs" color="subdued" css={styles.label}>
+        {i18n.CONTROL_TYPE_COLUMN}
       </EuiText>
       <span />
       <span />

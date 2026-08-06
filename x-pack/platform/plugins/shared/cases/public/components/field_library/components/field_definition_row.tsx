@@ -27,7 +27,7 @@ import * as i18n from '../translations';
  * and unordered groups line up with each other too.
  */
 export const getFieldRowGridColumns = (euiTheme: EuiThemeComputed) =>
-  `${euiTheme.size.l} minmax(0, 2fr) minmax(0, 2.5fr) minmax(0, 1.5fr) minmax(0, 1.25fr) ${euiTheme.size.xl}`;
+  `${euiTheme.size.l} minmax(0, 2fr) minmax(0, 1.5fr) minmax(0, 2.5fr) minmax(0, 1.25fr) minmax(0, 1.25fr) ${euiTheme.size.xl}`;
 
 interface FieldDefinitionRowProps {
   fieldDefinition: FieldDefinition;
@@ -47,8 +47,9 @@ interface FieldDefinitionRowProps {
  *
  * A card per field wasted most of its width on nothing — a short field name left two thirds of the
  * row empty, and stacking name over description made every entry three lines tall for two short
- * strings. This is a fixed-column list instead: label, name, type, and obligations each own a
- * column, so values line up down the page and a scan compares like with like. The ordered group
+ * strings. This is a fixed-column list instead: label, name, description, control type, and
+ * obligations each own a column, so values line up down the page and a scan compares like with
+ * like. The ordered group
  * adds a drag handle in the gutter; nothing else differs between the two groups.
  */
 export const FieldDefinitionRow: React.FC<FieldDefinitionRowProps> = ({
@@ -68,7 +69,7 @@ export const FieldDefinitionRow: React.FC<FieldDefinitionRowProps> = ({
     () => ({
       row: css`
         display: grid;
-        /* handle | label | name-or-description | type | badges | actions */
+        /* handle | label | name | description | control type | badges | actions */
         grid-template-columns: ${getFieldRowGridColumns(euiTheme)};
         align-items: center;
         gap: ${euiTheme.size.m};
@@ -134,9 +135,7 @@ export const FieldDefinitionRow: React.FC<FieldDefinitionRowProps> = ({
   const isRequiredOnClose = inlineField?.validation?.required_on_close === true;
   const controlTitle = inlineField?.control ? FIELD_TYPE_TITLES[inlineField.control] : undefined;
   const label = inlineField?.label ?? fieldDefinition.name;
-  // The description is genuinely useful but rarely short; it rides in the name column's tooltip
-  // rather than claiming a third line on every row.
-  const secondary = fieldDefinition.description ?? fieldDefinition.name;
+  const description = fieldDefinition.description ?? '';
 
   return (
     <div css={styles.row} data-test-subj={`fieldDefinitionRow-${fieldDefinition.name}`}>
@@ -170,11 +169,21 @@ export const FieldDefinitionRow: React.FC<FieldDefinitionRowProps> = ({
       <EuiText
         size="xs"
         color="subdued"
-        css={[styles.truncated, fieldDefinition.description ? undefined : styles.name]}
-        title={secondary}
-        data-test-subj="fieldDefinitionSecondary"
+        css={[styles.truncated, styles.name]}
+        title={fieldDefinition.name}
+        data-test-subj="fieldDefinitionName"
       >
-        {secondary}
+        {fieldDefinition.name}
+      </EuiText>
+
+      <EuiText
+        size="xs"
+        color="subdued"
+        css={styles.truncated}
+        title={description}
+        data-test-subj="fieldDefinitionDescription"
+      >
+        {description}
       </EuiText>
 
       <EuiText size="xs" color="subdued" css={styles.truncated}>

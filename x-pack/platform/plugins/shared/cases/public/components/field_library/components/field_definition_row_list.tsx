@@ -17,7 +17,7 @@ interface FieldDefinitionRowListProps {
   parseInlineField: (definition: string) => InlineField | undefined;
   onEdit: (fieldDefinition: FieldDefinition) => void;
   onDelete: (fieldDefinition: FieldDefinition) => void;
-  emptyMessage: string;
+  emptyMessage: React.ReactNode;
   dataTestSubj: string;
 }
 
