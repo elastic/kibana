@@ -364,10 +364,13 @@ describe('runEvalExperimentTool', () => {
 });
 
 describe('discovery tools', () => {
+  const emptyFacets = { tags: [], maturity: [] };
+
   it('lists datasets via the evals dataset service', async () => {
     const list = jest.fn().mockResolvedValue({
       datasets: [{ id: 'd1', name: 'D1', description: 'x', examples_count: 2 }],
       total: 1,
+      facets: emptyFacets,
     });
     const { deps } = createDeps({
       getStartDependencies: jest.fn().mockResolvedValue({
@@ -378,10 +381,55 @@ describe('discovery tools', () => {
 
     const result = firstResult(await listEvalDatasetsTool(deps).handler({}, createContext()));
 
-    expect(list).toHaveBeenCalledWith({ search: undefined, page: 1, perPage: 50 });
+    expect(list).toHaveBeenCalledWith({
+      search: undefined,
+      tags: undefined,
+      maturity: undefined,
+      page: 1,
+      perPage: 50,
+    });
     expect(result.type).toBe(ToolResultType.other);
     expect(result.data.total).toBe(1);
     expect(result.data.datasets[0].id).toBe('d1');
+  });
+
+  it('narrows datasets by tag and maturity and reports the available tags', async () => {
+    const list = jest.fn().mockResolvedValue({
+      datasets: [
+        {
+          id: 'd1',
+          name: 'D1',
+          description: 'x',
+          tags: ['golden', 'esql'],
+          maturity: 'golden',
+          examples_count: 2,
+        },
+      ],
+      total: 1,
+      facets: { tags: [{ value: 'golden', count: 3 }], maturity: [{ value: 'golden', count: 3 }] },
+    });
+    const { deps } = createDeps({
+      getStartDependencies: jest.fn().mockResolvedValue({
+        evals: { datasetService: { getClient: () => ({ list }) } },
+        agentBuilder: {},
+      }) as unknown as EvalExperimentsToolDeps['getStartDependencies'],
+    });
+
+    const result = firstResult(
+      await listEvalDatasetsTool(deps).handler(
+        { tags: ['golden'], maturity: ['golden'] },
+        createContext()
+      )
+    );
+
+    expect(list).toHaveBeenCalledWith(
+      expect.objectContaining({ tags: ['golden'], maturity: ['golden'] })
+    );
+    expect(result.data.datasets[0]).toMatchObject({
+      tags: ['golden', 'esql'],
+      maturity: 'golden',
+    });
+    expect(result.data.available_tags).toEqual(['golden']);
   });
 
   it('returns an error result when the dataset service is unavailable', async () => {

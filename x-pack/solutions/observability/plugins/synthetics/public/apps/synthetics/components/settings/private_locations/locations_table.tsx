@@ -10,16 +10,21 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useDispatch } from 'react-redux-v7';
 import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useSyntheticsRefreshContext } from '../../../contexts';
 import { CopyName } from './copy_name';
 import { ViewLocationMonitors } from './view_location_monitors';
 import { TableTitle } from '../../common/components/table_title';
@@ -29,6 +34,9 @@ import { PrivateLocationDocsLink, START_ADDING_LOCATIONS_DESCRIPTION } from './e
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useLocationMonitors } from './hooks/use_location_monitors';
+import { useAgentStats } from './hooks/use_agent_stats';
+import { LocationAgentDetails } from './location_agent_details';
+import { RelativeTimestamp } from './relative_timestamp';
 import { PolicyName } from './policy_name';
 import { LOCATION_NAME_LABEL } from './location_form';
 import { setIsPrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
@@ -68,6 +76,21 @@ export const PrivateLocationsTable = ({
   const [locationPendingDelete, setLocationPendingDelete] = useState<string | null>(null);
 
   const { locationMonitors, loading } = useLocationMonitors();
+  const { byLocation: agentStatsByLocation, loading: agentStatsLoading } = useAgentStats();
+  const { refreshApp, lastRefresh } = useSyntheticsRefreshContext();
+
+  // Expanded rows: per-agent health/capacity breakdown for a location's agents.
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const toggleRow = (id: string) =>
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
 
   const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
 
@@ -82,8 +105,34 @@ export const PrivateLocationsTable = ({
 
   const columns: Array<EuiBasicTableColumn<ListItem>> = [
     {
+      align: 'left',
+      width: '40px',
+      isExpander: true,
+      name: (
+        <EuiScreenReaderOnly>
+          <span>{EXPAND_ROW_LABEL}</span>
+        </EuiScreenReaderOnly>
+      ),
+      render: (item: ListItem) => {
+        const isExpanded = expandedIds.has(item.id);
+        const label = isExpanded ? COLLAPSE_ROW_LABEL : EXPAND_ROW_LABEL;
+        return (
+          <EuiToolTip content={label} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="syntheticsExpandLocationAgents"
+              size="xs"
+              iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+              aria-label={label}
+              onClick={() => toggleRow(item.id)}
+            />
+          </EuiToolTip>
+        );
+      },
+    },
+    {
       field: 'label',
       name: LOCATION_NAME_LABEL,
+      width: '20%',
       render: (label: string) => <CopyName text={label} />,
     },
     {
@@ -103,7 +152,14 @@ export const PrivateLocationsTable = ({
     {
       field: 'agentPolicyId',
       name: AGENT_POLICY_LABEL,
-      render: (agentPolicyId: string) => <PolicyName agentPolicyId={agentPolicyId} />,
+      render: (agentPolicyId: string, item: ListItem) => (
+        <PolicyName
+          agentPolicyId={agentPolicyId}
+          locationStats={agentStatsByLocation.get(item.id)}
+          // The expanded panel already shows the agent count, so drop the badge there.
+          hideAgentCount={expandedIds.has(item.id)}
+        />
+      ),
     },
     {
       name: TAGS_LABEL,
@@ -210,10 +266,34 @@ export const PrivateLocationsTable = ({
     monitors: locationMonitors?.find((l) => l.id === location.id)?.count ?? 0,
   }));
 
+  const itemIdToExpandedRowMap = items.reduce<Record<string, React.ReactNode>>((acc, item) => {
+    if (expandedIds.has(item.id)) {
+      acc[item.id] = (
+        <LocationAgentDetails
+          stats={agentStatsByLocation.get(item.id)}
+          loading={agentStatsLoading}
+          agentPolicyId={item.agentPolicyId}
+          locationLabel={item.label}
+          locationMonitorCount={item.monitors}
+        />
+      );
+    }
+    return acc;
+  }, {});
+
   const openFlyout = () => dispatch(setIsPrivateLocationFlyoutVisible(true));
 
   const renderToolRight = () => {
     return [
+      <EuiButton
+        data-test-subj="syntheticsRefreshPrivateLocationsButton"
+        iconType="refresh"
+        onClick={refreshApp}
+        isLoading={loading || agentStatsLoading}
+        key="refreshPrivateLocations"
+      >
+        {REFRESH_LABEL}
+      </EuiButton>,
       <NoPermissionsTooltip
         canEditSynthetics={canSave}
         canManagePrivateLocations={canManagePrivateLocations}
@@ -239,12 +319,25 @@ export const PrivateLocationsTable = ({
         {START_ADDING_LOCATIONS_DESCRIPTION} <PrivateLocationDocsLink label={LEARN_MORE} />
       </EuiText>
       <EuiSpacer size="m" />
+      <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued" className="eui-textNoWrap">
+            <FormattedMessage
+              id="xpack.synthetics.monitorManagement.lastUpdated"
+              defaultMessage="Updated {time}"
+              values={{ time: <RelativeTimestamp timestamp={lastRefresh} /> }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
       <EuiInMemoryTable<ListItem>
         itemId={'id'}
         tableLayout="auto"
         tableCaption={PRIVATE_LOCATIONS}
         items={items}
         columns={columns}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         childrenBetween={
           <TableTitle
             total={items.length}
@@ -318,6 +411,18 @@ export const MONITORS = i18n.translate('xpack.synthetics.monitorManagement.monit
 
 export const AGENT_POLICY_LABEL = i18n.translate('xpack.synthetics.monitorManagement.agentPolicy', {
   defaultMessage: 'Agent Policy',
+});
+
+const EXPAND_ROW_LABEL = i18n.translate('xpack.synthetics.monitorManagement.expandRow', {
+  defaultMessage: 'Expand per-agent details',
+});
+
+const COLLAPSE_ROW_LABEL = i18n.translate('xpack.synthetics.monitorManagement.collapseRow', {
+  defaultMessage: 'Collapse per-agent details',
+});
+
+const REFRESH_LABEL = i18n.translate('xpack.synthetics.monitorManagement.refresh', {
+  defaultMessage: 'Refresh',
 });
 
 const DELETE_LOCATION = i18n.translate(

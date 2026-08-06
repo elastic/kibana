@@ -17,7 +17,7 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AppHeader } from '@kbn/app-header';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
@@ -38,6 +38,7 @@ import { WorkflowExecutionStatsBar } from '../../features/workflow_executions_st
 import { WorkflowList } from '../../features/workflow_list';
 import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
+import { getAddConnectorsMenuItem } from '../../shared/ui/get_add_connectors_menu_item';
 import { shouldShowWorkflowsEmptyState } from '../../shared/utils/workflow_utils';
 import { WorkflowsFilterPopover } from '../../widgets/workflow_filter_popover/workflow_filter_popover';
 import { WorkflowSearchField } from '../../widgets/workflow_search_field/ui/workflow_search_field';
@@ -137,6 +138,7 @@ export function WorkflowsPage() {
 
   /** Import uses bulk APIs that require both create and update; gate UI to match server authz. */
   const canImportWorkflows = Boolean(canCreateWorkflow && canUpdateWorkflow);
+  const addConnectorsMenuItem = useMemo(() => getAddConnectorsMenuItem(application), [application]);
   const isExecutionStatsBarEnabled = featureFlags?.getBooleanValue(
     WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID,
     false
@@ -146,8 +148,26 @@ export function WorkflowsPage() {
   const shouldShowEmptyState = shouldShowWorkflowsEmptyState(workflows, search);
   const shouldShowFilters = !shouldShowEmptyState || showManagedWorkflowsFilter;
 
-  const appMenu = useMemo<AppMenuConfig>(
-    () => ({
+  const appMenu = useMemo<AppMenuConfig>(() => {
+    const items: AppMenuItemType[] = [];
+    if (canImportWorkflows) {
+      items.push({
+        id: 'importWorkflows',
+        order: 1,
+        label: i18n.translate('workflows.importWorkflowsButton', {
+          defaultMessage: 'Import',
+        }),
+        iconType: 'download',
+        overflow: true,
+        run: () => setShowImportFlyout(true),
+        testId: 'importWorkflowsButton',
+      });
+    }
+    if (addConnectorsMenuItem) {
+      items.push(addConnectorsMenuItem);
+    }
+
+    return {
       primaryActionItem: canCreateWorkflow
         ? {
             id: 'createWorkflow',
@@ -159,24 +179,9 @@ export function WorkflowsPage() {
             testId: 'createWorkflowButton',
           }
         : undefined,
-      items: canImportWorkflows
-        ? [
-            {
-              id: 'importWorkflows',
-              order: 1,
-              label: i18n.translate('workflows.importWorkflowsButton', {
-                defaultMessage: 'Import',
-              }),
-              iconType: 'download',
-              overflow: true,
-              run: () => setShowImportFlyout(true),
-              testId: 'importWorkflowsButton',
-            },
-          ]
-        : [],
-    }),
-    [canCreateWorkflow, canImportWorkflows, navigateToCreateWorkflow]
-  );
+      items,
+    };
+  }, [addConnectorsMenuItem, canCreateWorkflow, canImportWorkflows, navigateToCreateWorkflow]);
 
   return (
     <EuiPageTemplate
@@ -188,7 +193,6 @@ export function WorkflowsPage() {
         title={i18n.translate('workflows.pageTitle', { defaultMessage: 'Workflows' })}
         menu={appMenu}
         docLink={WORKFLOWS_DOCUMENTATION_URL}
-        showAddIntegrations
       />
       <EuiPageTemplate.Section restrictWidth={false}>
         {shouldShowFilters ? (
