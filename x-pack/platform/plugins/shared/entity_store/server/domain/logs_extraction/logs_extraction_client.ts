@@ -253,43 +253,22 @@ export class LogsExtractionClient {
       config.excludedIndexPatterns
     );
 
-    const mainPromise = this.runMainPath({
+    const allIndexPatterns = [...localIndexPatterns, ...remoteIndexPatterns];
+
+    const mainResult = await this.runMainPath({
       type,
       config,
       engineState,
       opts,
       entityDefinition,
       latestIndex: await resolveLatestEntitiesIndexName(this.esClient, this.namespace),
-      indexPatterns: localIndexPatterns,
+      indexPatterns: allIndexPatterns,
     });
-
-    const remoteStrategyIndexPatterns = this.remoteLogsExtractionClient.strategy.buildPatterns({
-      localIndexPatterns,
-      remoteIndexPatterns,
-    });
-    const remotePromise = this.remoteLogsExtractionClient.extractToUpdates({
-      type,
-      entityDefinition,
-      remoteIndexPatterns: remoteStrategyIndexPatterns,
-      docsLimit: config.docsLimit,
-      maxLogsPerPage: config.maxLogsPerPage,
-      lookbackPeriod: config.lookbackPeriod,
-      delay: config.delay,
-      frequency: config.frequency,
-      maxTimeWindowSize: config.maxTimeWindowSize,
-      maxLogsPerWindow: config.maxLogsPerWindow,
-      maxLogsPerWindowCapBehavior: config.maxLogsPerWindowCapBehavior,
-      signal: opts?.signal,
-      windowOverride: opts?.specificWindow,
-    });
-
-    const [mainResult, remoteResult] = await Promise.all([mainPromise, remotePromise]);
 
     return {
       ...mainResult,
-      isRemote: remoteStrategyIndexPatterns.length > 0,
-      indexPatterns: [...localIndexPatterns, ...remoteStrategyIndexPatterns],
-      remoteError: remoteResult.error,
+      isRemote: remoteIndexPatterns.length > 0,
+      indexPatterns: allIndexPatterns,
     };
   }
 
@@ -820,6 +799,16 @@ export class LogsExtractionClient {
         namespace: this.namespace,
         remote: false,
       });
+
+      if (
+        esqlResponse._clusters &&
+        esqlResponse._clusters.successful !== esqlResponse._clusters.total
+      ) {
+        const { partial, skipped, successful, total, failed } = esqlResponse._clusters;
+        this.logger.warn(
+          `Cluster-level partial success during extraction for ${type} in ${this.namespace}: partial=${partial}, failed=${failed}, skipped=${skipped}, successful=${successful}, total=${total}`
+        );
+      }
 
       addedToTotalCount += esqlResponse.values.length;
       pagination = extractMainPaginationParams(esqlResponse, docsLimit);

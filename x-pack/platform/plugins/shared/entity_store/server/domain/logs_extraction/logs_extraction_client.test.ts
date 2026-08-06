@@ -868,7 +868,7 @@ describe('LogsExtractionClient', () => {
       });
     });
 
-    it('should filter remote index patterns from the main query and run remote extraction in parallel', async () => {
+    it('should include remote index patterns in the main extraction query', async () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
@@ -896,79 +896,14 @@ describe('LogsExtractionClient', () => {
       const result = await client.extractLogs('user');
 
       expect(result.success).toBe(true);
-      // Main path uses local patterns only; remote client runs in parallel via strategy.buildPatterns.
+      // All patterns (local and remote) flow through the main LOOKUP JOIN path.
       expect(result.success && result.scannedIndices).toContain('logs-*');
       expect(result.success && result.scannedIndices).toContain('metrics-*');
       expect(result.success && result.scannedIndices).toContain('remote_cluster:logs-*');
       expect(result.success && result.scannedIndices).toContain('other:filebeat-*');
       // probe, extraction, terminal empty probe, and its follow-up sweep extraction.
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(4);
-      expect(mockRemoteLogsExtractionClient.strategy.buildPatterns).toHaveBeenCalledWith(
-        expect.objectContaining({
-          localIndexPatterns: expect.arrayContaining(['logs-*', 'metrics-*']),
-          remoteIndexPatterns: ['remote_cluster:logs-*', 'other:filebeat-*'],
-        })
-      );
-      expect(mockRemoteLogsExtractionClient.extractToUpdates).toHaveBeenCalledTimes(1);
-      expect(mockRemoteLogsExtractionClient.extractToUpdates).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: 'user',
-          remoteIndexPatterns: ['remote_cluster:logs-*', 'other:filebeat-*'],
-        })
-      );
-    });
-
-    it('should store remote errors in the saved object while main execution remains unchanged', async () => {
-      const mockEsqlResponse: ESQLSearchResponse = {
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID_FIELD, type: 'keyword' },
-          { name: 'entity.id', type: 'keyword' },
-        ],
-        values: [['2024-01-02T10:00:00.000Z', 'hash1', 'user:u1']],
-      };
-
-      const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*,remote_cluster:logs-*'),
-      };
-
-      const remoteError = new Error('remote connection failed');
-      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
-        createMockEngineDescriptor('user') as Awaited<
-          ReturnType<EngineDescriptorClient['findOrThrow']>
-        >
-      );
-      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExtractSuccessSequence(mockEsqlResponse);
-      mockIngestEntities.mockResolvedValue(undefined);
-      mockRemoteLogsExtractionClient.extractToUpdates.mockResolvedValue({
-        count: 0,
-        pages: 0,
-        error: remoteError,
-      });
-
-      const result = await client.extractLogs('user');
-
-      expect(result.success).toBe(true);
-      expect(result.success && result.count).toBe(1);
-      expect(result.success && result.scannedIndices).toContain('logs-*');
-      expect(result.success && result.scannedIndices).toContain('remote_cluster:logs-*');
-      // probe, extraction, terminal empty probe, and its follow-up sweep extraction.
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(4);
-      expect(mockIngestEntities).toHaveBeenCalledTimes(2);
-
-      // Remote error is stored in the saved object alongside the cleared log extraction state.
-      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
-        'user',
-        expect.objectContaining({
-          logExtractionState: expect.objectContaining({
-            checkpointTimestamp: null,
-            paginationId: null,
-            lastExecutionTimestamp: expect.any(String),
-          }),
-          error: { message: remoteError.message, action: 'extractLogs' },
-        })
-      );
+      expect(mockRemoteLogsExtractionClient.extractToUpdates).not.toHaveBeenCalled();
     });
 
     it('should clear a previous error after a successful extraction', async () => {

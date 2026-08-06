@@ -102,7 +102,7 @@ export async function createRequestHandlerContext({
   const logsExtractionClient = new LogsExtractionClient({
     logger,
     namespace,
-    esClient,
+    esClient: isServerless ? cpsClient : esClient,
     dataViewsService,
     engineDescriptorClient,
     globalStateClient,

@@ -72,7 +72,7 @@ export async function createLogsExtractionClient({
   const logsExtractionClient = new LogsExtractionClient({
     logger,
     namespace,
-    esClient,
+    esClient: isServerless ? cpsClient : esClient,
     dataViewsService,
     engineDescriptorClient: new EngineDescriptorClient(soClient, namespace, logger),
     globalStateClient: new EntityStoreGlobalStateClient(soClient, namespace, logger),
