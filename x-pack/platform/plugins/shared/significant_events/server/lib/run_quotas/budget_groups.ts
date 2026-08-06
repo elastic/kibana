@@ -40,26 +40,14 @@ export const COUNTED_WORKFLOW_BUDGET_GROUPS = {
   [SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID]: 'investigation',
 } as const satisfies Record<string, RunBudgetGroupId>;
 
-/** @deprecated Use {@link COUNTED_WORKFLOW_BUDGET_GROUPS} */
-export const GATED_WORKFLOW_BUDGET_GROUPS = COUNTED_WORKFLOW_BUDGET_GROUPS;
-
 export type CountedWorkflowId = keyof typeof COUNTED_WORKFLOW_BUDGET_GROUPS;
-
-/** @deprecated Use {@link CountedWorkflowId} */
-export type GatedWorkflowId = CountedWorkflowId;
 
 export const COUNTED_WORKFLOW_IDS = Object.keys(
   COUNTED_WORKFLOW_BUDGET_GROUPS
 ) as readonly CountedWorkflowId[];
 
-/** @deprecated Use {@link COUNTED_WORKFLOW_IDS} */
-export const GATED_WORKFLOW_IDS = COUNTED_WORKFLOW_IDS;
-
 export const isCountedWorkflowId = (workflowId: string): workflowId is CountedWorkflowId =>
   workflowId in COUNTED_WORKFLOW_BUDGET_GROUPS;
-
-/** @deprecated Use {@link isCountedWorkflowId} */
-export const isGatedWorkflowId = isCountedWorkflowId;
 
 /** The workflows sharing one counter, derived so the two views cannot drift. */
 export const workflowIdsInBudgetGroup = (group: RunBudgetGroupId): CountedWorkflowId[] =>

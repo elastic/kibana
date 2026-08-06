@@ -24,12 +24,12 @@ const RUN_QUOTAS_QUERY_KEY = ['significantEventsRunQuotas'] as const;
 const RUN_QUOTAS_REFETCH_INTERVAL_MS = 30_000;
 
 const SAVE_SUCCESS_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.runQuotas.saveSuccessToastTitle',
+  'xpack.significantEventsApp.runQuotas.saveSuccessToastTitle',
   { defaultMessage: 'Updated daily run limits' }
 );
 
 const SAVE_SUCCESS_TOAST_TEXT = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.runQuotas.saveSuccessToastText',
+  'xpack.significantEventsApp.runQuotas.saveSuccessToastText',
   {
     defaultMessage:
       'New limits are applied to the automation workflows and take effect on their next run.',
@@ -37,7 +37,7 @@ const SAVE_SUCCESS_TOAST_TEXT = i18n.translate(
 );
 
 const SAVE_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.runQuotas.saveErrorToastTitle',
+  'xpack.significantEventsApp.runQuotas.saveErrorToastTitle',
   { defaultMessage: 'Failed to update daily run limits' }
 );
 

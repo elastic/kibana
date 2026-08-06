@@ -61,7 +61,7 @@ const quotas = (overrides: Partial<RunQuotasResponse> = {}): RunQuotasResponse =
     timezone: 'UTC',
   },
   groups: RUN_BUDGET_GROUP_IDS.map((id) => group(id)),
-  ledgerUnavailable: false,
+  usageUnavailable: false,
   ...overrides,
 });
 
@@ -209,7 +209,7 @@ describe('RunLimitsSection', () => {
   });
 
   it('warns that usage is unknown when the run ledger cannot be read', () => {
-    setup({ data: quotas({ ledgerUnavailable: true }) });
+    setup({ data: quotas({ usageUnavailable: true }) });
 
     expect(screen.getByTestId('streams-settings-run-limits-usage-unavailable')).toBeInTheDocument();
   });

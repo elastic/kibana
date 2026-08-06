@@ -8,13 +8,9 @@
 export {
   COUNTED_WORKFLOW_BUDGET_GROUPS,
   COUNTED_WORKFLOW_IDS,
-  GATED_WORKFLOW_BUDGET_GROUPS,
-  GATED_WORKFLOW_IDS,
   isCountedWorkflowId,
-  isGatedWorkflowId,
   workflowIdsInBudgetGroup,
   type CountedWorkflowId,
-  type GatedWorkflowId,
 } from './budget_groups';
 export { getRunQuotaSettingsSavedObjectType } from './saved_object';
 export {
@@ -22,4 +18,5 @@ export {
   type RunQuotaService,
   type RunQuotaSettingsUpdate,
 } from './run_quota_service';
-export { resolveDailyWindow, isValidTimeZone } from './window';
+export { enforceRunQuotas } from './enforce';
+export { resolveDailyWindow } from './window';

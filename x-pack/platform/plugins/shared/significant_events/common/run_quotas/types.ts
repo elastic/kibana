@@ -66,9 +66,9 @@ export const MAX_RUN_LIMIT = 10_000;
 export const DEFAULT_RUN_QUOTA_TIME_ZONE = 'UTC';
 
 export interface RunLimit {
-  /** When false the group is uncapped and the gate never stops a run. */
+  /** When false the group is uncapped and never pauses its engine. */
   enabled: boolean;
-  /** Maximum runs admitted per calendar day. */
+  /** Maximum runs per calendar day before the engine is paused. */
   max: number;
 }
 
@@ -91,13 +91,13 @@ export interface RunBudgetGroupUsage {
   group: RunBudgetGroupId;
   engine: RunQuotaEngineId;
   limit: RunLimit;
-  /** Runs admitted in the current window, all origins included. */
+  /** Runs started in the current window, all triggers included. */
   used: number;
-  /** Runs left before automation is stopped, or `null` when uncapped. */
+  /** Runs left before the engine is paused, or `null` when uncapped. */
   remaining: number | null;
-  /** True once automated runs are being refused. Never true when uncapped. */
+  /** True once the group is over its limit. Never true when uncapped. */
   exhausted: boolean;
-  /** `used` broken down by the `triggered_by` of each recorded run. */
+  /** `used` broken down by the `triggeredBy` of each execution. */
   byTrigger: Record<string, number>;
 }
 
@@ -107,10 +107,23 @@ export interface RunQuotasResponse {
   groups: RunBudgetGroupUsage[];
   /**
    * True when `.workflows-executions` could not be read, so `used` is reported
-   * as zero and soft enforcement cannot see real usage until the next successful read.
-   * Kept as `ledgerUnavailable` for API compatibility with earlier clients.
+   * as zero. Enforcement skips the tick entirely rather than acting on usage it
+   * cannot see.
    */
-  ledgerUnavailable: boolean;
+  usageUnavailable: boolean;
+}
+
+/** What one enforcement pass reconciled. Returned by the `_enforce` route. */
+export interface RunQuotaEnforcementResult {
+  /** Engines over their limit, for which an automation pause was requested. */
+  pausedEngines: RunQuotaEngineId[];
+  /**
+   * Engines back within limit, for which a resume of a `run_quota` pause was
+   * requested. Engines that were not quota-paused are left untouched.
+   */
+  resumedEngines: RunQuotaEngineId[];
+  /** True when usage could not be read, so nothing was reconciled this pass. */
+  skipped: boolean;
 }
 
 export const DEFAULT_RUN_QUOTA_SETTINGS: RunQuotaSettings = {
@@ -122,20 +135,3 @@ export const DEFAULT_RUN_QUOTA_SETTINGS: RunQuotaSettings = {
     investigation: { enabled: true, max: DEFAULT_RUN_LIMITS.investigation },
   },
 };
-
-/**
- * Origins that count as a person asking for the run. Soft quotas still count
- * these toward usage, but engine pause only stops automation workflows — UI
- * leaves stay available except where a paused engine has no separate automation
- * surface (investigation overshoot is accepted until native rate-limits land).
- */
-export const HUMAN_RUN_ORIGINS = [
-  'manual',
-  'sigevents-investigation-ui',
-  'significant-events-memory-ui',
-] as const;
-
-export type HumanRunOrigin = (typeof HUMAN_RUN_ORIGINS)[number];
-
-export const isHumanRunOrigin = (origin: string): origin is HumanRunOrigin =>
-  (HUMAN_RUN_ORIGINS as readonly string[]).includes(origin);

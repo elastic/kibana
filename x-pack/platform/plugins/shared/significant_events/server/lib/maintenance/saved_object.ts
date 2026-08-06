@@ -78,6 +78,11 @@ const engineMaintenanceEntrySchemaV2 = schema.object({
   state: schema.string(),
   reason: schema.maybe(schema.string()),
   pausedAt: schema.maybe(schema.string()),
+  // Recorded so an engine resume re-enables exactly what the engine pause turned
+  // off, and never a workflow the user had already disabled themselves.
+  disabledWorkflows: schema.maybe(
+    schema.arrayOf(disabledWorkflowSchemaV1, { maxSize: MAINTENANCE_STATE_ARRAY_MAX_SIZE })
+  ),
 });
 
 /**

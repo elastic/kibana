@@ -21,10 +21,7 @@ import {
   type RunQuotaSettings,
   type RunQuotasResponse,
 } from '../../../common';
-import {
-  COUNTED_WORKFLOW_BUDGET_GROUPS,
-  COUNTED_WORKFLOW_IDS,
-} from './budget_groups';
+import { COUNTED_WORKFLOW_BUDGET_GROUPS, COUNTED_WORKFLOW_IDS } from './budget_groups';
 import {
   RUN_QUOTA_SETTINGS_SO_ID,
   RUN_QUOTA_SETTINGS_SO_TYPE,
@@ -32,13 +29,8 @@ import {
 } from './saved_object';
 import { resolveDailyWindow } from './window';
 
-/**
- * Partial update — only `limits` is accepted. `timezone` is kept for
- * backwards-compatible callers but is ignored: the daily window is always UTC.
- */
+/** Partial update — only `limits` is accepted; the daily window is always UTC. */
 export interface RunQuotaSettingsUpdate {
-  /** @deprecated ignored — timezone is always UTC */
-  timezone?: string;
   limits?: Partial<Record<RunBudgetGroupId, RunLimit>>;
 }
 
@@ -91,8 +83,8 @@ interface ExecutionUsage {
 /**
  * Soft-quota usage from `.workflows-executions`. Deployment-wide: counted
  * workflows are installed once at the global scope. Test runs are excluded.
- * In-flight and failed runs count (startedAt in window) — same "failed counts"
- * product rule as before, without an admit-time ledger.
+ * A run counts from the moment it starts, so in-flight and failed runs both
+ * consume budget — a workflow that fails still spent the inference calls.
  */
 const readExecutionUsage = async ({
   esClient,
@@ -151,8 +143,7 @@ const readExecutionUsage = async ({
       const existing = byGroup[group] ?? { total: 0, byTrigger: {} };
       existing.total += bucket.doc_count;
       for (const trigger of bucket.triggers.buckets) {
-        existing.byTrigger[trigger.key] =
-          (existing.byTrigger[trigger.key] ?? 0) + trigger.doc_count;
+        existing.byTrigger[trigger.key] = (existing.byTrigger[trigger.key] ?? 0) + trigger.doc_count;
       }
       byGroup[group] = existing;
     }
@@ -241,7 +232,8 @@ export const createRunQuotaService = ({
         { id: RUN_QUOTA_SETTINGS_SO_ID, overwrite: true }
       );
 
-      // Soft limits: enforce reads settings via GET /run_quotas — no workflow reinstall.
+      // Nothing to reinstall: the next enforcement pass reads these settings back
+      // through `getQuotas`, so a raised limit resumes an engine within minutes.
       return next;
     },
 
@@ -261,7 +253,7 @@ export const createRunQuotaService = ({
         groups: RUN_BUDGET_GROUP_IDS.map((group) =>
           toGroupUsage({ group, limit: settings.limits[group], usage: usage.byGroup[group] })
         ),
-        ledgerUnavailable: usage.unavailable,
+        usageUnavailable: usage.unavailable,
       };
     },
   };

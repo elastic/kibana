@@ -56,7 +56,7 @@ const getParsedWorkflowYaml = (id: string, values: Record<string, unknown>): Par
 
 const getParsedStaticWorkflowYaml = (id: string): ParsedWorkflow => {
   const definition = getManagedWorkflowDefinition(id);
-  if (!definition || typeof definition.yaml !== 'string') {
+  if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
     throw new Error(`Managed workflow definition ${id} is missing yaml`);
   }
   return parse(definition.yaml) as ParsedWorkflow;
@@ -177,9 +177,7 @@ describe('scheduled Significant Events managed workflows', () => {
     const discover = findStep(drainLoop?.steps ?? [], 'discover');
     expect(discover?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
-      // The root origin is forwarded so the child's run-quota gate can tell an
-      // automated pass from one a person started.
-      inputs: { detectionBatchMax: 7, runOrigin: '{{ execution.triggeredBy }}' },
+      inputs: { detectionBatchMax: 7 },
     });
   });
 

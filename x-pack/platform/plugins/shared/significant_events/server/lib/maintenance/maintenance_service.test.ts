@@ -1088,4 +1088,89 @@ describe('SignificantEventsMaintenanceService', () => {
       await expect(service.getState({ request: REQUEST })).resolves.toBe('paused');
     });
   });
+
+  describe('per-engine pause and resume', () => {
+    const CONTEXT_AUTOMATION_ID = SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID;
+
+    it('disables only that engine automation and records why, leaving global state alone', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service } = makeService({ management: api });
+
+      await service.pause({ request: REQUEST, engines: ['context'], reason: 'run_quota' });
+
+      const disabled = updateWorkflow.mock.calls
+        .filter((call) => call[1]?.enabled === false)
+        .map((call) => call[0]);
+      expect(disabled).toContain(CONTEXT_AUTOMATION_ID);
+      // Detection automation belongs to another engine and stays on.
+      expect(disabled).not.toContain(`${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-default`);
+
+      const status = await service.getStatus({ request: REQUEST });
+      expect(status.state).toBe('enabled');
+      expect(status.engines?.context).toEqual(
+        expect.objectContaining({ state: 'paused', reason: 'run_quota' })
+      );
+    });
+
+    it('re-enables exactly what the engine pause disabled', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service } = makeService({ management: api });
+
+      await service.pause({ request: REQUEST, engines: ['context'], reason: 'run_quota' });
+      updateWorkflow.mockClear();
+
+      await service.resume({ request: REQUEST, engines: ['context'], reasons: ['run_quota'] });
+
+      const enabled = updateWorkflow.mock.calls
+        .filter((call) => call[1]?.enabled === true)
+        .map((call) => call[0]);
+      expect(enabled).toContain(CONTEXT_AUTOMATION_ID);
+      expect((await service.getStatus({ request: REQUEST })).engines).toBeUndefined();
+    });
+
+    it('never re-enables an engine it did not pause', async () => {
+      // The enforce loop asks to resume every engine that is within limit, so an
+      // engine with no recorded pause must be left completely untouched — its
+      // automation may be off because the user turned the feature off.
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service } = makeService({ management: api });
+
+      await service.resume({
+        request: REQUEST,
+        engines: ['context', 'detection', 'investigation'],
+        reasons: ['run_quota'],
+      });
+
+      expect(updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('leaves a user-paused engine alone when resuming quota pauses', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service } = makeService({ management: api });
+
+      await service.pause({ request: REQUEST, engines: ['context'], reason: 'user' });
+      updateWorkflow.mockClear();
+
+      await service.resume({ request: REQUEST, engines: ['context'], reasons: ['run_quota'] });
+
+      expect(updateWorkflow).not.toHaveBeenCalled();
+      expect((await service.getStatus({ request: REQUEST })).engines?.context).toEqual(
+        expect.objectContaining({ state: 'paused', reason: 'user' })
+      );
+    });
+
+    it('does not fight a global pause', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service } = makeService({ management: api });
+
+      await service.pause({ request: REQUEST });
+      updateWorkflow.mockClear();
+
+      await service.pause({ request: REQUEST, engines: ['context'], reason: 'run_quota' });
+      await service.resume({ request: REQUEST, engines: ['context'], reasons: ['run_quota'] });
+
+      expect(updateWorkflow).not.toHaveBeenCalled();
+      await expect(service.getState({ request: REQUEST })).resolves.toBe('paused');
+    });
+  });
 });

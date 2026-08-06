@@ -22,7 +22,6 @@ import {
   SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_RUN_QUOTA_ENFORCE_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_RUN_QUOTA_RESET_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
@@ -47,13 +46,11 @@ export const GLOBAL_CORE_WORKFLOW_IDS = [
 ] as const;
 
 /**
- * Quota lifecycle workflows: installed globally, but never disabled by pause —
- * otherwise a paused deployment could never auto-resume at the daily reset.
+ * Installed globally, but never disabled by pause: run-quota enforcement is the
+ * control loop that pauses and resumes engines, so stopping it would strand
+ * whatever state it left behind.
  */
-export const RUN_QUOTA_LIFECYCLE_WORKFLOW_IDS = [
-  SIGNIFICANT_EVENTS_RUN_QUOTA_RESET_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_RUN_QUOTA_ENFORCE_WORKFLOW_ID,
-] as const;
+export const ALWAYS_ON_WORKFLOW_IDS = [SIGNIFICANT_EVENTS_RUN_QUOTA_ENFORCE_WORKFLOW_ID] as const;
 
 /** Memory workflows installed at the global scope when the memory flag is on. */
 export const MEMORY_WORKFLOW_IDS = [
@@ -75,7 +72,7 @@ export const GLOBAL_MAINTENANCE_WORKFLOW_IDS = [
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
   ...MEMORY_WORKFLOW_IDS,
   // Installed with the core set, but excluded from buildDisableTargets below.
-  ...RUN_QUOTA_LIFECYCLE_WORKFLOW_IDS,
+  ...ALWAYS_ON_WORKFLOW_IDS,
 ] as const;
 
 /** Workflows installed in the default space (continuous onboarding, KI sync, legacy). */
@@ -96,7 +93,7 @@ export const ALL_INSTALLABLE_WORKFLOW_IDS = [
   SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
   ...MEMORY_WORKFLOW_IDS,
   ...SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
-  ...RUN_QUOTA_LIFECYCLE_WORKFLOW_IDS,
+  ...ALWAYS_ON_WORKFLOW_IDS,
 ] as const;
 
 export interface MaintenanceWorkflowTarget {
@@ -105,17 +102,15 @@ export interface MaintenanceWorkflowTarget {
   spaceId: string;
 }
 
-const isRunQuotaLifecycleWorkflow = (id: string): boolean =>
-  (RUN_QUOTA_LIFECYCLE_WORKFLOW_IDS as readonly string[]).includes(id);
+const isAlwaysOnWorkflow = (id: string): boolean =>
+  (ALWAYS_ON_WORKFLOW_IDS as readonly string[]).includes(id);
 
 /** Targets whose `enabled` flag is toggled by pause/resume. */
 export const buildDisableTargets = (spaceIds: string[]): MaintenanceWorkflowTarget[] => [
-  ...GLOBAL_MAINTENANCE_WORKFLOW_IDS.filter((id) => !isRunQuotaLifecycleWorkflow(id)).map(
-    (id) => ({
-      id,
-      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-    })
-  ),
+  ...GLOBAL_MAINTENANCE_WORKFLOW_IDS.filter((id) => !isAlwaysOnWorkflow(id)).map((id) => ({
+    id,
+    spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+  })),
   ...DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS.map((id) => ({
     id,
     spaceId: DEFAULT_SPACE_ID,
@@ -135,7 +130,7 @@ export const buildDisableTargets = (spaceIds: string[]): MaintenanceWorkflowTarg
  */
 export const buildCancelTargets = (spaceIds: string[]): MaintenanceWorkflowTarget[] => [
   ...spaceIds.flatMap((spaceId) =>
-    GLOBAL_MAINTENANCE_WORKFLOW_IDS.filter((id) => !isRunQuotaLifecycleWorkflow(id)).map((id) => ({
+    GLOBAL_MAINTENANCE_WORKFLOW_IDS.filter((id) => !isAlwaysOnWorkflow(id)).map((id) => ({
       id,
       spaceId,
     }))
@@ -160,12 +155,12 @@ export const buildCancelTargets = (spaceIds: string[]): MaintenanceWorkflowTarge
  * (e.g. ki-onboarding leaf, memory-synthesis, investigation) are deliberately
  * excluded so manual runs always remain available.
  *
- * | Engine      | Stopped automation                                              |
- * |-------------|-----------------------------------------------------------------|
- * | context     | continuous-onboarding, ki-sync, legacy-continuous-KI,          |
- * |             | memory-consolidation, conversation-scraper, gap-detection       |
- * | detection   | orchestrator, scheduled-detection-*, scheduled-review-*         |
- * | investigation | nothing (the in-workflow quota gate refuses automated runs)   |
+ * | Engine        | Stopped automation                                        |
+ * |---------------|-----------------------------------------------------------|
+ * | context       | continuous-onboarding, ki-sync, legacy-continuous-KI,     |
+ * |               | memory-consolidation, conversation-scraper, gap-detection |
+ * | detection     | orchestrator, scheduled-detection-*, scheduled-review-*   |
+ * | investigation | nothing — see below                                       |
  */
 export const buildEngineDisableTargets = (
   engine: RunQuotaEngineId,
@@ -205,7 +200,12 @@ export const buildEngineDisableTargets = (
       ];
 
     case 'investigation':
-      // The in-workflow quota gate refuses automated runs; no separate disable needed.
+      // Investigations have no scheduled trigger of their own: they are fanned out
+      // by discovery, so pausing `detection` is what stops them. Disabling the
+      // investigation workflow itself would also break the manual "investigate"
+      // button, so an exhausted investigation budget overshoots until the detection
+      // side stops feeding it. Native Workflows rate-limits are the real fix
+      // (security-team#18658 / #18661) — see `docs/run_quotas.md`.
       return [];
   }
 };

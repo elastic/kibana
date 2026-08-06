@@ -11,9 +11,11 @@ import {
   MAX_RUN_LIMIT,
   MIN_RUN_LIMIT,
   RUN_BUDGET_GROUP_IDS,
+  type RunQuotaEnforcementResult,
   type RunQuotaSettings,
   type RunQuotasResponse,
 } from '../../../../common';
+import { enforceRunQuotas } from '../../../lib/run_quotas';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
@@ -57,7 +59,7 @@ const updateRunQuotasRoute = createServerRoute({
     access: 'internal',
     summary: 'Update Significant Events daily run limits',
     description:
-      'Sets the daily run limit per budget group and the time zone the daily window is anchored to. Omitted groups keep their current value. Limits are enforced inside the counted workflows, so a change takes effect after the managed workflows are reinstalled (triggered by this call). ' +
+      'Sets the daily run limit per budget group. Omitted groups keep their current value. Limits are soft: the next enforcement pass picks the new value up, so raising a limit un-pauses an engine and lowering one pauses it within a few minutes. ' +
       'Deployment-wide, gated by the same space-scoped streams.manage privilege as the other Significant Events settings.',
   },
   security: {
@@ -91,7 +93,44 @@ const updateRunQuotasRoute = createServerRoute({
   },
 });
 
+const enforceRunQuotasRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/run_quotas/_enforce',
+  options: {
+    access: 'internal',
+    summary: 'Reconcile engine pause state with daily run quotas',
+    description:
+      'Pauses the automation of any engine whose budget group is over its daily limit, and resumes engines that are back within limit (day rollover, or a raised limit). ' +
+      'Called on a timer by the run-quota enforce workflow; idempotent, and a no-op when usage cannot be read.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({}),
+  handler: async ({
+    request,
+    server,
+    logger,
+    getScopedClients,
+    runQuotaService,
+    maintenanceService,
+  }): Promise<RunQuotaEnforcementResult> => {
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
+
+    return enforceRunQuotas({
+      request,
+      runQuotaService,
+      maintenanceService,
+      logger,
+      updatedBy: 'system:run_quota_enforce',
+    });
+  },
+});
+
 export const internalRunQuotasRoutes = {
   ...getRunQuotasRoute,
   ...updateRunQuotasRoute,
+  ...enforceRunQuotasRoute,
 };

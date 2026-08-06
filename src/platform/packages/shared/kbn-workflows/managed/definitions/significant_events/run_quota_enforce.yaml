@@ -1,10 +1,11 @@
 version: "1"
 name: "Significant Events Run Quota Enforce"
 description: >
-  Soft daily run-quota enforcer (good enough for now — not a hard admit-time
-  limit). Counts usage via GET /run_quotas (backed by .workflows-executions) and
-  pauses automation for any engine whose budget group is already exhausted.
-  Concurrent / in-flight runs may overshoot until this workflow next ticks.
+  Soft daily run-quota enforcement (not a hard admit-time limit). Every 5 minutes
+  it asks Kibana to reconcile engine pause state with the day's usage: engines over
+  their budget are paused, engines back within budget (after the UTC day rolls over,
+  or after an admin raises a limit) are resumed. Because nothing is blocked at
+  admission, in-flight and concurrent runs can overshoot until the next pass.
   Harder Workflows execution rate-limits are the planned follow-up.
 enabled: true
 settings:
@@ -27,35 +28,14 @@ triggers:
   - type: manual
 
 steps:
-  - name: fetch_quotas
+  # All of the decision-making lives server-side: it needs the group -> engine
+  # mapping and the record of what each engine pause disabled.
+  - name: enforce_run_quotas
     type: kibana.request
     with:
-      method: GET
-      path: '/internal/significant_events/run_quotas'
+      method: POST
+      path: '/internal/significant_events/run_quotas/_enforce'
       headers:
         x-elastic-internal-origin: 'kibana'
     on-failure:
-      continue: false
-
-  # One pause call per exhausted group. Pausing the same engine twice is
-  # idempotent; context may fire twice (ki_extraction + memory) and that is fine.
-  - name: pause_exhausted_engines
-    type: foreach
-    foreach: '${{ steps.fetch_quotas.output.groups | default: [] }}'
-    iteration-on-failure:
       continue: true
-    steps:
-      - name: pause_engine
-        type: kibana.request
-        if: '${{ foreach.item.exhausted == true }}'
-        with:
-          method: POST
-          path: '/internal/significant_events/maintenance/_pause'
-          headers:
-            x-elastic-internal-origin: 'kibana'
-          body:
-            engines:
-              - '{{ foreach.item.engine }}'
-            reason: 'run_quota'
-        on-failure:
-          continue: true

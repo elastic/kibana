@@ -30,7 +30,3 @@ steps:
     type: workflow.execute
     with:
       workflow-id: "system-significant-events-discovery"
-      inputs:
-        # Forward the root origin so "run discovery now" from the UI is not gated
-        # by the daily run quota as if it were a scheduled pass.
-        runOrigin: "{{ execution.triggeredBy }}"

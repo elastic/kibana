@@ -40,6 +40,3 @@ steps:
           workflow-id: "system-significant-events-discovery"
           inputs:
             detectionBatchMax: __DISCOVERY_BATCH_SIZE__
-            # Forward the root origin so the daily run quota sees a scheduled pass
-            # as automation (and a manual re-run of this loop as a person's request).
-            runOrigin: "{{ execution.triggeredBy }}"

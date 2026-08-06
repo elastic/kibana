@@ -36,12 +36,6 @@ triggers:
         concurrency_key:
           type: string
           description: Optional key for concurrency deduplication. Defaults to the workflow execution ID.
-        run_origin:
-          type: string
-          description: >
-            Root origin of the run, forwarded by the invoking workflow so a human-initiated
-            chain is not treated as automation by the run-quota gate. Defaults to this
-            execution's own trigger.
       required:
         - message
       additionalProperties: false

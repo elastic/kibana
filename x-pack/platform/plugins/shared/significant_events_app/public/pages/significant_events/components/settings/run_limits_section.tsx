@@ -38,14 +38,15 @@ import {
   useRunQuotas,
   useUpdateRunQuotas,
 } from '../../../../hooks/use_significant_events_run_quotas';
+import { RUN_BUDGET_GROUP_LABELS } from './run_limit_labels';
 
 const SECTION_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.settings.runLimits.title',
+  'xpack.significantEventsApp.settings.runLimits.title',
   { defaultMessage: 'Daily run limits' }
 );
 
 const SECTION_DESCRIPTION = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.settings.runLimits.description',
+  'xpack.significantEventsApp.settings.runLimits.description',
   {
     defaultMessage:
       'Soft daily caps for AI workflow groups across the whole deployment. When a group reaches its limit, a system workflow pauses that engine’s automation within a few minutes — these are not hard admit-time blocks, so runs already in flight can finish and may briefly overshoot. Manual runs still go through. Counters reset at midnight UTC.',
@@ -54,69 +55,48 @@ const SECTION_DESCRIPTION = i18n.translate(
 
 const ENGINE_LABELS: Record<RunQuotaEngineId, string> = {
   context: i18n.translate(
-    'xpack.streams.significantEventsDiscovery.settings.runLimits.engine.context',
+    'xpack.significantEventsApp.settings.runLimits.engine.context',
     { defaultMessage: 'Context engine' }
   ),
   detection: i18n.translate(
-    'xpack.streams.significantEventsDiscovery.settings.runLimits.engine.detection',
+    'xpack.significantEventsApp.settings.runLimits.engine.detection',
     { defaultMessage: 'Detection engine' }
   ),
   investigation: i18n.translate(
-    'xpack.streams.significantEventsDiscovery.settings.runLimits.engine.investigation',
+    'xpack.significantEventsApp.settings.runLimits.engine.investigation',
     { defaultMessage: 'Investigation engine' }
-  ),
-};
-
-const GROUP_LABELS: Record<RunBudgetGroupId, string> = {
-  ki_extraction: i18n.translate(
-    'xpack.streams.significantEventsDiscovery.settings.runLimits.group.kiExtraction',
-    { defaultMessage: 'Knowledge indicator extraction' }
-  ),
-  memory: i18n.translate(
-    'xpack.streams.significantEventsDiscovery.settings.runLimits.group.memory',
-    {
-      defaultMessage: 'Memory updates',
-    }
-  ),
-  detection: i18n.translate(
-    'xpack.streams.significantEventsDiscovery.settings.runLimits.group.detection',
-    { defaultMessage: 'Discovery and significant event generation' }
-  ),
-  investigation: i18n.translate(
-    'xpack.streams.significantEventsDiscovery.settings.runLimits.group.investigation',
-    { defaultMessage: 'Investigations' }
   ),
 };
 
 const GROUP_DESCRIPTIONS: Record<RunBudgetGroupId, string> = {
   ki_extraction: i18n.translate(
-    'xpack.streams.significantEventsDiscovery.settings.runLimits.groupHelp.kiExtraction',
+    'xpack.significantEventsApp.settings.runLimits.groupHelp.kiExtraction',
     { defaultMessage: 'Onboarding runs that extract knowledge indicators from a stream.' }
   ),
   memory: i18n.translate(
-    'xpack.streams.significantEventsDiscovery.settings.runLimits.groupHelp.memory',
+    'xpack.significantEventsApp.settings.runLimits.groupHelp.memory',
     {
       defaultMessage:
         'Synthesis, consolidation, gap detection, and conversation scraping runs share this counter.',
     }
   ),
   detection: i18n.translate(
-    'xpack.streams.significantEventsDiscovery.settings.runLimits.groupHelp.detection',
+    'xpack.significantEventsApp.settings.runLimits.groupHelp.detection',
     { defaultMessage: 'Discovery runs that turn detections into significant events.' }
   ),
   investigation: i18n.translate(
-    'xpack.streams.significantEventsDiscovery.settings.runLimits.groupHelp.investigation',
+    'xpack.significantEventsApp.settings.runLimits.groupHelp.investigation',
     { defaultMessage: 'Investigation runs, whether triggered by triage or by a person.' }
   ),
 };
 
 const usageText = ({ used, limit }: { used: number; limit: RunLimit }) =>
   limit.enabled
-    ? i18n.translate('xpack.streams.significantEventsDiscovery.settings.runLimits.usageOfLimit', {
+    ? i18n.translate('xpack.significantEventsApp.settings.runLimits.usageOfLimit', {
         defaultMessage: '{used} of {max} runs used today',
         values: { used, max: limit.max },
       })
-    : i18n.translate('xpack.streams.significantEventsDiscovery.settings.runLimits.usageUnlimited', {
+    : i18n.translate('xpack.significantEventsApp.settings.runLimits.usageUnlimited', {
         defaultMessage: '{used} runs today (no limit)',
         values: { used },
       });
@@ -126,12 +106,12 @@ const resetsInText = (resetsAt: string): string => {
   const minutes = Math.max(0, Math.round((new Date(resetsAt).getTime() - Date.now()) / 60_000));
   const hours = Math.floor(minutes / 60);
   return hours > 0
-    ? i18n.translate('xpack.streams.significantEventsDiscovery.settings.runLimits.resetsInHours', {
+    ? i18n.translate('xpack.significantEventsApp.settings.runLimits.resetsInHours', {
         defaultMessage: 'Counters reset in {hours}h {minutes}m.',
         values: { hours, minutes: minutes % 60 },
       })
     : i18n.translate(
-        'xpack.streams.significantEventsDiscovery.settings.runLimits.resetsInMinutes',
+        'xpack.significantEventsApp.settings.runLimits.resetsInMinutes',
         {
           defaultMessage: 'Counters reset in {minutes}m.',
           values: { minutes },
@@ -161,7 +141,7 @@ const GroupRow = ({
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
             <EuiText size="m">
-              <h4>{GROUP_LABELS[group]}</h4>
+              <h4>{RUN_BUDGET_GROUP_LABELS[group]}</h4>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -177,7 +157,7 @@ const GroupRow = ({
             <EuiSwitch
               data-test-subj={`streams-settings-run-limit-enabled-${group}`}
               label={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.runLimits.enableLabel',
+                'xpack.significantEventsApp.settings.runLimits.enableLabel',
                 { defaultMessage: 'Limit daily runs' }
               )}
               checked={draft.enabled}
@@ -188,7 +168,7 @@ const GroupRow = ({
           {draft.enabled && (
             <EuiFormRow
               label={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.runLimits.maxLabel',
+                'xpack.significantEventsApp.settings.runLimits.maxLabel',
                 { defaultMessage: 'Runs per day' }
               )}
             >
@@ -216,7 +196,7 @@ const GroupRow = ({
                 {usageText({ used, limit: usage.limit })}
                 {usage.exhausted &&
                   ` ${i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.runLimits.exhausted',
+                    'xpack.significantEventsApp.settings.runLimits.exhausted',
                     { defaultMessage: 'Automated runs are paused until the counter resets.' }
                   )}`}
               </EuiText>
@@ -299,7 +279,7 @@ export function RunLimitsSection({ canManage }: { canManage: boolean }) {
               iconType="error"
               data-test-subj="streams-settings-run-limits-error"
               title={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.runLimits.errorTitle',
+                'xpack.significantEventsApp.settings.runLimits.errorTitle',
                 { defaultMessage: 'Could not load daily run limits' }
               )}
             >
@@ -309,7 +289,7 @@ export function RunLimitsSection({ canManage }: { canManage: boolean }) {
                 data-test-subj="streams-settings-run-limits-retry"
               >
                 {i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.runLimits.retry',
+                  'xpack.significantEventsApp.settings.runLimits.retry',
                   { defaultMessage: 'Retry' }
                 )}
               </EuiButton>
@@ -322,7 +302,7 @@ export function RunLimitsSection({ canManage }: { canManage: boolean }) {
 
         {data && (
           <>
-            {data.ledgerUnavailable && (
+            {data.usageUnavailable && (
               <>
                 <EuiCallOut
                   announceOnMount
@@ -331,16 +311,16 @@ export function RunLimitsSection({ canManage }: { canManage: boolean }) {
                   iconType="warning"
                   data-test-subj="streams-settings-run-limits-usage-unavailable"
                   title={i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.settings.runLimits.usageUnavailableTitle',
+                    'xpack.significantEventsApp.settings.runLimits.usageUnavailableTitle',
                     { defaultMessage: 'Usage counts are unavailable' }
                   )}
                 >
                   <p>
                     {i18n.translate(
-                      'xpack.streams.significantEventsDiscovery.settings.runLimits.usageUnavailableBody',
+                      'xpack.significantEventsApp.settings.runLimits.usageUnavailableBody',
                       {
                         defaultMessage:
-                          'Today’s run counts could not be read from workflow executions, so every group is shown as unused. Soft pause will not stop automation until usage can be read again.',
+                          'Today’s run counts could not be read from workflow executions, so every group is shown as unused. Limits are not applied until usage can be read again.',
                       }
                     )}
                   </p>
@@ -381,7 +361,7 @@ export function RunLimitsSection({ canManage }: { canManage: boolean }) {
             <EuiText size="xs" color="subdued" data-test-subj="streams-settings-run-limits-reset">
               {resetsInText(data.window.resetsAt)}{' '}
               {i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.runLimits.timezone',
+                'xpack.significantEventsApp.settings.runLimits.timezone',
                 {
                   defaultMessage: 'The daily window follows {timezone}.',
                   values: { timezone: data.window.timezone },
@@ -402,7 +382,7 @@ export function RunLimitsSection({ canManage }: { canManage: boolean }) {
                       data-test-subj="streams-settings-run-limits-cancel"
                     >
                       {i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.runLimits.cancel',
+                        'xpack.significantEventsApp.settings.runLimits.cancel',
                         { defaultMessage: 'Cancel' }
                       )}
                     </EuiButtonEmpty>
@@ -417,7 +397,7 @@ export function RunLimitsSection({ canManage }: { canManage: boolean }) {
                       data-test-subj="streams-settings-run-limits-save"
                     >
                       {i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.runLimits.save',
+                        'xpack.significantEventsApp.settings.runLimits.save',
                         { defaultMessage: 'Save run limits' }
                       )}
                     </EuiButton>
@@ -438,13 +418,13 @@ export function RunLimitsSection({ canManage }: { canManage: boolean }) {
               iconType="lock"
               data-test-subj="streams-settings-run-limits-no-manage"
               title={i18n.translate(
-                'xpack.streams.significantEventsDiscovery.settings.runLimits.noManageTitle',
+                'xpack.significantEventsApp.settings.runLimits.noManageTitle',
                 { defaultMessage: 'Administrator access required' }
               )}
             >
               <p>
                 {i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.settings.runLimits.noManageBody',
+                  'xpack.significantEventsApp.settings.runLimits.noManageBody',
                   {
                     defaultMessage:
                       'You can view daily run limits and usage, but changing them requires the Streams manage privilege.',

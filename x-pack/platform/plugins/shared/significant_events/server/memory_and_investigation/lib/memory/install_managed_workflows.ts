@@ -15,11 +15,7 @@ export const installMemoryWorkflows = async ({
   client: PluginScopedManagedWorkflowsApi;
 }): Promise<void> => {
   const results = await Promise.allSettled(
-    MEMORY_WORKFLOW_IDS.map((id) =>
-      client.install(id, {
-        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      })
-    )
+    MEMORY_WORKFLOW_IDS.map((id) => client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
   );
 
   const failures = results.flatMap((result, index) =>

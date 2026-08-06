@@ -55,6 +55,8 @@ export const createManagedWorkflowsInstaller = ({
     await installWorkflows({ client });
     await installInvestigationWorkflow({ client });
 
+    // Log success only after the whole sequence (including reconciliation) has actually landed, and
+    // only once at INFO. Re-installs on later flag flips are routine, so keep them at debug.
     if (!reconciled) {
       await client.ready();
       reconciled = true;

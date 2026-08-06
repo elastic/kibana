@@ -133,7 +133,7 @@ describe('createRunQuotaService', () => {
     expect(detection.byTrigger).toEqual({ scheduled: 18, manual: 2 });
     expect(memory.used).toBe(0);
     expect(memory.exhausted).toBe(false);
-    expect(quotas.ledgerUnavailable).toBe(false);
+    expect(quotas.usageUnavailable).toBe(false);
 
     const [[searchArgs]] = search.mock.calls as unknown as Array<
       [{ index: string; query: { bool: { filter: unknown[] } } }]
@@ -150,7 +150,7 @@ describe('createRunQuotaService', () => {
 
     const quotas = await service.getQuotas();
 
-    expect(quotas.ledgerUnavailable).toBe(true);
+    expect(quotas.usageUnavailable).toBe(true);
     expect(quotas.groups.every(({ used }) => used === 0)).toBe(true);
   });
 
@@ -199,13 +199,18 @@ describe('createRunQuotaService', () => {
     );
   });
 
-  it('ignores timezone in updateSettings and always writes UTC', async () => {
-    const { service } = createHarness();
-
-    const result = await service.updateSettings({
-      request,
-      update: { timezone: 'Europe/Zurich' },
+  it('rewrites a stored non-UTC timezone to UTC on update', async () => {
+    const { service, create } = createHarness({
+      attributes: { timezone: 'Europe/Zurich', limits: {} },
     });
+
+    const result = await service.updateSettings({ request, update: {} });
+
     expect(result.timezone).toBe('UTC');
+    expect(create).toHaveBeenCalledWith(
+      RUN_QUOTA_SETTINGS_SO_TYPE,
+      expect.objectContaining({ timezone: 'UTC' }),
+      expect.anything()
+    );
   });
 });

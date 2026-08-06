@@ -79,9 +79,6 @@ triggers:
       - name: queriesMaxExistingForContext
         type: number
         description: "Max existing queries for LLM context in query generation."
-      - name: runOrigin
-        type: string
-        description: "Root origin of the run, forwarded by the invoking workflow for attribution. Defaults to this execution's own trigger."
 steps:
   # -----------------------------------------------------------------------
   # Step 0: Initialize variables.

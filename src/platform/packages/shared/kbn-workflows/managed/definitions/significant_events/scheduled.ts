@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderTemplate } from './run_quota_gate';
 import SCHEDULED_DETECTION_YAML from './scheduled_detection.yaml';
 import SCHEDULED_REVIEW_YAML from './scheduled_review.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
@@ -37,6 +36,16 @@ const SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT = {
   versionStrategy: 'auto',
   enablement: 'restorable',
 } as const;
+
+// yamlTemplate values are substituted into the static yaml files above via
+// exact-token replacement, since values (e.g. batch sizes) are needed at
+// workflow-install time rather than at workflow-run time and so can't be
+// expressed with the engine's own `${{ }}` / `{{ }}` runtime templating.
+const renderTemplate = (template: string, values: Record<string, string | number>): string =>
+  Object.entries(values).reduce(
+    (yaml, [token, value]) => yaml.split(token).join(String(value)),
+    template
+  );
 
 export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,

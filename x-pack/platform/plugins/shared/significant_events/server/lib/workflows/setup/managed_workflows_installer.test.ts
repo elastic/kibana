@@ -20,9 +20,9 @@ import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/type
 import { createManagedWorkflowsInstaller } from './managed_workflows_installer';
 
 // Significant events is gated solely by the availability flag now, so the installer always writes
-// the full set: 10 base workflows (incl. run-quota enforce/reset) + 4 memory workflows
+// the full set: 9 base workflows (incl. run-quota enforce) + 4 memory workflows
 // (both via `installWorkflows`) + 1 investigation workflow.
-const BASE_WORKFLOW_COUNT = 10;
+const BASE_WORKFLOW_COUNT = 9;
 const MEMORY_WORKFLOW_COUNT = 4;
 const INVESTIGATION_WORKFLOW_COUNT = 1;
 const TOTAL_WORKFLOW_COUNT =
@@ -126,17 +126,17 @@ describe('createManagedWorkflowsInstaller', () => {
     }
   });
 
-  it('installs counted workflows without baking run-quota template values', async () => {
+  it('installs counted workflows without baking in run-quota values', async () => {
+    // Run quotas are enforced outside the workflow YAML, so a limit change must
+    // never require reinstalling the product workflows.
     const { client, installer } = createInstaller();
 
     await installer.install();
 
-    for (const [id, options] of client.install.mock.calls) {
-      expect(options).not.toHaveProperty('values');
-      expect(id).toEqual(expect.any(String));
-    }
     expect(installedIds(client)).toContain(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID);
-    expect(installedIds(client)).toContain(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID);
+    for (const [, options] of client.install.mock.calls) {
+      expect(options).not.toHaveProperty('values');
+    }
   });
 
   it('installs the investigation workflow when available', async () => {

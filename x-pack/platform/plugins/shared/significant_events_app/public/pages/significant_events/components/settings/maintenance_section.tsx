@@ -51,7 +51,7 @@ const ENGINE_SECTION_DESCRIPTION = i18n.translate(
   'xpack.significantEventsApp.settings.maintenance.enginesDescription',
   {
     defaultMessage:
-      'Pause automation for one engine without stopping the whole deployment. Manual runs (onboarding, investigation, memory synthesis) stay available. Engines paused by a daily run limit resume automatically after midnight UTC.',
+      'Pause automation for one engine without stopping the whole deployment. Manual runs (onboarding, investigation, memory synthesis) stay available. An engine paused by a daily run limit resumes on its own once it is back within limit — after the counters reset at midnight UTC, or as soon as you raise the limit.',
   }
 );
 

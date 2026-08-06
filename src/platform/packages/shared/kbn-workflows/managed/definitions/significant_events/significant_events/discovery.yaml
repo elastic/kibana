@@ -26,10 +26,6 @@ triggers:
         default: 10
         required: false
         description: 'Max rules per discovery invocation. Caps agent message size; remaining detections are picked up on the next cycle.'
-      - name: runOrigin
-        type: string
-        required: false
-        description: 'Root origin of the run, forwarded by the invoking workflow for attribution. Defaults to this execution''s own trigger.'
 outputs:
   - name: processedCount
     type: number
@@ -347,9 +343,6 @@ steps:
                             with:
                               workflow-id: 'system-significant-events-investigation'
                               inputs:
-                                # Forward the root origin so the daily run quota attributes
-                                # this fan-out to whatever started the discovery pass.
-                                run_origin: '{{ variables.runOrigin }}'
                                 message: |
                                   {{ steps.resolve_open_event.output.hits.hits[0]._source.title }}
 

@@ -16,7 +16,7 @@ export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID =
 export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 7,
+  version: 4,
   billable: false,
   yaml: MEMORY_SYNTHESIS_YAML,
   management: {

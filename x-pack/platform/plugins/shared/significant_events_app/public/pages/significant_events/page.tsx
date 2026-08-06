@@ -18,6 +18,7 @@ import { useSignificantEventsPrivileges } from '../../hooks/use_significant_even
 import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
 import { useBlocksNewActivity } from '../../hooks/use_significant_events_maintenance';
 import { useRunQuotas } from '../../hooks/use_significant_events_run_quotas';
+import { RUN_BUDGET_GROUP_LABELS } from './components/settings/run_limit_labels';
 import { RedirectTo } from '../../components/redirect_to';
 import { SignificantEventsNotEnabledPrompt } from '../../components/not_enabled_prompt';
 import {
@@ -365,7 +366,7 @@ export function SignificantEventsPage() {
                     'xpack.significantEventsApp.runQuotaExhaustedBannerTitle',
                     {
                       defaultMessage:
-                        '{count, plural, one {# engine} other {# engines}} reached the daily run limit',
+                        '{count, plural, one {# workflow group} other {# workflow groups}} reached the daily run limit',
                       values: { count: exhaustedGroups.length },
                     }
                   )}
@@ -373,9 +374,11 @@ export function SignificantEventsPage() {
                   <p>
                     {i18n.translate('xpack.significantEventsApp.runQuotaExhaustedBannerBody', {
                       defaultMessage:
-                        'Automated runs are stopped for: {groups}. Runs you start yourself still work. Counters reset at {resetsAt} UTC.',
+                        'Automation is being stopped for: {groups}. Runs you start yourself still work. Counters reset at {resetsAt} UTC.',
                       values: {
-                        groups: exhaustedGroups.map((g) => g.group).join(', '),
+                        groups: exhaustedGroups
+                          .map(({ group }) => RUN_BUDGET_GROUP_LABELS[group])
+                          .join(', '),
                         resetsAt: runQuotasData?.window.resetsAt
                           ? new Date(runQuotasData.window.resetsAt).toLocaleTimeString([], {
                               hour: '2-digit',
