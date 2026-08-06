@@ -2,20 +2,16 @@
 $schema: 'https://moonrepo.dev/schemas/toolchains.json'
 
 javascript:
-  packageManager: yarn
+  packageManager: pnpm
   inferTasksFromScripts: true # Automatically infer tasks from package.json scripts.
-  dependencyVersionFormat: link
+  dependencyVersionFormat: workspace
   rootPackageDependenciesOnly: true # Keep installs rooted at the workspace package.json only.
-  syncPackageManagerField: true
+  syncPackageManagerField: false # packageManager is pinned by hand + corepack; don't let moon rewrite it.
   dedupeOnLockfileChange: true # Dedupe dependencies when the lockfile changes.
   syncProjectWorkspaceDependencies: false
 
 node:
   syncVersionManagerConfig: nvm
-
-yarn:
-  installArgs:
-    - '--non-interactive'
 
 typescript:
   includeProjectReferenceSources: false # This would add references to tsconfigs

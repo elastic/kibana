@@ -1488,6 +1488,15 @@ allowBuilds:
   'protobufjs': false # prints a version-scheme warning
   'puppeteer': false # browser download skipped via .puppeteerrc
   'sharp': false # native build; prebuilds are sufficient
+
+# @elastic/esql suite versions, referenced via `catalog:` below (replaces the
+# deprecated `$@elastic/esql` override syntax). Must match `@elastic/esql` in
+# package.json; the renovate `esql-js` group bumps them together.
+catalog:
+  '@elastic/esql-grammar': '4.16.0'
+  '@elastic/esql-promql-grammar': '4.16.0'
+  '@elastic/esql-types': '4.16.0'
+  '@elastic/pretty-printer': '4.16.0'
 overrides:
   '@aws-sdk/client-bedrock-agent-runtime': '3.994.0'
   '@aws-sdk/client-bedrock-runtime': '3.994.0'
@@ -1501,10 +1510,10 @@ overrides:
   '@elastic/charts>react-redux': 'npm:react-redux@7.2.8'
   '@elastic/charts>redux': 'npm:redux@4.2.1'
   '@elastic/elasticsearch@9>@elastic/transport': '9.3.7'
-  '@elastic/esql-grammar': '$@elastic/esql'
-  '@elastic/esql-promql-grammar': '$@elastic/esql'
-  '@elastic/esql-types': '$@elastic/esql'
-  '@elastic/pretty-printer': '$@elastic/esql'
+  '@elastic/esql-grammar': 'catalog:'
+  '@elastic/esql-promql-grammar': 'catalog:'
+  '@elastic/esql-types': 'catalog:'
+  '@elastic/pretty-printer': 'catalog:'
   '@emnapi/core': '1.11.1'
   '@emnapi/runtime': '1.11.1'
   '@emotion/sheet': 'npm:@elastic/emotion-sheet@1.4.1'
