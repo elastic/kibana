@@ -11,6 +11,7 @@ import type { WorkspaceGlobalContext } from './types';
 import { exec } from './exec';
 import { exists } from './utils/exists';
 import { getGitCommonDir } from './utils/get_git_common_dir';
+import { commitExists } from './utils/commit_exists';
 
 /**
  * Ensure a lightweight clone of the main Kibana repo exists. The caller pre-computes
@@ -45,14 +46,14 @@ export async function ensureClonedRepo(
       cwd: process.cwd(),
     });
 
-    await fetchRef({ log, baseCloneDir, ref });
+    await fetchRef({ log, baseCloneDir, repoRoot, ref });
 
     return baseCloneDir;
   }
 
-  log.debug(`Base clone already present at ${baseCloneDir}; fetching ref ${ref}`);
+  log.debug(`Base clone already present at ${baseCloneDir}; ensuring ref ${ref} is available`);
 
-  await fetchRef({ log, baseCloneDir, ref });
+  await fetchRef({ log, baseCloneDir, repoRoot, ref });
 
   return baseCloneDir;
 }
@@ -60,13 +61,20 @@ export async function ensureClonedRepo(
 async function fetchRef({
   log,
   baseCloneDir,
+  repoRoot,
   ref,
 }: {
   log: WorkspaceGlobalContext['log'];
   baseCloneDir: string;
+  repoRoot: string;
   ref: string;
 }) {
-  await exec('git', ['fetch', 'origin', ref], {
+  if (await commitExists(baseCloneDir, ref)) {
+    log.debug(`Commit ${ref} already present in base clone; skipping fetch`);
+    return;
+  }
+
+  await exec('git', ['fetch', repoRoot, ref], {
     log,
     cwd: baseCloneDir,
   });

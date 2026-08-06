@@ -14,15 +14,18 @@ import { ensureClonedRepo } from './ensure_cloned_repo';
 import { exec } from './exec';
 import { exists } from './utils/exists';
 import { getGitCommonDir } from './utils/get_git_common_dir';
+import { commitExists } from './utils/commit_exists';
 import type { WorkspaceGlobalContext } from './types';
 
 jest.mock('./exec');
 jest.mock('./utils/exists');
 jest.mock('./utils/get_git_common_dir');
+jest.mock('./utils/commit_exists');
 
 const mockExec = exec as jest.MockedFunction<typeof exec>;
 const mockExists = exists as jest.MockedFunction<typeof exists>;
 const mockGetGitCommonDir = getGitCommonDir as jest.MockedFunction<typeof getGitCommonDir>;
+const mockCommitExists = commitExists as jest.MockedFunction<typeof commitExists>;
 
 function createContext(): WorkspaceGlobalContext {
   const log = new ToolingLog({
@@ -50,6 +53,7 @@ describe('ensureClonedRepo', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockExec.mockResolvedValue({} as Awaited<ReturnType<typeof exec>>);
+    mockCommitExists.mockResolvedValue(false);
   });
 
   it('clones with --reference and fetches the ref when base does not exist', async () => {
@@ -67,15 +71,17 @@ describe('ensureClonedRepo', () => {
       ['clone', '--reference', '/path/to/main/.git', context.repoRoot, context.baseCloneDir],
       expect.objectContaining({ cwd: process.cwd() })
     );
+    expect(mockCommitExists).toHaveBeenCalledWith(context.baseCloneDir, sha);
     expect(mockExec).toHaveBeenCalledWith(
       'git',
-      ['fetch', 'origin', sha],
+      ['fetch', context.repoRoot, sha],
       expect.objectContaining({ cwd: context.baseCloneDir })
     );
   });
 
-  it('fetches only the ref when base already exists', async () => {
+  it('fetches from the source repo when the commit is missing from base', async () => {
     mockExists.mockResolvedValue(true);
+    mockCommitExists.mockResolvedValue(false);
 
     const context = createContext();
     const sha = 'deadbeef';
@@ -86,8 +92,20 @@ describe('ensureClonedRepo', () => {
     expect(mockExec).toHaveBeenCalledTimes(1);
     expect(mockExec).toHaveBeenCalledWith(
       'git',
-      ['fetch', 'origin', sha],
+      ['fetch', context.repoRoot, sha],
       expect.objectContaining({ cwd: context.baseCloneDir })
     );
+  });
+
+  it('skips fetch when the commit is already reachable in base', async () => {
+    mockExists.mockResolvedValue(true);
+    mockCommitExists.mockResolvedValue(true);
+
+    const context = createContext();
+    const sha = 'deadbeef';
+
+    await ensureClonedRepo(context, { ref: sha });
+
+    expect(mockExec).not.toHaveBeenCalled();
   });
 });
