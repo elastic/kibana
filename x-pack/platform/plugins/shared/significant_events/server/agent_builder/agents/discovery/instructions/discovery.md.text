@@ -195,7 +195,7 @@ Pre-check — split immediately if any of the following hold:
    - Exception: explicit recovery evidence for the same incident allows a positive/health detection to pair with its originating failure symptom when both sides resolve to the same affected dependency path/mechanism. Topology and signal convergence alone do not qualify.
 4. The only apparent connection is a signal previously recorded as `confirmed: false`.
    - An unconfirmed signal never establishes or restores a continuation. The current detection must independently pair with a confirmed signal on the open event under the checks below.
-   - **Recovery reconciliation exception:** a detection may update an open event carrying the same `rule_uuid` even when that prior signal is unconfirmed, but only to close that same episode. Require a successfully executed exact rule query with verified healthy/opposite rows or no matching failure rows, and no query error, telemetry gap, or unrelated result. This applies even when `change_point_type` is directionally ambiguous: the exact current query is the recovery evidence for the existing episode. Closing preserves that episode's lifecycle; do not create a new dismissed event for it. This exception never establishes an active incident, groups another rule, or justifies an `open` event.
+   - **Recovery reconciliation exception:** a detection may update an open event carrying the same `rule_uuid` even when that prior signal is unconfirmed, but only to close that same episode. Require a successfully executed exact rule query with verified healthy/opposite rows or no matching failure rows, and no query error, telemetry gap, or unrelated result. This applies even when `change_point_type` is directionally ambiguous: the exact current query is the recovery evidence for the existing episode. Closing preserves that episode's lifecycle; do not create a new dismissed event for it. This exception never establishes an active incident, groups another rule, or justifies an `open` event. Same-rule empty/healthy authored-query evidence recovers only episodes grounded in that rule's hypothesis. For an off-topic observed-error episode, keep it `open` until evidence of that error class clears (or an operator dismisses it).
 
 For the remaining pairs, match if at least one criterion holds:
 1. **Cascade effect**
@@ -256,7 +256,7 @@ For events returned by `platform_sig_events_event_search`, derive:
 - **Onset timing** — use a stored timestamp only when it represents incident onset; otherwise treat timing as unknown.
 
 Maintain `matched_rule_uuids`, initially empty. Add a detection's `rule_uuid` immediately on acceptance. Never assign the same `rule_uuid` twice.
-Before accepting any continuation, identify the specific confirmed open-event signal that passes `<incident_matching>`. A returned event, shared topology, or a previously unconfirmed copy of the current rule is not acceptance evidence. If no confirmed signal passes the pairwise check, the detection starts a new event and omits `event_id`.
+Before accepting any continuation, identify the specific confirmed open-event signal that passes `<incident_matching>`, or apply the Recovery reconciliation exception to close that same episode. A returned event, shared topology, or a previously unconfirmed copy of the current rule is not acceptance evidence for an active continuation. If neither a confirmed pairwise match nor the Recovery reconciliation exception applies, the detection starts a new event and omits `event_id`. Under Recovery reconciliation, reuse that episode's `event_id` only to close it.
 
 Run 3.1 then 3.2 for each detection
 
@@ -377,7 +377,7 @@ Everything the operator reads (`title`, `summary`, `symptom_hypothesis`, signal 
    - `open`/`20-low`: confirmed minor impact with at least one event-aligned signal, or a concrete off-topic observed-error event whose found row shows negligible impact.
    - **Known ongoing cap**: memory-identified ongoing/background issues may stay `open` at no more than `40-medium`.
    - `dismissed`: every batch grounding check is non-confirming, unrelated, or verifies only benign/positive activity, and no off-topic row contains a concrete non-benign error; also for same-batch duplicates.
-   - `closed`: every batch detection assigned to this event has recovery-lens grounding, or the Recovery reconciliation exception, with either verified healthy/opposite rows or a successfully executed exact query with no matching failure rows. Do not close when a query error, telemetry gap, unrelated result, or any active failure row remains; prior-cycle signals copied unchanged are trusted as recorded.
+   - `closed`: every batch detection assigned to this event has recovery-lens grounding, or the Recovery reconciliation exception, with either verified healthy/opposite rows or a successfully executed exact query with no matching failure rows. Do not close when a query error, telemetry gap, unrelated result, or any active failure row remains; prior-cycle signals copied unchanged are trusted as recorded. For an off-topic observed-error episode, keep it `open` until evidence of that error class clears; same-rule empty/healthy authored-query recovery does not apply.
 
 </critical_rules>
 
