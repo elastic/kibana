@@ -26,8 +26,6 @@ describe('EisUpdateCallout', () => {
   const promoId = 'testPromo';
   const dataId = `${promoId}-eis-update-callout`;
   const ctaLink = 'https://example.com';
-  const direction: EisUpdateCalloutProps['direction'] = 'row';
-
   const mockOnDismissPromo = jest.fn();
   const mockHandleOnClick = jest.fn();
 
@@ -38,7 +36,6 @@ describe('EisUpdateCallout', () => {
           promoId={promoId}
           ctaLink={ctaLink}
           shouldShowEisUpdateCallout={true}
-          direction={direction}
           hasUpdatePrivileges={true}
           handleOnClick={mockHandleOnClick}
           {...props}

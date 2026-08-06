@@ -20,7 +20,6 @@ describe('EisPromotionalCallout', () => {
   const promoId = 'testPromo';
   const dataId = `${promoId}-eis-promo-callout`;
   const ctaLink = 'https://example.com';
-  const direction: EisPromotionalCalloutProps['direction'] = 'row';
   const mockOnDismissPromo = jest.fn();
 
   const renderEisPromotionalCallout = (props?: Partial<EisPromotionalCalloutProps>) => {
@@ -30,7 +29,6 @@ describe('EisPromotionalCallout', () => {
           promoId={promoId}
           ctaLink={ctaLink}
           isCloudEnabled={true}
-          direction={direction}
           {...props}
         />
       </EuiThemeProvider>

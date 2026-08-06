@@ -8,16 +8,9 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiImage,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import searchRocketIcon from '../assets/search-rocket.svg';
+import { EuiIllustration } from '@elastic/eui';
+import { cloudRocketDeploy } from '@elastic/eui-illustrations';
+import { AnnouncementBanner } from '@kbn/announcement-banner';
 import {
   EIS_CALLOUT_DOCUMENTATION_BTN,
   EIS_PROMO_CALLOUT_DESCRIPTION,
@@ -29,14 +22,12 @@ export interface EisPromotionalCalloutProps {
   ctaLink: string;
   promoId: string;
   isCloudEnabled: boolean;
-  direction: 'row' | 'column';
 }
 
 export const EisPromotionalCallout = ({
   ctaLink,
   promoId,
   isCloudEnabled,
-  direction,
 }: EisPromotionalCalloutProps) => {
   const { isPromoVisible, onDismissPromo } = useShowEisPromotionalContent({
     promoId: `${promoId}EisPromoCallout`,
@@ -49,44 +40,24 @@ export const EisPromotionalCallout = ({
   }
 
   return (
-    <EuiCallOut
+    <AnnouncementBanner
       data-test-subj={dataId}
-      css={({ euiTheme }) => ({
-        backgroundColor: `${euiTheme.colors.backgroundBaseSubdued}`,
-        border: `${euiTheme.border.thin}`,
-        borderRadius: `${euiTheme.border.radius.medium}`,
-      })}
+      title={EIS_CALLOUT_TITLE}
+      text={EIS_PROMO_CALLOUT_DESCRIPTION}
+      media={<EuiIllustration type={cloudRocketDeploy} alt="" />}
+      color="highlighted"
       onDismiss={onDismissPromo}
-    >
-      <EuiFlexGroup
-        direction={direction}
-        alignItems="flexStart"
-        gutterSize={direction === 'row' ? 'l' : 'm'}
-      >
-        <EuiImage src={searchRocketIcon} alt="" />
-        <div>
-          <EuiTitle>
-            <h4>{EIS_CALLOUT_TITLE}</h4>
-          </EuiTitle>
-          <EuiText color="subdued" size="s">
-            <p>{EIS_PROMO_CALLOUT_DESCRIPTION}</p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiButton
-            fullWidth={false}
-            color="text"
-            size="s"
-            href={ctaLink}
-            data-test-subj="eisPromoCalloutCtaBtn"
-            data-telemetry-id={`${dataId}-viewEisDocs-link`}
-            target="_blank"
-            iconSide="right"
-            iconType="external"
-          >
-            {EIS_CALLOUT_DOCUMENTATION_BTN}
-          </EuiButton>
-        </div>
-      </EuiFlexGroup>
-    </EuiCallOut>
+      actionProps={{
+        primary: {
+          children: EIS_CALLOUT_DOCUMENTATION_BTN,
+          href: ctaLink,
+          target: '_blank',
+          iconType: 'external',
+          iconSide: 'right',
+          'data-test-subj': 'eisPromoCalloutCtaBtn',
+          'data-telemetry-id': `${dataId}-viewEisDocs-link`,
+        },
+      }}
+    />
   );
 };

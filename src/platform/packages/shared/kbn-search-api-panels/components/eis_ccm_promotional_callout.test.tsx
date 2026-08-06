@@ -53,8 +53,6 @@ const mockUseKibana = (overrides?: Partial<any>) => {
 describe('EisCloudConnectPromoCallout', () => {
   const promoId = 'testPromo';
   const dataId = `${promoId}-cloud-connect-callout`;
-  const direction: EisCloudConnectPromoCalloutProps['direction'] = 'row';
-
   const renderComponent = (props?: Partial<EisCloudConnectPromoCalloutProps>) =>
     render(
       <EuiThemeProvider>
@@ -62,7 +60,6 @@ describe('EisCloudConnectPromoCallout', () => {
           promoId={promoId}
           isSelfManaged={true}
           navigateToApp={mockNavigateToApp}
-          direction={direction}
           {...props}
         />
       </EuiThemeProvider>
