@@ -339,7 +339,7 @@ export const bucketHistogramOperationSchema = z
       .union([
         z.number().min(LENS_HISTOGRAM_GRANULARITY_MIN).meta({
           description:
-            'Target number of histogram buckets (bars). The effective ceiling is the `histogram:maxBars` advanced setting (default 1000).',
+            'Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.',
         }),
         z.literal('auto'),
       ])
