@@ -9,6 +9,7 @@ import {
   generateRuleSchemaDoc,
   generateRuleOperationsDoc,
   generateActionPolicySchemaDoc,
+  getSeverityValues,
 } from './schema_to_skill_docs';
 
 describe('schema_to_skill_docs', () => {
@@ -56,6 +57,14 @@ describe('schema_to_skill_docs', () => {
       const doc = generateRuleOperationsDoc();
       expect(doc).toContain('pending_count');
       expect(doc).toContain('recovering_count');
+    });
+  });
+
+  describe('getSeverityValues', () => {
+    it('matches the snapshot', () => {
+      expect(getSeverityValues().join(', ')).toMatchInlineSnapshot(
+        `"info, low, medium, high, critical"`
+      );
     });
   });
 

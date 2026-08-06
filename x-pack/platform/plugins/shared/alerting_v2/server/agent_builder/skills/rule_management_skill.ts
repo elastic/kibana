@@ -13,7 +13,11 @@ import {
   RULE_MANAGEMENT_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
 import { manageRuleTool } from '../tools/manage_rule';
-import { generateRuleSchemaDoc, generateRuleOperationsDoc } from './schema_to_skill_docs';
+import {
+  generateRuleSchemaDoc,
+  generateRuleOperationsDoc,
+  getSeverityValues,
+} from './schema_to_skill_docs';
 
 export const createRuleManagementSkill = () =>
   defineSkillType({
@@ -80,10 +84,19 @@ When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${
 
 Severity is a per-event property on alert events and episodes, not a rule-level field. It is extracted at execution time from a column named \`severity\` in the ES|QL breach query output.
 
-- **Valid values**: \`info\`, \`low\`, \`medium\`, \`high\`, \`critical\` (case-insensitive).
+- **Valid values**: ${getSeverityValues().map((v) => `\`${v}\``).join(', ')} (case-insensitive).
 - If the breach query does not produce a \`severity\` column, alert events have no severity.
 - Different groups can produce different severities in the same rule execution (the value comes from each row).
-- Action policies can match on \`severity\` to route high-severity episodes differently (e.g. PagerDuty for critical, email for low).`,
+- Action policies can match on \`severity\` to route high-severity episodes differently (e.g. PagerDuty for critical, email for low).
+
+### Setting Severity in ES|QL
+
+Severity is set by adding a \`severity\` column to the breach query via \`EVAL\`:
+
+- **Literal severity** — all alerts from the rule share the same severity:
+  \`| EVAL severity = "critical"\`
+- **Conditional severity** — severity varies per group based on data:
+  \`| EVAL severity = CASE(cpu > 0.95, "critical", cpu > 0.8, "high", "medium")\``,
       },
       {
         name: 'rule-schema',
@@ -169,18 +182,7 @@ State transition is only allowed on \`kind: alert\` rules. Refer to the [rule-op
 
 ## Severity
 
-Severity is set by including a \`severity\` column in the ES|QL breach query. The rule executor extracts it from each breach row and stamps it on the resulting alert events. Valid values: \`info\`, \`low\`, \`medium\`, \`high\`, \`critical\`.
-
-- **Literal severity** — all alerts from the rule share the same severity:
-  \`| EVAL severity = "critical"\`
-- **Conditional severity** — severity varies per group based on data:
-  \`| EVAL severity = CASE(cpu > 0.95, "critical", cpu > 0.8, "high", "medium")\`
-- If the query does not produce a \`severity\` column, alert events have no severity.
-- Severity is per alert event, not per rule — different groups can have different severities in the same execution.
-
-When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`.
-
-Refer to the [concepts reference](./references/concepts.md) for more on the severity extraction model.
+When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Refer to the [concepts reference](./references/concepts.md) for valid values, the extraction model, and literal vs conditional patterns.
 
 ## Recovery Strategy
 

@@ -6,7 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { createRuleDataBaseSchema, createActionPolicyDataSchema } from '@kbn/alerting-v2-schemas';
+import {
+  createRuleDataBaseSchema,
+  createActionPolicyDataSchema,
+  alertEventSeveritySchema,
+} from '@kbn/alerting-v2-schemas';
 import { ruleOperationSchema } from '../tools/manage_rule/operations';
 
 const LARGE_ENUM_THRESHOLD = 20;
@@ -231,6 +235,11 @@ export const generateRuleOperationsDoc = (): string => {
     variants,
   ].join('\n');
 };
+
+/**
+ * Returns the list of valid severity values from the alertEventSeveritySchema.
+ */
+export const getSeverityValues = (): string[] => alertEventSeveritySchema.options;
 
 /**
  * Generates concise markdown documentation from the create-action-policy Zod schema.
