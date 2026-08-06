@@ -27,11 +27,14 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       access: 'internal',
       security: {
         authz: {
+          // Read + proxy only: the handler reads package info and forwards to
+          // the IaC Provisioner. It never writes Fleet objects, so READ is the
+          // correct level — matching the sibling GET cloud-connector routes.
           requiredPrivileges: [
             {
               anyRequired: [
-                FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
-                FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
               ],
             },
           ],
