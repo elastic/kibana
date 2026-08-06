@@ -148,6 +148,7 @@ dependsOn:
   - '@kbn/esql-composer'
   - '@kbn/cps'
   - '@kbn/core-http-browser'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -160,6 +161,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
