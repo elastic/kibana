@@ -181,6 +181,69 @@ describe('template field key utils', () => {
       expect(result.display).toBeUndefined();
       expect(result.validation).toBeUndefined();
     });
+
+    describe('validation merge', () => {
+      const libFieldWithValidation: InlineField = {
+        ...libField,
+        validation: {
+          required: true,
+          pattern: { regex: '^[a-z]+$' },
+          min_length: 2,
+          max_length: 10,
+        },
+      };
+
+      it('preserves the library format constraints when the override only sets an unrelated key', () => {
+        const result = applyRefFieldOverride(libFieldWithValidation, {
+          $ref: 'lib_field',
+          validation: { max_length: 20 },
+        });
+        expect(result.validation).toEqual({
+          required: true,
+          pattern: { regex: '^[a-z]+$' },
+          min_length: 2,
+          max_length: 20,
+        });
+      });
+
+      it('drops the library required-family keys when the override defines a different required* key', () => {
+        const result = applyRefFieldOverride(libFieldWithValidation, {
+          $ref: 'lib_field',
+          validation: { required_when: showWhen },
+        });
+        expect(result.validation).toEqual({
+          required_when: showWhen,
+          pattern: { regex: '^[a-z]+$' },
+          min_length: 2,
+          max_length: 10,
+        });
+        expect(result.validation?.required).toBeUndefined();
+      });
+
+      it('drops the library required-family keys even when the override sets required_on_close only', () => {
+        const result = applyRefFieldOverride(libFieldWithValidation, {
+          $ref: 'lib_field',
+          validation: { required_on_close: true },
+        });
+        expect(result.validation?.required).toBeUndefined();
+        expect(result.validation?.required_when).toBeUndefined();
+        expect(result.validation?.required_on_close).toBe(true);
+        expect(result.validation?.pattern).toEqual({ regex: '^[a-z]+$' });
+      });
+
+      it('lets the override redeclare required alongside other required* keys unchanged by it', () => {
+        const result = applyRefFieldOverride(libFieldWithValidation, {
+          $ref: 'lib_field',
+          validation: { required: false },
+        });
+        expect(result.validation).toEqual({
+          required: false,
+          pattern: { regex: '^[a-z]+$' },
+          min_length: 2,
+          max_length: 10,
+        });
+      });
+    });
   });
 
   describe('resolveTemplateFields', () => {
