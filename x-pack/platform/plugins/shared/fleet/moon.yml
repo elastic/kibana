@@ -150,5 +150,6 @@ fileGroups:
     - package.json
     - test/scout/**/*
     - test/scout_automatic_import/**/*
+    - test/scout_iac_provisioner/**/*
     - '!target/**/*'
 tasks: {}
