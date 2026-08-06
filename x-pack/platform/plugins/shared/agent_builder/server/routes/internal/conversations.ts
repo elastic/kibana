@@ -108,7 +108,7 @@ export function registerInternalConversationRoutes({
           round_id: schema.string({ maxLength: 256 }),
         }),
         body: schema.object({
-          vote: schema.oneOf([schema.literal('up'), schema.literal('down')]),
+          vote: schema.nullable(schema.oneOf([schema.literal('up'), schema.literal('down')])),
           chips: schema.maybe(schema.arrayOf(schema.string({ maxLength: 256 }))),
           comment: schema.maybe(schema.string({ maxLength: 5000 })),
         }),

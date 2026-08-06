@@ -56,7 +56,7 @@ export interface ConversationClient {
   updateRoundFeedback(
     conversationId: string,
     roundId: string,
-    feedback: { vote: 'up' | 'down'; chips?: string[]; comment?: string }
+    feedback: { vote: 'up' | 'down' | null; chips?: string[]; comment?: string }
   ): Promise<void>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
   delete(conversationId: string): Promise<boolean>;
@@ -242,7 +242,7 @@ class ConversationClientImpl implements ConversationClient {
   async updateRoundFeedback(
     conversationId: string,
     roundId: string,
-    feedback: { vote: 'up' | 'down'; chips?: string[]; comment?: string }
+    feedback: { vote: 'up' | 'down' | null; chips?: string[]; comment?: string }
   ): Promise<void> {
     return this._updateRoundFeedbackWithRetry(conversationId, roundId, feedback, false);
   }
@@ -250,7 +250,7 @@ class ConversationClientImpl implements ConversationClient {
   private async _updateRoundFeedbackWithRetry(
     conversationId: string,
     roundId: string,
-    userFeedback: { vote: 'up' | 'down'; chips?: string[]; comment?: string },
+    userFeedback: { vote: 'up' | 'down' | null; chips?: string[]; comment?: string },
     isRetry: boolean
   ): Promise<void> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'owner' });
@@ -262,19 +262,26 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     const round = rounds[roundIndex];
-    const enrichedFeedback: ConversationRoundFeedback = {
-      vote: userFeedback.vote,
-      chips: userFeedback.chips ?? [],
-      comment: userFeedback.comment ?? '',
-      submitted_at: new Date().toISOString(),
-      connector_id: round.model_usage?.connector_id,
-      model: round.model_usage?.model,
-      trace_id: Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id,
-    };
+    const { feedback: _removed, ...roundWithoutFeedback } = round;
+    const updatedRound =
+      userFeedback.vote === null
+        ? roundWithoutFeedback
+        : {
+            ...round,
+            feedback: {
+              vote: userFeedback.vote,
+              chips: userFeedback.chips ?? [],
+              comment: userFeedback.comment ?? '',
+              submitted_at: new Date().toISOString(),
+              connector_id: round.model_usage?.connector_id,
+              model: round.model_usage?.model,
+              trace_id: Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id,
+            } satisfies ConversationRoundFeedback,
+          };
 
     const updatedRounds = [
       ...rounds.slice(0, roundIndex),
-      { ...round, feedback: enrichedFeedback },
+      updatedRound,
       ...rounds.slice(roundIndex + 1),
     ];
 

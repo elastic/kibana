@@ -81,7 +81,7 @@ export class ConversationsService {
   }: {
     conversationId: string;
     roundId: string;
-    vote: 'up' | 'down';
+    vote: 'up' | 'down' | null;
     chips?: string[];
     comment?: string;
   }): Promise<void> {
