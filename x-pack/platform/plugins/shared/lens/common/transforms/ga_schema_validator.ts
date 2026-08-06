@@ -84,8 +84,12 @@ export const toLegacyDurationUnits = <T>(value: T): T => {
   const obj = value as Record<string, unknown>;
 
   if (obj.type === 'duration') {
+    // `decimals`/`compact` are a GA-only addition to the duration format. The deprecated legacy schema
+    // (`legacyDurationFormatSchema`) does not allow them, so leaving them might make the same body fail
+    // request validation.
+    const { decimals, compact, ...rest } = obj;
     return {
-      ...obj,
+      ...rest,
       ...(typeof obj.from === 'string' ? { from: gaDurationInputUnitToLegacyApi(obj.from) } : {}),
       ...(typeof obj.to === 'string' ? { to: gaDurationOutputUnitToLegacyApi(obj.to) } : {}),
     } as unknown as T;
