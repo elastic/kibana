@@ -10,43 +10,28 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import {
   SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_AGENT_TYPE_ID,
-  SIGNIFICANT_EVENTS_JUDGE_AGENT_ID,
-  SIGNIFICANT_EVENTS_JUDGE_AGENT_TYPE_ID,
+  discoveryAgentType,
 } from '.';
 import { installDiscoveryAgents } from './install_discovery_agents';
 
 describe('installDiscoveryAgents', () => {
   it('ensures system-owned persisted typed agents in the requested space', async () => {
     const agentBuilder = agentBuilderMocks.createStart();
+    const availability = { cacheMode: 'space' as const, handler: jest.fn() };
 
-    await installDiscoveryAgents({ agentBuilder, spaceId: 'space-1' });
+    await installDiscoveryAgents({ agentBuilder, spaceId: 'space-1', availability });
 
+    expect(agentBuilder.agents.ensure).toHaveBeenCalledTimes(1);
     expect(agentBuilder.agents.ensure).toHaveBeenCalledWith({
       spaceId: 'space-1',
+      availability,
       agent: {
         id: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
         type: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_TYPE_ID,
         name: 'Significant Events Discovery',
-        description: expect.any(String),
+        description: discoveryAgentType.description,
         labels: ['observability', 'streams', 'significant-events', 'discovery'],
         avatar_symbol: 'SD',
-        access_control: { access_mode: AgentAccessControlMode.Public },
-        configuration: {
-          tools: [],
-          skill_ids: [],
-          connector_ids: [],
-        },
-      },
-    });
-    expect(agentBuilder.agents.ensure).toHaveBeenCalledWith({
-      spaceId: 'space-1',
-      agent: {
-        id: SIGNIFICANT_EVENTS_JUDGE_AGENT_ID,
-        type: SIGNIFICANT_EVENTS_JUDGE_AGENT_TYPE_ID,
-        name: 'Significant Events Judge',
-        description: expect.any(String),
-        labels: ['observability', 'streams', 'significant-events', 'discovery', 'judge'],
-        avatar_symbol: 'SJ',
         access_control: { access_mode: AgentAccessControlMode.Public },
         configuration: {
           tools: [],

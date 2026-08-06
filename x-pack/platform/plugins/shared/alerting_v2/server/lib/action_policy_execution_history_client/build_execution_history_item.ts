@@ -34,7 +34,8 @@ export const isString = (v: unknown): v is string => typeof v === 'string';
 
 export const isPolicyOutcome = (action: unknown): action is PolicyExecutionOutcome =>
   action === ACTION_POLICY_EVENT_ACTIONS.DISPATCHED ||
-  action === ACTION_POLICY_EVENT_ACTIONS.THROTTLED;
+  action === ACTION_POLICY_EVENT_ACTIONS.THROTTLED ||
+  action === ACTION_POLICY_EVENT_ACTIONS.DISPATCH_FAILED;
 
 export function collectIdsFromEvents(events: IValidatedEvent[]): {
   policyIds: string[];
@@ -156,7 +157,7 @@ export function buildExecutionHistoryItem(
     .map((id) => ({ id, name: workflowNames.get(id) ?? null }));
 
   return {
-    '@timestamp': timestamp,
+    dispatched_at: timestamp,
     policy: { id: policyId, name: policyNames.get(policyId) ?? null },
     outcome: action,
     episode_count: Number(dispatcher.episode_count ?? 0),
