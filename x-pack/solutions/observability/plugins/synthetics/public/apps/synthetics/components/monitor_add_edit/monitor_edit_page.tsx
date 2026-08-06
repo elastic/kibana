@@ -59,7 +59,6 @@ export const MonitorEditPage: React.FC = () => {
 
   const monitorNotFoundError = useMonitorNotFound(error, data?.id);
 
-  // Own the breadcrumbs for the whole edit route, including the not-found state.
   useMonitorAddEditBreadcrumbs(true, { monitorNotFound: Boolean(monitorNotFoundError) });
 
   const canUsePublicLocations = useCanUsePublicLocations(data?.[ConfigKey.LOCATIONS]);

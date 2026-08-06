@@ -23,7 +23,6 @@ export const MonitorNotFoundPage: React.FC = () => {
   return <MonitorNotFoundPrompt />;
 };
 
-// Kept separate so the edit route can render it without owning breadcrumbs.
 export const MonitorNotFoundPrompt: React.FC = () => {
   const { application } = useKibana<ClientPluginsStart>().services;
   const { monitorId } = useParams<{ monitorId: string }>();

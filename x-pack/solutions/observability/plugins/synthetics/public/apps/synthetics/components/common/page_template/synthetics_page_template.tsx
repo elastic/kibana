@@ -23,7 +23,7 @@ export const WrappedPageTemplate = (props: LazyObservabilityPageTemplateProps) =
     () => chrome?.getChromeStyle$() ?? of<ChromeStyle>('classic'),
     [chrome]
   );
-  // Seed synchronously to avoid a one-frame breadcrumb flicker.
+
   const chromeStyle = useObservable<ChromeStyle>(
     chromeStyle$,
     chrome?.getChromeStyle() ?? 'classic'
