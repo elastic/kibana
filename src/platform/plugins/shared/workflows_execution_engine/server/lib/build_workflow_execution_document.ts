@@ -82,7 +82,6 @@ export const buildWorkflowExecutionDocument = (
     context,
     status: ExecutionStatus.PENDING,
     createdAt: now.toISOString(),
-    '@timestamp': now.toISOString(),
     executedBy: authenticatedUser,
     triggeredBy,
     ...(metadata ? { metadata } : {}),

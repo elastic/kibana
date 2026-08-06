@@ -14,7 +14,6 @@ import { TOKEN_USAGE_MAPPING } from './token_usage_mapping';
 export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
   dynamic: false,
   properties: {
-    '@timestamp': mappings.date(),
     spaceId: mappings.keyword(),
     id: mappings.keyword(),
     workflowId: mappings.keyword(),

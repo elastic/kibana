@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
@@ -24,10 +25,10 @@ describe('getChildWorkflowExecutions', () => {
   let mockStepDataClient: jest.Mocked<StepExecutionsDataClient>;
 
   const mockWorkflowGetByIds = (documents: unknown[]) =>
-    createMockGetExecutionsByIdsResponse(documents as any);
+    createMockGetExecutionsByIdsResponse(documents as unknown as EsWorkflowExecution[]);
 
   const mockStepGetByIds = (documents: unknown[]) =>
-    createMockGetExecutionsByIdsResponse(documents as any, {
+    createMockGetExecutionsByIdsResponse(documents as unknown as EsWorkflowStepExecution[], {
       index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
     });
 

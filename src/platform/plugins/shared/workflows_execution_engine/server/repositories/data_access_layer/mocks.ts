@@ -13,7 +13,7 @@ import type {
   WorkflowExecutionsDataClient,
 } from './types';
 
-export const createMockGetExecutionsByIdsResponse = <TExecution extends { id: string }>(
+export const createMockGetExecutionsByIdsResponse = <TExecution>(
   documents: TExecution[],
   options: {
     index?: string;

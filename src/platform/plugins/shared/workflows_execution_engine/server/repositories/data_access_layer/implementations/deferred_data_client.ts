@@ -24,7 +24,7 @@ import type {
   GetExecutionsByIdsResponse,
   ScriptUpdateRequest,
   ScriptUpdateResponse,
-} from './data_access_layer';
+} from '../types';
 
 export class DeferredDataClient<TExecution extends { id: string }>
   implements DataClient<TExecution>

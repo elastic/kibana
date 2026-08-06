@@ -113,7 +113,7 @@ describe('WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS', () => {
     // pins that decision so a future contributor doesn't accidentally
     // duplicate the envelope here.
     const properties = WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties ?? {};
-    expect(properties.hitl).toBeUndefined();
+    expect((properties as Record<string, unknown>).hitl).toBeUndefined();
   });
 
   it('indexes aggregate and per-step token usage fields', () => {

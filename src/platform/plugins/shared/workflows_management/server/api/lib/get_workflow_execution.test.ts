@@ -8,6 +8,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
@@ -42,7 +43,7 @@ describe('getWorkflowExecution', () => {
   };
 
   const mockStepGetByIds = (documents: unknown[]) =>
-    createMockGetExecutionsByIdsResponse(documents as any, {
+    createMockGetExecutionsByIdsResponse(documents as unknown as EsWorkflowStepExecution[], {
       index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
     });
 
@@ -56,7 +57,7 @@ describe('getWorkflowExecution', () => {
   describe('source excludes with mget (stepExecutionIds present)', () => {
     beforeEach(() => {
       mockWorkflowDataClient.getByIds.mockResolvedValue(
-        createMockGetExecutionsByIdsResponse([baseExecutionDoc] as any)
+        createMockGetExecutionsByIdsResponse([baseExecutionDoc] as unknown as EsWorkflowExecution[])
       );
       mockStepDataClient.getByIds.mockResolvedValue(
         mockStepGetByIds([
@@ -145,7 +146,7 @@ describe('getWorkflowExecution', () => {
       mockWorkflowDataClient.getByIds.mockResolvedValue(
         createMockGetExecutionsByIdsResponse([
           { ...baseExecutionDoc, stepExecutionIds: undefined },
-        ] as any)
+        ] as unknown as EsWorkflowExecution[])
       );
       mockStepDataClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
     });
@@ -203,7 +204,7 @@ describe('getWorkflowExecution', () => {
       mockWorkflowDataClient.getByIds.mockResolvedValue(
         createMockGetExecutionsByIdsResponse([
           { ...baseExecutionDoc, spaceId: 'other-space' },
-        ] as any)
+        ] as unknown as EsWorkflowExecution[])
       );
 
       const result = await getWorkflowExecution({
@@ -218,7 +219,7 @@ describe('getWorkflowExecution', () => {
 
     it('should return the execution DTO with step executions', async () => {
       mockWorkflowDataClient.getByIds.mockResolvedValue(
-        createMockGetExecutionsByIdsResponse([baseExecutionDoc] as any)
+        createMockGetExecutionsByIdsResponse([baseExecutionDoc] as unknown as EsWorkflowExecution[])
       );
       mockStepDataClient.getByIds.mockResolvedValue(
         mockStepGetByIds([
@@ -253,7 +254,9 @@ describe('getWorkflowExecution', () => {
 
     it('should include workflow document version when present on the execution', async () => {
       mockWorkflowDataClient.getByIds.mockResolvedValue(
-        createMockGetExecutionsByIdsResponse([{ ...baseExecutionDoc, version: 7 }] as any)
+        createMockGetExecutionsByIdsResponse([
+          { ...baseExecutionDoc, version: 7 },
+        ] as unknown as EsWorkflowExecution[])
       );
       mockStepDataClient.getByIds.mockResolvedValue(mockStepGetByIds([]));
 
@@ -269,7 +272,7 @@ describe('getWorkflowExecution', () => {
 
     it('should omit workflow document version when absent on legacy executions', async () => {
       mockWorkflowDataClient.getByIds.mockResolvedValue(
-        createMockGetExecutionsByIdsResponse([baseExecutionDoc] as any)
+        createMockGetExecutionsByIdsResponse([baseExecutionDoc] as unknown as EsWorkflowExecution[])
       );
       mockStepDataClient.getByIds.mockResolvedValue(mockStepGetByIds([]));
 

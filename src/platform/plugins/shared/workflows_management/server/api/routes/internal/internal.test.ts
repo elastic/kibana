@@ -58,7 +58,7 @@ describe('Internal Routes', () => {
     logWorkflowRestored: jest.Mock;
   };
   let mockTriggerEventsIsEnabled: boolean;
-  let mockWorkflowDataClientSearch: jest.Mock;
+  let mockSearch: jest.Mock;
   const mockSearchTriggerEventLog = jest.fn<
     Promise<SearchTriggerEventLogResult>,
     [TriggerEventLogSearchCall]
@@ -109,7 +109,7 @@ describe('Internal Routes', () => {
       logWorkflowUpdated: jest.fn(),
       logWorkflowRestored: jest.fn(),
     };
-    mockWorkflowDataClientSearch = jest.fn().mockResolvedValue({
+    mockSearch = jest.fn().mockResolvedValue({
       hits: { hits: [], total: { value: 0, relation: 'eq' } },
     });
 
@@ -120,8 +120,14 @@ describe('Internal Routes', () => {
           searchTriggerEventLog: mockSearchTriggerEventLog,
         },
       })),
-      getWorkflowDataClient: jest.fn().mockResolvedValue({
-        search: mockWorkflowDataClientSearch,
+      getCoreStart: jest.fn().mockResolvedValue({
+        elasticsearch: {
+          client: {
+            asInternalUser: {
+              search: mockSearch,
+            },
+          },
+        },
       }),
     };
 
@@ -570,110 +576,6 @@ describe('Internal Routes', () => {
   it('rejects non-integer workflow history page values at route validation', () => {
     expect(() => workflowHistoryQuerySchema.validate({ page: 1.5 })).toThrow(
       'page must be an integer'
-    );
-  });
-
-  it('should execute options list search with enforced space and step filters', async () => {
-    mockWorkflowDataClientSearch.mockResolvedValue({
-      aggregations: {
-        suggestions: {
-          buckets: [{ key: 'completed', doc_count: 4 }],
-        },
-        totalCardinality: { value: 1 },
-        validation: {
-          buckets: {
-            completed: { doc_count: 4 },
-          },
-        },
-      },
-    });
-
-    const response = httpServerMock.createResponseFactory();
-    const request = createExecutionReadRequest({
-      method: 'post',
-      path: '/internal/workflows/executions/options_list',
-      body: {
-        size: 10,
-        fieldName: 'status',
-        filters: [{ term: { workflowId: 'wf-1' } }],
-        selectedOptions: ['completed'],
-      },
-    });
-
-    await routeHandlers[`POST:/internal/workflows/executions/options_list`].handler(
-      mockContext,
-      request,
-      response
-    );
-
-    expect(mockWorkflowDataClientSearch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: {
-          bool: {
-            filter: expect.arrayContaining([
-              { term: { workflowId: 'wf-1' } },
-              {
-                bool: {
-                  should: [
-                    { term: { spaceId: 'default' } },
-                    { bool: { must_not: { exists: { field: 'spaceId' } } } },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-              { bool: { must_not: { exists: { field: 'stepId' } } } },
-              { bool: { must_not: [{ term: { managed: true } }] } },
-            ]),
-          },
-        },
-      })
-    );
-
-    expect(response.ok).toHaveBeenCalledWith({
-      body: {
-        suggestions: [{ value: 'completed', docCount: 4 }],
-        totalCardinality: 1,
-        invalidSelections: [],
-      },
-    });
-  });
-
-  it('should not exclude managed executions from options list when the user can read them', async () => {
-    mockWorkflowDataClientSearch.mockResolvedValue({
-      aggregations: {
-        suggestions: { buckets: [] },
-        totalCardinality: { value: 0 },
-        validation: { buckets: {} },
-      },
-    });
-
-    const response = httpServerMock.createResponseFactory();
-    const request = createExecutionReadRequest(
-      {
-        method: 'post',
-        path: '/internal/workflows/executions/options_list',
-        body: {
-          size: 10,
-          fieldName: 'status',
-          filters: [],
-          selectedOptions: [],
-        },
-      },
-      {
-        [WorkflowsManagementApiActions.readExecution]: true,
-        [WorkflowsManagementApiActions.readManagedExecution]: true,
-      }
-    );
-
-    await routeHandlers[`POST:/internal/workflows/executions/options_list`].handler(
-      mockContext,
-      request,
-      response
-    );
-
-    const filter = mockWorkflowDataClientSearch.mock.calls[0][0].query.bool.filter;
-    expect(filter).not.toEqual(
-      expect.arrayContaining([{ bool: { must_not: [{ term: { managed: true } }] } }])
     );
   });
 });

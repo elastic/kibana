@@ -160,7 +160,6 @@ export class StepExecutionRuntime {
       topologicalIndex: this.topologicalOrder.indexOf(this.node.id),
       status: ExecutionStatus.RUNNING,
       startedAt: this.stepExecution?.startedAt ?? stepStartedAt.toISOString(),
-      '@timestamp': stepStartedAt.toISOString(),
     });
     this.logStepStart(stepId, this.stepExecutionId);
   }

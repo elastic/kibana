@@ -153,7 +153,6 @@ export interface EsWorkflowExecution {
   stepId?: string;
   scopeStack: StackFrame[];
   createdAt: string;
-  '@timestamp': string;
   error: SerializedError | null;
   createdBy?: string; // Keep for backwards compatibility with existing documents
   executedBy?: string; // User who executed the workflow
@@ -227,7 +226,6 @@ export interface EsWorkflowStepExecution {
   /** Whether this step execution belongs to a test run of the workflow. */
   isTestRun?: boolean;
   startedAt: string;
-  '@timestamp': string;
   finishedAt?: string;
   executionTimeMs?: number;
 
