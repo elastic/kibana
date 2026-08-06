@@ -353,11 +353,13 @@ describe('FormBasedDimensionEditor', () => {
     ];
     expect(allOptions.slice(0, 7)).toEqual(getVisibleFieldSelectOptions());
 
-    // press arrow up to go back to the beginning
+    // press arrow up (x2) to go back to the beginning
+    fireEvent.keyDown(comboBoxInput, { key: 'ArrowUp', code: 'ArrowUp' });
+    fireEvent.keyUp(comboBoxInput, { key: 'ArrowUp', code: 'ArrowUp' });
     fireEvent.keyDown(comboBoxInput, { key: 'ArrowUp', code: 'ArrowUp' });
     fireEvent.keyUp(comboBoxInput, { key: 'ArrowUp', code: 'ArrowUp' });
     expect(getVisibleFieldSelectOptions()).toEqual(allOptions.slice(8));
-  }, 10000); // this test can be long running due to a big tree we're rendering and userEvent.type function that is slow
+  }, 10000);
 
   it('should hide fields that have no data', () => {
     (useExistingFieldsReader as jest.Mock).mockImplementationOnce(() => {
