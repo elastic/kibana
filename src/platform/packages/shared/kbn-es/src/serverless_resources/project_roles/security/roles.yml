@@ -11,7 +11,9 @@ viewer:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
       privileges:
-        - read
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - '.siem-signals*'
         - '.lists-*'
@@ -95,7 +97,9 @@ editor:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
       privileges:
-        - read
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - '.siem-signals*'
         - '.lists-*'
@@ -209,7 +213,9 @@ t1_analyst:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
       privileges:
-        - read
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - '.alerts-security*'
         - '.siem-signals-*'
@@ -291,7 +297,9 @@ t2_analyst:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
       privileges:
-        - read
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - .alerts-security*
         - .siem-signals-*
@@ -377,7 +385,9 @@ t3_analyst:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
       privileges:
-        - read
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -482,7 +492,9 @@ threat_intelligence_analyst:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
       privileges:
-        - read
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -576,7 +588,9 @@ rule_author:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
       privileges:
-        - read
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -673,7 +687,9 @@ soc_manager:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
       privileges:
-        - read
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -776,7 +792,9 @@ detections_admin:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
       privileges:
-        - read
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -860,7 +878,9 @@ platform_engineer:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
       privileges:
-        - read
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - apm-*-transaction*
         - traces-apm*
@@ -951,7 +971,9 @@ endpoint_operations_analyst:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
       privileges:
-        - read
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
@@ -1060,7 +1082,9 @@ endpoint_policy_manager:
         - .logs-osquery_manager.actions-*
         - .logs-osquery_manager.action.responses-*
       privileges:
-        - read
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
     - names:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
