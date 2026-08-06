@@ -202,7 +202,7 @@ describe('createKnowledgeBaseEntry', () => {
 
     expect(esClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        document: expect.objectContaining({
+        body: expect.objectContaining({
           users: [{ id: 'my_profile_uid', name: 'my_username' }],
         }),
       })
