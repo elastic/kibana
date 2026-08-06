@@ -426,21 +426,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await comboBox.set('filterOperatorList', 'is not');
       await testSubjects.setValue('filterParams', 'fake-rule-id');
       await testSubjects.click('add-and-filter');
-      // Add second part of query after AND
-      const firstDropdown = await find.byCssSelector(
-        '[data-test-subj="filter-0.1"] [data-test-subj="filterFieldSuggestionList"] [data-test-subj="comboBoxSearchInput"]'
-      );
-      await firstDropdown.click();
-      await firstDropdown.type('kibana.alert.action_group');
-      const filterKeyOptionsList = await find.byCssSelector('.euiComboBoxOptionsList');
-      await find.clickByButtonText('kibana.alert.action_group', filterKeyOptionsList);
-      const secondDropdown = await find.byCssSelector(
-        '[data-test-subj="filter-0.1"] [data-test-subj="filterOperatorList"] [data-test-subj="comboBoxSearchInput"]'
-      );
-      await secondDropdown.click();
-      await secondDropdown.type('exists');
-      const filterOperationOptionsList = await find.byCssSelector('.euiComboBoxOptionsList');
-      await find.clickByButtonText('exists', filterOperationOptionsList);
+      const andFilterForm = await testSubjects.find('filter-0.1');
+      const andFieldInput = await andFilterForm.findByTestSubject('filterFieldSuggestionList');
+      await comboBox.setElement(andFieldInput, 'kibana.alert.action_group');
+      const andOperatorInput = await andFilterForm.findByTestSubject('filterOperatorList');
+      await comboBox.setElement(andOperatorInput, 'exists');
       await testSubjects.click('saveFilter');
       await testSubjects.setValue('queryInput', '_id: *');
 
