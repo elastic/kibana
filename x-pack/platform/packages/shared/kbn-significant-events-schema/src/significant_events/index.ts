@@ -11,7 +11,6 @@ export {
   type Detection,
   type ChangePointType,
 } from './detections';
-export { discoverySchema, type Discovery } from './discoveries';
 export {
   blastRadiusEntrySchema,
   causalFeatureSchema,
@@ -30,6 +29,7 @@ export {
   type SignificantEventInvestigation,
   type SignificantEventStatus,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
   significantEventInvestigationSchema,
   significantEventSchema,
   significantEventStatusSchema,
@@ -39,6 +39,7 @@ export {
   MAX_RULE_NAME_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_SIGNAL_DESCRIPTION_LENGTH,
 } from './constants';
 export {
   INVESTIGATION_PROGRESS_UI_EVENT,

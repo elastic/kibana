@@ -7669,6 +7669,92 @@ describe('Package policy service', () => {
       });
     });
 
+    describe('when the package is synthetics', () => {
+      // Synthetics persists only the single active input and drops the disabled ones. It is a
+      // keep_policies_up_to_date package, so a package bump auto-upgrades every policy through
+      // updatePackageInputs; without the guard the dropped inputs are re-added and the policy
+      // re-bloats (and, historically, resurrected an enabled synthetics/browser — the #229595
+      // regression reverted in #236104).
+      it('does not re-add inputs that were stripped from the stored policy', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'synthetics-http-monitor',
+          description: '',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: {
+            name: 'synthetics',
+            title: 'Elastic Synthetics',
+            version: '1.0.0',
+          },
+          inputs: [
+            {
+              type: 'synthetics/http',
+              policy_template: 'synthetics',
+              enabled: true,
+              streams: [],
+              vars: {
+                type: { type: 'text', value: 'http' },
+              },
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'synthetics',
+          description: 'Elastic Synthetics',
+          title: 'Elastic Synthetics',
+          version: '1.1.0',
+          latestVersion: '1.1.0',
+          release: 'ga',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/obs-ux-management-team' },
+          policy_templates: [
+            {
+              name: 'synthetics',
+              title: 'Synthetics',
+              description: 'Synthetics',
+              inputs: [
+                { type: 'synthetics/http', title: 'HTTP', description: 'HTTP' },
+                { type: 'synthetics/tcp', title: 'TCP', description: 'TCP' },
+                { type: 'synthetics/icmp', title: 'ICMP', description: 'ICMP' },
+                { type: 'synthetics/browser', title: 'Browser', description: 'Browser' },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        // Mirrors packageToPackagePolicyInputs(packageInfo): every input is present. The synthetics
+        // package now defaults every input to disabled.
+        const inputsOverride: NewPackagePolicyInput[] = [
+          { type: 'synthetics/http', policy_template: 'synthetics', enabled: false, streams: [] },
+          { type: 'synthetics/tcp', policy_template: 'synthetics', enabled: false, streams: [] },
+          { type: 'synthetics/icmp', policy_template: 'synthetics', enabled: false, streams: [] },
+          {
+            type: 'synthetics/browser',
+            policy_template: 'synthetics',
+            enabled: false,
+            streams: [],
+          },
+        ];
+
+        const result = updatePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          inputsOverride as InputsOverride[],
+          false
+        );
+
+        expect(result.inputs).toHaveLength(1);
+        expect(result.inputs[0].type).toEqual('synthetics/http');
+        expect(result.inputs[0].enabled).toBe(true);
+        expect(result.inputs.some((input) => input.type === 'synthetics/browser')).toBe(false);
+      });
+    });
+
     describe('when variable is undefined in original object', () => {
       it('adds the variable definition to the resulting object', () => {
         const basePackagePolicy: NewPackagePolicy = {
