@@ -12,7 +12,9 @@ import type { EsClient } from '@kbn/scout';
 import { LOG_SAMPLES_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import { significantEventsCpsApiTest as apiTest, COMMON_API_HEADERS } from '../fixtures';
 
-const CPS_TEST_INDEX = 'logs-cps-se-ki-test';
+// Must not match the `logs` data-stream-only index template; we create a plain index with
+// explicit mappings so both projects share identical field types for cross-project ES|QL.
+const CPS_TEST_INDEX = 'cps-se-ki-test';
 const VIEW_PREFIX = '$.';
 const ROOT_STREAM = 'logs.otel';
 const PARENT_STREAM = `${ROOT_STREAM}.cpsse`;
