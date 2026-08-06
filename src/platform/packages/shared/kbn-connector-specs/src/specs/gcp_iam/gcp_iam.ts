@@ -785,7 +785,9 @@ Gotchas:
         // The role name already carries its `roles/` prefix: `/v1/roles/iam.x` is correct and
         // `/v1/roles/roles/iam.x` 404s (both verified against the live API).
         await ctx.client.get(`${IAM_API}/roles/iam.serviceAccountViewer`);
-        return { ok: true, message: 'Successfully connected to the Google Cloud IAM API' };
+        // Resolving is what signals success; ConnectorTestHandlerResult declares `ok?: never`,
+        // so a failure must throw rather than return an ok flag.
+        return { message: 'Successfully connected to the Google Cloud IAM API' };
       } catch (error) {
         return throwWithApiError(error);
       }

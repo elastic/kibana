@@ -811,8 +811,9 @@ describe('GcpIam', () => {
       const result = await GcpIam.test?.handler?.(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(`${IAM}/roles/iam.serviceAccountViewer`);
+      // ConnectorTestHandlerResult declares `ok?: never`, so the handler signals success by
+      // resolving rather than by returning an ok flag.
       expect(result).toEqual({
-        ok: true,
         message: 'Successfully connected to the Google Cloud IAM API',
       });
     });
