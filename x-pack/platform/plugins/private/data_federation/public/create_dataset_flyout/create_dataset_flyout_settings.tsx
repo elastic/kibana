@@ -19,11 +19,11 @@ import type { Control, UseFormGetValues, UseFormSetValue } from 'react-hook-form
 import { useController } from 'react-hook-form';
 
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
+import { MaxFieldSizeField } from './max_field_size_field';
 import {
   emptyCreateDatasetSettingsFormValues,
   validateMaxErrorRatio,
   validateMaxErrors,
-  validateMaxFieldSize,
   validateSchemaSampleSize,
   type CreateDatasetFormValues,
   type DatasetBooleanFormValue,
@@ -392,11 +392,6 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
     name: 'settings.multi_value_syntax',
     control,
   });
-  const { field: maxFieldSizeField, fieldState: maxFieldSizeState } = useController({
-    name: 'settings.max_field_size',
-    control,
-    rules: { validate: validateMaxFieldSize },
-  });
   const { field: errorModeField } = useController({ name: 'settings.error_mode', control });
   const { field: maxErrorsField, fieldState: maxErrorsState } = useController({
     name: 'settings.max_errors',
@@ -535,25 +530,7 @@ function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFor
           inputRef={multiValueSyntaxField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow
-        label={createDatasetFlyoutStrings.settingsMaxFieldSizeLabel()}
-        helpText={createDatasetFlyoutStrings.settingsMaxFieldSizeHelp()}
-        fullWidth
-        isInvalid={Boolean(maxFieldSizeState.error)}
-        error={maxFieldSizeState.error?.message}
-      >
-        <EuiFieldNumber
-          data-test-subj="createDatasetFlyoutSettingsMaxFieldSize"
-          fullWidth
-          min={0}
-          step={1}
-          isInvalid={Boolean(maxFieldSizeState.error)}
-          value={maxFieldSizeField.value}
-          onChange={(e) => maxFieldSizeField.onChange(e.target.value)}
-          name={maxFieldSizeField.name}
-          inputRef={maxFieldSizeField.ref}
-        />
-      </EuiFormRow>
+      <MaxFieldSizeField control={control} testSubjPrefix="createDatasetFlyout" />
       <EuiFormRow label={createDatasetFlyoutStrings.settingsErrorModeLabel()} fullWidth>
         <EuiSelect
           options={ERROR_MODE_OPTIONS()}

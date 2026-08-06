@@ -34,9 +34,9 @@ import { SettingsPresetComboBox } from './settings_preset_combo_box';
 import {
   validateMaxErrorRatio,
   validateMaxErrors,
-  validateMaxFieldSize,
   validateSchemaSampleSize,
 } from './create_dataset_flyout_form_state';
+import { MaxFieldSizeField } from './max_field_size_field';
 
 export interface DatasetSettingsFieldProps {
   control: Control<CreateDatasetFormValues>;
@@ -257,17 +257,7 @@ export const DatasetSettingsField: FunctionComponent<DatasetSettingsFieldProps> 
         />
       );
     case 'max_field_size':
-      return (
-        <NumberSettingsField
-          control={control}
-          name="settings.max_field_size"
-          label={createDatasetFlyoutStrings.settingsMaxFieldSizeLabel()}
-          helpText={createDatasetFlyoutStrings.settingsMaxFieldSizeHelp()}
-          testSubj={`${testSubjPrefix}SettingsMaxFieldSize`}
-          min={0}
-          rules={{ validate: validateMaxFieldSize }}
-        />
-      );
+      return <MaxFieldSizeField control={control} testSubjPrefix={testSubjPrefix} />;
     case 'segment_size':
       return (
         <TextSettingsField

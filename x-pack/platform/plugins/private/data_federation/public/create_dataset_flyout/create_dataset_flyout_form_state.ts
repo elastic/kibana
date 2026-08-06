@@ -169,6 +169,20 @@ export const buildDatasetSettingsFromFormValues = (
   const { format } = settings;
   const isCsvTsv = format === 'csv' || format === 'tsv';
   const isNdjson = format === 'ndjson';
+  const supportsErrorHandling =
+    isCsvTsv || format === 'ndjson' || format === 'parquet' || format === 'orc';
+
+  const applyErrorHandlingSettings = () => {
+    if (settings.error_mode) applied.error_mode = settings.error_mode;
+
+    if (settings.error_mode !== 'fail_fast') {
+      const maxErrors = parseNonNegativeInteger(settings.max_errors);
+      if (maxErrors !== undefined) applied.max_errors = maxErrors;
+
+      const maxErrorRatio = parseRatio(settings.max_error_ratio);
+      if (maxErrorRatio !== undefined) applied.max_error_ratio = maxErrorRatio;
+    }
+  };
 
   if (isCsvTsv) {
     if (settings.delimiter) applied.delimiter = settings.delimiter;
@@ -185,15 +199,7 @@ export const buildDatasetSettingsFromFormValues = (
     if (settings.comment) applied.comment = settings.comment;
     if (settings.column_prefix) applied.column_prefix = settings.column_prefix;
     if (settings.multi_value_syntax) applied.multi_value_syntax = settings.multi_value_syntax;
-    if (settings.error_mode) applied.error_mode = settings.error_mode;
-
-    if (settings.error_mode !== 'fail_fast') {
-      const maxErrors = parseNonNegativeInteger(settings.max_errors);
-      if (maxErrors !== undefined) applied.max_errors = maxErrors;
-
-      const maxErrorRatio = parseRatio(settings.max_error_ratio);
-      if (maxErrorRatio !== undefined) applied.max_error_ratio = maxErrorRatio;
-    }
+    applyErrorHandlingSettings();
 
     const maxFieldSize = parseNonNegativeInteger(settings.max_field_size);
     if (maxFieldSize !== undefined) applied.max_field_size = maxFieldSize;
@@ -208,6 +214,10 @@ export const buildDatasetSettingsFromFormValues = (
 
   if (isNdjson && settings.segment_size) {
     applied.segment_size = settings.segment_size;
+  }
+
+  if (supportsErrorHandling && !isCsvTsv) {
+    applyErrorHandlingSettings();
   }
 
   if (format === 'parquet') {

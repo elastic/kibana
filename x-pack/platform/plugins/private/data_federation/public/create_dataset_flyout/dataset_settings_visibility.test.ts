@@ -38,5 +38,23 @@ describe('dataset_settings_visibility', () => {
         'max_error_ratio',
       ]);
     });
+
+    it('shows error mode for parquet when fail_fast is selected', () => {
+      expect(getVisibleFieldsForAccordion('errorHandling', 'parquet', 'fail_fast')).toEqual([
+        'error_mode',
+      ]);
+    });
+
+    it('shows error mode for ndjson when fail_fast is selected', () => {
+      expect(getVisibleFieldsForAccordion('errorHandling', 'ndjson', 'fail_fast')).toEqual([
+        'error_mode',
+      ]);
+    });
+
+    it('shows error mode for orc when fail_fast is selected', () => {
+      expect(getVisibleFieldsForAccordion('errorHandling', 'orc', 'fail_fast')).toEqual([
+        'error_mode',
+      ]);
+    });
   });
 });

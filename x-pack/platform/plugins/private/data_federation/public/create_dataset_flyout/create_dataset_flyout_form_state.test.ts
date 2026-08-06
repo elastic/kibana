@@ -172,8 +172,37 @@ describe('create_dataset_flyout_form_state', () => {
       ).toEqual({ format: 'csv', delimiter: ',', header_row: true });
     });
 
-    it('excludes CSV-only fields when format is parquet', () => {
-      // parquet has no format-specific fields in the form (API-only)
+    it('includes ndjson error handling settings when format is ndjson', () => {
+      const result = buildDatasetSettingsFromFormValues({
+        ...empty(),
+        format: 'ndjson',
+        error_mode: 'skip_row',
+        max_errors: '5',
+        schema_sample_size: '100',
+      });
+      expect(result).toEqual({
+        format: 'ndjson',
+        error_mode: 'skip_row',
+        max_errors: 5,
+        schema_sample_size: 100,
+      });
+    });
+
+    it('includes orc error handling settings when format is orc', () => {
+      const result = buildDatasetSettingsFromFormValues({
+        ...empty(),
+        format: 'orc',
+        error_mode: 'null_field',
+        max_error_ratio: '0.1',
+      });
+      expect(result).toEqual({
+        format: 'orc',
+        error_mode: 'null_field',
+        max_error_ratio: 0.1,
+      });
+    });
+
+    it('includes parquet error handling settings when format is parquet', () => {
       const result = buildDatasetSettingsFromFormValues({
         ...empty(),
         format: 'parquet',
@@ -183,6 +212,23 @@ describe('create_dataset_flyout_form_state', () => {
         encoding: 'UTF-8',
         error_mode: 'skip_row',
         max_errors: '5',
+        schema_sample_size: '100',
+      });
+      expect(result).toEqual({
+        format: 'parquet',
+        error_mode: 'skip_row',
+        max_errors: 5,
+      });
+    });
+
+    it('excludes CSV-only fields when format is parquet', () => {
+      const result = buildDatasetSettingsFromFormValues({
+        ...empty(),
+        format: 'parquet',
+        delimiter: ',',
+        mode: 'quoted',
+        header_row: 'true',
+        encoding: 'UTF-8',
         schema_sample_size: '100',
       });
       expect(result).toEqual({ format: 'parquet' });

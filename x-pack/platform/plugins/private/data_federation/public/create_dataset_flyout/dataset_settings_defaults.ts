@@ -30,6 +30,8 @@ const CSV_TSV_DEFAULTS: Partial<CreateDatasetSettingsFormValues> = {
   max_error_ratio: '0.0',
   header_row: 'true',
   comment: '//',
+  quote: '"',
+  escape: '\\',
   multi_value_syntax: 'none',
   error_mode: 'fail_fast',
   max_field_size: '10485760',
@@ -43,16 +45,26 @@ const FORMAT_DEFAULTS: Partial<
   tsv: { ...UNIVERSAL_DEFAULTS, ...CSV_TSV_DEFAULTS, delimiter: '\t', mode: 'plain' },
   ndjson: {
     ...UNIVERSAL_DEFAULTS,
+    error_mode: 'fail_fast',
+    max_error_ratio: '0.0',
     schema_sample_size: '20000',
     segment_size: '4mb',
-    datetime_format: 'strict_date_optional_time',
+    datetime_format: 'ISO-8601',
   },
   parquet: {
     ...UNIVERSAL_DEFAULTS,
+    hive_partitioning: 'true',
+    error_mode: 'fail_fast',
+    max_error_ratio: '0.0',
     optimized_reader: 'true',
     late_materialization: 'true',
   },
-  orc: { ...UNIVERSAL_DEFAULTS },
+  orc: {
+    ...UNIVERSAL_DEFAULTS,
+    hive_partitioning: 'true',
+    error_mode: 'fail_fast',
+    max_error_ratio: '0.0',
+  },
 };
 
 export const getDefaultSettingsForFormat = (

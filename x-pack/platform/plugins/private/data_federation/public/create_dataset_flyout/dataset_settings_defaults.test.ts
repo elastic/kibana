@@ -13,11 +13,13 @@ import { applySettingsForFormat, getDefaultSettingsForFormat } from './dataset_s
 import { NULL_VALUE_EMPTY_STRING_PRESET } from './dataset_settings_options';
 
 describe('getDefaultSettingsForFormat', () => {
-  it('returns universal structure defaults for orc', () => {
+  it('returns orc defaults', () => {
     expect(getDefaultSettingsForFormat('orc')).toEqual({
       partition_detection: 'auto',
       schema_resolution: 'union_by_name',
-      hive_partitioning: 'false',
+      hive_partitioning: 'true',
+      error_mode: 'fail_fast',
+      max_error_ratio: '0.0',
     });
   });
 });
@@ -34,6 +36,8 @@ describe('applySettingsForFormat', () => {
       mode: 'quoted',
       header_row: 'true',
       comment: '//',
+      quote: '"',
+      escape: '\\',
       multi_value_syntax: 'none',
       error_mode: 'fail_fast',
       encoding: 'UTF-8',
@@ -46,17 +50,28 @@ describe('applySettingsForFormat', () => {
     });
   });
 
-  it('applies tsv defaults including tab delimiter and plain mode', () => {
-    expect(applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'tsv')).toMatchObject({
+  it('applies tsv defaults to an empty form', () => {
+    expect(applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'tsv')).toEqual({
+      ...emptyCreateDatasetSettingsFormValues(),
       format: 'tsv',
+      partition_detection: 'auto',
+      schema_resolution: 'union_by_name',
+      hive_partitioning: 'false',
       delimiter: '\t',
       mode: 'plain',
       header_row: 'true',
+      comment: '//',
+      quote: '"',
+      escape: '\\',
+      multi_value_syntax: 'none',
+      error_mode: 'fail_fast',
       encoding: 'UTF-8',
+      column_prefix: 'col',
       null_value: NULL_VALUE_EMPTY_STRING_PRESET,
       schema_sample_size: '20000',
-      partition_detection: 'auto',
-      schema_resolution: 'union_by_name',
+      max_error_ratio: '0.0',
+      max_field_size: '10485760',
+      datetime_format: 'ISO-8601',
     });
   });
 
@@ -67,9 +82,11 @@ describe('applySettingsForFormat', () => {
       partition_detection: 'auto',
       schema_resolution: 'union_by_name',
       hive_partitioning: 'false',
+      error_mode: 'fail_fast',
+      max_error_ratio: '0.0',
       schema_sample_size: '20000',
       segment_size: '4mb',
-      datetime_format: 'strict_date_optional_time',
+      datetime_format: 'ISO-8601',
     });
   });
 
@@ -79,9 +96,23 @@ describe('applySettingsForFormat', () => {
       format: 'parquet',
       partition_detection: 'auto',
       schema_resolution: 'union_by_name',
-      hive_partitioning: 'false',
+      hive_partitioning: 'true',
+      error_mode: 'fail_fast',
+      max_error_ratio: '0.0',
       optimized_reader: 'true',
       late_materialization: 'true',
+    });
+  });
+
+  it('applies orc defaults', () => {
+    expect(applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'orc')).toEqual({
+      ...emptyCreateDatasetSettingsFormValues(),
+      format: 'orc',
+      partition_detection: 'auto',
+      schema_resolution: 'union_by_name',
+      hive_partitioning: 'true',
+      error_mode: 'fail_fast',
+      max_error_ratio: '0.0',
     });
   });
 
@@ -98,6 +129,8 @@ describe('applySettingsForFormat', () => {
       mode: 'plain',
       header_row: 'true',
       comment: '//',
+      quote: '"',
+      escape: '\\',
       multi_value_syntax: 'none',
       error_mode: 'fail_fast',
       encoding: 'UTF-8',
@@ -134,7 +167,9 @@ describe('applySettingsForFormat', () => {
       format: 'parquet',
       partition_detection: 'auto',
       schema_resolution: 'union_by_name',
-      hive_partitioning: 'false',
+      hive_partitioning: 'true',
+      error_mode: 'fail_fast',
+      max_error_ratio: '0.0',
       optimized_reader: 'true',
       late_materialization: 'true',
     });
@@ -175,7 +210,7 @@ describe('applySettingsForFormat', () => {
 
     expect(applySettingsForFormat(csvSettings, 'ndjson')).toMatchObject({
       format: 'ndjson',
-      datetime_format: 'strict_date_optional_time',
+      datetime_format: 'ISO-8601',
     });
   });
 });

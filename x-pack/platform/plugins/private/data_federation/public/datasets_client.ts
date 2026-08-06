@@ -25,7 +25,7 @@ function omitEmptySettingsFields(settings: object): Record<string, unknown> {
     if (value === undefined || value === null) {
       return true;
     }
-    if (typeof value === 'string' && value.trim() === '') {
+    if (typeof value === 'string' && value === '') {
       return true;
     }
     return false;

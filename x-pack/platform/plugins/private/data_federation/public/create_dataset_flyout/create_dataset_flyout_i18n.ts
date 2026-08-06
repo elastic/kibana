@@ -326,7 +326,7 @@ export const createDatasetFlyoutStrings = {
 
   settingsDelimiterOptionTab: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsDelimiterOptionTab', {
-      defaultMessage: 'Tab',
+      defaultMessage: 'Tab (\\t)',
     }),
 
   settingsDelimiterOptionSemicolon: () =>
@@ -499,7 +499,12 @@ export const createDatasetFlyoutStrings = {
 
   settingsMaxFieldSizeHelp: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMaxFieldSizeHelp', {
-      defaultMessage: 'Maximum size of a single field in bytes. Default is 10 MB (10485760). 0 means unlimited.',
+      defaultMessage: 'Maximum size of a single field. Default is 10 MB. 0 means unlimited.',
+    }),
+
+  settingsMaxFieldSizeUnitAriaLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsMaxFieldSizeUnitAriaLabel', {
+      defaultMessage: 'Max field size unit',
     }),
 
   settingsMaxFieldSizeInvalid: () =>

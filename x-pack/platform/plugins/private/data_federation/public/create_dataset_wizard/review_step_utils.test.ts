@@ -45,7 +45,8 @@ describe('review_step_utils', () => {
         format: 'parquet',
         partition_detection: 'auto',
         schema_resolution: 'union_by_name',
-        hive_partitioning: false,
+        hive_partitioning: true,
+        error_mode: 'fail_fast',
         optimized_reader: true,
         late_materialization: true,
       },
@@ -73,6 +74,8 @@ describe('review_step_utils', () => {
         mode: 'quoted',
         header_row: true,
         encoding: 'UTF-8',
+        quote: '"',
+        escape: '\\',
         comment: '//',
         column_prefix: 'col',
         datetime_format: 'ISO-8601',
@@ -80,6 +83,87 @@ describe('review_step_utils', () => {
         error_mode: 'fail_fast',
         max_field_size: 10485760,
         schema_sample_size: 20000,
+      },
+    });
+  });
+
+  it('builds the tsv request body with tsv defaults', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      name: 'dataset-obs-prod-s3',
+      data_source: 'obs-prod-s3',
+      resource: 's3://obs-logs-prod/**/*.tsv',
+      settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'tsv'),
+    };
+
+    expect(buildDatasetRequestBody(values)).toEqual({
+      data_source: 'obs-prod-s3',
+      resource: 's3://obs-logs-prod/**/*.tsv',
+      settings: {
+        format: 'tsv',
+        partition_detection: 'auto',
+        schema_resolution: 'union_by_name',
+        hive_partitioning: false,
+        delimiter: '\t',
+        mode: 'plain',
+        header_row: true,
+        encoding: 'UTF-8',
+        quote: '"',
+        escape: '\\',
+        comment: '//',
+        column_prefix: 'col',
+        datetime_format: 'ISO-8601',
+        multi_value_syntax: 'none',
+        error_mode: 'fail_fast',
+        max_field_size: 10485760,
+        schema_sample_size: 20000,
+      },
+    });
+  });
+
+  it('builds the ndjson request body with ndjson defaults', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      name: 'dataset-obs-prod-s3',
+      data_source: 'obs-prod-s3',
+      resource: 's3://obs-logs-prod/**/*.ndjson',
+      settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'ndjson'),
+    };
+
+    expect(buildDatasetRequestBody(values)).toEqual({
+      data_source: 'obs-prod-s3',
+      resource: 's3://obs-logs-prod/**/*.ndjson',
+      settings: {
+        format: 'ndjson',
+        partition_detection: 'auto',
+        schema_resolution: 'union_by_name',
+        hive_partitioning: false,
+        schema_sample_size: 20000,
+        datetime_format: 'ISO-8601',
+        error_mode: 'fail_fast',
+        segment_size: '4mb',
+      },
+    });
+  });
+
+  it('builds the orc request body with orc defaults', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      name: 'dataset-obs-prod-s3',
+      data_source: 'obs-prod-s3',
+      resource: 's3://obs-logs-prod/**/*.orc',
+      settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'orc'),
+    };
+
+    expect(buildDatasetRequestBody(values)).toEqual({
+      data_source: 'obs-prod-s3',
+      resource: 's3://obs-logs-prod/**/*.orc',
+      settings: {
+        format: 'orc',
+        partition_detection: 'auto',
+        schema_resolution: 'union_by_name',
+        hive_partitioning: true,
+        error_mode: 'fail_fast',
       },
     });
   });
@@ -170,7 +254,7 @@ describe('review_step_utils', () => {
 
     expect(rows).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ displayValue: 'Infer from file', badge: 'default' }),
+        expect.objectContaining({ displayValue: 'Inferred from dataset', badge: 'default' }),
         expect.objectContaining({
           label: 'Manual changes',
           displayValue: '2 types',

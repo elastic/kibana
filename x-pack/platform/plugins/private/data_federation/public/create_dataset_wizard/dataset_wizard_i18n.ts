@@ -229,7 +229,7 @@ export const datasetWizardStrings = {
 
   delimiterOptionTab: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.delimiterOptionTab', {
-      defaultMessage: 'Tab',
+      defaultMessage: 'Tab (\\t)',
     }),
 
   delimiterOptionSemicolon: () =>
@@ -289,7 +289,7 @@ export const datasetWizardStrings = {
 
   schemaMappingModeAutomatic: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingModeAutomatic', {
-      defaultMessage: 'Infer from file',
+      defaultMessage: 'Inferred from dataset',
     }),
 
   schemaMappingModeAutomaticFlow1: () =>

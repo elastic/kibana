@@ -48,7 +48,7 @@ export interface DatasetSettingsFile {
   multi_value_syntax?: 'none' | 'brackets';
   max_field_size?: number;
 
-  // CSV/TSV — error handling
+  // CSV/TSV, NDJSON, Parquet, and ORC — error handling
   error_mode?: 'fail_fast' | 'skip_row' | 'null_field';
   max_errors?: number;
   max_error_ratio?: number;

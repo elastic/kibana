@@ -37,6 +37,54 @@ const STRUCTURED_FORMAT_FIELDS: TestConfigurationPreviewField[] = [
   { name: 'process.pid', type: 'long' },
 ];
 
+const CSV_HEADER_ROW_FIELDS: TestConfigurationPreviewField[] = [
+  { name: 'timestamp', type: 'date' },
+  { name: 'message', type: 'text' },
+  { name: 'level', type: 'keyword' },
+  { name: 'host', type: 'keyword' },
+  { name: 'service', type: 'keyword' },
+  { name: 'status_code', type: 'long' },
+  { name: 'duration_ms', type: 'long' },
+  { name: 'user', type: 'keyword' },
+  { name: 'region', type: 'keyword' },
+  { name: 'error_type', type: 'keyword' },
+  { name: 'log_path', type: 'keyword' },
+  { name: 'process_pid', type: 'long' },
+];
+
+const NDJSON_FORMAT_FIELDS: TestConfigurationPreviewField[] = [
+  { name: '@timestamp', type: 'date' },
+  { name: 'message', type: 'text' },
+  { name: 'log.level', type: 'keyword' },
+  { name: 'host.name', type: 'keyword' },
+  { name: 'service.name', type: 'keyword' },
+  { name: 'trace.id', type: 'keyword' },
+  { name: 'transaction.id', type: 'keyword' },
+  { name: 'http.response.status_code', type: 'long' },
+  { name: 'event.duration', type: 'long' },
+  { name: 'user.name', type: 'keyword' },
+  { name: 'cloud.region', type: 'keyword' },
+  { name: 'error.message', type: 'text' },
+  { name: 'process.pid', type: 'long' },
+  { name: 'agent.version', type: 'keyword' },
+];
+
+const isCsvHeaderRowEnabled = (settings: CreateDatasetSettingsFormValues): boolean =>
+  settings.header_row.trim().toLowerCase() !== 'false';
+
+const getPrefixedColumnFields = (
+  prefix: string,
+  profiles: readonly TestConfigurationPreviewField[]
+): TestConfigurationPreviewField[] =>
+  Array.from({ length: TEST_CONFIGURATION_PREVIEW_MIN_COLUMN_COUNT }, (_, index) => {
+    const profile = profiles[index % profiles.length];
+
+    return {
+      name: `${prefix}${index + 1}`,
+      type: profile.type,
+    };
+  });
+
 const extractManualMappingFields = (
   mappings: Record<string, object>
 ): TestConfigurationPreviewField[] => {
@@ -57,22 +105,22 @@ const getFormatInferredFields = (
 ): TestConfigurationPreviewField[] => {
   switch (settings.format) {
     case 'csv':
-    case 'tsv': {
-      const prefix = settings.column_prefix.trim() || 'col';
-      return Array.from({ length: TEST_CONFIGURATION_PREVIEW_MIN_COLUMN_COUNT }, (_, index) => ({
-        name: `${prefix}${index + 1}`,
-        type: 'keyword',
-      }));
-    }
+    case 'tsv':
+      if (isCsvHeaderRowEnabled(settings)) {
+        return CSV_HEADER_ROW_FIELDS;
+      }
+
+      return getPrefixedColumnFields(
+        settings.column_prefix.trim() || 'col',
+        CSV_HEADER_ROW_FIELDS
+      );
     case 'ndjson':
+      return NDJSON_FORMAT_FIELDS;
     case 'parquet':
     case 'orc':
       return STRUCTURED_FORMAT_FIELDS;
     default:
-      return Array.from({ length: TEST_CONFIGURATION_PREVIEW_MIN_COLUMN_COUNT }, (_, index) => ({
-        name: `field_${index + 1}`,
-        type: 'keyword',
-      }));
+      return STRUCTURED_FORMAT_FIELDS.slice(0, TEST_CONFIGURATION_PREVIEW_MIN_COLUMN_COUNT);
   }
 };
 
@@ -125,10 +173,37 @@ export const getTestConfigurationPreviewFields = (
   return getFormatInferredFields(values.settings);
 };
 
+const getPrefixedColumnSampleField = (
+  field: TestConfigurationPreviewField
+): TestConfigurationPreviewField | undefined => {
+  const match = field.name.match(/(\d+)$/);
+  if (!match) {
+    return undefined;
+  }
+
+  const columnIndex = Number(match[1]) - 1;
+  if (!Number.isInteger(columnIndex) || columnIndex < 0) {
+    return undefined;
+  }
+
+  return CSV_HEADER_ROW_FIELDS[columnIndex % CSV_HEADER_ROW_FIELDS.length];
+};
+
 const mockValueForField = (
   field: TestConfigurationPreviewField,
   rowIndex: number
 ): string | number | boolean => {
+  const prefixedColumnSample = getPrefixedColumnSampleField(field);
+  if (prefixedColumnSample && prefixedColumnSample.name !== field.name) {
+    return mockValueForField(
+      {
+        ...prefixedColumnSample,
+        type: field.type ?? prefixedColumnSample.type,
+      },
+      rowIndex
+    );
+  }
+
   const normalizedType = field.type?.toLowerCase();
   const fieldName = field.name.toLowerCase();
 
@@ -145,29 +220,45 @@ const mockValueForField = (
     normalizedType === 'long' ||
     normalizedType === 'integer' ||
     normalizedType === 'short' ||
+    fieldName.includes('status_code') ||
+    fieldName.endsWith('.pid') ||
+    fieldName.endsWith('_pid') ||
+    fieldName === 'quantity'
+  ) {
+    if (fieldName.includes('status_code')) {
+      return [200, 201, 404, 500][rowIndex % 4];
+    }
+
+    return (rowIndex + 1) * 128;
+  }
+
+  if (
     normalizedType === 'double' ||
     normalizedType === 'float' ||
     normalizedType === 'scaled_float' ||
-    fieldName.includes('count') ||
-    fieldName.includes('bytes') ||
-    fieldName.includes('size') ||
     fieldName.includes('duration') ||
-    fieldName.includes('status_code') ||
-    fieldName.endsWith('.pid')
+    fieldName.includes('price') ||
+    fieldName.includes('total')
   ) {
-    return (rowIndex + 1) * 128;
+    if (fieldName.includes('duration')) {
+      return (rowIndex + 1) * 128;
+    }
+
+    return Number(((rowIndex + 1) * 12.5).toFixed(2));
   }
 
   if (normalizedType === 'boolean') {
     return rowIndex % 2 === 0;
   }
 
-  if (fieldName === 'level') {
+  if (fieldName === 'level' || fieldName === 'log.level') {
     return ['info', 'warn', 'error', 'debug'][rowIndex % 4];
   }
 
-  if (fieldName === 'message' || normalizedType === 'text') {
-    return `Sample log event ${rowIndex + 1}`;
+  if (fieldName === 'message' || fieldName === 'error.message' || normalizedType === 'text') {
+    return rowIndex > 0 && rowIndex % 3 === 0
+      ? `Completed checkout for order ${1000 + rowIndex}`
+      : `Sample log event ${rowIndex + 1}`;
   }
 
   if (fieldName.includes('host')) {
@@ -175,7 +266,7 @@ const mockValueForField = (
   }
 
   if (fieldName.includes('service')) {
-    return `service-${(rowIndex % 3) + 1}`;
+    return ['checkout-api', 'payments-api', 'catalog-api'][rowIndex % 3];
   }
 
   if (fieldName.includes('region')) {
@@ -190,12 +281,56 @@ const mockValueForField = (
     return ['NullPointerException', 'TimeoutError', 'ValidationError'][rowIndex % 3];
   }
 
-  if (fieldName.includes('trace') || fieldName.includes('span') || fieldName.includes('id')) {
-    return `trace-${rowIndex + 1}-abc123`;
+  if (fieldName === 'trace.id' || fieldName === 'span.id' || fieldName === 'transaction.id') {
+    return `${fieldName.split('.')[0]}-${rowIndex + 1}-abc123def456`;
+  }
+
+  if (fieldName === 'order_id') {
+    return `ORD-${1000 + rowIndex}`;
+  }
+
+  if (fieldName === 'customer_id') {
+    return `CUST-${5000 + rowIndex}`;
+  }
+
+  if (fieldName === 'product_name') {
+    return ['Widget A', 'Widget B', 'Gadget C'][rowIndex % 3];
+  }
+
+  if (fieldName === 'category') {
+    return ['Electronics', 'Home', 'Office'][rowIndex % 3];
+  }
+
+  if (fieldName === 'currency') {
+    return ['USD', 'EUR', 'GBP'][rowIndex % 3];
+  }
+
+  if (fieldName === 'country') {
+    return ['US', 'DE', 'JP'][rowIndex % 3];
+  }
+
+  if (fieldName === 'status') {
+    return ['shipped', 'pending', 'delivered'][rowIndex % 3];
+  }
+
+  if (fieldName === 'channel') {
+    return ['web', 'mobile', 'retail'][rowIndex % 3];
+  }
+
+  if (fieldName === 'campaign') {
+    return ['spring-sale', 'retargeting', 'newsletter'][rowIndex % 3];
+  }
+
+  if (fieldName === 'source') {
+    return ['organic', 'paid-search', 'email'][rowIndex % 3];
   }
 
   if (fieldName.includes('user')) {
     return `user-${rowIndex + 1}`;
+  }
+
+  if (fieldName === 'agent.version') {
+    return `8.${rowIndex % 4}.0`;
   }
 
   return `${field.name}-value-${rowIndex + 1}`;
