@@ -104,7 +104,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await find.clickByCssSelector(`[data-test-subj=${SOLUTION_SELECTOR_SUBJ}] button`);
         await find.clickByCssSelector(`button#security`);
 
-        expect(await find.byButtonText('Switch solution')).to.be.ok();
+        await testSubjects.existOrFail('confirmModalConfirmButton');
       });
     });
 
