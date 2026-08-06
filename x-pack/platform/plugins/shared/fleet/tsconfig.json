@@ -16,7 +16,8 @@
     "package.json",
     "../../../../../typings/**/*",
     "test/scout/**/*",
-    "test/scout_automatic_import/**/*"
+    "test/scout_automatic_import/**/*",
+    "test/scout_iac_provisioner/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
