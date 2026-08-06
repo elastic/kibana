@@ -21,61 +21,62 @@ export type ListToolsInput = z.infer<typeof ListToolsInputSchema>;
 
 export const SearchCodeInputSchema = lazySchema(() =>
   z.object({
-    query: z.string().min(1).describe('GitHub code search query'),
-    page: z.number().optional().default(1),
-    perPage: z.number().optional().default(10),
+    query: z.string().min(1).max(2000).describe('GitHub code search query'),
+    page: z.number().optional().default(1).describe('Page number (1-based)'),
+    perPage: z.number().optional().default(10).describe('Results per page (max 100)'),
   })
 );
 export type SearchCodeInput = z.infer<typeof SearchCodeInputSchema>;
 
 export const SearchRepositoriesInputSchema = lazySchema(() =>
   z.object({
-    query: z.string().min(1).describe('GitHub repository search query'),
-    page: z.number().optional().default(1),
-    perPage: z.number().optional().default(10),
+    query: z.string().min(1).max(2000).describe('GitHub repository search query'),
+    page: z.number().optional().default(1).describe('Page number (1-based)'),
+    perPage: z.number().optional().default(10).describe('Results per page (max 100)'),
   })
 );
 export type SearchRepositoriesInput = z.infer<typeof SearchRepositoriesInputSchema>;
 
 export const SearchIssuesInputSchema = lazySchema(() =>
   z.object({
-    query: z.string().min(1).describe('GitHub issue search query'),
+    query: z.string().min(1).max(2000).describe('GitHub issue search query'),
     order: z.enum(['asc', 'desc']).optional().default('desc'),
-    sort: z.string().optional().default('created'),
-    page: z.number().optional().default(1),
-    perPage: z.number().optional().default(10),
+    sort: z.string().max(50).optional().default('created'),
+    page: z.number().optional().default(1).describe('Page number (1-based)'),
+    perPage: z.number().optional().default(10).describe('Results per page (max 100)'),
   })
 );
 export type SearchIssuesInput = z.infer<typeof SearchIssuesInputSchema>;
 
 export const SearchPullRequestsInputSchema = lazySchema(() =>
   z.object({
-    query: z.string().min(1).describe('GitHub pull request search query'),
+    query: z.string().min(1).max(2000).describe('GitHub pull request search query'),
     order: z.enum(['asc', 'desc']).optional().default('desc'),
-    sort: z.string().optional().default('created'),
-    page: z.number().optional().default(1),
-    perPage: z.number().optional().default(10),
+    sort: z.string().max(50).optional().default('created'),
+    page: z.number().optional().default(1).describe('Page number (1-based)'),
+    perPage: z.number().optional().default(10).describe('Results per page (max 100)'),
   })
 );
 export type SearchPullRequestsInput = z.infer<typeof SearchPullRequestsInputSchema>;
 
 export const SearchUsersInputSchema = lazySchema(() =>
   z.object({
-    query: z.string().min(1).describe('GitHub user search query'),
-    page: z.number().optional().default(1),
-    perPage: z.number().optional().default(10),
+    query: z.string().min(1).max(2000).describe('GitHub user search query'),
+    page: z.number().optional().default(1).describe('Page number (1-based)'),
+    perPage: z.number().optional().default(10).describe('Results per page (max 100)'),
   })
 );
 export type SearchUsersInput = z.infer<typeof SearchUsersInputSchema>;
 
 export const ListIssuesInputSchema = lazySchema(() =>
   z.object({
-    owner: z.string().min(1).describe('Repository owner (user or org)'),
-    repo: z.string().min(1).describe('Repository name'),
+    owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
+    repo: z.string().min(1).max(200).describe('Repository name'),
     state: z.enum(['open', 'closed', 'all']).optional().default('open'),
     first: z.number().optional().default(10).describe('Number of results to return'),
     after: z
       .string()
+      .max(2048)
       .optional()
       .describe('Cursor for pagination (endCursor from previous response)'),
   })
@@ -84,12 +85,13 @@ export type ListIssuesInput = z.infer<typeof ListIssuesInputSchema>;
 
 export const ListPullRequestsInputSchema = lazySchema(() =>
   z.object({
-    owner: z.string().min(1).describe('Repository owner (user or org)'),
-    repo: z.string().min(1).describe('Repository name'),
+    owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
+    repo: z.string().min(1).max(200).describe('Repository name'),
     state: z.enum(['open', 'closed', 'all']).optional().default('open'),
     first: z.number().optional().default(10).describe('Number of results to return'),
     after: z
       .string()
+      .max(2048)
       .optional()
       .describe('Cursor for pagination (endCursor from previous response)'),
   })
@@ -98,12 +100,13 @@ export type ListPullRequestsInput = z.infer<typeof ListPullRequestsInputSchema>;
 
 export const ListCommitsInputSchema = lazySchema(() =>
   z.object({
-    owner: z.string().min(1).describe('Repository owner (user or org)'),
-    repo: z.string().min(1).describe('Repository name'),
-    sha: z.string().optional().describe('Branch name or commit SHA to start listing from'),
+    owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
+    repo: z.string().min(1).max(200).describe('Repository name'),
+    sha: z.string().max(200).optional().describe('Branch name or commit SHA to start listing from'),
     first: z.number().optional().default(10).describe('Number of results to return'),
     after: z
       .string()
+      .max(2048)
       .optional()
       .describe('Cursor for pagination (endCursor from previous response)'),
   })
@@ -112,11 +115,12 @@ export type ListCommitsInput = z.infer<typeof ListCommitsInputSchema>;
 
 export const ListBranchesInputSchema = lazySchema(() =>
   z.object({
-    owner: z.string().min(1).describe('Repository owner (user or org)'),
-    repo: z.string().min(1).describe('Repository name'),
+    owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
+    repo: z.string().min(1).max(200).describe('Repository name'),
     first: z.number().optional().default(10).describe('Number of results to return'),
     after: z
       .string()
+      .max(2048)
       .optional()
       .describe('Cursor for pagination (endCursor from previous response)'),
   })
@@ -125,11 +129,12 @@ export type ListBranchesInput = z.infer<typeof ListBranchesInputSchema>;
 
 export const ListReleasesInputSchema = lazySchema(() =>
   z.object({
-    owner: z.string().min(1).describe('Repository owner (user or org)'),
-    repo: z.string().min(1).describe('Repository name'),
+    owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
+    repo: z.string().min(1).max(200).describe('Repository name'),
     first: z.number().optional().default(10).describe('Number of results to return'),
     after: z
       .string()
+      .max(2048)
       .optional()
       .describe('Cursor for pagination (endCursor from previous response)'),
   })
@@ -138,11 +143,12 @@ export type ListReleasesInput = z.infer<typeof ListReleasesInputSchema>;
 
 export const ListTagsInputSchema = lazySchema(() =>
   z.object({
-    owner: z.string().min(1).describe('Repository owner (user or org)'),
-    repo: z.string().min(1).describe('Repository name'),
+    owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
+    repo: z.string().min(1).max(200).describe('Repository name'),
     first: z.number().optional().default(10).describe('Number of results to return'),
     after: z
       .string()
+      .max(2048)
       .optional()
       .describe('Cursor for pagination (endCursor from previous response)'),
   })
@@ -151,25 +157,25 @@ export type ListTagsInput = z.infer<typeof ListTagsInputSchema>;
 
 export const GetCommitInputSchema = lazySchema(() =>
   z.object({
-    owner: z.string().min(1).describe('Repository owner (user or org)'),
-    repo: z.string().min(1).describe('Repository name'),
-    sha: z.string().min(1).describe('Commit SHA'),
+    owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
+    repo: z.string().min(1).max(200).describe('Repository name'),
+    sha: z.string().min(1).max(200).describe('Commit SHA'),
   })
 );
 export type GetCommitInput = z.infer<typeof GetCommitInputSchema>;
 
 export const GetLatestReleaseInputSchema = lazySchema(() =>
   z.object({
-    owner: z.string().min(1).describe('Repository owner (user or org)'),
-    repo: z.string().min(1).describe('Repository name'),
+    owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
+    repo: z.string().min(1).max(200).describe('Repository name'),
   })
 );
 export type GetLatestReleaseInput = z.infer<typeof GetLatestReleaseInputSchema>;
 
 export const PullRequestReadInputSchema = lazySchema(() =>
   z.object({
-    owner: z.string().min(1).describe('Repository owner (user or org)'),
-    repo: z.string().min(1).describe('Repository name'),
+    owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
+    repo: z.string().min(1).max(200).describe('Repository name'),
     pullNumber: z.number().describe('Pull request number'),
     method: z
       .enum(['get', 'get_diff', 'get_review_comments'])
@@ -182,11 +188,12 @@ export type PullRequestReadInput = z.infer<typeof PullRequestReadInputSchema>;
 
 export const GetFileContentsInputSchema = lazySchema(() =>
   z.object({
-    owner: z.string().min(1).describe('Repository owner (user or org)'),
-    repo: z.string().min(1).describe('Repository name'),
-    path: z.string().min(1).describe('File or directory path within the repository'),
+    owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
+    repo: z.string().min(1).max(200).describe('Repository name'),
+    path: z.string().min(1).max(1024).describe('File or directory path within the repository'),
     ref: z
       .string()
+      .max(200)
       .optional()
       .describe('Branch name, tag, or commit SHA (defaults to default branch)'),
   })
@@ -195,8 +202,8 @@ export type GetFileContentsInput = z.infer<typeof GetFileContentsInputSchema>;
 
 export const GetIssueInputSchema = lazySchema(() =>
   z.object({
-    owner: z.string().min(1).describe('Repository owner (user or org)'),
-    repo: z.string().min(1).describe('Repository name'),
+    owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
+    repo: z.string().min(1).max(200).describe('Repository name'),
     issueNumber: z.number().describe('Issue number'),
   })
 );
@@ -204,8 +211,8 @@ export type GetIssueInput = z.infer<typeof GetIssueInputSchema>;
 
 export const GetIssueCommentsInputSchema = lazySchema(() =>
   z.object({
-    owner: z.string().min(1).describe('Repository owner (user or org)'),
-    repo: z.string().min(1).describe('Repository name'),
+    owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
+    repo: z.string().min(1).max(200).describe('Repository name'),
     issueNumber: z.number().describe('Issue number'),
   })
 );
@@ -213,9 +220,12 @@ export type GetIssueCommentsInput = z.infer<typeof GetIssueCommentsInputSchema>;
 
 export const CallToolInputSchema = lazySchema(() =>
   z.object({
-    name: z.string().min(1).describe('Name of the MCP tool to call'),
+    name: z.string().min(1).max(200).describe('Name of the MCP tool to call'),
     arguments: z
-      .record(z.string(), z.unknown())
+      .record(z.string().max(200), z.unknown())
+      .refine((v) => Object.keys(v).length <= 50, {
+        message: 'arguments must have at most 50 keys',
+      })
       .optional()
       .describe('Arguments to pass to the tool (tool-specific)'),
   })
@@ -265,10 +275,7 @@ export const UpdateIssueInputSchema = lazySchema(() =>
       issueNumber: z.number().describe('Issue number to update'),
       title: z.string().min(1).max(200).optional().describe('New issue title'),
       body: z.string().max(2000).optional().describe('New issue body in Markdown'),
-      state: z
-        .enum(['open', 'closed'])
-        .optional()
-        .describe('New issue state: "open" or "closed"'),
+      state: z.enum(['open', 'closed']).optional().describe('New issue state: "open" or "closed"'),
       assignees: z
         .array(z.string().max(200))
         .max(25)
@@ -293,7 +300,10 @@ export const UpdateIssueInputSchema = lazySchema(() =>
         v.assignees !== undefined ||
         v.labels !== undefined ||
         v.milestone !== undefined,
-      { message: 'At least one of title, body, state, assignees, labels, or milestone must be provided' }
+      {
+        message:
+          'At least one of title, body, state, assignees, labels, or milestone must be provided',
+      }
     )
 );
 export type UpdateIssueInput = z.infer<typeof UpdateIssueInputSchema>;
@@ -310,11 +320,7 @@ export const CreatePullRequestInputSchema = lazySchema(() =>
       .describe(
         'Branch containing the changes (e.g. "feature/my-branch"). For cross-repo PRs use "user:branch".'
       ),
-    base: z
-      .string()
-      .min(1)
-      .max(200)
-      .describe('Branch to merge into (e.g. "main")'),
+    base: z.string().min(1).max(200).describe('Branch to merge into (e.g. "main")'),
     body: z.string().max(2000).optional().describe('Pull request description in Markdown'),
     draft: z.boolean().optional().describe('If true, create as a draft pull request'),
     maintainerCanModify: z
@@ -385,12 +391,10 @@ export const CreateBranchInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(200)
-      .describe('Full reference name, must start with "refs/heads/" (e.g. "refs/heads/feature/my-branch")'),
-    sha: z
-      .string()
-      .min(1)
-      .max(200)
-      .describe('SHA of the commit the new branch should point to'),
+      .describe(
+        'Full reference name, must start with "refs/heads/" (e.g. "refs/heads/feature/my-branch")'
+      ),
+    sha: z.string().min(1).max(200).describe('SHA of the commit the new branch should point to'),
   })
 );
 export type CreateBranchInput = z.infer<typeof CreateBranchInputSchema>;
@@ -434,10 +438,7 @@ export const UpdatePullRequestInputSchema = lazySchema(() =>
       pullNumber: z.number().describe('Pull request number to update'),
       title: z.string().min(1).max(200).optional().describe('New title for the pull request'),
       body: z.string().max(2000).optional().describe('New description in Markdown'),
-      state: z
-        .enum(['open', 'closed'])
-        .optional()
-        .describe('New state: "open" or "closed"'),
+      state: z.enum(['open', 'closed']).optional().describe('New state: "open" or "closed"'),
       base: z
         .string()
         .max(200)
@@ -498,11 +499,7 @@ export const TriggerWorkflowInputSchema = lazySchema(() =>
       .min(1)
       .max(200)
       .describe('Workflow file name (e.g. "ci.yml") or numeric workflow ID'),
-    ref: z
-      .string()
-      .min(1)
-      .max(200)
-      .describe('Branch name or tag to run the workflow on'),
+    ref: z.string().min(1).max(200).describe('Branch name or tag to run the workflow on'),
     inputs: z
       .record(z.string().max(200), z.string().max(2000))
       .refine((v) => Object.keys(v).length <= 50, {
