@@ -34,11 +34,11 @@ type LensESQLConfig = LensConfig & { dataset: LensESQLDataset };
 
 const getStreamTypeLabel = (streamName?: string): string => {
   if (streamName?.startsWith('metrics')) {
-    return i18n.translate('xpack.observability.nightshift.detectionFlyout.trend.metricsLabel', {
+    return i18n.translate('xpack.nightshift.detectionFlyout.trend.metricsLabel', {
       defaultMessage: '[Metrics]',
     });
   }
-  return i18n.translate('xpack.observability.nightshift.detectionFlyout.trend.logsLabel', {
+  return i18n.translate('xpack.nightshift.detectionFlyout.trend.logsLabel', {
     defaultMessage: '[Logs]',
   });
 };
@@ -98,10 +98,9 @@ const buildLensConfig = ({
       xAxis: { field: 'timestamp', type: 'dateHistogram' },
       yAxis: [
         {
-          label: i18n.translate(
-            'xpack.observability.nightshift.detectionFlyout.trend.valueAxisLabel',
-            { defaultMessage: 'Occurrences' }
-          ),
+          label: i18n.translate('xpack.nightshift.detectionFlyout.trend.valueAxisLabel', {
+            defaultMessage: 'Occurrences',
+          }),
           value: 'occurrences',
           format: 'number',
           decimals: 0,
@@ -201,10 +200,9 @@ export function ChangePointLensChart({
         color="warning"
         iconType="warning"
         size="s"
-        title={i18n.translate(
-          'xpack.observability.nightshift.detectionFlyout.trend.lensErrorTitle',
-          { defaultMessage: 'Unable to load occurrence visualization' }
-        )}
+        title={i18n.translate('xpack.nightshift.detectionFlyout.trend.lensErrorTitle', {
+          defaultMessage: 'Unable to load occurrence visualization',
+        })}
       />
     );
   }
