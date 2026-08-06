@@ -19,7 +19,6 @@ project:
 dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/i18n'
-  - '@kbn/ui-callout'
 tags:
   - shared-browser
   - package
