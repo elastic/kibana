@@ -2,11 +2,11 @@
 idiomatic_version_file_enable_tools = ["node"]
 
 [tools]
-yarn = "1.22.21"
+pnpm = 11.17.0
 
 [tasks.bootstrap]
 description = "Install and link Kibana dependencies"
-run = "yarn kbn bootstrap"
+run = "pnpm kbn bootstrap"
 
 [tasks."river:prebuild"]
 description = "Prebuild River sandbox image"
