@@ -40,7 +40,6 @@ type PanelProps = Pick<
   | 'showShadow'
   | 'showBorder'
   | 'showBadges'
-  | 'showNotifications'
   | 'hideLoader'
   | 'hideHeader'
   | 'hideInspector'
@@ -154,7 +153,6 @@ export function LensRenderer({
   const panelProps: PanelProps = useMemo(() => {
     return {
       hideInspector: !showInspector,
-      showNotifications: false,
       showShadow: false,
       showBadges: false,
       titleHighlight,

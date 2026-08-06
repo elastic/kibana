@@ -16,10 +16,14 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+import { DatasetTags, DatasetMaturity } from '../common_attributes.gen';
+
 export const CreateEvaluationDatasetRequestBody = lazySchema(() =>
   z.object({
-    name: z.string(),
-    description: z.string(),
+    name: z.string().min(1).max(256),
+    description: z.string().max(2048),
+    tags: DatasetTags.optional(),
+    maturity: DatasetMaturity.optional(),
   })
 );
 export type CreateEvaluationDatasetRequestBody = z.infer<typeof CreateEvaluationDatasetRequestBody>;

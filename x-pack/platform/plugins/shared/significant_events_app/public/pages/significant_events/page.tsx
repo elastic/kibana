@@ -7,6 +7,7 @@
 
 import { EuiButton, EuiCallOut, EuiLoadingElastic, EuiSpacer } from '@elastic/eui';
 import type { AppHeaderMenu } from '@kbn/app-header';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
@@ -123,7 +124,7 @@ export function SignificantEventsPage() {
         order: 1,
         label: nightshiftLabel,
         iconType: 'moon',
-        href: getUrlForApp('observability', { path: '/nightshift' }),
+        href: getUrlForApp(NIGHTSHIFT_APP_ID),
       },
     ];
 
