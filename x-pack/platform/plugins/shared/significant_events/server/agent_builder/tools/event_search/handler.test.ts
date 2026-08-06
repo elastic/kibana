@@ -126,7 +126,7 @@ describe('searchEventsToolHandler', () => {
     const result = await searchEventsToolHandler({
       eventClient: eventClient as never,
       params: {
-        rule_uuids: ['rule-uuid-1', 'rule-uuid-rejected'],
+        status: 'open',
         exclude_unconfirmed_signals: true,
         view: 'compact',
       },
@@ -134,8 +134,13 @@ describe('searchEventsToolHandler', () => {
 
     expect(result.events[0].signals).toEqual([
       expect.objectContaining({
-        rule_uuid: 'rule-uuid-1',
+        collected_at: '2026-07-20T08:00:00.000Z',
         confirmed: true,
+        description: 'Payment call failed',
+        esql_query: 'FROM logs.checkout',
+        rule_name: 'Payment failures',
+        rule_uuid: 'rule-uuid-1',
+        stream_name: 'logs.checkout',
       }),
     ]);
   });
