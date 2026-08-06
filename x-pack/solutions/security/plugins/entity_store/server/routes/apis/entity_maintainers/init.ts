@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import { EntityMaintainerTaskStatus } from '../../../tasks/entity_maintainers/types';
 import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
@@ -51,10 +52,11 @@ export function registerInitMaintainers(router: EntityStorePluginRouter) {
         }
 
         const { status: entityStoreStatus } = await assetManagerClient.getStatus(false);
-        await entityMaintainersClient.init(req, {
-          autoStart: req.body?.autoStart,
-          entityStoreStatus,
-        });
+        const maintainersStatus =
+          entityStoreStatus === 'running'
+            ? EntityMaintainerTaskStatus.STARTED
+            : EntityMaintainerTaskStatus.STOPPED;
+        await entityMaintainersClient.init(req, { autoStart: req.body?.autoStart, maintainersStatus });
 
         return res.ok({ body: { ok: true } });
       })

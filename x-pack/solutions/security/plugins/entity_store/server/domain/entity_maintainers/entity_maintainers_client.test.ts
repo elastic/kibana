@@ -500,7 +500,7 @@ describe('EntityMaintainersClient', () => {
       );
     });
 
-    it('should schedule new maintainers as STARTED when store is running', async () => {
+    it('should schedule new maintainers as STARTED when maintainersStatus is STARTED', async () => {
       entityMaintainersRegistry.getAll.mockReturnValue([
         {
           id: 'm1',
@@ -516,7 +516,7 @@ describe('EntityMaintainersClient', () => {
       const client = createClient({ taskManager: taskManager as any });
       const request = createMockRequest();
 
-      await client.init(request, { entityStoreStatus: 'running' });
+      await client.init(request, { maintainersStatus: EntityMaintainerTaskStatus.STARTED });
 
       expect(scheduleEntityMaintainerTask).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -526,7 +526,7 @@ describe('EntityMaintainersClient', () => {
       );
     });
 
-    it('should schedule new maintainers as STOPPED when store is stopped', async () => {
+    it('should schedule new maintainers as STOPPED when maintainersStatus is STOPPED', async () => {
       entityMaintainersRegistry.getAll.mockReturnValue([
         {
           id: 'm1',
@@ -542,7 +542,7 @@ describe('EntityMaintainersClient', () => {
       const client = createClient({ taskManager: taskManager as any });
       const request = createMockRequest();
 
-      await client.init(request, { entityStoreStatus: 'stopped' });
+      await client.init(request, { maintainersStatus: EntityMaintainerTaskStatus.STOPPED });
 
       expect(scheduleEntityMaintainerTask).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -552,7 +552,7 @@ describe('EntityMaintainersClient', () => {
       );
     });
 
-    it('should schedule new maintainers as STOPPED when entityStoreStatus is not provided', async () => {
+    it('should schedule new maintainers as STARTED when maintainersStatus is not provided', async () => {
       entityMaintainersRegistry.getAll.mockReturnValue([
         {
           id: 'm1',
@@ -573,7 +573,7 @@ describe('EntityMaintainersClient', () => {
       expect(scheduleEntityMaintainerTask).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'm1',
-          initialTaskStatus: EntityMaintainerTaskStatus.STOPPED,
+          initialTaskStatus: EntityMaintainerTaskStatus.STARTED,
         })
       );
     });
