@@ -53,6 +53,7 @@ import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { getFieldSnakeKey } from '../../../common/utils/template_fields';
 import * as i18n from './translations';
+import type { CasesClientArgs } from '../types';
 
 interface CreateIncidentArgs {
   theCase: Case;
@@ -859,3 +860,18 @@ export const enrichCasesWithFieldLabels = (
 
   return cases.map((c) => enrichedCasesById.get(c.id) ?? c);
 };
+
+export function wrapTelemetry<TArgs extends unknown[], TReturn>(
+  counter: string,
+  clientArgs: CasesClientArgs,
+  fn: (...args: TArgs) => TReturn
+): (...args: TArgs) => TReturn {
+  const requestSource = clientArgs.requestSource ? clientArgs.requestSource : 'unknown';
+  return (...args: TArgs) => {
+    clientArgs.usageCounter?.incrementCounter({
+      counterName: counter,
+      counterType: `cases_client.${requestSource}`,
+    });
+    return fn(...args);
+  };
+}

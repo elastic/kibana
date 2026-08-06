@@ -73,6 +73,7 @@ export interface CasesClientArgs {
   readonly casesEventBus?: CasesEventBus;
   readonly request: KibanaRequest;
   readonly closeReasonValidator?: (closeReason: string, owner: string) => Promise<boolean>;
+  readonly requestSource?: string;
 }
 
 export type CasesSearchParams = Partial<

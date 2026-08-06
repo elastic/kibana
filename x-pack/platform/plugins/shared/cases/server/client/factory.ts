@@ -157,10 +157,12 @@ export class CasesClientFactory {
     request,
     scopedClusterClient,
     savedObjectsService,
+    requestSource = 'unknown',
   }: {
     request: KibanaRequest;
     savedObjectsService: SavedObjectsServiceStart;
     scopedClusterClient: ElasticsearchClient;
+    requestSource?: string;
   }): Promise<CasesClient> {
     this.validateInitialization();
 
@@ -226,6 +228,7 @@ export class CasesClientFactory {
       casesEventBus: this.options.casesEventBus,
       request,
       closeReasonValidator: boundCloseReasonValidator,
+      requestSource,
     });
   }
 

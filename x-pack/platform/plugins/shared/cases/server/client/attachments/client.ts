@@ -37,6 +37,7 @@ import { bulkGet } from './bulk_get';
 import { update } from './update';
 import { bulkDeleteFileAttachments } from './bulk_delete';
 import { addFile } from './add_file';
+import { wrapTelemetry } from '../cases/utils';
 
 /**
  * API for interacting with the attachments to a case.
@@ -96,20 +97,35 @@ export const createAttachmentsSubClient = (
   casesClientInternal: CasesClientInternal
 ): AttachmentsSubClient => {
   const attachmentSubClient: AttachmentsSubClient = {
-    add: (params: AddArgs) => addComment(params, clientArgs),
-    bulkCreate: (params: BulkCreateArgs) => bulkCreate(params, clientArgs),
-    bulkGet: (params) => bulkGet(params, clientArgs, casesClient),
-    delete: (params) => deleteComment(params, clientArgs),
-    deleteAll: (params) => deleteAll(params, clientArgs),
-    bulkDeleteFileAttachments: (params) =>
-      bulkDeleteFileAttachments(params, clientArgs, casesClient),
-    find: (params) => find(params, clientArgs),
-    getAllDocumentsAttachedToCase: (params) =>
+    add: wrapTelemetry('add_attachment', clientArgs, (params: AddArgs) =>
+      addComment(params, clientArgs)
+    ),
+    bulkCreate: wrapTelemetry('bulk_create_attachments', clientArgs, (params: BulkCreateArgs) =>
+      bulkCreate(params, clientArgs)
+    ),
+    bulkGet: (params: BulkGetArgs) => bulkGet(params, clientArgs, casesClient),
+    delete: wrapTelemetry('delete_attachment', clientArgs, (params: DeleteArgs) =>
+      deleteComment(params, clientArgs)
+    ),
+    deleteAll: wrapTelemetry('delete_all_attachments', clientArgs, (params: DeleteAllArgs) =>
+      deleteAll(params, clientArgs)
+    ),
+    bulkDeleteFileAttachments: wrapTelemetry(
+      'bulk_delete_file_attachments',
+      clientArgs,
+      (params: BulkDeleteFileArgs) => bulkDeleteFileAttachments(params, clientArgs, casesClient)
+    ),
+    find: (params: FindCommentsArgs) => find(params, clientArgs),
+    getAllDocumentsAttachedToCase: (params: GetAllDocumentsAttachedToCase) =>
       getAllDocumentsAttachedToCase(params, clientArgs, casesClient),
-    getAll: (params) => getAll(params, clientArgs),
-    get: (params) => get(params, clientArgs),
-    update: (params) => update(params, clientArgs),
-    addFile: (params: AddFileArgs) => addFile(params, clientArgs, casesClient),
+    getAll: (params: GetAllArgs) => getAll(params, clientArgs),
+    get: (params: GetArgs) => get(params, clientArgs),
+    update: wrapTelemetry('update_attachment', clientArgs, (params: UpdateArgs) =>
+      update(params, clientArgs)
+    ),
+    addFile: wrapTelemetry('add_file_attachment', clientArgs, (params: AddFileArgs) =>
+      addFile(params, clientArgs, casesClient)
+    ),
   };
 
   return Object.freeze(attachmentSubClient);
