@@ -13,10 +13,12 @@ import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_p
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
 import {
+  FOR_LOOP_ESQL_CELL_YAML,
   FOR_LOOP_FOLDED_ONLY_YAML,
   FOR_LOOP_NESTED_YAML,
   FOR_LOOP_RUNTIME_JSON_YAML,
   FOR_LOOP_VALIDATION_YAML,
+  forLoopEsqlCellWorkflowDefinition,
   forLoopFoldedOnlyWorkflowDefinition,
   forLoopNestedWorkflowDefinition,
   forLoopRuntimeJsonWorkflowDefinition,
@@ -167,6 +169,27 @@ steps:
     expect(
       runtimeResults.some(
         (r) => r.severity === 'warning' && r.message === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON
+      )
+    ).toBe(true);
+  });
+
+  it('maps ES|QL result cell collections to warning diagnostics', () => {
+    const esqlDoc = parseDocument(FOR_LOOP_ESQL_CELL_YAML);
+    const esqlModel = createFakeMonacoModel(FOR_LOOP_ESQL_CELL_YAML);
+    const esqlGraph = WorkflowGraph.fromWorkflowDefinition(forLoopEsqlCellWorkflowDefinition);
+
+    const esqlResults = validateLiquidForLoopCollections(
+      FOR_LOOP_ESQL_CELL_YAML,
+      esqlDoc,
+      esqlModel,
+      esqlGraph,
+      forLoopEsqlCellWorkflowDefinition
+    );
+
+    expect(esqlResults.filter((r) => r.severity === 'error')).toHaveLength(0);
+    expect(
+      esqlResults.some(
+        (r) => r.severity === 'warning' && r.message === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE
       )
     ).toBe(true);
   });
