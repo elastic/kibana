@@ -6,6 +6,7 @@
  */
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import {
   createKnowledgeBaseEntry,
   transformToCreateSchema,
@@ -177,17 +178,18 @@ describe('createKnowledgeBaseEntry', () => {
   test('it rejects a private entry when the user has no profile UID', async () => {
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
 
-    await expect(
-      createKnowledgeBaseEntry({
-        esClient,
-        knowledgeBaseIndex: 'index-1',
-        spaceId: 'test',
-        user: { ...authenticatedUser, profile_uid: undefined },
-        knowledgeBaseEntry: getCreateKnowledgeBaseEntrySchemaMock(),
-        logger,
-        telemetry,
-      })
-    ).rejects.toThrowError(
+    const createEntry = createKnowledgeBaseEntry({
+      esClient,
+      knowledgeBaseIndex: 'index-1',
+      spaceId: 'test',
+      user: { ...authenticatedUser, profile_uid: undefined },
+      knowledgeBaseEntry: getCreateKnowledgeBaseEntrySchemaMock(),
+      logger,
+      telemetry,
+    });
+
+    await expect(createEntry).rejects.toBeInstanceOf(BadRequestError);
+    await expect(createEntry).rejects.toThrowError(
       'Cannot persist a private knowledge base entry without a user profile UID'
     );
     expect(esClient.create).not.toHaveBeenCalled();

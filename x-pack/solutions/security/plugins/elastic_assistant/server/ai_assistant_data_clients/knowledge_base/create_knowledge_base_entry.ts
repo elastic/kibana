@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import type {
   AnalyticsServiceSetup,
   AuthenticatedUser,
@@ -115,7 +116,9 @@ interface TransformToUpdateSchemaProps {
 const ensurePrivateEntryOwner = (user: AuthenticatedUser, global?: boolean): void => {
   // global: true -> available to all authorized users in the current Kibana space.
   if (!global && !user.profile_uid) {
-    throw new Error('Cannot persist a private knowledge base entry without a user profile UID');
+    throw new BadRequestError(
+      'Cannot persist a private knowledge base entry without a user profile UID'
+    );
   }
 };
 
