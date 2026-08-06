@@ -1175,6 +1175,7 @@
     "@kbn/shared-ux-file-types": "link:src/platform/packages/shared/shared-ux/file/types",
     "@kbn/shared-ux-file-upload": "link:src/platform/packages/shared/shared-ux/file/file_upload/impl",
     "@kbn/shared-ux-file-util": "link:src/platform/packages/shared/shared-ux/file/util",
+    "@kbn/shared-ux-flyout-info-blocks": "link:src/platform/packages/shared/shared-ux/flyout/info-blocks",
     "@kbn/shared-ux-label-formatter": "link:src/platform/packages/shared/shared-ux/label_formatter",
     "@kbn/shared-ux-link-redirect-app": "link:src/platform/packages/shared/shared-ux/link/redirect_app/impl",
     "@kbn/shared-ux-markdown": "link:src/platform/packages/shared/shared-ux/markdown/impl",
@@ -1638,7 +1639,7 @@
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "12.1.0",
-    "@arizeai/phoenix-client": "4.2.0",
+    "@arizeai/phoenix-client": "7.1.1",
     "@axe-core/playwright": "4.11.0",
     "@babel/core": "7.26.8",
     "@babel/eslint-parser": "7.24.7",

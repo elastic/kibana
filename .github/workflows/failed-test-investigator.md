@@ -325,6 +325,8 @@ State only _what to change_ — the "why" belongs in Root cause & evidence, so d
 
 **Anchor the fix to best practices.** Prefer the fix that brings the test in line with our best practices over a narrower patch that leaves the anti-pattern in place. When the fix maps to a best-practice rule, cite that rule as a section-scoped Markdown link (see below) so the developer learns the underlying guideline.
 
+**A recommended wait must name a real signal.** Before proposing "wait for X before acting", verify the signal exists and name it concretely (`data-test-subj`, attribute, or DOM state, with `file:line`). If nothing observable exposes the state (e.g. an async parse in a worker), say so and recommend exposing one via a small application-side change instead — an abstract "wait for readiness" that can't be implemented invites the implementer to retry the interaction until the outcome looks right, which our guardrails forbid.
+
 - **Single file:** name the `file:line` and the change, as a single sentence or a short diff. Do not paste surrounding code that already exists — link to it.
 - **Multiple files (one fix spanning several):** a short table of `file:line` → change, one row per file. This lists the parts of the _one_ recommended fix, not a menu of alternatives. No rationale column.
 - **No concrete fix:** in one or two sentences, name the evidence that would unblock one.

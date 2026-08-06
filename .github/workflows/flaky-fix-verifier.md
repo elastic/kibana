@@ -427,11 +427,14 @@ When you iterate, you are editing a PR you did not open. This is allowed because
 - **Keep the PR description current.** If your revision changed the approach, the root cause, or what the patch does, also emit one `update-pull-request` safe output correcting the title/body (keep the fixer's format, rewrite only what went stale); if they still describe the fix accurately, emit nothing.
 - Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
 
-## Guardrails
+## Workflow guardrails
 
 - Never exceed 6 total `/flaky` triggers of your own for this PR; use the precomputed `triggeredByBot` in `flaky-run-count.json` (kibanamachine-authored only) rather than re-tallying, so developer-triggered `/flaky` comments don't count toward this.
 - Comments are costly noise: post one only when strictly necessary and genuinely useful, keep the summary to 1–3 sentences (any extra depth goes in a terse `<details>` block, per [Update comment](#update-comment)), and prefer none: a routine run needs only its `/flaky` comment, and a first-run `passed` verdict posts nothing (the one exception is a `passed` verdict that only held after more than one flaky run — see [Update comment](#update-comment)).
 - The `/flaky` command must be its own comment and start with `/flaky ` (it is consumed by `.github/workflows/trigger-flaky.yml`).
 - Never include the literal phrase `Flaky Test Runner Stats` in any comment you post — that header is how this workflow detects the runner's results comment, and reusing it would make the workflow re-trigger on its own comment.
-- Do not weaken assertions, wrap assertions **or interactions** in `retry()` / `retry.tryForTime` (re-issuing a click/type/navigation so a "missed" interaction registers on a later attempt hides a real actionability bug, not just wrapping an `expect`), bump timeouts as the primary fix, or strip tags to skip the test (see the `flaky-test-investigator` skill's pitfalls). A revised fix must address a root cause and follow the testing best practices in `docs/extend/testing/` (`scout-best-practices.md`, `ui-best-practices.md`, `api-best-practices.md`).
 - Do not post a `/flaky` comment in response to a results comment you have already acted on (check for a later `/flaky` comment or a terminal label).
+
+## Fix guardrails
+
+{{#import .github/workflows/shared/flaky-test-fix-guardrails.md}}
