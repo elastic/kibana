@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getDocumentText, collectContainersWithMatch } from './doc_scan';
-import { buildNodes } from './tree_model';
+import { getDocumentText, collectSearchMatches } from './doc_scan';
+import { buildNodes, ROOT_ID } from './tree_model';
 
 describe('getDocumentText', () => {
   it('joins the keys and primitive values of a nested object with newlines', () => {
@@ -42,14 +42,27 @@ describe('getDocumentText', () => {
   });
 });
 
-describe('collectContainersWithMatch', () => {
+describe('collectSearchMatches', () => {
   it('returns the ids of every collection whose subtree contains the term', () => {
     const nodes = buildNodes({ geo: { city: 'Berlin' }, other: 'x' });
-    expect([...collectContainersWithMatch(nodes, 'berl')]).toEqual(['json-viewer-geo']);
+    expect([...collectSearchMatches(nodes, 'berl').containers]).toEqual(['json-viewer-geo']);
   });
 
   it('returns an empty set when nothing matches', () => {
     const nodes = buildNodes({ geo: { city: 'Berlin' } });
-    expect(collectContainersWithMatch(nodes, 'zzz').size).toBe(0);
+    expect(collectSearchMatches(nodes, 'zzz').containers.size).toBe(0);
+  });
+
+  it('reveals past the pager budget when a match sits deeper than INITIAL_CHILDREN', () => {
+    const nodes = buildNodes({
+      logs: Object.fromEntries(
+        Array.from({ length: 15 }, (_, i) => [`field_${i}`, i === 12 ? 'needle' : `other_${i}`])
+      ),
+    });
+    const matches = collectSearchMatches(nodes, 'needle');
+
+    expect([...matches.containers]).toEqual(['json-viewer-logs']);
+    expect(matches.reveals.get('json-viewer-logs')).toBe(13);
+    expect(matches.reveals.has(ROOT_ID)).toBe(false);
   });
 });

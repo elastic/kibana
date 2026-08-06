@@ -11,11 +11,11 @@
  * In-table search support for the JSON tree. Both helpers are the same depth-first `visit` over the
  * document's node tree (`buildNodes`); they differ only in what they collect.
  *
- * `collectContainersWithMatch` drives *visible* auto-expansion: in-table search only sees rendered
- * DOM text, so when a term is active every collection whose subtree contains a matching value is
- * force-opened so the match renders and the grid can highlight it. A match hidden past a collection's
- * "show more" cap isn't surfaced — a deliberate simplification that keeps the rendered DOM bounded by
- * the existing caps. This runs only for the handful of on-screen cells.
+ * `collectSearchMatches` drives *visible* auto-expansion and auto-reveal: in-table search only sees
+ * rendered DOM text, so when a term is active every collection whose subtree contains a matching
+ * value is force-opened, and any list that would hide a match past its "show more" cap is revealed
+ * far enough (up to `MAX_SEARCH_REVEAL`) for the match to render. This runs only for the handful of
+ * on-screen cells.
  *
  * `getDocumentText` drives the *counting* pass. The grid counts matches by rendering every row's cell
  * off-screen on each keystroke; mounting the whole tree there is what makes the grid freeze on large
@@ -23,30 +23,67 @@
  * searchable content for the counter to walk at a fraction of the render cost.
  */
 
-import { buildNodes, type JsonNode, type JsonValue } from './tree_model';
+import {
+  buildNodes,
+  INITIAL_CHILDREN,
+  MAX_SEARCH_REVEAL,
+  ROOT_ID,
+  type JsonNode,
+  type JsonValue,
+} from './tree_model';
 
-export const EMPTY_ID_SET: ReadonlySet<string> = new Set();
+export interface SearchMatches {
+  /** Every collection whose subtree contains a match; auto-expanded so the match renders. */
+  containers: ReadonlySet<string>;
+  /**
+   * The minimum number of children that list must reveal ("Show more") so a node containing a match
+   * is visible.
+   */
+  reveals: ReadonlyMap<string, number>;
+}
 
-// The ids of every collection whose subtree contains the term — i.e. the nodes to force-open.
-export const collectContainersWithMatch = (
-  nodes: JsonNode[],
-  termLower: string
-): ReadonlySet<string> => {
-  const matched = new Set<string>();
-  const visit = (node: JsonNode): boolean => {
+export const EMPTY_SEARCH_MATCHES: SearchMatches = {
+  containers: new Set(),
+  reveals: new Map(),
+};
+
+/**
+ * Collects the nodes that need to be expanded / revealed to display a search match.
+ */
+export const collectSearchMatches = (nodes: JsonNode[], termLower: string): SearchMatches => {
+  const containers = new Set<string>();
+  const reveals = new Map<string, number>();
+
+  const bumpReveal = (listId: string, index: number) => {
+    const needed = index + 1;
+    if (
+      needed > INITIAL_CHILDREN &&
+      needed <= MAX_SEARCH_REVEAL &&
+      needed > (reveals.get(listId) ?? 0)
+    ) {
+      reveals.set(listId, needed);
+    }
+  };
+
+  const visit = (node: JsonNode, listId: string, index: number): boolean => {
+    let hasMatch: boolean;
     if (node.kind === 'leaf') {
-      return String(node.value).toLowerCase().includes(termLower);
+      hasMatch = String(node.value).toLowerCase().includes(termLower);
+    } else {
+      hasMatch = false;
+      node.children.forEach((child, childIndex) => {
+        if (visit(child, node.id, childIndex)) hasMatch = true;
+      });
+      if (hasMatch) containers.add(node.id);
     }
 
-    let hasMatch = false;
-    for (const child of node.children) {
-      if (visit(child)) hasMatch = true;
-    }
-    if (hasMatch) matched.add(node.id);
+    // Check if the node needs to be revealed.
+    if (hasMatch) bumpReveal(listId, index);
     return hasMatch;
   };
-  nodes.forEach(visit);
-  return matched;
+
+  nodes.forEach((node, index) => visit(node, ROOT_ID, index));
+  return { containers, reveals };
 };
 
 // A '\n'-joined blob of a document's keys and primitive values, memoised in a WeakMap keyed by the

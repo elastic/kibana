@@ -18,7 +18,7 @@ import {
   type FormatValue,
   type JsonValue,
 } from './tree_model';
-import { collectContainersWithMatch, EMPTY_ID_SET } from './doc_scan';
+import { collectSearchMatches, EMPTY_SEARCH_MATCHES } from './doc_scan';
 import {
   useRovingTreeNavigation,
   useTreeExpansion,
@@ -59,23 +59,30 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
 
   const searchTermLower = expandNodesContainingTerm?.trim().toLowerCase() ?? '';
-  const expandedBySearchNodes = useMemo(
-    () => (searchTermLower ? collectContainersWithMatch(nodes, searchTermLower) : EMPTY_ID_SET),
+  const searchMatches = useMemo(
+    () => (searchTermLower ? collectSearchMatches(nodes, searchTermLower) : EMPTY_SEARCH_MATCHES),
     [nodes, searchTermLower]
   );
 
   const expansion = useTreeExpansion({
     initialState,
     onStateChange,
-    expandedBySearchNodes,
+    expandedBySearchNodes: searchMatches.containers,
     expandableIds,
   });
 
   const rootType = useMemo(() => (Array.isArray(json) ? 'array' : 'object'), [json]);
 
   const rows = useMemo(
-    () => buildRows(nodes, rootType, expansion.effectiveExpanded, expansion.revealed),
-    [nodes, rootType, expansion.effectiveExpanded, expansion.revealed]
+    () =>
+      buildRows(
+        nodes,
+        rootType,
+        expansion.effectiveExpanded,
+        expansion.revealed,
+        searchMatches.reveals
+      ),
+    [nodes, rootType, expansion.effectiveExpanded, expansion.revealed, searchMatches.reveals]
   );
 
   const nav = useRovingTreeNavigation(rows, expansion);
