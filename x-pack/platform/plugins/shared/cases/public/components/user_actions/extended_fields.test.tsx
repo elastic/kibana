@@ -43,6 +43,120 @@ describe('createExtendedFieldsUserActionBuilder', () => {
     expect(screen.getByText('set Risk Score to high')).toBeInTheDocument();
   });
 
+  it('resolves a migrated custom field uuid key to its configured label', () => {
+    // Migrated custom fields are stored under `${customFieldKey}_as_<type>`; the camelCased
+    // payload key (testKey1AsKeyword) must map back to the configured label, not startCase(key).
+    const userAction = getUserAction('extended_fields', UserActionActions.update, {
+      type: 'extended_fields',
+      payload: { extendedFields: { testKey1AsKeyword: 'migrated value' } },
+    });
+
+    const builder = createExtendedFieldsUserActionBuilder({
+      ...builderArgs,
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+    expect(screen.getByText('set My test label 1 to migrated value')).toBeInTheDocument();
+  });
+
+  it('resolves a non-migrated global/template field key to its enriched label', () => {
+    // A natively-authored field (name: new_field, label: "My Field") is not in the customFields
+    // config; its label must come from the case's server-enriched extendedFieldsLabels
+    // (keyed by snake storage key `new_field_as_keyword`), not startCase("newField") → "New Field".
+    const userAction = getUserAction('extended_fields', UserActionActions.update, {
+      type: 'extended_fields',
+      payload: { extendedFields: { newFieldAsKeyword: 'yo' } },
+    });
+
+    const builder = createExtendedFieldsUserActionBuilder({
+      ...builderArgs,
+      caseData: {
+        ...builderArgs.caseData,
+        extendedFieldsLabels: { new_field_as_keyword: 'My Field' },
+      },
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+    expect(screen.getByText('set My Field to yo')).toBeInTheDocument();
+  });
+
+  it('formats a user picker value using the control resolved from extendedFieldsControls', () => {
+    // Reproduces the reported bug: without a control type, the raw JSON-stringified
+    // `{ uid, name }[]` payload value was shown verbatim instead of the parsed name(s).
+    const userAction = getUserAction('extended_fields', UserActionActions.update, {
+      type: 'extended_fields',
+      payload: {
+        extendedFields: {
+          usersAsKeyword: JSON.stringify([
+            { uid: 'u-1', name: 'Bobby "Bob" Thorton' },
+            { uid: 'u-2', name: 'jdoe' },
+          ]),
+        },
+      },
+    });
+
+    const builder = createExtendedFieldsUserActionBuilder({
+      ...builderArgs,
+      caseData: {
+        ...builderArgs.caseData,
+        extendedFieldsLabels: { users_as_keyword: 'Users' },
+        extendedFieldsControls: { users_as_keyword: 'USER_PICKER' },
+      },
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+    expect(screen.getByText('set Users to Bobby "Bob" Thorton, jdoe')).toBeInTheDocument();
+  });
+
+  it('falls back to the raw string when extendedFieldsControls is undefined', () => {
+    const userAction = getUserAction('extended_fields', UserActionActions.update, {
+      type: 'extended_fields',
+      payload: { extendedFields: { riskScoreAsKeyword: 'high' } },
+    });
+
+    const builder = createExtendedFieldsUserActionBuilder({
+      ...builderArgs,
+      caseData: { ...builderArgs.caseData, extendedFieldsControls: undefined },
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+    expect(screen.getByText('set Risk Score to high')).toBeInTheDocument();
+  });
+
+  it('falls back to the raw string when extendedFieldsControls is defined but the specific key is absent', () => {
+    // extendedFieldsControls is present (covers other keys) but does NOT contain `riskScoreAsKeyword`.
+    const userAction = getUserAction('extended_fields', UserActionActions.update, {
+      type: 'extended_fields',
+      payload: { extendedFields: { riskScoreAsKeyword: 'high' } },
+    });
+
+    const builder = createExtendedFieldsUserActionBuilder({
+      ...builderArgs,
+      caseData: {
+        ...builderArgs.caseData,
+        extendedFieldsControls: { severity_as_keyword: 'SELECT_BASIC' },
+      },
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+    expect(screen.getByText('set Risk Score to high')).toBeInTheDocument();
+  });
+
   it('renders generic label when multiple fields are updated at once', () => {
     const userAction = getUserAction('extended_fields', UserActionActions.update, {
       type: 'extended_fields',

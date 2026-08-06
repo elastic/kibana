@@ -41,6 +41,7 @@ dependsOn:
   - '@kbn/alerts-ui-shared'
   - '@kbn/deeplinks-workflows'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/ui-callout'
 tags:
   - shared-browser
   - package
