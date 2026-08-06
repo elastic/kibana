@@ -82,10 +82,6 @@ steps:
       totalCachedTokens: 0
       discoveredFeatures: []
       iterationResults: []
-      diverseOffset: 0
-      # Sentinel: -1 ensures the first iteration always differs from diverseOffset (0).
-      previousDiverseOffset: -1
-      effectiveDiverseRatio: "${{ inputs.diverseRatio }}"
       connectorId: ""
 
   # -----------------------------------------------------------------------
@@ -112,11 +108,10 @@ steps:
             featureTtlDays: "${{ inputs.featureTtlDays }}"
             sampleSize: "${{ inputs.sampleSize }}"
             entityFilteredRatio: "${{ inputs.entityFilteredRatio }}"
-            diverseRatio: "${{ variables.effectiveDiverseRatio }}"
+            diverseRatio: "${{ inputs.diverseRatio }}"
             maxEntityFilters: "${{ inputs.maxEntityFilters }}"
             maxExcludedFeaturesInPrompt: "${{ inputs.maxExcludedFeaturesInPrompt }}"
             maxPreviouslyIdentifiedFeatures: "${{ inputs.maxPreviouslyIdentifiedFeatures }}"
-            diverseOffset: "${{ variables.diverseOffset }}"
 
       # 2b: If no documents were returned, stop the loop.
       - name: check_docs
@@ -137,21 +132,8 @@ steps:
           totalPromptTokens: "${{ variables.totalPromptTokens | plus: steps.identify_inferred.output.iterationResult.tokensUsed.prompt }}"
           totalTokens: "${{ variables.totalTokens | plus: steps.identify_inferred.output.iterationResult.tokensUsed.total }}"
           totalCachedTokens: "${{ variables.totalCachedTokens | plus: steps.identify_inferred.output.iterationResult.tokensUsed.cached }}"
-          previousDiverseOffset: "${{ variables.diverseOffset }}"
-          diverseOffset: "${{ steps.identify_inferred.output.nextDiverseOffset }}"
 
-      # 2d: Disable diverse sampling once the diverse document pool is
-      #     exhausted (offset stops advancing).
-      - name: check_diverse_exhaustion
-        type: if
-        condition: "${{ variables.diverseOffset == variables.previousDiverseOffset }}"
-        steps:
-          - name: exhaust_diverse
-            type: data.set
-            with:
-              effectiveDiverseRatio: 0
-
-      # 2e: Track whether at least one iteration succeeded.
+      # 2d: Track whether at least one iteration succeeded.
       - name: mark_success
         type: if
         condition: "${{ steps.identify_inferred.output.iterationResult.state == 'success' }}"

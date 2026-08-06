@@ -44,6 +44,11 @@ import { unflattenObject } from '@kbn/object-utils';
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { isLeft } from 'fp-ts/Either';
+import {
+  formatLogThresholdSearchResponseError,
+  getSearchResponseErrorContext,
+  type LogThresholdSearchResponseErrorContext,
+} from './format_search_response_error';
 import { getChartGroupNames } from '../../../../common/utils/get_chart_group_names';
 import type {
   RuleParams,
@@ -264,7 +269,7 @@ export const createLogThresholdExecutor =
         validatedParams,
       });
     } catch (e) {
-      throw new Error(e);
+      throw e instanceof Error ? e : new Error(String(e));
     }
 
     return { state: {} };
@@ -299,14 +304,17 @@ export async function executeAlert(
 
   if (hasGroupBy(ruleParams)) {
     processGroupByResults(
-      await getGroupedResults(query, esClient),
+      await getGroupedResults(query, esClient, {
+        indexPattern,
+        groupBy: ruleParams.groupBy,
+      }),
       ruleParams,
       alertReporter,
       alertsClient
     );
   } else {
     processUngroupedResults(
-      await getUngroupedResults(query, esClient),
+      await getUngroupedResults(query, esClient, { indexPattern }),
       ruleParams,
       alertReporter,
       alertsClient
@@ -360,9 +368,13 @@ export async function executeRatioAlert(
   }
 
   if (hasGroupBy(ruleParams)) {
+    const groupedErrorContext = {
+      indexPattern,
+      groupBy: ruleParams.groupBy,
+    };
     const [numeratorGroupedResults, denominatorGroupedResults] = await Promise.all([
-      getGroupedResults(numeratorQuery, esClient),
-      getGroupedResults(denominatorQuery, esClient),
+      getGroupedResults(numeratorQuery, esClient, groupedErrorContext),
+      getGroupedResults(denominatorQuery, esClient, groupedErrorContext),
     ]);
     processGroupByRatioResults(
       numeratorGroupedResults,
@@ -373,8 +385,8 @@ export async function executeRatioAlert(
     );
   } else {
     const [numeratorUngroupedResults, denominatorUngroupedResults] = await Promise.all([
-      getUngroupedResults(numeratorQuery, esClient),
-      getUngroupedResults(denominatorQuery, esClient),
+      getUngroupedResults(numeratorQuery, esClient, { indexPattern }),
+      getUngroupedResults(denominatorQuery, esClient, { indexPattern }),
     ]);
     processUngroupedRatioResults(
       numeratorUngroupedResults,
@@ -867,21 +879,36 @@ export const getUngroupedESQuery = (
   };
 };
 
-const getUngroupedResults = async (query: object, esClient: ElasticsearchClient) => {
+const getUngroupedResults = async (
+  query: object,
+  esClient: ElasticsearchClient,
+  errorContext: LogThresholdSearchResponseErrorContext = {}
+) => {
   const searchResponse = await esClient.search(query);
   const decoded = UngroupedSearchQueryResponseRT.decode(searchResponse);
 
   if (isLeft(decoded)) {
-    const errorMessages = formatErrors(decoded.left);
-    throw new Error(`Failed to parse ungrouped search response: ${errorMessages.join(', ')}`);
+    throw new Error(
+      formatLogThresholdSearchResponseError({
+        searchResponse,
+        validationErrors: decoded.left,
+        responseType: 'ungrouped',
+        errorContext: getSearchResponseErrorContext(query, errorContext),
+      })
+    );
   }
 
   return decoded.right;
 };
 
-const getGroupedResults = async (query: object, esClient: ElasticsearchClient) => {
+const getGroupedResults = async (
+  query: object,
+  esClient: ElasticsearchClient,
+  errorContext: LogThresholdSearchResponseErrorContext = {}
+) => {
   let compositeGroupBuckets: GroupedSearchQueryResponse['aggregations']['groups']['buckets'] = [];
   let lastAfterKey: GroupedSearchQueryResponse['aggregations']['groups']['after_key'] | undefined;
+  const resolvedErrorContext = getSearchResponseErrorContext(query, errorContext);
 
   while (true) {
     const queryWithAfterKey: any = { ...query };
@@ -891,8 +918,14 @@ const getGroupedResults = async (query: object, esClient: ElasticsearchClient) =
     const decoded = GroupedSearchQueryResponseRT.decode(searchResponse);
 
     if (isLeft(decoded)) {
-      const errorMessages = formatErrors(decoded.left);
-      throw new Error(`Failed to parse grouped search response: ${errorMessages.join(', ')}`);
+      throw new Error(
+        formatLogThresholdSearchResponseError({
+          searchResponse,
+          validationErrors: decoded.left,
+          responseType: 'grouped',
+          errorContext: resolvedErrorContext,
+        })
+      );
     }
 
     const groupResponse = decoded.right;

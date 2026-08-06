@@ -527,41 +527,33 @@ describe('CensysConnector', () => {
   });
 
   describe('test handler', () => {
-    it('returns ok on success', async () => {
+    it('calls the organization endpoint on success', async () => {
       mockClient.get.mockResolvedValue({ data: { organization: { id: ORGANIZATION_ID } } });
-      if (!CensysConnector.test) throw new Error('Test handler not defined');
       const result = await CensysConnector.test.handler(mockContext);
       const call = mockClient.get.mock.calls[0];
       expect(call[0]).toBe(
         `https://api.platform.censys.io/v3/accounts/organizations/${ORGANIZATION_ID}`
       );
-      expect(result.ok).toBe(true);
+      expect(result).toEqual({});
     });
 
-    it('returns ok=false on API failure', async () => {
+    it('throws on API failure', async () => {
       mockClient.get.mockRejectedValue(new Error('Unauthorized'));
-      if (!CensysConnector.test) throw new Error('Test handler not defined');
-      const result = await CensysConnector.test.handler(mockContext);
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Unauthorized');
+      await expect(CensysConnector.test.handler(mockContext)).rejects.toThrow('Unauthorized');
     });
 
-    it('returns ok=false with an enriched Censys auth error when 401 is returned', async () => {
+    it('throws with an enriched Censys auth error when 401 is returned', async () => {
       mockClient.get.mockRejectedValue({
         response: { status: 401, data: { message: 'Access token is not active' } },
       });
-      if (!CensysConnector.test) throw new Error('Test handler not defined');
-      const result = await CensysConnector.test.handler(mockContext);
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Censys API error (401): Access token is not active');
+      await expect(CensysConnector.test.handler(mockContext)).rejects.toThrow(
+        'Censys API error (401): Access token is not active'
+      );
     });
 
-    it('returns ok=false when organizationId is missing', async () => {
-      if (!CensysConnector.test) throw new Error('Test handler not defined');
+    it('throws when organizationId is missing', async () => {
       const ctxNoOrg = { ...mockContext, config: {} } as unknown as ActionContext;
-      const result = await CensysConnector.test.handler(ctxNoOrg);
-      expect(result.ok).toBe(false);
-      expect(result.message).toMatch(/organization ID/i);
+      await expect(CensysConnector.test.handler(ctxNoOrg)).rejects.toThrow(/organization ID/i);
     });
   });
 });

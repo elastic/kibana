@@ -51,11 +51,7 @@ export function registerUninstall(router: EntityStorePluginRouter) {
         },
       },
       wrapMiddlewares(async (ctx, req, res) => {
-        const {
-          logger,
-          assetManagerClient: assetManager,
-          preferencesClient,
-        } = await ctx.entityStore;
+        const { logger, assetManagerClient: assetManager } = await ctx.entityStore;
         const { entityTypes } = req.body;
         logger.debug(`uninstalling entities: [${entityTypes.join(', ')}]`);
 
@@ -71,8 +67,6 @@ export function registerUninstall(router: EntityStorePluginRouter) {
           // so we call it here to ensure all namespace-scoped resources are cleaned up
           await assetManager.cleanupNamespace();
         }
-
-        await preferencesClient.update({ autoInstall: false });
 
         return res.ok({ body: { ok: true } });
       })
