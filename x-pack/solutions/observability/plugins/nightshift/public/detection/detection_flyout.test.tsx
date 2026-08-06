@@ -129,7 +129,8 @@ describe('DetectionFlyout', () => {
     mockOpenChat.mockClear();
     mockStreamFeatures.mockReturnValue({
       features: [webFrontendFeature],
-      isLoading: false,
+      isInitialLoading: false,
+      isFetching: false,
       isError: false,
       refetch: jest.fn(),
     });
@@ -234,7 +235,8 @@ describe('DetectionFlyout', () => {
   it('hides the impacted services section when no entry resolves to a service', () => {
     mockStreamFeatures.mockReturnValue({
       features: [],
-      isLoading: false,
+      isInitialLoading: false,
+      isFetching: false,
       isError: false,
       refetch: jest.fn(),
     });

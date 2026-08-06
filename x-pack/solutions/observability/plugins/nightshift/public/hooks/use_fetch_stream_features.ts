@@ -14,7 +14,10 @@ const NO_FEATURES: Feature[] = [];
 
 export interface StreamFeaturesResult {
   features: Feature[];
-  isLoading: boolean;
+  /** True only until the first load settles; a refetch keeps the previous features on screen. */
+  isInitialLoading: boolean;
+  /** True for any request in flight, including a retry after an error. */
+  isFetching: boolean;
   isError: boolean;
   refetch: () => void;
 }
@@ -51,18 +54,28 @@ export const useFetchStreamFeatures = (streamNames: string[]): StreamFeaturesRes
   } = useKibana().services;
   const uniqueStreamNames = [...new Set(streamNames)].sort();
 
-  const { data, isInitialLoading, isError, refetch } = useQuery<Feature[], Error>({
+  const { data, isInitialLoading, isFetching, isError, refetch } = useQuery<Feature[], Error>({
     queryKey: ['nightshift.streamFeatures', uniqueStreamNames],
     enabled: uniqueStreamNames.length > 0,
     queryFn: async ({ signal }) => {
-      const featuresByStream = await Promise.all(
+      const settled = await Promise.allSettled(
         uniqueStreamNames.map((streamName) =>
           fetchStreamFeatures(significantEventsRepositoryClient, streamName, signal)
         )
       );
-      return featuresByStream.flat();
+
+      // One unreachable stream must not blank out the services resolved from the others, but a
+      // total failure still has to surface as an error rather than an empty impact list.
+      const loaded = settled.filter(
+        (result): result is PromiseFulfilledResult<Feature[]> => result.status === 'fulfilled'
+      );
+      if (loaded.length === 0 && settled.length > 0) {
+        throw (settled[0] as PromiseRejectedResult).reason;
+      }
+
+      return loaded.flatMap(({ value }) => value);
     },
   });
 
-  return { features: data ?? NO_FEATURES, isLoading: isInitialLoading, isError, refetch };
+  return { features: data ?? NO_FEATURES, isInitialLoading, isFetching, isError, refetch };
 };

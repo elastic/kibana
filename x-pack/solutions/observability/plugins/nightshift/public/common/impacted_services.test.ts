@@ -7,10 +7,10 @@
 
 import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
 import {
-  getImpactedEntities,
-  getImpactedEntityKey,
-  getImpactedEntityStreamNames,
-} from './impacted_entities';
+  getImpactedServiceKey,
+  getImpactedServiceStreamNames,
+  getImpactedServices,
+} from './impacted_services';
 
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-07-10T12:00:00Z',
@@ -45,11 +45,11 @@ const entityEntry = {
   stream_name: 'logs.checkout',
 };
 
-describe('getImpactedEntities', () => {
+describe('getImpactedServices', () => {
   it('resolves entity entries backed by a service knowledge indicator', () => {
     const feature = mockFeature();
 
-    expect(getImpactedEntities(mockEvent({ blast_radius: [entityEntry] }), [feature])).toEqual([
+    expect(getImpactedServices(mockEvent({ blast_radius: [entityEntry] }), [feature])).toEqual([
       {
         key: 'entity:feat-checkout:checkout-api',
         name: 'checkout-api',
@@ -62,7 +62,25 @@ describe('getImpactedEntities', () => {
   it('matches a feature by its id when the entry does not reference the uuid', () => {
     const feature = mockFeature({ uuid: 'some-other-uuid', id: 'feat-checkout' });
 
-    expect(getImpactedEntities(mockEvent({ blast_radius: [entityEntry] }), [feature])).toHaveLength(
+    expect(getImpactedServices(mockEvent({ blast_radius: [entityEntry] }), [feature])).toHaveLength(
+      1
+    );
+  });
+
+  it('prefers a uuid match over another feature that reuses the same value as its id', () => {
+    const byId = mockFeature({ uuid: 'unrelated-uuid', id: 'feat-checkout', title: 'By id' });
+    const byUuid = mockFeature({ uuid: 'feat-checkout', id: 'unrelated-id', title: 'By uuid' });
+
+    expect(
+      getImpactedServices(mockEvent({ blast_radius: [entityEntry] }), [byId, byUuid])[0].feature
+    ).toBe(byUuid);
+  });
+
+  // `Feature.subtype` is an unconstrained string written by a model, so casing is not guaranteed.
+  it('accepts a service subtype regardless of casing', () => {
+    const feature = mockFeature({ subtype: 'Service' });
+
+    expect(getImpactedServices(mockEvent({ blast_radius: [entityEntry] }), [feature])).toHaveLength(
       1
     );
   });
@@ -90,31 +108,37 @@ describe('getImpactedEntities', () => {
       mockFeature({ uuid: 'feat-edge', subtype: 'service' }),
     ];
 
-    expect(getImpactedEntities(event, features)).toEqual([]);
+    expect(getImpactedServices(event, features)).toEqual([]);
   });
 
   it('drops entities whose knowledge indicator is not a service', () => {
     const feature = mockFeature({ subtype: 'database' });
 
-    expect(getImpactedEntities(mockEvent({ blast_radius: [entityEntry] }), [feature])).toEqual([]);
+    expect(getImpactedServices(mockEvent({ blast_radius: [entityEntry] }), [feature])).toEqual([]);
+  });
+
+  it('drops entities whose knowledge indicator has no subtype', () => {
+    const feature = mockFeature({ subtype: undefined });
+
+    expect(getImpactedServices(mockEvent({ blast_radius: [entityEntry] }), [feature])).toEqual([]);
   });
 
   it('drops entities whose feature_id resolves to nothing', () => {
-    expect(getImpactedEntities(mockEvent({ blast_radius: [entityEntry] }), [])).toEqual([]);
+    expect(getImpactedServices(mockEvent({ blast_radius: [entityEntry] }), [])).toEqual([]);
   });
 
   it('never falls back to a stream name when there is no blast radius', () => {
-    expect(getImpactedEntities(mockEvent(), [mockFeature()])).toEqual([]);
+    expect(getImpactedServices(mockEvent(), [mockFeature()])).toEqual([]);
   });
 
   it('deduplicates repeated entries', () => {
     const event = mockEvent({ blast_radius: [entityEntry, { ...entityEntry }] });
 
-    expect(getImpactedEntities(event, [mockFeature()])).toHaveLength(1);
+    expect(getImpactedServices(event, [mockFeature()])).toHaveLength(1);
   });
 });
 
-describe('getImpactedEntityStreamNames', () => {
+describe('getImpactedServiceStreamNames', () => {
   it('collects distinct streams from entity entries only', () => {
     const events = [
       mockEvent({ blast_radius: [entityEntry] }),
@@ -137,14 +161,19 @@ describe('getImpactedEntityStreamNames', () => {
       mockEvent(),
     ];
 
-    expect(getImpactedEntityStreamNames(events)).toEqual(['logs.checkout', 'logging-eis']);
+    expect(getImpactedServiceStreamNames(events)).toEqual(['logs.checkout', 'logging-eis']);
   });
 });
 
-describe('getImpactedEntityKey', () => {
-  it('separates entries that share a feature but name different entities', () => {
-    expect(getImpactedEntityKey(entityEntry)).not.toBe(
-      getImpactedEntityKey({ ...entityEntry, name: 'checkout-worker' })
+describe('getImpactedServiceKey', () => {
+  it('separates entries that share a feature but name different services', () => {
+    expect(getImpactedServiceKey(entityEntry)).not.toBe(
+      getImpactedServiceKey({ ...entityEntry, name: 'checkout-worker' })
     );
+  });
+
+  // `getBlastRadiusEbtDetail` reads this prefix to derive the privacy-safe analytics category.
+  it('keeps the entry type as the leading key segment', () => {
+    expect(getImpactedServiceKey(entityEntry)).toMatch(/^entity:/);
   });
 });

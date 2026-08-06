@@ -31,7 +31,7 @@ import {
 import { useFetchSignificantEvents } from '../hooks/use_fetch_significant_events';
 import { useFetchStreamFeatures } from '../hooks/use_fetch_stream_features';
 import { useCloseSignificantEvent } from '../hooks/use_close_significant_event';
-import { getImpactedEntityStreamNames } from '../common/impacted_entities';
+import { getImpactedServiceStreamNames } from '../common/impacted_services';
 import {
   buildBlastRadiusChips,
   filterEventsByBlastRadiusChip,
@@ -195,12 +195,19 @@ export function NightshiftApp(): React.ReactElement {
     [needsActionEvents, resolvedEvents]
   );
 
-  const { features } = useFetchStreamFeatures(
-    useMemo(() => getImpactedEntityStreamNames(needsActionEvents), [needsActionEvents])
+  // Chips cover every event on the page, resolved included, so filtering by a service that only
+  // appears in resolved events is still reachable.
+  const {
+    features,
+    isInitialLoading: isLoadingBlastRadius,
+    isError: isBlastRadiusError,
+    refetch: refetchBlastRadius,
+  } = useFetchStreamFeatures(
+    useMemo(() => getImpactedServiceStreamNames(shownEvents), [shownEvents])
   );
   const blastRadius = useMemo(
-    () => buildBlastRadiusChips(needsActionEvents, features),
-    [needsActionEvents, features]
+    () => buildBlastRadiusChips(shownEvents, { features }),
+    [shownEvents, features]
   );
 
   const activeBlastRadiusChip = blastRadius.some(({ key }) => key === selectedBlastRadiusKey)
@@ -222,11 +229,11 @@ export function NightshiftApp(): React.ReactElement {
   );
 
   const visibleNeedsActionEvents = useMemo(
-    () => filterEventsByBlastRadiusChip(needsActionEvents, activeBlastRadiusChip, features),
+    () => filterEventsByBlastRadiusChip(needsActionEvents, activeBlastRadiusChip, { features }),
     [needsActionEvents, activeBlastRadiusChip, features]
   );
   const visibleResolvedEvents = useMemo(
-    () => filterEventsByBlastRadiusChip(resolvedEvents, activeBlastRadiusChip, features),
+    () => filterEventsByBlastRadiusChip(resolvedEvents, activeBlastRadiusChip, { features }),
     [resolvedEvents, activeBlastRadiusChip, features]
   );
 
@@ -477,6 +484,9 @@ export function NightshiftApp(): React.ReactElement {
 
           <BlastRadiusEntities
             entities={blastRadius}
+            isError={isBlastRadiusError}
+            isLoading={isLoadingBlastRadius}
+            onRetry={refetchBlastRadius}
             onSelect={handleBlastRadiusSelect}
             selectedEntityKey={activeBlastRadiusChip}
           />

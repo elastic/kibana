@@ -111,7 +111,8 @@ function setEvents({
   });
   mockUseFetchStreamFeatures.mockReturnValue({
     features: featuresForEvents(events),
-    isLoading: false,
+    isInitialLoading: false,
+    isFetching: false,
     isError: false,
     refetch: jest.fn(),
   });
@@ -340,7 +341,7 @@ describe('NightshiftApp', () => {
     expect(container.querySelectorAll('[data-test-subj="blast-radius-chip"]')).toHaveLength(12);
   });
 
-  it('only builds blast radius chips from need-action entities, not resolved ones', () => {
+  it('builds blast radius chips from resolved events as well as need-action ones', () => {
     setEvents({
       events: [
         mockEvent({
@@ -357,9 +358,26 @@ describe('NightshiftApp', () => {
     });
     const { container } = renderWithIntl();
 
-    expect(container.querySelectorAll('[data-test-subj="blast-radius-chip"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-test-subj="blast-radius-chip"]')).toHaveLength(2);
     expect(screen.getByRole('button', { name: /service-active/i })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /service-resolved/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /service-resolved/i })).toBeInTheDocument();
+  });
+
+  it('surfaces a retry when the impacted services lookup fails', () => {
+    const refetch = jest.fn();
+    setEvents({ events: [mockEvent({ event_id: '1' })] });
+    mockUseFetchStreamFeatures.mockReturnValue({
+      features: [],
+      isInitialLoading: false,
+      isFetching: false,
+      isError: true,
+      refetch,
+    });
+    renderWithIntl();
+
+    expect(screen.getByText('Unable to load impacted services')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('blast-radius-retry'));
+    expect(refetch).toHaveBeenCalled();
   });
 
   it('filters significant events by blast radius', () => {
@@ -442,8 +460,8 @@ describe('NightshiftApp', () => {
     expect(screen.getByRole('button', { name: 'Need action: 1' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Resolved: 1' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Resolved' })).toBeInTheDocument();
-    // Blast radius is built from need-action events only, so the dismissed event's stream has no chip.
-    expect(screen.queryByRole('button', { name: /service-z/i })).not.toBeInTheDocument();
+    // Chips cover every shown event, so the dismissed event's service is filterable too.
+    expect(screen.getByRole('button', { name: /service-z/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /service-a/i })).toBeInTheDocument();
   });
 

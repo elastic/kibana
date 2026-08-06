@@ -4,6 +4,7 @@ Backing stream docs, Knowledge Indicators, and rule occurrences for seed_nightsh
 
 Invoked by seed_nightshift.sh; not meant to be run standalone unless for debugging.
 """
+
 from __future__ import annotations
 
 import base64
@@ -507,7 +508,9 @@ def lengthen_significant_events_ndjson(ndjson: str) -> str:
             obj["summary"] = lengthen_for_truncation_demo(rich)
         for signal in obj.get("signals", []):
             if isinstance(signal, dict) and isinstance(signal.get("description"), str):
-                signal["description"] = lengthen_for_truncation_demo(signal["description"])
+                signal["description"] = lengthen_for_truncation_demo(
+                    signal["description"]
+                )
         output.append(json.dumps(obj, separators=(",", ":")))
     return "\n".join(output) + "\n"
 
@@ -524,6 +527,7 @@ def prepare_ki_feature_for_seed(feature: dict) -> dict:
         )
         prepared["description"] = lengthen_for_truncation_demo(rich)
     return prepared
+
 
 # Backing streams are logs.* only (Nightshift demo does not use metrics streams yet).
 STREAMS = [
@@ -566,7 +570,10 @@ KI_FEATURES_BY_STREAM: dict[str, list[dict]] = {
                 "User-facing web application serving checkout, browse, and search flows. "
                 "P95 request latency spiked after the api-gateway v2.8.1 rollout."
             ),
-            "properties": {"service.name": "web-frontend", "deployment.version": "v2.8.1"},
+            "properties": {
+                "service.name": "web-frontend",
+                "deployment.version": "v2.8.1",
+            },
             "confidence": 88,
             "evidence": [
                 "service.name = web-frontend",
@@ -588,7 +595,10 @@ KI_FEATURES_BY_STREAM: dict[str, list[dict]] = {
                 "Edge API gateway routing authenticated traffic to backend services. "
                 "Auth middleware on v2.8.1 performs synchronous DB lookups under load."
             ),
-            "properties": {"service.name": "api-gateway", "deployment.version": "v2.8.1"},
+            "properties": {
+                "service.name": "api-gateway",
+                "deployment.version": "v2.8.1",
+            },
             "confidence": 91,
             "evidence": [
                 "service.name = api-gateway",
@@ -655,7 +665,10 @@ KI_FEATURES_BY_STREAM: dict[str, list[dict]] = {
                 "Internal DNS resolver scaled below peak demand during maintenance, "
                 "causing SERVFAIL spikes in us-east-1 AZ-b."
             ),
-            "properties": {"service.name": "coredns", "cloud.availability_zone": "us-east-1b"},
+            "properties": {
+                "service.name": "coredns",
+                "cloud.availability_zone": "us-east-1b",
+            },
             "confidence": 79,
             "evidence": [
                 "dns.response_code = SERVFAIL",
@@ -803,16 +816,33 @@ def build_impacted_service_feature(feature_id: str, stream_name: str) -> dict:
     }
 
 
+# Deriving a feature for *every* blast_radius entity would make impacted services resolve 100% of
+# the time locally, so the path Nightshift takes on real clusters — an entity whose feature_id
+# matches no knowledge indicator, which is dropped from the UI — would never be exercised in dev.
+# These are left unseeded on purpose.
+UNRESOLVED_IMPACTED_SERVICE_IDS: frozenset[str] = frozenset({"search-api"})
+
+
 def add_impacted_service_features() -> None:
     """Derived, not hand-written, so a new blast_radius entity cannot silently become invisible."""
-    seeded = {feature["id"] for features in KI_FEATURES_BY_STREAM.values() for feature in features}
+    seeded = {
+        feature["id"]
+        for features in KI_FEATURES_BY_STREAM.values()
+        for feature in features
+    }
     for entries in BLAST_RADIUS_BY_EVENT_ID.values():
         for entry in entries:
-            if entry["type"] != "entity" or entry["feature_id"] in seeded:
+            if (
+                entry["type"] != "entity"
+                or entry["feature_id"] in seeded
+                or entry["feature_id"] in UNRESOLVED_IMPACTED_SERVICE_IDS
+            ):
                 continue
             seeded.add(entry["feature_id"])
             KI_FEATURES_BY_STREAM.setdefault(entry["stream_name"], []).append(
-                build_impacted_service_feature(entry["feature_id"], entry["stream_name"])
+                build_impacted_service_feature(
+                    entry["feature_id"], entry["stream_name"]
+                )
             )
 
 
@@ -880,7 +910,9 @@ def ensure_backing_data_stream(name: str) -> None:
     )
 
 
-def kibana_request(method: str, path: str, body: dict | None = None) -> tuple[int, object]:
+def kibana_request(
+    method: str, path: str, body: dict | None = None
+) -> tuple[int, object]:
     payload = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(
         f"{KIBANA_URL}{path}",
@@ -985,7 +1017,9 @@ def enrich_doc(index: str, ts: dt.datetime, minutes_to_anchor: float, seq: int) 
                 "service.name": "payment-service",
                 "kubernetes.pod.name": pod,
                 "jvm.memory.heap.used": min(heap, 2_147_483_648),
-                "message": "pod killed: OOMKilled (exit code 137)" if seq % 4 == 0 else "processing batch",
+                "message": "pod killed: OOMKilled (exit code 137)"
+                if seq % 4 == 0
+                else "processing batch",
             }
         )
     elif index == "logs.elasticsearch":
@@ -1005,7 +1039,9 @@ def enrich_doc(index: str, ts: dt.datetime, minutes_to_anchor: float, seq: int) 
     elif index == "logs.dns-resolver":
         base.update(
             {
-                "dns.response_code": "SERVFAIL" if minutes_to_anchor <= 20 else "NOERROR",
+                "dns.response_code": "SERVFAIL"
+                if minutes_to_anchor <= 20
+                else "NOERROR",
                 "message": "SERVFAIL resolving payments.internal.svc",
             }
         )
@@ -1067,7 +1103,9 @@ def seed_backing_streams() -> None:
             minutes_to_anchor = (anchor - bucket).total_seconds() / 60
             count = docs_per_bucket(shape, minutes_to_anchor, rng)
             for i in range(count):
-                ts = bucket + dt.timedelta(seconds=i * (BUCKET_MINUTES * 60 // max(count, 1)))
+                ts = bucket + dt.timedelta(
+                    seconds=i * (BUCKET_MINUTES * 60 // max(count, 1))
+                )
                 doc = enrich_doc(index, ts, minutes_to_anchor, seq)
                 lines.append(json.dumps({"create": {}}))
                 lines.append(json.dumps(doc))
@@ -1141,9 +1179,7 @@ def bulk_create(index: str, documents: list[dict]) -> int:
         lines.append(json.dumps({"create": {}}))
         lines.append(json.dumps(document))
 
-    result = es_request(
-        "POST", f"/{index}/_bulk?refresh=true", "\n".join(lines) + "\n"
-    )
+    result = es_request("POST", f"/{index}/_bulk?refresh=true", "\n".join(lines) + "\n")
     if result is None or result.get("errors"):
         raise SystemExit(
             f"ERROR: bulk index into {index} failed: {json.dumps(result)[:500]}"
@@ -1154,7 +1190,9 @@ def bulk_create(index: str, documents: list[dict]) -> int:
 def seed_detection_occurrences() -> None:
     detections = parse_seed_detections()
     if not detections:
-        raise SystemExit("ERROR: no Nightshift detections were provided for occurrence seeding")
+        raise SystemExit(
+            "ERROR: no Nightshift detections were provided for occurrence seeding"
+        )
     rule_uuids = [detection["rule_uuid"] for detection in detections]
 
     es_request(
@@ -1251,5 +1289,8 @@ if __name__ == "__main__":
     try:
         main()
     except urllib.error.URLError as err:
-        print(f"ERROR: request failed — is Elasticsearch/Kibana running? {err}", file=sys.stderr)
+        print(
+            f"ERROR: request failed — is Elasticsearch/Kibana running? {err}",
+            file=sys.stderr,
+        )
         sys.exit(1)

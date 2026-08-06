@@ -6,7 +6,7 @@
  */
 
 import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
-import { getImpactedEntities } from '../common/impacted_entities';
+import { getImpactedServices } from '../common/impacted_services';
 
 export interface BlastRadiusChip {
   count: number;
@@ -14,21 +14,29 @@ export interface BlastRadiusChip {
   name: string;
 }
 
+interface BlastRadiusChipOptions {
+  /** Knowledge indicators used to resolve each event's blast radius into impacted services. */
+  features: Feature[];
+}
+
 export const eventHasBlastRadiusChip = (
   event: SignificantEvent,
   chipKey: string,
-  features: Feature[]
-): boolean => getImpactedEntities(event, features).some(({ key }) => key === chipKey);
+  { features }: BlastRadiusChipOptions
+): boolean => getImpactedServices(event, features).some(({ key }) => key === chipKey);
 
-/** Landing blast-radius pills from the impacted entities of need-action events. */
+/**
+ * Landing blast-radius pills. Each pill is one impacted service — the subset of `blast_radius[]`
+ * that resolves to a `service` knowledge indicator — counted across the events it appears in.
+ */
 export const buildBlastRadiusChips = (
   events: SignificantEvent[],
-  features: Feature[]
+  { features }: BlastRadiusChipOptions
 ): BlastRadiusChip[] => {
   const byChip = new Map<string, BlastRadiusChip>();
 
   events.forEach((event) => {
-    getImpactedEntities(event, features).forEach(({ key, name }) => {
+    getImpactedServices(event, features).forEach(({ key, name }) => {
       const current = byChip.get(key);
       byChip.set(key, { key, name, count: (current?.count ?? 0) + 1 });
     });
@@ -42,6 +50,8 @@ export const buildBlastRadiusChips = (
 export const filterEventsByBlastRadiusChip = (
   events: SignificantEvent[],
   chipKey: string | undefined,
-  features: Feature[]
+  { features }: BlastRadiusChipOptions
 ): SignificantEvent[] =>
-  chipKey ? events.filter((event) => eventHasBlastRadiusChip(event, chipKey, features)) : events;
+  chipKey
+    ? events.filter((event) => eventHasBlastRadiusChip(event, chipKey, { features }))
+    : events;

@@ -34,7 +34,8 @@ jest.mock('@kbn/investigation-output', () => ({
 jest.mock('../hooks/use_fetch_stream_features', () => ({
   useFetchStreamFeatures: () => ({
     features: [],
-    isLoading: false,
+    isInitialLoading: false,
+    isFetching: false,
     isError: false,
     refetch: jest.fn(),
   }),

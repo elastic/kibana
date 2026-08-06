@@ -44,12 +44,8 @@ import { EntityFlyout } from '../entity/entity_flyout';
 import { FlyoutSectionTitle } from '../common/flyout_section_title';
 import { TruncatableSummary } from '../common/truncatable_summary';
 import { useKibana } from '../hooks/use_kibana';
-import { useFetchStreamFeatures } from '../hooks/use_fetch_stream_features';
-import {
-  getImpactedEntities,
-  getImpactedEntityStreamNames,
-  type ImpactedEntity,
-} from '../common/impacted_entities';
+import { useImpactedServices } from '../hooks/use_impacted_services';
+import type { ImpactedService } from '../common/impacted_services';
 import { formatChatAttachmentDescription } from '../chat/chat_attachment_description';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
@@ -73,18 +69,15 @@ export function DetectionFlyout({
   const { euiTheme } = useEuiTheme();
   const formatTimestamp = useFormatTimestamp();
   const { share, agentBuilder } = useKibana().services;
-  const [selectedEntity, setSelectedEntity] = useState<ImpactedEntity | undefined>();
+  const [selectedEntity, setSelectedEntity] = useState<ImpactedService | undefined>();
 
   const {
-    features: streamFeatures,
-    isLoading: isLoadingStreamFeatures,
+    services: associatedEntities,
+    isInitialLoading: isLoadingStreamFeatures,
+    isFetching: isFetchingStreamFeatures,
     isError: isStreamFeaturesError,
     refetch: refetchStreamFeatures,
-  } = useFetchStreamFeatures(useMemo(() => getImpactedEntityStreamNames([event]), [event]));
-  const associatedEntities = useMemo(
-    () => getImpactedEntities(event, streamFeatures),
-    [event, streamFeatures]
-  );
+  } = useImpactedServices(event);
   const selectedEntityFeature = selectedEntity?.feature;
 
   useEffect(() => {
@@ -240,6 +233,7 @@ export function DetectionFlyout({
                     data-test-subj="nightshiftDetectionFlyoutEntitiesRetryButton"
                     flush="left"
                     iconType="refresh"
+                    isLoading={isFetchingStreamFeatures}
                     onClick={() => refetchStreamFeatures()}
                     size="s"
                   >
