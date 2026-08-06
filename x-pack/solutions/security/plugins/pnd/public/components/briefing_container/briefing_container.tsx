@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import styled from '@emotion/styled';
 import type { Investigation, RecommendedAction } from '@kbn/pnd-common';
 import {
   EuiAccordion,
@@ -33,6 +34,20 @@ interface BriefingContainerProps {
   briefingType: RecommendedAction;
   briefingList: Investigation[];
 }
+
+const StyledAccordion = styled(EuiAccordion)`
+  &.euiAccordion-isOpen {
+    .euiAccordion__triggerWrapper {
+      border-bottom: 1px solid ${({ theme }) => theme.euiTheme.colors.disabled};
+    }
+  }
+
+  .euiAccordion__triggerWrapper {
+    padding: ${({ theme }) =>
+      `${theme.euiTheme.size.m} ${theme.euiTheme.size.l} ${theme.euiTheme.size.m} ${theme.euiTheme.size.m}`};
+    box-sizing: border-box;
+  }
+`;
 
 export const BriefingContainer = memo<BriefingContainerProps>(
   ({ briefingId, briefingType, briefingList }) => {
@@ -62,7 +77,7 @@ export const BriefingContainer = memo<BriefingContainerProps>(
         paddingSize="none"
         hasBorder
       >
-        <EuiAccordion
+        <StyledAccordion
           id={`briefing-container-${briefingId}`}
           buttonContent={buttonContent}
           initialIsOpen
@@ -74,13 +89,6 @@ export const BriefingContainer = memo<BriefingContainerProps>(
               }
             `,
           }}
-          css={css`
-            .euiAccordion__triggerWrapper {
-              border-bottom: 1px solid ${euiTheme.colors.disabled};
-              padding: ${euiTheme.size.m} ${euiTheme.size.l} ${euiTheme.size.m} ${euiTheme.size.m};
-              box-sizing: border-box;
-            }
-          `}
         >
           {briefingList.length > 0 ? (
             <EuiFlexGroup direction="column" gutterSize="none">
@@ -100,7 +108,7 @@ export const BriefingContainer = memo<BriefingContainerProps>(
               </EuiText>
             </EuiPanel>
           )}
-        </EuiAccordion>
+        </StyledAccordion>
       </EuiPanel>
     );
   }
