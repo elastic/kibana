@@ -27,6 +27,9 @@ export const RenderIacTemplateRequestSchema = {
         }),
         policyTemplates: schema.arrayOf(schema.string({ minLength: 1, maxLength: 255 }), {
           minSize: 1,
+          // Bounds input to avoid unbounded validation work; a package exposes
+          // only a handful of policy templates, so this is a generous ceiling.
+          maxSize: 100,
           meta: {
             description: 'Policy template names whose inputs to include in the rendered template.',
           },
