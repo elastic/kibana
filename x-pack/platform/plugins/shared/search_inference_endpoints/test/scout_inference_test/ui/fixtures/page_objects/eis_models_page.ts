@@ -37,6 +37,7 @@ export class EisModelsPage {
   readonly addEndpointCancelButton: Locator;
   readonly addEndpointCloseButton: Locator;
   readonly addEndpointIdField: Locator;
+  readonly addEndpointReasoningToggle: Locator;
 
   // Manage Region Preferences Modal
   readonly manageRegionsButton: Locator;
@@ -93,6 +94,7 @@ export class EisModelsPage {
     this.addEndpointCancelButton = this.page.testSubj.locator('addEndpointModalCancelButton');
     this.addEndpointCloseButton = this.page.testSubj.locator('addEndpointModalCloseButton');
     this.addEndpointIdField = this.page.testSubj.locator('addEndpointIdField');
+    this.addEndpointReasoningToggle = this.page.testSubj.locator('addEndpointReasoningToggle');
 
     // Manage Region Preferences Modal
     this.manageRegionsButton = this.page.testSubj.locator('eisManageRegionsButton');
