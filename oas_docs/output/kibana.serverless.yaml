@@ -102376,12 +102376,14 @@ components:
       type: object
       properties:
         fill:
-          description: 'Area fill type: solid or gradient. Defaults to solid for stacked and percentage, and to gradient for unstacked areas'
+          availability:
+            since: 9.6.0
+          default: solid
+          description: 'Area fill type: solid or gradient. Defaults to solid.'
           enum:
             - solid
             - gradient
           type: string
-          x-state: Generally available
         fill_opacity:
           default: 0.3
           description: Area fill opacity (0-1 typical, max 2 for legacy)
