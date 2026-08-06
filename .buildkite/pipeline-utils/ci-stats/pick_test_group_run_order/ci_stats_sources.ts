@@ -39,8 +39,12 @@ export function buildCiStatsSources(args: {
   pipelineSlug: string;
   prNumber: string | undefined;
   prMergeBase: string | undefined;
+  mergeQueueMergeBase: string | undefined;
 }): CiStatsSource[] {
-  const { trackedBranch, ownBranch, pipelineSlug, prNumber, prMergeBase } = args;
+  const { trackedBranch, ownBranch, pipelineSlug, prNumber, prMergeBase, mergeQueueMergeBase } =
+    args;
+
+  const isMergeQueue = pipelineSlug === PIPELINES.MERGE_QUEUE;
 
   return [
     // try to get times from a recent successful job on this PR
@@ -49,7 +53,10 @@ export function buildCiStatsSources(args: {
     // kibana-elasticsearch-serverless-verify-and-promote is not necessarily run in commit order -
     // using kibana-on-merge groups will provide a closer approximation, with a failure mode -
     // of too many ftr groups instead of potential timeouts.
+    // merge-queue builds run on throwaway gh-readonly-queue/* branches, so their own
+    // branch has no history; they use merge-base and tracked-branch sources below.
     ...(!prNumber &&
+    !isMergeQueue &&
     pipelineSlug !== PIPELINES.ON_MERGE &&
     pipelineSlug !== PIPELINES.ES_SERVERLESS_VERIFY
       ? [
@@ -57,8 +64,24 @@ export function buildCiStatsSources(args: {
           { branch: trackedBranch, jobName: pipelineSlug },
         ]
       : []),
-    // try to get times from the mergeBase commit
-    ...(prMergeBase ? [{ commit: prMergeBase, jobName: PIPELINES.ON_MERGE }] : []),
+    // try to get times from the merge-queue group's merge-base commit
+    ...(mergeQueueMergeBase
+      ? [
+          { commit: mergeQueueMergeBase, jobName: PIPELINES.ON_MERGE },
+          { commit: mergeQueueMergeBase, jobName: PIPELINES.MERGE_QUEUE },
+        ]
+      : []),
+    // try to get times from the mergeBase commit; with a merge queue enabled the
+    // merge base may only have been built by the merge-queue pipeline
+    ...(prMergeBase
+      ? [
+          { commit: prMergeBase, jobName: PIPELINES.ON_MERGE },
+          { commit: prMergeBase, jobName: PIPELINES.MERGE_QUEUE },
+        ]
+      : []),
+    // merge-queue builds report the target branch as their branch, so recent queue
+    // builds on the tracked branch are a good source for Jest durations
+    ...(isMergeQueue ? [{ branch: trackedBranch, jobName: PIPELINES.MERGE_QUEUE }] : []),
     // fallback to the latest times from the tracked branch
     { branch: trackedBranch, jobName: PIPELINES.ON_MERGE },
     // finally fallback to the latest times from the main branch in case this branch is brand new

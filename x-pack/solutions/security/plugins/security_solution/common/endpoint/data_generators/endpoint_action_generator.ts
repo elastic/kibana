@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
@@ -41,6 +43,7 @@ import {
   type ResponseActionUploadOutputContent,
   type ResponseActionUploadParameters,
   type WithAllKeys,
+  type KilledProcessDescendant,
 } from '../types';
 import {
   DEFAULT_EXECUTE_ACTION_TIMEOUT,
@@ -217,6 +220,91 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         type: 'json',
         content: {
           code: 'ra_cancel_success',
+        },
+      } as typeof output;
+    }
+
+    if (command === 'kill-process' && !output) {
+      output = {
+        type: 'json',
+        content: {
+          code: overrides.error
+            ? 'ra_kill-process_error_not-found'
+            : 'ra_kill-process_success_done',
+          ...(!overrides.error
+            ? {
+                command: 'some_command.exe',
+                pid: 234,
+                descendants: [
+                  {
+                    pid: 456,
+                    parent_pid: 234,
+                    entity_id: 'ksuqwn8364fnbks.456',
+                    parent_entity_id: 'ksuqwn8364fnbks.234',
+                    command: '456_command.exe',
+                    was_killed: true,
+                  },
+                  {
+                    pid: 567,
+                    parent_pid: 456,
+                    entity_id: 'ksuqwn8364fnbks.567',
+                    parent_entity_id: 'ksuqwn8364fnbks.456',
+                    command: '567_command.exe',
+                    was_killed: true,
+                  },
+                  {
+                    pid: 5671,
+                    parent_pid: 567,
+                    entity_id: 'ksuqwn8364fnbks.5671',
+                    parent_entity_id: 'ksuqwn8364fnbks.567',
+                    command: '5671_command.exe',
+                    was_killed: true,
+                  },
+                  {
+                    pid: 56711,
+                    parent_pid: 5671,
+                    entity_id: 'ksuqwn8364fnbks.56711',
+                    parent_entity_id: 'ksuqwn8364fnbks.5671',
+                    command: '56711_command.exe',
+                    was_killed: true,
+                  },
+                  {
+                    pid: 56712,
+                    parent_pid: 5671,
+                    entity_id: 'ksuqwn8364fnbks.56712',
+                    parent_entity_id: 'ksuqwn8364fnbks.5671',
+                    command: '56712_command.exe',
+                    was_killed: true,
+                  },
+                  {
+                    pid: 654,
+                    parent_pid: 234,
+                    entity_id: 'ksuqwn8364fnbks.654',
+                    parent_entity_id: 'ksuqwn8364fnbks.234',
+                    command: '654_command.exe',
+                    was_killed: false,
+                    error: 'process is protected',
+                  },
+                ],
+              }
+            : {}),
+        },
+      } as typeof output;
+    }
+
+    if (command === 'suspend-process' && !output) {
+      output = {
+        type: 'json',
+        content: {
+          code: overrides.error
+            ? 'ra_suspend-process_error_not-found'
+            : 'ra_suspend-process_success_done',
+          ...(!overrides.error
+            ? {
+                command: 'some_command.exe',
+                pid: 234,
+              }
+            : {}),
         },
       } as typeof output;
     }
@@ -632,6 +720,76 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
   randomN(max: number): number {
     return super.randomN(max);
+  }
+
+  /**
+   * Generate a random list of processes descendants
+   * @param initialParentPid
+   * @param nLevels the number of child levels
+   * @param maxChildProcesses - the max number of processes per level.
+   */
+  createProcessDescendants(
+    initialParentPid: number = this.randomN(1000),
+    nLevels: number = 5,
+    maxChildProcesses: number = 3
+  ): KilledProcessDescendant[] {
+    const descendants: KilledProcessDescendant[] = [];
+    const possibleErrors = [
+      'process not found',
+      'process cannot be killed',
+      'process failed to be killed',
+    ];
+    let pidSuffix = 1;
+
+    const generateProcess = (
+      parentPid: number,
+      parentEntityId: string = this.randomString(50)
+    ): KilledProcessDescendant => {
+      const wasKilled = this.randomChoice([true, false]);
+
+      return {
+        pid: Number(this.randomN(5000).toString().concat(String(pidSuffix++))),
+        parent_pid: parentPid,
+        entity_id: this.randomString(50),
+        parent_entity_id: parentEntityId,
+        command: this.randomFileSystemPath(this.randomN(80)),
+        was_killed: wasKilled,
+        error: wasKilled ? undefined : this.randomChoice(possibleErrors),
+      };
+    };
+
+    const queue: { parentPID: number; parentEntity: string; levels: number }[] = [
+      { parentPID: initialParentPid, parentEntity: this.randomString(50), levels: nLevels },
+    ];
+
+    while (queue.length > 0) {
+      const { parentPID, parentEntity, levels } = queue.shift()!;
+      const process = generateProcess(parentPID, parentEntity);
+      descendants.push(process);
+
+      const remainingLevels = levels - 1;
+      if (remainingLevels > 0) {
+        queue.push({
+          parentPID: process.pid!,
+          parentEntity: process.entity_id!,
+          levels: remainingLevels,
+        });
+
+        // Now add some siblings at this process level with them having random levels
+        // themselves that does not exceed the next level depth
+        queue.push(
+          ...this.randomArray(maxChildProcesses, () => {
+            return {
+              parentPID: process.pid!,
+              parentEntity: process.entity_id!,
+              levels: this.randomN(remainingLevels),
+            };
+          })
+        );
+      }
+    }
+
+    return descendants;
   }
 
   randomResponseActionProcesses(n?: number): ProcessesEntry[] {

@@ -44,7 +44,7 @@ export class NightshiftPlugin
 
     coreSetup.application.register({
       id: NIGHTSHIFT_APP_ID,
-      title: i18n.translate('xpack.observability.nightshift.appTitle', {
+      title: i18n.translate('xpack.nightshift.appTitle', {
         defaultMessage: 'Nightshift',
       }),
       appRoute: NIGHTSHIFT_APP_ROUTE,
