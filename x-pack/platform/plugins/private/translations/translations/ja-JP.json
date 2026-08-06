@@ -18557,7 +18557,6 @@
     "xpack.csp.rules.rulePageHeader.pageHeaderTitle": "{benchmarkName} {benchmarkVersion} - ルール",
     "xpack.csp.rules.rulesFlyout.ruleStateSwitchTitle": "有効",
     "xpack.csp.rules.rulesFlyout.ruleStateSwitchTooltip": "ルールを無効化すると、関連付けられた検出ルールとアラートも無効化されます。もう一度有効化しても、自動的に再有効化されません",
-    "xpack.csp.rules.rulesPageHeader.benchmarkRulesButtonLabel": "ベンチマーク",
     "xpack.csp.rules.rulesTable.bulkActionsOptionTitle": "オプション",
     "xpack.csp.rules.rulesTable.cisSectionColumnLabel": "CISセクション",
     "xpack.csp.rules.rulesTable.clearSelectionOption": "選択した項目をクリア",

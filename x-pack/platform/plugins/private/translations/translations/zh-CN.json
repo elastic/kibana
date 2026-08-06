@@ -18565,7 +18565,6 @@
     "xpack.csp.rules.rulePageHeader.pageHeaderTitle": "{benchmarkName} {benchmarkVersion} - 规则",
     "xpack.csp.rules.rulesFlyout.ruleStateSwitchTitle": "已启用",
     "xpack.csp.rules.rulesFlyout.ruleStateSwitchTooltip": "禁用规则还会禁用其关联的检测规则和告警。再次启用该规则不会自动重新启用关联检测规则和告警",
-    "xpack.csp.rules.rulesPageHeader.benchmarkRulesButtonLabel": "基准",
     "xpack.csp.rules.rulesTable.bulkActionsOptionTitle": "选项",
     "xpack.csp.rules.rulesTable.cisSectionColumnLabel": "CIS 部分",
     "xpack.csp.rules.rulesTable.clearSelectionOption": "清除所选内容",

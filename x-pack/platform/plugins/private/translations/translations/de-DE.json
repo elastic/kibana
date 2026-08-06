@@ -18504,7 +18504,6 @@
     "xpack.csp.rules.rulePageHeader.pageHeaderTitle": "{benchmarkName} {benchmarkVersion} - Regeln",
     "xpack.csp.rules.rulesFlyout.ruleStateSwitchTitle": "Aktiviert",
     "xpack.csp.rules.rulesFlyout.ruleStateSwitchTooltip": "Durch das Deaktivieren einer Regel werden auch die zugehörigen Erkennungsregeln und Alerts deaktiviert. Durch erneutes Aktivieren werden sie nicht automatisch wieder aktiviert.",
-    "xpack.csp.rules.rulesPageHeader.benchmarkRulesButtonLabel": "Benchmarks",
     "xpack.csp.rules.rulesTable.bulkActionsOptionTitle": "Optionen",
     "xpack.csp.rules.rulesTable.cisSectionColumnLabel": "CIS-Bereich",
     "xpack.csp.rules.rulesTable.clearSelectionOption": "Auswahl löschen",

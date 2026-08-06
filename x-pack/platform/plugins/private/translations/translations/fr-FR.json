@@ -18468,7 +18468,6 @@
     "xpack.csp.rules.rulePageHeader.pageHeaderTitle": "{benchmarkName} {benchmarkVersion} – Règles",
     "xpack.csp.rules.rulesFlyout.ruleStateSwitchTitle": "Activé",
     "xpack.csp.rules.rulesFlyout.ruleStateSwitchTooltip": "Le fait de désactiver une règle désactive également les règles et alertes de détection qui lui sont associées. Celles-ci ne seront pas automatiquement réactivées si vous réactivez la règle.",
-    "xpack.csp.rules.rulesPageHeader.benchmarkRulesButtonLabel": "Benchmarks",
     "xpack.csp.rules.rulesTable.bulkActionsOptionTitle": "Options",
     "xpack.csp.rules.rulesTable.cisSectionColumnLabel": "Section CIS",
     "xpack.csp.rules.rulesTable.clearSelectionOption": "Effacer la sélection",
