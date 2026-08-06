@@ -196,7 +196,7 @@ Key rules:
 - **Parallelize when possible** — use `spaceTest` + `scoutSpace` for worker-isolated spaces
 - **Test fixture** for per-test isolated setup; **Worker fixture** for shared setup
 - **Page objects** encapsulate selectors and actions; assertions stay in specs
-- **EUI test helpers** — drive EUI components through `page.components.*` (e.g. `page.components.comboBox(testSubj)`, `page.components.dataGrid(testSubj)`); do not use the deprecated `EuiXxxWrapper` classes
+- **EUI test helpers** — drive EUI components through the `page.components` fixture (e.g. `page.components.comboBox(testSubj)`, `page.components.dataGrid(testSubj)`); Scout pre-binds them to the page, so don't import from `@elastic/eui-test-helpers` directly
 - **All created data must be cleaned up** — see Step 3b
 
 ### Step 5: Review and verify `[low freedom — mandatory checklist]`
