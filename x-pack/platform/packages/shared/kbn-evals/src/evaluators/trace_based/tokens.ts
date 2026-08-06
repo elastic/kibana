@@ -87,19 +87,22 @@ export function createCachedTokensEvaluator({
         | STATS 
         cached_tokens = SUM(TO_LONG(attributes.gen_ai.usage.cache_read.input_tokens)),
         input_tokens = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens))`,
+      // A provider that supports caching reports the attribute as 0 on a miss, which sums to 0 and
+      // scores normally. Missing from every span means the provider does not report caching at all,
+      // so there is no measurement to record and a 0 would misreport it as a fully missed cache.
+      isNotReported: (response) => {
+        const { columns, values } = response;
+        const row = values[0];
+        const cachedTokens = row[columns.findIndex((col) => col.name === 'cached_tokens')];
+        const inputTokens = row[columns.findIndex((col) => col.name === 'input_tokens')];
+
+        return cachedTokens == null && inputTokens != null;
+      },
       extractResult: (response) => {
         const { columns, values } = response;
         const row = values[0];
         const cachedTokensIdx = columns.findIndex((col) => col.name === 'cached_tokens');
-        const inputTokensIdx = columns.findIndex((col) => col.name === 'input_tokens');
-        const cachedTokens = row[cachedTokensIdx];
-
-        if (cachedTokens !== null && cachedTokens !== undefined) {
-          return cachedTokens;
-        }
-
-        const inputTokens = row[inputTokensIdx];
-        return inputTokens === null || inputTokens === undefined ? null : 0;
+        return row[cachedTokensIdx];
       },
       isResultValid: (result) => result !== null,
     },

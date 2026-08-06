@@ -55,13 +55,23 @@ describe('createCachedTokensEvaluator', () => {
     expect(mockEsClient.esql.query as jest.Mock).toHaveBeenCalledTimes(1);
   });
 
-  it('scores 0 without retrying when the trace exists but reports no cached tokens', async () => {
-    mockResponse([[null, 4000]]);
+  it('scores a reported cache miss as 0', async () => {
+    mockResponse([[0, 4000]]);
 
     const result = await evaluate();
 
     expect(result.score).toBe(0);
     expect(result.label).toBeUndefined();
+    expect(mockEsClient.esql.query as jest.Mock).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports no score without retrying when the provider never reports cached tokens', async () => {
+    mockResponse([[null, 4000]]);
+
+    const result = await evaluate();
+
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('unavailable');
     expect(mockEsClient.esql.query as jest.Mock).toHaveBeenCalledTimes(1);
     expect(mockLog.error).not.toHaveBeenCalled();
     expect(mockLog.warning).not.toHaveBeenCalled();

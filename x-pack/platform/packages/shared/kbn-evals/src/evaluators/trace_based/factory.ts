@@ -16,12 +16,20 @@ interface EsqlResponse {
   values: any[][];
 }
 
+// Returned by `fetchStats` when the metric is not measurable for this trace, to keep the
+// "no value" case distinct from a legitimate score.
+const NOT_REPORTED = Symbol('notReported');
+
 export interface TraceBasedEvaluatorConfig {
   name: string;
   buildQuery: (traceId: string) => string;
   extractResult: (response: EsqlResponse) => number | null;
   // Optional validation for the extracted result. Return false to signal the trace data looks incomplete, which triggers a retry
   isResultValid?: (result: number | null) => boolean;
+  // Optional check for a trace that is present but never emitted this metric, which no amount of
+  // retrying will produce. Reported as an unscored result so aggregations exclude it, rather than
+  // scored as a zero the provider never measured.
+  isNotReported?: (response: EsqlResponse) => boolean;
 }
 
 export function createTraceBasedEvaluator({
@@ -33,7 +41,7 @@ export function createTraceBasedEvaluator({
   log: ToolingLog;
   config: TraceBasedEvaluatorConfig;
 }): Evaluator {
-  const { name, buildQuery, extractResult, isResultValid } = config;
+  const { name, buildQuery, extractResult, isResultValid, isNotReported } = config;
 
   return {
     evaluate: async ({ output }) => {
@@ -61,7 +69,7 @@ export function createTraceBasedEvaluator({
 
       let lastResult: number | null | undefined;
 
-      async function fetchStats(): Promise<number> {
+      async function fetchStats(): Promise<number | typeof NOT_REPORTED> {
         const query = buildQuery(traceId);
         const response = (await traceEsClient.esql.query({ query })) as unknown as EsqlResponse;
 
@@ -69,6 +77,10 @@ export function createTraceBasedEvaluator({
 
         if (!values || values.length === 0) {
           throw new Error(`No data found for trace`);
+        }
+
+        if (isNotReported?.(response)) {
+          return NOT_REPORTED;
         }
 
         const result = extractResult(response);
@@ -94,6 +106,14 @@ export function createTraceBasedEvaluator({
             );
           },
         });
+
+        if (score === NOT_REPORTED) {
+          return {
+            score: null,
+            label: 'unavailable',
+            explanation: `${name} was not reported for trace ${traceId}`,
+          };
+        }
 
         return {
           score,
