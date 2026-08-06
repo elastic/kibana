@@ -97,6 +97,7 @@ export function ProjectPickerListItemTagsPopover({
                     {...(state.isReadOnly
                       ? {
                           iconType: 'empty',
+                          color: 'default',
                         }
                       : {
                           iconSide: 'right',
