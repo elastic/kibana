@@ -64,7 +64,7 @@ describe('headers', () => {
     );
     expect(result.options.headers).toEqual({
       'cache-control': 'public, max-age=31536000, immutable',
-      'content-type': 'application/javascript; charset=utf-8',
+      'content-type': 'text/javascript; charset=utf-8',
     });
   });
 
@@ -81,7 +81,7 @@ describe('headers', () => {
     );
     expect(result.options.headers).toEqual({
       'cache-control': 'must-revalidate',
-      'content-type': 'application/javascript; charset=utf-8',
+      'content-type': 'text/javascript; charset=utf-8',
       etag: expect.stringMatching(/^[a-f0-9]{64}-\/public/i),
     });
   });

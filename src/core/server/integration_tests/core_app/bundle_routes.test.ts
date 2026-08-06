@@ -92,7 +92,7 @@ describe('bundle routes', () => {
       .expect(200);
 
     const actualFile = await readFile(resolve(fooPluginFixture, 'plugin.js'));
-    expect(response.get('content-type')).toEqual('application/javascript; charset=utf-8');
+    expect(response.get('content-type')).toEqual('text/javascript; charset=utf-8');
     expect(actualFile.toString('utf8')).toEqual(response.text);
   });
 
@@ -141,7 +141,7 @@ describe('bundle routes', () => {
       .expect(200);
 
     expect(response.get('content-encoding')).toEqual('gzip');
-    expect(response.get('content-type')).toEqual('application/javascript; charset=utf-8');
+    expect(response.get('content-type')).toEqual('text/javascript; charset=utf-8');
 
     const actualFile = await readFile(resolve(fooPluginFixture, 'gzip_chunk.js'));
     expect(actualFile.toString('utf8')).toEqual(response.text);
