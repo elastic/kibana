@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData } from '../fixtures';
+import { spaceTest, testData } from '../fixtures';
 
 spaceTest.describe(
   'Lens metric trendline on dashboard (ES|QL)',
