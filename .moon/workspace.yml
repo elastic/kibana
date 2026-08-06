@@ -1,5 +1,5 @@
 # https://moonrepo.dev/docs/config/workspace
-$schema: https://moonrepo.dev/schemas/workspace.json
+$schema: https://moonrepo.dev/schemas/v2/workspace.json
 
 projects:
   # Glob-based discovery skips dotfile directories, so `.buildkite` is registered
