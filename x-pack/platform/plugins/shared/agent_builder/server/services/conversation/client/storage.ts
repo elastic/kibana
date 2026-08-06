@@ -31,7 +31,23 @@ const storageSettings = {
       title: types.text({}),
       created_at: types.date({}),
       updated_at: types.date({}),
-      conversation_rounds: types.object({ dynamic: false, properties: {} }),
+      conversation_rounds: types.object({
+        dynamic: false,
+        properties: {
+          feedback: types.object({
+            dynamic: false,
+            properties: {
+              vote: types.keyword({}),
+              chips: types.keyword({}),
+              comment: types.text({}),
+              submitted_at: types.date({}),
+              connector_id: types.keyword({}),
+              model: types.keyword({}),
+              trace_id: types.keyword({}),
+            },
+          }),
+        },
+      }),
       attachments: types.object({ dynamic: false, properties: {} }),
       state: types.object({ dynamic: false, properties: {} }),
       status: types.keyword({}),
