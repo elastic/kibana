@@ -9,6 +9,8 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { initialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 import { AlertDescription } from './alert_description';
 import {
   ALERT_DESCRIPTION_DETAILS_TEST_ID,
@@ -16,13 +18,18 @@ import {
   RULE_SUMMARY_BUTTON_TEST_ID,
 } from './test_ids';
 
-const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
+jest.mock('../../../../common/components/user_privileges');
+
+const createMockHit = (flattened: DataTableRecord['flattened'], index = ''): DataTableRecord =>
   ({
     id: '1',
-    raw: {},
+    raw: { _index: index },
     flattened,
     isAnchor: false,
   } as DataTableRecord);
+
+const PREVIEW_INDEX = '.preview.alerts-security.alerts-default';
+const REMOTE_INDEX = 'remote_cluster:alerts';
 
 const alertHitWithDescription = createMockHit({
   'event.kind': 'signal',
@@ -41,6 +48,16 @@ const documentHit = createMockHit({
   'some.other.field': 'value',
 });
 
+const previewAlertHit = createMockHit(
+  { 'event.kind': 'signal', 'kibana.alert.rule.uuid': '123' },
+  PREVIEW_INDEX
+);
+
+const remoteAlertHit = createMockHit(
+  { 'event.kind': 'signal', 'kibana.alert.rule.uuid': '123' },
+  REMOTE_INDEX
+);
+
 const renderDescription = (props: Parameters<typeof AlertDescription>[0]) =>
   render(
     <IntlProvider locale="en">
@@ -51,6 +68,16 @@ const renderDescription = (props: Parameters<typeof AlertDescription>[0]) =>
 const NO_DATA_MESSAGE = "There's no description for this rule.";
 
 describe('<AlertDescription />', () => {
+  beforeEach(() => {
+    jest.mocked(useUserPrivileges).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: true, edit: false },
+      },
+    });
+  });
+
   it('should render rule title and description when hit is an alert with description', () => {
     const { getByTestId } = renderDescription({ hit: alertHitWithDescription });
 
@@ -84,11 +111,38 @@ describe('<AlertDescription />', () => {
     expect(onShowRuleSummary).toHaveBeenCalledTimes(1);
   });
 
-  it('should render rule summary button as disabled when ruleSummaryDisabled is true', () => {
+  it('should render rule summary button as disabled for a rule preview document', () => {
+    const { getByTestId } = renderDescription({
+      hit: previewAlertHit,
+      onShowRuleSummary: jest.fn(),
+    });
+
+    expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toHaveAttribute('disabled');
+  });
+
+  it('should render rule summary button as disabled when user cannot read rules', () => {
+    jest.mocked(useUserPrivileges).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: false, edit: false },
+      },
+    });
+
     const { getByTestId } = renderDescription({
       hit: alertHitWithDescription,
       onShowRuleSummary: jest.fn(),
-      ruleSummaryDisabled: true,
+    });
+
+    expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toHaveAttribute('disabled');
+  });
+
+  it('should render rule summary button as disabled for a remote document', () => {
+    const { getByTestId } = renderDescription({
+      hit: remoteAlertHit,
+      onShowRuleSummary: jest.fn(),
     });
 
     expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toBeInTheDocument();
