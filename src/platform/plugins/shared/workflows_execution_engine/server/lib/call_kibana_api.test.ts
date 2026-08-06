@@ -93,13 +93,23 @@ const UIAM_ATTESTATION_HEADER = 'x-some-internal-caller-attestation';
 
 const mockGetAttestationHeaders = jest.fn();
 
-function createCoreStart({ uiamAttestation }: { uiamAttestation?: string } = {}): CoreStart {
+function createCoreStart({
+  uiamAttestation,
+  serverBasePath = '',
+}: {
+  uiamAttestation?: string;
+  serverBasePath?: string;
+} = {}): CoreStart {
   if (uiamAttestation) {
     mockGetAttestationHeaders.mockReturnValue({ [UIAM_ATTESTATION_HEADER]: uiamAttestation });
   }
 
   return {
     http: {
+      basePath: {
+        serverBasePath,
+        prepend: jest.fn((path: string) => `${serverBasePath}${path}`),
+      },
       selfClient: { asScoped: mockAsScoped },
     },
     security: {
@@ -143,6 +153,66 @@ describe('callKibanaApi', () => {
     expect(options.method).toBe('GET');
     expect(options.query).toEqual({ perPage: 20, owner: 'cases', skip: undefined });
     expect(options.body).toBeUndefined();
+  });
+
+  it('includes the configured server base path in loopback requests', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      {
+        fakeRequest: createFakeRequest(),
+        coreStart: createCoreStart({ serverBasePath: '/my-base-path' }),
+      },
+      {
+        method: 'GET',
+        path: '/api/status',
+      }
+    );
+
+    expect(mockSelfFetch.mock.calls[0][0]).toBe('/my-base-path/api/status');
+  });
+
+  it('delegates server base path resolution to Core', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+    const coreStart = createCoreStart({ serverBasePath: '/configured-base-path' });
+    const prependBasePath = coreStart.http.basePath.prepend as jest.Mock;
+    prependBasePath.mockReturnValue('/core-resolved-base-path/api/status');
+
+    await callKibanaApi(
+      {
+        fakeRequest: createFakeRequest(),
+        coreStart,
+      },
+      {
+        method: 'GET',
+        path: '/api/status',
+      }
+    );
+
+    expect(prependBasePath).toHaveBeenCalledWith('/api/status');
+    expect(mockSelfFetch.mock.calls[0][0]).toBe('/core-resolved-base-path/api/status');
+  });
+
+  it('places a non-default space after the configured server base path', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      {
+        fakeRequest: createFakeRequest(),
+        coreStart: createCoreStart({ serverBasePath: '/my-base-path' }),
+        spaceId: 'my-space',
+      },
+      {
+        method: 'POST',
+        path: '/api/detection_engine/signals/assignees',
+        body: { assignees: ['elastic'] },
+      }
+    );
+
+    expect(mockSelfFetch.mock.calls[0][0]).toBe(
+      '/my-base-path/s/my-space/api/detection_engine/signals/assignees'
+    );
+    expect(lastFetchOptions().body).toEqual({ assignees: ['elastic'] });
   });
 
   // The self client resolves the base URL itself, and the workflow fake request has no base path, so
