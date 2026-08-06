@@ -58,7 +58,7 @@ export const BriefPage: React.FC = () => {
 
   const investigations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
 
-  const queueRows = useMemo(
+  const sortedEvents = useMemo(
     () =>
       investigations
         .filter(isQueueRow)
@@ -78,19 +78,19 @@ export const BriefPage: React.FC = () => {
       investigate: 0,
       tune: 0,
     };
-    for (const investigation of queueRows) {
+    for (const investigation of sortedEvents) {
       const action = investigation.recommendedAction;
       if (action && action in counts) {
         counts[action as RecommendedAction] += 1;
       }
     }
     return counts;
-  }, [queueRows]);
+  }, [sortedEvents]);
 
   const surfaces = useMemo(() => {
     const seen = new Set<string>();
     const labels: string[] = [];
-    for (const investigation of queueRows) {
+    for (const investigation of sortedEvents) {
       const surface = investigation.affectedSurface?.trim();
       if (surface && !seen.has(surface)) {
         seen.add(surface);
@@ -98,34 +98,34 @@ export const BriefPage: React.FC = () => {
       }
     }
     return labels;
-  }, [queueRows]);
+  }, [sortedEvents]);
 
-  const filtered = useMemo(
+  const filteredQueueItems = useMemo(
     () =>
-      queueRows.filter((investigation) => {
+      sortedEvents.filter((investigation) => {
         if (!matchesBucket(investigation, selectedBucket)) return false;
         if (surfaceFilter && investigation.affectedSurface !== surfaceFilter) return false;
         return true;
       }),
-    [queueRows, selectedBucket, surfaceFilter]
+    [sortedEvents, selectedBucket, surfaceFilter]
   );
 
-  const grouped = useMemo(() => {
+  const groupedBriefingItems = useMemo(() => {
     const groups: Array<{
       id: RecommendedAction;
       label: string;
       items: Investigation[];
     }> = [];
     for (const bucket of BRIEF_CONTAINER_BUCKETS) {
-      const items = filtered.filter(
+      const items = filteredQueueItems.filter(
         (investigation) => investigation.recommendedAction === bucket.id
       );
-      if (items.length > 0) {
+      if (items.length >= 0) {
         groups.push({ ...bucket, items });
       }
     }
     return groups;
-  }, [filtered]);
+  }, [filteredQueueItems]);
 
   return (
     <PndPageSection restrictWidth="900px">
@@ -138,7 +138,7 @@ export const BriefPage: React.FC = () => {
                 font-weight: 700;
               `}
             >
-              {i18n.greetingEmphasis(queueRows.length)}
+              {i18n.greetingEmphasis(sortedEvents.length)}
             </span>
           </>
         }
@@ -178,7 +178,7 @@ export const BriefPage: React.FC = () => {
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup
-            gutterSize="s"
+            gutterSize="m"
             wrap
             responsive={false}
             alignItems="center"
@@ -213,12 +213,12 @@ export const BriefPage: React.FC = () => {
 
       {error ? <EuiEmptyPrompt iconType="alert" title={<h2>{i18n.LOAD_ERROR}</h2>} /> : null}
 
-      {!isLoading && !error && filtered.length === 0 ? (
+      {!isLoading && !error && filteredQueueItems.length === 0 ? (
         <EuiEmptyPrompt iconType="visTagCloud" title={<h2>{i18n.EMPTY_BRIEFING_QUEUE}</h2>} />
       ) : null}
 
       {!isLoading && !error
-        ? grouped.map((group) => (
+        ? groupedBriefingItems.map((group) => (
             <BriefingContainer
               briefingId={group.id}
               briefingType={group.id as RecommendedAction}
