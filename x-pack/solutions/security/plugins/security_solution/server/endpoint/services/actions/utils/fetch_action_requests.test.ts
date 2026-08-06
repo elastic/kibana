@@ -508,7 +508,7 @@ describe('fetchActionRequests()', () => {
       expect(esClientMock.search).not.toHaveBeenCalled();
     });
 
-    it('should scope the search by originSpaceId instead of local integration policy ids', async () => {
+    it('should scope the search by originSpaceId or a locally visible integration policy', async () => {
       await fetchActionRequests(fetchOptions);
 
       expect(readEsClientMock.search).toHaveBeenCalledWith(
@@ -516,7 +516,23 @@ describe('fetchActionRequests()', () => {
           query: {
             bool: {
               must: [
-                { bool: { filter: { term: { originSpaceId: 'default' } } } },
+                {
+                  bool: {
+                    filter: {
+                      bool: {
+                        should: [
+                          { term: { originSpaceId: 'default' } },
+                          {
+                            terms: {
+                              'agent.policy.integrationPolicyId': expect.any(Array),
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
                 { bool: { filter: [] } },
               ],
             },
@@ -526,12 +542,12 @@ describe('fetchActionRequests()', () => {
       );
     });
 
-    it('should not resolve integration policy ids from Fleet, which cannot fan out', async () => {
+    it('should resolve integration policy ids from Fleet for the shared-policy case', async () => {
       await fetchActionRequests(fetchOptions);
 
       expect(
         fetchOptions.endpointService.getInternalFleetServices().packagePolicy.fetchAllItemIds
-      ).not.toHaveBeenCalled();
+      ).toHaveBeenCalled();
     });
 
     it('should exclude documents with no originSpaceId, which may belong to a named space on a linked project', async () => {
@@ -554,7 +570,23 @@ describe('fetchActionRequests()', () => {
           query: {
             bool: {
               must: [
-                { bool: { filter: { term: { originSpaceId: 'foo' } } } },
+                {
+                  bool: {
+                    filter: {
+                      bool: {
+                        should: [
+                          { term: { originSpaceId: 'foo' } },
+                          {
+                            terms: {
+                              'agent.policy.integrationPolicyId': expect.any(Array),
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
                 { bool: { filter: [] } },
               ],
             },
@@ -586,7 +618,19 @@ describe('fetchActionRequests()', () => {
                     filter: {
                       bool: {
                         should: [
-                          { term: { originSpaceId: 'bar' } },
+                          {
+                            bool: {
+                              should: [
+                                { term: { originSpaceId: 'bar' } },
+                                {
+                                  terms: {
+                                    'agent.policy.integrationPolicyId': expect.any(Array),
+                                  },
+                                },
+                              ],
+                              minimum_should_match: 1,
+                            },
+                          },
                           { term: { tags: ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted } },
                         ],
                         minimum_should_match: 1,
@@ -601,6 +645,61 @@ describe('fetchActionRequests()', () => {
         }),
         expect.anything()
       );
+    });
+
+    it('should include an action whose integration policy is visible in the active space even if its originSpaceId differs', async () => {
+      await fetchActionRequests(fetchOptions);
+
+      const [[{ query }]] = readEsClientMock.search.mock.calls as unknown as Array<
+        [
+          {
+            query: { bool: { must: Array<{ bool: { filter: { bool: { should: unknown[] } } } }> } };
+          }
+        ]
+      >;
+      const spaceFilter = query.bool.must[0].bool.filter as { bool: { should: unknown[] } };
+
+      expect(spaceFilter.bool.should).toEqual(
+        expect.arrayContaining([{ terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } }])
+      );
+    });
+
+    it('should include an action whose originSpaceId matches the active space', async () => {
+      await fetchActionRequests(fetchOptions);
+
+      const [[{ query }]] = readEsClientMock.search.mock.calls as unknown as Array<
+        [
+          {
+            query: { bool: { must: Array<{ bool: { filter: { bool: { should: unknown[] } } } }> } };
+          }
+        ]
+      >;
+      const spaceFilter = query.bool.must[0].bool.filter as { bool: { should: unknown[] } };
+
+      expect(spaceFilter.bool.should).toEqual(
+        expect.arrayContaining([{ term: { originSpaceId: 'default' } }])
+      );
+    });
+
+    it('should require at least one space-visibility condition, excluding actions matching neither', async () => {
+      await fetchActionRequests(fetchOptions);
+
+      const [[{ query }]] = readEsClientMock.search.mock.calls as unknown as Array<
+        [
+          {
+            query: {
+              bool: {
+                must: Array<{ bool: { filter: { bool: { minimum_should_match: number } } } }>;
+              };
+            };
+          }
+        ]
+      >;
+      const spaceFilter = query.bool.must[0].bool.filter as {
+        bool: { minimum_should_match: number };
+      };
+
+      expect(spaceFilter.bool.minimum_should_match).toBe(1);
     });
 
     describe('and the caller has no request identity', () => {

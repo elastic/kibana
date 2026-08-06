@@ -69,9 +69,13 @@ export const fetchActionRequestById = async <
   if (!actionRequest) {
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
   } else if (!bypassSpaceValidation && cpsRead) {
-    // The Fleet lookup below throws for an agent not enrolled locally, which would 404 every
-    // cross-project action, so visibility comes off the document. Strict: a missing `originSpaceId`
-    // cannot be told apart from a linked project's document here.
+    // Visibility is the OR of two rules. The document's own `originSpaceId` covers the fanned-in
+    // case, where the Fleet lookup would throw because the agent is not enrolled locally and would
+    // therefore 404 every cross-project action. The Fleet lookup is then still consulted as a
+    // fallback, because an integration policy shared into this space after the action was created
+    // makes that action visible here even though its `originSpaceId` names another space. This
+    // mirrors the list query in `fetch_action_requests.ts`; the two must agree or a row is listed
+    // and then 404s when opened.
     const actionTags = Array.isArray(actionRequest.tags)
       ? actionRequest.tags
       : actionRequest.tags
@@ -85,12 +89,36 @@ export const fetchActionRequestById = async <
       (isOrphanAction && (await fetchOrphanActionsSpaceId(endpointService)) === spaceId);
 
     if (!isVisibleInSpace) {
-      logger.debug(
-        () =>
-          `Action [${actionId}] with originSpaceId [${actionRequest.originSpaceId}] is not visible in space [${spaceId}]`
+      // originSpaceId does not match, but a policy shared into this space since the action was
+      // created should still make it visible (shared-policy case). Fall back to the Fleet check.
+      const integrationPolicyIds = (actionRequest.agent.policy ?? []).map(
+        ({ integrationPolicyId }) => integrationPolicyId
       );
 
-      throw new NotFoundError(`Action [${actionId}] not found`);
+      // An empty list would make Fleet's `matchAll: false` check vacuously pass, so the fallback is
+      // only attempted when the document actually names a policy
+      let fleetAllowed = false;
+
+      if (integrationPolicyIds.length > 0) {
+        try {
+          await endpointService.getInternalFleetServices(spaceId).ensureInCurrentSpace({
+            integrationPolicyIds,
+            options: { matchAll: false },
+          });
+          fleetAllowed = true;
+        } catch (err) {
+          // Not visible via a shared policy either, so both rules failed and the throw below stands
+        }
+      }
+
+      if (!fleetAllowed) {
+        logger.debug(
+          () =>
+            `Action [${actionId}] with originSpaceId [${actionRequest.originSpaceId}] is not visible in space [${spaceId}]`
+        );
+
+        throw new NotFoundError(`Action [${actionId}] not found`);
+      }
     }
   } else if (!bypassSpaceValidation) {
     if (!actionRequest.agent.policy || actionRequest.agent.policy.length === 0) {
