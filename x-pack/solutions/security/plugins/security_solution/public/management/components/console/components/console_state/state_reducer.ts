@@ -38,6 +38,12 @@ export const initiateState = (
     commandHistory: [],
     sidePanel: { show: null },
     footerContent: '',
+    // This interface will be set with real implementation in`console_state.tsx`
+    // once the store has been initialized
+    consoleApi: {
+      setInput: () => {},
+      setFocusOnInput: () => {},
+    },
     input: {
       leftOfCursorText: '',
       rightOfCursorText: '',

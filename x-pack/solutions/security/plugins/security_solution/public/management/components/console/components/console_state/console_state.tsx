@@ -6,7 +6,17 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import React, { useReducer, memo, createContext, useContext, useEffect, useCallback } from 'react';
+import React, {
+  useMemo,
+  useReducer,
+  memo,
+  createContext,
+  useContext,
+  useEffect,
+  useCallback,
+} from 'react';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import type { ConsoleProps } from '../..';
 import {
   useSaveInputHistoryToStorage,
   useStoredInputHistory,
@@ -18,7 +28,9 @@ import type { ConsoleDataState, ConsoleStore } from './types';
 
 const ConsoleStateContext = createContext<null | ConsoleStore>(null);
 
-type ConsoleStateProviderProps = PropsWithChildren<{}> & InitialStateInterface;
+type ConsoleStateProviderProps = PropsWithChildren<{}> &
+  InitialStateInterface &
+  Pick<ConsoleProps, 'apiRef'>;
 
 /**
  * A Console wide data store for internal state management between inner components
@@ -32,11 +44,13 @@ export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
     dataTestSubj,
     storagePrefix,
     managedKey,
+    apiRef,
     children,
   }) => {
     const [getConsoleState, storeConsoleState] = useWithManagedConsoleState(managedKey);
     const storedInputHistoryData = useStoredInputHistory(storagePrefix);
     const saveInputHistoryData = useSaveInputHistoryToStorage(storagePrefix);
+    const isMounted = useIsMounted();
 
     const stateInitializer = useCallback(
       (stateInit: InitialStateInterface): ConsoleDataState => {
@@ -57,6 +71,32 @@ export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
       { commands, scrollToBottom, keyCapture, HelpComponent, dataTestSubj, storagePrefix },
       stateInitializer
     );
+
+    useMemo(() => {
+      state.consoleApi.setInput = (command: string) => {
+        if (isMounted()) {
+          dispatch({
+            type: 'updateInputTextEnteredState',
+            payload: {
+              leftOfCursorText: command,
+              rightOfCursorText: '',
+            },
+          });
+        }
+      };
+
+      state.consoleApi.setFocusOnInput = () => {
+        if (isMounted()) {
+          dispatch({ type: 'addFocusToKeyCapture' });
+        }
+      };
+    }, [isMounted, state.consoleApi]);
+
+    useMemo(() => {
+      if (isMounted() && apiRef) {
+        Object.assign((apiRef.current = apiRef.current ?? {}), state.consoleApi);
+      }
+    }, [apiRef, isMounted, state.consoleApi]);
 
     // Anytime `state` changes AND the console is under ConsoleManager's control, then
     // store the console's state to ConsoleManager. This is what enables a console to be

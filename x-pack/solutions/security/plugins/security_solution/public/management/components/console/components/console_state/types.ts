@@ -15,6 +15,7 @@ import type {
   CommandDefinition,
   CommandExecutionComponent,
   CommandArgDefinition,
+  ConsoleApi,
 } from '../../types';
 
 export interface ConsoleDataState {
@@ -34,6 +35,9 @@ export interface ConsoleDataState {
    * List of commands entered by the user and being shown in the UI
    */
   commandHistory: CommandHistoryItem[];
+
+  /** The console external API */
+  consoleApi: ConsoleApi;
 
   sidePanel: {
     show: null | 'help'; // will have other values in the future

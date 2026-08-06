@@ -113,6 +113,7 @@ export const Console = memo<ConsoleProps>(
     TitleComponent,
     storagePrefix,
     managedKey,
+    apiRef,
     ...commonProps
   }) => {
     const scrollingViewport = useRef<HTMLDivElement | null>(null);
@@ -155,6 +156,7 @@ export const Console = memo<ConsoleProps>(
         HelpComponent={HelpComponent}
         dataTestSubj={commonProps['data-test-subj']}
         storagePrefix={storagePrefix}
+        apiRef={apiRef}
       >
         <ConsoleWindow {...commonProps}>
           <EuiFlexGroup className="layout" gutterSize="none" responsive={false}>
