@@ -8,13 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { ListType } from '@kbn/securitysolution-lists-common/api';
-import {
-  ExceptionListItem,
-  ExceptionListItemDescription,
-  ExceptionListItemName,
-  ExceptionListItemOsTypeArray,
-  ExceptionListItemTags,
-} from '../api';
+import { ExceptionListItem, ExceptionListItemOsTypeArray } from '../api';
 
 /**
  * Entry operators, mirroring the operator labels of the exceptions UI. Each
@@ -174,11 +168,11 @@ export const OVERWRITE_REQUIRES_ITEM_ID_MESSAGE = i18n.translate(
 );
 
 export const exceptionItemBaseSchema = z.object({
-  name: ExceptionListItemName,
-  description: ExceptionListItemDescription,
+  name: z.string().min(1).max(256),
+  description: z.string().max(2048),
   entries: entriesArraySchema,
   os_types: ExceptionListItemOsTypeArray.optional(),
-  tags: ExceptionListItemTags.optional(),
+  tags: z.array(z.string().min(1).max(256)).max(50).optional(),
   // ISO 8601 datetime after which the exception no longer applies. Kept a
   // plain string so template expressions pass workflow validation; the
   // exceptions API enforces the format.
