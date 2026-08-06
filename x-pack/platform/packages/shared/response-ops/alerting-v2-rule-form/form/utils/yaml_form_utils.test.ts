@@ -154,6 +154,18 @@ describe('yaml_form_utils', () => {
       expect(result).not.toHaveProperty('state_transition');
     });
 
+    it('excludes state_transition for signal even when form state still holds it', () => {
+      const formValues: FormValues = {
+        ...defaultTestFormValues,
+        kind: 'signal',
+        stateTransition: { pendingCount: 3, recoveringCount: 1 },
+      };
+
+      const result = formValuesToYamlObject(formValues);
+
+      expect(result).not.toHaveProperty('state_transition');
+    });
+
     it('excludes empty grouping fields array', () => {
       const formValues: FormValues = {
         ...defaultTestFormValues,

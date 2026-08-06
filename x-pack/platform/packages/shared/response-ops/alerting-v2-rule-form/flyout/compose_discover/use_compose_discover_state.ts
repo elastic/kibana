@@ -18,13 +18,13 @@ import type {
 
 export const getStepIds = (isAlert: boolean): StepId[] =>
   isAlert
-    ? ['alertCondition', 'recoveryCondition', 'details', 'notifications']
-    : ['alertCondition', 'details'];
+    ? ['alertCondition', 'outcome', 'details', 'notifications']
+    : ['alertCondition', 'outcome', 'details'];
 
 export const getBuilderStepIds = (isAlert: boolean): StepId[] =>
   isAlert
-    ? ['builderCondition', 'recoveryCondition', 'details', 'notifications']
-    : ['builderCondition', 'details'];
+    ? ['builderCondition', 'outcome', 'details', 'notifications']
+    : ['builderCondition', 'outcome', 'details'];
 
 export interface InitialStateConfig {
   mode: ComposeDiscoverMode;
@@ -68,7 +68,7 @@ export const createInitialState = ({
  *
  * create/edit/clone + alertCondition + manualSplitEnabled → ['base', 'alert']
  * create/edit/clone + alertCondition                      → undefined (unified editor; create runs heuristic on Apply)
- * isAlert + recoveryCondition  + custom                 → ['recovery']
+ * isAlert + outcome + custom                              → ['recovery']
  * everything else                                         → undefined (single editor)
  */
 export function getSandboxTabs(
@@ -87,7 +87,7 @@ export function getSandboxTabs(
     }
     return ['base', 'alert'];
   }
-  if (stepId === 'recoveryCondition' && state.recoveryType === 'custom') return ['recovery'];
+  if (stepId === 'outcome' && state.recoveryType === 'custom') return ['recovery'];
   return undefined;
 }
 
@@ -116,12 +116,12 @@ export function reducer(
       };
     case 'KIND_CHANGE':
       // Reset manual split when switching kind — the unified query is rebuilt.
+      // Stay on the current step (Outcome owns mode selection); do not force the sandbox open.
       return action.kind === 'alert'
-        ? { ...state, step: 0, childOpen: true, activeTab: 'base', manualSplitEnabled: false }
+        ? { ...state, activeTab: 'base', manualSplitEnabled: false }
         : {
             ...state,
             recoveryType: 'default',
-            step: 0,
             activeTab: 'alert',
             manualSplitEnabled: false,
           };

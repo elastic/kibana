@@ -72,6 +72,10 @@ const CUSTOM_RECOVERY_QUERY: RuleQuery = {
   recovery: { segment: RECOVERY_SEGMENT },
 };
 
+const renderEsqlRecovery = (props: React.ComponentProps<typeof EsqlRecoveryContent>) => (
+  <EsqlRecoveryContent {...props} />
+);
+
 const renderRecoveryStep = (
   stateOverrides: Partial<ComposeDiscoverState> = {},
   queryOverride?: RuleQuery
@@ -84,17 +88,17 @@ const renderRecoveryStep = (
   const onRecoveryTypeChange = jest.fn();
   const services = createMockServices();
 
-  render(
+  const view = render(
     <RecoveryConditionStep
       state={state}
       dispatch={dispatch}
       onRecoveryTypeChange={onRecoveryTypeChange}
-      renderCustomRecovery={EsqlRecoveryContent}
+      renderCustomRecovery={renderEsqlRecovery}
     />,
     { wrapper: createComposeFormWrapper(queryOverride, services) }
   );
 
-  return { dispatch, state, onRecoveryTypeChange };
+  return { dispatch, state, onRecoveryTypeChange, view, services };
 };
 
 describe('RecoveryConditionStep', () => {
@@ -147,5 +151,25 @@ describe('RecoveryConditionStep', () => {
       step: state.step,
       isAlert: true,
     });
+  });
+
+  it('toggles custom recovery content without a hooks-order crash', () => {
+    const { view, dispatch, onRecoveryTypeChange } = renderRecoveryStep(
+      { recoveryType: 'default' },
+      CUSTOM_RECOVERY_QUERY
+    );
+
+    expect(() => {
+      view.rerender(
+        <RecoveryConditionStep
+          state={createState({ queryCommitted: true, recoveryType: 'custom' })}
+          dispatch={dispatch}
+          onRecoveryTypeChange={onRecoveryTypeChange}
+          renderCustomRecovery={renderEsqlRecovery}
+        />
+      );
+    }).not.toThrow();
+
+    expect(screen.getByTestId('composeDiscoverEditRecovery')).toBeInTheDocument();
   });
 });

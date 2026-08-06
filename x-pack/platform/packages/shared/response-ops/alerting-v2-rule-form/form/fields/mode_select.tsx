@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
+import {
+  EuiCheckableCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleKind } from '@kbn/alerting-v2-schemas';
 
@@ -14,87 +22,110 @@ interface ModeSelectProps {
   value: RuleKind;
   onChange: (kind: RuleKind) => void;
   disabled?: boolean;
-  compressed?: boolean;
+  /**
+   * When true, only the currently selected card is rendered (no radio interaction).
+   * Used in edit mode where kind is immutable.
+   */
+  readOnly?: boolean;
   'data-test-subj'?: string;
 }
 
 const LABEL_TEXT = i18n.translate('xpack.alertingV2.ruleForm.modeField.label', {
-  defaultMessage: 'Mode',
+  defaultMessage: "What's your goal?",
 });
 
 const ALERT_TITLE = i18n.translate('xpack.alertingV2.ruleForm.modeField.alert.title', {
-  defaultMessage: 'Alert',
+  defaultMessage: 'Detect and respond',
 });
 
 const SIGNAL_TITLE = i18n.translate('xpack.alertingV2.ruleForm.modeField.signal.title', {
-  defaultMessage: 'Signal',
+  defaultMessage: 'Collect evidence',
 });
 
 const ALERT_DESCRIPTION = i18n.translate('xpack.alertingV2.ruleForm.modeField.alert.description', {
   defaultMessage:
-    'Tracks a problem across state changes and can notify your team or trigger automated actions when the state changes. Choose this to monitor ongoing issues.',
+    'Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team.',
 });
 
 const SIGNAL_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleForm.modeField.signal.description',
   {
     defaultMessage:
-      'Records each match as a data point without lifecycle tracking or notifications. Choose this to capture activity for querying and investigation.',
+      'Matches are stored as queryable data points. No alerts, no notifications - just data.',
   }
 );
 
 const MODE_OPTIONS: Array<{
   value: RuleKind;
-  inputDisplay: string;
-  dropdownDisplay: React.ReactNode;
+  title: string;
+  description: string;
 }> = [
   {
     value: 'alert',
-    inputDisplay: ALERT_TITLE,
-    dropdownDisplay: (
-      <>
-        <strong>{ALERT_TITLE}</strong>
-        <EuiText size="s" color="subdued">
-          <p>{ALERT_DESCRIPTION}</p>
-        </EuiText>
-      </>
-    ),
+    title: ALERT_TITLE,
+    description: ALERT_DESCRIPTION,
   },
   {
     value: 'signal',
-    inputDisplay: SIGNAL_TITLE,
-    dropdownDisplay: (
-      <>
-        <strong>{SIGNAL_TITLE}</strong>
-        <EuiText size="s" color="subdued">
-          <p>{SIGNAL_DESCRIPTION}</p>
-        </EuiText>
-      </>
-    ),
+    title: SIGNAL_TITLE,
+    description: SIGNAL_DESCRIPTION,
   },
 ];
 
+const ModeCardLabel = ({ title, description }: { title: string; description: string }) => (
+  <>
+    <EuiText size="s">
+      <strong>{title}</strong>
+    </EuiText>
+    <EuiSpacer size="xs" />
+    <EuiText size="xs" color="subdued">
+      {description}
+    </EuiText>
+  </>
+);
+
 /**
  * Presentational Mode select. Switches a rule between `alert` (stateful lifecycle)
- * and `signal` (stateless detection) modes. Each option renders its title and a
- * description in the dropdown.
+ * and `signal` (stateless detection) modes. Uses radio-style checkable cards so the
+ * consequence of each mode is legible before the user commits.
  */
 export const ModeSelect = ({
   value,
   onChange,
   disabled = false,
-  compressed = false,
+  readOnly = false,
   'data-test-subj': dataTestSubj = 'ruleV2ModeSelect',
-}: ModeSelectProps) => (
-  <EuiFormRow label={LABEL_TEXT} fullWidth>
-    <EuiSuperSelect<RuleKind>
-      options={MODE_OPTIONS}
-      valueOfSelected={value}
-      onChange={onChange}
-      disabled={disabled}
-      compressed={compressed}
-      fullWidth
-      data-test-subj={dataTestSubj}
-    />
-  </EuiFormRow>
-);
+}: ModeSelectProps) => {
+  const radioGroupId = useGeneratedHtmlId({ prefix: 'ruleV2ModeSelect' });
+  const options = readOnly ? MODE_OPTIONS.filter((option) => option.value === value) : MODE_OPTIONS;
+
+  return (
+    <EuiFormRow label={LABEL_TEXT} fullWidth data-test-subj={dataTestSubj}>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
+        role="radiogroup"
+        aria-label={LABEL_TEXT}
+        id={radioGroupId}
+      >
+        {options.map((option) => {
+          const optionId = `${radioGroupId}-${option.value}`;
+          return (
+            <EuiFlexItem key={option.value} grow={false}>
+              <EuiCheckableCard
+                id={optionId}
+                data-test-subj={`${dataTestSubj}-${option.value}`}
+                label={<ModeCardLabel title={option.title} description={option.description} />}
+                checkableType="radio"
+                name={radioGroupId}
+                checked={value === option.value}
+                disabled={disabled || readOnly}
+                onChange={() => onChange(option.value)}
+              />
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
+    </EuiFormRow>
+  );
+};

@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useFormContext, useWatch } from 'react-hook-form';
+import { useWatch } from 'react-hook-form';
 import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type {
   ComposeDiscoverState,
@@ -22,13 +22,10 @@ import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
 import type { FormValues } from '../../../form/types';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
-import { ModeSelect } from '../../../form/fields/mode_select';
-import { AlertDelayField } from '../../../form/fields/alert_delay_field';
-import { NoDataStrategySelect } from '../../../form/fields/no_data_strategy_select';
 import { ScheduleField } from '../../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../../form/fields/lookback_window_field';
 import { AlertConditionStep } from './alert_condition_step';
-import { RecoveryConditionStep } from './recovery_condition_step';
+import { OutcomeStep } from './outcome_step';
 import { EsqlRecoveryContent } from './esql_recovery_content';
 import { DetailsAndArtifactsStep } from './details_and_artifacts_step';
 import { NotificationsStep } from './notifications_step';
@@ -71,16 +68,18 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     }),
     render: () => null,
   },
-  recoveryCondition: {
-    id: 'recoveryCondition',
-    title: i18n.translate('xpack.alertingV2.composeDiscover.recoveryCondition.stepTitle', {
-      defaultMessage: 'Recovery Condition',
+  outcome: {
+    id: 'outcome',
+    title: i18n.translate('xpack.alertingV2.composeDiscover.outcome.stepTitle', {
+      defaultMessage: 'Outcome',
     }),
     render: (props) => (
-      <RecoveryConditionStep
+      <OutcomeStep
         state={props.state}
         dispatch={props.dispatch}
         onRecoveryTypeChange={props.onRecoveryTypeChange}
+        onKindChange={props.onKindChange}
+        isEditing={props.isEditing}
         renderCustomRecovery={props.renderCustomRecovery}
       />
     ),
@@ -151,7 +150,14 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
     return base;
   });
 
-  const renderCustomRecovery = definition?.renderRecoveryStep ?? EsqlRecoveryContent;
+  /*
+   * Always return a render function that mounts via createElement. Passing the
+   * EsqlRecoveryContent FC itself and invoking it as a plain function would
+   * attribute its hooks to RecoveryConditionStep and crash when Custom recovery
+   * toggles on (more hooks than the previous render).
+   */
+  const renderCustomRecovery =
+    definition?.renderRecoveryStep ?? ((props) => React.createElement(EsqlRecoveryContent, props));
 
   return { steps, renderCustomRecovery };
 };
@@ -166,11 +172,7 @@ export const ComposeDiscoverForm = ({
   ruleId,
   builderType,
 }: Props) => {
-  const { setValue } = useFormContext<FormValues>();
   const isAlert = useWatch<FormValues, 'kind'>({ name: 'kind' }) === 'alert';
-  const noDataStrategy = useWatch<FormValues, 'noDataStrategy'>({ name: 'noDataStrategy' });
-  const query = useWatch<FormValues, 'query'>({ name: 'query' });
-  const isQueryStandalone = query.format === 'standalone';
   const { steps, renderCustomRecovery } = useMemo(
     () => getSteps(isAlert, builderType),
     [isAlert, builderType]
@@ -183,6 +185,7 @@ export const ComposeDiscoverForm = ({
     dispatch,
     services,
     onRecoveryTypeChange,
+    onKindChange,
     isEditing,
     ruleId,
     renderCustomRecovery,
@@ -196,42 +199,7 @@ export const ComposeDiscoverForm = ({
         stepContent
       ) : (
         <>
-          <ModeSelect
-            value={isAlert ? 'alert' : 'signal'}
-            onChange={onKindChange}
-            disabled={(!builderType && !state.queryCommitted) || isEditing || state.childOpen}
-            compressed
-            data-test-subj="composeDiscoverModeSelect"
-          />
-          <EuiSpacer size="m" />
           {stepContent}
-          {isAlert && (
-            <>
-              <EuiHorizontalRule margin="m" />
-              <EuiTitle size="xs">
-                <h3>
-                  <FormattedMessage
-                    id="xpack.alertingV2.composeDiscover.alertCondition.alertConditionsTitle"
-                    defaultMessage="Alert conditions"
-                  />
-                </h3>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <AlertDelayField />
-              <EuiSpacer size="m" />
-              <NoDataStrategySelect
-                value={noDataStrategy ?? 'none'}
-                onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
-                disabled={isQueryStandalone}
-                disabledReason={i18n.translate(
-                  'xpack.alertingV2.composeDiscover.alertCondition.noDataDisabledReason',
-                  { defaultMessage: 'An alert condition is required to act on no data.' }
-                )}
-                compressed
-                data-test-subj="composeDiscoverNoDataStrategy"
-              />
-            </>
-          )}
           <EuiHorizontalRule margin="m" />
           <EuiTitle size="xs">
             <h3>

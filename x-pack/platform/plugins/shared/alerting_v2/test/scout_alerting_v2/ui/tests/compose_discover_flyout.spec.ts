@@ -172,8 +172,8 @@ test.describe(
         await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
       });
 
-      await test.step('advance through Recovery Condition to the Details step', async () => {
-        await pageObjects.composeDiscover.clickNext(); // Recovery Condition
+      await test.step('advance through Outcome to the Details step', async () => {
+        await pageObjects.composeDiscover.clickNext(); // Outcome
         await pageObjects.composeDiscover.clickNext(); // Details
         await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
       });
@@ -493,24 +493,25 @@ test.describe(
       pageObjects,
       apiServices,
     }) => {
-      await test.step('open create flyout, commit a query, then switch to signal mode', async () => {
+      await test.step('open create flyout, commit a query, then switch to signal mode on Outcome', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
         await pageObjects.composeDiscover.openSandbox();
 
         // Signal mode always resolves time fields from breach.query (not the
         // alert-standalone bug). Kept as coverage for timestamp-only create +
-        // mode switch. ModeSelect stays disabled until a query is committed.
+        // mode switch on the Outcome step.
         await pageObjects.composeDiscover.setSandboxQuery(CREATE_SIGNAL_TIMESTAMP_QUERY);
         await pageObjects.composeDiscover.selectSandboxTimeField('timestamp');
         await expect(pageObjects.composeDiscover.sandboxTimeFieldSelector).toHaveValue('timestamp');
         await pageObjects.composeDiscover.clickApply();
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
+        await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveValue('timestamp');
+        await pageObjects.composeDiscover.clickNext(); // Outcome
         await pageObjects.composeDiscover.selectMode('signal');
       });
 
       await test.step('name the rule and submit', async () => {
-        await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveValue('timestamp');
         await pageObjects.composeDiscover.clickNext(); // Details
         await pageObjects.composeDiscover.setRuleName(CREATE_SIGNAL_TIMESTAMP_RULE_NAME);
         await pageObjects.composeDiscover.clickSubmit();

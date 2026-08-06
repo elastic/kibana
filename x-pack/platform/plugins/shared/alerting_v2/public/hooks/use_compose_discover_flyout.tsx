@@ -12,17 +12,23 @@ import type {
 } from '@kbn/alerting-v2-rule-form';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
 import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
+import type { IHttpFetchError } from '@kbn/core/public';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { RuleApiResponse } from '../services/rules_api';
+import { enrichHttpErrorMessage } from '../utils/enrich_http_error';
+import { getFriendlyRuleHttpErrorToastMessage } from '../utils/friendly_http_error';
 import { useCreateRule } from './use_create_rule';
 import { useSetupRuleNotifications } from './use_setup_rule_notifications';
 import { useUpdateRule } from './use_update_rule';
@@ -49,6 +55,8 @@ export const useComposeDiscoverFlyout = ({
   const http = useService(CoreStart('http'));
   const notifications = useService(CoreStart('notifications'));
   const application = useService(CoreStart('application'));
+  const i18nStart = useService(CoreStart('i18n'));
+  const theme = useService(CoreStart('theme'));
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
   const lens = useService(PluginStart('lens')) as LensPublicStart;
@@ -66,9 +74,10 @@ export const useComposeDiscoverFlyout = ({
   const [builderType, setBuilderType] = useState<string | null>(null);
   const [initialBuilderState, setInitialBuilderState] = useState<BuilderState>(undefined);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
-  const createRuleMutation = useCreateRule();
+  const navigateToQueryStepRef = useRef<(() => void) | null>(null);
+  const createRuleMutation = useCreateRule({ suppressErrorToast: true });
   const setupNotificationsMutation = useSetupRuleNotifications();
-  const updateRuleMutation = useUpdateRule();
+  const updateRuleMutation = useUpdateRule({ suppressErrorToast: true });
   const ruleFormServices = useMemo<RuleFormServices>(
     () => ({
       http,
@@ -97,6 +106,52 @@ export const useComposeDiscoverFlyout = ({
       application.navigateToUrl(http.basePath.prepend(createSuccessRedirectPath));
     }
   }, [application, createSuccessRedirectPath, http]);
+
+  const showSaveErrorToast = useCallback(
+    (error: Error, mode: 'create' | 'update') => {
+      const status = (error as IHttpFetchError).response?.status;
+      const title =
+        mode === 'create'
+          ? i18n.translate('xpack.alertingV2.hooks.useCreateRule.errorMessage', {
+              defaultMessage: 'Rule not created',
+            })
+          : i18n.translate('xpack.alertingV2.hooks.useUpdateRule.errorMessage', {
+              defaultMessage: 'Edits not saved',
+            });
+
+      if (status === 400) {
+        notifications.toasts.addDanger({
+          title,
+          text: toMountPoint(
+            <FormattedMessage
+              id="xpack.alertingV2.useComposeDiscoverFlyout.badRequestToast"
+              defaultMessage="The rule could not be saved because some fields are invalid. {reviewQuery}"
+              values={{
+                reviewQuery: (
+                  <EuiLink
+                    data-test-subj="composeDiscoverReviewQueryToastAction"
+                    onClick={() => navigateToQueryStepRef.current?.()}
+                  >
+                    {i18n.translate('xpack.alertingV2.useComposeDiscoverFlyout.reviewQueryAction', {
+                      defaultMessage: 'Review query',
+                    })}
+                  </EuiLink>
+                ),
+              }}
+            />,
+            { i18n: i18nStart, theme }
+          ),
+        });
+        return;
+      }
+
+      notifications.toasts.addError(enrichHttpErrorMessage(error), {
+        title,
+        toastMessage: getFriendlyRuleHttpErrorToastMessage(error),
+      });
+    },
+    [i18nStart, notifications.toasts, theme]
+  );
 
   const openCreateFlyout = useCallback(() => {
     setTargetRule(null);
@@ -180,6 +235,10 @@ export const useComposeDiscoverFlyout = ({
     [openRuleFlyout]
   );
 
+  const handleProvideQueryStepNavigator = useCallback((navigate: () => void) => {
+    navigateToQueryStepRef.current = navigate;
+  }, []);
+
   const flyout = flyoutOpen ? (
     <ComposeDiscoverFlyout
       historyKey={historyKey}
@@ -190,37 +249,39 @@ export const useComposeDiscoverFlyout = ({
       services={ruleFormServices}
       builderType={builderType ?? undefined}
       initialBuilderState={initialBuilderState}
-      onCreateRule={(payload, ruleNotifications) =>
-        createRuleMutation.mutate(payload, {
-          onSuccess: (rule) => {
-            const actions = ruleNotifications?.workflows ?? [];
-            if (actions.length > 0) {
-              setupNotificationsMutation.mutate(
-                { rule, actions },
-                { onSuccess: closeAndRedirect, onError: closeAndRedirect }
-              );
-            } else {
-              closeAndRedirect();
-            }
-          },
-        })
-      }
-      onUpdateRule={(id, payload, ruleNotifications) =>
-        updateRuleMutation.mutate(
-          { id, payload },
-          {
-            onSuccess: (rule) => {
-              const actions = ruleNotifications?.workflows ?? [];
-              if (actions.length === 0) {
-                closeFlyout();
-                return;
-              }
-              // Only close the flyout once notification setup also succeeds
-              setupNotificationsMutation.mutate({ rule, actions }, { onSuccess: closeFlyout });
-            },
+      onProvideQueryStepNavigator={handleProvideQueryStepNavigator}
+      onCreateRule={async (payload, ruleNotifications) => {
+        try {
+          const rule = await createRuleMutation.mutateAsync(payload);
+          const actions = ruleNotifications?.workflows ?? [];
+          if (actions.length > 0) {
+            setupNotificationsMutation.mutate(
+              { rule, actions },
+              { onSuccess: closeAndRedirect, onError: closeAndRedirect }
+            );
+          } else {
+            closeAndRedirect();
           }
-        )
-      }
+        } catch (error) {
+          showSaveErrorToast(error as Error, 'create');
+          throw error;
+        }
+      }}
+      onUpdateRule={async (id, payload, ruleNotifications) => {
+        try {
+          const rule = await updateRuleMutation.mutateAsync({ id, payload });
+          const actions = ruleNotifications?.workflows ?? [];
+          if (actions.length === 0) {
+            closeFlyout();
+            return;
+          }
+          // Only close the flyout once notification setup also succeeds
+          setupNotificationsMutation.mutate({ rule, actions }, { onSuccess: closeFlyout });
+        } catch (error) {
+          showSaveErrorToast(error as Error, 'update');
+          throw error;
+        }
+      }}
       isSaving={
         createRuleMutation.isLoading ||
         setupNotificationsMutation.isLoading ||

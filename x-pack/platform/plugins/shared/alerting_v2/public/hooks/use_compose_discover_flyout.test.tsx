@@ -10,9 +10,11 @@ import React from 'react';
 import { render, screen, act, waitFor } from '@testing-library/react';
 import type { RuleApiResponse } from '../services/rules_api';
 
-const mockCreateMutate = jest.fn();
-const mockUpdateMutate = jest.fn();
+const mockCreateMutateAsync = jest.fn();
+const mockUpdateMutateAsync = jest.fn();
 const mockSetupMutate = jest.fn();
+const mockAddDanger = jest.fn();
+const mockAddError = jest.fn();
 
 let capturedFlyoutProps: Record<string, unknown> = {};
 
@@ -24,11 +26,21 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   RULE_BUILDER_REGISTRY: {},
 }));
 
+jest.mock('@kbn/react-kibana-mount', () => ({
+  toMountPoint: (node: unknown) => node,
+}));
+
 jest.mock('./use_create_rule', () => ({
-  useCreateRule: () => ({ mutate: mockCreateMutate, isLoading: false }),
+  useCreateRule: () => ({
+    mutateAsync: mockCreateMutateAsync,
+    isLoading: false,
+  }),
 }));
 jest.mock('./use_update_rule', () => ({
-  useUpdateRule: () => ({ mutate: mockUpdateMutate, isLoading: false }),
+  useUpdateRule: () => ({
+    mutateAsync: mockUpdateMutateAsync,
+    isLoading: false,
+  }),
 }));
 jest.mock('./use_setup_rule_notifications', () => ({
   useSetupRuleNotifications: () => ({ mutate: mockSetupMutate, isLoading: false }),
@@ -46,9 +58,20 @@ jest.mock('@kbn/core-di-browser', () => ({
       case 'core:http':
         return { basePath: { prepend: (path: string) => path } };
       case 'core:notifications':
-        return { toasts: { addWarning: jest.fn(), addInfo: jest.fn() } };
+        return {
+          toasts: {
+            addWarning: jest.fn(),
+            addInfo: jest.fn(),
+            addDanger: mockAddDanger,
+            addError: mockAddError,
+          },
+        };
       case 'core:application':
         return { navigateToUrl: mockNavigateToUrl };
+      case 'core:i18n':
+        return {};
+      case 'core:theme':
+        return {};
       default:
         return {};
     }
@@ -94,13 +117,13 @@ const renderAndOpenCreate = async (redirectPath?: string) => {
   });
 };
 
-const callOnCreateRule = (notifications?: unknown) => {
+const callOnCreateRule = async (notifications?: unknown) => {
   const onCreateRule = capturedFlyoutProps.onCreateRule as (
     payload: unknown,
     notifications?: unknown
-  ) => void;
-  act(() => {
-    onCreateRule({ metadata: { name: 'My rule' } }, notifications);
+  ) => Promise<void>;
+  await act(async () => {
+    await onCreateRule({ metadata: { name: 'My rule' } }, notifications);
   });
 };
 
@@ -114,14 +137,14 @@ const renderAndOpenEdit = async () => {
   });
 };
 
-const callOnUpdateRule = (notifications?: unknown) => {
+const callOnUpdateRule = async (notifications?: unknown) => {
   const onUpdateRule = capturedFlyoutProps.onUpdateRule as (
     id: string,
     payload: unknown,
     notifications?: unknown
-  ) => void;
-  act(() => {
-    onUpdateRule('rule-1', { metadata: { name: 'My rule (updated)' } }, notifications);
+  ) => Promise<void>;
+  await act(async () => {
+    await onUpdateRule('rule-1', { metadata: { name: 'My rule (updated)' } }, notifications);
   });
 };
 
@@ -130,7 +153,7 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
     jest.clearAllMocks();
     capturedFlyoutProps = {};
     hookApi = undefined;
-    mockCreateMutate.mockImplementation((_payload, opts) => opts?.onSuccess?.(createdRule));
+    mockCreateMutateAsync.mockResolvedValue(createdRule);
   });
 
   it('opens in create mode with no ruleId and provides onCreateRule', async () => {
@@ -139,18 +162,16 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
     expect(capturedFlyoutProps.mode).toBe('create');
     expect(capturedFlyoutProps.ruleId).toBeUndefined();
     expect(capturedFlyoutProps.onCreateRule).toBeDefined();
+    expect(capturedFlyoutProps.onProvideQueryStepNavigator).toBeDefined();
   });
 
   it('creates the rule then sets up notifications and redirects on success', async () => {
     mockSetupMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.());
 
     await renderAndOpenCreate(REDIRECT_PATH);
-    callOnCreateRule({ workflows: [existingAction] });
+    await callOnCreateRule({ workflows: [existingAction] });
 
-    expect(mockCreateMutate).toHaveBeenCalledWith(
-      { metadata: { name: 'My rule' } },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
-    );
+    expect(mockCreateMutateAsync).toHaveBeenCalledWith({ metadata: { name: 'My rule' } });
     expect(mockSetupMutate).toHaveBeenCalledWith(
       { rule: createdRule, actions: [existingAction] },
       expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) })
@@ -166,7 +187,7 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
     mockSetupMutate.mockImplementation((_vars, opts) => opts?.onError?.(new Error('setup failed')));
 
     await renderAndOpenCreate(REDIRECT_PATH);
-    callOnCreateRule({ workflows: [existingAction] });
+    await callOnCreateRule({ workflows: [existingAction] });
 
     expect(mockSetupMutate).toHaveBeenCalledTimes(1);
 
@@ -178,15 +199,32 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
 
   it('redirects without setting up notifications when there are no actions', async () => {
     await renderAndOpenCreate(REDIRECT_PATH);
-    callOnCreateRule(undefined);
+    await callOnCreateRule(undefined);
 
-    expect(mockCreateMutate).toHaveBeenCalledTimes(1);
+    expect(mockCreateMutateAsync).toHaveBeenCalledTimes(1);
     expect(mockSetupMutate).not.toHaveBeenCalled();
 
     await waitFor(() => {
       expect(mockNavigateToUrl).toHaveBeenCalledWith(REDIRECT_PATH);
       expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
     });
+  });
+
+  it('shows a Review query toast action on create 400 and rethrows', async () => {
+    const error = Object.assign(new Error('bad request'), {
+      response: { status: 400 },
+    });
+    mockCreateMutateAsync.mockRejectedValue(error);
+
+    await renderAndOpenCreate(REDIRECT_PATH);
+    await expect(callOnCreateRule(undefined)).rejects.toBe(error);
+
+    expect(mockAddDanger).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Rule not created',
+      })
+    );
+    expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
   });
 });
 
@@ -195,8 +233,7 @@ describe('useComposeDiscoverFlyout — edit submission wiring', () => {
     jest.clearAllMocks();
     capturedFlyoutProps = {};
     hookApi = undefined;
-    // The rule update is an idempotent PATCH; default it to succeed with the updated rule.
-    mockUpdateMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.(updatedRule));
+    mockUpdateMutateAsync.mockResolvedValue(updatedRule);
   });
 
   it('passes ruleId only in edit mode and provides onUpdateRule', async () => {
@@ -211,12 +248,12 @@ describe('useComposeDiscoverFlyout — edit submission wiring', () => {
     mockSetupMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.());
 
     await renderAndOpenEdit();
-    callOnUpdateRule({ workflows: [existingAction] });
+    await callOnUpdateRule({ workflows: [existingAction] });
 
-    expect(mockUpdateMutate).toHaveBeenCalledWith(
-      { id: 'rule-1', payload: { metadata: { name: 'My rule (updated)' } } },
-      expect.objectContaining({ onSuccess: expect.any(Function) })
-    );
+    expect(mockUpdateMutateAsync).toHaveBeenCalledWith({
+      id: 'rule-1',
+      payload: { metadata: { name: 'My rule (updated)' } },
+    });
     expect(mockSetupMutate).toHaveBeenCalledWith(
       { rule: updatedRule, actions: [existingAction] },
       expect.objectContaining({ onSuccess: expect.any(Function) })
@@ -231,7 +268,7 @@ describe('useComposeDiscoverFlyout — edit submission wiring', () => {
     mockSetupMutate.mockImplementation(() => undefined);
 
     await renderAndOpenEdit();
-    callOnUpdateRule({ workflows: [existingAction] });
+    await callOnUpdateRule({ workflows: [existingAction] });
 
     expect(mockSetupMutate).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
@@ -239,9 +276,9 @@ describe('useComposeDiscoverFlyout — edit submission wiring', () => {
 
   it('closes without setting up notifications when there are no actions', async () => {
     await renderAndOpenEdit();
-    callOnUpdateRule(undefined);
+    await callOnUpdateRule(undefined);
 
-    expect(mockUpdateMutate).toHaveBeenCalledTimes(1);
+    expect(mockUpdateMutateAsync).toHaveBeenCalledTimes(1);
     expect(mockSetupMutate).not.toHaveBeenCalled();
 
     await waitFor(() => {
@@ -251,7 +288,7 @@ describe('useComposeDiscoverFlyout — edit submission wiring', () => {
 
   it('does not set up notifications when the workflows list is empty', async () => {
     await renderAndOpenEdit();
-    callOnUpdateRule({ workflows: [] });
+    await callOnUpdateRule({ workflows: [] });
 
     expect(mockSetupMutate).not.toHaveBeenCalled();
 

@@ -68,6 +68,7 @@ import {
 } from './use_heuristic_split';
 import { useSplitQueryCompletion } from './use_split_query_completion';
 import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
+import { resolveNoDataStrategyForQuery } from './resolve_no_data_strategy';
 import { useResolveTimeField } from './use_resolve_time_field';
 
 const LazyYamlRuleForm = React.lazy(() =>
@@ -172,22 +173,28 @@ export interface ComposeDiscoverFlyoutProps {
   /**
    * Called with the create payload when the user submits in create mode. When the user
    * enables the notifications step, `notifications` carries the captured action draft list;
-   * otherwise it is `undefined`.
+   * otherwise it is `undefined`. May return a promise; rejection leaves the flyout mounted.
    */
   onCreateRule: (
     payload: ReturnType<typeof composeFormToCreateRequest>,
     notifications?: RuleNotificationsValue
-  ) => void;
+  ) => void | Promise<void>;
   /**
    * Called with id + update payload when the user submits in edit mode. When the user
    * configures simple actions, `notifications` carries the captured action draft list so
    * the caller can create linked action policies; otherwise it is `undefined`.
+   * May return a promise; rejection leaves the flyout mounted.
    */
   onUpdateRule?: (
     id: string,
     payload: ReturnType<typeof composeFormToUpdateRequest>,
     notifications?: RuleNotificationsValue
-  ) => void;
+  ) => void | Promise<void>;
+  /**
+   * Registers a navigator that moves the still-mounted flyout to the query step.
+   * Used by the host to attach a "Review query" action on save 400 toasts.
+   */
+  onProvideQueryStepNavigator?: (navigate: () => void) => void;
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
   builderType?: string;
@@ -249,6 +256,7 @@ export function ComposeDiscoverFlyout({
   services,
   onCreateRule,
   onUpdateRule,
+  onProvideQueryStepNavigator,
   isSaving = false,
   builderType,
   initialBuilderState,
@@ -318,6 +326,13 @@ export function ComposeDiscoverFlyout({
     }
     wasChildOpenRef.current = uiState.childOpen;
   }, [uiState.childOpen]);
+
+  useEffect(() => {
+    onProvideQueryStepNavigator?.(() => {
+      dispatch({ type: 'SET_STEP', step: 0 });
+      dispatch({ type: 'CLOSE_CHILD' });
+    });
+  }, [dispatch, onProvideQueryStepNavigator]);
 
   // Registered once here so providers persist across Sandbox open/close cycles.
   useEsqlAutocomplete(baseServices);
@@ -614,11 +629,11 @@ export function ComposeDiscoverFlyout({
         const alertQuery = splitResultToRuleQuery(full).query;
         setSandboxQuery(alertQuery);
         methods.setValue('query', alertQuery, { shouldDirty: true });
-        methods.setValue(
-          'noDataStrategy',
-          alertQuery.format === 'standalone' ? 'none' : 'last_known_status',
-          { shouldDirty: true }
-        );
+        const currentNoData = methods.getValues('noDataStrategy');
+        const resolvedNoData = resolveNoDataStrategyForQuery(currentNoData, alertQuery.format);
+        if (resolvedNoData !== currentNoData) {
+          methods.setValue('noDataStrategy', resolvedNoData, { shouldDirty: true });
+        }
         methods.setValue('recoveryStrategy', 'no_breach', { shouldDirty: true });
       } else {
         // Assemble from committed query — discards any unapplied sandbox edits cleanly.
@@ -629,7 +644,8 @@ export function ComposeDiscoverFlyout({
         };
         setSandboxQuery(standalone);
         methods.setValue('query', standalone, { shouldDirty: true });
-        methods.setValue('noDataStrategy', undefined, { shouldDirty: true });
+        // Keep noDataStrategy in form state so alert↔signal round-trips preserve a
+        // still-valid choice; request mappers omit it for signal rules.
         methods.setValue('recoveryStrategy', undefined, { shouldDirty: true });
       }
       methods.setValue('kind', kind, { shouldDirty: true });
@@ -843,7 +859,11 @@ export function ComposeDiscoverFlyout({
 
     methods.setValue('query', queryToCommit, { shouldDirty: true });
     if (isAlert && queryToCommit.format === 'standalone') {
-      methods.setValue('noDataStrategy', 'none', { shouldDirty: true });
+      const currentNoData = methods.getValues('noDataStrategy');
+      const resolvedNoData = resolveNoDataStrategyForQuery(currentNoData, 'standalone');
+      if (resolvedNoData !== currentNoData) {
+        methods.setValue('noDataStrategy', resolvedNoData, { shouldDirty: true });
+      }
       if (uiState.recoveryType === 'custom') {
         dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: 'default', isBuilderMode });
         methods.setValue('recoveryStrategy', 'no_breach', { shouldDirty: true });
@@ -876,7 +896,7 @@ export function ComposeDiscoverFlyout({
     cancelYamlParse,
   ]);
 
-  const handleSubmit = methods.handleSubmit((values) => {
+  const handleSubmit = methods.handleSubmit(async (values) => {
     if (hasValidationErrors) {
       return;
     }
@@ -886,10 +906,19 @@ export function ComposeDiscoverFlyout({
         return;
       }
     }
-    if (isCreate) {
-      onCreateRule(composeFormToCreateRequest(values, builderType), values.notifications);
-    } else if (ruleId && onUpdateRule) {
-      onUpdateRule(ruleId, composeFormToUpdateRequest(values, builderType), values.notifications);
+    try {
+      if (isCreate) {
+        await onCreateRule(composeFormToCreateRequest(values, builderType), values.notifications);
+      } else if (ruleId && onUpdateRule) {
+        await onUpdateRule(
+          ruleId,
+          composeFormToUpdateRequest(values, builderType),
+          values.notifications
+        );
+      }
+    } catch {
+      // Caller owns the error toast. Leave the flyout mounted so the host can
+      // navigate back to the query step from a 400 action.
     }
   });
 

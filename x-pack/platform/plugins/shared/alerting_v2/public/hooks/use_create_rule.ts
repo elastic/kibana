@@ -14,7 +14,12 @@ import { ruleKeys } from './query_key_factory';
 import { enrichHttpErrorMessage } from '../utils/enrich_http_error';
 import { getFriendlyRuleHttpErrorToastMessage } from '../utils/friendly_http_error';
 
-export const useCreateRule = () => {
+interface UseCreateRuleOptions {
+  /** When true, the hook skips its default error toast so the caller can own UX. */
+  suppressErrorToast?: boolean;
+}
+
+export const useCreateRule = ({ suppressErrorToast = false }: UseCreateRuleOptions = {}) => {
   const rulesApi = useService(RulesApi);
   const { toasts } = useService(CoreStart('notifications'));
   const queryClient = useQueryClient();
@@ -32,6 +37,9 @@ export const useCreateRule = () => {
       queryClient.invalidateQueries(ruleKeys.tags());
     },
     onError: (error: Error) => {
+      if (suppressErrorToast) {
+        return;
+      }
       toasts.addError(enrichHttpErrorMessage(error), {
         title: i18n.translate('xpack.alertingV2.hooks.useCreateRule.errorMessage', {
           defaultMessage: 'Rule not created',
