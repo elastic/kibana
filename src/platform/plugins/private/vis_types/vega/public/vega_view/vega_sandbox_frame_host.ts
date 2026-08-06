@@ -61,6 +61,8 @@ export const createVegaSandboxFrameHost = ({
   iframe.setAttribute('title', 'Vega sandbox');
   iframe.style.border = '0';
   iframe.style.background = 'transparent';
+  // Avoid a white flash while the iframe document is loading in dark mode.
+  iframe.style.visibility = 'hidden';
   iframe.style.position = 'absolute';
   iframe.style.inset = '0';
   iframe.style.height = '100%';
@@ -86,10 +88,16 @@ export const createVegaSandboxFrameHost = ({
   window.addEventListener('message', messageHandler);
   parentEl.appendChild(iframe);
 
+  const loadHandler = () => {
+    iframe.style.visibility = 'visible';
+  };
+  iframe.addEventListener('load', loadHandler);
+
   return {
     iframe,
     destroy: () => {
       window.removeEventListener('message', messageHandler);
+      iframe.removeEventListener('load', loadHandler);
       iframe.remove();
     },
     postMessage: (message) => {

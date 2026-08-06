@@ -32,6 +32,8 @@ export interface VegaSandboxWarningPayload {
 }
 
 export interface VegaSandboxInitMessage {
+  /** Parent UI color mode (optional). */
+  colorMode?: 'DARK' | 'LIGHT';
   protocolVersion: number;
   type: 'init';
 }

@@ -54,7 +54,11 @@ export const getVegaVisRenderer: (
       unmountComponentAtNode(domNode);
     });
 
+    let completionCalled = false;
     const renderComplete = () => {
+      if (completionCalled) return;
+      completionCalled = true;
+
       reportVegaRender({
         containerType: extractContainerType(handlers.getExecutionContext()),
         isVegaLite: visData.isVegaLite,
@@ -65,6 +69,27 @@ export const getVegaVisRenderer: (
     };
 
     const [startServices] = await deps.core.getStartServices();
+
+    const domNodeWithState = domNode as typeof domNode & {
+      __kbnVegaThemeSub__?: { unsubscribe: () => void };
+    };
+    domNodeWithState.__kbnVegaThemeSub__?.unsubscribe();
+    domNodeWithState.__kbnVegaThemeSub__ = undefined;
+
+    const toThemeKey = (t: { name: string; darkMode: boolean }) =>
+      `${t.name}:${t.darkMode ? 'dark' : 'light'}`;
+    let themeKey = toThemeKey(startServices.theme.getTheme());
+    domNodeWithState.__kbnVegaThemeSub__ = startServices.theme.theme$.subscribe((theme) => {
+      const nextKey = toThemeKey(theme);
+      if (themeKey === nextKey) return;
+      themeKey = nextKey;
+      handlers.reload();
+    });
+    handlers.onDestroy(() => {
+      domNodeWithState.__kbnVegaThemeSub__?.unsubscribe();
+      domNodeWithState.__kbnVegaThemeSub__ = undefined;
+    });
+
     const sandboxedRenderingEnabled = startServices.featureFlags.getBooleanValue(
       VEGA_SANDBOXED_RENDERING_FLAG,
       false

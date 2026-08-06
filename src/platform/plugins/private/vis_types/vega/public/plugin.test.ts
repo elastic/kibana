@@ -130,6 +130,10 @@ describe('VegaPlugin', () => {
         ADD_CANVAS_ELEMENT_TRIGGER,
         ADD_VEGA_PANEL_ACTION_ID
       );
+      expect(uiActions.attachAction).not.toHaveBeenCalledWith(
+        ADD_CANVAS_ELEMENT_TRIGGER,
+        ADD_VEGA_EMBEDDABLE_ACTION_ID
+      );
     });
 
     it('swaps in the standalone action and detaches the legacy action when the flag is enabled', () => {
@@ -138,13 +142,13 @@ describe('VegaPlugin', () => {
         ADD_PANEL_TRIGGER,
         ADD_VEGA_EMBEDDABLE_ACTION_ID
       );
-      expect(uiActions.detachAction).toHaveBeenCalledWith(
-        ADD_PANEL_TRIGGER,
-        ADD_VEGA_PANEL_ACTION_ID
-      );
       expect(uiActions.attachAction).toHaveBeenCalledWith(
         ADD_CANVAS_ELEMENT_TRIGGER,
         ADD_VEGA_EMBEDDABLE_ACTION_ID
+      );
+      expect(uiActions.detachAction).toHaveBeenCalledWith(
+        ADD_PANEL_TRIGGER,
+        ADD_VEGA_PANEL_ACTION_ID
       );
       expect(uiActions.detachAction).toHaveBeenCalledWith(
         ADD_CANVAS_ELEMENT_TRIGGER,

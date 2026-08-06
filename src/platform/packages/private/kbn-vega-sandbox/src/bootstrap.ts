@@ -33,6 +33,7 @@ declare global {
 let controller: VegaSandboxRenderController | undefined;
 let initialized = false;
 let hrefInterceptorInstalled = false;
+let pendingRestoreState: unknown | undefined;
 
 const getRoot = (): HTMLElement => {
   const root = document.getElementById('vega-sandbox-root');
@@ -82,7 +83,10 @@ const isInboundMessage = (value: unknown): value is VegaSandboxInboundMessage =>
   !Array.isArray(value) &&
   typeof (value as { type?: unknown }).type === 'string';
 
-const handleInit = ({ protocolVersion }: { protocolVersion: number }): void => {
+const handleInit = ({
+  protocolVersion,
+  colorMode,
+}: Extract<VegaSandboxInboundMessage, { type: 'init' }>): void => {
   if (protocolVersion !== VEGA_SANDBOX_PROTOCOL_VERSION) {
     postToParent({
       type: 'error',
@@ -95,6 +99,10 @@ const handleInit = ({ protocolVersion }: { protocolVersion: number }): void => {
       },
     });
     return;
+  }
+
+  if (colorMode) {
+    document.documentElement.style.colorScheme = colorMode === 'DARK' ? 'dark' : 'light';
   }
 
   installHrefInterceptor();
@@ -113,6 +121,7 @@ const handleRender = async (message: Extract<VegaSandboxInboundMessage, { type: 
     }
   }
   controller?.destroy();
+  controller = undefined;
   const root = getRoot();
   root.replaceChildren();
 
@@ -135,6 +144,11 @@ const handleRender = async (message: Extract<VegaSandboxInboundMessage, { type: 
     onWarn: (warning) => postToParent({ type: 'warn', warning }),
   });
 
+  if (pendingRestoreState !== undefined && controller?.view) {
+    await controller.view.setState(pendingRestoreState as any);
+    pendingRestoreState = undefined;
+  }
+
   if (message.dimensions) {
     await controller.resize(message.dimensions);
   }
@@ -143,7 +157,11 @@ const handleRender = async (message: Extract<VegaSandboxInboundMessage, { type: 
 };
 
 const handleRestoreState = async (state: unknown): Promise<void> => {
-  if (!initialized || !controller?.view || !state) {
+  if (!initialized || !state) {
+    return;
+  }
+  if (!controller?.view) {
+    pendingRestoreState = state;
     return;
   }
   await controller.view.setState(state as any);

@@ -13,6 +13,7 @@ import {
   type EuiResizeObserverProps,
   euiScrollBarStyles,
   type UseEuiTheme,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin/common';
@@ -49,7 +50,7 @@ interface VegaVisComponentProps {
   deps: VegaVisualizationDependencies;
   fireEvent: IInterpreterRenderHandlers['event'];
   inspectorAdapters?: VegaInspectorAdapters;
-  renderComplete: (params?: { timedOut?: boolean }) => void;
+  renderComplete: () => void;
   renderMode: RenderMode;
   visData: VegaRenderDescriptor;
   useSandbox: boolean;
@@ -87,6 +88,7 @@ export const VegaVisComponent = ({
   useSandbox,
   sandboxFrameSrc,
 }: VegaVisComponentProps) => {
+  const { colorMode } = useEuiTheme();
   const styles = useMemoCss(vegaVisStyles);
   const chartDiv = useRef<HTMLDivElement>(null);
   const renderCompleted = useRef(false);
@@ -94,26 +96,11 @@ export const VegaVisComponent = ({
   const sandboxHost = useRef<VegaSandboxFrameHost | null>(null);
   const sandboxLoaded = useRef(false);
   const pendingSandboxMessages = useRef<VegaSandboxMessage[]>([]);
-  const completionTimeoutId = useRef<number | undefined>(undefined);
-  const renderSequence = useRef(0);
   const sandboxRenderInFlight = useRef(false);
 
   const [sandboxMessages, setSandboxMessages] = useState<
     Array<{ type: 'warn' | 'err'; text: string }>
   >([]);
-
-  const sandboxRenderDescriptor = useMemo(
-    () => ({
-      spec: visData.spec,
-      vlspec: visData.vlspec,
-      colorSchemes: visData.colorSchemes,
-      renderer: visData.renderer,
-      useHover: visData.useHover,
-      useResize: visData.useResize,
-      tooltips: visData.tooltips,
-    }),
-    [visData]
-  );
 
   const vegaStateRestorer = useMemo(
     () =>
@@ -130,34 +117,12 @@ export const VegaVisComponent = ({
     });
   }, []);
 
-  const clearCompletionTimeout = useCallback(() => {
-    if (completionTimeoutId.current != null) {
-      window.clearTimeout(completionTimeoutId.current);
-      completionTimeoutId.current = undefined;
-    }
-  }, []);
-
-  const completeSandboxRender = useCallback(
-    ({ timedOut }: { timedOut?: boolean } = {}) => {
-      if (renderCompleted.current) return;
-      renderCompleted.current = true;
-      sandboxRenderInFlight.current = false;
-      clearCompletionTimeout();
-      renderComplete({ timedOut });
-    },
-    [clearCompletionTimeout, renderComplete]
-  );
-
-  const startCompletionTimeout = useCallback(
-    (seq: number) => {
-      clearCompletionTimeout();
-      completionTimeoutId.current = window.setTimeout(() => {
-        if (renderSequence.current !== seq || renderCompleted.current) return;
-        completeSandboxRender({ timedOut: true });
-      }, 15000);
-    },
-    [clearCompletionTimeout, completeSandboxRender]
-  );
+  const completeSandboxRender = useCallback(() => {
+    if (renderCompleted.current) return;
+    renderCompleted.current = true;
+    sandboxRenderInFlight.current = false;
+    renderComplete();
+  }, [renderComplete]);
 
   const postToSandbox = useCallback((message: VegaSandboxMessage) => {
     const host = sandboxHost.current;
@@ -269,8 +234,6 @@ export const VegaVisComponent = ({
 
       const onLoad = () => {
         sandboxLoaded.current = true;
-        // Always init after load, then flush any pending render.
-        host.postMessage({ type: 'init', protocolVersion: VEGA_SANDBOX_PROTOCOL_VERSION });
         flushPendingSandboxMessage();
       };
 
@@ -282,7 +245,6 @@ export const VegaVisComponent = ({
         sandboxHost.current = null;
         sandboxLoaded.current = false;
         pendingSandboxMessages.current = [];
-        clearCompletionTimeout();
       };
     }
 
@@ -291,10 +253,8 @@ export const VegaVisComponent = ({
     return () => {
       visController.current?.destroy();
       visController.current = null;
-      clearCompletionTimeout();
     };
   }, [
-    clearCompletionTimeout,
     deps,
     fireEvent,
     flushPendingSandboxMessage,
@@ -328,9 +288,18 @@ export const VegaVisComponent = ({
 
       renderCompleted.current = false;
       sandboxRenderInFlight.current = true;
-      const seq = ++renderSequence.current;
-      startCompletionTimeout(seq);
 
+      const sandboxRenderDescriptor = {
+        spec: visData.spec,
+        vlspec: visData.vlspec,
+        colorSchemes: visData.colorSchemes,
+        renderer: visData.renderer,
+        useHover: visData.useHover,
+        useResize: visData.useResize,
+        tooltips: visData.tooltips,
+      };
+
+      postToSandbox({ type: 'init', protocolVersion: VEGA_SANDBOX_PROTOCOL_VERSION, colorMode });
       postToSandbox({
         type: 'render',
         descriptor: sandboxRenderDescriptor,
@@ -357,8 +326,6 @@ export const VegaVisComponent = ({
     inspectorAdapters,
     postToSandbox,
     renderComplete,
-    sandboxRenderDescriptor,
-    startCompletionTimeout,
     useSandbox,
     vegaStateRestorer,
     visData,

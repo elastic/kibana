@@ -116,6 +116,7 @@ const renderSandboxDocument = (nonce: string, bundleSrc: string) => `<!doctype h
         height: 100%;
         margin: 0;
         padding: 0;
+        background: transparent;
       }
       body {
         overflow: hidden;

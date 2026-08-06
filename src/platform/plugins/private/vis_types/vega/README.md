@@ -42,8 +42,8 @@ opaque-origin iframe (`sandbox="allow-scripts"`). This has a few verification co
 - **CDN (`server.cdn.url`)**: The sandbox document loads `kbn-vega-sandbox` using
   `core.http.staticAssets.prependPublicUrl()`, so it works with and without a configured CDN origin.
 - **Reporting (PNG/PDF)**: Reporting completion depends on the sandbox `rendered` message reaching
-  the parent. If the message never arrives, the parent uses a timeout fallback to avoid indefinite
-  reporting hangs.
+  the parent. If the message never arrives, screenshotting/reporting will eventually time out based
+  on `xpack.screenshotting.capture.timeouts.renderComplete`.
 
 ### Manual checks still required before default-on
 

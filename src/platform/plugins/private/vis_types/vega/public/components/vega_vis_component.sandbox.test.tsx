@@ -82,38 +82,8 @@ const createDeps = () =>
 
 describe('VegaVisComponent sandbox protocol', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
     lastOnMessage = undefined;
     lastHost = undefined;
-  });
-
-  afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
-  });
-
-  it('invokes renderComplete with timedOut=true when rendered never arrives', () => {
-    const renderComplete = jest.fn();
-
-    const { unmount } = render(
-      <VegaVisComponent
-        deps={createDeps()}
-        fireEvent={jest.fn()}
-        inspectorAdapters={createInspectorAdapters()}
-        renderComplete={renderComplete}
-        renderMode="view"
-        visData={createDescriptor()}
-        useSandbox
-        sandboxFrameSrc="/internal/vis_type_vega/sandbox"
-      />
-    );
-
-    expect(lastHost).toBeDefined();
-    (lastHost!.iframe as any).dispatchLoad();
-
-    jest.advanceTimersByTime(15000);
-    expect(renderComplete).toHaveBeenCalledWith({ timedOut: true });
-    unmount();
   });
 
   it('invokes renderComplete exactly once when rendered arrives, ignoring duplicates', () => {
@@ -138,7 +108,7 @@ describe('VegaVisComponent sandbox protocol', () => {
     lastOnMessage!({ type: 'rendered' });
 
     expect(renderComplete).toHaveBeenCalledTimes(1);
-    expect(renderComplete).toHaveBeenCalledWith({});
+    expect(renderComplete).toHaveBeenCalledWith();
     unmount();
   });
 });
