@@ -173,12 +173,13 @@ if [[ ! -f "${LIBYARA_A}" ]]; then
   exit 1
 fi
 
-echo "Linking validate_yara WASM module ..."
+echo "Linking validate_yara WASM module (engine ${YARA_VERSION}) ..."
 emcc \
   "${SCRIPT_DIR}/validate_yara.c" \
   "${LIBYARA_A}" \
   -I"${INCLUDE_DIR}" \
   -O2 -DNDEBUG \
+  -DYARA_ENGINE_VERSION=\"${YARA_VERSION}\" \
   -s WASM=1 \
   -s MODULARIZE=1 \
   -s EXPORT_NAME="createYaraValidateModule" \

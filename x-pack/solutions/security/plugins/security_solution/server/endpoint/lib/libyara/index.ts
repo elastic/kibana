@@ -40,4 +40,4 @@
  */
 
 export type { YaraDiagnostic, YaraDiagnosticSeverity, YaraValidateResult } from './types';
-export { validateYaraRule } from './validate_yara_rule';
+export { getYaraEngineVersion, validateYaraRule } from './validate_yara_rule';

@@ -11,8 +11,9 @@
  * Exposes:
  *   - validate_yara(source) -> JSON string { errors, warnings }
  *   - validate_yara_free(ptr)
+ *   - yara_engine_version() -> version string (from -DYARA_ENGINE_VERSION)
  *
- * Engine: YARA 4.3.2 (matches Elastic Endpoint pin).
+ * Engine pin: see build.sh YARA_VERSION / dist/ENGINE.md (matches Elastic Endpoint).
  */
 
 #include <stdio.h>
@@ -241,7 +242,11 @@ void validate_yara_free(char* ptr) {
   free(ptr);
 }
 
+#ifndef YARA_ENGINE_VERSION
+#error "YARA_ENGINE_VERSION must be set by build.sh (-DYARA_ENGINE_VERSION=\"x.y.z\")"
+#endif
+
 EMSCRIPTEN_KEEPALIVE
 const char* yara_engine_version(void) {
-  return "4.3.2";
+  return YARA_ENGINE_VERSION;
 }

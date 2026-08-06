@@ -20,6 +20,7 @@ import { validateYaraRule } from '../../../endpoint/lib/libyara';
 
 jest.mock('../../../endpoint/lib/libyara', () => ({
   validateYaraRule: jest.fn(async () => ({ errors: [], warnings: [] })),
+  getYaraEngineVersion: jest.fn(async () => 'MOCKED_VERSION'),
 }));
 
 const mockValidateYaraRule = validateYaraRule as jest.MockedFunction<typeof validateYaraRule>;
@@ -273,7 +274,7 @@ describe('YARA Signatures API validations', () => {
 
       await expect(
         customYaraSignaturesValidator.validatePreCreateItem(buildCreateItem())
-      ).rejects.toThrow(/Invalid YARA rule \(libyara 4\.3\.2\): line 2: syntax error/);
+      ).rejects.toThrow(/Invalid YARA rule \(libyara MOCKED_VERSION\): line 2: syntax error/);
       expect(mockValidateYaraRule).toHaveBeenCalled();
     });
 

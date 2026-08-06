@@ -14,7 +14,7 @@ import type {
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { validateYaraRule } from '../../../endpoint/lib/libyara';
+import { getYaraEngineVersion, validateYaraRule } from '../../../endpoint/lib/libyara';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../common/endpoint/service/artifacts/constants';
 import { BaseValidator } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
@@ -204,11 +204,13 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
 
     // TODO: in POC we reject on errors, and allow warnings. Improve error messages.
     if (errors.length > 0) {
+      const libyaraVersion = await getYaraEngineVersion();
+
       const details = errors
         .map((e) => (e.line > 0 ? `line ${e.line}: ${e.message}` : e.message))
         .join('; ');
       throw new EndpointArtifactExceptionValidationError(
-        `Invalid YARA rule (libyara 4.3.2): ${details}`
+        `Invalid YARA rule (libyara ${libyaraVersion}): ${details}`
       );
     }
   }

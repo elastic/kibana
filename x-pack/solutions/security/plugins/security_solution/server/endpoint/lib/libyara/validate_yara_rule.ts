@@ -44,6 +44,15 @@ export const validateYaraRule = async (source: string): Promise<YaraValidateResu
 };
 
 /**
+ * Returns the pinned libyara engine version string from the WASM module
+ * (e.g. `"4.3.2"`). See `wasm/dist/ENGINE.md`.
+ */
+export const getYaraEngineVersion = async (): Promise<string> => {
+  const mod = await loadModule();
+  return mod.ccall<string>('yara_engine_version', 'string', [], []);
+};
+
+/**
  * Emscripten MODULARIZE=1 factory shape for our compile-only wrapper.
  * Generated JS lives next to this package under wasm/dist/.
  */

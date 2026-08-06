@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { validateYaraRule } from './validate_yara_rule';
+import { getYaraEngineVersion, validateYaraRule } from './validate_yara_rule';
 
 /**
  * Smoke test against the real libyara WASM artifact.
  * Keep this focused — unit tests of the API validator should mock validateYaraRule.
  */
 describe('validateYaraRule (libyara WASM)', () => {
+  it('reports the pinned engine version', async () => {
+    await expect(getYaraEngineVersion()).resolves.toBe('4.3.2');
+  });
+
   it('accepts a minimal valid rule', async () => {
     const result = await validateYaraRule(`
 rule Minimal {
