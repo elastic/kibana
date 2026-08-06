@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiSelectableProps, Direction } from '@elastic/eui';
 import {
   EuiSelectable,
@@ -100,6 +100,14 @@ export function DataViewsList({
     );
     return sortingService.sortData(filteredDataViewsList);
   });
+
+  // Re-derive the list when the dataViewsList prop changes — it is fetched asynchronously and can arrive after mount.
+  useEffect(() => {
+    const filteredDataViewsList = dataViewsList.filter(
+      (dataView) => !dataView.isAdhoc || dataView.type !== ESQL_TYPE
+    );
+    setSortedDataViewsList(sortingService.sortData(filteredDataViewsList));
+  }, [dataViewsList, sortingService]);
 
   const sortOrderOptions = useMemo(
     () =>
