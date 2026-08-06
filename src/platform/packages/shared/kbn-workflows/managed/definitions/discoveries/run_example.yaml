@@ -64,9 +64,9 @@ description: |
   ```
 enabled: true
 tags:
-  - Attack discovery
-  - Security
-  - Example
+  - attack-discovery
+  - security
+  - example
   - attackDiscovery:run_example
 
 triggers:
