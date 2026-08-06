@@ -10,7 +10,6 @@ import {
   EuiButtonIcon,
   EuiPopover,
   EuiContextMenuPanel,
-  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
