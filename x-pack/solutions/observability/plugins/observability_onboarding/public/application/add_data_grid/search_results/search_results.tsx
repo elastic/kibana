@@ -22,10 +22,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-// Provisional defaults pending final designs: two rows of three cards, then a
-// Show more button. Both are props so the design answer is a host-side change.
+// Provisional pending final designs: two rows of three cards, then a Show more
+// button. Page size is a prop so a host can shrink it in a narrower slot.
 const DEFAULT_PAGE_SIZE = 6;
-const DEFAULT_COLUMNS = 3;
+const COLUMNS = 3;
 
 export interface AddDataSearchResultsProps<TItem extends { id: string }> {
   searchTerm: string;
@@ -35,7 +35,6 @@ export interface AddDataSearchResultsProps<TItem extends { id: string }> {
   onRetry?: () => void;
   renderCard: (item: TItem) => React.ReactNode;
   pageSize?: number;
-  columns?: 1 | 2 | 3 | 4;
 }
 
 export function AddDataSearchResults<TItem extends { id: string }>({
@@ -46,7 +45,6 @@ export function AddDataSearchResults<TItem extends { id: string }>({
   onRetry,
   renderCard,
   pageSize = DEFAULT_PAGE_SIZE,
-  columns = DEFAULT_COLUMNS,
 }: AddDataSearchResultsProps<TItem>) {
   const countId = useGeneratedHtmlId({ prefix: 'addDataSearchResultsCount' });
   const [visibleCount, setVisibleCount] = useState(pageSize);
@@ -145,7 +143,7 @@ export function AddDataSearchResults<TItem extends { id: string }>({
             <strong>{countLabel}</strong>
           </EuiText>
           <EuiSpacer size="m" />
-          <EuiFlexGrid columns={columns} gutterSize="m">
+          <EuiFlexGrid columns={COLUMNS} gutterSize="m">
             {visibleItems.map((item, index) => {
               const isFocusTarget = index === focusIndex;
               return (

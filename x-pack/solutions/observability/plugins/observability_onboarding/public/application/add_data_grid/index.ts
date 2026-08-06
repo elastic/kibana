@@ -7,10 +7,7 @@
 
 export { AddDataSearchBar, type AddDataSearchBarProps } from './search_bar/search_bar';
 export { CuratedGrid, type CuratedGridProps } from './curated_grid/curated_grid';
-export { CuratedCategorySection } from './curated_grid/curated_category';
-export { CuratedTileCard } from './curated_grid/curated_tile';
 export { MiniTilesRow, type MiniTilesRowProps } from './mini_tiles/mini_tiles_row';
-export { MiniTileCard } from './mini_tiles/mini_tile_card';
 export {
   AddDataSearchResults,
   type AddDataSearchResultsProps,

@@ -88,13 +88,30 @@ describe('AddDataSearchResults', () => {
         items={makeItems(8)}
         isLoading={false}
         renderCard={renderCard}
-        pageSize={6}
       />
     );
     expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(6);
     await user.click(screen.getByTestId('addDataSearchResultsShowMore'));
     expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(8);
     expect(screen.queryByTestId('addDataSearchResultsShowMore')).not.toBeInTheDocument();
+  });
+
+  // The other cases run on the default page size, so this is the only place a
+  // host-supplied `pageSize` is exercised at all.
+  it('pages by the host-supplied page size', async () => {
+    const user = userEvent.setup();
+    renderWithI18n(
+      <AddDataSearchResults
+        searchTerm="redis"
+        items={makeItems(8)}
+        isLoading={false}
+        renderCard={renderCard}
+        pageSize={3}
+      />
+    );
+    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(3);
+    await user.click(screen.getByTestId('addDataSearchResultsShowMore'));
+    expect(screen.getAllByTestId(/^card-item-/)).toHaveLength(6);
   });
 
   it('moves focus onto the first revealed card when Show more unmounts the button', async () => {
@@ -105,7 +122,6 @@ describe('AddDataSearchResults', () => {
         items={makeItems(8)}
         isLoading={false}
         renderCard={renderCard}
-        pageSize={6}
       />
     );
     await user.click(screen.getByTestId('addDataSearchResultsShowMore'));
@@ -120,7 +136,6 @@ describe('AddDataSearchResults', () => {
         items={makeItems(14)}
         isLoading={false}
         renderCard={renderCard}
-        pageSize={6}
       />
     );
     await user.click(screen.getByTestId('addDataSearchResultsShowMore'));
@@ -132,7 +147,6 @@ describe('AddDataSearchResults', () => {
           items={makeItems(14)}
           isLoading={false}
           renderCard={renderCard}
-          pageSize={6}
         />
       </I18nProvider>
     );
@@ -156,7 +170,6 @@ describe('AddDataSearchResults', () => {
         items={makeItems(14, 'redis')}
         isLoading={false}
         renderCard={renderTrackedCard}
-        pageSize={6}
       />
     );
     await user.click(screen.getByTestId('addDataSearchResultsShowMore'));
@@ -170,7 +183,6 @@ describe('AddDataSearchResults', () => {
           items={makeItems(14, 'nginx')}
           isLoading={false}
           renderCard={renderTrackedCard}
-          pageSize={6}
         />
       </I18nProvider>
     );

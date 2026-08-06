@@ -10,9 +10,14 @@ import { useEuiTheme } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useHistory } from 'react-router-dom';
 import type { CuratedCategory, MiniTile } from '../add_data_grid';
+import type { LogoIconProps } from '../shared/logo_icon';
 import { LogoIcon } from '../shared/logo_icon';
 import { INTEGRATION_TILES } from './integration_tiles';
 import { INTEGRATION_MINI_TILES } from './integration_mini_tiles';
+
+const tileIcon = (logo: LogoIconProps['logo'], color: LogoIconProps['color']) => (
+  <LogoIcon logo={logo} isAvatar size="l" avatarType="space" hasBorder color={color} />
+);
 
 /**
  * The o11y flavor of the Add Data grid: plugin tile content plus everything
@@ -35,16 +40,7 @@ export const useObservabilityCuratedCategories = (): CuratedCategory[] => {
             id: tile.id,
             title: tile.title,
             description: tile.description,
-            icon: (
-              <LogoIcon
-                logo={resolvedLogo}
-                isAvatar
-                size="l"
-                avatarType="space"
-                hasBorder
-                color={euiTheme.colors.backgroundBaseSubdued}
-              />
-            ),
+            icon: tileIcon(resolvedLogo, euiTheme.colors.backgroundBaseSubdued),
             'data-test-subj': `observabilityOnboardingIntegrationTile-${tile.id}`,
             ...navigation,
           };
@@ -62,16 +58,7 @@ export const useObservabilityMiniTiles = (): MiniTile[] => {
       INTEGRATION_MINI_TILES.map((tile) => ({
         id: tile.id,
         title: tile.title,
-        icon: (
-          <LogoIcon
-            logo={tile.logo}
-            isAvatar
-            size="l"
-            avatarType="space"
-            hasBorder
-            color={euiTheme.colors.backgroundBaseSubdued}
-          />
-        ),
+        icon: tileIcon(tile.logo, euiTheme.colors.backgroundBaseSubdued),
         'data-test-subj': `observabilityOnboardingIntegrationMiniTile-${tile.id}`,
         // Mini tile destinations are an open kickoff question. The noop keeps
         // the current interactive card styling until destinations are decided.

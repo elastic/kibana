@@ -119,4 +119,21 @@ describe('ObservabilitySearchResults', () => {
     renderResults();
     expect(await screen.findByTestId('addDataSearchResultsError')).toBeInTheDocument();
   });
+
+  it('remounts the package query when Retry follows a registry failure', async () => {
+    const user = userEvent.setup();
+    const perMount = [
+      { ...packagesResult, allCards: [], eprPackageLoadingError: new Error('registry down') },
+      packagesResult,
+    ];
+    // Fleet's hook is react-query backed, so a re-render replays the cached
+    // error and only a fresh mount re-queries. `useState` models that: without
+    // it this would pass even if Retry never unmounted the results.
+    const useCachedPackagesResult = () => React.useState(() => perMount.shift())[0];
+    mockUseAvailablePackages.mockImplementation(useCachedPackagesResult);
+
+    renderResults();
+    await user.click(await screen.findByTestId('addDataSearchResultsRetryButton'));
+    expect(await screen.findByTestId('mockPackageCard')).toHaveTextContent('Redis');
+  });
 });

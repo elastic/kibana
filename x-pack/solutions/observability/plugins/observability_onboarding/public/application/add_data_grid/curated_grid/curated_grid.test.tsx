@@ -33,14 +33,12 @@ describe('CuratedGrid', () => {
     expect(screen.getByTestId('tile-aws')).toBeInTheDocument();
   });
 
-  it('renders the optional heading and the trailing children slot', () => {
+  it('renders the trailing children slot', () => {
     render(
-      <CuratedGrid categories={categories} title="All integrations" subtitle="Browse them.">
+      <CuratedGrid categories={categories}>
         <div data-test-subj="trailingSlot" />
       </CuratedGrid>
     );
-    expect(screen.getByText('All integrations')).toBeInTheDocument();
-    expect(screen.getByText('Browse them.')).toBeInTheDocument();
     expect(screen.getByTestId('trailingSlot')).toBeInTheDocument();
   });
 });
