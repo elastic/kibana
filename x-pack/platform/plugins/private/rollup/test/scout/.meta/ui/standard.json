@@ -1,5 +1,5 @@
 {
-  "sha1": "8d223c68ffe9764705f717327cec285670e6b41b",
+  "sha1": "bd6de402f697bf48df264c85c346a6445fdda5a0",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -15,8 +15,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/ui/tests/hybrid_data_view.spec.ts",
-        "line": 53,
-        "column": 9
+        "line": 47,
+        "column": 55
       }
     },
     {
@@ -29,8 +29,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/ui/tests/hybrid_data_view.spec.ts",
-        "line": 76,
-        "column": 9
+        "line": 61,
+        "column": 15
       }
     },
     {
@@ -43,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/ui/tests/rollup_jobs_wizard.spec.ts",
-        "line": 44,
-        "column": 9
+        "line": 32,
+        "column": 13
       }
     },
     {
@@ -57,8 +57,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/rollup/test/scout/ui/tests/tsvb.spec.ts",
-        "line": 52,
-        "column": 9
+        "line": 45,
+        "column": 10
       }
     }
   ]
