@@ -6,8 +6,8 @@
  */
 
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
-import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from './use_kibana';
+import { useSignificantEventsAvailability } from './use_significant_events_availability';
 
 export type SignificantEventsPrivileges = ReturnType<typeof useSignificantEventsPrivileges>;
 
@@ -18,14 +18,12 @@ export function useSignificantEventsPrivileges() {
         capabilities: { streams },
       },
     },
-    services: { availability$ },
   } = useKibana();
 
-  // The composite gate (rollout flag × Enterprise license × pricing tier) is computed
-  // once in the plugin's start() and multicast through the services context — every
-  // feature-flag evaluation POSTs a usage counter, so components must not recreate
-  // the observable.
-  const significantEventsAvailable = useObservable(availability$);
+  // Availability comes from the server endpoint (the single source of truth,
+  // covering the rollout flag, project type, pricing tier, license and required
+  // plugins). The query is cached, so multiple callers share one request.
+  const { availability, isLoading } = useSignificantEventsAvailability();
 
   return {
     /**
@@ -37,8 +35,8 @@ export function useSignificantEventsPrivileges() {
       [STREAMS_UI_PRIVILEGES.show]: boolean;
     },
     significantEvents: {
-      available: significantEventsAvailable ?? false,
+      available: availability?.available ?? false,
     },
-    isLoading: significantEventsAvailable === undefined,
+    isLoading,
   };
 }

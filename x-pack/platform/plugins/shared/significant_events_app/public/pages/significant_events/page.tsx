@@ -68,11 +68,7 @@ export function SignificantEventsPage() {
     },
   } = useKibana();
 
-  const {
-    ui: streamsUiPrivileges,
-    significantEvents,
-    isLoading: isPrivilegesLoading,
-  } = useSignificantEventsPrivileges();
+  const { ui: streamsUiPrivileges } = useSignificantEventsPrivileges();
   const canManageStreams = streamsUiPrivileges.manage;
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
@@ -221,13 +217,13 @@ export function SignificantEventsPage() {
     [tab, router]
   );
 
-  if (isPrivilegesLoading || isAvailabilityLoading) {
+  if (isAvailabilityLoading) {
     return <EuiLoadingElastic size="xxl" />;
   }
 
-  if (!significantEvents.available || (availability && !availability.available)) {
+  if (!availability || !availability.available) {
     const reason =
-      availability && !availability.available ? availability.reason : ('feature_flag' as const);
+      availability && !availability.available ? availability.reason : ('unknown' as const);
     return (
       <SignificantEventsAppPageTemplate.Body grow>
         <SignificantEventsNotEnabledPrompt reason={reason} />
