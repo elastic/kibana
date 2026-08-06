@@ -7,10 +7,10 @@
 
 import { renderHook } from '@testing-library/react';
 import { getFlyoutManagerStore } from '@elastic/eui';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
-import { useTimelinePortalZIndex } from './use_timeline_portal_z_index';
+import { useIsNewFlyoutEnabled } from './use_is_new_flyout_enabled';
+import { useUnmanagedFlyoutZIndex } from './use_unmanaged_flyout_z_index';
 
-const TIMELINE_UNMANAGED_FLYOUT_ID = 'security-solution-timeline';
+const TEST_ID = 'test-unmanaged-flyout';
 
 const mockAddUnmanagedFlyout = jest.fn();
 const mockCloseUnmanagedFlyout = jest.fn();
@@ -26,9 +26,9 @@ jest.mock('@elastic/eui', () => ({
   useEuiTheme: () => ({ euiTheme: { levels: { flyout: 1000 } } }),
 }));
 
-jest.mock('../../../common/hooks/use_is_new_flyout_enabled');
+jest.mock('./use_is_new_flyout_enabled');
 
-describe('useTimelinePortalZIndex', () => {
+describe('useUnmanagedFlyoutZIndex', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetState.mockReturnValue({ currentZIndex: 0 });
@@ -37,51 +37,54 @@ describe('useTimelinePortalZIndex', () => {
   it('returns undefined and does not register when the new flyout system is disabled', () => {
     (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(false);
 
-    const { result } = renderHook(() => useTimelinePortalZIndex(true));
+    const { result } = renderHook(() => useUnmanagedFlyoutZIndex({ id: TEST_ID, active: true }));
 
     expect(result.current).toBeUndefined();
     expect(getFlyoutManagerStore).not.toHaveBeenCalled();
   });
 
-  it('returns undefined and does not register when Timeline is not visible, even if enabled', () => {
+  it('returns undefined and does not register when not active, even if enabled', () => {
     (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
 
-    const { result } = renderHook(() => useTimelinePortalZIndex(false));
+    const { result } = renderHook(() => useUnmanagedFlyoutZIndex({ id: TEST_ID, active: false }));
 
     expect(result.current).toBeUndefined();
     expect(getFlyoutManagerStore).not.toHaveBeenCalled();
   });
 
-  it('registers as an unmanaged flyout and returns flyoutLevel + currentZIndex when enabled and visible', () => {
+  it('registers as an unmanaged flyout and returns flyoutLevel + currentZIndex when enabled and active', () => {
     (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
     mockGetState.mockReturnValue({ currentZIndex: 6 });
 
-    const { result } = renderHook(() => useTimelinePortalZIndex(true));
+    const { result } = renderHook(() => useUnmanagedFlyoutZIndex({ id: TEST_ID, active: true }));
 
     expect(result.current).toBe(1006);
-    expect(mockAddUnmanagedFlyout).toHaveBeenCalledWith(TIMELINE_UNMANAGED_FLYOUT_ID);
+    expect(mockAddUnmanagedFlyout).toHaveBeenCalledWith(TEST_ID);
   });
 
   it('unregisters the unmanaged flyout on unmount', () => {
     (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
 
-    const { unmount } = renderHook(() => useTimelinePortalZIndex(true));
+    const { unmount } = renderHook(() => useUnmanagedFlyoutZIndex({ id: TEST_ID, active: true }));
     unmount();
 
-    expect(mockCloseUnmanagedFlyout).toHaveBeenCalledWith(TIMELINE_UNMANAGED_FLYOUT_ID);
+    expect(mockCloseUnmanagedFlyout).toHaveBeenCalledWith(TEST_ID);
   });
 
-  it('unregisters and resets the z-index when Timeline transitions from visible to hidden', () => {
+  it('unregisters and resets the z-index when transitioning from active to inactive', () => {
     (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
 
-    const { result, rerender } = renderHook(({ visible }) => useTimelinePortalZIndex(visible), {
-      initialProps: { visible: true },
-    });
+    const { result, rerender } = renderHook(
+      ({ active }) => useUnmanagedFlyoutZIndex({ id: TEST_ID, active }),
+      {
+        initialProps: { active: true },
+      }
+    );
     expect(result.current).toBeDefined();
 
-    rerender({ visible: false });
+    rerender({ active: false });
 
-    expect(mockCloseUnmanagedFlyout).toHaveBeenCalledWith(TIMELINE_UNMANAGED_FLYOUT_ID);
+    expect(mockCloseUnmanagedFlyout).toHaveBeenCalledWith(TEST_ID);
     expect(result.current).toBeUndefined();
   });
 });
