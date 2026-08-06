@@ -21,6 +21,16 @@ interface FieldValueViewProps {
   onEdit?: () => void;
 }
 
+export interface FieldValueRowProps {
+  /** Used to build this row's `data-test-subj`s and its edit button's accessible name. */
+  name: string;
+  label: string;
+  requirementLabel?: string;
+  isTextValue?: boolean;
+  onEdit?: () => void;
+  children: React.ReactNode;
+}
+
 const getSelectedValues = (value: unknown): string[] => {
   if (Array.isArray(value)) {
     return value.filter((item): item is string => typeof item === 'string');
@@ -87,23 +97,18 @@ const getValueText = (field: InlineField, value: unknown): string | undefined =>
   return String(value);
 };
 
-export const FieldValueView: React.FC<FieldValueViewProps> = ({
-  field,
-  value,
-  isRequired,
-  isRequiredOnClose,
-  onEdit,
-}) => {
+/**
+ * Shared styling for a single "row" of a section in view mode: a label above its value, an edit
+ * pencil beside it, and (when `onEdit` is passed) the whole row acting as the edit control. Used by
+ * both the template-fields section (via `FieldValueView` below) and the legacy custom fields
+ * section, so the two read as the same design rather than two similar-looking implementations.
+ */
+const useFieldValueRowStyles = () => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs');
   const sFontSize = useEuiFontSize('s');
 
-  const valueText = useMemo(() => getValueText(field, value), [field, value]);
-  const label = field.label ?? field.name;
-  const isTextValue =
-    field.control === FieldType.INPUT_TEXT || field.control === FieldType.TEXTAREA;
-
-  const styles = useMemo(
+  return useMemo(
     () => ({
       // The row itself is the edit control. A per-row "Edit" button turns a sidebar of eight
       // fields into a column of eight identical blue links that outweigh the values they sit
@@ -172,14 +177,24 @@ export const FieldValueView: React.FC<FieldValueViewProps> = ({
     }),
     [euiTheme, xsFontSize, sFontSize]
   );
+};
 
-  // "Required" is only actionable while the field is empty; repeating it on filled fields is noise.
-  // "Required on close" is a standing obligation, so it stays regardless.
-  const requirementLabel = isRequiredOnClose
-    ? commonI18n.REQUIRED_ON_CLOSE
-    : isRequired && valueText === undefined
-    ? commonI18n.REQUIRED
-    : undefined;
+/**
+ * A single section-view row: label (with an optional requirement badge) above its value, an edit
+ * pencil affordance beside it, and — when `onEdit` is passed — the whole row acting as the button
+ * that requests edit mode. Generic over what a "value" is, so both a template field's resolved
+ * value (`FieldValueView` below) and a legacy custom field's own `View` component can render inside
+ * it, giving the two sections an identical look without one depending on the other's field model.
+ */
+export const FieldValueRow: React.FC<FieldValueRowProps> = ({
+  name,
+  label,
+  requirementLabel,
+  isTextValue = false,
+  onEdit,
+  children,
+}) => {
+  const styles = useFieldValueRowStyles();
 
   const content = (
     <>
@@ -187,27 +202,17 @@ export const FieldValueView: React.FC<FieldValueViewProps> = ({
         <span css={styles.label}>
           {label}
           {requirementLabel ? (
-            <span
-              css={styles.requirement}
-              data-test-subj={`template-field-requirement-${field.name}`}
-            >
+            <span css={styles.requirement} data-test-subj={`template-field-requirement-${name}`}>
               {requirementLabel}
             </span>
           ) : null}
         </span>
         <EuiText
           size="s"
-          data-test-subj={`template-field-value-text-${field.name}`}
+          data-test-subj={`template-field-value-text-${name}`}
           css={[styles.value, isTextValue ? styles.textValue : undefined]}
         >
-          {valueText !== undefined ? (
-            valueText
-          ) : (
-            // One phrase for every empty field, editable or not, so a column of them reads as one
-            // state rather than a mix of instructions. Subdued but upright: italics on a third of
-            // the rows made the panel look like it was quoting itself.
-            <EuiTextColor color="subdued">{i18n.FIELD_VALUE_NOT_SET}</EuiTextColor>
-          )}
+          {children}
         </EuiText>
       </span>
       {onEdit ? (
@@ -224,7 +229,7 @@ export const FieldValueView: React.FC<FieldValueViewProps> = ({
 
   if (!onEdit) {
     return (
-      <div data-test-subj={`template-field-value-${field.name}`} css={styles.row}>
+      <div data-test-subj={`template-field-value-${name}`} css={styles.row}>
         {content}
       </div>
     );
@@ -235,13 +240,55 @@ export const FieldValueView: React.FC<FieldValueViewProps> = ({
       type="button"
       onClick={onEdit}
       aria-label={i18n.EDIT_FIELD_LABEL(label)}
-      data-test-subj={`template-field-edit-${field.name}`}
+      data-test-subj={`template-field-edit-${name}`}
       css={[styles.row, styles.interactiveRow]}
     >
-      <span data-test-subj={`template-field-value-${field.name}`} css={{ display: 'contents' }}>
+      <span data-test-subj={`template-field-value-${name}`} css={{ display: 'contents' }}>
         {content}
       </span>
     </button>
+  );
+};
+
+FieldValueRow.displayName = 'FieldValueRow';
+
+export const FieldValueView: React.FC<FieldValueViewProps> = ({
+  field,
+  value,
+  isRequired,
+  isRequiredOnClose,
+  onEdit,
+}) => {
+  const valueText = useMemo(() => getValueText(field, value), [field, value]);
+  const label = field.label ?? field.name;
+  const isTextValue =
+    field.control === FieldType.INPUT_TEXT || field.control === FieldType.TEXTAREA;
+
+  // "Required" is only actionable while the field is empty; repeating it on filled fields is noise.
+  // "Required on close" is a standing obligation, so it stays regardless.
+  const requirementLabel = isRequiredOnClose
+    ? commonI18n.REQUIRED_ON_CLOSE
+    : isRequired && valueText === undefined
+    ? commonI18n.REQUIRED
+    : undefined;
+
+  return (
+    <FieldValueRow
+      name={field.name}
+      label={label}
+      requirementLabel={requirementLabel}
+      isTextValue={isTextValue}
+      onEdit={onEdit}
+    >
+      {valueText !== undefined ? (
+        valueText
+      ) : (
+        // One phrase for every empty field, editable or not, so a column of them reads as one
+        // state rather than a mix of instructions. Subdued but upright: italics on a third of
+        // the rows made the panel look like it was quoting itself.
+        <EuiTextColor color="subdued">{i18n.FIELD_VALUE_NOT_SET}</EuiTextColor>
+      )}
+    </FieldValueRow>
   );
 };
 

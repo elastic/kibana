@@ -98,6 +98,7 @@ const useGetCasesFeaturesRes = {
 };
 
 const replaceCustomField = jest.fn();
+const replaceCustomFieldAsync = jest.fn().mockResolvedValue(undefined);
 const onUpdateField = jest.fn();
 
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
@@ -132,6 +133,7 @@ describe('CaseViewSidebar (redesign)', () => {
       isUpdatingCustomField: false,
       isError: false,
       mutate: replaceCustomField,
+      mutateAsync: replaceCustomFieldAsync,
     }));
   });
 
@@ -325,11 +327,17 @@ describe('CaseViewSidebar (redesign)', () => {
 
     expect(await screen.findByTestId('case-view-sidebar-legacy-custom-fields')).toBeInTheDocument();
 
+    // Every field in the section starts as a label/value row; clicking any one of them (like the
+    // template fields section) opens the whole section for editing.
+    await userEvent.click(
+      await screen.findByTestId(`template-field-edit-${customFieldsMock[1].key}`)
+    );
+
     await userEvent.click(await screen.findByRole('switch'));
 
     // The legacy custom fields section buffers edits: toggling puts the section into edit mode and
     // the write only goes out on Save.
-    expect(replaceCustomField).not.toHaveBeenCalled();
+    expect(replaceCustomFieldAsync).not.toHaveBeenCalled();
     expect(await screen.findByTestId('section-edit-changed-count')).toHaveTextContent(
       '1 unsaved field'
     );
@@ -337,7 +345,7 @@ describe('CaseViewSidebar (redesign)', () => {
     await userEvent.click(await screen.findByTestId('section-edit-save'));
 
     await waitFor(() => {
-      expect(replaceCustomField).toHaveBeenCalledWith({
+      expect(replaceCustomFieldAsync).toHaveBeenCalledWith({
         caseId: caseData.id,
         caseVersion: caseData.version,
         caseData: caseDataWithCustomFields,

@@ -20,7 +20,11 @@ import { isFieldUpdating } from '../utils/sidebar_helpers';
  */
 export const useTemplateFieldsActions = ({ caseData }: { caseData: CaseUI }) => {
   const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({ caseData });
-  const { isLoading: isUpdatingCustomField, mutate: replaceCustomField } = useReplaceCustomField();
+  const {
+    isLoading: isUpdatingCustomField,
+    mutate: replaceCustomField,
+    mutateAsync: replaceCustomFieldAsync,
+  } = useReplaceCustomField();
 
   const onSubmitCustomField = useCallback(
     (customField: CaseUICustomField) => {
@@ -35,6 +39,31 @@ export const useTemplateFieldsActions = ({ caseData }: { caseData: CaseUI }) => 
     [replaceCustomField, caseData]
   );
 
+  // The legacy custom fields section's Save button: `SectionEditProvider`'s contract is one merged
+  // `onSave`, but each custom field still has its own replace endpoint, so this fans out to one
+  // request per changed field. That mutation already rebases on a version conflict, so the writes
+  // can go out together rather than being chained.
+  const onSaveCustomFields = useCallback(
+    (
+      values: Record<string, unknown>,
+      { onSuccess, onError }: { onSuccess: () => void; onError: () => void }
+    ) => {
+      const changedFields = Object.values(values) as CaseUICustomField[];
+      Promise.all(
+        changedFields.map((customField) =>
+          replaceCustomFieldAsync({
+            caseId: caseData.id,
+            customFieldId: customField.key,
+            customFieldValue: customField.value,
+            caseVersion: caseData.version,
+            caseData,
+          })
+        )
+      ).then(onSuccess, onError);
+    },
+    [replaceCustomFieldAsync, caseData]
+  );
+
   const isCustomFieldsLoading = useMemo(
     () => isFieldUpdating(isLoading, loadingKey, 'customFields') || isUpdatingCustomField,
     [isLoading, loadingKey, isUpdatingCustomField]
@@ -44,8 +73,9 @@ export const useTemplateFieldsActions = ({ caseData }: { caseData: CaseUI }) => 
     () => ({
       onUpdateField,
       onSubmitCustomField,
+      onSaveCustomFields,
       isCustomFieldsLoading,
     }),
-    [onUpdateField, onSubmitCustomField, isCustomFieldsLoading]
+    [onUpdateField, onSubmitCustomField, onSaveCustomFields, isCustomFieldsLoading]
   );
 };

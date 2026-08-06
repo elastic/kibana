@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiButton, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiButton, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { CasesConfigurationUI, CaseUICustomField } from '../../../../common/ui';
 import type { CaseUI } from '../../../../common';
 import { useCasesContext } from '../../cases_context/use_cases_context';
@@ -24,6 +24,15 @@ interface Props {
   onSubmit: (customField: CaseUICustomField) => void;
   /** Defaults to classic (legacy case view). Redesign passes `inline`. */
   editVariant?: 'classic' | 'inline';
+  /**
+   * `inline` only: whether the section (not any single field) is in edit mode. `false` renders
+   * every field as a label/value row with an edit affordance instead of its editable form —
+   * matching the template fields section, where clicking any field's row opens all of them at
+   * once.
+   */
+  isSectionEditing?: boolean;
+  /** `inline` only: requests that the whole section enter edit mode. */
+  onRequestSectionEdit?: () => void;
   /**
    * Section edit mode: keys whose value has been changed but not yet saved. Each gets a marker and
    * its own revert control.
@@ -43,12 +52,21 @@ const CustomFieldsComponent: React.FC<Props> = ({
   customFieldsConfiguration,
   onSubmit,
   editVariant = 'classic',
+  isSectionEditing = true,
+  onRequestSectionEdit,
   modifiedKeys,
   onRevertField,
   resetTokens,
 }) => {
   const { permissions } = useCasesContext();
+  const { euiTheme } = useEuiTheme();
   const markerStyles = useFieldMarkerStyles();
+  // Matches the template-field revert's own spacing, so a field's editor and its revert sit the
+  // same distance apart in both sections.
+  const revertButtonStyles = useMemo(
+    () => ({ alignSelf: 'flex-start' as const, marginBlockStart: euiTheme.size.xs }),
+    [euiTheme]
+  );
   const onSubmitCustomField = useCallback(
     (customFieldToAdd: CaseUICustomField) => {
       onSubmit(customFieldToAdd);
@@ -81,16 +99,21 @@ const CustomFieldsComponent: React.FC<Props> = ({
           customField={customField}
           onSubmit={onSubmitCustomField}
           editVariant={editVariant}
+          isSectionEditing={isSectionEditing}
+          onRequestSectionEdit={onRequestSectionEdit}
         />
         {isModified && onRevertField ? (
           // Matches the template-field revert: a quiet button, not a flush link, so the only way
-          // back for a single field is not missed under a filled input.
+          // back for a single field is not missed under a filled input. `alignSelf` overrides the
+          // wrapping EuiFlexItem's own `display: flex; flex-direction: column`, which otherwise
+          // stretches every direct child (this button included) to the row's full width.
           <EuiButton
             size="s"
             color="primary"
             fill={false}
             iconType="editorUndo"
             onClick={() => onRevertField(customFieldConf.key)}
+            css={revertButtonStyles}
             data-test-subj={`case-custom-field-revert-${customFieldConf.key}`}
           >
             {i18n.REVERT_FIELD}

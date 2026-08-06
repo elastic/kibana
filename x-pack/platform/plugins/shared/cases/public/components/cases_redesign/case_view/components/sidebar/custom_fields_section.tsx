@@ -5,48 +5,52 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiPanel, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CasesConfigurationUI, CaseUICustomField } from '../../../../../../common/ui';
 import type { CaseUI } from '../../../../../../common';
 import { CustomFields } from '../../../../case_view/components/custom_fields';
-import {
-  SectionEditBar,
-  useSectionEditingStyles,
-} from '../../../../templates_v2/field_types/section_edit_bar';
+import { useSectionEdit } from '../../../../templates_v2/field_types/section_edit_context';
 
 interface CustomFieldsSectionProps {
   isLoading: boolean;
   customFields: CaseUI['customFields'];
   customFieldsConfiguration: CasesConfigurationUI['customFields'];
-  onSubmit: (customField: CaseUICustomField) => void;
 }
 
+/** This section's id in the `SectionEditProvider` that wraps it (see `case_view_sidebar.tsx`). */
+const FORM_ID = 'legacyCustomFields';
+
 /**
- * The legacy custom fields section, edited as a group rather than one field at a time.
+ * The legacy custom fields section, edited as a group rather than one field at a time — the same
+ * edit-mode contract as the template fields section, and for the same reason: each custom field
+ * type owns its own form and used to persist the moment it changed, so a pass over four fields
+ * wrote the case four times with no way back.
  *
- * Each custom field type owns its own form and used to persist the moment it changed, so a pass over
- * four fields wrote the case four times with no way back. Here the edits are buffered instead: the
- * section enters edit mode on the first change, and Save flushes the buffer. A revert (or Cancel)
- * remounts the affected editors, which is the only way to reset form state these components keep to
- * themselves.
+ * This registers itself as a form with the section's `SectionEditProvider` (via `useSectionEdit`)
+ * rather than owning its own edit-mode state and Save/Cancel bar: the wrapping
+ * `SidebarAccordionSection` already renders that bar in its pinned header whenever a form is
+ * registered and editing, which is what makes this section look and behave exactly like the
+ * template fields one instead of a similar-looking reimplementation of it.
  */
 export const CustomFieldsSection: React.FC<CustomFieldsSectionProps> = ({
   isLoading,
   customFields,
   customFieldsConfiguration,
-  onSubmit,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const editingStyles = useSectionEditingStyles();
+  const sectionEdit = useSectionEdit();
   const [pendingFields, setPendingFields] = useState<Record<string, CaseUICustomField>>({});
   const [resetTokens, setResetTokens] = useState<Record<string, number>>({});
 
   const groupStyles = useMemo(() => css({ gap: euiTheme.size.m }), [euiTheme]);
 
   const modifiedKeys = useMemo(() => new Set(Object.keys(pendingFields)), [pendingFields]);
-  const isEditing = modifiedKeys.size > 0;
+  // No provider above means no pinned Save/Cancel bar can ever appear, so there is no path back
+  // out of a per-field edit — falling back to "always editable" keeps that case usable rather than
+  // stranding the reader in a view they cannot leave.
+  const isSectionEditing = sectionEdit ? sectionEdit.isEditing : true;
 
   const bufferField = useCallback((customField: CaseUICustomField) => {
     setPendingFields((previous) => ({ ...previous, [customField.key]: customField }));
@@ -70,48 +74,49 @@ export const CustomFieldsSection: React.FC<CustomFieldsSectionProps> = ({
     [bumpResetTokens]
   );
 
-  const onCancel = useCallback(() => {
+  const reset = useCallback(() => {
     bumpResetTokens(Object.keys(pendingFields));
     setPendingFields({});
   }, [bumpResetTokens, pendingFields]);
 
-  const onSave = useCallback(() => {
-    // Each field has its own replace endpoint, and that mutation already rebases on a version
-    // conflict, so the writes can go out together rather than being chained.
-    Object.values(pendingFields).forEach(onSubmit);
-    setPendingFields({});
-  }, [onSubmit, pendingFields]);
+  const commit = useCallback(() => setPendingFields({}), []);
+
+  // Each field type already validates before buffering (see `custom_fields/*/edit.tsx`'s
+  // InlineEdit), so whatever made it into `pendingFields` is already known-valid — collect can
+  // just hand it over rather than re-validating.
+  const collect = useCallback(async () => pendingFields, [pendingFields]);
+
+  const registerForm = sectionEdit?.registerForm;
+  const unregisterForm = sectionEdit?.unregisterForm;
+
+  useEffect(() => {
+    if (!registerForm || !unregisterForm) {
+      return;
+    }
+    registerForm(FORM_ID, { changedCount: modifiedKeys.size, collect, commit, reset });
+    return () => unregisterForm(FORM_ID);
+  }, [registerForm, unregisterForm, modifiedKeys.size, collect, commit, reset]);
 
   return (
-    <EuiPanel
-      hasShadow={false}
-      hasBorder={false}
-      color="transparent"
-      paddingSize={isEditing ? 's' : 'none'}
-      css={isEditing ? editingStyles : undefined}
+    <EuiFlexGroup
+      direction="column"
+      responsive={false}
+      css={groupStyles}
       data-test-subj="legacy-custom-fields-section"
     >
-      <EuiFlexGroup direction="column" responsive={false} css={groupStyles}>
-        <CustomFields
-          isLoading={isLoading}
-          customFields={customFields}
-          customFieldsConfiguration={customFieldsConfiguration}
-          onSubmit={bufferField}
-          editVariant="inline"
-          modifiedKeys={modifiedKeys}
-          onRevertField={onRevertField}
-          resetTokens={resetTokens}
-        />
-      </EuiFlexGroup>
-      {isEditing ? (
-        <SectionEditBar
-          changedCount={modifiedKeys.size}
-          isSaving={isLoading}
-          onCancel={onCancel}
-          onSave={onSave}
-        />
-      ) : null}
-    </EuiPanel>
+      <CustomFields
+        isLoading={isLoading}
+        customFields={customFields}
+        customFieldsConfiguration={customFieldsConfiguration}
+        onSubmit={bufferField}
+        editVariant="inline"
+        isSectionEditing={isSectionEditing}
+        onRequestSectionEdit={sectionEdit?.requestEdit}
+        modifiedKeys={modifiedKeys}
+        onRevertField={onRevertField}
+        resetTokens={resetTokens}
+      />
+    </EuiFlexGroup>
   );
 };
 

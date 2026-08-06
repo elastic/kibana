@@ -207,7 +207,7 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
     </EuiText>
   );
 
-  const { onUpdateField, onSubmitCustomField, isCustomFieldsLoading } = useTemplateFieldsActions({
+  const { onUpdateField, onSaveCustomFields, isCustomFieldsLoading } = useTemplateFieldsActions({
     caseData,
   });
 
@@ -295,47 +295,51 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
               <AttributesFields caseData={caseData} />
             </SidebarAccordionSection>
             {showLegacyCustomFieldsAccordion ? (
-              <SidebarAccordionSection
-                withDivider
-                id="legacyCustomFields"
-                title={
-                  isTemplatesV2Enabled ? (
-                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        {redesignI18n.LEGACY_CUSTOM_FIELDS_TITLE}
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge
-                          color="warning"
-                          data-test-subj="legacy-custom-fields-deprecated-badge"
-                        >
-                          {configureCasesI18n.DEPRECATED_BADGE}
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  ) : (
-                    redesignI18n.LEGACY_CUSTOM_FIELDS_TITLE
-                  )
-                }
-                isOpen={isOpen('legacyCustomFields')}
-                onToggle={onToggle}
-                data-test-subj="case-view-sidebar-legacy-custom-fields"
-              >
-                {isTemplatesV2Enabled ? (
-                  <>
-                    <CustomFieldsDeprecationCallout
-                      title={redesignI18n.LEGACY_CUSTOM_FIELDS_TITLE}
-                    />
-                    <EuiSpacer size="m" />
-                  </>
-                ) : null}
-                <CustomFieldsSection
-                  isLoading={isCustomFieldsLoading}
-                  customFields={caseData.customFields}
-                  customFieldsConfiguration={casesConfiguration.customFields}
-                  onSubmit={onSubmitCustomField}
-                />
-              </SidebarAccordionSection>
+              // The provider sits outside the section, not inside it: the section renders the save
+              // row in its own pinned header (see the template fields section below), so it has to
+              // be able to read this state.
+              <SectionEditProvider onSave={onSaveCustomFields}>
+                <SidebarAccordionSection
+                  withDivider
+                  id="legacyCustomFields"
+                  title={
+                    isTemplatesV2Enabled ? (
+                      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          {redesignI18n.LEGACY_CUSTOM_FIELDS_TITLE}
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge
+                            color="warning"
+                            data-test-subj="legacy-custom-fields-deprecated-badge"
+                          >
+                            {configureCasesI18n.DEPRECATED_BADGE}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    ) : (
+                      redesignI18n.LEGACY_CUSTOM_FIELDS_TITLE
+                    )
+                  }
+                  isOpen={isOpen('legacyCustomFields')}
+                  onToggle={onToggle}
+                  data-test-subj="case-view-sidebar-legacy-custom-fields"
+                >
+                  {isTemplatesV2Enabled ? (
+                    <>
+                      <CustomFieldsDeprecationCallout
+                        title={redesignI18n.LEGACY_CUSTOM_FIELDS_TITLE}
+                      />
+                      <EuiSpacer size="m" />
+                    </>
+                  ) : null}
+                  <CustomFieldsSection
+                    isLoading={isCustomFieldsLoading}
+                    customFields={caseData.customFields}
+                    customFieldsConfiguration={casesConfiguration.customFields}
+                  />
+                </SidebarAccordionSection>
+              </SectionEditProvider>
             ) : null}
             {isTemplatesV2Enabled ? (
               /* The provider sits outside the section, not inside it: the section renders the save

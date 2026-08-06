@@ -189,10 +189,6 @@ describe('Case View Page files tab', () => {
     );
     await userEvent.paste('!!!');
 
-    await userEvent.click(
-      await screen.findByTestId(`template-field-confirm-${customFieldsMock[0].key}`)
-    );
-
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
         ...customFieldsMock[0],
@@ -222,10 +218,6 @@ describe('Case View Page files tab', () => {
 
     await userEvent.click(textFormField);
     await userEvent.paste(' updated!!');
-
-    await userEvent.click(
-      await screen.findByTestId(`template-field-confirm-${customFieldsMock[0].key}`)
-    );
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
