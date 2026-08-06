@@ -258,19 +258,10 @@ const KILL_CHAIN: ForensicEvent[] = [
 export async function seedForensicTimeline(
   { esClient }: { esClient: Client },
   log: ToolingLog,
-  baseTime: Date = new Date(Date.now() - 3 * 60 * 60 * 1000),
-  /**
-   * Maps a seeded host to a REAL Fleet-enrolled agent UUID. Required for any
-   * environment where Osquery live queries must resolve `agent.id` from
-   * telemetry to an actually-enrolled agent (e.g. the BlackHat live demo) —
-   * without this, the synthetic `eval-agent-forensic-*` id is written instead
-   * and any live query dispatched against it hangs forever (no such agent).
-   * Omit for eval-suite runs, where no live Osquery dispatch happens.
-   */
-  agentIdOverrides: Partial<Record<keyof typeof AGENT_IDS, string>> = {}
+  baseTime: Date = new Date(Date.now() - 3 * 60 * 60 * 1000)
 ): Promise<void> {
   const operations = KILL_CHAIN.flatMap((event) => {
-    const agentId = agentIdOverrides[event.host] ?? AGENT_IDS[event.host];
+    const agentId = AGENT_IDS[event.host];
     const timestamp = new Date(baseTime.getTime() + event.offsetMinutes * 60 * 1000).toISOString();
     const [, dataset] = event.index.match(/^logs-(endpoint\.events\.[a-z]+)-default$/) ?? [];
 
