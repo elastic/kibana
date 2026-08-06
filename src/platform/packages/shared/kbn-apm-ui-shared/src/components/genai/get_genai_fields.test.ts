@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -29,6 +31,33 @@ describe('hasGenAiData', () => {
 
   it('returns false when no gen_ai fields present', () => {
     expect(hasGenAiData({ 'service.name': ['my-svc'], 'span.id': ['abc'] })).toBe(false);
+  });
+
+  it('returns false when gen_ai keys exist but all values are null (ES|QL zip-padded rows)', () => {
+    expect(
+      hasGenAiData({
+        'attributes.gen_ai.request.model': null,
+        'gen_ai.input.messages': null,
+        'service.name': 'cart',
+      })
+    ).toBe(false);
+  });
+
+  it('returns false when gen_ai values are arrays of nulls', () => {
+    expect(hasGenAiData({ 'attributes.gen_ai.input.messages': [null] })).toBe(false);
+  });
+
+  it('returns false when gen_ai keys exist with undefined values', () => {
+    expect(hasGenAiData({ 'attributes.gen_ai.request.model': undefined })).toBe(false);
+  });
+
+  it('returns true when at least one gen_ai field has a real value among null ones', () => {
+    expect(
+      hasGenAiData({
+        'attributes.gen_ai.input.messages': null,
+        'attributes.gen_ai.usage.input_tokens': 1100,
+      })
+    ).toBe(true);
   });
 
   it('returns false for empty metadata', () => {
@@ -217,6 +246,24 @@ describe('getGenAiFields', () => {
     expect(fields.requestModel).toBe('claude-3');
     expect(fields.provider).toBe('anthropic');
   });
+
+  it('parses messages from bare gen_ai.* keys (no attributes. prefix)', () => {
+    const fields = getGenAiFields({
+      'gen_ai.input.messages': [JSON.stringify({ role: 'user', content: 'Hello' })],
+      'gen_ai.output.messages': [JSON.stringify({ role: 'assistant', content: 'Hi!' })],
+    });
+    expect(fields.inputMessages).toHaveLength(1);
+    expect(fields.inputMessages[0].content).toBe('Hello');
+    expect(fields.outputMessages[0].role).toBe('assistant');
+  });
+
+  it('parses messages from labels.gen_ai_* keys (APM Server ingest)', () => {
+    const fields = getGenAiFields({
+      'labels.gen_ai_input_messages': [JSON.stringify({ role: 'user', content: 'Hello' })],
+    });
+    expect(fields.inputMessages).toHaveLength(1);
+    expect(fields.inputMessages[0].role).toBe('user');
+  });
 });
 
 describe('getMessageCopyText', () => {
@@ -258,5 +305,54 @@ describe('getMessageCopyText', () => {
       tool_calls: [{ id: 'call_1', type: 'function', function: { name: 'search' } }],
     };
     expect(getMessageCopyText(msg)).toBe(JSON.stringify(msg, null, 2));
+  });
+});
+
+describe('null-valued gen_ai fields (Discover records)', () => {
+  it('does not throw and returns empty messages for a doc with null message fields', () => {
+    // Regression: Discover flattened records carry null for absent fields;
+    // parseGenAiMessages used to throw on [null] (raw[0].trimStart()).
+    const metadata = {
+      'attributes.gen_ai.conversation.id': 'conv-agent-001',
+      'attributes.gen_ai.input.messages': null,
+      'attributes.gen_ai.output.messages': null,
+      'attributes.gen_ai.system_instructions': null,
+      'attributes.gen_ai.operation.name': 'chat',
+      'attributes.gen_ai.provider.name': 'openai',
+      'attributes.gen_ai.request.model': 'gpt-4o',
+      'attributes.gen_ai.response.model': null,
+      'attributes.gen_ai.response.finish_reasons': null,
+      'attributes.gen_ai.usage.input_tokens': 1100,
+      'attributes.gen_ai.usage.output_tokens': 420,
+      'gen_ai.input.messages': null,
+    };
+
+    const fields = getGenAiFields(metadata);
+
+    expect(fields.inputMessages).toEqual([]);
+    expect(fields.outputMessages).toEqual([]);
+    expect(fields.systemInstructions).toBeUndefined();
+    expect(fields.response.finish_reasons).toBeUndefined();
+    expect(fields.operationName).toBe('chat');
+    expect(fields.requestModel).toBe('gpt-4o');
+    expect(fields.inputTokens).toBe(1100);
+    expect(fields.outputTokens).toBe(420);
+  });
+
+  it('does not let a null attributes.* value shadow the bare gen_ai.* fallback', () => {
+    const fields = getGenAiFields({
+      'attributes.gen_ai.request.model': null,
+      'gen_ai.request.model': 'gpt-4o',
+    });
+
+    expect(fields.requestModel).toBe('gpt-4o');
+  });
+
+  it('drops null elements from multi-valued fields', () => {
+    const fields = getGenAiFields({
+      'attributes.gen_ai.response.finish_reasons': [null, 'stop'],
+    });
+
+    expect(fields.response.finish_reasons).toEqual(['stop']);
   });
 });
