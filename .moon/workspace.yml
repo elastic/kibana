@@ -22,11 +22,10 @@ pipeline:
   syncProjects: false
 
 # https://moonrepo.dev/docs/config/workspace#experiments
-# Benchmarked during the 2.4.6 upgrade. All left OFF here (safety > speed); enable
-# the safe wins in a dedicated follow-up so this PR stays a pure version bump.
+# Benchmarked during the 2.4.6 upgrade, only the two low-risk wins are enabled.
 experiments:
-  asyncGraphBuilding: false # ~-13% on graph/query workloads, low risk — safe win, enable in follow-up
-  nativeFileHashing: false # small consistent win, low risk — safe win, enable in follow-up
+  asyncGraphBuilding: true # ~-13% on graph/query workloads, low risk
+  nativeFileHashing: true # small consistent win, low risk
   asyncAffectedTracking: false # governs affected/test selection; no measured gain and a bug means missed CI tests
   casOutputsCache: false # changes local output-cache format (interacts with the HTTP remote cache); only a noisy cold-build gain
 
