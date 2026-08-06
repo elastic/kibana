@@ -1,5 +1,5 @@
 {
-  "sha1": "b2f60de567fdccc69c507c1d89b4229831a813ed",
+  "sha1": "44408a755171bce73031cfd90e14d4a66aac70a1",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -771,6 +771,22 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
         "line": 316,
         "column": 25
+      }
+    },
+    {
+      "id": "1bf6ab7417a0378-69dccf9a88e32b3",
+      "title": "Agent Builder — concurrent conversation writes API keeps both rounds when two clients converse with the same conversation at once",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_concurrency_api.spec.ts",
+        "line": 37,
+        "column": 38
       }
     },
     {

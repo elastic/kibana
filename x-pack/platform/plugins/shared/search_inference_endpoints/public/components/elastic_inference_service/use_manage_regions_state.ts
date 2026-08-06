@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRegionPolicy } from '../../hooks/use_region_policy';
 import { useSaveRegionPolicy } from '../../hooks/use_save_region_policy';
+import { useDeleteRegionPolicy } from '../../hooks/use_delete_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
 import { getAvailableRegions, getAvailableGeos, regionKey } from '../../utils/eis_utils';
 import type { PolicyMode } from '../../types';
@@ -23,6 +24,7 @@ export const useManageRegionsState = (onClose: () => void) => {
     isError: isEndpointsError,
   } = useEisModels();
   const { mutate: savePolicy, isLoading: isSaving } = useSaveRegionPolicy();
+  const { mutate: deletePolicy, isLoading: isDeleting } = useDeleteRegionPolicy(onClose);
 
   const availableRegions = useMemo(() => getAvailableRegions(eisEndpoints ?? []), [eisEndpoints]);
   const availableGeos = useMemo(() => getAvailableGeos(eisEndpoints ?? []), [eisEndpoints]);
@@ -36,8 +38,10 @@ export const useManageRegionsState = (onClose: () => void) => {
   const [activeTab, setActiveTab] = useState<PolicyMode>('geo');
   const [syncedFromInitial, setSyncedFromInitial] = useState(false);
   const [isNewPolicy, setIsNewPolicy] = useState(false);
+  const [useCustomPolicy, setUseCustomPolicy] = useState(false);
   const [isCallOutDismissed, setIsCallOutDismissed] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   // Seed state once both queries finish loading.
   useEffect(() => {
@@ -46,6 +50,8 @@ export const useManageRegionsState = (onClose: () => void) => {
       const seedState = computeSeedState(policy, availableRegions, availableGeos);
       setActiveTab(seedState.activeTab);
       setIsNewPolicy(seedState.isNewPolicy);
+      // Toggle is ON when a custom policy is already saved; OFF for first-time setup.
+      setUseCustomPolicy(!seedState.isNewPolicy);
       seedRegions(seedState.regionKeys);
       seedGeos(seedState.geos);
       setSyncedFromInitial(true);
@@ -66,22 +72,39 @@ export const useManageRegionsState = (onClose: () => void) => {
   const isError = isPolicyError || isEndpointsError;
   const activeSelectionIsDirty =
     activeTab === 'regions' ? regionTab.regionSelection.isDirty : geoSelection.isDirty;
-  const isDirty = syncedFromInitial && (isNewPolicy || activeSelectionIsDirty);
-  const noSelections =
-    activeTab === 'geo'
-      ? geoSelection.totalSelected === 0
-      : regionTab.regionSelection.totalSelected === 0;
-  const isSaveDisabled = isSaving || isLoading || !isDirty || noSelections;
+  const hasExistingPolicy = syncedFromInitial && !isNewPolicy;
+  const pendingDelete = hasExistingPolicy && !useCustomPolicy;
+
+  const hasUnsavedSelectionChanges = isNewPolicy || activeSelectionIsDirty;
+  const hasCustomPolicyEdits = syncedFromInitial && hasUnsavedSelectionChanges;
+  const isDirty = useCustomPolicy ? hasCustomPolicyEdits : pendingDelete;
+
+  const hasNoGeosSelected = geoSelection.totalSelected === 0;
+  const hasNoRegionsSelected = regionTab.regionSelection.totalSelected === 0;
+  const hasEmptySelection = activeTab === 'geo' ? hasNoGeosSelected : hasNoRegionsSelected;
+
+  const isBusy = isSaving || isDeleting || isLoading;
+  const requiresSelection = useCustomPolicy && hasEmptySelection;
+  const isSaveDisabled = isBusy || !isDirty || requiresSelection;
 
   // --- Confirmation flow handlers ---
   const handleRequestSave = useCallback(() => {
-    setShowConfirmation(true);
-  }, []);
+    if (pendingDelete) {
+      setShowDeleteConfirmation(true);
+    } else {
+      setShowConfirmation(true);
+    }
+  }, [pendingDelete]);
 
   const handleCancelConfirmation = useCallback(() => {
     if (isSaving) return;
     setShowConfirmation(false);
   }, [isSaving]);
+
+  const handleCancelDeleteConfirmation = useCallback(() => {
+    if (isDeleting) return;
+    setShowDeleteConfirmation(false);
+  }, [isDeleting]);
 
   const handleConfirmSave = useCallback(() => {
     if (activeTab === 'geo') {
@@ -116,6 +139,10 @@ export const useManageRegionsState = (onClose: () => void) => {
     savePolicy,
     onClose,
   ]);
+
+  const handleConfirmDelete = useCallback(() => {
+    deletePolicy();
+  }, [deletePolicy]);
 
   const handleDismissCallOut = useCallback(() => {
     setIsCallOutDismissed(true);
@@ -178,16 +205,23 @@ export const useManageRegionsState = (onClose: () => void) => {
       isLoading,
       isError,
       isSaving,
+      isDeleting,
       isDirty,
-      isNewPolicy,
+      hasExistingPolicy,
+      pendingDelete,
+      useCustomPolicy,
       isSaveDisabled,
       isCallOutDismissed,
       showConfirmation,
+      showDeleteConfirmation,
       setActiveTab,
+      setUseCustomPolicy,
       handleDismissCallOut,
       handleRequestSave,
       handleConfirmSave,
       handleCancelConfirmation,
+      handleConfirmDelete,
+      handleCancelDeleteConfirmation,
     },
     regionTab: regionTabReturn,
     geoTab: geoTabReturn,

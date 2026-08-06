@@ -45,11 +45,6 @@ const JS_YAML_LEGACY_CONSUMERS = [
   'src/platform/packages/shared/kbn-connector-cli/src/create_connectors/manifest_loader.ts',
   'src/platform/packages/shared/kbn-edot-collector/src/get_edot_collector_configuration.ts',
   'src/platform/packages/shared/kbn-edot-collector/src/read_kibana_config.ts',
-  'src/platform/packages/shared/kbn-scout/src/cli/create_test_tracks.ts',
-  'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/agent_builder_smoke/stateful/classic.stateful.config.ts',
-  'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.test.ts',
-  'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.ts',
-  'src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/ftr_configs_manifest.ts',
   'src/platform/plugins/private/interactive_setup/server/kibana_config_writer.ts',
   'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/yaml_form_utils.test.ts',
   'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/yaml_form_utils.ts',
@@ -477,6 +472,7 @@ module.exports = {
     '@elastic/eui/tooltip-button-icon-wrap': 'error',
     '@elastic/eui/tooltip-focusable-anchor': 'error',
     '@elastic/eui/no-unnamed-radio-group': 'error',
+    '@elastic/eui/require-aria-label-for-modals': 'error',
   },
 
   overrides: [

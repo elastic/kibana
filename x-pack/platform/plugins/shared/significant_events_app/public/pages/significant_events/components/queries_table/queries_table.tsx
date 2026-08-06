@@ -510,6 +510,7 @@ export function QueriesTable() {
       )}
       {selectedQuery && (
         <QueryDetailsFlyout
+          key={selectedQuery.query.id}
           item={selectedQuery}
           onClose={closeQueryFlyout}
           onDelete={(queryId, streamName) =>
