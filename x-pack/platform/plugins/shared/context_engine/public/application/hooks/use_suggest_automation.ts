@@ -20,11 +20,14 @@ const AUTOMATION_REFRESH_TOOL_IDS: ReadonlySet<string> = new Set([
   CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
 ]);
 
+const KI_AUTOMATION_GENERATION_SKILL_ID = 'ki-automation-generation';
+
 const SUGGEST_AUTOMATION_INITIAL_MESSAGE = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.automations.suggestAutomationInitialMessage',
   {
     defaultMessage:
-      'Use the ki-automation-generation skill for this AI index. Sample the configured sources, suggest a Knowledge Indicator extraction strategy, draft a workflow automation, and test it with a small pilot run.',
+      'Use [/{skillId}](skill://{skillId}) for this AI index. Sample the configured sources, ask the user for a Knowledge Indicator extraction strategy, draft a workflow automation, and test it with a small pilot run.',
+    values: { skillId: KI_AUTOMATION_GENERATION_SKILL_ID },
   }
 );
 
@@ -134,6 +137,7 @@ export const useSuggestAutomation = ({
 
     agentBuilder.openChat({
       newConversation: true,
+      autoSendInitialMessage: false,
       initialMessage: SUGGEST_AUTOMATION_INITIAL_MESSAGE,
       sessionTag: `context-engine-ai-index-${aiIndex.id}`,
       attachments: [

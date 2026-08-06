@@ -113,7 +113,10 @@ describe('useSuggestAutomation', () => {
     expect(openChat).toHaveBeenCalledWith(
       expect.objectContaining({
         newConversation: true,
-        initialMessage: expect.stringContaining('ki-automation-generation'),
+        autoSendInitialMessage: false,
+        initialMessage: expect.stringContaining(
+          '[/ki-automation-generation](skill://ki-automation-generation)'
+        ),
         sessionTag: 'context-engine-ai-index-my-ai-index',
         attachments: [
           expect.objectContaining({
