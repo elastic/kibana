@@ -25,7 +25,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
-    'appMenu',
     'svlCommonPage',
     'common',
     'discover',
@@ -91,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('app-menu-overflow-button');
         await testSubjects.existOrFail('discoverAlertsButton');
         await testSubjects.click('app-menu-overflow-button');
-        await PageObjects.appMenu.existOrFail('shareTopNavButton');
+        await testSubjects.existOrFail('~shareTopNavButton');
         await testSubjects.existOrFail('docTableExpandToggleColumn');
         await testSubjects.existOrFail('dataGridColumnSortingButton');
         await testSubjects.existOrFail('fieldListFiltersFieldSearch');
@@ -117,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('app-menu-overflow-button');
         await testSubjects.existOrFail('discoverAlertsButton');
         await testSubjects.click('app-menu-overflow-button');
-        await PageObjects.appMenu.existOrFail('shareTopNavButton');
+        await testSubjects.existOrFail('~shareTopNavButton');
         await testSubjects.missingOrFail('dataGridColumnSortingButton');
         await testSubjects.existOrFail('docTableExpandToggleColumn');
         await testSubjects.existOrFail('fieldListFiltersFieldTypeFilterToggle');

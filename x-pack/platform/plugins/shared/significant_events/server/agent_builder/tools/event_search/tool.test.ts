@@ -56,10 +56,12 @@ describe('event_search tool', () => {
       tool.schema.safeParse({ topology_feature_ids: Array.from({ length: 101 }, (_, i) => `${i}`) })
         .success
     ).toBe(false);
-    expect(tool.schema.safeParse({ per_page: 50 }).success).toBe(true);
-    expect(tool.schema.safeParse({ per_page: 51 }).success).toBe(false);
-    expect(tool.schema.parse({ query: '' }).query).toBeUndefined();
+    expect(tool.schema.safeParse({ per_page: 50, rule_uuids: ['rule-1'] }).success).toBe(true);
+    expect(tool.schema.safeParse({ per_page: 51, rule_uuids: ['rule-1'] }).success).toBe(false);
+    expect(tool.schema.parse({ query: '', rule_uuids: ['rule-1'] }).query).toBeUndefined();
     expect(tool.schema.parse({ query: '  latency  ' }).query).toBe('latency');
+    expect(tool.schema.parse({ rule_uuids: ['rule-uuid-1'] }).status).toBe('open');
+    expect(tool.schema.safeParse({}).success).toBe(false);
   });
 
   it('returns events on success and tracks telemetry', async () => {
