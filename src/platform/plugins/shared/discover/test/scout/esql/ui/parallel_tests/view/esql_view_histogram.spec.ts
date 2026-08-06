@@ -75,9 +75,9 @@ spaceTest.describe('Discover ES|QL view - histogram', { tag: tags.deploymentAgno
     async ({ pageObjects }) => {
       const { discover, datePicker, filterBar } = pageObjects;
 
-      await datePicker.setAbsoluteRange(testData.DEFAULT_TIME_RANGE_DISPLAY);
-      await discover.waitUntilTabIsLoaded();
-
+      // The time range comes from `timepicker:timeDefaults` (set in `beforeAll`),
+      // so there's no need to drive the picker UI here — it is disabled anyway
+      // until a query targeting an index with a time field has been executed.
       await discover.codeEditor.setCodeEditorValue('from logstash-* | limit 100');
       await discover.submitQuery();
       await discover.waitUntilTabIsLoaded();
