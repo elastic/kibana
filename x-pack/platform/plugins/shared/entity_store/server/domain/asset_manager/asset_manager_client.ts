@@ -60,20 +60,8 @@ import {
   getLegacySecurityLatestEntitiesIndexName,
   getLegacySecurityLatestEntityIndexPattern,
 } from '../../../common/domain/entity_index';
-import {
-  getLatestIndexTemplateId,
-  getLegacySecurityLatestIndexTemplateId,
-} from './latest_index_template';
-import {
-  getUpdatesIndexTemplateId,
-  getLegacySecurityUpdatesIndexTemplateId,
-} from './updates_index_template';
-import {
-  getComponentTemplateName,
-  getLegacySecurityComponentTemplateName,
-  getUpdatesComponentTemplateName,
-  getLegacySecurityUpdatesComponentTemplateName,
-} from './component_templates';
+import { getLatestIndexTemplateId } from './latest_index_template';
+import { getComponentTemplateName } from './component_templates';
 import {
   getUpdatesEntitiesDataStreamName,
   getLegacySecurityUpdatesEntitiesDataStreamName,
@@ -83,7 +71,6 @@ import {
   getLegacySecurityMetadataEntitiesDataStreamName,
 } from './metadata_data_stream';
 import type { LogsExtractionClient } from '../logs_extraction';
-import type { RemoteLogExtractionStateClient } from '../saved_objects/remote_log_extraction_state';
 import type { ManagedEntityDefinition } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import {
@@ -102,7 +89,6 @@ interface AssetManagerDependencies {
   taskManager: TaskManagerStartContract;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
-  remoteLogExtractionStateClient: RemoteLogExtractionStateClient;
   namespace: string;
   isServerless: boolean;
   logsExtractionClient: LogsExtractionClient;
@@ -119,7 +105,6 @@ export class AssetManagerClient {
   private readonly taskManager: TaskManagerStartContract;
   private readonly engineDescriptorClient: EngineDescriptorClient;
   private readonly globalStateClient: EntityStoreGlobalStateClient;
-  private readonly remoteLogExtractionStateClient: RemoteLogExtractionStateClient;
   private readonly namespace: string;
   private readonly isServerless: boolean;
   private readonly logsExtractionClient: LogsExtractionClient;
@@ -135,7 +120,6 @@ export class AssetManagerClient {
     this.taskManager = deps.taskManager;
     this.engineDescriptorClient = deps.engineDescriptorClient;
     this.globalStateClient = deps.globalStateClient;
-    this.remoteLogExtractionStateClient = deps.remoteLogExtractionStateClient;
     this.namespace = deps.namespace;
     this.isServerless = deps.isServerless;
     this.logsExtractionClient = deps.logsExtractionClient;
@@ -281,10 +265,7 @@ export class AssetManagerClient {
       await this.stop(type);
 
       // Per-type saved objects — always safe to remove for this type alone.
-      await Promise.all([
-        this.engineDescriptorClient.delete(type),
-        this.remoteLogExtractionStateClient.delete(type),
-      ]);
+      await this.engineDescriptorClient.delete(type);
 
       // The ES indices/data streams are shared across all entity types in the namespace
       // (their names carry the namespace, not the type). Only remove them once no engine
@@ -567,102 +548,31 @@ export class AssetManagerClient {
     };
   }
 
-  /**
-   * Resolves a component's installed status by checking the neutral name first, then falling
-   * back to the legacy Security-scoped name. Mirrors the dual-probe pattern used by
-   * {@link getIndexComponents} for concrete indices and data streams.
-   *
-   * Preference: neutral wins when both exist (e.g. after a re-install post-upgrade).
-   * If only legacy exists, the legacy id is reported as installed.
-   * If neither exists, the legacy id is reported as not installed.
-   */
-  private async resolveComponentStatus(
-    resource: EngineComponentResource,
-    neutralId: string,
-    legacyId: string,
-    exists: (id: string) => Promise<boolean>
-  ): Promise<EngineComponentStatus> {
-    const [neutralExists, legacyExists] = await Promise.all([exists(neutralId), exists(legacyId)]);
-    if (neutralExists) {
-      return { id: neutralId, installed: true, resource };
-    } else {
-      return { id: legacyId, installed: legacyExists, resource };
-    }
-  }
-
   private async getIndexTemplateComponents(): Promise<EngineComponentStatus[]> {
-    const probe = (id: string) =>
-      this.tryAsBoolean(this.esClient.indices.getIndexTemplate({ name: id }));
-    return Promise.all([
-      this.resolveComponentStatus(
-        'index_template',
-        getLatestIndexTemplateId(this.namespace),
-        getLegacySecurityLatestIndexTemplateId(this.namespace),
-        probe
-      ),
-      this.resolveComponentStatus(
-        'index_template',
-        getUpdatesIndexTemplateId(this.namespace),
-        getLegacySecurityUpdatesIndexTemplateId(this.namespace),
-        probe
-      ),
-    ]);
+    const resource = 'index_template';
+    const latestId = getLatestIndexTemplateId(this.namespace);
+    const latestExists = await this.tryAsBoolean(
+      this.esClient.indices.getIndexTemplate({ name: latestId })
+    );
+    return [{ id: latestId, installed: latestExists, resource }];
   }
 
   private async getIndexComponents(): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'index';
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
-    const legacyLatestIndex = getLegacySecurityLatestEntitiesIndexName(this.namespace);
-    const updatesDataStreamName = getUpdatesEntitiesDataStreamName(this.namespace);
-    const legacyUpdatesDataStreamName = getLegacySecurityUpdatesEntitiesDataStreamName(
-      this.namespace
-    );
-    const [latestExists, legacyLatestExists, updatesExists, legacyUpdatesExists] =
-      await Promise.all([
-        this.esClient.indices.exists({ index: latestIndex }),
-        this.esClient.indices.exists({ index: legacyLatestIndex }),
-        this.tryAsBoolean(this.esClient.indices.getDataStream({ name: updatesDataStreamName })),
-        this.tryAsBoolean(
-          this.esClient.indices.getDataStream({ name: legacyUpdatesDataStreamName })
-        ),
-      ]);
-    return [
-      {
-        id: latestExists ? latestIndex : legacyLatestExists ? legacyLatestIndex : latestIndex,
-        installed: latestExists || legacyLatestExists,
-        resource,
-      },
-      {
-        id: updatesExists
-          ? updatesDataStreamName
-          : legacyUpdatesExists
-          ? legacyUpdatesDataStreamName
-          : updatesDataStreamName,
-        installed: updatesExists || legacyUpdatesExists,
-        resource,
-      },
-    ];
+    const latestExists = await this.esClient.indices.exists({ index: latestIndex });
+    return [{ id: latestIndex, installed: latestExists, resource }];
   }
 
   private async getComponentTemplateComponents(
     definition: ManagedEntityDefinition
   ): Promise<EngineComponentStatus[]> {
-    const probe = (name: string) =>
-      this.tryAsBoolean(this.esClient.cluster.getComponentTemplate({ name }));
-    return Promise.all([
-      this.resolveComponentStatus(
-        'component_template',
-        getComponentTemplateName(definition.type, this.namespace),
-        getLegacySecurityComponentTemplateName(definition.type, this.namespace),
-        probe
-      ),
-      this.resolveComponentStatus(
-        'component_template',
-        getUpdatesComponentTemplateName(definition.type, this.namespace),
-        getLegacySecurityUpdatesComponentTemplateName(definition.type, this.namespace),
-        probe
-      ),
-    ]);
+    const resource: EngineComponentResource = 'component_template';
+    const latestName = getComponentTemplateName(definition.type, this.namespace);
+    const latestExists = await this.tryAsBoolean(
+      this.esClient.cluster.getComponentTemplate({ name: latestName })
+    );
+    return [{ id: latestName, installed: latestExists, resource }];
   }
 
   private async getIlmPolicyComponents(): Promise<EngineComponentStatus[]> {

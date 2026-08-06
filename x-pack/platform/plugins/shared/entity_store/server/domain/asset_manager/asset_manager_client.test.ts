@@ -158,9 +158,6 @@ describe('AssetManagerClient', () => {
         mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
       globalStateClient:
         mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-      remoteLogExtractionStateClient: {
-        delete: jest.fn().mockResolvedValue(undefined),
-      } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
       namespace,
       isServerless: false,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
@@ -256,9 +253,6 @@ describe('AssetManagerClient', () => {
           mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
         globalStateClient:
           mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-        remoteLogExtractionStateClient: {
-          delete: jest.fn().mockResolvedValue(undefined),
-        } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
         namespace,
         isServerless: false,
         logsExtractionClient: {
@@ -596,9 +590,6 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
         find: jest.fn(),
         delete: jest.fn(),
       } as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-      remoteLogExtractionStateClient: {
-        delete: jest.fn(),
-      } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
       namespace,
       isServerless: false,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
@@ -784,9 +775,6 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
         engineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
       globalStateClient:
         globalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-      remoteLogExtractionStateClient: {
-        delete: jest.fn(),
-      } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
       namespace,
       isServerless: true,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
@@ -807,7 +795,7 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
   };
 
   describe('legacy-only assets (FF-off post-upgrade scenario)', () => {
-    it('reports legacy index template names as installed', async () => {
+    it('reports neutral index template name as not installed when only legacy exists', async () => {
       const client = buildClient({
         latestTemplateExists: false,
         legacyLatestTemplateExists: true,
@@ -821,14 +809,12 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       const templates = await getComponentsByResource(client, 'index_template');
 
-      expect(templates).toHaveLength(2);
-      expect(templates[0].id).toContain('security_');
-      expect(templates[0].installed).toBe(true);
-      expect(templates[1].id).toContain('security_');
-      expect(templates[1].installed).toBe(true);
+      expect(templates).toHaveLength(1);
+      expect(templates[0].id).not.toContain('security_');
+      expect(templates[0].installed).toBe(false);
     });
 
-    it('reports legacy component template names as installed', async () => {
+    it('reports neutral component template name as not installed when only legacy exists', async () => {
       const client = buildClient({
         latestTemplateExists: false,
         legacyLatestTemplateExists: true,
@@ -842,11 +828,9 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       const componentTemplates = await getComponentsByResource(client, 'component_template');
 
-      expect(componentTemplates).toHaveLength(2);
-      expect(componentTemplates[0].id).toContain('security_');
-      expect(componentTemplates[0].installed).toBe(true);
-      expect(componentTemplates[1].id).toContain('security_');
-      expect(componentTemplates[1].installed).toBe(true);
+      expect(componentTemplates).toHaveLength(1);
+      expect(componentTemplates[0].id).not.toContain('security_');
+      expect(componentTemplates[0].installed).toBe(false);
     });
   });
 
@@ -865,11 +849,9 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       const templates = await getComponentsByResource(client, 'index_template');
 
-      expect(templates).toHaveLength(2);
+      expect(templates).toHaveLength(1);
       expect(templates[0].id).not.toContain('security_');
       expect(templates[0].installed).toBe(true);
-      expect(templates[1].id).not.toContain('security_');
-      expect(templates[1].installed).toBe(true);
     });
 
     it('reports neutral component template names as installed', async () => {
@@ -886,11 +868,9 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       const componentTemplates = await getComponentsByResource(client, 'component_template');
 
-      expect(componentTemplates).toHaveLength(2);
+      expect(componentTemplates).toHaveLength(1);
       expect(componentTemplates[0].id).not.toContain('security_');
       expect(componentTemplates[0].installed).toBe(true);
-      expect(componentTemplates[1].id).not.toContain('security_');
-      expect(componentTemplates[1].installed).toBe(true);
     });
   });
 

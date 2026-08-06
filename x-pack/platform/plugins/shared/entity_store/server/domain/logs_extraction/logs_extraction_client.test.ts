@@ -6,8 +6,6 @@
  */
 
 import { LogsExtractionClient } from './logs_extraction_client';
-import type { RemoteExtractionStrategy } from './remote/strategies';
-import type { RemoteLogsExtractionClient } from './remote';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
@@ -84,22 +82,6 @@ import {
 import { ENGINE_STATUS } from '../constants';
 import type { EntityType } from '../../../common/domain/definitions/entity_schema';
 
-type MockRemoteLogsExtractionClient = jest.Mocked<
-  Pick<RemoteLogsExtractionClient, 'extractToUpdates'>
-> & {
-  strategy: Pick<RemoteExtractionStrategy, 'id' | 'buildPatterns'>;
-};
-
-function createMockRemoteLogsExtractionClient(): MockRemoteLogsExtractionClient {
-  return {
-    extractToUpdates: jest.fn().mockResolvedValue({ count: 0, pages: 0 }),
-    strategy: {
-      id: 'ccs',
-      buildPatterns: jest.fn(({ remoteIndexPatterns }) => remoteIndexPatterns),
-    },
-  };
-}
-
 jest.mock('../../infra/elasticsearch/esql');
 jest.mock('../../infra/elasticsearch/ingest');
 
@@ -169,7 +151,6 @@ describe('LogsExtractionClient', () => {
     Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
   >;
   let mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
-  let mockRemoteLogsExtractionClient: ReturnType<typeof createMockRemoteLogsExtractionClient>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -193,7 +174,6 @@ describe('LogsExtractionClient', () => {
       update: jest.fn().mockResolvedValue({}),
     };
     mockGlobalStateClient = createMockGlobalStateClient();
-    mockRemoteLogsExtractionClient = createMockRemoteLogsExtractionClient();
 
     client = new LogsExtractionClient({
       logger: mockLogger,
@@ -202,8 +182,6 @@ describe('LogsExtractionClient', () => {
       dataViewsService: mockDataViewsService,
       engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
       globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-      remoteLogsExtractionClient:
-        mockRemoteLogsExtractionClient as unknown as RemoteLogsExtractionClient,
     });
   });
 
@@ -244,7 +222,6 @@ describe('LogsExtractionClient', () => {
       expect(result.success && result.count).toBe(2);
       expect(result.success && result.scannedIndices).toContain('logs-*');
       expect(result.success && result.scannedIndices).toContain('filebeat-*');
-      expect(result.success && result.scannedIndices).toContain('.entities.v2.updates.default');
       expect(result.success && result.scannedIndices).not.toContain(
         '.alerts-security.alerts-default'
       );
@@ -301,8 +278,6 @@ describe('LogsExtractionClient', () => {
         dataViewsService: mockDataViewsService,
         engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
         globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-        remoteLogsExtractionClient:
-          mockRemoteLogsExtractionClient as unknown as RemoteLogsExtractionClient,
       });
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -413,8 +388,6 @@ describe('LogsExtractionClient', () => {
         dataViewsService: mockDataViewsService,
         engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
         globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-        remoteLogsExtractionClient:
-          mockRemoteLogsExtractionClient as unknown as RemoteLogsExtractionClient,
       });
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -903,7 +876,6 @@ describe('LogsExtractionClient', () => {
       expect(result.success && result.scannedIndices).toContain('other:filebeat-*');
       // probe, extraction, terminal empty probe, and its follow-up sweep extraction.
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(4);
-      expect(mockRemoteLogsExtractionClient.extractToUpdates).not.toHaveBeenCalled();
     });
 
     it('should clear a previous error after a successful extraction', async () => {
