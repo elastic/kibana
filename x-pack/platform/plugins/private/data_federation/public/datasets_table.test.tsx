@@ -70,7 +70,7 @@ describe('DatasetsTable', () => {
     expect(onCreate).not.toHaveBeenCalled();
   });
 
-  it('calls onCreate when create is enabled and clicked', async () => {
+  it('calls onCreate with the selected flow when a menu item is chosen', async () => {
     const onCreate = jest.fn();
 
     const { getByTestId } = render(
@@ -95,7 +95,10 @@ describe('DatasetsTable', () => {
     );
 
     fireEvent.click(getByTestId('dataSetsSetsCreateButton'));
+    fireEvent.click(getByTestId('dataSetsSetsCreateFlow2Button'));
+
     expect(onCreate).toHaveBeenCalledTimes(1);
+    expect(onCreate).toHaveBeenCalledWith('flow_2');
   });
 
   it('calls onDataSourceFilterChange when the filter changes', async () => {

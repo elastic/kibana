@@ -13,6 +13,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataSetWithName, DataSource } from '../common';
 import { ConfirmDeleteDataSetModal } from './confirm_delete_data_set_modal';
 import { ConfirmDeleteDataSetsModal } from './confirm_delete_data_sets_modal';
+import { buildCreateDatasetWizardPath } from './create_dataset_wizard/dataset_wizard_flow_variant';
+import type { DatasetWizardFlowVariant } from './create_dataset_wizard/dataset_wizard_flow_variant';
 import { DatasetsTable, type DataSetListRow } from './datasets_table';
 import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
 import { mainTranslations } from './main_i18n';
@@ -154,9 +156,12 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     }
   }, [datasetsClient, loadDataSets, pendingDeleteDataSets, toasts]);
 
-  const handleCreate = useCallback(() => {
-    history.push('/create');
-  }, [history]);
+  const handleCreate = useCallback(
+    (flowVariant: DatasetWizardFlowVariant) => {
+      history.push(buildCreateDatasetWizardPath(flowVariant));
+    },
+    [history]
+  );
 
   const handleEdit = useCallback(
     (item: DataSetListRow) => {

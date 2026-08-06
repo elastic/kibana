@@ -19,6 +19,8 @@ import {
 
 import type { DataSetWithName, DataSource } from '../common';
 import { getDataSourceTypeVerbose } from './get_data_source_type_label';
+import { AddDatasetMenuButton } from './add_dataset_menu_button';
+import type { DatasetWizardFlowVariant } from './create_dataset_wizard/dataset_wizard_flow_variant';
 import { mainTranslations } from './main_i18n';
 
 /** Data set row in the table; `type` is resolved from the linked data source. */
@@ -32,7 +34,7 @@ export interface DatasetsTableProps {
   isCreateDisabled: boolean;
   onSelectionChange: (next: DataSetListRow[]) => void;
   onDataSourceFilterChange: (next: string) => void;
-  onCreate: () => void;
+  onCreate: (flowVariant: DatasetWizardFlowVariant) => void;
   onEdit: (item: DataSetListRow) => void;
   onDelete: (item: DataSetListRow) => void;
   onDeleteSelected: (items: DataSetListRow[]) => void;
@@ -170,15 +172,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  color="primary"
-                  data-test-subj="dataSetsSetsCreateButton"
-                  onClick={onCreate}
-                  disabled={isCreateDisabled}
-                >
-                  {mainTranslations.columns.dataSets.addButtonLabel}
-                </EuiButton>
+                <AddDatasetMenuButton isDisabled={isCreateDisabled} onSelectFlow={onCreate} />
               </EuiFlexItem>
             </EuiFlexGroup>
           ),

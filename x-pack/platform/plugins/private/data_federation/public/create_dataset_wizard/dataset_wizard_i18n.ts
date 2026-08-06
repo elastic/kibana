@@ -289,7 +289,7 @@ export const datasetWizardStrings = {
 
   schemaMappingModeAutomatic: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingModeAutomatic', {
-      defaultMessage: 'Automatic',
+      defaultMessage: 'Infer from file',
     }),
 
   schemaMappingModeAwsGlueTable: () =>
@@ -305,7 +305,40 @@ export const datasetWizardStrings = {
   schemaMappingAutomaticDescription: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingAutomaticDescription', {
       defaultMessage:
-        'Elastic will sample the file and infer column names and types automatically. Parquet files carry embedded schema and are inferred with highest fidelity. For NDJSON and CSV, a best-effort type inference is applied.',
+        'Elastic infers field names and types from your file. Review the sample below and adjust any type before continuing. Parquet uses embedded schema for highest fidelity; NDJSON and CSV use best-effort inference.',
+    }),
+
+  automaticSchemaSampleFieldColumn: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.automaticSchemaSampleFieldColumn', {
+      defaultMessage: 'Field',
+    }),
+
+  automaticSchemaSampleTypeColumn: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.automaticSchemaSampleTypeColumn', {
+      defaultMessage: 'Type',
+    }),
+
+  automaticSchemaSampleTableCaption: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.automaticSchemaSampleTableCaption', {
+      defaultMessage: 'Inferred schema sample',
+    }),
+
+  automaticSchemaSampleTypeSelectAriaLabel: (fieldName: string) =>
+    i18n.translate('xpack.dataFederation.datasetWizard.automaticSchemaSampleTypeSelectAriaLabel', {
+      defaultMessage: 'Type for {fieldName}',
+      values: { fieldName },
+    }),
+
+  automaticSchemaSampleResetTypeAriaLabel: (fieldName: string) =>
+    i18n.translate('xpack.dataFederation.datasetWizard.automaticSchemaSampleResetTypeAriaLabel', {
+      defaultMessage: 'Reset type for {fieldName} to auto-detected value',
+      values: { fieldName },
+    }),
+
+  automaticSchemaSampleResetTypeTooltip: (inferredType: string) =>
+    i18n.translate('xpack.dataFederation.datasetWizard.automaticSchemaSampleResetTypeTooltip', {
+      defaultMessage: 'Reset to the auto-detected type ({inferredType}).',
+      values: { inferredType },
     }),
 
   schemaMappingAwsGlueTableDescription: () =>
@@ -444,7 +477,12 @@ export const datasetWizardStrings = {
 
   reviewPreviewTabTitle: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.reviewPreviewTabTitle', {
-      defaultMessage: 'Preview',
+      defaultMessage: 'Preview configuration',
+    }),
+
+  reviewPreviewResultsTabTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewPreviewResultsTabTitle', {
+      defaultMessage: 'Preview results',
     }),
 
   reviewRequestTabTitle: () =>
@@ -500,6 +538,17 @@ export const datasetWizardStrings = {
   reviewManualMappingsCount: (count: number) =>
     i18n.translate('xpack.dataFederation.datasetWizard.reviewManualMappingsCount', {
       defaultMessage: '{count, plural, one {# field} other {# fields}}',
+      values: { count },
+    }),
+
+  reviewAutomaticFieldTypesLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewAutomaticFieldTypesLabel', {
+      defaultMessage: 'Manual changes',
+    }),
+
+  reviewAutomaticFieldTypesCount: (count: number) =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewAutomaticFieldTypesCount', {
+      defaultMessage: '{count, plural, one {# type} other {# types}}',
       values: { count },
     }),
 

@@ -155,6 +155,30 @@ describe('review_step_utils', () => {
     expect(formatRow?.badge).toBeUndefined();
   });
 
+  it('returns automatic schema mapping rows when inferred field types were modified', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      schema_mapping_mode: 'automatic' as const,
+      automatic_field_types: {
+        '@timestamp': 'keyword',
+        message: 'text',
+      },
+    };
+
+    const rows = getReviewSchemaMappingRows(values);
+
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ displayValue: 'Infer from file', badge: 'default' }),
+        expect.objectContaining({
+          label: 'Manual changes',
+          displayValue: '2 types',
+          badge: 'modified',
+        }),
+      ])
+    );
+  });
+
   it('returns Glue schema mapping rows when AWS Glue table mode is selected', () => {
     const values = {
       ...emptyDatasetWizardFormValues(),

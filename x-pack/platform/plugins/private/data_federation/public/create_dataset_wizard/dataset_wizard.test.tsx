@@ -14,6 +14,7 @@ import { Router } from 'react-router-dom';
 import type { DataSource } from '../../common';
 import { ADDITIONAL_SETTINGS_STEP, REVIEW_STEP, SCHEMA_MAPPINGS_STEP } from './dataset_wizard_constants';
 import { DatasetWizard } from './dataset_wizard';
+import { DATASET_WIZARD_FLOW_VARIANT_1 } from './dataset_wizard_flow_variant';
 import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
 import { applySettingsForFormat } from '../create_dataset_flyout/dataset_settings_defaults';
 import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_flyout/create_dataset_flyout_form_state';
@@ -54,6 +55,7 @@ describe('DatasetWizard step navigation', () => {
             existingDataSetNames={[]}
             dataSources={dataSources}
             defaultValues={defaultValues}
+            flowVariant={DATASET_WIZARD_FLOW_VARIANT_1}
             reloadDataSources={jest.fn().mockResolvedValue(undefined)}
             onCancel={jest.fn()}
             onSave={jest.fn().mockResolvedValue(null)}
@@ -155,87 +157,27 @@ describe('DatasetWizard step navigation', () => {
     settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
   };
 
-  it('runs the mocked test configuration preview on the schema mappings step', async () => {
-    jest.useFakeTimers();
-
+  it('does not show the data preview table on the schema mappings step', () => {
     const { getByTestId, queryByTestId } = renderWizard(
       `/create?step=${SCHEMA_MAPPINGS_STEP}`,
       testConfigurationDraft
     );
 
-    expect(getByTestId('datasetWizardTestConfiguration')).toBeInTheDocument();
-    expect(queryByTestId('datasetWizardTestConfigurationPreview')).toBeNull();
-
-    fireEvent.click(getByTestId('datasetWizardTestConfiguration'));
-    expect(getByTestId('datasetWizardTestConfigurationPreview')).toBeInTheDocument();
-
-    jest.useRealTimers();
+    expect(getByTestId('datasetWizardSchemaMappingsStep')).toBeInTheDocument();
+    expect(queryByTestId('datasetWizardTestConfigurationTable')).toBeNull();
   });
 
-  it('runs the mocked test configuration preview on the review step', async () => {
-    jest.useFakeTimers();
-
-    const { getByTestId, queryByTestId } = renderWizard(
+  it('shows the data preview in the review step preview results tab', () => {
+    const { getByTestId, getByText, queryByTestId } = renderWizard(
       `/create?step=${REVIEW_STEP}`,
       testConfigurationDraft
     );
 
-    expect(queryByTestId('datasetWizardTestConfigurationPreview')).toBeNull();
+    expect(queryByTestId('datasetWizardTestConfigurationTable')).toBeNull();
 
-    fireEvent.click(getByTestId('datasetWizardTestConfiguration'));
-    expect(getByTestId('datasetWizardTestConfigurationPreview')).toBeInTheDocument();
-    expect(getByTestId('datasetWizardTestConfigurationLoading')).toBeInTheDocument();
+    fireEvent.click(getByText('Preview results'));
 
-    await act(async () => {
-      jest.advanceTimersByTime(600);
-    });
-
-    await waitFor(() => {
-      expect(queryByTestId('datasetWizardTestConfigurationLoading')).toBeNull();
-      expect(getByTestId('datasetWizardTestConfigurationTable')).toBeInTheDocument();
-    });
-
-    fireEvent.click(getByTestId('datasetWizardTestConfigurationClose'));
-    expect(queryByTestId('datasetWizardTestConfigurationPreview')).toBeNull();
-
-    fireEvent.click(getByTestId('datasetWizardTestConfiguration'));
-
-    await act(async () => {
-      jest.advanceTimersByTime(600);
-    });
-
-    await waitFor(() => {
-      expect(getByTestId('datasetWizardTestConfigurationTable')).toBeInTheDocument();
-    });
-
-    jest.useRealTimers();
-  });
-
-  it('closes the test configuration preview when navigating to another step', async () => {
-    jest.useFakeTimers();
-
-    const { getByTestId, queryByTestId, history } = renderWizard(
-      `/create?step=${SCHEMA_MAPPINGS_STEP}`,
-      testConfigurationDraft
-    );
-
-    fireEvent.click(getByTestId('datasetWizardTestConfiguration'));
-
-    await act(async () => {
-      jest.advanceTimersByTime(600);
-    });
-
-    await waitFor(() => {
-      expect(getByTestId('datasetWizardTestConfigurationTable')).toBeInTheDocument();
-    });
-
-    history.replace(`/create?step=${REVIEW_STEP}`);
-
-    await waitFor(() => {
-      expect(queryByTestId('datasetWizardTestConfigurationPreview')).toBeNull();
-    });
-
-    jest.useRealTimers();
+    expect(getByTestId('datasetWizardTestConfigurationTable')).toBeInTheDocument();
   });
 
   it('blocks advancing from logistics when region is not selected', async () => {

@@ -32,7 +32,7 @@ const defaultValues = {
 };
 
 describe('ReviewStep', () => {
-  it('renders Summary, Preview, and Request tabs', () => {
+  it('renders Summary, Preview, Preview results, and Request tabs', () => {
     render(
       <EuiProvider>
         <ReviewStep values={defaultValues} dataSources={[s3DataSource]} />
@@ -40,7 +40,8 @@ describe('ReviewStep', () => {
     );
 
     expect(screen.getByText('Summary')).toBeInTheDocument();
-    expect(screen.getByText('Preview')).toBeInTheDocument();
+    expect(screen.getByText('Preview configuration')).toBeInTheDocument();
+    expect(screen.getByText('Preview results')).toBeInTheDocument();
     expect(screen.getByText('Request')).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: 'Review configuration for dataset-obs-prod-s3' })
@@ -92,7 +93,7 @@ describe('ReviewStep', () => {
       </EuiProvider>
     );
 
-    fireEvent.click(screen.getByText('Preview'));
+    fireEvent.click(screen.getByText('Preview configuration'));
 
     expect(screen.getByTestId('datasetWizardReviewPreviewCodeScroll')).toBeInTheDocument();
     expect(screen.getByTestId('datasetWizardReviewPreviewCode')).toHaveTextContent(
@@ -101,6 +102,20 @@ describe('ReviewStep', () => {
     expect(screen.getByTestId('datasetWizardReviewPreviewCode')).toHaveTextContent(
       '"format": "parquet"'
     );
+  });
+
+  it('shows the data preview in the preview results tab', () => {
+    render(
+      <EuiProvider>
+        <ReviewStep values={defaultValues} dataSources={[s3DataSource]} />
+      </EuiProvider>
+    );
+
+    fireEvent.click(screen.getByText('Preview results'));
+
+    expect(screen.getByTestId('datasetWizardTestConfigurationTableScroll')).toBeInTheDocument();
+    expect(screen.getByTestId('datasetWizardTestConfigurationTable')).toBeInTheDocument();
+    expect(screen.getByText('@timestamp')).toBeInTheDocument();
   });
 
   it('shows the request in the request tab', () => {

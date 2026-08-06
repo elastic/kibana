@@ -342,6 +342,18 @@ export const getReviewSchemaMappingRows = (values: DatasetWizardFormValues): Rev
     });
   }
 
+  if (values.schema_mapping_mode === 'automatic') {
+    const modifiedFieldTypeCount = Object.keys(values.automatic_field_types ?? {}).length;
+
+    if (modifiedFieldTypeCount > 0) {
+      rows.push({
+        label: datasetWizardStrings.reviewAutomaticFieldTypesLabel(),
+        displayValue: datasetWizardStrings.reviewAutomaticFieldTypesCount(modifiedFieldTypeCount),
+        badge: 'modified',
+      });
+    }
+  }
+
   if (values.schema_mapping_mode === 'aws_glue_table') {
     rows.push(
       {

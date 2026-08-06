@@ -39,7 +39,10 @@ jest.mock('./datasets_table', () => ({
         <div data-test-subj="mockFilterValue">{String(props.dataSourceFilter ?? '')}</div>
         <div data-test-subj="mockCreateDisabled">{String(props.isCreateDisabled)}</div>
 
-        <button data-test-subj="mockCreate" onClick={() => (props.onCreate as any)()} />
+        <button
+          data-test-subj="mockCreate"
+          onClick={() => (props.onCreate as any)('flow_1')}
+        />
         <button
           data-test-subj="mockSelectFirst"
           onClick={() => (props.onSelectionChange as any)([filteredItems[0]])}
@@ -180,7 +183,7 @@ describe('DatasetsTabContent', () => {
 
     fireEvent.click(document.querySelector('[data-test-subj="mockCreate"]') as Element);
 
-    expect(mockHistoryPush).toHaveBeenCalledWith('/create');
+    expect(mockHistoryPush).toHaveBeenCalledWith('/create?flow=flow_1');
   });
 
   it('confirms single delete via client and reloads', async () => {

@@ -21,7 +21,8 @@
     "@kbn/kibana-react-plugin",
     "@kbn/index-management-plugin",
     "@kbn/index-management-shared-types",
-    "@kbn/es-ui-shared-plugin"
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/react-field"
   ],
   "exclude": [
     "target/**/*",

@@ -35,8 +35,9 @@ import {
   type ReviewSettingBadge,
   type ReviewSummaryRow,
 } from '../review_step_utils';
-
-const REVIEW_TAB_MAX_HEIGHT_PX = 500;
+import { TestConfigurationPreviewContent } from '../test_configuration_preview';
+import { getSchemaSamplePreviewTableHeight } from '../schema_sample_preview_table';
+import { TEST_CONFIGURATION_PREVIEW_ROW_COUNT } from '../test_configuration_preview_utils';
 
 export interface ReviewStepProps {
   values: DatasetWizardFormValues;
@@ -121,36 +122,51 @@ const SettingsSummarySection = ({ rows }: { rows: ReviewSummaryRow[] }) => {
 export const ReviewStep: FunctionComponent<ReviewStepProps> = ({ values, dataSources }) => {
   const { euiTheme } = useEuiTheme();
 
+  const reviewTabContentAreaHeight = useMemo(
+    () => getSchemaSamplePreviewTableHeight(euiTheme, TEST_CONFIGURATION_PREVIEW_ROW_COUNT),
+    [euiTheme]
+  );
+
+  const reviewTabPanelHeight = useMemo(
+    () =>
+      `calc(${euiTheme.size.m} + ${euiTheme.size.m} + ${euiTheme.size.l} + ${reviewTabContentAreaHeight})`,
+    [euiTheme.size.l, euiTheme.size.m, reviewTabContentAreaHeight]
+  );
+
   const reviewTabPanelStyles = useMemo(
     () => css`
-      max-height: ${REVIEW_TAB_MAX_HEIGHT_PX}px;
-      height: ${REVIEW_TAB_MAX_HEIGHT_PX}px;
+      height: ${reviewTabPanelHeight};
+      max-height: ${reviewTabPanelHeight};
       display: flex;
       flex-direction: column;
       box-sizing: border-box;
     `,
-    []
+    [reviewTabPanelHeight]
   );
 
-  const reviewTabScrollAreaStyles = useMemo(
+  const reviewTabContentAreaStyles = useMemo(
     () => css`
-      flex: 1 1 auto;
-      min-height: 0;
+      height: ${reviewTabContentAreaHeight};
+      min-height: ${reviewTabContentAreaHeight};
+      max-height: ${reviewTabContentAreaHeight};
       overflow: auto;
       padding-right: ${euiTheme.size.xs};
+      box-sizing: border-box;
     `,
-    [euiTheme.size.xs]
+    [euiTheme.size.xs, reviewTabContentAreaHeight]
   );
 
-  const reviewCodeBlockAreaStyles = useMemo(
+  const reviewTabCodeBlockAreaStyles = useMemo(
     () => css`
-      flex: 1 1 auto;
-      min-height: 0;
+      height: ${reviewTabContentAreaHeight};
+      min-height: ${reviewTabContentAreaHeight};
+      max-height: ${reviewTabContentAreaHeight};
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      box-sizing: border-box;
     `,
-    []
+    [reviewTabContentAreaHeight]
   );
 
   const logisticsRows = useMemo(
@@ -166,14 +182,13 @@ export const ReviewStep: FunctionComponent<ReviewStepProps> = ({ values, dataSou
 
   const requestText = useMemo(() => buildDatasetRequestText(values), [values]);
   const previewPayload = useMemo(() => buildDatasetPayloadFromWizardValues(values), [values]);
-
   const previewJson = useMemo(() => JSON.stringify(previewPayload, null, 2), [previewPayload]);
   const requestLanguage = requestText.length < 60000 ? 'json' : undefined;
 
   const SummaryTab = () => (
     <div css={reviewTabPanelStyles} data-test-subj="datasetWizardReviewSummaryTab">
       <EuiSpacer size="m" />
-      <div css={reviewTabScrollAreaStyles} data-test-subj="datasetWizardReviewSummaryScroll">
+      <div css={reviewTabContentAreaStyles} data-test-subj="datasetWizardReviewSummaryScroll">
         <EuiFlexGroup alignItems="flexStart">
           <EuiFlexItem grow={1}>
             <EuiTitle size="xxs">
@@ -211,7 +226,7 @@ export const ReviewStep: FunctionComponent<ReviewStepProps> = ({ values, dataSou
         <p>{datasetWizardStrings.reviewPreviewDescription()}</p>
       </EuiText>
       <EuiSpacer size="m" />
-      <div css={reviewCodeBlockAreaStyles} data-test-subj="datasetWizardReviewPreviewCodeScroll">
+      <div css={reviewTabCodeBlockAreaStyles} data-test-subj="datasetWizardReviewPreviewCodeScroll">
         <EuiCodeBlock
           language="json"
           isCopyable
@@ -224,6 +239,20 @@ export const ReviewStep: FunctionComponent<ReviewStepProps> = ({ values, dataSou
     </div>
   );
 
+  const PreviewResultsTab = () => (
+    <div css={reviewTabPanelStyles} data-test-subj="datasetWizardReviewPreviewResultsTab">
+      <EuiSpacer size="m" />
+      <EuiText size="s">
+        <p>{datasetWizardStrings.testConfigurationPreviewDescription()}</p>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <TestConfigurationPreviewContent
+        values={values}
+        maxVisibleRows={TEST_CONFIGURATION_PREVIEW_ROW_COUNT}
+      />
+    </div>
+  );
+
   const RequestTab = () => (
     <div css={reviewTabPanelStyles} data-test-subj="datasetWizardReviewRequestTab">
       <EuiSpacer size="m" />
@@ -231,7 +260,7 @@ export const ReviewStep: FunctionComponent<ReviewStepProps> = ({ values, dataSou
         <p>{datasetWizardStrings.reviewRequestDescription()}</p>
       </EuiText>
       <EuiSpacer size="m" />
-      <div css={reviewCodeBlockAreaStyles} data-test-subj="datasetWizardReviewRequestCodeScroll">
+      <div css={reviewTabCodeBlockAreaStyles} data-test-subj="datasetWizardReviewRequestCodeScroll">
         <EuiCodeBlock
           language={requestLanguage}
           isCopyable
@@ -256,6 +285,12 @@ export const ReviewStep: FunctionComponent<ReviewStepProps> = ({ values, dataSou
       name: datasetWizardStrings.reviewPreviewTabTitle(),
       content: <PreviewTab />,
       'data-test-subj': 'datasetWizardReviewPreviewTabButton',
+    },
+    {
+      id: 'preview_results',
+      name: datasetWizardStrings.reviewPreviewResultsTabTitle(),
+      content: <PreviewResultsTab />,
+      'data-test-subj': 'datasetWizardReviewPreviewResultsTabButton',
     },
     {
       id: 'request',

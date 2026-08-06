@@ -136,6 +136,15 @@ export const mainTranslations = {
       addButtonLabel: i18n.translate('xpack.dataFederation.setsAddButtonLabel', {
         defaultMessage: 'Add dataset',
       }),
+      addMenuAriaLabel: i18n.translate('xpack.dataFederation.setsAddMenuAriaLabel', {
+        defaultMessage: 'Add dataset flow options',
+      }),
+      addFlow1Label: i18n.translate('xpack.dataFederation.setsAddFlow1Label', {
+        defaultMessage: 'Flow 1',
+      }),
+      addFlow2Label: i18n.translate('xpack.dataFederation.setsAddFlow2Label', {
+        defaultMessage: 'Flow 2',
+      }),
     },
   },
 

@@ -10,13 +10,15 @@ import React, { useEffect, useMemo } from 'react';
 import type { EuiButtonGroupProps } from '@elastic/eui';
 import { EuiButtonGroup, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
-import { useController } from 'react-hook-form';
+import { useController, useWatch } from 'react-hook-form';
 
 import type { DataSource } from '../../../common';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import type { DatasetWizardFormValues, SchemaMappingMode } from '../dataset_wizard_form_state';
+import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
+import { InferredSchemaPreviewTable } from '../inferred_schema_preview_table';
+import { getTestConfigurationPreviewFields } from '../test_configuration_preview_utils';
 import { AwsGlueTableSchemaMappingsEditor } from './aws_glue_table_schema_mappings_editor';
-import { ManualSchemaMappingsEditor } from './manual_schema_mappings_editor';
 
 const SCHEMA_MAPPING_MODE_DESCRIPTIONS: Record<'automatic', () => string> = {
   automatic: datasetWizardStrings.schemaMappingAutomaticDescription,
@@ -56,6 +58,12 @@ export const SchemaMappingsStep: FunctionComponent<SchemaMappingsStepProps> = ({
     }
   }, [field, isAwsGlueTableSupported]);
 
+  useEffect(() => {
+    if (field.value === 'manual') {
+      field.onChange('automatic');
+    }
+  }, [field]);
+
   const options = useMemo<EuiButtonGroupProps['options']>(() => {
     const allOptions: EuiButtonGroupProps['options'] = [
       {
@@ -68,11 +76,6 @@ export const SchemaMappingsStep: FunctionComponent<SchemaMappingsStepProps> = ({
         label: datasetWizardStrings.schemaMappingModeAwsGlueTable(),
         'data-test-subj': 'datasetWizardSchemaMappingModeAwsGlueTable',
       },
-      {
-        id: 'manual',
-        label: datasetWizardStrings.schemaMappingModeManual(),
-        'data-test-subj': 'datasetWizardSchemaMappingModeManual',
-      },
     ];
 
     return isAwsGlueTableSupported
@@ -80,7 +83,17 @@ export const SchemaMappingsStep: FunctionComponent<SchemaMappingsStepProps> = ({
       : allOptions.filter((option) => option.id !== 'aws_glue_table');
   }, [isAwsGlueTableSupported]);
 
-  const selectedMode = field.value;
+  const selectedMode = field.value === 'manual' ? 'automatic' : field.value;
+  const settings = useWatch({ control, name: 'settings' });
+  const automaticSchemaSampleFields = useMemo(() => {
+    const previewValues: DatasetWizardFormValues = {
+      ...emptyDatasetWizardFormValues(),
+      settings: settings ?? emptyDatasetWizardFormValues().settings,
+      schema_mapping_mode: 'automatic',
+    };
+
+    return getTestConfigurationPreviewFields(previewValues);
+  }, [settings]);
 
   return (
     <div data-test-subj="datasetWizardSchemaMappingsStep">
@@ -97,7 +110,7 @@ export const SchemaMappingsStep: FunctionComponent<SchemaMappingsStepProps> = ({
         legend={datasetWizardStrings.schemaMappingModeLegend()}
         type="single"
         options={options}
-        idSelected={field.value}
+        idSelected={selectedMode}
         onChange={(id) => {
           field.onChange(id as SchemaMappingMode);
         }}
@@ -106,17 +119,23 @@ export const SchemaMappingsStep: FunctionComponent<SchemaMappingsStepProps> = ({
       />
 
       <EuiSpacer size="l" />
-      {selectedMode === 'manual' ? (
-        <ManualSchemaMappingsEditor control={control} />
-      ) : selectedMode === 'aws_glue_table' ? (
+      {selectedMode === 'aws_glue_table' ? (
         <AwsGlueTableSchemaMappingsEditor
           control={control}
           dataSourceRegion={dataSourceRegion}
         />
       ) : (
-        <EuiText size="s" data-test-subj="datasetWizardSchemaMappingModeDescription">
-          <p>{SCHEMA_MAPPING_MODE_DESCRIPTIONS[selectedMode]()}</p>
-        </EuiText>
+        <>
+          <EuiText size="s" data-test-subj="datasetWizardSchemaMappingModeDescription">
+            <p>{SCHEMA_MAPPING_MODE_DESCRIPTIONS[selectedMode]()}</p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <InferredSchemaPreviewTable
+            control={control}
+            inferredFields={automaticSchemaSampleFields}
+            testSubjPrefix="datasetWizardAutomaticSchemaSample"
+          />
+        </>
       )}
     </div>
   );

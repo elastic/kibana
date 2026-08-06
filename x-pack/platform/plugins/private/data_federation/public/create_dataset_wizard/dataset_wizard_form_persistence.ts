@@ -59,9 +59,21 @@ export const isDatasetWizardFormValues = (value: unknown): value is DatasetWizar
     return false;
   }
 
+  if (!isRecord(candidate.automatic_field_types)) {
+    return false;
+  }
+
   if (
     !Object.values(candidate.manual_mappings).every(
       (mappingValue) => mappingValue !== null && typeof mappingValue === 'object'
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    !Object.values(candidate.automatic_field_types).every(
+      (fieldType) => typeof fieldType === 'string'
     )
   ) {
     return false;

@@ -9,7 +9,7 @@ import type { FunctionComponent, MouseEvent } from 'react';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PLUGIN_ID, type DataSetWithName, type DataSource } from '../../common';
@@ -28,11 +28,13 @@ import {
   loadWizardFormDraft,
   mergeWizardFormValues,
 } from './dataset_wizard_form_persistence';
+import { resolveWizardFlowVariant } from './dataset_wizard_flow_variant';
 
 const DATA_FEDERATION_MANAGEMENT_PATH = `/app/management/data/${PLUGIN_ID}`;
 
 export const DatasetWizardPage: FunctionComponent = () => {
   const history = useHistory();
+  const location = useLocation();
   const { datasetName: encodedDatasetName } = useParams<{ datasetName?: string }>();
   const datasetName = encodedDatasetName ? decodeURIComponent(encodedDatasetName) : undefined;
   const isEditMode = datasetName !== undefined;
@@ -72,6 +74,11 @@ export const DatasetWizardPage: FunctionComponent = () => {
 
     return draft ? mergeWizardFormValues(base, draft) : base;
   }, [datasetName, initialDataSet, isEditMode]);
+
+  const flowVariant = useMemo(
+    () => resolveWizardFlowVariant(location.search),
+    [location.search]
+  );
 
   const pageTitle = isEditMode
     ? datasetWizardStrings.editPageTitle(datasetName ?? '')
@@ -146,12 +153,13 @@ export const DatasetWizardPage: FunctionComponent = () => {
       <AppHeader title={pageTitle} back={back} spacing="bleed" />
       <EuiSpacer size="l" />
       <DatasetWizard
-        key={isEditMode ? initialDataSet?.name : 'create'}
+        key={isEditMode ? initialDataSet?.name : `create-${flowVariant}`}
         isEditMode={isEditMode}
         initialDataSet={initialDataSet}
         existingDataSetNames={existingDataSetNames}
         dataSources={dataSources}
         defaultValues={defaultValues}
+        flowVariant={flowVariant}
         reloadDataSources={reloadDataSources}
         onCancel={onCancel}
         onSave={onSave}

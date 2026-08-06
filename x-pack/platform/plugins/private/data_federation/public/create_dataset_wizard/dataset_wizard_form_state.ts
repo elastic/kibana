@@ -23,6 +23,8 @@ export interface DatasetWizardFormValues extends CreateDatasetFormValues {
   schema_mapping_mode: SchemaMappingMode;
   /** Prototype-only field; not persisted to the API yet. */
   manual_mappings: Record<string, object>;
+  /** Prototype-only overrides for automatic schema field types. */
+  automatic_field_types: Record<string, string>;
   /** Prototype-only field; not persisted to the API yet. */
   glue_database: string;
   /** Prototype-only field; not persisted to the API yet. */
@@ -38,6 +40,7 @@ export const emptyDatasetWizardFormValues = (): DatasetWizardFormValues => ({
   region: '',
   schema_mapping_mode: 'automatic',
   manual_mappings: {},
+  automatic_field_types: {},
   glue_database: '',
   glue_table_name: '',
   glue_catalog_region: '',
@@ -49,6 +52,7 @@ export const dataSetToWizardFormValues = (data: DataSetWithName): DatasetWizardF
   region: '',
   schema_mapping_mode: 'automatic',
   manual_mappings: {},
+  automatic_field_types: {},
   glue_database: '',
   glue_table_name: '',
   glue_catalog_region: '',

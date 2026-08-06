@@ -18,6 +18,7 @@ import { FORMAT_SUPER_SELECT_OPTIONS } from '../../create_dataset_flyout/dataset
 import type { DatasetFormatFormValue } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
 import { emptyCreateDatasetSettingsFormValues } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
 import { createDatasetFlyoutStrings } from '../../create_dataset_flyout/create_dataset_flyout_i18n';
+import { AutoDetectedSuffix } from '../auto_detected_suffix';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { inferFormatFromResource } from '../infer_format_from_resource';
@@ -129,8 +130,6 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
   ]);
 
   const formatSuperSelectOptions = useMemo(() => {
-    const autoDetectedSuffix = ` ${datasetWizardStrings.formatAutoDetectedSuffix()}`;
-
     return FORMAT_SUPER_SELECT_OPTIONS().map((option) => {
       const isSelectedAutoDetected = option.value === format && option.value === autoDetectedFormat;
 
@@ -143,7 +142,8 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
         inputDisplay: (
           <>
             {option.inputDisplay}
-            {autoDetectedSuffix}
+            {' '}
+            <AutoDetectedSuffix />
           </>
         ),
       };

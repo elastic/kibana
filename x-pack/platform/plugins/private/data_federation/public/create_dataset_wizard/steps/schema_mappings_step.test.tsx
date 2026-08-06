@@ -15,12 +15,6 @@ import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { SchemaMappingsStep } from './schema_mappings_step';
 
-jest.mock('./manual_schema_mappings_editor', () => ({
-  ManualSchemaMappingsEditor: () => (
-    <div data-test-subj="datasetWizardManualSchemaMappingsEditor">Manual mappings editor</div>
-  ),
-}));
-
 const s3DataSource: DataSource = {
   name: 's3-source',
   type: 's3',
@@ -66,7 +60,7 @@ const TestHarness = ({
 };
 
 describe('SchemaMappingsStep', () => {
-  it('renders automatic and manual options for non-S3 data sources', () => {
+  it('renders the automatic option for non-S3 data sources', () => {
     const { getByTestId, getByText, queryByTestId } = render(<TestHarness />);
 
     expect(getByText('Schema mappings (optional)')).toBeInTheDocument();
@@ -77,8 +71,9 @@ describe('SchemaMappingsStep', () => {
     );
     expect(queryByTestId('datasetWizardSchemaMappingModeAwsGlueTable')).toBeNull();
     expect(getByTestId('datasetWizardSchemaMappingModeDescription')).toHaveTextContent(
-      'Elastic will sample the file and infer column names and types automatically.'
+      'Elastic infers field names and types from your file. Review the sample below and adjust any type before continuing.'
     );
+    expect(getByTestId('datasetWizardAutomaticSchemaSampleTable')).toBeInTheDocument();
   });
 
   it('shows the AWS Glue table option for S3 data sources', () => {
@@ -92,7 +87,7 @@ describe('SchemaMappingsStep', () => {
     expect(getByTestId('datasetWizardSchemaMappingModeAwsGlueTable')).toBeInTheDocument();
   });
 
-  it('updates the description when switching schema mapping modes', () => {
+  it('updates the editor when switching to AWS Glue table mode', () => {
     const { getByTestId, queryByTestId } = render(
       <TestHarness
         dataSources={[s3DataSource]}
@@ -103,10 +98,8 @@ describe('SchemaMappingsStep', () => {
     fireEvent.click(getByTestId('datasetWizardSchemaMappingModeAwsGlueTable'));
     expect(getByTestId('datasetWizardAwsGlueTableSchemaMappings')).toBeInTheDocument();
     expect(getByTestId('datasetWizardAwsGlueCallout')).toBeInTheDocument();
-
-    fireEvent.click(getByTestId('datasetWizardSchemaMappingModeManual'));
     expect(queryByTestId('datasetWizardSchemaMappingModeDescription')).toBeNull();
-    expect(getByTestId('datasetWizardManualSchemaMappingsEditor')).toBeInTheDocument();
+    expect(queryByTestId('datasetWizardAutomaticSchemaSampleTable')).toBeNull();
   });
 
   it('resets aws_glue_table to automatic when the data source is not S3', () => {
@@ -139,5 +132,22 @@ describe('SchemaMappingsStep', () => {
     rerender(<Harness dataSource="gcs-source" />);
 
     expect(getByTestId('schemaMappingModeValue')).toHaveTextContent('automatic');
+  });
+
+  it('resets manual to automatic when manual mode is no longer supported', () => {
+    const { getByTestId } = render(
+      <TestHarness
+        defaultValues={{
+          ...emptyDatasetWizardFormValues(),
+          schema_mapping_mode: 'manual',
+        }}
+      />
+    );
+
+    expect(getByTestId('datasetWizardSchemaMappingModeAutomatic')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    expect(getByTestId('datasetWizardAutomaticSchemaSampleTable')).toBeInTheDocument();
   });
 });
