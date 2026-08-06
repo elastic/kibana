@@ -8,9 +8,10 @@
  */
 
 /**
- * The Inspector continues to show the table request plus the visualization
- * requests for a slow ES|QL query; currently the visualization work appears
- * as two entries (one failed attempt and one successful retry).
+ * The Inspector must not duplicate the "Table"/"Visualization" entries when an
+ * ES|QL query is slow (mirrors the FTR `with slow queries` test). Failed
+ * attempts may additionally be listed when the visualization request is
+ * retried, so only the successful entries are counted here.
  *
  * Stateful-only: the slow-query simulation relies on the ES `error_query`
  * test feature (see `ELASTIC_ESQL_DELAY_SECONDS` in
@@ -24,6 +25,7 @@ import { spaceTest, testData } from '../../fixtures';
 import {
   getInspectorRequestNames,
   getInspectorRequestTotalTime,
+  selectInspectorRequest,
   switchToRequestsView,
 } from '../../fixtures/inspector_helpers';
 
@@ -35,9 +37,9 @@ declare global {
 
 const AGG_QUERY = 'from logstash-* | sort @timestamp';
 
-// Simulated ES|QL round-trip delay (see
+// Simulated ES|QL round-trip delay, matching the FTR test it replaces (see
 // `src/platform/plugins/shared/data/common/search/expressions/esql.ts`).
-const ESQL_DELAY_SECONDS = 1;
+const ESQL_DELAY_SECONDS = 5;
 
 spaceTest.describe(
   'Discover ES|QL view - inspector, slow query',
@@ -61,7 +63,7 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'shows the table request and visualization retry entries for a slow query',
+      'shows a single table and visualization request for a slow query',
       async ({ page, pageObjects }) => {
         const { discover } = pageObjects;
 
@@ -83,21 +85,24 @@ spaceTest.describe(
         await discover.openInspectorFromTabMenu();
         await switchToRequestsView(page);
 
+        // Failed attempts ("Visualization (failed)") may or may not be listed
+        // depending on how the slow response is retried, so assert on the
+        // successful entries only — those are the ones that must not be
+        // duplicated by the delayed response.
         await expect
-          .poll(async () => (await getInspectorRequestNames(page)).length, {
-            timeout: 30_000,
-          })
-          .toBe(3);
+          .poll(
+            async () => {
+              const names = await getInspectorRequestNames(page);
+              return {
+                table: names.filter((name) => name === 'Table').length,
+                visualization: names.filter((name) => name === 'Visualization').length,
+              };
+            },
+            { timeout: 30_000 }
+          )
+          .toStrictEqual({ table: 1, visualization: 1 });
 
-        const requestNames = await getInspectorRequestNames(page);
-        expect(requestNames.filter((name) => name === 'Table')).toHaveLength(1);
-
-        const visualizationRequests = requestNames.filter((name) =>
-          name.startsWith('Visualization')
-        );
-        expect(visualizationRequests).toHaveLength(2);
-        expect(visualizationRequests.some((name) => name.includes('(failed)'))).toBe(true);
-
+        await selectInspectorRequest(page, 'Table');
         const requestTotalTime = await getInspectorRequestTotalTime(page);
         expect(requestTotalTime).toBeGreaterThan(ESQL_DELAY_SECONDS * 1000);
       }

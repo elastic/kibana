@@ -19,15 +19,26 @@ export const getInspectorRequestCommand = async (
   page: ScoutPage,
   requestName: string
 ): Promise<string> => {
-  const chooser = page.testSubj.locator('inspectorRequestChooser');
-  await expect(chooser).toBeVisible();
-  await chooser.click();
-  await page.testSubj.click(`inspectorRequestChooser${requestName}`);
+  await selectInspectorRequest(page, requestName);
   await page.testSubj.click('inspectorRequestDetailRequest');
   const codeViewer = page.testSubj.locator('inspectorRequestCodeViewerContainer');
   await expect(codeViewer).toBeVisible();
   const text = await codeViewer.innerText();
   return text.split('\n')[0].trim();
+};
+
+/**
+ * Selects the named request in the inspector's request chooser combo box, so
+ * that the request/statistics panels show that request's details.
+ */
+export const selectInspectorRequest = async (
+  page: ScoutPage,
+  requestName: string
+): Promise<void> => {
+  const chooser = page.testSubj.locator('inspectorRequestChooser');
+  await expect(chooser).toBeVisible();
+  await chooser.click();
+  await page.testSubj.click(`inspectorRequestChooser${requestName}`);
 };
 
 export const normalizeInspectorCommand = (value: string): string => {
@@ -40,7 +51,8 @@ export const normalizeInspectorCommand = (value: string): string => {
 /**
  * Reads the "Request total time" stat of the currently selected request in
  * milliseconds (mirrors the FTR `inspector.getRequestTotalTime()` service
- * method).
+ * method). Pair it with {@link selectInspectorRequest} when more than one
+ * request is listed, since the selection determines what is measured.
  */
 export const getInspectorRequestTotalTime = async (page: ScoutPage): Promise<number> => {
   const totalTime = page.testSubj.locator('inspectorRequestTotalTime');
