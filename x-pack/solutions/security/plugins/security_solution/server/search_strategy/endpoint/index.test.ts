@@ -267,7 +267,10 @@ describe('endpointSearchStrategyProvider', () => {
 
       await provider.cancel?.(
         'search-id',
-        { strategy: 'endpointResponseActions', projectRouting: 'something' } as unknown as SearchArgs[1],
+        {
+          strategy: 'endpointResponseActions',
+          projectRouting: 'something',
+        } as unknown as SearchArgs[1],
         deps
       );
 

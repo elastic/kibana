@@ -114,10 +114,23 @@ export const fetchActionRequests = async ({
 
   const must: QueryDslQueryContainer[] = [];
 
-  // The policy ids below come from local Fleet saved objects, which do not fan out, so under CPS they
-  // would filter out every linked project's action. `originSpaceId` replaces the clause one for one.
+  // Under CPS, an action is visible if its originSpaceId matches OR its integration policy is shared
+  // into the active space. The Fleet round trip comes back (previously skipped) because sharing a
+  // policy into a new space should make its actions visible even when their originSpaceId differs.
   const matchSpace: QueryDslQueryContainer = cpsRead
-    ? buildOriginSpaceIdFilter(spaceId, { matchMissingOriginSpaceId: false })
+    ? {
+        bool: {
+          should: [
+            buildOriginSpaceIdFilter(spaceId, { matchMissingOriginSpaceId: false }),
+            {
+              terms: {
+                'agent.policy.integrationPolicyId': await fetchIntegrationPolicyIds(fleetServices),
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      }
     : {
         terms: {
           'agent.policy.integrationPolicyId': await fetchIntegrationPolicyIds(fleetServices),
@@ -127,7 +140,7 @@ export const fetchActionRequests = async ({
   logger.debug(
     () =>
       `Narrowing results to only response actions visible in space [${spaceId}] using ${
-        cpsRead ? 'the originSpaceId carried by the document' : 'local integration policy ids'
+        cpsRead ? 'originSpaceId and integration policy ids' : 'local integration policy ids'
       }`
   );
 

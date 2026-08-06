@@ -227,5 +227,48 @@ describe('fetchActionRequestById() utility', () => {
         })
       ).resolves.toEqual(expect.objectContaining({ originSpaceId: 'default' }));
     });
+
+    it('should accept an action whose integration policy is visible in the active space even if its originSpaceId differs', async () => {
+      (
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+      ).mockResolvedValueOnce(undefined);
+
+      await expect(
+        fetchActionRequestById(endpointServiceMock, 'other-space', '123', {
+          scoped: endpointServiceMock.asScoped(request),
+        })
+      ).resolves.toEqual(expect.objectContaining({ originSpaceId: 'default' }));
+
+      expect(
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+      ).toHaveBeenCalledWith({
+        integrationPolicyIds: ['integration-policy-1'],
+        options: { matchAll: false },
+      });
+    });
+
+    it('should accept an action whose originSpaceId matches the active space without consulting Fleet', async () => {
+      await expect(
+        fetchActionRequestById(endpointServiceMock, 'default', '123', {
+          scoped: endpointServiceMock.asScoped(request),
+        })
+      ).resolves.toBeDefined();
+
+      expect(
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should reject an action when neither originSpaceId matches nor the integration policy is visible in the active space', async () => {
+      (
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+      ).mockRejectedValueOnce(new Error('policy not in space'));
+
+      await expect(
+        fetchActionRequestById(endpointServiceMock, 'other-space', '123', {
+          scoped: endpointServiceMock.asScoped(request),
+        })
+      ).rejects.toThrow('Action [123] not found');
+    });
   });
 });
