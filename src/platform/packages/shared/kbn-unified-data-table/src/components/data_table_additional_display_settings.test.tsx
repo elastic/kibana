@@ -23,9 +23,12 @@ const defaultDisplaySettingsProps = {
   lineCountInput: 10,
   rowHeight: RowHeightMode.custom,
   sampleSize: 10,
+  isSummaryColumnToggleDisabled: false,
+  showSummaryColumn: false,
+  onChangeShowSummaryColumn: jest.fn(),
 };
 
-const getSampleSizeNumberInput = () => screen.getByRole('spinbutton', { name: 'Sample size' });
+const getSampleSizeNumberInput = () => screen.getByRole('spinbutton');
 
 const renderDisplaySettings = (
   props: Partial<UnifiedDataTableAdditionalDisplaySettingsProps> = {}
@@ -286,6 +289,24 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       );
 
       expect(onChangeHeaderRowHeight).toHaveBeenCalledWith('auto');
+    });
+  });
+
+  describe('summary column toggle', () => {
+    it('should render the Summary column toggle and wire onChange', async () => {
+      const onChangeShowSummaryColumn = jest.fn();
+
+      renderDisplaySettings({
+        showSummaryColumn: false,
+        isSummaryColumnToggleDisabled: false,
+        onChangeShowSummaryColumn,
+      });
+
+      expect(screen.getByText('Show Summary column')).toBeVisible();
+
+      await userEvent.click(screen.getByTestId('additionalDisplaySettingsShowSummaryColumn'));
+
+      expect(onChangeShowSummaryColumn).toHaveBeenCalledWith(true);
     });
   });
 });

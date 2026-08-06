@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import type { RowHeightSettingsProps } from './row_height_settings';
 import { RowHeightSettings } from './row_height_settings';
+import { SummaryColumnToggle, summaryToggleLabel } from './summary_column_toggle';
 
 export const DEFAULT_MAX_ALLOWED_SAMPLE_SIZE = 1000;
 export const MIN_ALLOWED_SAMPLE_SIZE = 1;
@@ -33,6 +34,9 @@ export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   lineCountInput: number | undefined;
   headerLineCountInput: number | undefined;
   densityControl?: React.ReactNode;
+  isSummaryColumnToggleDisabled: boolean;
+  showSummaryColumn: boolean;
+  onChangeShowSummaryColumn: (showSummaryColumn: boolean) => void;
 }
 
 const defaultOnChangeSampleSize = () => {};
@@ -52,6 +56,9 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   lineCountInput,
   headerLineCountInput,
   densityControl,
+  isSummaryColumnToggleDisabled,
+  showSummaryColumn,
+  onChangeShowSummaryColumn,
 }) => {
   const [activeSampleSize, setActiveSampleSize] = useState<number | ''>(sampleSize);
   const minRangeSampleSize = Math.max(
@@ -111,24 +118,34 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     }
 
     settings.push(
-      <>
-        <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
-          <EuiRange
-            compressed
-            fullWidth
-            min={minRangeSampleSize}
-            max={maxAllowedSampleSize}
-            step={step}
-            showInput
-            value={activeSampleSize}
-            onChange={onChangeActiveSampleSize}
-            data-test-subj="unifiedDataTableSampleSizeInput"
-            showRange
-          />
-        </EuiFormRow>
-      </>
+      <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
+        <EuiRange
+          compressed
+          fullWidth
+          min={minRangeSampleSize}
+          max={maxAllowedSampleSize}
+          step={step}
+          showInput
+          value={activeSampleSize}
+          onChange={onChangeActiveSampleSize}
+          data-test-subj="unifiedDataTableSampleSizeInput"
+          showRange
+        />
+      </EuiFormRow>
     );
   }
+
+  settings.push(
+    <EuiFormRow label={summaryToggleLabel} display="columnCompressed">
+      <SummaryColumnToggle
+        dataTestSubj="additionalDisplaySettingsShowSummaryColumn"
+        checked={showSummaryColumn}
+        disabled={isSummaryColumnToggleDisabled}
+        onChange={onChangeShowSummaryColumn}
+        showLabel={false}
+      />
+    </EuiFormRow>
+  );
 
   if (Boolean(densityControl)) {
     settings.push(densityControl);

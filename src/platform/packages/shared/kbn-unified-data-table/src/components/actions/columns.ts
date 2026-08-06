@@ -13,6 +13,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { omit } from 'lodash';
 import { popularizeField } from '../../utils/popularize_field';
 import type { UnifiedDataTableSettings } from '../../types';
+import { SOURCE_COLUMN } from '../../utils/columns';
 
 export function getStateColumnActions({
   capabilities,
@@ -69,12 +70,15 @@ export function getStateColumnActions({
 
   function onSetColumns(nextColumns: string[], hideTimeColumn: boolean) {
     // The next line should be gone when classic table will be removed
-    const actualColumns =
+    // Strip display-only prepended time field before persisting
+    const colsWithoutDisplayTime =
       !hideTimeColumn && dataView.timeFieldName && dataView.timeFieldName === nextColumns[0]
         ? (nextColumns || []).slice(1)
         : nextColumns;
-
-    let nextSettings = cleanColumnSettings(nextColumns, settings);
+    // Keep mixed `_source` lists and collapse sole `_source` → []
+    const actualColumns = buildColumns(colsWithoutDisplayTime);
+    // Use normalized columns so orphaned `_source` settings are dropped
+    let nextSettings = cleanColumnSettings(actualColumns, settings);
 
     // When columns are removed, reset the last column to auto width if only absolute
     // width columns remain, to ensure the columns fill the available grid space
@@ -93,17 +97,15 @@ export function getStateColumnActions({
 }
 
 /**
- * Helper function to provide a fallback to a single _source column if the given array of columns
- * is empty, and removes _source if there are more than 1 columns given
- * @param columns
+ * Normalizes column state after add/remove/set.
+ * Sole `_source` collapses to [] (Summary is injected later by getDisplayedColumns).
+ * Mixed lists that include `_source` are kept as-is.
  */
 function buildColumns(columns: string[]) {
-  if (columns.length > 1 && columns.indexOf('_source') !== -1) {
-    return columns.filter((col) => col !== '_source');
-  } else if (columns.length !== 0) {
-    return columns;
+  if (columns.length === 1 && columns[0] === SOURCE_COLUMN) {
+    return [];
   }
-  return [];
+  return columns;
 }
 
 function addColumn(columns: string[], columnName: string) {

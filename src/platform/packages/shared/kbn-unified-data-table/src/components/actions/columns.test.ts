@@ -171,4 +171,59 @@ describe('Test column actions', () => {
       settings: { columns: { third: { width: 100 } } },
     });
   });
+
+  describe('Summary column coexistence', () => {
+    it('keeps _source when adding another column', () => {
+      const setAppState = jest.fn();
+      const actions = getStateColumnAction(
+        { columns: ['message', '_source'] },
+        setAppState
+      );
+
+      actions.onAddColumn('extension');
+
+      expect(setAppState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: ['message', '_source', 'extension'],
+        })
+      );
+    });
+
+    it('collapses to empty columns when only _source remains', () => {
+      const setAppState = jest.fn();
+      const actions = getStateColumnAction(
+        { columns: ['message', '_source'] },
+        setAppState
+      );
+
+      actions.onRemoveColumn('message');
+
+      expect(setAppState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: [],
+          sort: [],
+        })
+      );
+    });
+
+    it('normalizes sole _source through onSetColumns and drops its settings', () => {
+      const setAppState = jest.fn();
+      const actions = getStateColumnAction(
+        {
+          columns: ['message', '_source'],
+          settings: { columns: { _source: { width: 400 }, message: { width: 100 } } },
+        },
+        setAppState
+      );
+
+      actions.onSetColumns(['_source'], true);
+
+      expect(setAppState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: [],
+          settings: { columns: {} },
+        })
+      );
+    });
+  });
 });
