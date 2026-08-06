@@ -100,14 +100,15 @@ describe('UserStorageClient', () => {
       expect(httpErrors).not.toHaveBeenCalled();
     });
 
-    it('rejects update() at the write step, after the read resolved to the default', async () => {
+    it('rejects a read-modify-write at the write step, after the read gave the default', async () => {
       const { client, api } = buildClient({}, false);
-      const updater = jest.fn((current: string) => `${current}-next`);
 
-      await expect(client.update('key', 'fallback', updater)).rejects.toThrow(
+      const current = await client.get<string>('key', 'fallback');
+      expect(current).toBe('fallback');
+
+      await expect(client.set('key', `${current}-next`)).rejects.toThrow(
         'user storage is not available'
       );
-      expect(updater).toHaveBeenCalledWith('fallback');
       expect(api.get).not.toHaveBeenCalled();
       expect(api.set).not.toHaveBeenCalled();
     });
@@ -467,50 +468,6 @@ describe('UserStorageClient', () => {
       fetch1.resolve('fetched'); // still authoritative — the failed write changed nothing
       await expect(getPromise).resolves.toBe('fetched');
       expect(client.peek('key')).toBe('fetched');
-    });
-  });
-
-  describe('update', () => {
-    it('reads the resolved (not unhydrated) current value as the mutation base', async () => {
-      const { client, api } = buildClient({});
-      let resolveFetch!: (v: { items: string[] }) => void;
-      api.get.mockReturnValue(
-        new Promise<{ items: string[] }>((resolve) => (resolveFetch = resolve))
-      );
-
-      const updatePromise = client.update<{ items: string[] }>('key', { items: [] }, (current) => ({
-        items: [...current.items, 'new'],
-      }));
-
-      // Resolve only after update() has been called against the still-unhydrated cache.
-      resolveFetch({ items: ['existing'] });
-
-      await updatePromise;
-
-      expect(api.set).toHaveBeenCalledWith('key', { items: ['existing', 'new'] });
-    });
-
-    it('skips the write when the updater returns the same reference (no-op)', async () => {
-      // Assert against the cached reference; the client clones `initialValues` internally.
-      const { client, api } = buildClient({ key: { items: ['a'] } });
-      const cached = client.peek('key');
-
-      const result = await client.update('key', { items: [] }, (current) => current);
-
-      expect(result).toBe(cached);
-      expect(api.set).not.toHaveBeenCalled();
-    });
-
-    it('persists the updater result when it differs from the current value', async () => {
-      const { client, api } = buildClient({ key: { items: ['a'] } });
-      api.set.mockResolvedValue({ items: ['a', 'b'] });
-
-      const result = await client.update<{ items: string[] }>('key', { items: [] }, (current) => ({
-        items: [...current.items, 'b'],
-      }));
-
-      expect(api.set).toHaveBeenCalledWith('key', { items: ['a', 'b'] });
-      expect(result).toEqual({ items: ['a', 'b'] });
     });
   });
 

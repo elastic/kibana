@@ -67,47 +67,44 @@ export class DateRangePickerPresetsService implements IDateRangePickerPresetsSer
   }
 
   public async savePreset(preset: PresetItem): Promise<SavePresetOutcome> {
-    let outcome: SavePresetOutcome = 'saved';
     const presetKey = getPresetKey(preset);
+    const base = await this.getStoredPresets();
 
-    await this.userStorage.update<StoredPresets>(
-      DATE_RANGE_PICKER_PRESETS_KEY,
-      DEFAULT_STORED_PRESETS,
-      (stored) => {
-        const base = normalize(stored).presets ?? this.getDefaultPresets();
+    if (base.some((item) => getPresetKey(item) === presetKey)) return 'duplicate';
+    if (base.length >= MAX_PRESETS) return 'limit-reached';
 
-        if (base.some((item) => getPresetKey(item) === presetKey)) {
-          outcome = 'duplicate';
-          return stored;
-        }
+    await this.userStorage.set<StoredPresets>(DATE_RANGE_PICKER_PRESETS_KEY, {
+      version: 1,
+      presets: [...base, preset].map(toPresetItem),
+    });
 
-        if (base.length >= MAX_PRESETS) {
-          outcome = 'limit-reached';
-          return stored;
-        }
-
-        return { version: 1, presets: [...base, preset].map(toPresetItem) };
-      }
-    );
-
-    return outcome;
+    return 'saved';
   }
 
   public async deletePreset(preset: PresetItem): Promise<void> {
     const presetKey = getPresetKey(preset);
+    const base = await this.getStoredPresets();
+    const next = base.filter((item) => getPresetKey(item) !== presetKey);
 
-    await this.userStorage.update<StoredPresets>(
+    // Nothing matched — skip the write.
+    if (next.length === base.length) return;
+
+    await this.userStorage.set<StoredPresets>(DATE_RANGE_PICKER_PRESETS_KEY, {
+      version: 1,
+      presets: next.map(toPresetItem),
+    });
+  }
+
+  /**
+   * Resolved read for use as a write base. This key is `preload: false`, so
+   * `get()` (never `peek()`) is required — an unhydrated read would persist the
+   * defaults over whatever the user already had stored.
+   */
+  private async getStoredPresets(): Promise<PresetItem[]> {
+    const stored = await this.userStorage.get<StoredPresets>(
       DATE_RANGE_PICKER_PRESETS_KEY,
-      DEFAULT_STORED_PRESETS,
-      (stored) => {
-        const base = normalize(stored).presets ?? this.getDefaultPresets();
-        const next = base.filter((item) => getPresetKey(item) !== presetKey);
-
-        // Nothing matched — no-op, skips the write.
-        if (next.length === base.length) return stored;
-
-        return { version: 1, presets: next.map(toPresetItem) };
-      }
+      DEFAULT_STORED_PRESETS
     );
+    return normalize(stored).presets ?? this.getDefaultPresets();
   }
 }

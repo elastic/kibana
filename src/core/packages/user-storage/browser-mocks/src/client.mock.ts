@@ -19,20 +19,9 @@ export const clientMock = (): jest.Mocked<IUserStorageClient> => {
     get$: jest.fn().mockReturnValue(new Subject<unknown>()),
     set: jest.fn().mockImplementation((_key: string, value: unknown) => Promise.resolve(value)),
     remove: jest.fn().mockResolvedValue(undefined),
-    update: jest.fn(),
     getUpdate$: jest.fn().mockReturnValue(new Subject<unknown>()),
     getHttpError$: jest.fn().mockReturnValue(new Subject<Error>()),
   });
-
-  // Mirror the real client's resolved read-modify-write behavior.
-  mock.update.mockImplementation(
-    async (key: string, defaultValue: unknown, updater: (current: unknown) => unknown) => {
-      const current = await mock.get(key, defaultValue);
-      const next = updater(current);
-      if (next === current) return current;
-      return mock.set(key, next);
-    }
-  );
 
   return mock;
 };

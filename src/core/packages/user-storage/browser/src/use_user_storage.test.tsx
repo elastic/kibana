@@ -42,14 +42,6 @@ const buildClient = (initial: Record<string, unknown> = {}): IUserStorageClient 
       delete cache[key];
       subject$.next({ ...cache });
     }) as IUserStorageClient['remove'],
-    update: (async (key: string, defaultValue: unknown, updater: (current: unknown) => unknown) => {
-      const current = cache[key] !== undefined ? cache[key] : defaultValue;
-      const next = updater(current);
-      if (next === current) return current;
-      cache[key] = next;
-      subject$.next({ ...cache });
-      return next;
-    }) as unknown as IUserStorageClient['update'],
     getUpdate$: () =>
       new BehaviorSubject({ type: 'remove' as const, key: '', oldValue: undefined }),
     getHttpError$: () => new BehaviorSubject(new Error('noop')),

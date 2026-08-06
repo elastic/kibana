@@ -163,20 +163,6 @@ export class UserStorageClient implements IUserStorageClient {
     this.update$.next({ type: 'remove', key, oldValue });
   }
 
-  public async update<T = unknown>(
-    key: string,
-    defaultValue: T,
-    updater: (current: T) => T
-  ): Promise<T> {
-    // Ensure hydration is complete before calling the updater
-    const current = await this.get<T>(key, defaultValue);
-    const next = updater(current);
-
-    if (next === current) return current;
-
-    return this.set<T>(key, next);
-  }
-
   public getUpdate$(): Observable<UserStorageUpdate> {
     return this.update$.asObservable();
   }

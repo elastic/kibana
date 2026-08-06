@@ -100,6 +100,13 @@ export interface IUserStorageClient {
    * untouched, the error is published to `getHttpError$`, and the promise rejects.
    *
    * Rejects without issuing a request when `isAvailable()` is `false`.
+   *
+   * For a read-modify-write, compute the new value from `await get(key, default)`
+   * and never from `peek(key)`: on a `preload: false` key `peek` returns the
+   * default until the lazy fetch lands, so writing back a `peek`-derived value
+   * overwrites whatever the user already had stored. Note that this is a plain
+   * last-write-wins write with no concurrency control — two tabs writing the same
+   * key will not merge.
    */
   set<T = unknown>(key: string, value: T): Promise<T>;
 
@@ -111,21 +118,6 @@ export interface IUserStorageClient {
    * Rejects without issuing a request when `isAvailable()` is `false`.
    */
   remove(key: string): Promise<void>;
-
-  /**
-   * Safe read-modify-write helper for structured values behind a lazy key.
-   * Awaits the resolved current value (see `get`), applies `updater`, and
-   * persists the result via `set` — so the mutation is always computed from
-   * the true stored value, never an unhydrated default.
-   *
-   * If `updater` returns the exact same reference it was given, `update`
-   * treats the call as a no-op and skips the HTTP write, returning the
-   * unchanged current value.
-   *
-   * This is a single resolved-read-then-write; it does not detect or retry
-   * on concurrent writers (last write wins, same as `set`).
-   */
-  update<T = unknown>(key: string, defaultValue: T, updater: (current: T) => T): Promise<T>;
 
   /**
    * Stream of every successful key update (write or remove).
