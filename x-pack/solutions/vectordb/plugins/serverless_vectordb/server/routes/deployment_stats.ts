@@ -25,17 +25,16 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
         const client = core.elasticsearch.client;
         const savedObjectsClient = core.savedObjects.getClient();
 
-        const [{ indicesCount, storeSizeBytes, vectorDocsCount }, dashboardsCount] =
-          await Promise.all([
-            fetchIndexStats(client, logger),
-            fetchDashboardsCount(savedObjectsClient, logger),
-          ]);
+        const [{ indicesCount, storeSizeBytes, vectorCount }, dashboardsCount] = await Promise.all([
+          fetchIndexStats(client, logger),
+          fetchDashboardsCount(savedObjectsClient, logger),
+        ]);
 
         return response.ok({
           body: {
             indicesCount,
             storeSizeBytes,
-            vectorDocsCount,
+            vectorCount,
             dashboardsCount,
           },
         });
