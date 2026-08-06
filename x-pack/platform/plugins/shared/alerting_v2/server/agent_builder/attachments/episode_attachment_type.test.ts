@@ -168,8 +168,8 @@ describe('createEpisodeAttachmentType', () => {
   });
 
   describe('isStale', () => {
-    it('returns false when origin_snapshot_at is missing', async () => {
-      const attachment = buildVersionedAttachment({ origin_snapshot_at: undefined });
+    it('returns false when origin is missing', async () => {
+      const attachment = buildVersionedAttachment({ origin: undefined });
 
       const result = await definition.isStale!(
         attachment,
@@ -180,11 +180,8 @@ describe('createEpisodeAttachmentType', () => {
       expect(getEpisode).not.toHaveBeenCalled();
     });
 
-    it('returns false when last_timestamp equals snapshot time', async () => {
-      getEpisode.mockResolvedValueOnce({
-        ...baseEpisodeData,
-        last_timestamp: '2026-04-10T12:00:00.000Z',
-      });
+    it('returns false when the episode does not exist', async () => {
+      getEpisode.mockResolvedValueOnce(undefined);
 
       const result = await definition.isStale!(
         buildVersionedAttachment(),
@@ -194,11 +191,8 @@ describe('createEpisodeAttachmentType', () => {
       expect(result).toBe(false);
     });
 
-    it('returns false when last_timestamp is before snapshot time', async () => {
-      getEpisode.mockResolvedValueOnce({
-        ...baseEpisodeData,
-        last_timestamp: '2026-04-09T12:00:00.000Z',
-      });
+    it('returns false when live last_timestamp matches latest version', async () => {
+      getEpisode.mockResolvedValueOnce(baseEpisodeData);
 
       const result = await definition.isStale!(
         buildVersionedAttachment(),
@@ -208,7 +202,7 @@ describe('createEpisodeAttachmentType', () => {
       expect(result).toBe(false);
     });
 
-    it('returns true when last_timestamp is after snapshot AND differs from latest version', async () => {
+    it('returns true when live last_timestamp differs from latest version', async () => {
       getEpisode.mockResolvedValueOnce({
         ...baseEpisodeData,
         last_timestamp: '2026-04-20T12:00:00.000Z',
@@ -222,15 +216,38 @@ describe('createEpisodeAttachmentType', () => {
       expect(result).toBe(true);
     });
 
-    it('returns false when last_timestamp is after snapshot but matches latest version', async () => {
-      const sameTimestamp = '2026-04-15T12:00:00.000Z';
-      getEpisode.mockResolvedValueOnce({ ...baseEpisodeData, last_timestamp: sameTimestamp });
+    it('returns true when current_version has no matching version entry', async () => {
+      getEpisode.mockResolvedValueOnce(baseEpisodeData);
       const attachment = buildVersionedAttachment({
+        current_version: 99,
+      });
+
+      const result = await definition.isStale!(
+        attachment,
+        createResolveContext()
+      );
+
+      expect(result).toBe(true);
+    });
+
+    it('returns false after a refresh brings the latest version up to date', async () => {
+      const refreshedTimestamp = '2026-04-20T12:00:00.000Z';
+      getEpisode.mockResolvedValueOnce({
+        ...baseEpisodeData,
+        last_timestamp: refreshedTimestamp,
+      });
+      const attachment = buildVersionedAttachment({
+        current_version: 2,
         versions: [
           {
             version: 1,
-            data: { ...baseEpisodeData, last_timestamp: sameTimestamp },
-            created_at: '2026-04-15T12:00:00.000Z',
+            data: baseEpisodeData,
+            created_at: '2026-04-10T12:00:00.000Z',
+          } as never,
+          {
+            version: 2,
+            data: { ...baseEpisodeData, last_timestamp: refreshedTimestamp },
+            created_at: refreshedTimestamp,
           } as never,
         ],
       });

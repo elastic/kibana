@@ -97,7 +97,7 @@ export const createEpisodeAttachmentType = ({
     attachment: VersionedAttachment<typeof EPISODE_ATTACHMENT_TYPE, EpisodeAttachmentData>,
     context: AttachmentResolveContext
   ): Promise<boolean> => {
-    if (!attachment.origin || !attachment.origin_snapshot_at) {
+    if (!attachment.origin) {
       return false;
     }
     try {
@@ -105,12 +105,9 @@ export const createEpisodeAttachmentType = ({
       if (!episode) {
         return false;
       }
-      if (Date.parse(episode.last_timestamp) > Date.parse(attachment.origin_snapshot_at)) {
-        const latestVersion = getLatestVersion(attachment);
-        if (!latestVersion) return false;
-        return episode.last_timestamp !== latestVersion.data.last_timestamp;
-      }
-      return false;
+      const latestVersion = getLatestVersion(attachment);
+      if (!latestVersion) return true;
+      return episode.last_timestamp !== latestVersion.data.last_timestamp;
     } catch (error) {
       logger.warn(
         `Failed to check staleness for episode attachment "${attachment.origin}": ${error}`
