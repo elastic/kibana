@@ -13,6 +13,7 @@ import type { WaitForInputGraphNode } from '@kbn/workflows/graph';
 import { WaitForInputStepSchema } from '@kbn/workflows/spec/schema';
 import { WaitForInputStepImpl } from './wait_for_input_step';
 import type { ConnectorExecutor } from '../../connector_executor';
+import { WorkflowTemplatingEngine } from '../../templating_engine';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { ContextDependencies } from '../../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -158,37 +159,37 @@ describe('WaitForInputStepImpl', () => {
       });
     });
 
-    it('should render the message and the template syntax in schema property default values', async () => {
+    it('should render the message and schema property default values via the templating engine', async () => {
+      // Typed schema defaults must use ${{ }} so the engine preserves the
+      // underlying type (plain {{ }} always stringifies — e.g. "true").
+      // String defaults can keep plain {{ }} syntax.
       const schema = {
         type: 'object',
         properties: {
           approved: {
             type: 'boolean',
             title: 'Approve isolation?',
-            default: '{{inputs.approved}}',
+            default: '${{ inputs.approved }}',
+          },
+          reason: {
+            type: 'string',
+            default: '{{ inputs.reason }}',
           },
         },
         required: ['approved'],
       };
-      const renderedSchema = {
-        type: 'object',
-        properties: {
-          approved: { type: 'boolean', title: 'Approve isolation?', default: true },
-          reason: { type: 'string' },
-        },
-        required: ['approved'],
+      const renderContext = {
+        inputs: { message: 'hello world', approved: true, reason: 'looks good' },
       };
-      node.configuration.with = {
-        message: '{{inputs.message}}',
-        schema,
-      } as WaitForInputStep['with'];
+      const templatingEngine = new WorkflowTemplatingEngine();
       (
         mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
-      ).mockImplementation((v: unknown) => {
-        if (v === '{{inputs.message}}') return 'hello world';
-        if (v === schema) return renderedSchema;
-        return v;
-      });
+      ).mockImplementation((v: unknown) => templatingEngine.render(v, renderContext));
+
+      node.configuration.with = {
+        message: '{{ inputs.message }}',
+        schema,
+      } as WaitForInputStep['with'];
 
       underTest = new WaitForInputStepImpl(
         node,
@@ -203,12 +204,11 @@ describe('WaitForInputStepImpl', () => {
       expect(
         mockStepExecutionRuntime.contextManager.renderValueAccordingToContext
       ).toHaveBeenCalledWith(schema);
-      expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith({
-        message: 'hello world',
-        schema: renderedSchema,
-      });
       const persisted = (mockStepExecutionRuntime.setInput as jest.Mock).mock.calls[0][0];
+      expect(persisted.message).toBe('hello world');
       expect(persisted.schema.properties.approved.default).toBe(true);
+      expect(typeof persisted.schema.properties.approved.default).toBe('boolean');
+      expect(persisted.schema.properties.reason.default).toBe('looks good');
     });
 
     it('should not call setInput when the with block is absent', async () => {
