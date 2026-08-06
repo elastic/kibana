@@ -12,7 +12,6 @@ import {
   EuiBottomBar,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCode,
   EuiErrorBoundary,
   EuiFlexGroup,
@@ -22,6 +21,7 @@ import {
   EuiSpacer,
   EuiSteps,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { useSpaceSettingsContext } from '../../../../../../hooks/use_space_settings_context';
@@ -791,33 +791,32 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       ) : null}
       {fipsAgentsCount > 0 && !fipsCompatibleIntegration && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount={false}
             size="m"
-            color="warning"
-            iconType="warning"
             title={
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.fipsCalloutTitle"
                 defaultMessage="This integration is not FIPS compatible"
               />
             }
-          >
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.fipsCalloutDescription"
-              defaultMessage="The selected agent policies have one or more agents enrolled in FIPS mode. Installing this integration could interfere with the agents' ability to ingest data correctly. For more information, see the {guideLink}."
-              values={{
-                guideLink: (
-                  <EuiLink href={docLinks.links.fleet.fipsIngest} target="_blank" external>
-                    <FormattedMessage
-                      id="xpack.fleet.agentEnrollmentCallout.fipsMessage.guideLink"
-                      defaultMessage="Guide"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.fipsCalloutDescription"
+                defaultMessage="The selected agent policies have one or more agents enrolled in FIPS mode. Installing this integration could interfere with the agents' ability to ingest data correctly. For more information, see the {guideLink}."
+                values={{
+                  guideLink: (
+                    <EuiLink href={docLinks.links.fleet.fipsIngest} target="_blank" external>
+                      <FormattedMessage
+                        id="xpack.fleet.agentEnrollmentCallout.fipsMessage.guideLink"
+                        defaultMessage="Guide"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+          />
 
           <EuiSpacer size="m" />
         </>
@@ -832,33 +831,33 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
       {showSecretsDisabledCallout && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             size="m"
-            color="warning"
             title={
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutTitle"
                 defaultMessage="Policy secrets are disabled"
               />
             }
-          >
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDescription"
-              defaultMessage="This integration contains {policySecretsLink}, but you have a Fleet Server running on a version earlier than {minimumSecretsVersion}. Please upgrade your Fleet Server to enable policy secrets for all integrations."
-              values={{
-                policySecretsLink: (
-                  <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
-                    <FormattedMessage
-                      id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDocsLink"
-                      defaultMessage="policy secrets"
-                    />
-                  </EuiLink>
-                ),
-                minimumSecretsVersion: <EuiCode>{SECRETS_MINIMUM_FLEET_SERVER_VERSION}</EuiCode>,
-              }}
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDescription"
+                defaultMessage="This integration contains {policySecretsLink}, but you have a Fleet Server running on a version earlier than {minimumSecretsVersion}. Please upgrade your Fleet Server to enable policy secrets for all integrations."
+                values={{
+                  policySecretsLink: (
+                    <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDocsLink"
+                        defaultMessage="policy secrets"
+                      />
+                    </EuiLink>
+                  ),
+                  minimumSecretsVersion: <EuiCode>{SECRETS_MINIMUM_FLEET_SERVER_VERSION}</EuiCode>,
+                }}
+              />
+            }
+          />
 
           <EuiSpacer size="m" />
         </>

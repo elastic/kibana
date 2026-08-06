@@ -8,7 +8,6 @@
 import React, { memo } from 'react';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -21,6 +20,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -76,7 +76,7 @@ export const IntegrationSyncFlyout: React.FunctionComponent<Props> = memo(
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           {syncedIntegrationsStatus?.error && (
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               title={
                 <FormattedMessage
@@ -84,13 +84,10 @@ export const IntegrationSyncFlyout: React.FunctionComponent<Props> = memo(
                   defaultMessage="Error"
                 />
               }
-              color="danger"
-              iconType="error"
               size="s"
               data-test-subj="integrationSyncFlyoutTopErrorCallout"
-            >
-              <EuiText size="s">{syncedIntegrationsStatus?.error}</EuiText>
-            </EuiCallOut>
+              text={syncedIntegrationsStatus?.error}
+            />
           )}
           <EuiFlexGroup direction="column" gutterSize="m">
             {(syncedIntegrationsStatus?.integrations ?? [])

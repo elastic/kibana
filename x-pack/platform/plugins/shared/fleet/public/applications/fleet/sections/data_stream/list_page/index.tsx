@@ -14,10 +14,10 @@ import {
   EuiFlexItem,
   EuiEmptyPrompt,
   EuiInMemoryTable,
-  EuiCallOut,
   EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n-react';
 
@@ -202,19 +202,16 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
       {deprecatedILMCheck?.deprecatedILMPolicies &&
         deprecatedILMCheck.deprecatedILMPolicies.length > 0 && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               title={
                 <FormattedMessage
                   id="xpack.fleet.dataStreamList.deprecatedILMCalloutTitle"
                   defaultMessage="Action required: Deprecated ILM policies detected"
                 />
               }
-              color="warning"
-              iconType="warning"
               announceOnMount
               data-test-subj="deprecatedILMCallout"
-            >
-              <p>
+              text={
                 <FormattedMessage
                   id="xpack.fleet.dataStreamList.deprecatedILMCalloutDescription"
                   defaultMessage="You are using modified deprecated ILM policies ({policies}). These policies should be migrated according to the new lifecycle management approach. {learnMoreLink}"
@@ -242,8 +239,8 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
                     ),
                   }}
                 />
-              </p>
-            </EuiCallOut>
+              }
+            />
             <EuiSpacer size="m" />
           </>
         )}

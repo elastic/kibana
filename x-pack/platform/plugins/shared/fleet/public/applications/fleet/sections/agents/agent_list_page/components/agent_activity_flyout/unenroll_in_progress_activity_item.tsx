@@ -6,15 +6,8 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  EuiPanel,
-  EuiButton,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiPanel, EuiButton } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -95,11 +88,9 @@ export const UnenrollInProgressActivityItem: React.FunctionComponent<{
 
         {isScheduled && (
           <EuiFlexItem>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               size="m"
-              color="warning"
-              iconType="warning"
               data-test-subj="unenrollGracePeriodWarning"
               title={
                 <FormattedMessage
@@ -108,12 +99,13 @@ export const UnenrollInProgressActivityItem: React.FunctionComponent<{
                   values={{ time: formattedTime(action.startTime!) }}
                 />
               }
-            >
-              <FormattedMessage
-                id="xpack.fleet.agentActivityFlyout.unenrollGracePeriodWarningBody"
-                defaultMessage="After this point, some agents may already be unenrolled."
-              />
-            </EuiCallOut>
+              text={
+                <FormattedMessage
+                  id="xpack.fleet.agentActivityFlyout.unenrollGracePeriodWarningBody"
+                  defaultMessage="After this point, some agents may already be unenrolled."
+                />
+              }
+            />
           </EuiFlexItem>
         )}
 

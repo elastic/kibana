@@ -12,7 +12,6 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import styled from 'styled-components';
 import {
   EuiBadge,
-  EuiCallOut,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -23,6 +22,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
@@ -898,33 +898,32 @@ export function Detail() {
 
   const securityCallout = missingSecurityConfiguration ? (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount
-        color="warning"
-        iconType="lock"
         title={
           <FormattedMessage
             id="xpack.fleet.epm.packageDetailsSecurityRequiredCalloutTitle"
             defaultMessage="Security needs to be enabled in order to add Elastic Agent integrations"
           />
         }
-      >
-        <FormattedMessage
-          id="xpack.fleet.epm.packageDetailsSecurityRequiredCalloutDescription"
-          defaultMessage="In order to fully use Fleet, you must enable Elasticsearch and Kibana security features.
+        text={
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsSecurityRequiredCalloutDescription"
+            defaultMessage="In order to fully use Fleet, you must enable Elasticsearch and Kibana security features.
         Follow the {guideLink} to enable security."
-          values={{
-            guideLink: (
-              <a href={services.http.basePath.prepend('/app/fleet')}>
-                <FormattedMessage
-                  id="xpack.fleet.epm.packageDetailsSecurityRequiredCalloutDescriptionGuideLink"
-                  defaultMessage="steps in this guide"
-                />
-              </a>
-            ),
-          }}
-        />
-      </EuiCallOut>
+            values={{
+              guideLink: (
+                <a href={services.http.basePath.prepend('/app/fleet')}>
+                  <FormattedMessage
+                    id="xpack.fleet.epm.packageDetailsSecurityRequiredCalloutDescriptionGuideLink"
+                    defaultMessage="steps in this guide"
+                  />
+                </a>
+              ),
+            }}
+          />
+        }
+      />
       <EuiSpacer />
     </>
   ) : undefined;
