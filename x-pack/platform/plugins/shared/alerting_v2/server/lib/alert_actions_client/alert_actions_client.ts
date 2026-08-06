@@ -15,12 +15,9 @@ import {
   type BulkResponse,
   type CreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
+import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
-import {
-  ALERT_ACTIONS_DATA_STREAM,
-  type AlertAction,
-} from '../../resources/datastreams/alert_actions';
-import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
+import type { AlertAction } from '../../resources/datastreams/alert_actions';
 import { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
