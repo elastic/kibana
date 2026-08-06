@@ -44,12 +44,10 @@ import type { ConfigSchema } from '../server/config';
 
 import { getVegaInspectorView } from './vega_inspector/vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
-import {
-  ADD_VEGA_EMBEDDABLE_ACTION_ID,
-  ADD_VEGA_PANEL_ACTION_ID,
-  VEGA_EMBEDDABLE_TYPE,
-  VEGA_STANDALONE_EMBEDDABLE_FLAG,
-} from './constants';
+import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
+import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
+
+const ACTION_ATTACHMENT_TRIGGERS = [ADD_PANEL_TRIGGER, ADD_CANVAS_ELEMENT_TRIGGER] as const;
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -162,7 +160,7 @@ export class VegaPlugin implements Plugin<void, void> {
           ? [ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID]
           : [ADD_VEGA_PANEL_ACTION_ID, ADD_VEGA_EMBEDDABLE_ACTION_ID];
 
-        for (const trigger of [ADD_PANEL_TRIGGER, ADD_CANVAS_ELEMENT_TRIGGER]) {
+        for (const trigger of ACTION_ATTACHMENT_TRIGGERS) {
           deps.uiActions.attachAction(trigger, actionToAttach);
           deps.uiActions.detachAction(trigger, actionToDetach);
         }
@@ -171,6 +169,5 @@ export class VegaPlugin implements Plugin<void, void> {
 
   public stop() {
     this.standaloneEmbeddableFlagSubscription?.unsubscribe();
-    this.standaloneEmbeddableFlagSubscription = undefined;
   }
 }

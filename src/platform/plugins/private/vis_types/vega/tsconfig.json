@@ -5,6 +5,7 @@
     "strictNullChecks": false
   },
   "include": [
+    "common/**/*",
     "server/**/*",
     "public/**/*",
     "test/scout/**/*",

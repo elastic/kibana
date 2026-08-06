@@ -13,16 +13,31 @@ import type {
   VisTypeVegaPluginSetup,
   VisTypeVegaPluginStart,
 } from './types';
+import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
+import { getVegaEmbeddableSchema } from './embeddable/schema';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
+  private standaloneEmbeddableEnabled = false;
+
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { home, usageCollection }: VisTypeVegaPluginSetupDependencies) {
+  public setup(core: CoreSetup, { embeddable }: VisTypeVegaPluginSetupDependencies) {
+    embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
+      title: 'Vega',
+      getSchema: (getDrilldownsSchema) =>
+        this.standaloneEmbeddableEnabled ? getVegaEmbeddableSchema(getDrilldownsSchema) : undefined,
+    });
     return {};
   }
 
   public start(core: CoreStart) {
+    // Startup-only: public API/OpenAPI contract should not hot-swap mid-process.
+    void core.featureFlags
+      .getBooleanValue(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
+      .then((enabled) => {
+        this.standaloneEmbeddableEnabled = enabled;
+      })
+      .catch(() => {});
     return {};
   }
-  public stop() {}
 }

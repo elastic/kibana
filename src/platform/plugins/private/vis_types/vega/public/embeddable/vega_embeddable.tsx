@@ -17,7 +17,6 @@ import type {
   DefaultEmbeddableApi,
   EmbeddablePublicDefinition,
   HasDrilldowns,
-  SerializedDrilldowns,
 } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, combineLatest, EMPTY, map, merge, skip, switchMap, tap } from 'rxjs';
 import type { Query } from '@kbn/es-query';
@@ -43,14 +42,13 @@ import {
   type PublishesProjectRoutingOverrides,
   type PublishesRendered,
   type HasSupportedTriggers,
-  type SerializedTimeRange,
-  type SerializedTitles,
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_EVENT_APPLY_FILTER } from '../constants';
+import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
+import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
 import type { VegaParser } from '../data_model/vega_parser';
@@ -59,6 +57,9 @@ import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_o
 import { specUsesEsql } from '../lib/spec_uses_esql';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
 import { createInspectorAdapters } from '../vega_inspector';
+import type { VegaByValueState } from '../../server';
+
+export type { VegaByValueState };
 
 const LazyVegaVisComponent = lazy(() =>
   import('../async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
@@ -83,17 +84,11 @@ interface VegaRenderInput {
 }
 
 /**
- * By-value state for the dedicated Dashboard Vega panel. The panel is UI-only: it is not
- * registered as a server embeddable, so it has no runtime schema and is treated as an unmapped
- * panel by the public Dashboard REST API (dropped on read, rejected on write).
+ * By-value state for the dedicated Dashboard Vega panel.
+ *
+ * When `vega.standaloneEmbeddable` is enabled, the server registers a schema for this type so it
+ * participates in public dashboards-as-code validation and OpenAPI generation.
  */
-export type VegaByValueState = SerializedTitles &
-  SerializedTimeRange &
-  SerializedDrilldowns & {
-    /** The Vega or Vega-Lite specification as an HJSON or JSON string. */
-    spec: string;
-  };
-
 export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   HasDrilldowns &
   HasEditCapabilities &

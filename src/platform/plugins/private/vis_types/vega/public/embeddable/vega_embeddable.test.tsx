@@ -19,7 +19,8 @@ import { getMockPresentationContainer } from '@kbn/presentation-publishing/inter
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VegaParser } from '../data_model/vega_parser';
 import type { VegaVisualizationDependencies } from '../plugin';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_EVENT_APPLY_FILTER } from '../constants';
+import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
+import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent, VegaEventHandler } from '../types';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
 import { vegaEmbeddableFactory } from './vega_embeddable';

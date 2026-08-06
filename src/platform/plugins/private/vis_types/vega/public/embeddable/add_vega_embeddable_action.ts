@@ -12,7 +12,8 @@ import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { apiCanAddNewPanel, type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { ADD_VEGA_EMBEDDABLE_ACTION_ID, VEGA_EMBEDDABLE_TYPE } from '../constants';
+import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
+import { ADD_VEGA_EMBEDDABLE_ACTION_ID } from '../constants';
 import { getDefaultSpec } from '../default_spec';
 import type { VegaByValueState, VegaEmbeddableApi } from './vega_embeddable';
 

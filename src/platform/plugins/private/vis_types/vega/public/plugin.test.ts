@@ -22,11 +22,8 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import {
-  ADD_VEGA_EMBEDDABLE_ACTION_ID,
-  ADD_VEGA_PANEL_ACTION_ID,
-  VEGA_EMBEDDABLE_TYPE,
-} from './constants';
+import { VEGA_EMBEDDABLE_TYPE } from '../common/constants';
+import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
 import { VegaPlugin, type VegaPluginStartDependencies } from './plugin';
 
 const mockCreateVegaFn = jest.fn();

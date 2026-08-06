@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { VEGA_EMBEDDABLE_TYPE } from '../constants';
+import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
 import { getDefaultSpec } from '../default_spec';
 import { getAddVegaEmbeddableAction } from './add_vega_embeddable_action';
 
