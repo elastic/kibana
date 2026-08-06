@@ -10,6 +10,10 @@ import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
+export const CHIP_OTHER = i18n.translate('xpack.agentBuilder.feedback.chip.other', {
+  defaultMessage: 'Other',
+});
+
 const DOWN_CHIPS = [
   i18n.translate('xpack.agentBuilder.feedback.chip.inaccurate', {
     defaultMessage: 'Inaccurate',
@@ -20,7 +24,7 @@ const DOWN_CHIPS = [
   i18n.translate('xpack.agentBuilder.feedback.chip.didntFollowInstructions', {
     defaultMessage: "Didn't follow instructions",
   }),
-  i18n.translate('xpack.agentBuilder.feedback.chip.other', { defaultMessage: 'Other' }),
+  CHIP_OTHER,
 ];
 
 const UP_CHIPS = [
