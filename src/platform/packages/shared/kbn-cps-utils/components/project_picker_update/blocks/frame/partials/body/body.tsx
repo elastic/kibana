@@ -78,7 +78,10 @@ export function ProjectPickerFrameBodyHeader() {
       )}
       {Boolean(state.filterExpressions.size) ? (
         <EuiFlexItem>
-          <ProjectPickerFilterDisplay onEditFilter={handleEditFilterRequest} />
+          <ProjectPickerFilterDisplay
+            onEditFilter={handleEditFilterRequest}
+            currentFilterInputId={editingFilter?.id}
+          />
         </EuiFlexItem>
       ) : null}
       {filterViewMode === FilterViewMode.VIEW ? (

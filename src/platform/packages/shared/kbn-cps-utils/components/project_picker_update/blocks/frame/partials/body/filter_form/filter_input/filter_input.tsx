@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, type ComponentProps, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, type ComponentProps } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
-  EuiFilterGroup,
   EuiSuperSelect,
   EuiComboBox,
   type EuiSuperSelectProps,
   type EuiComboBoxOptionOption,
   type EuiComboBoxOptionsListProps,
 } from '@elastic/eui';
-import { useForm, useController, type Control, Controller } from 'react-hook-form';
+import type { UseFormReturn } from 'react-hook-form';
+import { useController, type Control, Controller } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import {
   type FilterOperatorLiteral,
@@ -33,15 +33,22 @@ export interface FilterInput {
 }
 
 interface FilterSelectionInputProps {
-  defaultValue?: FilterInput;
+  form: UseFormReturn<FilterInput>;
   onFilterInputChanged: (filterInput: FilterInput) => void;
-  isInvalid?: boolean;
+  /**
+   * Business-rule validator invoked by RHF on submit (and on revalidation).
+   * Return `true` when valid, or an error message string when invalid.
+   */
+  validateExpression: (input: FilterInput) => true | string;
   getFilteringDimensionsOptions: () => string[];
   getFilterValuesOptions: (anchor: Omit<Partial<FilterInput>, 'tagValue'>) => string[];
 }
 
 interface FilterInputStandardSelectProps
-  extends Pick<EuiSuperSelectProps, 'compressed' | 'disabled' | 'placeholder' | 'aria-label'> {
+  extends Pick<
+    EuiSuperSelectProps,
+    'compressed' | 'disabled' | 'placeholder' | 'aria-label' | 'fullWidth' | 'isInvalid'
+  > {
   control: Control<Exclude<FilterInput, { tagValue: undefined }>>;
   name: Exclude<keyof FilterInput, 'tagValue'>;
   options: ReturnType<typeof toSelectableOptions>;
@@ -110,23 +117,26 @@ function FilterInputStandardSelect({
 
   return (
     <EuiSuperSelect
+      buttonRef={field.ref}
       options={options}
       valueOfSelected={field.value}
       onChange={handleChange}
+      fullWidth
       {...props}
     />
   );
 }
 
 export function FilterSelectionInput({
-  defaultValue,
+  form,
   onFilterInputChanged,
+  validateExpression,
   getFilteringDimensionsOptions,
   getFilterValuesOptions,
 }: FilterSelectionInputProps) {
-  const form = useForm<FilterInput>({
-    ...(defaultValue ? { defaultValues: defaultValue } : {}),
-  });
+  const {
+    formState: { errors },
+  } = form;
 
   const [anchoringFilteringTagName, filteringOperator, filteringTagValue] = form.watch([
     'tagName',
@@ -183,10 +193,17 @@ export function FilterSelectionInput({
     );
   }, [anchoringFilteringTagName, customFilterValues, filteringOperator, getFilterValuesOptions]);
 
+  const validateTagValue = useCallback(
+    (_value: FilterInput['tagValue'], formValues: FilterInput) => {
+      return validateExpression(formValues);
+    },
+    [validateExpression]
+  );
+
   const renderTagValueInput = useCallback<
     ComponentProps<typeof Controller<FilterInput, 'tagValue'>>['render']
   >(
-    ({ field }) => {
+    ({ field: { ref, ...field } }) => {
       const handleChange = (options: Array<EuiComboBoxOptionOption<string>>) => {
         if (isMultiValueOperator) {
           field.onChange(options.map((option) => option.value));
@@ -231,6 +248,7 @@ export function FilterSelectionInput({
           selectedOptions={selectedOptions}
           singleSelection={isMultiValueOperator ? false : { asPlainText: true }}
           isDisabled={isDisabled}
+          isInvalid={errors.tagValue != null}
           onCreateOption={onCreateOption}
           customOptionText={i18n.translate('cpsUtils.projectPicker.filterBox.customOptionText', {
             defaultMessage: "Add '{searchValue}' as your search value on {tagName}",
@@ -245,6 +263,7 @@ export function FilterSelectionInput({
                   defaultMessage: 'Select a value',
                 })
           }
+          inputRef={ref}
           compressed
           fullWidth
         />
@@ -252,34 +271,65 @@ export function FilterSelectionInput({
     },
     [
       filterValues,
-      isMultiValueOperator,
       anchoringFilteringTagName,
       filteringOperator,
       isExistenceCheckOperator,
+      isMultiValueOperator,
+      errors.tagValue,
     ]
   );
 
   const styles = useCallback(
     ({ euiTheme }: UseEuiTheme) => ({
+      display: 'flex' as const,
+      flexDirection: 'row' as const,
+      borderRadius: euiTheme.border.radius.medium,
+
       '& > *': {
-        flexBasis: 'calc(100% / 3) !important',
+        flexGrow: 1,
+        flexShrink: 1,
       },
-      '& > *:not(:last-child)': {
-        borderRight: `1px solid ${euiTheme.colors.borderBasePlain}`,
+
+      '& > *:nth-child(3n+1), & > *:nth-child(3n+2)': {
+        flexBasis: '50%',
       },
-      '& > * button, & > * [data-test-subj="comboBoxInput"]': {
-        borderRadius: 'unset',
-        borderWidth: '0',
-        borderStyle: 'none',
-        borderColor: 'transparent',
-        boxShadow: 'none',
+
+      '& > *:nth-child(3n+3)': {
+        flexBasis: '100%',
+      },
+
+      [`@media (min-width: ${euiTheme.breakpoint.s}px)`]: {
+        flexWrap: 'nowrap' as const,
+
+        '& > *': {
+          flexBasis: 'calc(100% / 3)',
+        },
+
+        '& > *:nth-child(3n+1) button:not(:has(svg)), & > *:nth-child(3n+1) [data-test-subj="comboBoxInput"]':
+          {
+            borderRight: 'none',
+            borderTopRightRadius: 'unset',
+            borderBottomRightRadius: 'unset',
+          },
+        '& > *:nth-child(3n+2) button:not(:has(svg)), & > *:nth-child(3n+2) [data-test-subj="comboBoxInput"]':
+          {
+            borderRadius: 'unset',
+            boxShadow:
+              'inset 0 1px 0 0 var(--euiFormControlStateColor), inset 0 -1px 0 0 var(--euiFormControlStateColor)',
+          },
+        '& > *:nth-child(3n+3) button:not(:has(svg)), & > *:nth-child(3n+3) [data-test-subj="comboBoxInput"]':
+          {
+            borderLeft: 'none',
+            borderTopLeftRadius: 'unset',
+            borderBottomLeftRadius: 'unset',
+          },
       },
     }),
     []
   );
 
   return (
-    <EuiFilterGroup css={styles}>
+    <div css={styles}>
       <FilterInputStandardSelect
         control={form.control}
         name="tagName"
@@ -288,12 +338,14 @@ export function FilterSelectionInput({
           defaultMessage: 'Select a tag',
         })}
         compressed
+        fullWidth
       />
       <FilterInputStandardSelect
         control={form.control}
         name="operator"
         options={filterOperators}
         disabled={!anchoringFilteringTagName}
+        fullWidth={false}
         compressed
       />
       <Controller
@@ -302,8 +354,10 @@ export function FilterSelectionInput({
         render={renderTagValueInput}
         rules={{
           required: !isExistenceCheckOperator,
+          validate: validateTagValue,
+          deps: ['tagName', 'operator'],
         }}
       />
-    </EuiFilterGroup>
+    </div>
   );
 }

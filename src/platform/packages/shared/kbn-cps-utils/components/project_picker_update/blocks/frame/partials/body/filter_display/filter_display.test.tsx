@@ -71,7 +71,7 @@ const defaultActions = {
 
 const renderComponent = (
   stateOverrides: Partial<ProjectPickerState> = {},
-  props: { onEditFilter?: jest.Mock } = {}
+  props: { onEditFilter?: jest.Mock; currentFilterInputId?: string } = {}
 ) => {
   const onEditFilter = props.onEditFilter ?? jest.fn();
   mockUseProjectPickerState.mockReturnValue(createState(stateOverrides));
@@ -81,7 +81,10 @@ const renderComponent = (
     onEditFilter,
     ...render(
       <EuiThemeProvider>
-        <ProjectPickerFilterDisplay onEditFilter={onEditFilter} />
+        <ProjectPickerFilterDisplay
+          onEditFilter={onEditFilter}
+          currentFilterInputId={props.currentFilterInputId}
+        />
       </EuiThemeProvider>
     ),
   };
@@ -164,6 +167,55 @@ describe('ProjectPickerFilterDisplay', () => {
       await user.click(screen.getByText('_type:security'));
 
       expect(screen.queryByLabelText('Filter actions')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('inactive filters', () => {
+    it('keeps the badge clickable when the filter is disabled', async () => {
+      const user = userEvent.setup();
+
+      renderComponent({
+        filterExpressions: createFilterExpressions([[typeSecurityExpression, false]]),
+        selectedProjects: ['p1'],
+      });
+
+      expect(screen.getByRole('button', { name: 'Remove filter' })).toBeInTheDocument();
+
+      await user.click(screen.getByText('_type:security'));
+
+      expect(screen.getByLabelText('Filter actions')).toBeInTheDocument();
+      expect(screen.getByText('Enable')).toBeInTheDocument();
+      expect(screen.queryByText('Disable')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('filter currently being edited', () => {
+    it('renders the matching badge without interactive controls', async () => {
+      const user = userEvent.setup();
+
+      renderComponent(
+        {
+          filterExpressions: createFilterExpressions([
+            [typeSecurityExpression],
+            [envProdExpression],
+          ]),
+          selectedProjects: ['p1'],
+        },
+        { currentFilterInputId: typeSecurityKey }
+      );
+
+      expect(screen.getByText('_type:security')).toBeInTheDocument();
+      expect(screen.getByText('env:prod')).toBeInTheDocument();
+      // Only the non-editing badge keeps a remove control.
+      expect(screen.getAllByRole('button', { name: 'Remove filter' })).toHaveLength(1);
+
+      await user.click(screen.getByText('_type:security'));
+
+      expect(screen.queryByLabelText('Filter actions')).not.toBeInTheDocument();
+
+      await user.click(screen.getByText('env:prod'));
+
+      expect(screen.getByLabelText('Filter actions')).toBeInTheDocument();
     });
   });
 });

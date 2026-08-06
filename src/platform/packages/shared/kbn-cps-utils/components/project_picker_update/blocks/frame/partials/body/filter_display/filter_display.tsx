@@ -164,10 +164,14 @@ const getFilterBadgeContextMenuItems = ({
 };
 
 export interface ProjectPickerFilterDisplayProps {
+  currentFilterInputId?: string;
   onEditFilter: (filter: Pick<EditingFilter, 'id' | 'expression'> | null) => void;
 }
 
-export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilterDisplayProps) {
+export function ProjectPickerFilterDisplay({
+  currentFilterInputId,
+  onEditFilter,
+}: ProjectPickerFilterDisplayProps) {
   const state = useProjectPickerState();
   const actions = useProjectPickerActions();
   const { euiTheme } = useEuiTheme();
@@ -270,40 +274,42 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem css={styles.filterBadgesContainer}>
           <EuiFlexGroup gutterSize="s" responsive={false}>
-            {filterEntries.map(([id, entry]) => (
-              <EuiFlexItem key={id} grow={false}>
-                <FilterBadge
-                  filter={entry.expression}
-                  style={{
-                    width: 'fit-content',
-                    opacity: entry.enabled ? 1 : 0.5,
-                  }}
-                  {...(state.isReadOnly
-                    ? {
-                        iconType: 'empty',
-                        iconSide: 'right',
-                      }
-                    : {
-                        iconSide: 'right',
-                        iconType: 'cross',
-                        iconOnClick: handleFilterBadgeIconClick.bind(null, id),
-                        iconOnClickAriaLabel: i18n.translate(
-                          'cpsUtils.projectPicker.filterDisplay.filterBadgeIconClickAriaLabel',
-                          {
-                            defaultMessage: 'Remove filter',
-                          }
-                        ),
-                        onClick: handleFilterBadgeClick.bind(null, id),
-                        onClickAriaLabel: i18n.translate(
-                          'cpsUtils.projectPicker.filterDisplay.filterBadgeClickAriaLabel',
-                          {
-                            defaultMessage: 'Click to view filter actions',
-                          }
-                        ),
-                      })}
-                />
-              </EuiFlexItem>
-            ))}
+            {filterEntries.map(([id, entry]) => {
+              const isNonInteractive = id === currentFilterInputId || state.isReadOnly;
+
+              return (
+                <EuiFlexItem key={id} grow={false}>
+                  <FilterBadge
+                    filter={entry.expression}
+                    isDisabled={isNonInteractive}
+                    isInactive={!entry.enabled}
+                    {...(isNonInteractive
+                      ? {
+                          iconType: 'empty',
+                          iconSide: 'right',
+                        }
+                      : {
+                          iconSide: 'right',
+                          iconType: 'cross',
+                          iconOnClick: handleFilterBadgeIconClick.bind(null, id),
+                          iconOnClickAriaLabel: i18n.translate(
+                            'cpsUtils.projectPicker.filterDisplay.filterBadgeIconClickAriaLabel',
+                            {
+                              defaultMessage: 'Remove filter',
+                            }
+                          ),
+                          onClick: handleFilterBadgeClick.bind(null, id),
+                          onClickAriaLabel: i18n.translate(
+                            'cpsUtils.projectPicker.filterDisplay.filterBadgeClickAriaLabel',
+                            {
+                              defaultMessage: 'Click to view filter actions',
+                            }
+                          ),
+                        })}
+                  />
+                </EuiFlexItem>
+              );
+            })}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

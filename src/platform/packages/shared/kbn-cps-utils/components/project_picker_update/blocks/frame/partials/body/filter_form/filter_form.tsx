@@ -18,6 +18,7 @@ import {
   EuiForm,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useForm, FormProvider, type FieldErrors } from 'react-hook-form';
 import { useProjectPickerActions, useProjectPickerState } from '../../../../../state';
 import {
   previewFilterMatchingIds,
@@ -37,6 +38,12 @@ export interface ProjectPickerFilterFormProps {
   onCloseFilterFormRequested?: () => void;
 }
 
+function getFirstErrorMessage(errors: FieldErrors<FilterInput>): string | null {
+  const message =
+    errors.tagValue?.message ?? errors.tagName?.message ?? errors.operator?.message ?? null;
+  return typeof message === 'string' ? message : null;
+}
+
 export function ProjectPickerFilterForm({
   filterId,
   onCloseFilterFormRequested,
@@ -53,6 +60,14 @@ export function ProjectPickerFilterForm({
     return state.filterExpressions.get(filterId)?.expression;
   }, [filterId, state.filterExpressions]);
 
+  const form = useForm<FilterInput>({
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
+    ...(parsedDefaultFilterExpression ? { values: parsedDefaultFilterExpression } : {}),
+  });
+
+  const { errors } = form.formState;
+
   const getFilteringDimensionsOptions = useCallback(
     () => state.filteringDimensions,
     [state.filteringDimensions]
@@ -64,143 +79,159 @@ export function ProjectPickerFilterForm({
         return [];
       }
 
-      const values = state.visibleProjectIds
-        .map((projectId) => state.availableProjects.get(projectId)?.[anchor.tagName!])
-        .filter((value): value is string => value != null);
+      let values: (string | undefined)[] = [];
 
-      return [...new Set(values)];
+      if (!filterId) {
+        // When creating a new filter, we want to select within the range of the visible projects
+        values = state.visibleProjectIds.map(
+          (projectId) => state.availableProjects.get(projectId)?.[anchor.tagName!]
+        );
+      } else {
+        // However, when editing an existing filter we want to widen the values to include all values from the anchor on available projects
+        values = Array.from(state.availableProjects.values()).map(
+          (project) => project[anchor.tagName!]
+        );
+      }
+
+      return [...new Set(values.filter((value): value is string => value != null))];
     },
-    [state.availableProjects, state.visibleProjectIds]
+    [state.availableProjects, state.visibleProjectIds, filterId]
   );
-
-  const previewMatchingIds = useMemo(
-    () =>
-      previewFilterMatchingIds(
-        state.availableProjects,
-        state.filterExpressions,
-        {
-          tagName: filterInput?.tagName,
-          operator: filterInput?.operator,
-          tagValue: filterInput?.tagValue,
-        },
-        filterId
-      ),
-    [filterId, filterInput, state.availableProjects, state.filterExpressions]
-  );
-
-  const hasZeroMatchPreview = previewMatchingIds !== null && previewMatchingIds.length === 0;
 
   const completeFilterExpression = useMemo(
     () => (filterInput && isValidFilterExpression(filterInput) ? filterInput : null),
     [filterInput]
   );
 
-  const isDuplicateFilterPreview =
-    completeFilterExpression !== null &&
-    isDuplicateFilterExpressionDraft(state.filterExpressions, completeFilterExpression, filterId);
+  const shouldDisableCreateFilter = !completeFilterExpression;
 
-  const shouldDisableCreateFilter =
-    !completeFilterExpression || hasZeroMatchPreview || isDuplicateFilterPreview;
+  const validateExpression = useCallback(
+    (input: FilterInput): true | string => {
+      if (!isValidFilterExpression(input)) {
+        return true;
+      }
 
-  const handleOnCreateFilter = useCallback(async () => {
-    if (!completeFilterExpression) {
-      return;
-    }
+      const matchingIds = previewFilterMatchingIds(
+        state.availableProjects,
+        state.filterExpressions,
+        input,
+        filterId
+      );
 
-    if (filterId) {
-      actions.updateFilterExpression({ id: filterId, expression: completeFilterExpression });
-    } else {
-      actions.addFilterExpression({ expression: completeFilterExpression });
-    }
-    onCloseFilterFormRequested?.();
-  }, [actions, completeFilterExpression, filterId, onCloseFilterFormRequested]);
+      if (matchingIds !== null && matchingIds.length === 0) {
+        return i18n.translate('cpsUtils.projectPicker.filterBox.filteringDimensionHelpText', {
+          defaultMessage:
+            'No projects match this filter. Adjust so at least one project is included in your search.',
+        });
+      }
 
-  const filterFormHelpText = useMemo(() => {
-    return hasZeroMatchPreview || isDuplicateFilterPreview ? (
-      <>
-        {hasZeroMatchPreview ? (
-          <EuiText color="danger" size="xs">
-            {i18n.translate('cpsUtils.projectPicker.filterBox.filteringDimensionHelpText', {
-              defaultMessage:
-                'No projects match this filter. Adjust so at least one project is included in your search.',
-            })}
-          </EuiText>
-        ) : null}
-        {isDuplicateFilterPreview ? (
-          <EuiText color="danger" size="xs">
-            {i18n.translate('cpsUtils.projectPicker.filterBox.duplicateFilterHelpText', {
-              defaultMessage:
-                'This filter already exists. Change the filter or edit the existing one.',
-            })}
-          </EuiText>
-        ) : null}
-      </>
-    ) : null;
-  }, [hasZeroMatchPreview, isDuplicateFilterPreview]);
+      if (isDuplicateFilterExpressionDraft(state.filterExpressions, input, filterId)) {
+        return i18n.translate('cpsUtils.projectPicker.filterBox.duplicateFilterHelpText', {
+          defaultMessage: 'This filter already exists. Change the filter or edit the existing one.',
+        });
+      }
+
+      return true;
+    },
+    [filterId, state.availableProjects, state.filterExpressions]
+  );
+
+  const handleValidFilterInput = useCallback(
+    (input: FilterInput) => {
+      if (!isValidFilterExpression(input)) {
+        return;
+      }
+
+      if (filterId) {
+        actions.updateFilterExpression({ id: filterId, expression: input });
+      } else {
+        actions.addFilterExpression({ expression: input });
+      }
+      onCloseFilterFormRequested?.();
+    },
+    [actions, filterId, onCloseFilterFormRequested]
+  );
+
+  const handleOnCreateFilter = useCallback(() => {
+    void form.handleSubmit(handleValidFilterInput)();
+  }, [form, handleValidFilterInput]);
+
+  const validationError = getFirstErrorMessage(errors);
+
+  const filterFormHelpText = validationError ? (
+    <EuiText color="danger" size="xs">
+      {validationError}
+    </EuiText>
+  ) : null;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
-        <EuiForm>
-          <EuiFormRow
-            label={null}
-            isInvalid={hasZeroMatchPreview || isDuplicateFilterPreview}
-            helpText={filterFormHelpText}
-            fullWidth
-          >
-            <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-              <EuiFlexItem>
-                <FilterSelectionInput
-                  defaultValue={parsedDefaultFilterExpression}
-                  getFilteringDimensionsOptions={getFilteringDimensionsOptions}
-                  getFilterValuesOptions={getFilterValuesOptions}
-                  onFilterInputChanged={setFilterInput}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup responsive={false} gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      id="createFilterTooltip"
-                      content={i18n.translate('cpsUtils.projectPicker.filterBox.createFilter', {
-                        defaultMessage: 'Create filter',
-                      })}
-                      position="top"
-                    >
-                      <EuiButtonIcon
-                        size="s"
-                        iconType="check"
-                        display="base"
-                        color="success"
-                        aria-labelledby="createFilterTooltip"
-                        onClick={handleOnCreateFilter}
-                        disabled={shouldDisableCreateFilter}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      id="cancelFilterCreationTooltip"
-                      content={i18n.translate('cpsUtils.projectPicker.filterBox.clearFilter', {
-                        defaultMessage: 'Cancel filter creation',
-                      })}
-                      position="top"
-                    >
-                      <EuiButtonIcon
-                        size="s"
-                        iconType="cross"
-                        display="base"
-                        color="danger"
-                        aria-labelledby="cancelFilterCreationTooltip"
-                        onClick={onCloseFilterFormRequested}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-        </EuiForm>
+        <FormProvider {...form}>
+          <EuiForm>
+            <EuiFormRow
+              label={null}
+              isInvalid={Object.keys(errors).length > 0}
+              helpText={filterFormHelpText}
+              fullWidth
+            >
+              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+                <EuiFlexItem>
+                  <FilterSelectionInput
+                    form={form}
+                    getFilteringDimensionsOptions={getFilteringDimensionsOptions}
+                    getFilterValuesOptions={getFilterValuesOptions}
+                    onFilterInputChanged={setFilterInput}
+                    validateExpression={validateExpression}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup responsive={false} gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        id="createFilterTooltip"
+                        content={i18n.translate('cpsUtils.projectPicker.filterBox.createFilter', {
+                          defaultMessage: 'Create filter',
+                        })}
+                        position="top"
+                      >
+                        <EuiButtonIcon
+                          size="s"
+                          iconType="check"
+                          display="base"
+                          color="success"
+                          aria-labelledby="createFilterTooltip"
+                          data-test-subj="projectPickerFilterFormCreateBtn"
+                          onClick={handleOnCreateFilter}
+                          disabled={shouldDisableCreateFilter}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        id="cancelFilterCreationTooltip"
+                        content={i18n.translate('cpsUtils.projectPicker.filterBox.clearFilter', {
+                          defaultMessage: 'Cancel filter creation',
+                        })}
+                        position="top"
+                      >
+                        <EuiButtonIcon
+                          size="s"
+                          iconType="cross"
+                          display="base"
+                          color="danger"
+                          aria-labelledby="cancelFilterCreationTooltip"
+                          data-test-subj="projectPickerFilterFormCancelBtn"
+                          onClick={onCloseFilterFormRequested}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
+          </EuiForm>
+        </FormProvider>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
