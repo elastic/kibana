@@ -7,7 +7,6 @@
 
 import { uniqBy } from 'lodash/fp';
 import {
-  EuiAvatar,
   EuiButtonIcon,
   EuiCommentList,
   EuiScreenReaderOnly,
@@ -20,6 +19,7 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux-v7';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { userSelectedNotesForDeletion } from '../../../../notes';
+import { NoteAvatar } from '../../../../notes/components/note_avatar';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
@@ -228,11 +228,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
                 ),
                 children: <EuiText size="s">{timeline.description}</EuiText>,
                 timelineAvatar: (
-                  <EuiAvatar
-                    data-test-subj="avatar"
-                    name={timeline.updatedBy != null ? timeline.updatedBy : '?'}
-                    size="l"
-                  />
+                  <NoteAvatar data-test-subj="avatar" displayName={timeline.updatedBy} size="l" />
                 ),
                 actions: null,
               },
@@ -279,11 +275,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
               />
             ),
             timelineAvatar: (
-              <EuiAvatar
-                data-test-subj="avatar"
-                name={note.updatedBy != null ? note.updatedBy : '?'}
-                size="l"
-              />
+              <NoteAvatar data-test-subj="avatar" displayName={note.updatedBy} size="l" />
             ),
           };
         }),

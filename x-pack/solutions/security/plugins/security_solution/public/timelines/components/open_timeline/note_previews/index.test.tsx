@@ -50,6 +50,10 @@ jest.mock('./hooks/use_delete_note');
 
 jest.mock('../../../../common/components/user_privileges');
 
+jest.mock('../../../../common/components/user_profiles/use_suggest_users', () => ({
+  useSuggestUsers: () => ({ isLoading: false, data: [] }),
+}));
+
 const deleteMutateMock = jest.fn();
 
 describe('NotePreviews', () => {

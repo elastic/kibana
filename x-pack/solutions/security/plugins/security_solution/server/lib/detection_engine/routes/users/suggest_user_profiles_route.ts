@@ -16,6 +16,15 @@ import { buildSiemResponse } from '../utils';
 import type { StartPlugins } from '../../../../plugin';
 import { SuggestUserProfilesRequestQuery } from '../../../../../common/api/detection_engine/users';
 
+/**
+ * Number of user profiles to request from the security plugin.
+ * Without an explicit size, `userProfiles.suggest` defaults to 10, which is too few for
+ * consumers that match an existing name against the full set of profiles (e.g. note avatars)
+ * rather than searching interactively. 100 is the maximum the security plugin accepts;
+ * requesting more makes it throw.
+ */
+const MAX_USER_PROFILES = 100;
+
 export const suggestUserProfilesRoute = (
   router: SecuritySolutionPluginRouter,
   getStartServices: StartServicesAccessor<StartPlugins>
@@ -49,6 +58,7 @@ export const suggestUserProfilesRoute = (
         try {
           const users = await security.userProfiles.suggest({
             name: searchTerm,
+            size: MAX_USER_PROFILES,
             dataPath: 'avatar',
             requiredPrivileges: {
               spaceId,

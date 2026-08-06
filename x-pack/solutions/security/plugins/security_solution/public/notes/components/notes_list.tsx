@@ -6,13 +6,14 @@
  */
 
 import React, { memo } from 'react';
-import { EuiAvatar, EuiComment, EuiCommentList, EuiLoadingElastic } from '@elastic/eui';
+import { EuiComment, EuiCommentList, EuiLoadingElastic } from '@elastic/eui';
 import { useSelector } from 'react-redux-v7';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { OpenFlyoutButtonIcon } from './open_flyout_button';
 import { OpenTimelineButtonIcon } from './open_timeline_button';
 import { DeleteNoteButtonIcon } from './delete_note_button';
+import { NoteAvatar } from './note_avatar';
 import { MarkdownRenderer } from '../../common/components/markdown_editor';
 import { ADD_NOTE_LOADING_TEST_ID, NOTE_AVATAR_TEST_ID, NOTES_COMMENT_TEST_ID } from './test_ids';
 import type { State } from '../../common/store';
@@ -80,10 +81,10 @@ export const NotesList = memo(({ notes, options }: NotesListProps) => {
               </>
             }
             timelineAvatar={
-              <EuiAvatar
+              <NoteAvatar
                 data-test-subj={`${NOTE_AVATAR_TEST_ID}-${index}`}
                 size="l"
-                name={note.updatedBy || '?'}
+                displayName={note.updatedBy}
               />
             }
           >

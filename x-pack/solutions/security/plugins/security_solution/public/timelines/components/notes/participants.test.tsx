@@ -16,6 +16,10 @@ import {
   TIMELINE_PARTICIPANT_TITLE_TEST_ID,
 } from './test_ids';
 
+jest.mock('../../../common/components/user_profiles/use_suggest_users', () => ({
+  useSuggestUsers: () => ({ isLoading: false, data: [] }),
+}));
+
 const mockNote: Note = {
   eventId: '1',
   noteId: '1',

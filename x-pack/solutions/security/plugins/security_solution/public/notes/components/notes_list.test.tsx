@@ -20,11 +20,14 @@ import { ReqStatus } from '../store/notes.slice';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import type { Note } from '../../../common/api/timeline';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useSuggestUsers } from '../../common/components/user_profiles/use_suggest_users';
 
 jest.mock('../../common/hooks/use_experimental_features');
 
 jest.mock('../../common/components/user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+
+jest.mock('../../common/components/user_profiles/use_suggest_users');
 
 const mockNote: Note = {
   eventId: '1',
@@ -47,6 +50,11 @@ describe('NotesList', () => {
       timelinePrivileges: { read: true },
       notesPrivileges: { crud: true, read: true },
     });
+
+    (useSuggestUsers as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: [],
+    });
   });
 
   it('should render a note as a comment', () => {
@@ -61,6 +69,29 @@ describe('NotesList', () => {
     expect(getByTestId(`${DELETE_NOTE_BUTTON_TEST_ID}-0`)).toBeInTheDocument();
     expect(getByTestId(`${OPEN_TIMELINE_BUTTON_TEST_ID}-0`)).toBeInTheDocument();
     expect(getByTestId(`${NOTE_AVATAR_TEST_ID}-0`)).toBeInTheDocument();
+  });
+
+  it('should render the user profile image in the avatar when a profile matches the user', () => {
+    (useSuggestUsers as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: [
+        {
+          uid: '1',
+          user: { username: 'elastic' },
+          data: { avatar: { imageUrl: 'my-image-url' } },
+        },
+      ],
+    });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <NotesList notes={[mockNote]} />
+      </TestProviders>
+    );
+
+    const avatar = getByTestId(`${NOTE_AVATAR_TEST_ID}-0`);
+    // EuiAvatar renders the profile image as a CSS background, not an <img> element
+    expect(avatar).toHaveStyle('background-image: url(my-image-url)');
   });
 
   it('should render ? in avatar is user is missing', () => {

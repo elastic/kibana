@@ -60,6 +60,17 @@ describe('suggestUserProfilesRoute', () => {
       expect(response.body).toEqual(expectedBody);
     });
 
+    test('requests the maximum number of user profiles the security plugin allows', async () => {
+      const request = buildRequest();
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      // Without an explicit size the security plugin only returns 10 profiles, which is not
+      // enough for consumers that match a stored display name against all known profiles.
+      expect(mockSecurityStart.userProfiles.suggest).toHaveBeenCalledWith(
+        expect.objectContaining({ size: 100 })
+      );
+    });
+
     test('returns 500 if `security.userProfiles.suggest` throws error', async () => {
       mockSecurityStart.userProfiles.suggest.mockRejectedValue(new Error('something went wrong'));
       const request = buildRequest();
