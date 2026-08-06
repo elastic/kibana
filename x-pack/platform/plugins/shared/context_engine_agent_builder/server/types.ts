@@ -10,6 +10,7 @@ import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/server
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextEngineAgentBuilderPluginSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

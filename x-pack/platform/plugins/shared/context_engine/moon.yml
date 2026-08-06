@@ -46,6 +46,11 @@ dependsOn:
   - '@kbn/deeplinks-management'
   - '@kbn/code-editor'
   - '@kbn/ui-callout'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-common'
+  - '@kbn/zod'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/security-plugin'
 tags:
   - plugin
   - prod

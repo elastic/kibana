@@ -121,8 +121,9 @@ Do **not** hand-write or persist workflow YAML yourself. Use these tools:
   a tricky access pattern template, or re-write queries that failed to execute.
 - **platform.workflows.validate_workflow** — validate a complete YAML string before presenting it.
 - **platform.workflows.get_workflow** — read a saved workflow's metadata (name, description) or,
-  when needed, its full YAML. Defaults to metadata only; pass `includeYaml: true` only when
-  editing a specific workflow or when the user asks to review/compare definitions.
+  when needed, its full YAML (`includeYaml: true`, tool result only). Pass `attach: true` to load
+  a saved workflow into a `workflow.yaml` conversation attachment before editing with
+  `generate_workflow`. Defaults to metadata only.
 - **platform.workflows.get_step_definitions** / **platform.workflows.get_examples** — confirm
   a step's `with` params or find a pattern.
 - **platform.workflows.get_connectors** — list configured connectors and their types.
@@ -138,50 +139,74 @@ Follow these phases in order. Do not skip ahead.
 
 ### When an `ai_index` attachment is present
 
-If the conversation includes a `platform.context_engine.ai_index` attachment, **skip Phases 1–3**.
-The attachment already specifies the destination, sources, and existing automations — treat them as
-confirmed.
+If the conversation includes a `platform.context_engine.ai_index` attachment, **skip Phases 1–3
+entirely**. The attachment is the source of truth for destination, sources, and existing
+automations — treat them as confirmed.
 
-1. Sample only the attachment's configured sources (do not call `list_indices` to discover unrelated
-   indices).
-2. For ES|QL sources, use `execute_esql` against the configured query; for connector sources, use
-   `get_connectors` only as needed for the listed connector ids.
-3. **Existing automations gate** — if the attachment lists one or more workflow ids, handle them
-   before drafting anything new (see below).
-4. Jump to **Phase 4** once the user has chosen whether to edit an existing automation or create a
-   new one (and you have any YAML baseline required for edits).
-5. Do not ask the user to pick sources or re-confirm the destination unless something in the
-   attachment is clearly incomplete.
+**Do not:**
+- Call `platform.core.list_indices` or run open-ended source discovery
+- Ask the user to pick sources or re-confirm the destination unless the attachment is clearly incomplete
+- Call `platform.core.generate_workflow` before the user chooses edit vs create when automations exist
+- Pass a workflow id from the automation list directly to `generate_workflow` without
+  `get_workflow(attach: true)` first
+- Load full YAML for every automation unless the user explicitly asks to review or compare
+
+**Order of operations**
+
+1. **Existing automations gate** (if the attachment lists workflow ids) — **first**, before sampling
+   or drafting. See below.
+2. **Sample sources** — only the attachment's configured sources:
+   - ES|QL sources: `platform.core.execute_esql` against the configured query
+   - Connector sources: `platform.workflows.get_connectors` only as needed for listed connector ids
+3. **Phase 4+** — draft pilot → save gate → execute → review (see below)
 
 #### Existing automations on the AI index
 
-When `Existing automations` in the attachment is non-empty:
+When `Existing automations` in the attachment is non-empty, this gate runs **before** source
+sampling and **before** any call to `generate_workflow`:
 
-1. Call `platform.workflows.get_workflow` for **each** listed workflow id with the default
-   metadata-only response (`includeYaml` omitted or `false`). Use id, name, and description to
-   present what is already attached — do **not** load every YAML up front.
-2. Call `ask_user_question` before Phase 4. Offer at least:
-   - **Edit an existing automation** — list each by `name` (and id); the user picks which one.
-   - **Create a new complementary automation** — a different KI strategy or scope than what
-     metadata suggests is already covered.
+1. Call `platform.workflows.get_workflow` for **each** listed workflow id with metadata only
+   (`includeYaml` omitted or `false`). Use id, name, and description to build the user-facing list
+   — do **not** load every YAML up front.
+2. Call `ask_user_question` immediately. Use a single question such as:
+
+   **Question:** "This AI index already has workflow automations. What would you like to do?"
+
+   **Options** — one per existing workflow, plus a create-new option (do not merge into vague choices):
+   - `Edit: {name}` (`{id}`) — for each workflow returned by `get_workflow`
+   - `Create a new automation` — a complementary workflow with a different KI strategy or scope
+
+   Do **not** call `generate_workflow` until the user picks one option.
+
 3. **If the user chooses to edit one automation:**
-   - Call `platform.workflows.get_workflow` again for **only that workflow id** with
-     `includeYaml: true`.
-   - Use the returned YAML as the baseline; call `platform.core.generate_workflow` with
-     `workflowId` set to that workflow's id and the edit intent in `query` / `context`.
+   - Call `platform.workflows.get_workflow` for **only that workflow id** with `attach: true`
+     (creates or reuses a `workflow.yaml` conversation attachment whose id equals the workflow id;
+     workflow ids from the automation list are **not** attachment ids until attached).
+   - Sample the attachment's configured sources (step 2 above) if you need fresh data for the edit.
+   - Call `platform.core.generate_workflow` with `attachmentId` set to the `attachmentId` returned
+     by `get_workflow`, plus the edit intent in `query` / `context`.
    - Proceed through Phase 4 save/execute gates for that workflow (updating the existing id, not
-     creating a duplicate attachment).
+     creating a duplicate).
 4. **If the user chooses to create a new automation:**
-   - Use metadata (name + description) to infer what is already covered and propose something
-     **materially different** (different strategy, source slice, or KI granularity).
+   - Sample the attachment's configured sources (step 2 above).
+   - Use existing workflow metadata (name + description) to infer what is already covered and propose
+     something **materially different** (different strategy, source slice, or KI granularity).
    - Do **not** call `get_workflow` with `includeYaml: true` for all existing workflows by default.
    - If the user asks to review or compare an existing workflow's definition, or wants a YAML-level
-     duplicate check, call `get_workflow` with `includeYaml: true` for **only the workflow(s) they
-     name** — never bulk-load every attached YAML unless they explicitly request it.
+     duplicate check, call `get_workflow` with `includeYaml: true` and **without** `attach: true`
+     for **only the workflow(s) they name**.
    - If your proposed pilot still overlaps what metadata implies, explain the overlap and ask the
      user to confirm or pick a different angle before calling `generate_workflow`.
-5. If there are **no** existing automations, skip this gate and go straight to Phase 4 after
-   sampling sources.
+   - Proceed to Phase 4.
+
+#### No existing automations on the AI index
+
+When `Existing automations: none`:
+
+1. Sample only the attachment's configured sources (step 2 above).
+2. Briefly propose a KI strategy per source based on what you sampled (use the strategy catalog;
+   do not re-run Phase 2 source discovery). Confirm with the user if the strategy is unclear.
+3. Proceed to Phase 4.
 
 ### Phase 1 — Discover
 

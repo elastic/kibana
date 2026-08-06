@@ -17,6 +17,7 @@ import { workflowIdSchema } from '@kbn/workflows-management-plugin/common/lib/wo
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 import type { WorkflowsAiTelemetryClient } from '../telemetry/workflows_ai_telemetry_client';
+import { workflowTools } from '../../common/constants';
 import { emitWorkflowDiff, extractConversationId } from './utils/workflow_attachments';
 
 const generateWorkflowSchema = z.object({
@@ -115,8 +116,20 @@ When the workflow is alert-triggered (\`type: alert\`), runtime alert data is ex
 
       const sourceAttachment = attachmentId ? attachments.get(attachmentId) : undefined;
       if (attachmentId && !sourceAttachment) {
+        const workflowAttachmentIds = attachments
+          .getActive()
+          .filter((attachment) => attachment.type === WORKFLOW_YAML_ATTACHMENT_TYPE)
+          .map((attachment) => attachment.id);
+        const existingAttachmentHint =
+          workflowAttachmentIds.length > 0
+            ? ` Conversation workflow attachment ids: ${workflowAttachmentIds.join(', ')}.`
+            : '';
         return {
-          results: [errorResult(`Attachment with ID '${attachmentId}' not found.`)],
+          results: [
+            errorResult(
+              `Attachment with ID '${attachmentId}' not found.${existingAttachmentHint} To edit a saved workflow that is not yet in the conversation, call \`${workflowTools.getWorkflow}\` with \`attach: true\` first, then pass the returned \`attachmentId\` to this tool. Workflow ids from automation lists are not conversation attachment ids until attached.`
+            ),
+          ],
         };
       }
       if (sourceAttachment && sourceAttachment.type !== WORKFLOW_YAML_ATTACHMENT_TYPE) {

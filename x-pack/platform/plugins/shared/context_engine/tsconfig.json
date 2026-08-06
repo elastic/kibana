@@ -41,7 +41,6 @@
     "@kbn/deeplinks-management",
     "@kbn/code-editor",
     "@kbn/ui-callout",
-    "@kbn/agent-builder-server",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
     "@kbn/zod",

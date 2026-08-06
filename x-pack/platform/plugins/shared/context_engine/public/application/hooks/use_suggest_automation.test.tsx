@@ -114,8 +114,8 @@ describe('useSuggestAutomation', () => {
       expect.objectContaining({
         newConversation: true,
         autoSendInitialMessage: false,
-        initialMessage: expect.stringContaining(
-          '[/ki-automation-generation](skill://ki-automation-generation)'
+        initialMessage: expect.stringMatching(
+          /\[\/ki-automation-generation\]\(skill:\/\/ki-automation-generation\).*When an ai_index attachment is present/s
         ),
         sessionTag: 'context-engine-ai-index-my-ai-index',
         attachments: [
