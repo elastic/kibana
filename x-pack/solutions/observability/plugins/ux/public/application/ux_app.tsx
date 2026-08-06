@@ -11,7 +11,7 @@ import { Redirect } from 'react-router-dom';
 import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import type { RouteComponentProps, RouteProps } from 'react-router-dom';
-import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -30,7 +30,6 @@ import { UXActionMenu } from '../components/app/rum_dashboard/action_menu';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { createStaticDataView } from '../services/rest/data_view';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
-import { useKibanaServices } from '../hooks/use_kibana_services';
 import { PluginContext } from '../context/plugin_context';
 
 export type BreadcrumbTitle<T = {}> =
@@ -52,23 +51,23 @@ export const uxRoutes: RouteDefinition[] = [
   },
 ];
 
-function UxApp() {
-  const { http } = useKibanaServices();
-  const basePath = http.basePath.get();
+// No hrefs: the dashboard is the only route, so a linked crumb would render a back button pointing
+// at the current page.
+const UX_BREADCRUMBS: ChromeBreadcrumb[] = [
+  {
+    text: i18n.translate('xpack.ux.breadcrumbs.root', {
+      defaultMessage: 'User Experience',
+    }),
+  },
+  {
+    text: i18n.translate('xpack.ux.breadcrumbs.dashboard', {
+      defaultMessage: 'Dashboard',
+    }),
+  },
+];
 
-  useBreadcrumbs([
-    {
-      text: i18n.translate('xpack.ux.breadcrumbs.root', {
-        defaultMessage: 'User Experience',
-      }),
-      href: basePath + '/app/ux',
-    },
-    {
-      text: i18n.translate('xpack.ux.breadcrumbs.dashboard', {
-        defaultMessage: 'Dashboard',
-      }),
-    },
-  ]);
+function UxApp() {
+  useBreadcrumbs(UX_BREADCRUMBS);
 
   return (
     <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
