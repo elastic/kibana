@@ -137,7 +137,8 @@
     "@kbn/test-es-server",
     "@kbn/security-authorization-core",
     "@kbn/security-plugin-types-server",
-    "@kbn/core-test-helpers-model-versions"
+    "@kbn/core-test-helpers-model-versions",
+    "@kbn/react-kibana-mount"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
