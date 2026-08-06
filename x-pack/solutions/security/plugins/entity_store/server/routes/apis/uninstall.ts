@@ -71,8 +71,6 @@ export function registerUninstall(router: EntityStorePluginRouter) {
           await entityMaintainersClient.removeAll();
         }
 
-        await preferencesClient.update({ autoInstall: false });
-
         return res.ok({ body: { ok: true } });
       })
     );
