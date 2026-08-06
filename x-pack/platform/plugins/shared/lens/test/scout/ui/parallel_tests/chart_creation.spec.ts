@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData, getImportedSavedObjectId } from '../fixtures';
+import { getImportedSavedObjectId, spaceTest, testData } from '../fixtures';
 
 const NEW_CHART_TITLE = 'A fancy lens test';
 
