@@ -61,7 +61,6 @@ describe('fromEs', () => {
             tool_ids: ['id_1', 'id_2'],
           },
         ],
-        ai_indices: [],
       },
       description: 'description',
       labels: ['foo', 'bar'],
@@ -94,7 +93,6 @@ describe('fromEs', () => {
             tool_ids: ['legacy_id_1', 'legacy_id_2'],
           },
         ],
-        ai_indices: [],
       },
       description: 'description',
       labels: ['foo', 'bar'],
@@ -169,19 +167,12 @@ describe('fromEs', () => {
     expect(definition.configuration.ai_indices).toEqual(['ai-index-1']);
   });
 
-  it('defaults ai_indices to [] when the config does not set it', () => {
+  // The empty-list default is applied by the agents route, which knows whether the Context
+  // Engine is enabled; this converter only maps what is stored.
+  it('leaves ai_indices unset when the config does not set it', () => {
     const definition = fromEs(getSampleDoc());
 
-    expect(definition.configuration.ai_indices).toEqual([]);
-  });
-
-  it('defaults ai_indices to [] for the default agent as well', () => {
-    const document = getSampleDoc();
-    document._source!.id = agentBuilderDefaultAgentId;
-
-    const definition = fromEs(document);
-
-    expect(definition.configuration.ai_indices).toEqual([]);
+    expect(definition.configuration.ai_indices).toBeUndefined();
   });
 
   it('defaults enable_elastic_capabilities to true for default agent when missing', () => {
@@ -661,8 +652,8 @@ describe('updateRequestToEs', () => {
       expect(docProperties.config!.ai_indices).toEqual([]);
     });
 
-    // ai_indices is maintained by the Context Engine rather than authored by the user, so a partial
-    // update from the agent edit form must not drop it.
+    // Same spread semantics as every other config field: a partial update from the agent edit
+    // form must not drop what is already stored.
     it('preserves stored ai_indices when the update does not mention it', () => {
       const docProperties = convert({
         name: 'new name',

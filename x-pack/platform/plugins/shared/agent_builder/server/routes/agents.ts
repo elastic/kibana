@@ -9,11 +9,13 @@ import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import { AgentAccessControlRole, AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { MAX_AI_INDEX_ID_LENGTH } from '@kbn/context-engine-plugin/common/constants';
+import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, AGENTS_WRITE_SECURITY } from './route_security';
 import type {
+  AgentDefinitionWithPermissions,
   GetAgentResponse,
   CreateAgentResponse,
   UpdateAgentResponse,
@@ -23,6 +25,7 @@ import type {
   UpdateAgentAccessControlRequestBody,
   UpdateAgentAccessControlResponse,
 } from '../../common/http_api/agents';
+import type { AgentBuilderHandlerContext } from '../request_handler_context';
 import { asError } from '../utils/as_error';
 
 const TOOL_SELECTION_SCHEMA = schema.arrayOf(
@@ -83,6 +86,33 @@ const AI_INDICES_SCHEMA = schema.arrayOf(
     meta: { description: 'Array of AI indices to associate with the agent.' },
   }
 );
+
+const AI_INDICES_NOT_ENABLED_MESSAGE =
+  '[request body.configuration.ai_indices]: the Context Engine is not enabled';
+
+/**
+ * `ai_indices` is only readable and writable while the Context Engine is enabled. The setting is
+ * registered by the `agentBuilderSml` plugin, a required dependency of `agentBuilder`.
+ */
+const isContextEngineEnabled = async (ctx: AgentBuilderHandlerContext): Promise<boolean> => {
+  const { uiSettings } = await ctx.core;
+  return Boolean(await uiSettings.client.get(CONTEXT_ENGINE_ENABLED_SETTING_ID));
+};
+
+/**
+ * Shapes `ai_indices` for a response: absent while the Context Engine is disabled, and present
+ * with an empty-list default while it is enabled.
+ */
+const withAiIndices = <T extends AgentDefinitionWithPermissions>(
+  agent: T,
+  contextEngineEnabled: boolean
+): T => {
+  const { ai_indices: aiIndices, ...configuration } = agent.configuration;
+
+  return contextEngineEnabled
+    ? { ...agent, configuration: { ...configuration, ai_indices: aiIndices ?? [] } }
+    : { ...agent, configuration };
+};
 
 const ACCESS_CONTROL_MODE_SCHEMA = schema.oneOf(
   [
@@ -171,8 +201,9 @@ export function registerAgentRoutes({
         const { agents: agentsService } = getInternalServices();
         const service = await agentsService.getRegistry({ request });
         const agents = await service.list();
+        const contextEngineEnabled = await isContextEngineEnabled(ctx);
         return response.ok<ListAgentResponse>({
-          body: { results: agents },
+          body: { results: agents.map((agent) => withAiIndices(agent, contextEngineEnabled)) },
         });
       })
     );
@@ -214,7 +245,10 @@ export function registerAgentRoutes({
         const service = await agents.getRegistry({ request });
 
         const profile = await service.get(request.params.id);
-        return response.ok<GetAgentResponse>({ body: profile });
+        const contextEngineEnabled = await isContextEngineEnabled(ctx);
+        return response.ok<GetAgentResponse>({
+          body: withAiIndices(profile, contextEngineEnabled),
+        });
       })
     );
 
@@ -321,6 +355,11 @@ export function registerAgentRoutes({
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
 
+        const contextEngineEnabled = await isContextEngineEnabled(ctx);
+        if (request.body.configuration.ai_indices !== undefined && !contextEngineEnabled) {
+          return response.badRequest({ body: { message: AI_INDICES_NOT_ENABLED_MESSAGE } });
+        }
+
         try {
           const createdProfile = await service.create(request.body);
           analyticsService?.reportAgentCreated({
@@ -331,7 +370,9 @@ export function registerAgentRoutes({
             agentId: createdProfile.id,
             agentName: createdProfile.name,
           });
-          return response.ok<CreateAgentResponse>({ body: createdProfile });
+          return response.ok<CreateAgentResponse>({
+            body: withAiIndices(createdProfile, contextEngineEnabled),
+          });
         } catch (error) {
           auditLogService.logAgentCreated(request, {
             agentId: request.body.id,
@@ -453,6 +494,11 @@ export function registerAgentRoutes({
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
 
+        const contextEngineEnabled = await isContextEngineEnabled(ctx);
+        if (request.body.configuration?.ai_indices !== undefined && !contextEngineEnabled) {
+          return response.badRequest({ body: { message: AI_INDICES_NOT_ENABLED_MESSAGE } });
+        }
+
         try {
           const profile = await service.update(request.params.id, request.body);
           analyticsService?.reportAgentUpdated({
@@ -463,7 +509,9 @@ export function registerAgentRoutes({
             agentId: profile.id,
             agentName: profile.name,
           });
-          return response.ok<UpdateAgentResponse>({ body: profile });
+          return response.ok<UpdateAgentResponse>({
+            body: withAiIndices(profile, contextEngineEnabled),
+          });
         } catch (error) {
           auditLogService.logAgentUpdated(request, {
             agentId: request.params.id,
