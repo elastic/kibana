@@ -60,10 +60,11 @@ function isToolDefinition(def: BindToolsInput): def is ToolDefinition {
 
 function resolveToolSchema(schema: unknown): ToolSchema {
   if (isInteropZodSchema(schema)) {
-    return pick(
-      zodToJsonSchema(schema as unknown as Parameters<typeof zodToJsonSchema>[0]),
-      ['type', 'properties', 'required']
-    ) as ToolSchema;
+    return pick(zodToJsonSchema(schema as unknown as Parameters<typeof zodToJsonSchema>[0]), [
+      'type',
+      'properties',
+      'required',
+    ]) as ToolSchema;
   }
   return pick(schema as JsonSchema7Type, ['type', 'properties', 'required']) as ToolSchema;
 }
