@@ -107,8 +107,11 @@ Span names follow the OTel \`{operation} {identifier}\` convention:
 - \`attributes.gen_ai.usage.input_tokens\` / \`attributes.gen_ai.usage.output_tokens\` — wrap in \`TO_LONG(...)\` before aggregating.
 - \`attributes.gen_ai.request.model\` — model name.
 - \`attributes.gen_ai.provider.name\` — provider name.
-- \`attributes.gen_ai.agent.id\` — agent id (hashed for custom agents in exported traces). Also the
-  field each agent's data stream is routed on — use it to break results down per agent.
+- \`attributes.gen_ai.agent.id\` — agent id, **hashed** for custom agents unless
+  \`agentBuilder:tracing:includeRealIds\` is on, so it usually does *not* equal the human-readable id.
+  Break results down per agent by grouping \`BY\` this field; do **not** filter
+  \`WHERE attributes.gen_ai.agent.id == "<human-known-id>"\` (that typically returns zero rows) — only
+  filter on a value already seen in returned data.
 - \`attributes.gen_ai.conversation.id\` — conversation id (hashed unless \`agentBuilder:tracing:includeRealIds\` is on).
 - \`attributes.elastic.conversation.title\` — conversation title on the conversation-turn (\`CHAIN\`) span only; omitted unless \`agentBuilder:tracing:includeRealNames\` is on.
 - \`duration\` — span duration in **nanoseconds**; divide by \`1000000000.0\` for seconds.
@@ -129,8 +132,8 @@ Span names follow the OTel \`{operation} {identifier}\` convention:
 
 ### Example query patterns
 
-These patterns assume the current space index. Replace \`<traces-index>\` with the index returned by
-the inline tool.
+These patterns assume the current space's index **pattern**. Replace \`<traces-index>\` with the
+index pattern returned by the inline tool (it covers every agent's stream in the space).
 
 Total tokens by model (last 24h):
 

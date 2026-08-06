@@ -33,8 +33,8 @@ const buildTracesQueryRules = (tracesIndex: string) =>
 This is a set of rules that you must follow strictly when generating ES|QL for Agent Builder trace spans:
 * Use ONLY this per-space index pattern: ${tracesIndex} — it already covers every agent's traces stream in the current space. Never broaden it further to a traces-agent_builder.otel-* wildcard (that would mix in other spaces' data), and never narrow it to a single concrete index.
 * Traces are stored per agent, one data stream per agent within the space — attributes.gen_ai.agent.id is the field to break results down by agent. Do not group or filter by index name.
-* When the user's question is about a specific agent, filter with WHERE attributes.gen_ai.agent.id == "<agentId>" rather than trying to target that agent's index directly.
-* When comparing agents, group with BY attributes.gen_ai.agent.id in the STATS aggregation.
+* IMPORTANT: attributes.gen_ai.agent.id is HASHED for custom agents unless agentBuilder:tracing:includeRealIds is enabled, so it usually does NOT equal the human-readable agent id. A WHERE attributes.gen_ai.agent.id == "<human-known-id>" filter therefore typically returns zero rows — never assume a guessed/known id will match.
+* Prefer grouping with BY attributes.gen_ai.agent.id in the STATS aggregation and letting the user pick from the returned ids. Only add an equality filter on attributes.gen_ai.agent.id for a value you have already observed in returned data, never for a human-supplied id.
 * Always constrain the time range with @timestamp to the window the user asked about (default to the last 24 hours when they do not specify one).
 * LLM / token usage spans: span.name LIKE "chat *"
 * Tool call spans: span.name LIKE "execute_tool *"
@@ -61,7 +61,7 @@ export const createTracesEsqlTool = (): BuiltinSkillBoundedTool<typeof tracesEsq
   type: ToolType.builtin,
   description:
     'Generate and execute ES|QL against the current space Agent Builder OTel traces ' +
-    '(span telemetry and captured message content), covering every agent\'s per-agent traces ' +
+    "(span telemetry and captured message content), covering every agent's per-agent traces " +
     'stream in the space. Scopes queries to the active Kibana space automatically.',
   schema: tracesEsqlSchema,
   confirmation: { askUser: 'never' },

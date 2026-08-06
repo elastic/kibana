@@ -9,10 +9,10 @@ import { context as otelContext, propagation, TraceFlags } from '@opentelemetry/
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { CONVERSATION_ID_BAGGAGE_KEY } from '@kbn/inference-tracing';
+import { UNRESOLVED_AGENT_NAMESPACE_SEGMENT } from '../../common/traces';
 import {
   AGENT_BUILDER_OWNER_BAGGAGE_KEY,
   AGENT_BUILDER_OWNER_BAGGAGE_VALUE,
-  SPACE_ID_BAGGAGE_KEY,
   TRACES_NAMESPACE_BAGGAGE_KEY,
   isAgentBuilderSpan,
   withAgentBuilderContext,
@@ -51,16 +51,17 @@ describe('withAgentBuilderContext', () => {
     withAgentBuilderContext(
       () => {
         expect(getActiveBaggageEntry(TRACES_NAMESPACE_BAGGAGE_KEY)).toBe('marketing.sales-bot');
-        expect(getActiveBaggageEntry(SPACE_ID_BAGGAGE_KEY)).toBe('marketing');
       },
       { spaceId: 'marketing', agentId: 'sales-bot' }
     );
   });
 
-  it('falls back to the space id alone when the agent cannot be resolved', () => {
+  it('falls back to the unresolved-agent namespace when the agent cannot be resolved', () => {
     withAgentBuilderContext(
       () => {
-        expect(getActiveBaggageEntry(TRACES_NAMESPACE_BAGGAGE_KEY)).toBe('marketing');
+        expect(getActiveBaggageEntry(TRACES_NAMESPACE_BAGGAGE_KEY)).toBe(
+          `marketing.${UNRESOLVED_AGENT_NAMESPACE_SEGMENT}`
+        );
       },
       { spaceId: 'marketing' }
     );

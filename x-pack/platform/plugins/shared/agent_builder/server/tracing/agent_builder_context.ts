@@ -13,7 +13,6 @@ import { buildAgentBuilderTracesNamespace } from '../../common/traces';
 
 export const AGENT_BUILDER_OWNER_BAGGAGE_KEY = 'kibana.agent_builder';
 export const AGENT_BUILDER_OWNER_BAGGAGE_VALUE = '1';
-export const SPACE_ID_BAGGAGE_KEY = 'agent_builder.space_id';
 /**
  * W3C baggage key carrying the per-agent trace data-stream namespace (`<spaceId>` or
  * `<spaceId>.<agentId>`). Set by {@link withAgentBuilderContext} on the root span's context so
@@ -30,7 +29,13 @@ export const DATA_STREAM_NAMESPACE_ATTR = 'data_stream.namespace';
  * allowing the AgentBuilderSpanProcessor to filter them from other inference consumers.
  *
  * When `spaceId` is provided, the traces-namespace baggage is always set — falling back to the
- * space id alone when `agentId` is unresolved, so routing never broadens beyond the space.
+ * unresolved-agent namespace when `agentId` can't be resolved, so routing never broadens beyond the
+ * space nor leaves data in an unreadable bare-space stream.
+ *
+ * The namespace is set once on the conversation root context and inherited by every descendant span
+ * via OTel context propagation. In a multi-agent round this means a sub-agent's spans route to the
+ * *root* agent's stream while still carrying their own `gen_ai.agent.id` — break results down by
+ * that attribute, not by stream/index name.
  */
 export const withAgentBuilderContext = <T>(
   fn: () => T,
@@ -42,7 +47,6 @@ export const withAgentBuilderContext = <T>(
     value: AGENT_BUILDER_OWNER_BAGGAGE_VALUE,
   });
   if (options?.spaceId) {
-    baggage = baggage.setEntry(SPACE_ID_BAGGAGE_KEY, { value: options.spaceId });
     baggage = baggage.setEntry(TRACES_NAMESPACE_BAGGAGE_KEY, {
       value: buildAgentBuilderTracesNamespace({
         spaceId: options.spaceId,

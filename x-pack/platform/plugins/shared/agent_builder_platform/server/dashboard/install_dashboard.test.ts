@@ -101,9 +101,11 @@ describe('setAgentBuilderDashboard', () => {
     const stringified = JSON.stringify(objects);
     expect(stringified).not.toContain(AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER);
     // Queries must cover every per-agent stream in the space ("my-space.*"), not a bare
-    // space-scoped index ("my-space").
+    // space-scoped index ("my-space"). Assert the wildcard form is present and that the bare
+    // form never appears immediately followed by anything other than the `.` wildcard segment
+    // (robust to reformatting/whitespace, unlike matching a specific trailing character).
     expect(stringified).toContain('FROM traces-agent_builder.otel-my-space.*');
-    expect(stringified).not.toMatch(/FROM traces-agent_builder\.otel-my-space\\n/);
+    expect(stringified).not.toMatch(/traces-agent_builder\.otel-my-space(?![.\w*-])/);
   });
 
   it('sets the dashboard id to the space-scoped id in the imported object', async () => {
