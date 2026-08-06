@@ -3479,6 +3479,7 @@ x-pack/solutions/security/plugins/elastic_assistant/server/lib/prompt/defend_ins
 x-pack/solutions/security/plugins/elastic_assistant/server/knowledge_base/defend_insights @elastic/security-defend-workflows
 x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/common/components/response_actions @elastic/security-defend-workflows
+x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/response @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/osquery_automated_response_actions.tsx @elastic/security-defend-workflows
 /x-pack/solutions/security/packages/test-api-clients/supertest/endpoint_management.gen.ts @elastic/security-defend-workflows
 /x-pack/solutions/security/packages/test-api-clients/supertest/osquery.gen.ts @elastic/security-defend-workflows
@@ -3508,6 +3509,7 @@ x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/
 x-pack/solutions/security/plugins/security_solution/public/explore @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/flyout_v2/entity @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/entities @elastic/security-entity-analytics
 
 x-pack/solutions/security/packages/navigation/src/navigation_tree/entity_analytics_navigation_tree.ts @elastic/security-entity-analytics
 
@@ -3591,6 +3593,8 @@ x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details
 x-pack/solutions/security/plugins/security_solution/public/flyout_v2/entity/generic @elastic/contextual-security-apps
 /x-pack/solutions/security/plugins/security_solution/public/flyout/csp_details @elastic/contextual-security-apps
 /x-pack/solutions/security/plugins/security_solution/public/flyout_v2/csp @elastic/contextual-security-apps
+x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/graph @elastic/contextual-security-apps
+x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/session_view @elastic/contextual-security-apps
 
 ## Fleet plugin (co-owned with Fleet team)
 x-pack/platform/plugins/shared/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/contextual-security-apps
