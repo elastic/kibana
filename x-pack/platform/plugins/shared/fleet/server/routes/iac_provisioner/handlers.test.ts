@@ -8,32 +8,32 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 
 import {
-  IacProviderRenderError,
-  IacProviderUnavailableError,
+  IacProvisionerRenderError,
+  IacProvisionerUnavailableError,
   PackageNotFoundError,
 } from '../../errors';
 import { appContextService } from '../../services/app_context';
-import { iacProviderService } from '../../services';
+import { iacProvisionerService } from '../../services';
 import { getPackageInfo } from '../../services/epm/packages';
-import { isIacProviderEnabled } from '../../services/utils/iac_provider';
+import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
 import {
-  reportIacProviderRenderCompleted,
-  reportIacProviderRenderRequested,
-} from '../../services/telemetry/iac_provider_telemetry';
+  reportIacProvisionerRenderCompleted,
+  reportIacProvisionerRenderRequested,
+} from '../../services/telemetry/iac_provisioner_telemetry';
 
 import { renderIacTemplateHandler } from './handlers';
 
 jest.mock('../../services/app_context');
 jest.mock('../../services', () => ({
-  iacProviderService: { renderTemplate: jest.fn() },
+  iacProvisionerService: { renderTemplate: jest.fn() },
 }));
 jest.mock('../../services/epm/packages');
-jest.mock('../../services/utils/iac_provider');
-jest.mock('../../services/telemetry/iac_provider_telemetry');
+jest.mock('../../services/utils/iac_provisioner');
+jest.mock('../../services/telemetry/iac_provisioner_telemetry');
 
-const mockedRenderTemplate = jest.mocked(iacProviderService.renderTemplate);
+const mockedRenderTemplate = jest.mocked(iacProvisionerService.renderTemplate);
 const mockedGetPackageInfo = jest.mocked(getPackageInfo);
-const mockedIsEnabled = jest.mocked(isIacProviderEnabled);
+const mockedIsEnabled = jest.mocked(isIacProvisionerEnabled);
 
 const buildContext = () =>
   ({
@@ -80,7 +80,7 @@ describe('renderIacTemplateHandler', () => {
     jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger as any);
   });
 
-  it('returns 404 when the IaC Provider is not enabled', async () => {
+  it('returns 404 when the IaC Provisioner is not enabled', async () => {
     mockedIsEnabled.mockReturnValue(false);
 
     await renderIacTemplateHandler(
@@ -144,10 +144,10 @@ describe('renderIacTemplateHandler', () => {
     expect(mockedGetPackageInfo).toHaveBeenCalledWith(
       expect.objectContaining({ skipArchive: true })
     );
-    expect(reportIacProviderRenderRequested).toHaveBeenCalledWith(
+    expect(reportIacProvisionerRenderRequested).toHaveBeenCalledWith(
       expect.objectContaining({ flow: 'cloud_connector', integrationCount: 2 })
     );
-    expect(reportIacProviderRenderCompleted).toHaveBeenCalledWith(
+    expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
       expect.objectContaining({ success: true, httpStatus: 200 })
     );
   });
@@ -262,7 +262,7 @@ describe('renderIacTemplateHandler', () => {
   it('passes provider 4xx through with error codes so the client can fall back', async () => {
     mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
     mockedRenderTemplate.mockRejectedValue(
-      new IacProviderRenderError('unrenderable', 422, ['render.blueprint_not_found'])
+      new IacProvisionerRenderError('unrenderable', 422, ['render.blueprint_not_found'])
     );
 
     await renderIacTemplateHandler(
@@ -283,7 +283,7 @@ describe('renderIacTemplateHandler', () => {
         }),
       })
     );
-    expect(reportIacProviderRenderCompleted).toHaveBeenCalledWith(
+    expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
       expect.objectContaining({
         success: false,
         httpStatus: 422,
@@ -294,7 +294,7 @@ describe('renderIacTemplateHandler', () => {
 
   it('maps non-422 provider 4xx to 502 so auth-like statuses never reach the browser', async () => {
     mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
-    mockedRenderTemplate.mockRejectedValue(new IacProviderRenderError('mTLS rejected', 401, []));
+    mockedRenderTemplate.mockRejectedValue(new IacProvisionerRenderError('mTLS rejected', 401, []));
 
     await renderIacTemplateHandler(
       buildContext(),
@@ -310,7 +310,7 @@ describe('renderIacTemplateHandler', () => {
     // could trip the browser's session-expiry handling.
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 502 }));
     // Telemetry keeps the provider's real status.
-    expect(reportIacProviderRenderCompleted).toHaveBeenCalledWith(
+    expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
       expect.objectContaining({ success: false, httpStatus: 401 })
     );
   });
@@ -336,14 +336,14 @@ describe('renderIacTemplateHandler', () => {
       })
     );
     expect(appContextService.getLogger().get().error).not.toHaveBeenCalled();
-    expect(reportIacProviderRenderCompleted).toHaveBeenCalledWith(
+    expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
       expect.objectContaining({ success: false, httpStatus: 404 })
     );
   });
 
   it('maps provider unavailability to 502', async () => {
     mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
-    mockedRenderTemplate.mockRejectedValue(new IacProviderUnavailableError('no response'));
+    mockedRenderTemplate.mockRejectedValue(new IacProvisionerUnavailableError('no response'));
 
     await renderIacTemplateHandler(
       buildContext(),
@@ -356,7 +356,7 @@ describe('renderIacTemplateHandler', () => {
     );
 
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 502 }));
-    expect(reportIacProviderRenderCompleted).toHaveBeenCalledWith(
+    expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
       expect.objectContaining({ success: false })
     );
   });
@@ -384,7 +384,7 @@ describe('renderIacTemplateHandler', () => {
     expect(appContextService.getLogger().get().error).toHaveBeenCalledWith(
       expect.stringContaining('unexpected boom')
     );
-    expect(reportIacProviderRenderCompleted).toHaveBeenCalledWith(
+    expect(reportIacProvisionerRenderCompleted).toHaveBeenCalledWith(
       expect.objectContaining({ success: false, httpStatus: 500 })
     );
   });

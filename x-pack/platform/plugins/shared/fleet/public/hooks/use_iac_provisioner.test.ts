@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 
 import { useConfig, useStartServices } from '.';
 
-import { useIacProvider } from './use_iac_provider';
+import { useIacProvisioner } from './use_iac_provisioner';
 
 jest.mock('./use_config');
 jest.mock('./use_core');
@@ -21,18 +21,18 @@ const mockEnvironment = ({
   isCloudEnabled = false,
   isServerlessEnabled = false,
   agentlessEnabled = false,
-  iacProviderEnabled = false,
+  iacProvisionerEnabled = false,
 }) => {
   mockedUseConfig.mockReturnValue({
     agentless: { enabled: agentlessEnabled },
-    iacProvider: { enabled: iacProviderEnabled },
+    iacProvisioner: { enabled: iacProvisionerEnabled },
   } as any);
   mockedUseStartServices.mockReturnValue({
     cloud: { isCloudEnabled, isServerlessEnabled },
   } as any);
 };
 
-describe('useIacProvider', () => {
+describe('useIacProvisioner', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -40,30 +40,30 @@ describe('useIacProvider', () => {
   it.each([
     [
       'cloud + agentless + flag',
-      { isCloudEnabled: true, agentlessEnabled: true, iacProviderEnabled: true },
+      { isCloudEnabled: true, agentlessEnabled: true, iacProvisionerEnabled: true },
       true,
     ],
     [
       'serverless + agentless + flag',
-      { isServerlessEnabled: true, agentlessEnabled: true, iacProviderEnabled: true },
+      { isServerlessEnabled: true, agentlessEnabled: true, iacProvisionerEnabled: true },
       true,
     ],
     [
       'flag off',
-      { isCloudEnabled: true, agentlessEnabled: true, iacProviderEnabled: false },
+      { isCloudEnabled: true, agentlessEnabled: true, iacProvisionerEnabled: false },
       false,
     ],
     [
       'agentless off',
-      { isCloudEnabled: true, agentlessEnabled: false, iacProviderEnabled: true },
+      { isCloudEnabled: true, agentlessEnabled: false, iacProvisionerEnabled: true },
       false,
     ],
-    ['self-managed', { agentlessEnabled: true, iacProviderEnabled: true }, false],
+    ['self-managed', { agentlessEnabled: true, iacProvisionerEnabled: true }, false],
   ])('%s => %s', (_label, environment, expected) => {
     mockEnvironment(environment);
 
-    const { result } = renderHook(() => useIacProvider());
+    const { result } = renderHook(() => useIacProvisioner());
 
-    expect(result.current.isIacProviderEnabled).toBe(expected);
+    expect(result.current.isIacProvisionerEnabled).toBe(expected);
   });
 });

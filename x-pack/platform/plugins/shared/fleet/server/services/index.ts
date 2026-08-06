@@ -67,8 +67,8 @@ export { checkAllowedPackages } from './check_allowed_packages';
 export { cloudConnectorService } from './cloud_connector';
 export type { CloudConnectorServiceInterface } from './cloud_connector';
 
-export { iacProviderService } from './iac_provider';
-export type { IacProviderService } from './iac_provider';
+export { iacProvisionerService } from './iac_provisioner';
+export type { IacProvisionerService } from './iac_provisioner';
 
 export * from './cloud_connectors';
 

@@ -8,14 +8,14 @@
 import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { useIacProvider, useStartServices } from '../../../hooks';
-import { sendRenderIacTemplate } from '../../../hooks/use_request/iac_provider';
+import { useIacProvisioner, useStartServices } from '../../../hooks';
+import { sendRenderIacTemplate } from '../../../hooks/use_request/iac_provisioner';
 import {
   CLOUD_CONNECTOR_RENDER_FLOW,
-  IAC_PROVIDER_FALLBACK_REASON_MISSING_CONTEXT,
-  IAC_PROVIDER_FALLBACK_REASON_RENDER_FAILED,
-  IAC_PROVIDER_RENDER_FALLBACK_EVENT,
-} from '../../../../common/telemetry/iac_provider_events';
+  IAC_PROVISIONER_FALLBACK_REASON_MISSING_CONTEXT,
+  IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED,
+  IAC_PROVISIONER_RENDER_FALLBACK_EVENT,
+} from '../../../../common/telemetry/iac_provisioner_events';
 import { AWS_CLOUD_PROVIDER } from '../../../../common/types/models/cloud_connector';
 import type { AccountType } from '../../../types';
 import type { CloudSetupForCloudConnector } from '../types';
@@ -37,7 +37,7 @@ export interface UseCloudConnectorTemplateParams {
 
 export type CloudConnectorLaunchButtonProps =
   /**
-   * IaC Provider flow: renders the template just-in-time on click and opens
+   * IaC Provisioner flow: renders the template just-in-time on click and opens
    * the CloudFormation console.
    */
   | { onClick: () => Promise<void> }
@@ -62,7 +62,7 @@ export const useCloudConnectorTemplate = ({
   packageName,
   policyTemplates,
 }: UseCloudConnectorTemplateParams): UseCloudConnectorTemplateResult => {
-  const { isIacProviderEnabled } = useIacProvider();
+  const { isIacProvisionerEnabled } = useIacProvisioner();
   const { analytics } = useStartServices();
   const [isGeneratingTemplate, setIsGeneratingTemplate] = useState(false);
   const [templateGenerationError, setTemplateGenerationError] = useState<string | undefined>(
@@ -79,7 +79,7 @@ export const useCloudConnectorTemplate = ({
     setTemplateGenerationError(undefined);
 
     const reportFallback = (reason: string) => {
-      analytics.reportEvent(IAC_PROVIDER_RENDER_FALLBACK_EVENT.eventType, {
+      analytics.reportEvent(IAC_PROVISIONER_RENDER_FALLBACK_EVENT.eventType, {
         flow: CLOUD_CONNECTOR_RENDER_FLOW,
         reason,
       });
@@ -97,11 +97,11 @@ export const useCloudConnectorTemplate = ({
       !TEMPLATE_URL_PARAM_REGEX.test(staticTemplateUrl)
     ) {
       if (staticTemplateUrl) {
-        reportFallback(IAC_PROVIDER_FALLBACK_REASON_MISSING_CONTEXT);
+        reportFallback(IAC_PROVISIONER_FALLBACK_REASON_MISSING_CONTEXT);
         window.open(staticTemplateUrl, '_blank');
       } else {
         setTemplateGenerationError(
-          i18n.translate('xpack.fleet.cloudConnector.iacProvider.missingContextError', {
+          i18n.translate('xpack.fleet.cloudConnector.iacProvisioner.missingContextError', {
             defaultMessage: 'CloudFormation template is not available for this integration.',
           })
         );
@@ -133,7 +133,7 @@ export const useCloudConnectorTemplate = ({
       });
 
       if (error || !data) {
-        reportFallback(IAC_PROVIDER_FALLBACK_REASON_RENDER_FAILED);
+        reportFallback(IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED);
         navigateTo(staticTemplateUrl);
         return;
       }
@@ -150,7 +150,7 @@ export const useCloudConnectorTemplate = ({
     } catch (e) {
       cloudFormationTab?.close();
       setTemplateGenerationError(
-        i18n.translate('xpack.fleet.cloudConnector.iacProvider.templateGenerationError', {
+        i18n.translate('xpack.fleet.cloudConnector.iacProvisioner.templateGenerationError', {
           defaultMessage:
             'Failed to generate the CloudFormation template. Try again, or contact your administrator if the problem persists.',
         })
@@ -160,7 +160,7 @@ export const useCloudConnectorTemplate = ({
     }
   }, [analytics, packageName, policyTemplates, staticTemplateUrl]);
 
-  if (!isIacProviderEnabled) {
+  if (!isIacProvisionerEnabled) {
     return {
       launchButtonProps: { href: staticTemplateUrl, target: '_blank' },
       isDisabled: !staticTemplateUrl,

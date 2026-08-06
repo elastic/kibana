@@ -7,22 +7,22 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import { iacProviderService } from '../../services';
-import type { IacProviderRenderIntegration } from '../../services/iac_provider';
+import { iacProvisionerService } from '../../services';
+import type { IacProvisionerRenderIntegration } from '../../services/iac_provisioner';
 import { appContextService } from '../../services/app_context';
 import { getPackageInfo } from '../../services/epm/packages';
-import { isIacProviderEnabled } from '../../services/utils/iac_provider';
+import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
 import {
-  reportIacProviderRenderCompleted,
-  reportIacProviderRenderRequested,
-} from '../../services/telemetry/iac_provider_telemetry';
+  reportIacProvisionerRenderCompleted,
+  reportIacProvisionerRenderRequested,
+} from '../../services/telemetry/iac_provisioner_telemetry';
 import {
   FleetNotFoundError,
-  IacProviderRenderError,
-  IacProviderUnavailableError,
+  IacProvisionerRenderError,
+  IacProvisionerUnavailableError,
 } from '../../errors';
 import type { FleetRequestHandler } from '../../types';
-import type { RenderIacTemplateRequestSchema } from '../../types/rest_spec/iac_provider';
+import type { RenderIacTemplateRequestSchema } from '../../types/rest_spec/iac_provisioner';
 
 export const renderIacTemplateHandler: FleetRequestHandler<
   undefined,
@@ -31,12 +31,12 @@ export const renderIacTemplateHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
-  const logger = appContextService.getLogger().get('IacProvider renderIacTemplateHandler');
+  const logger = appContextService.getLogger().get('IacProvisioner renderIacTemplateHandler');
   const { provider, flow, integrations: requestedIntegrations } = request.body;
 
-  if (!isIacProviderEnabled()) {
+  if (!isIacProvisionerEnabled()) {
     return response.notFound({
-      body: { message: 'IaC Provider is not enabled' },
+      body: { message: 'IaC Provisioner is not enabled' },
     });
   }
 
@@ -53,7 +53,7 @@ export const renderIacTemplateHandler: FleetRequestHandler<
 
   const startTime = Date.now();
   try {
-    const integrations: IacProviderRenderIntegration[] = await Promise.all(
+    const integrations: IacProvisionerRenderIntegration[] = await Promise.all(
       Array.from(templatesByPackage, async ([pkgName, policyTemplates]) => {
         // Empty pkgVersion resolves to the installed version, falling back to
         // the latest available: at connector-creation time the package may not
@@ -98,14 +98,14 @@ export const renderIacTemplateHandler: FleetRequestHandler<
       });
     }
 
-    reportIacProviderRenderRequested({
+    reportIacProvisionerRenderRequested({
       flow,
       integrationCount: integrations.length,
     });
 
-    const rendered = await iacProviderService.renderTemplate({ provider, integrations });
+    const rendered = await iacProvisionerService.renderTemplate({ provider, integrations });
 
-    reportIacProviderRenderCompleted({
+    reportIacProvisionerRenderCompleted({
       flow,
       success: true,
       httpStatus: 200,
@@ -116,8 +116,8 @@ export const renderIacTemplateHandler: FleetRequestHandler<
   } catch (error) {
     const latencyMs = Date.now() - startTime;
 
-    if (error instanceof IacProviderRenderError) {
-      reportIacProviderRenderCompleted({
+    if (error instanceof IacProvisionerRenderError) {
+      reportIacProvisionerRenderCompleted({
         flow,
         success: false,
         httpStatus: error.statusCode,
@@ -134,8 +134,8 @@ export const renderIacTemplateHandler: FleetRequestHandler<
       });
     }
 
-    if (error instanceof IacProviderUnavailableError) {
-      reportIacProviderRenderCompleted({
+    if (error instanceof IacProvisionerUnavailableError) {
+      reportIacProvisionerRenderCompleted({
         flow,
         success: false,
         httpStatus: error.statusCode ?? 0,
@@ -151,7 +151,7 @@ export const renderIacTemplateHandler: FleetRequestHandler<
     // A requested package doesn't exist (getPackageInfo) — a caller mistake,
     // not a server failure, so no error-level log.
     if (error instanceof FleetNotFoundError) {
-      reportIacProviderRenderCompleted({
+      reportIacProvisionerRenderCompleted({
         flow,
         success: false,
         httpStatus: 404,
@@ -164,7 +164,7 @@ export const renderIacTemplateHandler: FleetRequestHandler<
     }
 
     logger.error(`Failed to render IaC template: ${error.message}`);
-    reportIacProviderRenderCompleted({
+    reportIacProvisionerRenderCompleted({
       flow,
       success: false,
       httpStatus: 500,

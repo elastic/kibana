@@ -8,19 +8,19 @@
 import { useConfig, useStartServices } from '.';
 
 /**
- * Client-side mirror of the server's `isIacProviderEnabled()` gate: the IaC
- * Provider is only available where agentless is (cloud or serverless with
- * `xpack.fleet.agentless.enabled`) and the `xpack.fleet.iacProvider.enabled`
+ * Client-side mirror of the server's `isIacProvisionerEnabled()` gate: the IaC
+ * Provisioner is only available where agentless is (cloud or serverless with
+ * `xpack.fleet.agentless.enabled`) and the `xpack.fleet.iacProvisioner.enabled`
  * flag is on. On-prem support is pending the auth decision in
  * https://github.com/elastic/security-team/issues/18240.
  */
-export const useIacProvider = (): { isIacProviderEnabled: boolean } => {
+export const useIacProvisioner = (): { isIacProvisionerEnabled: boolean } => {
   const config = useConfig();
   const { cloud } = useStartServices();
   const isHosted = Boolean(cloud?.isCloudEnabled || cloud?.isServerlessEnabled);
 
   return {
-    isIacProviderEnabled:
-      isHosted && config.agentless?.enabled === true && config.iacProvider?.enabled === true,
+    isIacProvisionerEnabled:
+      isHosted && config.agentless?.enabled === true && config.iacProvisioner?.enabled === true,
   };
 };

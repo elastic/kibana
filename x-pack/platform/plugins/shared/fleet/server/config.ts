@@ -50,7 +50,7 @@ export const config: PluginConfigDescriptor = {
         enabled: true,
       },
     },
-    iacProvider: {
+    iacProvisioner: {
       enabled: true,
     },
     enableExperimental: true,
@@ -278,7 +278,7 @@ export const config: PluginConfigDescriptor = {
           ),
         })
       ),
-      iacProvider: schema.maybe(
+      iacProvisioner: schema.maybe(
         schema.object({
           enabled: schema.boolean({ defaultValue: false }),
           api: schema.maybe(

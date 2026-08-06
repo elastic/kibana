@@ -8,13 +8,13 @@
 import { fetch as undiciFetch, Agent } from 'undici';
 
 import {
-  IacProviderConfigError,
-  IacProviderRenderError,
-  IacProviderUnavailableError,
+  IacProvisionerConfigError,
+  IacProvisionerRenderError,
+  IacProvisionerUnavailableError,
 } from '../errors';
 
 import { appContextService } from './app_context';
-import { iacProviderService, parseIacProviderErrors } from './iac_provider';
+import { iacProvisionerService, parseIacProvisionerErrors } from './iac_provisioner';
 
 jest.mock('undici', () => ({
   fetch: jest.fn(),
@@ -57,10 +57,10 @@ const jsonResponse = (status: number, body: unknown) =>
 function mockConfig(overrides: Record<string, unknown> = {}) {
   jest.spyOn(appContextService, 'getConfig').mockReturnValue({
     agentless: { enabled: true },
-    iacProvider: {
+    iacProvisioner: {
       enabled: true,
       api: {
-        url: 'https://iac-provider.example',
+        url: 'https://iac-provisioner.example',
         tls: { certificate: '/path/tls.crt', key: '/path/tls.key', ca: '/path/ca.crt' },
       },
       ...overrides,
@@ -82,30 +82,30 @@ function mockLogger() {
   return logger;
 }
 
-describe('IacProviderService', () => {
+describe('IacProvisionerService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('throws IacProviderConfigError when the feature is not enabled', async () => {
+  it('throws IacProvisionerConfigError when the feature is not enabled', async () => {
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: { enabled: true },
-      iacProvider: { enabled: false },
+      iacProvisioner: { enabled: false },
     } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
     mockLogger();
 
-    await expect(iacProviderService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
-      IacProviderConfigError
+    await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+      IacProvisionerConfigError
     );
   });
 
-  it('throws IacProviderConfigError when the API url is missing', async () => {
+  it('throws IacProvisionerConfigError when the API url is missing', async () => {
     mockConfig({ api: undefined });
     mockLogger();
 
-    await expect(iacProviderService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
-      IacProviderConfigError
+    await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+      IacProvisionerConfigError
     );
   });
 
@@ -116,11 +116,11 @@ describe('IacProviderService', () => {
       jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
     );
 
-    const result = await iacProviderService.renderTemplate(RENDER_REQUEST);
+    const result = await iacProvisionerService.renderTemplate(RENDER_REQUEST);
 
     expect(result).toEqual({ artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' });
     expect(mockedFetch).toHaveBeenCalledWith(
-      'https://iac-provider.example/api/v1/render',
+      'https://iac-provisioner.example/api/v1/render',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify(RENDER_REQUEST),
@@ -140,16 +140,16 @@ describe('IacProviderService', () => {
 
   it('supports CA-only TLS config, still verifying the server certificate', async () => {
     // Local dev: the provider doesn't verify clients, so no cert/key pair —
-    // this must not throw IacProviderConfigError.
+    // this must not throw IacProvisionerConfigError.
     mockConfig({
-      api: { url: 'https://iac-provider.example', tls: { ca: '/path/ca.crt' } },
+      api: { url: 'https://iac-provisioner.example', tls: { ca: '/path/ca.crt' } },
     });
     mockLogger();
     mockedFetch.mockResolvedValueOnce(
       jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
     );
 
-    const result = await iacProviderService.renderTemplate(RENDER_REQUEST);
+    const result = await iacProvisionerService.renderTemplate(RENDER_REQUEST);
 
     expect(result).toEqual({ artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' });
     expect(mockedAgent).toHaveBeenCalledWith({
@@ -169,11 +169,11 @@ describe('IacProviderService', () => {
       jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
     );
 
-    await iacProviderService.renderTemplate(RENDER_REQUEST);
+    await iacProvisionerService.renderTemplate(RENDER_REQUEST);
 
     const debugLogged = logger.debug.mock.calls.flat().map(String).join(' ');
     // The full outbound request is visible: URL, body, timeout…
-    expect(debugLogged).toContain('https://iac-provider.example/api/v1/render');
+    expect(debugLogged).toContain('https://iac-provisioner.example/api/v1/render');
     expect(debugLogged).toContain('cloud_security_posture');
     expect(debugLogged).toContain('"timeoutMs":30000');
     // …but TLS entries only report presence, never their configured values.
@@ -195,7 +195,7 @@ describe('IacProviderService', () => {
       jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
     );
 
-    await iacProviderService.renderTemplate(RENDER_REQUEST);
+    await iacProvisionerService.renderTemplate(RENDER_REQUEST);
 
     const allLogged = [
       ...logger.info.mock.calls,
@@ -210,44 +210,44 @@ describe('IacProviderService', () => {
     expect(allLogged).not.toContain('X-Amz-Signature');
   });
 
-  it('maps a 422 response to IacProviderRenderError with the provider error codes', async () => {
+  it('maps a 422 response to IacProvisionerRenderError with the provider error codes', async () => {
     mockConfig();
     mockLogger();
     mockedFetch.mockResolvedValueOnce(
       jsonResponse(422, { code: 'render.blueprint_not_found', message: 'blueprint not found' })
     );
 
-    const promise = iacProviderService.renderTemplate(RENDER_REQUEST);
-    await expect(promise).rejects.toThrow(IacProviderRenderError);
-    await promise.catch((error: IacProviderRenderError) => {
+    const promise = iacProvisionerService.renderTemplate(RENDER_REQUEST);
+    await expect(promise).rejects.toThrow(IacProvisionerRenderError);
+    await promise.catch((error: IacProvisionerRenderError) => {
       expect(error.statusCode).toBe(422);
       expect(error.errorCodes).toEqual(['render.blueprint_not_found']);
     });
   });
 
-  it('maps a 5xx response to IacProviderUnavailableError', async () => {
+  it('maps a 5xx response to IacProvisionerUnavailableError', async () => {
     mockConfig();
     mockLogger();
     mockedFetch.mockResolvedValueOnce(
       jsonResponse(500, { code: 'render.internal_error', message: 'boom' })
     );
 
-    await expect(iacProviderService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
-      IacProviderUnavailableError
+    await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+      IacProvisionerUnavailableError
     );
   });
 
-  it('maps a network failure to IacProviderUnavailableError', async () => {
+  it('maps a network failure to IacProvisionerUnavailableError', async () => {
     mockConfig();
     mockLogger();
     mockedFetch.mockRejectedValueOnce(new TypeError('fetch failed'));
 
-    await expect(iacProviderService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
-      IacProviderUnavailableError
+    await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+      IacProvisionerUnavailableError
     );
   });
 
-  it('maps a body that fails to read to IacProviderUnavailableError', async () => {
+  it('maps a body that fails to read to IacProvisionerUnavailableError', async () => {
     mockConfig();
     mockLogger();
     // Headers arrived (200) but the body stalls until the timeout aborts it —
@@ -260,39 +260,39 @@ describe('IacProviderService', () => {
       },
     } as any);
 
-    await expect(iacProviderService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
-      IacProviderUnavailableError
+    await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+      IacProvisionerUnavailableError
     );
   });
 
-  it('throws IacProviderConfigError when only one of certificate/key is configured', async () => {
+  it('throws IacProvisionerConfigError when only one of certificate/key is configured', async () => {
     // A half-configured pair must not silently downgrade to an
     // unauthenticated connection.
     mockConfig({
       api: {
-        url: 'https://iac-provider.example',
+        url: 'https://iac-provisioner.example',
         tls: { certificate: '/path/tls.crt', ca: '/path/ca.crt' },
       },
     });
     mockLogger();
 
-    await expect(iacProviderService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
-      IacProviderConfigError
+    await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+      IacProvisionerConfigError
     );
     expect(mockedFetch).not.toHaveBeenCalled();
   });
 });
 
-describe('parseIacProviderErrors', () => {
+describe('parseIacProvisionerErrors', () => {
   it('parses the single { code, message } shape', () => {
-    expect(parseIacProviderErrors({ code: 'render.conflict', message: 'conflict' })).toEqual([
+    expect(parseIacProvisionerErrors({ code: 'render.conflict', message: 'conflict' })).toEqual([
       { code: 'render.conflict', message: 'conflict' },
     ]);
   });
 
   it('parses the MultiErrorResponse { errors: [...] } shape', () => {
     expect(
-      parseIacProviderErrors({
+      parseIacProvisionerErrors({
         errors: [
           { code: 'render.conflict', message: 'a' },
           { code: 'render.protected_path', message: 'b' },
@@ -305,8 +305,8 @@ describe('parseIacProviderErrors', () => {
   });
 
   it('returns empty for unknown shapes', () => {
-    expect(parseIacProviderErrors(undefined)).toEqual([]);
-    expect(parseIacProviderErrors('nope')).toEqual([]);
-    expect(parseIacProviderErrors({})).toEqual([]);
+    expect(parseIacProvisionerErrors(undefined)).toEqual([]);
+    expect(parseIacProvisionerErrors('nope')).toEqual([]);
+    expect(parseIacProvisionerErrors({})).toEqual([]);
   });
 });

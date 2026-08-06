@@ -9,7 +9,7 @@ import { appContextService } from '..';
 
 import { isAgentlessEnabled } from './agentless';
 
-export interface IacProviderConfig {
+export interface IacProvisionerConfig {
   enabled?: boolean;
   api?: {
     url?: string;
@@ -22,10 +22,10 @@ export interface IacProviderConfig {
 }
 
 /**
- * The IaC Provider is only reachable from agentless-capable environments for
+ * The IaC Provisioner is only reachable from agentless-capable environments for
  * the MVP; on-prem support is pending the auth decision in
  * https://github.com/elastic/security-team/issues/18240.
  */
-export const isIacProviderEnabled = (): boolean => {
-  return isAgentlessEnabled() && Boolean(appContextService.getConfig()?.iacProvider?.enabled);
+export const isIacProvisionerEnabled = (): boolean => {
+  return isAgentlessEnabled() && Boolean(appContextService.getConfig()?.iacProvisioner?.enabled);
 };

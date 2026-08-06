@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector';
-import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../common/telemetry/iac_provider_events';
+import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../common/telemetry/iac_provisioner_events';
 
 export const RenderIacTemplateRequestSchema = {
   body: schema.object({

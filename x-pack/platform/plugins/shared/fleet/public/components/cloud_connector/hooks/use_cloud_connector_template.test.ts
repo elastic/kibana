@@ -7,15 +7,15 @@
 
 import { renderHook, act } from '@testing-library/react';
 
-import { useIacProvider, useStartServices } from '../../../hooks';
-import { sendRenderIacTemplate } from '../../../hooks/use_request/iac_provider';
+import { useIacProvisioner, useStartServices } from '../../../hooks';
+import { sendRenderIacTemplate } from '../../../hooks/use_request/iac_provisioner';
 
 import { useCloudConnectorTemplate } from './use_cloud_connector_template';
 
 jest.mock('../../../hooks');
-jest.mock('../../../hooks/use_request/iac_provider');
+jest.mock('../../../hooks/use_request/iac_provisioner');
 
-const mockedUseIacProvider = jest.mocked(useIacProvider);
+const mockedUseIacProvisioner = jest.mocked(useIacProvisioner);
 const mockedUseStartServices = jest.mocked(useStartServices);
 const mockedSendRenderIacTemplate = jest.mocked(sendRenderIacTemplate);
 
@@ -71,9 +71,9 @@ describe('useCloudConnectorTemplate', () => {
     });
   };
 
-  describe('when the IaC Provider is disabled', () => {
+  describe('when the IaC Provisioner is disabled', () => {
     beforeEach(() => {
-      mockedUseIacProvider.mockReturnValue({ isIacProviderEnabled: false });
+      mockedUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
     });
 
     it('returns href button props with the static template URL', () => {
@@ -103,9 +103,9 @@ describe('useCloudConnectorTemplate', () => {
     });
   });
 
-  describe('when the IaC Provider is enabled', () => {
+  describe('when the IaC Provisioner is enabled', () => {
     beforeEach(() => {
-      mockedUseIacProvider.mockReturnValue({ isIacProviderEnabled: true });
+      mockedUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
     });
 
     it('returns onClick button props instead of an href', () => {
@@ -177,7 +177,7 @@ describe('useCloudConnectorTemplate', () => {
       expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
       const openedUrl = windowOpenSpy.mock.calls[0][0] as string;
       expect(openedUrl).toContain('static.example');
-      expect(reportEvent).toHaveBeenCalledWith('iac_provider_render_fallback', {
+      expect(reportEvent).toHaveBeenCalledWith('iac_provisioner_render_fallback', {
         flow: 'cloud_connector',
         reason: 'missing_render_context',
       });
@@ -192,7 +192,7 @@ describe('useCloudConnectorTemplate', () => {
       expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
       const openedUrl = windowOpenSpy.mock.calls[0][0] as string;
       expect(openedUrl).toContain('static.example');
-      expect(reportEvent).toHaveBeenCalledWith('iac_provider_render_fallback', {
+      expect(reportEvent).toHaveBeenCalledWith('iac_provisioner_render_fallback', {
         flow: 'cloud_connector',
         reason: 'missing_render_context',
       });
@@ -224,7 +224,7 @@ describe('useCloudConnectorTemplate', () => {
       await launch(result);
 
       expect(cloudFormationTab.location.href).toContain('static.example');
-      expect(reportEvent).toHaveBeenCalledWith('iac_provider_render_fallback', {
+      expect(reportEvent).toHaveBeenCalledWith('iac_provisioner_render_fallback', {
         flow: 'cloud_connector',
         reason: 'render_failed',
       });
@@ -256,7 +256,7 @@ describe('useCloudConnectorTemplate', () => {
       await launch(result);
 
       expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
-      expect(reportEvent).toHaveBeenCalledWith('iac_provider_render_fallback', {
+      expect(reportEvent).toHaveBeenCalledWith('iac_provisioner_render_fallback', {
         flow: 'cloud_connector',
         reason: 'missing_render_context',
       });

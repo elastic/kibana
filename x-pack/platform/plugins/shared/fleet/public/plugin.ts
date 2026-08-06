@@ -82,7 +82,7 @@ import type {
 
 import { API_VERSIONS } from '../common/constants';
 
-import { registerIacProviderTelemetryEvents } from '../common/telemetry/iac_provider_events';
+import { registerIacProvisionerTelemetryEvents } from '../common/telemetry/iac_provisioner_events';
 
 import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constants';
 import type { RequestError } from './hooks';
@@ -197,7 +197,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     // Set up http client
     setHttpClient(core.http);
 
-    registerIacProviderTelemetryEvents(core.analytics);
+    registerIacProvisionerTelemetryEvents(core.analytics);
 
     // Register Integrations app
     core.application.register({

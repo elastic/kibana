@@ -53,7 +53,7 @@ export interface FleetConfigType {
       enabled: boolean;
     };
   };
-  iacProvider?: {
+  iacProvisioner?: {
     enabled: boolean;
     api?: {
       url?: string;
