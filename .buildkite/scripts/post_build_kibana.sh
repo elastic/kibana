@@ -4,13 +4,6 @@ set -euo pipefail
 
 source "$(dirname "$0")/common/util.sh"
 
-
-# [rspack-transition] avoid shipping bundle sizes while RSPack is not the default
-if [[ "${KBN_USE_RSPACK:-}" == "true" ]]; then
-  echo "Skipping shipping bundle sizes to CI Stats (rspack build)"
-  export DISABLE_CI_STATS_SHIPPING=true
-fi
-
 if [[ ! "${DISABLE_CI_STATS_SHIPPING:-}" ]]; then
   cmd=(
     "node" "scripts/ship_ci_stats"
