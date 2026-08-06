@@ -354,6 +354,14 @@ export class DatePicker {
     return this.page.testSubj.locator(this.getDateRangePresetTestSubject(label));
   }
 
+  /**
+   * Delete action for a preset. Only user-saved presets expose one; presets
+   * coming from the `timepicker:quickRanges` uiSetting are locked.
+   */
+  getDateRangePresetDeleteButton(label: string) {
+    return this.getDateRangePreset(label).getByTestId('dateRangePickerDeletePresetButton');
+  }
+
   async deleteDateRangePreset(label: string) {
     if (!(await this.isNewDateRangePicker())) {
       throw new Error('deleteDateRangePreset is only supported by the new DateRangePicker');
