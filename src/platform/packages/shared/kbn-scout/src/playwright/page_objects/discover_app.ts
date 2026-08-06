@@ -21,6 +21,8 @@ export type DiscoverQueryMode = 'esql' | 'classic';
 
 export interface DiscoverGotoOptions {
   queryMode: DiscoverQueryMode;
+  /** Open a Discover session by id (`#/view/{id}`) instead of a blank Discover page. */
+  savedSearchId?: string;
 }
 
 export interface DataViewOptions {
@@ -48,7 +50,10 @@ export class DiscoverApp {
   async goto(options: DiscoverGotoOptions) {
     await this.setQueryMode(options.queryMode);
 
-    await this.page.gotoApp('discover');
+    await this.page.gotoApp(
+      'discover',
+      options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined
+    );
     await this.waitForDiscoverPage();
   }
 

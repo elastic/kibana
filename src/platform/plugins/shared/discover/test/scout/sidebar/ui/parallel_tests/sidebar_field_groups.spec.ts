@@ -48,51 +48,60 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
     expect(metaFields).toContain('_score');
   });
 
-  spaceTest('tracks selected and popular fields across refresh', async ({ page, pageObjects }) => {
-    const { discover, unifiedFieldList } = pageObjects;
+  spaceTest(
+    'tracks selected and popular fields across refresh',
+    async ({ browserAuth, page, pageObjects }) => {
+      const { discover, unifiedFieldList } = pageObjects;
 
-    await unifiedFieldList.clickFieldListItemAdd('extension');
-    await discover.waitUntilSearchingHasFinished();
-    await unifiedFieldList.clickFieldListItemAdd('@message');
-    await discover.waitUntilSearchingHasFinished();
+      // Selecting columns calls popularizeField, which requires indexPatterns.save and
+      // persists counts on the data view. Security editor lacks that capability.
+      await browserAuth.loginAsAdmin();
+      await discover.goto({ queryMode: 'classic' });
+      await discover.waitUntilTabIsLoaded();
 
-    expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
-      'extension',
-      '@message',
-    ]);
+      await unifiedFieldList.clickFieldListItemAdd('extension');
+      await discover.waitUntilSearchingHasFinished();
+      await unifiedFieldList.clickFieldListItemAdd('@message');
+      await discover.waitUntilSearchingHasFinished();
 
-    expect(await unifiedFieldList.getSidebarSectionFieldCount('popular')).toBeGreaterThan(0);
+      expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
+        'extension',
+        '@message',
+      ]);
 
-    await unifiedFieldList.clickFieldListItemRemove('@message');
-    await discover.waitUntilSearchingHasFinished();
-    await unifiedFieldList.clickFieldListItemAdd('bytes');
-    await discover.waitUntilSearchingHasFinished();
-    await unifiedFieldList.clickFieldListItemAdd('@message');
-    await discover.waitUntilSearchingHasFinished();
+      expect(await unifiedFieldList.getSidebarSectionFieldCount('popular')).toBeGreaterThan(0);
 
-    expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
-      'extension',
-      'bytes',
-      '@message',
-    ]);
+      await unifiedFieldList.clickFieldListItemRemove('@message');
+      await discover.waitUntilSearchingHasFinished();
+      await unifiedFieldList.clickFieldListItemAdd('bytes');
+      await discover.waitUntilSearchingHasFinished();
+      await unifiedFieldList.clickFieldListItemAdd('@message');
+      await discover.waitUntilSearchingHasFinished();
 
-    const popularBeforeRefresh = await unifiedFieldList.getSidebarSectionFieldNames('popular');
-    expect(popularBeforeRefresh).toContain('extension');
-    expect(popularBeforeRefresh).toContain('@message');
-    expect(popularBeforeRefresh).toContain('bytes');
+      expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
+        'extension',
+        'bytes',
+        '@message',
+      ]);
 
-    await page.reload();
-    await discover.waitUntilTabIsLoaded();
+      const popularBeforeRefresh = await unifiedFieldList.getSidebarSectionFieldNames('popular');
+      expect(popularBeforeRefresh).toContain('extension');
+      expect(popularBeforeRefresh).toContain('@message');
+      expect(popularBeforeRefresh).toContain('bytes');
 
-    expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
-      'extension',
-      'bytes',
-      '@message',
-    ]);
-    expect(await unifiedFieldList.getSidebarSectionFieldNames('popular')).toStrictEqual(
-      popularBeforeRefresh
-    );
-  });
+      await page.reload();
+      await discover.waitUntilTabIsLoaded();
+
+      expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
+        'extension',
+        'bytes',
+        '@message',
+      ]);
+      expect(await unifiedFieldList.getSidebarSectionFieldNames('popular')).toStrictEqual(
+        popularBeforeRefresh
+      );
+    }
+  );
 
   spaceTest('passes filters down to field stats', async ({ pageObjects }) => {
     const { discover, filterBar, unifiedFieldList } = pageObjects;

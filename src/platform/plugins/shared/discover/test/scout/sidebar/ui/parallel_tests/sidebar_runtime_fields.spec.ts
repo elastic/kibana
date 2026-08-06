@@ -8,13 +8,34 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, tags } from '../fixtures';
+import { spaceTest, tags, testData } from '../fixtures';
 
+/**
+ * Runtime field CRUD needs an ad-hoc data view: Security editor has Discover but
+ * not `indexPatterns`, so "Add a field" is hidden on persisted data views.
+ * Create the session via API (`data_view_spec`) instead of the data-view UI.
+ */
 spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeEach(async ({ browserAuth, discoverScoutSpace, pageObjects }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
     await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.discover.goto({ queryMode: 'classic' });
+
+    const sessionId = await discoverScoutSpace.createDiscoverSession({
+      title: `sidebar-runtime-fields-${discoverScoutSpace.id}`,
+      tabs: [
+        {
+          id: 'main',
+          label: 'Untitled',
+          data_source: {
+            type: 'data_view_spec',
+            index_pattern: testData.DEFAULT_DATA_VIEW,
+            time_field: '@timestamp',
+          },
+        },
+      ],
+    });
+
+    await pageObjects.discover.goto({ queryMode: 'classic', savedSearchId: sessionId });
     await pageObjects.discover.waitUntilTabIsLoaded();
   });
 
@@ -29,10 +50,6 @@ spaceTest.describe('Discover sidebar runtime fields', { tag: tags.deploymentAgno
       const fieldName = '_bytes-runtimefield';
       const labeledName = '_bytes-runtimefield2';
 
-      await discover.createDataViewFromSearchBar({
-        name: 'logstash',
-        adHoc: true,
-      });
       const baselineCount = await unifiedFieldList.getAvailableFieldCount();
       expect(baselineCount).toBeGreaterThan(0);
 
