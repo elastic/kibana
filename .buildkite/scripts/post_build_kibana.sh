@@ -40,10 +40,10 @@ cd -
 
 # [rspack-transition] Upload build type marker for cache validation.
 # Delete this block when the legacy optimizer is removed.
-if [[ "${KBN_USE_RSPACK:-}" == "true" ]]; then
-  echo "rspack" > "$KIBANA_DIR/target/kibana-build-type.txt"
-else
+if [[ "${KBN_USE_RSPACK:-}" == "false" || "${KBN_USE_RSPACK:-}" == "0" ]]; then
   echo "legacy" > "$KIBANA_DIR/target/kibana-build-type.txt"
+else
+  echo "rspack" > "$KIBANA_DIR/target/kibana-build-type.txt"
 fi
 cd "$KIBANA_DIR/target"
 buildkite-agent artifact upload "kibana-build-type.txt"
