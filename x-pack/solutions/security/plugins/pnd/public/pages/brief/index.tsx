@@ -23,7 +23,6 @@ import { useInvestigations } from '../../hooks/use_investigations_api';
 import * as i18n from './translations';
 import { BriefingContainer } from '../../components/briefing_container';
 import { BRIEF_CONTAINER_BUCKETS } from '../../components/briefing_container/translations';
-import { CategoryFilter } from '../../components/filters/category_filter';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 const AUTO_RESOLVED_STATUSES = new Set(['auto-resolved', 'closed']);
@@ -34,17 +33,8 @@ const isQueueRow = (investigation: Investigation): boolean =>
 const isAutoResolved = (investigation: Investigation): boolean =>
   AUTO_RESOLVED_STATUSES.has(investigation.status ?? '');
 
-const matchesBucket = (
-  investigation: Investigation,
-  bucket: 'all' | RecommendedAction
-): boolean => {
-  if (bucket === 'all') return true;
-  return investigation.recommendedAction === bucket;
-};
-
 export const BriefPage: React.FC = () => {
   const { data, isLoading, error } = useInvestigations();
-  const [selectedBucket, setSelectedBucket] = useState<'all' | RecommendedAction>('all');
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
   usePndDocTitle(i18n.PAGE_TITLE);
 
@@ -67,22 +57,6 @@ export const BriefPage: React.FC = () => {
     [investigations]
   );
 
-  const bucketCounts = useMemo(() => {
-    const counts: Record<RecommendedAction, number> = {
-      contain: 0,
-      escalate: 0,
-      investigate: 0,
-      tune: 0,
-    };
-    for (const investigation of sortedEvents) {
-      const action = investigation.recommendedAction;
-      if (action && action in counts) {
-        counts[action as RecommendedAction] += 1;
-      }
-    }
-    return counts;
-  }, [sortedEvents]);
-
   const surfaces = useMemo(() => {
     const seen = new Set<string>();
     const labels: string[] = [];
@@ -99,11 +73,10 @@ export const BriefPage: React.FC = () => {
   const filteredQueueItems = useMemo(
     () =>
       sortedEvents.filter((investigation) => {
-        if (!matchesBucket(investigation, selectedBucket)) return false;
         if (surfaceFilter && investigation.affectedSurface !== surfaceFilter) return false;
         return true;
       }),
-    [sortedEvents, surfaceFilter, selectedBucket]
+    [sortedEvents, surfaceFilter]
   );
 
   const groupedBriefingItems = useMemo(() => {
@@ -141,12 +114,6 @@ export const BriefPage: React.FC = () => {
         subtitle={
           autoResolvedCount > 0 ? i18n.autonomousSubline(autoResolvedCount) : i18n.CLEAR_SUBLINE
         }
-      />
-
-      <CategoryFilter
-        selectedBucket={selectedBucket}
-        bucketCounts={bucketCounts}
-        onChange={setSelectedBucket}
       />
 
       {surfaces.length > 0 ? (
