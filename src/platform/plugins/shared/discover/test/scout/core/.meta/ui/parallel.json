@@ -1,0 +1,1734 @@
+{
+  "sha1": "87c202ab01312963f04dc5299195269b7a1da502",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "44016f4041590ae-398c8c02ed1a873",
+      "title": "Teardown Discover core tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
+      }
+    },
+    {
+      "id": "002955b6e2ba042-1b409be2f2af3b3",
+      "title": "Setup Discover core tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/global.setup.ts",
+        "line": 7,
+        "column": 1
+      }
+    },
+    {
+      "id": "82b761bd2797f84-18b4901c763184e",
+      "title": "search with scripted fields should show incomplete results callout when a scripted field errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/async_scripted_fields.spec.ts",
+        "line": 25,
+        "column": 51
+      }
+    },
+    {
+      "id": "82b761bd2797f84-545d38b9c060ea0",
+      "title": "search with scripted fields should show incomplete results warning badge on a dashboard panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/async_scripted_fields.spec.ts",
+        "line": 31,
+        "column": 22
+      }
+    },
+    {
+      "id": "82b761bd2797f84-dfe73c14ffa692f",
+      "title": "search with scripted fields should return results without errors for a query with a valid scripted field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/async_scripted_fields.spec.ts",
+        "line": 39,
+        "column": 20
+      }
+    },
+    {
+      "id": "4710c4af03427d2-5b3ce35208b6e1c",
+      "title": "Discover cascade layout - data fetching does not refetch when returning to a previously expanded group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_data_fetching.spec.ts",
+        "line": 33,
+        "column": 66
+      }
+    },
+    {
+      "id": "4710c4af03427d2-dfd74b6fa05b557",
+      "title": "Discover cascade layout - data fetching does not refetch when re-expanding a group after switching tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_data_fetching.spec.ts",
+        "line": 50,
+        "column": 28
+      }
+    },
+    {
+      "id": "4710c4af03427d2-9e7e3b25088cb7c",
+      "title": "Discover cascade layout - data fetching keeps an expanded row fetch active when switching tabs quickly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_data_fetching.spec.ts",
+        "line": 99,
+        "column": 43
+      }
+    },
+    {
+      "id": "01317eee2504745-cb5a5ae6b09708f",
+      "title": "Discover cascade layout - row actions, fullscreen, and mode switches renders grouped results, supports row actions and fullscreen, and switches modes without errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_interactions.spec.ts",
+        "line": 36,
+        "column": 66
+      }
+    },
+    {
+      "id": "22fda904edc58b0-192fbfbe8d1aeb8",
+      "title": "Discover cascade layout - state restoration restores cascade scroll position when switching tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_state_restoration.spec.ts",
+        "line": 30,
+        "column": 66
+      }
+    },
+    {
+      "id": "22fda904edc58b0-10590105dfc02e7",
+      "title": "Discover cascade layout - state restoration restores expanded state and nested scroll when switching tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_state_restoration.spec.ts",
+        "line": 55,
+        "column": 13
+      }
+    },
+    {
+      "id": "f033b315932db6a-cf1d0ab3767cdfd",
+      "title": "Data view without timefield should not display a timepicker",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/dataview_without_timefield.spec.ts",
+        "line": 29,
+        "column": 64
+      }
+    },
+    {
+      "id": "f033b315932db6a-4dcd58d4d17dc8f",
+      "title": "Data view without timefield should adapt sidebar fields when switching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/dataview_without_timefield.spec.ts",
+        "line": 32,
+        "column": 5
+      }
+    },
+    {
+      "id": "f033b315932db6a-689e4102c9d0f2c",
+      "title": "Data view without timefield should display a timepicker after switching to an index pattern with timefield",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/dataview_without_timefield.spec.ts",
+        "line": 42,
+        "column": 12
+      }
+    },
+    {
+      "id": "f033b315932db6a-2cb55638133f42c",
+      "title": "Data view without timefield should switch between with and without timefield using the browser back button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/dataview_without_timefield.spec.ts",
+        "line": 48,
+        "column": 23
+      }
+    },
+    {
+      "id": "f033b315932db6a-23036590bd0ebdb",
+      "title": "Data view without timefield should disable the auto refresh interval when switching to a data view without a time field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/dataview_without_timefield.spec.ts",
+        "line": 76,
+        "column": 20
+      }
+    },
+    {
+      "id": "f033b315932db6a-00c5477088e960e",
+      "title": "Data view without timefield should allow switching from a saved search with a time field to a saved search without a time field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/dataview_without_timefield.spec.ts",
+        "line": 90,
+        "column": 19
+      }
+    },
+    {
+      "id": "f033b315932db6a-c5b17d1e26ed8de",
+      "title": "Data view without timefield should allow switching from data views with different timefields and sort correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/dataview_without_timefield.spec.ts",
+        "line": 117,
+        "column": 25
+      }
+    },
+    {
+      "id": "478c3baf483d35a-f5bf8287919c203",
+      "title": "Discover default columns should render default columns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_columns.spec.ts",
+        "line": 28,
+        "column": 23
+      }
+    },
+    {
+      "id": "478c3baf483d35a-ec1d070ad629b2a",
+      "title": "Discover default columns should render only available default columns after switching data views",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_columns.spec.ts",
+        "line": 34,
+        "column": 5
+      }
+    },
+    {
+      "id": "478c3baf483d35a-bca73198e1adbdc",
+      "title": "Discover default columns should combine selected columns and default columns after switching data views",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_columns.spec.ts",
+        "line": 92,
+        "column": 20
+      }
+    },
+    {
+      "id": "478c3baf483d35a-4d84b3cd62b02cb",
+      "title": "Discover default columns should not change columns if discover:modifyColumnsOnSwitch is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_columns.spec.ts",
+        "line": 147,
+        "column": 3
+      }
+    },
+    {
+      "id": "b36e5d4fe77e2d1-958b3be687e6b1b",
+      "title": "Discover default route can use a saved search as default route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_route.spec.ts",
+        "line": 36,
+        "column": 33
+      }
+    },
+    {
+      "id": "b36e5d4fe77e2d1-be60dfd199df2dc",
+      "title": "Discover default route can use a URL with filters as default route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_route.spec.ts",
+        "line": 44,
+        "column": 31
+      }
+    },
+    {
+      "id": "11e9f59685b0708-72dffb3fb6f5ef9",
+      "title": "Discover drag and drop should support dragging and dropping a field onto the grid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/drag_drop.spec.ts",
+        "line": 23,
+        "column": 23
+      }
+    },
+    {
+      "id": "11e9f59685b0708-4f3f7ae3f30246d",
+      "title": "Discover drag and drop should support dragging and dropping a field onto the grid (with keyboard)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/drag_drop.spec.ts",
+        "line": 45,
+        "column": 84
+      }
+    },
+    {
+      "id": "55e9b7b5fffea61-28cdc8d1189eea3",
+      "title": "Discover feature controls — share and reporting discover:all gets a short share URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 30,
+        "column": 31
+      }
+    },
+    {
+      "id": "55e9b7b5fffea61-00052ff5a8cd2fa",
+      "title": "Discover feature controls — share and reporting discover:all can generate a CSV report",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 37,
+        "column": 76
+      }
+    },
+    {
+      "id": "55e9b7b5fffea61-3f1dc73612eea1e",
+      "title": "Discover feature controls — share and reporting discover:read + url_create also gets a short share URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 44,
+        "column": 14
+      }
+    },
+    {
+      "id": "55e9b7b5fffea61-658b64ad2978e8b",
+      "title": "Discover feature controls — share and reporting discover:read without url_create only gets a long share URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 49,
+        "column": 64
+      }
+    },
+    {
+      "id": "55e9b7b5fffea61-c763afe8d7022e3",
+      "title": "Discover feature controls — share and reporting discover:read snapshot URL encodes the current query, sort and time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 59,
+        "column": 54
+      }
+    },
+    {
+      "id": "bd30a08bd26a48f-2cfd5e822a3757a",
+      "title": "Discover field data shows expected hit counts for KQL field data queries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_data.spec.ts",
+        "line": 33,
+        "column": 50
+      }
+    },
+    {
+      "id": "bd30a08bd26a48f-a8f44ec1d28f93c",
+      "title": "Discover field data highlights search terms in field data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_data.spec.ts",
+        "line": 38,
+        "column": 31
+      }
+    },
+    {
+      "id": "bd30a08bd26a48f-e0f78621f567cf2",
+      "title": "Discover field data shows a KQL syntax error callout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_data.spec.ts",
+        "line": 43,
+        "column": 23
+      }
+    },
+    {
+      "id": "bd30a08bd26a48f-c5c5a049bc79180",
+      "title": "Discover field data shows top-level object keys and normalizes legacy source-column URLs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_data.spec.ts",
+        "line": 49,
+        "column": 13
+      }
+    },
+    {
+      "id": "bd30a08bd26a48f-39a7bf9f4993ce7",
+      "title": "Discover field data keeps default columns while adding and removing a selected field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_data.spec.ts",
+        "line": 73,
+        "column": 12
+      }
+    },
+    {
+      "id": "9f99890da1788e7-a9e47bd94859ec7",
+      "title": "Discover runtime field editor metadata adds a custom label to an existing field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_metadata.spec.ts",
+        "line": 20,
+        "column": 52
+      }
+    },
+    {
+      "id": "9f99890da1788e7-bc6e968db391160",
+      "title": "Discover runtime field editor metadata adds and updates a custom description for an existing field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_metadata.spec.ts",
+        "line": 33,
+        "column": 66
+      }
+    },
+    {
+      "id": "9f99890da1788e7-7379ec4a544b40d",
+      "title": "Discover runtime field editor metadata replaces the ECS description for the timestamp field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_metadata.spec.ts",
+        "line": 52,
+        "column": 38
+      }
+    },
+    {
+      "id": "9f99890da1788e7-c43399dc9e4aeee",
+      "title": "Discover runtime field editor metadata shows a validation error when a custom description is too long",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_metadata.spec.ts",
+        "line": 80,
+        "column": 6
+      }
+    },
+    {
+      "id": "6690f87edeb1cd8-62fcf40a53e2aa3",
+      "title": "Discover filter editor should add a phrases filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/filter_editor.spec.ts",
+        "line": 60,
+        "column": 32
+      }
+    },
+    {
+      "id": "6690f87edeb1cd8-916ef4064612fbb",
+      "title": "Discover filter editor should show the phrases if you re-open a phrases filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/filter_editor.spec.ts",
+        "line": 70,
+        "column": 31
+      }
+    },
+    {
+      "id": "6690f87edeb1cd8-cdd572780fe3f78",
+      "title": "Discover filter editor should support filtering on nested fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/filter_editor.spec.ts",
+        "line": 83,
+        "column": 18
+      }
+    },
+    {
+      "id": "6690f87edeb1cd8-3fab466edceb071",
+      "title": "Discover filter editor should support app filters in histogram/total hits and data grid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/filter_editor.spec.ts",
+        "line": 94,
+        "column": 20
+      }
+    },
+    {
+      "id": "6690f87edeb1cd8-3d7d735f4628d32",
+      "title": "Discover filter editor should support pinned filters in histogram/total hits and data grid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/filter_editor.spec.ts",
+        "line": 103,
+        "column": 67
+      }
+    },
+    {
+      "id": "6690f87edeb1cd8-355219a2ab7aef3",
+      "title": "Discover filter editor should support range filter on version fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/filter_editor.spec.ts",
+        "line": 108,
+        "column": 21
+      }
+    },
+    {
+      "id": "6bc7303e5c0365b-7ac4102f64101ea",
+      "title": "Discover flyouts closes the doc viewer when opening ES|QL docs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/flyouts.spec.ts",
+        "line": 19,
+        "column": 23
+      }
+    },
+    {
+      "id": "6bc7303e5c0365b-f083079b60ab38c",
+      "title": "Discover flyouts closes the doc viewer when opening the Lens edit flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/flyouts.spec.ts",
+        "line": 27,
+        "column": 13
+      }
+    },
+    {
+      "id": "6bc7303e5c0365b-78a9080dd474452",
+      "title": "Discover flyouts closes ES|QL docs when opening the doc viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/flyouts.spec.ts",
+        "line": 31,
+        "column": 18
+      }
+    },
+    {
+      "id": "6bc7303e5c0365b-e1a8acda5be53bc",
+      "title": "Discover flyouts closes ES|QL docs when opening the Lens edit flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/flyouts.spec.ts",
+        "line": 40,
+        "column": 23
+      }
+    },
+    {
+      "id": "6bc7303e5c0365b-050933582993d7d",
+      "title": "Discover flyouts closes the Lens edit flyout when opening the doc viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/flyouts.spec.ts",
+        "line": 49,
+        "column": 5
+      }
+    },
+    {
+      "id": "77972141b65b12e-11a9ee664bb6bd9",
+      "title": "Discover inspector request stats shows zero hits for a request with no results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/inspector_stats.spec.ts",
+        "line": 21,
+        "column": 23
+      }
+    },
+    {
+      "id": "77972141b65b12e-ecb27d4b9fa6544",
+      "title": "Discover inspector request stats shows total hits for a request with results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/inspector_stats.spec.ts",
+        "line": 27,
+        "column": 5
+      }
+    },
+    {
+      "id": "d512328fa6962f1-2f83ef189a298ae",
+      "title": "Discover large strings renders large string field data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/large_string.spec.ts",
+        "line": 35,
+        "column": 62
+      }
+    },
+    {
+      "id": "d512328fa6962f1-4e060fddf03f6e9",
+      "title": "Discover large strings searches and highlights a term inside large string field data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/large_string.spec.ts",
+        "line": 40,
+        "column": 31
+      }
+    },
+    {
+      "id": "6f04bfedac6ae21-9dce01d077eaeb0",
+      "title": "Discover new search action resets filters and query in data view mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/new_search_action.spec.ts",
+        "line": 20,
+        "column": 50
+      }
+    },
+    {
+      "id": "6f04bfedac6ae21-b343c143ee2710e",
+      "title": "Discover new search action resets a saved search while preserving ad hoc data view mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/new_search_action.spec.ts",
+        "line": 35,
+        "column": 20
+      }
+    },
+    {
+      "id": "6f04bfedac6ae21-f9bcf2c134d035f",
+      "title": "Discover new search action resets unsaved ES query mode state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/new_search_action.spec.ts",
+        "line": 61,
+        "column": 22
+      }
+    },
+    {
+      "id": "6f04bfedac6ae21-a548558c9d2022a",
+      "title": "Discover new search action resets saved ES query mode state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/new_search_action.spec.ts",
+        "line": 70,
+        "column": 20
+      }
+    },
+    {
+      "id": "b9d2cfb478c121f-3b92bd636ef1c43",
+      "title": "preserve url goes back to last opened url",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/preserve_url.spec.ts",
+        "line": 37,
+        "column": 5
+      }
+    },
+    {
+      "id": "b9d2cfb478c121f-eeb550ab0686ceb",
+      "title": "preserve url remembers url after switching spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/preserve_url.spec.ts",
+        "line": 52,
+        "column": 5
+      }
+    },
+    {
+      "id": "053bceb435aae2d-6b70caaf831ec2c",
+      "title": "Discover request cancellation allows cancelling active requests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_cancellation.spec.ts",
+        "line": 31,
+        "column": 23
+      }
+    },
+    {
+      "id": "af07fa66e78a026-9414796ab2a6675",
+      "title": "Discover request counts - data view mode should send 2 search requests (documents + chart) on page load",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 40,
+        "column": 20
+      }
+    },
+    {
+      "id": "af07fa66e78a026-d6ab6809825ab1c",
+      "title": "Discover request counts - data view mode should send 2 requests (documents + chart) when refreshing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 53,
+        "column": 22
+      }
+    },
+    {
+      "id": "af07fa66e78a026-70550fec82c9a04",
+      "title": "Discover request counts - data view mode should send 2 requests (documents + chart) when changing the query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 61,
+        "column": 19
+      }
+    },
+    {
+      "id": "af07fa66e78a026-9205e1a0df03410",
+      "title": "Discover request counts - data view mode should send 2 requests (documents + chart) when changing the time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 75,
+        "column": 7
+      }
+    },
+    {
+      "id": "af07fa66e78a026-70d8dd242626fca",
+      "title": "Discover request counts - data view mode should send no requests when toggling the chart visibility",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 90,
+        "column": 7
+      }
+    },
+    {
+      "id": "af07fa66e78a026-b9876cbfd8a0714",
+      "title": "Discover request counts - data view mode should send a request for chart data when showing the chart after a time range change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 97,
+        "column": 31
+      }
+    },
+    {
+      "id": "af07fa66e78a026-b1e44dd5127f037",
+      "title": "Discover request counts - data view mode should send expected requests for saved search changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 115,
+        "column": 31
+      }
+    },
+    {
+      "id": "af07fa66e78a026-e9489ce54e89912",
+      "title": "Discover request counts - data view mode should send 2 requests (documents + chart) when adding a filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 162,
+        "column": 27
+      }
+    },
+    {
+      "id": "af07fa66e78a026-48d60bb76674be3",
+      "title": "Discover request counts - data view mode should send 2 requests (documents + chart) when sorting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 174,
+        "column": 31
+      }
+    },
+    {
+      "id": "af07fa66e78a026-b9fd78bcec0d769",
+      "title": "Discover request counts - data view mode should send 1 request (chart) when changing to a breakdown field without an other bucket",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 192,
+        "column": 16
+      }
+    },
+    {
+      "id": "af07fa66e78a026-d250fc5c7acc8d7",
+      "title": "Discover request counts - data view mode should send 2 requests (chart + other bucket) when changing to a breakdown field with an other bucket",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 207,
+        "column": 31
+      }
+    },
+    {
+      "id": "af07fa66e78a026-016ffc090791b11",
+      "title": "Discover request counts - data view mode should send 1 request (chart) when changing the chart interval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 218,
+        "column": 29
+      }
+    },
+    {
+      "id": "af07fa66e78a026-1b2cc86dacd9241",
+      "title": "Discover request counts - data view mode should send 2 requests (documents + chart) when changing the data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
+        "line": 226,
+        "column": 15
+      }
+    },
+    {
+      "id": "6cbcd58675e0810-21dc485ed0caea5",
+      "title": "Discover request counts - ES|QL mode should send 2 requests (documents + chart) on submit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
+        "line": 46,
+        "column": 27
+      }
+    },
+    {
+      "id": "6cbcd58675e0810-ee762da870acf85",
+      "title": "Discover request counts - ES|QL mode should send 2 requests (documents + chart) when refreshing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
+        "line": 55,
+        "column": 51
+      }
+    },
+    {
+      "id": "6cbcd58675e0810-407a637f3791346",
+      "title": "Discover request counts - ES|QL mode should send 2 requests (documents + chart) when changing the query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
+        "line": 62,
+        "column": 33
+      }
+    },
+    {
+      "id": "6cbcd58675e0810-30d5ce62b5af1d6",
+      "title": "Discover request counts - ES|QL mode should send 2 requests (documents + chart) when changing the time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
+        "line": 78,
+        "column": 33
+      }
+    },
+    {
+      "id": "6cbcd58675e0810-7cbe84a735e821e",
+      "title": "Discover request counts - ES|QL mode should send no requests when toggling the chart visibility",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
+        "line": 95,
+        "column": 9
+      }
+    },
+    {
+      "id": "6cbcd58675e0810-af9567d179501fe",
+      "title": "Discover request counts - ES|QL mode should send a request for chart data when showing the chart after a time range change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
+        "line": 106,
+        "column": 19
+      }
+    },
+    {
+      "id": "adcd001115fd3a8-48b9e02303701a3",
+      "title": "Discover runtime field editor CRUD creates a runtime field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/runtime_field_crud.spec.ts",
+        "line": 19,
+        "column": 50
+      }
+    },
+    {
+      "id": "adcd001115fd3a8-7ca613e7cd0749e",
+      "title": "Discover runtime field editor CRUD renames a newly created runtime field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/runtime_field_crud.spec.ts",
+        "line": 24,
+        "column": 29
+      }
+    },
+    {
+      "id": "adcd001115fd3a8-abb094520ff5584",
+      "title": "Discover runtime field editor CRUD persists a runtime field in a saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/runtime_field_crud.spec.ts",
+        "line": 34,
+        "column": 18
+      }
+    },
+    {
+      "id": "adcd001115fd3a8-87a6f4d212ce964",
+      "title": "Discover runtime field editor CRUD deletes a runtime field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/runtime_field_crud.spec.ts",
+        "line": 44,
+        "column": 20
+      }
+    },
+    {
+      "id": "adcd001115fd3a8-b9c1a42deddd647",
+      "title": "Discover runtime field editor CRUD shows runtime fields in the document viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/runtime_field_crud.spec.ts",
+        "line": 52,
+        "column": 86
+      }
+    },
+    {
+      "id": "120cd28841dab7c-6432ec59932f2ea",
+      "title": "Discover search on page load setting does not fetch until the user requests data when disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_on_page_load.spec.ts",
+        "line": 31,
+        "column": 7
+      }
+    },
+    {
+      "id": "120cd28841dab7c-8ceb0cc9a2a6939",
+      "title": "Discover search on page load setting loads fields after refresh button click when disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_on_page_load.spec.ts",
+        "line": 51,
+        "column": 41
+      }
+    },
+    {
+      "id": "120cd28841dab7c-45073de3c7d92fa",
+      "title": "Discover search on page load setting loads fields after submit query when disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_on_page_load.spec.ts",
+        "line": 70,
+        "column": 11
+      }
+    },
+    {
+      "id": "120cd28841dab7c-3a50a3ad006ed8a",
+      "title": "Discover search on page load setting loads fields after changing the time range when disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_on_page_load.spec.ts",
+        "line": 86,
+        "column": 22
+      }
+    },
+    {
+      "id": "120cd28841dab7c-0024e2c50f6aeff",
+      "title": "Discover search on page load setting does not fetch when saving a search while disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_on_page_load.spec.ts",
+        "line": 102,
+        "column": 59
+      }
+    },
+    {
+      "id": "120cd28841dab7c-9d1da31a2bfb370",
+      "title": "Discover search on page load setting resets to unfetched state after opening a saved search and pressing New",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_on_page_load.spec.ts",
+        "line": 125,
+        "column": 7
+      }
+    },
+    {
+      "id": "120cd28841dab7c-ea428c4e427fba5",
+      "title": "Discover search on page load setting fetches data initially when enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/search_on_page_load.spec.ts",
+        "line": 140,
+        "column": 27
+      }
+    },
+    {
+      "id": "3085731bee89644-502dd4a8af59315",
+      "title": "Discover shared links should allow for copying the snapshot URL with state in query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links.spec.ts",
+        "line": 33,
+        "column": 64
+      }
+    },
+    {
+      "id": "3085731bee89644-20a3d8e627abeca",
+      "title": "Discover shared links should load snapshot URL with empty sort param correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links.spec.ts",
+        "line": 39,
+        "column": 51
+      }
+    },
+    {
+      "id": "3085731bee89644-c2d80d059981da0",
+      "title": "Discover shared links should allow for copying the snapshot URL with state in session storage",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links.spec.ts",
+        "line": 47,
+        "column": 24
+      }
+    },
+    {
+      "id": "3085731bee89644-087a8daa0898646",
+      "title": "Discover shared links sharing hashed url shouldn't crash the app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links.spec.ts",
+        "line": 60,
+        "column": 41
+      }
+    },
+    {
+      "id": "c7aed303f6b649b-42bdbd699342333",
+      "title": "Discover side nav link saves the last URL when in data view mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/sidenav_link.spec.ts",
+        "line": 28,
+        "column": 23
+      }
+    },
+    {
+      "id": "c7aed303f6b649b-8af80798d852a85",
+      "title": "Discover side nav link saves the last URL when in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/sidenav_link.spec.ts",
+        "line": 32,
+        "column": 56
+      }
+    },
+    {
+      "id": "c7aed303f6b649b-53b39d00b08807e",
+      "title": "Discover side nav link does not save the last URL if it was an ad-hoc data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/sidenav_link.spec.ts",
+        "line": 37,
+        "column": 23
+      }
+    },
+    {
+      "id": "c7aed303f6b649b-c6d431d3f6edb8e",
+      "title": "Discover side nav link saves the last URL if the session was saved",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/sidenav_link.spec.ts",
+        "line": 48,
+        "column": 37
+      }
+    },
+    {
+      "id": "43f49b4192f4f06-fbdaa99c7544650",
+      "title": "Discover source filters hides source-filtered fields from the field list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/source_filters.spec.ts",
+        "line": 31,
+        "column": 62
+      }
+    },
+    {
+      "id": "69775aa52d4e75c-8b9c03c82c9a60e",
+      "title": "Data view with unmapped fields unmapped fields exist on a new saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unmapped_fields.spec.ts",
+        "line": 35,
+        "column": 23
+      }
+    },
+    {
+      "id": "69775aa52d4e75c-f0f2d7d9751d7e2",
+      "title": "Data view with unmapped fields unmapped fields exist on an existing saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unmapped_fields.spec.ts",
+        "line": 50,
+        "column": 95
+      }
+    },
+    {
+      "id": "512c2d777e75fd2-66d68af59d45f37",
+      "title": "Discover unsaved changes indicator should not show the indicator initially nor after changes to a draft saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
+        "line": 60,
+        "column": 5
+      }
+    },
+    {
+      "id": "512c2d777e75fd2-98b06ec124bf1d1",
+      "title": "Discover unsaved changes indicator should show the indicator only after changes to a persisted saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
+        "line": 69,
+        "column": 20
+      }
+    },
+    {
+      "id": "512c2d777e75fd2-70f31122f3a1a0b",
+      "title": "Discover unsaved changes indicator should not show the indicator after loading a saved search, only after changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
+        "line": 79,
+        "column": 25
+      }
+    },
+    {
+      "id": "512c2d777e75fd2-72de09fcf67d283",
+      "title": "Discover unsaved changes indicator should not show the indicator after loading an ES|QL saved search, only after changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
+        "line": 92,
+        "column": 32
+      }
+    },
+    {
+      "id": "512c2d777e75fd2-bd3f21386f403a3",
+      "title": "Discover unsaved changes indicator should allow reverting changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
+        "line": 98,
+        "column": 25
+      }
+    },
+    {
+      "id": "512c2d777e75fd2-72e53721adb6d63",
+      "title": "Discover unsaved changes indicator should hide the indicator once user manually reverts changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
+        "line": 144,
+        "column": 20
+      }
+    },
+    {
+      "id": "512c2d777e75fd2-480bafd70ff8501",
+      "title": "Discover unsaved changes indicator should not show the indicator after pinning a filter, but should appear after disabling a filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_indicator.spec.ts",
+        "line": 191,
+        "column": 29
+      }
+    },
+    {
+      "id": "da36c7ffd981d81-aaf15abc562feec",
+      "title": "Discover URL state should show a warning and fall back to the default data view when navigating to a URL with an invalid data view ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/url_state.spec.ts",
+        "line": 37,
+        "column": 64
+      }
+    },
+    {
+      "id": "da36c7ffd981d81-f877a06040894ca",
+      "title": "Discover URL state should show a warning and fall back to the current data view if the URL is updated to an invalid data view ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/url_state.spec.ts",
+        "line": 46,
+        "column": 5
+      }
+    },
+    {
+      "id": "da36c7ffd981d81-2bd7d9e6f1b1889",
+      "title": "Discover URL state should sync Lens global state to Discover sidebar link and carry over the state when navigating to Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/url_state.spec.ts",
+        "line": 62,
+        "column": 20
+      }
+    },
+    {
+      "id": "da36c7ffd981d81-c6e8a99ff0c01b9",
+      "title": "Discover URL state should merge custom global filters with saved search filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/url_state.spec.ts",
+        "line": 103,
+        "column": 78
+      }
+    },
+    {
+      "id": "285c753247d9434-a83f4d0b439c1d5",
+      "title": "Discover view mode toggle should show Documents tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/view_mode_toggle.spec.ts",
+        "line": 20,
+        "column": 23
+      }
+    },
+    {
+      "id": "285c753247d9434-73b0ec4263788b4",
+      "title": "Discover view mode toggle should show an error callout on invalid query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/view_mode_toggle.spec.ts",
+        "line": 24,
+        "column": 31
+      }
+    },
+    {
+      "id": "285c753247d9434-2b6b9b641321e29",
+      "title": "Discover view mode toggle should hide view mode toggle in fullscreen mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/view_mode_toggle.spec.ts",
+        "line": 33,
+        "column": 18
+      }
+    },
+    {
+      "id": "285c753247d9434-e02be8edc024f57",
+      "title": "Discover view mode toggle should not show view mode toggle for ES|QL searches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/view_mode_toggle.spec.ts",
+        "line": 38,
+        "column": 23
+      }
+    }
+  ]
+}

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { logRequest } from '@kbn/as-code-utils';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { logRequest } from '@kbn/as-code-utils';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { PUBLIC_API_VERSION, commonRouteConfig } from '../constants';
@@ -39,14 +39,14 @@ export function registerDeleteRoute(
       },
       validate: {
         request: {
-          params: schema.object({
-            id: schema.string({
-              meta: {
+          params: z
+            .object({
+              id: z.string().meta({
                 description:
                   'The markdown library item ID, as returned by the create or search endpoints.',
-              },
-            }),
-          }),
+              }),
+            })
+            .strict(),
         },
         response: {
           204: {
@@ -62,7 +62,7 @@ export function registerDeleteRoute(
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter }, async () => {
         try {
           await deleteMarkdown(ctx, req.params.id);
         } catch (e) {

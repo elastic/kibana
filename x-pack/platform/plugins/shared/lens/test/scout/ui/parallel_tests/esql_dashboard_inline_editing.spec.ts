@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { spaceTest, tags, KibanaCodeEditorWrapper } from '@kbn/scout';
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { PageObjects, ScoutPage } from '@kbn/scout';
-import { applyLensInlineEditorAndWaitClosed, testData } from '../fixtures';
+import { applyLensInlineEditorAndWaitClosed, spaceTest, testData } from '../fixtures';
 
 const setEsqlQueryAndRun = async (
   dashboard: PageObjects['dashboard'],
@@ -24,7 +24,7 @@ const setEsqlQueryAndRun = async (
   await dashboard.waitForRenderComplete();
 };
 
-spaceTest.describe('Lens ESQL dashboard inline editing', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.uiSettings.set({
       'dateFormat:tz': 'UTC',
@@ -95,6 +95,8 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: tags.stateful.cl
       const codeEditor = new KibanaCodeEditorWrapper(page);
 
       await spaceTest.step('create a line chart panel with a red Y-axis color', async () => {
+        // Wait for flyout to be ready before switching to line chart
+        await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
         await lens.switchToVisualization('line', { search: 'Line' });
         await dashboard.waitForPanelsToLoad(1);
 
@@ -126,7 +128,7 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: tags.stateful.cl
         'add limit and verify line chart type and red color persist',
         async () => {
           await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-          await expect(lens.getInlineEditor()).toBeVisible();
+          await expect(lens.inlineEditor).toBeVisible();
 
           await setEsqlQueryAndRun(
             dashboard,

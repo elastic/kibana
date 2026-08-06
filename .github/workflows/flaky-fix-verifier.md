@@ -70,6 +70,7 @@ env:
 
 imports:
   - .github/workflows/buildkite-cli-setup.md
+  - .github/workflows/shared/app-dex-agents-otel.md
 
 engine:
   id: claude
@@ -77,12 +78,11 @@ engine:
   model: opus
   max-turns: 120
   env:
-    ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
-    ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
-    ENABLE_PROMPT_CACHING_1H: '1'
-    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
-    ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
+    ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+    ANTHROPIC_BASE_URL: https://openrouter.ai/api
+    ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-4.8[1m]
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
+    ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
     CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
@@ -101,7 +101,7 @@ network:
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
-    - elastic.litellm-prod.ai
+    - openrouter.ai
 sandbox:
   agent: awf
 
@@ -185,6 +185,12 @@ safe-outputs:
     required-labels: [flaky-test-fixer]
     protected-files: fallback-to-issue
     patch-format: am
+    max: 1
+  # Refreshes the PR title/body when a pushed revision invalidates them (see "Pushing a revised fix").
+  update-pull-request:
+    operation: replace
+    footer: false
+    target: *pr_number
     max: 1
   # Custom safe-job: take the draft fix PR out of draft once verification is done.
   jobs:
@@ -418,6 +424,7 @@ When you iterate, you are editing a PR you did not open. This is allowed because
 - Check out the PR head branch (e.g. `gh pr checkout ${{ env.PR_NUMBER }}`), make the minimal edit, and commit it.
 - Emit a single `push-to-pull-request-branch` safe output targeting PR #${{ env.PR_NUMBER }}.
 - Keep the change minimal and focused on the root cause. Re-running `/flaky` after the push validates the new commit, since the runner builds from the updated PR head.
+- **Keep the PR description current.** If your revision changed the approach, the root cause, or what the patch does, also emit one `update-pull-request` safe output correcting the title/body (keep the fixer's format, rewrite only what went stale); if they still describe the fix accurately, emit nothing.
 - Don't add explanatory code comments to the patch by default — a good test-side fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it to 1–2 sentences; a simple change like a timeout bump never warrants a comment.
 
 ## Guardrails

@@ -6,9 +6,9 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { spaceTest, KibanaCodeEditorWrapper } from '@kbn/scout';
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { applyLensInlineEditorAndWaitClosed } from '../fixtures';
+import { applyLensInlineEditorAndWaitClosed, spaceTest } from '../fixtures';
 
 const INITIAL_ESQL_QUERY = `FROM kibana_sample_data_logs
   | STATS count = COUNT(*) BY \`Over time\` = TBUCKET(50), agent.keyword`;
@@ -121,7 +121,7 @@ spaceTest.describe.skip(
 
           const allOptionTexts = await page.components
             .comboBox('filterIndexPatternsSelect')
-            .getAvailableOptions();
+            .getAllVisibleOptions();
           expect(allOptionTexts.length).toBeGreaterThan(0);
           expect(allOptionTexts).toHaveLength(new Set(allOptionTexts).size);
         });
@@ -172,7 +172,7 @@ spaceTest.describe.skip(
 
           const fieldOptions = await page.components
             .comboBox('filterFieldSuggestionList')
-            .getAvailableOptions();
+            .getAllVisibleOptions();
           expect(fieldOptions.length).toBeGreaterThan(0);
         });
       }
