@@ -81,119 +81,9 @@ triggers:
         description: "Max existing queries for LLM context in query generation."
       - name: runOrigin
         type: string
-        description: "Root origin of the run, forwarded by the invoking workflow so a human-initiated chain is not treated as automation by the run-quota gate. Defaults to this execution's own trigger."
+        description: "Root origin of the run, forwarded by the invoking workflow for attribution. Defaults to this execution's own trigger."
 consts:
-  RUN_LEDGER_INDEX: ".significant_events-runs"
-  RUN_BUDGET_GROUP: "ki_extraction"
-  RUN_ENGINE: "context"
-  RUN_QUOTA_ENABLED: __RUN_QUOTA_ENABLED__
-  RUN_DAILY_LIMIT: __RUN_DAILY_LIMIT__
-  RUN_QUOTA_TIME_ZONE: "__RUN_QUOTA_TIME_ZONE__"
 steps:
-  # -----------------------------------------------------------------------
-  # Daily run-quota gate. Automated runs (continuous onboarding) stop here once
-  # the KI extraction budget is used up for the day; onboarding a stream from the
-  # UI always works. Only this parent is counted — the features identification and
-  # query generation workflows it invokes are not, so one onboarding consumes one
-  # unit of budget. See `server/lib/run_quotas` in the significant_events plugin.
-  # -----------------------------------------------------------------------
-  - name: quota_resolve_origin
-    type: data.set
-    with:
-      runOrigin: "{{ inputs.runOrigin | default: execution.triggeredBy }}"
-
-  - name: quota_count_runs
-    type: elasticsearch.request
-    with:
-      method: POST
-      path: "/{{ consts.RUN_LEDGER_INDEX }}/_count"
-      body:
-        query:
-          bool:
-            filter:
-              - term:
-                  budget_group: "{{ consts.RUN_BUDGET_GROUP }}"
-              - term:
-                  outcome: "admitted"
-              - range:
-                  "@timestamp":
-                    gte: "now/d"
-                    time_zone: "{{ consts.RUN_QUOTA_TIME_ZONE }}"
-    on-failure:
-      continue: true
-
-  - name: quota_evaluate
-    type: data.set
-    with:
-      # Fail open on an unreadable ledger: a missing count must not stall the pipeline.
-      quotaUsed: "${{ steps.quota_count_runs.output.count | default: 0 }}"
-      # Fail closed on an unknown origin: only these three mean a person asked for
-      # the run. Keep in sync with HUMAN_RUN_ORIGINS in the significant_events plugin.
-      quotaAutomated: '${{ variables.runOrigin != "manual" and variables.runOrigin != "sigevents-investigation-ui" and variables.runOrigin != "significant-events-memory-ui" }}'
-
-  - name: quota_decide
-    type: data.set
-    with:
-      quotaRefused: "${{ consts.RUN_QUOTA_ENABLED and steps.quota_evaluate.output.quotaAutomated and steps.quota_evaluate.output.quotaUsed >= consts.RUN_DAILY_LIMIT }}"
-
-  # Recorded before any work starts, so a run that later fails still consumed
-  # budget. Refused runs are recorded too — as `refused`, which the counter
-  # excludes — so a day spent at the cap does not inflate its own usage.
-  # `refresh=wait_for` makes an admitted run visible to the next gate's count.
-  - name: quota_record_run
-    type: elasticsearch.request
-    with:
-      method: POST
-      path: "/{{ consts.RUN_LEDGER_INDEX }}/_doc?refresh=wait_for"
-      body:
-        "@timestamp": '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-        budget_group: "{{ consts.RUN_BUDGET_GROUP }}"
-        engine: "{{ consts.RUN_ENGINE }}"
-        outcome: "{% if steps.quota_decide.output.quotaRefused %}refused{% else %}admitted{% endif %}"
-        workflow_id: "{{ workflow.id }}"
-        execution_id: "{{ execution.id }}"
-        triggered_by: "{{ variables.runOrigin }}"
-        kibana:
-          space_ids:
-            - "{{ workflow.spaceId }}"
-    on-failure:
-      continue: true
-
-  # When the quota is exhausted, pause the context engine so further automation stops.
-  - name: quota_pause_engine
-    type: kibana.request
-    if: "${{ steps.quota_decide.output.quotaRefused }}"
-    with:
-      method: POST
-      path: '/internal/significant_events/maintenance/_pause'
-      headers:
-        x-elastic-internal-origin: 'kibana'
-      body:
-        engines:
-          - '{{ consts.RUN_ENGINE }}'
-        reason: 'run_quota'
-    on-failure:
-      continue: true
-
-  # Reads as "everything was skipped", which is exactly what happened, so the
-  # `/onboarding/_status` poll in continuous onboarding terminates normally.
-  - name: quota_stop_if_exhausted
-    type: workflow.output
-    if: "${{ steps.quota_decide.output.quotaRefused }}"
-    with:
-      streamName: "${{ inputs.streamName }}"
-      featuresSkipped: true
-      featuresConnectorUsed: ""
-      discoveredFeatures: []
-      featuresTokensUsed: {}
-      queriesSkipped: true
-      queriesConnectorUsed: ""
-      persistedQueries: []
-      queriesTokensUsed: {}
-
-  # -----------------------------------------------------------------------
-  # Step 0: Initialize variables.
-  # -----------------------------------------------------------------------
   - name: init
     type: data.set
     with:
@@ -207,11 +97,6 @@ steps:
       queriesConnectorUsed: ""
       cycleStartedAt: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.000Z" }}'
 
-  # -----------------------------------------------------------------------
-  # Step 1: Recency check — auto-skip features if recently identified.
-  #         When skipQueries=true we always want to identify features,
-  #         so the recency optimization is skipped in that case.
-  # -----------------------------------------------------------------------
   - name: check_should_identify
     type: if
     condition: "${{ variables.skipFeatures == false and inputs.skipQueries == false }}"
@@ -232,9 +117,6 @@ steps:
             with:
               skipFeatures: true
 
-  # -----------------------------------------------------------------------
-  # Step 2: Features identification (unless skipped or recent)
-  # -----------------------------------------------------------------------
   - name: run_features
     type: if
     condition: "${{ variables.skipFeatures == false }}"
@@ -263,9 +145,6 @@ steps:
           featuresTokensUsed: "${{ steps.identify_features.output.tokensUsed }}"
           featuresConnectorUsed: "${{ steps.identify_features.output.connectorId }}"
 
-  # -----------------------------------------------------------------------
-  # Step 3: Queries generation (unless skipped)
-  # -----------------------------------------------------------------------
   - name: run_queries
     type: if
     condition: "${{ inputs.skipQueries == false }}"
@@ -286,11 +165,6 @@ steps:
           queriesTokensUsed: "${{ steps.generate_queries.output.tokensUsed }}"
           queriesConnectorUsed: "${{ steps.generate_queries.output.connectorId }}"
 
-  # -----------------------------------------------------------------------
-  # Step 4: Keep-alive — re-stamp persistent KIs (durable ones, plus excluded
-  #         features whose exclusion must be remembered) not refreshed this
-  #         cycle so DSL retention does not physically delete them.
-  # -----------------------------------------------------------------------
   - name: keep_alive_persistent
     type: kibana.request
     with:
@@ -301,9 +175,6 @@ steps:
       body:
         lastRefreshedBefore: "${{ variables.cycleStartedAt }}"
 
-  # -----------------------------------------------------------------------
-  # Step 5: Output summary
-  # -----------------------------------------------------------------------
   - name: output_result
     type: workflow.output
     with:

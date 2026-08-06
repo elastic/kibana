@@ -9,7 +9,9 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import { WORKFLOWS_EXECUTIONS_INDEX } from '@kbn/workflows-management-plugin/common';
 import { DEFAULT_RUN_LIMITS, MAX_RUN_LIMIT } from '../../../common';
+import { SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { createRunQuotaService, resolveSettings } from './run_quota_service';
 import { RUN_QUOTA_SETTINGS_SO_TYPE } from './saved_object';
 
@@ -17,10 +19,6 @@ const request = {} as KibanaRequest;
 
 const notFound = () =>
   SavedObjectsErrorHelpers.createGenericNotFoundError(RUN_QUOTA_SETTINGS_SO_TYPE, 'missing');
-
-interface LedgerSearchArgs {
-  query: { bool: { filter: unknown[] } };
-}
 
 const createHarness = ({
   attributes,
@@ -37,8 +35,7 @@ const createHarness = ({
   });
   const create = jest.fn(async () => ({}));
   const search = jest.fn(
-    async (_args: LedgerSearchArgs) =>
-      searchResponse ?? { aggregations: { groups: { buckets: [] } } }
+    async () => searchResponse ?? { aggregations: { workflows: { buckets: [] } } }
   );
 
   const server = {
@@ -51,14 +48,12 @@ const createHarness = ({
     },
   } as unknown as StreamsServer;
 
-  const onSettingsChanged = jest.fn(async () => {});
   const service = createRunQuotaService({
     logger: loggerMock.create(),
     server,
-    onSettingsChanged,
   });
 
-  return { service, get, create, search, onSettingsChanged };
+  return { service, get, create, search };
 };
 
 describe('resolveSettings', () => {
@@ -71,7 +66,7 @@ describe('resolveSettings', () => {
     });
   });
 
-  it('clamps out-of-range limits so the gate stays enforceable', () => {
+  it('clamps out-of-range limits', () => {
     const { limits } = resolveSettings({
       timezone: 'UTC',
       limits: {
@@ -93,7 +88,6 @@ describe('resolveSettings', () => {
       },
     });
 
-    // Timezone is always UTC regardless of any stored value (not configurable).
     expect(timezone).toBe('UTC');
     expect(limits.memory).toEqual({ enabled: false, max: 4 });
     expect(limits.detection).toEqual({ enabled: true, max: DEFAULT_RUN_LIMITS.detection });
@@ -107,14 +101,14 @@ describe('resolveSettings', () => {
 });
 
 describe('createRunQuotaService', () => {
-  it('reports usage per group from admitted runs only', async () => {
+  it('reports usage per group from workflow executions', async () => {
     const { service, search } = createHarness({
       searchResponse: {
         aggregations: {
-          groups: {
+          workflows: {
             buckets: [
               {
-                key: 'detection',
+                key: SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
                 doc_count: 20,
                 triggers: {
                   buckets: [
@@ -141,14 +135,18 @@ describe('createRunQuotaService', () => {
     expect(memory.exhausted).toBe(false);
     expect(quotas.ledgerUnavailable).toBe(false);
 
-    expect(search.mock.calls[0][0].query.bool.filter).toContainEqual({
-      term: { outcome: 'admitted' },
+    const [[searchArgs]] = search.mock.calls as unknown as Array<
+      [{ index: string; query: { bool: { filter: unknown[] } } }]
+    >;
+    expect(searchArgs.index).toBe(WORKFLOWS_EXECUTIONS_INDEX);
+    expect(searchArgs.query.bool.filter).toContainEqual({
+      term: { isTestRun: false },
     });
   });
 
-  it('reports zero usage when the ledger cannot be read, matching what the gate enforces', async () => {
+  it('reports zero usage when executions cannot be read', async () => {
     const { service, search } = createHarness();
-    search.mockRejectedValue(new Error('ledger down'));
+    search.mockRejectedValue(new Error('executions down'));
 
     const quotas = await service.getQuotas();
 
@@ -161,8 +159,14 @@ describe('createRunQuotaService', () => {
       attributes: { timezone: 'UTC', limits: { memory: { enabled: false, max: 1 } } },
       searchResponse: {
         aggregations: {
-          groups: {
-            buckets: [{ key: 'memory', doc_count: 99, triggers: { buckets: [] } }],
+          workflows: {
+            buckets: [
+              {
+                key: 'system-significant-events-memory-synthesis',
+                doc_count: 99,
+                triggers: { buckets: [] },
+              },
+            ],
           },
         },
       },
@@ -175,8 +179,8 @@ describe('createRunQuotaService', () => {
     expect(memory.exhausted).toBe(false);
   });
 
-  it('merges a partial update into the stored settings and reinstalls the workflows', async () => {
-    const { service, create, onSettingsChanged } = createHarness({
+  it('merges a partial update into the stored settings without reinstalling workflows', async () => {
+    const { service, create } = createHarness({
       attributes: { timezone: 'UTC', limits: { memory: { enabled: true, max: 4 } } },
     });
 
@@ -193,26 +197,15 @@ describe('createRunQuotaService', () => {
       expect.objectContaining({ updatedBy: 'elastic' }),
       expect.objectContaining({ overwrite: true })
     );
-    expect(onSettingsChanged).toHaveBeenCalledWith(next);
   });
 
   it('ignores timezone in updateSettings and always writes UTC', async () => {
     const { service } = createHarness();
 
-    // Timezone is not configurable; any supplied value is silently dropped.
     const result = await service.updateSettings({
       request,
       update: { timezone: 'Europe/Zurich' },
     });
     expect(result.timezone).toBe('UTC');
-  });
-
-  it('keeps the saved limits when the reinstall fails, since a later install picks them up', async () => {
-    const { service, onSettingsChanged } = createHarness();
-    onSettingsChanged.mockRejectedValue(new Error('workflows unavailable'));
-
-    await expect(
-      service.updateSettings({ request, update: { limits: { memory: { enabled: true, max: 2 } } } })
-    ).resolves.toEqual(expect.objectContaining({ timezone: 'UTC' }));
   });
 });

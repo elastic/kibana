@@ -9,25 +9,19 @@
 
 import CONVERSATION_SCRAPER_YAML from './conversation_scraper.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
-import {
-  renderRunQuotaGate,
-  type SignificantEventsRunQuotaTemplateValues,
-} from '../run_quota_gate';
 
 export const SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID =
   'system-significant-events-memory-conversation-scraper';
 
-// Templated because it carries the daily run-quota gate. All four memory
-// workflows share the `memory` budget, so all four are reinstalled when it changes.
 export const SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 6,
+  version: 7,
   billable: false,
-  yamlTemplate: (values) => renderRunQuotaGate(CONVERSATION_SCRAPER_YAML, values),
+  yaml: CONVERSATION_SCRAPER_YAML,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
     enablement: 'restorable',
   },
-} as const satisfies ManagedWorkflowDefinition<SignificantEventsRunQuotaTemplateValues>;
+} as const satisfies ManagedWorkflowDefinition;

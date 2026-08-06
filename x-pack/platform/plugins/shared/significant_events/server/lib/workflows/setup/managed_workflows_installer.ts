@@ -7,7 +7,6 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
-import type { RunQuotaSettings } from '../../../../common';
 import { installWorkflows } from './install_workflows';
 import { installInvestigationWorkflow } from '../../../memory_and_investigation/lib/investigation/install_investigation_workflow';
 
@@ -23,12 +22,6 @@ export interface ManagedWorkflowsInstaller {
 export interface CreateManagedWorkflowsInstallerOptions {
   getClient: () => Promise<PluginScopedManagedWorkflowsApi>;
   isAvailable: () => Promise<boolean>;
-  /**
-   * Daily run limits are rendered into the gated workflow definitions at install
-   * time (workflow steps cannot read saved objects), so they are read on every
-   * install and a limit change takes effect by installing again.
-   */
-  getRunQuotaSettings: () => Promise<RunQuotaSettings>;
   logger: Logger;
 }
 
@@ -44,7 +37,6 @@ export interface CreateManagedWorkflowsInstallerOptions {
 export const createManagedWorkflowsInstaller = ({
   getClient,
   isAvailable,
-  getRunQuotaSettings,
   logger,
 }: CreateManagedWorkflowsInstallerOptions): ManagedWorkflowsInstaller => {
   let queue: Promise<void> = Promise.resolve();
@@ -59,13 +51,10 @@ export const createManagedWorkflowsInstaller = ({
     }
 
     const client = await getClient();
-    const runQuotaSettings = await getRunQuotaSettings();
 
-    await installWorkflows({ client, runQuotaSettings });
-    await installInvestigationWorkflow({ client, runQuotaSettings });
+    await installWorkflows({ client });
+    await installInvestigationWorkflow({ client });
 
-    // Log success only after the whole sequence (including reconciliation) has actually landed, and
-    // only once at INFO. Re-installs on later flag flips are routine, so keep them at debug.
     if (!reconciled) {
       await client.ready();
       reconciled = true;

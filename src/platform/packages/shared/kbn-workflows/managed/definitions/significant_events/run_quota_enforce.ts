@@ -14,7 +14,7 @@ export const SIGNIFICANT_EVENTS_RUN_QUOTA_ENFORCE_WORKFLOW_ID =
 export const SIGNIFICANT_EVENTS_RUN_QUOTA_ENFORCE_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_RUN_QUOTA_ENFORCE_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 1,
+  version: 2,
   billable: false,
   yaml: RUN_QUOTA_ENFORCE_YAML,
   management: {

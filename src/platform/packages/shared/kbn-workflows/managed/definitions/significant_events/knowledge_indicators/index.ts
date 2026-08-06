@@ -13,10 +13,6 @@ import ONBOARDING_YAML from './onboarding.yaml';
 import QUERIES_GENERATION_YAML from './queries_generation.yaml';
 import SYNC_YAML from './sync.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
-import {
-  renderRunQuotaGate,
-  type SignificantEventsRunQuotaTemplateValues,
-} from '../run_quota_gate';
 
 export const SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID =
   'system-streams-ki-features-identification';
@@ -64,18 +60,14 @@ export const SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW = {
   management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 
-// Templated because it carries the daily run-quota gate: the limit has to be
-// baked in at install time, so the significant_events plugin reinstalls this
-// workflow whenever the KI extraction budget changes. Only this parent is
-// counted; the two child workflows it invokes are not.
 export const SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 6,
+  version: 7,
   billable: false,
-  yamlTemplate: (values) => renderRunQuotaGate(ONBOARDING_YAML, values),
+  yaml: ONBOARDING_YAML,
   management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,
-} as const satisfies ManagedWorkflowDefinition<SignificantEventsRunQuotaTemplateValues>;
+} as const satisfies ManagedWorkflowDefinition;
 
 export const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,

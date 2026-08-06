@@ -9,25 +9,19 @@
 
 import MEMORY_SYNTHESIS_YAML from './memory_synthesis.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
-import {
-  renderRunQuotaGate,
-  type SignificantEventsRunQuotaTemplateValues,
-} from '../run_quota_gate';
 
 export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID =
   'system-significant-events-memory-synthesis';
 
-// Templated because it carries the daily run-quota gate. All four memory
-// workflows share the `memory` budget, so all four are reinstalled when it changes.
 export const SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 6,
+  version: 7,
   billable: false,
-  yamlTemplate: (values) => renderRunQuotaGate(MEMORY_SYNTHESIS_YAML, values),
+  yaml: MEMORY_SYNTHESIS_YAML,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
     enablement: 'restorable',
   },
-} as const satisfies ManagedWorkflowDefinition<SignificantEventsRunQuotaTemplateValues>;
+} as const satisfies ManagedWorkflowDefinition;

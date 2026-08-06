@@ -48,7 +48,7 @@ const SECTION_DESCRIPTION = i18n.translate(
   'xpack.streams.significantEventsDiscovery.settings.runLimits.description',
   {
     defaultMessage:
-      'Cap how many times each group of AI workflows runs per day across the whole deployment. Once a group reaches its limit, its automated runs stop early until the counter resets; runs you start yourself still go through (and still count). Limits are enforced by the workflows themselves, so a change applies from their next run.',
+      'Soft daily caps for AI workflow groups across the whole deployment. When a group reaches its limit, a system workflow pauses that engine’s automation within a few minutes — these are not hard admit-time blocks, so runs already in flight can finish and may briefly overshoot. Manual runs still go through. Counters reset at midnight UTC.',
   }
 );
 
@@ -340,7 +340,7 @@ export function RunLimitsSection({ canManage }: { canManage: boolean }) {
                       'xpack.streams.significantEventsDiscovery.settings.runLimits.usageUnavailableBody',
                       {
                         defaultMessage:
-                          'Today’s run counts could not be read, so every group is shown as unused. Limits are enforced by the same read, which means automation is not being blocked right now.',
+                          'Today’s run counts could not be read from workflow executions, so every group is shown as unused. Soft pause will not stop automation until usage can be read again.',
                       }
                     )}
                   </p>

@@ -1,9 +1,11 @@
 version: "1"
 name: "Significant Events Run Quota Enforce"
 description: >
-  Backup sweep that pauses any engine whose daily run quota is already exhausted.
-  The gated workflows pause their engine on refuse; this scheduled pass catches
-  engines that were left running after a failed pause call or a race.
+  Soft daily run-quota enforcer (good enough for now — not a hard admit-time
+  limit). Counts usage via GET /run_quotas (backed by .workflows-executions) and
+  pauses automation for any engine whose budget group is already exhausted.
+  Concurrent / in-flight runs may overshoot until this workflow next ticks.
+  Harder Workflows execution rate-limits are the planned follow-up.
 enabled: true
 settings:
   timeout: "5m"
@@ -21,7 +23,7 @@ tags:
 triggers:
   - type: scheduled
     with:
-      every: "15m"
+      every: "5m"
   - type: manual
 
 steps:

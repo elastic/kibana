@@ -9,26 +9,19 @@
 
 import INVESTIGATION_WORKFLOW_YAML from './investigation_workflow.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
-import {
-  renderRunQuotaGate,
-  type SignificantEventsRunQuotaTemplateValues,
-} from '../run_quota_gate';
 
 export const SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID =
   'system-significant-events-investigation';
 
-// Templated because it carries the daily run-quota gate: the limit has to be
-// baked in at install time, so the significant_events plugin reinstalls this
-// workflow whenever the investigation budget changes.
 export const SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 6,
+  version: 7,
   billable: false,
-  yamlTemplate: (values) => renderRunQuotaGate(INVESTIGATION_WORKFLOW_YAML, values),
+  yaml: INVESTIGATION_WORKFLOW_YAML,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
     enablement: 'restorable',
   },
-} as const satisfies ManagedWorkflowDefinition<SignificantEventsRunQuotaTemplateValues>;
+} as const satisfies ManagedWorkflowDefinition;

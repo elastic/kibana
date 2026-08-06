@@ -85,7 +85,6 @@ export {
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './significant_events';
 export { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from './significant_events/investigation';
-export type { SignificantEventsRunQuotaTemplateValues } from './significant_events/run_quota_gate';
 export {
   PND_WATCH_DARK_WORKFLOW_ID,
   PND_WATCH_DEEP_WORKFLOW_ID,

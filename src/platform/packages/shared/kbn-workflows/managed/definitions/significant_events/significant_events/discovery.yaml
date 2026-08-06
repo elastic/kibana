@@ -29,7 +29,7 @@ triggers:
       - name: runOrigin
         type: string
         required: false
-        description: 'Root origin of the run, forwarded by the invoking workflow so a human-initiated chain is not treated as automation by the run-quota gate. Defaults to this execution''s own trigger.'
+        description: 'Root origin of the run, forwarded by the invoking workflow for attribution. Defaults to this execution''s own trigger.'
 outputs:
   - name: processedCount
     type: number
@@ -39,110 +39,8 @@ consts:
   DETECTIONS_INDEX: '.significant_events-detections'
   EVENTS_INDEX: '.significant_events-events'
   INVESTIGATABLE_SEVERITIES: ['80-critical', '60-high']
-  RUN_LEDGER_INDEX: '.significant_events-runs'
-  RUN_BUDGET_GROUP: 'detection'
-  RUN_ENGINE: 'detection'
-  RUN_QUOTA_ENABLED: __RUN_QUOTA_ENABLED__
-  RUN_DAILY_LIMIT: __RUN_DAILY_LIMIT__
-  RUN_QUOTA_TIME_ZONE: '__RUN_QUOTA_TIME_ZONE__'
 
 steps:
-  # -----------------------------------------------------------------------
-  # Daily run-quota gate. Automated runs stop here once this budget group has
-  # used its allowance for the day; a human-initiated run always proceeds, and
-  # every admitted run consumes budget either way. See `server/lib/run_quotas`
-  # in the significant_events plugin.
-  # -----------------------------------------------------------------------
-  - name: quota_resolve_origin
-    type: data.set
-    with:
-      runOrigin: '{{ inputs.runOrigin | default: execution.triggeredBy }}'
-
-  - name: quota_count_runs
-    type: elasticsearch.request
-    with:
-      method: POST
-      path: '/{{ consts.RUN_LEDGER_INDEX }}/_count'
-      body:
-        query:
-          bool:
-            filter:
-              - term:
-                  budget_group: '{{ consts.RUN_BUDGET_GROUP }}'
-              - term:
-                  outcome: 'admitted'
-              - range:
-                  '@timestamp':
-                    gte: 'now/d'
-                    time_zone: '{{ consts.RUN_QUOTA_TIME_ZONE }}'
-    on-failure:
-      continue: true
-
-  - name: quota_evaluate
-    type: data.set
-    with:
-      # Fail open on an unreadable ledger: a missing count must not stall the pipeline.
-      quotaUsed: '${{ steps.quota_count_runs.output.count | default: 0 }}'
-      # Fail closed on an unknown origin: only these three mean a person asked for
-      # the run. Keep in sync with HUMAN_RUN_ORIGINS in the significant_events plugin.
-      quotaAutomated: '${{ variables.runOrigin != "manual" and variables.runOrigin != "sigevents-investigation-ui" and variables.runOrigin != "significant-events-memory-ui" }}'
-
-  - name: quota_decide
-    type: data.set
-    with:
-      quotaRefused: '${{ consts.RUN_QUOTA_ENABLED and steps.quota_evaluate.output.quotaAutomated and steps.quota_evaluate.output.quotaUsed >= consts.RUN_DAILY_LIMIT }}'
-
-  # Recorded before any work starts, so a run that later fails still consumed
-  # budget. Refused runs are recorded too — as `refused`, which the counter
-  # excludes — so a day spent at the cap does not inflate its own usage.
-  # `refresh=wait_for` makes an admitted run visible to the next gate's count.
-  - name: quota_record_run
-    type: elasticsearch.request
-    with:
-      method: POST
-      path: '/{{ consts.RUN_LEDGER_INDEX }}/_doc?refresh=wait_for'
-      body:
-        '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-        budget_group: '{{ consts.RUN_BUDGET_GROUP }}'
-        engine: '{{ consts.RUN_ENGINE }}'
-        outcome: '{% if steps.quota_decide.output.quotaRefused %}refused{% else %}admitted{% endif %}'
-        workflow_id: '{{ workflow.id }}'
-        execution_id: '{{ execution.id }}'
-        triggered_by: '{{ variables.runOrigin }}'
-        kibana:
-          space_ids:
-            - '{{ workflow.spaceId }}'
-    on-failure:
-      continue: true
-
-  # When the quota is exhausted, pause the engine so further automation stops
-  # immediately instead of waiting for the next poll. The daily reset workflow
-  # resumes it after midnight UTC. on-failure: continue so a failed pause never
-  # blocks the exit path.
-  - name: quota_pause_engine
-    type: kibana.request
-    if: '${{ steps.quota_decide.output.quotaRefused }}'
-    with:
-      method: POST
-      path: '/internal/significant_events/maintenance/_pause'
-      headers:
-        x-elastic-internal-origin: 'kibana'
-      body:
-        engines:
-          - '{{ consts.RUN_ENGINE }}'
-        reason: 'run_quota'
-    on-failure:
-      continue: true
-
-  # Reads as an idle pass to the caller, so the scheduled review loop drains and exits
-  # instead of failing — a cancelled child would fail its parent's execute step.
-  - name: quota_stop_if_exhausted
-    type: workflow.output
-    if: '${{ steps.quota_decide.output.quotaRefused }}'
-    with:
-      processedCount: 0
-      hasWork: false
-
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
   - name: set_initial_vars
     type: data.set
@@ -202,9 +100,6 @@ steps:
           processedCount: '${{ steps.compute_batch_size.output.processedCount }}'
           hasWork: false
 
-  # -----------------------------------------------------------------------
-  # Correlate detections into discoveries.
-  # -----------------------------------------------------------------------
   - name: run_discovery_agent
     type: ai.agent
     agent-id: "significant-events.discovery"
@@ -330,11 +225,6 @@ steps:
             on-failure:
               continue: true
 
-  # -----------------------------------------------------------------------
-  # Trigger root-cause investigation for newly-opened high-severity events.
-  # The discovery agent owns the event decision and events_write; deterministic
-  # queue advancement stays in the workflow and does not consume agent turns.
-  # -----------------------------------------------------------------------
 
   # Eviction-safe snapshot — ai.agent outputs are evictable; data.set outputs are not.
   - name: check_discovery_agent_output

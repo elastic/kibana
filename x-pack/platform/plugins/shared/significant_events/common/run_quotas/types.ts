@@ -48,9 +48,9 @@ export const RUN_BUDGET_GROUPS_BY_ENGINE: Readonly<
 };
 
 /**
- * Defaults cap day-to-day automation at 20 runs per group. This is the
- * settled product decision (2026-08-06); adjusted after observing real
- * customer-0 cluster run rates.
+ * Soft daily defaults: 20 runs per group (2026-08-06). Soft pause via
+ * `run_quota_enforce` is good enough for now; harder Workflows execution
+ * rate-limits are the follow-up. Adjust after observing customer-0 hit rates.
  */
 export const DEFAULT_RUN_LIMITS: Readonly<Record<RunBudgetGroupId, number>> = {
   ki_extraction: 20,
@@ -106,8 +106,9 @@ export interface RunQuotasResponse {
   window: RunQuotaWindow;
   groups: RunBudgetGroupUsage[];
   /**
-   * True when the run ledger could not be read, so `used` is reported as zero.
-   * The in-workflow gate fails open the same way, so nothing is being blocked.
+   * True when `.workflows-executions` could not be read, so `used` is reported
+   * as zero and soft enforcement cannot see real usage until the next successful read.
+   * Kept as `ledgerUnavailable` for API compatibility with earlier clients.
    */
   ledgerUnavailable: boolean;
 }
@@ -123,13 +124,10 @@ export const DEFAULT_RUN_QUOTA_SETTINGS: RunQuotaSettings = {
 };
 
 /**
- * Origins that count as a person asking for the run. These are never gated —
- * a human is never blocked — though they do consume budget like any other run.
- * Anything else (`scheduled`, `workflow-step`, `alert`, or an origin added
- * later) is treated as automation, so the gate fails closed for new callers.
- *
- * Kept in sync with the `quota_evaluate` step of the gated workflow
- * definitions by `run_quota_gate.test.ts`.
+ * Origins that count as a person asking for the run. Soft quotas still count
+ * these toward usage, but engine pause only stops automation workflows — UI
+ * leaves stay available except where a paused engine has no separate automation
+ * surface (investigation overshoot is accepted until native rate-limits land).
  */
 export const HUMAN_RUN_ORIGINS = [
   'manual',

@@ -6,15 +6,16 @@
  */
 
 export {
+  COUNTED_WORKFLOW_BUDGET_GROUPS,
+  COUNTED_WORKFLOW_IDS,
   GATED_WORKFLOW_BUDGET_GROUPS,
   GATED_WORKFLOW_IDS,
+  isCountedWorkflowId,
   isGatedWorkflowId,
-  runQuotaValuesFor,
   workflowIdsInBudgetGroup,
+  type CountedWorkflowId,
   type GatedWorkflowId,
 } from './budget_groups';
-export { RUN_LEDGER_DATA_STREAM, RUN_OUTCOME_ADMITTED, RUN_OUTCOME_REFUSED } from './data_stream';
-export { initializeRunLedgerTemplate } from './initialize_template';
 export { getRunQuotaSettingsSavedObjectType } from './saved_object';
 export {
   createRunQuotaService,

@@ -13,7 +13,6 @@ import {
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
-import { DEFAULT_RUN_QUOTA_SETTINGS } from '../../../../common';
 import { installMemoryWorkflows } from './install_managed_workflows';
 
 const MEMORY_WORKFLOW_IDS = [
@@ -23,31 +22,23 @@ const MEMORY_WORKFLOW_IDS = [
   SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
 ] as const;
 
-const EXPECTED_MEMORY_RUN_QUOTA_VALUES = {
-  runQuotaEnabled: DEFAULT_RUN_QUOTA_SETTINGS.limits.memory.enabled,
-  runDailyLimit: DEFAULT_RUN_QUOTA_SETTINGS.limits.memory.max,
-  runQuotaTimeZone: DEFAULT_RUN_QUOTA_SETTINGS.timezone,
-};
-
 const createClientMock = () =>
   ({
     install: jest.fn().mockResolvedValue(undefined),
   } as unknown as jest.Mocked<Pick<PluginScopedManagedWorkflowsApi, 'install'>>);
 
 describe('installMemoryWorkflows', () => {
-  it('installs all four memory workflows globally with the shared memory run limit', async () => {
+  it('installs all four memory workflows globally', async () => {
     const client = createClientMock();
 
     await installMemoryWorkflows({
       client: client as unknown as PluginScopedManagedWorkflowsApi,
-      runQuotaSettings: DEFAULT_RUN_QUOTA_SETTINGS,
     });
 
     expect(client.install).toHaveBeenCalledTimes(MEMORY_WORKFLOW_IDS.length);
     for (const workflowId of MEMORY_WORKFLOW_IDS) {
       expect(client.install).toHaveBeenCalledWith(workflowId, {
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        values: EXPECTED_MEMORY_RUN_QUOTA_VALUES,
       });
     }
   });
@@ -63,7 +54,6 @@ describe('installMemoryWorkflows', () => {
     await expect(
       installMemoryWorkflows({
         client: client as unknown as PluginScopedManagedWorkflowsApi,
-        runQuotaSettings: DEFAULT_RUN_QUOTA_SETTINGS,
       })
     ).rejects.toThrow(
       `Failed to install memory workflows: [${SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID} (synthesis boom); ${SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID} (scraper boom)]`

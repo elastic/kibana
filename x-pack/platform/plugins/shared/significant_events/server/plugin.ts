@@ -29,7 +29,6 @@ import { createMaintenanceSystemRequest } from './lib/maintenance/system_request
 import {
   createRunQuotaService,
   getRunQuotaSettingsSavedObjectType,
-  initializeRunLedgerTemplate,
   type RunQuotaService,
 } from './lib/run_quotas';
 import {
@@ -345,14 +344,11 @@ export class SignificantEventsPlugin
       getScopedClients: this.getScopedClients,
     });
 
-    // Daily run limits are baked into the gated workflow definitions at install
-    // time, so a limit change has to reinstall them to take effect.
+    // Soft daily run quotas: usage is counted from `.workflows-executions` and
+    // engines are paused by the scheduled enforce workflow — no YAML reinstall.
     this.runQuotaService = createRunQuotaService({
       logger: this.logger,
       server: this.server,
-      onSettingsChanged: async () => {
-        await this.managedWorkflowsInstaller?.install();
-      },
     });
 
     registerRoutes({
@@ -421,14 +417,12 @@ export class SignificantEventsPlugin
     // so a runtime flag flip can never close the reconciliation window with a partial set (which
     // would prune the owner's other workflows). Created here so the availability path below reuses
     // the same instance.
-    if (plugins.workflowsExtensions && this.runQuotaService) {
+    if (plugins.workflowsExtensions) {
       const { workflowsExtensions } = plugins;
-      const { runQuotaService } = this;
       this.managedWorkflowsInstaller = createManagedWorkflowsInstaller({
         getClient: () =>
           workflowsExtensions.initManagedWorkflowsClient(SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER),
         isAvailable,
-        getRunQuotaSettings: () => runQuotaService.getSettings(),
         logger: this.logger,
       });
     }
@@ -568,13 +562,6 @@ export class SignificantEventsPlugin
       {
         name: 'knowledge indicators template',
         run: initializeKnowledgeIndicatorsTemplate({ esClient, logger: this.logger }),
-      },
-      {
-        // Must exist before the first gated workflow run: the gate writes its
-        // ledger entry with the workflow caller's credentials, which cannot
-        // create an index template.
-        name: 'run ledger template',
-        run: initializeRunLedgerTemplate({ esClient, logger: this.logger }),
       },
     ];
 

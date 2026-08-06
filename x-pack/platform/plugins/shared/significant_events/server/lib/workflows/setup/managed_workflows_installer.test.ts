@@ -17,7 +17,6 @@ import {
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
-import { DEFAULT_RUN_QUOTA_SETTINGS } from '../../../../common';
 import { createManagedWorkflowsInstaller } from './managed_workflows_installer';
 
 // Significant events is gated solely by the availability flag now, so the installer always writes
@@ -50,7 +49,6 @@ const createInstaller = (
   const installer = createManagedWorkflowsInstaller({
     getClient: jest.fn().mockResolvedValue(client),
     isAvailable: jest.fn().mockResolvedValue(true),
-    getRunQuotaSettings: jest.fn().mockResolvedValue(DEFAULT_RUN_QUOTA_SETTINGS),
     logger: loggerMock.create(),
     ...overrides,
   });
@@ -124,45 +122,21 @@ describe('createManagedWorkflowsInstaller', () => {
     for (const workflowId of memoryWorkflowIds) {
       expect(client.install).toHaveBeenCalledWith(workflowId, {
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        values: {
-          runQuotaEnabled: DEFAULT_RUN_QUOTA_SETTINGS.limits.memory.enabled,
-          runDailyLimit: DEFAULT_RUN_QUOTA_SETTINGS.limits.memory.max,
-          runQuotaTimeZone: DEFAULT_RUN_QUOTA_SETTINGS.timezone,
-        },
       });
     }
   });
 
-  it('renders the current run limits into every gated workflow', async () => {
-    const { client, installer } = createInstaller({
-      getRunQuotaSettings: jest.fn().mockResolvedValue({
-        timezone: 'Europe/Zurich',
-        limits: {
-          ...DEFAULT_RUN_QUOTA_SETTINGS.limits,
-          detection: { enabled: true, max: 7 },
-          investigation: { enabled: false, max: 10 },
-        },
-      }),
-    });
+  it('installs counted workflows without baking run-quota template values', async () => {
+    const { client, installer } = createInstaller();
 
     await installer.install();
 
-    const valuesById = new Map(
-      client.install.mock.calls.map(([id, options]) => [id, options.values])
-    );
-
-    expect(valuesById.get(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID)).toEqual({
-      runQuotaEnabled: true,
-      runDailyLimit: 7,
-      runQuotaTimeZone: 'Europe/Zurich',
-    });
-    expect(valuesById.get(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID)).toEqual({
-      runQuotaEnabled: false,
-      runDailyLimit: 10,
-      runQuotaTimeZone: 'Europe/Zurich',
-    });
-    // Non-gated workflows must not be handed template values.
-    expect(valuesById.get(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID)).toBeUndefined();
+    for (const [id, options] of client.install.mock.calls) {
+      expect(options).not.toHaveProperty('values');
+      expect(id).toEqual(expect.any(String));
+    }
+    expect(installedIds(client)).toContain(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID);
+    expect(installedIds(client)).toContain(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID);
   });
 
   it('installs the investigation workflow when available', async () => {

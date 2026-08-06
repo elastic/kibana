@@ -1,18 +1,29 @@
-# Nightshift Daily Run Quotas
+# Nightshift Daily Run Quotas (soft limits)
 
-> Settled decisions as of **2026-08-06**. See the [PR](https://github.com/elastic/kibana/pull/TODO) for context and discussion.
+> Settled decisions as of **2026-08-06**. Soft enforcement without per-workflow YAML gates is **intentional and good enough for now**.
+
+## Soft vs hard limits (read this first)
+
+| | **v1 — soft quotas (this branch)** | **Later — harder Workflows execution limits** |
+|---|---|---|
+| When enforced | After usage is observed; engines paused by a scheduled system workflow (every 5m) | At workflow start, by the Workflows engine |
+| Overshoot | Expected: in-flight / concurrent runs can finish past the cap | Should not admit automated runs past the cap |
+| Product YAML | Unchanged — no gate preamble in Nightshift workflows | Likely a `settings` rate-limit / window on the definition |
+| Dependency | None (Nightshift-owned) | [security-team#18658](https://github.com/elastic/security-team/issues/18658) (time-windowed execution limits), [security-team#18661](https://github.com/elastic/security-team/issues/18661) (bypass by trigger type) — see nightshift-program `dependencies.md` |
+
+**These soft quotas are good enough for customer-0 / early use.** They stop automation from running unbounded once a daily budget is clearly exceeded, without coupling every product workflow to a gate. When native Workflows execution rate-limits ship, migrate to that for true hard limits; keep this pause/reset layer as a backstop if useful.
 
 ## Overview
 
-Daily run quotas cap how many times each group of AI workflows executes per calendar day (UTC midnight boundary). Once a group exhausts its budget, **automation stops** until the counter resets; runs started by a human always go through.
+Daily run quotas cap how many times each group of AI workflows executes per calendar day (UTC midnight). Once a group is exhausted, a **system workflow pauses that engine’s automation**. Limits are **soft**: in-flight and concurrent runs may finish and briefly overshoot until the next enforce tick.
+
+Original Nightshift product workflows are **not** modified for quotas.
 
 ---
 
 ## Settled decisions
 
 ### 1. Defaults — all four groups = 20
-
-`DEFAULT_RUN_LIMITS` in `common/run_quotas/types.ts`:
 
 | Budget group | Default limit |
 |---|---|
@@ -21,123 +32,72 @@ Daily run quotas cap how many times each group of AI workflows executes per cale
 | `detection` | 20 |
 | `investigation` | 20 |
 
-**Follow-up**: observe customer-0 cluster run rates after first production deployment and adjust defaults if 20 is too low or high for realistic workloads.
+**Follow-up**: observe customer-0 how fast limits are hit.
 
-### 2. No timezone configurability — UTC only
+### 2. Soft limits — no in-workflow gate (good enough for now)
 
-The daily window is always anchored to UTC midnight. The `timezone` field is retained in `RunQuotaSettings` for backwards compatibility but is always forced to `UTC` on write. The PUT route body no longer accepts a `timezone` parameter.
+Counted workflows are **not** patched with a quota preamble. Usage is read server-side from `.workflows-executions`. Enforcement is:
 
-**Rationale**: avoiding per-deployment timezone drift in a deployment-wide counter; simplifies the reset workflow (always midnight UTC).
+1. `system-significant-events-run-quota-enforce` (every **5m**) — `GET /run_quotas` → pause exhausted engines with `reason: 'run_quota'`
+2. `system-significant-events-run-quota-reset` (cron `5 0 * * *` UTC) — resume engines paused for `run_quota`
 
-### 3. Banner when limit hit
+Harder, admit-time limits belong to the Workflows platform (see table above). Do not re-introduce per-workflow YAML gates as a long-term design unless platform rate-limits stall.
 
-When any budget group has `exhausted: true` from `GET /internal/significant_events/run_quotas`, an `EuiCallOut` (warning) is shown on all non-settings tabs. Test subject: `significantEventsRunQuotaExhaustedBanner`. Shows which engines/groups are exhausted and when counters reset.
+### 3. What is counted
 
-### 4. Run count = workflow runs
+Workflow executions for the IDs in `COUNTED_WORKFLOW_BUDGET_GROUPS` since UTC midnight (`startedAt`, `isTestRun: false`). Failed and in-flight runs count. Refused/gated runs no longer exist as a separate ledger concept.
 
-Quota is enforced by counting workflow executions, not LLM tokens. Tokens-per-run tracking is deferred to a follow-up.
+### 4. Automation pause vs humans
 
-**Rationale**: simple and predictable for operators; token complexity adds little value for v1 defaults.
+Engine pause disables **automation** workflows only (same targets as before). Manual leaves stay available. **Investigation** has no separate automation disable list — soft overshoot of investigation continues until native Workflows rate-limits land ([#18658](https://github.com/elastic/security-team/issues/18658), [#18661](https://github.com/elastic/security-team/issues/18661)).
 
-### 5. Failed runs count toward quota
+### 5. Banner / Settings / UTC
 
-A run recorded as `admitted` in the ledger before any LLM work counts toward the budget, even if the workflow subsequently fails. A refused run is recorded as `refused` and does NOT count.
+Unchanged: exhaustion banner, Settings run-limits UI, UTC-only window, per-engine pause controls.
 
-**Follow-up**: Stats/Settings page should surface failed-vs-succeeded breakdown separately.
+### 6. Ledger `.significant_events-runs`
 
-### 6. Quotas enforce automation only — humans are never blocked
+No longer written or required. Usage comes from `.workflows-executions`. The old ledger template is not installed.
 
-The `HUMAN_RUN_ORIGINS` set (`manual`, `sigevents-investigation-ui`, `significant-events-memory-ui`) bypasses the gate. Engine pause also only disables automation workflows; user-callable leaves (KI onboarding UI, memory synthesis, investigation UI button) remain available.
+### 7. Other product decisions (unchanged)
 
-### 7. Memory writes inside investigation do not hit the memory quota
-
-Investigations trigger memory updates as child workflows. The memory quota gate only counts the top-level memory parent workflows (consolidation, gap detection, conversation scraper, synthesis). Child invocations from investigation are unaffected.
-
-### 8. Ledger: dedicated `.significant_events-runs` index
-
-The run ledger lives in `.significant_events-runs`. No existing Nightshift index is suitable:
-- `.significant_events-detections/events` are domain data
-- `.workflows-executions` is not writable with workflow user credentials
-
-### 9. Per-engine pause
-
-When a gated workflow refuses a run (quota exhausted), it calls `POST /internal/significant_events/maintenance/_pause` with `{ engines: ['<engine>'], reason: 'run_quota' }` to stop further automation for that engine. This is separate from the global pause.
-
-**Automation disabled per engine when paused for `run_quota`:**
-
-| Engine | Workflows disabled |
-|---|---|
-| `context` | `system-streams-ki-continuous-onboarding`, `system-streams-ki-sync`, legacy continuous KI, memory-consolidation, conversation-scraper, gap-detection |
-| `detection` | `system-significant-events-orchestrator`, `system-significant-events-scheduled-detection-*`, `system-significant-events-scheduled-review-*` |
-| `investigation` | nothing (the gate refuses automated invocations; no scheduled trigger to disable) |
-
-**Manual runs always remain available** — `ki-onboarding`, `investigation`, and `memory-synthesis` leaves are not disabled.
-
-### 10. System workflows for pause-on-limit and daily reset
-
-Two always-on system workflows (installed globally, never disabled by Pause):
-
-| Workflow id | Trigger | Action |
-|---|---|---|
-| `system-significant-events-run-quota-enforce` | every 15m (+ manual) | For each exhausted budget group, `POST …/maintenance/_pause` with `{ engines: [<engine>], reason: 'run_quota' }` (backup if an in-gate pause call fails) |
-| `system-significant-events-run-quota-reset` | cron `5 0 * * *` UTC (+ manual) | `POST …/maintenance/_resume` with `{ engines: ['context','detection','investigation'], reasons: ['run_quota'] }` — resumes only quota-paused engines; user-paused engines stay paused |
-
-Gated workflows also call `_pause` themselves immediately on refuse (`quota_pause_engine` step).
-
-Tracked in nightshift-program dependency list: [Workflows: Execution Rate Limits and Cost Controls](https://github.com/elastic/nightshift-program/blob/main/workstreams/significant-events/dependencies.md#workflows-execution-rate-limits-and-cost-controls).
-
-### 11. In-workflow gate vs. native rate-limit
-
-v1 uses an in-workflow `kibana.request` + `elasticsearch.request` gate. Follow-ups to migrate to native Workflows rate-limiting (same dependency entry as above):
-- Time-windowed execution limits (`max` + `window`): https://github.com/elastic/security-team/issues/18658
-- Bypass by trigger type (e.g. `manual`): https://github.com/elastic/security-team/issues/18661
-
-### 12. Refused investigation event marker — deferred
-
-When a triage-triggered investigation is refused by the gate, no marker is written to the significant event document. The event remains in `open` status and will be retried by the next day's detection cycle. An explicit "refused" marker was considered but deferred — the current behavior is safe and avoids extra states in the UI.
-
-### 13. Settings layout — keep as-is
-
-The current per-engine group layout in `RunLimitsSection` (Settings tab) is kept for v1. Timezone is shown as a read-only "UTC" label. Per-engine pause controls are exposed in `MaintenanceSection`.
-
-### 14. "Engines as inference-feature parents" — OUT OF SCOPE / deferred
-
-A proposal to use engine IDs as the inference feature hierarchy was considered for quota/model-selection purposes. This is deferred; the current `aggregate-by`/`plugin-id` per-step attribution model is unchanged.
+- Failed runs count toward the soft quota  
+- Memory inside investigation does not use a separate admit-time gate (investigation executions still count toward investigation)  
+- Settings layout kept; iterate later  
+- Token-per-run not required for v1  
+- “Engines as inference-feature parents” out of scope  
 
 ---
 
-## Architecture summary
+## Architecture
 
 ```
-gated workflow runs
-  │
-  ├─ quota_count_runs (ES count)
-  ├─ quota_evaluate (is automated? used >= limit?)
-  ├─ quota_record_run (write ledger entry: admitted | refused)
-  ├─ quota_pause_engine (kibana.request if refused → pause engine for run_quota)
-  └─ quota_stop_if_exhausted (workflow.output early exit if refused)
+counted workflows run unchanged
+        │
+        ▼
+.workflows-executions  (platform index)
+        │
+        ▼
+GET /internal/significant_events/run_quotas
+        │
+        ├─ Settings UI + exhaustion banner
+        │
+        ▼
+run_quota_enforce (every 5m)
+        └─ POST maintenance/_pause { engines, reason: run_quota }
 
-enforce (every 15m)
-  └─ pause any engine whose groups are exhausted (backup)
-
-daily reset (00:05 UTC)
-  └─ resume engines with reason=run_quota → clears engines map entries
+run_quota_reset (00:05 UTC)
+        └─ POST maintenance/_resume { engines, reasons: [run_quota] }
 ```
 
 ## Files
 
 | Purpose | Path |
 |---|---|
-| Common types / defaults | `common/run_quotas/types.ts` |
-| Server service | `server/lib/run_quotas/run_quota_service.ts` |
-| Budget groups ↔ workflows | `server/lib/run_quotas/budget_groups.ts` |
-| Maintenance service (engine pause) | `server/lib/maintenance/maintenance_service.ts` |
-| Maintenance SO (modelVersion 2) | `server/lib/maintenance/saved_object.ts` |
-| Per-engine automation targets | `server/lib/maintenance/managed_workflow_targets.ts` |
-| Maintenance routes | `server/routes/internal/maintenance/route.ts` |
-| Run quotas route | `server/routes/internal/run_quotas/route.ts` |
-| Enforce workflow | `…/kbn-workflows/…/significant_events/run_quota_enforce.yaml` |
-| Reset workflow | `…/kbn-workflows/…/significant_events/run_quota_reset.yaml` |
-| UI run-limits hook | `significant_events_app/.../hooks/use_significant_events_run_quotas.ts` |
-| UI maintenance / per-engine pause | `significant_events_app/.../components/settings/maintenance_section.tsx` |
-| Exhausted banner | `significant_events_app/.../pages/significant_events/page.tsx` |
+| Defaults / types | `common/run_quotas/types.ts` |
+| Counted workflow → group map | `server/lib/run_quotas/budget_groups.ts` |
+| Usage + settings service | `server/lib/run_quotas/run_quota_service.ts` |
+| Enforce workflow | `…/run_quota_enforce.yaml` |
+| Reset workflow | `…/run_quota_reset.yaml` |
+| Per-engine pause | `server/lib/maintenance/*` |
+| UI | `significant_events_app/.../run_limits_section.tsx`, `maintenance_section.tsx`, `page.tsx` |

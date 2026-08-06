@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import { WORKFLOWS_EXECUTIONS_INDEX } from '@kbn/workflows-management-plugin/common';
 import {
   DEFAULT_RUN_QUOTA_SETTINGS,
   MAX_RUN_LIMIT,
@@ -20,7 +21,10 @@ import {
   type RunQuotaSettings,
   type RunQuotasResponse,
 } from '../../../common';
-import { RUN_LEDGER_DATA_STREAM, RUN_OUTCOME_ADMITTED } from './data_stream';
+import {
+  COUNTED_WORKFLOW_BUDGET_GROUPS,
+  COUNTED_WORKFLOW_IDS,
+} from './budget_groups';
 import {
   RUN_QUOTA_SETTINGS_SO_ID,
   RUN_QUOTA_SETTINGS_SO_TYPE,
@@ -39,10 +43,6 @@ export interface RunQuotaSettingsUpdate {
 }
 
 export interface RunQuotaService {
-  /**
-   * The effective settings, read without a request. Used by the managed-workflow
-   * installer, which renders the limits into the gated workflow definitions.
-   */
   getSettings(): Promise<RunQuotaSettings>;
   updateSettings(params: {
     request: KibanaRequest;
@@ -61,7 +61,6 @@ export interface RunQuotaService {
 export const resolveSettings = (
   attributes: RunQuotaSettingsAttributes | undefined
 ): RunQuotaSettings => {
-  // Timezone is always UTC — not user-configurable. Ignore any stored value.
   const timezone = DEFAULT_RUN_QUOTA_SETTINGS.timezone;
 
   const limits = Object.fromEntries(
@@ -75,8 +74,6 @@ export const resolveSettings = (
         group,
         {
           enabled: stored.enabled,
-          // A stored value outside the accepted range would make the gate
-          // unenforceable, so clamp rather than trust it.
           max: Math.min(Math.max(Math.round(stored.max), MIN_RUN_LIMIT), MAX_RUN_LIMIT),
         },
       ];
@@ -86,17 +83,18 @@ export const resolveSettings = (
   return { timezone, limits };
 };
 
-interface LedgerUsage {
+interface ExecutionUsage {
   byGroup: Record<string, { total: number; byTrigger: Record<string, number> }>;
   unavailable: boolean;
 }
 
 /**
- * Reads admitted runs for the current window. Deployment-wide: the counted
- * workflows are installed once at the global scope, so runs are not split by
- * space even though each ledger entry records the space it ran in.
+ * Soft-quota usage from `.workflows-executions`. Deployment-wide: counted
+ * workflows are installed once at the global scope. Test runs are excluded.
+ * In-flight and failed runs count (startedAt in window) — same "failed counts"
+ * product rule as before, without an admit-time ledger.
  */
-const readLedgerUsage = async ({
+const readExecutionUsage = async ({
   esClient,
   windowStart,
   logger,
@@ -104,35 +102,34 @@ const readLedgerUsage = async ({
   esClient: ElasticsearchClient;
   windowStart: string;
   logger: Logger;
-}): Promise<LedgerUsage> => {
+}): Promise<ExecutionUsage> => {
   try {
     const response = await esClient.search({
-      index: RUN_LEDGER_DATA_STREAM,
+      index: WORKFLOWS_EXECUTIONS_INDEX,
       size: 0,
-      // The ledger data stream exists from bootstrap, but stay tolerant so a
-      // failed bootstrap degrades to "no usage" instead of a broken settings page.
       allow_no_indices: true,
       ignore_unavailable: true,
       query: {
         bool: {
           filter: [
-            { range: { '@timestamp': { gte: windowStart } } },
-            { term: { outcome: RUN_OUTCOME_ADMITTED } },
+            { terms: { workflowId: [...COUNTED_WORKFLOW_IDS] } },
+            { range: { startedAt: { gte: windowStart } } },
+            { term: { isTestRun: false } },
           ],
         },
       },
       aggs: {
-        groups: {
-          terms: { field: 'budget_group', size: RUN_BUDGET_GROUP_IDS.length * 4 },
+        workflows: {
+          terms: { field: 'workflowId', size: COUNTED_WORKFLOW_IDS.length * 2 },
           aggs: {
-            triggers: { terms: { field: 'triggered_by', size: 20 } },
+            triggers: { terms: { field: 'triggeredBy', size: 20 } },
           },
         },
       },
     });
 
-    const groups = (
-      response.aggregations?.groups as
+    const workflows = (
+      response.aggregations?.workflows as
         | {
             buckets: Array<{
               key: string;
@@ -143,25 +140,27 @@ const readLedgerUsage = async ({
         | undefined
     )?.buckets;
 
-    return {
-      unavailable: false,
-      byGroup: Object.fromEntries(
-        (groups ?? []).map((bucket) => [
-          bucket.key,
-          {
-            total: bucket.doc_count,
-            byTrigger: Object.fromEntries(
-              bucket.triggers.buckets.map((trigger) => [trigger.key, trigger.doc_count])
-            ),
-          },
-        ])
-      ),
-    };
+    const byGroup: ExecutionUsage['byGroup'] = {};
+    for (const bucket of workflows ?? []) {
+      const group = COUNTED_WORKFLOW_BUDGET_GROUPS[
+        bucket.key as keyof typeof COUNTED_WORKFLOW_BUDGET_GROUPS
+      ];
+      if (!group) {
+        continue;
+      }
+      const existing = byGroup[group] ?? { total: 0, byTrigger: {} };
+      existing.total += bucket.doc_count;
+      for (const trigger of bucket.triggers.buckets) {
+        existing.byTrigger[trigger.key] =
+          (existing.byTrigger[trigger.key] ?? 0) + trigger.doc_count;
+      }
+      byGroup[group] = existing;
+    }
+
+    return { unavailable: false, byGroup };
   } catch (error) {
-    // The in-workflow gate fails open on the same read, so reporting zero usage
-    // is consistent with what is actually being enforced.
     logger.warn(
-      `Failed to read the significant events run ledger: ${
+      `Failed to read workflow executions for run quotas: ${
         error instanceof Error ? error.message : String(error)
       }`
     );
@@ -176,7 +175,7 @@ const toGroupUsage = ({
 }: {
   group: RunBudgetGroupId;
   limit: RunLimit;
-  usage: LedgerUsage['byGroup'][string] | undefined;
+  usage: ExecutionUsage['byGroup'][string] | undefined;
 }): RunBudgetGroupUsage => {
   const used = usage?.total ?? 0;
   return {
@@ -193,20 +192,12 @@ const toGroupUsage = ({
 export const createRunQuotaService = ({
   logger,
   server,
-  onSettingsChanged,
 }: {
   logger: Logger;
   server: StreamsServer;
-  /**
-   * Called after a successful settings write. Limits live in the gated workflow
-   * YAML, so they only take effect once the workflows are reinstalled.
-   */
-  onSettingsChanged?: (settings: RunQuotaSettings) => Promise<void>;
 }): RunQuotaService => {
   const log = logger.get('significant-events-run-quotas');
 
-  // Reads run requestless (the installer has no request), writes go through the
-  // caller's scoped client so the write is audited against the acting user.
   const internalRepository = () =>
     server.core.savedObjects.createInternalRepository([RUN_QUOTA_SETTINGS_SO_TYPE]);
 
@@ -221,7 +212,6 @@ export const createRunQuotaService = ({
       return so.attributes;
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
-        // Never written yet: the defaults are the effective settings.
         return undefined;
       }
       throw error;
@@ -235,7 +225,6 @@ export const createRunQuotaService = ({
     getSettings,
 
     async updateSettings({ request, update, updatedBy }) {
-      // Timezone is always UTC; any value supplied by the caller is silently ignored.
       const soClient = server.core.savedObjects.getScopedClient(request, {
         includedHiddenTypes: [RUN_QUOTA_SETTINGS_SO_TYPE],
       });
@@ -252,17 +241,7 @@ export const createRunQuotaService = ({
         { id: RUN_QUOTA_SETTINGS_SO_ID, overwrite: true }
       );
 
-      // Reinstall failures are not fatal for the write: the new limits are
-      // persisted and the next install (boot, flag flip, another edit) picks
-      // them up. Surface it so an operator can tell enforcement is stale.
-      await onSettingsChanged?.(next).catch((error: unknown) => {
-        log.warn(
-          `Run limits were saved but the gated workflows could not be reinstalled, so enforcement still uses the previous limits: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      });
-
+      // Soft limits: enforce reads settings via GET /run_quotas — no workflow reinstall.
       return next;
     },
 
@@ -270,9 +249,7 @@ export const createRunQuotaService = ({
       const settings = await getSettings();
       const window = resolveDailyWindow(settings.timezone);
 
-      const usage = await readLedgerUsage({
-        // The ledger is a hidden internal index that no end user is granted
-        // read access to; the route's own authorization gates this read.
+      const usage = await readExecutionUsage({
         esClient: server.core.elasticsearch.client.asInternalUser,
         windowStart: window.start,
         logger: log,
