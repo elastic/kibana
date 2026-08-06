@@ -95008,7 +95008,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Target number of histogram buckets (bars). The effective ceiling is the `histogram:maxBars` advanced setting (default 1000).
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
