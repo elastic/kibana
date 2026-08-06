@@ -139,10 +139,6 @@ describe('lazySchema', () => {
       });
     });
 
-    // Mirrors the crash from metricStylingSchema / metricConfigSchemaESQL: a lazy
-    // schema stored as a field inside another lazy schema's factory. The ctx.seen
-    // identity mismatch (proxy !== real) used to throw:
-    //   TypeError: Cannot set properties of undefined (setting 'ref')
     it('produces a JSON schema when a lazy schema is nested inside another lazy schema', () => {
       const Inner = lazySchema(() => z.object({ value: z.number() }));
       const Outer = lazySchema(() => z.object({ inner: Inner, tag: z.string() }));
