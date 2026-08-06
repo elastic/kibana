@@ -167,8 +167,6 @@ describe('fromEs', () => {
     expect(definition.configuration.ai_indices).toEqual(['ai-index-1']);
   });
 
-  // The empty-list default is applied by the agents route, which knows whether the Context
-  // Engine is enabled; this converter only maps what is stored.
   it('leaves ai_indices unset when the config does not set it', () => {
     const definition = fromEs(getSampleDoc());
 
@@ -652,8 +650,6 @@ describe('updateRequestToEs', () => {
       expect(docProperties.config!.ai_indices).toEqual([]);
     });
 
-    // Same spread semantics as every other config field: a partial update from the agent edit
-    // form must not drop what is already stored.
     it('preserves stored ai_indices when the update does not mention it', () => {
       const docProperties = convert({
         name: 'new name',
