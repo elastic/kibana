@@ -481,8 +481,8 @@ function processStats(
       assets: false,
       modules: false,
     });
+
     if (warningOutput.trim()) {
-      log.warning('Build warnings:');
       log.warning(warningOutput);
     }
   }

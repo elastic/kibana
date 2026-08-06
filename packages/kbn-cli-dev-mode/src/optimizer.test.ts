@@ -426,7 +426,7 @@ describe('rspack path', () => {
     expect(runComplete).toHaveBeenCalled();
   });
 
-  it('reports an error when dynamic import of @kbn/rspack-optimizer fails', async () => {
+  it('fails when dynamic import of @kbn/rspack-optimizer fails', async () => {
     rspackTestState.importShouldFail = true;
     jest.resetModules();
 
@@ -438,16 +438,14 @@ describe('rspack path', () => {
       ...defaultOptions,
     });
 
-    subscriptions.push(
-      optimizer.run$.subscribe({
-        error,
-      })
-    );
+    const error = jest.fn();
+    subscriptions.push(optimizer.run$.subscribe({ error }));
 
     await flushPromises();
 
     expect(error).toHaveBeenCalledWith(new Error('Failed to load @kbn/rspack-optimizer'));
     expect(kbnOptimizer.runOptimizer).not.toHaveBeenCalled();
+    expect(RspackOptimizerMock).not.toHaveBeenCalled();
 
     rspackTestState.importShouldFail = false;
     jest.resetModules();
