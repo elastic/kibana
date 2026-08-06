@@ -65,13 +65,6 @@ const COMMON_STATE_IGNORE_PATHS = [
   // TODO: check DSL differing properties changed in transforms
   // Broad `…columns.*.params` is intentionally NOT skipped — keep comparing params so we can
   // investigate Custom Rank By / `orderAgg` (and other residual params diffs) under strict compare.
-  //
-  // TEMP skips for open PRESERVE fix PRs (remove each when the linked PR merges):
-  // - #283058 histogram granularity: SO→API still clamps `maxBars > 7` to `'auto'`.
-  'state.datasourceStates.formBased.layers.*.columns.*.params.maxBars',
-  // - #283159 metric trendline orderBy: trendline breakdown reuses main-layer `orderBy.columnId`.
-  //   (Wildcard matcher is per path segment, so we cannot target `*_trendline` layers only.)
-  'state.datasourceStates.formBased.layers.*.columns.*.params.orderBy',
   'state.datasourceStates.formBased.layers.*.columns.*.params.orderAgg',
   // TODO: check missing ES|QL column properties stripped out in transforms
   'state.datasourceStates.textBased.layers.*.columns.*.inMetricDimension', // dropped at state -> API and only applied from API -> State if explicitly set
