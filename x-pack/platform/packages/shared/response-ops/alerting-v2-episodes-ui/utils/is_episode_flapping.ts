@@ -6,6 +6,7 @@
  */
 
 import { filter, size, takeRight } from 'lodash';
+import { DEFAULT_FLAPPING_LOOKBACK } from '@kbn/alerting-v2-common-queries';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 
 export interface FlappingSettings {
@@ -14,7 +15,7 @@ export interface FlappingSettings {
 }
 
 export const DEFAULT_EPISODE_FLAPPING_SETTINGS: FlappingSettings = {
-  lookBackWindow: 20,
+  lookBackWindow: DEFAULT_FLAPPING_LOOKBACK,
   statusChangeThreshold: 4,
 };
 

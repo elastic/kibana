@@ -89,6 +89,12 @@ export const ALERTING_V2_ERROR_CODES = {
   INVALID_ACTION_POLICY_DATA: 'INVALID_ACTION_POLICY_DATA',
   /** A user-supplied date string failed ISO-8601 parsing. */
   INVALID_DATE_STRING: 'INVALID_DATE_STRING',
+  /**
+   * A delete could not queue the action policy's API key for invalidation, so
+   * the policy was left in place rather than deleted. The single delete throws
+   * it; bulk delete reports it per item.
+   */
+  API_KEY_INVALIDATION_FAILED: 'API_KEY_INVALIDATION_FAILED',
 
   // ──────────────────────── Alert actions ────────────────────
   /** No alert event matched the supplied `group_hash` (and `episode_id`). */
@@ -141,6 +147,24 @@ export type AlertingV2ErrorCode =
  * of enrichment).
  */
 export const ALERTING_V2_LOG_CODES = {
+  // ──────────────── Action policy API key invalidation ───────────────
+  /**
+   * A delete refused to remove one or more action policies because their API
+   * keys could not be queued for invalidation. Nothing was destroyed, so the
+   * keys are still referenced and a retry can invalidate them — but the
+   * pending-invalidation saved object store is failing writes and needs
+   * attention.
+   */
+  ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION:
+    'ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION',
+  /**
+   * A delete queued action policy API keys for invalidation and then failed
+   * to remove the matching policies. The policies survive with keys that are
+   * about to be invalidated, so they will stop being able to dispatch until
+   * their keys are rotated.
+   */
+  ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED: 'ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED',
+
   // ─────────────── Execution history (graceful degradation) ──────────────
   /**
    * One or more `task-run` hits returned by Elasticsearch on the rule
