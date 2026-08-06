@@ -494,6 +494,23 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
       describe('Execution', () => {
         // New connectors
         describe('Add event', () => {
+          // Use a dedicated connector so the event-log assertions are isolated from
+          // the rest of the suite's executions on the shared connector.
+          before(async () => {
+            const { body } = await supertest
+              .post('/api/actions/connector')
+              .set('kbn-xsrf', 'foo')
+              .send({
+                name: 'A servicenow simulator',
+                connector_type_id: '.servicenow-itom',
+                config: {
+                  apiUrl: serviceNowSimulatorURL,
+                },
+                secrets: mockServiceNowBasic.secrets,
+              });
+            simulatedActionId = body.id;
+          });
+
           it('should add an event ', async () => {
             const { body: result } = await supertest
               .post(`/api/actions/connector/${simulatedActionId}/_execute`)
@@ -512,18 +529,35 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                 id: simulatedActionId,
                 provider: 'actions',
                 actions: new Map([
-                  ['execute-start', { equal: 5 }],
-                  ['execute', { equal: 5 }],
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
                 ]),
               });
             });
 
-            const executeEvent = events[events.length - 1];
+            const executeEvent = events.find((event) => event?.event?.action === 'execute');
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(317);
           });
         });
 
         describe('getChoices', () => {
+          // Use a dedicated connector so the event-log assertions are isolated from
+          // the rest of the suite's executions on the shared connector.
+          before(async () => {
+            const { body } = await supertest
+              .post('/api/actions/connector')
+              .set('kbn-xsrf', 'foo')
+              .send({
+                name: 'A servicenow simulator',
+                connector_type_id: '.servicenow-itom',
+                config: {
+                  apiUrl: serviceNowSimulatorURL,
+                },
+                secrets: mockServiceNowBasic.secrets,
+              });
+            simulatedActionId = body.id;
+          });
+
           it('should get choices', async () => {
             const { body: result } = await supertest
               .post(`/api/actions/connector/${simulatedActionId}/_execute`)
@@ -577,13 +611,13 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                 id: simulatedActionId,
                 provider: 'actions',
                 actions: new Map([
-                  ['execute-start', { equal: 6 }],
-                  ['execute', { equal: 6 }],
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
                 ]),
               });
             });
 
-            const executeEvent = events[events.length - 1];
+            const executeEvent = events.find((event) => event?.event?.action === 'execute');
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(0);
           });
         });
