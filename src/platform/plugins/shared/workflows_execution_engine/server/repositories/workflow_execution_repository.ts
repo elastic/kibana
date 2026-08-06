@@ -146,7 +146,7 @@ export class WorkflowExecutionRepository {
       throw new Error('Workflow execution ID is required for update');
     }
 
-    await this.workflowExecutionsDataClient.bulk({
+    const response = await this.workflowExecutionsDataClient.bulk({
       items: [
         {
           operation: 'update',
@@ -155,6 +155,18 @@ export class WorkflowExecutionRepository {
       ],
       refresh: options.refresh ?? false,
     });
+
+    // bulk() treats item-level errors as partial failures and never throws.
+    // For a single-document update, any error must propagate so callers don't
+    // silently proceed after a failed write (e.g. doc-not-found, version conflict).
+    const itemError = response.items[0]?.error;
+    if (itemError) {
+      throw new Error(
+        `Failed to update workflow execution ${workflowExecution.id}: ${
+          itemError.reason ?? JSON.stringify(itemError)
+        }`
+      );
+    }
   }
 
   /**

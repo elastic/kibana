@@ -241,6 +241,21 @@ describe('WorkflowExecutionRepository', () => {
         'Workflow execution ID is required for update'
       );
     });
+
+    it('should throw when the bulk response contains an item-level error', async () => {
+      workflowExecutionsDataClient.bulk.mockResolvedValue(
+        asBulkResponse({
+          errors: true,
+          items: [
+            { id: '1', error: { type: 'document_missing_exception', reason: 'document missing' } },
+          ],
+        })
+      );
+
+      await expect(
+        repository.updateWorkflowExecution({ id: '1', status: ExecutionStatus.RUNNING })
+      ).rejects.toThrow('Failed to update workflow execution 1: document missing');
+    });
   });
 
   describe('searchWorkflowExecutions', () => {
