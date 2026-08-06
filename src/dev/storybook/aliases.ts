@@ -64,6 +64,7 @@ export const storybookAliases = {
     'x-pack/platform/plugins/shared/observability_ai_assistant/.storybook',
   observability_shared: 'x-pack/solutions/observability/plugins/observability_shared/.storybook',
   observability_slo: 'x-pack/solutions/observability/plugins/slo/.storybook',
+  nightshift: 'x-pack/solutions/observability/plugins/nightshift/.storybook',
   observability: 'x-pack/solutions/observability/plugins/observability/.storybook',
   presentation: 'src/platform/plugins/shared/presentation_util/storybook',
   profiling: 'x-pack/solutions/observability/plugins/profiling/.storybook',
