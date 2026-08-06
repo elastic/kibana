@@ -11,20 +11,12 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
   EuiLoadingSpinner,
-  EuiPanel,
   EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n-react';
-import { useHistory } from 'react-router-dom';
 import type { Investigation, RecommendedAction } from '@kbn/pnd-common';
 import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
@@ -32,11 +24,12 @@ import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
 import * as i18n from './translations';
 import { BriefingContainer } from '../../components/briefing_container';
+import { BRIEF_CONTAINER_BUCKETS } from '../../components/briefing_container/translations';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 const AUTO_RESOLVED_STATUSES = new Set(['auto-resolved', 'closed']);
 
-const BUCKET_COLORS: Record<Exclude<i18n.BriefBucket, 'all'>, string> = {
+const BUCKET_COLORS: Record<RecommendedAction, string> = {
   contain: 'danger',
   escalate: 'warning',
   investigate: 'primary',
@@ -49,141 +42,17 @@ const isQueueRow = (investigation: Investigation): boolean =>
 const isAutoResolved = (investigation: Investigation): boolean =>
   AUTO_RESOLVED_STATUSES.has(investigation.status ?? '');
 
-const matchesBucket = (investigation: Investigation, bucket: i18n.BriefBucket): boolean => {
+const matchesBucket = (
+  investigation: Investigation,
+  bucket: 'all' | RecommendedAction
+): boolean => {
   if (bucket === 'all') return true;
   return investigation.recommendedAction === bucket;
 };
 
-const BriefCard: React.FC<{
-  investigation: Investigation;
-  hasBorder: boolean;
-  onOpen: () => void;
-  onOpenChat: () => void;
-}> = ({ investigation, hasBorder, onOpen, onOpenChat }) => {
-  const { euiTheme } = useEuiTheme();
-  const inMotion = investigation.status === 'in-progress';
-
-  return (
-    <EuiPanel
-      paddingSize="m"
-      role="button"
-      tabIndex={0}
-      aria-label={investigation.title}
-      borderRadius="none"
-      css={{
-        cursor: 'pointer',
-        borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
-        borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
-        boxSizing: 'border-box',
-        boxShadow: 'none',
-        '&:hover': {
-          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-          boxShadow: 'none',
-        },
-      }}
-      hasBorder={false}
-      hasShadow={false}
-      onClick={onOpen}
-      onKeyDown={(event: React.KeyboardEvent) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          onOpen();
-        }
-      }}
-    >
-      <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
-        {investigation.priorityScore != null ? (
-          <EuiFlexItem grow={false}>
-            <EuiText size="m">
-              <strong>{investigation.priorityScore}</strong>
-            </EuiText>
-          </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h3>{investigation.title}</h3>
-              </EuiTitle>
-            </EuiFlexItem>
-            {investigation.recordId ? (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {investigation.recordId}
-                </EuiText>
-              </EuiFlexItem>
-            ) : null}
-            {inMotion ? (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{i18n.IN_MOTION}</EuiBadge>
-              </EuiFlexItem>
-            ) : null}
-            {investigation.pendingProposalCount > 0 ? (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="warning">
-                  {i18n.pendingProposalsLabel(investigation.pendingProposalCount)}
-                </EuiBadge>
-              </EuiFlexItem>
-            ) : null}
-            <EuiFlexItem grow />
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                <FormattedRelative value={investigation.updatedAt} />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {investigation.summary ? (
-            <>
-              <EuiSpacer size="xs" />
-              <EuiText size="s" color="subdued">
-                <p>{investigation.summary}</p>
-              </EuiText>
-            </>
-          ) : null}
-          <EuiSpacer size="s" />
-          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                <strong>{i18n.WATCHED_BY}</strong> {i18n.watchTierLabel(investigation.watch_tier)}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow />
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                color={inMotion ? 'text' : 'primary'}
-                onClick={(event: React.MouseEvent) => {
-                  event.stopPropagation();
-                  onOpen();
-                }}
-              >
-                {investigation.primaryActionLabel ?? i18n.DEFAULT_ACTION}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18n.OPEN_CHAT} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  aria-label={i18n.OPEN_CHAT}
-                  iconType="comment"
-                  color="text"
-                  onClick={(event: React.MouseEvent) => {
-                    event.stopPropagation();
-                    onOpenChat();
-                  }}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-};
-
 export const BriefPage: React.FC = () => {
-  const history = useHistory();
   const { data, isLoading, error } = useInvestigations();
-  const [selectedBucket, setSelectedBucket] = useState<i18n.BriefBucket>('all');
+  const [selectedBucket, setSelectedBucket] = useState<'all' | RecommendedAction>('all');
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
   usePndDocTitle(i18n.PAGE_TITLE);
 
@@ -203,7 +72,7 @@ export const BriefPage: React.FC = () => {
   );
 
   const bucketCounts = useMemo(() => {
-    const counts: Record<Exclude<i18n.BriefBucket, 'all'>, number> = {
+    const counts: Record<RecommendedAction, number> = {
       contain: 0,
       escalate: 0,
       investigate: 0,
@@ -243,11 +112,11 @@ export const BriefPage: React.FC = () => {
 
   const grouped = useMemo(() => {
     const groups: Array<{
-      id: Exclude<i18n.BriefBucket, 'all'>;
+      id: RecommendedAction;
       label: string;
       items: Investigation[];
     }> = [];
-    for (const bucket of i18n.BRIEF_BUCKETS) {
+    for (const bucket of BRIEF_CONTAINER_BUCKETS) {
       const items = filtered.filter(
         (investigation) => investigation.recommendedAction === bucket.id
       );
@@ -289,7 +158,7 @@ export const BriefPage: React.FC = () => {
             {i18n.ALL_BUCKET}
           </EuiButtonEmpty>
         </EuiFlexItem>
-        {i18n.BRIEF_BUCKETS.map((bucket) => (
+        {BRIEF_CONTAINER_BUCKETS.map((bucket) => (
           <EuiFlexItem key={bucket.id} grow={false}>
             <EuiButton
               size="s"
@@ -345,7 +214,7 @@ export const BriefPage: React.FC = () => {
       {error ? <EuiEmptyPrompt iconType="alert" title={<h2>{i18n.LOAD_ERROR}</h2>} /> : null}
 
       {!isLoading && !error && filtered.length === 0 ? (
-        <EuiEmptyPrompt iconType="visTagCloud" title={<h2>{i18n.EMPTY_BUCKET}</h2>} />
+        <EuiEmptyPrompt iconType="visTagCloud" title={<h2>{i18n.EMPTY_BRIEFING_QUEUE}</h2>} />
       ) : null}
 
       {!isLoading && !error
@@ -354,18 +223,7 @@ export const BriefPage: React.FC = () => {
               briefingId={group.id}
               briefingType={group.id as RecommendedAction}
               briefingList={group.items}
-            >
-              {group.items.map((investigation, i) => (
-                <EuiFlexItem key={investigation.id} grow={false}>
-                  <BriefCard
-                    investigation={investigation}
-                    hasBorder={i < group.items.length - 1}
-                    onOpen={() => history.push(`/investigations/${investigation.id}`)}
-                    onOpenChat={() => history.push('/chats')}
-                  />
-                </EuiFlexItem>
-              ))}
-            </BriefingContainer>
+            />
           ))
         : null}
     </PndPageSection>

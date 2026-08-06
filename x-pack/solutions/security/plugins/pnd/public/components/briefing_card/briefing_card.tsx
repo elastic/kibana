@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -22,15 +21,26 @@ import {
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { Investigation } from '@kbn/pnd-common';
+import { useHistory } from 'react-router-dom';
+import { WATCH_TIER_LABELS, BRIEFING_CARD_LABELS, BRIEFING_CARD_ACTIONS } from './translations';
+import { getEmptyValue } from '../helpers';
 
-export const BriefCard: React.FC<{
+export const BriefingCard: React.FC<{
   investigation: Investigation;
   hasBorder: boolean;
-  onOpen: () => void;
-  onOpenChat: () => void;
-}> = ({ investigation, hasBorder, onOpen, onOpenChat }) => {
+}> = ({ investigation, hasBorder }) => {
   const { euiTheme } = useEuiTheme();
   const inMotion = investigation.status === 'in-progress';
+  const emptyValue = getEmptyValue();
+  const history = useHistory();
+
+  const onOpen = useCallback(() => {
+    history.push(`/investigations/${investigation.id}`);
+  }, [history, investigation.id]);
+
+  const onOpenChat = useCallback(() => {
+    history.push(`/chats`);
+  }, [history]);
 
   return (
     <EuiPanel
@@ -39,11 +49,17 @@ export const BriefCard: React.FC<{
       tabIndex={0}
       aria-label={investigation.title}
       borderRadius="none"
-      css={css`
-        cursor: pointer;
-        border-bottom: ${hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none'};
-        border-radius: ${hasBorder ? 'none' : euiTheme.size.s};
-      `}
+      css={{
+        cursor: 'pointer',
+        borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
+        borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
+        boxSizing: 'border-box',
+        boxShadow: 'none',
+        '&:hover': {
+          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+          boxShadow: 'none',
+        },
+      }}
       hasBorder={false}
       hasShadow={false}
       onClick={onOpen}
@@ -78,13 +94,13 @@ export const BriefCard: React.FC<{
             ) : null}
             {inMotion ? (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{i18n.IN_MOTION}</EuiBadge>
+                <EuiBadge color="hollow">{BRIEFING_CARD_LABELS.inMotion}</EuiBadge>
               </EuiFlexItem>
             ) : null}
             {investigation.pendingProposalCount > 0 ? (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="warning">
-                  {i18n.pendingProposalsLabel(investigation.pendingProposalCount)}
+                  {BRIEFING_CARD_LABELS.pendingProposals(investigation.pendingProposalCount)}
                 </EuiBadge>
               </EuiFlexItem>
             ) : null}
@@ -107,7 +123,10 @@ export const BriefCard: React.FC<{
           <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
-                <strong>{i18n.WATCHED_BY}</strong> {i18n.watchTierLabel(investigation.watch_tier)}
+                <strong>{BRIEFING_CARD_LABELS.watchedBy}</strong>{' '}
+                {investigation.watch_tier
+                  ? WATCH_TIER_LABELS[investigation.watch_tier]
+                  : emptyValue}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow />
@@ -120,13 +139,13 @@ export const BriefCard: React.FC<{
                   onOpen();
                 }}
               >
-                {investigation.primaryActionLabel ?? i18n.DEFAULT_ACTION}
+                {investigation.primaryActionLabel ?? BRIEFING_CARD_ACTIONS.default}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18n.OPEN_CHAT} disableScreenReaderOutput>
+              <EuiToolTip content={BRIEFING_CARD_ACTIONS.openChat} disableScreenReaderOutput>
                 <EuiButtonIcon
-                  aria-label={i18n.OPEN_CHAT}
+                  aria-label={BRIEFING_CARD_ACTIONS.openChat}
                   iconType="comment"
                   color="text"
                   onClick={(event: React.MouseEvent) => {

@@ -12,11 +12,14 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
+  EuiTitle,
   EuiPanel,
   useEuiTheme,
+  EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { BRIEFING_CONTAINER_LABELS, EMPTY_BRIEFING_QUEUE } from './translations';
+import { BriefingCard } from '../briefing_card';
 
 const BRIEF_CATEGORY_COLORS: Record<RecommendedAction, string> = {
   contain: 'danger',
@@ -29,18 +32,17 @@ interface BriefingContainerProps {
   briefingId: string;
   briefingType: RecommendedAction;
   briefingList: Investigation[];
-  children?: React.ReactNode;
 }
 
 export const BriefingContainer = memo<BriefingContainerProps>(
-  ({ briefingId, briefingType, briefingList, children }) => {
+  ({ briefingId, briefingType, briefingList }) => {
     const { euiTheme } = useEuiTheme();
     const buttonContent = (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong>{briefingType}</strong>
-          </EuiText>
+          <EuiTitle size="xxs">
+            <h3>{BRIEFING_CONTAINER_LABELS[briefingType]}</h3>
+          </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiBadge color={BRIEF_CATEGORY_COLORS[briefingType]}>{briefingList.length}</EuiBadge>
@@ -80,9 +82,24 @@ export const BriefingContainer = memo<BriefingContainerProps>(
             }
           `}
         >
-          <EuiFlexGroup direction="column" gutterSize="none">
-            {children}
-          </EuiFlexGroup>
+          {briefingList.length > 0 ? (
+            <EuiFlexGroup direction="column" gutterSize="none">
+              {briefingList.map((investigation, i) => (
+                <EuiFlexItem key={investigation.id} grow={false}>
+                  <BriefingCard
+                    investigation={investigation}
+                    hasBorder={i < briefingList.length - 1}
+                  />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          ) : (
+            <EuiPanel>
+              <EuiText size="s" color="subdued">
+                {EMPTY_BRIEFING_QUEUE}
+              </EuiText>
+            </EuiPanel>
+          )}
         </EuiAccordion>
       </EuiPanel>
     );
