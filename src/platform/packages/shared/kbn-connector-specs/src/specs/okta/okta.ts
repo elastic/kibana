@@ -62,7 +62,7 @@ import type {
   UnsuspendUserInput,
 } from './types';
 
-/** Scopes required for Must + Should actions — keep in sync with auth helpText and docs. */
+/** Scopes required for Must + Should actions - keep in sync with auth helpText and docs. */
 const OKTA_OAUTH_SCOPES = ['okta.users.manage', 'okta.groups.manage', 'okta.logs.read'].join(' ');
 
 interface OktaConfig {
@@ -139,7 +139,7 @@ const formatOktaError = (action: string, error: unknown): Error => {
     const summary = data.errorSummary ?? JSON.stringify(data);
     const code = data.errorCode ? ` [${data.errorCode}]` : '';
     const id = data.errorId ? ` (errorId: ${data.errorId})` : '';
-    const causesSuffix = causes ? ` — ${causes}` : '';
+    const causesSuffix = causes ? ` - ${causes}` : '';
     return new Error(
       `Okta ${action} failed (status ${err.response.status})${code}: ${summary}${causesSuffix}${id}`
     );
@@ -170,7 +170,7 @@ export const Okta: ConnectorSpec = {
     displayName: 'Okta',
     description: i18n.translate('core.kibanaConnectorSpecs.okta.metadata.description', {
       defaultMessage:
-        'Contain compromised Okta identities — suspend users, revoke sessions, reset MFA, manage group membership, and query System Log events',
+        'Contain compromised Okta identities - suspend users, revoke sessions, reset MFA, manage group membership, and query System Log events',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -203,7 +203,7 @@ export const Okta: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.okta.auth.oauth.tokenUrl.helpText',
                 {
                   defaultMessage:
-                    'Org Authorization Server token endpoint. Must match your Org URL, for example https://your-okta-domain.okta.com/oauth2/v1/token. Create an API Services app with Public key/Private key client authentication, grant scopes okta.users.manage okta.groups.manage okta.logs.read, and assign an admin role to the service app.',
+                    'Org Authorization Server token endpoint. Must match your Org URL, for example https://your-okta-domain.okta.com/oauth2/v1/token (use https:// with two slashes). Create an API Services app with Public key/Private key client authentication, grant scopes okta.users.manage okta.groups.manage okta.logs.read, assign an admin role, and disable Require Demonstrating Proof of Possession (DPoP) on the app - Kibana does not send DPoP proofs yet.',
                 }
               ),
             },
@@ -258,7 +258,7 @@ export const Okta: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.okta.auth.ssws.apiToken.helpText',
                 {
                   defaultMessage:
-                    'Paste the raw Okta API token from Security > API > Tokens. Do not include a prefix — the connector sends Authorization: SSWS automatically. Prefer the OAuth service-app auth type when possible. Token privileges must allow user lifecycle, sessions, groups, and System Log read (equivalent to okta.users.manage, okta.groups.manage, okta.logs.read).',
+                    'Paste the raw Okta API token from Security > API > Tokens. Do not include a prefix - the connector sends Authorization: SSWS automatically. Prefer the OAuth service-app auth type when possible. Token privileges must allow user lifecycle, sessions, groups, and System Log read (equivalent to okta.users.manage, okta.groups.manage, okta.logs.read).',
                 }
               ),
               placeholder: '00…',
@@ -367,7 +367,7 @@ export const Okta: ConnectorSpec = {
     deactivateUser: {
       isTool: true,
       description:
-        'Deactivate a user (DEPROVISIONED) as a full lifecycle containment step beyond suspend. Destructive relative to suspend — prefer suspendUser when investigation may reverse the decision.',
+        'Deactivate a user (DEPROVISIONED) as a full lifecycle containment step beyond suspend. Destructive relative to suspend - prefer suspendUser when investigation may reverse the decision.',
       input: DeactivateUserInputSchema,
       handler: async (ctx, input: DeactivateUserInput) => {
         const orgUrl = getOrgUrl(ctx);
@@ -673,9 +673,10 @@ export const Okta: ConnectorSpec = {
     '',
     '### Gotchas',
     '- Suspend already clears sessions; still call `clearUserSessions` when you need oauthTokens or forgetDevices options.',
-    '- User path segments accept id, login, or unambiguous shortname — always prefer the id from `getUser` for writes.',
+    '- User path segments accept id, login, or unambiguous shortname - always prefer the id from `getUser` for writes.',
     '- `search` and `filter` must not be combined on `searchUsers`.',
     '- Prefer OAuth private_key_jwt (RS256 + kid) over SSWS tokens.',
+    '- If token requests fail with invalid_dpop_proof, disable Require DPoP on the Okta API Services app (Kibana does not send DPoP proofs yet).',
   ].join('\n'),
 
   test: {

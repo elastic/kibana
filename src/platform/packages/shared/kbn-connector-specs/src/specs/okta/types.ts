@@ -187,7 +187,7 @@ export const ListUsersInputSchema = lazySchema(() =>
       .min(1)
       .max(MAX_USER_LIMIT)
       .optional()
-      .describe('Page size (1–200). Okta defaults to 10 when omitted.'),
+      .describe('Page size (1-200). Okta defaults to 10 when omitted.'),
     after: z
       .string()
       .max(MAX_FILTER_LENGTH)
@@ -236,7 +236,7 @@ export const SearchUsersInputSchema = lazySchema(() =>
         .min(1)
         .max(MAX_USER_LIMIT)
         .optional()
-        .describe('Page size (1–200). Okta defaults to 10 when omitted.'),
+        .describe('Page size (1-200). Okta defaults to 10 when omitted.'),
       after: z
         .string()
         .max(MAX_FILTER_LENGTH)
@@ -284,7 +284,7 @@ export const GetLogsInputSchema = lazySchema(() =>
       .min(1)
       .max(MAX_LOG_LIMIT)
       .optional()
-      .describe('Number of events to return (1–1000). Okta defaults to 100.'),
+      .describe('Number of events to return (1-1000). Okta defaults to 100.'),
     sortOrder: z
       .enum(['ASCENDING', 'DESCENDING'])
       .optional()
