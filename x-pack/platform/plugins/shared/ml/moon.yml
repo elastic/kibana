@@ -157,6 +157,7 @@ dependsOn:
   - '@kbn/lens-common'
   - '@kbn/scout'
   - '@kbn/core-http-common'
+  - '@kbn/zod'
   - '@kbn/app-header'
   - '@kbn/ui-callout'
 tags:
