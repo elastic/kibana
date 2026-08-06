@@ -11,7 +11,7 @@ import { randomBytes } from 'crypto';
 import type { CoreSetup } from '@kbn/core/server';
 import type { IExternalUrlPolicy } from '@kbn/core-http-common';
 import { VEGA_SANDBOX_BUNDLE_FILE, VEGA_SANDBOX_BUNDLE_PUBLIC_PATH } from '@kbn/vega-sandbox';
-import { VEGA_SANDBOX_ROUTE_PATH } from '../common/sandbox_constants';
+import { VEGA_SANDBOX_ROUTE_PATH } from '../common/constants';
 
 const HTML_HEADERS = {
   'content-type': 'text/html; charset=utf-8',

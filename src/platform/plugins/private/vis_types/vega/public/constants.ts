@@ -19,6 +19,9 @@ export const VEGA_STANDALONE_EMBEDDABLE_FLAG = 'vega.standaloneEmbeddable';
 /** Browser feature flag gating sandboxed Vega rendering. Off by default. */
 export const VEGA_SANDBOXED_RENDERING_FLAG = 'vega.sandboxedRendering';
 
+/** Internal route that serves the sandbox iframe document. */
+export const VEGA_SANDBOX_ROUTE_PATH = '/internal/vis_type_vega/sandbox';
+
 export const ADD_VEGA_EMBEDDABLE_ACTION_ID = 'addVegaEmbeddableAction';
 
 /** Legacy "Add Vega" action that navigates to the Visualize editor (Canvas + flag-off Dashboard). */
