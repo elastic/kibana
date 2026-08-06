@@ -124,11 +124,6 @@ export const selectIsExecutionsTab = createSelector(
   selectActiveTab,
   (activeTab): activeTab is 'executions' => activeTab === 'executions'
 );
-export const selectIsWorkflowEditorReadOnly = createSelector(
-  selectIsExecutionsTab,
-  selectWorkflow,
-  (isExecutionsTab, workflow): boolean => isExecutionsTab || workflow?.managed === true
-);
 export const selectIsWorkflowTab = createSelector(
   selectActiveTab,
   (activeTab): activeTab is 'workflow' => activeTab === 'workflow'
@@ -139,7 +134,7 @@ export const selectIsWorkflowTab = createSelector(
  * These selectors are used to get the correct data for the editor based on the active tab (current workflow or previous execution).
  */
 
-const selectIsEditorExecutionYaml = createSelector(
+export const selectIsEditorExecutionYaml = createSelector(
   selectIsExecutionsTab,
   selectExecution,
   (isExecutionsTab, execution) => Boolean(isExecutionsTab && execution?.yaml)

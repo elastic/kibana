@@ -16,8 +16,9 @@ import {
   selectEditorWorkflowDefinition,
   selectFocusedStepId,
   selectFocusedTriggerId,
+  selectIsEditorExecutionYaml,
   selectIsExecutionsTab,
-  selectIsWorkflowEditorReadOnly,
+  selectWorkflow,
   selectWorkflowId,
   selectYamlString as selectYamlStringSelector,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -36,6 +37,7 @@ const mockUseUiSetting$ = jest.fn();
 const mockUseWorkflowUrlState = jest.fn();
 const mockUseWorkflowActions = jest.fn();
 const mockUseSelector = jest.fn();
+const mockUseParams = jest.fn();
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => mockUseKibana(),
@@ -43,6 +45,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
+}));
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: () => mockUseParams(),
 }));
 jest.mock('../../../entities/workflows/model/use_workflow_actions', () => ({
   useWorkflowActions: () => mockUseWorkflowActions(),
@@ -137,8 +143,9 @@ describe('WorkflowDetailEditor', () => {
 
   // Named base implementation so tests can extend it without creating infinite recursion
   const baseUseSelectorImpl = (selector: any) => {
+    if (selector === selectIsEditorExecutionYaml) return false;
     if (selector === selectIsExecutionsTab) return false;
-    if (selector === selectIsWorkflowEditorReadOnly) return false;
+    if (selector === selectWorkflow) return { managed: false };
     if (selector === selectYamlStringSelector) return mockYaml;
     if (selector === selectWorkflowId) return 'workflow-1';
     if (selector === selectFocusedStepId) return undefined;
@@ -191,6 +198,7 @@ describe('WorkflowDetailEditor', () => {
     jest.clearAllMocks();
 
     mockUseWorkflowsCapabilities.mockReturnValue(mockWorkflowsManagementCapabilities);
+    mockUseParams.mockReturnValue({ id: 'workflow-1' });
 
     mockUseKibana.mockReturnValue({
       services: {
@@ -248,11 +256,21 @@ describe('WorkflowDetailEditor', () => {
       expect(queryByTestId('workflowEditorReadOnlyBadge')).not.toBeInTheDocument();
     });
 
-    it('shows the read-only badge on the executions tab', () => {
+    it('does not show the read-only badge on the executions tab without a selection', () => {
       mockUseSelector.mockImplementation((selector: any) => {
         if (selector === selectIsExecutionsTab) return true;
-        if (selector === selectIsWorkflowEditorReadOnly) return true;
         return baseUseSelectorImpl(selector);
+      });
+
+      const { queryByTestId } = renderEditor();
+      expect(queryByTestId('workflowEditorReadOnlyBadge')).not.toBeInTheDocument();
+    });
+
+    it('shows the read-only badge when an execution is selected', () => {
+      mockUseWorkflowUrlState.mockReturnValue({
+        ...mockUseWorkflowUrlState(),
+        activeTab: 'executions',
+        selectedExecutionId: 'execution-1',
       });
 
       const { getByTestId } = renderEditor();
@@ -261,8 +279,29 @@ describe('WorkflowDetailEditor', () => {
 
     it('shows the read-only badge for managed workflows', () => {
       mockUseSelector.mockImplementation((selector: any) => {
-        if (selector === selectIsWorkflowEditorReadOnly) return true;
+        if (selector === selectWorkflow) return { managed: true };
         return baseUseSelectorImpl(selector);
+      });
+
+      const { getByTestId } = renderEditor();
+      expect(getByTestId('workflowEditorReadOnlyBadge')).toHaveTextContent('Read only');
+    });
+
+    it('shows the read-only badge without update privileges', () => {
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...mockWorkflowsManagementCapabilities,
+        canUpdateWorkflow: false,
+      });
+
+      const { getByTestId } = renderEditor();
+      expect(getByTestId('workflowEditorReadOnlyBadge')).toHaveTextContent('Read only');
+    });
+
+    it('shows the read-only badge without create privileges for a new workflow', () => {
+      mockUseParams.mockReturnValue({});
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...mockWorkflowsManagementCapabilities,
+        canCreateWorkflow: false,
       });
 
       const { getByTestId } = renderEditor();
@@ -391,7 +430,7 @@ describe('WorkflowDetailEditor', () => {
         clearResumeParam: jest.fn(),
       });
       mockUseSelector.mockImplementation((selector: any) => {
-        if (selector === selectIsWorkflowEditorReadOnly) return true;
+        if (selector === selectWorkflow) return { managed: true };
         return baseUseSelectorImpl(selector);
       });
 

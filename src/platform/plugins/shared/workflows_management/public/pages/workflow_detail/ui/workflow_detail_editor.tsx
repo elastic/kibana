@@ -46,7 +46,6 @@ import {
   selectFocusedTriggerId,
   selectIsExecutionsTab,
   selectIsSavingYaml,
-  selectIsWorkflowEditorReadOnly,
   selectIsYamlSyntaxValid,
   selectWorkflowId,
   selectYamlString,
@@ -58,6 +57,7 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { ExecutionGraph } from '../../../features/debug_graph/execution_graph';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowEditorReadOnly } from '../../../hooks/use_workflow_editor_read_only';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { getTestRunTooltipContent } from '../../../shared/ui';
@@ -109,7 +109,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   const workflowYaml = useSelector(selectYamlString) ?? '';
   const workflowId = useSelector(selectWorkflowId);
   const isExecutionsTab = useSelector(selectIsExecutionsTab);
-  const isReadOnly = useSelector(selectIsWorkflowEditorReadOnly);
+  const isReadOnly = useWorkflowEditorReadOnly();
   const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
   const isSaving = useSelector(selectIsSavingYaml);
   const getContextOverrideData = useContextOverrideData();
