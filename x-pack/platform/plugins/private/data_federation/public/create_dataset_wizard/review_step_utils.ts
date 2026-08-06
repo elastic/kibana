@@ -37,6 +37,11 @@ import {
 } from '../create_dataset_flyout/dataset_settings_visibility';
 import { getAwsRegionLabel } from './aws_regions';
 import { datasetWizardStrings } from './dataset_wizard_i18n';
+import {
+  DATASET_WIZARD_FLOW_VARIANT_1,
+  DATASET_WIZARD_FLOW_VARIANT_2,
+  type DatasetWizardFlowVariant,
+} from './dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues, SchemaMappingMode } from './dataset_wizard_form_state';
 import { inferFormatFromResource } from './infer_format_from_resource';
 
@@ -213,10 +218,15 @@ const getFormatLabel = (format: Exclude<DatasetWizardFormValues['settings']['for
   return format;
 };
 
-const getSchemaMappingModeLabel = (mode: SchemaMappingMode): string => {
+const getSchemaMappingModeLabel = (
+  mode: SchemaMappingMode,
+  flowVariant: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_2
+): string => {
   switch (mode) {
     case 'automatic':
-      return datasetWizardStrings.schemaMappingModeAutomatic();
+      return flowVariant === DATASET_WIZARD_FLOW_VARIANT_1
+        ? datasetWizardStrings.schemaMappingModeAutomaticFlow1()
+        : datasetWizardStrings.schemaMappingModeAutomatic();
     case 'aws_glue_table':
       return datasetWizardStrings.schemaMappingModeAwsGlueTable();
     case 'manual':
@@ -321,11 +331,14 @@ export const getReviewSettingsRows = (
   return rows;
 };
 
-export const getReviewSchemaMappingRows = (values: DatasetWizardFormValues): ReviewSummaryRow[] => {
+export const getReviewSchemaMappingRows = (
+  values: DatasetWizardFormValues,
+  flowVariant: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_2
+): ReviewSummaryRow[] => {
   const rows: ReviewSummaryRow[] = [
     {
       label: datasetWizardStrings.schemaMappingModeLegend(),
-      displayValue: getSchemaMappingModeLabel(values.schema_mapping_mode),
+      displayValue: getSchemaMappingModeLabel(values.schema_mapping_mode, flowVariant),
       badge: values.schema_mapping_mode === 'automatic' ? 'default' : 'modified',
     },
   ];
@@ -342,7 +355,7 @@ export const getReviewSchemaMappingRows = (values: DatasetWizardFormValues): Rev
     });
   }
 
-  if (values.schema_mapping_mode === 'automatic') {
+  if (values.schema_mapping_mode === 'automatic' && flowVariant === DATASET_WIZARD_FLOW_VARIANT_2) {
     const modifiedFieldTypeCount = Object.keys(values.automatic_field_types ?? {}).length;
 
     if (modifiedFieldTypeCount > 0) {

@@ -20,6 +20,10 @@ import { emptyCreateDatasetSettingsFormValues } from '../../create_dataset_flyou
 import { createDatasetFlyoutStrings } from '../../create_dataset_flyout/create_dataset_flyout_i18n';
 import { AutoDetectedSuffix } from '../auto_detected_suffix';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
+import {
+  DATASET_WIZARD_FLOW_VARIANT_1,
+  type DatasetWizardFlowVariant,
+} from '../dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { inferFormatFromResource } from '../infer_format_from_resource';
 
@@ -37,6 +41,7 @@ export interface AdditionalSettingsStepProps {
   resource: string;
   syncedResourceRef: MutableRefObject<string | null>;
   isEditMode: boolean;
+  flowVariant: DatasetWizardFlowVariant;
 }
 
 export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepProps> = ({
@@ -46,6 +51,7 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
   resource,
   syncedResourceRef,
   isEditMode,
+  flowVariant,
 }) => {
   const [autoDetectedFormat, setAutoDetectedFormat] = useState<DatasetFormatFormValue | ''>('');
   const [formatSelectionSource, setFormatSelectionSource] = useState<FormatSelectionSource>('none');
@@ -130,6 +136,11 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
   ]);
 
   const formatSuperSelectOptions = useMemo(() => {
+    const autoDetectedSuffix =
+      flowVariant === DATASET_WIZARD_FLOW_VARIANT_1
+        ? ` ${datasetWizardStrings.formatAutoDetectedSuffix()}`
+        : null;
+
     return FORMAT_SUPER_SELECT_OPTIONS().map((option) => {
       const isSelectedAutoDetected = option.value === format && option.value === autoDetectedFormat;
 
@@ -143,12 +154,16 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
           <>
             {option.inputDisplay}
             {' '}
-            <AutoDetectedSuffix />
+            {flowVariant === DATASET_WIZARD_FLOW_VARIANT_1 ? (
+              autoDetectedSuffix
+            ) : (
+              <AutoDetectedSuffix />
+            )}
           </>
         ),
       };
     });
-  }, [autoDetectedFormat, format]);
+  }, [autoDetectedFormat, flowVariant, format]);
 
   const accordionTitles = useMemo(
     () => ({

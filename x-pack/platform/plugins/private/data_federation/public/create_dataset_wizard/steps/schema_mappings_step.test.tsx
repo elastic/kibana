@@ -13,7 +13,17 @@ import { useForm } from 'react-hook-form';
 import type { DataSource } from '../../../common';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
+import {
+  DATASET_WIZARD_FLOW_VARIANT_1,
+  DATASET_WIZARD_FLOW_VARIANT_2,
+} from '../dataset_wizard_flow_variant';
 import { SchemaMappingsStep } from './schema_mappings_step';
+
+jest.mock('./manual_schema_mappings_editor', () => ({
+  ManualSchemaMappingsEditor: () => (
+    <div data-test-subj="datasetWizardManualSchemaMappingsEditor">Manual mappings editor</div>
+  ),
+}));
 
 const s3DataSource: DataSource = {
   name: 's3-source',
@@ -34,11 +44,13 @@ const TestHarness = ({
   dataSource = 'gcs-source',
   dataSourceRegion = '',
   defaultValues = emptyDatasetWizardFormValues(),
+  flowVariant = DATASET_WIZARD_FLOW_VARIANT_1,
 }: {
   dataSources?: DataSource[];
   dataSource?: string;
   dataSourceRegion?: string;
   defaultValues?: DatasetWizardFormValues;
+  flowVariant?: typeof DATASET_WIZARD_FLOW_VARIANT_1 | typeof DATASET_WIZARD_FLOW_VARIANT_2;
 }) => {
   const { control } = useForm<DatasetWizardFormValues>({
     defaultValues: {
@@ -54,14 +66,84 @@ const TestHarness = ({
         dataSources={dataSources}
         dataSource={dataSource}
         dataSourceRegion={dataSourceRegion}
+        flowVariant={flowVariant}
       />
     </EuiProvider>
   );
 };
 
-describe('SchemaMappingsStep', () => {
-  it('renders the automatic option for non-S3 data sources', () => {
+describe('SchemaMappingsStep flow 1', () => {
+  it('renders automatic and manual options for non-S3 data sources', () => {
     const { getByTestId, getByText, queryByTestId } = render(<TestHarness />);
+
+    expect(getByText('Schema mappings (optional)')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardSchemaMappingModeButtonGroup')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardSchemaMappingModeAutomatic')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    expect(queryByTestId('datasetWizardSchemaMappingModeAwsGlueTable')).toBeNull();
+    expect(getByTestId('datasetWizardSchemaMappingModeDescription')).toHaveTextContent(
+      'Elastic will sample the file and infer column names and types automatically.'
+    );
+  });
+
+  it('updates the editor when switching schema mapping modes', () => {
+    const { getByTestId, queryByTestId } = render(
+      <TestHarness
+        dataSources={[s3DataSource]}
+        dataSource="s3-source"
+      />
+    );
+
+    fireEvent.click(getByTestId('datasetWizardSchemaMappingModeAwsGlueTable'));
+    expect(getByTestId('datasetWizardAwsGlueTableSchemaMappings')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardAwsGlueCallout')).toBeInTheDocument();
+
+    fireEvent.click(getByTestId('datasetWizardSchemaMappingModeManual'));
+    expect(queryByTestId('datasetWizardSchemaMappingModeDescription')).toBeNull();
+    expect(getByTestId('datasetWizardManualSchemaMappingsEditor')).toBeInTheDocument();
+  });
+
+  it('resets aws_glue_table to automatic when the data source is not S3', () => {
+    const Harness = ({ dataSource }: { dataSource: string }) => {
+      const { control, watch } = useForm<DatasetWizardFormValues>({
+        defaultValues: {
+          ...emptyDatasetWizardFormValues(),
+          data_source: dataSource,
+          schema_mapping_mode: 'aws_glue_table',
+        },
+      });
+
+      return (
+        <EuiProvider>
+          <SchemaMappingsStep
+            control={control}
+            dataSources={[s3DataSource, gcsDataSource]}
+            dataSource={dataSource}
+            dataSourceRegion=""
+            flowVariant={DATASET_WIZARD_FLOW_VARIANT_1}
+          />
+          <span data-test-subj="schemaMappingModeValue">{watch('schema_mapping_mode')}</span>
+        </EuiProvider>
+      );
+    };
+
+    const { getByTestId, rerender } = render(<Harness dataSource="s3-source" />);
+
+    expect(getByTestId('schemaMappingModeValue')).toHaveTextContent('aws_glue_table');
+
+    rerender(<Harness dataSource="gcs-source" />);
+
+    expect(getByTestId('schemaMappingModeValue')).toHaveTextContent('automatic');
+  });
+});
+
+describe('SchemaMappingsStep flow 2', () => {
+  it('renders the infer from file option for non-S3 data sources', () => {
+    const { getByTestId, getByText, queryByTestId } = render(
+      <TestHarness flowVariant={DATASET_WIZARD_FLOW_VARIANT_2} />
+    );
 
     expect(getByText('Schema mappings (optional)')).toBeInTheDocument();
     expect(getByTestId('datasetWizardSchemaMappingModeButtonGroup')).toBeInTheDocument();
@@ -81,6 +163,7 @@ describe('SchemaMappingsStep', () => {
       <TestHarness
         dataSources={[s3DataSource]}
         dataSource="s3-source"
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_2}
       />
     );
 
@@ -92,6 +175,7 @@ describe('SchemaMappingsStep', () => {
       <TestHarness
         dataSources={[s3DataSource]}
         dataSource="s3-source"
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_2}
       />
     );
 
@@ -119,6 +203,7 @@ describe('SchemaMappingsStep', () => {
             dataSources={[s3DataSource, gcsDataSource]}
             dataSource={dataSource}
             dataSourceRegion=""
+            flowVariant={DATASET_WIZARD_FLOW_VARIANT_2}
           />
           <span data-test-subj="schemaMappingModeValue">{watch('schema_mapping_mode')}</span>
         </EuiProvider>
@@ -141,6 +226,7 @@ describe('SchemaMappingsStep', () => {
           ...emptyDatasetWizardFormValues(),
           schema_mapping_mode: 'manual',
         }}
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_2}
       />
     );
 

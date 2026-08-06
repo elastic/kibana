@@ -10,37 +10,33 @@ import React, { useEffect, useMemo } from 'react';
 import type { EuiButtonGroupProps } from '@elastic/eui';
 import { EuiButtonGroup, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
-import { useController, useWatch } from 'react-hook-form';
+import { useController } from 'react-hook-form';
 
 import type { DataSource } from '../../../common';
 import type { DatasetWizardFlowVariant } from '../dataset_wizard_flow_variant';
-import {
-  DATASET_WIZARD_FLOW_VARIANT_1,
-  DATASET_WIZARD_FLOW_VARIANT_2,
-} from '../dataset_wizard_flow_variant';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import type { DatasetWizardFormValues, SchemaMappingMode } from '../dataset_wizard_form_state';
-import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
-import { InferredSchemaPreviewTable } from '../inferred_schema_preview_table';
-import { getTestConfigurationPreviewFields } from '../test_configuration_preview_utils';
 import { AwsGlueTableSchemaMappingsEditor } from './aws_glue_table_schema_mappings_editor';
-import { SchemaMappingsStepFlow1, isAwsGlueTableSchemaMappingSupported } from './schema_mappings_step_flow_1';
-
-export { isAwsGlueTableSchemaMappingSupported };
+import { ManualSchemaMappingsEditor } from './manual_schema_mappings_editor';
 
 const SCHEMA_MAPPING_MODE_DESCRIPTIONS: Record<'automatic', () => string> = {
-  automatic: datasetWizardStrings.schemaMappingAutomaticDescription,
+  automatic: datasetWizardStrings.schemaMappingAutomaticDescriptionFlow1,
 };
+
+export const isAwsGlueTableSchemaMappingSupported = (
+  dataSources: readonly DataSource[],
+  dataSourceName: string
+): boolean => dataSources.find((dataSource) => dataSource.name === dataSourceName)?.type === 's3';
 
 export interface SchemaMappingsStepProps {
   control: Control<DatasetWizardFormValues>;
   dataSources: readonly DataSource[];
   dataSource: string;
   dataSourceRegion: string;
-  flowVariant: DatasetWizardFlowVariant;
+  flowVariant?: DatasetWizardFlowVariant;
 }
 
-export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps> = ({
+export const SchemaMappingsStepFlow1: FunctionComponent<SchemaMappingsStepProps> = ({
   control,
   dataSources,
   dataSource,
@@ -62,23 +58,22 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
     }
   }, [field, isAwsGlueTableSupported]);
 
-  useEffect(() => {
-    if (field.value === 'manual') {
-      field.onChange('automatic');
-    }
-  }, [field]);
-
   const options = useMemo<EuiButtonGroupProps['options']>(() => {
     const allOptions: EuiButtonGroupProps['options'] = [
       {
         id: 'automatic',
-        label: datasetWizardStrings.schemaMappingModeAutomatic(),
+        label: datasetWizardStrings.schemaMappingModeAutomaticFlow1(),
         'data-test-subj': 'datasetWizardSchemaMappingModeAutomatic',
       },
       {
         id: 'aws_glue_table',
         label: datasetWizardStrings.schemaMappingModeAwsGlueTable(),
         'data-test-subj': 'datasetWizardSchemaMappingModeAwsGlueTable',
+      },
+      {
+        id: 'manual',
+        label: datasetWizardStrings.schemaMappingModeManual(),
+        'data-test-subj': 'datasetWizardSchemaMappingModeManual',
       },
     ];
 
@@ -87,17 +82,7 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
       : allOptions.filter((option) => option.id !== 'aws_glue_table');
   }, [isAwsGlueTableSupported]);
 
-  const selectedMode = field.value === 'manual' ? 'automatic' : field.value;
-  const settings = useWatch({ control, name: 'settings' });
-  const automaticSchemaSampleFields = useMemo(() => {
-    const previewValues: DatasetWizardFormValues = {
-      ...emptyDatasetWizardFormValues(),
-      settings: settings ?? emptyDatasetWizardFormValues().settings,
-      schema_mapping_mode: 'automatic',
-    };
-
-    return getTestConfigurationPreviewFields(previewValues);
-  }, [settings]);
+  const selectedMode = field.value;
 
   return (
     <div data-test-subj="datasetWizardSchemaMappingsStep">
@@ -114,7 +99,7 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
         legend={datasetWizardStrings.schemaMappingModeLegend()}
         type="single"
         options={options}
-        idSelected={selectedMode}
+        idSelected={field.value}
         onChange={(id) => {
           field.onChange(id as SchemaMappingMode);
         }}
@@ -123,31 +108,18 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
       />
 
       <EuiSpacer size="l" />
-      {selectedMode === 'aws_glue_table' ? (
+      {selectedMode === 'manual' ? (
+        <ManualSchemaMappingsEditor control={control} />
+      ) : selectedMode === 'aws_glue_table' ? (
         <AwsGlueTableSchemaMappingsEditor
           control={control}
           dataSourceRegion={dataSourceRegion}
         />
       ) : (
-        <>
-          <EuiText size="s" data-test-subj="datasetWizardSchemaMappingModeDescription">
-            <p>{SCHEMA_MAPPING_MODE_DESCRIPTIONS[selectedMode]()}</p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <InferredSchemaPreviewTable
-            control={control}
-            inferredFields={automaticSchemaSampleFields}
-            testSubjPrefix="datasetWizardAutomaticSchemaSample"
-          />
-        </>
+        <EuiText size="s" data-test-subj="datasetWizardSchemaMappingModeDescription">
+          <p>{SCHEMA_MAPPING_MODE_DESCRIPTIONS[selectedMode]()}</p>
+        </EuiText>
       )}
     </div>
   );
 };
-
-export const SchemaMappingsStep: FunctionComponent<SchemaMappingsStepProps> = (props) =>
-  props.flowVariant === DATASET_WIZARD_FLOW_VARIANT_1 ? (
-    <SchemaMappingsStepFlow1 {...props} />
-  ) : (
-    <SchemaMappingsStepFlow2 {...props} />
-  );

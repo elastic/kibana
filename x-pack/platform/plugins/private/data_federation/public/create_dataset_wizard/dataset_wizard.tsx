@@ -53,7 +53,14 @@ import { LogisticsStep } from './steps/logistics_step';
 import { AdditionalSettingsStep } from './steps/additional_settings_step';
 import { SchemaMappingsStep } from './steps/schema_mappings_step';
 import { ReviewStep } from './steps/review_step';
-import type { DatasetWizardFlowVariant } from './dataset_wizard_flow_variant';
+import {
+  DATASET_WIZARD_FLOW_VARIANT_1,
+  type DatasetWizardFlowVariant,
+} from './dataset_wizard_flow_variant';
+import { TestConfigurationPreview } from './test_configuration_preview';
+
+const TEST_CONFIGURATION_LOADING_MS = 600;
+const TEST_CONFIGURATION_STEPS: DatasetWizardStep[] = [SCHEMA_MAPPINGS_STEP, REVIEW_STEP];
 
 export interface DatasetWizardProps {
   isEditMode: boolean;
@@ -95,7 +102,11 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   const [saveError, setSaveError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
   const [isCreateDataSourceFlyoutOpen, setIsCreateDataSourceFlyoutOpen] = useState(false);
+  const [isTestConfigPanelOpen, setIsTestConfigPanelOpen] = useState(false);
+  const [isTestConfigLoading, setIsTestConfigLoading] = useState(false);
   const additionalSettingsSyncedResourceRef = useRef<string | null>(null);
+  const testConfigLoadingTimeoutRef = useRef<number | undefined>();
+  const isFlow1 = flowVariant === DATASET_WIZARD_FLOW_VARIANT_1;
 
   const {
     control,
@@ -199,6 +210,53 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
     return validateResourceForDataSource(resource, dataSource, dataSources) === true;
   }, [dataSources, validateName, watchedDataSource, watchedName, watchedRegion, watchedResource]);
+
+  useEffect(() => {
+    if (!isFlow1) {
+      return;
+    }
+
+    setIsTestConfigPanelOpen(false);
+    setIsTestConfigLoading(false);
+
+    if (testConfigLoadingTimeoutRef.current !== undefined) {
+      window.clearTimeout(testConfigLoadingTimeoutRef.current);
+      testConfigLoadingTimeoutRef.current = undefined;
+    }
+  }, [currentStep, isFlow1]);
+
+  useEffect(
+    () => () => {
+      if (testConfigLoadingTimeoutRef.current !== undefined) {
+        window.clearTimeout(testConfigLoadingTimeoutRef.current);
+      }
+    },
+    []
+  );
+
+  const clearTestConfigLoadingTimeout = useCallback(() => {
+    if (testConfigLoadingTimeoutRef.current !== undefined) {
+      window.clearTimeout(testConfigLoadingTimeoutRef.current);
+      testConfigLoadingTimeoutRef.current = undefined;
+    }
+  }, []);
+
+  const handleCloseTestConfiguration = useCallback(() => {
+    setIsTestConfigPanelOpen(false);
+    setIsTestConfigLoading(false);
+    clearTestConfigLoadingTimeout();
+  }, [clearTestConfigLoadingTimeout]);
+
+  const handleTestConfiguration = useCallback(() => {
+    setIsTestConfigPanelOpen(true);
+    setIsTestConfigLoading(true);
+    clearTestConfigLoadingTimeout();
+
+    testConfigLoadingTimeoutRef.current = window.setTimeout(() => {
+      setIsTestConfigLoading(false);
+      testConfigLoadingTimeoutRef.current = undefined;
+    }, TEST_CONFIGURATION_LOADING_MS);
+  }, [clearTestConfigLoadingTimeout]);
 
   useEffect(() => {
     const stepFromUrl = parseWizardStepFromSearch(location.search) ?? LOGISTICS_STEP;
@@ -398,6 +456,8 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
   const showBackButton = currentStep > LOGISTICS_STEP;
   const isLastStep = currentStep === REVIEW_STEP;
+  const showTestConfiguration =
+    isFlow1 && TEST_CONFIGURATION_STEPS.includes(currentStep);
 
   const renderStepContent = () => (
     <>
@@ -417,6 +477,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           resource={watchedResource ?? ''}
           syncedResourceRef={additionalSettingsSyncedResourceRef}
           isEditMode={isEditMode}
+          flowVariant={flowVariant}
         />
       </div>
       <div hidden={currentStep !== SCHEMA_MAPPINGS_STEP}>
@@ -425,10 +486,11 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           dataSources={dataSources}
           dataSource={watchedDataSource ?? ''}
           dataSourceRegion={watchedRegion ?? ''}
+          flowVariant={flowVariant}
         />
       </div>
       <div hidden={currentStep !== REVIEW_STEP}>
-        <ReviewStep values={getValues()} dataSources={dataSources} />
+        <ReviewStep values={getValues()} dataSources={dataSources} flowVariant={flowVariant} />
       </div>
     </>
   );
@@ -450,6 +512,17 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
         <div data-test-subj="datasetWizardStepContent">{renderStepContent()}</div>
 
+        {showTestConfiguration && isTestConfigPanelOpen ? (
+          <>
+            <EuiSpacer size="l" />
+            <TestConfigurationPreview
+              values={getValues()}
+              isLoading={isTestConfigLoading}
+              onClose={handleCloseTestConfiguration}
+            />
+          </>
+        ) : null}
+
       <EuiSpacer size="xl" />
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -464,6 +537,17 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
                 <EuiButtonEmpty data-test-subj="datasetWizardBack" onClick={handleBack}>
                   {datasetWizardStrings.backButton()}
                 </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : null}
+            {showTestConfiguration ? (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="datasetWizardTestConfiguration"
+                  isLoading={isTestConfigLoading}
+                  onClick={handleTestConfiguration}
+                >
+                  {datasetWizardStrings.testConfigurationButton()}
+                </EuiButton>
               </EuiFlexItem>
             ) : null}
             <EuiFlexItem grow={false}>

@@ -12,6 +12,7 @@ import { useForm } from 'react-hook-form';
 
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
+import { DATASET_WIZARD_FLOW_VARIANT_2 } from '../dataset_wizard_flow_variant';
 import { AdditionalSettingsStep } from './additional_settings_step';
 
 const TestHarness = ({
@@ -35,6 +36,7 @@ const TestHarness = ({
         resource={resource}
         syncedResourceRef={syncedResourceRef}
         isEditMode={isEditMode}
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_2}
       />
     </EuiProvider>
   );
@@ -83,6 +85,7 @@ describe('AdditionalSettingsStep', () => {
             resource="s3://bucket/data.csv"
             syncedResourceRef={syncedResourceRef}
             isEditMode={false}
+            flowVariant={DATASET_WIZARD_FLOW_VARIANT_2}
           />
           <div data-test-subj="settingsSnapshot">{JSON.stringify(settings)}</div>
         </EuiProvider>

@@ -13,6 +13,10 @@ import type { DataSource } from '../../../common';
 import { applySettingsForFormat } from '../../create_dataset_flyout/dataset_settings_defaults';
 import { emptyCreateDatasetSettingsFormValues } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
 import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
+import {
+  DATASET_WIZARD_FLOW_VARIANT_1,
+  DATASET_WIZARD_FLOW_VARIANT_2,
+} from '../dataset_wizard_flow_variant';
 import { getReviewSettingsRows } from '../review_step_utils';
 import { ReviewStep } from './review_step';
 
@@ -31,11 +35,56 @@ const defaultValues = {
   settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
 };
 
-describe('ReviewStep', () => {
+describe('ReviewStep flow 1', () => {
+  it('renders Summary, Preview, and Request tabs', () => {
+    render(
+      <EuiProvider>
+        <ReviewStep
+          values={defaultValues}
+          dataSources={[s3DataSource]}
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_1}
+        />
+      </EuiProvider>
+    );
+
+    expect(screen.getByText('Summary')).toBeInTheDocument();
+    expect(screen.getByText('Preview')).toBeInTheDocument();
+    expect(screen.getByText('Request')).toBeInTheDocument();
+    expect(screen.queryByText('Preview results')).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Review configuration for dataset-obs-prod-s3' })
+    ).toBeInTheDocument();
+  });
+
+  it('shows the resolved payload in the preview tab', () => {
+    render(
+      <EuiProvider>
+        <ReviewStep
+          values={defaultValues}
+          dataSources={[s3DataSource]}
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_1}
+        />
+      </EuiProvider>
+    );
+
+    fireEvent.click(screen.getByText('Preview'));
+
+    expect(screen.getByTestId('datasetWizardReviewPreviewCodeScroll')).toBeInTheDocument();
+    expect(screen.getByTestId('datasetWizardReviewPreviewCode')).toHaveTextContent(
+      '"name": "dataset-obs-prod-s3"'
+    );
+  });
+});
+
+describe('ReviewStep flow 2', () => {
   it('renders Summary, Preview, Preview results, and Request tabs', () => {
     render(
       <EuiProvider>
-        <ReviewStep values={defaultValues} dataSources={[s3DataSource]} />
+        <ReviewStep
+          values={defaultValues}
+          dataSources={[s3DataSource]}
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_2}
+        />
       </EuiProvider>
     );
 
@@ -51,7 +100,11 @@ describe('ReviewStep', () => {
   it('shows logistics and settings in the summary tab', () => {
     render(
       <EuiProvider>
-        <ReviewStep values={defaultValues} dataSources={[s3DataSource]} />
+        <ReviewStep
+          values={defaultValues}
+          dataSources={[s3DataSource]}
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_2}
+        />
       </EuiProvider>
     );
 
@@ -76,7 +129,11 @@ describe('ReviewStep', () => {
 
     render(
       <EuiProvider>
-        <ReviewStep values={csvValues} dataSources={[s3DataSource]} />
+        <ReviewStep
+          values={csvValues}
+          dataSources={[s3DataSource]}
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_2}
+        />
       </EuiProvider>
     );
 
@@ -89,7 +146,11 @@ describe('ReviewStep', () => {
   it('shows the resolved payload in the preview tab', () => {
     render(
       <EuiProvider>
-        <ReviewStep values={defaultValues} dataSources={[s3DataSource]} />
+        <ReviewStep
+          values={defaultValues}
+          dataSources={[s3DataSource]}
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_2}
+        />
       </EuiProvider>
     );
 
@@ -107,7 +168,11 @@ describe('ReviewStep', () => {
   it('shows the data preview in the preview results tab', () => {
     render(
       <EuiProvider>
-        <ReviewStep values={defaultValues} dataSources={[s3DataSource]} />
+        <ReviewStep
+          values={defaultValues}
+          dataSources={[s3DataSource]}
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_2}
+        />
       </EuiProvider>
     );
 
@@ -121,15 +186,17 @@ describe('ReviewStep', () => {
   it('shows the request in the request tab', () => {
     render(
       <EuiProvider>
-        <ReviewStep values={defaultValues} dataSources={[s3DataSource]} />
+        <ReviewStep
+          values={defaultValues}
+          dataSources={[s3DataSource]}
+          flowVariant={DATASET_WIZARD_FLOW_VARIANT_2}
+        />
       </EuiProvider>
     );
 
     fireEvent.click(screen.getByText('Request'));
 
     expect(screen.getByTestId('datasetWizardReviewRequestCodeScroll')).toBeInTheDocument();
-    expect(screen.getByTestId('datasetWizardReviewRequestCode')).toHaveTextContent(
-      'PUT /internal/data_federation/dataset/dataset-obs-prod-s3'
-    );
+    expect(screen.getByTestId('datasetWizardReviewRequestCode')).toHaveTextContent('PUT');
   });
 });

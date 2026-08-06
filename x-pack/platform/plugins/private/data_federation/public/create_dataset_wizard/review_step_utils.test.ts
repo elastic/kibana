@@ -9,6 +9,7 @@ import type { DataSource } from '../../common';
 import { getDataSetByIdApiPath } from '../../common';
 import { applySettingsForFormat } from '../create_dataset_flyout/dataset_settings_defaults';
 import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_flyout/create_dataset_flyout_form_state';
+import { DATASET_WIZARD_FLOW_VARIANT_2 } from './dataset_wizard_flow_variant';
 import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
 import {
   buildDatasetPayloadFromWizardValues,
@@ -165,7 +166,7 @@ describe('review_step_utils', () => {
       },
     };
 
-    const rows = getReviewSchemaMappingRows(values);
+    const rows = getReviewSchemaMappingRows(values, DATASET_WIZARD_FLOW_VARIANT_2);
 
     expect(rows).toEqual(
       expect.arrayContaining([
@@ -190,7 +191,7 @@ describe('review_step_utils', () => {
       region: 'us-west-2',
     };
 
-    const rows = getReviewSchemaMappingRows(values);
+    const rows = getReviewSchemaMappingRows(values, DATASET_WIZARD_FLOW_VARIANT_2);
 
     expect(rows).toEqual(
       expect.arrayContaining([

@@ -292,6 +292,11 @@ export const datasetWizardStrings = {
       defaultMessage: 'Infer from file',
     }),
 
+  schemaMappingModeAutomaticFlow1: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingModeAutomaticFlow1', {
+      defaultMessage: 'Automatic',
+    }),
+
   schemaMappingModeAwsGlueTable: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingModeAwsGlueTable', {
       defaultMessage: 'AWS Glue table',
@@ -306,6 +311,12 @@ export const datasetWizardStrings = {
     i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingAutomaticDescription', {
       defaultMessage:
         'Elastic infers field names and types from your file. Review the sample below and adjust any type before continuing. Parquet uses embedded schema for highest fidelity; NDJSON and CSV use best-effort inference.',
+    }),
+
+  schemaMappingAutomaticDescriptionFlow1: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingAutomaticDescriptionFlow1', {
+      defaultMessage:
+        'Elastic will sample the file and infer column names and types automatically. Parquet files carry embedded schema and are inferred with highest fidelity. For NDJSON and CSV, a best-effort type inference is applied.',
     }),
 
   automaticSchemaSampleFieldColumn: () =>
@@ -478,6 +489,11 @@ export const datasetWizardStrings = {
   reviewPreviewTabTitle: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.reviewPreviewTabTitle', {
       defaultMessage: 'Preview configuration',
+    }),
+
+  reviewPreviewTabTitleFlow1: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewPreviewTabTitleFlow1', {
+      defaultMessage: 'Preview',
     }),
 
   reviewPreviewResultsTabTitle: () =>

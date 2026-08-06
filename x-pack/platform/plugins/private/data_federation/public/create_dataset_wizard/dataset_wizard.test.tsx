@@ -14,7 +14,7 @@ import { Router } from 'react-router-dom';
 import type { DataSource } from '../../common';
 import { ADDITIONAL_SETTINGS_STEP, REVIEW_STEP, SCHEMA_MAPPINGS_STEP } from './dataset_wizard_constants';
 import { DatasetWizard } from './dataset_wizard';
-import { DATASET_WIZARD_FLOW_VARIANT_1 } from './dataset_wizard_flow_variant';
+import { DATASET_WIZARD_FLOW_VARIANT_1, DATASET_WIZARD_FLOW_VARIANT_2 } from './dataset_wizard_flow_variant';
 import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
 import { applySettingsForFormat } from '../create_dataset_flyout/dataset_settings_defaults';
 import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_flyout/create_dataset_flyout_form_state';
@@ -44,7 +44,11 @@ describe('DatasetWizard step navigation', () => {
     sessionStorage.clear();
   });
 
-  const renderWizard = (initialEntry = '/create', defaultValues = emptyDatasetWizardFormValues()) => {
+  const renderWizard = (
+    initialEntry = '/create',
+    defaultValues = emptyDatasetWizardFormValues(),
+    flowVariant = DATASET_WIZARD_FLOW_VARIANT_1
+  ) => {
     const history = createMemoryHistory({ initialEntries: [initialEntry] });
 
     const view = render(
@@ -55,7 +59,7 @@ describe('DatasetWizard step navigation', () => {
             existingDataSetNames={[]}
             dataSources={dataSources}
             defaultValues={defaultValues}
-            flowVariant={DATASET_WIZARD_FLOW_VARIANT_1}
+            flowVariant={flowVariant}
             reloadDataSources={jest.fn().mockResolvedValue(undefined)}
             onCancel={jest.fn()}
             onSave={jest.fn().mockResolvedValue(null)}
@@ -157,7 +161,7 @@ describe('DatasetWizard step navigation', () => {
     settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet'),
   };
 
-  it('does not show the data preview table on the schema mappings step', () => {
+  it('does not show the data preview table on the schema mappings step in flow 1', () => {
     const { getByTestId, queryByTestId } = renderWizard(
       `/create?step=${SCHEMA_MAPPINGS_STEP}`,
       testConfigurationDraft
@@ -167,12 +171,60 @@ describe('DatasetWizard step navigation', () => {
     expect(queryByTestId('datasetWizardTestConfigurationTable')).toBeNull();
   });
 
-  it('shows the data preview in the review step preview results tab', () => {
-    const { getByTestId, getByText, queryByTestId } = renderWizard(
+  it('runs the mocked test configuration preview on the schema mappings step in flow 1', async () => {
+    jest.useFakeTimers();
+
+    const { getByTestId, queryByTestId } = renderWizard(
+      `/create?step=${SCHEMA_MAPPINGS_STEP}`,
+      testConfigurationDraft
+    );
+
+    expect(getByTestId('datasetWizardTestConfiguration')).toBeInTheDocument();
+    expect(queryByTestId('datasetWizardTestConfigurationPreview')).toBeNull();
+
+    fireEvent.click(getByTestId('datasetWizardTestConfiguration'));
+    expect(getByTestId('datasetWizardTestConfigurationPreview')).toBeInTheDocument();
+
+    jest.useRealTimers();
+  });
+
+  it('runs the mocked test configuration preview on the review step in flow 1', async () => {
+    jest.useFakeTimers();
+
+    const { getByTestId, queryByTestId } = renderWizard(
       `/create?step=${REVIEW_STEP}`,
       testConfigurationDraft
     );
 
+    expect(queryByTestId('datasetWizardTestConfigurationPreview')).toBeNull();
+
+    fireEvent.click(getByTestId('datasetWizardTestConfiguration'));
+    expect(getByTestId('datasetWizardTestConfigurationPreview')).toBeInTheDocument();
+    expect(getByTestId('datasetWizardTestConfigurationLoading')).toBeInTheDocument();
+
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    await waitFor(() => {
+      expect(queryByTestId('datasetWizardTestConfigurationLoading')).toBeNull();
+      expect(getByTestId('datasetWizardTestConfigurationTable')).toBeInTheDocument();
+    });
+
+    fireEvent.click(getByTestId('datasetWizardTestConfigurationClose'));
+    expect(queryByTestId('datasetWizardTestConfigurationPreview')).toBeNull();
+
+    jest.useRealTimers();
+  });
+
+  it('shows the data preview in the review step preview results tab in flow 2', () => {
+    const { getByTestId, getByText, queryByTestId } = renderWizard(
+      `/create?step=${REVIEW_STEP}`,
+      testConfigurationDraft,
+      DATASET_WIZARD_FLOW_VARIANT_2
+    );
+
+    expect(queryByTestId('datasetWizardTestConfiguration')).toBeNull();
     expect(queryByTestId('datasetWizardTestConfigurationTable')).toBeNull();
 
     fireEvent.click(getByText('Preview results'));
