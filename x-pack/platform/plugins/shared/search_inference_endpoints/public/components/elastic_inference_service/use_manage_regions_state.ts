@@ -140,6 +140,10 @@ export const useManageRegionsState = (onClose: () => void) => {
     onClose,
   ]);
 
+  const handleConfirmDelete = useCallback(() => {
+    deletePolicy();
+  }, [deletePolicy]);
+
   const handleDismissCallOut = useCallback(() => {
     setIsCallOutDismissed(true);
   }, []);
@@ -216,7 +220,7 @@ export const useManageRegionsState = (onClose: () => void) => {
       handleRequestSave,
       handleConfirmSave,
       handleCancelConfirmation,
-      handleConfirmDelete: deletePolicy,
+      handleConfirmDelete,
       handleCancelDeleteConfirmation,
     },
     regionTab: regionTabReturn,
