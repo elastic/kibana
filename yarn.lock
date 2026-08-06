@@ -1968,12 +1968,12 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@9.4.2":
-  version "9.4.2"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.4.2.tgz#be41243fb67b73b3114ca803cd153591782b6c8b"
-  integrity sha512-H9myMlLUeotkZhZ4ppinoMGDFxmW3lY8/s+4TIk1vFHyCvWU1Ej4T7azX5buCzemyFApgN0ywnEuvOtpel2VZg==
+"@elastic/elasticsearch@9.5.0":
+  version "9.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.5.0.tgz#97699f53a9dccbc83281c7c6ca9a3c7310af4f1b"
+  integrity sha512-6PApbQaAgVHpOvZJrAUSMrU+Nm2PznuIuTUoV29jCezL9Yze1keptiTvtsMqBsnw8v8wvfN6e4L1RTlwa5624A==
   dependencies:
-    "@elastic/transport" "^9.3.5"
+    "@elastic/transport" "^9.4.0"
     tslib "^2.4.0"
 
 "@elastic/ems-client@8.7.0":
@@ -2318,7 +2318,7 @@
     history "^4.9.0"
     qs "^6.9.7"
 
-"@elastic/transport@9.3.7", "@elastic/transport@^9.3.5":
+"@elastic/transport@9.3.7", "@elastic/transport@^9.4.0":
   version "9.3.7"
   resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-9.3.7.tgz#5b81998f5b6305dd6f8d9b05da824a96c53df8b8"
   integrity sha512-L38Ax21uF2OPUmCRWycZ/dZdMYf7gMrtClcxvVrqJVFmn8ET2M++GYmFGJpLqOHS1beATxOXLWe7y2ijSQz/ng==
