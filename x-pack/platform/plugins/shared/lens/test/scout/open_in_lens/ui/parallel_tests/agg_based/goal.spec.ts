@@ -8,10 +8,10 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
-  testData,
   convertToLensByTitle,
   createOpenInLensSuiteSetup,
   spaceTest,
+  testData,
 } from '../../fixtures';
 
 spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.deploymentAgnostic }, () => {

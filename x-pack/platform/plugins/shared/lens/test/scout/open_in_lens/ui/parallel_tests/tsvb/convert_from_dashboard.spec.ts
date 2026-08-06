@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData, createOpenInLensSuiteSetup, spaceTest } from '../../fixtures';
+import { createOpenInLensSuiteSetup, spaceTest, testData } from '../../fixtures';
 
 // FLAKY: https://github.com/elastic/kibana/issues/179307
 // Tracks known stateful FTR flakiness during the Scout migration. Serverless FTR also
