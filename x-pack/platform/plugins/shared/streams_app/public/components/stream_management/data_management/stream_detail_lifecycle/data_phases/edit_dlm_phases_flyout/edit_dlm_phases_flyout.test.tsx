@@ -439,6 +439,43 @@ describe('EditDlmPhasesFlyout', () => {
     });
   });
 
+  it('hides boundary help text when delete falls below frozen, but keeps it for non-boundary errors', async () => {
+    renderDlmFlyout({}, { initialSelectedPhase: 'delete' });
+    await tick();
+
+    const deletePanel = withinPhase('delete');
+    const helpText = 'Must occur after the frozen phase (30d).';
+
+    // Initially: valid state — help text is visible.
+    expect(deletePanel.getByText(helpText)).toBeInTheDocument();
+
+    // Enter a value below frozen (boundary error) — message should appear exactly once.
+    const valueInput = deletePanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`);
+    fireEvent.change(valueInput, { target: { value: '20' } });
+    fireEvent.blur(valueInput);
+
+    await waitFor(() => {
+      // Error is shown (via EuiFormRow error prop), help text is suppressed — only one instance.
+      expect(deletePanel.getAllByText(helpText)).toHaveLength(1);
+    });
+
+    // Restore to a valid value above frozen, then enter a non-integer value: help text stays.
+    fireEvent.change(valueInput, { target: { value: '90' } });
+    fireEvent.blur(valueInput);
+    await waitFor(() =>
+      expect(deletePanel.queryByText(/An integer is required/)).not.toBeInTheDocument()
+    );
+
+    fireEvent.change(valueInput, { target: { value: '90.5' } });
+    fireEvent.blur(valueInput);
+
+    await waitFor(() => {
+      expect(deletePanel.getByText(/An integer is required/)).toBeInTheDocument();
+      // Help text remains visible — boundary error isn't active.
+      expect(deletePanel.getByText(helpText)).toBeInTheDocument();
+    });
+  });
+
   it('allows removing frozen and delete phases and shows empty state when both removed', async () => {
     renderDlmFlyout({}, { initialSelectedPhase: 'frozen' });
     await tick();

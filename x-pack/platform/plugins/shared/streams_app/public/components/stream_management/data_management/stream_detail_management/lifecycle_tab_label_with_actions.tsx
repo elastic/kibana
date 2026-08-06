@@ -34,16 +34,23 @@ interface LifecycleTabEditAction {
   'data-test-subj': string;
 }
 
+interface LifecycleTabImportAction {
+  disabled?: boolean;
+  onClick: () => void;
+}
+
 interface LifecycleTabLabelWithActionsProps {
   showActions: boolean;
   onCopy: () => void;
   editAction?: LifecycleTabEditAction;
+  importAction?: LifecycleTabImportAction;
 }
 
 export const LifecycleTabLabelWithActions = ({
   showActions,
   onCopy,
   editAction,
+  importAction,
 }: LifecycleTabLabelWithActionsProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -62,6 +69,26 @@ export const LifecycleTabLabelWithActions = ({
       })}
     </EuiContextMenuItem>,
   ];
+
+  if (importAction) {
+    menuItems.push(
+      <EuiContextMenuItem
+        key="importFromStream"
+        icon="importAction"
+        disabled={importAction.disabled}
+        onClick={() => {
+          if (importAction.disabled) return;
+          setIsOpen(false);
+          importAction.onClick();
+        }}
+        data-test-subj="streamsLifecycleTabImportFromStream"
+      >
+        {i18n.translate('xpack.streams.lifecycleTab.actions.importFromStream', {
+          defaultMessage: 'Import from another stream',
+        })}
+      </EuiContextMenuItem>
+    );
+  }
 
   if (editAction) {
     menuItems.push(
@@ -138,6 +165,8 @@ interface LifecycleTabLabelProps {
   showActions: boolean;
   notifications: CoreStart['notifications'];
   share: SharePublicStart;
+  onImportFromStream?: () => void;
+  isImportFromStreamDisabled?: boolean;
 }
 
 export const LifecycleTabLabel = ({
@@ -145,6 +174,8 @@ export const LifecycleTabLabel = ({
   showActions,
   notifications,
   share,
+  onImportFromStream,
+  isImportFromStreamDisabled = false,
 }: LifecycleTabLabelProps) => {
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
@@ -154,6 +185,27 @@ export const LifecycleTabLabel = ({
 
   const isClassic = StreamsSchema.ClassicStream.GetResponse.is(definition);
   const isWired = StreamsSchema.WiredStream.GetResponse.is(definition);
+
+  const importAction = useMemo((): LifecycleTabImportAction | undefined => {
+    if (!definition.privileges.lifecycle || !definition.privileges.manage_failure_store) {
+      return undefined;
+    }
+
+    return {
+      disabled: !onImportFromStream || isImportFromStreamDisabled,
+      onClick: () => {
+        if (isImportFromStreamDisabled) {
+          return;
+        }
+        onImportFromStream?.();
+      },
+    };
+  }, [
+    definition.privileges.lifecycle,
+    definition.privileges.manage_failure_store,
+    isImportFromStreamDisabled,
+    onImportFromStream,
+  ]);
 
   const editAction = useMemo((): LifecycleTabEditAction | undefined => {
     if (isClassic) {
@@ -229,6 +281,7 @@ export const LifecycleTabLabel = ({
           });
         }
       }}
+      importAction={importAction}
       editAction={editAction}
     />
   );

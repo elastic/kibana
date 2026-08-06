@@ -1,5 +1,5 @@
 {
-  "sha1": "3bbd2cb0a12ba2ba41d03f3cb6443061b54181ef",
+  "sha1": "5651c42cd2722ef18a5aa3fdd747a234edf2faef",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -261,7 +261,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 96,
+        "line": 98,
         "column": 9
       }
     },
@@ -275,7 +275,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 103,
+        "line": 105,
         "column": 9
       }
     },
@@ -289,7 +289,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 127,
+        "line": 129,
         "column": 9
       }
     },
@@ -303,7 +303,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 146,
+        "line": 148,
         "column": 9
       }
     },
@@ -317,7 +317,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 170,
+        "line": 172,
         "column": 9
       }
     },

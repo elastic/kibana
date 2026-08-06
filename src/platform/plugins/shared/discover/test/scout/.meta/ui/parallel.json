@@ -1,5 +1,5 @@
 {
-  "sha1": "a7c53f93ce2aeb580c6c4054e41a93d2597b3ab6",
+  "sha1": "ee7b0714ff79d2019d6beeebadeff2e4513867b9",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -644,8 +644,8 @@
       }
     },
     {
-      "id": "1bd51040dfd96ad-a966b4d2472039f",
-      "title": "Discover data grid sample size - saved search and Dashboard saves a custom sample size with a search",
+      "id": "1bd51040dfd96ad-4165cd5e8ccb60d",
+      "title": "Discover data grid sample size - saved search and Dashboard saves and restores a custom sample size",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -653,6 +653,32 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size_saved_search_dashboard.spec.ts",
         "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "1bd51040dfd96ad-02edc36d356bb8c",
+      "title": "Discover data grid sample size - saved search and Dashboard new Discover sessions use the default sample size",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size_saved_search_dashboard.spec.ts",
+        "line": 94,
+        "column": 14
+      }
+    },
+    {
+      "id": "1bd51040dfd96ad-2e6bba352dc2c66",
+      "title": "Discover data grid sample size - saved search and Dashboard loading an archived saved search uses the default sample size",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size_saved_search_dashboard.spec.ts",
+        "line": 114,
         "column": 14
       }
     },
@@ -665,7 +691,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size_saved_search_dashboard.spec.ts",
-        "line": 112,
+        "line": 133,
         "column": 14
       }
     },
@@ -678,7 +704,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid/data_grid_sample_size_saved_search_dashboard.spec.ts",
-        "line": 125,
+        "line": 146,
         "column": 14
       }
     },
@@ -1512,6 +1538,71 @@
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/unmapped_fields.spec.ts",
         "line": 70,
         "column": 12
+      }
+    },
+    {
+      "id": "35067bbcb21d5b1-28cdc8d1189eea3",
+      "title": "Discover feature controls — share and reporting discover:all gets a short share URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 37,
+        "column": 14
+      }
+    },
+    {
+      "id": "35067bbcb21d5b1-00052ff5a8cd2fa",
+      "title": "Discover feature controls — share and reporting discover:all can generate a CSV report",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 47,
+        "column": 14
+      }
+    },
+    {
+      "id": "35067bbcb21d5b1-3f1dc73612eea1e",
+      "title": "Discover feature controls — share and reporting discover:read + url_create also gets a short share URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 55,
+        "column": 14
+      }
+    },
+    {
+      "id": "35067bbcb21d5b1-658b64ad2978e8b",
+      "title": "Discover feature controls — share and reporting discover:read without url_create only gets a long share URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 68,
+        "column": 14
+      }
+    },
+    {
+      "id": "35067bbcb21d5b1-c763afe8d7022e3",
+      "title": "Discover feature controls — share and reporting discover:read snapshot URL encodes the current query, sort and time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
+        "line": 82,
+        "column": 14
       }
     },
     {
