@@ -50875,7 +50875,8 @@ paths:
                   - item
           description: 'OK: A successful request.'
       summary: Get space settings
-      tags: []
+      tags:
+        - Fleet internals
       x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -50941,7 +50942,8 @@ paths:
                   - item
           description: 'OK: A successful request.'
       summary: Create space settings
-      tags: []
+      tags:
+        - Fleet internals
       x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
