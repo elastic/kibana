@@ -6,7 +6,8 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { submitFeedback } from './feedback_api';
+import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
+import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 
 type Vote = 'up' | 'down' | null;
 
@@ -35,6 +36,8 @@ const SUBMITTED_VISIBLE_MS = 2500;
 const SUBMITTED_FADE_MS = 500;
 
 export const useFeedback = (roundId: string): UseFeedbackReturn => {
+  const conversationId = useConversationId();
+  const { conversationsService } = useAgentBuilderServices();
   const [vote, setVoteState] = useState<Vote>(null);
   const [chips, setChips] = useState<string[]>([]);
   const [comment, setCommentState] = useState('');
@@ -100,10 +103,12 @@ export const useFeedback = (roundId: string): UseFeedbackReturn => {
         setVoteState('up');
         setModalOpen(false);
         setInviteVisible(true);
-        submitFeedback({ roundId, vote: 'up', chips: [], comment: '' });
+        if (conversationId) {
+          conversationsService.submitRoundFeedback({ conversationId, roundId, vote: 'up' });
+        }
       }
     },
-    [roundId, reset, clearSubmittedTimers]
+    [conversationId, conversationsService, roundId, reset, clearSubmittedTimers]
   );
 
   const toggleChip = useCallback((chip: string) => {
@@ -127,10 +132,11 @@ export const useFeedback = (roundId: string): UseFeedbackReturn => {
 
   const submit = useCallback(async () => {
     const currentVote = voteRef.current;
-    if (!currentVote) return;
+    if (!currentVote || !conversationId) return;
     setIsSubmitting(true);
     try {
-      await submitFeedback({
+      await conversationsService.submitRoundFeedback({
+        conversationId,
         roundId,
         vote: currentVote,
         chips: chipsRef.current,
@@ -152,7 +158,7 @@ export const useFeedback = (roundId: string): UseFeedbackReturn => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [roundId, clearSubmittedTimers]);
+  }, [conversationId, conversationsService, roundId, clearSubmittedTimers]);
 
   return {
     vote,
