@@ -59,10 +59,8 @@ export class UserStorageClient implements IUserStorageClient {
   private readonly httpErrors$ = new Subject<Error>();
   /** Emits whenever the cache is hydrated by a lazy fetch. */
   private readonly loaded$ = new Subject<{ key: string; value: unknown }>();
-  /** In-flight lazy-fetch promises, keyed by storage key, so concurrent callers share one request. */
+  /** The current lazy fetch per key: concurrent callers share it, and a fetch missing from it is stale. */
   private readonly fetchesInFlight = new Map<string, Promise<unknown>>();
-  /** Per-key successful-write counter; a fetch that started before a write is discarded so it can't clobber it. */
-  private readonly writeCountByKey = new Map<string, number>();
 
   constructor({ api, initialValues, available, done$ }: UserStorageClientParams) {
     this.api = api;
@@ -188,7 +186,6 @@ export class UserStorageClient implements IUserStorageClient {
 
     const oldValue = this.cache[key];
     this.cache[key] = stored;
-    this.bumpWriteCount(key);
     // Invalidate any in-flight GET so its stale outcome can't clobber this write.
     this.fetchesInFlight.delete(key);
     this.update$.next({ type: 'set', key, newValue: stored, oldValue });
@@ -206,7 +203,6 @@ export class UserStorageClient implements IUserStorageClient {
 
     const oldValue = this.cache[key];
     delete this.cache[key];
-    this.bumpWriteCount(key);
     // Invalidate any in-flight GET so a stale outcome can't resurrect the value.
     this.fetchesInFlight.delete(key);
     this.update$.next({ type: 'remove', key, oldValue });
@@ -234,14 +230,6 @@ export class UserStorageClient implements IUserStorageClient {
     return this.httpErrors$.asObservable();
   }
 
-  private getWriteCount(key: string): number {
-    return this.writeCountByKey.get(key) ?? 0;
-  }
-
-  private bumpWriteCount(key: string): void {
-    this.writeCountByKey.set(key, this.getWriteCount(key) + 1);
-  }
-
   /**
    * Starts (or joins an already-started) lazy GET for `key`, resolving with
    * the fetched value. Resolves immediately from the cache if already hydrated.
@@ -261,9 +249,6 @@ export class UserStorageClient implements IUserStorageClient {
     const inFlight = this.fetchesInFlight.get(key);
     if (inFlight) return inFlight;
 
-    // Snapshot the write count; a successful set()/remove() landing mid-fetch bumps it.
-    const writeCountAtStart = this.getWriteCount(key);
-
     const getCurrentOrRefetch = () => {
       const current = this.cache[key];
       // A set leaves an authoritative value; a remove leaves the cache absent, so
@@ -271,11 +256,12 @@ export class UserStorageClient implements IUserStorageClient {
       return current !== undefined ? current : this.startFetch(key);
     };
 
-    const promise = this.api.get(key).then(
+    const isStale = () => this.fetchesInFlight.get(key) !== promise;
+
+    const promise: Promise<unknown> = this.api.get(key).then(
       (value) => {
-        // Check staleness before touching the map: a write may have invalidated
-        // this promise and installed a newer fetch in its place.
-        if (this.getWriteCount(key) !== writeCountAtStart) {
+        // A write (or a newer fetch replacing this one) removed this promise from the map.
+        if (isStale()) {
           return getCurrentOrRefetch();
         }
         this.fetchesInFlight.delete(key);
@@ -286,7 +272,7 @@ export class UserStorageClient implements IUserStorageClient {
       (error: unknown) => {
         // A stale GET error is obsolete too — recover from the post-write state
         // instead of publishing it.
-        if (this.getWriteCount(key) !== writeCountAtStart) {
+        if (isStale()) {
           return getCurrentOrRefetch();
         }
         const err = error instanceof Error ? error : new Error(String(error));
