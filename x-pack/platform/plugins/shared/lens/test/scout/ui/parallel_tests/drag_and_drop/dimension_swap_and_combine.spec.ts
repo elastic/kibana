@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createLogstashLensEditorSuiteSetup, testData } from '../../fixtures';
+import { createLogstashLensEditorSuiteSetup, spaceTest, testData } from '../../fixtures';
 
 /**
  * Migrated from FTR `group5/drag_and_drop.ts` duplicate/swap/combine scenarios.
