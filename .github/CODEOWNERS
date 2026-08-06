@@ -3723,6 +3723,12 @@ docs/release-notes                            @elastic/ski-docs
 docs/docset.yml                               @elastic/ski-docs
 docs/redirects.yml                            @elastic/ski-docs
 
+# Internal developer docs, published to codex.elastic.dev only. Teams adding a subject own its
+# directory; add that entry below rather than in the generated block, which is rewritten by
+# `node scripts/generate codeowners`.
+docs-dev/                                     @elastic/appex-sharedux
+docs-dev/kbn-ui/                              @elastic/appex-sharedux
+
 # Side navigation title glossary
 src/platform/packages/shared/shared-ux/label_formatter/src/to_sentence_case.ts @elastic/ski-docs
 
