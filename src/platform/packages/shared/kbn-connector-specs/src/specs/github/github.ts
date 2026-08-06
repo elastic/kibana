@@ -20,7 +20,14 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import type {
+  AddAssigneeInput,
+  AddIssueCommentInput,
+  AddLabelsInput,
   CallToolInput,
+  CreateBranchInput,
+  CreateIssueInput,
+  CreateOrUpdateFileInput,
+  CreatePullRequestInput,
   GetCommitInput,
   GetFileContentsInput,
   GetIssueCommentsInput,
@@ -32,37 +39,56 @@ import type {
   ListPullRequestsInput,
   ListReleasesInput,
   ListTagsInput,
+  MergePullRequestInput,
   PullRequestReadInput,
+  RequestReviewersInput,
   SearchCodeInput,
   SearchIssuesInput,
   SearchPullRequestsInput,
   SearchRepositoriesInput,
   SearchUsersInput,
+  TriggerWorkflowInput,
+  UpdateIssueInput,
+  UpdatePullRequestInput,
 } from './types';
 import {
+  AddAssigneeInputSchema,
+  AddIssueCommentInputSchema,
+  AddLabelsInputSchema,
+  CallToolInputSchema,
+  CreateBranchInputSchema,
+  CreateIssueInputSchema,
+  CreateOrUpdateFileInputSchema,
+  CreatePullRequestInputSchema,
+  GetCommitInputSchema,
+  GetFileContentsInputSchema,
+  GetIssueCommentsInputSchema,
+  GetIssueInputSchema,
+  GetLatestReleaseInputSchema,
   GetMeInputSchema,
-  ListToolsInputSchema,
-  SearchCodeInputSchema,
-  SearchRepositoriesInputSchema,
-  SearchIssuesInputSchema,
-  SearchPullRequestsInputSchema,
-  SearchUsersInputSchema,
+  ListBranchesInputSchema,
+  ListCommitsInputSchema,
   ListIssuesInputSchema,
   ListPullRequestsInputSchema,
-  ListCommitsInputSchema,
-  ListBranchesInputSchema,
   ListReleasesInputSchema,
   ListTagsInputSchema,
-  GetCommitInputSchema,
-  GetLatestReleaseInputSchema,
+  ListToolsInputSchema,
+  MergePullRequestInputSchema,
   PullRequestReadInputSchema,
-  GetFileContentsInputSchema,
-  GetIssueInputSchema,
-  GetIssueCommentsInputSchema,
-  CallToolInputSchema,
+  RequestReviewersInputSchema,
+  SearchCodeInputSchema,
+  SearchIssuesInputSchema,
+  SearchPullRequestsInputSchema,
+  SearchRepositoriesInputSchema,
+  SearchUsersInputSchema,
+  TriggerWorkflowInputSchema,
+  UpdateIssueInputSchema,
+  UpdatePullRequestInputSchema,
 } from './types';
 
 const GITHUB_MCP_SERVER_URL = 'https://api.githubcopilot.com/mcp/';
+const GITHUB_API_BASE = 'https://api.github.com';
+const GITHUB_API_VERSION_HEADER = { 'X-GitHub-Api-Version': '2022-11-28' } as const;
 
 export const GithubConnector: ConnectorSpec = {
   metadata: {
@@ -70,7 +96,7 @@ export const GithubConnector: ConnectorSpec = {
     displayName: 'GitHub',
     description: i18n.translate('core.kibanaConnectorSpecs.github.metadata.description', {
       defaultMessage:
-        'Search repositories, issues, and pull requests, browse file contents, and list branches in GitHub',
+        'Search, browse, and manage GitHub repositories: create and update issues and pull requests, add comments, labels, and assignees, create branches, trigger workflows, and merge pull requests.',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -376,6 +402,234 @@ export const GithubConnector: ConnectorSpec = {
       },
     },
 
+    createIssue: {
+      isTool: true,
+      description:
+        'Create a new issue in a GitHub repository. Returns the created issue including its number, URL, and state.',
+      input: CreateIssueInputSchema,
+      handler: async (ctx, input: CreateIssueInput) => {
+        const { owner, repo, title, body, assignees, labels, milestone } = input;
+        const requestBody: Record<string, unknown> = { title };
+        if (body !== undefined) requestBody.body = body;
+        if (assignees !== undefined) requestBody.assignees = assignees;
+        if (labels !== undefined) requestBody.labels = labels;
+        if (milestone !== undefined) requestBody.milestone = milestone;
+        const response = await ctx.client.post(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues`,
+          requestBody,
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    addIssueComment: {
+      isTool: true,
+      description:
+        'Add a comment to an existing issue or pull request. Returns the created comment including its ID and URL.',
+      input: AddIssueCommentInputSchema,
+      handler: async (ctx, input: AddIssueCommentInput) => {
+        const { owner, repo, issueNumber, body } = input;
+        const response = await ctx.client.post(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/${issueNumber}/comments`,
+          { body },
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    updateIssue: {
+      isTool: true,
+      description:
+        'Update an existing issue (title, body, state, assignees, labels, or milestone). At least one field must be provided. To close an issue set state to "closed".',
+      input: UpdateIssueInputSchema,
+      handler: async (ctx, input: UpdateIssueInput) => {
+        const { owner, repo, issueNumber, title, body, state, assignees, labels, milestone } =
+          input;
+        const requestBody: Record<string, unknown> = {};
+        if (title !== undefined) requestBody.title = title;
+        if (body !== undefined) requestBody.body = body;
+        if (state !== undefined) requestBody.state = state;
+        if (assignees !== undefined) requestBody.assignees = assignees;
+        if (labels !== undefined) requestBody.labels = labels;
+        if (milestone !== undefined) requestBody.milestone = milestone;
+        const response = await ctx.client.patch(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/${issueNumber}`,
+          requestBody,
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    createPullRequest: {
+      isTool: true,
+      description:
+        'Create a new pull request. The head branch must already exist and have commits not in the base branch. Returns the PR including its number and URL.',
+      input: CreatePullRequestInputSchema,
+      handler: async (ctx, input: CreatePullRequestInput) => {
+        const { owner, repo, title, head, base, body, draft, maintainerCanModify } = input;
+        const requestBody: Record<string, unknown> = { title, head, base };
+        if (body !== undefined) requestBody.body = body;
+        if (draft !== undefined) requestBody.draft = draft;
+        if (maintainerCanModify !== undefined)
+          requestBody.maintainer_can_modify = maintainerCanModify;
+        const response = await ctx.client.post(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls`,
+          requestBody,
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    mergePullRequest: {
+      isTool: true,
+      description:
+        'Merge an open pull request. Returns the merge commit SHA and a confirmation message. Fails if the PR is not mergeable.',
+      input: MergePullRequestInputSchema,
+      handler: async (ctx, input: MergePullRequestInput) => {
+        const { owner, repo, pullNumber, commitTitle, commitMessage, mergeMethod } = input;
+        const requestBody: Record<string, unknown> = { merge_method: mergeMethod };
+        if (commitTitle !== undefined) requestBody.commit_title = commitTitle;
+        if (commitMessage !== undefined) requestBody.commit_message = commitMessage;
+        const response = await ctx.client.put(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls/${pullNumber}/merge`,
+          requestBody,
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    addLabels: {
+      isTool: true,
+      description:
+        'Add one or more labels to an issue or pull request. Labels are added without removing existing ones. Returns the full updated label list.',
+      input: AddLabelsInputSchema,
+      handler: async (ctx, input: AddLabelsInput) => {
+        const { owner, repo, issueNumber, labels } = input;
+        const response = await ctx.client.post(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/${issueNumber}/labels`,
+          { labels },
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    addAssignee: {
+      isTool: true,
+      description:
+        'Add one or more assignees to an issue or pull request. Assignees are added without removing existing ones.',
+      input: AddAssigneeInputSchema,
+      handler: async (ctx, input: AddAssigneeInput) => {
+        const { owner, repo, issueNumber, assignees } = input;
+        const response = await ctx.client.post(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/${issueNumber}/assignees`,
+          { assignees },
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    createBranch: {
+      isTool: true,
+      description:
+        'Create a new branch (git ref) in a repository. The ref must start with "refs/heads/". Use getCommit or listCommits to find a valid SHA.',
+      input: CreateBranchInputSchema,
+      handler: async (ctx, input: CreateBranchInput) => {
+        const { owner, repo, ref, sha } = input;
+        const response = await ctx.client.post(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/refs`,
+          { ref, sha },
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    createOrUpdateFile: {
+      isTool: true,
+      description:
+        'Create or update a single file in a repository. The content must be Base64-encoded. To update an existing file, provide the current file blob SHA (get it via getFileContents). Returns the commit and file metadata.',
+      input: CreateOrUpdateFileInputSchema,
+      handler: async (ctx, input: CreateOrUpdateFileInput) => {
+        const { owner, repo, path, message, content, sha, branch } = input;
+        const requestBody: Record<string, unknown> = { message, content };
+        if (sha !== undefined) requestBody.sha = sha;
+        if (branch !== undefined) requestBody.branch = branch;
+        const response = await ctx.client.put(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path.split('/').map(encodeURIComponent).join('/')}`,
+          requestBody,
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    updatePullRequest: {
+      isTool: true,
+      description:
+        'Update an open pull request (title, body, state, base branch, or maintainer permissions). At least one field must be provided. To close a PR set state to "closed".',
+      input: UpdatePullRequestInputSchema,
+      handler: async (ctx, input: UpdatePullRequestInput) => {
+        const { owner, repo, pullNumber, title, body, state, base, maintainerCanModify } = input;
+        const requestBody: Record<string, unknown> = {};
+        if (title !== undefined) requestBody.title = title;
+        if (body !== undefined) requestBody.body = body;
+        if (state !== undefined) requestBody.state = state;
+        if (base !== undefined) requestBody.base = base;
+        if (maintainerCanModify !== undefined)
+          requestBody.maintainer_can_modify = maintainerCanModify;
+        const response = await ctx.client.patch(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls/${pullNumber}`,
+          requestBody,
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    requestReviewers: {
+      isTool: true,
+      description:
+        'Request one or more reviewers (individuals or teams) on a pull request. Reviewers are added without removing existing requests. Returns the updated PR.',
+      input: RequestReviewersInputSchema,
+      handler: async (ctx, input: RequestReviewersInput) => {
+        const { owner, repo, pullNumber, reviewers, teamReviewers } = input;
+        const requestBody: Record<string, unknown> = {};
+        if (reviewers !== undefined) requestBody.reviewers = reviewers;
+        if (teamReviewers !== undefined) requestBody.team_reviewers = teamReviewers;
+        const response = await ctx.client.post(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls/${pullNumber}/requested_reviewers`,
+          requestBody,
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return response.data;
+      },
+    },
+
+    triggerWorkflow: {
+      isTool: true,
+      description:
+        'Trigger a workflow_dispatch event for a GitHub Actions workflow. The workflow must have a workflow_dispatch trigger defined in its YAML. Returns nothing on success (HTTP 204).',
+      input: TriggerWorkflowInputSchema,
+      handler: async (ctx, input: TriggerWorkflowInput) => {
+        const { owner, repo, workflowId, ref, inputs } = input;
+        const requestBody: Record<string, unknown> = { ref };
+        if (inputs !== undefined) requestBody.inputs = inputs;
+        await ctx.client.post(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/workflows/${encodeURIComponent(workflowId)}/dispatches`,
+          requestBody,
+          { headers: GITHUB_API_VERSION_HEADER }
+        );
+        return { ok: true };
+      },
+    },
+
     listTools: {
       isTool: true,
       description:
@@ -401,6 +655,7 @@ export const GithubConnector: ConnectorSpec = {
   },
 
   test: {
+    enabled: true,
     description: i18n.translate('connectorSpecs.github.test.description', {
       defaultMessage:
         'Verifies connection to the GitHub Copilot MCP server by listing available tools.',
@@ -422,6 +677,11 @@ export const GithubConnector: ConnectorSpec = {
     '- For broad discovery: use search* actions (searchCode, searchRepositories, searchIssues, searchPullRequests, searchUsers).',
     '- For browsing a specific repo: use list* actions (listIssues, listPullRequests, listCommits, listBranches, listReleases, listTags). All use cursor-based pagination via "first" + "after".',
     '- For specific details: use get* actions (getIssue, getIssueComments, pullRequestRead, getCommit, getLatestRelease, getFileContents).',
+    '- Write actions (require write permission on the repo):',
+    '  - Issues: createIssue, updateIssue, addIssueComment, addLabels, addAssignee.',
+    '  - Pull requests: createPullRequest, updatePullRequest, mergePullRequest, requestReviewers.',
+    '  - Repo management: createBranch (SHA from listCommits or getCommit), createOrUpdateFile (content must be Base64-encoded), triggerWorkflow.',
+    '- createOrUpdateFile requires the current blob SHA when updating an existing file; fetch it first with getFileContents.',
     '- For capabilities not yet exposed as named actions: listTools to discover, callTool to invoke.',
   ].join('\n'),
 };
