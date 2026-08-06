@@ -20,8 +20,9 @@ import type {
   AppHeaderTab,
 } from '@kbn/core-chrome-browser';
 import type { AppMenuConfig } from '@kbn/app-menu';
-import type { AppHeaderSpacing } from '../types';
+import type { AppHeaderBack, AppHeaderSpacing } from '../types';
 import { AppHeaderView } from './app_header';
+import { AppHeaderLoadingView, type AppHeaderLoadingMenu } from './app_header_loading';
 
 interface ComposedHeaderStoryProps {
   title: string;
@@ -241,5 +242,65 @@ export const WithoutTabs: Story = {
 export const NonEditableTitle: Story = {
   args: {
     editable: false,
+  },
+};
+
+const LoadingHeader = ({
+  menuSkeleton,
+  back,
+}: {
+  menuSkeleton?: AppHeaderLoadingMenu;
+  back?: AppHeaderBack;
+}) => {
+  const chrome = useMemo(() => createChromeStorybookStart(), []);
+
+  return (
+    <ChromeServiceProvider value={{ chrome }}>
+      <div
+        css={css`
+          width: 900px;
+        `}
+      >
+        <AppHeaderLoadingView menu={menuSkeleton} back={back} sticky={false} />
+      </div>
+    </ChromeServiceProvider>
+  );
+};
+
+export const Loading: Story = {
+  render: () => <LoadingHeader />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Default `AppHeaderLoading`: title skeleton plus overflow and primary-action placeholders.',
+      },
+    },
+  },
+};
+
+export const LoadingCustomMenu: Story = {
+  render: () => <LoadingHeader menuSkeleton={{ buttonCount: 2, hasPrimary: false }} />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Customized menu skeleton (`buttonCount: 2`, no primary) for headers that will not look ' +
+          'like the default overflow + primary layout.',
+      },
+    },
+  },
+};
+
+export const LoadingWithBack: Story = {
+  render: () => <LoadingHeader back={{ href: '/app/management', label: 'Stack Management' }} />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`AppHeaderLoading` with a back button. The title and menu stay skeletoned; only the ' +
+          'known back target renders.',
+      },
+    },
   },
 };
