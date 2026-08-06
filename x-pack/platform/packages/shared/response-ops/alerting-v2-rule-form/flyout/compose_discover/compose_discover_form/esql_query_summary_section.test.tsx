@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { RuleKind, RuleQuery } from '../../../form/types';
+import type { RuleQuery } from '../../../form/types';
 import {
   EsqlQuerySummarySection,
   getEsqlSummaryState,
@@ -40,7 +40,6 @@ describe('getEsqlSummaryState', () => {
     description: string;
     queryCommitted: boolean;
     query: RuleQuery;
-    forceUnified?: boolean;
     expected: EsqlSummaryState;
   }> = [
     {
@@ -91,21 +90,11 @@ describe('getEsqlSummaryState', () => {
       query: standaloneQuery(''),
       expected: 'empty',
     },
-    {
-      description: 'success for composed query when forceUnified (signal) and text has WHERE',
-      queryCommitted: true,
-      query: composedQuery(BASE, ALERT_SEGMENT),
-      forceUnified: true,
-      expected: 'success',
-    },
   ];
 
-  it.each(cases)(
-    '$description → $expected',
-    ({ queryCommitted, query, forceUnified, expected }) => {
-      expect(getEsqlSummaryState(queryCommitted, query, { forceUnified })).toBe(expected);
-    }
-  );
+  it.each(cases)('$description → $expected', ({ queryCommitted, query, expected }) => {
+    expect(getEsqlSummaryState(queryCommitted, query)).toBe(expected);
+  });
 
   /*
    * Callout priority is encoded by getEsqlSummaryState branch order:
@@ -122,13 +111,12 @@ describe('getEsqlSummaryState', () => {
 });
 
 describe('EsqlQuerySummarySection callouts', () => {
-  const renderSection = (queryCommitted: boolean, query: RuleQuery, kind: RuleKind = 'alert') =>
+  const renderSection = (queryCommitted: boolean, query: RuleQuery) =>
     render(
       <IntlProvider locale="en">
         <EsqlQuerySummarySection
           query={query}
           queryCommitted={queryCommitted}
-          kind={kind}
           isEditorOpen={false}
           onOpenEditor={jest.fn()}
         />
@@ -173,8 +161,8 @@ describe('EsqlQuerySummarySection callouts', () => {
     ).toBeInTheDocument();
   });
 
-  it('always shows a single query block for signal kind, never a guessed split', () => {
-    renderSection(true, composedQuery(BASE, ALERT_SEGMENT), 'signal');
+  it('renders a single query block for a standalone query, never a split', () => {
+    renderSection(true, standaloneQuery(`${BASE} | WHERE c > 3`));
     expect(screen.getByText('Query')).toBeInTheDocument();
     expect(screen.queryByText('Base query')).not.toBeInTheDocument();
     expect(screen.queryByText('Alert condition')).not.toBeInTheDocument();

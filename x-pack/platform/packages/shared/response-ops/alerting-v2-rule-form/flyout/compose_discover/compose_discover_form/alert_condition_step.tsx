@@ -37,8 +37,7 @@ export function AlertConditionStep({
   // Rules are registered by always-mounted QueryFieldRules in ComposeDiscoverForm.
   const { errors } = useFormState<FormValues>({ name: 'query' });
   const queryError = errors.query;
-  const kind = watch('kind');
-  const isAlert = kind === 'alert';
+  const isAlert = watch('kind') === 'alert';
   const timeField = watch('timeField') ?? '@timestamp';
   const grouping = watch('grouping');
   const groupFields = grouping?.fields ?? [];
@@ -120,7 +119,6 @@ export function AlertConditionStep({
       <EsqlQuerySummarySection
         query={query}
         queryCommitted={state.queryCommitted}
-        kind={kind}
         isEditorOpen={state.childOpen}
         onOpenEditor={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
       />

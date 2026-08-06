@@ -9,8 +9,7 @@ import React from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RuleKind, RuleQuery } from '../../../form/types';
-import { getBreachQuery } from '../../../form/utils/query_helpers';
+import type { RuleQuery } from '../../../form/types';
 import { QueryBlock, QuerySummary } from '../query_summary';
 import { splitResultToRuleQuery } from '../use_heuristic_split';
 
@@ -21,9 +20,9 @@ import { splitResultToRuleQuery } from '../use_heuristic_split';
  * (base + alert segment); a base-only query with no alert condition is persisted
  * as `standalone`.
  *
- * Signal rules always render as a single query block — we never display a
- * guessed base/condition split for signal, even if the in-progress query is
- * still composed during authoring.
+ * Rendering is keyed on the query's own `format`, not rule kind: a `standalone`
+ * query always renders a single block because that is the shape that will be
+ * persisted, and a `composed` query renders the base/condition split.
  */
 export type EsqlSummaryState =
   | 'before_apply'
@@ -36,10 +35,6 @@ export type EsqlSummaryState =
  * Derives the summary state from the committed query. Callout priority is
  * encoded by the branch order: empty → split failed → no alert condition.
  *
- * When `forceUnified` is set (signal rules), state is derived from the assembled
- * breach query text via the same heuristic — used only for guidance callouts,
- * never to render a split UI.
- *
  * For standalone queries the outcome is derived by running the same heuristic
  * split on the breach query text. A standalone rule whose query already contains
  * an alert condition returns 'success' so that no false "No alert condition"
@@ -47,14 +42,12 @@ export type EsqlSummaryState =
  */
 export const getEsqlSummaryState = (
   queryCommitted: boolean,
-  query: RuleQuery,
-  { forceUnified = false }: { forceUnified?: boolean } = {}
+  query: RuleQuery
 ): EsqlSummaryState => {
   if (!queryCommitted) return 'before_apply';
 
-  if (forceUnified || query.format === 'standalone') {
-    const text = query.format === 'standalone' ? query.breach.query : getBreachQuery(query);
-    return splitResultToRuleQuery(text).outcome;
+  if (query.format === 'standalone') {
+    return splitResultToRuleQuery(query.breach.query).outcome;
   }
 
   const hasBase = query.base.trim().length > 0;
@@ -82,7 +75,7 @@ const DESCRIPTIONS: Record<EsqlSummaryState, string> = {
   }),
   no_alert_condition: i18n.translate(
     'xpack.alertingV2.composeDiscover.esqlSummary.noAlertConditionDescription',
-    { defaultMessage: 'Base query defined — no separate alert condition' }
+    { defaultMessage: 'Only breach query defined' }
   ),
   split_failed: i18n.translate(
     'xpack.alertingV2.composeDiscover.esqlSummary.splitFailedDescription',
@@ -141,8 +134,6 @@ const getSummaryCallout = (state: EsqlSummaryState): React.ReactElement | null =
 interface EsqlQuerySummarySectionProps {
   query: RuleQuery;
   queryCommitted: boolean;
-  /** When `signal`, always render a single query block (never a guessed split). */
-  kind: RuleKind;
   /** Disables the edit CTA while the sandbox is already open. */
   isEditorOpen: boolean;
   onOpenEditor: () => void;
@@ -169,14 +160,11 @@ const ALERT_CONDITION_LABEL = (
 export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = ({
   query,
   queryCommitted,
-  kind,
   isEditorOpen,
   onOpenEditor,
 }) => {
-  const forceUnified = kind === 'signal';
-  const state = getEsqlSummaryState(queryCommitted, query, { forceUnified });
+  const state = getEsqlSummaryState(queryCommitted, query);
   const showBlocks = state !== 'before_apply';
-  const showUnifiedBlock = forceUnified || query.format === 'standalone';
 
   const isEditCta = state !== 'before_apply' && state !== 'empty';
   const ctaLabel = isEditCta
@@ -198,12 +186,8 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
       {state !== 'success' && state !== 'before_apply' && <EuiSpacer size="m" />}
 
       {showBlocks ? (
-        showUnifiedBlock ? (
-          <QueryBlock
-            label={QUERY_LABEL}
-            query={getBreachQuery(query)}
-            emptyMessage={NOT_DEFINED}
-          />
+        query.format === 'standalone' ? (
+          <QueryBlock label={QUERY_LABEL} query={query.breach.query} emptyMessage={NOT_DEFINED} />
         ) : (
           <>
             <QueryBlock label={BASE_QUERY_LABEL} query={query.base} emptyMessage={NOT_DEFINED} />
