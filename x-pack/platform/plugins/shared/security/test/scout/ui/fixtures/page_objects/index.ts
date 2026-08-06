@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
-
-export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('API Keys app', function () {
-    loadTestFile(require.resolve('./home_page'));
-  });
-};
+export { ApiKeysApp } from './api_keys_app';
+export type { ApiKeyExpiryFilter, ApiKeyTypeFilter } from './api_keys_app';
