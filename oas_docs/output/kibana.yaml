@@ -46139,7 +46139,8 @@ paths:
                   - item
           description: Successful response
       summary: Get space settings
-      tags: []
+      tags:
+        - Fleet internals
       x-state: Generally available; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -46214,7 +46215,8 @@ paths:
                   - item
           description: Successful response
       summary: Create space settings
-      tags: []
+      tags:
+        - Fleet internals
       x-state: Generally available; added in 9.1.0
       x-metaTags:
         - content: Kibana
