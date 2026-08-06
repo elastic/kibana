@@ -6,6 +6,11 @@
  */
 
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import {
+  MAX_ASSESSMENT_NOTE_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+} from '@kbn/significant-events-schema';
 import { updateSignificantEventStatus } from './update_event_status';
 import { EventClient } from './event_client';
 import type { SignificantEvent } from './data_stream';
@@ -82,6 +87,26 @@ describe('updateSignificantEventStatus', () => {
     // Written with `refresh: 'wait_for'` so an immediate re-read (e.g. the UI's post-mutation
     // refetch) sees this version rather than resurfacing the previous one.
     expect(callArg.refresh).toBe('wait_for');
+  });
+
+  it('updates the status of a legacy event with longer narratives', async () => {
+    const existing = createSignificantEvent({
+      event_uuid: 'event-1',
+      symptom_hypothesis: 'x'.repeat(MAX_SYMPTOM_HYPOTHESIS_LENGTH + 1),
+      summary: 'x'.repeat(MAX_SUMMARY_LENGTH + 1),
+      assessment_note: 'x'.repeat(MAX_ASSESSMENT_NOTE_LENGTH + 1),
+    });
+    const { client, dataStreamClient } = createEventClient([existing]);
+
+    await expect(
+      updateSignificantEventStatus({
+        eventClient: client,
+        eventUuid: 'event-1',
+        status: 'closed',
+      })
+    ).resolves.toMatchObject({ updated: 1, status: 'closed' });
+
+    expect(dataStreamClient.create).toHaveBeenCalledTimes(1);
   });
 
   it('ignores when the event is not found', async () => {

@@ -11,8 +11,11 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
-  significantEventSchema,
+  MAX_ASSESSMENT_NOTE_LENGTH,
   MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  significantEventSchema,
 } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
@@ -75,6 +78,25 @@ export const eventsWriteItemSchema = significantEventSchema
       (item.signals ?? []).every((s) => s.description.length <= MAX_SIGNAL_DESCRIPTION_LENGTH),
     {
       message: `Signal descriptions must be at most ${MAX_SIGNAL_DESCRIPTION_LENGTH} characters for agent input`,
+    }
+  )
+  .refine(
+    (item) =>
+      item.symptom_hypothesis === undefined ||
+      item.symptom_hypothesis.length <= MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+    {
+      message: `Symptom hypotheses must be at most ${MAX_SYMPTOM_HYPOTHESIS_LENGTH} characters for agent input`,
+    }
+  )
+  .refine((item) => item.summary.length <= MAX_SUMMARY_LENGTH, {
+    message: `Summaries must be at most ${MAX_SUMMARY_LENGTH} characters for agent input`,
+  })
+  .refine(
+    (item) =>
+      item.assessment_note === undefined ||
+      item.assessment_note.length <= MAX_ASSESSMENT_NOTE_LENGTH,
+    {
+      message: `Assessment notes must be at most ${MAX_ASSESSMENT_NOTE_LENGTH} characters for agent input`,
     }
   );
 

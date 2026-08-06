@@ -250,7 +250,7 @@ export const significantEventBaseSchema = z.object({
   // hypothesis of the observed failure. helps agents to understand and group signals that share the same symptom class.
   symptom_hypothesis: z
     .string()
-    .max(MAX_SYMPTOM_HYPOTHESIS_LENGTH)
+    .max(MAX_TEXT_LENGTH)
     .optional()
     .describe(
       dedent`
@@ -264,7 +264,7 @@ export const significantEventBaseSchema = z.object({
     ),
   summary: z
     .string()
-    .max(MAX_SUMMARY_LENGTH)
+    .max(MAX_TEXT_LENGTH)
     .describe(
       dedent`
         Objective, self-contained account of the observed state and potential impact. Max ${MAX_SUMMARY_LENGTH} chars.

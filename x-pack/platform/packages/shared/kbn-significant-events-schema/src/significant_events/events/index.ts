@@ -12,6 +12,7 @@ import {
   ASSESSMENT_NOTE_ROLE_RULE,
   MAX_ASSESSMENT_NOTE_LENGTH,
   MAX_ID_LENGTH,
+  MAX_TEXT_LENGTH,
   NO_RAW_SENSITIVE_VALUES_RULE,
 } from '../constants';
 
@@ -67,7 +68,7 @@ export const significantEventSchema = significantEventBaseSchema.extend({
   status: significantEventStatusSchema,
   assessment_note: z
     .string()
-    .max(MAX_ASSESSMENT_NOTE_LENGTH)
+    .max(MAX_TEXT_LENGTH)
     .optional()
     .describe(
       dedent`
