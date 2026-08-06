@@ -10,11 +10,7 @@ import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
-import {
-  getHistorySnapshotIndexPattern,
-  getEntitiesAlias,
-  ENTITY_LATEST,
-} from '@kbn/entity-store/server';
+import { getHistorySnapshotIndexPattern } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/constants';
@@ -29,21 +25,23 @@ import type {
   SecuritySolutionPluginCoreSetupDependencies,
   SetupPlugins,
 } from '../../../plugin_contract';
-import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { securityTool } from '../constants';
+import { buildRenderAttachmentTag } from './attachment_utils';
+import { getEntityStoreV2ToolAvailability } from './entity_store_v2_availability';
 import {
-  buildRenderAttachmentTag,
   buildSingleEntityAttachmentId,
-  describeAttachmentForRow,
   ensureEntityAttachment,
-  getRowValue,
-  isAttachmentIdentifierType,
-  stripEntityIdPrefix,
-  ENTITY_STORE_ENTITY_TYPE_FIELD,
-  ENTITY_STORE_ENTITY_ID_FIELD,
   stripRiskRecordForAttachment,
+  toAttachmentDescriptor,
   type EntityAttachmentRiskStats,
 } from './entity_attachment_utils';
+import {
+  escapeEsqlString,
+  getRowValue,
+  normalizeEntityId,
+  resolveSingleEntity,
+  ENTITY_STORE_ENTITY_ID_FIELD,
+} from './entity_resolution';
 import { createToolTelemetryTracker } from './tool_telemetry_tracker';
 import { fetchRiskScoreGrounding } from './risk_score_grounding';
 
@@ -82,25 +80,6 @@ const schema = z.object({
 });
 
 export const SECURITY_GET_ENTITY_TOOL_ID = securityTool('get_entity');
-
-const escapeEsqlString = (value: string) => value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-
-const escapeEsqlRlikePattern = (value: string) => {
-  const regexEscaped = value.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
-  return escapeEsqlString(regexEscaped);
-};
-
-export const normalizeEntityId = (
-  entityId: string,
-  entityType?: z.infer<typeof IdentifierType>
-): string => {
-  if (!entityType) {
-    return entityId;
-  }
-
-  const prefix = `${entityType}:`;
-  return entityId.startsWith(prefix) ? entityId : `${prefix}${entityId}`;
-};
 
 const intervalToEsql = (interval: string) => {
   const match = interval.match(/^(\d+)([smhdwM])$/);
@@ -376,85 +355,6 @@ const getResolutionTargetRiskIdCandidates = (target: Record<string, unknown>): s
   return dedupeNonEmptyStrings(candidates);
 };
 
-interface FindEntityByIdParams {
-  entityIndex: string;
-  entityId: string;
-  entityType?: z.infer<typeof IdentifierType>;
-  esClient: ElasticsearchClient;
-}
-
-type MatchSource = 'exact_id' | 'exact_name' | 'rlike_id' | 'rlike_name';
-
-interface FindEntityByIdResult {
-  source: MatchSource;
-  query: string;
-  columns: Array<{ name: string; type: string }>;
-  values: unknown[][];
-}
-
-const findEntityById = async ({
-  entityIndex,
-  entityId,
-  entityType,
-  esClient,
-}: FindEntityByIdParams): Promise<FindEntityByIdResult> => {
-  const normalizedEntityId = normalizeEntityId(entityId, entityType);
-  const escapedNormalized = escapeEsqlString(normalizedEntityId);
-
-  // 1. Exact id match (canonical key, uses prefix if entityType provided)
-  const idQuery = `FROM ${entityIndex} | WHERE entity.id == "${escapedNormalized}" | LIMIT 1`;
-  const idHit = await executeEsql({ query: idQuery, esClient });
-  if (idHit.values.length > 0) {
-    return { source: 'exact_id', query: idQuery, columns: idHit.columns, values: idHit.values };
-  }
-
-  // 2. Exact name match against entity.name, user.full_name, or host.name.
-  // `user.full_name` and `host.name` are multi-valued `collect` fields in the
-  // entity store, so we use MV_CONTAINS instead of `==` (which returns null
-  // with a warning on MV inputs). LIMIT 2 still detects display-name
-  // collisions so we can suppress the rich entity card and let the LLM
-  // disambiguate.
-  const escapedRaw = escapeEsqlString(entityId);
-  const nameExactQuery =
-    `FROM ${entityIndex} ` +
-    `| WHERE entity.name == "${escapedRaw}" ` +
-    `OR MV_CONTAINS(user.full_name, "${escapedRaw}") ` +
-    `OR MV_CONTAINS(host.name, "${escapedRaw}") ` +
-    `| LIMIT 2`;
-  const nameExactHit = await executeEsql({ query: nameExactQuery, esClient });
-  if (nameExactHit.values.length > 0) {
-    return {
-      source: 'exact_name',
-      query: nameExactQuery,
-      columns: nameExactHit.columns,
-      values: nameExactHit.values,
-    };
-  }
-
-  // 3. entity.id RLIKE fallback (substring match)
-  const rlikePattern = escapeEsqlRlikePattern(entityId);
-  const likeQuery = `FROM ${entityIndex} | WHERE entity.id RLIKE ".*${rlikePattern}.*" | LIMIT 5`;
-  const likeHit = await executeEsql({ query: likeQuery, esClient });
-  if (likeHit.values.length > 0) {
-    return {
-      source: 'rlike_id',
-      query: likeQuery,
-      columns: likeHit.columns,
-      values: likeHit.values,
-    };
-  }
-
-  // 4. entity.name / user.full_name RLIKE fallback (substring match)
-  const nameQuery = `FROM ${entityIndex} | WHERE entity.name RLIKE ".*${rlikePattern}.*" OR user.full_name RLIKE ".*${rlikePattern}.*" | LIMIT 5`;
-  const nameHit = await executeEsql({ query: nameQuery, esClient });
-  return {
-    source: 'rlike_name',
-    query: nameQuery,
-    columns: nameHit.columns,
-    values: nameHit.values,
-  };
-};
-
 interface EnrichEntityResultParams {
   row: unknown[];
   columns: Array<{ name: string; type: string }>;
@@ -583,44 +483,8 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
     tags: ['security', 'entity-store', 'entity-analytics'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
-        try {
-          const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
-          if (availability.status === 'available') {
-            const isEntityStoreV2Enabled = experimentalFeatures.entityAnalyticsEntityStoreV2;
-            if (!isEntityStoreV2Enabled) {
-              return {
-                status: 'unavailable',
-                reason: 'Entity Store V2 is not enabled.',
-              };
-            }
-
-            const [coreStart] = await core.getStartServices();
-            const esClient = coreStart.elasticsearch.client.asInternalUser;
-
-            // Tool is only available if the latest entity store index exists for this space
-            const indexExists = await esClient.indices.exists({
-              index: getEntitiesAlias(ENTITY_LATEST, spaceId),
-            });
-
-            if (!indexExists) {
-              return {
-                status: 'unavailable',
-                reason: 'Entity Store V2 index does not exist for this space',
-              };
-            }
-          }
-
-          return availability;
-        } catch (error) {
-          return {
-            status: 'unavailable',
-            reason: `Failed to check entity store v2 index availability: ${
-              error instanceof Error ? error.message : 'Unknown error'
-            }`,
-          };
-        }
-      },
+      handler: async ({ request, spaceId }: ToolAvailabilityContext) =>
+        getEntityStoreV2ToolAvailability({ core, request, spaceId, experimentalFeatures, logger }),
     },
     handler: async (params, { spaceId, esClient, savedObjectsClient, attachments }) => {
       logger.debug(
@@ -642,7 +506,6 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
         const [coreStart, { entityStore }] = await core.getStartServices();
         const client = esClient.asCurrentUser;
         const normalizedEntityId = normalizeEntityId(entityId, entityType);
-        const entityIndex = getEntitiesAlias(ENTITY_LATEST, spaceId);
         const entityStoreClient = entityStore.createCRUDClient(client, spaceId);
         const uiSettingsClient = coreStart.uiSettings.asScopedToClient(savedObjectsClient);
         const enrichedEntityService = new EnrichEntityService({
@@ -659,8 +522,8 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
           uiSettingsClient,
         });
 
-        const [{ source, query, columns, values }, grounding] = await Promise.all([
-          findEntityById({ entityIndex, entityId, entityType, esClient: client }),
+        const [resolved, grounding] = await Promise.all([
+          resolveSingleEntity({ esClient: client, spaceId, entityId, entityType }),
           fetchRiskScoreGrounding({
             entityStore,
             namespace: spaceId,
@@ -670,7 +533,7 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
 
         const groundingResult = grounding ? [grounding] : [];
 
-        if (values.length === 0) {
+        if (resolved.status === 'not_found') {
           return {
             results: [
               {
@@ -683,64 +546,31 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
           };
         }
 
+        const { query, columns, values } = resolved;
+
         // Persist a rich entity attachment only for high-confidence single-row
-        // matches. Exact id/name matches are always trusted; the entity.id RLIKE
-        // fallback is also trusted when the single resolved row's stripped id
-        // equals the user input (i.e. the LLM forgot the "{type}:" prefix).
-        // The entity.name RLIKE fallback stays excluded — display-name substring
-        // matches are too ambiguous to authoritatively render a card for.
-        const isRlikeIdPrefixMatch = (): boolean => {
-          if (source !== 'rlike_id' || values.length !== 1) {
-            return false;
-          }
-          const row = values[0];
-          const rawType = getRowValue(columns, row, ENTITY_STORE_ENTITY_TYPE_FIELD);
-          const rawId = getRowValue(columns, row, ENTITY_STORE_ENTITY_ID_FIELD);
-          if (!isAttachmentIdentifierType(rawType) || typeof rawId !== 'string') {
-            return false;
-          }
-          return stripEntityIdPrefix(rawId, rawType) === entityId;
-        };
+        // matches — `resolveSingleEntity` returns `resolved` (with an identity)
+        // in exactly that case.
+        const baseIdentity = resolved.status === 'resolved' ? resolved.identity : null;
 
-        const shouldCreateAttachment =
-          values.length === 1 &&
-          (source === 'exact_id' || source === 'exact_name' || isRlikeIdPrefixMatch());
-
-        const attachmentResult = shouldCreateAttachment
+        const attachmentResult = baseIdentity
           ? await (async () => {
-              const baseDescriptor = describeAttachmentForRow({ columns, row: values[0] });
-              if (!baseDescriptor) {
-                return null;
-              }
-
-              // Fetch the real risk breakdown so the chat card's
-              // contributions table mirrors the flyout instead of showing
-              // zeros (the entity store only stores high-level scores).
-              // We prefer the entity-store `entity.id` for the resolution
-              // lookup because the resolution group is keyed on that field.
-              const rowEntityStoreId = getRowValue(
-                columns,
-                values[0],
-                ENTITY_STORE_ENTITY_ID_FIELD
-              );
+              // Fetch the real risk breakdown so the chat card's contributions
+              // table mirrors the flyout instead of showing zeros (the entity
+              // store only stores high-level scores). The resolution lookup is
+              // keyed on the entity-store `entity.id`, which the resolved
+              // identity already carries.
               const enrichment = await fetchRiskStatsForAttachment({
-                identifierType: baseDescriptor.identifierType,
-                identifier: baseDescriptor.identifier,
-                entityStoreEntityId: typeof rowEntityStoreId === 'string' ? rowEntityStoreId : '',
+                identifierType: baseIdentity.identifierType,
+                identifier: baseIdentity.identifier,
+                entityStoreEntityId: baseIdentity.entityStoreId ?? '',
                 esClient: client,
                 spaceId,
                 logger,
                 createResolutionClient: entityStore?.createResolutionClient,
               });
 
-              const descriptor = describeAttachmentForRow({
-                columns,
-                row: values[0],
-                enrichment,
-              });
-              if (!descriptor) {
-                return null;
-              }
+              const descriptor = toAttachmentDescriptor(baseIdentity, enrichment);
 
               return ensureEntityAttachment({
                 attachments,

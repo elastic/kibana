@@ -97,7 +97,10 @@ export class DiscoverApp {
 
   async selectDataView(
     name: string,
-    { waitForFieldList = true }: { waitForFieldList?: boolean } = {}
+    {
+      createAdHocIfMissing = true,
+      waitForFieldList = true,
+    }: { createAdHocIfMissing?: boolean; waitForFieldList?: boolean } = {}
   ) {
     const dataViewSwitch = await this.getVisibleDataViewSwitch();
     const currentValue = await dataViewSwitch.innerText();
@@ -110,7 +113,11 @@ export class DiscoverApp {
     await switcher.waitFor({ state: 'visible' });
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
     const matchingDataViewLocator = switcher.locator(`[data-test-subj="dataView-${name}"]`);
-    if (await matchingDataViewLocator.isVisible()) {
+    if (!createAdHocIfMissing) {
+      // Let Playwright wait for the filtered option to render instead of checking visibility
+      // immediately after the final keystroke.
+      await matchingDataViewLocator.click();
+    } else if (await matchingDataViewLocator.isVisible()) {
       await matchingDataViewLocator.click();
     } else {
       await this.page.testSubj.locator('explore-matching-indices-button').click();
@@ -885,6 +892,22 @@ export class DiscoverApp {
       // Fields can appear in both "Popular fields" and the full field list.
       await resolveSelector(this.page, `field-${field}`).dragTo(gridLocator);
     }
+  }
+
+  /**
+   * Drags a sidebar field onto the grid using the keyboard, mirroring the FTR
+   * `dragFieldWithKeyboardToTable` implementation.
+   */
+  async dragFieldToGridWithKeyboard(fieldName: string) {
+    const keyboardHandler = this.page.locator(
+      `[data-attr-field="${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
+    );
+    await keyboardHandler.focus();
+    await this.page.keyboard.press('Enter'); // enter DnD mode
+    // domDroppable_overlay renders when DnD is active — use it as a sync point
+    await this.page.testSubj.locator('domDroppable_overlay').waitFor({ state: 'visible' });
+    await this.page.keyboard.press('ArrowRight'); // move to first drop target (the grid)
+    await this.page.keyboard.press('Enter'); // drop
   }
 
   async getFirstViewLensButtonFromFieldStatistics(): Promise<Locator> {

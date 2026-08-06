@@ -1,5 +1,5 @@
 {
-  "sha1": "3ec72f7394f285e1a5c4a008c4d923dbda0f1227",
+  "sha1": "c2b0a1dc51247d77cc43db9b26b09ebb1b22a463",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -608,8 +608,8 @@
       }
     },
     {
-      "id": "a408dc2671061e0-466cef2092a43b1",
-      "title": "Inference Navigation - Search Solution Space EIS Models Page: displays correct breadcrumbs in search solution navigation",
+      "id": "a408dc2671061e0-b211c4c2441fa34",
+      "title": "Inference Navigation - Search Solution Space EIS Models Page: displays correct navigation in search solution",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -617,13 +617,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation_search_solution.spec.ts",
-        "line": 25,
+        "line": 24,
         "column": 25
       }
     },
     {
-      "id": "a408dc2671061e0-9de5bdb039340ba",
-      "title": "Inference Navigation - Search Solution Space External Inference Page: displays correct breadcrumbs in search solution navigation",
+      "id": "a408dc2671061e0-44ab17459645221",
+      "title": "Inference Navigation - Search Solution Space External Inference Page: displays correct navigation in search solution",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -631,13 +631,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation_search_solution.spec.ts",
-        "line": 34,
-        "column": 22
+        "line": 37,
+        "column": 27
       }
     },
     {
-      "id": "a408dc2671061e0-e858606929a1019",
-      "title": "Inference Navigation - Search Solution Space Feature Settings Page: displays correct breadcrumbs in search solution navigation",
+      "id": "a408dc2671061e0-c2f90866cbad001",
+      "title": "Inference Navigation - Search Solution Space Feature Settings Page: displays correct navigation in search solution",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -645,8 +645,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation_search_solution.spec.ts",
-        "line": 48,
-        "column": 22
+        "line": 52,
+        "column": 27
       }
     },
     {
@@ -659,13 +659,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
-        "line": 18,
+        "line": 17,
         "column": 23
       }
     },
     {
-      "id": "40a7429a3ee22de-a3dcc52118922ad",
-      "title": "Inference Navigation EIS Models Page: displays correct breadcrumbs in serverless search navigation",
+      "id": "40a7429a3ee22de-127ce2fa7a97414",
+      "title": "Inference Navigation EIS Models Page: displays correct navigation in serverless search",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
@@ -673,8 +673,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
-        "line": 29,
-        "column": 13
+        "line": 33,
+        "column": 18
       }
     },
     {
@@ -687,13 +687,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
-        "line": 50,
-        "column": 25
+        "line": 52,
+        "column": 23
       }
     },
     {
-      "id": "40a7429a3ee22de-91b64dfbfbcf424",
-      "title": "Inference Navigation External Inference Page: displays correct breadcrumbs in serverless search navigation",
+      "id": "40a7429a3ee22de-691bf7a8588dfeb",
+      "title": "Inference Navigation External Inference Page: displays correct navigation in serverless search",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
@@ -701,7 +701,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
-        "line": 68,
+        "line": 71,
         "column": 4
       }
     },
@@ -715,13 +715,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
-        "line": 87,
+        "line": 92,
         "column": 16
       }
     },
     {
-      "id": "40a7429a3ee22de-0ee788225722c36",
-      "title": "Inference Navigation Feature Settings Page: displays correct breadcrumbs in serverless search navigation",
+      "id": "40a7429a3ee22de-1812ec35ffaebe1",
+      "title": "Inference Navigation Feature Settings Page: displays correct navigation in serverless search",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search",
@@ -729,7 +729,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
-        "line": 103,
+        "line": 109,
         "column": 18
       }
     },
@@ -1051,8 +1051,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 97,
-        "column": 87
+        "line": 98,
+        "column": 38
       }
     },
     {
@@ -1065,8 +1065,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 111,
-        "column": 13
+        "line": 114,
+        "column": 7
       }
     },
     {
@@ -1079,7 +1079,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 126,
+        "line": 130,
         "column": 11
       }
     },
@@ -1093,7 +1093,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 145,
+        "line": 149,
         "column": 38
       }
     },
@@ -1107,7 +1107,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 158,
+        "line": 162,
         "column": 7
       }
     },
@@ -1121,7 +1121,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 174,
+        "line": 178,
         "column": 13
       }
     }
