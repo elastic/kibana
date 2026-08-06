@@ -21,7 +21,7 @@ import { useMarkdownFormatterContext } from '../context';
 import { getAlertIdChipAriaLabel } from './translations';
 import type { ParsedField } from '../types';
 
-const ALERTS_INDEX_PATTERN = `${DEFAULT_ALERTS_INDEX}-*` as const;
+export const ALERTS_INDEX_PATTERN = `${DEFAULT_ALERTS_INDEX}-*` as const;
 
 /** Alert-document `_id` fields whose chips open the alert-details flyout when clicked. */
 const ALERT_ID_FIELDS: ReadonlySet<string> = new Set(['_id', 'kibana.alert.uuid']);
@@ -37,10 +37,11 @@ const inlineFieldWrapperCss = css`
   }
 `;
 
-/** Constrains long chip labels (UUIDs, hashes) to a readable width. */
+/** Constrains long chip labels (UUIDs, hashes) to a readable width.
+ *  10rem keeps the value theme-relative (scales with the root font size). */
 const chipLabelCss = css`
   display: inline-block;
-  max-width: 160px;
+  max-width: 10rem;
   overflow: hidden;
   text-overflow: ellipsis;
   vertical-align: middle;
@@ -98,7 +99,6 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
     }
   }, [enableNewFlyout, openDocumentFlyoutFromPattern, openFlyout, scopeId, stringValue]);
 
-  // --- Entity-field classification (host/user — opens entity flyout) ---
   const isEntityField = name in ENTITY_TYPE_BY_FIELD && typeof value === 'string';
 
   const { euid, isLoading } = useEntityEuidFromAlerts({
@@ -164,7 +164,6 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
     [euiTheme.font.scale.s, euiTheme.size.xs, flyoutPanelProps, isLoading, onEntityClick, value]
   );
 
-  // --- Render: disabled-actions path ---
   if (disableActions) {
     return (
       <span css={inlineFieldWrapperCss} data-test-subj="fieldMarkdownRendererInlineWrapper">
@@ -188,7 +187,6 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
     );
   }
 
-  // --- Render: alert-id chip ---
   if (isClickableAlertId && stringValue != null) {
     return (
       <span css={inlineFieldWrapperCss} data-test-subj="fieldMarkdownRendererInlineWrapper">
@@ -221,7 +219,6 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
     );
   }
 
-  // --- Render: default (entity fields and everything else) ---
   return (
     <span css={inlineFieldWrapperCss} data-test-subj="fieldMarkdownRendererInlineWrapper">
       <DraggableBadge
@@ -232,7 +229,12 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
         isAggregatable={false}
         field={name}
         tooltipContent={
-          isValueTruncated && value != null && value !== '' ? `${name}: ${value}` : undefined
+          // When entityButton is rendered, chipLabelRef is never attached (entity names are
+          // shown untruncated), so isValueTruncated is always false for entity fields.
+          // Guard explicitly so the intent is clear and the null/empty checks are not dead code.
+          entityButton == null && isValueTruncated && value != null && value !== ''
+            ? `${name}: ${value}`
+            : undefined
         }
         value={value}
       >

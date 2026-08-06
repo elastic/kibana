@@ -10,13 +10,12 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
-import { FieldMarkdownRenderer } from '.';
+import { ALERTS_INDEX_PATTERN, FieldMarkdownRenderer } from '.';
 import { MarkdownFormatterContext } from '../context';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
-import { DEFAULT_ALERTS_INDEX } from '../../../../../../common/constants';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../flyout_v2/use_flyout_api');
@@ -187,7 +186,9 @@ describe('FieldMarkdownRenderer', () => {
   });
 
   describe('alert-id chip', () => {
-    const ALERTS_INDEX_PATTERN = `${DEFAULT_ALERTS_INDEX}-*`;
+    // Note: JSDOM always reports scrollWidth === clientWidth === 0, so isValueTruncated is
+    // always false in tests. Tooltip content differences (field name vs "field: value") are
+    // not covered here; they require a real browser layout engine to observe.
     const alertId = 'test-alert-id-abc123';
 
     it('renders an alertIdButton when the field is _id and the value is in alertIds', () => {
