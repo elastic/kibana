@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, render, within } from '@testing-library/react';
+import { fireEvent, render, waitFor, within } from '@testing-library/react';
 
 import type { DataSource } from '../../common';
 import { getMockDataSourceConnectionStatus } from '../data_source_connection_status';
@@ -31,6 +31,7 @@ describe('DataSourceSuperSelect', () => {
           onChange={onChange}
           onConnectNewDataSource={onConnectNewDataSource}
           placeholder="Select a data source"
+          searchPlaceholder="Search data sources"
           connectNewDataSourceLabel="Connect new data source"
           aria-label="Data source"
           data-test-subj="datasetWizardDataSource"
@@ -42,14 +43,16 @@ describe('DataSourceSuperSelect', () => {
     return { ...view, onChange, onConnectNewDataSource };
   };
 
-  it('shows connection status for each data source in the dropdown', () => {
+  it('shows connection status for each data source in the dropdown', async () => {
     const { getByTestId, getAllByRole } = renderSelect();
 
     fireEvent.click(getByTestId('datasetWizardDataSource'));
 
-    const options = getAllByRole('option');
+    await waitFor(() => {
+      expect(getAllByRole('option')).toHaveLength(2);
+    });
 
-    expect(options).toHaveLength(2);
+    const options = getAllByRole('option');
 
     dataSources.forEach((dataSource, index) => {
       const status = getMockDataSourceConnectionStatus(dataSource.name);
@@ -76,5 +79,25 @@ describe('DataSourceSuperSelect', () => {
 
     expect(within(control).getByText('amazon-s3-test')).toBeInTheDocument();
     expect(within(control).getByText(statusLabel)).toBeInTheDocument();
+  });
+
+  it('filters data sources by search query', async () => {
+    const { getByTestId, getAllByRole } = renderSelect();
+
+    fireEvent.click(getByTestId('datasetWizardDataSource'));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardDataSourceSearch')).toBeInTheDocument();
+    });
+
+    fireEvent.change(getByTestId('datasetWizardDataSourceSearch'), {
+      target: { value: 'azure' },
+    });
+
+    await waitFor(() => {
+      expect(getAllByRole('option')).toHaveLength(1);
+    });
+
+    expect(within(getAllByRole('option')[0]).getByText('azure-blob')).toBeInTheDocument();
   });
 });

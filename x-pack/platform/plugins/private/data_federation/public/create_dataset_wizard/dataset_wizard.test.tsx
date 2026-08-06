@@ -71,16 +71,32 @@ describe('DatasetWizard step navigation', () => {
     return { ...view, history };
   };
 
-  const selectWizardRegion = (
+  const selectWizardRegion = async (
     getByRole: ReturnType<typeof render>['getByRole'],
     getByTestId: ReturnType<typeof render>['getByTestId'],
-    regionLabel: string
+    regionSearchTerm: string
   ) => {
     fireEvent.click(getByTestId('datasetWizardRegion'));
-    fireEvent.click(getByRole('option', { name: new RegExp(regionLabel) }));
+
+    await waitFor(() => {
+      expect(getByTestId('datasetWizardRegionSearch')).toBeInTheDocument();
+    });
+
+    fireEvent.change(getByTestId('datasetWizardRegionSearch'), {
+      target: { value: regionSearchTerm },
+    });
+
+    await waitFor(() => {
+      expect(getByRole('option', { name: new RegExp(regionSearchTerm, 'i') })).toBeInTheDocument();
+    });
+
+    fireEvent.click(getByRole('option', { name: new RegExp(regionSearchTerm, 'i') }));
   };
 
-  const fillLogisticsStep = (getByRole: ReturnType<typeof render>['getByRole'], getByTestId: ReturnType<typeof render>['getByTestId']) => {
+  const fillLogisticsStep = async (
+    getByRole: ReturnType<typeof render>['getByRole'],
+    getByTestId: ReturnType<typeof render>['getByTestId']
+  ) => {
     fireEvent.click(getByTestId('datasetWizardDataSource'));
     fireEvent.click(getByRole('option', { name: /source-1/ }));
     fireEvent.change(getByTestId('datasetWizardName'), {
@@ -89,7 +105,7 @@ describe('DatasetWizard step navigation', () => {
     fireEvent.change(getByTestId('datasetWizardResource'), {
       target: { value: 's3://bucket/data.csv' },
     });
-    selectWizardRegion(getByRole, getByTestId, 'US West \\(Oregon\\)');
+    await selectWizardRegion(getByRole, getByTestId, 'Oregon');
   };
 
   it('shows additional settings step after completing logistics', async () => {
@@ -97,7 +113,7 @@ describe('DatasetWizard step navigation', () => {
 
     expect(getByTestId('datasetWizardSettingsFormat')).not.toBeVisible();
 
-    fillLogisticsStep(getByRole, getByTestId);
+    await fillLogisticsStep(getByRole, getByTestId);
 
     expect(getByTestId('datasetWizardNext')).toBeInTheDocument();
     fireEvent.click(getByTestId('datasetWizardNext'));
@@ -265,7 +281,7 @@ describe('DatasetWizard step navigation', () => {
     fireEvent.change(getByTestId('datasetWizardResource'), {
       target: { value: 'sfr' },
     });
-    selectWizardRegion(getByRole, getByTestId, 'US West \\(Oregon\\)');
+    await selectWizardRegion(getByRole, getByTestId, 'Oregon');
 
     fireEvent.click(getByTestId('datasetWizardNext'));
 

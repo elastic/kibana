@@ -8,7 +8,7 @@
 import type { FunctionComponent, Ref } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import type { EuiSuperSelectOption } from '@elastic/eui';
+import type { EuiSuperSelectOption, EuiSelectableOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,12 +16,23 @@ import {
   EuiInputPopover,
   EuiLink,
   EuiPopoverFooter,
+  EuiPopoverTitle,
+  EuiSelectable,
   EuiSuperSelectControl,
-  useEuiTheme,
 } from '@elastic/eui';
 
 import { DATA_SOURCE_TYPES_TO_ICONS, type DataSource } from '../../common';
 import { DataSourceConnectionStatusHealth } from '../data_source_connection_status_badge';
+
+const selectableListProps = {
+  onFocusBadge: false,
+  paddingSize: 's' as const,
+  css: css`
+    max-block-size: 300px;
+    overflow-y: auto;
+  `,
+  bordered: false,
+};
 
 const DataSourceOptionDisplay: FunctionComponent<{ dataSource: DataSource }> = ({ dataSource }) => {
   const iconType = DATA_SOURCE_TYPES_TO_ICONS[dataSource.type];
@@ -55,6 +66,7 @@ export interface DataSourceSuperSelectProps {
   onChange: (value: string) => void;
   onConnectNewDataSource: () => void;
   placeholder: string;
+  searchPlaceholder: string;
   connectNewDataSourceLabel: string;
   'aria-label': string;
   'data-test-subj'?: string;
@@ -70,6 +82,7 @@ export const DataSourceSuperSelect: FunctionComponent<DataSourceSuperSelectProps
   onChange,
   onConnectNewDataSource,
   placeholder,
+  searchPlaceholder,
   connectNewDataSourceLabel,
   'aria-label': ariaLabel,
   'data-test-subj': dataTestSubj,
@@ -78,7 +91,6 @@ export const DataSourceSuperSelect: FunctionComponent<DataSourceSuperSelectProps
   isInvalid = false,
   fullWidth = false,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const controlOptions = useMemo(
@@ -88,6 +100,19 @@ export const DataSourceSuperSelect: FunctionComponent<DataSourceSuperSelectProps
         inputDisplay: <DataSourceOptionDisplay dataSource={ds} />,
       })),
     [dataSources]
+  );
+
+  const selectableOptions = useMemo(
+    (): EuiSelectableOption[] =>
+      dataSources.map((ds) => ({
+        key: ds.name,
+        label: ds.name,
+        searchableLabel: ds.name,
+        checked: value === ds.name ? 'on' : undefined,
+        prepend: <EuiIcon type={DATA_SOURCE_TYPES_TO_ICONS[ds.type]} size="m" aria-hidden />,
+        append: <DataSourceConnectionStatusHealth dataSourceName={ds.name} />,
+      })),
+    [dataSources, value]
   );
 
   const closePopover = useCallback(() => {
@@ -110,33 +135,6 @@ export const DataSourceSuperSelect: FunctionComponent<DataSourceSuperSelectProps
     closePopover();
     onConnectNewDataSource();
   }, [closePopover, onConnectNewDataSource]);
-
-  const listboxStyles = css`
-    max-block-size: 300px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: ${euiTheme.size.s};
-
-    .euiSuperSelect__item:focus {
-      outline: none;
-    }
-  `;
-
-  const itemStyles = css`
-    display: block;
-    inline-size: 100%;
-    padding: ${euiTheme.size.xs} ${euiTheme.size.s};
-    text-align: start;
-    color: ${euiTheme.colors.text};
-    background: transparent;
-    border: none;
-    cursor: pointer;
-
-    &:hover,
-    &:focus {
-      background: ${euiTheme.focus.backgroundColor};
-    }
-  `;
 
   const control = (
     <EuiSuperSelectControl
@@ -165,27 +163,28 @@ export const DataSourceSuperSelect: FunctionComponent<DataSourceSuperSelectProps
       fullWidth={fullWidth}
       disableFocusTrap
     >
-      <div
-        className="euiSuperSelect__listbox eui-scrollBar"
-        css={listboxStyles}
-        role="listbox"
-        aria-label={ariaLabel}
+      <EuiSelectable
+        searchable
+        searchProps={{
+          placeholder: searchPlaceholder,
+          'data-test-subj': `${dataTestSubj ?? 'dataSourceSuperSelect'}Search`,
+        }}
+        singleSelection="always"
+        options={selectableOptions}
+        listProps={selectableListProps}
+        onChange={(_newOptions, _event, changedOption) => {
+          if (changedOption?.key) {
+            handleSelect(String(changedOption.key));
+          }
+        }}
       >
-        {dataSources.map((ds) => (
-          <button
-            key={ds.name}
-            type="button"
-            className="euiSuperSelect__item"
-            css={itemStyles}
-            role="option"
-            id={ds.name}
-            onClick={() => handleSelect(ds.name)}
-            aria-selected={value === ds.name}
-          >
-            <DataSourceOptionDisplay dataSource={ds} />
-          </button>
-        ))}
-      </div>
+        {(list, search) => (
+          <>
+            <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+            {list}
+          </>
+        )}
+      </EuiSelectable>
       <EuiPopoverFooter paddingSize="s">
         <EuiFlexGroup justifyContent="center" responsive={false}>
           <EuiFlexItem grow={false}>

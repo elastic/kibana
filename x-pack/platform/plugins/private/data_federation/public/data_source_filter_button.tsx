@@ -11,15 +11,15 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFilterGroup,
-  EuiPanel,
   EuiPopover,
+  EuiPopoverTitle,
   EuiSelectable,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { mainTranslations } from './main_i18n';
 
-const selectableListCss = css`
+const filterPopoverCss = css`
   width: 220px;
 `;
 
@@ -74,6 +74,10 @@ export const DataSourceFilterButton: FunctionComponent<DataSourceFilterButtonPro
           searchProps={{
             placeholder: mainTranslations.filters.dataSourceSearchPlaceholder,
           }}
+          listProps={{
+            paddingSize: 's',
+            isVirtualized: false,
+          }}
           onChange={(newOptions) => {
             onChange(
               newOptions
@@ -82,10 +86,11 @@ export const DataSourceFilterButton: FunctionComponent<DataSourceFilterButtonPro
             );
           }}
         >
-          {(list) => (
-            <EuiPanel paddingSize="none" css={selectableListCss}>
+          {(list, search) => (
+            <div css={filterPopoverCss}>
+              <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
               {list}
-            </EuiPanel>
+            </div>
           )}
         </EuiSelectable>
       </EuiPopover>

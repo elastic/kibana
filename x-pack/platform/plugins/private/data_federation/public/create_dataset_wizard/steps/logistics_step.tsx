@@ -127,6 +127,7 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
             fullWidth
             aria-label={datasetWizardStrings.dataSourceLabel()}
             placeholder={datasetWizardStrings.dataSourcePlaceholder()}
+            searchPlaceholder={datasetWizardStrings.dataSourceSearchPlaceholder()}
             connectNewDataSourceLabel={datasetWizardStrings.connectNewDataSource()}
             value={dataSourceField.value || undefined}
             onChange={onDataSourceChange}
@@ -199,6 +200,7 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
             fullWidth
             aria-label={datasetWizardStrings.regionLabel()}
             placeholder={datasetWizardStrings.regionPlaceholder()}
+            searchPlaceholder={datasetWizardStrings.regionSearchPlaceholder()}
             isInvalid={Boolean(regionFieldState.error)}
             value={regionField.value || undefined}
             onChange={regionField.onChange}

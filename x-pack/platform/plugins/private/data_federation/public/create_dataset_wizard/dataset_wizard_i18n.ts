@@ -64,6 +64,11 @@ export const datasetWizardStrings = {
       defaultMessage: 'Select an existing data source or connect a new one',
     }),
 
+  dataSourceSearchPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.dataSourceSearchPlaceholder', {
+      defaultMessage: 'Search data sources',
+    }),
+
   connectNewDataSource: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.connectNewDataSource', {
       defaultMessage: 'Connect new data source',
@@ -118,6 +123,11 @@ export const datasetWizardStrings = {
   regionPlaceholder: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.regionPlaceholder', {
       defaultMessage: 'Select region',
+    }),
+
+  regionSearchPlaceholder: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.regionSearchPlaceholder', {
+      defaultMessage: 'Search regions',
     }),
 
   regionRequired: () =>
