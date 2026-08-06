@@ -38,7 +38,6 @@ import type {
 
 export type AvailableMetricIcon = $Values<typeof AvailableMetricIcons>;
 export type MetricDensity = 'compact' | 'default';
-
 /**
  * Visibility and placement of the secondary metric name.
  * `hidden` has no equivalent in `@elastic/charts`, where it is expressed as an empty label.

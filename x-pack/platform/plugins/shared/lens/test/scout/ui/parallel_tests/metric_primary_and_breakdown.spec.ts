@@ -92,6 +92,9 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         for (const datum of data) {
           expect(datum.subtitle).toBe('Average of bytes');
           expect(datum.value).toMatch(NUMERIC_VALUE);
+          // Name display defaults to Hide, so the secondary extra text is the value alone
+          // (no "Average of bytes" name prefix).
+          expect(datum.extraText).toMatch(NUMERIC_VALUE);
           expect(datum.color).toBe(DEFAULT_TILE_COLOR);
           expect(datum.trendlineColor).toBe(DEFAULT_TILE_COLOR);
           expect(datum.showingTrendline).toBe(true);
