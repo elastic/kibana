@@ -172,7 +172,6 @@ fileGroups:
     - scripts/**/*
     - __mocks__/**/*
     - test/scout/**/*
-    - test/scout_basic_license/**/*
     - common/**/*.json
     - public/**/*.json
     - server/**/*.json

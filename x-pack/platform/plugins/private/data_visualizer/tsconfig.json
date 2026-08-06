@@ -10,8 +10,7 @@
     "scripts/**/*",
     "server/**/*",
     "types/**/*",
-    "test/scout/**/*",
-    "test/scout_basic_license/**/*"
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/aiops-components",

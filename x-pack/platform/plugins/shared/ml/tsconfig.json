@@ -10,7 +10,6 @@
     "scripts/**/*",
     "__mocks__/**/*",
     "test/scout/**/*",
-    "test/scout_basic_license/**/*",
     "../../../../../typings/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",

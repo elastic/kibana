@@ -110,7 +110,6 @@ fileGroups:
     - server/**/*
     - types/**/*
     - test/scout/**/*
-    - test/scout_basic_license/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
