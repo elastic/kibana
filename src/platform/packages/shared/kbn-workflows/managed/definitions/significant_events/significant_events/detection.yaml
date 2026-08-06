@@ -1,6 +1,6 @@
 version: "1"
 name: "Significant Events Detection"
-description: "Detects statistically significant changes in alert firing patterns per rule using the Elasticsearch change_point aggregation. Writes an immutable change-point detection per rule on transition; lifecycle (recovered/quiet) is NOT determined here — it is read from the alerts by the discovery flow."
+description: "Detects statistically significant changes in alert firing patterns per rule using the Elasticsearch change_point aggregation. Writes an immutable change-point detection per rule on transition; lifecycle (recovered/quiet) is NOT determined here — it is read from the alerts by the discovery (triage) workflow."
 enabled: true
 tags:
   - observability

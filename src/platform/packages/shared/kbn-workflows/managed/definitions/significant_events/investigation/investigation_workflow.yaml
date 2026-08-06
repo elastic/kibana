@@ -1,9 +1,9 @@
 version: '1'
-name: Investigation
+name: Significant Events Investigation
 description: >
-  Root cause analysis for an observability issue. One agent investigates using
-  available signals — logs, traces, metrics, topology, and memory — then
-  produces a structured root cause conclusion.
+  Root-cause investigation for an observability issue via the Nightshift
+  Investigator. Queries available signals — logs, traces, metrics, topology,
+  and memory — then confirms a root cause and produces a structured conclusion.
 enabled: true
 settings:
   timeout: '60m'

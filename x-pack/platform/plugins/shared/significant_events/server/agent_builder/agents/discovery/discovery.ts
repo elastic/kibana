@@ -18,7 +18,7 @@ export const discoveryAgentType = {
   id: SIGNIFICANT_EVENTS_DISCOVERY_AGENT_TYPE_ID,
   name: 'Nightshift Triager',
   description:
-    'Correlates related detections into significant events using shared infrastructure, temporal proximity, and causal plausibility, verifies current state, and writes final event records with status, calibrated severity, and supporting evidence.',
+    'Nightshift triage agent: validates detection change-points, correlates related signals into significant events, decides final status and calibrated severity from grounded evidence, and writes operator-ready event records.',
   avatar_icon: 'logoElastic',
   baseConfiguration: {
     instructions,

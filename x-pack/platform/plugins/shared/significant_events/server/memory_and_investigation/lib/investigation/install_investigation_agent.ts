@@ -30,8 +30,8 @@ export const installInvestigationAgent = async ({
       type: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
       name: 'Nightshift Investigator',
       description:
-        'Investigates an observability issue by querying available signals (logs, traces, metrics), ' +
-        'reasoning about causality direction, and producing a contributing-factors conclusion with supporting evidence.',
+        'Nightshift investigation agent: queries available signals (logs, traces, metrics, topology, memory), ' +
+        'confirms a root cause among contributing-factor hypotheses, and produces a structured conclusion with supporting evidence.',
       labels: ['observability', 'streams', 'significant-events', 'investigation', 'root-cause'],
       avatar_symbol: 'NI',
       access_control: { access_mode: AgentAccessControlMode.Public },

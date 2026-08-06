@@ -1,6 +1,6 @@
 version: '1'
 name: 'Significant Events Discovery'
-description: 'Correlates unhandled detections into significant events using a discovery agent, writes final event versions, and propagates rule-level resolutions.'
+description: 'Correlates unhandled detections into significant events using the Nightshift Triager, writes final event versions with status and severity, and propagates rule-level resolutions.'
 enabled: true
 settings:
   timeout: '45m'
@@ -97,7 +97,7 @@ steps:
           hasWork: false
 
   # -----------------------------------------------------------------------
-  # Correlate detections into discoveries.
+  # Triage detections into significant events (Nightshift Triager).
   # -----------------------------------------------------------------------
   - name: run_discovery_agent
     type: ai.agent
@@ -134,7 +134,7 @@ steps:
               events_write tool — this is a compact summary only.
           significant_events:
             type: array
-            description: 'Final events_write outcomes from the discovery agent. Successful writes include event_uuid; failed writes have written: false. The workflow uses only successful open items to gate trigger_investigation.'
+            description: 'Final events_write outcomes from the Nightshift Triager. Successful writes include event_uuid; failed writes have written: false. The workflow uses only successful open items to gate trigger_investigation.'
             items:
               type: object
               properties:
@@ -147,7 +147,7 @@ steps:
                 severity:
                   type: string
                   enum: ['80-critical', '60-high', '40-medium', '20-low']
-                  description: 'Severity of the event as decided by the discovery agent.'
+                  description: 'Severity of the event as decided by the Nightshift Triager.'
                 status:
                   type: string
                   enum: [open, dismissed, closed]
@@ -226,7 +226,7 @@ steps:
 
   # -----------------------------------------------------------------------
   # Trigger root-cause investigation for newly-opened high-severity events.
-  # The discovery agent owns the event decision and events_write; deterministic
+  # The Nightshift Triager owns the event decision and events_write; deterministic
   # queue advancement stays in the workflow and does not consume agent turns.
   # -----------------------------------------------------------------------
 
