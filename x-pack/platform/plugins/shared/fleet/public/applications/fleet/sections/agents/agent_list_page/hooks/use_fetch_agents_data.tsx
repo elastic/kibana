@@ -36,6 +36,7 @@ import {
 import { getKuery } from '../utils/get_kuery';
 
 import { removeVersionSuffixFromPolicyId } from '../../../../../../../common/services/version_specific_policies_utils';
+import { isScheduledAction } from '../components/agent_activity_flyout/agent_activity_helper';
 
 import { useSessionAgentListState, defaultAgentListState } from './use_session_agent_list_state';
 
@@ -237,30 +238,32 @@ export function useFetchAgentsData() {
   const [allTags, setAllTags] = useState<string[]>();
   const [latestAgentActionErrors, setLatestAgentActionErrors] = useState<string[]>([]);
 
-  const { data: actionErrors } = useQuery({
+  const { data: actionStatusData } = useQuery({
     refetchInterval: REFRESH_INTERVAL_MS,
     queryKey: ['get-action-statuses'],
-    initialData: [] as string[],
+    initialData: { errorActionIds: [] as string[], scheduledActionsCount: 0 },
     queryFn: async () => {
       const actionStatusResponse = await sendGetActionStatus({
-        latest: REFRESH_INTERVAL_MS + 5000, // avoid losing errors
         perPage: MAX_AGENT_ACTIONS,
       });
-
-      return (
-        actionStatusResponse.data?.items
-          .filter((action) => action.latestErrors?.length ?? 0 > 1)
-          .map((action) => action.actionId) || []
-      );
+      const items = actionStatusResponse.data?.items ?? [];
+      return {
+        errorActionIds: items
+          .filter((action) => (action.latestErrors?.length ?? 0) > 0)
+          .map((action) => action.actionId),
+        scheduledActionsCount: items.filter(isScheduledAction).length,
+      };
     },
   });
 
   useEffect(() => {
-    const allRecentActionErrors = [...new Set([...latestAgentActionErrors, ...actionErrors])];
+    const allRecentActionErrors = [
+      ...new Set([...latestAgentActionErrors, ...actionStatusData.errorActionIds]),
+    ];
     if (!isEqual(latestAgentActionErrors, allRecentActionErrors)) {
       setLatestAgentActionErrors(allRecentActionErrors);
     }
-  }, [latestAgentActionErrors, actionErrors]);
+  }, [latestAgentActionErrors, actionStatusData.errorActionIds]);
 
   // Use session storage state for pagination and sort
   const queryKeyPagination = JSON.stringify({
@@ -470,6 +473,7 @@ export function useFetchAgentsData() {
     queryHasChanged,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
+    scheduledActionsCount: actionStatusData.scheduledActionsCount,
     isUsingFilter,
     clearFilters: sessionState.clearFilters,
     onTableChange: sessionState.onTableChange,
