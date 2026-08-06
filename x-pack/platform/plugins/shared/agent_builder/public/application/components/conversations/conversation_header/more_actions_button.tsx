@@ -308,12 +308,11 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         button={<EuiButtonIcon {...buttonProps} />}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
-        panelPaddingSize="xs"
-        anchorPosition="downCenter"
+        panelPaddingSize="none"
+        anchorPosition="downRight"
         aria-label={fullscreenLabels.actionsAriaLabel}
       >
         <EuiContextMenuPanel items={menuItems} />
-        <EuiSpacer size="s" />
       </EuiPopover>
       <DeleteConversationModal
         isOpen={isDeleteModalOpen}
