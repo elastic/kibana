@@ -193,9 +193,7 @@ describe('FieldMarkdownRenderer', () => {
     it('renders an alertIdButton when the field is _id and the value is in alertIds', () => {
       render(
         <TestProviders>
-          <MarkdownFormatterContext.Provider
-            value={{ disableActions: false, alertIds: [alertId] }}
-          >
+          <MarkdownFormatterContext.Provider value={{ disableActions: false, alertIds: [alertId] }}>
             <FieldMarkdownRenderer icon="warning" name="_id" operator={':'} value={alertId} />
           </MarkdownFormatterContext.Provider>
         </TestProviders>
@@ -209,9 +207,7 @@ describe('FieldMarkdownRenderer', () => {
     it('renders an alertIdButton for kibana.alert.uuid when the value is in alertIds', () => {
       render(
         <TestProviders>
-          <MarkdownFormatterContext.Provider
-            value={{ disableActions: false, alertIds: [alertId] }}
-          >
+          <MarkdownFormatterContext.Provider value={{ disableActions: false, alertIds: [alertId] }}>
             <FieldMarkdownRenderer
               icon="warning"
               name="kibana.alert.uuid"
@@ -254,9 +250,7 @@ describe('FieldMarkdownRenderer', () => {
     it('does NOT render an alertIdButton when disableActions is true', () => {
       render(
         <TestProviders>
-          <MarkdownFormatterContext.Provider
-            value={{ disableActions: true, alertIds: [alertId] }}
-          >
+          <MarkdownFormatterContext.Provider value={{ disableActions: true, alertIds: [alertId] }}>
             <FieldMarkdownRenderer icon="warning" name="_id" operator={':'} value={alertId} />
           </MarkdownFormatterContext.Provider>
         </TestProviders>
@@ -301,9 +295,7 @@ describe('FieldMarkdownRenderer', () => {
 
       render(
         <TestProviders>
-          <MarkdownFormatterContext.Provider
-            value={{ disableActions: false, alertIds: [alertId] }}
-          >
+          <MarkdownFormatterContext.Provider value={{ disableActions: false, alertIds: [alertId] }}>
             <FieldMarkdownRenderer icon="warning" name="_id" operator={':'} value={alertId} />
           </MarkdownFormatterContext.Provider>
         </TestProviders>
