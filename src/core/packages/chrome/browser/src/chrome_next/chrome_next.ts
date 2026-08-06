@@ -272,6 +272,16 @@ type AppHeaderSecondaryContent =
 export type AppHeaderConfig = AppHeaderConfigBase & AppHeaderSecondaryContent;
 
 /**
+ * Chrome-owned registration config. Unlike {@link AppHeaderConfig}, `back` may be `false` to
+ * suppress the breadcrumb-derived fallback.
+ *
+ * @public
+ */
+export type ChromeAppHeaderConfig = Omit<AppHeaderConfig, 'back'> & {
+  back?: AppHeaderBack | false;
+};
+
+/**
  * Chrome Next rollout APIs.
  *
  * @remarks
@@ -340,7 +350,7 @@ export interface ChromeNext {
      * Pass the config to show; the returned callback removes it.
      * Per-app, cleared on app change.
      */
-    set(config: AppHeaderConfig): () => void;
+    set(config: ChromeAppHeaderConfig): () => void;
   };
   userMenu: {
     /**

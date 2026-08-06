@@ -13,7 +13,11 @@ import {
   RULE_MANAGEMENT_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
 import { manageRuleTool } from '../tools/manage_rule';
-import { generateRuleSchemaDoc, generateRuleOperationsDoc } from './schema_to_skill_docs';
+import {
+  generateRuleSchemaDoc,
+  generateRuleOperationsDoc,
+  getSeverityValues,
+} from './schema_to_skill_docs';
 
 export const createRuleManagementSkill = () =>
   defineSkillType({
@@ -72,7 +76,29 @@ Only \`kind: alert\` rules produce episodes. \`kind: signal\` rules write raw si
 
 Notifications are not configured on the rule itself. Alert episodes are matched and dispatched by **action policies** (notification policies) — space-scoped saved objects that send matched episodes to workflow destinations.
 
-When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.`,
+When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.
+
+---
+
+## Alert Event Severity
+
+Severity is a per-event property on alert events and episodes, not a rule-level field. It is extracted at execution time from a column named \`severity\` in the ES|QL breach query output.
+
+- **Valid values**: ${getSeverityValues()
+          .map((v) => `\`${v}\``)
+          .join(', ')} (case-insensitive).
+- If the breach query does not produce a \`severity\` column, alert events have no severity.
+- Different groups can produce different severities in the same rule execution (the value comes from each row).
+- Action policies can match on \`severity\` to route high-severity episodes differently (e.g. PagerDuty for critical, email for low).
+
+### Setting Severity in ES|QL
+
+Severity is set by adding a \`severity\` column to the breach query via \`EVAL\`:
+
+- **Literal severity** — all alerts from the rule share the same severity:
+  \`| EVAL severity = "critical"\`
+- **Conditional severity** — severity varies per group based on data:
+  \`| EVAL severity = CASE(cpu > 0.95, "critical", cpu > 0.8, "high", "medium")\``,
       },
       {
         name: 'rule-schema',
@@ -155,6 +181,10 @@ Use \`set_state_transition\` to delay alert firing until the threshold is breach
 - \`recovering_timeframe\` — optional time window for the recovering evaluation.
 
 State transition is only allowed on \`kind: alert\` rules. Refer to the [rule-operations-schema reference](./references/rule-operations-schema.md) for the full field schema.
+
+## Severity
+
+When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Refer to the [concepts reference](./references/concepts.md) for valid values, the extraction model, and literal vs conditional patterns.
 
 ## Recovery Strategy
 
