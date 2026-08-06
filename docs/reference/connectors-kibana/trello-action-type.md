@@ -3,7 +3,7 @@ navigation_title: "Trello"
 type: reference
 description: "Use the Trello connector to search and browse boards, lists, and cards, create and update cards, and post comments using the Trello REST API."
 applies_to:
-  stack: preview
+  stack: preview 9.6
   serverless: preview
 ---
 
@@ -127,7 +127,7 @@ To use the Trello connector, you need a Trello API key and API token.
 **Get an API key:**
 
 1. Go to [trello.com/power-ups/admin](https://trello.com/power-ups/admin).
-2. Create or open a Power-Up (this is just a container for the key — any name works).
+2. Create or open a Power-Up (this is a container for the key — any name works).
 3. Open its **API Key** tab and generate a key if one doesn't already exist.
 
 **Get an API token:**
