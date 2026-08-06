@@ -21,6 +21,7 @@ import { createRemoteLogsExtractionClient } from './domain/logs_extraction/remot
 import { HistorySnapshotClient } from './domain/history_snapshot';
 import { CRUDClient } from './domain/crud';
 import { EntityMetadataClient } from './domain/entity_metadata';
+import { RelationshipsClient } from './domain/relationships';
 import { ResolutionClient } from './domain/resolution';
 import { ResolutionRulesClient } from './domain/resolution/rules';
 import type { TelemetryReporter } from './telemetry/events';
@@ -143,6 +144,11 @@ export async function createRequestHandlerContext({
     }),
     crudClient,
     entityMetadataClient,
+    relationshipsClient: new RelationshipsClient({
+      logger,
+      esClient: core.elasticsearch.client.asCurrentUser,
+      namespace,
+    }),
     resolutionClient: new ResolutionClient({
       logger,
       esClient: core.elasticsearch.client.asCurrentUser,

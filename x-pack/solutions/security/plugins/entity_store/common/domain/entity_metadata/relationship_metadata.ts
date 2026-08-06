@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const RELATIONSHIP_OBSERVED_ACTION = 'relationship_observed' as const;
+
 export const RELATIONSHIP_KINDS = [
   'accesses_frequently',
   'accesses_infrequently',
@@ -28,7 +30,7 @@ export interface RelationshipMetadataMaintainer {
 export type RelationshipMetadataDoc = {
   '@timestamp': string;
   'event.kind': 'event';
-  'event.action': 'relationship_observed';
+  'event.action': typeof RELATIONSHIP_OBSERVED_ACTION;
   'event.ingested'?: string;
   'entity.id': string;
   'entity.source': string;
