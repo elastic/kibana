@@ -28,9 +28,9 @@ export const RegionSelectionToolbar: React.FC<RegionSelectionToolbarProps> = ({
 }) => (
   <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
-      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
+          <EuiText size="xs" data-test-subj="manageRegionsSelectionCount">
             <strong>
               {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.selectionCount', {
                 defaultMessage: '{selected} of {total} selected',
@@ -42,7 +42,6 @@ export const RegionSelectionToolbar: React.FC<RegionSelectionToolbarProps> = ({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="xs"
-            flush="left"
             onClick={onSelectAll}
             data-test-subj="manageRegionsSelectAllButton"
           >
