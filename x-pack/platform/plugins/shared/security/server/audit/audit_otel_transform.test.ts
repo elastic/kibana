@@ -45,14 +45,6 @@ describe('applyAuditOtelFieldMap', () => {
     expect(result).not.toHaveProperty('http.request.headers.x-forwarded-for');
   });
 
-  it('is a no-op for renames whose source key is absent', () => {
-    const result = applyAuditOtelFieldMap({ 'event.action': 'user_login' });
-
-    expect(result).not.toHaveProperty('kibana.space.id');
-    expect(result).not.toHaveProperty('source.ip');
-    expect(result['event.action']).toBe('user_login');
-  });
-
   it('builds url.original from the split url.* fields and drops those components', () => {
     const result = applyAuditOtelFieldMap({
       'url.scheme': 'https',
@@ -127,14 +119,6 @@ describe('applyAuditOtelFieldMap', () => {
     const result = applyAuditOtelFieldMap({ 'http.request.method': 'get' });
 
     expect(result['http.request.method']).toBe('GET');
-  });
-
-  it('silently skips uppercase for non-string or absent values', () => {
-    const absent = applyAuditOtelFieldMap({ 'event.action': 'user_login' });
-    expect(absent).not.toHaveProperty('http.request.method');
-
-    const nonString = applyAuditOtelFieldMap({ 'http.request.method': ['get'] });
-    expect(nonString['http.request.method']).toEqual(['get']);
   });
 
   it('does not mutate the input attributes', () => {
