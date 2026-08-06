@@ -96,7 +96,9 @@ export class NightshiftPlugin
         distinctUntilChanged(),
         map(
           (isAvailable): AppUpdater =>
-            () => ({ visibleIn: isAvailable ? ['globalSearch'] : [] })
+            () => ({
+              visibleIn: isAvailable ? ['globalSearch', 'projectSideNav'] : [],
+            })
         )
       )
       .subscribe(this.appUpdater$);

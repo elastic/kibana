@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import * as sourcererActions from './actions';
-import * as sourcererModel from './model';
+import type { LocationAgentStats } from '../../../../../common/types';
+import { createAsyncAction } from '../utils/actions';
 
-export { sourcererActions, sourcererModel };
-export * from './reducer';
+export const getAgentStatsAction = createAsyncAction<void, LocationAgentStats[]>(
+  '[AGENT STATS] GET'
+);

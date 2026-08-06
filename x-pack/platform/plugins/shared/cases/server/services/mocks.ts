@@ -169,6 +169,7 @@ const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
     get: jest.fn(),
     bulkGet: jest.fn(),
     getAllDocumentsAttachedToCase: jest.fn(),
+    getUnifiedAttachmentsByTypes: jest.fn().mockResolvedValue([]),
     getCaseAttatchmentStats: jest.fn(),
     getAttachmentIdsForCases: jest.fn(),
     getFileAttachments: jest.fn(),
