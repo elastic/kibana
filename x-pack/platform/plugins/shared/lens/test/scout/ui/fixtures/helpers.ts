@@ -8,7 +8,8 @@
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { ContentListWrapper } from '@kbn/scout';
-import type { Locator, PageObjects, ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
+import type { LensPageObjects } from './page_objects';
 import {
   DATA_VIEW_ID,
   FORMULA_ESCAPED_RUNTIME_FIELD,
@@ -128,8 +129,10 @@ export async function completeLensCsvExport(page: ScoutPage): Promise<void> {
   }
 }
 
-type DashboardAndLens = Pick<PageObjects, 'dashboard' | 'lens'>;
-type VisualizeAndLens = Pick<PageObjects, 'visualize' | 'lens'>;
+// Uses Lens-editor-only methods (e.g. `inlineEditor`, `convertToEsqlButton`), so this is
+// typed against the Lens plugin's rich page object, not the shared `@kbn/scout` `PageObjects`.
+type DashboardAndLens = Pick<LensPageObjects, 'dashboard' | 'lens'>;
+type VisualizeAndLens = Pick<LensPageObjects, 'visualize' | 'lens'>;
 
 /**
  * Builds a fresh Lens Metric visualization directly from the editor UI, with a primary and a
@@ -195,7 +198,7 @@ interface LogstashLensEditorBeforeEachContext {
   browserAuth: { loginAsPrivilegedUser: () => Promise<void> };
   context: ElasticChartDebugContext;
   page: { setViewportSize: (size: { width: number; height: number }) => Promise<void> };
-  pageObjects: Pick<PageObjects, 'visualize' | 'lens'>;
+  pageObjects: Pick<LensPageObjects, 'visualize' | 'lens'>;
 }
 
 /** Matches FTR lens group5 `browser.setWindowSize(1280, 1200)`. */
@@ -303,7 +306,7 @@ export function createLogstashLensEditorSuiteSetup(options?: {
 
 /** Opens a fresh empty Lens editor (URL navigation resets stale Visualize/Lens state). */
 export async function openEmptyLensEditor(
-  pageObjects: Pick<PageObjects, 'visualize' | 'lens'>
+  pageObjects: Pick<LensPageObjects, 'visualize' | 'lens'>
 ): Promise<void> {
   await pageObjects.visualize.goto();
   await pageObjects.visualize.openNewVisualizationWizard();
@@ -320,7 +323,7 @@ export async function openDimensionEditorAndWaitForFlyout(
   await dimensionButton.click();
 
   // Confirm that the secondary flyout is opened
-  await expect(lens.getSecondaryFlyoutBackButton()).toBeVisible();
+  await expect(lens.secondaryFlyoutBackButton).toBeVisible();
   await expect(page.getByTestId('text-based-languages-field-selection-row')).toBeVisible();
 }
 
@@ -329,17 +332,17 @@ export async function openInlineEditorAndWaitVisible(
   panelId: string
 ) {
   await dashboard.openInlineEditor(panelId);
-  await expect(lens.getInlineEditor()).toBeVisible();
+  await expect(lens.inlineEditor).toBeVisible();
 }
 
-export async function applyLensInlineEditorAndWaitClosed({ lens }: Pick<PageObjects, 'lens'>) {
-  await lens.getApplyFlyoutButton().click();
-  await expect(lens.getInlineEditor()).toBeHidden();
+export async function applyLensInlineEditorAndWaitClosed({ lens }: Pick<LensPageObjects, 'lens'>) {
+  await lens.applyFlyoutButton.click();
+  await expect(lens.inlineEditor).toBeHidden();
 }
 
-export async function cancelLensInlineEditorAndWaitClosed({ lens }: Pick<PageObjects, 'lens'>) {
-  await lens.getCancelFlyoutButton().click();
-  await expect(lens.getInlineEditor()).toBeHidden();
+export async function cancelLensInlineEditorAndWaitClosed({ lens }: Pick<LensPageObjects, 'lens'>) {
+  await lens.cancelFlyoutButton.click();
+  await expect(lens.inlineEditor).toBeHidden();
 }
 
 /**
@@ -365,15 +368,15 @@ export async function convertToEsqlViaModal({
   const { lens } = pageObjects;
 
   // Click on the "Conver to ES|QL" button in the in-line editor
-  await lens.getConvertToEsqlButton().click();
+  await lens.convertToEsqlButton.click();
 
   // Click on the confirmation button in the modal
-  const modal = lens.getConvertToEsqModal();
-  await lens.getConvertToEsqModalConfirmButton().click();
+  const modal = lens.convertToEsqlModal;
+  await lens.convertToEsqlModalConfirmButton.click();
   await expect(modal).toBeHidden();
 
   // Confirm that the in-line editor has been updated
-  await expect(lens.getConvertToEsqlButton()).toBeHidden();
+  await expect(lens.convertToEsqlButton).toBeHidden();
   await expect(page.getByTestId('ESQLEditor')).toBeVisible();
   await expect(page.getByText('ES|QL Query Results')).toBeVisible();
 }
