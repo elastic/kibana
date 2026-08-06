@@ -14,6 +14,14 @@ interface FetchEntitiesByIdsParams {
   entityIds: string[];
   logger: ScopedLogger;
   errorContext: string;
+  /**
+   * When true, propagate a lookup failure instead of returning an empty map. Callers that treat
+   * a missing entity as authoritative (e.g. base scoring with create-if-missing enabled) must
+   * not let a transient ES error be misread as "every score on this page is missing", which
+   * would route the whole page through the create path with no criticality or watchlist
+   * modifiers applied. Defaults to false, preserving the pre-existing best-effort behaviour.
+   */
+  strict?: boolean;
 }
 
 const normalizeWatchlists = (value: unknown): string[] => {
@@ -63,6 +71,7 @@ export const fetchEntitiesByIds = async ({
   entityIds,
   logger,
   errorContext,
+  strict = false,
 }: FetchEntitiesByIdsParams): Promise<Map<string, RiskScoreModifierEntity>> => {
   const entityMap = new Map<string, RiskScoreModifierEntity>();
 
@@ -93,6 +102,9 @@ export const fetchEntitiesByIds = async ({
       searchAfter = nextSearchAfter;
     } while (searchAfter !== undefined);
   } catch (error) {
+    if (strict) {
+      throw error;
+    }
     logger.warn(`${errorContext}: ${error}`);
   }
 

@@ -36,6 +36,17 @@ export interface EntityCreationRejected {
 export type EntityCreationCandidate = EntityCreationAccepted | EntityCreationRejected;
 
 /**
+ * Whether {@link getEntityCreationCandidate} can ever accept `entityType` — i.e. whether its
+ * definition declares `creatableFromDocument` at all (currently every type except `generic`).
+ * Lets callers skip fetching a representative document entirely for types that would always be
+ * rejected with `entity_type_not_creatable`, rather than issuing a query whose result is
+ * guaranteed to be discarded.
+ */
+export function isEntityTypeCreatableFromDocument(entityType: EntityType): boolean {
+  return getEntityDefinitionWithoutId(entityType).creatableFromDocument !== undefined;
+}
+
+/**
  * Evaluates whether one entity type is creatable from one source document (typically a
  * representative alert `_source`), per the type's own `creatableFromDocument` definition (see
  * `entity_schema.ts`). Returns the EUID and identity fields to seed a new entity document when
@@ -65,11 +76,12 @@ export function getEntityCreationCandidate(
     return { accepted: false, reason: 'event_outcome_failure' };
   }
 
-  if (rule.requires) {
+  if ('requires' in rule) {
     const evaluatedDoc = buildEvaluatedDoc(entityType, doc);
     if (!evaluateStreamlangCondition(evaluatedDoc, rule.requires)) {
-      // Guaranteed by the schema's refine: `rejectionReason` is required whenever `requires` is set.
-      return { accepted: false, reason: rule.rejectionReason ?? 'no_identity' };
+      // `rejectionReason` is required whenever `requires` is set — enforced by
+      // `creatableFromDocumentSchema`'s union, not just a runtime refine.
+      return { accepted: false, reason: rule.rejectionReason };
     }
   }
 

@@ -81,8 +81,10 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
         success: (input: {
           pagesProcessed: number;
           scoresWritten: number;
+          scoresMissingFromStore: number;
           entitiesCreated: number;
-          entitiesCreateRejected: number;
+          entityCreationsSkipped: number;
+          entityCreationsFailed: number;
         }) =>
           reportRunStageSummary({
             stage: 'phase1_base_scoring',
@@ -90,8 +92,10 @@ export const createRiskScoreMaintainerTelemetryReporter = ({
             durationMs: Date.now() - stageStartedAtMs,
             pagesProcessed: input.pagesProcessed,
             scoresWritten: input.scoresWritten,
+            scoresMissingFromStore: input.scoresMissingFromStore,
             entitiesCreated: input.entitiesCreated,
-            entitiesCreateRejected: input.entitiesCreateRejected,
+            entityCreationsSkipped: input.entityCreationsSkipped,
+            entityCreationsFailed: input.entityCreationsFailed,
           }),
         error: (input: { errorKind: MaintainerErrorKind }) =>
           reportRunStageSummary({

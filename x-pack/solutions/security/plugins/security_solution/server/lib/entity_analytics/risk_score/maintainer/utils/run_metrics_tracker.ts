@@ -29,8 +29,16 @@ export interface RunMetrics {
   lookupPrunedDocs: number;
   /** Entities created by the create-if-missing path during base scoring. */
   entitiesCreated: number;
-  /** not_in_store scores dropped by the create-if-missing path during base scoring. */
-  entitiesCreateRejected: number;
+  /**
+   * not_in_store scores the create-if-missing path never attempted to write during base
+   * scoring: no representative alert document, or the creation policy rejected the candidate.
+   */
+  entitiesCreateSkipped: number;
+  /**
+   * not_in_store scores that were policy-eligible but didn't end up written during base
+   * scoring: `euid_mismatch`, `reserved_field`, or the bulk create itself failed.
+   */
+  entitiesCreateFailed: number;
 }
 
 const METRIC_KEYS: ReadonlyArray<keyof RunMetrics> = [
@@ -49,7 +57,8 @@ const METRIC_KEYS: ReadonlyArray<keyof RunMetrics> = [
   'pagesProcessed',
   'lookupPrunedDocs',
   'entitiesCreated',
-  'entitiesCreateRejected',
+  'entitiesCreateSkipped',
+  'entitiesCreateFailed',
 ];
 
 const emptyMetrics = (): RunMetrics => ({
@@ -68,7 +77,8 @@ const emptyMetrics = (): RunMetrics => ({
   pagesProcessed: 0,
   lookupPrunedDocs: 0,
   entitiesCreated: 0,
-  entitiesCreateRejected: 0,
+  entitiesCreateSkipped: 0,
+  entitiesCreateFailed: 0,
 });
 
 const scoresWrittenRiskIndexTotal = (metrics: RunMetrics): number =>
@@ -113,7 +123,8 @@ export const createRunMetricsTracker = () => {
         scoresFailed: number;
         pagesProcessed: number;
         entitiesCreated: number;
-        entitiesCreateRejected: number;
+        entityCreationsSkipped: number;
+        entityCreationsFailed: number;
       }
     ) => {
       target.scoresWrittenRiskIndexBase = summary.scoresWrittenRiskIndex;
@@ -124,7 +135,8 @@ export const createRunMetricsTracker = () => {
       target.scoresFailedBase = summary.scoresFailed;
       target.pagesProcessed = summary.pagesProcessed;
       target.entitiesCreated = summary.entitiesCreated;
-      target.entitiesCreateRejected = summary.entitiesCreateRejected;
+      target.entitiesCreateSkipped = summary.entityCreationsSkipped;
+      target.entitiesCreateFailed = summary.entityCreationsFailed;
     },
 
     recordResolution: (target: RunMetrics, result: StepResult) => {

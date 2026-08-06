@@ -28,7 +28,8 @@ const emptyMetrics = (overrides: Partial<RunMetrics> = {}): RunMetrics => ({
   pagesProcessed: 0,
   lookupPrunedDocs: 0,
   entitiesCreated: 0,
-  entitiesCreateRejected: 0,
+  entitiesCreateSkipped: 0,
+  entitiesCreateFailed: 0,
   ...overrides,
 });
 
@@ -151,6 +152,7 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
           scoresCalculatedBase: 12,
           scoresDroppedNotInStore: 3,
           scoresMissingFromStoreBase: 3,
+          entitiesCreateSkipped: 3,
           scoresWrittenRiskIndexBase: 7,
           scoresWrittenEntityStoreBase: 7,
           scoresFailedBase: 2,
@@ -165,7 +167,6 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
         scanned: 12,
         qualified: 9,
         applied: 7,
-        droppedNotInStore: 3,
         skipped: 3,
         failed: 2,
       },
@@ -190,7 +191,6 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
       scanned: 5,
       qualified: 5,
       applied: 0,
-      droppedNotInStore: 0,
       skipped: 0,
       failed: 0,
     });
@@ -203,10 +203,10 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
         metrics: emptyMetrics({
           scoresCalculatedBase: 10,
           // 5 EUIDs were absent from the store at lookup; 3 got created and 2 were
-          // policy-rejected, so only the 2 rejected ones remain in the final skip count.
+          // policy-rejected, so only the 2 rejected ones remain in the skip count.
           scoresMissingFromStoreBase: 5,
           entitiesCreated: 3,
-          entitiesCreateRejected: 2,
+          entitiesCreateSkipped: 2,
           scoresDroppedNotInStore: 2,
           scoresWrittenRiskIndexBase: 8,
           scoresWrittenEntityStoreBase: 5,
@@ -219,9 +219,35 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
       scanned: 10,
       qualified: 8,
       applied: 8,
-      droppedNotInStore: 5,
       skipped: 2,
       failed: 0,
+    });
+  });
+
+  it('adds create-if-missing write failures into funnel.failed while keeping them qualified', () => {
+    expect(
+      buildRiskScoreEntityMaintainerRunSummary({
+        entityType: 'host',
+        metrics: emptyMetrics({
+          scoresCalculatedBase: 6,
+          // 2 EUIDs were absent from the store; both had a representative alert document and
+          // passed policy (so neither is skipped), but one hit `euid_mismatch` on write.
+          scoresMissingFromStoreBase: 2,
+          entitiesCreated: 1,
+          entitiesCreateFailed: 1,
+          scoresWrittenRiskIndexBase: 5,
+          scoresWrittenEntityStoreBase: 4,
+          scoresFailedBase: 0,
+          pagesProcessed: 1,
+        }),
+        stages: [],
+      }).funnel
+    ).toEqual({
+      scanned: 6,
+      qualified: 6,
+      applied: 5,
+      skipped: 0,
+      failed: 1,
     });
   });
 });

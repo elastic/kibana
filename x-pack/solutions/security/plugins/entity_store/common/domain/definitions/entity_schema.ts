@@ -173,17 +173,21 @@ export type CreationRejectionReason = z.infer<typeof creationRejectionReasonSche
  * It cannot reuse `postAggFilter` directly because that filter short-circuits on
  * `entity.id already exists`, which trivially passes for a synthetic doc that already carries the
  * candidate id.
+ *
+ * Modeled as a union rather than two independently-optional fields so the `rejectionReason` <->
+ * `requires` pairing is enforced by the type checker at every definition call site, not only by a
+ * runtime `.refine()` that nothing ever calls `.parse()` against (see `registry.test.ts`).
  */
-const creatableFromDocumentSchema = z
-  .object({
-    requires: z.optional(streamlangConditionSchema),
-    // Required when `requires` is set (see refine below); omitted otherwise, since a type with
-    // no extra requirement (e.g. `service`) has nothing for it to report.
-    rejectionReason: z.optional(creationRejectionReasonSchema),
-  })
-  .refine((value) => !value.requires || value.rejectionReason !== undefined, {
-    message: '`rejectionReason` is required when `requires` is set',
-  });
+const creatableFromDocumentSchema = z.union([
+  z.strictObject({
+    requires: streamlangConditionSchema,
+    rejectionReason: creationRejectionReasonSchema,
+  }),
+  // No extra requirement beyond the shared `entity_type_not_creatable` / `event_outcome_failure`
+  // gates (e.g. `service`). `.strictObject` rejects a lone `requires` or `rejectionReason` here,
+  // which would otherwise silently match this branch as an unknown/ignored key.
+  z.strictObject({}),
+]);
 export type CreatableFromDocument = z.infer<typeof creatableFromDocumentSchema>;
 
 export const entitySchema = z.object({

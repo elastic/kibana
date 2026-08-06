@@ -20,9 +20,11 @@ export type {
   BulkObjectResponse,
   CreateEntityFromSourceRequest,
   CreateEntitiesFromSourceResult,
+  CreateEntityFromSourceOutcome,
   EntityCreationRejectionReason,
   CreateEntityFromSourceRejectionReason,
 } from './domain/crud';
+export { isEntityTypeCreatableFromDocument } from '../common/domain/definitions/creatable_from_document';
 export type { EntityMetadataClient } from './domain/entity_metadata';
 export type { ResolutionClient } from './domain/resolution';
 export type { BulkDropTypeSummary } from './infra/elasticsearch/bulk_drop_aggregator';

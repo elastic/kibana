@@ -23,6 +23,13 @@ interface CreateMissingEntitiesParams {
   logger: ScopedLogger;
   /** Base scores whose `id_value` had no entity store record as of `fetchEntitiesByIds`. */
   missingScores: EntityRiskScoreRecord[];
+  abortSignal?: AbortSignal;
+}
+
+/** EUID + reason, so logs and metrics can name the affected score's identifier. */
+export interface CreateMissingEntitiesOutcome {
+  euid: string;
+  reason: string;
 }
 
 export interface CreateMissingEntitiesResult {
@@ -37,15 +44,16 @@ export interface CreateMissingEntitiesResult {
    */
   alreadyExists: string[];
   /**
-   * Total scores dropped: no representative alert document, the creation policy rejected them,
-   * or the bulk create itself failed.
+   * Scores never attempted because the creation policy would reject (or did reject) them:
+   * `no_alert_document` (no representative alert document was found) or an
+   * `EntityCreationRejectionReason` from `createEntitiesFromSource`.
    */
-  rejectedCount: number;
+  skipped: CreateMissingEntitiesOutcome[];
   /**
-   * Rejection counts by reason, for telemetry (`no_alert_document`, policy rejection reasons, or
-   * `bulk_create_failed`).
+   * Scores that were policy-eligible but didn't end up written: `euid_mismatch`,
+   * `reserved_field`, or `bulk_create_failed` from `createEntitiesFromSource`.
    */
-  rejectedByReason: Record<string, number>;
+  failed: CreateMissingEntitiesOutcome[];
 }
 
 const NO_ALERT_DOCUMENT_REASON = 'no_alert_document';
@@ -53,8 +61,8 @@ const NO_ALERT_DOCUMENT_REASON = 'no_alert_document';
 const emptyResult = (): CreateMissingEntitiesResult => ({
   created: [],
   alreadyExists: [],
-  rejectedCount: 0,
-  rejectedByReason: {},
+  skipped: [],
+  failed: [],
 });
 
 /**
@@ -74,6 +82,7 @@ export const createMissingEntities = async ({
   alertFilters,
   logger,
   missingScores,
+  abortSignal,
 }: CreateMissingEntitiesParams): Promise<CreateMissingEntitiesResult> => {
   if (missingScores.length === 0) {
     return emptyResult();
@@ -88,6 +97,7 @@ export const createMissingEntities = async ({
     alertFilters,
     euids,
     logger,
+    abortSignal,
   });
 
   const requests: CreateEntityFromSourceRequest[] = [];
@@ -97,6 +107,7 @@ export const createMissingEntities = async ({
       requests.push({
         type: entityType,
         source,
+        expectedEntityId: score.id_value,
         createdBy: ENTITY_CREATED_BY.RiskScoreMaintainer,
         fields: {
           'entity.risk.calculated_level': score.calculated_level,
@@ -105,9 +116,7 @@ export const createMissingEntities = async ({
         },
       });
     } else {
-      result.rejectedCount += 1;
-      result.rejectedByReason[NO_ALERT_DOCUMENT_REASON] =
-        (result.rejectedByReason[NO_ALERT_DOCUMENT_REASON] ?? 0) + 1;
+      result.skipped.push({ euid: score.id_value, reason: NO_ALERT_DOCUMENT_REASON });
     }
   }
 
@@ -117,22 +126,22 @@ export const createMissingEntities = async ({
 
   logger.debug(
     `create-if-missing: attempting to create ${requests.length} of ${missingScores.length} ` +
-      `not_in_store scores (${result.rejectedCount} had no representative alert document)`
+      `not_in_store scores (${result.skipped.length} had no representative alert document)`
   );
 
-  const { created, alreadyExists, rejected } = await crudClient.createEntitiesFromSource(requests);
+  const { created, alreadyExists, skipped, failed } = await crudClient.createEntitiesFromSource(
+    requests
+  );
 
   result.created.push(...created);
   result.alreadyExists.push(...alreadyExists);
-  result.rejectedCount += rejected.length;
-  for (const { reason } of rejected) {
-    result.rejectedByReason[reason] = (result.rejectedByReason[reason] ?? 0) + 1;
-  }
+  result.skipped.push(...skipped);
+  result.failed.push(...failed);
 
-  if (rejected.length > 0) {
+  if (skipped.length > 0 || failed.length > 0) {
     logger.debug(
-      `create-if-missing: creation policy rejected ${rejected.length} candidate(s): ` +
-        `${JSON.stringify(result.rejectedByReason)}`
+      `create-if-missing: creation policy skipped ${skipped.length} and failed ${failed.length} ` +
+        `candidate(s): ${JSON.stringify([...skipped, ...failed])}`
     );
   }
 

@@ -85,14 +85,14 @@ describe('createMissingEntities', () => {
     expect(result).toEqual({
       created: [],
       alreadyExists: [],
-      rejectedCount: 0,
-      rejectedByReason: {},
+      skipped: [],
+      failed: [],
     });
     expect(esClient.search).not.toHaveBeenCalled();
     expect(crudClient.createEntitiesFromSource).not.toHaveBeenCalled();
   });
 
-  it('counts scores with no representative alert document as rejected without calling the CRUD client', async () => {
+  it('skips scores with no representative alert document without calling the CRUD client', async () => {
     mockAlertDocsResponse(esClient, {});
 
     const result = await createMissingEntities({
@@ -103,18 +103,21 @@ describe('createMissingEntities', () => {
       missingScores: [buildScore('user:phantom@host1@local')],
     });
 
-    expect(result.rejectedCount).toBe(1);
-    expect(result.rejectedByReason).toEqual({ no_alert_document: 1 });
+    expect(result.skipped).toEqual([
+      { euid: 'user:phantom@host1@local', reason: 'no_alert_document' },
+    ]);
+    expect(result.failed).toEqual([]);
     expect(crudClient.createEntitiesFromSource).not.toHaveBeenCalled();
   });
 
-  it('forwards a create request per resolved document with the risk fields and provenance stamp', async () => {
+  it('forwards a create request per resolved document with the risk fields, provenance stamp, and expectedEntityId', async () => {
     const source = { user: { name: 'alice' }, host: { id: 'host-1' } };
     mockAlertDocsResponse(esClient, { 'user:alice@host-1@local': source });
     (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
       created: ['user:alice@host-1@local'],
       alreadyExists: [],
-      rejected: [],
+      skipped: [],
+      failed: [],
     });
 
     const score = buildScore('user:alice@host-1@local', {
@@ -135,6 +138,7 @@ describe('createMissingEntities', () => {
       {
         type: EntityType.user,
         source,
+        expectedEntityId: 'user:alice@host-1@local',
         createdBy: 'risk_score_maintainer',
         fields: {
           'entity.risk.calculated_level': 'High',
@@ -144,7 +148,8 @@ describe('createMissingEntities', () => {
       },
     ]);
     expect(result.created).toEqual(['user:alice@host-1@local']);
-    expect(result.rejectedCount).toBe(0);
+    expect(result.skipped).toEqual([]);
+    expect(result.failed).toEqual([]);
   });
 
   it('surfaces already-exists ids from a bulk-create race separately from created ids', async () => {
@@ -155,7 +160,8 @@ describe('createMissingEntities', () => {
     (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
       created: ['user:a@host1@local'],
       alreadyExists: ['user:b@host2@local'],
-      rejected: [],
+      skipped: [],
+      failed: [],
     });
 
     const result = await createMissingEntities({
@@ -168,17 +174,19 @@ describe('createMissingEntities', () => {
 
     expect(result.created).toEqual(['user:a@host1@local']);
     expect(result.alreadyExists).toEqual(['user:b@host2@local']);
-    expect(result.rejectedCount).toBe(0);
+    expect(result.skipped).toEqual([]);
+    expect(result.failed).toEqual([]);
   });
 
-  it('aggregates policy-rejected candidates by reason', async () => {
+  it('surfaces policy-skipped candidates from the CRUD client under skipped', async () => {
     mockAlertDocsResponse(esClient, {
       'user:idp@okta': { user: { name: 'idp' }, event: { module: 'okta' } },
     });
     (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
       created: [],
       alreadyExists: [],
-      rejected: [{ reason: 'user_not_local_namespace' }],
+      skipped: [{ euid: 'user:idp@okta', reason: 'user_not_local_namespace' }],
+      failed: [],
     });
 
     const result = await createMissingEntities({
@@ -190,18 +198,19 @@ describe('createMissingEntities', () => {
     });
 
     expect(result.created).toEqual([]);
-    expect(result.rejectedCount).toBe(1);
-    expect(result.rejectedByReason).toEqual({ user_not_local_namespace: 1 });
+    expect(result.skipped).toEqual([{ euid: 'user:idp@okta', reason: 'user_not_local_namespace' }]);
+    expect(result.failed).toEqual([]);
   });
 
-  it('combines no_alert_document rejections with policy rejections from the CRUD client', async () => {
+  it('surfaces write failures from the CRUD client under failed, distinct from policy skips', async () => {
     mockAlertDocsResponse(esClient, {
       'user:idp@okta': { user: { name: 'idp' } },
     });
     (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
       created: [],
       alreadyExists: [],
-      rejected: [{ reason: 'user_not_local_namespace' }],
+      skipped: [],
+      failed: [{ euid: 'user:idp@okta', reason: 'euid_mismatch' }],
     });
 
     const result = await createMissingEntities({
@@ -209,13 +218,41 @@ describe('createMissingEntities', () => {
       crudClient,
       logger,
       ...baseParams,
-      missingScores: [buildScore('user:idp@okta'), buildScore('user:no-doc@host1@local')],
+      missingScores: [buildScore('user:idp@okta')],
     });
 
-    expect(result.rejectedCount).toBe(2);
-    expect(result.rejectedByReason).toEqual({
-      no_alert_document: 1,
-      user_not_local_namespace: 1,
+    expect(result.skipped).toEqual([]);
+    expect(result.failed).toEqual([{ euid: 'user:idp@okta', reason: 'euid_mismatch' }]);
+  });
+
+  it('combines no_alert_document skips with policy skips and write failures from the CRUD client', async () => {
+    mockAlertDocsResponse(esClient, {
+      'user:idp@okta': { user: { name: 'idp' } },
+      'user:mismatch@host1@local': { user: { name: 'mismatch' }, host: { id: 'host1' } },
     });
+    (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
+      created: [],
+      alreadyExists: [],
+      skipped: [{ euid: 'user:idp@okta', reason: 'user_not_local_namespace' }],
+      failed: [{ euid: 'user:mismatch@host1@local', reason: 'euid_mismatch' }],
+    });
+
+    const result = await createMissingEntities({
+      esClient,
+      crudClient,
+      logger,
+      ...baseParams,
+      missingScores: [
+        buildScore('user:idp@okta'),
+        buildScore('user:mismatch@host1@local'),
+        buildScore('user:no-doc@host1@local'),
+      ],
+    });
+
+    expect(result.skipped).toEqual([
+      { euid: 'user:no-doc@host1@local', reason: 'no_alert_document' },
+      { euid: 'user:idp@okta', reason: 'user_not_local_namespace' },
+    ]);
+    expect(result.failed).toEqual([{ euid: 'user:mismatch@host1@local', reason: 'euid_mismatch' }]);
   });
 });

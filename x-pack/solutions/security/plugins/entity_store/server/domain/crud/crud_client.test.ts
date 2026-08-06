@@ -65,6 +65,7 @@ describe('CRUDClient', () => {
           {
             type: 'host',
             source: { host: { id: 'host-1' } },
+            expectedEntityId: 'host:host-1',
             createdBy: 'risk_score_maintainer',
           },
         ])
@@ -92,6 +93,7 @@ describe('CRUDClient', () => {
         {
           type: 'host',
           source: { host: { name: 'server1' } }, // no host.id
+          expectedEntityId: 'host:server1',
           createdBy: 'risk_score_maintainer',
         },
       ]);
@@ -99,7 +101,74 @@ describe('CRUDClient', () => {
       expect(result).toEqual({
         created: [],
         alreadyExists: [],
-        rejected: [{ reason: 'host_missing_host_id' }],
+        skipped: [{ euid: 'host:server1', reason: 'host_missing_host_id' }],
+        failed: [],
+      });
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('rejects a request whose re-derived EUID does not match expectedEntityId, without calling bulk', async () => {
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'host',
+          source: { host: { id: 'host-1', name: 'server1' } },
+          expectedEntityId: 'host:host-2', // caller expected a different EUID
+          createdBy: 'risk_score_maintainer',
+        },
+      ]);
+
+      expect(result).toEqual({
+        created: [],
+        alreadyExists: [],
+        skipped: [],
+        failed: [{ euid: 'host:host-2', reason: 'euid_mismatch' }],
+      });
+      expect(esClient.bulk).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('does not match expected EUID')
+      );
+    });
+
+    it('rejects on a multivalued identity field ranked differently than the caller expected', async () => {
+      // `getFieldValue` always takes the *first* array element when re-deriving the EUID here.
+      // A caller whose own routing key (`expectedEntityId`, e.g. a risk score's `id_value`) was
+      // computed from the same multivalued field via a different selection (e.g. an ES|QL query
+      // that picked a different element) would diverge from that re-derivation — this must be
+      // caught as a mismatch rather than silently creating an entity under the "wrong" EUID.
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'host',
+          source: { host: { id: ['host-2', 'host-1'] } },
+          expectedEntityId: 'host:host-1',
+          createdBy: 'risk_score_maintainer',
+        },
+      ]);
+
+      expect(result).toEqual({
+        created: [],
+        alreadyExists: [],
+        skipped: [],
+        failed: [{ euid: 'host:host-1', reason: 'euid_mismatch' }],
+      });
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('rejects a request whose fields supply a reserved dot-path, without calling bulk', async () => {
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'host',
+          source: { host: { id: 'host-1' } },
+          expectedEntityId: 'host:host-1',
+          createdBy: 'risk_score_maintainer',
+          fields: { 'entity.created_by': 'risk_score_maintainer' },
+        },
+      ]);
+
+      expect(result).toEqual({
+        created: [],
+        alreadyExists: [],
+        skipped: [],
+        failed: [{ euid: 'host:host-1', reason: 'reserved_field' }],
       });
       expect(esClient.bulk).not.toHaveBeenCalled();
     });
@@ -111,12 +180,18 @@ describe('CRUDClient', () => {
         {
           type: 'host',
           source: { host: { id: 'host-1', name: 'server1' } },
+          expectedEntityId: 'host:host-1',
           createdBy: 'risk_score_maintainer',
           fields: { 'entity.risk.calculated_score_norm': 70 },
         },
       ]);
 
-      expect(result).toEqual({ created: ['host:host-1'], alreadyExists: [], rejected: [] });
+      expect(result).toEqual({
+        created: ['host:host-1'],
+        alreadyExists: [],
+        skipped: [],
+        failed: [],
+      });
       expect(esClient.bulk).toHaveBeenCalledTimes(1);
       expect(esClient.bulk).toHaveBeenCalledWith(expect.objectContaining({ refresh: false }));
 
@@ -140,6 +215,7 @@ describe('CRUDClient', () => {
         {
           type: 'host',
           source: { host: { id: 'host-1' } }, // no host.name
+          expectedEntityId: 'host:host-1',
           createdBy: 'risk_score_maintainer',
         },
       ]);
@@ -160,6 +236,7 @@ describe('CRUDClient', () => {
         {
           type: 'user',
           source: { user: { name: 'alice' }, host: { id: 'host-1', name: 'workstation-1' } },
+          expectedEntityId: 'user:alice@host-1@local',
           createdBy: 'risk_score_maintainer',
         },
       ]);
@@ -194,6 +271,7 @@ describe('CRUDClient', () => {
         {
           type: 'service',
           source: { service: { name: 'api-gateway' } },
+          expectedEntityId: 'service:api-gateway',
           createdBy: 'logs_extraction',
         },
       ]);
@@ -201,11 +279,12 @@ describe('CRUDClient', () => {
       expect(result).toEqual({
         created: [],
         alreadyExists: ['service:api-gateway'],
-        rejected: [],
+        skipped: [],
+        failed: [],
       });
     });
 
-    it('counts entities that fail for a reason other than a conflict as rejected, and logs a warning', async () => {
+    it('counts entities that fail for a reason other than a conflict as failed, and logs a warning', async () => {
       esClient.bulk.mockResolvedValue({
         errors: true,
         items: [
@@ -223,6 +302,7 @@ describe('CRUDClient', () => {
         {
           type: 'service',
           source: { service: { name: 'api-gateway' } },
+          expectedEntityId: 'service:api-gateway',
           createdBy: 'logs_extraction',
         },
       ]);
@@ -230,19 +310,26 @@ describe('CRUDClient', () => {
       expect(result).toEqual({
         created: [],
         alreadyExists: [],
-        rejected: [{ reason: 'bulk_create_failed' }],
+        skipped: [],
+        failed: [{ euid: 'service:api-gateway', reason: 'bulk_create_failed' }],
       });
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('some_other_exception'));
     });
 
-    it('mixes created, rejected, and untouched-by-bulk results across a batch', async () => {
+    it('mixes created, skipped, and untouched-by-bulk results across a batch', async () => {
       esClient.bulk.mockResolvedValue({ errors: false, items: [] } as any);
 
       const result = await client.createEntitiesFromSource([
-        { type: 'host', source: { host: { id: 'host-1' } }, createdBy: 'risk_score_maintainer' },
+        {
+          type: 'host',
+          source: { host: { id: 'host-1' } },
+          expectedEntityId: 'host:host-1',
+          createdBy: 'risk_score_maintainer',
+        },
         {
           type: 'generic',
           source: { entity: { id: 'anything' } },
+          expectedEntityId: 'anything',
           createdBy: 'risk_score_maintainer',
         },
       ]);
@@ -250,7 +337,8 @@ describe('CRUDClient', () => {
       expect(result).toEqual({
         created: ['host:host-1'],
         alreadyExists: [],
-        rejected: [{ reason: 'entity_type_not_creatable' }],
+        skipped: [{ euid: 'anything', reason: 'entity_type_not_creatable' }],
+        failed: [],
       });
     });
   });

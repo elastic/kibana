@@ -43,6 +43,21 @@ import { type WorkflowEmitTarget, WorkflowEventPublisher } from './workflow_even
 
 const RETRY_ON_CONFLICT = 3;
 
+/**
+ * Dot-paths `buildEntityFromSource` sets itself (identity, provenance, type scoping, name, and
+ * lifecycle bounds). `fields` is merged last in `buildEntityFromSource`, so without this guard a
+ * caller-supplied `fields` entry could silently overwrite any of them before the bulk write.
+ */
+const RESERVED_CREATE_FROM_SOURCE_FIELDS: ReadonlySet<string> = new Set([
+  'entity.id',
+  'entity.created_by',
+  'entity.EngineMetadata.Type',
+  'entity.EngineMetadata.UntypedId',
+  'entity.name',
+  'entity.lifecycle.first_seen',
+  'entity.lifecycle.last_seen',
+]);
+
 interface CRUDClientDependencies {
   logger: Logger;
   esClient: ElasticsearchClient;
@@ -96,6 +111,14 @@ export interface CreateEntityFromSourceRequest {
   type: EntityType;
   /** Representative source document (e.g. an alert `_source`) used to derive identity + policy gates. */
   source: unknown;
+  /**
+   * EUID the caller has already routed other data under for this entity (e.g. a risk score's
+   * `id_value`). The EUID re-derived from `source` must match this exactly, or the request is
+   * rejected with `euid_mismatch` — otherwise a divergence between the caller's routing key and
+   * the source document's identity fields (e.g. a multivalued field ranked differently) would
+   * create an orphan entity while the caller's own record still fails to land on it.
+   */
+  expectedEntityId: string;
   /** Provenance stamp written to `entity.created_by`. */
   createdBy: EntityCreatedBy;
   /** Additional dot-path fields to merge onto the created doc (e.g. `entity.risk.calculated_score`). */
@@ -103,22 +126,39 @@ export interface CreateEntityFromSourceRequest {
 }
 
 /**
- * `EntityCreationRejectionReason` values are policy rejections that never reach Elasticsearch.
- * `bulk_create_failed` covers requests that passed the policy but failed in the bulk create
- * itself for a reason other than a 409 conflict (e.g. a mapping or validation error) — see
- * `createEntitiesFromSource`.
+ * `EntityCreationRejectionReason` values are policy rejections that never reach Elasticsearch —
+ * see {@link CreateEntitiesFromSourceResult.skipped}.
+ * `euid_mismatch`, `reserved_field`, and `bulk_create_failed` are requests that would otherwise
+ * have written but didn't — see {@link CreateEntitiesFromSourceResult.failed}.
  */
 export type CreateEntityFromSourceRejectionReason =
   | EntityCreationRejectionReason
+  | 'euid_mismatch'
+  | 'reserved_field'
   | 'bulk_create_failed';
+
+/** One request's outcome, keyed by `expectedEntityId` so logs and metrics can name the affected EUID. */
+export interface CreateEntityFromSourceOutcome {
+  euid: string;
+  reason: CreateEntityFromSourceRejectionReason;
+}
 
 export interface CreateEntitiesFromSourceResult {
   /** EUIDs successfully created. */
   created: string[];
   /** EUIDs that already existed by the time the bulk create ran (race with another creator). */
   alreadyExists: string[];
-  /** Requests that never reached Elasticsearch because the creation policy rejected them, or that failed in the bulk create itself. */
-  rejected: Array<{ reason: CreateEntityFromSourceRejectionReason }>;
+  /**
+   * Requests the creation policy rejected before anything reached Elasticsearch (see
+   * `EntityCreationRejectionReason` / `getEntityCreationCandidate`).
+   */
+  skipped: CreateEntityFromSourceOutcome[];
+  /**
+   * Requests that were policy-eligible but didn't end up written: the re-derived EUID didn't
+   * match `expectedEntityId`, `fields` supplied a reserved dot-path, or the bulk create itself
+   * failed for a reason other than a 409 conflict.
+   */
+  failed: CreateEntityFromSourceOutcome[];
 }
 
 // EntityUpdateClient is the maintainer-safe CRUD surface: all CRUD methods
@@ -488,22 +528,51 @@ export class CRUDClient {
    * silently overwriting it — callers should fall back to the update path for those ids.
    *
    * Does not wait for a refresh: nothing in the same maintainer run reads these documents back
-   * from the latest index, so the extra ES-side cost of `wait_for` isn't warranted here. Failures
-   * are still logged and reported back to the caller (see `bulk_create_failed` below).
+   * from the latest index, so the extra ES-side cost of `wait_for` isn't warranted here. Per-item
+   * write failures are logged and reported back to the caller as `failed` (see
+   * `CreateEntitiesFromSourceResult`); a request-level failure (the bulk call itself rejecting)
+   * propagates as a thrown error, same as every other bulk method on this client.
    */
   public async createEntitiesFromSource(
     requests: CreateEntityFromSourceRequest[]
   ): Promise<CreateEntitiesFromSourceResult> {
     await this.assertInstalled();
 
-    const result: CreateEntitiesFromSourceResult = { created: [], alreadyExists: [], rejected: [] };
+    const result: CreateEntitiesFromSourceResult = {
+      created: [],
+      alreadyExists: [],
+      skipped: [],
+      failed: [],
+    };
     const operations: Array<BulkOperationContainer | Entity> = [];
     const euids: string[] = [];
 
     for (const request of requests) {
+      const reservedField = request.fields
+        ? Object.keys(request.fields).find((field) => RESERVED_CREATE_FROM_SOURCE_FIELDS.has(field))
+        : undefined;
+      if (reservedField) {
+        this.logger.warn(
+          `createEntitiesFromSource: rejecting request for "${request.expectedEntityId}": ` +
+            `\`fields\` supplied reserved path "${reservedField}"`
+        );
+        result.failed.push({ euid: request.expectedEntityId, reason: 'reserved_field' });
+        continue;
+      }
+
       const candidate = getEntityCreationCandidate(request.type, request.source);
       if (!candidate.accepted) {
-        result.rejected.push({ reason: candidate.reason });
+        result.skipped.push({ euid: request.expectedEntityId, reason: candidate.reason });
+        continue;
+      }
+
+      if (candidate.euid !== request.expectedEntityId) {
+        this.logger.warn(
+          `createEntitiesFromSource: EUID derived from source ("${candidate.euid}") does not ` +
+            `match expected EUID ("${request.expectedEntityId}"); rejecting to avoid creating an ` +
+            `unrelated entity`
+        );
+        result.failed.push({ euid: request.expectedEntityId, reason: 'euid_mismatch' });
         continue;
       }
 
@@ -520,7 +589,7 @@ export class CRUDClient {
         request.type,
         this.namespace,
         doc,
-        candidate.euid,
+        request.expectedEntityId,
         true
       );
 
@@ -546,16 +615,16 @@ export class CRUDClient {
 
     resp.items.forEach((item, i) => {
       const outcome = Object.values(item)[0] as { status: number; error?: { type?: string } };
-      const euid = euids[i];
+      const euidValue = euids[i];
       if (outcome.status === 409 || outcome.error?.type === 'version_conflict_engine_exception') {
-        result.alreadyExists.push(euid);
+        result.alreadyExists.push(euidValue);
       } else if (outcome.error) {
         this.logger.warn(
-          `createEntitiesFromSource: failed to create entity ${euid}: ${outcome.error.type}`
+          `createEntitiesFromSource: failed to create entity ${euidValue}: ${outcome.error.type}`
         );
-        result.rejected.push({ reason: 'bulk_create_failed' });
+        result.failed.push({ euid: euidValue, reason: 'bulk_create_failed' });
       } else {
-        result.created.push(euid);
+        result.created.push(euidValue);
       }
     });
 

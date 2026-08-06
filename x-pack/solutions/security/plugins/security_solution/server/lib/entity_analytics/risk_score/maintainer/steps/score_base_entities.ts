@@ -38,6 +38,13 @@ interface ScoreBaseEntitiesParams {
   watchlistConfigs: Map<string, WatchlistObject>;
   calculationRunId: string;
   abortSignal?: AbortSignal;
+  /**
+   * Create-if-missing opt-in, forwarded to `fetchEntitiesByIds` as `strict`: with creation
+   * enabled, a lookup failure must not be silently treated as "every score on this page is
+   * missing" (see `fetchEntitiesByIds`). Defaults to false (best-effort lookup), matching
+   * pre-existing behaviour when the flag is off.
+   */
+  createMissingEntities?: boolean;
 }
 
 interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
@@ -69,19 +76,26 @@ export interface Phase1BaseScoringSummary extends StepResult {
   scores: Record<string, number>;
   /**
    * Scores whose entity_id was absent from the entity store at lookup time, before any
-   * create-if-missing attempt. A superset of `entitiesCreateRejected` (and, when creation is
-   * enabled, includes recovered created/raced scores that are not otherwise dropped).
+   * create-if-missing attempt. A superset of `entityCreationsSkipped` + `entityCreationsFailed`
+   * (and, when creation is enabled, includes recovered created/raced scores that are not
+   * otherwise dropped).
    */
   scoresMissingFromStore: number;
   /** EUID-valid scores whose entity was created via the create-if-missing path. */
   entitiesCreated: number;
   /**
-   * not_in_store scores dropped by the create-if-missing path (no representative alert document,
-   * the creation policy rejected the candidate, or the bulk create itself failed). Always 0 when
+   * not_in_store scores the create-if-missing path never attempted to write: no representative
+   * alert document was found, or the creation policy rejected the candidate. Always 0 when
    * `createMissingEntities` is false, since scores are dropped without evaluating a policy in
    * that case.
    */
-  entitiesCreateRejected: number;
+  entityCreationsSkipped: number;
+  /**
+   * not_in_store scores that were policy-eligible but didn't end up written: the re-derived EUID
+   * didn't match the score's `id_value`, or the bulk create itself failed. Always 0 when
+   * `createMissingEntities` is false.
+   */
+  entityCreationsFailed: number;
 }
 
 interface EuidPageBounds {
@@ -118,6 +132,7 @@ export const calculateBaseEntityScores = async function* ({
   watchlistConfigs,
   calculationRunId,
   abortSignal,
+  createMissingEntities = false,
 }: ScoreBaseEntitiesParams): AsyncGenerator<ScoredEntityPage> {
   let afterKey: Record<string, string> | undefined;
   let previousPageUpperBound: string | undefined;
@@ -159,6 +174,7 @@ export const calculateBaseEntityScores = async function* ({
         logger,
         errorContext:
           'Error fetching entities for base modifier application. Base scoring will proceed without modifiers',
+        strict: createMissingEntities,
       });
 
       yield applyBaseScoreModifiers({
@@ -189,10 +205,14 @@ export const scoreBaseEntities = async ({
   let scoresMissingFromStore = 0;
   let scoresFailed = 0;
   let entitiesCreated = 0;
-  let entitiesCreateRejected = 0;
+  let entityCreationsSkipped = 0;
+  let entityCreationsFailed = 0;
   const newScores: Record<string, number> = {};
 
-  for await (const page of calculateBaseEntityScores(params)) {
+  for await (const page of calculateBaseEntityScores({
+    ...params,
+    createMissingEntities: createMissingEntitiesEnabled,
+  })) {
     pagesProcessed += 1;
     scoresCalculated += page.scores.length;
     // The composite aggregation discovers EUIDs from alerts, which can include
@@ -222,10 +242,12 @@ export const scoreBaseEntities = async ({
           alertFilters: params.alertFilters,
           logger: params.logger,
           missingScores,
+          abortSignal: params.abortSignal,
         });
 
         entitiesCreated += createResult.created.length;
-        entitiesCreateRejected += createResult.rejectedCount;
+        entityCreationsSkipped += createResult.skipped.length;
+        entityCreationsFailed += createResult.failed.length;
 
         const createdSet = new Set(createResult.created);
         const alreadyExistsSet = new Set(createResult.alreadyExists);
@@ -239,7 +261,8 @@ export const scoreBaseEntities = async ({
 
         params.logger.debug(
           `create-if-missing: created=${createdScores.length} alreadyExists=${racedScores.length} ` +
-            `rejected=${createResult.rejectedCount} (of ${missingScores.length} not_in_store scores)`
+            `skipped=${createResult.skipped.length} failed=${createResult.failed.length} ` +
+            `(of ${missingScores.length} not_in_store scores)`
         );
       } else {
         params.logger.debug(
@@ -284,7 +307,8 @@ export const scoreBaseEntities = async ({
     scoresFailed,
     scores: newScores,
     entitiesCreated,
-    entitiesCreateRejected,
+    entityCreationsSkipped,
+    entityCreationsFailed,
   };
 };
 

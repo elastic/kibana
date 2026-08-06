@@ -96,14 +96,20 @@ export const buildRiskScorePhase0EntityMaintainerRunSummary = ({
  * - stages[] = base / resolution / reset_to_zero applied + status/duration
  *
  * With the create-if-missing path (#280948):
- * - scanned           = scores calculated from alerts
- * - qualified         = scanned minus the final skip count, i.e. entities that were either
- *                       already in the store or successfully created/raced
- * - applied           = scores written to the entity store, via update or create
- * - droppedNotInStore = absent at lookup, before any create-if-missing attempt (informational;
- *                       a superset of `skipped` once creation recovers some of them)
- * - skipped           = of the above, scores never recovered (no representative alert document,
- *                       policy-rejected, or bulk-create failure)
+ * - scanned   = scores calculated from alerts
+ * - qualified = scanned minus `skipped`, i.e. entities that were either already in the store,
+ *               successfully created/raced, or policy-eligible but write-failed (write failures
+ *               stay qualified — they were never rejected up front, see `failed` below)
+ * - applied   = successful existing-entity updates plus successful creates, counted exactly once
+ * - skipped   = not_in_store scores the create-if-missing path never attempted to write (no
+ *               representative alert document, or the creation policy rejected the candidate)
+ * - failed    = entity-store update failures plus create-if-missing write failures
+ *               (`euid_mismatch`, `reserved_field`, `bulk_create_failed`)
+ *
+ * `droppedNotInStore` is deliberately omitted here: the framework defines that field as 404
+ * bulk-write errors, not pre-write lookup misses. The raw missing-before-create count
+ * (`scoresMissingFromStoreBase`) is reported instead on the risk-score-specific
+ * `phase1_base_scoring` stage-summary event.
  */
 export const buildRiskScoreEntityMaintainerRunSummary = ({
   entityType,
@@ -114,9 +120,10 @@ export const buildRiskScoreEntityMaintainerRunSummary = ({
   metrics: RunMetrics;
   stages: RiskScoreFrameworkStageSummary[];
 }): EntityMaintainerRunSummary => {
-  const skipped = metrics.scoresDroppedNotInStore;
+  const skipped = metrics.entitiesCreateSkipped;
   const qualifiedBase = metrics.scoresCalculatedBase - skipped;
   const appliedBase = metrics.scoresWrittenEntityStoreBase + metrics.entitiesCreated;
+  const failedBase = metrics.scoresFailedBase + metrics.entitiesCreateFailed;
 
   return {
     scope: { kind: 'entity_type', value: entityType },
@@ -125,9 +132,8 @@ export const buildRiskScoreEntityMaintainerRunSummary = ({
       scanned: metrics.scoresCalculatedBase,
       qualified: qualifiedBase,
       applied: appliedBase,
-      droppedNotInStore: metrics.scoresMissingFromStoreBase,
       skipped,
-      failed: metrics.scoresFailedBase,
+      failed: failedBase,
     },
     stages,
   };

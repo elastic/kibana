@@ -77,7 +77,7 @@ x-pack/solutions/security/plugins/entity_store/
 **Public routes:** status, install, uninstall, start, stop, CRUD (entities), resolution (link/unlink/group), check_privileges
 **Internal routes:** entity_maintainers, force_log_extraction, force_history_snapshot, force_ccs_extract_to_updates
 **Resolution routes (public):** `resolution/link` (POST), `resolution/unlink` (POST), `resolution/group` (GET)
-**Maintainer routes (internal):** `entity_maintainers` (GET), `entity_maintainers/start/{id}` (PUT), `entity_maintainers/stop/{id}` (PUT), `entity_maintainers/run/{id}` (PUT), `entity_maintainers/init` (POST)
+**Maintainer routes (internal):** `entity_maintainers` (GET), `entity_maintainers/start/{id}` (PUT), `entity_maintainers/stop/{id}` (PUT), `entity_maintainers/run/{id}` (POST), `entity_maintainers/init` (POST)
 **Resolution field path:** `entity.relationships.resolution.resolved_to` (NOT `entity.resolved_to`)
 **Target entity** = no `resolved_to` field. **Alias entity** = has `resolved_to` pointing to target's `entity.id`.
 **Create** uses `esClient.create()`. **Bulk** writes to LATEST index (not UPDATES).

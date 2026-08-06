@@ -541,8 +541,10 @@ const executeEntityTypeRun = async ({
     baseStage.success({
       pagesProcessed: baseSummary.pagesProcessed,
       scoresWritten: baseSummary.scoresWrittenRiskIndex,
+      scoresMissingFromStore: baseSummary.scoresMissingFromStore,
       entitiesCreated: baseSummary.entitiesCreated,
-      entitiesCreateRejected: baseSummary.entitiesCreateRejected,
+      entityCreationsSkipped: baseSummary.entityCreationsSkipped,
+      entityCreationsFailed: baseSummary.entityCreationsFailed,
     });
     frameworkTelemetryStages.push({
       name: 'base',

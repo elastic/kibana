@@ -41,7 +41,8 @@ export interface BuildEntityFromSourceParams {
  * {@link EntityCreationAccepted} candidate (see `getEntityCreationCandidate`). Populates the
  * fields a real `createEntity` caller would send: `entity.id` plus its identity source fields,
  * `entity.name`, entity type scoping (`entity.EngineMetadata.*`), provenance (`entity.created_by`),
- * `entity.source`, and initial lifecycle timestamps. `@timestamp` is left to `validateAndTransformDoc`.
+ * `entity.source`, and an initial `entity.lifecycle.last_seen` (see rationale below for why
+ * `first_seen` is deliberately left unset). `@timestamp` is left to `validateAndTransformDoc`.
  */
 export function buildEntityFromSource({
   entityType,
@@ -77,9 +78,14 @@ export function buildEntityFromSource({
     set(built, ENTITY_SOURCE_FIELD, entitySource);
   }
 
+  // Only `last_seen` is set from the representative document's `@timestamp`. That document is
+  // deliberately the *newest* matching alert (see `fetchAlertIdentityDocs`), so it would make a
+  // wrong and permanent `first_seen`: logs extraction merges lifecycle bounds as
+  // `first_seen = COALESCE(first_seen, recent…)`, so once a value is stored here it wins on every
+  // subsequent extraction run. Leaving `first_seen` unset lets extraction populate it correctly
+  // from the entity's actual history on its next run.
   const timestamp = getFieldValue(doc, '@timestamp');
   if (timestamp !== undefined) {
-    set(built, 'entity.lifecycle.first_seen', timestamp);
     set(built, 'entity.lifecycle.last_seen', timestamp);
   }
 

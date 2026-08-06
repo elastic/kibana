@@ -232,7 +232,8 @@ describe('score_base_entities', () => {
       expect(summary.scoresMissingFromStore).toBe(1);
       expect(summary.scoresFailed).toBe(0);
       expect(summary.entitiesCreated).toBe(0);
-      expect(summary.entitiesCreateRejected).toBe(0);
+      expect(summary.entityCreationsSkipped).toBe(0);
+      expect(summary.entityCreationsFailed).toBe(0);
     });
 
     it('writes no scores when no entity on the page is in the entity store', async () => {
@@ -268,7 +269,8 @@ describe('score_base_entities', () => {
       expect(summary.scoresMissingFromStore).toBe(2);
       expect(summary.scoresFailed).toBe(0);
       expect(summary.entitiesCreated).toBe(0);
-      expect(summary.entitiesCreateRejected).toBe(0);
+      expect(summary.entityCreationsSkipped).toBe(0);
+      expect(summary.entityCreationsFailed).toBe(0);
     });
   });
 
@@ -316,7 +318,8 @@ describe('score_base_entities', () => {
       (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
         created: ['user:new@okta'],
         alreadyExists: [],
-        rejected: [],
+        skipped: [],
+        failed: [],
       });
 
       const writer = buildWriter();
@@ -343,7 +346,8 @@ describe('score_base_entities', () => {
       expect(summary.scoresMissingFromStore).toBe(1);
       expect(summary.scoresDroppedNotInStore).toBe(0);
       expect(summary.entitiesCreated).toBe(1);
-      expect(summary.entitiesCreateRejected).toBe(0);
+      expect(summary.entityCreationsSkipped).toBe(0);
+      expect(summary.entityCreationsFailed).toBe(0);
     });
 
     it('routes a 409 race to the entity store update path in addition to the risk index', async () => {
@@ -366,7 +370,8 @@ describe('score_base_entities', () => {
       (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
         created: [],
         alreadyExists: ['user:raced@okta'],
-        rejected: [],
+        skipped: [],
+        failed: [],
       });
 
       const writer = buildWriter();
@@ -388,7 +393,8 @@ describe('score_base_entities', () => {
       expect(summary.scoresMissingFromStore).toBe(1);
       expect(summary.scoresDroppedNotInStore).toBe(0);
       expect(summary.entitiesCreated).toBe(0);
-      expect(summary.entitiesCreateRejected).toBe(0);
+      expect(summary.entityCreationsSkipped).toBe(0);
+      expect(summary.entityCreationsFailed).toBe(0);
     });
 
     it('drops policy-rejected candidates and counts them, without writing anything for them', async () => {
@@ -411,7 +417,8 @@ describe('score_base_entities', () => {
       (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
         created: [],
         alreadyExists: [],
-        rejected: [{ reason: 'user_not_local_namespace' }],
+        skipped: [{ euid: 'user:rejected@okta', reason: 'user_not_local_namespace' }],
+        failed: [],
       });
 
       const writer = buildWriter();
@@ -431,7 +438,53 @@ describe('score_base_entities', () => {
       expect(summary.scoresMissingFromStore).toBe(1);
       expect(summary.scoresDroppedNotInStore).toBe(1);
       expect(summary.entitiesCreated).toBe(0);
-      expect(summary.entitiesCreateRejected).toBe(1);
+      expect(summary.entityCreationsSkipped).toBe(1);
+      expect(summary.entityCreationsFailed).toBe(0);
+    });
+
+    it('counts a write failure (e.g. euid_mismatch) as failed, not skipped', async () => {
+      mockCompositeAggPage(esClient, ['user:mismatched@okta']);
+      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
+        values: [esqlRow('user:mismatched@okta')],
+      });
+      (esClient.search as jest.Mock).mockResolvedValueOnce({
+        aggregations: {
+          by_entity_id: {
+            buckets: [
+              {
+                key: 'user:mismatched@okta',
+                latest: { hits: { hits: [{ _source: { user: { name: 'mismatched' } } }] } },
+              },
+            ],
+          },
+        },
+      });
+      (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
+        created: [],
+        alreadyExists: [],
+        skipped: [],
+        failed: [{ euid: 'user:mismatched@okta', reason: 'euid_mismatch' }],
+      });
+
+      const writer = buildWriter();
+
+      const summary = await scoreBaseEntities({
+        esClient,
+        crudClient,
+        logger,
+        writer,
+        idBasedRiskScoringEnabled: true,
+        createMissingEntities: true,
+        ...baseParams,
+      });
+
+      const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
+      expect(writtenScores).toHaveLength(0);
+      expect(summary.scoresMissingFromStore).toBe(1);
+      expect(summary.scoresDroppedNotInStore).toBe(1);
+      expect(summary.entitiesCreated).toBe(0);
+      expect(summary.entityCreationsSkipped).toBe(0);
+      expect(summary.entityCreationsFailed).toBe(1);
     });
 
     it('restores the pre-existing drop behaviour when the kill switch is off', async () => {
@@ -460,7 +513,8 @@ describe('score_base_entities', () => {
       expect(summary.scoresMissingFromStore).toBe(1);
       expect(summary.scoresDroppedNotInStore).toBe(1);
       expect(summary.entitiesCreated).toBe(0);
-      expect(summary.entitiesCreateRejected).toBe(0);
+      expect(summary.entityCreationsSkipped).toBe(0);
+      expect(summary.entityCreationsFailed).toBe(0);
     });
   });
 });

@@ -12,6 +12,7 @@ export {
   type BulkObjectResponse,
   type CreateEntityFromSourceRequest,
   type CreateEntitiesFromSourceResult,
+  type CreateEntityFromSourceOutcome,
   type CreateEntityFromSourceRejectionReason,
 } from './crud_client';
 export type { EntityCreationRejectionReason } from '../../../common/domain/definitions/creatable_from_document';
