@@ -12,7 +12,7 @@ import {
   TextField,
   PasswordField,
   TextAreaField,
-  SelectField,
+  CardRadioGroupField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { i18n } from '@kbn/i18n';
@@ -22,21 +22,6 @@ import type { AuthType } from '@kbn/connector-schemas/ssh_host';
 
 const { emptyField } = fieldValidators;
 
-const authTypeOptions = [
-  {
-    value: AUTH_TYPE.PrivateKey,
-    text: i18n.translate('xpack.stackConnectors.components.sshHost.authType.privateKey', {
-      defaultMessage: 'Private key',
-    }),
-  },
-  {
-    value: AUTH_TYPE.Password,
-    text: i18n.translate('xpack.stackConnectors.components.sshHost.authType.password', {
-      defaultMessage: 'Password',
-    }),
-  },
-];
-
 const SshHostConnectorFieldsComponent: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
@@ -44,6 +29,78 @@ const SshHostConnectorFieldsComponent: React.FunctionComponent<ActionConnectorFi
     watch: 'config.authType',
   });
   const authType = config?.authType ?? AUTH_TYPE.PrivateKey;
+
+  const authOptions = [
+    {
+      value: AUTH_TYPE.PrivateKey,
+      label: i18n.translate('xpack.stackConnectors.components.sshHost.authType.privateKey', {
+        defaultMessage: 'Private key',
+      }),
+      'data-test-subj': 'sshHostAuthPrivateKey',
+      children: authType === AUTH_TYPE.PrivateKey && (
+        <UseField
+          path="secrets.sshPrivateKey"
+          component={TextAreaField}
+          config={{
+            label: i18n.translate('xpack.stackConnectors.components.sshHost.privateKeyLabel', {
+              defaultMessage: 'SSH private key',
+            }),
+            validations: [
+              {
+                validator: emptyField(
+                  i18n.translate('xpack.stackConnectors.components.sshHost.privateKeyRequired', {
+                    defaultMessage: 'SSH private key is required.',
+                  })
+                ),
+              },
+            ],
+          }}
+          componentProps={{
+            euiFieldProps: {
+              readOnly,
+              rows: 8,
+              fullWidth: true,
+              'data-test-subj': 'sshHostPrivateKeyInput',
+            },
+          }}
+        />
+      ),
+    },
+    {
+      value: AUTH_TYPE.Password,
+      label: i18n.translate('xpack.stackConnectors.components.sshHost.authType.password', {
+        defaultMessage: 'Password',
+      }),
+      'data-test-subj': 'sshHostAuthPassword',
+      children: authType === AUTH_TYPE.Password && (
+        <UseField
+          path="secrets.password"
+          component={PasswordField}
+          config={{
+            label: i18n.translate('xpack.stackConnectors.components.sshHost.passwordLabel', {
+              defaultMessage: 'Password',
+            }),
+            validations: [
+              {
+                validator: emptyField(
+                  i18n.translate('xpack.stackConnectors.components.sshHost.passwordRequired', {
+                    defaultMessage: 'Password is required.',
+                  })
+                ),
+              },
+            ],
+          }}
+          componentProps={{
+            euiFieldProps: {
+              readOnly,
+              fullWidth: true,
+              'data-test-subj': 'sshHostPasswordInput',
+            },
+          }}
+        />
+      ),
+    },
+  ];
 
   return (
     <>
@@ -102,77 +159,15 @@ const SshHostConnectorFieldsComponent: React.FunctionComponent<ActionConnectorFi
       <EuiSpacer size="m" />
       <UseField
         path="config.authType"
-        component={SelectField}
+        component={CardRadioGroupField}
         config={{
           label: i18n.translate('xpack.stackConnectors.components.sshHost.authTypeLabel', {
             defaultMessage: 'Authentication',
           }),
           defaultValue: AUTH_TYPE.PrivateKey,
         }}
-        componentProps={{
-          euiFieldProps: {
-            options: authTypeOptions,
-            disabled: readOnly,
-            fullWidth: true,
-            'data-test-subj': 'sshHostAuthTypeSelect',
-          },
-        }}
+        componentProps={{ options: authOptions }}
       />
-      <EuiSpacer size="m" />
-      {authType === AUTH_TYPE.Password ? (
-        <UseField
-          path="secrets.password"
-          component={PasswordField}
-          config={{
-            label: i18n.translate('xpack.stackConnectors.components.sshHost.passwordLabel', {
-              defaultMessage: 'Password',
-            }),
-            validations: [
-              {
-                validator: emptyField(
-                  i18n.translate('xpack.stackConnectors.components.sshHost.passwordRequired', {
-                    defaultMessage: 'Password is required.',
-                  })
-                ),
-              },
-            ],
-          }}
-          componentProps={{
-            euiFieldProps: {
-              readOnly,
-              fullWidth: true,
-              'data-test-subj': 'sshHostPasswordInput',
-            },
-          }}
-        />
-      ) : (
-        <UseField
-          path="secrets.sshPrivateKey"
-          component={TextAreaField}
-          config={{
-            label: i18n.translate('xpack.stackConnectors.components.sshHost.privateKeyLabel', {
-              defaultMessage: 'SSH private key',
-            }),
-            validations: [
-              {
-                validator: emptyField(
-                  i18n.translate('xpack.stackConnectors.components.sshHost.privateKeyRequired', {
-                    defaultMessage: 'SSH private key is required.',
-                  })
-                ),
-              },
-            ],
-          }}
-          componentProps={{
-            euiFieldProps: {
-              readOnly,
-              rows: 8,
-              fullWidth: true,
-              'data-test-subj': 'sshHostPrivateKeyInput',
-            },
-          }}
-        />
-      )}
     </>
   );
 };

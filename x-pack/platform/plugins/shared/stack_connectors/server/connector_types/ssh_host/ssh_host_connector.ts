@@ -129,7 +129,7 @@ ${params.script}`;
     });
 
     const command = `#!/bin/bash
-(COMMAND_TMP_DIR="${tmpDir}" bash "${scriptFile}" < /dev/null > "${stdoutFile}" 2>"${stderrFile}"; echo $? > "${codeFile}") </dev/null >/dev/null 2>&1 &
+setsid bash -c 'COMMAND_TMP_DIR="${tmpDir}" bash "${scriptFile}" < /dev/null > "${stdoutFile}" 2>"${stderrFile}"; echo $? > "${codeFile}"' < /dev/null > /dev/null 2>&1 &
 PID=$!
 echo $PID > "${tmpDir}/pid.txt"
 TIMEOUT=20
@@ -290,8 +290,8 @@ fi`;
       script: `
 TMP_DIR="${tmpDir}"
 if [ -f "$TMP_DIR/pid.txt" ]; then
-  PID=$(cat "$TMP_DIR/pid.txt");
-  kill -9 $PID 2>/dev/null || true;
+  PID=$(cat "$TMP_DIR/pid.txt")
+  kill -9 -$PID 2>/dev/null || kill -9 $PID 2>/dev/null || true
 fi
 rm -rf "$TMP_DIR"
 `,
@@ -314,7 +314,7 @@ rm -rf "$TMP_DIR"
       '-o ConnectTimeout=10',
       '-o ControlMaster=auto',
       `-o ControlPath="${this.getControlPath()}"`,
-      '-o ControlPersist=60s',
+      '-o ControlPersist=10s',
       `-P ${port}`,
     ];
 
@@ -391,9 +391,9 @@ rm -rf "$TMP_DIR"
           },
         };
       }
+      default:
+        throw new Error(`Unsupported authType: ${authType}`);
     }
-
-    throw new Error(`Unsupported authType: ${authType}`);
   }
 
   private async execCommand(
@@ -417,7 +417,7 @@ rm -rf "$TMP_DIR"
       '-o ConnectTimeout=10',
       '-o ControlMaster=auto',
       `-o ControlPath="${this.getControlPath()}"`,
-      '-o ControlPersist=60s',
+      '-o ControlPersist=10s',
       `-p ${port}`,
     ];
 
