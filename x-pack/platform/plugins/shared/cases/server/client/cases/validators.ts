@@ -305,16 +305,8 @@ export const validateCaseExtendedFields = async ({
   const globalKeySet = new Set(globalFields.map((f) => getFieldSnakeKey(f.name, f.type)));
 
   if (!templateId) {
-    // No template — only global field keys are permitted.
-    const invalidKeys = Object.keys(extendedFields).filter((k) => !globalKeySet.has(k));
-    if (invalidKeys.length) {
-      throw Boom.badRequest(
-        `extended_fields keys [${invalidKeys.join(
-          ', '
-        )}] are not global (isGlobal) field definitions`
-      );
-    }
-    // Also validate the VALUES against each global field's own definition.
+    // No template — only global field keys are permitted. validateExtendedFields reports any
+    // other key as unknown, pointing at the exact key to use where one can be derived.
     const globalErrors = validateExtendedFields(extendedFields, globalFields, { partial });
     if (globalErrors.length) {
       throw Boom.badRequest(`Invalid extended_fields: ${globalErrors.join('; ')}`);

@@ -2850,7 +2850,9 @@ describe('update', () => {
           clientArgs,
           casesClientMock
         )
-      ).rejects.toThrow('are not global (isGlobal) field definitions');
+      ).rejects.toThrow(
+        'Unknown extended field key: "risk_score_as_keyword". No fields are available for this case'
+      );
     });
   });
 

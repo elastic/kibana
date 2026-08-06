@@ -986,7 +986,7 @@ describe('create', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'extended_fields keys [risk_score_as_keyword] are not global (isGlobal) field definitions'
+        'Invalid extended_fields: Unknown extended field key: "risk_score_as_keyword". No fields are available for this case'
       );
     });
 
