@@ -42,14 +42,6 @@ export interface ConfigurationPersistedAttributes {
    * only (the migration task never filters/sorts by it), same as the sibling flags.
    */
   legacyCasesMigrated?: boolean;
-  /**
-   * Semantics version of the completed case backfill (see `CASE_BACKFILL_VERSION` in the
-   * templates-migration task). Absent on spaces flagged by releases that only wrote
-   * `legacyCasesMigrated`; those spaces are re-backfilled once so values stranded by the
-   * earlier semantics (e.g. behind empty-string `extended_fields` keys) are repaired.
-   * Stored in `_source` only, same as the sibling flags.
-   */
-  caseBackfillVersion?: number;
 }
 
 type PersistedObservableTypesConfiguration = Array<{

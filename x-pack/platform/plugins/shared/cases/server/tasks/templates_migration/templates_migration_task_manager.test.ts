@@ -25,11 +25,7 @@ import {
   CASES_TEMPLATES_MIGRATION_TASK_TYPE,
   CASES_TEMPLATES_MIGRATION_TASK_ID,
 } from './constants';
-import {
-  CASE_BACKFILL_RESCHEDULE_DELAY_MS,
-  CASE_BACKFILL_VERSION,
-  MAX_CASE_BACKFILL_FAILED_RUNS,
-} from './types';
+import { CASE_BACKFILL_RESCHEDULE_DELAY_MS, MAX_CASE_BACKFILL_FAILED_RUNS } from './types';
 
 const createSavedObjectsRepositoryMock = () => ({
   find: jest.fn(),
@@ -67,7 +63,6 @@ const buildConfigureSO = (
     legacyTemplatesMigrated: boolean;
     legacyCustomFieldsMigrated: boolean;
     legacyCasesMigrated: boolean;
-    caseBackfillVersion: number;
   }> = {}
 ) => ({
   id: overrides.id ?? 'config-1',
@@ -86,7 +81,6 @@ const buildConfigureSO = (
     legacyTemplatesMigrated: overrides.legacyTemplatesMigrated,
     legacyCustomFieldsMigrated: overrides.legacyCustomFieldsMigrated,
     legacyCasesMigrated: overrides.legacyCasesMigrated,
-    caseBackfillVersion: overrides.caseBackfillVersion,
   },
 });
 
@@ -306,7 +300,7 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         configSO.id,
-        { legacyCasesMigrated: true, caseBackfillVersion: CASE_BACKFILL_VERSION },
+        { legacyCasesMigrated: true },
         expect.anything()
       );
     });
@@ -899,7 +893,7 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         configSO.id,
-        { legacyCasesMigrated: true, caseBackfillVersion: CASE_BACKFILL_VERSION },
+        { legacyCasesMigrated: true },
         expect.anything()
       );
       expect(repo.update.mock.calls[0][2]).not.toHaveProperty('legacyTemplatesMigrated');
@@ -1147,15 +1141,17 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         configSO.id,
-        { legacyCasesMigrated: true, caseBackfillVersion: CASE_BACKFILL_VERSION },
+        { legacyCasesMigrated: true },
         expect.anything()
       );
     });
 
-    it('re-backfills a space flagged by a release that predates caseBackfillVersion, repairing empty values', async () => {
-      // legacyCasesMigrated was set by the v1 backfill, which treated an empty-string
-      // extended_fields entry as an existing value. The space must be rescanned once and the
-      // legacy value copied over the empty mirror key.
+    it('never rescans a space already flagged as migrated — a deliberately cleared v2 value is preserved', async () => {
+      // The space completed its one-shot backfill in an earlier release; since then a user
+      // explicitly cleared the v2 mirror key (extended_fields value '') while the legacy
+      // customFields value remains. The backfill must NOT revisit the space — rerunning it
+      // with the ''-fills-as-empty semantics would silently restore the stale legacy value
+      // over the deliberate clear.
       const configSO = buildConfigureSO({
         customFields: [buildLegacyCustomField('cf_text')],
         legacyCustomFieldsMigrated: true,
@@ -1164,7 +1160,7 @@ describe('TemplatesMigrationTaskManager', () => {
       });
       const caseSO = buildCaseSO(
         'case-1',
-        [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'from-legacy' }],
+        [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'stale-legacy' }],
         { cf_text_as_keyword: '' }
       );
       mockFindByType(configSO, [caseSO]);
@@ -1172,37 +1168,7 @@ describe('TemplatesMigrationTaskManager', () => {
       const manager = await buildAndSchedule();
       await getTaskRunner(manager).run();
 
-      expect(repo.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(repo.bulkUpdate.mock.calls[0][0]).toEqual([
-        expect.objectContaining({
-          id: 'case-1',
-          attributes: { extended_fields: { cf_text_as_keyword: 'from-legacy' } },
-        }),
-      ]);
-      // The completion marker is upgraded so the space is not rescanned on the next restart.
-      expect(repo.update).toHaveBeenCalledWith(
-        CASE_CONFIGURE_SAVED_OBJECT,
-        configSO.id,
-        { legacyCasesMigrated: true, caseBackfillVersion: CASE_BACKFILL_VERSION },
-        expect.anything()
-      );
-    });
-
-    it('skips a space whose caseBackfillVersion is current', async () => {
-      const configSO = buildConfigureSO({
-        customFields: [buildLegacyCustomField('cf_text')],
-        legacyCustomFieldsMigrated: true,
-        legacyTemplatesMigrated: true,
-        legacyCasesMigrated: true,
-        caseBackfillVersion: CASE_BACKFILL_VERSION,
-      });
-      mockFindByType(configSO, [
-        buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),
-      ]);
-
-      const manager = await buildAndSchedule();
-      await getTaskRunner(manager).run();
-
+      // No case scan, no case writes, no flag rewrites: the cleared '' value stays cleared.
       const caseFind = repo.find.mock.calls.find((c) => c[0]?.type === CASE_SAVED_OBJECT);
       expect(caseFind).toBeUndefined();
       expect(repo.bulkUpdate).not.toHaveBeenCalled();
@@ -1253,7 +1219,7 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         configSO.id,
-        { legacyCasesMigrated: true, caseBackfillVersion: CASE_BACKFILL_VERSION },
+        { legacyCasesMigrated: true },
         expect.anything()
       );
     });
@@ -1326,7 +1292,7 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         configSO.id,
-        { legacyCasesMigrated: true, caseBackfillVersion: CASE_BACKFILL_VERSION },
+        { legacyCasesMigrated: true },
         expect.anything()
       );
       expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
@@ -1354,7 +1320,7 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(repo.update).not.toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         configSO.id,
-        { legacyCasesMigrated: true, caseBackfillVersion: CASE_BACKFILL_VERSION },
+        { legacyCasesMigrated: true },
         expect.anything()
       );
       expect(repo.closePointInTime).not.toHaveBeenCalled();
@@ -1423,7 +1389,7 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(repo.update).not.toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         configSO.id,
-        { legacyCasesMigrated: true, caseBackfillVersion: CASE_BACKFILL_VERSION },
+        { legacyCasesMigrated: true },
         expect.anything()
       );
       expect(result).toEqual(expect.objectContaining({ runAt: expect.any(Date) }));
@@ -1464,7 +1430,7 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         configSO.id,
-        { legacyCasesMigrated: true, caseBackfillVersion: CASE_BACKFILL_VERSION },
+        { legacyCasesMigrated: true },
         expect.anything()
       );
     });
@@ -1556,13 +1522,13 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         'cfgB',
-        { legacyCasesMigrated: true, caseBackfillVersion: CASE_BACKFILL_VERSION },
+        { legacyCasesMigrated: true },
         expect.anything()
       );
       expect(repo.update).not.toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         'cfgA',
-        { legacyCasesMigrated: true, caseBackfillVersion: CASE_BACKFILL_VERSION },
+        { legacyCasesMigrated: true },
         expect.anything()
       );
       // ...and the run reschedules (still incomplete) recording one failing run.
@@ -1721,7 +1687,7 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(repo.update).toHaveBeenCalledWith(
         CASE_CONFIGURE_SAVED_OBJECT,
         cfg.id,
-        { legacyCasesMigrated: true, caseBackfillVersion: CASE_BACKFILL_VERSION },
+        { legacyCasesMigrated: true },
         expect.anything()
       );
     });
@@ -1877,7 +1843,6 @@ describe('TemplatesMigrationTaskManager', () => {
         legacyTemplatesMigrated: true,
         legacyCustomFieldsMigrated: true,
         legacyCasesMigrated: true,
-        caseBackfillVersion: CASE_BACKFILL_VERSION,
       });
       mockFindByType(configSO, []);
       const hook = jest.fn().mockResolvedValue(undefined);

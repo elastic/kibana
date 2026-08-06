@@ -212,6 +212,13 @@ const isEmptyExtendedFieldValue = (value: unknown): boolean => value == null || 
  * - A `customFields` entry whose value is `null` or `undefined` is skipped — the case left the
  *   field empty; the v2 field then renders empty rather than being forced to a value.
  *
+ * SCOPE — first migration only. Treating `''` as fillable is only safe because this runs at most
+ * once per space: during the space's initial one-shot migration, before users have meaningfully
+ * interacted with the v2 fields. A space flagged `legacyCasesMigrated` is never rescanned
+ * (see `configureNeedsCaseBackfill`) — by then an empty mirror key is ambiguous (untouched vs
+ * deliberately cleared through the v2 update path), and refilling it would silently restore a
+ * stale legacy value over a user's explicit clear.
+ *
  * Returns only the entries to write (keys missing or empty). Callers are responsible for
  * spreading the result over the existing map; see {@link mergeCustomFieldsIntoExtendedFields}
  * for the combined helper.

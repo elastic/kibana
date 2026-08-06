@@ -27,22 +27,6 @@ export const CASE_BACKFILL_RESCHEDULE_DELAY_MS = 3000;
 export const CASE_BACKFILL_FAILURE_RESCHEDULE_DELAY_MS = 30000;
 export const MAX_CASE_BACKFILL_FAILED_RUNS = 5;
 
-/**
- * Version of the existing-case backfill semantics, persisted per space as
- * `caseBackfillVersion` on the configure SO when its backfill completes. A space is only
- * skipped when its persisted version is current, so bumping this constant re-runs the
- * (idempotent, never-overwriting) backfill once for every space after an upgrade.
- *
- * History:
- * - 1 — original backfill (implied by `legacyCasesMigrated: true` with no version recorded).
- *       It treated any pre-existing `extended_fields` key — including the empty-string
- *       entries the v2 UI writes for untouched/cleared fields — as a value, so legacy
- *       custom-field values behind such keys were never copied and, because the space was
- *       flagged, never revisited.
- * - 2 — the backfill also fills keys holding `''`/`null`, repairing cases stranded by v1.
- */
-export const CASE_BACKFILL_VERSION = 2;
-
 /** A single legacy custom-field / template as stored on the `cases-configure` SO. */
 export type LegacyCustomField = NonNullable<
   ConfigurationPersistedAttributes['customFields']
