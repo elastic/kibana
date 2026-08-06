@@ -114,8 +114,17 @@ safe-outputs:
   create-pull-request:
     draft: true
     max: 1
-    labels: [flaky-test-fixer, release_note:skip]
-    allowed-labels: ['backport:skip', 'backport:all-open', 'backport:version', 'v9.*', 'v8.*']
+    labels: [flaky-test-fixer]
+    allowed-labels:
+      [
+        'release_note:skip',
+        'release_note:fix',
+        'backport:skip',
+        'backport:all-open',
+        'backport:version',
+        'v9.*',
+        'v8.*',
+      ]
     # Request whoever triggered the fix as reviewer. A bot actor (rare) can't be a
     # reviewer, so the handler just logs a warning and the PR is still created.
     reviewers: ${{ github.actor }}
@@ -232,7 +241,7 @@ timeout-minutes: 90
 
 # Flaky Test Fixer
 
-Open a single draft PR with the smallest possible test-side fix for this flaky-test issue. Do not open a PR if any of the following is true:
+Open a single draft PR with the smallest possible fix for this flaky-test issue. Prefer a test-side fix, but when the root cause is in application code, a minimal application-side fix is welcome — don't paper over a product bug with a test-side workaround. Do not open a PR if any of the following is true:
 
 - an open PR already covers it: one patching the same test, or the same root cause behind a related failed-test issue. Search for PRs that reference this issue number (in their body or in the issue timeline), and for recent PRs touching the failing test's file;
 - you cannot identify a credible fix; or
@@ -253,8 +262,8 @@ Kibana is already bootstrapped for you. The `bk` (Buildkite) CLI is installed an
 1. **Establish a current root-cause analysis.** Read the failed-test investigator's comment(s) on the issue for the suspected root cause and proposed fix, and note the most recent one's permalink, timestamp, any attribution it makes (e.g. an implicated PR/commit), and where the failures happened, so you can cite them in the PR's Context section. **Do not treat that comment as ground truth**: a prior analysis can be based on stale data or superseded guidance, and building on a stale diagnosis is a top cause of fixes that don't hold. Assess whether it is still current and, when it is not, re-investigate from scratch before proposing anything — see [Validate the investigation is current](#validate-the-investigation-is-current). If, after that, no action is needed, skip to step 7.
 2. Read the failing test and the helpers, fixtures, and page objects it imports.
 3. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
-4. Apply the smallest test-side patch that addresses the root cause on the target branch. Don't add explanatory code comments to the patch by default — a good test-side fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it to 1–2 sentences; a simple change like a timeout bump never warrants a comment.
-5. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check` (and, for a Jest test, run it with `node scripts/jest`). FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
+4. Apply the smallest patch that addresses the root cause on the target branch — test-side by default, application-side when that's where the root cause lives. Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it to 1–2 sentences; a simple change like a timeout bump never warrants a comment.
+5. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check` (and, for a Jest test, run it with `node scripts/jest`). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
 6. Decide the backport strategy and open the PR (see "PR format" and "Backport label" below). If the fix has to land on a version branch rather than `main`, don't open a PR at all — hand it over in the outcome comment instead (see "Fixes that must target a version branch").
 7. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 8. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
@@ -329,6 +338,10 @@ Add the following at the very end of the PR description (and outside of the deta
 
 (Per "Requester mention", drop `Requested by @${{ env.REQUESTED_BY }}.` from the NOTE if the requester is a bot or `kibanamachine`, leaving the rest of the NOTE.)
 
+## Release note label
+
+Pass exactly one release-note label in the `labels` field of the `create_pull_request` safe output: `release_note:skip` when the patch only touches test code, `release_note:fix` when it changes application code (the fix is user-facing).
+
 ## Backport label
 
 The guiding principle is to backport a fix to every older active version branch where it still applies — don't leave older branches flaky, so propagate the fix as widely as it safely fits.
@@ -386,7 +399,7 @@ Follow this format:
   Open this PR against <version-branch> manually — this workflow can only target `main`. Everything you need is below. cc @<requester-github-handle-here-if-not-a-bot>
 
   - **Title:** `<PR title, per "PR format">`
-  - **Labels:** `flaky-test-fixer`, `release_note:skip`, `<backport label(s), per "Backport label" — write "no backport label" if you weren't sure>`
+  - **Labels:** `flaky-test-fixer`, `<release_note:skip or release_note:fix, per "Release note label">`, `<backport label(s), per "Backport label" — write "no backport label" if you weren't sure>`
 
   <details>
   <summary>PR description</summary>
@@ -424,9 +437,9 @@ Follow this format:
   ```markdown
   ### ⏭️ No fix PR was opened
 
-  The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), not test-side, so there's nothing to patch here. cc @<requester-github-handle-here-if-not-a-bot>
+  The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), so there's nothing to patch in this repo. cc @<requester-github-handle-here-if-not-a-bot>
   ```
-  Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified.
+  Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure-side, or the root cause can't be confidently identified.
 - **Backport the existing fix** (fix already on `main`, contained PR — no PR opened):
   ```markdown
   ### The fix is already on `main` — it needs backporting
