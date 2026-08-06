@@ -17,6 +17,7 @@ import type {
 import type { ExperimentalFeatures } from '../../../../common';
 import type { Mutable } from 'utility-types';
 import { validateYaraRule } from '../../../endpoint/lib/libyara';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
 
 jest.mock('../../../endpoint/lib/libyara', () => ({
   validateYaraRule: jest.fn(async () => ({ errors: [], warnings: [] })),
@@ -263,6 +264,7 @@ describe('YARA Signatures API validations', () => {
         osTypes: generated.os_types,
         listId: generated.list_id,
         itemId: generated.item_id,
+        tags: [GLOBAL_ARTIFACT_TAG],
       } as unknown as CreateExceptionListItemOptions;
     };
 
@@ -284,11 +286,9 @@ describe('YARA Signatures API validations', () => {
         warnings: [{ severity: 'warning', message: 'may slow down scanning', line: 1 }],
       });
 
-      try {
-        await customYaraSignaturesValidator.validatePreCreateItem(buildCreateItem());
-      } catch (error) {
-        expect(error.message).not.toContain('Invalid YARA rule');
-      }
+      await expect(
+        customYaraSignaturesValidator.validatePreCreateItem(buildCreateItem())
+      ).resolves.not.toThrow();
     });
   });
 });

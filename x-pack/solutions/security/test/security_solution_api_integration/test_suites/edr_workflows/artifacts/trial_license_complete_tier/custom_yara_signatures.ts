@@ -353,7 +353,7 @@ export default function ({ getService }: FtrProviderContext) {
                 (MAX_YARA_RULE_CONTENT_BYTE_LENGTH - dummyRuleWithComment.length) /
                   Buffer.byteLength(euroSign)
               ) +
-              1;
+              'a'; // plus one byte
 
             expect(Buffer.byteLength(valueOverByteLimit, 'utf8')).to.be.greaterThan(
               MAX_YARA_RULE_CONTENT_BYTE_LENGTH

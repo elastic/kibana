@@ -79,7 +79,8 @@ const isWasmTrap = (error: unknown): boolean =>
 const loadModule = async (): Promise<YaraValidateModule> => {
   if (!modulePromise) {
     modulePromise = (async () => {
-      // CJS Emscripten output — load via createRequire from this ESM/CJS boundary.
+      // Emscripten emits CJS; load it with createRequire. __filename/__dirname are
+      // fine here — Kibana server code is Babel-transpiled to CJS at runtime.
       const require = createRequire(__filename);
       const distDir = path.join(__dirname, 'wasm', 'dist');
       const factory = require(path.join(distDir, 'validate_yara.js')) as CreateYaraValidateModule;

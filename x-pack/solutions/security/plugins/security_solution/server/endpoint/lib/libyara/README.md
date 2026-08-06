@@ -1,6 +1,6 @@
 # libyara WASM
 
-This folder contains the official `libyara` C API wrapped in-house in WebAssembly, so it can be used to validated YARA rules.
+This folder contains the official `libyara` C API wrapped in-house in WebAssembly, so it can be used to validate YARA rules.
 
 We use `libyara` to validate rules exactly the same way as Endpoint does, with the same tool on the same version.
 
