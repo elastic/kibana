@@ -272,11 +272,7 @@ Kibana is already bootstrapped for you. The `bk` (Buildkite) CLI is installed an
 
 ## Fix guardrails
 
-Every patch must meet the same bar the Flaky Fix Verifier holds revisions to (the `flaky-test-investigator` skill's pitfalls carry the full rationale):
-
-- Do not weaken assertions, wrap assertions **or interactions** in `retry()` / `retry.tryForTime` (re-issuing a click/type/navigation so a "missed" interaction registers on a later attempt hides a real actionability bug, not just wrapping an `expect`), bump timeouts as the primary fix, or strip tags to skip the test.
-- Wait on readiness signals instead of retrying outcomes. When the state the test must wait on has no DOM footprint (e.g. an async parse in a worker), prefer a small application-side change that exposes one (a `data-test-subj` or attribute) over re-issuing actions until the outcome looks right — re-running actions also re-fires their side effects.
-- Follow the testing best practices in `docs/extend/testing/` (`scout-best-practices.md`, `ui-best-practices.md`, `api-best-practices.md`), even where the surrounding test file predates them: an existing retry-wrapped interaction nearby is legacy to fix, not a pattern to copy.
+{{#import .github/workflows/shared/fix-guardrails.md}}
 
 ## Validate the investigation is current
 
