@@ -17,26 +17,14 @@ import type { Locator } from '@playwright/test';
  * Prototype for `@elastic/eui-test-helpers` (see the package CONTRIBUTING guide);
  * lives in kbn-scout until it is ported and published.
  *
- * `testSubj` may be set either on the `EuiDataGrid` itself or on an ancestor
- * wrapper that contains exactly one grid — consumers commonly only have a subj
- * on a surrounding container (e.g. `alertsTableIsLoaded`), while EUI toggles
- * state classes (fullscreen) on the `.euiDataGrid` element itself, so the
- * object resolves the actual grid element internally.
+ * `testSubj` must be set on the `EuiDataGrid` itself (the guard enforces it) —
+ * EUI toggles state classes (fullscreen) on that element. When the subj is not
+ * unique on the page (e.g. portal-rendered duplicates), narrow with the `scope`
+ * parameter instead of pointing the subj at a wrapper.
  */
 export class EuiDataGridObject extends BaseObject {
   constructor(scope: ObjectScope, testSubj: string) {
-    // No componentSelector: the subj element is often an ancestor of the grid,
-    // not the grid itself, so the BaseObject root guard cannot be used here.
-    // Root-resolution support in BaseObject is tracked for the EUI port.
-    super(scope, testSubj);
-  }
-
-  /**
-   * The `.euiDataGrid` element — the subj element itself when the consumer set
-   * the subj on `EuiDataGrid`, otherwise its single `.euiDataGrid` descendant.
-   */
-  private get grid(): Locator {
-    return this.root.locator(':scope.euiDataGrid, :scope .euiDataGrid');
+    super(scope, testSubj, '.euiDataGrid');
   }
 
   /**
@@ -44,7 +32,7 @@ export class EuiDataGridObject extends BaseObject {
    * virtualized horizontal scrolling do not affect the column id.
    */
   cell(rowIndex: number, columnId: string): Locator {
-    return this.grid.locator(
+    return this.root.locator(
       `.euiDataGridRowCell[data-gridcell-column-id="${columnId}"][data-gridcell-row-index="${rowIndex}"]`
     );
   }
@@ -54,7 +42,7 @@ export class EuiDataGridObject extends BaseObject {
    * this is the rendered window, not necessarily every row.
    */
   cells(columnId: string): Locator {
-    return this.grid.locator(`.euiDataGridRowCell[data-gridcell-column-id="${columnId}"]`);
+    return this.root.locator(`.euiDataGridRowCell[data-gridcell-column-id="${columnId}"]`);
   }
 
   /**
@@ -66,7 +54,7 @@ export class EuiDataGridObject extends BaseObject {
    * never treat it as the full data set.
    */
   public get rows(): Locator {
-    return this.grid.locator('.euiDataGridRow');
+    return this.root.locator('.euiDataGridRow');
   }
 
   /**
@@ -75,7 +63,7 @@ export class EuiDataGridObject extends BaseObject {
    * visible action label (e.g. 'Hide column', 'Sort A-Z').
    */
   async doActionOnColumn(columnId: string, actionLabel: string): Promise<void> {
-    const headerCell = this.grid.locator(
+    const headerCell = this.root.locator(
       `.euiDataGridHeaderCell[data-gridcell-column-id="${columnId}"]`
     );
     // The actions button only becomes interactable when the header cell is
@@ -107,7 +95,7 @@ export class EuiDataGridObject extends BaseObject {
 
   /** The grid element only while it carries the fullscreen state class. */
   private get fullScreenGrid(): Locator {
-    return this.grid.and(this.root.page().locator('.euiDataGrid--fullScreen'));
+    return this.root.and(this.root.page().locator('.euiDataGrid--fullScreen'));
   }
 
   /**
@@ -115,7 +103,7 @@ export class EuiDataGridObject extends BaseObject {
    * click, which keeps the tooltip open over the grid — blur it right away.
    */
   private async clickFullScreenButton(): Promise<void> {
-    const button = this.grid.getByTestId('dataGridFullScreenButton');
+    const button = this.root.getByTestId('dataGridFullScreenButton');
     await button.click();
     await button.blur();
   }
