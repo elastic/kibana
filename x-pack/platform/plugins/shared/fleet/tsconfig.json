@@ -48,6 +48,7 @@
     "@kbn/custom-integrations-plugin",
 
     // packages
+    "@kbn/ui-callout",
     "@kbn/deeplinks-management",
     "@kbn/core-application-common",
     "@kbn/core-capabilities-common",
