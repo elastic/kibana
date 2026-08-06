@@ -24,6 +24,8 @@ lens/test/scout/
 
 ## Running tests
 
+### Stateful
+
 Start the server once and leave it running:
 
 ```bash
@@ -50,6 +52,28 @@ node scripts/playwright test --project local --config x-pack/platform/plugins/sh
 ```
 
 Add `--ui` to any of these to open the Playwright UI runner.
+
+### Serverless
+
+Only the configs marked `all` in the table above have serverless coverage: `core/api`, `open_in_lens` and `tsdb`. The two `core/ui` configs are stateful-only, so they would match nothing here.
+
+Start a project type — `search`, `observability_complete` or `security_complete`:
+
+```bash
+node scripts/scout.js start-server --arch serverless --domain search
+```
+
+Then run against it, passing the tag for the domain you started:
+
+```bash
+node scripts/playwright test --project local \
+  --grep @local-serverless-search \
+  --config x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel.playwright.config.ts
+```
+
+`--grep` matters here in a way it doesn't on stateful. Playwright does not filter by tag on its own, and every Lens test carries `@local-stateful-classic`, so omitting it on stateful is harmless. On serverless it would also pick up the stateful-only specs, which are not meant to run there. Use `@local-serverless-observability_complete` or `@local-serverless-security_complete` for the other two domains.
+
+`node scripts/scout.js run-tests --arch serverless --domain search --config <path>` boots the stack and applies the matching `--grep` for you, which is handy for a one-off run.
 
 After moving or adding specs, refresh the generated manifests under each namespace's `.meta/`:
 
