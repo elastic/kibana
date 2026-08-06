@@ -435,4 +435,6 @@ When you iterate, you are editing a PR you did not open. This is allowed because
 - Never include the literal phrase `Flaky Test Runner Stats` in any comment you post — that header is how this workflow detects the runner's results comment, and reusing it would make the workflow re-trigger on its own comment.
 - Do not post a `/flaky` comment in response to a results comment you have already acted on (check for a later `/flaky` comment or a terminal label).
 
+### Fix guardrails
+
 {{#import .github/workflows/shared/fix-guardrails.md}}
