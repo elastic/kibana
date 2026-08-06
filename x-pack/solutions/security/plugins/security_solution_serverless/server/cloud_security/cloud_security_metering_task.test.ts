@@ -390,6 +390,21 @@ describe('getGcpComputeDurationRuntimeMapping', () => {
     expect(source).toContain('lastStopTimestamp');
     expect(source).toContain('emit(');
   });
+
+  it('should guard the _source access and timestamp parsing so a malformed doc cannot abort the search', () => {
+    const mapping = getGcpComputeDurationRuntimeMapping(Date.now());
+    const source: string = mapping[GCP_COMPUTE_DURATION_RUNTIME_FIELD].script.source;
+
+    // A runtime-field script error fails the whole search request, and the metering callers
+    // swallow errors log-only — so an unguarded parse would silently zero all CSPM usage.
+    expect(source).toContain('try {');
+    expect(source).toContain('catch (Exception e)');
+    // Both ZonedDateTime.parse calls must be inside the try block
+    const tryIndex = source.indexOf('try {');
+    expect(source.indexOf('ZonedDateTime.parse')).toBeGreaterThan(tryIndex);
+    expect(source.lastIndexOf('ZonedDateTime.parse')).toBeGreaterThan(tryIndex);
+    expect(source.indexOf('catch')).toBeGreaterThan(source.lastIndexOf('emit('));
+  });
 });
 
 describe('getAssetAggQueryByCloudSecuritySolution', () => {
