@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { posix, win32 } from 'path';
+
 import moment from 'moment';
 import { uniqBy } from 'lodash';
 
@@ -30,10 +32,8 @@ import type { FileEventDoc } from '../helpers';
 import { getValidCodeSignature, groupEndpointIdsByOS } from '../helpers';
 
 const getFileBasename = (filePath: string, os: string): string => {
-  // Windows paths may mix `\` and `/` separators; other platforms use `/` only
-  const separatorPattern = os === 'windows' ? /[\\/]/ : /\//;
-  const segments = filePath.split(separatorPattern).filter((segment) => segment.length > 0);
-  return segments.length > 0 ? segments[segments.length - 1] : filePath;
+  const basename = os === 'windows' ? win32.basename(filePath) : posix.basename(filePath);
+  return basename.length > 0 ? basename : filePath;
 };
 
 const clampToMaxNameLength = (name: string): string => name.slice(0, MAX_NAME_LENGTH);
