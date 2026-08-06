@@ -25,7 +25,11 @@ import type { FieldDefinitionsService } from '../../services/field_definitions';
 import { parseTemplate } from '../../routes/api/templates/parse_template';
 import { validateExtendedFields } from '../../../common/types/domain/template/validate_extended_fields';
 import { parseFieldDefinitionsToInlineFields, getFieldSnakeKey } from '../../../common/utils';
-import { resolveTemplateFields } from '../../../common/utils/template_fields';
+import {
+  mergeCustomFieldsIntoExtendedFields,
+  resolveTemplateFields,
+} from '../../../common/utils/template_fields';
+import { fillMissingCustomFields } from './utils';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { isDisplayOnlyField, FieldType } from '../../../common/types/domain/template/fields';
 import { evaluateCondition } from '../../../common/types/domain/template/evaluate_conditions';
@@ -206,6 +210,61 @@ export const resolveGlobalFieldKeys = async (
 ): Promise<Set<string>> => {
   const inlineFields = await resolveGlobalFields(owner, fieldDefinitionsService);
   return new Set(inlineFields.map((f) => getFieldSnakeKey(f.name, f.type)));
+};
+
+/**
+ * Enforces `required` on global (isGlobal) field definitions at case-creation time, with the
+ * same semantics v1 required custom fields get from `validateRequiredCustomFields`: a required
+ * field with no value and no default fails the create with a 400.
+ *
+ * The check runs against the *effective* values the create will persist across BOTH
+ * representations — not just the request's `extended_fields`:
+ * - the caller's `extended_fields` (with template + global definition defaults already merged
+ *   in by the create path),
+ * - v1 configuration `defaultValue`s for custom fields absent from the request (they are filled
+ *   into the persisted `customFields` by `fillMissingCustomFields`, so a required global field
+ *   linked to such a v1 field is satisfied — matching v1's default-satisfies-required rule),
+ * - the caller's `customFields`, mirrored with the same customFields-win semantics the
+ *   write-time mirror applies after validation (including explicit-null deletes), so a value
+ *   supplied through the legacy representation satisfies the linked global field and an
+ *   explicit null does not.
+ *
+ * Only required-ness is enforced here (`requiredOnly`): mirrored keys of unlinked legacy fields
+ * must not be flagged as unknown, and value validation of the request's own map is handled by
+ * `validateCaseExtendedFields`.
+ */
+export const validateRequiredGlobalFields = ({
+  globalFields,
+  extendedFields,
+  requestCustomFields,
+  customFieldsConfiguration,
+}: {
+  globalFields: InlineField[];
+  extendedFields: Record<string, string>;
+  requestCustomFields?: CaseRequestCustomFields;
+  customFieldsConfiguration?: CustomFieldsConfiguration;
+}): void => {
+  const requestKeys = new Set((requestCustomFields ?? []).map((cf) => cf.key));
+  // Only the entries the fill ADDS (v1 config defaults), and only real values: the fill also
+  // pads absent optional fields with synthetic nulls which are never mirrored and must not
+  // delete a caller-sent extended_fields value from the effective view.
+  const filledDefaults = fillMissingCustomFields({
+    customFields: requestCustomFields,
+    customFieldsConfiguration,
+  }).filter((cf) => !requestKeys.has(cf.key) && cf.value !== null && cf.value !== undefined);
+
+  const effectiveExtendedFields =
+    mergeCustomFieldsIntoExtendedFields(
+      [...filledDefaults, ...(requestCustomFields ?? [])],
+      extendedFields
+    ) ?? extendedFields;
+
+  const errors = validateExtendedFields(effectiveExtendedFields, globalFields, {
+    requiredOnly: true,
+  });
+  if (errors.length) {
+    throw Boom.badRequest(`Invalid extended_fields: ${errors.join('; ')}`);
+  }
 };
 
 /**

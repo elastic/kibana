@@ -24,6 +24,7 @@ import {
   validateCustomFields,
   resolveGlobalFields,
   validateCaseExtendedFields,
+  validateRequiredGlobalFields,
 } from './validators';
 import type { CreateUserAction, CommonUserActionArgs } from '../../services/user_actions/types';
 import type { InlineField } from '../../../common/types/domain/template/fields';
@@ -149,13 +150,6 @@ export const create = async (
     // collision — see resolveApplicableFields), then caller-sent values (caller always wins).
     // Runs AFTER template expansion so the collision order holds, and BEFORE extended_fields
     // validation so the merged map is what gets validated.
-    //
-    // Captured before injection: when the map exists only because defaults were injected, the
-    // validation below must run with partial (update) semantics. Full create-time validation
-    // enforces `required` on absent fields, and enforcing it here would 400 requests that
-    // succeeded before defaults injection existed — e.g. every legacy customFields-only create
-    // in a space whose required v1 custom fields are mirrored into required global definitions.
-    const hadExtendedFieldsBeforeDefaults = query.extended_fields !== undefined;
     let globalFields: InlineField[] | undefined;
     if (clientArgs.config.templates.enabled) {
       globalFields = await resolveGlobalFields(query.owner, fieldDefinitionsService);
@@ -179,6 +173,21 @@ export const create = async (
           },
         };
       }
+
+      // v1-parity `required` enforcement: a required global field with no default and no value
+      // fails the create with a 400, exactly like a required v1 custom field does through
+      // validateRequiredCustomFields. Runs AFTER defaults injection (a definition default
+      // satisfies its own field) and checks the EFFECTIVE values across both representations —
+      // a value arriving through the legacy customFields mirror, or a v1 configuration
+      // defaultValue filled into customFields at persist time, satisfies the linked global
+      // field. That keeps every legacy customFields-only create that passes v1 validation
+      // passing here too.
+      validateRequiredGlobalFields({
+        globalFields,
+        extendedFields: query.extended_fields ?? {},
+        requestCustomFields: query.customFields,
+        customFieldsConfiguration,
+      });
     }
 
     if (query.extended_fields) {
@@ -191,10 +200,14 @@ export const create = async (
         templatesService,
         fieldDefinitionsService,
         owner: query.owner,
-        // Injection-only maps get partial semantics: validate the injected values, but do not
-        // enforce `required` on fields the caller never sent — that keeps creates that
-        // succeeded before defaults injection succeeding after it (see comment above).
-        partial: !hadExtendedFieldsBeforeDefaults,
+        // With the templates feature on, required-ness is owned by the effective-value check
+        // above (which also sees values arriving through the customFields mirror); this pass
+        // validates the request's own map with partial semantics so an absent field is not
+        // wrongly flagged as required when its value comes through the legacy representation.
+        // Template-field required-ness is unaffected: expansion materializes a key for every
+        // template field, and present-but-empty values are still validated in partial mode.
+        // Flag-off requests keep full create semantics, byte-for-byte as before.
+        partial: clientArgs.config.templates.enabled,
         preResolvedTemplateFields: resolvedTemplateFields,
       });
     }

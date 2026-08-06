@@ -628,4 +628,65 @@ describe('validateExtendedFields', () => {
       expect(validateExtendedFields(extendedFields, fields)).toEqual([]);
     });
   });
+
+  describe('requiredOnly mode', () => {
+    it('reports missing required fields', () => {
+      const fields: FieldSchemaType[] = [makeInputTextField({ validation: { required: true } })];
+
+      expect(validateExtendedFields({}, fields, { requiredOnly: true })).toEqual([
+        'Field "Summary" is required',
+      ]);
+    });
+
+    it('does not report unknown keys', () => {
+      const fields: FieldSchemaType[] = [makeInputTextField()];
+
+      expect(
+        validateExtendedFields({ some_unlinked_mirror_key_as_keyword: 'x' }, fields, {
+          requiredOnly: true,
+        })
+      ).toEqual([]);
+    });
+
+    it('does not run per-field value validation', () => {
+      const fields: FieldSchemaType[] = [
+        makeInputTextField({
+          validation: { required: true, min_length: 10 },
+        }),
+      ];
+
+      // 'hi' violates min_length but satisfies required — requiredOnly must accept it.
+      expect(
+        validateExtendedFields({ summary_as_keyword: 'hi' }, fields, { requiredOnly: true })
+      ).toEqual([]);
+    });
+
+    it('does not run the value-size backstop', () => {
+      const fields: FieldSchemaType[] = [makeInputTextField()];
+      const oversized = 'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1);
+
+      expect(
+        validateExtendedFields({ summary_as_keyword: oversized }, fields, { requiredOnly: true })
+      ).toEqual([]);
+    });
+
+    it('still respects show_when visibility for required fields', () => {
+      const fields: FieldSchemaType[] = [
+        makeSelectField(),
+        makeInputTextField({
+          validation: { required: true },
+          display: { show_when: { field: 'priority', operator: 'eq', value: 'high' } },
+        }),
+      ];
+
+      // Hidden (condition not met) — required not enforced.
+      expect(
+        validateExtendedFields({ priority_as_keyword: 'low' }, fields, { requiredOnly: true })
+      ).toEqual([]);
+      // Visible — required enforced.
+      expect(
+        validateExtendedFields({ priority_as_keyword: 'high' }, fields, { requiredOnly: true })
+      ).toEqual(['Field "Summary" is required']);
+    });
+  });
 });

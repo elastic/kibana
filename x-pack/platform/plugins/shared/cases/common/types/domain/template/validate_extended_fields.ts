@@ -147,15 +147,32 @@ const validateField = (field: InlineField, value: string, errors: string[]): voi
 export const validateExtendedFields = (
   extendedFields: Record<string, string>,
   fields: Array<RefField | InlineField>,
-  { partial = false, onClose = false }: { partial?: boolean; onClose?: boolean } = {}
+  {
+    partial = false,
+    onClose = false,
+    requiredOnly = false,
+  }: {
+    partial?: boolean;
+    onClose?: boolean;
+    /**
+     * Only enforce required-ness (including `required_when` / `show_when` evaluation); skip
+     * unknown-key, size, and per-field value validation. Used when the map under validation is
+     * an *effective* view assembled from several sources (e.g. the create path's merge of
+     * `extended_fields` with the legacy `customFields` mirror), where keys mirrored from
+     * unlinked legacy fields are expected and their values are validated elsewhere.
+     */
+    requiredOnly?: boolean;
+  } = {}
 ): string[] => {
   let errors: string[] = [];
   // Display-only fields (e.g. MARKDOWN) hold no value and are excluded from a case's stored
   // `extended_fields`, so they take no part in value/required validation.
   const inlineFields = fields.filter(isInlineField).filter((f) => !isDisplayOnlyField(f));
 
-  // 1. Value-size backstop
-  errors = errors.concat(validateExtendedFieldValueSizes(extendedFields));
+  // 1. Value-size backstop (skipped in requiredOnly mode — see option docs above)
+  if (!requiredOnly) {
+    errors = errors.concat(validateExtendedFieldValueSizes(extendedFields));
+  }
 
   // 3. Build helper maps
   const fieldValues: Record<string, string | undefined> = {};
@@ -189,7 +206,7 @@ export const validateExtendedFields = (
 
       if (isRequired && isEmpty) {
         errors.push(`Field "${field.label ?? field.name}" is required`);
-      } else if (!isEmpty) {
+      } else if (!isEmpty && !requiredOnly) {
         validateField(field, value, errors);
       }
     }

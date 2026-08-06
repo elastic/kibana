@@ -1708,35 +1708,26 @@ describe('create', () => {
     });
 
     describe('required global fields', () => {
-      // Defaults injection must be invisible to callers that never engaged with
-      // extended_fields: a request without extended_fields that succeeded before injection
-      // existed must keep succeeding after it, even when a REQUIRED global field has no
-      // default (required stays a UI submit-time gate there, exactly like v1 required
-      // customFields). Full create-time `required` enforcement only applies when the caller —
-      // or a pinned template — actually produced an extended_fields map, which is the
-      // pre-injection behavior. These tests lock both sides in so the inject/validate steps
-      // can't silently become a breaking change (or silently drop the existing enforcement).
-      it('creates the case when a required global field has no default and no caller value (no extended_fields sent)', async () => {
-        // Regression guard for the v1 mirror: required legacy customFields are mirrored into
-        // required global definitions with no default, so rejecting here would 400 every
-        // customFields-only create in such a space.
+      // A required global field is enforced at create time with the same semantics v1 required
+      // custom fields get from validateRequiredCustomFields: no value + no default → 400. The
+      // check runs against the EFFECTIVE values across both representations, so a value arriving
+      // through the legacy customFields mirror (or a v1 configuration defaultValue filled at
+      // persist time) satisfies the linked global field — legacy customFields-only creates that
+      // pass v1 validation keep passing here.
+      it('rejects when a required global field has no default and no caller value (no extended_fields sent)', async () => {
         const clientArgs = createClientArgs();
         clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
           fieldDefinitions: [makeGlobalDef('risk_score', undefined, { required: true })],
           total: 1,
         });
 
-        await create(theCase, clientArgs, casesClientMock);
-
-        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
-        // Nothing to inject (no default) — the field is simply left unset.
-        expect(createArgs.attributes.extended_fields).toBeUndefined();
+        await expect(create(theCase, clientArgs, casesClientMock)).rejects.toThrow(
+          'Field "risk_score" is required'
+        );
+        expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
       });
 
-      it('injected defaults do not trigger required enforcement of other global fields', async () => {
-        // The injection materializes an extended_fields map the caller never sent; validating
-        // that map with full create semantics would enforce `required` on the no-default field
-        // and reject a request that succeeded before injection existed.
+      it('rejects when injected defaults leave another required global field empty', async () => {
         const clientArgs = createClientArgs();
         clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
           fieldDefinitions: [
@@ -1746,17 +1737,13 @@ describe('create', () => {
           total: 2,
         });
 
-        await create(theCase, clientArgs, casesClientMock);
-
-        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
-        expect(createArgs.attributes.extended_fields).toEqual({
-          notes_as_keyword: 'default notes',
-        });
+        await expect(create(theCase, clientArgs, casesClientMock)).rejects.toThrow(
+          'Field "risk_score" is required'
+        );
+        expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
       });
 
-      it('still rejects when the caller sends extended_fields but omits a required global field', async () => {
-        // Pre-injection behavior preserved: a caller that engages with extended_fields gets
-        // full create-time validation, including `required` on absent fields.
+      it('rejects when the caller sends extended_fields but omits a required global field', async () => {
         const clientArgs = createClientArgs();
         clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
           fieldDefinitions: [
@@ -1805,6 +1792,135 @@ describe('create', () => {
         const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
         expect(createArgs.attributes.extended_fields).toEqual({
           risk_score_as_keyword: 'caller-value',
+        });
+      });
+
+      describe('v1 mirror interplay', () => {
+        // The global definition migrated from a v1 custom field keeps the v1 key as its name,
+        // so the customFields mirror writes to the same storage key the required check reads.
+        const v1LinkedClient = (customFieldsConfiguration: unknown[]) => {
+          const client = createCasesClientMock();
+          client.configure.get = jest.fn().mockResolvedValue([
+            {
+              owner: SECURITY_SOLUTION_OWNER,
+              customFields: customFieldsConfiguration,
+              templates: [],
+            },
+          ]);
+          return client;
+        };
+
+        it('a caller-sent customFields value satisfies the linked required global field', async () => {
+          const clientArgs = createClientArgs();
+          clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+            fieldDefinitions: [makeGlobalDef('risk_score', undefined, { required: true })],
+            total: 1,
+          });
+          const casesClient = v1LinkedClient([
+            {
+              key: 'risk_score',
+              type: CustomFieldTypes.TEXT,
+              label: 'Risk score',
+              required: true,
+            },
+          ]);
+
+          await create(
+            {
+              ...theCase,
+              customFields: [{ key: 'risk_score', type: CustomFieldTypes.TEXT, value: 'high' }],
+            },
+            clientArgs,
+            casesClient
+          );
+
+          const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+          // The write-time mirror persists the legacy value under the global storage key.
+          expect(createArgs.attributes.extended_fields).toEqual({
+            risk_score_as_keyword: 'high',
+          });
+        });
+
+        it('a v1 configuration defaultValue satisfies the linked required global field', async () => {
+          // v1 semantics: a required custom field with a configured default passes validation
+          // even when absent from the request (fillMissingCustomFields persists the default).
+          // The linked global field must not fail the same request.
+          const clientArgs = createClientArgs();
+          clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+            fieldDefinitions: [makeGlobalDef('risk_score', undefined, { required: true })],
+            total: 1,
+          });
+          const casesClient = v1LinkedClient([
+            {
+              key: 'risk_score',
+              type: CustomFieldTypes.TEXT,
+              label: 'Risk score',
+              required: true,
+              defaultValue: 'medium',
+            },
+          ]);
+
+          await create(theCase, clientArgs, casesClient);
+
+          expect(clientArgs.services.caseService.createCase).toHaveBeenCalled();
+        });
+
+        it('an explicit null customFields value does not satisfy the linked required global field', async () => {
+          // The write-time mirror deletes the storage key on an explicit null, so the persisted
+          // global field would be empty — the create must fail. The v1 field itself is optional
+          // here (a required v1 field already 400s on null via validateRequiredCustomFields).
+          const clientArgs = createClientArgs();
+          clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+            fieldDefinitions: [makeGlobalDef('risk_score', undefined, { required: true })],
+            total: 1,
+          });
+          const casesClient = v1LinkedClient([
+            {
+              key: 'risk_score',
+              type: CustomFieldTypes.TEXT,
+              label: 'Risk score',
+              required: false,
+            },
+          ]);
+
+          await expect(
+            create(
+              {
+                ...theCase,
+                customFields: [{ key: 'risk_score', type: CustomFieldTypes.TEXT, value: null }],
+              },
+              clientArgs,
+              casesClient
+            )
+          ).rejects.toThrow('Field "risk_score" is required');
+          expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
+        });
+
+        it('a synthetic null padded for an absent optional v1 field does not wipe a caller extended_fields value', async () => {
+          // fillMissingCustomFields pads absent optional-no-default fields with null values;
+          // those synthetic entries are never mirrored and must not delete the caller's
+          // extended_fields value from the effective view the required check reads.
+          const clientArgs = createClientArgs();
+          clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+            fieldDefinitions: [makeGlobalDef('risk_score', undefined, { required: true })],
+            total: 1,
+          });
+          const casesClient = v1LinkedClient([
+            {
+              key: 'risk_score',
+              type: CustomFieldTypes.TEXT,
+              label: 'Risk score',
+              required: false,
+            },
+          ]);
+
+          await create(
+            { ...theCase, extended_fields: { risk_score_as_keyword: 'caller-value' } },
+            clientArgs,
+            casesClient
+          );
+
+          expect(clientArgs.services.caseService.createCase).toHaveBeenCalled();
         });
       });
     });
