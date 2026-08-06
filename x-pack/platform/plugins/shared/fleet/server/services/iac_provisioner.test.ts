@@ -265,7 +265,7 @@ describe('IacProvisionerService', () => {
     );
   });
 
-  it('throws IacProvisionerConfigError when only one of certificate/key is configured', async () => {
+  it('throws IacProvisionerConfigError when only the certificate is configured', async () => {
     // A half-configured pair must not silently downgrade to an
     // unauthenticated connection.
     mockConfig({
@@ -280,6 +280,45 @@ describe('IacProvisionerService', () => {
       IacProvisionerConfigError
     );
     expect(mockedFetch).not.toHaveBeenCalled();
+  });
+
+  it('throws IacProvisionerConfigError when only the key is configured', async () => {
+    // Symmetric to the certificate-only case: the other half of the pair
+    // missing must fail just as loudly.
+    mockConfig({
+      api: {
+        url: 'https://iac-provisioner.example',
+        tls: { key: '/path/tls.key', ca: '/path/ca.crt' },
+      },
+    });
+    mockLogger();
+
+    await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+      IacProvisionerConfigError
+    );
+    expect(mockedFetch).not.toHaveBeenCalled();
+  });
+
+  it('still verifies the server certificate when no TLS material is configured', async () => {
+    // No cert/key/ca at all is a valid config (e.g. a provider fronted by a
+    // public CA) — it must not throw and must keep rejectUnauthorized: true.
+    mockConfig({
+      api: { url: 'https://iac-provisioner.example', tls: undefined },
+    });
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
+    );
+
+    await iacProvisionerService.renderTemplate(RENDER_REQUEST);
+
+    expect(mockedAgent).toHaveBeenCalledWith({
+      connect: expect.objectContaining({
+        cert: undefined,
+        key: undefined,
+        rejectUnauthorized: true,
+      }),
+    });
   });
 });
 
