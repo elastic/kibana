@@ -185,6 +185,7 @@ export const PolicyHostsField = ({
             <>
               <EuiSpacer />
               <EuiCallOut
+                announceOnMount
                 data-test-subj="syntheticsConditionShardingCallout"
                 title={CONDITION_SHARDING_CALLOUT_TITLE}
                 size="s"
