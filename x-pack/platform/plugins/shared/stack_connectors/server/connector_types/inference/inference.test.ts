@@ -128,6 +128,23 @@ describe('InferenceConnector', () => {
         expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
       }
     });
+
+    it('marks 403 errors as user errors so they are not retried', async () => {
+      // @ts-ignore
+      mockEsClient.transport.request.mockResolvedValue({
+        body: Readable.from([
+          `{\"error\":{\"code\":\"forbidden\",\"message\":\"Received an unsuccessful status code for request from inference entity id [.rainbow-sprinkles-elastic] status [403]. Error message: [Organization is not authorized to access any resource]\",\"type\":\"security_exception\"}}`,
+        ]),
+        statusCode: 403,
+      });
+
+      expect.assertions(1);
+      await connector
+        .performApiUnifiedCompletion({
+          body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
+        })
+        .catch((e) => expect(getErrorSource(e)).toBe(TaskErrorSource.USER));
+    });
   });
 
   describe('performApiRerank', () => {
