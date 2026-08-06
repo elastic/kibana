@@ -85,7 +85,7 @@ export const getInvalidMaintenanceWindowsError = ({
 
   const invalidMsg = invalid.length
     ? i18n.translate('xpack.synthetics.maintenanceWindows.validation.invalid', {
-        defaultMessage: 'Couldn`t find maintenance window(s) with id or name: {invalid}.',
+        defaultMessage: `Couldn't find maintenance window(s) with id or name: {invalid}.`,
         values: { invalid: invalid.join(', ') },
       })
     : '';
