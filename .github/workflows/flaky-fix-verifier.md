@@ -186,13 +186,9 @@ safe-outputs:
     protected-files: fallback-to-issue
     patch-format: am
     max: 1
-  # Used together with a pushed revision, and only when that revision invalidates
-  # the PR's title/body (see "Pushing a revised fix"). `replace` because the body
-  # is rewritten in the fixer's format rather than appended to; `footer: false`
-  # because the carried-over body already ends with its own attribution footer.
-  # No `required-labels` guard: gh-aw 0.81.6 silently drops it for this output
-  # (the update-entity parser never reads it); the `flaky-test-fixer` label gate
-  # in the activation rules is what scopes this workflow to fixer PRs.
+  # Refreshes the PR title/body when a pushed revision invalidates them (see
+  # "Pushing a revised fix"); no `required-labels` guard because gh-aw 0.81.6
+  # silently drops it here — the `flaky-test-fixer` activation gate scopes us.
   update-pull-request:
     operation: replace
     footer: false
