@@ -21,7 +21,7 @@ export const buildNewSignificantEventChatOptions = (
 ): OpenSignificantEventChatOptions => ({
   newConversation: true,
   autoSendInitialMessage: true,
-  initialMessage: i18n.translate('xpack.observability.nightshift.explainEventPrompt', {
+  initialMessage: i18n.translate('xpack.nightshift.explainEventPrompt', {
     defaultMessage: 'Explain this significant event: {significantEventName}',
     values: { significantEventName: event.title },
   }),

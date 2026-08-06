@@ -586,29 +586,9 @@
     ]
   },
   {
-    "id": "obs-presentation",
-    "name": "Obs UX: Presentation",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-presentation-team",
-      "label": "Team:obs-presentation"
-    },
-    "responsibilities": [
-      "APM",
-      "Hosts",
-      "Infrastructure",
-      "Universal Profiling",
-      "Observability Overview"
-    ]
-  },
-  {
     "id": "obs-signals-metrics",
-    "name": "Obs UX: Signals & Metrics",
-    "areas": [
-      "observability"
-    ],
+    "name": "Observability signals: Metrics",
+    "areas": ["observability"],
     "github": {
       "team": "elastic/obs-signals-metrics-team",
       "label": "Team:obs-signals-metrics"
