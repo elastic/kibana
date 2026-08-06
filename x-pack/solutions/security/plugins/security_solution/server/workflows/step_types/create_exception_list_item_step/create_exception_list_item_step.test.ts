@@ -9,13 +9,15 @@ import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
+import type { ExceptionListItem } from '@kbn/securitysolution-exceptions-common/api';
+import type { ExceptionItemSummary } from '@kbn/securitysolution-exceptions-common/workflows';
 import { createExceptionListItemStepDefinition } from './create_exception_list_item_step';
 import { createExceptionListItemInputSchema } from '../../../../common/workflows/step_types/create_exception_list_item_step/create_exception_list_item_step_common';
 
 type Context = StepHandlerContext<typeof createExceptionListItemInputSchema>;
 
 /** A full item as the exceptions APIs return it. */
-const createdItem = {
+const createdItem: ExceptionListItem = {
   id: 'so-id',
   item_id: 'item-id',
   list_id: 'corporate-allowlist',
@@ -35,7 +37,7 @@ const createdItem = {
 };
 
 /** The summary slice of `createdItem` that the step promises as output. */
-const createdItemOutput = {
+const createdItemOutput: ExceptionItemSummary = {
   id: 'so-id',
   item_id: 'item-id',
   list_id: 'corporate-allowlist',

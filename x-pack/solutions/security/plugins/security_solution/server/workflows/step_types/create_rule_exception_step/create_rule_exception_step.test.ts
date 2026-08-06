@@ -8,6 +8,8 @@
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
+import type { ExceptionListItem } from '@kbn/securitysolution-exceptions-common/api';
+import type { ExceptionItemSummary } from '@kbn/securitysolution-exceptions-common/workflows';
 import { createRuleExceptionStepDefinition } from './create_rule_exception_step';
 import { createRuleExceptionInputSchema } from '../../../../common/workflows/step_types/create_rule_exception_step/create_rule_exception_step_common';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
@@ -34,7 +36,7 @@ const ruleWithDefaultList = {
 };
 
 /** A full item as the exceptions APIs return it. */
-const createdItem = {
+const createdItem: ExceptionListItem = {
   id: 'so-id',
   item_id: 'item-id',
   list_id: 'rule-default-list',
@@ -54,7 +56,7 @@ const createdItem = {
 };
 
 /** The summary slice of `createdItem` that the step promises as output. */
-const createdItemOutput = {
+const createdItemOutput: ExceptionItemSummary = {
   id: 'so-id',
   item_id: 'item-id',
   list_id: 'rule-default-list',
