@@ -162,11 +162,8 @@ export const loggerContextConfigSchema = schema.object({
 export type LoggerContextConfigType = TypeOf<typeof loggerContextConfigSchema>;
 
 /**
- * Runtime variant of {@link loggerContextConfigSchema} used to validate the programmatic
- * {@link LoggingServiceSetup.configure} inputs. Identical to the strict schema except that OTel
- * appenders additionally accept the programmatic-only options of
- * {@link OtelAppenderProgrammaticConfig} (e.g. an attribute-transform callback), which cannot be
- * expressed in YAML.
+ * Validates {@link LoggingServiceSetup.configure} inputs. Same as {@link loggerContextConfigSchema}
+ * but accepts the programmatic-only appender options (see {@link programmaticAppendersSchema}).
  *
  * @internal
  */

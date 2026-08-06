@@ -220,99 +220,78 @@ const toAttributes = (
  * @internal
  */
 export class OtelAppender implements DisposableAppender {
-  public static configSchema = schema.object(
-    {
-      type: schema.literal('otel'),
-      protocol: schema.oneOf(
-        [schema.literal('http'), schema.literal('proto'), schema.literal('grpc')],
-        { defaultValue: 'proto' }
-      ),
-      url: schema.string(),
-      headers: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
-      /**
-       * Optional layout config. Defaults to pattern layout (body.text, aliased to `message`).
-       * Use `{ type: 'json' }` for a structured body (body.structured); note that the ECS
-       * `message` field will be empty in that case because it aliases body.text.
-       */
-      layout: schema.maybe(Layouts.configSchema),
-      // Optional: user-provided attributes override the service attributes derived from APM config.
-      attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-      // Allowlist of resource-attribute keys to include (default ['*'] = keep all).
-      includeResources: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
-      // Resource-attribute keys to also emit as per-record log attributes.
-      promoteResourceAttributes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
-      ssl: schema.maybe(
-        schema.object(
-          {
-            certificateAuthorities: schema.maybe(
-              schema.oneOf([
-                schema.string(),
-                schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
-              ])
-            ),
-            certificate: schema.maybe(schema.string()),
-            key: schema.maybe(schema.string()),
-            keyPassphrase: schema.maybe(schema.string()),
-            verificationMode: schema.oneOf(
-              [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
-              { defaultValue: 'full' }
-            ),
-            allowPartialTrustChain: schema.boolean({ defaultValue: true }),
-          },
-          {
-            validate: (raw) => {
-              if (raw.certificate && !raw.key) {
-                return 'Must specify [ssl.key] when [ssl.certificate] is set';
-              }
-              if (raw.key && !raw.certificate) {
-                return 'Must specify [ssl.certificate] when [ssl.key] is set';
-              }
-              if (raw.keyPassphrase && !raw.key) {
-                return 'Must specify [ssl.key] when [ssl.keyPassphrase] is set';
-              }
-            },
-          }
-        )
-      ),
-    },
-    {
-      // Joi silently skips unknown keys whose values are functions, so the programmatic-only
-      // options are rejected explicitly: they must never reach the appender via a strict
-      // (YAML-safe) config, even when the caller bypasses TypeScript. The runtime variant below
-      // overrides this validation.
-      validate: (raw) => {
-        if ('transformAttributes' in raw || 'dropResourceAttributes' in raw) {
-          return '[transformAttributes] and [dropResourceAttributes] are only accepted on the programmatic logging configuration path';
-        }
-      },
-    }
-  );
-
-  /**
-   * Runtime variant of {@link OtelAppender.configSchema} used to validate programmatic logging
-   * context configs ({@link LoggingServiceSetup.configure}). It extends the strict YAML schema with
-   * options that cannot be serialised (see {@link OtelAppenderProgrammaticConfig}):
-   * an attribute-transform callback and a resource-attribute denylist.
-   *
-   * The strict schema remains the only one wired into the YAML config (`logging.appenders`) and the
-   * exported `loggerContextConfigSchema`, so these options can never be set via kibana.yml.
-   */
-  public static runtimeConfigSchema = OtelAppender.configSchema.extends(
-    {
-      transformAttributes: schema.maybe(
-        schema.any({
-          validate: (value) => {
-            if (typeof value !== 'function') {
-              return 'expected a function';
+  public static configSchema = schema.object({
+    type: schema.literal('otel'),
+    protocol: schema.oneOf(
+      [schema.literal('http'), schema.literal('proto'), schema.literal('grpc')],
+      { defaultValue: 'proto' }
+    ),
+    url: schema.string(),
+    headers: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
+    /**
+     * Optional layout config. Defaults to pattern layout (body.text, aliased to `message`).
+     * Use `{ type: 'json' }` for a structured body (body.structured); note that the ECS
+     * `message` field will be empty in that case because it aliases body.text.
+     */
+    layout: schema.maybe(Layouts.configSchema),
+    // Optional: user-provided attributes override the service attributes derived from APM config.
+    attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    // Allowlist of resource-attribute keys to include (default ['*'] = keep all).
+    includeResources: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+    // Resource-attribute keys to also emit as per-record log attributes.
+    promoteResourceAttributes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+    ssl: schema.maybe(
+      schema.object(
+        {
+          certificateAuthorities: schema.maybe(
+            schema.oneOf([
+              schema.string(),
+              schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
+            ])
+          ),
+          certificate: schema.maybe(schema.string()),
+          key: schema.maybe(schema.string()),
+          keyPassphrase: schema.maybe(schema.string()),
+          verificationMode: schema.oneOf(
+            [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+            { defaultValue: 'full' }
+          ),
+          allowPartialTrustChain: schema.boolean({ defaultValue: true }),
+        },
+        {
+          validate: (raw) => {
+            if (raw.certificate && !raw.key) {
+              return 'Must specify [ssl.key] when [ssl.certificate] is set';
+            }
+            if (raw.key && !raw.certificate) {
+              return 'Must specify [ssl.certificate] when [ssl.key] is set';
+            }
+            if (raw.keyPassphrase && !raw.key) {
+              return 'Must specify [ssl.key] when [ssl.keyPassphrase] is set';
             }
           },
-        })
-      ),
-      dropResourceAttributes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
-    },
-    // Override the strict schema's rejection of the programmatic-only options above.
-    { validate: undefined }
-  );
+        }
+      )
+    ),
+  });
+
+  /**
+   * {@link OtelAppender.configSchema} plus the programmatic-only options of
+   * {@link OtelAppenderProgrammaticConfig}; used only by the {@link LoggingServiceSetup.configure}
+   * validation path, never wired into YAML config validation.
+   */
+  public static runtimeConfigSchema = OtelAppender.configSchema.extends({
+    transformAttributes: schema.maybe(
+      schema.any({
+        validate: (value) => {
+          if (typeof value !== 'function') {
+            return 'expected an attribute-transform function (attrs: Attributes) => Attributes';
+          }
+        },
+      })
+    ),
+    dropResourceAttributes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+  });
 
   private readonly loggerProvider: LoggerProvider;
   private readonly logger: Logger;

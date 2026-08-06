@@ -46,10 +46,8 @@ export type AppenderConfigType =
   | RollingFileAppenderConfig;
 
 /**
- * Appender configs accepted by the programmatic logging configuration path
- * ({@link LoggingServiceSetup.configure}): every YAML-safe {@link AppenderConfigType}, plus the
- * programmatic-only OTel appender extension ({@link OtelAppenderProgrammaticConfig}) which carries
- * options that cannot be expressed in YAML.
+ * Appender configs accepted by {@link LoggingServiceSetup.configure}: every YAML-safe
+ * {@link AppenderConfigType} plus {@link OtelAppenderProgrammaticConfig}.
  * @public
  */
 export type ProgrammaticAppenderConfigType = AppenderConfigType | OtelAppenderProgrammaticConfig;

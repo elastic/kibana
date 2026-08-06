@@ -116,12 +116,13 @@ describe('OtelAppender', () => {
       expect(result.promoteResourceAttributes).toBeUndefined();
     });
 
-    it('rejects the programmatic-only options (transformAttributes, dropResourceAttributes)', () => {
-      // These can never come from kibana.yml: the strict schema forbids unknown keys.
+    it('rejects YAML-representable values for the programmatic-only options', () => {
+      // kibana.yml can only express serializable values, and the strict schema rejects unknown
+      // keys, so neither option can ever arrive from config files.
       expect(() =>
         OtelAppender.configSchema.validate({
           ...validConfig,
-          transformAttributes: (attrs: Record<string, unknown>) => attrs,
+          transformAttributes: 'not-a-function',
         })
       ).toThrow(/transformAttributes/);
       expect(() =>

@@ -138,39 +138,29 @@ export interface OtelAppenderConfig {
 }
 
 /**
- * Transforms the flattened per-record OTel attributes of a log record before it is emitted.
- * Receives the fully flattened attributes (including promoted resource attributes and flattened
- * `log.meta` for pattern layout) and returns the attributes to emit.
- *
- * Only usable on the programmatic configuration path — see
- * {@link OtelAppenderProgrammaticConfig.transformAttributes}.
+ * Maps a log record's fully-flattened per-record OTel attributes (including promoted resource
+ * attributes and, for pattern layout, flattened `log.meta`) to the attributes to emit.
  *
  * @public
  */
 export type OtelAttributesTransform = (attributes: Attributes) => Attributes;
 
 /**
- * Programmatic-only extension of {@link OtelAppenderConfig}.
- *
- * These options cannot be expressed in YAML, so they are accepted exclusively through the
- * programmatic logging configuration path ({@link LoggingServiceSetup.configure}). They are
- * rejected by the appender's YAML config schema.
+ * Programmatic-only extension of {@link OtelAppenderConfig}: options that cannot be expressed
+ * in YAML, accepted exclusively through {@link LoggingServiceSetup.configure}.
  *
  * @public
  */
 export interface OtelAppenderProgrammaticConfig extends OtelAppenderConfig {
   /**
-   * Callback applied to the flattened per-record OTel attributes after layout/meta flattening
-   * and resource-attribute promotion, just before the record is emitted. Use for output-shaping
-   * that is too specific to belong in a serializable config (e.g. audit log field mappings).
+   * Applied to the flattened attributes just before emit. Use for output-shaping too specific
+   * to belong in serializable config (e.g. audit log field mappings).
    */
   transformAttributes?: OtelAttributesTransform;
   /**
-   * Resource-attribute keys removed from the OTLP resource at appender construction. Applied
-   * only when {@link OtelAppenderConfig.includeResources} is `['*']` (the default) — an explicit
-   * `includeResources` allowlist fully governs the resource and takes precedence. Keys absent
-   * from the resource are silently skipped. Async-detected values (e.g. `host.id`) are preserved
-   * for the SDK to resolve at export time unless explicitly dropped here.
+   * Resource-attribute keys removed at appender construction, only when
+   * {@link OtelAppenderConfig.includeResources} is the default `['*']` (an explicit allowlist
+   * takes precedence). Async-detected values (e.g. `host.id`) are preserved unless dropped here.
    */
   dropResourceAttributes?: string[];
 }

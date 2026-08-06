@@ -33,14 +33,7 @@ export const appendersSchema = schema.oneOf([
   RollingFileAppender.configSchema,
 ]);
 
-/**
- * Runtime variant of {@link appendersSchema} used to validate programmatic logging context configs
- * ({@link LoggingServiceSetup.configure}). Identical to the strict schema except that OTel appenders
- * additionally accept the programmatic-only options of {@link OtelAppenderProgrammaticConfig}
- * (e.g. an attribute-transform callback). Never wired into YAML config validation.
- *
- * @internal
- */
+/** @internal {@link appendersSchema}, but OTel appenders use {@link OtelAppender.runtimeConfigSchema}. */
 export const programmaticAppendersSchema = schema.oneOf([
   ConsoleAppender.configSchema,
   FileAppender.configSchema,

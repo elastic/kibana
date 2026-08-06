@@ -103,10 +103,7 @@ export class LoggingSystem implements ILoggingSystem {
    */
   public async setContextConfig(baseContextParts: string[], rawConfig: LoggerContextConfigInput) {
     const context = LoggingConfig.getLoggerContext(baseContextParts);
-    // The runtime schema is used here (not the strict loggerContextConfigSchema) so that
-    // programmatic-only appender options — e.g. the OTel appender's transformAttributes
-    // callback — are accepted on this code path while remaining rejected in YAML configs.
-    // Validation fails fast, before any appender is recreated.
+    // Fails fast, before any appender is recreated.
     const contextConfig = loggerContextProgrammaticConfigSchema.validate(rawConfig);
     this.contextConfigs.set(context, {
       ...contextConfig,

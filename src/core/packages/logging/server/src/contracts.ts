@@ -40,12 +40,8 @@ export interface LoggingServiceSetup {
 }
 
 /**
- * Input used to configure logging dynamically using {@link LoggingServiceSetup.configure}
- *
- * @remarks
- * Unlike the YAML (`logging.*`) config, this programmatic path also accepts
- * {@link OtelAppenderProgrammaticConfig} for OTel appenders, which carries options that cannot
- * be expressed in YAML (e.g. an attribute-transform callback).
+ * Input used to configure logging dynamically using {@link LoggingServiceSetup.configure}.
+ * Unlike YAML config, also accepts {@link ProgrammaticAppenderConfigType}.
  * @public
  */
 export interface LoggerContextConfigInput {
