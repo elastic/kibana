@@ -75,6 +75,7 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
 
   return (
     <EuiPopover
+      aria-label={labels.plugins.pluginContextMenuButtonLabel}
       button={
         <EuiToolTip content={labels.plugins.pluginContextMenuButtonLabel} disableScreenReaderOutput>
           <EuiButtonIcon

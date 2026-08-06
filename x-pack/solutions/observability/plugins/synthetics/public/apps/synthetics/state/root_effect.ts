@@ -50,6 +50,7 @@ import {
 import { fetchMonitorStatusHeatmap, quietFetchMonitorStatusHeatmap } from './status_heatmap';
 import { fetchOverviewTrendStats, refreshOverviewTrendStats } from './overview/effects';
 import { fetchAgentPoliciesEffect } from './agent_policies';
+import { fetchAgentStatsEffect } from './agent_stats';
 import { fetchMonitorHealthEffect } from './monitor_health';
 
 export const rootEffect = function* root(): Generator {
@@ -66,6 +67,7 @@ export const rootEffect = function* root(): Generator {
     fork(augmentStaleStatusEffect),
     fork(fetchNetworkEventsEffect),
     fork(fetchAgentPoliciesEffect),
+    fork(fetchAgentStatsEffect),
     fork(fetchDynamicSettingsEffect),
     fork(fetchLocationMonitorsEffect),
     fork(setDynamicSettingsEffect),

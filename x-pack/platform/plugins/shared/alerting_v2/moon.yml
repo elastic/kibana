@@ -137,6 +137,8 @@ dependsOn:
   - '@kbn/content-list-toolbar'
   - '@kbn/es'
   - '@kbn/test-es-server'
+  - '@kbn/security-authorization-core'
+  - '@kbn/security-plugin-types-server'
 tags:
   - plugin
   - prod
