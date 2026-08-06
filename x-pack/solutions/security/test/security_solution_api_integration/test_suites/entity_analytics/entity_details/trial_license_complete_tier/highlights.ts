@@ -309,7 +309,8 @@ export default function ({ getService }: FtrProviderContext) {
           MEDIUM: 0,
           NONE: 0,
         },
-        anomalies: [],
+        // anomalies is null when there are no ML findings
+        anomalies: null,
       });
       expect(Object.values(body.replacements)).toEqual(['un-existent-host']);
       expect(body.prompt).toContain(

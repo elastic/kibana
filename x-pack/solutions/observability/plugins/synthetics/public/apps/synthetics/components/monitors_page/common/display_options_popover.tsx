@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useOverviewDisplayOptions } from './use_overview_display_options';
 import {
@@ -38,6 +39,7 @@ import {
  */
 export const DisplayOptionsPopover: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
 
   const { options, setOption } = useOverviewDisplayOptions();
   const { checked: includeHeartbeatMonitors, setChecked: setIncludeHeartbeatMonitors } =
@@ -74,13 +76,16 @@ export const DisplayOptionsPopover: React.FC = () => {
   return (
     <EuiPopover
       id="syntheticsOverviewDisplayOptions"
+      aria-labelledby={popoverTitleId}
       button={button}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
       anchorPosition="downRight"
       panelPaddingSize="m"
     >
-      <EuiPopoverTitle paddingSize="s">{POPOVER_TITLE}</EuiPopoverTitle>
+      <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
+        {POPOVER_TITLE}
+      </EuiPopoverTitle>
       <div css={{ minWidth: 280, maxWidth: 320 }}>
         <EuiTitle size="xxxs">
           <h4>{DISPLAY_HEADING}</h4>

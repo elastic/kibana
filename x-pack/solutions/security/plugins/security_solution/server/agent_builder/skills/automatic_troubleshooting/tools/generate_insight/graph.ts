@@ -126,18 +126,20 @@ ${JSON.stringify(generationData, null, 2)}
 Provide a concise and actionable insight for each group of events that can help address the problem described.
     `);
 
+    if (!Array.isArray(insights)) {
+      throw new Error(
+        `Automatic Troubleshooting insight generation failed for insight type "${insightType}": the model returned no usable insights envelope (structured output was missing or malformed). This is NOT a "no findings" result — no insights were created or suppressed and existing insights were left unchanged.`
+      );
+    }
+
     return {
       insights: insights.filter((insight) => insight.events && insight.events.length),
     };
   }
 
   async function createWorkflowInsights({ insights, insightType }: StateType) {
-    if (insights.length === 0) {
-      return {
-        results: [],
-      };
-    }
-
+    // Always call through, even with no insights: the service suppresses stale
+    // insights first and safely no-ops creation on an empty array.
     const workflowInsights = await securityWorkflowInsightsService.createFromDefendInsights(
       insights,
       endpointIds,
@@ -146,6 +148,12 @@ Provide a concise and actionable insight for each group of events that can help 
       model.chatModel.name,
       spaceId
     );
+
+    if (!workflowInsights.length) {
+      return {
+        results: [],
+      };
+    }
 
     const results: ToolHandlerResult[] = [
       {
