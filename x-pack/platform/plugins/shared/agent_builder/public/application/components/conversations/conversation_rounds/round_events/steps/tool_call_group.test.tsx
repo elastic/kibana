@@ -72,7 +72,8 @@ describe('ToolCallGroup', () => {
       'tool: search',
       'tool: read',
     ]);
-    expect(childStatuses.every((el) => /(^|\s)ran(\s|$)/.test(el.textContent ?? ''))).toBe(true);
+    // textContent concatenates badge + suffix without a space (e.g. "tool: searchran")
+    expect(childStatuses.every((el) => /ran$/.test(el.textContent ?? ''))).toBe(true);
 
     await user.click(screen.getAllByRole('button')[1]);
     expect(screen.getByRole('dialog')).toBeInTheDocument();
