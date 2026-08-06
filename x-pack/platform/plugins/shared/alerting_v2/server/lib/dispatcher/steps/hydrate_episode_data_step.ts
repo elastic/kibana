@@ -42,7 +42,7 @@ export class HydrateEpisodeDataStep implements DispatcherStep {
       return { type: 'continue' };
     }
 
-    const episodeIds = dispatchable.map((ep) => ep.episode_id);
+    const episodeIds = [...new Set(dispatchable.map((ep) => ep.episode_id))];
 
     const { gte, lte } = computeTimestampBounds(dispatchable);
 
