@@ -62,6 +62,8 @@ interface AttachmentHeaderProps {
   previewBadgeState?: 'none' | 'preview_available' | 'previewing';
   /** When true, uses canvas flyout corner radius (top-right only). */
   isCanvas?: boolean;
+  /** When true, rounds all corners and omits the bottom border (no body content). */
+  isHeaderOnly?: boolean;
 }
 
 export const COMPACT_WIDTH_THRESHOLD = 560;
@@ -76,6 +78,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   onClosePreview,
   previewBadgeState = 'none',
   isCanvas = false,
+  isHeaderOnly = false,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -96,16 +99,22 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     text-overflow: ellipsis;
   `;
 
+  const headerBorderRadius = isCanvas
+    ? `0 ${euiTheme.border.radius.small} 0 0`
+    : isHeaderOnly
+      ? `${AB_PANEL_RADIUS}px`
+      : `${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px 0 0`;
+
   const headerStyles = css`
     position: relative;
     display: flex;
-    border-bottom: ${euiTheme.border.thin};
-    border-color: ${euiTheme.colors.borderBaseSubdued};
-    border-radius: ${
-      isCanvas
-        ? `0 ${euiTheme.border.radius.small} 0 0`
-        : `${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px 0 0`
-    };
+    ${!isHeaderOnly
+      ? `
+      border-bottom: ${euiTheme.border.thin};
+      border-color: ${euiTheme.colors.borderBaseSubdued};
+    `
+      : ''}
+    border-radius: ${headerBorderRadius};
     min-height: ${HEADER_HEIGHT}px;
   `;
 
