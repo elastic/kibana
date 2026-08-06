@@ -35,10 +35,13 @@ export function registerCasesAgentBuilderTools(
   agentBuilder: AgentBuilderPluginSetup,
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>,
   coreSetup: CoreSetup<CasesServerStartDependencies>,
-  { analyticsV2Enabled }: { analyticsV2Enabled: boolean }
+  {
+    analyticsV2Enabled,
+    templatesEnabled,
+  }: { analyticsV2Enabled: boolean; templatesEnabled: boolean }
 ): void {
   agentBuilder.tools.register(searchCasesTool(coreSetup, getCasesClient));
-  agentBuilder.tools.register(manageCasesTool(getCasesClient));
+  agentBuilder.tools.register(manageCasesTool(getCasesClient, templatesEnabled));
   agentBuilder.tools.register(attachmentsTool(getCasesClient));
   agentBuilder.tools.register(observablesTool(getCasesClient));
   agentBuilder.skills.register(casesSkill);

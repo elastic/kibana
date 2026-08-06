@@ -6,7 +6,6 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
-
+import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
 export const dataTableRecordToEpisode = (record: DataTableRecord): AlertEpisode =>
   record.flattened as unknown as AlertEpisode;

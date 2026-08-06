@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { mockGlobalState } from '../../common/mock';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { SelectedDataView } from '../store/model';
-import { initSourcererScope } from '../store/model';
-import { mockBrowserFields } from '../../common/containers/source/mock';
+import { initDataView, initSourcererScope } from '../store/model';
+import { mockBrowserFields, mockIndexFields } from '../../common/containers/source/mock';
+import {
+  DEFAULT_DATA_VIEW_ID,
+  DEFAULT_INDEX_PATTERN,
+  DEFAULT_SIGNALS_INDEX,
+} from '../../../common/constants';
 
 export const mockPatterns = [
   'auditbeat-*',
@@ -19,6 +24,20 @@ export const mockPatterns = [
   'winlogbeat-*',
   'journalbeat-*',
 ];
+
+const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
+  mockIndexFields.map((field) => [field.name, field])
+);
+
+const mockDefaultDataView = {
+  ...initDataView,
+  browserFields: mockBrowserFields,
+  id: DEFAULT_DATA_VIEW_ID,
+  fields: mockFieldMap,
+  loading: false,
+  patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`],
+  title: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`, 'fakebeat-*'].join(','),
+};
 
 export const mockSourcererScope: SelectedDataView = {
   ...initSourcererScope,
@@ -38,9 +57,9 @@ export const mockSourcererScope: SelectedDataView = {
       },
     },
   },
-  sourcererDataView: mockGlobalState.sourcerer.defaultDataView,
+  sourcererDataView: mockDefaultDataView,
   selectedPatterns: mockPatterns,
   indicesExist: true,
   loading: false,
-  dataViewId: mockGlobalState.sourcerer.defaultDataView.id,
+  dataViewId: mockDefaultDataView.id,
 };

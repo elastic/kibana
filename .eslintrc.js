@@ -1247,7 +1247,7 @@ module.exports = {
       files: [
         'x-pack/platform/plugins/shared/observability_solution/**/*.{ts,tsx}',
         'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/{streams,streams_app}/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/{significant_events_app,streams,streams_app}/**/*.{ts,tsx}',
         'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
       ],
       rules: {
@@ -1287,6 +1287,7 @@ module.exports = {
         'x-pack/solutions/observability/plugins/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/solutions/observability/packages/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/platform/plugins/shared/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/platform/plugins/shared/significant_events_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/platform/plugins/shared/streams_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/platform/packages/shared/kbn-unified-chart-section-viewer/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
@@ -1522,7 +1523,7 @@ module.exports = {
         'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
-      plugins: ['eslint-plugin-node', 'react'],
+      plugins: ['eslint-plugin-n', 'react'],
       env: {
         jest: true,
       },
@@ -1531,7 +1532,7 @@ module.exports = {
         'array-callback-return': 'error',
         'no-array-constructor': 'error',
         complexity: 'warn',
-        'node/no-deprecated-api': 'error',
+        'n/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',
@@ -1823,7 +1824,7 @@ module.exports = {
     {
       // typescript and javascript for front and back
       files: ['x-pack/solutions/security/plugins/lists/**/*.{js,mjs,ts,tsx}'],
-      plugins: ['eslint-plugin-node'],
+      plugins: ['eslint-plugin-n'],
       env: {
         jest: true,
       },
@@ -1847,7 +1848,7 @@ module.exports = {
             ignoreDeclarationSort: true,
           },
         ],
-        'node/no-deprecated-api': 'error',
+        'n/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',
@@ -2336,6 +2337,8 @@ module.exports = {
      */
     {
       files: ['src/platform/plugins/shared/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
+      // Playwright resolves its configuration from a default export.
+      excludedFiles: ['src/platform/plugins/shared/vis_types/timeseries/**/*playwright.config.ts'],
       rules: {
         'import/no-default-export': 'error',
       },
@@ -2537,7 +2540,7 @@ module.exports = {
         'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
       ],
-      plugins: ['eslint-plugin-node', 'react'],
+      plugins: ['eslint-plugin-n', 'react'],
       env: {
         jest: true,
       },
@@ -2546,7 +2549,7 @@ module.exports = {
         'array-callback-return': 'error',
         'no-array-constructor': 'error',
         complexity: 'warn',
-        'node/no-deprecated-api': 'error',
+        'n/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',

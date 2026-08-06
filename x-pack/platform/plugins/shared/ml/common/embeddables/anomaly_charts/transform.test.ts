@@ -14,7 +14,7 @@ import { transformOut } from './transform_out';
 describe('anomaly charts embeddable transforms', () => {
   describe('schema', () => {
     it('accepts anomaly charts state', () => {
-      const state = anomalyChartsEmbeddableStateSchema.validate({
+      const state = anomalyChartsEmbeddableStateSchema.parse({
         job_ids: ['job-1', 'group-1'],
         max_series_to_plot: 12,
         severity_threshold: [{ min: 25, max: 50 }],
@@ -32,7 +32,7 @@ describe('anomaly charts embeddable transforms', () => {
     });
 
     it('accepts optional max_series_to_plot and severity_threshold', () => {
-      const state = anomalyChartsEmbeddableStateSchema.validate({
+      const state = anomalyChartsEmbeddableStateSchema.parse({
         job_ids: ['job-1'],
       });
 
@@ -43,7 +43,7 @@ describe('anomaly charts embeddable transforms', () => {
 
     it('rejects an empty job_ids array', () => {
       expect(() =>
-        anomalyChartsEmbeddableStateSchema.validate({
+        anomalyChartsEmbeddableStateSchema.parse({
           job_ids: [],
         })
       ).toThrow();
@@ -51,7 +51,7 @@ describe('anomaly charts embeddable transforms', () => {
 
     it('rejects max_series_to_plot outside the supported range', () => {
       expect(() =>
-        anomalyChartsEmbeddableStateSchema.validate({
+        anomalyChartsEmbeddableStateSchema.parse({
           job_ids: ['job-1'],
           max_series_to_plot: 51,
         })
@@ -60,7 +60,7 @@ describe('anomaly charts embeddable transforms', () => {
 
     it('rejects custom severity_threshold ranges', () => {
       expect(() =>
-        anomalyChartsEmbeddableStateSchema.validate({
+        anomalyChartsEmbeddableStateSchema.parse({
           job_ids: ['job-1'],
           severity_threshold: [{ min: 24, max: 48 }],
         })
@@ -69,7 +69,7 @@ describe('anomaly charts embeddable transforms', () => {
 
     it('rejects more severity_threshold ranges than the supported severity buckets', () => {
       expect(() =>
-        anomalyChartsEmbeddableStateSchema.validate({
+        anomalyChartsEmbeddableStateSchema.parse({
           job_ids: ['job-1'],
           severity_threshold: [
             { min: 0, max: 3 },
