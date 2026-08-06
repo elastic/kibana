@@ -641,8 +641,6 @@ groups:
           eck: ga
           self: ga
           serverless: unavailable
-        note: |
-          :applies_to: stack: removed 9.6
 
       - setting: "labs:dashboard:enable_ui"
         id: labs-dashboard-enable-ui
