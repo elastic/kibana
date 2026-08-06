@@ -669,8 +669,6 @@ groups:
           eck: ga
           self: ga
           serverless: unavailable
-        note: |
-          :applies_to: stack: removed 9.6
 
   - group: Accessibility
     id: kibana-accessibility-settings
