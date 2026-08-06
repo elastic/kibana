@@ -13,14 +13,14 @@ import { metricsExplorerResponseRT } from '../../../../common/http_api/metrics_e
 import { apiTest, testData } from '../fixtures';
 
 const METRICS_EXPLORER_PATH = '/api/infra/metrics_explorer';
-const { min, max } = testData.HOSTS_7_0_0_DATES;
+const { min, max } = testData.DATES['7.0.0'].hosts;
 
 apiTest.describe('Metrics Explorer API', { tag: tags.stateful.all }, () => {
   let viewerApiCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, esArchiver }) => {
     viewerApiCredentials = await requestAuth.getApiKey('viewer');
-    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.hosts7_0_0);
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.HOSTS_7_0_0);
   });
 
   apiTest('works for multiple metrics', async ({ apiClient }) => {
