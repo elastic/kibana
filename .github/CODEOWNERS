@@ -2775,7 +2775,6 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ki_automatio
 /x-pack/platform/test/functional/page_objects/tag_management_page.ts @elastic/appex-sharedux
 /src/platform/test/functional/services/saved_query_management_component.ts @elastic/kibana-management
 /src/platform/test/functional/services/management @elastic/kibana-management
-/x-pack/platform/test/functional/apps/cross_cluster_replication @elastic/kibana-management
 /x-pack/platform/test/functional/apps/ingest_pipelines @elastic/kibana-management
 /x-pack/platform/test/functional/apps/license_management @elastic/kibana-management
 /x-pack/platform/test/functional/apps/management @elastic/kibana-management
@@ -2831,7 +2830,6 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ki_automatio
 /x-pack/platform/test/accessibility/apps/group1/management.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group1/painless_lab.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group1/search_profiler.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group3/cross_cluster_replication.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group3/license_management.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group3/remote_clusters.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group3/rollup_jobs.ts @elastic/kibana-management
