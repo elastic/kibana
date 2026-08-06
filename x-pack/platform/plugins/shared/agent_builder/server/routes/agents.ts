@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import { AgentAccessControlRole, AgentAccessControlMode } from '@kbn/agent-builder-common';
+import { MAX_AI_INDEX_ID_LENGTH } from '@kbn/context-engine-plugin/common/constants';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
@@ -75,6 +76,7 @@ const CONNECTORS_SCHEMA = schema.arrayOf(
 const AI_INDICES_SCHEMA = schema.arrayOf(
   schema.string({
     meta: { description: 'AI indices to associate with the agent.' },
+    maxLength: MAX_AI_INDEX_ID_LENGTH,
   }),
   {
     maxSize: 100,
