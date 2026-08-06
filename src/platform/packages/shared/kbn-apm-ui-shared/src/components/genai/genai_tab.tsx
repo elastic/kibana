@@ -1,40 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiBadge,
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { EbtClickAttrsElementOnly } from '@kbn/ebt-click';
+import { asInteger } from '../../utils';
 import type { GenAiFields } from './get_genai_fields';
 import { GenAiFieldValue } from './genai_field_value';
 import { GenAiMessages } from './genai_messages';
 import { GenAiSection } from './genai_section';
-
-interface PillProps {
-  label: string;
-  value: string | number;
-  testSubj?: string;
-}
-
-function Pill({ label, value, testSubj }: PillProps) {
-  return (
-    <EuiBadge color="hollow" data-test-subj={testSubj}>
-      {label}: <strong>{value}</strong>
-    </EuiBadge>
-  );
-}
 
 interface DetailRow {
   id: string;
@@ -58,7 +41,9 @@ const detailTableCss = css`
 const DETAIL_COLUMNS: Array<EuiBasicTableColumn<DetailRow>> = [
   {
     field: 'label' as const,
-    name: 'Field',
+    name: i18n.translate('apmUiShared.genAi.details.fieldColumnLabel', {
+      defaultMessage: 'Field',
+    }),
     width: '160px',
     render: (label: React.ReactNode) => (
       <EuiText size="xs">
@@ -68,16 +53,25 @@ const DETAIL_COLUMNS: Array<EuiBasicTableColumn<DetailRow>> = [
   },
   {
     field: 'content' as const,
-    name: 'Value',
+    name: i18n.translate('apmUiShared.genAi.details.valueColumnLabel', {
+      defaultMessage: 'Value',
+    }),
     render: (content: React.ReactNode) => content,
   },
 ];
 
 interface Props {
   genAi: GenAiFields;
+  /** When provided, copy-button clicks are tracked via `data-ebt-*` attributes. */
+  ebt?: EbtClickAttrsElementOnly;
+  /**
+   * When provided, replaces the built-in field table — e.g. with the doc
+   * viewer's field table that offers filter actions in the Discover context.
+   */
+  detailsSlot?: React.ReactNode;
 }
 
-export function GenAiTab({ genAi }: Props) {
+export function GenAiTab({ genAi, ebt, detailsSlot }: Props) {
   const {
     operationName,
     requestModel,
@@ -93,57 +87,59 @@ export function GenAiTab({ genAi }: Props) {
     conversationId,
   } = genAi;
 
-  // ── Summary pills ──────────────────────────────────────────────────────────
-  const pills: PillProps[] = [];
+  // ── Field rows (single flat table — the former Summary fields lead) ───────
+  const detailRows: DetailRow[] = [];
+
   if (operationName) {
-    pills.push({
-      label: i18n.translate('xpack.apm.genAi.pill.operationName', {
+    detailRows.push({
+      id: 'operationName',
+      label: i18n.translate('apmUiShared.genAi.params.operationName', {
         defaultMessage: 'Operation',
       }),
-      value: operationName,
-      testSubj: 'genAiPillOperationName',
+      content: <GenAiFieldValue value={operationName} />,
     });
   }
   if (requestModel) {
-    pills.push({
-      label: i18n.translate('xpack.apm.genAi.pill.model', { defaultMessage: 'Model' }),
-      value: requestModel,
-      testSubj: 'genAiPillModel',
+    detailRows.push({
+      id: 'requestModel',
+      label: i18n.translate('apmUiShared.genAi.params.requestModel', {
+        defaultMessage: 'Request model',
+      }),
+      content: <GenAiFieldValue value={requestModel} />,
     });
   }
   if (provider) {
-    pills.push({
-      label: i18n.translate('xpack.apm.genAi.pill.provider', { defaultMessage: 'Provider' }),
-      value: provider,
-      testSubj: 'genAiPillProvider',
+    detailRows.push({
+      id: 'provider',
+      label: i18n.translate('apmUiShared.genAi.params.provider', {
+        defaultMessage: 'Provider',
+      }),
+      content: <GenAiFieldValue value={provider} />,
     });
   }
   if (inputTokens !== undefined) {
-    pills.push({
-      label: i18n.translate('xpack.apm.genAi.pill.inputTokens', {
+    detailRows.push({
+      id: 'inputTokens',
+      label: i18n.translate('apmUiShared.genAi.params.inputTokens', {
         defaultMessage: 'Input tokens',
       }),
-      value: inputTokens,
-      testSubj: 'genAiPillInputTokens',
+      // Same formatting as the waterfall token badges (e.g. 1,438).
+      content: <GenAiFieldValue value={asInteger(inputTokens)} />,
     });
   }
   if (outputTokens !== undefined) {
-    pills.push({
-      label: i18n.translate('xpack.apm.genAi.pill.outputTokens', {
+    detailRows.push({
+      id: 'outputTokens',
+      label: i18n.translate('apmUiShared.genAi.params.outputTokens', {
         defaultMessage: 'Output tokens',
       }),
-      value: outputTokens,
-      testSubj: 'genAiPillOutputTokens',
+      content: <GenAiFieldValue value={asInteger(outputTokens)} />,
     });
   }
-
-  // ── Details rows ───────────────────────────────────────────────────────────
-  const detailRows: DetailRow[] = [];
-
   if (responseModel) {
     detailRows.push({
       id: 'responseModel',
-      label: i18n.translate('xpack.apm.genAi.params.responseModel', {
+      label: i18n.translate('apmUiShared.genAi.params.responseModel', {
         defaultMessage: 'Response model',
       }),
       content: <GenAiFieldValue value={responseModel} />,
@@ -152,7 +148,7 @@ export function GenAiTab({ genAi }: Props) {
   if (conversationId) {
     detailRows.push({
       id: 'conversationId',
-      label: i18n.translate('xpack.apm.genAi.params.conversationId', {
+      label: i18n.translate('apmUiShared.genAi.params.conversationId', {
         defaultMessage: 'Conversation ID',
       }),
       content: <GenAiFieldValue value={conversationId} />,
@@ -161,7 +157,7 @@ export function GenAiTab({ genAi }: Props) {
   if (response.id) {
     detailRows.push({
       id: 'responseId',
-      label: i18n.translate('xpack.apm.genAi.params.responseId', {
+      label: i18n.translate('apmUiShared.genAi.params.responseId', {
         defaultMessage: 'Response ID',
       }),
       content: <GenAiFieldValue value={response.id} />,
@@ -170,7 +166,7 @@ export function GenAiTab({ genAi }: Props) {
   if (response.finish_reasons?.length) {
     detailRows.push({
       id: 'finishReasons',
-      label: i18n.translate('xpack.apm.genAi.params.finishReasons', {
+      label: i18n.translate('apmUiShared.genAi.params.finishReasons', {
         defaultMessage: 'Finish reasons',
       }),
       content: <GenAiFieldValue value={response.finish_reasons} />,
@@ -187,34 +183,15 @@ export function GenAiTab({ genAi }: Props) {
 
   return (
     <>
-      {/* ── Section 1: Summary ─────────────────────────────────────────── */}
-      {pills.length > 0 && (
+      {/* ── Details: single flat field table in a collapsible section ───── */}
+      {(detailsSlot != null || detailRows.length > 0) && (
         <GenAiSection
-          id="summary"
-          title={i18n.translate('xpack.apm.genAi.section.summary', {
-            defaultMessage: 'Summary',
+          id="details"
+          title={i18n.translate('apmUiShared.genAi.section.details', {
+            defaultMessage: 'Details',
           })}
         >
-          <EuiFlexGroup gutterSize="xs" wrap data-test-subj="genAiPills">
-            {pills.map((p) => (
-              <EuiFlexItem grow={false} key={p.testSubj}>
-                <Pill {...p} />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </GenAiSection>
-      )}
-
-      {/* ── Section 2: Details ─────────────────────────────────────────── */}
-      {detailRows.length > 0 && (
-        <>
-          <EuiSpacer size="m" />
-          <GenAiSection
-            id="details"
-            title={i18n.translate('xpack.apm.genAi.section.details', {
-              defaultMessage: 'Details',
-            })}
-          >
+          {detailsSlot ?? (
             <EuiBasicTable
               itemId="id"
               tableLayout="auto"
@@ -223,21 +200,21 @@ export function GenAiTab({ genAi }: Props) {
               columns={DETAIL_COLUMNS}
               data-test-subj="genAiDetails"
               css={detailTableCss}
-              tableCaption={i18n.translate('xpack.apm.genAi.section.details.tableCaption', {
+              tableCaption={i18n.translate('apmUiShared.genAi.section.details.tableCaption', {
                 defaultMessage: 'GenAI details',
               })}
             />
-          </GenAiSection>
-        </>
+          )}
+        </GenAiSection>
       )}
 
-      {/* ── Section 3: Conversation ────────────────────────────────────── */}
+      {/* ── Conversation ─────────────────────────────────────────────────── */}
       {hasConversation && (
         <>
           <EuiSpacer size="m" />
           <GenAiSection
             id="conversation"
-            title={i18n.translate('xpack.apm.genAi.section.conversation', {
+            title={i18n.translate('apmUiShared.genAi.section.conversation', {
               defaultMessage: 'Conversation',
             })}
           >
@@ -245,6 +222,7 @@ export function GenAiTab({ genAi }: Props) {
               inputMessages={inputMessages}
               outputMessages={outputMessages}
               systemInstructions={systemInstructions}
+              ebt={ebt}
             />
           </GenAiSection>
         </>

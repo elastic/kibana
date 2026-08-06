@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { GenAiMessages } from './genai_messages';
+import { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';
 
 jest.mock('@kbn/shared-ux-markdown', () => ({
   Markdown: ({ children }: { children: string }) => (
@@ -117,6 +120,29 @@ describe('GenAiMessages — copy buttons', () => {
     const { container } = renderMessages([], [], undefined);
     expect(container.firstChild).toBeNull();
     expect(screen.queryByTestId('genAiMessageCopy-0')).toBeNull();
+  });
+
+  it('adds data-ebt-* attributes to copy buttons when the ebt prop is passed', () => {
+    render(
+      <EuiThemeProvider>
+        <GenAiMessages
+          inputMessages={[{ role: 'user', content: 'Hello' }]}
+          outputMessages={[]}
+          ebt={{ element: 'docViewerGenAiTab' }}
+        />
+      </EuiThemeProvider>
+    );
+    const copyBtn = screen.getByTestId('genAiMessageCopy-0');
+    expect(copyBtn).toHaveAttribute('data-ebt-action', GENAI_EBT_CLICK_ACTIONS.COPY_MESSAGE);
+    expect(copyBtn).toHaveAttribute('data-ebt-element', 'docViewerGenAiTab');
+    expect(copyBtn).toHaveAttribute('data-ebt-detail', 'user');
+  });
+
+  it('omits data-ebt-* attributes when the ebt prop is absent', () => {
+    renderMessages([{ role: 'user', content: 'Hello' }]);
+    const copyBtn = screen.getByTestId('genAiMessageCopy-0');
+    expect(copyBtn).not.toHaveAttribute('data-ebt-action');
+    expect(copyBtn).not.toHaveAttribute('data-ebt-element');
   });
 
   it('sets data-highlighted on mouseEnter and clears it on mouseLeave', () => {

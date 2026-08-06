@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiButtonEmpty, EuiSpacer, useEuiTheme } from '@elastic/eui';
@@ -24,13 +26,13 @@ export function ViewMore({ label, children }: Props) {
   const testSubj = label ? `apmViewMoreLink-${label}` : 'apmViewMoreLink';
   const ariaLabel = expanded
     ? i18n
-        .translate('xpack.apm.genAi.viewMore.viewLessLabel', {
+        .translate('apmUiShared.genAi.viewMore.viewLessLabel', {
           defaultMessage: 'View less {label}',
           values: { label: label ?? '' },
         })
         .trim()
     : i18n
-        .translate('xpack.apm.genAi.viewMore.viewMoreLabel', {
+        .translate('apmUiShared.genAi.viewMore.viewMoreLabel', {
           defaultMessage: 'View more {label}',
           values: { label: label ?? '' },
         })
@@ -66,8 +68,8 @@ export function ViewMore({ label, children }: Props) {
         onClick={() => setExpanded((v) => !v)}
       >
         {expanded
-          ? i18n.translate('xpack.apm.genAi.viewMore.viewLess', { defaultMessage: 'View less' })
-          : i18n.translate('xpack.apm.genAi.viewMore.viewMore', { defaultMessage: 'View more' })}
+          ? i18n.translate('apmUiShared.genAi.viewMore.viewLess', { defaultMessage: 'View less' })
+          : i18n.translate('apmUiShared.genAi.viewMore.viewMore', { defaultMessage: 'View more' })}
       </EuiButtonEmpty>
     </>
   );
