@@ -4,13 +4,23 @@ navigation_title: Kibana UI
 
 # Kibana UI (`@kbn/ui`)
 
-Reusable, opinionated UI components for Kibana, built on top of [EUI](https://elastic.github.io/eui/) and `@elastic/eui`.
+Reusable, opinionated UI for Kibana — components that compose [EUI](https://elastic.github.io/eui/), plus the layout and chrome primitives EUI intentionally leaves to the application.
 
 ## What is Kibana UI?
 
-EUI is Elastic's design language and component library — flexible, product-agnostic primitives shared across Kibana, Cloud UI, AutoOps, and internal apps. That agnosticism is the right choice for a shared library, but it means EUI intentionally stays out of Kibana-specific concerns like persistence, state management, and data fetching.
+EUI is Elastic's design language and component library — flexible, product-agnostic primitives shared across Kibana, Cloud UI, AutoOps, and internal apps. That agnosticism is the right choice for a shared library, but it means EUI intentionally stays out of Kibana-specific concerns like persistence, state management, data fetching, and how a Kibana page is put together.
 
 `@kbn/ui` is the layer above EUI where those concerns live. Think of EUI as atoms and molecules; `@kbn/ui` composes them into the molecules and organisms that define how Kibana's UI actually works: page templates, data tables with built-in persistence, search + filter patterns, empty states, and more. EUI remains the foundation — `@kbn/ui` extends it, it does not replace it.
+
+Not everything here is an EUI composition, though. Kibana also needs structure EUI deliberately doesn't provide: the application shell's CSS grid, the side navigation, and the constants and hooks that go with them. These consume EUI's theme tokens and breakpoints rather than its components, and they belong here for the same reason the compositions do — each one encodes a Kibana-wide decision that every plugin would otherwise re-litigate.
+
+In practice, packages fall into a few shapes:
+
+- **EUI compositions** — `@kbn/ui-callout`, `@kbn/ui-feedback`. Opinionated defaults layered over EUI components.
+- **Structure and chrome** — `@kbn/ui-chrome-layout`, `@kbn/ui-side-navigation`. The shell Kibana renders everything else inside; closer to layout primitives than to EUI wrappers.
+- **Supporting utilities** — `@kbn/ui-chrome-layout-utils`, `@kbn/ui-chrome-layout-constants`. Shared tokens, hooks, and helpers the above depend on.
+
+A package doesn't need to be a candidate for promotion to EUI to belong here. Some patterns will graduate upward; others, like the application grid, are Kibana's by nature and simply need one canonical home.
 
 ## Why do we need it?
 
@@ -75,6 +85,6 @@ Packages use the `@kbn/ui-<component>` naming convention and are owned by `@elas
 
 ### Guidelines
 
-- **Compose EUI, don't fork it.** Wrap and configure `@elastic/eui` components; avoid reimplementing what EUI already provides.
+- **Compose EUI, don't fork it.** Where EUI provides a primitive, wrap and configure it instead of reimplementing it. Structural components EUI doesn't cover should still build on its theme tokens and breakpoints.
 - **Opinionated defaults, escape hatches.** Encode "the Kibana way" by default, but allow overrides where necessary.
 - **Mark portability intent.** If a component is a candidate for extraction to Cloud UI or promotion to EUI, note it in the package README.

@@ -3723,10 +3723,11 @@ docs/release-notes                            @elastic/ski-docs
 docs/docset.yml                               @elastic/ski-docs
 docs/redirects.yml                            @elastic/ski-docs
 
-# Internal developer docs, published to codex.elastic.dev only. Teams adding a subject own its
-# directory; add that entry below rather than in the generated block, which is rewritten by
-# `node scripts/generate codeowners`.
-docs-dev/                                     @elastic/appex-sharedux
+# Internal developer docs, published to codex.elastic.dev only. Only the shared scaffolding is
+# owned here; teams adding a subject own its directory and add that entry below, rather than in
+# the generated block, which is rewritten by `node scripts/generate codeowners`.
+docs-dev/docset.yml                           @elastic/appex-sharedux
+docs-dev/index.md                             @elastic/appex-sharedux
 docs-dev/kbn-ui/                              @elastic/appex-sharedux
 
 # Side navigation title glossary
