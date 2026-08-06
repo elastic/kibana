@@ -14,8 +14,9 @@ import { buildOwnsConfigs } from './configs';
 export const ownsMaintainer: RegisterEntityMaintainerConfig = {
   id: 'owns',
   description:
-    'Resolves owns (user → host device) relationships from raw_identifiers on entity documents ' +
-    '(Okta: user → enrolled device via owns.raw_identifiers.host.id)',
+    'Resolves owns (user → host device) relationships. ' +
+    'Okta: from raw_identifiers on entity documents (owns.raw_identifiers.host.id). ' +
+    'Entra ID: from device log documents, inverting registered_owners into user-keyed edges.',
   interval: '1d',
   timeout: '1h',
   initialState: {},
