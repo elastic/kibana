@@ -44,13 +44,76 @@ export const getMockFindings = ({
   return Array.from({ length: numberOfFindings }, () => mockFiniding(postureType, isBillableAsset));
 };
 
+/**
+ * Builds the resource.raw payload of a GCP compute instance finding as stored by cloudbeat
+ * (GCP Cloud Asset Inventory shape: resource.raw.resource.data.*). The metering duration filter
+ * reads status / lastStartTimestamp / lastStopTimestamp from this structure.
+ */
+const getGcpComputeRawData = ({
+  status,
+  runningDurationHours,
+}: {
+  status: 'RUNNING' | 'TERMINATED';
+  runningDurationHours: number;
+}) => {
+  const durationMs = runningDurationHours * 60 * 60 * 1000;
+  const lastStop = status === 'TERMINATED' ? new Date(Date.now() - 60 * 1000) : undefined;
+  const lastStart = new Date((lastStop ? lastStop.getTime() : Date.now()) - durationMs);
+
+  return {
+    resource: {
+      data: {
+        status,
+        creationTimestamp: new Date(lastStart.getTime() - 60 * 1000).toISOString(),
+        lastStartTimestamp: lastStart.toISOString(),
+        ...(lastStop ? { lastStopTimestamp: lastStop.toISOString() } : {}),
+      },
+    },
+  };
+};
+
+/**
+ * GCP compute instance CSPM findings with an explicit running duration, for exercising the
+ * >=24h duration-based metering filter.
+ */
+export const getMockGcpComputeFindings = ({
+  numberOfFindings,
+  runningDurationHours,
+  status = 'RUNNING',
+}: {
+  numberOfFindings: number;
+  runningDurationHours: number;
+  status?: 'RUNNING' | 'TERMINATED';
+}) => {
+  return Array.from({ length: numberOfFindings }, () => ({
+    resource: {
+      id: chance.guid(),
+      sub_type: 'gcp-compute-instance',
+      raw: getGcpComputeRawData({ status, runningDurationHours }),
+    },
+    rule: {
+      benchmark: {
+        posture_type: 'cspm',
+      },
+    },
+  }));
+};
+
 const mockFiniding = (postureType: string, isBillableAsset?: boolean) => {
   if (postureType === 'cspm') {
     const randomAsset = isBillableAsset
       ? chance.pickone(BILLABLE_ASSETS_CONFIG.cspm)
       : 'not-billable-asset';
     return {
-      resource: { id: chance.guid(), sub_type: randomAsset },
+      resource: {
+        id: chance.guid(),
+        sub_type: randomAsset,
+        // gcp-compute-instance is only billable with >=24h running time; attach a
+        // long-running raw payload so a random billable pick stays deterministic.
+        ...(randomAsset === 'gcp-compute-instance'
+          ? { raw: getGcpComputeRawData({ status: 'RUNNING', runningDurationHours: 48 }) }
+          : {}),
+      },
       rule: {
         benchmark: {
           posture_type: 'cspm',
