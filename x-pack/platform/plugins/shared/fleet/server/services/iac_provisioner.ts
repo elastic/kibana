@@ -11,6 +11,8 @@ import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { Logger } from '@kbn/logging';
 import apm from 'elastic-apm-node';
 
+import type { AWS_CLOUD_PROVIDER } from '../../common/types/models/cloud_connector';
+
 import {
   IacProvisionerConfigError,
   IacProvisionerRenderError,
@@ -31,7 +33,9 @@ export interface IacProvisionerRenderIntegration {
 }
 
 export interface IacProvisionerRenderRequest {
-  provider: 'aws';
+  // Only AWS is supported today; typed off the shared constant so the value
+  // and type can't drift and adding a provider is a one-line change.
+  provider: typeof AWS_CLOUD_PROVIDER;
   integrations: IacProvisionerRenderIntegration[];
 }
 
