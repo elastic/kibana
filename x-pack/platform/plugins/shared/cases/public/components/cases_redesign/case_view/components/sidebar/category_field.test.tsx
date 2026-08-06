@@ -74,41 +74,20 @@ describe('CategoryField', () => {
     expect(screen.getByTestId('comboBoxSearchInput')).toBeDisabled();
   });
 
-  it('does not call onSubmit until the change is confirmed', async () => {
+  it('persists a valid change immediately, with no confirm step', async () => {
     renderWithTestingProviders(<CategoryField {...defaultProps} />);
 
     await user.type(screen.getByRole('combobox'), `${categories[0]}{enter}`);
 
-    expect(onSubmit).not.toHaveBeenCalled();
-    expect(screen.getByTestId('template-field-confirm-category')).toBeInTheDocument();
-    expect(screen.getByTestId('template-field-cancel-category')).toBeInTheDocument();
-
-    await user.click(screen.getByTestId('template-field-confirm-category'));
-
     await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(categories[0]));
-  });
-
-  it('reverts the pending change when cancel is clicked', async () => {
-    renderWithTestingProviders(<CategoryField {...defaultProps} category="My category" />);
-
-    await user.click(screen.getByTestId('comboBoxClearButton'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('template-field-cancel-category')).toBeInTheDocument();
-    });
-
-    await user.click(screen.getByTestId('template-field-cancel-category'));
-
-    expect(onSubmit).not.toHaveBeenCalled();
-    expect(screen.getByDisplayValue('My category')).toBeInTheDocument();
     expect(screen.queryByTestId('template-field-confirm-category')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('template-field-cancel-category')).not.toBeInTheDocument();
   });
 
   it('trims the category before submitting', async () => {
     renderWithTestingProviders(<CategoryField {...defaultProps} />);
 
     await user.type(screen.getByRole('combobox'), 'category-with-space            {enter}');
-    await user.click(screen.getByTestId('template-field-confirm-category'));
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledWith('category-with-space'));
   });
@@ -117,7 +96,6 @@ describe('CategoryField', () => {
     renderWithTestingProviders(<CategoryField {...defaultProps} category="My category" />);
 
     await user.click(screen.getByTestId('comboBoxClearButton'));
-    await user.click(screen.getByTestId('template-field-confirm-category'));
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(null));
   });
@@ -128,7 +106,6 @@ describe('CategoryField', () => {
     renderWithTestingProviders(<CategoryField {...defaultProps} />);
 
     await user.type(screen.getByRole('combobox'), `${longCategory}{enter}`);
-    await user.click(screen.getByTestId('template-field-confirm-category'));
 
     expect(
       await screen.findByText(
@@ -142,7 +119,6 @@ describe('CategoryField', () => {
     renderWithTestingProviders(<CategoryField {...defaultProps} />);
 
     await user.type(screen.getByRole('combobox'), '   {enter}');
-    await user.click(screen.getByTestId('template-field-confirm-category'));
 
     expect(await screen.findByText('Empty category is not allowed')).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();

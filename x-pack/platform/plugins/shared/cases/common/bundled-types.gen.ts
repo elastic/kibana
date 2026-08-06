@@ -1239,6 +1239,51 @@ export const GetCaseTemplatesResponse = lazySchema(() =>
 export type GetCaseTemplatesResponse = z.infer<typeof GetCaseTemplatesResponse>;
 
 /**
+  * The body for creating or fully replacing a case template. Server-managed attributes (author, usage statistics, field summaries, version flags) are computed and cannot be set.
+
+Resource limits (enforced on write; a violation returns `400`): an owner may have at most 200 templates per space, and a definition may declare at most 200 fields. Version history is intentionally uncapped. A single stored extended-field value may not exceed 30000 UTF-8 bytes. The YAML `definition` string itself may not exceed 30000 characters (enforced on create, update, and `dry_run`).
+
+  */
+export const TemplateWriteRequest = lazySchema(() =>
+  z.object({
+    /**
+      * The template identity name, unique per owner (case-insensitive). May be omitted when the YAML definition provides a case-default title (`name:`), which is then used as the identity name.
+
+      */
+    name: z.string().min(1).max(50).optional(),
+    owner: Owner,
+    /**
+      * The template definition as a YAML string: case defaults (name, severity, category, tags, assignees, connector, settings) and a `fields` array of inline field definitions or `$ref` entries pointing into the owner's field library. Stored field values appear on cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`.
+
+      */
+    definition: z.string().max(30000),
+    /**
+     * A description of the template.
+     */
+    description: z.string().max(1000).optional(),
+    tags: TemplateTags.optional(),
+    /**
+     * Disabled templates are hidden from the case creation flow.
+     */
+    isEnabled: z.boolean().optional().default(true),
+  })
+);
+export type TemplateWriteRequest = z.infer<typeof TemplateWriteRequest>;
+
+/**
+ * Returned instead of the template when the request was sent with `dry_run=true`.
+ */
+export const TemplateDryRunResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Always `true` — validation failures return a 4xx error instead.
+     */
+    valid: z.boolean(),
+  })
+);
+export type TemplateDryRunResponse = z.infer<typeof TemplateDryRunResponse>;
+
+/**
   * The fields a caller may apply to a case's `extended_fields`. When no template is in scope, this is the owner's global (library-wide) fields; when a template is applied, it also includes that template's fields. Migrated legacy custom fields appear here as `global` fields, so existing automations can look up the exact key to write.
 
   */
