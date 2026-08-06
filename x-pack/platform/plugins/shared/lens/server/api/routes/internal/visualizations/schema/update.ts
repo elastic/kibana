@@ -10,10 +10,11 @@ import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
 
 import {
   lensCMUpdateOptionsSchema,
-  lensItemDataSchemaV2,
+  lensItemDataSchemaV3,
 } from '../../../../../content_management/zod';
 import { lensItemDataSchemaV0 } from '../../../../../content_management/zod/v0';
 import { lensItemDataSchemaV1 } from '../../../../../content_management/zod/v1';
+import { lensItemDataSchemaV2 } from '../../../../../content_management/zod/v2';
 import { lensResponseItemSchema } from './common';
 
 export const lensUpdateRequestParamsSchema = z
@@ -30,6 +31,7 @@ export const lensUpdateRequestQuerySchema = lensCMUpdateOptionsSchema
 
 export const lensUpdateRequestBodySchema = z.union([
   lensApiConfigSchema,
+  lensItemDataSchemaV3,
   lensItemDataSchemaV2,
   lensItemDataSchemaV1,
   lensItemDataSchemaV0, // Temporarily permit passing old v0 SO attributes on create

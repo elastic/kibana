@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-// When we introduce a new version we need to export a union of all the version schemas
-export * from './v3';
+export type * from './types';
+export * from './transforms';

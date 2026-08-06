@@ -8,15 +8,15 @@
 import { z } from '@kbn/zod';
 import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
 import {
-  lensCommonSavedObjectSchemaV2,
-  lensItemDataSchemaV2,
-  lensSavedObjectSchemaV2,
+  lensCommonSavedObjectSchemaV3,
+  lensItemDataSchemaV3,
+  lensSavedObjectSchemaV3,
 } from '../../../../../content_management/zod';
 
 /**
  * The Lens item meta returned from the server
  */
-export const lensItemMetaSchema = lensCommonSavedObjectSchemaV2
+export const lensItemMetaSchema = lensCommonSavedObjectSchemaV3
   .pick({
     type: true,
     createdAt: true,
@@ -33,8 +33,8 @@ export const lensItemMetaSchema = lensCommonSavedObjectSchemaV2
  */
 export const lensResponseItemSchema = z
   .object({
-    id: lensSavedObjectSchemaV2.shape.id,
-    data: z.union([lensApiConfigSchema, lensItemDataSchemaV2]),
+    id: lensSavedObjectSchemaV3.shape.id,
+    data: z.union([lensApiConfigSchema, lensItemDataSchemaV3]),
     meta: lensItemMetaSchema,
   })
   .strict()

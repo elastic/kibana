@@ -9,14 +9,14 @@ import { z } from '@kbn/zod';
 import { lensApiConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 
-import { lensCommonSavedObjectSchemaV2 } from '../../../../content_management/zod';
+import { lensCommonSavedObjectSchemaV3 } from '../../../../content_management/zod';
 
 /**
  * The Lens response item returned from the server
  */
 export const lensResponseItemSchema = z
   .object({
-    id: lensCommonSavedObjectSchemaV2.shape.id,
+    id: lensCommonSavedObjectSchemaV3.shape.id,
     data: lensApiConfigSchemaNoESQL,
     meta: asCodeMetaSchema,
   })
