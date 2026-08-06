@@ -108,10 +108,7 @@ describe('createEpisodeAttachmentType', () => {
     it('returns episode data parsed against the schema', async () => {
       getEpisode.mockResolvedValueOnce(baseEpisodeData);
 
-      const result = await definition.resolve!(
-        'ep-1',
-        createResolveContext()
-      );
+      const result = await definition.resolve!('ep-1', createResolveContext());
 
       expect(getEpisode).toHaveBeenCalledWith('ep-1');
       expect(result).toEqual(expect.objectContaining({ 'episode.id': 'ep-1' }));
@@ -126,10 +123,7 @@ describe('createEpisodeAttachmentType', () => {
       };
       getEpisode.mockResolvedValueOnce(episodeWithNulls);
 
-      const result = await definition.resolve!(
-        'ep-1',
-        createResolveContext()
-      );
+      const result = await definition.resolve!('ep-1', createResolveContext());
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -144,10 +138,7 @@ describe('createEpisodeAttachmentType', () => {
     it('returns undefined when the episode does not exist', async () => {
       getEpisode.mockResolvedValueOnce(undefined);
 
-      const result = await definition.resolve!(
-        'ep-missing',
-        createResolveContext()
-      );
+      const result = await definition.resolve!('ep-missing', createResolveContext());
 
       expect(result).toBeUndefined();
     });
@@ -155,10 +146,7 @@ describe('createEpisodeAttachmentType', () => {
     it('returns undefined and logs a warning when the client throws', async () => {
       getEpisode.mockRejectedValueOnce(new Error('boom'));
 
-      const result = await definition.resolve!(
-        'ep-missing',
-        createResolveContext()
-      );
+      const result = await definition.resolve!('ep-missing', createResolveContext());
 
       expect(result).toBeUndefined();
       expect(logger.warn).toHaveBeenCalledWith(
@@ -171,10 +159,7 @@ describe('createEpisodeAttachmentType', () => {
     it('returns false when origin is missing', async () => {
       const attachment = buildVersionedAttachment({ origin: undefined });
 
-      const result = await definition.isStale!(
-        attachment,
-        createResolveContext()
-      );
+      const result = await definition.isStale!(attachment, createResolveContext());
 
       expect(result).toBe(false);
       expect(getEpisode).not.toHaveBeenCalled();
@@ -183,10 +168,7 @@ describe('createEpisodeAttachmentType', () => {
     it('returns false when the episode does not exist', async () => {
       getEpisode.mockResolvedValueOnce(undefined);
 
-      const result = await definition.isStale!(
-        buildVersionedAttachment(),
-        createResolveContext()
-      );
+      const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
       expect(result).toBe(false);
     });
@@ -194,10 +176,7 @@ describe('createEpisodeAttachmentType', () => {
     it('returns false when live last_timestamp matches latest version', async () => {
       getEpisode.mockResolvedValueOnce(baseEpisodeData);
 
-      const result = await definition.isStale!(
-        buildVersionedAttachment(),
-        createResolveContext()
-      );
+      const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
       expect(result).toBe(false);
     });
@@ -208,10 +187,7 @@ describe('createEpisodeAttachmentType', () => {
         last_timestamp: '2026-04-20T12:00:00.000Z',
       });
 
-      const result = await definition.isStale!(
-        buildVersionedAttachment(),
-        createResolveContext()
-      );
+      const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
       expect(result).toBe(true);
     });
@@ -222,10 +198,7 @@ describe('createEpisodeAttachmentType', () => {
         current_version: 99,
       });
 
-      const result = await definition.isStale!(
-        attachment,
-        createResolveContext()
-      );
+      const result = await definition.isStale!(attachment, createResolveContext());
 
       expect(result).toBe(true);
     });
@@ -252,10 +225,7 @@ describe('createEpisodeAttachmentType', () => {
         ],
       });
 
-      const result = await definition.isStale!(
-        attachment,
-        createResolveContext()
-      );
+      const result = await definition.isStale!(attachment, createResolveContext());
 
       expect(result).toBe(false);
     });
@@ -263,10 +233,7 @@ describe('createEpisodeAttachmentType', () => {
     it('returns false and logs a warning when the client throws', async () => {
       getEpisode.mockRejectedValueOnce(new Error('boom'));
 
-      const result = await definition.isStale!(
-        buildVersionedAttachment(),
-        createResolveContext()
-      );
+      const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
       expect(result).toBe(false);
       expect(logger.warn).toHaveBeenCalledWith(

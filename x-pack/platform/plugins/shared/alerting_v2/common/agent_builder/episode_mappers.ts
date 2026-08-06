@@ -13,9 +13,7 @@ const nullishToUndefined = <T>(value: T | null | undefined): T | undefined => va
 /**
  * Maps an {@link AlertEpisode} row to attachment `data`, normalizing nullables to undefined.
  */
-export const alertEpisodeToEpisodeAttachment = (
-  episode: AlertEpisode
-): EpisodeAttachmentData => ({
+export const alertEpisodeToEpisodeAttachment = (episode: AlertEpisode): EpisodeAttachmentData => ({
   '@timestamp': episode['@timestamp'],
   'episode.id': episode['episode.id'],
   'episode.status': episode['episode.status'],
