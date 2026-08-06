@@ -10,13 +10,15 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { usePageReady } from '@kbn/ebt-tools';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
 import { NightshiftApp } from './app';
 import { useFetchSignificantEvents } from '../hooks/use_fetch_significant_events';
+import { useFetchStreamFeatures } from '../hooks/use_fetch_stream_features';
 import { useCloseSignificantEvent } from '../hooks/use_close_significant_event';
 import { useKibana } from '../hooks/use_kibana';
 
 jest.mock('../hooks/use_fetch_significant_events');
+jest.mock('../hooks/use_fetch_stream_features');
 jest.mock('../hooks/use_close_significant_event');
 jest.mock('../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
@@ -34,9 +36,37 @@ jest.mock('../event/event_flyout', () => ({
 }));
 
 const mockUseFetchSignificantEvents = useFetchSignificantEvents as jest.Mock;
+const mockUseFetchStreamFeatures = useFetchStreamFeatures as jest.Mock;
 const mockUseCloseSignificantEvent = useCloseSignificantEvent as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 const mockUsePageReady = usePageReady as jest.Mock;
+
+const impactedService = (name: string, streamName = 'logs.app') => ({
+  type: 'entity' as const,
+  feature_id: `feat-${name}`,
+  name,
+  stream_name: streamName,
+});
+
+/** Every impacted-service entry in a fixture resolves to a matching service knowledge indicator. */
+const featuresForEvents = (events: SignificantEvent[]): Feature[] =>
+  events.flatMap((event) =>
+    (event.blast_radius ?? [])
+      .filter((entry) => entry.type === 'entity')
+      .map(
+        (entry): Feature => ({
+          uuid: entry.feature_id,
+          id: entry.feature_id,
+          stream_name: entry.stream_name,
+          type: 'entity',
+          subtype: 'service',
+          title: entry.type === 'entity' ? entry.name : entry.feature_id,
+          description: '',
+          properties: {},
+          confidence: 90,
+        })
+      )
+  );
 
 const openChat = jest.fn();
 const scrollIntoView = jest.fn();
@@ -77,6 +107,12 @@ function setEvents({
     error,
     isFetching: isFetching ?? isLoading,
     isLoading,
+    refetch: jest.fn(),
+  });
+  mockUseFetchStreamFeatures.mockReturnValue({
+    features: featuresForEvents(events),
+    isLoading: false,
+    isError: false,
     refetch: jest.fn(),
   });
 }
@@ -265,12 +301,12 @@ describe('NightshiftApp', () => {
     expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
   });
 
-  it('renders blast radius badges from stream_names', () => {
-    const streamNames = Array.from({ length: 10 }, (_, index) => `service-${index}`);
+  it('renders blast radius badges from impacted services', () => {
+    const services = Array.from({ length: 10 }, (_, index) => impactedService(`service-${index}`));
     setEvents({
       events: [
-        mockEvent({ event_id: '1', stream_names: streamNames }),
-        mockEvent({ event_id: '2', stream_names: ['service-0'] }),
+        mockEvent({ event_id: '1', blast_radius: services }),
+        mockEvent({ event_id: '2', blast_radius: [impactedService('service-0')] }),
       ],
     });
     const { container } = renderWithIntl();
@@ -279,10 +315,18 @@ describe('NightshiftApp', () => {
     expect(screen.queryByTestId('blast-radius-show-more')).not.toBeInTheDocument();
   });
 
+  it('renders no blast radius chips when no impacted service resolves', () => {
+    setEvents({ events: [mockEvent({ event_id: '1', stream_names: ['service-a', 'service-b'] })] });
+    const { container } = renderWithIntl();
+
+    expect(container.querySelectorAll('[data-test-subj="blast-radius-chip"]')).toHaveLength(0);
+    expect(screen.queryByText('Impacted services')).not.toBeInTheDocument();
+  });
+
   it('collapses blast radius chips after ten with a show-more control', () => {
-    const streamNames = Array.from({ length: 12 }, (_, index) => `service-${index}`);
+    const services = Array.from({ length: 12 }, (_, index) => impactedService(`service-${index}`));
     setEvents({
-      events: [mockEvent({ event_id: '1', stream_names: streamNames })],
+      events: [mockEvent({ event_id: '1', blast_radius: services })],
     });
     const { container } = renderWithIntl();
 
@@ -299,8 +343,16 @@ describe('NightshiftApp', () => {
   it('only builds blast radius chips from need-action entities, not resolved ones', () => {
     setEvents({
       events: [
-        mockEvent({ event_id: '1', status: 'open', stream_names: ['service-active'] }),
-        mockEvent({ event_id: '2', status: 'closed', stream_names: ['service-resolved'] }),
+        mockEvent({
+          event_id: '1',
+          status: 'open',
+          blast_radius: [impactedService('service-active')],
+        }),
+        mockEvent({
+          event_id: '2',
+          status: 'closed',
+          blast_radius: [impactedService('service-resolved')],
+        }),
       ],
     });
     const { container } = renderWithIntl();
@@ -313,15 +365,23 @@ describe('NightshiftApp', () => {
   it('filters significant events by blast radius', () => {
     setEvents({
       events: [
-        mockEvent({ event_id: '1', stream_names: ['service-a'], title: 'Service A event' }),
-        mockEvent({ event_id: '2', stream_names: ['service-b'], title: 'Service B event' }),
+        mockEvent({
+          event_id: '1',
+          blast_radius: [impactedService('service-a')],
+          title: 'Service A event',
+        }),
+        mockEvent({
+          event_id: '2',
+          blast_radius: [impactedService('service-b')],
+          title: 'Service B event',
+        }),
       ],
     });
     renderWithIntl();
 
     const blastRadiusButton = screen.getByRole('button', { name: /service-b/i });
     expect(blastRadiusButton).toHaveAttribute('data-ebt-action', 'filterByBlastRadius');
-    expect(blastRadiusButton).toHaveAttribute('data-ebt-detail', 'stream');
+    expect(blastRadiusButton).toHaveAttribute('data-ebt-detail', 'entity');
     fireEvent.click(blastRadiusButton);
 
     expect(screen.getByText('Service B event')).toBeInTheDocument();
@@ -333,8 +393,16 @@ describe('NightshiftApp', () => {
   it('clears the blast radius filter when the selected chip is clicked again', () => {
     setEvents({
       events: [
-        mockEvent({ event_id: '1', stream_names: ['service-a'], title: 'Service A event' }),
-        mockEvent({ event_id: '2', stream_names: ['service-b'], title: 'Service B event' }),
+        mockEvent({
+          event_id: '1',
+          blast_radius: [impactedService('service-a')],
+          title: 'Service A event',
+        }),
+        mockEvent({
+          event_id: '2',
+          blast_radius: [impactedService('service-b')],
+          title: 'Service B event',
+        }),
       ],
     });
     renderWithIntl();
@@ -356,13 +424,13 @@ describe('NightshiftApp', () => {
         mockEvent({
           event_id: '1',
           status: 'open',
-          stream_names: ['service-a'],
+          blast_radius: [impactedService('service-a')],
           title: 'Active event',
         }),
         mockEvent({
           event_id: '2',
           status: 'dismissed',
-          stream_names: ['service-z'],
+          blast_radius: [impactedService('service-z')],
           title: 'Dismissed event',
         }),
       ],
@@ -584,10 +652,14 @@ describe('NightshiftApp', () => {
   it('ranks blast radius chips by event count descending', () => {
     setEvents({
       events: [
-        mockEvent({ event_id: '1', severity: '20-low', stream_names: ['busy'] }),
-        mockEvent({ event_id: '2', severity: '20-low', stream_names: ['busy'] }),
-        mockEvent({ event_id: '3', severity: '20-low', stream_names: ['busy'] }),
-        mockEvent({ event_id: '4', severity: '80-critical', stream_names: ['critical'] }),
+        mockEvent({ event_id: '1', severity: '20-low', blast_radius: [impactedService('busy')] }),
+        mockEvent({ event_id: '2', severity: '20-low', blast_radius: [impactedService('busy')] }),
+        mockEvent({ event_id: '3', severity: '20-low', blast_radius: [impactedService('busy')] }),
+        mockEvent({
+          event_id: '4',
+          severity: '80-critical',
+          blast_radius: [impactedService('critical')],
+        }),
       ],
     });
     const { container } = renderWithIntl();

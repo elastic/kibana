@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import { useQueries, useQuery, type UseQueryOptions, type UseQueryResult } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { SignificantEventsRepositoryClient } from '@kbn/significant-events-plugin/public';
 import { isComputedFeature, type Feature } from '@kbn/significant-events-schema';
 import { useKibana } from './use_kibana';
+
+const NO_FEATURES: Feature[] = [];
+
+export interface StreamFeaturesResult {
+  features: Feature[];
+  isLoading: boolean;
+  isError: boolean;
+  refetch: () => void;
+}
 
 const fetchStreamFeatures = async (
   significantEventsRepositoryClient: SignificantEventsRepositoryClient,
@@ -31,42 +40,29 @@ const fetchStreamFeatures = async (
   return (response.features ?? []).filter((feature) => !isComputedFeature(feature));
 };
 
-export const useFetchStreamFeatures = (
-  streamName: string | undefined
-): UseQueryResult<Feature[], Error> => {
+/**
+ * Loads every stream's knowledge indicators under a single cache entry so the returned array keeps
+ * a stable identity across renders — callers memoize impacted entities on it, and a fresh array
+ * each render would retrigger their effects.
+ */
+export const useFetchStreamFeatures = (streamNames: string[]): StreamFeaturesResult => {
   const {
     significantEvents: { significantEventsRepositoryClient },
   } = useKibana().services;
+  const uniqueStreamNames = [...new Set(streamNames)].sort();
 
-  return useQuery<Feature[], Error>({
-    queryKey: ['nightshift.streamFeatures', streamName],
-    enabled: Boolean(streamName),
-    queryFn: async ({ signal }) =>
-      fetchStreamFeatures(significantEventsRepositoryClient, streamName!, signal),
-  });
-};
-
-export const useFetchStreamFeaturesByStream = (
-  streamNames: string[]
-): ReadonlyMap<string, Feature[]> => {
-  const {
-    significantEvents: { significantEventsRepositoryClient },
-  } = useKibana().services;
-
-  const queries = useQueries({
-    queries: streamNames.map(
-      (streamName): UseQueryOptions<Feature[], Error> => ({
-        queryKey: ['nightshift.streamFeatures', streamName],
-        enabled: Boolean(streamName),
-        queryFn: ({ signal }) =>
-          fetchStreamFeatures(significantEventsRepositoryClient, streamName, signal),
-      })
-    ),
+  const { data, isInitialLoading, isError, refetch } = useQuery<Feature[], Error>({
+    queryKey: ['nightshift.streamFeatures', uniqueStreamNames],
+    enabled: uniqueStreamNames.length > 0,
+    queryFn: async ({ signal }) => {
+      const featuresByStream = await Promise.all(
+        uniqueStreamNames.map((streamName) =>
+          fetchStreamFeatures(significantEventsRepositoryClient, streamName, signal)
+        )
+      );
+      return featuresByStream.flat();
+    },
   });
 
-  const featuresByStream = new Map<string, Feature[]>();
-  streamNames.forEach((streamName, index) => {
-    featuresByStream.set(streamName, queries[index]?.data ?? []);
-  });
-  return featuresByStream;
+  return { features: data ?? NO_FEATURES, isLoading: isInitialLoading, isError, refetch };
 };

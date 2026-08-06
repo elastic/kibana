@@ -191,7 +191,7 @@ export function BlastRadiusEntities({
           `}
         >
           {i18n.translate('xpack.nightshift.blastRadiusTitle', {
-            defaultMessage: 'Impacted entities',
+            defaultMessage: 'Impacted services',
           })}
         </span>
         <EuiFlexGroup

@@ -29,7 +29,9 @@ import {
   getResolvedEvents,
 } from '../event/significant_event_status';
 import { useFetchSignificantEvents } from '../hooks/use_fetch_significant_events';
+import { useFetchStreamFeatures } from '../hooks/use_fetch_stream_features';
 import { useCloseSignificantEvent } from '../hooks/use_close_significant_event';
+import { getImpactedEntityStreamNames } from '../common/impacted_entities';
 import {
   buildBlastRadiusChips,
   filterEventsByBlastRadiusChip,
@@ -193,8 +195,13 @@ export function NightshiftApp(): React.ReactElement {
     [needsActionEvents, resolvedEvents]
   );
 
-  // Blast radius pills come from each event's `blast_radius[]` (stream_names only when absent).
-  const blastRadius = useMemo(() => buildBlastRadiusChips(needsActionEvents), [needsActionEvents]);
+  const { features } = useFetchStreamFeatures(
+    useMemo(() => getImpactedEntityStreamNames(needsActionEvents), [needsActionEvents])
+  );
+  const blastRadius = useMemo(
+    () => buildBlastRadiusChips(needsActionEvents, features),
+    [needsActionEvents, features]
+  );
 
   const activeBlastRadiusChip = blastRadius.some(({ key }) => key === selectedBlastRadiusKey)
     ? selectedBlastRadiusKey
@@ -215,12 +222,12 @@ export function NightshiftApp(): React.ReactElement {
   );
 
   const visibleNeedsActionEvents = useMemo(
-    () => filterEventsByBlastRadiusChip(needsActionEvents, activeBlastRadiusChip),
-    [needsActionEvents, activeBlastRadiusChip]
+    () => filterEventsByBlastRadiusChip(needsActionEvents, activeBlastRadiusChip, features),
+    [needsActionEvents, activeBlastRadiusChip, features]
   );
   const visibleResolvedEvents = useMemo(
-    () => filterEventsByBlastRadiusChip(resolvedEvents, activeBlastRadiusChip),
-    [resolvedEvents, activeBlastRadiusChip]
+    () => filterEventsByBlastRadiusChip(resolvedEvents, activeBlastRadiusChip, features),
+    [resolvedEvents, activeBlastRadiusChip, features]
   );
 
   const selectedEventVisible = useMemo(() => {

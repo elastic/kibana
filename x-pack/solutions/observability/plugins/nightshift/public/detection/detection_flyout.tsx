@@ -46,11 +46,10 @@ import { TruncatableSummary } from '../common/truncatable_summary';
 import { useKibana } from '../hooks/use_kibana';
 import { useFetchStreamFeatures } from '../hooks/use_fetch_stream_features';
 import {
-  getDetectionEntities,
-  enrichEntityFeature,
-  resolveEntityFeature,
-  type DetectionEntityRef,
-} from '../event/get_detection_entities';
+  getImpactedEntities,
+  getImpactedEntityStreamNames,
+  type ImpactedEntity,
+} from '../common/impacted_entities';
 import { formatChatAttachmentDescription } from '../chat/chat_attachment_description';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
@@ -74,24 +73,19 @@ export function DetectionFlyout({
   const { euiTheme } = useEuiTheme();
   const formatTimestamp = useFormatTimestamp();
   const { share, agentBuilder } = useKibana().services;
-  const [selectedEntity, setSelectedEntity] = useState<DetectionEntityRef | undefined>();
+  const [selectedEntity, setSelectedEntity] = useState<ImpactedEntity | undefined>();
 
   const {
-    data: streamFeatures = [],
+    features: streamFeatures,
     isLoading: isLoadingStreamFeatures,
     isError: isStreamFeaturesError,
     refetch: refetchStreamFeatures,
-  } = useFetchStreamFeatures(detection.stream_name);
+  } = useFetchStreamFeatures(useMemo(() => getImpactedEntityStreamNames([event]), [event]));
   const associatedEntities = useMemo(
-    () => getDetectionEntities(event, detection, streamFeatures),
-    [detection, event, streamFeatures]
+    () => getImpactedEntities(event, streamFeatures),
+    [event, streamFeatures]
   );
-  const selectedEntityFeature = useMemo(() => {
-    if (!selectedEntity) {
-      return undefined;
-    }
-    return enrichEntityFeature(selectedEntity, resolveEntityFeature(selectedEntity), signal);
-  }, [selectedEntity, signal]);
+  const selectedEntityFeature = selectedEntity?.feature;
 
   useEffect(() => {
     if (selectedEntity && !associatedEntities.some((entity) => entity.key === selectedEntity.key)) {
@@ -220,7 +214,7 @@ export function DetectionFlyout({
             <>
               <FlyoutSectionTitle>
                 {i18n.translate('xpack.nightshift.detectionFlyout.entitiesTitle', {
-                  defaultMessage: 'Impacted entities',
+                  defaultMessage: 'Impacted services',
                 })}
               </FlyoutSectionTitle>
               <EuiSpacer size="s" />
@@ -238,7 +232,7 @@ export function DetectionFlyout({
                   iconType="warning"
                   size="s"
                   title={i18n.translate('xpack.nightshift.detectionFlyout.entitiesErrorTitle', {
-                    defaultMessage: 'Unable to load impacted entities',
+                    defaultMessage: 'Unable to load impacted services',
                   })}
                 >
                   <EuiButtonEmpty
@@ -266,7 +260,7 @@ export function DetectionFlyout({
                             action: NIGHTSHIFT_EBT_ACTIONS.VIEW_ENTITY,
                             element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_FLYOUT_ENTITIES,
                           }}
-                          label={entity.label}
+                          label={entity.name}
                           onClick={() => setSelectedEntity(entity)}
                           testSubj="nightshiftDetectionFlyoutEntityChip"
                           size="compact"
@@ -373,7 +367,6 @@ export function DetectionFlyout({
         <EntityFlyout
           key={selectedEntityFeature.uuid}
           feature={selectedEntityFeature}
-          enableChatAttachment={Boolean(selectedEntity?.feature)}
           onClose={closeEntityFlyout}
         />
       )}

@@ -24,13 +24,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 const mockGetRedirectUrl = jest.fn(() => '/app/discover#redirect');
 const mockOpenChat = jest.fn();
 
+const mockStreamFeatures = jest.fn();
+
 jest.mock('../hooks/use_fetch_stream_features', () => ({
-  useFetchStreamFeatures: () => ({
-    data: [],
-    isLoading: false,
-    isError: false,
-    refetch: jest.fn(),
-  }),
+  useFetchStreamFeatures: () => mockStreamFeatures(),
 }));
 
 jest.mock('./change_point_lens_chart', () => ({
@@ -68,6 +65,19 @@ jest.mock('../hooks/use_kibana', () => ({
   }),
 }));
 
+const webFrontendFeature = {
+  uuid: 'feat-web-frontend',
+  id: 'web-frontend',
+  stream_name: 'logs.web-frontend',
+  type: 'entity',
+  subtype: 'service',
+  title: 'web-frontend',
+  description: 'Frontend service entity',
+  properties: {},
+  confidence: 90,
+  evidence: ['stream_name = logs.web-frontend'],
+};
+
 const mockEvent: SignificantEvent = {
   '@timestamp': '2026-07-10T12:00:00Z',
   event_id: 'evt-001',
@@ -78,6 +88,14 @@ const mockEvent: SignificantEvent = {
   summary: 'Latency increased on web-frontend.',
   severity: '80-critical',
   confidence: 0.92,
+  blast_radius: [
+    {
+      type: 'entity',
+      feature_id: 'feat-web-frontend',
+      name: 'web-frontend',
+      stream_name: 'logs.web-frontend',
+    },
+  ],
 };
 
 const mockDetection: LifecycleDetection = {
@@ -109,6 +127,12 @@ const mockSignal: SignalEntry = {
 describe('DetectionFlyout', () => {
   beforeEach(() => {
     mockOpenChat.mockClear();
+    mockStreamFeatures.mockReturnValue({
+      features: [webFrontendFeature],
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
   });
 
   const renderFlyout = (props: Partial<React.ComponentProps<typeof DetectionFlyout>> = {}) =>
@@ -176,7 +200,7 @@ describe('DetectionFlyout', () => {
     renderFlyout();
 
     const chip = screen.getByTestId('nightshiftDetectionFlyoutEntityChip');
-    expect(chip).toHaveTextContent('logs.web-frontend');
+    expect(chip).toHaveTextContent('web-frontend');
     expect(chip.tagName).toBe('BUTTON');
     expect(chip).toHaveAttribute('data-ebt-action', 'viewEntity');
     expect(chip).toHaveAttribute('data-ebt-element', 'nightshiftDetectionFlyoutEntities');
@@ -190,7 +214,7 @@ describe('DetectionFlyout', () => {
     const entityFlyout = screen.getByTestId('nightshiftEntityFlyout');
     expect(entityFlyout).toBeInTheDocument();
     expect(within(entityFlyout).getByText('Summary')).toBeInTheDocument();
-    expect(within(entityFlyout).getByText(mockSignal.description)).toBeInTheDocument();
+    expect(within(entityFlyout).getByText(webFrontendFeature.description)).toBeInTheDocument();
     expect(within(entityFlyout).getByText('stream_name = logs.web-frontend')).toBeInTheDocument();
   });
 
@@ -207,10 +231,16 @@ describe('DetectionFlyout', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it('hides the associated entities section without a stream name', () => {
-    renderFlyout({ detection: { ...mockDetection, stream_name: '' } });
+  it('hides the impacted services section when no entry resolves to a service', () => {
+    mockStreamFeatures.mockReturnValue({
+      features: [],
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
+    renderFlyout();
 
-    expect(screen.queryByText('Impacted entities')).not.toBeInTheDocument();
+    expect(screen.queryByText('Impacted services')).not.toBeInTheDocument();
   });
 
   it('renders the Lens occurrence chart in the trend section', () => {

@@ -25,13 +25,12 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { UseQueryResult } from '@kbn/react-query';
 import type {
-  Feature,
   LifecycleDetection,
   EventLifecycleResponse,
   SignificantEvent,
 } from '@kbn/significant-events-schema';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
-import { useFetchStreamFeaturesByStream } from '../hooks/use_fetch_stream_features';
+import { useFetchStreamFeatures } from '../hooks/use_fetch_stream_features';
 import { useFormatTimestamp } from '../common/format_timestamp';
 import {
   filterOccurrencesForDetection,
@@ -39,7 +38,7 @@ import {
   type OccurrencePoint,
 } from '../detection/change_point';
 import { ChangePointSparkline } from '../detection/change_point_visualization';
-import { getDetectionEntities } from './get_detection_entities';
+import { getImpactedEntities, getImpactedEntityStreamNames } from '../common/impacted_entities';
 import { nightshiftBackgroundTransition } from '../common/transition';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 
@@ -73,17 +72,15 @@ const parseTimestamp = (timestamp: string): number => {
 
 function DetectionCard({
   detection,
-  event,
   occurrences,
-  streamFeatures,
+  entityLabels,
   isLoadingOccurrences,
   isSelected = false,
   onClick,
 }: {
   detection: LifecycleDetection;
-  event: SignificantEvent;
   occurrences: OccurrencePoint[];
-  streamFeatures: Feature[];
+  entityLabels: string[];
   isLoadingOccurrences: boolean;
   isSelected?: boolean;
   onClick?: (detection: LifecycleDetection) => void;
@@ -91,13 +88,6 @@ function DetectionCard({
   const { euiTheme } = useEuiTheme();
   const formatTimestamp = useFormatTimestamp();
   const changePointLabel = getChangePointLabel(detection.change_point_type);
-  const entityLabels = useMemo(() => {
-    const entities = getDetectionEntities(event, detection, streamFeatures);
-    if (entities.length > 0) {
-      return entities.map((entity) => entity.label);
-    }
-    return detection.stream_name ? [detection.stream_name] : [];
-  }, [detection, event, streamFeatures]);
   const visibleEntityLabels = entityLabels.slice(0, MAX_VISIBLE_ENTITY_PILLS);
   const hiddenEntityCount = Math.max(entityLabels.length - visibleEntityLabels.length, 0);
 
@@ -374,17 +364,13 @@ export function DetectionsList({
     [data]
   );
 
-  const streamNames = useMemo(
-    () => [
-      ...new Set(
-        detections
-          .map((detection) => detection.stream_name)
-          .filter((streamName): streamName is string => Boolean(streamName))
-      ),
-    ],
-    [detections]
+  const { features } = useFetchStreamFeatures(
+    useMemo(() => getImpactedEntityStreamNames([event]), [event])
   );
-  const streamFeaturesByStream = useFetchStreamFeaturesByStream(streamNames);
+  const entityLabels = useMemo(
+    () => getImpactedEntities(event, features).map(({ name }) => name),
+    [event, features]
+  );
 
   // Only skeleton on first load — keep cached cards visible during background refetch.
   const isInitialLoading = isLoading && (data?.detections?.length ?? 0) === 0;
@@ -448,12 +434,11 @@ export function DetectionsList({
             <DetectionCard
               key={detection.detection_id}
               detection={detection}
-              event={event}
               occurrences={filterOccurrencesForDetection(
                 detection.rule_uuid ? occurrencesByRuleUuid?.get(detection.rule_uuid) ?? [] : [],
                 detection['@timestamp']
               )}
-              streamFeatures={streamFeaturesByStream.get(detection.stream_name ?? '') ?? []}
+              entityLabels={entityLabels}
               isLoadingOccurrences={isLoadingOccurrences && Boolean(detection.rule_uuid)}
               isSelected={detection.detection_id === selectedDetectionId}
               onClick={onDetectionClick}

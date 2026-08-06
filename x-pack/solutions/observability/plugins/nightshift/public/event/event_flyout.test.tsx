@@ -33,12 +33,11 @@ jest.mock('@kbn/investigation-output', () => ({
 
 jest.mock('../hooks/use_fetch_stream_features', () => ({
   useFetchStreamFeatures: () => ({
-    data: [],
+    features: [],
     isLoading: false,
     isError: false,
     refetch: jest.fn(),
   }),
-  useFetchStreamFeaturesByStream: () => new Map<string, never[]>(),
 }));
 
 jest.mock('../detection/change_point_lens_chart', () => ({

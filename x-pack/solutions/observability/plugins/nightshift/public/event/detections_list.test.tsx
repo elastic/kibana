@@ -11,10 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { LifecycleDetection, SignificantEvent } from '@kbn/significant-events-schema';
 import { DetectionsList } from './detections_list';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
-import {
-  useFetchStreamFeatures,
-  useFetchStreamFeaturesByStream,
-} from '../hooks/use_fetch_stream_features';
+import { useFetchStreamFeatures } from '../hooks/use_fetch_stream_features';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
@@ -44,7 +41,18 @@ jest.mock('../hooks/use_kibana', () => ({
 
 const mockUseFetchEventLifecycle = useFetchEventLifecycle as jest.Mock;
 const mockUseFetchStreamFeatures = useFetchStreamFeatures as jest.Mock;
-const mockUseFetchStreamFeaturesByStream = useFetchStreamFeaturesByStream as jest.Mock;
+
+const serviceFeature = (uuid: string, id: string) => ({
+  uuid,
+  id,
+  stream_name: 'logs.web-frontend',
+  type: 'entity',
+  subtype: 'service',
+  title: id,
+  description: '',
+  properties: { name: id },
+  confidence: 90,
+});
 
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-07-10T12:00:00Z',
@@ -56,8 +64,9 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
   summary: 'Summary',
   severity: '60-high',
   confidence: 0.9,
-  causal_features: [
+  blast_radius: [
     {
+      type: 'entity',
       feature_id: 'web-frontend',
       name: 'web-frontend',
       stream_name: 'logs.web-frontend',
@@ -91,41 +100,11 @@ function setLifecycle({
     refetch,
   });
   mockUseFetchStreamFeatures.mockReturnValue({
-    data: [
-      {
-        uuid: 'feat-web-frontend',
-        id: 'web-frontend',
-        stream_name: 'logs.web-frontend',
-        type: 'entity',
-        title: 'web-frontend',
-        description: '',
-        properties: { name: 'web-frontend' },
-        confidence: 90,
-      },
-    ],
+    features: [serviceFeature('feat-web-frontend', 'web-frontend')],
     isLoading: false,
     isError: false,
     refetch: jest.fn(),
   });
-  mockUseFetchStreamFeaturesByStream.mockReturnValue(
-    new Map([
-      [
-        'logs.web-frontend',
-        [
-          {
-            uuid: 'feat-web-frontend',
-            id: 'web-frontend',
-            stream_name: 'logs.web-frontend',
-            type: 'entity',
-            title: 'web-frontend',
-            description: '',
-            properties: { name: 'web-frontend' },
-            confidence: 90,
-          },
-        ],
-      ],
-    ])
-  );
   return { refetch };
 }
 
@@ -230,60 +209,34 @@ describe('DetectionsList', () => {
 
   it('shows at most two entity pills plus an overflow pill', () => {
     setLifecycle({ detections: [mockDetection()] });
-    mockUseFetchStreamFeaturesByStream.mockReturnValue(
-      new Map([
-        [
-          'logs.web-frontend',
-          [
-            {
-              uuid: 'feat-entity-one',
-              id: 'entity-one',
-              stream_name: 'logs.web-frontend',
-              type: 'entity',
-              title: 'entity-one',
-              description: '',
-              properties: { name: 'entity-one' },
-              confidence: 90,
-            },
-            {
-              uuid: 'feat-entity-two',
-              id: 'entity-two',
-              stream_name: 'logs.web-frontend',
-              type: 'entity',
-              title: 'entity-two',
-              description: '',
-              properties: { name: 'entity-two' },
-              confidence: 90,
-            },
-            {
-              uuid: 'feat-entity-three',
-              id: 'entity-three',
-              stream_name: 'logs.web-frontend',
-              type: 'entity',
-              title: 'entity-three',
-              description: '',
-              properties: { name: 'entity-three' },
-              confidence: 90,
-            },
-          ],
-        ],
-      ])
-    );
+    mockUseFetchStreamFeatures.mockReturnValue({
+      features: [
+        serviceFeature('feat-entity-one', 'entity-one'),
+        serviceFeature('feat-entity-two', 'entity-two'),
+        serviceFeature('feat-entity-three', 'entity-three'),
+      ],
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
 
     renderList({
       event: mockEvent({
-        causal_features: [
+        blast_radius: [
           {
+            type: 'entity',
             feature_id: 'entity-one',
             name: 'entity-one',
             stream_name: 'logs.web-frontend',
           },
           {
+            type: 'entity',
             feature_id: 'entity-two',
             name: 'entity-two',
             stream_name: 'logs.web-frontend',
           },
           {
+            type: 'entity',
             feature_id: 'entity-three',
             name: 'entity-three',
             stream_name: 'logs.web-frontend',
