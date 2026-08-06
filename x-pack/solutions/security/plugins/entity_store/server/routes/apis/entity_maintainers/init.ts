@@ -53,7 +53,7 @@ export function registerInitMaintainers(router: EntityStorePluginRouter) {
 
         const { status: entityStoreStatus } = await assetManagerClient.getStatus(false);
         const maintainersStatus =
-          entityStoreStatus === 'running'
+          entityStoreStatus === ENTITY_STORE_STATUS.RUNNING
             ? EntityMaintainerTaskStatus.STARTED
             : EntityMaintainerTaskStatus.STOPPED;
         await entityMaintainersClient.init(req, {
