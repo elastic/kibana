@@ -315,6 +315,47 @@ describe('customFields → extended_fields adapter utilities', () => {
 
       expect(result).toEqual({ x_as_keyword: 'v' });
     });
+
+    it('does NOT fill a key whose existing value is the empty string (deliberate clear preserved)', () => {
+      // The v2 UI persists '' both for untouched fields and for fields the user explicitly
+      // cleared, and the migration runs asynchronously — field definitions become visible
+      // before a space's backfill completes, so a '' observed at backfill time may be a
+      // deliberate clear. It is ambiguous, so it must never be overwritten with the stale
+      // legacy value.
+      const result = buildExtendedFieldsBackfill(
+        [{ key: 'priority', type: 'text', value: 'low' }],
+        {
+          priority_as_keyword: '',
+        }
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('fills a key whose existing value is null', () => {
+      const result = buildExtendedFieldsBackfill(
+        [{ key: 'priority', type: 'text', value: 'low' }],
+        {
+          priority_as_keyword: null,
+        }
+      );
+
+      expect(result).toEqual({ priority_as_keyword: 'low' });
+    });
+
+    it('does not fill a key whose existing value is a non-empty string', () => {
+      const result = buildExtendedFieldsBackfill(
+        [
+          { key: 'kept', type: 'text', value: 'legacy' },
+          { key: 'zero', type: 'number', value: 1 },
+          { key: 'flag', type: 'toggle', value: true },
+        ],
+        { kept_as_keyword: 'v2-value', zero_as_integer: '0', flag_as_boolean: 'false' }
+      );
+
+      // '0' and 'false' are real (falsy-looking) v2 values and must win over the legacy mirror.
+      expect(result).toEqual({});
+    });
   });
 
   describe('mergeCustomFieldsIntoExtendedFields', () => {
