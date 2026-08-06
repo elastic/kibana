@@ -16,6 +16,7 @@ import { esqlColumn } from './esql_column';
  * Build ES|QL expression nodes directly with the AST `Builder` instead of the
  * `esql.exp` / `query.where` tagged templates.
  *
+ * Workaround until https://github.com/elastic/kibana/issues/283422 is resolved.
  * The tagged templates print every interpolated node to text and re-parse the
  * whole expression. That round trip corrupts string literals whose value
  * contains a backslash followed by `r`, `n` or `t` (e.g. Windows paths like
@@ -23,6 +24,9 @@ import { esqlColumn } from './esql_column';
  * the following letter as a single control-character escape. Constructing the
  * AST here keeps values as literal nodes that are only escaped once, at print
  * time, matching the pre-migration behavior that resolved params after parsing.
+ *
+ * Once the parser is fixed and `@elastic/esql` is bumped, these helpers can be
+ * removed and the call sites can go back to the tagged templates.
  */
 
 /** A string literal node, escaped only once at print time (never re-parsed). */
