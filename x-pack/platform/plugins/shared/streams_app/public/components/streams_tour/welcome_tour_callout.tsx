@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBanner, EuiSpacer } from '@elastic/eui';
+import { EuiBanner, EuiSpacer, type EuiBannerProps } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsTour } from './streams_tour_provider';
 import { AssetImage } from '../asset_image';
@@ -36,20 +36,21 @@ export function WelcomeTourCallout({
     startTour(firstClassicStreamName);
   };
 
-  const viewDocsAction = {
+  const viewDocsAction: NonNullable<EuiBannerProps['actionProps']>['primary'] = {
     children: i18n.translate('xpack.streams.welcomeCallout.docsButton', {
       defaultMessage: 'View docs',
     }),
     href: docLinks.links.observability.logsStreams,
     target: '_blank',
     rel: 'noopener',
-    iconType: 'external' as const,
-    iconSide: 'right' as const,
+    iconType: 'external',
+    iconSide: 'right',
   };
 
   return (
     <>
       <EuiBanner
+        headingElement="h2"
         title={i18n.translate('xpack.streams.welcomeCallout.title', {
           defaultMessage:
             'Welcome to Streams, our next-generation model to manage your data in a single place',
@@ -85,7 +86,7 @@ export function WelcomeTourCallout({
         }
         onDismiss={dismissCallout}
         dismissButtonProps={{
-          'aria-label': i18n.translate('xpack.streams.welcomeCallout.dismissButton', {
+          'aria-label': i18n.translate('xpack.streams.welcomeCallout.dismissButtonAriaLabel', {
             defaultMessage: "Don't show this again",
           }),
         }}
