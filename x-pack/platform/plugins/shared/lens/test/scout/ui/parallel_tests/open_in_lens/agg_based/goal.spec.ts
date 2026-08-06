@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData, convertToLensByTitle, createOpenInLensSuiteSetup } from '../../../fixtures';
+import {
+  convertToLensByTitle,
+  createOpenInLensSuiteSetup,
+  spaceTest,
+  testData,
+} from '../../../fixtures';
 
 spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.deploymentAgnostic }, () => {
   const openInLensSuite = createOpenInLensSuiteSetup({
@@ -51,7 +56,7 @@ spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.deploymen
     await lens.waitForVisualization('mtrVis');
     expect(await lens.getLayerCount()).toBe(1);
 
-    await expect(lens.getDimensionTriggerLocator()).toHaveCount(2);
+    await expect(lens.dimensionTriggerLocator).toHaveCount(2);
     const dimensions = await lens.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Average machine.ram');
     await expect(dimensions[1]).toHaveText('Static value: 1');
@@ -80,7 +85,7 @@ spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.deploymen
     await lens.waitForVisualization('mtrVis');
     expect(await lens.getLayerCount()).toBe(1);
 
-    await expect(lens.getDimensionTriggerLocator()).toHaveCount(3);
+    await expect(lens.dimensionTriggerLocator).toHaveCount(3);
     const dimensions = await lens.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Overall Max of Count');
     await expect(dimensions[1]).toHaveText('Static value: 1');
@@ -110,7 +115,7 @@ spaceTest.describe('Lens open in Lens — agg-based Goal', { tag: tags.deploymen
     await lens.waitForVisualization('mtrVis');
     expect(await lens.getLayerCount()).toBe(1);
 
-    await expect(lens.getDimensionTriggerLocator()).toHaveCount(3);
+    await expect(lens.dimensionTriggerLocator).toHaveCount(3);
     const dimensions = await lens.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Average machine.ram');
     await expect(dimensions[1]).toHaveText('Static value: 13300000000');
