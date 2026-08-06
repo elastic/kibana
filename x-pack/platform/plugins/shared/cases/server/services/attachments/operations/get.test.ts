@@ -439,6 +439,44 @@ describe('AttachmentService getter', () => {
         }),
       ]);
     });
+
+    it('skips a malformed attachment and logs a warning instead of throwing', async () => {
+      const validAttachment = {
+        id: 'entity-so-valid',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+        references: [],
+        score: 0,
+        attributes: {
+          type: 'security.entity',
+          attachmentId: 'user:alice@default',
+          metadata: { entityName: 'alice', entityType: 'user' },
+          owner: 'securitySolution',
+          created_at: '2020-01-01T00:00:00.000Z',
+          created_by: { username: 'elastic', full_name: null, email: null },
+          pushed_at: null,
+          pushed_by: null,
+          updated_at: null,
+          updated_by: null,
+        },
+      };
+      const malformedAttachment = {
+        ...validAttachment,
+        id: 'entity-so-malformed',
+        attributes: { ...validAttachment.attributes },
+      };
+      unset(malformedAttachment, 'attributes.attachmentId');
+      const soFindRes = createSOFindResponse([malformedAttachment, validAttachment]);
+
+      mockFinder(soFindRes);
+
+      const res = await attachmentGetter.getUnifiedAttachmentsByTypes({
+        caseId: '1',
+        types: ['security.entity'],
+      });
+
+      expect(res).toEqual([expect.objectContaining({ id: 'entity-so-valid' })]);
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('entity-so-malformed'));
+    });
   });
 
   describe('get', () => {

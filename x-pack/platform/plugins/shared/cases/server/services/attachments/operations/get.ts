@@ -372,7 +372,7 @@ export class AttachmentGetter {
 
       let result: Array<SavedObject<UnifiedAttachmentAttributes>> = [];
       for await (const page of finder.find()) {
-        result = result.concat(AttachmentGetter.decodeUnifiedAttachments(page));
+        result = result.concat(this.decodeUnifiedAttachments(page));
       }
 
       return result;
@@ -384,13 +384,29 @@ export class AttachmentGetter {
     }
   }
 
-  private static decodeUnifiedAttachments(
+  /**
+   * Decodes each attachment individually and skips (with a warning) any that fail: unlike
+   * {@link decodeDocuments}, callers of this method (e.g. case metrics) can still return
+   * useful data derived from the other attachments, so one non-conforming `security.entity`
+   * document shouldn't fail the whole call.
+   */
+  private decodeUnifiedAttachments(
     response: SavedObjectsFindResponse<UnifiedAttachmentAttributes>
   ): Array<SavedObject<UnifiedAttachmentAttributes>> {
-    return response.saved_objects.map((so) => {
-      const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(so.attributes);
-      return Object.assign(so, { attributes: validatedAttributes });
-    });
+    const decoded: Array<SavedObject<UnifiedAttachmentAttributes>> = [];
+
+    for (const so of response.saved_objects) {
+      try {
+        const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(so.attributes);
+        decoded.push(Object.assign(so, { attributes: validatedAttributes }));
+      } catch (error) {
+        this.context.log.warn(
+          `Failed to decode unified attachment id ${so.id} of type ${so.type}, skipping it: ${error}`
+        );
+      }
+    }
+
+    return decoded;
   }
 
   /**

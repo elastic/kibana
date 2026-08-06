@@ -21,19 +21,33 @@ const topFieldsFor = (hostName: string) => ({
 });
 
 describe('AlertHosts', () => {
-  it('builds a terms aggregation sized to capture every unique value in a case', () => {
+  it('builds a terms aggregation sized to the display limit by default', () => {
     const agg = new AlertHosts();
 
     expect(agg.build()).toMatchObject({
       hosts_frequency: {
         terms: {
           field: 'host.id',
-          size: MAX_ALERTS_PER_CASE,
+          size: 10,
         },
       },
       hosts_total: {
         cardinality: {
           field: 'host.id',
+        },
+      },
+    });
+  });
+
+  it('widenToExhaustive sizes the terms aggregation to capture every unique value in a case', () => {
+    const agg = new AlertHosts();
+    agg.widenToExhaustive();
+
+    expect(agg.build()).toMatchObject({
+      hosts_frequency: {
+        terms: {
+          field: 'host.id',
+          size: MAX_ALERTS_PER_CASE,
         },
       },
     });

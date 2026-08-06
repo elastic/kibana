@@ -12,16 +12,27 @@ import type { AggregationBuilder, AggregationResponse } from '../../types';
 const DISPLAY_LIMIT = 10;
 
 export class AlertUsers implements AggregationBuilder<SingleCaseMetricsResponse> {
-  constructor(private readonly displayLimit: number = DISPLAY_LIMIT) {}
+  private termsSize: number;
+
+  constructor(private readonly displayLimit: number = DISPLAY_LIMIT) {
+    this.termsSize = displayLimit;
+  }
+
+  /**
+   * Widens the terms aggregation from the display limit to MAX_ALERTS_PER_CASE so it
+   * captures every unique user.name, not just the displayed top-N. Only call this when
+   * there are entity attachments to dedupe against — it's otherwise wasted aggregation cost.
+   */
+  widenToExhaustive(): void {
+    this.termsSize = MAX_ALERTS_PER_CASE;
+  }
 
   build() {
     return {
       users_frequency: {
         terms: {
           field: userName,
-          // Sized to MAX_ALERTS_PER_CASE so buckets capture every unique user.name, not just
-          // the displayed top-N — callers need the full set to dedupe against entities exactly.
-          size: MAX_ALERTS_PER_CASE,
+          size: this.termsSize,
         },
       },
       users_total: {

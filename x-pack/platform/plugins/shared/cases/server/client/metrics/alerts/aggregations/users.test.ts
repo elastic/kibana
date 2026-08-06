@@ -9,19 +9,33 @@ import { MAX_ALERTS_PER_CASE } from '../../../../../common/constants';
 import { AlertUsers } from './users';
 
 describe('AlertUsers', () => {
-  it('builds a terms aggregation sized to capture every unique value in a case', () => {
+  it('builds a terms aggregation sized to the display limit by default', () => {
     const agg = new AlertUsers();
 
     expect(agg.build()).toEqual({
       users_frequency: {
         terms: {
           field: 'user.name',
-          size: MAX_ALERTS_PER_CASE,
+          size: 10,
         },
       },
       users_total: {
         cardinality: {
           field: 'user.name',
+        },
+      },
+    });
+  });
+
+  it('widenToExhaustive sizes the terms aggregation to capture every unique value in a case', () => {
+    const agg = new AlertUsers();
+    agg.widenToExhaustive();
+
+    expect(agg.build()).toMatchObject({
+      users_frequency: {
+        terms: {
+          field: 'user.name',
+          size: MAX_ALERTS_PER_CASE,
         },
       },
     });

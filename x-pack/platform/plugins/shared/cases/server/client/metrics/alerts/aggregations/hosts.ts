@@ -34,16 +34,28 @@ const hostId = 'host.id';
 const DISPLAY_LIMIT = 10;
 
 export class AlertHosts implements AggregationBuilder<SingleCaseMetricsResponse> {
-  constructor(private readonly displayLimit: number = DISPLAY_LIMIT) {}
+  private termsSize: number;
+
+  constructor(private readonly displayLimit: number = DISPLAY_LIMIT) {
+    this.termsSize = displayLimit;
+  }
+
+  /**
+   * Widens the terms aggregation from the display limit to MAX_ALERTS_PER_CASE so it
+   * captures every unique host.id, not just the displayed top-N. Only call this when there
+   * are entity attachments to dedupe against — it also multiplies the per-bucket top_hits
+   * sub-aggregation cost, so callers should skip it otherwise.
+   */
+  widenToExhaustive(): void {
+    this.termsSize = MAX_ALERTS_PER_CASE;
+  }
 
   build(): Record<string, estypes.AggregationsAggregationContainer> {
     return {
       hosts_frequency: {
         terms: {
           field: hostId,
-          // Sized to MAX_ALERTS_PER_CASE so buckets capture every unique host.id, not just
-          // the displayed top-N — callers need the full set to dedupe against entities exactly.
-          size: MAX_ALERTS_PER_CASE,
+          size: this.termsSize,
         },
         aggs: {
           top_fields: {

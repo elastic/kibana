@@ -12,12 +12,33 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { AlertDetails } from './details';
 import { mockAlertsService } from '../test_utils/alerts';
-import type { SingleCaseBaseHandlerCommonOptions } from '../types';
+import type { SingleCaseBaseHandlerCommonOptions, AggregationBuilder } from '../types';
 import { CaseMetricsFeature } from '../../../../common/types/api';
 import { createAttachmentServiceMock } from '../../../services/mocks';
 import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
-import { CASE_ATTACHMENT_SAVED_OBJECT } from '../../../../common/constants';
+import { CASE_ATTACHMENT_SAVED_OBJECT, MAX_ALERTS_PER_CASE } from '../../../../common/constants';
 import { getOwnersFilter } from '../../../authorization/utils';
+import { AlertHosts, AlertUsers } from './aggregations';
+
+const DISPLAY_LIMIT = 10;
+
+const buildEntityAttachment = (id: string, entityName: string, entityType: 'user' | 'host') => ({
+  id,
+  type: 'cases-attachments',
+  references: [],
+  attributes: {
+    type: SECURITY_ENTITY_ATTACHMENT_TYPE,
+    attachmentId: `${entityType}:${entityName}@default`,
+    metadata: { entityName, entityType },
+    owner: 'securitySolution',
+    created_at: '2020-01-01T00:00:00.000Z',
+    created_by: { username: 'elastic', full_name: null, email: null },
+    pushed_at: null,
+    pushed_by: null,
+    updated_at: null,
+    updated_by: null,
+  },
+});
 
 describe('AlertDetails', () => {
   let client: CasesClientMock;
@@ -57,6 +78,28 @@ describe('AlertDetails', () => {
       filter: getOwnersFilter(CASE_ATTACHMENT_SAVED_OBJECT, ['securitySolution']),
     });
     expect(getAuthorizationFilter).toHaveBeenCalled();
+  });
+
+  it('fetches alerts and entity attachments concurrently rather than sequentially', async () => {
+    let resolveAlerts: (
+      value: Array<{ id: string; index: string; attached_at: string }>
+    ) => void = () => {};
+    client.attachments.getAllDocumentsAttachedToCase.mockReturnValue(
+      new Promise((resolve) => {
+        resolveAlerts = resolve;
+      })
+    );
+
+    const handler = new AlertDetails(constructorOptions);
+    handler.setupFeature(CaseMetricsFeature.ALERTS_USERS);
+    const computePromise = handler.compute();
+
+    // The entity attachment fetch shouldn't wait on the (still-pending) alerts fetch.
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(attachmentService.getter.getUnifiedAttachmentsByTypes).toHaveBeenCalled();
+
+    resolveAlerts([]);
+    await computePromise;
   });
 
   it('returns empty alert details metrics when no features were setup', async () => {
@@ -352,6 +395,85 @@ describe('AlertDetails', () => {
         users: { total: 0, values: [] },
         hosts: { total: 0, values: [] },
       },
+    });
+  });
+
+  describe('aggregation widening', () => {
+    const getBuiltAggregationSizes = () => {
+      const { aggregationBuilders } = mockServices.services.alertsService.executeAggregations.mock
+        .calls[0][0] as { aggregationBuilders: Array<AggregationBuilder<unknown>> };
+
+      const usersBuilder = aggregationBuilders.find((builder) => builder instanceof AlertUsers);
+      const hostsBuilder = aggregationBuilders.find((builder) => builder instanceof AlertHosts);
+
+      return {
+        users: (usersBuilder?.build() as { users_frequency: { terms: { size: number } } })
+          ?.users_frequency.terms.size,
+        hosts: (hostsBuilder?.build() as { hosts_frequency: { terms: { size: number } } })
+          ?.hosts_frequency.terms.size,
+      };
+    };
+
+    it('keeps the display-limit-sized aggregations when there are no entity attachments', async () => {
+      const handler = new AlertDetails(constructorOptions);
+      handler.setupFeature(CaseMetricsFeature.ALERTS_USERS);
+      handler.setupFeature(CaseMetricsFeature.ALERTS_HOSTS);
+
+      await handler.compute();
+
+      expect(getBuiltAggregationSizes()).toEqual({ users: DISPLAY_LIMIT, hosts: DISPLAY_LIMIT });
+    });
+
+    it('widens only the users aggregation when there are only user entity attachments', async () => {
+      attachmentService.getter.getUnifiedAttachmentsByTypes.mockResolvedValue([
+        buildEntityAttachment('entity-1', 'alice', 'user'),
+      ]);
+
+      const handler = new AlertDetails(constructorOptions);
+      handler.setupFeature(CaseMetricsFeature.ALERTS_USERS);
+      handler.setupFeature(CaseMetricsFeature.ALERTS_HOSTS);
+
+      await handler.compute();
+
+      expect(getBuiltAggregationSizes()).toEqual({
+        users: MAX_ALERTS_PER_CASE,
+        hosts: DISPLAY_LIMIT,
+      });
+    });
+
+    it('widens only the hosts aggregation when there are only host entity attachments', async () => {
+      attachmentService.getter.getUnifiedAttachmentsByTypes.mockResolvedValue([
+        buildEntityAttachment('entity-1', 'web01', 'host'),
+      ]);
+
+      const handler = new AlertDetails(constructorOptions);
+      handler.setupFeature(CaseMetricsFeature.ALERTS_USERS);
+      handler.setupFeature(CaseMetricsFeature.ALERTS_HOSTS);
+
+      await handler.compute();
+
+      expect(getBuiltAggregationSizes()).toEqual({
+        users: DISPLAY_LIMIT,
+        hosts: MAX_ALERTS_PER_CASE,
+      });
+    });
+
+    it('widens both aggregations when there are both user and host entity attachments', async () => {
+      attachmentService.getter.getUnifiedAttachmentsByTypes.mockResolvedValue([
+        buildEntityAttachment('entity-1', 'alice', 'user'),
+        buildEntityAttachment('entity-2', 'web01', 'host'),
+      ]);
+
+      const handler = new AlertDetails(constructorOptions);
+      handler.setupFeature(CaseMetricsFeature.ALERTS_USERS);
+      handler.setupFeature(CaseMetricsFeature.ALERTS_HOSTS);
+
+      await handler.compute();
+
+      expect(getBuiltAggregationSizes()).toEqual({
+        users: MAX_ALERTS_PER_CASE,
+        hosts: MAX_ALERTS_PER_CASE,
+      });
     });
   });
 });

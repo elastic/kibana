@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SavedObject } from '@kbn/core/server';
 import { AttachmentType } from '../../../../common';
 import { CASE_ATTACHMENT_SAVED_OBJECT } from '../../../../common/constants';
 import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
@@ -13,11 +14,12 @@ import { CaseMetricsFeature } from '../../../../common/types/api';
 import { Operations } from '../../../authorization';
 import { getOwnersFilter } from '../../../authorization/utils';
 import { createCaseError } from '../../../common/error';
+import type { UnifiedAttachmentAttributes } from '../../../common/types/attachments_v2';
 
 import { SingleCaseAggregationHandler } from '../single_case_aggregation_handler';
 import type { AggregationBuilder, SingleCaseBaseHandlerCommonOptions } from '../types';
 import { AlertHosts, AlertUsers } from './aggregations';
-import type { KnownAlertNames } from './entity_associated';
+import type { EntityAssociatedNames, KnownAlertNames } from './entity_associated';
 import {
   collectEntityAssociatedNames,
   mergeAlertMetricsWithEntityNames,
@@ -36,8 +38,7 @@ export class AlertDetails extends SingleCaseAggregationHandler {
 
   public async compute(): Promise<SingleCaseMetricsResponse> {
     const {
-      authorization,
-      services: { alertsService, attachmentService },
+      services: { alertsService },
       logger,
     } = this.options.clientArgs;
     const { casesClient } = this.options;
@@ -47,10 +48,17 @@ export class AlertDetails extends SingleCaseAggregationHandler {
         return {};
       }
 
-      const alerts = await casesClient.attachments.getAllDocumentsAttachedToCase({
-        caseId: this.caseId,
-        attachmentTypes: [AttachmentType.alert],
-      });
+      // Independent of each other until merged below, so fetch them concurrently.
+      const [alerts, entityAttachments] = await Promise.all([
+        casesClient.attachments.getAllDocumentsAttachedToCase({
+          caseId: this.caseId,
+          attachmentTypes: [AttachmentType.alert],
+        }),
+        this.getEntityAttachments(),
+      ]);
+
+      const entityNames = collectEntityAssociatedNames(entityAttachments);
+      this.widenAggregationsForEntities(entityNames);
 
       let metrics: SingleCaseMetricsResponse =
         this.formatResponse<SingleCaseMetricsResponse>(undefined);
@@ -68,32 +76,59 @@ export class AlertDetails extends SingleCaseAggregationHandler {
         };
       }
 
-      // Entity attachments only live on cases-attachments; getAttachmentAuthorizationFilter
-      // ORs in cases-comments, which Saved Objects rejects for an attachments-only find.
-      const { authorizedOwners } = await authorization.getAuthorizationFilter(
-        Operations.getAttachmentMetrics
-      );
-      const authorizationFilter = authorizedOwners?.length
-        ? getOwnersFilter(CASE_ATTACHMENT_SAVED_OBJECT, authorizedOwners)
-        : undefined;
-
-      const entityAttachments = await attachmentService.getter.getUnifiedAttachmentsByTypes({
-        caseId: this.caseId,
-        types: [SECURITY_ENTITY_ATTACHMENT_TYPE],
-        filter: authorizationFilter,
-      });
-
-      return mergeAlertMetricsWithEntityNames(
-        metrics,
-        collectEntityAssociatedNames(entityAttachments),
-        knownAlertNames
-      );
+      return mergeAlertMetricsWithEntityNames(metrics, entityNames, knownAlertNames);
     } catch (error) {
       throw createCaseError({
         message: `Failed to retrieve alerts details attached case id: ${this.caseId}: ${error}`,
         error,
         logger,
       });
+    }
+  }
+
+  private async getEntityAttachments(): Promise<Array<SavedObject<UnifiedAttachmentAttributes>>> {
+    const {
+      authorization,
+      services: { attachmentService },
+    } = this.options.clientArgs;
+
+    // Entity attachments only live on cases-attachments; getAttachmentAuthorizationFilter
+    // ORs in cases-comments, which Saved Objects rejects for an attachments-only find.
+    const { authorizedOwners } = await authorization.getAuthorizationFilter(
+      Operations.getAttachmentMetrics
+    );
+    const authorizationFilter = authorizedOwners?.length
+      ? getOwnersFilter(CASE_ATTACHMENT_SAVED_OBJECT, authorizedOwners)
+      : undefined;
+
+    return attachmentService.getter.getUnifiedAttachmentsByTypes({
+      caseId: this.caseId,
+      types: [SECURITY_ENTITY_ATTACHMENT_TYPE],
+      filter: authorizationFilter,
+    });
+  }
+
+  /**
+   * Widens the underlying alert aggregations to capture every unique name (not just the
+   * displayed top-N) so they can be exactly deduped against entity names — but only for the
+   * entity kinds actually present, since widening is expensive (up to 100x the aggregation
+   * buckets) and pointless when there's nothing of that kind to reconcile against.
+   */
+  private widenAggregationsForEntities(entityNames: EntityAssociatedNames): void {
+    const widenUsers = entityNames.userNames.size > 0;
+    const widenHosts = entityNames.hostsByName.size > 0;
+
+    if (!widenUsers && !widenHosts) {
+      return;
+    }
+
+    for (const builder of this.aggregationBuilders) {
+      if (widenUsers && builder instanceof AlertUsers) {
+        builder.widenToExhaustive();
+      }
+      if (widenHosts && builder instanceof AlertHosts) {
+        builder.widenToExhaustive();
+      }
     }
   }
 }
