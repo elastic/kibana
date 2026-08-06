@@ -415,7 +415,9 @@ export const GithubConnector: ConnectorSpec = {
         if (labels !== undefined) requestBody.labels = labels;
         if (milestone !== undefined) requestBody.milestone = milestone;
         const response = await ctx.client.post(
-          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues`,
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/issues`,
           requestBody,
           { headers: GITHUB_API_VERSION_HEADER }
         );
@@ -431,7 +433,9 @@ export const GithubConnector: ConnectorSpec = {
       handler: async (ctx, input: AddIssueCommentInput) => {
         const { owner, repo, issueNumber, body } = input;
         const response = await ctx.client.post(
-          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/${issueNumber}/comments`,
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/issues/${issueNumber}/comments`,
           { body },
           { headers: GITHUB_API_VERSION_HEADER }
         );
@@ -455,7 +459,9 @@ export const GithubConnector: ConnectorSpec = {
         if (labels !== undefined) requestBody.labels = labels;
         if (milestone !== undefined) requestBody.milestone = milestone;
         const response = await ctx.client.patch(
-          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/${issueNumber}`,
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/issues/${issueNumber}`,
           requestBody,
           { headers: GITHUB_API_VERSION_HEADER }
         );
@@ -495,7 +501,9 @@ export const GithubConnector: ConnectorSpec = {
         if (commitTitle !== undefined) requestBody.commit_title = commitTitle;
         if (commitMessage !== undefined) requestBody.commit_message = commitMessage;
         const response = await ctx.client.put(
-          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls/${pullNumber}/merge`,
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/pulls/${pullNumber}/merge`,
           requestBody,
           { headers: GITHUB_API_VERSION_HEADER }
         );
@@ -511,7 +519,9 @@ export const GithubConnector: ConnectorSpec = {
       handler: async (ctx, input: AddLabelsInput) => {
         const { owner, repo, issueNumber, labels } = input;
         const response = await ctx.client.post(
-          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/${issueNumber}/labels`,
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/issues/${issueNumber}/labels`,
           { labels },
           { headers: GITHUB_API_VERSION_HEADER }
         );
@@ -527,7 +537,9 @@ export const GithubConnector: ConnectorSpec = {
       handler: async (ctx, input: AddAssigneeInput) => {
         const { owner, repo, issueNumber, assignees } = input;
         const response = await ctx.client.post(
-          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues/${issueNumber}/assignees`,
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/issues/${issueNumber}/assignees`,
           { assignees },
           { headers: GITHUB_API_VERSION_HEADER }
         );
@@ -543,7 +555,9 @@ export const GithubConnector: ConnectorSpec = {
       handler: async (ctx, input: CreateBranchInput) => {
         const { owner, repo, ref, sha } = input;
         const response = await ctx.client.post(
-          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/refs`,
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/git/refs`,
           { ref, sha },
           { headers: GITHUB_API_VERSION_HEADER }
         );
@@ -562,7 +576,9 @@ export const GithubConnector: ConnectorSpec = {
         if (sha !== undefined) requestBody.sha = sha;
         if (branch !== undefined) requestBody.branch = branch;
         const response = await ctx.client.put(
-          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path.split('/').map(encodeURIComponent).join('/')}`,
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/contents/${path.split('/').map(encodeURIComponent).join('/')}`,
           requestBody,
           { headers: GITHUB_API_VERSION_HEADER }
         );
@@ -585,7 +601,9 @@ export const GithubConnector: ConnectorSpec = {
         if (maintainerCanModify !== undefined)
           requestBody.maintainer_can_modify = maintainerCanModify;
         const response = await ctx.client.patch(
-          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls/${pullNumber}`,
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/pulls/${pullNumber}`,
           requestBody,
           { headers: GITHUB_API_VERSION_HEADER }
         );
@@ -596,7 +614,7 @@ export const GithubConnector: ConnectorSpec = {
     requestReviewers: {
       isTool: true,
       description:
-        'Request one or more reviewers (individuals or teams) on a pull request. Reviewers are added without removing existing requests. Returns the updated PR.',
+        'Request one or more reviewers (individuals or teams) on a pull request. Reviewers are added without removing existing requests. Returns the updated PR. Note: GitHub rejects requests where a reviewer is the same user as the PR author with a 422 error — do not request the authenticated user as a reviewer on their own PR.',
       input: RequestReviewersInputSchema,
       handler: async (ctx, input: RequestReviewersInput) => {
         const { owner, repo, pullNumber, reviewers, teamReviewers } = input;
@@ -604,7 +622,9 @@ export const GithubConnector: ConnectorSpec = {
         if (reviewers !== undefined) requestBody.reviewers = reviewers;
         if (teamReviewers !== undefined) requestBody.team_reviewers = teamReviewers;
         const response = await ctx.client.post(
-          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/pulls/${pullNumber}/requested_reviewers`,
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/pulls/${pullNumber}/requested_reviewers`,
           requestBody,
           { headers: GITHUB_API_VERSION_HEADER }
         );
@@ -622,7 +642,9 @@ export const GithubConnector: ConnectorSpec = {
         const requestBody: Record<string, unknown> = { ref };
         if (inputs !== undefined) requestBody.inputs = inputs;
         await ctx.client.post(
-          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/workflows/${encodeURIComponent(workflowId)}/dispatches`,
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/actions/workflows/${encodeURIComponent(workflowId)}/dispatches`,
           requestBody,
           { headers: GITHUB_API_VERSION_HEADER }
         );
@@ -673,6 +695,7 @@ export const GithubConnector: ConnectorSpec = {
 
   skill: [
     'Action strategy guide:',
+    '- Parameter names are camelCase. Use the exact names shown (e.g. issueNumber, pullNumber, workflowId) — never snake_case equivalents like issue_number or pull_number.',
     '- Start with getMe to identify the authenticated user.',
     '- For broad discovery: use search* actions (searchCode, searchRepositories, searchIssues, searchPullRequests, searchUsers).',
     '- For browsing a specific repo: use list* actions (listIssues, listPullRequests, listCommits, listBranches, listReleases, listTags). All use cursor-based pagination via "first" + "after".',
