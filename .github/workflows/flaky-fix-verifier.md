@@ -190,7 +190,7 @@ safe-outputs:
   update-pull-request:
     operation: replace
     footer: false
-    target: '*'
+    target: *pr_number
     max: 1
   # Custom safe-job: take the draft fix PR out of draft once verification is done.
   jobs:
