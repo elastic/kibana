@@ -151,6 +151,7 @@ export {
   type ConversationAccessControl,
   type ToolCallWithResult,
   type ConversationRound,
+  type ConversationRoundFeedback,
   type Conversation,
   type ConversationOrigin,
   type ConversationRoundAuthor,

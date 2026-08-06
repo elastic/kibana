@@ -317,6 +317,26 @@ export enum ConversationDisplayStatus {
 }
 
 /**
+ * User feedback submitted for a conversation round.
+ */
+export interface ConversationRoundFeedback {
+  /** Thumbs up or thumbs down */
+  vote: 'up' | 'down';
+  /** Optional chip labels selected by the user */
+  chips?: string[];
+  /** Optional free-text comment */
+  comment?: string;
+  /** ISO timestamp when the feedback was submitted */
+  submitted_at: string;
+  /** Connector ID from the round's model_usage at submission time */
+  connector_id?: string;
+  /** Model identifier from the round's model_usage at submission time */
+  model?: string;
+  /** Trace ID from the round at submission time */
+  trace_id?: string;
+}
+
+/**
  * Represents a round in a conversation, containing all the information
  * related to this particular round.
  */
@@ -351,6 +371,8 @@ export interface ConversationRound {
   trace_id?: string | string[];
   /** Runtime configuration overrides that were applied to this round */
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
+  /** User feedback for this round, if submitted */
+  feedback?: ConversationRoundFeedback;
 }
 
 export interface ConversationOrigin {
