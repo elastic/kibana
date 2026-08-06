@@ -33,7 +33,7 @@ export const useFetchSignificantEvents = ({
   stream,
   search,
 }: UseFetchSignificantEventsParams) => {
-  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;;
+  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
   const showFetchErrorToast = useFetchErrorToast();
 
   const [pagination, setPagination] = useState({ page: 1, perPage: 25 });

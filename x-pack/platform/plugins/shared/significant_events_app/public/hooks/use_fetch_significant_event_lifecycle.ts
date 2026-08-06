@@ -11,7 +11,7 @@ import { useKibana } from './use_kibana';
 import { useFetchErrorToast } from './use_fetch_error_toast';
 
 export const useFetchSignificantEventLifecycle = (eventUuid: string | undefined) => {
-  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;;
+  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
   const showFetchErrorToast = useFetchErrorToast();
 
   return useQuery<EventLifecycleResponse, Error>({

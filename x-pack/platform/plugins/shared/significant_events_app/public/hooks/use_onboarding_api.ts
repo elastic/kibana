@@ -20,7 +20,7 @@ export interface ScheduleOnboardingOptions {
 }
 
 export function useOnboardingApi() {
-  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;;
+  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
 
   const { signal } = useAbortController();
 

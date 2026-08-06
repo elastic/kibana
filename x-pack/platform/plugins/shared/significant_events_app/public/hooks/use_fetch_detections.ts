@@ -18,7 +18,7 @@ interface UseFetchDetectionsParams {
 }
 
 export const useFetchDetections = ({ from, to }: UseFetchDetectionsParams) => {
-  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;;
+  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
   const showFetchErrorToast = useFetchErrorToast();
 
   const [pagination, setPagination] = useState({ page: 1, perPage: 25 });
@@ -57,7 +57,7 @@ export const useFetchDetections = ({ from, to }: UseFetchDetectionsParams) => {
 };
 
 export const useFetchDetectionHistory = (ruleUuid: string | undefined) => {
-  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;;
+  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
   const showFetchErrorToast = useFetchErrorToast();
 
   return useQuery<{ hits: Detection[] }, Error>({
