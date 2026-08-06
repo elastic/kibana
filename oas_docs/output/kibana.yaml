@@ -68985,7 +68985,6 @@ paths:
                               items:
                                 $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
                               type: array
-                            updated_at: {}
                           required:
                             - steps
                         settings:
@@ -69080,7 +69079,6 @@ paths:
                                   items:
                                     $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
                                   type: array
-                                updated_at: {}
                               required:
                                 - steps
                             - additionalProperties: false
@@ -69091,7 +69089,6 @@ paths:
                                     additionalProperties: {}
                                     type: object
                                   type: array
-                                updated_at: {}
                               required:
                                 - processors
                         settings:
@@ -88445,7 +88442,6 @@ components:
                           items:
                             $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
                           type: array
-                        updated_at: {}
                       required:
                         - steps
                     - additionalProperties: false
@@ -88456,7 +88452,6 @@ components:
                             additionalProperties: {}
                             type: object
                           type: array
-                        updated_at: {}
                       required:
                         - processors
                 settings:
@@ -113057,7 +113052,6 @@ components:
                       items:
                         $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
                       type: array
-                    updated_at: {}
                   required:
                     - steps
                 settings:
