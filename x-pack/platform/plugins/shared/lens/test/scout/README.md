@@ -2,7 +2,7 @@
 
 ## Namespaces
 
-The Lens Scout suite is split into [namespaces](https://www.elastic.co/docs/extend/kibana/testing/setup-scout#scout-namespaces) so that each Playwright config carries a homogeneous set of environment tags. Scout schedules environments per config rather than per test, so a config that mixes `@local-stateful-classic` with deployment-agnostic tests is spun up in every environment — including ones where the stateful-only tests can never run. Keeping the tags homogeneous is what stops the Flaky Test Runner from fanning a stateful-only suite out across four environments.
+The Lens Scout suite is split into [namespaces](https://www.elastic.co/docs/extend/kibana/testing/setup-scout#scout-namespaces) so that each Playwright config carries a homogeneous set of environment tags.
 
 ```
 lens/test/scout/
@@ -21,8 +21,6 @@ lens/test/scout/
 | `core/api/playwright.config.ts` | all |
 | `open_in_lens/ui/parallel.playwright.config.ts` | all |
 | `tsdb/ui/playwright.config.ts` | all |
-
-When adding a spec, put it in the namespace whose tag set matches. A deployment-agnostic test added to `core/ui` would drag that config back into all four environments and undo the split.
 
 ## Running tests
 
@@ -58,15 +56,3 @@ After moving or adding specs, refresh the generated manifests under each namespa
 ```bash
 node scripts/scout update-test-config-manifests
 ```
-
-## TSVB Open in Lens coverage notes
-
-The TSVB Open in Lens Scout tests verify that TSVB panels convert correctly to Lens.
-
-The non-dashboard TSVB conversion specs focus on conversion logic. The following dashboard persistence flows are tracked separately in `open_in_lens/ui/parallel_tests/tsvb/convert_from_dashboard.spec.ts`:
-
-- Save and return to dashboard: does the converted panel persist after saving?
-- Replace in dashboard: does the converted Lens panel replace the original TSVB panel?
-- Save to library: can the converted visualization be saved as a library item?
-
-The dashboard conversion spec is temporarily marked `fixme` while Scout stability is validated. The original stateful FTR suite was skipped for [#179307](https://github.com/elastic/kibana/issues/179307), while serverless FTR also covered these dashboard flows, so keep the skip temporary and confirm follow-up coverage before removing the old context.
