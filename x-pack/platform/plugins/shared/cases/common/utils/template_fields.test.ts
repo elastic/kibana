@@ -154,6 +154,96 @@ describe('template field key utils', () => {
       });
       expect(result.metadata?.default).toBeUndefined();
     });
+
+    const showWhen = {
+      combine: 'all' as const,
+      rules: [{ field: 'toggle_field', operator: 'eq' as const, value: true }],
+    };
+
+    it('applies a local display.show_when override onto a $ref field', () => {
+      const result = applyRefFieldOverride(libField, {
+        $ref: 'lib_field',
+        display: { show_when: showWhen },
+      });
+      expect(result.display?.show_when).toEqual(showWhen);
+    });
+
+    it('applies a local validation.required_when override onto a $ref field', () => {
+      const result = applyRefFieldOverride(libField, {
+        $ref: 'lib_field',
+        validation: { required_when: showWhen },
+      });
+      expect(result.validation?.required_when).toEqual(showWhen);
+    });
+
+    it('leaves display/validation untouched when the $ref has no override', () => {
+      const result = applyRefFieldOverride(libField, { $ref: 'lib_field' });
+      expect(result.display).toBeUndefined();
+      expect(result.validation).toBeUndefined();
+    });
+
+    describe('validation merge', () => {
+      const libFieldWithValidation: InlineField = {
+        ...libField,
+        validation: {
+          required: true,
+          pattern: { regex: '^[a-z]+$' },
+          min_length: 2,
+          max_length: 10,
+        },
+      };
+
+      it('preserves the library format constraints when the override only sets an unrelated key', () => {
+        const result = applyRefFieldOverride(libFieldWithValidation, {
+          $ref: 'lib_field',
+          validation: { max_length: 20 },
+        });
+        expect(result.validation).toEqual({
+          required: true,
+          pattern: { regex: '^[a-z]+$' },
+          min_length: 2,
+          max_length: 20,
+        });
+      });
+
+      it('drops the library required-family keys when the override defines a different required* key', () => {
+        const result = applyRefFieldOverride(libFieldWithValidation, {
+          $ref: 'lib_field',
+          validation: { required_when: showWhen },
+        });
+        expect(result.validation).toEqual({
+          required_when: showWhen,
+          pattern: { regex: '^[a-z]+$' },
+          min_length: 2,
+          max_length: 10,
+        });
+        expect(result.validation?.required).toBeUndefined();
+      });
+
+      it('drops the library required-family keys even when the override sets required_on_close only', () => {
+        const result = applyRefFieldOverride(libFieldWithValidation, {
+          $ref: 'lib_field',
+          validation: { required_on_close: true },
+        });
+        expect(result.validation?.required).toBeUndefined();
+        expect(result.validation?.required_when).toBeUndefined();
+        expect(result.validation?.required_on_close).toBe(true);
+        expect(result.validation?.pattern).toEqual({ regex: '^[a-z]+$' });
+      });
+
+      it('lets the override redeclare required alongside other required* keys unchanged by it', () => {
+        const result = applyRefFieldOverride(libFieldWithValidation, {
+          $ref: 'lib_field',
+          validation: { required: false },
+        });
+        expect(result.validation).toEqual({
+          required: false,
+          pattern: { regex: '^[a-z]+$' },
+          min_length: 2,
+          max_length: 10,
+        });
+      });
+    });
   });
 
   describe('resolveTemplateFields', () => {
@@ -201,6 +291,16 @@ describe('template field key utils', () => {
     it('drops a $ref that cannot be resolved in the library', () => {
       const ref: RefField = { $ref: 'unknown' };
       expect(resolveTemplateFields([ref], libDefs)).toEqual([]);
+    });
+
+    it('preserves a local display.show_when authored on a $ref entry (regression: previously silently dropped)', () => {
+      const showWhen = {
+        combine: 'all' as const,
+        rules: [{ field: 'open_tuning_request', operator: 'eq' as const, value: true }],
+      };
+      const ref: RefField = { $ref: 'lib_text', display: { show_when: showWhen } };
+      const [resolved] = resolveTemplateFields([ref], libDefs);
+      expect(resolved.display?.show_when).toEqual(showWhen);
     });
 
     it('produces an empty extended-fields default for a null-cleared $ref', () => {
