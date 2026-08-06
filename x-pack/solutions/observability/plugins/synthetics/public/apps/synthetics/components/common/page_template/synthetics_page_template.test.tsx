@@ -10,8 +10,11 @@ import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import type { EuiPageHeaderProps } from '@elastic/eui';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { render as rtlRender } from '@testing-library/react';
 import { render } from '../../../utils/testing';
 import { WrappedPageTemplate } from './synthetics_page_template';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 describe('WrappedPageTemplate', () => {
   const inPageBreadcrumbs = [{ text: 'Monitors', href: '/app/synthetics/monitors' }];
@@ -31,7 +34,7 @@ describe('WrappedPageTemplate', () => {
       return null;
     };
 
-    render(
+    render<Pick<ClientPluginsStart, 'observabilityShared'>>(
       <WrappedPageTemplate
         pageHeader={{ pageTitle: 'Monitor name', breadcrumbs: inPageBreadcrumbs }}
       />,
@@ -44,7 +47,7 @@ describe('WrappedPageTemplate', () => {
             next: { ...defaultChrome.next, isEnabled: isNextChromeEnabled },
           },
           observabilityShared: { navigation: { PageTemplate } },
-        } as any,
+        },
       }
     );
 
@@ -83,15 +86,12 @@ describe('WrappedPageTemplate', () => {
       return null;
     };
 
-    render(
-      <WrappedPageTemplate
-        pageHeader={{ pageTitle: 'Monitor name', breadcrumbs: inPageBreadcrumbs }}
-      />,
-      {
-        core: {
-          observabilityShared: { navigation: { PageTemplate } },
-        } as any,
-      }
+    rtlRender(
+      <KibanaContextProvider services={{ observabilityShared: { navigation: { PageTemplate } } }}>
+        <WrappedPageTemplate
+          pageHeader={{ pageTitle: 'Monitor name', breadcrumbs: inPageBreadcrumbs }}
+        />
+      </KibanaContextProvider>
     );
 
     expect(receivedPageHeaders.at(-1)?.breadcrumbs).toEqual(inPageBreadcrumbs);

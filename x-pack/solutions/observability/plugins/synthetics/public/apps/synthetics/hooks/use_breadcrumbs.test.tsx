@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
 import { createMemoryHistory } from 'history';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { render } from '../utils/testing';
@@ -18,6 +17,8 @@ import type { SyntheticsUrlParams } from '../utils/url_params/get_supported_url_
 import { getSupportedUrlParams } from '../utils/url_params/get_supported_url_params';
 import { makeBaseBreadcrumb, useBreadcrumbs } from './use_breadcrumbs';
 import { SyntheticsSettingsContext } from '../contexts';
+import type { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 
@@ -36,7 +37,7 @@ describe('useBreadcrumbs', () => {
   ];
 
   const renderAtRoute = (route: string, url: string = route) => {
-    const [getBreadcrumbs, core] = mockCore();
+    const { core, getBreadcrumbs } = createBreadcrumbsCore();
 
     const Component = () => {
       useBreadcrumbs(expectedCrumbs);
@@ -115,27 +116,28 @@ describe('useBreadcrumbs', () => {
   });
 });
 
-const mockCore: () => [() => ChromeBreadcrumb[], any] = () => {
+const createBreadcrumbsCore = (): {
+  core: Pick<CoreStart, 'application' | 'chrome'>;
+  getBreadcrumbs: () => ChromeBreadcrumb[];
+} => {
   let breadcrumbObj: ChromeBreadcrumb[] = [];
-  const get = () => {
-    return breadcrumbObj;
-  };
   const defaultCoreMock = coreMock.createStart();
 
-  const core = {
-    application: {
-      getUrlForApp: (app: string) =>
-        app === 'synthetics' ? '/app/synthetics' : '/app/observability',
-      navigateToUrl: jest.fn(),
-    },
-    chrome: {
-      ...defaultCoreMock.chrome,
-      getChromeStyle$: () => new BehaviorSubject<ChromeStyle>('classic').asObservable(),
-      setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
-        breadcrumbObj = newBreadcrumbs;
+  return {
+    getBreadcrumbs: () => breadcrumbObj,
+    core: {
+      application: {
+        getUrlForApp: (app: string) =>
+          app === 'synthetics' ? '/app/synthetics' : '/app/observability',
+        navigateToUrl: jest.fn(),
+      } as unknown as CoreStart['application'],
+      chrome: {
+        ...defaultCoreMock.chrome,
+        getChromeStyle$: () => new BehaviorSubject<ChromeStyle>('classic').asObservable(),
+        setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
+          breadcrumbObj = newBreadcrumbs;
+        },
       },
     },
   };
-
-  return [get, core];
 };
