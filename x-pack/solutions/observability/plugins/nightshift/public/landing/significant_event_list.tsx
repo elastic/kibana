@@ -95,16 +95,13 @@ export function SignificantEventList({
             <p>
               {filterActive
                 ? statusColor === 'success'
-                  ? i18n.translate(
-                      'xpack.observability.nightshift.list.filteredResolvedEmptyDescription',
-                      {
-                        defaultMessage: 'No resolved events match this filter.',
-                      }
-                    )
-                  : i18n.translate('xpack.observability.nightshift.list.filteredEmptyDescription', {
+                  ? i18n.translate('xpack.nightshift.list.filteredResolvedEmptyDescription', {
+                      defaultMessage: 'No resolved events match this filter.',
+                    })
+                  : i18n.translate('xpack.nightshift.list.filteredEmptyDescription', {
                       defaultMessage: 'No events match this filter.',
                     })
-                : i18n.translate('xpack.observability.nightshift.list.emptyDescription', {
+                : i18n.translate('xpack.nightshift.list.emptyDescription', {
                     defaultMessage: 'No significant events found',
                   })}
             </p>
@@ -128,7 +125,7 @@ export function SignificantEventList({
                           : NIGHTSHIFT_EBT_DETAILS.RESOLVED,
                     })}
                   >
-                    {i18n.translate('xpack.observability.nightshift.list.clearFilterButton', {
+                    {i18n.translate('xpack.nightshift.list.clearFilterButton', {
                       defaultMessage: 'Clear filter',
                     })}
                   </EuiButtonEmpty>
