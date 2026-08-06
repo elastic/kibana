@@ -18,14 +18,19 @@ import { PLUGIN } from '../../../../../common/constants/plugin';
 import type { ClientPluginsStart } from '../../../../plugin';
 
 export const MonitorNotFoundPage: React.FC = () => {
+  useMonitorListBreadcrumbs([{ text: MONITOR_NOT_FOUND_TITLE }]);
+
+  return <MonitorNotFoundPrompt />;
+};
+
+// Kept separate so the edit route can render it without owning breadcrumbs.
+export const MonitorNotFoundPrompt: React.FC = () => {
   const { application } = useKibana<ClientPluginsStart>().services;
   const { monitorId } = useParams<{ monitorId: string }>();
 
-  useMonitorListBreadcrumbs([{ text: NOT_FOUND_TITLE }]);
-
   return (
     <NotFoundPrompt
-      title={NOT_FOUND_TITLE}
+      title={MONITOR_NOT_FOUND_TITLE}
       body={
         <FormattedMessage
           id="xpack.synthetics.prompt.errors.notFound.body"
@@ -52,6 +57,9 @@ export const MonitorNotFoundPage: React.FC = () => {
   );
 };
 
-const NOT_FOUND_TITLE = i18n.translate('xpack.synthetics.prompt.errors.notFound.title', {
-  defaultMessage: 'Monitor not found',
-});
+export const MONITOR_NOT_FOUND_TITLE = i18n.translate(
+  'xpack.synthetics.prompt.errors.notFound.title',
+  {
+    defaultMessage: 'Monitor not found',
+  }
+);

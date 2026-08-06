@@ -75,4 +75,25 @@ describe('WrappedPageTemplate', () => {
 
     expect(pageHeaders[0]?.breadcrumbs).toBeUndefined();
   });
+
+  it('keeps the in-page breadcrumbs when chrome is missing from services', () => {
+    const receivedPageHeaders: Array<EuiPageHeaderProps | undefined> = [];
+    const PageTemplate = ({ pageHeader }: { pageHeader?: EuiPageHeaderProps }) => {
+      receivedPageHeaders.push(pageHeader);
+      return null;
+    };
+
+    render(
+      <WrappedPageTemplate
+        pageHeader={{ pageTitle: 'Monitor name', breadcrumbs: inPageBreadcrumbs }}
+      />,
+      {
+        core: {
+          observabilityShared: { navigation: { PageTemplate } },
+        } as any,
+      }
+    );
+
+    expect(receivedPageHeaders.at(-1)?.breadcrumbs).toEqual(inPageBreadcrumbs);
+  });
 });

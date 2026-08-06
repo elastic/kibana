@@ -23,14 +23,14 @@ export const WrappedPageTemplate = (props: LazyObservabilityPageTemplateProps) =
     () => chrome?.getChromeStyle$() ?? of<ChromeStyle>('classic'),
     [chrome]
   );
-  // Seeded synchronously, otherwise the breadcrumbs paint once before the subscription drops them.
+  // Seed synchronously to avoid a one-frame breadcrumb flicker.
   const chromeStyle = useObservable<ChromeStyle>(
     chromeStyle$,
     chrome?.getChromeStyle() ?? 'classic'
   );
 
   // The chrome header renders its own back button, so in-page breadcrumbs would duplicate it.
-  const hasChromeBackButton = Boolean(chrome?.next.isEnabled) && chromeStyle === 'project';
+  const hasChromeBackButton = Boolean(chrome?.next?.isEnabled) && chromeStyle === 'project';
   const pageHeader =
     hasChromeBackButton && props.pageHeader
       ? { ...props.pageHeader, breadcrumbs: undefined }
