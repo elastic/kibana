@@ -127,7 +127,9 @@ export const createAgentGraph = ({
       return {
         mainActions: [action],
         currentCycle,
-        errorCount: 0,
+        // Successful inference calls can still produce recoverable error actions,
+        // which must count toward the retry limit.
+        errorCount: isAgentErrorAction(action) ? state.errorCount + 1 : 0,
       };
     } catch (error) {
       const executionError = convertError(error);

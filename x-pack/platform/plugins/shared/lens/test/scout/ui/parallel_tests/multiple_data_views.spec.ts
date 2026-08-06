@@ -6,9 +6,14 @@
  */
 
 import type { DebugState } from '@elastic/charts';
-import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { addDataLayer, enableElasticChartDebug, openEmptyLensEditor, testData } from '../fixtures';
+import {
+  addDataLayer,
+  enableElasticChartDebug,
+  openEmptyLensEditor,
+  spaceTest,
+  testData,
+} from '../fixtures';
 
 const VIS_TITLE = 'xyChart with multiple data views';
 
