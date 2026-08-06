@@ -18,7 +18,7 @@ describe('getAutoDetectCommand', () => {
     metricsEnabled: true,
   };
 
-  it('generates basic command without wired streams', () => {
+  it('generates the basic command', () => {
     const command = getAutoDetectCommand(baseParams);
 
     expect(command).toContain('curl http://localhost:5603/api/auto_detect.sh');
@@ -31,30 +31,6 @@ describe('getAutoDetectCommand', () => {
     expect(command).not.toContain('--metrics-enabled=false');
   });
 
-  it('includes --write-to-logs-stream=true when useWiredStreams is true', () => {
-    const command = getAutoDetectCommand({
-      ...baseParams,
-      useWiredStreams: true,
-    });
-
-    expect(command).toContain('--write-to-logs-stream=true');
-  });
-
-  it('does NOT include --write-to-logs-stream when useWiredStreams is false', () => {
-    const command = getAutoDetectCommand({
-      ...baseParams,
-      useWiredStreams: false,
-    });
-
-    expect(command).not.toContain('--write-to-logs-stream');
-  });
-
-  it('does NOT include --write-to-logs-stream when useWiredStreams is undefined', () => {
-    const command = getAutoDetectCommand(baseParams);
-
-    expect(command).not.toContain('--write-to-logs-stream');
-  });
-
   it('includes --metrics-enabled=false when metricsEnabled is false', () => {
     const command = getAutoDetectCommand({
       ...baseParams,
@@ -62,16 +38,5 @@ describe('getAutoDetectCommand', () => {
     });
 
     expect(command).toContain('--metrics-enabled=false');
-  });
-
-  it('combines wired streams and metrics disabled correctly', () => {
-    const command = getAutoDetectCommand({
-      ...baseParams,
-      metricsEnabled: false,
-      useWiredStreams: true,
-    });
-
-    expect(command).toContain('--metrics-enabled=false');
-    expect(command).toContain('--write-to-logs-stream=true');
   });
 });
