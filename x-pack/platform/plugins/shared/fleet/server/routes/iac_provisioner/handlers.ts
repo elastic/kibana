@@ -17,9 +17,9 @@ import {
   reportIacProvisionerRenderRequested,
 } from '../../services/telemetry/iac_provisioner_telemetry';
 import {
-  FleetNotFoundError,
   IacProvisionerRenderError,
   IacProvisionerUnavailableError,
+  PackageNotFoundError,
 } from '../../errors';
 import { getErrorMessage } from '../../errors/utils';
 import type { FleetRequestHandler } from '../../types';
@@ -149,9 +149,10 @@ export const renderIacTemplateHandler: FleetRequestHandler<
       });
     }
 
-    // A requested package doesn't exist (getPackageInfo) — a caller mistake,
-    // not a server failure, so no error-level log.
-    if (error instanceof FleetNotFoundError) {
+    // A requested package doesn't exist (getPackageInfo throws
+    // PackageNotFoundError) — a caller mistake, not a server failure, so no
+    // error-level log.
+    if (error instanceof PackageNotFoundError) {
       reportIacProvisionerRenderCompleted({
         flow,
         success: false,
