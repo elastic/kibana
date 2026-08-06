@@ -11,20 +11,21 @@ const FROM_QUERY_PATTERN = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i;
 
 /**
  * Returns the ES|QL query used to resolve index date fields for time-field
- * selection. Alert rules use the composed base; signal rules use the
- * standalone breach query. Empty when the query is not committed, has no FROM,
- * or is an alert query that is not composed (alert + standalone is YAML-only).
+ * selection. Uses the base query in alert (tracking) mode and the full breach
+ * query in signal mode.
+ *
+ * Alert + standalone is YAML-only and never authored by the form, but the
+ * Query sandbox still opens from YAML mode — those rules have no composed
+ * base, so fall back to `breach.query` for field-caps resolution.
  */
 export function getTimeFieldResolutionQuery(
   query: RuleQuery,
   isAlert: boolean,
   queryCommitted: boolean
 ): string {
-  let candidate = '';
-  if (isAlert && query.format === 'composed') {
-    candidate = query.base;
-  } else if (!isAlert && query.format === 'standalone') {
-    candidate = query.breach.query;
-  }
+  const baseQuery = query.format === 'composed' ? query.base : '';
+  const fullQuery = query.format === 'standalone' ? query.breach.query : '';
+  // Prefer composed base for alerts; YAML-only standalone alerts only have breach.query.
+  const candidate = isAlert ? baseQuery || fullQuery : fullQuery;
   return FROM_QUERY_PATTERN.test(candidate) && queryCommitted ? candidate : '';
 }
