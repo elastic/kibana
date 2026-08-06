@@ -88,7 +88,7 @@ const AI_INDICES_SCHEMA = schema.arrayOf(
 );
 
 const AI_INDICES_NOT_ENABLED_MESSAGE =
-  '[request body.configuration.ai_indices]: the Context Engine is not enabled';
+  '[request body.configuration.ai_indices]: the Context Engine is not enabled. Set contextEngine:enabled to true to enable it.';
 
 /**
  * `ai_indices` is only readable and writable while the Context Engine is enabled. The setting is
