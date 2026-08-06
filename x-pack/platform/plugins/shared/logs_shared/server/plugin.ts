@@ -51,7 +51,9 @@ export class LogsSharedPlugin
   }
 
   public setup(core: LogsSharedPluginCoreSetup, plugins: LogsSharedServerPluginSetupDeps) {
-    const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
+    const isServerless =
+      plugins.cloud?.isServerlessEnabled ||
+      this.context.env.packageInfo.buildFlavor === 'serverless';
 
     const framework = new KibanaFramework(core, plugins);
 

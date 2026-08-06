@@ -14,7 +14,11 @@ import {
 import { ResourceTypes } from '@kbn/product-doc-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
-import { ensureSecurityLabsInstalled, useEnsureSecurityLabs } from './use_ensure_security_labs';
+import {
+  ensureSecurityLabsInstalled,
+  useEnsureSecurityLabs,
+  _resetInstallAttemptedForTesting,
+} from './use_ensure_security_labs';
 
 describe('ensureSecurityLabsInstalled', () => {
   const inferenceId = defaultInferenceEndpoints.ELSER;
@@ -68,7 +72,7 @@ describe('ensureSecurityLabsInstalled', () => {
     });
   });
 
-  it('skips install when status is error', async () => {
+  it('reinstalls when status is error', async () => {
     (productDocBase.installation.getStatus as jest.Mock).mockResolvedValue({
       inferenceId,
       resourceType: ResourceTypes.securityLabs,
@@ -84,7 +88,10 @@ describe('ensureSecurityLabsInstalled', () => {
       hasManagePrivilege: true,
     });
 
-    expect(productDocBase.installation.install).not.toHaveBeenCalled();
+    expect(productDocBase.installation.install).toHaveBeenCalledWith({
+      inferenceId,
+      resourceType: ResourceTypes.securityLabs,
+    });
   });
 
   it('skips install when already installed', async () => {
@@ -187,6 +194,10 @@ describe('ensureSecurityLabsInstalled', () => {
 });
 
 describe('useEnsureSecurityLabs', () => {
+  afterEach(() => {
+    _resetInstallAttemptedForTesting();
+  });
+
   const createServices = () => {
     const productDocBase = {
       installation: {
@@ -276,5 +287,71 @@ describe('useEnsureSecurityLabs', () => {
 
     expect(logger.error).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalled();
+  });
+
+  it('does not re-fire install on re-mount after a successful attempt', async () => {
+    const { productDocBase, uiSettings, logger } = createServices();
+    const uiSettingsCast = uiSettings as unknown as Parameters<
+      typeof useEnsureSecurityLabs
+    >[0]['uiSettings'];
+
+    const { unmount } = renderHook(() =>
+      useEnsureSecurityLabs({
+        productDocBase,
+        uiSettings: uiSettingsCast,
+        logger,
+        hasManagePrivilege: true,
+      })
+    );
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(productDocBase.installation.install).toHaveBeenCalledTimes(1);
+
+    // Simulate SPA navigation: unmount then remount
+    unmount();
+    renderHook(() =>
+      useEnsureSecurityLabs({
+        productDocBase,
+        uiSettings: uiSettingsCast,
+        logger,
+        hasManagePrivilege: true,
+      })
+    );
+    await new Promise((resolve) => setImmediate(resolve));
+
+    // install should still have been called exactly once across both mounts
+    expect(productDocBase.installation.install).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries after privilege is lost and regained (space switch)', async () => {
+    const { productDocBase, uiSettings, logger } = createServices();
+    const uiSettingsCast = uiSettings as unknown as Parameters<
+      typeof useEnsureSecurityLabs
+    >[0]['uiSettings'];
+
+    // First mount with privilege
+    const { rerender, unmount } = renderHook(
+      ({ hasManagePrivilege }: { hasManagePrivilege: boolean }) =>
+        useEnsureSecurityLabs({
+          productDocBase,
+          uiSettings: uiSettingsCast,
+          logger,
+          hasManagePrivilege,
+        }),
+      { initialProps: { hasManagePrivilege: true } }
+    );
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(productDocBase.installation.install).toHaveBeenCalledTimes(1);
+
+    // Space switch removes privilege → resets the flag
+    rerender({ hasManagePrivilege: false });
+    await new Promise((resolve) => setImmediate(resolve));
+
+    // Space switch grants privilege again → should retry
+    rerender({ hasManagePrivilege: true });
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(productDocBase.installation.install).toHaveBeenCalledTimes(2);
+
+    unmount();
   });
 });

@@ -12,6 +12,7 @@
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/cloud-plugin",
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/i18n-react",

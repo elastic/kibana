@@ -12,6 +12,7 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
+import { isEisAvailableFromInferenceGet } from '@kbn/product-doc-common';
 import { productDocInstallStatusSavedObjectTypeName } from '../common/consts';
 import type { ProductDocBaseConfig } from './config';
 import type {
@@ -181,6 +182,16 @@ export class ProductDocBasePlugin
       return;
     }
 
+    const eisAvailable = await isEisAvailableFromInferenceGet(() =>
+      core.elasticsearch.client.asInternalUser.inference.get({})
+    );
+    if (!eisAvailable) {
+      this.logger.info(
+        'Skipping product documentation auto-install: Elastic Inference Service (EIS) is not available'
+      );
+      return;
+    }
+
     // Product docs for all projects
     documentationManager.ensureDefaultProductDocumentation().catch((err: Error) => {
       this.logger.error(
@@ -192,7 +203,7 @@ export class ProductDocBasePlugin
     });
 
     // Security labs only for security projects; in traditional deployments all solutions are available
-    const isSecurityProject = isServerless ? cloud?.serverless?.projectType === 'security' : true;
+    const isSecurityProject = isServerless ? cloud?.serverless?.projectType === 'security' : false;
     if (isSecurityProject) {
       documentationManager.ensureDefaultSecurityLabs().catch((err: Error) => {
         this.logger.error(

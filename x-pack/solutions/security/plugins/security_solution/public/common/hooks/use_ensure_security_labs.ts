@@ -20,6 +20,17 @@ import { ResourceTypes } from '@kbn/product-doc-common';
 // (gen_ai_settings vs search_inference_endpoints "Use AI features" toggle).
 const AI_DISABLED_SENTINELS = new Set(['NO_DEFAULT_MODEL', 'NO_DEFAULT_CONNECTOR']);
 
+// Module-level guard: the server's runStartupTasks already handles installation on
+// startup. This hook is a client-side fallback (e.g. AI enabled mid-session). Using
+// a module-level flag means re-mounts from SPA navigation don't redundantly re-check.
+// Reset when privilege is lost so a later space-switch that grants privilege retries.
+let installAttempted = false;
+
+/** Reset module-level state. Call in beforeEach during tests. */
+export const _resetInstallAttemptedForTesting = () => {
+  installAttempted = false;
+};
+
 export interface EnsureSecurityLabsServices {
   productDocBase: ProductDocBasePluginStart;
   uiSettings: IUiSettingsClient;
@@ -106,6 +117,14 @@ export const useEnsureSecurityLabs = (services: EnsureSecurityLabsServices): voi
   const { productDocBase, uiSettings, logger, hasManagePrivilege } = services;
 
   useEffect(() => {
+    if (!hasManagePrivilege) {
+      // Reset so we retry when privilege is gained (e.g. space switch).
+      installAttempted = false;
+      return;
+    }
+    if (installAttempted) return;
+    installAttempted = true;
+
     ensureSecurityLabsInstalled({
       productDocBase,
       uiSettings,
@@ -119,6 +138,8 @@ export const useEnsureSecurityLabs = (services: EnsureSecurityLabsServices): voi
         logger.warn(error);
         return;
       }
+      // Reset on unexpected errors so the next mount retries.
+      installAttempted = false;
       logger.error('Failed to auto-install Security Labs content');
       logger.error(error);
     });
