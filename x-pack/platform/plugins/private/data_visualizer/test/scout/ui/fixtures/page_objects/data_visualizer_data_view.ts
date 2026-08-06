@@ -56,12 +56,15 @@ export class DataVisualizerDataView {
   }
 
   /**
-   * Refreshes field stats via the date picker apply button (matches FTR).
-   * Callers should wait on a page-ready signal (loaded table / field row) afterward.
+   * Refreshes field stats via the date picker apply button (matches FTR
+   * waitForDatePickerIndicatorLoaded → click → waitForDatePickerIndicatorLoaded).
    */
   async refreshFieldStats() {
     await expect(this.applyTimeButton).toBeEnabled({ timeout: 10_000 });
     await this.applyTimeButton.click();
+    // Apply disables while stats reload; wait until it is clickable again so we
+    // don't assert the table mid-refresh.
+    await expect(this.applyTimeButton).toBeEnabled({ timeout: 30_000 });
   }
 
   async addRuntimeField(name: string, script: string, fieldType: string) {
@@ -91,10 +94,13 @@ export class DataVisualizerDataView {
     await this.fieldEditorSaveButton.click();
     await this.waitForIndexPatternFieldEditorHidden();
 
-    // Saving triggers mlTimefilterRefresh$; apply again (FTR does the same). Stats for
-    // the new runtime field can take longer than Playwright's default 10s wait.
-    await this.refreshFieldStats();
-    await this.table.waitForRow(name, { timeout: 60_000 });
+    // Saving already fires mlTimefilterRefresh$; applying again matches FTR. Retry
+    // because the onSave refresh can abort the first apply request before the new
+    // runtime field is present in overall stats (show-empty-fields is off by default).
+    await expect(async () => {
+      await this.refreshFieldStats();
+      await this.table.waitForRow(name, { timeout: 15_000 });
+    }).toPass({ timeout: 60_000 });
   }
 
   async renameField(originalName: string, newName: string) {

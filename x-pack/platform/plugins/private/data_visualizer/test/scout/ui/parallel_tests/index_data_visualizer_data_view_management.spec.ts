@@ -180,84 +180,72 @@ spaceTest.describe('data view management', { tag: tags.stateful.classic }, () =>
     await mlTestResources.resetKibanaTimeZone(scoutSpace.id);
   });
 
-  spaceTest(
-    'manages runtime fields and custom labels',
-    async ({ pageObjects, mlTestResources, scoutSpace }) => {
-      const resetToIndexVisualizer = async () => {
-        await mlTestResources.deleteDataViewByTitle(indexPatternTitle, scoutSpace.id);
-        await mlTestResources.createDataViewIfNeeded(
-          indexPatternTitle,
-          '@timestamp',
-          scoutSpace.id
-        );
-        await navigateToIndexDataVisualizer(pageObjects, originalTestData);
-      };
+  // beforeEach navigates the full ML → data visualizer path; keep timeout above the
+  // default 60s so field-editor + stats refresh are not starved by setup (hooks count
+  // toward the test timeout). Matches FTR's separate it() cases.
+  spaceTest('adds new field', async ({ pageObjects }) => {
+    scoutTest.setTimeout(120_000);
 
-      await scoutTest.step('adds new field', async () => {
-        for (const newField of addDeleteFieldTestData.newFields!) {
-          await pageObjects.dataVisualizerDataView.addRuntimeField(
-            newField.fieldName,
-            newField.script,
-            newField.type
-          );
-        }
-
-        for (const fieldRow of addDeleteFieldTestData.expected.metricFields as Array<
-          Required<MetricFieldVisConfig>
-        >) {
-          await assertNumberFieldContents(
-            pageObjects.dataVisualizerTable,
-            fieldRow.fieldName,
-            fieldRow.docCountFormatted,
-            fieldRow.topValuesCount,
-            fieldRow.viewableInLens,
-            fieldRow.hasActionMenu
-          );
-        }
-
-        for (const fieldRow of addDeleteFieldTestData.expected.nonMetricFields!) {
-          await assertNonMetricFieldContents(
-            pageObjects.dataVisualizerTable,
-            fieldRow.type,
-            fieldRow.fieldName,
-            fieldRow.docCountFormatted,
-            fieldRow.exampleCount,
-            fieldRow.viewableInLens,
-            fieldRow.hasActionMenu
-          );
-        }
-
-        await checkPageDetails(pageObjects, addDeleteFieldTestData);
-      });
-
-      await scoutTest.step('sets custom label for existing field', async () => {
-        await resetToIndexVisualizer();
-
-        for (const field of customLabelTestData.fieldsToRename!) {
-          await pageObjects.dataVisualizerDataView.renameField(field.originalName, field.newName);
-          await expect
-            .poll(() => pageObjects.dataVisualizerTable.getDisplayName(field.originalName))
-            .toBe(field.newName);
-        }
-      });
-
-      await scoutTest.step('deletes existing field', async () => {
-        await resetToIndexVisualizer();
-
-        for (const newField of addDeleteFieldTestData.newFields!) {
-          await pageObjects.dataVisualizerDataView.addRuntimeField(
-            newField.fieldName,
-            newField.script,
-            newField.type
-          );
-        }
-
-        for (const fieldToDelete of addDeleteFieldTestData.newFields!) {
-          await pageObjects.dataVisualizerDataView.deleteField(fieldToDelete.fieldName);
-        }
-
-        await checkPageDetails(pageObjects, originalTestData);
-      });
+    for (const newField of addDeleteFieldTestData.newFields!) {
+      await pageObjects.dataVisualizerDataView.addRuntimeField(
+        newField.fieldName,
+        newField.script,
+        newField.type
+      );
     }
-  );
+
+    for (const fieldRow of addDeleteFieldTestData.expected.metricFields as Array<
+      Required<MetricFieldVisConfig>
+    >) {
+      await assertNumberFieldContents(
+        pageObjects.dataVisualizerTable,
+        fieldRow.fieldName,
+        fieldRow.docCountFormatted,
+        fieldRow.topValuesCount,
+        fieldRow.viewableInLens,
+        fieldRow.hasActionMenu
+      );
+    }
+
+    for (const fieldRow of addDeleteFieldTestData.expected.nonMetricFields!) {
+      await assertNonMetricFieldContents(
+        pageObjects.dataVisualizerTable,
+        fieldRow.type,
+        fieldRow.fieldName,
+        fieldRow.docCountFormatted,
+        fieldRow.exampleCount,
+        fieldRow.viewableInLens,
+        fieldRow.hasActionMenu
+      );
+    }
+
+    await checkPageDetails(pageObjects, addDeleteFieldTestData);
+  });
+
+  spaceTest('sets custom label for existing field', async ({ pageObjects }) => {
+    for (const field of customLabelTestData.fieldsToRename!) {
+      await pageObjects.dataVisualizerDataView.renameField(field.originalName, field.newName);
+      await expect
+        .poll(() => pageObjects.dataVisualizerTable.getDisplayName(field.originalName))
+        .toBe(field.newName);
+    }
+  });
+
+  spaceTest('deletes existing field', async ({ pageObjects }) => {
+    scoutTest.setTimeout(120_000);
+
+    for (const newField of addDeleteFieldTestData.newFields!) {
+      await pageObjects.dataVisualizerDataView.addRuntimeField(
+        newField.fieldName,
+        newField.script,
+        newField.type
+      );
+    }
+
+    for (const fieldToDelete of addDeleteFieldTestData.newFields!) {
+      await pageObjects.dataVisualizerDataView.deleteField(fieldToDelete.fieldName);
+    }
+
+    await checkPageDetails(pageObjects, originalTestData);
+  });
 });
