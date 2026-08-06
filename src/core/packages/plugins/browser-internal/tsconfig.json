@@ -35,6 +35,7 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/core-deprecations-browser-mocks",
     "@kbn/utility-types",
+    "@kbn/core-application-browser-internal",
     "@kbn/core-plugins-contracts-browser",
     "@kbn/core-security-browser-mocks",
     "@kbn/core-user-profile-browser-mocks",
