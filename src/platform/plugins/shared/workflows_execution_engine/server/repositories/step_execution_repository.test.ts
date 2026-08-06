@@ -97,6 +97,27 @@ describe('StepExecutionRepository', () => {
         'Step execution ID is required for upsert'
       );
     });
+
+    it('should throw with failed document details when bulk response contains errors', async () => {
+      stepExecutionsDataClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          { id: 'step-1', index: '.workflows-step-executions' },
+          {
+            id: 'step-2',
+            index: '.workflows-step-executions',
+            error: { type: 'document_missing_exception', reason: 'document missing' },
+          },
+        ],
+      });
+
+      await expect(
+        underTest.bulkUpsert([
+          { id: 'step-1', stepId: 'test-step-1' } as any,
+          { id: 'step-2', stepId: 'test-step-2' } as any,
+        ])
+      ).rejects.toThrow('Failed to upsert 1 step executions:');
+    });
   });
 
   describe('getStepExecutionsByIds', () => {

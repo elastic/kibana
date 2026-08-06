@@ -122,12 +122,22 @@ export class StepExecutionRepository {
       }
     });
 
-    await this.stepExecutionsDataClient.bulk({
+    const bulkResponse = await this.stepExecutionsDataClient.bulk({
       items: stepExecutions.map((stepExecution) => ({
         operation: 'upsert',
         document: stepExecution as Partial<EsWorkflowStepExecution> & { id: string },
       })),
       refresh: false, // Performance optimization: documents become searchable after next refresh (~1s)
     });
+
+    if (bulkResponse.errors) {
+      const failed = bulkResponse.items
+        .filter((item) => item.error)
+        .map((item) => ({ id: item.id, error: item.error }));
+
+      throw new Error(
+        `Failed to upsert ${failed.length} step executions: ${JSON.stringify(failed)}`
+      );
+    }
   }
 }
