@@ -284,9 +284,7 @@ describe('handleAgentExecution', () => {
 
       await lastValueFrom(events$.pipe(toArray()));
 
-      expect(getConversationRoundAuthor).toHaveBeenCalledWith(
-        expect.objectContaining({ conversation: expect.objectContaining({ id: 'conversation-1' }) })
-      );
+      expect(getConversationRoundAuthor).toHaveBeenCalledTimes(1);
       expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ author }));
     });
   });

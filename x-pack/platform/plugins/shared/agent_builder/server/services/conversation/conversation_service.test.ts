@@ -7,9 +7,8 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ConversationAccessControlMode, ConversationOriginType } from '@kbn/agent-builder-common';
+import { ConversationOriginType } from '@kbn/agent-builder-common';
 import { getUserFromRequest } from '../utils';
-import { createEmptyConversation } from '../../test_utils/conversations';
 import { ConversationServiceImpl } from './conversation_service';
 
 jest.mock('../utils');
@@ -44,9 +43,6 @@ describe('ConversationServiceImpl', () => {
 
       const author = await service.getConversationRoundAuthor({
         request,
-        conversation: createEmptyConversation({
-          access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
-        }),
         origin: {
           type: ConversationOriginType.Slack,
           external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
@@ -58,14 +54,11 @@ describe('ConversationServiceImpl', () => {
       expect(getUserFromRequestMock).not.toHaveBeenCalled();
     });
 
-    it('attributes public rounds from an external origin without author to the current Kibana user', async () => {
+    it('attributes rounds from an external origin without author to the current Kibana user', async () => {
       const service = createService();
 
       const author = await service.getConversationRoundAuthor({
         request,
-        conversation: createEmptyConversation({
-          access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
-        }),
         origin: {
           type: ConversationOriginType.Slack,
           external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
@@ -75,15 +68,10 @@ describe('ConversationServiceImpl', () => {
       expect(author).toEqual({ id: 'profile-1', username: 'jane' });
     });
 
-    it('attributes public conversations to the current Kibana user', async () => {
+    it('attributes rounds to the current Kibana user', async () => {
       const service = createService();
 
-      const author = await service.getConversationRoundAuthor({
-        request,
-        conversation: createEmptyConversation({
-          access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
-        }),
-      });
+      const author = await service.getConversationRoundAuthor({ request });
 
       expect(author).toEqual({ id: 'profile-1', username: 'jane' });
     });
@@ -92,47 +80,9 @@ describe('ConversationServiceImpl', () => {
       const service = createService();
       getUserFromRequestMock.mockResolvedValue({ username: 'jane' });
 
-      const author = await service.getConversationRoundAuthor({
-        request,
-        conversation: createEmptyConversation({
-          access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
-        }),
-      });
+      const author = await service.getConversationRoundAuthor({ request });
 
       expect(author).toEqual({ id: 'jane', username: 'jane' });
-    });
-
-    it('does not attribute private conversations', async () => {
-      const service = createService();
-
-      const author = await service.getConversationRoundAuthor({
-        request,
-        conversation: createEmptyConversation({
-          access_control: { access_mode: ConversationAccessControlMode.Private, entries: [] },
-        }),
-      });
-
-      expect(author).toBeUndefined();
-      expect(getUserFromRequestMock).not.toHaveBeenCalled();
-    });
-
-    it('does not attribute private conversations even when the external origin provides an author', async () => {
-      const service = createService();
-
-      const author = await service.getConversationRoundAuthor({
-        request,
-        conversation: createEmptyConversation({
-          access_control: { access_mode: ConversationAccessControlMode.Private, entries: [] },
-        }),
-        origin: {
-          type: ConversationOriginType.Slack,
-          external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-          author: { id: 'U123', username: 'jane', full_name: 'Jane Doe' },
-        },
-      });
-
-      expect(author).toBeUndefined();
-      expect(getUserFromRequestMock).not.toHaveBeenCalled();
     });
   });
 });

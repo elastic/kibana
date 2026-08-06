@@ -45,6 +45,7 @@ const storageSettings = {
           entries: types.nested({
             properties: {
               type: types.keyword({}),
+              id: types.keyword({}),
               name: types.keyword({}),
               role: types.keyword({}),
             },

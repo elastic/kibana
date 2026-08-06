@@ -11,8 +11,7 @@ import type {
   SecurityServiceStart,
   ElasticsearchServiceStart,
 } from '@kbn/core/server';
-import type { Conversation, ConversationRoundAuthor } from '@kbn/agent-builder-common';
-import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
+import type { ConversationRoundAuthor } from '@kbn/agent-builder-common';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getUserFromRequest } from '../utils';
@@ -25,7 +24,6 @@ export interface ConversationService {
   getScopedClient(options: { request: KibanaRequest }): Promise<ConversationClient>;
   getConversationRoundAuthor(options: {
     request: KibanaRequest;
-    conversation: Conversation;
     origin?: ExecutionConversationOrigin;
   }): Promise<ConversationRoundAuthor | undefined>;
 }
@@ -64,24 +62,20 @@ export class ConversationServiceImpl implements ConversationService {
 
   /**
    * Returns the author of a conversation round.
-   * Only public conversation rounds have an author; private conversations are single-owner
-   * (captured by conversation.user). External origins (e.g. Slack) provide their own author and
-   * take precedence; otherwise the author is the authenticated Kibana user that initiated the
-   * round, including rounds from an external origin that omits `author`.
+   * Every round is attributed, whatever the conversation's access mode: authorship is recorded when
+   * the round is written and cannot be reconstructed later, so a conversation that starts private
+   * and is shared afterwards would otherwise lose the authorship of everything said before sharing.
+   * External origins (e.g. Slack) provide their own author and take precedence; otherwise the author
+   * is the authenticated Kibana user that initiated the round, including rounds from an external
+   * origin that omits `author`.
    */
   async getConversationRoundAuthor({
     request,
-    conversation,
     origin,
   }: {
     request: KibanaRequest;
-    conversation: Conversation;
     origin?: ExecutionConversationOrigin;
   }): Promise<ConversationRoundAuthor | undefined> {
-    if (conversation.access_control?.access_mode !== ConversationAccessControlMode.Public) {
-      return undefined;
-    }
-
     if (origin?.author) {
       return origin.author;
     }

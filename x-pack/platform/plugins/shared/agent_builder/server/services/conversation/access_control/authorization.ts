@@ -44,6 +44,32 @@ const isPublicConversation = ({
   return conversation.access_control?.access_mode === ConversationAccessControlMode.Public;
 };
 
+/**
+ * Checks whether the conversation was shared with the current user.
+ *
+ * Entries are matched on the stable id the same way `isConversationOwner` matches owners: an entry
+ * that stored an id never falls back to the username, so a grant cannot be consumed by a
+ * same-username principal from another realm. Legacy documents carry no `entries`.
+ */
+export const isConversationMember = ({
+  conversation,
+  user,
+}: {
+  conversation: Pick<ConversationProperties, 'access_control'>;
+  user: UserIdAndName;
+}): boolean =>
+  conversation.access_control?.entries?.some((entry) => {
+    if (entry.type !== 'user') {
+      return false;
+    }
+
+    if (entry.id !== undefined && user.id !== undefined) {
+      return entry.id === user.id;
+    }
+
+    return entry.id === undefined && !!user.username && entry.name === user.username;
+  }) ?? false;
+
 export const hasConversationConverseAccess = ({
   conversation,
   user,
@@ -55,7 +81,7 @@ export const hasConversationConverseAccess = ({
     return true;
   }
 
-  return isPublicConversation({ conversation });
+  return isPublicConversation({ conversation }) || isConversationMember({ conversation, user });
 };
 
 export const hasConversationOwnerAccess = ({
@@ -82,6 +108,14 @@ export const hasConversationDeleteAccess = ({
   user: UserIdAndName;
 }): boolean => hasConversationOwnerAccess({ conversation, user });
 
+export const hasConversationUpdateAccessControlAccess = ({
+  conversation,
+  user,
+}: {
+  conversation: Pick<ConversationProperties, 'user_id' | 'user_name' | 'access_control'>;
+  user: UserIdAndName;
+}): boolean => hasConversationOwnerAccess({ conversation, user });
+
 export const getConversationPermissions = ({
   conversation,
   user,
@@ -91,4 +125,5 @@ export const getConversationPermissions = ({
 }): ConversationPermissions => ({
   rename: hasConversationRenameAccess({ conversation, user }),
   delete: hasConversationDeleteAccess({ conversation, user }),
+  update_access_control: hasConversationUpdateAccessControlAccess({ conversation, user }),
 });

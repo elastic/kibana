@@ -42,9 +42,42 @@ const buildOwnedConversationFilter = ({ user }: { user: UserIdAndName }) => {
 };
 
 /**
+ * Matches conversations shared with the current user.
+ */
+const buildSharedConversationFilter = ({ user }: { user: UserIdAndName }) => {
+  const shouldClauses: Array<Record<string, unknown>> = [];
+
+  if (user.id !== undefined) {
+    shouldClauses.push({ term: { 'access_control.entries.id': user.id } });
+  }
+
+  shouldClauses.push({
+    bool: {
+      must_not: { exists: { field: 'access_control.entries.id' } },
+      filter: { term: { 'access_control.entries.name': user.username } },
+    },
+  });
+
+  return {
+    nested: {
+      path: 'access_control.entries',
+      ignore_unmapped: true,
+      query: {
+        bool: {
+          filter: [
+            { term: { 'access_control.entries.type': 'user' } },
+            { bool: { should: shouldClauses, minimum_should_match: 1 } },
+          ],
+        },
+      },
+    },
+  };
+};
+
+/**
  * Builds the Elasticsearch filter for listing readable conversations.
  *
- * A conversation is listable when it is public or owned by the current user, and
+ * A conversation is listable when it is public, owned by the current user, or shared with them, and
  * its underlying agent is one the user can currently access.
  */
 export const buildReadAccessFilter = ({
@@ -59,7 +92,11 @@ export const buildReadAccessFilter = ({
       filter: [
         {
           bool: {
-            should: [buildPublicConversationFilter(), buildOwnedConversationFilter({ user })],
+            should: [
+              buildPublicConversationFilter(),
+              buildOwnedConversationFilter({ user }),
+              buildSharedConversationFilter({ user }),
+            ],
             minimum_should_match: 1,
           },
         },
