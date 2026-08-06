@@ -20,12 +20,15 @@ export interface InvestigationDiscoverParams extends SerializableRecord {
 }
 
 /**
- * Whether a bound is an absolute instant we can hand to Discover as-is. Datemath (`now-1h`) and
+ * Parses a bound as an absolute instant we can hand to Discover as-is. Datemath (`now-1h`) and
  * malformed values parse to `NaN` here and are rejected: resolved at click time they would frame
  * a window unrelated to the one the query actually ran over, which reads as real evidence while
  * showing the wrong data — a worse failure than no link.
  */
-const isAbsoluteTimestamp = (value: string): boolean => !Number.isNaN(Date.parse(value));
+const parseAbsoluteTimestamp = (value: string): number | undefined => {
+  const timestamp = Date.parse(value);
+  return Number.isNaN(timestamp) ? undefined : timestamp;
+};
 
 /**
  * Builds the Discover params for an evidence entry's query, or `undefined` when it has none that
@@ -43,7 +46,10 @@ export const buildEvidenceDiscoverParams = (
     return undefined;
   }
 
-  if (!isAbsoluteTimestamp(timeRange.from) || !isAbsoluteTimestamp(timeRange.to)) {
+  const from = parseAbsoluteTimestamp(timeRange.from);
+  const to = parseAbsoluteTimestamp(timeRange.to);
+
+  if (from === undefined || to === undefined || from >= to) {
     return undefined;
   }
 

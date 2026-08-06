@@ -146,7 +146,8 @@ on, which the UI turns into a Discover link they can open.
 
 **Every hypothesis you mark `confirmed` or `dismissed` must carry at least one evidence entry.** A
 dismissal needs one as much as a confirmation — "why did you rule that out?" is exactly the
-question evidence answers. If you genuinely have nothing to cite, still say so in `reason`.
+question evidence answers. When the deciding observation has no query string, cite it as a
+description-only evidence entry; `esql_query` and `time_range` are optional in that case.
 
 Each entry has:
 

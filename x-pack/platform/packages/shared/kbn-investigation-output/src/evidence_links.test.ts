@@ -45,6 +45,8 @@ describe('buildEvidenceDiscoverParams', () => {
   it.each([
     ['datemath', { from: 'now-1h', to: 'now' }],
     ['a malformed bound', { from: 'yesterday afternoon', to: '2026-07-28T15:00:00Z' }],
+    ['a reversed range', { from: '2026-07-28T15:00:00Z', to: '2026-07-28T13:30:00Z' }],
+    ['an empty range', { from: '2026-07-28T15:00:00Z', to: '2026-07-28T15:00:00Z' }],
   ])('returns undefined for %s, which would frame the wrong window', (_label, window) => {
     expect(
       buildEvidenceDiscoverParams({
