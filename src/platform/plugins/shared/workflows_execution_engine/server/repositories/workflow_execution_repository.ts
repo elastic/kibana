@@ -73,6 +73,9 @@ export class WorkflowExecutionRepository {
       refresh: options.refresh ?? false,
     });
 
+    // bulk() treats item-level errors as partial failures and never throws.
+    // For a single-document create, any error must propagate so callers don't
+    // silently proceed after a failed write (e.g. version conflict on duplicate ID).
     const itemError = response.items[0]?.error;
     if (itemError) {
       throw new Error(
