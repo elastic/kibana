@@ -94,6 +94,8 @@ describe('RuleWorkflowSubscriber', () => {
       expect(mockLogger.error).toHaveBeenCalledWith('workflows unreachable', {
         labels: {
           event_type: RULE_CREATED_EVENT_TYPE,
+          rule_id: ruleCreatedEvent.payload.ruleId,
+          space_id: ruleCreatedEvent.payload.spaceId,
           code: ALERTING_LOG_CODES.RULE_WORKFLOW_SUBSCRIBER_FAILURE,
         },
         error: expect.objectContaining({ message: 'workflows unreachable' }),

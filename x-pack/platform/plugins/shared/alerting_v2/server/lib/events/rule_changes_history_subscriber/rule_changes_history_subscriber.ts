@@ -117,7 +117,11 @@ export class RuleChangesHistorySubscriber {
       this.logger.error({
         error: err,
         code: ALERTING_LOG_CODES.RULE_CHANGES_HISTORY_SUBSCRIBER_FAILURE,
-        labels: { event_type: event.type },
+        labels: {
+          event_type: event.type,
+          rule_id: ruleId,
+          space_id: spaceId,
+        },
       });
     }
   }

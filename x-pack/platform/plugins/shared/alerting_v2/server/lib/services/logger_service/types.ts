@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import type { LogMessageSource } from '@kbn/logging';
 import type { AlertingV2LogCode } from '../../errors/error_codes';
 
@@ -15,7 +16,7 @@ import type { AlertingV2LogCode } from '../../errors/error_codes';
  */
 export type AlertingLabels = Partial<{
   rule_id: string;
-  rule_kind: 'alert' | 'signal';
+  rule_kind: RuleKind;
   space_id: string;
   policy_id: string;
   group_id: string;

@@ -103,7 +103,12 @@ export class AlertActionWorkflowSubscriber {
       this.logger.error({
         error: err,
         code: ALERTING_LOG_CODES.ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILURE,
-        labels: { event_type: trigger.eventType },
+        labels: {
+          event_type: trigger.eventType,
+          space_id: event.spaceId,
+          episode_id: event.episodeId,
+          ...(event.ruleId != null ? { rule_id: event.ruleId } : {}),
+        },
       });
     }
   }

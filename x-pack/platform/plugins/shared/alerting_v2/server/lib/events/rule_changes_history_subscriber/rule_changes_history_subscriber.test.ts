@@ -10,6 +10,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { UserProfileWithSecurity } from '@kbn/core-user-profile-common';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerService } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { RuleChangesHistoryAction } from '../../rule_changes_history';
@@ -191,6 +192,15 @@ describe('RuleChangesHistorySubscriber', () => {
       ).resolves.toBeUndefined();
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledWith('es unreachable', {
+        labels: {
+          event_type: RULE_CREATED_EVENT_TYPE,
+          rule_id: payload.ruleId,
+          space_id: payload.spaceId,
+          code: ALERTING_LOG_CODES.RULE_CHANGES_HISTORY_SUBSCRIBER_FAILURE,
+        },
+        error: expect.objectContaining({ message: 'es unreachable' }),
+      });
     });
   });
 

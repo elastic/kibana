@@ -89,10 +89,16 @@ export class RuleExecutorWorkflowSubscriber {
 
       await this.workflows.emitEvent(context.request, trigger.triggerId, payload);
     } catch (err) {
+      const rule = event.payload.rule as { ruleId?: string; id?: string; spaceId: string };
+
       this.logger.error({
         error: err,
         code: ALERTING_LOG_CODES.RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILURE,
-        labels: { event_type: trigger.eventType },
+        labels: {
+          event_type: trigger.eventType,
+          rule_id: rule.ruleId ?? rule.id,
+          space_id: rule.spaceId,
+        },
       });
     }
   }
