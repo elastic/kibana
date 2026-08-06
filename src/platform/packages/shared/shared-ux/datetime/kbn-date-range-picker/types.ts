@@ -53,6 +53,11 @@ export interface TimeRangeBounds {
 /** Used for presets and recent options */
 export interface TimeRangeBoundsOption extends TimeRangeBounds {
   label?: string;
+  /**
+   * Opt-in: the delete action is only rendered for options explicitly marked
+   * deletable, so options owned by configuration cannot be removed from the UI.
+   */
+  isDeletable?: boolean;
 }
 
 /** Calendar-specific configuration options. */

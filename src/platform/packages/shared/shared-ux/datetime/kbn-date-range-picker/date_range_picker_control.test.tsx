@@ -124,6 +124,41 @@ describe('DateRangePickerControl', () => {
       await waitForPopoverClose();
     });
 
+    it('offers deletion only for presets marked as deletable', async () => {
+      const onPresetDelete = jest.fn();
+
+      renderWithEuiTheme(
+        <DateRangePicker
+          {...defaultProps}
+          defaultValue="last 20 minutes"
+          onPresetDelete={onPresetDelete}
+          presets={[
+            { start: 'now-1h', end: 'now', label: 'Last 1 hour', isDeletable: true },
+            { start: 'now/d', end: 'now/d', label: 'Today', isDeletable: false },
+          ]}
+        />
+      );
+
+      const input = openEditing();
+      fireEvent.keyDown(input, { key: 'ArrowDown' });
+
+      const deletable = screen.getByTestId('dateRangePickerPresetItem-Last_1_hour');
+      const locked = screen.getByTestId('dateRangePickerPresetItem-Today');
+
+      expect(
+        within(locked).queryByTestId('dateRangePickerDeletePresetButton')
+      ).not.toBeInTheDocument();
+
+      fireEvent.click(within(deletable).getByTestId('dateRangePickerDeletePresetButton'));
+
+      expect(onPresetDelete).toHaveBeenCalledWith(
+        expect.objectContaining({ start: 'now-1h', end: 'now' })
+      );
+
+      fireEvent.keyDown(input, { key: 'Escape' });
+      await waitForPopoverClose();
+    });
+
     it('derives readable input from bounds when selecting a preset with a display-only label', async () => {
       const expectedInputText = 'May 1, 2026, 00:00:00.000 to May 2, 2026, 23:59:00.000';
 
