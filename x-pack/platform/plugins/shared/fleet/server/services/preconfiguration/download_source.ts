@@ -17,9 +17,7 @@ import { agentPolicyService } from '../agent_policy';
 export function getPreconfiguredDownloadSourcesFromConfig(
   config?: FleetConfigType
 ): PreconfiguredDownloadSource[] {
-  const { binaryDownloadSource: sourcesFromConfig } = config ?? {};
-
-  return (sourcesFromConfig ?? []).map((ds) => ({
+  return ((config?.binaryDownloadSource ?? []) as PreconfiguredDownloadSource[]).map((ds) => ({
     ...ds,
     is_preconfigured: true,
   }));
@@ -38,25 +36,31 @@ function hasChanged(existing: DownloadSource, preconfigured: PreconfiguredDownlo
 async function createOrUpdatePreconfiguredDownloadSources(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  preconfiguredSources: PreconfiguredDownloadSource[]
+  preconfiguredSources: PreconfiguredDownloadSource[],
+  allExistingSources: DownloadSource[]
 ) {
-  const allExistingSources = await downloadSourceService.list();
-
   for (const preconfigured of preconfiguredSources) {
-    const existing = allExistingSources.items.find((ds) => ds.id === preconfigured.id);
+    const existing = allExistingSources.find((ds) => ds.id === preconfigured.id);
     if (!existing) {
       await downloadSourceService.create(soClient, esClient, preconfigured, {
         id: preconfigured.id,
         overwrite: true,
       });
-    } else if (!existing.is_preconfigured || hasChanged(existing, preconfigured)) {
-      await downloadSourceService.update(soClient, esClient, preconfigured.id, {
-        ...preconfigured,
-        is_preconfigured: true,
-      });
-      await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, preconfigured.id, {
-        isDefault: preconfigured.is_default,
-      });
+    } else {
+      const dataChanged = hasChanged(existing, preconfigured);
+      if (!existing.is_preconfigured || dataChanged) {
+        await downloadSourceService.update(soClient, esClient, preconfigured.id, {
+          ...preconfigured,
+          is_preconfigured: true,
+        });
+        if (dataChanged) {
+          await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(
+            esClient,
+            preconfigured.id,
+            { isDefault: preconfigured.is_default }
+          );
+        }
+      }
     }
   }
 }
@@ -64,22 +68,25 @@ async function createOrUpdatePreconfiguredDownloadSources(
 async function cleanPreconfiguredDownloadSources(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  preconfiguredSources: PreconfiguredDownloadSource[]
+  preconfiguredSources: PreconfiguredDownloadSource[],
+  allExistingSources: DownloadSource[]
 ) {
-  const allDownloadSources = await downloadSourceService.list();
-  const existingPreconfigured = allDownloadSources.items.filter((ds) => ds.is_preconfigured === true);
+  const existingPreconfigured = allExistingSources.filter((ds) => ds.is_preconfigured === true);
 
   for (const existing of existingPreconfigured) {
-    const stillConfigured = preconfiguredSources.find((ds) => ds.id === existing.id);
-    if (stillConfigured) {
+    if (preconfiguredSources.find((ds) => ds.id === existing.id)) {
       continue;
     }
 
-    // If this preconfigured source was removed from config, unmark it as preconfigured
-    // (don't delete, since it may be in use by agent policies)
-    await downloadSourceService.update(soClient, esClient, existing.id, {
-      is_preconfigured: false,
-    });
+    const isInUse = await agentPolicyService.agentPoliciesExistForDownloadSourceId(existing.id);
+    if (isInUse) {
+      // Keep the source but unmark it so users can manage it freely
+      await downloadSourceService.update(soClient, esClient, existing.id, {
+        is_preconfigured: false,
+      });
+    } else {
+      await downloadSourceService.delete(existing.id, { fromPreconfiguration: true });
+    }
   }
 }
 
@@ -88,6 +95,17 @@ export async function ensurePreconfiguredDownloadSources(
   esClient: ElasticsearchClient,
   preconfiguredSources: PreconfiguredDownloadSource[]
 ) {
-  await createOrUpdatePreconfiguredDownloadSources(soClient, esClient, preconfiguredSources);
-  await cleanPreconfiguredDownloadSources(soClient, esClient, preconfiguredSources);
+  const { items: allExistingSources } = await downloadSourceService.list();
+  await createOrUpdatePreconfiguredDownloadSources(
+    soClient,
+    esClient,
+    preconfiguredSources,
+    allExistingSources
+  );
+  await cleanPreconfiguredDownloadSources(
+    soClient,
+    esClient,
+    preconfiguredSources,
+    allExistingSources
+  );
 }

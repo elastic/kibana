@@ -429,7 +429,7 @@ class DownloadSourceService {
     logger.debug(`Updated download source ${id}`);
   }
 
-  public async delete(id: string) {
+  public async delete(id: string, options?: { fromPreconfiguration?: boolean }) {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting download source ${id}`);
 
@@ -439,7 +439,7 @@ class DownloadSourceService {
       throw new DownloadSourceError(`Default Download source ${id} cannot be deleted.`);
     }
 
-    if (targetDS.is_preconfigured) {
+    if (targetDS.is_preconfigured && !options?.fromPreconfiguration) {
       throw new DownloadSourceError(`Preconfigured Download source ${id} cannot be deleted.`);
     }
 

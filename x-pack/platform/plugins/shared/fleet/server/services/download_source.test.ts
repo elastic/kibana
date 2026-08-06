@@ -1143,6 +1143,41 @@ describe('Download Service', () => {
       );
       expect(soClientMock.delete).toBeCalled();
     });
+
+    it('should throw when deleting a preconfigured source without fromPreconfiguration option', async () => {
+      getMockedSoClient();
+      const esoClientMockLocal = getMockedEncryptedSoClient();
+      esoClientMockLocal.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        mockDownloadSourceSO('download-source-preconfigured', {
+          is_default: false,
+          is_preconfigured: true,
+          name: 'Preconfigured',
+          host: 'http://preconfigured.co',
+        })
+      );
+
+      await expect(downloadSourceService.delete('download-source-preconfigured')).rejects.toThrow(
+        'Preconfigured Download source download-source-preconfigured cannot be deleted.'
+      );
+    });
+
+    it('should allow deleting a preconfigured source with fromPreconfiguration: true', async () => {
+      const soClientMock = getMockedSoClient();
+      const esoClientMockLocal = getMockedEncryptedSoClient();
+      esoClientMockLocal.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        mockDownloadSourceSO('download-source-preconfigured', {
+          is_default: false,
+          is_preconfigured: true,
+          name: 'Preconfigured',
+          host: 'http://preconfigured.co',
+        })
+      );
+
+      await downloadSourceService.delete('download-source-preconfigured', {
+        fromPreconfiguration: true,
+      });
+      expect(soClientMock.delete).toBeCalled();
+    });
   });
 
   describe('get', () => {

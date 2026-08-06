@@ -66,5 +66,4 @@ export interface PreconfiguredOutput extends Omit<Output, 'config_yaml'> {
 
 export interface PreconfiguredDownloadSource extends DownloadSourceBase {
   id: string;
-  allow_edit?: string[];
 }

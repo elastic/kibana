@@ -103,11 +103,19 @@ describe('ensurePreconfiguredDownloadSources', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedAgentPolicyService.bumpAllAgentPoliciesForDownloadSource.mockResolvedValue(undefined as any);
+    mockedAgentPolicyService.bumpAllAgentPoliciesForDownloadSource.mockResolvedValue(
+      undefined as any
+    );
+    mockedAgentPolicyService.agentPoliciesExistForDownloadSourceId.mockResolvedValue(false);
   });
 
   it('should create a new download source if it does not exist', async () => {
-    mockedDownloadSourceService.list.mockResolvedValue({ items: [], total: 0, page: 1, perPage: 10 });
+    mockedDownloadSourceService.list.mockResolvedValue({
+      items: [],
+      total: 0,
+      page: 1,
+      perPage: 10,
+    });
     mockedDownloadSourceService.create.mockResolvedValue({
       id: 'ds-1',
       name: 'My Source',
@@ -134,9 +142,11 @@ describe('ensurePreconfiguredDownloadSources', () => {
       expect.objectContaining({ id: 'ds-1', name: 'My Source' }),
       { id: 'ds-1', overwrite: true }
     );
+    // list() should only be called once
+    expect(mockedDownloadSourceService.list).toHaveBeenCalledTimes(1);
   });
 
-  it('should update an existing download source when it has changed', async () => {
+  it('should update an existing download source and bump policies when data has changed', async () => {
     const existingSource = {
       id: 'ds-1',
       name: 'Old Name',
@@ -177,6 +187,43 @@ describe('ensurePreconfiguredDownloadSources', () => {
     );
   });
 
+  it('should update is_preconfigured flag without bumping policies when only that flag differs', async () => {
+    const existingSource = {
+      id: 'ds-1',
+      name: 'My Source',
+      host: 'https://example.com',
+      is_default: false,
+      is_preconfigured: false,
+    };
+    mockedDownloadSourceService.list.mockResolvedValue({
+      items: [existingSource],
+      total: 1,
+      page: 1,
+      perPage: 10,
+    });
+    mockedDownloadSourceService.update.mockResolvedValue(undefined as any);
+
+    const preconfiguredSources = [
+      {
+        id: 'ds-1',
+        name: 'My Source',
+        host: 'https://example.com',
+        is_default: false,
+        is_preconfigured: true,
+      },
+    ];
+
+    await ensurePreconfiguredDownloadSources(soClient, esClient, preconfiguredSources);
+
+    expect(mockedDownloadSourceService.update).toHaveBeenCalledWith(
+      soClient,
+      esClient,
+      'ds-1',
+      expect.objectContaining({ is_preconfigured: true })
+    );
+    expect(mockedAgentPolicyService.bumpAllAgentPoliciesForDownloadSource).not.toHaveBeenCalled();
+  });
+
   it('should not update an existing preconfigured source when nothing has changed', async () => {
     const existingSource = {
       id: 'ds-1',
@@ -208,7 +255,7 @@ describe('ensurePreconfiguredDownloadSources', () => {
     expect(mockedDownloadSourceService.update).not.toHaveBeenCalled();
   });
 
-  it('should unmark a removed preconfigured source as preconfigured', async () => {
+  it('should delete a removed preconfigured source when not referenced by any agent policy', async () => {
     const existingSource = {
       id: 'ds-removed',
       name: 'Removed Source',
@@ -222,16 +269,44 @@ describe('ensurePreconfiguredDownloadSources', () => {
       page: 1,
       perPage: 10,
     });
+    mockedAgentPolicyService.agentPoliciesExistForDownloadSourceId.mockResolvedValue(false);
+    mockedDownloadSourceService.delete.mockResolvedValue(undefined as any);
+
+    await ensurePreconfiguredDownloadSources(soClient, esClient, []);
+
+    expect(mockedDownloadSourceService.delete).toHaveBeenCalledWith('ds-removed', {
+      fromPreconfiguration: true,
+    });
+    expect(mockedDownloadSourceService.update).not.toHaveBeenCalled();
+  });
+
+  it('should unmark a removed preconfigured source when it is still referenced by agent policies', async () => {
+    const existingSource = {
+      id: 'ds-in-use',
+      name: 'In-Use Source',
+      host: 'https://in-use.example.com',
+      is_default: false,
+      is_preconfigured: true,
+    };
+    mockedDownloadSourceService.list.mockResolvedValue({
+      items: [existingSource],
+      total: 1,
+      page: 1,
+      perPage: 10,
+    });
+    mockedAgentPolicyService.agentPoliciesExistForDownloadSourceId.mockResolvedValue(true);
     mockedDownloadSourceService.update.mockResolvedValue(undefined as any);
 
-    // Empty preconfigured sources — the existing one was removed from config
     await ensurePreconfiguredDownloadSources(soClient, esClient, []);
 
     expect(mockedDownloadSourceService.update).toHaveBeenCalledWith(
       soClient,
       esClient,
-      'ds-removed',
-      { is_preconfigured: false }
+      'ds-in-use',
+      {
+        is_preconfigured: false,
+      }
     );
+    expect(mockedDownloadSourceService.delete).not.toHaveBeenCalled();
   });
 });
