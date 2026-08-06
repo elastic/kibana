@@ -188,7 +188,7 @@ const services: Partial<KibanaServices> = {
       },
     },
     dateRangePickerPresets: {
-      getDefaultPresets: () => [],
+      getUiSettingsPresets: () => [],
       getPresets$: () => of([]),
       getCanWrite$: () => of(false),
       savePreset: () => Promise.resolve('saved'),

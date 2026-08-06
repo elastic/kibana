@@ -12,7 +12,7 @@ import type { DateRangePickerPresetsService } from '@kbn/date-range-picker-prese
 
 export const createDateRangePickerPresetsServiceMock =
   (): jest.Mocked<DateRangePickerPresetsService> => ({
-    getDefaultPresets: jest.fn(() => []),
+    getUiSettingsPresets: jest.fn(() => []),
     getPresets$: jest.fn(() => of([])),
     getCanWrite$: jest.fn(() => of(false)),
     savePreset: jest.fn().mockResolvedValue('saved'),

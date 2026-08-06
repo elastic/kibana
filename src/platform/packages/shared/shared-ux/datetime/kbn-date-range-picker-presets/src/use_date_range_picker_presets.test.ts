@@ -19,16 +19,21 @@ import type {
 
 import { useDateRangePickerPresets } from './use_date_range_picker_presets';
 
-const defaultPresets: PresetItem[] = [
+const uiSettingsPresets: PresetItem[] = [
   { start: 'now/d', end: 'now/d', label: 'Today' },
   { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
 ];
 
+const lockedPresets: PresetItem[] = uiSettingsPresets.map((preset) => ({
+  ...preset,
+  isDeletable: false,
+}));
+
 const createServiceMock = (
   overrides: Partial<jest.Mocked<DateRangePickerPresetsService>> = {}
 ): jest.Mocked<DateRangePickerPresetsService> => ({
-  getDefaultPresets: jest.fn(() => defaultPresets),
-  getPresets$: jest.fn(() => of(defaultPresets)),
+  getUiSettingsPresets: jest.fn(() => uiSettingsPresets),
+  getPresets$: jest.fn(() => of(lockedPresets)),
   getCanWrite$: jest.fn(() => of(true)),
   savePreset: jest.fn<Promise<SavePresetOutcome>, [PresetItem]>().mockResolvedValue('saved'),
   deletePreset: jest.fn<Promise<void>, [PresetItem]>().mockResolvedValue(undefined),
@@ -148,11 +153,11 @@ describe('useDateRangePickerPresets', () => {
   });
 
   describe('when disabled', () => {
-    it('returns the default presets without reading stored presets', () => {
+    it('returns the locked quick ranges without reading stored presets', () => {
       const service = createServiceMock();
       const { hook } = renderPresetsHook({ service, persistenceEnabled: false });
 
-      expect(hook.result.current.presets).toEqual(defaultPresets);
+      expect(hook.result.current.presets).toEqual(lockedPresets);
       expect(service.getPresets$).not.toHaveBeenCalled();
     });
 

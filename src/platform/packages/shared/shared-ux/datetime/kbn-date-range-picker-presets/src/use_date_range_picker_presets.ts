@@ -14,9 +14,10 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { useObservable } from '@kbn/use-observable';
 
-import type {
-  DateRangePickerPresetsService,
-  PresetItem,
+import {
+  mergePresets,
+  type DateRangePickerPresetsService,
+  type PresetItem,
 } from '@kbn/date-range-picker-presets-common';
 
 export interface UseDateRangePickerPresetsArgs {
@@ -27,8 +28,8 @@ export interface UseDateRangePickerPresetsArgs {
    */
   service: DateRangePickerPresetsService;
   /**
-   * When `false`, presets are the read-only quick-ranges defaults: no stored
-   * value is read and save/delete are unavailable. Consumers gate this on their
+   * When `false`, presets are the locked quick ranges alone: no stored value is
+   * read and save/delete are unavailable. Consumers gate this on their
    * persistence feature flag.
    */
   persistenceEnabled: boolean;
@@ -46,13 +47,14 @@ export const useDateRangePickerPresets = ({
   persistenceEnabled,
   notifications,
 }: UseDateRangePickerPresetsArgs): UseDateRangePickerPresetsResult => {
-  const defaultPresets = useMemo(() => service.getDefaultPresets(), [service]);
+  const uiSettingsPresets = useMemo(() => service.getUiSettingsPresets(), [service]);
+  const lockedPresets = useMemo(() => mergePresets([], uiSettingsPresets), [uiSettingsPresets]);
 
   const presets$ = useMemo(
-    () => (persistenceEnabled ? service.getPresets$() : of(defaultPresets)),
-    [persistenceEnabled, service, defaultPresets]
+    () => (persistenceEnabled ? service.getPresets$() : of(lockedPresets)),
+    [persistenceEnabled, service, lockedPresets]
   );
-  const presets = useObservable(presets$, defaultPresets);
+  const presets = useObservable(presets$, lockedPresets);
 
   const canWrite$ = useMemo(
     () => (persistenceEnabled ? service.getCanWrite$() : of(false)),
