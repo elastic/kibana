@@ -87,9 +87,11 @@ describe('GET /internal/significant_events/events', () => {
 });
 
 describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
-  it('adds the earliest lineage timestamp for deep-linked events', async () => {
+  it('returns lineage events with query-computed created_at', async () => {
+    const createdAt = '2025-12-31T19:00:00.000Z';
     const firstVersion = {
       '@timestamp': '2026-01-01T00:00:00+05:00',
+      created_at: createdAt,
       event_uuid: 'version-1',
       event_id: 'event-1',
       status: 'open' as const,
@@ -121,11 +123,6 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
       server: {},
     } as never);
 
-    // created_at is normalized to UTC ISO (matches the format ESQL MIN(@timestamp) emits)
-    const expectedCreatedAt = new Date(firstVersion['@timestamp']).toISOString();
-    expect(response.events).toEqual([
-      { ...firstVersion, created_at: expectedCreatedAt },
-      { ...latestVersion, created_at: expectedCreatedAt },
-    ]);
+    expect(response.events).toEqual([firstVersion, latestVersion]);
   });
 });

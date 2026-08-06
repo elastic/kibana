@@ -259,7 +259,7 @@ export class EventClient {
     };
 
     const dataQuery = buildBaseQuery()
-      .sort(['created_at', 'DESC'], ['_id', 'ASC'])
+      .sort(['@timestamp', 'DESC'], ['_id', 'ASC'])
       .limit(page * perPage)
       .keep('_source', 'created_at');
     const countQuery = buildBaseQuery().pipe`STATS total = COUNT(*)`.keep('total');
@@ -338,15 +338,22 @@ export class EventClient {
     return { hits: result.hits };
   }
 
-  async findByEventId(eventId: string): Promise<{ hits: SignificantEvent[] }> {
-    const result = await runFindByIdEsqlQuery<SignificantEvent>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
+  async findByEventId(eventId: string): Promise<{ hits: SignificantEventResponse[] }> {
+    const query = fromIndexForSpace({
       index: EVENTS_DATA_STREAM,
-      idField: FIELD_EVENT_ID,
-      idValue: eventId,
+      space: this.clients.space,
+      columns: ['_source'],
+    }).where`${esql.col(FIELD_EVENT_ID)} == ${esql.str(eventId)}`
+      .pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(FIELD_EVENT_ID)}`
+      .sort(['@timestamp', 'ASC'])
+      .keep('_source', 'created_at');
+
+    const hits = await executeEsqlQuery<SignificantEventResponse>({
+      esClient: this.clients.esClient,
+      query,
+      fields: ['created_at'],
     });
-    return { hits: result.hits };
+    return { hits };
   }
 
   async findLatestByEventIds(eventIds: string[]): Promise<Map<string, SignificantEvent>> {

@@ -205,7 +205,7 @@ describe('EventClient', () => {
       expect(dataQuery!.indexOf('INLINE STATS created_at')).toBeLessThan(
         dataQuery!.indexOf('status IN')
       );
-      expect(dataQuery).toContain('SORT created_at DESC, _id ASC');
+      expect(dataQuery).toContain('SORT @timestamp DESC, _id ASC');
     });
 
     it('filters open state after latest-per-slug reduction', async () => {

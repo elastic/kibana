@@ -199,10 +199,7 @@ const eventsLifecycleRoute = createServerRoute({
       }
     );
 
-    const createdAt = new Date(events[0]['@timestamp']).toISOString();
-    const lifecycleEvents = events.map((event) => ({ ...event, created_at: createdAt }));
-
-    return { detections, events: lifecycleEvents };
+    return { detections, events };
   },
 });
 
