@@ -143,7 +143,25 @@ export const BriefPage: React.FC = () => {
                   }
                   onClickAriaLabel={surface}
                 >
-                  <EuiText size="xs">{surface}</EuiText>
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    alignItems="center"
+                    responsive={false}
+                    direction="row"
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs">{surface}</EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="danger">
+                        {
+                          investigations.filter(
+                            (investigation) => investigation.affectedSurface === surface
+                          ).length
+                        }
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiBadge>
               </EuiFlexItem>
             ))}
