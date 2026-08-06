@@ -28,26 +28,6 @@
       }
     },
     {
-      "id": "ee79b7ded0533e5-f09cc026ca3cd2a",
-      "title": "Discover sidebar collapse collapses and expands the field list sidebar",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_collapse.spec.ts",
-        "line": 20,
-        "column": 23
-      }
-    },
-    {
       "id": "63f18de62370464-70fd013e9a28908",
       "title": "Discover sidebar data view switching shows an empty field list for a data view whose index is missing",
       "expectedStatus": "passed",
