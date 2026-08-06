@@ -185,6 +185,11 @@ export const getSearchQueryByCloudSecuritySolution = (
  *   resource.raw.resource.data.status            — "RUNNING" | "TERMINATED" | "STOPPING" | ...
  *   resource.raw.resource.data.lastStartTimestamp — ISO-8601 string with offset
  *   resource.raw.resource.data.lastStopTimestamp  — ISO-8601 string with offset (TERMINATED only)
+ *
+ * The whole body is wrapped in try/catch: a runtime-field script error aborts the entire search
+ * request, and the callers of that search swallow errors (log-only), so a single malformed doc
+ * would otherwise silently zero all CSPM usage reporting for the run. A doc that fails to parse
+ * simply emits nothing and is not counted.
  */
 export const getGcpComputeDurationRuntimeMapping = (nowMillis: number) => ({
   [GCP_COMPUTE_DURATION_RUNTIME_FIELD]: {
@@ -195,33 +200,39 @@ export const getGcpComputeDurationRuntimeMapping = (nowMillis: number) => ({
         if (doc['resource.sub_type'].size() == 0) return;
         if (!doc['resource.sub_type'].value.equals(params['subType'])) return;
 
-        def src = params['_source'];
-        if (src == null) return;
-        def resourceMap = (Map) src.get('resource');
-        if (resourceMap == null) return;
-        def raw = (Map) resourceMap.get('raw');
-        if (raw == null) return;
-        def rawResource = (Map) raw.get('resource');
-        if (rawResource == null) return;
-        def data = (Map) rawResource.get('data');
-        if (data == null) return;
+        try {
+          def src = params['_source'];
+          if (src == null) return;
+          def resourceMap = (Map) src.get('resource');
+          if (resourceMap == null) return;
+          def raw = (Map) resourceMap.get('raw');
+          if (raw == null) return;
+          def rawResource = (Map) raw.get('resource');
+          if (rawResource == null) return;
+          def data = (Map) rawResource.get('data');
+          if (data == null) return;
 
-        def status = (String) data.get('status');
-        def lastStartStr = (String) data.get('lastStartTimestamp');
-        if (lastStartStr == null || lastStartStr.length() == 0) return;
+          def status = (String) data.get('status');
+          def lastStartStr = (String) data.get('lastStartTimestamp');
+          if (lastStartStr == null || lastStartStr.length() == 0) return;
 
-        long lastStartMs = ZonedDateTime.parse(lastStartStr).toInstant().toEpochMilli();
-        long duration;
+          long lastStartMs = ZonedDateTime.parse(lastStartStr).toInstant().toEpochMilli();
+          long duration;
 
-        if ('RUNNING'.equals(status)) {
-          duration = params['nowMillis'] - lastStartMs;
-        } else {
-          def lastStopStr = (String) data.get('lastStopTimestamp');
-          if (lastStopStr == null || lastStopStr.length() == 0) return;
-          duration = ZonedDateTime.parse(lastStopStr).toInstant().toEpochMilli() - lastStartMs;
+          if ('RUNNING'.equals(status)) {
+            duration = params['nowMillis'] - lastStartMs;
+          } else {
+            def lastStopStr = (String) data.get('lastStopTimestamp');
+            if (lastStopStr == null || lastStopStr.length() == 0) return;
+            duration = ZonedDateTime.parse(lastStopStr).toInstant().toEpochMilli() - lastStartMs;
+          }
+
+          emit(duration);
+        } catch (Exception e) {
+          // Malformed doc (unexpected shape, non-string field, unparseable timestamp):
+          // skip it rather than aborting the whole search request.
+          return;
         }
-
-        emit(duration);
       `,
       params: {
         nowMillis,
