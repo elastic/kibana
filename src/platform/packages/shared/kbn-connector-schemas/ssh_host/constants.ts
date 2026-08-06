@@ -15,6 +15,13 @@ export const CONNECTOR_NAME = i18n.translate('connectors.sshHost.title', {
   defaultMessage: 'SSH Host',
 });
 
+export const AUTH_TYPE = {
+  PrivateKey: 'privateKey',
+  Password: 'password',
+} as const;
+
+export type AuthType = (typeof AUTH_TYPE)[keyof typeof AUTH_TYPE];
+
 export enum SUB_ACTION {
   Exec = 'exec',
   ExecAsync = 'execAsync',

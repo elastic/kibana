@@ -10,15 +10,20 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 export const ConfigSchema = lazySchema(() =>
-  z.object({ host: z.string().min(1).max(253) }).strict()
+  z
+    .object({
+      host: z.string().min(1).max(253),
+      authType: z.enum(['privateKey', 'password']).default('privateKey'),
+    })
+    .strict()
 );
 
 export const SecretsSchema = lazySchema(() =>
   z
     .object({
       username: z.string().min(1).max(256),
-      password: z.string().max(1024).optional(),
-      sshPrivateKey: z.string().min(1).max(65536),
+      sshPrivateKey: z.string().max(65536).nullable().default(null),
+      password: z.string().max(1024).nullable().default(null),
     })
     .strict()
 );

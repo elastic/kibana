@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './constants';
+export { CONNECTOR_ID, CONNECTOR_NAME, AUTH_TYPE, SUB_ACTION } from './constants';
+export type { AuthType } from './constants';
 
 export {
   ConfigSchema,
