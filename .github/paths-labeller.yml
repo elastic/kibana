@@ -32,10 +32,9 @@
     - 'src/platform/packages/shared/kbn-synthtrace/**/*.*'
     - 'src/platform/packages/shared/kbn-synthtrace-client/**/*.*'
     - 'src/platform/packages/shared/kbn-apm-utils/**/*.*'
-- 'Team:Fleet':
+- 'Team:streams-ui':
     - 'x-pack/platform/plugins/shared/fleet/**/*.*'
     - 'x-pack/platform/test/fleet_api_integration/**/*.*'
-- 'Team:streams-ui':
     - 'x-pack/platform/plugins/shared/streams/**/*.*'
     - 'x-pack/platform/plugins/shared/streams_app/**/*.*'
     - 'x-pack/platform/plugins/shared/ingest_hub/**/*.*'
