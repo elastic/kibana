@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
@@ -22,4 +23,8 @@ export interface ContextEngineStartDependencies {
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   console?: ConsolePluginStart;
+}
+
+export interface ContextEngineAdditionalStartServices {
+  agentBuilder?: AgentBuilderPluginStart;
 }

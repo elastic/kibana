@@ -40,6 +40,12 @@
     "@kbn/deeplinks-workflows",
     "@kbn/deeplinks-management",
     "@kbn/code-editor",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-common",
+    "@kbn/zod",
+    "@kbn/shared-ux-ai-components",
+    "@kbn/security-plugin"
   ]
 }

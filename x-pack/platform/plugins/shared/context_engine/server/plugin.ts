@@ -18,6 +18,8 @@ import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
 import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
+import { registerAttachmentTypes } from './attachment_types';
+import { registerAgentBuilderTools } from './agent_builder/tools';
 
 export class ContextEnginePlugin
   implements
@@ -59,6 +61,23 @@ export class ContextEnginePlugin
 
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
+      registerAgentBuilderAttachments: registerAttachmentTypes,
+      registerAgentBuilderTools: (agentBuilder, getCoreStart) =>
+        registerAgentBuilderTools({
+          agentBuilder,
+          getCoreStart,
+          getSecurityStart: async () => {
+            const [, startDeps] = await coreSetup.getStartServices();
+            return startDeps.security;
+          },
+          getWorkflowsManagement: () => setupDeps.workflowsManagement?.management,
+          getAiIndexService: () => {
+            if (!this.aiIndexService) {
+              throw new Error('AI index service not available — plugin has not started');
+            }
+            return this.aiIndexService;
+          },
+        }),
     };
   }
 

@@ -8,7 +8,7 @@ tags:
   - index-selection
   - knowledge-indicators
 consts:
-  target_index: .ai-index-idx-ki-example
+  target_index: ai-index-idx-ki-example
   indices:
     - raw-cases-all
     - raw-articles-all

@@ -11,7 +11,10 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { ContextEngineStartDependencies } from '../types';
+import type {
+  ContextEngineAdditionalStartServices,
+  ContextEngineStartDependencies,
+} from '../types';
 import type { ContextEngineServices } from './hooks/use_kibana';
 import { ContextEngineRoutes } from './routes';
 
@@ -20,16 +23,19 @@ const queryClient = new QueryClient();
 export const mountApp = ({
   core,
   plugins,
+  additionalServices,
   element,
   history,
 }: {
   core: CoreStart;
   plugins: ContextEngineStartDependencies;
+  additionalServices: ContextEngineAdditionalStartServices;
   element: HTMLElement;
   history: ScopedHistory;
 }) => {
   const services: ContextEngineServices = {
     ...core,
+    ...additionalServices,
     share: plugins.share,
     triggersActionsUi: plugins.triggersActionsUi,
     console: plugins.console,
