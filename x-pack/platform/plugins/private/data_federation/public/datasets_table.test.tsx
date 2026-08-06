@@ -47,11 +47,8 @@ describe('DatasetsTable', () => {
         <DatasetsTable
           filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
           selectedItems={[]}
-          dataSourceFilterOptions={[
-            { value: '', text: 'All' },
-            { value: 'ds1', text: 'ds1' },
-          ]}
-          dataSourceFilter=""
+          dataSourceNames={['ds1']}
+          dataSourceFilter={[]}
           isCreateDisabled={true}
           onSelectionChange={jest.fn()}
           onDataSourceFilterChange={jest.fn()}
@@ -78,11 +75,8 @@ describe('DatasetsTable', () => {
         <DatasetsTable
           filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
           selectedItems={[]}
-          dataSourceFilterOptions={[
-            { value: '', text: 'All' },
-            { value: 'ds1', text: 'ds1' },
-          ]}
-          dataSourceFilter=""
+          dataSourceNames={['ds1']}
+          dataSourceFilter={[]}
           isCreateDisabled={false}
           onSelectionChange={jest.fn()}
           onDataSourceFilterChange={jest.fn()}
@@ -101,22 +95,17 @@ describe('DatasetsTable', () => {
     expect(onCreate).toHaveBeenCalledWith('flow_2');
   });
 
-  it('calls onDataSourceFilterChange when the filter changes', async () => {
-    const onDataSourceFilterChange = jest.fn();
-
+  it('renders the data source filter button', () => {
     const { getByTestId } = render(
       <EuiProvider>
         <DatasetsTable
           filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
           selectedItems={[]}
-          dataSourceFilterOptions={[
-            { value: '', text: 'All' },
-            { value: 'ds1', text: 'ds1' },
-          ]}
-          dataSourceFilter=""
+          dataSourceNames={['ds1', 'ds2']}
+          dataSourceFilter={['ds1']}
           isCreateDisabled={false}
           onSelectionChange={jest.fn()}
-          onDataSourceFilterChange={onDataSourceFilterChange}
+          onDataSourceFilterChange={jest.fn()}
           onCreate={jest.fn()}
           onEdit={jest.fn()}
           onDelete={jest.fn()}
@@ -125,9 +114,7 @@ describe('DatasetsTable', () => {
       </EuiProvider>
     );
 
-    fireEvent.change(getByTestId('dataSetsSetsDataSourceFilter'), { target: { value: 'ds1' } });
-    expect(onDataSourceFilterChange).toHaveBeenCalledTimes(1);
-    expect(onDataSourceFilterChange).toHaveBeenCalledWith('ds1');
+    expect(getByTestId('dataSetsSetsDataSourceFilter')).toBeInTheDocument();
   });
 
   it('calls onEdit and onDelete for row actions', async () => {
@@ -142,11 +129,8 @@ describe('DatasetsTable', () => {
             createDataSetRow({ name: 'set2', dataSource: 'ds1' }),
           ]}
           selectedItems={[]}
-          dataSourceFilterOptions={[
-            { value: '', text: 'All' },
-            { value: 'ds1', text: 'ds1' },
-          ]}
-          dataSourceFilter=""
+          dataSourceNames={['ds1']}
+          dataSourceFilter={[]}
           isCreateDisabled={false}
           onSelectionChange={jest.fn()}
           onDataSourceFilterChange={jest.fn()}
@@ -181,11 +165,8 @@ describe('DatasetsTable', () => {
         <DatasetsTable
           filteredItems={[...selectedItems, createDataSetRow({ name: 'set2', dataSource: 'ds1' })]}
           selectedItems={selectedItems}
-          dataSourceFilterOptions={[
-            { value: '', text: 'All' },
-            { value: 'ds1', text: 'ds1' },
-          ]}
-          dataSourceFilter=""
+          dataSourceNames={['ds1']}
+          dataSourceFilter={[]}
           isCreateDisabled={false}
           onSelectionChange={jest.fn()}
           onDataSourceFilterChange={jest.fn()}

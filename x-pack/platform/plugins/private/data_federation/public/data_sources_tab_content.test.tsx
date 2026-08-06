@@ -133,6 +133,7 @@ const renderComponent = async ({
           dataSources={dataSources}
           dataSets={dataSets}
           loadDataSources={loadDataSources}
+          onViewDataSetsForDataSource={jest.fn()}
         />
       </KibanaContextProvider>
     </EuiProvider>

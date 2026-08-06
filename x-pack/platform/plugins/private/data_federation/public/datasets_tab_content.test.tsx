@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
@@ -36,7 +36,7 @@ jest.mock('./datasets_table', () => ({
     return (
       <div data-test-subj="mockDatasetsTable">
         <div data-test-subj="mockSelectedCount">{String(selectedItems.length)}</div>
-        <div data-test-subj="mockFilterValue">{String(props.dataSourceFilter ?? '')}</div>
+        <div data-test-subj="mockFilterValue">{JSON.stringify(props.dataSourceFilter ?? [])}</div>
         <div data-test-subj="mockCreateDisabled">{String(props.isCreateDisabled)}</div>
 
         <button
@@ -49,11 +49,11 @@ jest.mock('./datasets_table', () => ({
         />
         <button
           data-test-subj="mockChangeFilterToDs1"
-          onClick={() => (props.onDataSourceFilterChange as any)('ds1')}
+          onClick={() => (props.onDataSourceFilterChange as any)(['ds1'])}
         />
         <button
           data-test-subj="mockChangeFilterToMissing"
-          onClick={() => (props.onDataSourceFilterChange as any)('missing')}
+          onClick={() => (props.onDataSourceFilterChange as any)(['missing'])}
         />
         <button
           data-test-subj="mockDeleteFirst"
@@ -136,20 +136,32 @@ const renderComponent = async ({
   dataSets,
   datasetsClient,
   loadDataSets,
+  initialDataSourceFilter = [] as string[],
 }: {
   dataSources: DataSource[];
   dataSets: DataSetWithName[];
   datasetsClient: MockDatasetsClient;
   loadDataSets: () => Promise<void>;
+  initialDataSourceFilter?: string[];
 }) => {
+  const Harness = () => {
+    const [dataSourceFilter, setDataSourceFilter] = useState(initialDataSourceFilter);
+
+    return (
+      <DatasetsTabContent
+        dataSources={dataSources}
+        dataSets={dataSets}
+        loadDataSets={loadDataSets}
+        dataSourceFilter={dataSourceFilter}
+        onDataSourceFilterChange={setDataSourceFilter}
+      />
+    );
+  };
+
   return render(
     <EuiProvider>
       <KibanaContextProvider services={createServicesMock({ datasetsClient })}>
-        <DatasetsTabContent
-          dataSources={dataSources}
-          dataSets={dataSets}
-          loadDataSets={loadDataSets}
-        />
+        <Harness />
       </KibanaContextProvider>
     </EuiProvider>
   );
@@ -247,26 +259,36 @@ describe('DatasetsTabContent', () => {
     );
     await waitFor(() => {
       expect(document.querySelector('[data-test-subj="mockFilterValue"]')?.textContent).toBe(
-        'missing'
+        '["missing"]'
       );
     });
+
+    const Harness = () => {
+      const [dataSourceFilter, setDataSourceFilter] = useState<string[]>([]);
+
+      return (
+        <DatasetsTabContent
+          dataSources={[createDataSource('ds1')]}
+          dataSets={[]}
+          loadDataSets={loadDataSets}
+          dataSourceFilter={dataSourceFilter}
+          onDataSourceFilterChange={setDataSourceFilter}
+        />
+      );
+    };
 
     rerender(
       <EuiProvider>
         <KibanaContextProvider
           services={createServicesMock({ datasetsClient: { add: jest.fn(), delete: jest.fn() } })}
         >
-          <DatasetsTabContent
-            dataSources={[createDataSource('ds1')]}
-            dataSets={[]}
-            loadDataSets={loadDataSets}
-          />
+          <Harness />
         </KibanaContextProvider>
       </EuiProvider>
     );
 
     await waitFor(() => {
-      expect(document.querySelector('[data-test-subj="mockFilterValue"]')?.textContent).toBe('');
+      expect(document.querySelector('[data-test-subj="mockFilterValue"]')?.textContent).toBe('[]');
     });
   });
 });

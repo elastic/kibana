@@ -21,16 +21,30 @@ import {
 } from '@elastic/eui';
 
 import { DATA_SOURCE_TYPES_TO_ICONS, type DataSource } from '../../common';
+import { DataSourceConnectionStatusHealth } from '../data_source_connection_status_badge';
 
 const DataSourceOptionDisplay: FunctionComponent<{ dataSource: DataSource }> = ({ dataSource }) => {
   const iconType = DATA_SOURCE_TYPES_TO_ICONS[dataSource.type];
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      responsive={false}
+      justifyContent="spaceBetween"
+      css={{ inlineSize: '100%' }}
+    >
       <EuiFlexItem grow={false}>
-        <EuiIcon type={iconType} size="m" aria-hidden />
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={iconType} size="m" aria-hidden />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{dataSource.name}</EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{dataSource.name}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <DataSourceConnectionStatusHealth dataSourceName={dataSource.name} />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

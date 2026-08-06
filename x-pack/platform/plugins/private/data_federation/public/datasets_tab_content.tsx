@@ -24,12 +24,16 @@ export interface DatasetsTabContentProps {
   dataSources: DataSource[];
   dataSets: DataSetWithName[];
   loadDataSets: () => Promise<void>;
+  dataSourceFilter: readonly string[];
+  onDataSourceFilterChange: (value: string[]) => void;
 }
 
 export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
   dataSources,
   dataSets,
   loadDataSets,
+  dataSourceFilter,
+  onDataSourceFilterChange,
 }) => {
   const history = useHistory();
   const {
@@ -37,7 +41,6 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
   } = useKibana<DataFederationKibanaServices>();
 
   const [selectedDataSets, setSelectedDataSets] = useState<DataSetListRow[]>([]);
-  const [dataSourceFilter, setDataSourceFilter] = useState<string>('');
   const [pendingDeleteDataSet, setPendingDeleteDataSet] = useState<DataSetListRow | null>(null);
   const [isDeletingDataSet, setIsDeletingDataSet] = useState(false);
   const [deleteDataSetError, setDeleteDataSetError] = useState<string | null>(null);
@@ -55,32 +58,35 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     }));
   }, [dataSets, dataSources]);
 
-  const dataSourceFilterOptions = useMemo(
-    () => [
-      { value: '', text: mainTranslations.filters.allDataSources },
-      ...dataSources
-        .map((ds) => ds.name)
-        .sort()
-        .map((name) => ({ value: name, text: name })),
-    ],
+  const dataSourceNames = useMemo(
+    () => dataSources.map((ds) => ds.name).sort(),
     [dataSources]
   );
 
   useEffect(() => {
-    if (dataSourceFilter && !dataSources.some((ds) => ds.name === dataSourceFilter)) {
-      setDataSourceFilter('');
+    if (dataSourceFilter.length === 0) {
+      return;
     }
-  }, [dataSourceFilter, dataSources]);
+
+    const validNames = new Set(dataSourceNames);
+    const nextFilter = dataSourceFilter.filter((name) => validNames.has(name));
+
+    if (nextFilter.length !== dataSourceFilter.length) {
+      onDataSourceFilterChange(nextFilter);
+    }
+  }, [dataSourceFilter, dataSourceNames, onDataSourceFilterChange]);
 
   useEffect(() => {
     setSelectedDataSets([]);
   }, [dataSourceFilter]);
 
   const filteredDataSetItems = useMemo(() => {
-    if (!dataSourceFilter) {
+    if (dataSourceFilter.length === 0) {
       return dataSetItems;
     }
-    return dataSetItems.filter((ds) => ds.data_source === dataSourceFilter);
+
+    const selected = new Set(dataSourceFilter);
+    return dataSetItems.filter((ds) => selected.has(ds.data_source));
   }, [dataSetItems, dataSourceFilter]);
 
   const handleDeleteDataSet = useCallback((item: DataSetListRow) => {
@@ -175,11 +181,11 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
       <DatasetsTable
         filteredItems={filteredDataSetItems}
         selectedItems={selectedDataSets}
-        dataSourceFilterOptions={dataSourceFilterOptions}
+        dataSourceNames={dataSourceNames}
         dataSourceFilter={dataSourceFilter}
         isCreateDisabled={dataSources.length === 0}
         onSelectionChange={setSelectedDataSets}
-        onDataSourceFilterChange={setDataSourceFilter}
+        onDataSourceFilterChange={onDataSourceFilterChange}
         onCreate={handleCreate}
         onEdit={handleEdit}
         onDelete={handleDeleteDataSet}

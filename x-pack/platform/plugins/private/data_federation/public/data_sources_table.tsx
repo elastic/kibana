@@ -8,9 +8,11 @@
 import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButton, EuiButtonIcon, EuiInMemoryTable, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiInMemoryTable, EuiLink, EuiSpacer, EuiToolTip } from '@elastic/eui';
 
 import { ALL_DATA_SOURCE_TYPES, type DataSource } from '../common';
+import { DataSourceConnectionStatusHealth } from './data_source_connection_status_badge';
+import { getMockDataSourceConnectionStatus } from './data_source_connection_status';
 import { getDataSourceTypeVerbose } from './get_data_source_type_label';
 import { mainTranslations } from './main_i18n';
 
@@ -23,6 +25,7 @@ export interface DataSourcesTableProps {
   onEdit: (item: DataSource) => void;
   onDelete: (item: DataSource) => void;
   onDeleteSelected: (items: readonly DataSource[]) => void;
+  onViewDataSetsForDataSource?: (dataSourceName: string) => void;
 }
 
 export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
@@ -34,6 +37,7 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
   onEdit,
   onDelete,
   onDeleteSelected,
+  onViewDataSetsForDataSource,
 }) => {
   const columns = useMemo<Array<EuiBasicTableColumn<DataSource>>>(
     () => [
@@ -41,13 +45,41 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
         field: 'name',
         name: mainTranslations.columns.dataSources.name,
         sortable: true,
-        width: '22%',
+        width: '20%',
         'data-test-subj': 'dataSetsColName',
+      },
+      {
+        name: mainTranslations.columns.dataSources.status,
+        sortable: (item: DataSource) => getMockDataSourceConnectionStatus(item.name),
+        width: '14%',
+        render: (item: DataSource) => (
+          <DataSourceConnectionStatusHealth dataSourceName={item.name} />
+        ),
+        'data-test-subj': 'dataSetsColStatus',
       },
       {
         name: mainTranslations.columns.dataSources.dataSetsCount,
         width: '10%',
-        render: (item: DataSource) => dataSetsCountByDataSource.get(item.name) ?? 0,
+        render: (item: DataSource) => {
+          const count = dataSetsCountByDataSource.get(item.name) ?? 0;
+
+          if (count > 0 && onViewDataSetsForDataSource) {
+            return (
+              <EuiLink
+                onClick={() => onViewDataSetsForDataSource(item.name)}
+                aria-label={mainTranslations.columns.dataSources.viewDataSetsLinkAriaLabel(
+                  count,
+                  item.name
+                )}
+                data-test-subj="dataSetsCountLink"
+              >
+                {count}
+              </EuiLink>
+            );
+          }
+
+          return count;
+        },
         'data-test-subj': 'dataSetsColDataSetsCount',
       },
       {
@@ -125,7 +157,7 @@ export const DataSourcesTable: FunctionComponent<DataSourcesTableProps> = ({
         ],
       },
     ],
-    [dataSetsCountByDataSource, onDelete, onEdit]
+    [dataSetsCountByDataSource, onDelete, onEdit, onViewDataSetsForDataSource]
   );
 
   return (

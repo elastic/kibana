@@ -36,6 +36,18 @@ export const mainTranslations = {
       dataSetsCount: i18n.translate('xpack.dataFederation.table.columnDataSetsCount', {
         defaultMessage: 'Datasets',
       }),
+      status: i18n.translate('xpack.dataFederation.table.columnStatus', {
+        defaultMessage: 'Status',
+      }),
+      connectionStatusConnected: i18n.translate(
+        'xpack.dataFederation.table.connectionStatusConnected',
+        {
+          defaultMessage: 'Connected',
+        }
+      ),
+      connectionStatusBroken: i18n.translate('xpack.dataFederation.table.connectionStatusBroken', {
+        defaultMessage: 'Disconnected',
+      }),
       description: i18n.translate('xpack.dataFederation.table.columnDescription', {
         defaultMessage: 'Description',
       }),
@@ -70,6 +82,11 @@ export const mainTranslations = {
             'To delete a data source, you must first delete all datasets that read from it.',
         }
       ),
+      viewDataSetsLinkAriaLabel: (count: number, dataSourceName: string) =>
+        i18n.translate('xpack.dataFederation.table.viewDataSetsLinkAriaLabel', {
+          defaultMessage: 'View {count} datasets for {dataSourceName}',
+          values: { count, dataSourceName },
+        }),
       caption: i18n.translate('xpack.dataFederation.table.caption', {
         defaultMessage: 'Data sources',
       }),
@@ -173,6 +190,12 @@ export const mainTranslations = {
     allDataSources: i18n.translate('xpack.dataFederation.filters.allDataSources', {
       defaultMessage: 'Data sources',
     }),
+    dataSourceSearchPlaceholder: i18n.translate(
+      'xpack.dataFederation.filters.dataSourceSearchPlaceholder',
+      {
+        defaultMessage: 'Filter options',
+      }
+    ),
   },
 
   confirmDeleteDataSource: {

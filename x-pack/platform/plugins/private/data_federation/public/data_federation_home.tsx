@@ -46,6 +46,7 @@ export const DataFederationHome: FunctionComponent = () => {
 
   const [selectedTabId, setSelectedTabId] = useState<'sets' | 'sources'>('sets');
   const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
+  const [dataSourceFilter, setDataSourceFilter] = useState<string[]>([]);
 
   useEffect(() => {
     const tab = new URLSearchParams(location.search).get('tab');
@@ -74,6 +75,12 @@ export const DataFederationHome: FunctionComponent = () => {
   const onTabClick = useCallback((tabId: 'sets' | 'sources') => {
     setHasUserSelectedTab(true);
     setSelectedTabId(tabId);
+  }, []);
+
+  const viewDataSetsForDataSource = useCallback((dataSourceName: string) => {
+    setHasUserSelectedTab(true);
+    setSelectedTabId('sets');
+    setDataSourceFilter([dataSourceName]);
   }, []);
 
   const headerBadges = useMemo<AppHeaderBadge[]>(
@@ -113,6 +120,7 @@ export const DataFederationHome: FunctionComponent = () => {
           dataSources={dataSources}
           dataSets={dataSets}
           loadDataSources={reloadDataSources}
+          onViewDataSetsForDataSource={viewDataSetsForDataSource}
         />
       );
     }
@@ -122,9 +130,11 @@ export const DataFederationHome: FunctionComponent = () => {
         dataSources={dataSources}
         dataSets={dataSets}
         loadDataSets={reloadDataSets}
+        dataSourceFilter={dataSourceFilter}
+        onDataSourceFilterChange={setDataSourceFilter}
       />
     );
-  }, [dataSources, dataSets, reloadDataSets, reloadDataSources, selectedTabId]);
+  }, [dataSourceFilter, dataSources, dataSets, reloadDataSets, reloadDataSources, selectedTabId, viewDataSetsForDataSource]);
 
   return (
     <>

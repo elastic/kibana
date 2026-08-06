@@ -13,11 +13,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
 
 import type { DataSetWithName, DataSource } from '../common';
+import { DataSourceFilterButton } from './data_source_filter_button';
 import { getDataSourceTypeVerbose } from './get_data_source_type_label';
 import { AddDatasetMenuButton } from './add_dataset_menu_button';
 import type { DatasetWizardFlowVariant } from './create_dataset_wizard/dataset_wizard_flow_variant';
@@ -29,11 +29,11 @@ export type DataSetListRow = DataSetWithName & { type?: DataSource['type'] };
 export interface DatasetsTableProps {
   filteredItems: DataSetListRow[];
   selectedItems: DataSetListRow[];
-  dataSourceFilterOptions: Array<{ value: string; text: string }>;
-  dataSourceFilter: string;
+  dataSourceNames: string[];
+  dataSourceFilter: readonly string[];
   isCreateDisabled: boolean;
   onSelectionChange: (next: DataSetListRow[]) => void;
-  onDataSourceFilterChange: (next: string) => void;
+  onDataSourceFilterChange: (next: string[]) => void;
   onCreate: (flowVariant: DatasetWizardFlowVariant) => void;
   onEdit: (item: DataSetListRow) => void;
   onDelete: (item: DataSetListRow) => void;
@@ -43,7 +43,7 @@ export interface DatasetsTableProps {
 export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
   filteredItems,
   selectedItems,
-  dataSourceFilterOptions,
+  dataSourceNames,
   dataSourceFilter,
   isCreateDisabled,
   onSelectionChange,
@@ -163,12 +163,10 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
           toolsRight: (
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiSelect
-                  data-test-subj="dataSetsSetsDataSourceFilter"
-                  aria-label={mainTranslations.filters.dataSource}
-                  options={dataSourceFilterOptions}
-                  value={dataSourceFilter}
-                  onChange={(e) => onDataSourceFilterChange(e.target.value)}
+                <DataSourceFilterButton
+                  dataSourceNames={dataSourceNames}
+                  selectedDataSourceNames={dataSourceFilter}
+                  onChange={onDataSourceFilterChange}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

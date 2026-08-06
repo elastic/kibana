@@ -82,7 +82,7 @@ describe('DatasetWizard step navigation', () => {
 
   const fillLogisticsStep = (getByRole: ReturnType<typeof render>['getByRole'], getByTestId: ReturnType<typeof render>['getByTestId']) => {
     fireEvent.click(getByTestId('datasetWizardDataSource'));
-    fireEvent.click(getByRole('option', { name: 'source-1' }));
+    fireEvent.click(getByRole('option', { name: /source-1/ }));
     fireEvent.change(getByTestId('datasetWizardName'), {
       target: { value: 'my-dataset' },
     });
@@ -236,7 +236,7 @@ describe('DatasetWizard step navigation', () => {
     const { getByRole, getByTestId, history } = renderWizard();
 
     fireEvent.click(getByTestId('datasetWizardDataSource'));
-    fireEvent.click(getByRole('option', { name: 'source-1' }));
+    fireEvent.click(getByRole('option', { name: /source-1/ }));
     fireEvent.change(getByTestId('datasetWizardName'), {
       target: { value: 'my-dataset' },
     });
@@ -258,7 +258,7 @@ describe('DatasetWizard step navigation', () => {
     const { getByRole, getByTestId, history } = renderWizard();
 
     fireEvent.click(getByTestId('datasetWizardDataSource'));
-    fireEvent.click(getByRole('option', { name: 'source-1' }));
+    fireEvent.click(getByRole('option', { name: /source-1/ }));
     fireEvent.change(getByTestId('datasetWizardName'), {
       target: { value: 'my-dataset' },
     });

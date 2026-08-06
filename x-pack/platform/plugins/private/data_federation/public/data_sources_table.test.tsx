@@ -55,6 +55,54 @@ describe('DataSourcesTable', () => {
     expect(onCreate).toHaveBeenCalledTimes(1);
   });
 
+  it('renders mock connection status for each data source', () => {
+    const { getAllByTestId } = render(
+      <EuiProvider>
+        <DataSourcesTable
+          dataSources={[createDataSource('obs-prod-s3', 's3'), createDataSource('source-b', 's3')]}
+          selectedDataSources={[]}
+          dataSetsCountByDataSource={new Map()}
+          onSelectionChange={jest.fn()}
+          onCreate={jest.fn()}
+          onEdit={jest.fn()}
+          onDelete={jest.fn()}
+          onDeleteSelected={jest.fn()}
+        />
+      </EuiProvider>
+    );
+
+    const statuses = getAllByTestId('dataSourceConnectionStatus');
+    expect(statuses).toHaveLength(2);
+    expect(statuses[0]).toHaveTextContent('Connected');
+    expect(statuses[1]).toHaveTextContent('Disconnected');
+  });
+
+  it('links dataset count to the datasets filter when count is greater than zero', () => {
+    const onViewDataSetsForDataSource = jest.fn();
+    const dataSetsCountByDataSource = new Map<string, number>([['Source A', 2], ['Source B', 0]]);
+
+    const { getByTestId, getByText } = render(
+      <EuiProvider>
+        <DataSourcesTable
+          dataSources={[createDataSource('Source A', 's3'), createDataSource('Source B', 's3')]}
+          selectedDataSources={[]}
+          dataSetsCountByDataSource={dataSetsCountByDataSource}
+          onSelectionChange={jest.fn()}
+          onCreate={jest.fn()}
+          onEdit={jest.fn()}
+          onDelete={jest.fn()}
+          onDeleteSelected={jest.fn()}
+          onViewDataSetsForDataSource={onViewDataSetsForDataSource}
+        />
+      </EuiProvider>
+    );
+
+    fireEvent.click(getByTestId('dataSetsCountLink'));
+    expect(onViewDataSetsForDataSource).toHaveBeenCalledTimes(1);
+    expect(onViewDataSetsForDataSource).toHaveBeenCalledWith('Source A');
+    expect(getByText('0')).toBeInTheDocument();
+  });
+
   it('disables the edit action for a data source with an unsupported type', async () => {
     const onEdit = jest.fn();
 
