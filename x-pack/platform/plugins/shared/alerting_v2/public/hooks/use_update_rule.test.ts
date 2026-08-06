@@ -122,4 +122,20 @@ describe('useUpdateRule', () => {
       });
     });
   });
+
+  it('should let onErrorToast override the default toast', async () => {
+    const error = new Error('bad request');
+    mockUpdateRule.mockRejectedValue(error);
+    const onErrorToast = jest.fn();
+    const { result } = renderHook(() => useUpdateRule({ onErrorToast }), {
+      wrapper: createWrapper(),
+    });
+
+    result.current.mutate({ id: 'rule-1', payload: {} });
+
+    await waitFor(() => {
+      expect(onErrorToast).toHaveBeenCalledTimes(1);
+      expect(mockAddError).not.toHaveBeenCalled();
+    });
+  });
 });

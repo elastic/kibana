@@ -14,12 +14,21 @@ import { ruleKeys } from './query_key_factory';
 import { enrichHttpErrorMessage } from '../utils/enrich_http_error';
 import { getFriendlyRuleHttpErrorToastMessage } from '../utils/friendly_http_error';
 
+const ERROR_TITLE = i18n.translate('xpack.alertingV2.hooks.useUpdateRule.errorMessage', {
+  defaultMessage: 'Edits not saved',
+});
+
 interface UseUpdateRuleOptions {
-  /** When true, the hook skips its default error toast so the caller can own UX. */
-  suppressErrorToast?: boolean;
+  /**
+   * Overrides the default error toast. Call `showDefaultToast` to fall back to
+   * the enriched addError toast for statuses the caller does not handle.
+   * Temporary escape hatch for compose-discover save UX; prefer removing once
+   * conditionless alert queries are saveable again.
+   */
+  onErrorToast?: (error: Error, showDefaultToast: () => void) => void;
 }
 
-export const useUpdateRule = ({ suppressErrorToast = false }: UseUpdateRuleOptions = {}) => {
+export const useUpdateRule = ({ onErrorToast }: UseUpdateRuleOptions = {}) => {
   const rulesApi = useService(RulesApi);
   const { toasts } = useService(CoreStart('notifications'));
   const queryClient = useQueryClient();
@@ -39,15 +48,16 @@ export const useUpdateRule = ({ suppressErrorToast = false }: UseUpdateRuleOptio
       queryClient.invalidateQueries(ruleKeys.detail(variables.id));
     },
     onError: (error: Error) => {
-      if (suppressErrorToast) {
+      const showDefaultToast = () =>
+        toasts.addError(enrichHttpErrorMessage(error), {
+          title: ERROR_TITLE,
+          toastMessage: getFriendlyRuleHttpErrorToastMessage(error),
+        });
+      if (onErrorToast) {
+        onErrorToast(error, showDefaultToast);
         return;
       }
-      toasts.addError(enrichHttpErrorMessage(error), {
-        title: i18n.translate('xpack.alertingV2.hooks.useUpdateRule.errorMessage', {
-          defaultMessage: 'Edits not saved',
-        }),
-        toastMessage: getFriendlyRuleHttpErrorToastMessage(error),
-      });
+      showDefaultToast();
     },
   });
 };

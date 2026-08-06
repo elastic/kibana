@@ -31,14 +31,40 @@ jest.mock('@kbn/react-kibana-mount', () => ({
 }));
 
 jest.mock('./use_create_rule', () => ({
-  useCreateRule: () => ({
-    mutateAsync: mockCreateMutateAsync,
+  useCreateRule: (
+    options: {
+      onErrorToast?: (error: Error, showDefaultToast: () => void) => void;
+    } = {}
+  ) => ({
+    mutateAsync: async (...args: unknown[]) => {
+      try {
+        return await mockCreateMutateAsync(...args);
+      } catch (error) {
+        options.onErrorToast?.(error as Error, () =>
+          mockAddError(error, { title: 'Rule not created' })
+        );
+        throw error;
+      }
+    },
     isLoading: false,
   }),
 }));
 jest.mock('./use_update_rule', () => ({
-  useUpdateRule: () => ({
-    mutateAsync: mockUpdateMutateAsync,
+  useUpdateRule: (
+    options: {
+      onErrorToast?: (error: Error, showDefaultToast: () => void) => void;
+    } = {}
+  ) => ({
+    mutateAsync: async (...args: unknown[]) => {
+      try {
+        return await mockUpdateMutateAsync(...args);
+      } catch (error) {
+        options.onErrorToast?.(error as Error, () =>
+          mockAddError(error, { title: 'Edits not saved' })
+        );
+        throw error;
+      }
+    },
     isLoading: false,
   }),
 }));

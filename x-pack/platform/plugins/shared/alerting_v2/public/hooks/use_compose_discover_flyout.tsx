@@ -27,8 +27,6 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { RuleApiResponse } from '../services/rules_api';
-import { enrichHttpErrorMessage } from '../utils/enrich_http_error';
-import { getFriendlyRuleHttpErrorToastMessage } from '../utils/friendly_http_error';
 import { useCreateRule } from './use_create_rule';
 import { useSetupRuleNotifications } from './use_setup_rule_notifications';
 import { useUpdateRule } from './use_update_rule';
@@ -75,9 +73,83 @@ export const useComposeDiscoverFlyout = ({
   const [initialBuilderState, setInitialBuilderState] = useState<BuilderState>(undefined);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
   const navigateToQueryStepRef = useRef<(() => void) | null>(null);
-  const createRuleMutation = useCreateRule({ suppressErrorToast: true });
+
+  /*
+   * Temporary: until composed alerts can persist an empty breach segment, a
+   * conditionless alert save 400s. Offer a Review query action that jumps back
+   * to step 0; everything else uses the hook's default enriched toast.
+   */
+  const handleCreateErrorToast = useCallback(
+    (error: Error, showDefaultToast: () => void) => {
+      if ((error as IHttpFetchError).response?.status !== 400) {
+        showDefaultToast();
+        return;
+      }
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.alertingV2.hooks.useCreateRule.errorMessage', {
+          defaultMessage: 'Rule not created',
+        }),
+        text: toMountPoint(
+          <FormattedMessage
+            id="xpack.alertingV2.useComposeDiscoverFlyout.badRequestToast"
+            defaultMessage="The rule could not be saved because some fields are invalid. {reviewQuery}"
+            values={{
+              reviewQuery: (
+                <EuiLink
+                  data-test-subj="composeDiscoverReviewQueryToastAction"
+                  onClick={() => navigateToQueryStepRef.current?.()}
+                >
+                  {i18n.translate('xpack.alertingV2.useComposeDiscoverFlyout.reviewQueryAction', {
+                    defaultMessage: 'Review query',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />,
+          { i18n: i18nStart, theme }
+        ),
+      });
+    },
+    [i18nStart, notifications.toasts, theme]
+  );
+
+  const handleUpdateErrorToast = useCallback(
+    (error: Error, showDefaultToast: () => void) => {
+      if ((error as IHttpFetchError).response?.status !== 400) {
+        showDefaultToast();
+        return;
+      }
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.alertingV2.hooks.useUpdateRule.errorMessage', {
+          defaultMessage: 'Edits not saved',
+        }),
+        text: toMountPoint(
+          <FormattedMessage
+            id="xpack.alertingV2.useComposeDiscoverFlyout.badRequestToast"
+            defaultMessage="The rule could not be saved because some fields are invalid. {reviewQuery}"
+            values={{
+              reviewQuery: (
+                <EuiLink
+                  data-test-subj="composeDiscoverReviewQueryToastAction"
+                  onClick={() => navigateToQueryStepRef.current?.()}
+                >
+                  {i18n.translate('xpack.alertingV2.useComposeDiscoverFlyout.reviewQueryAction', {
+                    defaultMessage: 'Review query',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />,
+          { i18n: i18nStart, theme }
+        ),
+      });
+    },
+    [i18nStart, notifications.toasts, theme]
+  );
+
+  const createRuleMutation = useCreateRule({ onErrorToast: handleCreateErrorToast });
   const setupNotificationsMutation = useSetupRuleNotifications();
-  const updateRuleMutation = useUpdateRule({ suppressErrorToast: true });
+  const updateRuleMutation = useUpdateRule({ onErrorToast: handleUpdateErrorToast });
   const ruleFormServices = useMemo<RuleFormServices>(
     () => ({
       http,
@@ -106,52 +178,6 @@ export const useComposeDiscoverFlyout = ({
       application.navigateToUrl(http.basePath.prepend(createSuccessRedirectPath));
     }
   }, [application, createSuccessRedirectPath, http]);
-
-  const showSaveErrorToast = useCallback(
-    (error: Error, mode: 'create' | 'update') => {
-      const status = (error as IHttpFetchError).response?.status;
-      const title =
-        mode === 'create'
-          ? i18n.translate('xpack.alertingV2.hooks.useCreateRule.errorMessage', {
-              defaultMessage: 'Rule not created',
-            })
-          : i18n.translate('xpack.alertingV2.hooks.useUpdateRule.errorMessage', {
-              defaultMessage: 'Edits not saved',
-            });
-
-      if (status === 400) {
-        notifications.toasts.addDanger({
-          title,
-          text: toMountPoint(
-            <FormattedMessage
-              id="xpack.alertingV2.useComposeDiscoverFlyout.badRequestToast"
-              defaultMessage="The rule could not be saved because some fields are invalid. {reviewQuery}"
-              values={{
-                reviewQuery: (
-                  <EuiLink
-                    data-test-subj="composeDiscoverReviewQueryToastAction"
-                    onClick={() => navigateToQueryStepRef.current?.()}
-                  >
-                    {i18n.translate('xpack.alertingV2.useComposeDiscoverFlyout.reviewQueryAction', {
-                      defaultMessage: 'Review query',
-                    })}
-                  </EuiLink>
-                ),
-              }}
-            />,
-            { i18n: i18nStart, theme }
-          ),
-        });
-        return;
-      }
-
-      notifications.toasts.addError(enrichHttpErrorMessage(error), {
-        title,
-        toastMessage: getFriendlyRuleHttpErrorToastMessage(error),
-      });
-    },
-    [i18nStart, notifications.toasts, theme]
-  );
 
   const openCreateFlyout = useCallback(() => {
     setTargetRule(null);
@@ -251,36 +277,28 @@ export const useComposeDiscoverFlyout = ({
       initialBuilderState={initialBuilderState}
       onProvideQueryStepNavigator={handleProvideQueryStepNavigator}
       onCreateRule={async (payload, ruleNotifications) => {
-        try {
-          const rule = await createRuleMutation.mutateAsync(payload);
-          const actions = ruleNotifications?.workflows ?? [];
-          if (actions.length > 0) {
-            setupNotificationsMutation.mutate(
-              { rule, actions },
-              { onSuccess: closeAndRedirect, onError: closeAndRedirect }
-            );
-          } else {
-            closeAndRedirect();
-          }
-        } catch (error) {
-          showSaveErrorToast(error as Error, 'create');
-          throw error;
+        // Rejection propagates to the flyout (stays mounted). onErrorToast
+        // already surfaced the failure, including the Review query action.
+        const rule = await createRuleMutation.mutateAsync(payload);
+        const actions = ruleNotifications?.workflows ?? [];
+        if (actions.length > 0) {
+          setupNotificationsMutation.mutate(
+            { rule, actions },
+            { onSuccess: closeAndRedirect, onError: closeAndRedirect }
+          );
+        } else {
+          closeAndRedirect();
         }
       }}
       onUpdateRule={async (id, payload, ruleNotifications) => {
-        try {
-          const rule = await updateRuleMutation.mutateAsync({ id, payload });
-          const actions = ruleNotifications?.workflows ?? [];
-          if (actions.length === 0) {
-            closeFlyout();
-            return;
-          }
-          // Only close the flyout once notification setup also succeeds
-          setupNotificationsMutation.mutate({ rule, actions }, { onSuccess: closeFlyout });
-        } catch (error) {
-          showSaveErrorToast(error as Error, 'update');
-          throw error;
+        const rule = await updateRuleMutation.mutateAsync({ id, payload });
+        const actions = ruleNotifications?.workflows ?? [];
+        if (actions.length === 0) {
+          closeFlyout();
+          return;
         }
+        // Only close the flyout once notification setup also succeeds
+        setupNotificationsMutation.mutate({ rule, actions }, { onSuccess: closeFlyout });
       }}
       isSaving={
         createRuleMutation.isLoading ||
