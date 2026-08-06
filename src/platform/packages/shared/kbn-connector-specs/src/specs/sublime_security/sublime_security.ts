@@ -566,10 +566,10 @@ Gotchas:
         await ctx.client.get(`${getBaseUrl(ctx)}/v0/mailboxes`, {
           params: { limit: 1 },
         });
-        return { ok: true, message: 'Successfully connected to the Sublime Platform API' };
       } catch (error) {
-        return throwWithApiError(error);
+        throwWithApiError(error);
       }
+      return {};
     },
   },
 };

@@ -9,9 +9,9 @@
 
 import React, { useLayoutEffect, useMemo, useRef } from 'react';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
-import type { AppHeaderConfig } from '@kbn/core-chrome-browser';
+import type { ChromeAppHeaderConfig } from '@kbn/core-chrome-browser';
 
-export const useChromeAppHeaderRegistration = (config: AppHeaderConfig) => {
+export const useChromeAppHeaderRegistration = (config: ChromeAppHeaderConfig) => {
   const chrome = useChromeService();
   const unregisterRef = useRef<(() => void) | undefined>(undefined);
   const isActive = chrome.next.isEnabled && chrome.getChromeStyle() === 'project';
@@ -36,10 +36,10 @@ export const useChromeAppHeaderRegistration = (config: AppHeaderConfig) => {
   }, [chrome, config, isActive]);
 };
 
-export const ChromeAppHeaderRegistration = React.memo<AppHeaderConfig>((props) => {
+export const ChromeAppHeaderRegistration = React.memo<ChromeAppHeaderConfig>((props) => {
   const { title, back, tabs, badges, menu, favorite, description, metadata, spacing } = props;
 
-  const config = useMemo<AppHeaderConfig>(
+  const config = useMemo<ChromeAppHeaderConfig>(
     () => ({
       title,
       back,

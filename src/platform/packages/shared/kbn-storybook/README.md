@@ -116,10 +116,16 @@ To keep the loop fast, `--dev` reuses an existing static Storybook build (`built
 
 ### Docs-Builder Integration
 
-When `--dev` finds a `docset.yml` colocated with the alias (e.g. `src/platform/kbn-ui/docset.yml` for `kbn_ui`) and `docs-builder` is on your `PATH`, it automatically launches `docs-builder serve` for that docset. It points `KIBANA_STORYBOOK_REGISTRY` at your local registry so embeds render live against your local assets.
+When `--dev` finds a `docset.yml` colocated with the alias and `docs-builder` is on your `PATH`, it automatically launches `docs-builder serve` for that docset. It points `KIBANA_STORYBOOK_REGISTRY` at your local registry so embeds render live against your local assets.
+
+Kibana's internal developer docs live in `docs-dev/` rather than beside the packages they document, so auto-detection finds nothing for aliases such as `kbn_ui`. Pass the docset explicitly:
+
+```bash
+yarn storybook_docs kbn_ui --dev --docs-path docs-dev
+```
 
 Options for docs-builder integration:
-- `--docs-path <dir>`: Point at a different docset.
+- `--docs-path <dir>`: Point at a docset auto-detection won't find, or a different one.
 - `--docs-port <port>`: Override docs-builder's default port.
 - `--no-docs`: Skip launching docs-builder entirely.
 

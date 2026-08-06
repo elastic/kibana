@@ -1523,7 +1523,7 @@ module.exports = {
         'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
-      plugins: ['eslint-plugin-node', 'react'],
+      plugins: ['eslint-plugin-n', 'react'],
       env: {
         jest: true,
       },
@@ -1532,7 +1532,7 @@ module.exports = {
         'array-callback-return': 'error',
         'no-array-constructor': 'error',
         complexity: 'warn',
-        'node/no-deprecated-api': 'error',
+        'n/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',
@@ -1824,7 +1824,7 @@ module.exports = {
     {
       // typescript and javascript for front and back
       files: ['x-pack/solutions/security/plugins/lists/**/*.{js,mjs,ts,tsx}'],
-      plugins: ['eslint-plugin-node'],
+      plugins: ['eslint-plugin-n'],
       env: {
         jest: true,
       },
@@ -1848,7 +1848,7 @@ module.exports = {
             ignoreDeclarationSort: true,
           },
         ],
-        'node/no-deprecated-api': 'error',
+        'n/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',
@@ -2540,7 +2540,7 @@ module.exports = {
         'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
       ],
-      plugins: ['eslint-plugin-node', 'react'],
+      plugins: ['eslint-plugin-n', 'react'],
       env: {
         jest: true,
       },
@@ -2549,7 +2549,7 @@ module.exports = {
         'array-callback-return': 'error',
         'no-array-constructor': 'error',
         complexity: 'warn',
-        'node/no-deprecated-api': 'error',
+        'n/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',

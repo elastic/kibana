@@ -408,7 +408,6 @@ export const AwsCloudwatch: ConnectorSpec = {
       const response = await callCloudWatchApi(ctx, 'ListMetrics', {});
       const metrics = (response.metrics as unknown[]) || [];
       return {
-        ok: true,
         message: `Successfully connected to AWS CloudWatch. Found ${metrics.length} metric(s) in this page.`,
       };
     },

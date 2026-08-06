@@ -82,10 +82,10 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
-   * (Fleet remote output) is visible from the managing cluster's Kibana. Off by default while
-   * we test impact on other features.
+   * (Fleet remote output) is visible from the managing cluster's Kibana.
+   * Release: 9.5
    */
-  defendRemoteOutputCcs: false,
+  defendRemoteOutputCcs: true,
 
   /**
    * Enables Cross-Project Search fan-out for Elastic Defend read paths on serverless, moving the reads
