@@ -101124,10 +101124,11 @@ components:
                     - after
                   type: string
                 visible:
-                  default: true
+                  default: false
                   description: When `true`, displays the secondary metric name as its label. Defaults to `false`.
                   type: boolean
             value:
+              additionalProperties: false
               description: Secondary metric value configuration
               type: object
               properties:
