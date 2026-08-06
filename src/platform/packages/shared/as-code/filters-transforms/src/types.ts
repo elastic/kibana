@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { Writable } from '@kbn/utility-types';
+import type { z } from '@kbn/zod';
 import type { storedFilterSchema } from '@kbn/es-query-server';
 
 /**
  * Local type definition for stored filters
  * Inferred from the storedFilterSchema in @kbn/es-query-server
  */
-export type StoredFilter = Writable<TypeOf<typeof storedFilterSchema>>;
+export type StoredFilter = z.output<typeof storedFilterSchema>;
