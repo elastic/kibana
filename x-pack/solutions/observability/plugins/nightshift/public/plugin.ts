@@ -102,7 +102,9 @@ export class NightshiftPlugin
         catchError(() => of(false)),
         map(
           (isAvailable): AppUpdater =>
-            () => ({ visibleIn: isAvailable ? ['globalSearch'] : [] })
+            () => ({
+              visibleIn: isAvailable ? ['globalSearch', 'projectSideNav'] : [],
+            })
         )
       )
       .subscribe(this.appUpdater$);

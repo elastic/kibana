@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { openInlineEditorAndWaitVisible, testData } from '../fixtures';
+import { openInlineEditorAndWaitVisible, test, testData } from '../fixtures';
 
 test.describe('Lens Convert to ES|QL button', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
@@ -41,6 +40,6 @@ test.describe('Lens Convert to ES|QL button', { tag: '@local-stateful-classic' }
       testData.ESQL_CONVERSION_PANEL_IDS.INLINE_METRIC
     );
 
-    await expect(lens.getConvertToEsqlButton()).toBeHidden();
+    await expect(lens.convertToEsqlButton).toBeHidden();
   });
 });

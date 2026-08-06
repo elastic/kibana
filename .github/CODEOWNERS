@@ -441,7 +441,6 @@ src/platform/packages/private/kbn-scout-info @elastic/appex-qa
 src/platform/packages/private/kbn-scout-reporting @elastic/appex-qa
 src/platform/packages/private/kbn-screenshotting-server @elastic/response-ops
 src/platform/packages/private/kbn-some-dev-log @elastic/kibana-operations
-src/platform/packages/private/kbn-split-button @elastic/kibana-data-discovery
 src/platform/packages/private/kbn-stdio-dev-helpers @elastic/kibana-operations
 src/platform/packages/private/kbn-telemetry-tools @elastic/kibana-core
 src/platform/packages/private/kbn-test-eui-helpers @elastic/kibana-visualizations
