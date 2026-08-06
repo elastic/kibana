@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
-import type { AppContextTestRender } from '../../mock/endpoint';
-import { createAppRootMockRenderer } from '../../mock/endpoint';
+import type { RenderResult } from '@testing-library/react';
+import { render as reactRender, act, fireEvent, cleanup } from '@testing-library/react';
+import type { MemoryHistory } from 'history';
+import { createMemoryHistory } from 'history';
+import { Router } from '@kbn/shared-ux-router';
 import { useNavigateByRouterEventHandler } from './use_navigate_by_router_event_handler';
-import { act, fireEvent, cleanup } from '@testing-library/react';
 
 type ClickHandlerMock<Return = void> = jest.Mock<
   Return,
@@ -17,9 +19,8 @@ type ClickHandlerMock<Return = void> = jest.Mock<
 >;
 
 describe('useNavigateByRouterEventHandler hook', () => {
-  let render: AppContextTestRender['render'];
-  let history: AppContextTestRender['history'];
-  let renderResult: ReturnType<AppContextTestRender['render']>;
+  let history: MemoryHistory;
+  let renderResult: RenderResult;
   let linkEle: HTMLAnchorElement;
   let clickHandlerSpy: ClickHandlerMock;
   // eslint-disable-next-line react/display-name
@@ -35,11 +36,15 @@ describe('useNavigateByRouterEventHandler hook', () => {
     );
   });
 
-  beforeEach(async () => {
-    ({ render, history } = createAppRootMockRenderer());
+  beforeEach(() => {
+    history = createMemoryHistory();
     clickHandlerSpy = jest.fn();
-    renderResult = render(<Link routeTo="/mock/path" onClick={clickHandlerSpy} />);
-    linkEle = (await renderResult.findByText('mock link')) as HTMLAnchorElement;
+    renderResult = reactRender(<Link routeTo="/mock/path" onClick={clickHandlerSpy} />, {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <Router history={history}>{children}</Router>
+      ),
+    });
+    linkEle = renderResult.getByText('mock link') as HTMLAnchorElement;
   });
   afterEach(cleanup);
 
