@@ -79,6 +79,21 @@ export const BEARER_AUTH_REQUIRED_MESSAGE = i18n.translate(
   }
 );
 
+export const WEBHOOK_AUTH_LABEL = i18n.translate('connectorSpecs.webhookAuth.label', {
+  defaultMessage: 'Webhook URL',
+});
+
+export const WEBHOOK_URL_LABEL = i18n.translate('connectorSpecs.webhookAuth.url.label', {
+  defaultMessage: 'Webhook URL',
+});
+
+export const WEBHOOK_URL_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.webhookAuth.url.requiredMessage',
+  {
+    defaultMessage: 'Webhook URL is required',
+  }
+);
+
 export const NO_AUTH_LABEL = i18n.translate('connectorSpecs.authType.noAuth.label', {
   defaultMessage: 'None',
 });

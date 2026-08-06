@@ -8,7 +8,10 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX } from '@kbn/workflows';
+import {
+  type ConnectorTypeInfo,
+  KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
+} from '@kbn/workflows';
 import { buildAutocompleteContext } from './context/build_autocomplete_context';
 import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
 import { getSuggestions, isInsideLoopBody } from './suggestions/get_suggestions';
@@ -111,6 +114,34 @@ function getDeduplicationKey(suggestion: monaco.languages.CompletionItem): strin
     return suggestion.filterText;
   }
   return typeof suggestion.label === 'string' ? suggestion.label : suggestion.label.label;
+}
+
+function getConnectorActionCapabilities(
+  connectorId: string,
+  connectorTypes: Record<string, ConnectorTypeInfo>
+): { connectorStepTypes: Set<string>; supportedStepTypes: Set<string> } | undefined {
+  const connectorTypeValues = Object.values(connectorTypes);
+  const connectorStepTypes = new Set(
+    connectorTypeValues.flatMap(({ actionTypeId, subActions }) => {
+      const stepTypePrefix = actionTypeId.replace(/^\./, '');
+      return subActions.map(({ name }) => `${stepTypePrefix}.${name}`);
+    })
+  );
+
+  for (const { actionTypeId, instances } of connectorTypeValues) {
+    const stepTypePrefix = actionTypeId.replace(/^\./, '');
+    const instance = instances.find(({ id }) => id === connectorId);
+    if (instance?.supportedSubActions !== undefined) {
+      return {
+        connectorStepTypes,
+        supportedStepTypes: new Set(
+          instance.supportedSubActions.map((subAction) => `${stepTypePrefix}.${subAction}`)
+        ),
+      };
+    }
+  }
+
+  return undefined;
 }
 
 /**
@@ -235,6 +266,26 @@ export function getCompletionItemProvider(
       }
 
       let suggestions = Array.from(deduplicatedMap.values());
+
+      if (matchType === 'type' && autocompleteContext.path && autocompleteContext.yamlDocument) {
+        const connectorId = autocompleteContext.yamlDocument.getIn([
+          ...autocompleteContext.path.slice(0, -1),
+          'connector-id',
+        ]);
+        const connectorTypes = autocompleteContext.dynamicConnectorTypes;
+        const capabilities =
+          typeof connectorId === 'string' && !connectorId.includes('{{') && connectorTypes
+            ? getConnectorActionCapabilities(connectorId, connectorTypes)
+            : undefined;
+        if (capabilities) {
+          suggestions = suggestions.filter((suggestion) => {
+            const key = getDeduplicationKey(suggestion);
+            return (
+              !capabilities.connectorStepTypes.has(key) || capabilities.supportedStepTypes.has(key)
+            );
+          });
+        }
+      }
 
       if (!isInsideLoopBody(autocompleteContext)) {
         suggestions = suggestions.filter((s) => {

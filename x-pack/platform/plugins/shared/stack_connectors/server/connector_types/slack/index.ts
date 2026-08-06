@@ -69,6 +69,8 @@ export function getConnectorType({
     id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
     name: CONNECTOR_NAME,
+    isDeprecated: true,
+    isCreateDisabled: true,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,

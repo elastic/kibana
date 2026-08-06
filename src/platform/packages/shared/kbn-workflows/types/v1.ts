@@ -569,6 +569,8 @@ export interface ConnectorInstance {
   name: string;
   isPreconfigured: boolean;
   isDeprecated: boolean;
+  /** Undefined for connector types without capability metadata; empty when no actions are available. */
+  supportedSubActions?: string[];
   config?: ConnectorInstanceConfig;
 }
 

@@ -151,6 +151,46 @@ describe('getAvailableConnectors', () => {
     });
   });
 
+  it('returns supported sub-actions for spec connectors based on auth type', async () => {
+    const actionsClient = {
+      getAll: jest.fn().mockResolvedValue([
+        mockConnector({
+          id: 'slack-webhook',
+          actionTypeId: '.slack2',
+          config: { authType: 'webhook' },
+        }),
+        mockConnector({
+          id: 'slack-bot',
+          actionTypeId: '.slack2',
+          config: { authType: 'bearer' },
+        }),
+        mockConnector({
+          id: 'slack-missing-auth',
+          actionTypeId: '.slack2',
+          config: {},
+        }),
+      ]),
+    };
+    const actionsClientWithRequest = {
+      listTypes: jest
+        .fn()
+        .mockResolvedValue([mockActionType({ id: '.slack2', name: 'Slack (v2)' })]),
+    };
+
+    const result = await getAvailableConnectors({
+      getActionsClient: jest.fn().mockResolvedValue(actionsClient),
+      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      spaceId: 'default',
+      request,
+    });
+
+    const [webhook, bot, missingAuth] = result.connectorTypes['.slack2'].instances;
+    expect(webhook.supportedSubActions).toEqual(['sendMessage']);
+    expect(bot.supportedSubActions).toContain('sendMessage');
+    expect(bot.supportedSubActions).not.toContain('searchMessages');
+    expect(missingAuth.supportedSubActions).toEqual([]);
+  });
+
   it('returns an empty payload when there are neither connectors nor action types', async () => {
     const actionsClient = { getAll: jest.fn().mockResolvedValue([]) };
     const actionsClientWithRequest = { listTypes: jest.fn().mockResolvedValue([]) };

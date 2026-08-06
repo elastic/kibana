@@ -86,6 +86,30 @@ describe('validateDeprecatedStepTypes', () => {
     ]);
   });
 
+  it.each(['slack', 'slack_api.postMessage'])(
+    'returns a migration warning for deprecated Slack V1 step type %s',
+    (stepType) => {
+      const slackStep = createStepInfo({
+        stepId: 'send_slack',
+        stepType,
+        propInfos: {
+          type: createPropInfo(['type'], stepType, [10, 20, 20]),
+        },
+      });
+
+      const results = validateDeprecatedStepTypes(
+        createWorkflowLookup([slackStep]),
+        mockLineCounter
+      );
+
+      expect(results[0]).toMatchObject({
+        owner: 'deprecated-step-validation',
+        severity: 'warning',
+        message: expect.stringContaining('Create a Slack (v2) connector'),
+      });
+    }
+  );
+
   it('returns no warnings for non-deprecated step types', () => {
     const currentStep = createStepInfo({
       stepId: 'create_case',

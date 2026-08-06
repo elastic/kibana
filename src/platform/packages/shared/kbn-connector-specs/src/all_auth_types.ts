@@ -18,6 +18,7 @@ export * from './auth_types/none';
 export * from './auth_types/oauth';
 export { OAuthAuthorizationCode } from './auth_types/oauth_authorization_code';
 export { OAuthClientCredentialsPrivateKeyJwt } from './auth_types/oauth_client_credentials_private_key_jwt';
+export { WebhookAuth } from './auth_types/webhook';
 export { Ears } from './auth_types/ears';
 export { KubernetesGkeAuth } from './auth_types/kubernetes_gke';
 export { KubernetesEksAuth } from './auth_types/kubernetes_eks';

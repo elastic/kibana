@@ -8,8 +8,10 @@
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import {
   getConnectorActionErrorMeta,
+  getConnectorAuthType,
   getFinitePositiveNumber,
   getHeaderValue,
+  isActionSupportedForAuthType,
 } from '@kbn/connector-specs';
 import type { ExecutorParams } from '../../sub_action_framework/types';
 import type {
@@ -88,35 +90,44 @@ export const generateExecutorFunction = ({
       fetchOptions?: FetchOptions;
     };
 
-    const axiosInstance = await getAxiosInstanceWithAuth({
-      connectorId,
-      connectorTokenClient,
-      additionalHeaders: globalAuthHeaders,
-      secrets,
-      signal,
-      authMode,
-      profileUid,
-      ...(fetchOptions?.max_content_length
-        ? { maxContentLength: fetchOptions.max_content_length }
-        : {}),
-    });
-
     if (!actions[subAction]) {
       const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
       logger.error(errorMessage);
       throw new Error(errorMessage);
     }
-
-    const actionContext = {
-      log: logger,
-      client: axiosInstance,
-      secrets,
-      config,
-    };
+    const action = actions[subAction];
 
     try {
+      const authType = getConnectorAuthType({ secrets, config });
+      if (!isActionSupportedForAuthType(action, authType)) {
+        throw new Error(
+          `Sub-action "${subAction}" is not supported by authentication type "${
+            authType ?? 'unknown'
+          }".`
+        );
+      }
+
+      const axiosInstance = await getAxiosInstanceWithAuth({
+        connectorId,
+        connectorTokenClient,
+        additionalHeaders: globalAuthHeaders,
+        secrets,
+        signal,
+        authMode,
+        profileUid,
+        ...(fetchOptions?.max_content_length
+          ? { maxContentLength: fetchOptions.max_content_length }
+          : {}),
+      });
+      const actionContext = {
+        log: logger,
+        client: axiosInstance,
+        secrets,
+        config,
+      };
+
       let data = {};
-      const res = await actions[subAction].handler(actionContext, subActionParams);
+      const res = await action.handler(actionContext, subActionParams);
 
       if (res != null) {
         data = res as Record<string, unknown>;
@@ -127,7 +138,7 @@ export const generateExecutorFunction = ({
       const errorMessage = error instanceof Error ? error.message : String(error);
       const contentLengthBytes = getResponseSizeHeaderBytes({
         error,
-        headerName: actions[subAction].responseSizeHeader ?? DEFAULT_RESPONSE_SIZE_HEADER,
+        headerName: action.responseSizeHeader ?? DEFAULT_RESPONSE_SIZE_HEADER,
       });
       const errorMeta = getErrorMeta({ error, contentLengthBytes });
       logger.error(`error on ${connectorId} event: ${errorMessage}`);

@@ -212,6 +212,67 @@ describe('generateExecutorFunction', () => {
     });
   });
 
+  describe('authentication constraints', () => {
+    const makeConstrainedActions = (): ConnectorSpec['actions'] => ({
+      constrainedAction: {
+        supportedAuthTypes: ['oauth'],
+        input: {} as never,
+        handler: mockHandler,
+      },
+    });
+
+    it('executes when the configured auth type is supported', async () => {
+      const executor = generateExecutorFunction({
+        actions: makeConstrainedActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const result = await executor({
+        ...makeExecOptions({ subAction: 'constrainedAction', subActionParams: {} }),
+        secrets: { authType: 'oauth' },
+      });
+
+      expect(result.status).toBe('ok');
+      expect(mockHandler).toHaveBeenCalled();
+    });
+
+    it('rejects unsupported auth types before calling the handler', async () => {
+      const executor = generateExecutorFunction({
+        actions: makeConstrainedActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const result = await executor({
+        ...makeExecOptions({ subAction: 'constrainedAction', subActionParams: {} }),
+        secrets: { authType: 'bearer' },
+      });
+
+      expect(result).toEqual({
+        status: 'error',
+        message: 'Sub-action "constrainedAction" is not supported by authentication type "bearer".',
+        actionId: connectorId,
+      });
+      expect(mockHandler).not.toHaveBeenCalled();
+      expect(mockGetAxiosInstanceWithAuth).not.toHaveBeenCalled();
+    });
+
+    it('fails closed when a constrained action has no auth type', async () => {
+      const executor = generateExecutorFunction({
+        actions: makeConstrainedActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const result = await executor({
+        ...makeExecOptions({ subAction: 'constrainedAction', subActionParams: {} }),
+        config: {},
+        secrets: {},
+      });
+
+      expect(result.status).toBe('error');
+      expect(mockHandler).not.toHaveBeenCalled();
+    });
+  });
+
   describe('handler error handling', () => {
     it('returns status error with the error message when handler throws an Error', async () => {
       mockHandler.mockRejectedValue(new Error('handler failed'));

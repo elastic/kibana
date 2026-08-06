@@ -72,6 +72,31 @@ describe('connector spec contracts', () => {
     expect(violations).toEqual([]);
   });
 
+  it.each(allSpecs)('%s has valid action authentication constraints', (_exportName, spec) => {
+    const authTypeIds = new Set((spec.auth?.types ?? []).map(getAuthTypeId));
+    const violations: string[] = [];
+
+    for (const [actionName, action] of Object.entries(spec.actions)) {
+      if (action.supportedAuthTypes === undefined) {
+        continue;
+      }
+
+      if (action.supportedAuthTypes.length === 0) {
+        violations.push(`${actionName} must support at least one auth type`);
+      }
+      if (new Set(action.supportedAuthTypes).size !== action.supportedAuthTypes.length) {
+        violations.push(`${actionName} supported auth types must be unique`);
+      }
+      for (const authTypeId of action.supportedAuthTypes) {
+        if (!authTypeIds.has(authTypeId)) {
+          violations.push(`${actionName} references unknown auth type ${authTypeId}`);
+        }
+      }
+    }
+
+    expect(violations).toEqual([]);
+  });
+
   it('keeps exported connector IDs and icon IDs in sync', () => {
     const connectorIdsRequiringMappedIcons = allSpecs
       .map(([, spec]) => spec)

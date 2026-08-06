@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
+import { isActionTypeCreatable } from './is_action_type_creatable';
 import type {
   ActionType,
   ActionConnector,
@@ -81,7 +82,7 @@ const ConnectorAddModal = ({
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> = actionTypeModel
     ? (actionTypeModel?.subtype ?? [])
-        .filter((item) => allActionTypes?.[item.id]?.enabledInConfig)
+        .filter((item) => isActionTypeCreatable(allActionTypes?.[item.id]))
         .map((subtypeAction) => ({
           ...actionTypeRegistry.get(subtypeAction.id),
           name: subtypeAction.name,

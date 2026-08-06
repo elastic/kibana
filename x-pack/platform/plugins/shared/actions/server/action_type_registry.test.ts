@@ -256,6 +256,14 @@ describe('actionTypeRegistry', () => {
       expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
     });
 
+    test('exposes create-disabled connector types', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(getConnectorType({ isCreateDisabled: true }));
+
+      expect(actionTypeRegistry.list()[0]).toMatchObject({ isCreateDisabled: true });
+    });
+
     test('returns list of connector types with parameter schema', () => {
       mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
       const connectorTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);

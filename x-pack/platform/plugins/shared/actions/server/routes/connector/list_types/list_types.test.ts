@@ -40,6 +40,7 @@ describe('listTypesRoute', () => {
         minimumLicenseRequired: 'gold',
         supportedFeatureIds: ['alerting'],
         subFeature: 'endpointSecurity',
+        isCreateDisabled: true,
       }),
     ];
 
@@ -57,6 +58,7 @@ describe('listTypesRoute', () => {
             "enabled_in_config": true,
             "enabled_in_license": true,
             "id": "1",
+            "is_create_disabled": true,
             "is_deprecated": false,
             "is_experimental": undefined,
             "is_system_action_type": false,
@@ -85,6 +87,7 @@ describe('listTypesRoute', () => {
           minimum_license_required: 'gold',
           is_system_action_type: false,
           sub_feature: 'endpointSecurity',
+          is_create_disabled: true,
           is_deprecated: false,
           source: 'stack',
           is_testable: false,
@@ -134,6 +137,7 @@ describe('listTypesRoute', () => {
             "enabled_in_config": true,
             "enabled_in_license": true,
             "id": "1",
+            "is_create_disabled": undefined,
             "is_deprecated": false,
             "is_experimental": undefined,
             "is_system_action_type": false,

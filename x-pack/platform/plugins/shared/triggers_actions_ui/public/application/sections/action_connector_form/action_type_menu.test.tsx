@@ -557,6 +557,30 @@ describe('connector_add_flyout', () => {
       expect(await screen.findByTestId('my-active-spec-connector-card')).toBeInTheDocument();
       expect(screen.queryByTestId('my-deprecated-spec-connector-card')).not.toBeInTheDocument();
     });
+
+    it('does not render a connector card when creation is disabled', async () => {
+      loadActionTypes.mockResolvedValue([
+        {
+          id: 'my-create-disabled-connector',
+          source: ACTION_TYPE_SOURCES.spec,
+          enabled: true,
+          name: 'My Create Disabled Connector',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          isDeprecated: false,
+          isCreateDisabled: true,
+        },
+      ]);
+
+      appMockRenderer.render(
+        <ActionTypeMenu onActionTypeChange={jest.fn()} actionTypeRegistry={actionTypeRegistry} />
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(screen.queryByTestId('my-create-disabled-connector-card')).not.toBeInTheDocument();
+    });
   });
 
   describe('beta badge', () => {

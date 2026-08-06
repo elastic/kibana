@@ -8,6 +8,7 @@
  */
 
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
+import { buildAutocompleteContext as mockedBuildAutocompleteContext } from './context/build_autocomplete_context';
 import {
   getCompletionItemProvider,
   WORKFLOW_COMPLETION_PROVIDER_ID,
@@ -16,6 +17,7 @@ import {
   clearAllYamlProviders,
   interceptMonacoYamlProvider,
 } from './intercept_monaco_yaml_provider';
+import { getSuggestions as mockedGetSuggestions } from './suggestions/get_suggestions';
 
 import { isDeprecatedStepType } from '../../../../../common/schema';
 
@@ -248,6 +250,73 @@ describe('getCompletionItemProvider', () => {
 
       expect(result?.suggestions).toHaveLength(1);
       expect(result?.suggestions?.[0].label).toBe('scheduled');
+    });
+
+    it('should filter workflow and YAML connector actions for the selected connector', async () => {
+      (mockedBuildAutocompleteContext as jest.Mock).mockReturnValueOnce({
+        path: ['steps', 0, 'type'],
+        yamlDocument: { getIn: jest.fn().mockReturnValue('slack-webhook') },
+        dynamicConnectorTypes: {
+          '.slack2': {
+            actionTypeId: '.slack2',
+            displayName: 'Slack (v2)',
+            enabled: true,
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'enterprise',
+            subActions: [
+              { name: 'searchMessages', displayName: 'Search messages' },
+              { name: 'sendMessage', displayName: 'Send message' },
+            ],
+            instances: [
+              {
+                id: 'slack-webhook',
+                name: 'Slack webhook',
+                isPreconfigured: false,
+                isDeprecated: false,
+                supportedSubActions: ['sendMessage'],
+              },
+            ],
+          },
+        },
+        lineParseResult: { matchType: 'type' },
+        isInEsqlQueryField: false,
+      });
+      (mockedGetSuggestions as jest.Mock).mockReturnValueOnce([
+        {
+          label: 'slack2.searchMessages',
+          insertText: 'slack2.searchMessages',
+          filterText: 'slack2.searchMessages',
+        },
+        {
+          label: 'slack2.sendMessage',
+          insertText: 'slack2.sendMessage',
+          filterText: 'slack2.sendMessage',
+        },
+      ]);
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            {
+              label: 'slack2.searchMessages',
+              insertText: 'slack2.searchMessages',
+              filterText: 'slack2.searchMessages',
+            },
+          ],
+        }),
+      });
+
+      const provider = getCompletionItemProvider(getState);
+      const result = await provider.provideCompletionItems!(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      expect(result?.suggestions?.map((suggestion) => suggestion.filterText)).toEqual([
+        'slack2.sendMessage',
+      ]);
     });
 
     it('should deduplicate event-driven triggers from YAML schema and workflow provider by technical id', async () => {

@@ -64,6 +64,7 @@ describe('Slack', () => {
     expect(types).toContain('oauth_authorization_code');
     expect(types).toContain('ears');
     expect(types).toContain('bearer');
+    expect(types).toContain('webhook');
   });
 
   it('supports oauth_authorization_code with correct Slack defaults', () => {
@@ -203,15 +204,11 @@ describe('Slack', () => {
       ).rejects.toThrow('Slack searchMessages error: invalid_auth');
     });
 
-    it('should throw a descriptive error when called with bot token auth', async () => {
-      const botTokenContext = {
-        ...mockContext,
-        secrets: { authType: 'bearer', token: 'xoxb-fake' },
-      } as unknown as ActionContext;
-
-      await expect(
-        Slack.actions.searchMessages.handler(botTokenContext, { query: 'test' })
-      ).rejects.toThrow('getConversationHistory');
+    it('supports only user-token auth types', () => {
+      expect(Slack.actions.searchMessages.supportedAuthTypes).toEqual([
+        'ears',
+        'oauth_authorization_code',
+      ]);
     });
   });
 
@@ -1456,6 +1453,68 @@ describe('Slack', () => {
       );
     });
 
+    it('should send Block Kit blocks using the Web API', async () => {
+      mockClient.post.mockResolvedValue({ data: { ok: true } });
+      const blocks = [{ type: 'section', text: { type: 'mrkdwn', text: '*Hello*' } }];
+
+      await Slack.actions.sendMessage.handler(mockContext, {
+        channel: 'C123',
+        text: 'Hello',
+        blocks,
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://slack.com/api/chat.postMessage',
+        { channel: 'C123', text: 'Hello', blocks },
+        expect.any(Object)
+      );
+    });
+
+    it('should send text and blocks using an incoming webhook', async () => {
+      mockClient.post.mockResolvedValue({ data: 'ok' });
+      const blocks = [{ type: 'section', text: { type: 'plain_text', text: 'Hello' } }];
+      const webhookContext = {
+        ...mockContext,
+        secrets: {
+          authType: 'webhook',
+          webhookUrl: 'https://hooks.slack.com/services/test',
+        },
+      } as unknown as ActionContext;
+
+      const result = await Slack.actions.sendMessage.handler(webhookContext, {
+        text: 'Hello',
+        blocks,
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://hooks.slack.com/services/test',
+        { text: 'Hello', blocks },
+        expect.any(Object)
+      );
+      expect(result).toEqual({ ok: true });
+    });
+
+    it('should reject an unsuccessful incoming webhook response', async () => {
+      mockClient.post.mockResolvedValue({ data: 'invalid_payload' });
+      const webhookContext = {
+        ...mockContext,
+        secrets: {
+          authType: 'webhook',
+          webhookUrl: 'https://hooks.slack.com/services/test',
+        },
+      } as unknown as ActionContext;
+
+      await expect(
+        Slack.actions.sendMessage.handler(webhookContext, { text: 'Hello' })
+      ).rejects.toThrow('Slack incoming webhook returned an unsuccessful response');
+    });
+
+    it('should require a channel for token authentication', async () => {
+      await expect(
+        Slack.actions.sendMessage.handler(mockContext, { text: 'Hello' })
+      ).rejects.toThrow('channel is required');
+    });
+
     it('should include unfurl options', async () => {
       const mockResponse = {
         data: {
@@ -1504,6 +1563,29 @@ describe('Slack', () => {
   });
 
   describe('test handler', () => {
+    it('should send a test message for incoming webhook auth', async () => {
+      mockClient.post.mockResolvedValue({ data: 'ok' });
+      const webhookContext = {
+        ...mockContext,
+        secrets: {
+          authType: 'webhook',
+          webhookUrl: 'https://hooks.slack.com/services/test',
+        },
+      } as unknown as ActionContext;
+
+      if (!Slack.test) {
+        throw new Error('Test handler not defined');
+      }
+      const result = await Slack.test.handler(webhookContext);
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://hooks.slack.com/services/test',
+        { text: 'Elastic Slack connector test message' },
+        expect.any(Object)
+      );
+      expect(result.ok).toBe(true);
+    });
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: {

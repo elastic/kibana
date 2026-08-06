@@ -9,7 +9,7 @@ applies_to:
 
 # Slack (v2) connector [slack-v2-action-type]
 
-The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send messages, create channels, and invite users to Slack channels using the Slack Web API. It supports three authentication methods: EARS (Elastic OAuth, recommended), OAuth Authorization Code (Slack OAuth v2), and Bot Token.
+The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send messages, create channels, and invite users to Slack channels. It supports four authentication methods: EARS (Elastic OAuth, recommended), OAuth Authorization Code (Slack OAuth v2), Bot Token, and Incoming Webhook URL.
 
 ## Create connectors in {{kib}} [define-slack-v2-ui]
 
@@ -17,7 +17,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [slack-v2-connector-configuration]
 
-Slack (v2) connectors support three authentication methods:
+Slack (v2) connectors support four authentication methods:
 
 EARS (recommended)
 :   Elastic's managed OAuth flow. Select this option and authorize access to your Slack workspace through Elastic. No app setup is required.
@@ -28,13 +28,16 @@ OAuth Authorization Code
 Bot Token
 :   A long-lived Slack bot token (format: `xoxb-...`) from a Slack app. Paste the token directly — no OAuth redirect is required. See [Get API credentials (Bot Token)](#slack-v2-api-credentials-bot-token) for setup steps.
 
+Incoming Webhook URL
+:   A Slack incoming webhook URL. This authentication method can only use **Send message**, and messages are sent to the channel configured for the webhook.
+
 ::::{note}
 The **Search messages** action requires a user token and is not available when using Bot Token authentication. Use **Get conversation history** to read messages from a specific channel instead.
 ::::
 
 ## Test connectors [slack-v2-action-configuration]
 
-You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by calling Slack `auth.test`.
+You can test connectors when you create or edit the connector in {{kib}}. Token-based connectors verify connectivity by calling Slack `auth.test`. Incoming webhooks send a test message to their configured channel.
 
 The Slack (v2) connector has the following actions:
 
@@ -141,16 +144,17 @@ Invite to conversation
     - `users` (required): Comma-separated list of user IDs to invite (for example, `U01PWE77HD2,U02ABC1234`).
 
 Send message
-:   Send a message to a Slack conversation ID.
-    - `channel` (required): Conversation ID (for example, `C123...`). Use **List channels** to browse IDs, or **Resolve channel ID** if you know the channel name.
-    - `text` (required): Message text.
+:   Send a text or Block Kit message.
+    - `channel` (required for token authentication): Conversation ID (for example, `C123...`). Incoming webhooks use their configured channel.
+    - `text` (optional): Message text. Include it as an accessibility and notification fallback when using `blocks`.
+    - `blocks` (optional): Up to 50 structured Slack Block Kit blocks. Either `text` or `blocks` is required.
     - `threadTs` (optional): Reply in a thread (timestamp of the parent message).
     - `unfurlLinks` (optional): Turn on unfurling of primarily text-based content.
     - `unfurlMedia` (optional): Turn on unfurling of media content.
 
 ## Connector networking configuration [slack-v2-connector-networking-configuration]
 
-Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. If you use [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings), include `slack.com` in the list.
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. If you use [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings), include `slack.com` and the host in your incoming webhook URL.
 
 ## Get API credentials (OAuth) [slack-v2-api-credentials-oauth]
 
