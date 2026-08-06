@@ -19,7 +19,6 @@ export {
 
 export { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from './mappings/workflow_executions_mappings';
 export { WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS } from './mappings/step_executions_mappings';
-export { TOKEN_USAGE_MAPPING } from './mappings/token_usage_mapping';
 
 export { createUnsupportedStorageSourceError } from './lib/validate_factory_params';
 export { getStepExecutionsByWorkflowExecution } from './lib/get_step_executions_by_workflow_execution';

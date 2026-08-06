@@ -8,7 +8,7 @@
  */
 
 import { mappings } from '@kbn/es-mappings';
-import { TOKEN_USAGE_MAPPING } from './token_usage_mapping';
+import { STEP_USAGE_MAPPING, TOKEN_USAGE_MAPPING } from './common';
 
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS = {
   dynamic: false,
@@ -56,16 +56,6 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS = {
     duration: mappings.long(),
     // Per-step token usage, extracted from `output.metadata.usage`.
     usage: TOKEN_USAGE_MAPPING,
-    stepUsage: {
-      type: 'nested' as const,
-      properties: {
-        stepId: mappings.keyword(),
-        connectorId: mappings.keyword(),
-        inputTokens: mappings.long(),
-        outputTokens: mappings.long(),
-        cachedTokens: mappings.long(),
-        totalTokens: mappings.long(),
-      },
-    },
+    stepUsage: STEP_USAGE_MAPPING,
   },
 };

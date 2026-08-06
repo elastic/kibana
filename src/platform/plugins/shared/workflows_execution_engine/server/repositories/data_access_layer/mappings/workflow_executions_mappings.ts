@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
-import { TOKEN_USAGE_MAPPING } from './token_usage_mapping';
+import { STEP_USAGE_MAPPING, TOKEN_USAGE_MAPPING } from './common';
 
 export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
   dynamic: false,
@@ -45,16 +44,7 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
     usage: TOKEN_USAGE_MAPPING,
     // Per-step token usage, retained on the workflow execution so callers can
     // query usage by producing step and resolved connector.
-    stepUsage: mappings.object({
-      properties: {
-        stepId: mappings.keyword(),
-        connectorId: mappings.keyword(),
-        inputTokens: mappings.long(),
-        outputTokens: mappings.long(),
-        cachedTokens: mappings.long(),
-        totalTokens: mappings.long(),
-      },
-    }),
+    stepUsage: STEP_USAGE_MAPPING,
     version: mappings.long(),
   },
-} satisfies MappingsDefinition;
+};

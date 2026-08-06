@@ -21,3 +21,15 @@ export const TOKEN_USAGE_MAPPING = mappings.object({
     totalTokens: mappings.long(),
   },
 }) satisfies MappingsDefinition;
+
+export const STEP_USAGE_MAPPING = {
+  type: 'nested' as const,
+  properties: {
+    stepId: mappings.keyword(),
+    connectorId: mappings.keyword(),
+    inputTokens: mappings.long(),
+    outputTokens: mappings.long(),
+    cachedTokens: mappings.long(),
+    totalTokens: mappings.long(),
+  },
+};
