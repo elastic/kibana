@@ -282,6 +282,14 @@ exports[`Error METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
 
 exports[`Error METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
 
+exports[`Error METRIC_JVM_CPU_RECENT_UTILIZATION 1`] = `undefined`;
+
+exports[`Error METRIC_JVM_MEMORY_LIMIT 1`] = `undefined`;
+
+exports[`Error METRIC_JVM_MEMORY_TYPE 1`] = `undefined`;
+
+exports[`Error METRIC_JVM_MEMORY_USED 1`] = `undefined`;
+
 exports[`Error METRIC_OTEL_JVM_CPU_PERCENT 1`] = `undefined`;
 
 exports[`Error METRIC_OTEL_JVM_GC_DURATION 1`] = `undefined`;
@@ -766,6 +774,14 @@ exports[`Span METRIC_JAVA_NON_HEAP_MEMORY_MAX 1`] = `undefined`;
 exports[`Span METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
 
 exports[`Span METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
+
+exports[`Span METRIC_JVM_CPU_RECENT_UTILIZATION 1`] = `undefined`;
+
+exports[`Span METRIC_JVM_MEMORY_LIMIT 1`] = `undefined`;
+
+exports[`Span METRIC_JVM_MEMORY_TYPE 1`] = `undefined`;
+
+exports[`Span METRIC_JVM_MEMORY_USED 1`] = `undefined`;
 
 exports[`Span METRIC_OTEL_JVM_CPU_PERCENT 1`] = `undefined`;
 
@@ -1261,6 +1277,14 @@ exports[`Transaction METRIC_JAVA_NON_HEAP_MEMORY_MAX 1`] = `undefined`;
 exports[`Transaction METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
 
 exports[`Transaction METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
+
+exports[`Transaction METRIC_JVM_CPU_RECENT_UTILIZATION 1`] = `undefined`;
+
+exports[`Transaction METRIC_JVM_MEMORY_LIMIT 1`] = `undefined`;
+
+exports[`Transaction METRIC_JVM_MEMORY_TYPE 1`] = `undefined`;
+
+exports[`Transaction METRIC_JVM_MEMORY_USED 1`] = `undefined`;
 
 exports[`Transaction METRIC_OTEL_JVM_CPU_PERCENT 1`] = `undefined`;
 

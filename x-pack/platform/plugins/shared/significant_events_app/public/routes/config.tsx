@@ -4,30 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 import type { RouteMap } from '@kbn/typed-react-router-config';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
 import { SignificantEventsAppPageTemplate } from '../components/page_template';
 import { RedirectTo } from '../components/redirect_to';
-
-/**
- * Placeholder rendered until the Significant Events page moves into this plugin.
- */
-function SignificantEventsPagePlaceholder() {
-  return (
-    <SignificantEventsAppPageTemplate.EmptyPrompt
-      title={
-        <h2>
-          {i18n.translate('xpack.significantEventsApp.placeholderPageTitle', {
-            defaultMessage: 'Significant Events',
-          })}
-        </h2>
-      }
-    />
-  );
-}
+import { SignificantEventsPage } from '../pages/significant_events/page';
 
 /**
  * The array of route definitions to be used when the application creates the routes.
@@ -47,7 +30,7 @@ const significantEventsAppRoutes = {
         element: <RedirectTo path="/{tab}" params={{ path: { tab: 'streams' } }} />,
       },
       '/{tab}': {
-        element: <SignificantEventsPagePlaceholder />,
+        element: <SignificantEventsPage />,
         params: t.intersection([
           t.type({
             path: t.type({
