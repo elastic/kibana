@@ -34,7 +34,7 @@ export const ConfirmDeleteRegionPolicyModal: React.FC<ConfirmDeleteRegionPolicyM
 
   return (
     <EuiConfirmModal
-      maxWidth={euiTheme.base * 29}
+      maxWidth={euiTheme.base * 30}
       aria-labelledby={modalTitleId}
       titleProps={{ id: modalTitleId, 'data-test-subj': 'confirmDeleteRegionPolicyTitle' }}
       title={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.deleteConfirm.title', {
