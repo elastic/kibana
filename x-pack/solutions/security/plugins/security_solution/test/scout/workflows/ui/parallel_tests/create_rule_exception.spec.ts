@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ExceptionItemOutput } from '../../../../../common/workflows/step_types/common/exception_item_schemas';
+import type { ExceptionItemOutput } from '../../../../../common/workflows/step_types/exceptions/common/exception_item_schemas';
 import { spaceTest, expect, tags } from '../fixtures';
-import { EXCEPTION_WORKFLOW_STEP_ROLE } from '../common/roles';
+import { EXCEPTION_WORKFLOW_STEP_ROLE } from '../common/exception_workflow_step_role';
 import { buildManualWorkflowYaml } from '../common/workflow_yaml';
 
 const STEP_TYPE = 'security.createRuleException';

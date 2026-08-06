@@ -26,7 +26,7 @@ import type {
   ExceptionItemBaseInput,
   ExceptionItemOutcome,
   ExceptionItemOutput,
-} from '../../../common/workflows/step_types/common/exception_item_schemas';
+} from '../../../common/workflows/step_types/exceptions/common/exception_item_schemas';
 
 /**
  * The step action on whose behalf a util call runs; used as the verb phrase

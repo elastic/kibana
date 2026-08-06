@@ -3394,6 +3394,18 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/enable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/disable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/server/workflows/utils/bulk_rule_action* @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/exceptions/ @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/create_rule_exception_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/create_exception_list_item_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/create_rule_exception_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/create_exception_list_item_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/create_rule_exception_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/create_exception_list_item_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/workflows/utils/exception_item* @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/common/exception_step_test_api.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/common/exception_workflow_step_role.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_rule_exception.spec.ts @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/create_exception_list_item.spec.ts @elastic/security-detection-engineering
 
 /x-pack/solutions/security/plugins/security_solution/scripts/openapi @elastic/security-detection-engineering
 

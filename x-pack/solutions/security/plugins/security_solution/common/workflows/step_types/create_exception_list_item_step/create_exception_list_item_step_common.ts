@@ -18,7 +18,7 @@ import {
   exceptionItemBaseSchema,
   exceptionItemOutputSchema,
   OVERWRITE_REQUIRES_ITEM_ID_MESSAGE,
-} from '../common/exception_item_schemas';
+} from '../exceptions/common/exception_item_schemas';
 
 export const CreateExceptionListItemStepId = 'security.createExceptionListItem' as const;
 
