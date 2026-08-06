@@ -11,6 +11,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/core-http-server",
+    "@kbn/core-http-browser",
     "@kbn/config-schema",
     "@kbn/logging",
     "@kbn/cps-utils",
