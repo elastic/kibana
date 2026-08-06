@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { EuiSelectableProps, Direction } from '@elastic/eui';
 import {
   EuiSelectable,
@@ -17,12 +17,14 @@ import {
   EuiPanel,
   EuiButtonGroup,
   toSentenceCase,
+  SortDirection,
 } from '@elastic/eui';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import { SortingService } from './sorting_service';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { sort } from './sort';
 import { MIDDLE_TRUNCATION_PROPS } from '../filter_bar/filter_editor/lib/helpers';
 
 const strings = {
@@ -66,6 +68,17 @@ const strings = {
   },
 };
 
+const DIRECTION_OPTIONS = [SortDirection.ASC, SortDirection.DESC].map((key) => {
+  return {
+    id: key,
+    iconType: `sort${toSentenceCase(key)}ending`,
+    label: strings.sortOrder[key].getSortOrderLabel(),
+  };
+});
+
+export const getAlphabeticalComparable = (item: DataViewListItemEnhanced) =>
+  item.name ?? item.title;
+
 export interface DataViewListItemEnhanced extends DataViewListItem {
   isAdhoc?: boolean;
 }
@@ -85,49 +98,25 @@ export function DataViewsList({
   selectableProps,
   searchListInputId,
 }: DataViewsListProps) {
-  const sortingService = useMemo(
+  const storage = useRef(new Storage(window.localStorage));
+
+  const [direction, setDirection] = useState<Direction>(sort.load(storage.current).direction);
+
+  const sortedDataViewsList = useMemo(
     () =>
-      new SortingService<DataViewListItemEnhanced>({
-        alphabetically: (item) => item.name || item.title,
-      }),
-    []
+      sort.sortData<DataViewListItemEnhanced>(
+        // Don't show ES|QL ad hoc data views in the data view list
+        dataViewsList.filter((dataView) => !dataView.isAdhoc || dataView.type !== ESQL_TYPE),
+        direction,
+        getAlphabeticalComparable
+      ),
+    [dataViewsList, direction]
   );
 
-  const [sortedDataViewsList, setSortedDataViewsList] = useState<DataViewListItemEnhanced[]>(() => {
-    // Don't show ES|QL ad hoc data views in the data view list
-    const filteredDataViewsList = dataViewsList.filter(
-      (dataView) => !dataView.isAdhoc || dataView.type !== ESQL_TYPE
-    );
-    return sortingService.sortData(filteredDataViewsList);
-  });
-
-  // Re-derive the list when the dataViewsList prop changes — it is fetched asynchronously and can arrive after mount.
-  useEffect(() => {
-    const filteredDataViewsList = dataViewsList.filter(
-      (dataView) => !dataView.isAdhoc || dataView.type !== ESQL_TYPE
-    );
-    setSortedDataViewsList(sortingService.sortData(filteredDataViewsList));
-  }, [dataViewsList, sortingService]);
-
-  const sortOrderOptions = useMemo(
-    () =>
-      sortingService.getOrderDirections().map((key) => {
-        return {
-          id: key,
-          iconType: `sort${toSentenceCase(key)}ending`,
-          label: strings.sortOrder[key].getSortOrderLabel(),
-        };
-      }),
-    [sortingService]
-  );
-
-  const onChangeSortDirection = useCallback(
-    (value: string) => {
-      sortingService.setDirection(value as Direction);
-      setSortedDataViewsList((dataViews) => sortingService.sortData(dataViews));
-    },
-    [sortingService]
-  );
+  const onChangeSortDirection = useCallback((value: string) => {
+    setDirection(value as Direction);
+    sort.save(storage.current, value as Direction);
+  }, []);
 
   return (
     <EuiSelectable<{
@@ -201,9 +190,9 @@ export function DataViewsList({
                 <EuiButtonGroup
                   isIconOnly
                   buttonSize="compressed"
-                  options={sortOrderOptions}
+                  options={DIRECTION_OPTIONS}
                   legend={strings.editorAndPopover.getSortDirectionLegend()}
-                  idSelected={sortingService.direction}
+                  idSelected={direction}
                   onChange={onChangeSortDirection}
                 />
               </EuiFlexItem>
