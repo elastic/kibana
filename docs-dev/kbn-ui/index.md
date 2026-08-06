@@ -1,26 +1,25 @@
 ---
-navigation_title: Kibana UI
+navigation_title: kbn/ui - Kibana UI
 ---
 
-# Kibana UI (`@kbn/ui`)
+# `@kbn/ui` - Kibana UI
 
-Reusable, opinionated UI for Kibana — components that compose [EUI](https://elastic.github.io/eui/), plus the layout and chrome primitives EUI intentionally leaves to the application.
+Reusable, opinionated UI patterns and components built specifically for Kibana.
 
 ## What is Kibana UI?
 
-EUI is Elastic's design language and component library — flexible, product-agnostic primitives shared across Kibana, Cloud UI, AutoOps, and internal apps. That agnosticism is the right choice for a shared library, but it means EUI intentionally stays out of Kibana-specific concerns like persistence, state management, data fetching, and how a Kibana page is put together.
+`@kbn/ui` is Kibana's canonical presentation layer. While [`@elastic/eui`](https://elastic.github.io/eui/) provides Elastic's product-agnostic design language and foundational components, `@kbn/ui` builds on those primitives to solve Kibana-specific UI concerns.
 
-`@kbn/ui` is the layer above EUI where those concerns live. Think of EUI as atoms and molecules; `@kbn/ui` composes them into the molecules and organisms that define how Kibana's UI actually works: page templates, data tables with built-in persistence, search + filter patterns, empty states, and more. EUI remains the foundation — `@kbn/ui` extends it, it does not replace it.
+Where EUI gives you flexible building blocks, `@kbn/ui` provides the opinionated glue. It can encapsulate the things EUI intentionally leaves out: state management, URL persistence, data fetching context, application-level layout, etc. By standardizing these patterns, `@kbn/ui` prevents every plugin from re-litigating how to build a standard Kibana user experience.
 
-Not everything here is an EUI composition, though. Kibana also needs structure EUI deliberately doesn't provide: the application shell's CSS grid, the side navigation, and the constants and hooks that go with them. These consume EUI's theme tokens and breakpoints rather than its components, and they belong here for the same reason the compositions do — each one encodes a Kibana-wide decision that every plugin would otherwise re-litigate.
+The packages within `@kbn/ui` generally provide:
 
-In practice, packages fall into a few shapes:
+- **Opinionated Wrappers:** Thin layers over EUI components that enforce Kibana's visual guidelines by providing standard defaults and restricting props.
+- **Composed Patterns:** Higher-order components that wire EUI primitives to Kibana's logic or combine multiple primitives (e.g., standard data tables, search/filter bars).
+- **Structure and Layout:** The scaffolding that plugins render inside, such as page templates, application shell grids, and global navigation.
+- **Supporting Utilities:** The shared hooks, constants, and tokens that power Kibana's UI layer.
 
-- **EUI compositions** — `@kbn/ui-callout`, `@kbn/ui-feedback`. Opinionated defaults layered over EUI components.
-- **Structure and chrome** — `@kbn/ui-chrome-layout`, `@kbn/ui-side-navigation`. The shell Kibana renders everything else inside; closer to layout primitives than to EUI wrappers.
-- **Supporting utilities** — `@kbn/ui-chrome-layout-utils`, `@kbn/ui-chrome-layout-constants`. Shared tokens, hooks, and helpers the above depend on.
-
-A package doesn't need to be a candidate for promotion to EUI to belong here. Some patterns will graduate upward; others, like the application grid, are Kibana's by nature and simply need one canonical home.
+Not every component in `@kbn/ui` is meant for eventual promotion to EUI. Some patterns may graduate upward, but many—- like the application shell or Kibana-specific data contexts—- belong permanently in `@kbn/ui` as the definitive way to build Kibana interfaces.
 
 ## Why do we need it?
 
@@ -49,14 +48,14 @@ onSave: (data: Record<string, unknown>) => Promise<void>
 savedObjectsClient: SavedObjectsClientContract
 ```
 
-### Allowed dependencies
+### Expected dependencies
 
 - `@elastic/eui`
 - `@emotion/react`, `@emotion/css`
 - `react`, `react-dom`
 - `@kbn/i18n`
 
-Additional exceptions _will_ exist, require review, and should be kept to an absolute minimum.
+Additional dependencies _may_ exist, will require review, and should be kept to an absolute minimum.
 
 ## Package structure
 
@@ -74,6 +73,34 @@ src/platform/kbn-ui/
 ```
 
 Packages use the `@kbn/ui-<component>` naming convention and are owned by `@elastic/appex-sharedux`.
+
+## Development [kbn-ui-development]
+
+All `@kbn/ui-*` packages share a single Storybook and docset.
+
+Run the stories in the shared `kbn-ui` Storybook:
+
+```bash
+yarn storybook kbn_ui
+```
+
+Run a package's tests:
+
+```bash
+yarn test:jest src/platform/kbn-ui/<component>
+```
+
+Preview these docs from the repository root:
+
+```bash
+yarn storybook_docs kbn_ui --dev --docs-path docs-dev
+```
+
+Or serve the docset directly:
+
+```bash
+docs-builder serve --path docs-dev
+```
 
 ## Contributing
 

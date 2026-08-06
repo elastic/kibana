@@ -1615,7 +1615,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/observability_document_profile @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/observability_root_profile @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_data_source_profile @elastic/obs-signals-traces-team
-/src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_document_profile @elastic/obs-signals-traces-team 
+/src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_document_profile @elastic/obs-signals-traces-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/security @elastic/kibana-data-discovery @elastic/security-threat-hunting
 /src/platform/plugins/shared/discover/test/scout/security_experience/ @elastic/security-threat-hunting
 
@@ -3726,8 +3726,8 @@ docs/redirects.yml                            @elastic/ski-docs
 # Internal developer docs, published to codex.elastic.dev only. Only the shared scaffolding is
 # owned here; teams adding a subject own its directory and add that entry below, rather than in
 # the generated block, which is rewritten by `node scripts/generate codeowners`.
-docs-dev/docset.yml                           @elastic/appex-sharedux
-docs-dev/index.md                             @elastic/appex-sharedux
+docs-dev/docset.yml                           @elastic/kibana-tech-leads
+docs-dev/index.md                             @elastic/kibana-tech-leads
 docs-dev/kbn-ui/                              @elastic/appex-sharedux
 
 # Side navigation title glossary

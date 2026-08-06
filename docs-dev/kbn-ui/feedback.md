@@ -6,12 +6,14 @@ navigation_title: Feedback
 
 The UI for One Feedback — a universal way for users to rate their experience and submit feedback from anywhere in {{kib}}. The package is self-contained so it can be distributed to external consumers (for example, Cloud UI) alongside {{kib}} itself.
 
+## Components
+
 It exposes two components:
 
 * `FeedbackTriggerButton` — a header button that opens the feedback form in a modal.
 * `FeedbackContainer` — the feedback form itself, for hosts that manage their own container.
 
-## Trigger button [kbn-ui-feedback-trigger-button]
+### Trigger button [kbn-ui-feedback-trigger-button]
 
 The button lives in the global header and opens the form on click. It is disabled until usage collection is opted in.
 
@@ -19,7 +21,7 @@ The button lives in the global header and opens the form on click. It is disable
 :id: kibana:kbn_ui:feedback--trigger-button
 :::
 
-## Feedback form [kbn-ui-feedback-form]
+### Feedback form [kbn-ui-feedback-form]
 
 `FeedbackContainer` renders the CSAT buttons, the context-aware questions, and the optional email-contact section.
 
@@ -57,28 +59,8 @@ Questions are defined per application in the `@kbn/feedback-registry` package. S
 
 ## Development [kbn-ui-feedback-development]
 
-Run the stories in the shared `kbn-ui` Storybook:
-
-```bash
-yarn storybook kbn_ui
-```
-
-## Testing [kbn-ui-feedback-testing]
+See [Development](index.md#kbn-ui-development) for how to run the shared Storybook and preview these docs. Run this package's tests with:
 
 ```bash
 yarn test:jest src/platform/kbn-ui/feedback
-```
-
-## Previewing docs [kbn-ui-feedback-previewing-docs]
-
-From the repository root:
-
-```bash
-yarn storybook_docs kbn_ui --dev --docs-path docs-dev
-```
-
-Or serve the docset directly:
-
-```bash
-docs-builder serve --path docs-dev
 ```
