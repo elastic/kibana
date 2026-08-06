@@ -11,6 +11,20 @@ import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 /**
+ * Selects the named request in the inspector's request chooser combo box, so
+ * that the request/statistics panels show that request's details.
+ */
+export const selectInspectorRequest = async (
+  page: ScoutPage,
+  requestName: string
+): Promise<void> => {
+  const chooser = page.testSubj.locator('inspectorRequestChooser');
+  await expect(chooser).toBeVisible();
+  await chooser.click();
+  await page.testSubj.click(`inspectorRequestChooser${requestName}`);
+};
+
+/**
  * Selects the named request from the inspector's chooser combo box, clicks
  * the "Request" tab to show the raw HTTP command, and returns the first line
  * of the code viewer (i.e. the HTTP method + path, before the JSON body).
@@ -25,20 +39,6 @@ export const getInspectorRequestCommand = async (
   await expect(codeViewer).toBeVisible();
   const text = await codeViewer.innerText();
   return text.split('\n')[0].trim();
-};
-
-/**
- * Selects the named request in the inspector's request chooser combo box, so
- * that the request/statistics panels show that request's details.
- */
-export const selectInspectorRequest = async (
-  page: ScoutPage,
-  requestName: string
-): Promise<void> => {
-  const chooser = page.testSubj.locator('inspectorRequestChooser');
-  await expect(chooser).toBeVisible();
-  await chooser.click();
-  await page.testSubj.click(`inspectorRequestChooser${requestName}`);
 };
 
 export const normalizeInspectorCommand = (value: string): string => {

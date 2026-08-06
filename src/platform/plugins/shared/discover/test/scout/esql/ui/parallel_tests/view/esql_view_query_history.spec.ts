@@ -14,7 +14,7 @@
 
 import { tags, type ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../../fixtures';
+import { spaceTest } from '../../fixtures';
 
 const openQueryHistory = async (page: ScoutPage) => {
   await page.testSubj.click('ESQLEditor-toggle-query-history-icon');
@@ -29,10 +29,8 @@ const getHistoryQueryTexts = async (page: ScoutPage): Promise<string[]> => {
 };
 
 spaceTest.describe('Discover ES|QL view - query history', { tag: tags.deploymentAgnostic }, () => {
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
-    await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
+  spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
+    await discoverScoutSpace.setupDiscoverDefaults();
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -48,9 +46,8 @@ spaceTest.describe('Discover ES|QL view - query history', { tag: tags.deployment
     await pageObjects.discover.waitUntilTabIsLoaded();
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
+  spaceTest.afterAll(async ({ discoverScoutSpace }) => {
+    await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
   spaceTest('records the current query in the history', async ({ page }) => {

@@ -1485,7 +1485,7 @@ export class DiscoverApp {
    * be visible).
    */
   async optOutOfCascadeGrouping() {
-    const groupBySwitch = this.page.testSubj.locator('discoverEnableCascadeLayoutSwitch');
+    const groupBySwitch = this.getCascadeLayoutSwitch();
     await expect(groupBySwitch).toBeVisible();
     await groupBySwitch.click();
 

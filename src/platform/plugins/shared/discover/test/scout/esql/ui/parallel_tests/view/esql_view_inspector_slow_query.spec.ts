@@ -21,7 +21,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../../fixtures';
+import { spaceTest } from '../../fixtures';
 import {
   getInspectorRequestNames,
   getInspectorRequestTotalTime,
@@ -35,7 +35,7 @@ declare global {
   }
 }
 
-const AGG_QUERY = 'from logstash-* | sort @timestamp';
+const SLOW_QUERY = 'from logstash-* | sort @timestamp';
 
 // Simulated ES|QL round-trip delay, matching the FTR test it replaces (see
 // `src/platform/plugins/shared/data/common/search/expressions/esql.ts`).
@@ -45,10 +45,8 @@ spaceTest.describe(
   'Discover ES|QL view - inspector, slow query',
   { tag: '@local-stateful-classic' },
   () => {
-    spaceTest.beforeAll(async ({ scoutSpace }) => {
-      await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
-      await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
-      await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
+    spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
+      await discoverScoutSpace.setupDiscoverDefaults();
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -57,9 +55,8 @@ spaceTest.describe(
       await pageObjects.discover.waitUntilTabIsLoaded();
     });
 
-    spaceTest.afterAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-      await scoutSpace.savedObjects.cleanStandardList();
+    spaceTest.afterAll(async ({ discoverScoutSpace }) => {
+      await discoverScoutSpace.teardownDiscoverDefaults();
     });
 
     spaceTest(
@@ -67,7 +64,7 @@ spaceTest.describe(
       async ({ page, pageObjects }) => {
         const { discover } = pageObjects;
 
-        await discover.codeEditor.setCodeEditorValue(AGG_QUERY);
+        await discover.codeEditor.setCodeEditorValue(SLOW_QUERY);
 
         // Simulate a slow ES|QL round-trip (debug setting, see
         // `src/platform/plugins/shared/data/common/search/expressions/esql.ts`)

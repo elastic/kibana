@@ -15,7 +15,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../../fixtures';
+import { spaceTest } from '../../fixtures';
 import {
   getInspectorRequestCommand,
   hasInspectorRequest,
@@ -23,13 +23,11 @@ import {
   switchToRequestsView,
 } from '../../fixtures/inspector_helpers';
 
-const AGG_QUERY = 'from logstash-* | sort @timestamp';
+const SORTED_QUERY = 'from logstash-* | sort @timestamp';
 
 spaceTest.describe('Discover ES|QL view - inspector', { tag: tags.deploymentAgnostic }, () => {
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
-    await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
+  spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
+    await discoverScoutSpace.setupDiscoverDefaults();
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -38,15 +36,14 @@ spaceTest.describe('Discover ES|QL view - inspector', { tag: tags.deploymentAgno
     await pageObjects.discover.waitUntilTabIsLoaded();
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
+  spaceTest.afterAll(async ({ discoverScoutSpace }) => {
+    await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
   spaceTest('shows Discover and Lens requests in the inspector', async ({ page, pageObjects }) => {
     const { discover } = pageObjects;
 
-    await discover.codeEditor.setCodeEditorValue(AGG_QUERY);
+    await discover.codeEditor.setCodeEditorValue(SORTED_QUERY);
     await discover.submitQuery();
     await discover.waitUntilTabIsLoaded();
     await discover.waitForHistogramRendered();

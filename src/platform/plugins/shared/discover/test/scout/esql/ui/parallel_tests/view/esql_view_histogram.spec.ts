@@ -15,14 +15,11 @@
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
-import { spaceTest, testData } from '../../fixtures';
+import { spaceTest } from '../../fixtures';
 
 spaceTest.describe('Discover ES|QL view - histogram', { tag: tags.deploymentAgnostic }, () => {
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
-    await scoutSpace.savedObjects.load(testData.FLIGHTS_KBN_ARCHIVE);
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
-    await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
+  spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
+    await discoverScoutSpace.setupDiscoverDefaults({ loadFlightsDataView: true });
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -31,9 +28,8 @@ spaceTest.describe('Discover ES|QL view - histogram', { tag: tags.deploymentAgno
     await pageObjects.discover.waitUntilTabIsLoaded();
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
+  spaceTest.afterAll(async ({ discoverScoutSpace }) => {
+    await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
   spaceTest(
@@ -75,9 +71,10 @@ spaceTest.describe('Discover ES|QL view - histogram', { tag: tags.deploymentAgno
     async ({ pageObjects }) => {
       const { discover, datePicker, filterBar } = pageObjects;
 
-      // The time range comes from `timepicker:timeDefaults` (set in `beforeAll`),
-      // so there's no need to drive the picker UI here — it is disabled anyway
-      // until a query targeting an index with a time field has been executed.
+      // The time range comes from `timepicker:timeDefaults` (set by
+      // `setupDiscoverDefaults`), so there's no need to drive the picker UI
+      // here — it is disabled anyway until a query targeting an index with a
+      // time field has been executed.
       await discover.codeEditor.setCodeEditorValue('from logstash-* | limit 100');
       await discover.submitQuery();
       await discover.waitUntilTabIsLoaded();

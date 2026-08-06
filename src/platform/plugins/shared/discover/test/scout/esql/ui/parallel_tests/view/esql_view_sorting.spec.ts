@@ -15,15 +15,13 @@
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
-import { spaceTest, testData } from '../../fixtures';
+import { spaceTest } from '../../fixtures';
 
 spaceTest.describe('Discover ES|QL view - sorting', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.use({ viewport: { width: 1600, height: 1200 } });
 
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
-    await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
+  spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
+    await discoverScoutSpace.setupDiscoverDefaults();
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -32,9 +30,8 @@ spaceTest.describe('Discover ES|QL view - sorting', { tag: tags.deploymentAgnost
     await pageObjects.discover.waitUntilTabIsLoaded();
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
+  spaceTest.afterAll(async ({ discoverScoutSpace }) => {
+    await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
   spaceTest(
