@@ -7,14 +7,12 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
-import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
+import { osqueryTool, agentBuilderToolsAvailability } from './common';
 import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import { pollActionResponses } from './poll_action_responses';
-
-const osqueryTool = (toolName: string): string => `${internalNamespaces.osquery}.${toolName}`;
 
 export const GET_LIVE_QUERY_RESULTS_TOOL_ID = osqueryTool('get_live_query_results');
 
@@ -54,15 +52,7 @@ export const getLiveQueryResultsTool = (
   description:
     'Wait for and retrieve Osquery live-query results for a dispatched action_id. Use after osquery.run_live_query when status is dispatched/partial, or when the analyst needs rows displayed in chat. Polls action responses until wait_seconds elapses or rows arrive.',
   schema: getLiveQueryResultsSchema,
-  availability: {
-    cacheMode: 'space',
-    handler: async () => ({
-      status: osqueryContext.experimentalFeatures.agentBuilderTools ? 'available' : 'unavailable',
-      reason: osqueryContext.experimentalFeatures.agentBuilderTools
-        ? undefined
-        : 'Osquery Agent Builder tools are not enabled',
-    }),
-  },
+  availability: agentBuilderToolsAvailability(osqueryContext),
   handler: async (input, { request }) => {
     const { action_id: actionId, wait_seconds: waitSeconds, max_rows: maxRows } = input;
     const waitBudgetMs = (waitSeconds ?? DEFAULT_WAIT_SECONDS) * 1_000;

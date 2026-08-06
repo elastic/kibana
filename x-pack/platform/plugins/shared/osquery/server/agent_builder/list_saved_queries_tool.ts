@@ -7,16 +7,14 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
-import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
+import { osqueryTool, agentBuilderToolsAvailability } from './common';
 import { savedQuerySavedObjectType } from '../../common/types';
 import type { SavedQuerySavedObject } from '../common/types';
 import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import { createInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
-
-const osqueryTool = (toolName: string): string => `${internalNamespaces.osquery}.${toolName}`;
 
 export const LIST_SAVED_QUERIES_TOOL_ID = osqueryTool('list_saved_queries');
 
@@ -38,15 +36,7 @@ export const listSavedQueriesTool = (
   description:
     'List available Osquery saved queries (prebuilt and custom). Use this to discover existing queries before authoring a custom one. Returns query text, platform, interval, and prebuilt status.',
   schema: listSavedQueriesSchema,
-  availability: {
-    cacheMode: 'space',
-    handler: async () => ({
-      status: osqueryContext.experimentalFeatures.agentBuilderTools ? 'available' : 'unavailable',
-      reason: osqueryContext.experimentalFeatures.agentBuilderTools
-        ? undefined
-        : 'Osquery Agent Builder tools are not enabled',
-    }),
-  },
+  availability: agentBuilderToolsAvailability(osqueryContext),
   handler: async (input, { request }) => {
     const { search, page, page_size: pageSize } = input;
 
