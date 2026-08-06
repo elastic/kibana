@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
 import { TOKEN_USAGE_MAPPING } from './token_usage_mapping';
 
@@ -57,5 +56,16 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS = {
     duration: mappings.long(),
     // Per-step token usage, extracted from `output.metadata.usage`.
     usage: TOKEN_USAGE_MAPPING,
+    stepUsage: {
+      type: 'nested' as const,
+      properties: {
+        stepId: mappings.keyword(),
+        connectorId: mappings.keyword(),
+        inputTokens: mappings.long(),
+        outputTokens: mappings.long(),
+        cachedTokens: mappings.long(),
+        totalTokens: mappings.long(),
+      },
+    },
   },
-} satisfies MappingsDefinition;
+};
