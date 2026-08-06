@@ -24,12 +24,15 @@ import type {
   NightshiftStartDependencies,
 } from './types';
 
-export class NightshiftPlugin implements Plugin<
-  NightshiftPublicSetup,
-  NightshiftPublicStart,
-  NightshiftSetupDependencies,
-  NightshiftStartDependencies
-> {
+export class NightshiftPlugin
+  implements
+    Plugin<
+      NightshiftPublicSetup,
+      NightshiftPublicStart,
+      NightshiftSetupDependencies,
+      NightshiftStartDependencies
+    >
+{
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({ visibleIn: [] }));
   private availabilitySubscription?: Subscription;
 
@@ -97,7 +100,10 @@ export class NightshiftPlugin implements Plugin<
       .pipe(
         map(({ available }) => available),
         catchError(() => of(false)),
-        map((isAvailable): AppUpdater => () => ({ visibleIn: isAvailable ? ['globalSearch'] : [] }))
+        map(
+          (isAvailable): AppUpdater =>
+            () => ({ visibleIn: isAvailable ? ['globalSearch'] : [] })
+        )
       )
       .subscribe(this.appUpdater$);
 
