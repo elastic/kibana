@@ -45,6 +45,85 @@ describe('UserStorageClient', () => {
     });
   });
 
+  describe('when user storage is unavailable', () => {
+    it('resolves get() to the default without issuing a request', async () => {
+      const { client, api } = buildClient({}, false);
+
+      await expect(client.get('key', 'fallback')).resolves.toBe('fallback');
+      await expect(client.get('key')).resolves.toBeUndefined();
+      expect(api.get).not.toHaveBeenCalled();
+    });
+
+    it('emits the default from get$ without issuing a request', async () => {
+      const { client, api } = buildClient({}, false);
+
+      await expect(firstValueFrom(client.get$('key', 'fallback'))).resolves.toBe('fallback');
+      expect(api.get).not.toHaveBeenCalled();
+    });
+
+    it('settles getState$ on resolved (not error) without issuing a request', async () => {
+      const { client, api } = buildClient({}, false);
+      const states: Array<{ status: string; value?: unknown }> = [];
+      client.getState$('key', 'fallback').subscribe((s) => states.push(s));
+
+      await flushMicrotasks();
+
+      expect(states).toEqual([
+        { status: 'loading', value: 'fallback' },
+        { status: 'resolved', value: 'fallback' },
+      ]);
+      expect(api.get).not.toHaveBeenCalled();
+    });
+
+    it('rejects set() locally without issuing a request or publishing an http error', async () => {
+      const { client, api } = buildClient({}, false);
+      const httpErrors = jest.fn();
+      client.getHttpError$().subscribe(httpErrors);
+
+      await expect(client.set('key', 'value')).rejects.toThrow(
+        'Cannot set user storage key "key": user storage is not available'
+      );
+      expect(api.set).not.toHaveBeenCalled();
+      expect(httpErrors).not.toHaveBeenCalled();
+      expect(client.peek('key')).toBeUndefined();
+    });
+
+    it('rejects remove() locally without issuing a request or publishing an http error', async () => {
+      const { client, api } = buildClient({}, false);
+      const httpErrors = jest.fn();
+      client.getHttpError$().subscribe(httpErrors);
+
+      await expect(client.remove('key')).rejects.toThrow(
+        'Cannot remove user storage key "key": user storage is not available'
+      );
+      expect(api.remove).not.toHaveBeenCalled();
+      expect(httpErrors).not.toHaveBeenCalled();
+    });
+
+    it('rejects update() at the write step, after the read resolved to the default', async () => {
+      const { client, api } = buildClient({}, false);
+      const updater = jest.fn((current: string) => `${current}-next`);
+
+      await expect(client.update('key', 'fallback', updater)).rejects.toThrow(
+        'user storage is not available'
+      );
+      expect(updater).toHaveBeenCalledWith('fallback');
+      expect(api.get).not.toHaveBeenCalled();
+      expect(api.set).not.toHaveBeenCalled();
+    });
+
+    it('does not emit an update event for a rejected write', async () => {
+      const { client } = buildClient({}, false);
+      const updates = jest.fn();
+      client.getUpdate$().subscribe(updates);
+
+      await expect(client.set('key', 'value')).rejects.toThrow();
+      await expect(client.remove('key')).rejects.toThrow();
+
+      expect(updates).not.toHaveBeenCalled();
+    });
+  });
+
   describe('peek', () => {
     it('returns cached values without triggering a lazy fetch', () => {
       const { client, api } = buildClient({ a: 1 });

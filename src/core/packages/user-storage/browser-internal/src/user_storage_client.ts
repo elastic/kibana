@@ -49,6 +49,10 @@ export interface UserStorageClientParams {
  * - `getUpdate$()` does **not** emit for lazy-fetch hydrations; only explicit
  *   `set` / `remove` calls produce update events.
  *
+ * When `isAvailable()` is `false` the server injects no values and every route
+ * would answer 403, so no HTTP request is made at all: reads resolve to their
+ * `defaultValue` and writes reject locally.
+ *
  * @internal
  */
 export class UserStorageClient implements IUserStorageClient {
@@ -173,6 +177,8 @@ export class UserStorageClient implements IUserStorageClient {
   }
 
   public async set<T = unknown>(key: string, value: T): Promise<T> {
+    this.assertAvailable('set', key);
+
     let stored: T;
     try {
       // Cache the server-validated value (post-transform/strip) rather than
@@ -193,6 +199,8 @@ export class UserStorageClient implements IUserStorageClient {
   }
 
   public async remove(key: string): Promise<void> {
+    this.assertAvailable('remove', key);
+
     try {
       await this.api.remove(key);
     } catch (error) {
@@ -231,6 +239,18 @@ export class UserStorageClient implements IUserStorageClient {
   }
 
   /**
+   * Throws when user storage is unavailable, so a write fails with an actionable
+   * message instead of a 403. Not published to `getHttpError$` - no request was made.
+   */
+  private assertAvailable(operation: 'set' | 'remove', key: string): void {
+    if (!this.available) {
+      throw new Error(
+        `Cannot ${operation} user storage key "${key}": user storage is not available for the current user. Gate write affordances on isAvailable().`
+      );
+    }
+  }
+
+  /**
    * Starts (or joins an already-started) lazy GET for `key`, resolving with
    * the fetched value. Resolves immediately from the cache if already hydrated.
    * Rejects if the underlying HTTP request fails; the failure is also published
@@ -243,6 +263,9 @@ export class UserStorageClient implements IUserStorageClient {
    * registered default.
    */
   private startFetch(key: string): Promise<unknown> {
+    // Nothing to fetch without user storage; readers fall back to their defaults.
+    if (!this.available) return Promise.resolve(undefined);
+
     const cached = this.cache[key];
     if (cached !== undefined) return Promise.resolve(cached);
 
