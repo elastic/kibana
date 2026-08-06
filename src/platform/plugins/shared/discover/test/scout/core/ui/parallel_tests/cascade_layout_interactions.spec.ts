@@ -87,11 +87,12 @@ spaceTest.describe(
         await spaceTest.step('expanding a row and entering/exiting fullscreen works', async () => {
           await discover.toggleCascadeLayoutRow(firstRowId);
 
-          // Scoped to the expanded row: while scrolled, the sticky pinned group header
-          // renders a `createPortal` duplicate of row content elsewhere in the DOM, so an
-          // unscoped page-wide `discoverDocTable` locator can match the wrong copy.
+          // `docTable` is the subj on the EuiDataGrid itself (the component-type guard
+          // requires that). Scoped to the expanded row: while scrolled, the sticky pinned
+          // group header renders a `createPortal` duplicate of row content elsewhere in
+          // the DOM, so an unscoped page-wide locator can match the wrong copy.
           const expandedRowGrid = page.components.dataGrid(
-            'discoverDocTable',
+            'docTable',
             page.locator(`[id="${firstRowId}"]`)
           );
           await expect(expandedRowGrid.rows).not.toHaveCount(0);
