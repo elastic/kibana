@@ -71,7 +71,7 @@ const PD_ACCEPT_HEADER = 'application/vnd.pagerduty+json;version=2';
 export const PagerdutyConnector: ConnectorSpec = {
   metadata: {
     id: '.pagerduty_mcp',
-    displayName: 'PagerDuty (MCP)',
+    displayName: 'PagerDuty',
     description: i18n.translate('core.kibanaConnectorSpecs.pagerduty.metadata.description', {
       defaultMessage:
         'Trigger, acknowledge, resolve, and update PagerDuty incidents; list services, on-call schedules, escalation policies, and users.',
