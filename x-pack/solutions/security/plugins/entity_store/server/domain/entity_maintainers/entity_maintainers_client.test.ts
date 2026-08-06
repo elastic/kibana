@@ -521,7 +521,7 @@ describe('EntityMaintainersClient', () => {
       expect(scheduleEntityMaintainerTask).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'm1',
-          initialTaskStatus: EntityMaintainerTaskStatus.STARTED,
+          taskStatus: EntityMaintainerTaskStatus.STARTED,
         })
       );
     });
@@ -547,7 +547,7 @@ describe('EntityMaintainersClient', () => {
       expect(scheduleEntityMaintainerTask).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'm1',
-          initialTaskStatus: EntityMaintainerTaskStatus.STOPPED,
+          taskStatus: EntityMaintainerTaskStatus.STOPPED,
         })
       );
     });
@@ -573,7 +573,7 @@ describe('EntityMaintainersClient', () => {
       expect(scheduleEntityMaintainerTask).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'm1',
-          initialTaskStatus: EntityMaintainerTaskStatus.STARTED,
+          taskStatus: EntityMaintainerTaskStatus.STARTED,
         })
       );
     });

@@ -137,7 +137,7 @@ export class EntityMaintainersClient {
     try {
       const maintainers = await this.getMaintainers();
       const toSchedule = maintainers.filter((m) => m.taskSnapshot === undefined);
-      const initialTaskStatus = options?.maintainersStatus ?? EntityMaintainerTaskStatus.STARTED;
+      const taskStatus = options?.maintainersStatus ?? EntityMaintainerTaskStatus.STARTED;
       await Promise.all(
         toSchedule.map(async ({ id, interval }) => {
           await scheduleEntityMaintainerTask({
@@ -148,7 +148,7 @@ export class EntityMaintainersClient {
             namespace: this.namespace,
             request,
             enabled: options?.autoStart ?? true,
-            initialTaskStatus,
+            taskStatus,
           });
         })
       );
