@@ -67,8 +67,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const failedAndDegradedDatasetName = 'synth.2';
   const failedAndDegradedDataStreamName = `logs-${failedAndDegradedDatasetName}-${defaultNamespace}`;
 
-  // Failing: See https://github.com/elastic/kibana/issues/278245
-  describe.skip('Dataset Quality Details', () => {
+  describe('Dataset Quality Details', () => {
     before(async () => {
       // Install Apache Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(apachePkg);

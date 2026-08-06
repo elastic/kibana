@@ -144,7 +144,10 @@
     "@kbn/es-query-constants",
     "@kbn/cps",
     "@kbn/core-spaces-common",
-    "@kbn/scout-oblt"
+    "@kbn/scout-oblt",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/es-archiver",
+    "@kbn/tooling-log"
   ],
   "exclude": ["target/**/*"]
 }

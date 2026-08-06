@@ -427,13 +427,12 @@ export class SignificantEventsPlugin
       })
     );
 
-    // Editable investigation + discovery/judge agents: installed via agents.ensure with the same
-    // availability gate as registered tools. Profiles stay installed; Agent Builder hides them
-    // when significant events is unavailable. Always ensure at start so the in-memory availability
-    // handler is registered even when the feature is currently off (otherwise leftover profiles
-    // from a prior enablement would show as available). Per-space installs also happen
-    // just-in-time from triggerInvestigationWorkflow, scheduled discovery enablement, and manual
-    // discovery execute.
+    // Editable investigation + discovery agents: installed via agents.ensure when
+    // significant events is available. skip(1) on availabilityEnabled$ drops the initial
+    // emission, so catch up at startup as well. Per-space installs also happen just-in-time
+    // from triggerInvestigationWorkflow (investigation), scheduled discovery enablement,
+    // and manual discovery execute (discovery).
+    // Pause re-assert runs inside ensureSignificantEventsInstalled after every install.
     if (plugins.agentBuilder && this.server) {
       const agentBuilder = plugins.agentBuilder;
       const availability = createSignificantEventsAvailability({
