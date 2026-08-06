@@ -456,3 +456,72 @@ export const triggerMaintainerRun = async (
     await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
   }
 };
+
+/** Entra ID integration log index (device + user documents share it). */
+const ENTRA_ID_LOG_INDEX = 'logs-entityanalytics_entra_id.entity-default';
+
+interface SeedEntraIdDeviceLogOptions {
+  /** Device object id — becomes host.id and the `host:<id>` target EUID. */
+  deviceId: string;
+  /** Device display name — becomes host.name. Not a resolvable identifier. */
+  deviceName: string;
+  /**
+   * Registered owners of the device. `mail` is optional so tests can exercise
+   * the non-mailbox-enabled case, where the owner resolves via id alone.
+   *
+   * NOTE: these are written as FLATTENED parallel arrays, mirroring how
+   * Elasticsearch indexes the `type: group` mapping in the real integration.
+   * Per-owner correlation is deliberately absent — a test that relied on
+   * mail[i] pairing with id[i] would not reflect production behaviour.
+   */
+  owners: Array<{ id: string; mail?: string }>;
+  /** @timestamp for the document. Defaults to 5 minutes ago (inside the 30d lookback). */
+  timestamp?: string;
+}
+
+/**
+ * Seeds one Entra ID device log document, shaped like the integration's
+ * post-pipeline output (see
+ * packages/entityanalytics_entra_id/data_stream/entity/_dev/test/pipeline/test-device.json-expected.json).
+ *
+ * Used by the entra_id `owns` maintainer suite, which reads device logs and
+ * inverts `registered_owners` into user-keyed `owns.host` edges.
+ */
+export const seedEntraIdDeviceLog = async (
+  esClient: EsClient,
+  { deviceId, deviceName, owners, timestamp }: SeedEntraIdDeviceLogOptions
+): Promise<void> => {
+  const ts = timestamp ?? new Date(Date.now() - 5 * 60_000).toISOString();
+
+  // Flatten to parallel arrays exactly as ES does for a `type: group` field.
+  const ownerIds = owners.map((o) => o.id);
+  const ownerMails = owners.map((o) => o.mail).filter((m): m is string => Boolean(m));
+
+  const registeredOwners: Record<string, string[]> = { id: ownerIds };
+  if (ownerMails.length > 0) {
+    registeredOwners.mail = ownerMails;
+  }
+
+  await esClient.index({
+    index: ENTRA_ID_LOG_INDEX,
+    refresh: 'wait_for',
+    document: {
+      '@timestamp': ts,
+      data_stream: {
+        dataset: 'entityanalytics_entra_id.device',
+        namespace: 'default',
+        type: 'logs',
+      },
+      event: { kind: 'asset', category: ['host'] },
+      host: { id: deviceId, name: deviceName },
+      device: { id: deviceId },
+      entityanalytics_entra_id: {
+        device: {
+          id: deviceId,
+          display_name: deviceName,
+          registered_owners: registeredOwners,
+        },
+      },
+    },
+  });
+};
