@@ -39,34 +39,6 @@ describe('DatasetsTable', () => {
     consoleWarnSpy.mockRestore();
   });
 
-  it('disables create when isCreateDisabled is true', async () => {
-    const onCreate = jest.fn();
-
-    const { getByTestId } = render(
-      <EuiProvider>
-        <DatasetsTable
-          filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
-          selectedItems={[]}
-          dataSourceNames={['ds1']}
-          dataSourceFilter={[]}
-          isCreateDisabled={true}
-          onSelectionChange={jest.fn()}
-          onDataSourceFilterChange={jest.fn()}
-          onCreate={onCreate}
-          onEdit={jest.fn()}
-          onDelete={jest.fn()}
-          onDeleteSelected={jest.fn()}
-        />
-      </EuiProvider>
-    );
-
-    const createButton = getByTestId('dataSetsSetsCreateButton');
-    expect(createButton).toBeDisabled();
-
-    fireEvent.click(createButton);
-    expect(onCreate).not.toHaveBeenCalled();
-  });
-
   it('calls onCreate with the selected flow when a menu item is chosen', async () => {
     const onCreate = jest.fn();
 
@@ -77,7 +49,6 @@ describe('DatasetsTable', () => {
           selectedItems={[]}
           dataSourceNames={['ds1']}
           dataSourceFilter={[]}
-          isCreateDisabled={false}
           onSelectionChange={jest.fn()}
           onDataSourceFilterChange={jest.fn()}
           onCreate={onCreate}
@@ -103,7 +74,6 @@ describe('DatasetsTable', () => {
           selectedItems={[]}
           dataSourceNames={['ds1', 'ds2']}
           dataSourceFilter={['ds1']}
-          isCreateDisabled={false}
           onSelectionChange={jest.fn()}
           onDataSourceFilterChange={jest.fn()}
           onCreate={jest.fn()}
@@ -131,7 +101,6 @@ describe('DatasetsTable', () => {
           selectedItems={[]}
           dataSourceNames={['ds1']}
           dataSourceFilter={[]}
-          isCreateDisabled={false}
           onSelectionChange={jest.fn()}
           onDataSourceFilterChange={jest.fn()}
           onCreate={jest.fn()}
@@ -167,7 +136,6 @@ describe('DatasetsTable', () => {
           selectedItems={selectedItems}
           dataSourceNames={['ds1']}
           dataSourceFilter={[]}
-          isCreateDisabled={false}
           onSelectionChange={jest.fn()}
           onDataSourceFilterChange={jest.fn()}
           onCreate={jest.fn()}

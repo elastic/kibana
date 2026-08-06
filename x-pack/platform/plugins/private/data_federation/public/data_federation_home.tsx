@@ -30,7 +30,6 @@ export const DataFederationHome: FunctionComponent = () => {
 
   const {
     items: dataSources,
-    hasLoaded: hasLoadedDataSources,
     reload: reloadDataSources,
   } = useLoadList<DataSource>(
     useCallback(async () => await dataSourcesClient.get(), [dataSourcesClient])
@@ -38,47 +37,26 @@ export const DataFederationHome: FunctionComponent = () => {
 
   const {
     items: dataSets,
-    hasLoaded: hasLoadedDataSets,
     reload: reloadDataSets,
   } = useLoadList<DataSetWithName>(
     useCallback(async () => await datasetsClient.get(), [datasetsClient])
   );
 
   const [selectedTabId, setSelectedTabId] = useState<'sets' | 'sources'>('sets');
-  const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
   const [dataSourceFilter, setDataSourceFilter] = useState<string[]>([]);
 
   useEffect(() => {
     const tab = new URLSearchParams(location.search).get('tab');
     if (tab === 'sources') {
       setSelectedTabId('sources');
-      setHasUserSelectedTab(true);
     }
   }, [location.search]);
 
-  useEffect(() => {
-    if (hasUserSelectedTab || !hasLoadedDataSources || !hasLoadedDataSets) {
-      return;
-    }
-
-    if (dataSources.length === 0 && dataSets.length === 0) {
-      setSelectedTabId('sources');
-    }
-  }, [
-    dataSets.length,
-    hasLoadedDataSets,
-    hasLoadedDataSources,
-    hasUserSelectedTab,
-    dataSources.length,
-  ]);
-
   const onTabClick = useCallback((tabId: 'sets' | 'sources') => {
-    setHasUserSelectedTab(true);
     setSelectedTabId(tabId);
   }, []);
 
   const viewDataSetsForDataSource = useCallback((dataSourceName: string) => {
-    setHasUserSelectedTab(true);
     setSelectedTabId('sets');
     setDataSourceFilter([dataSourceName]);
   }, []);

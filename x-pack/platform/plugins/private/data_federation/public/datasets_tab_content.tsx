@@ -183,7 +183,6 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
         selectedItems={selectedDataSets}
         dataSourceNames={dataSourceNames}
         dataSourceFilter={dataSourceFilter}
-        isCreateDisabled={dataSources.length === 0}
         onSelectionChange={setSelectedDataSets}
         onDataSourceFilterChange={onDataSourceFilterChange}
         onCreate={handleCreate}

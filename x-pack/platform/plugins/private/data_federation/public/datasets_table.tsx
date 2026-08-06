@@ -31,7 +31,6 @@ export interface DatasetsTableProps {
   selectedItems: DataSetListRow[];
   dataSourceNames: string[];
   dataSourceFilter: readonly string[];
-  isCreateDisabled: boolean;
   onSelectionChange: (next: DataSetListRow[]) => void;
   onDataSourceFilterChange: (next: string[]) => void;
   onCreate: (flowVariant: DatasetWizardFlowVariant) => void;
@@ -45,7 +44,6 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
   selectedItems,
   dataSourceNames,
   dataSourceFilter,
-  isCreateDisabled,
   onSelectionChange,
   onDataSourceFilterChange,
   onCreate,
@@ -170,7 +168,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <AddDatasetMenuButton isDisabled={isCreateDisabled} onSelectFlow={onCreate} />
+                <AddDatasetMenuButton onSelectFlow={onCreate} />
               </EuiFlexItem>
             </EuiFlexGroup>
           ),

@@ -37,7 +37,6 @@ jest.mock('./datasets_table', () => ({
       <div data-test-subj="mockDatasetsTable">
         <div data-test-subj="mockSelectedCount">{String(selectedItems.length)}</div>
         <div data-test-subj="mockFilterValue">{JSON.stringify(props.dataSourceFilter ?? [])}</div>
-        <div data-test-subj="mockCreateDisabled">{String(props.isCreateDisabled)}</div>
 
         <button
           data-test-subj="mockCreate"
@@ -172,7 +171,7 @@ describe('DatasetsTabContent', () => {
     mockHistoryPush.mockClear();
   });
 
-  it('disables create when there are no data sources', async () => {
+  it('navigates to create wizard when create is clicked without data sources', async () => {
     await renderComponent({
       dataSources: [],
       dataSets: [],
@@ -180,9 +179,9 @@ describe('DatasetsTabContent', () => {
       loadDataSets: jest.fn().mockResolvedValue(undefined),
     });
 
-    expect(document.querySelector('[data-test-subj="mockCreateDisabled"]')?.textContent).toBe(
-      'true'
-    );
+    fireEvent.click(document.querySelector('[data-test-subj="mockCreate"]') as Element);
+
+    expect(mockHistoryPush).toHaveBeenCalledWith('/create?flow=flow_1');
   });
 
   it('navigates to create wizard when create is clicked', async () => {

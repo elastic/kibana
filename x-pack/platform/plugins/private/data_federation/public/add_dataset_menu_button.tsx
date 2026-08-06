@@ -18,12 +18,10 @@ import {
 import { mainTranslations } from './main_i18n';
 
 export interface AddDatasetMenuButtonProps {
-  isDisabled: boolean;
   onSelectFlow: (flowVariant: DatasetWizardFlowVariant) => void;
 }
 
 export const AddDatasetMenuButton: FunctionComponent<AddDatasetMenuButtonProps> = ({
-  isDisabled,
   onSelectFlow,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -31,12 +29,8 @@ export const AddDatasetMenuButton: FunctionComponent<AddDatasetMenuButtonProps> 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   const togglePopover = useCallback(() => {
-    if (isDisabled) {
-      return;
-    }
-
     setIsPopoverOpen((open) => !open);
-  }, [isDisabled]);
+  }, []);
 
   const handleSelectFlow = useCallback(
     (flowVariant: DatasetWizardFlowVariant) => {
@@ -75,7 +69,6 @@ export const AddDatasetMenuButton: FunctionComponent<AddDatasetMenuButtonProps> 
       iconSide="right"
       data-test-subj="dataSetsSetsCreateButton"
       onClick={togglePopover}
-      disabled={isDisabled}
     >
       {mainTranslations.columns.dataSets.addButtonLabel}
     </EuiButton>
