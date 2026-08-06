@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { AppHeader, AppHeaderView } from './app_header';
-export type { AppHeaderProps, AppHeaderViewProps } from './app_header';
-export {
-  ChromeAppHeaderRegistration,
-  useChromeAppHeaderRegistration,
-} from './chrome_app_header_registration';
-export { SuppressChromeBackButton } from './suppress_chrome_back_button';
+import React from 'react';
+import { ChromeAppHeaderRegistration } from './chrome_app_header_registration';
+
+export const SuppressChromeBackButton = React.memo(() => (
+  <ChromeAppHeaderRegistration back={false} />
+));
+
+SuppressChromeBackButton.displayName = 'SuppressChromeBackButton';

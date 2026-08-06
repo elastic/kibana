@@ -15,7 +15,7 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
   ChromeSetup,
   ChromeStart,
-  AppHeaderConfig,
+  ChromeAppHeaderConfig,
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
@@ -167,7 +167,7 @@ export interface InternalChromeNext extends ChromeNext {
     set(mounted: boolean): void;
   };
   appHeader: ChromeNext['appHeader'] & {
-    get$(): Observable<AppHeaderConfig | undefined>;
+    get$(): Observable<ChromeAppHeaderConfig | undefined>;
   };
   userMenu: ChromeNext['userMenu'] & {
     get$(): Observable<ReactNode>;
