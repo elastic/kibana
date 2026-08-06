@@ -7,11 +7,10 @@
 
 import { useCurrentRoute } from '@kbn/typed-react-router-config';
 import { useContext, useEffect, useRef } from 'react';
-import { castArray } from 'lodash';
 import type { Breadcrumb } from '.';
 import { RouteBreadcrumbsContext } from '.';
 
-export function useRouteBreadcrumb(breadcrumb: Breadcrumb | Breadcrumb[]) {
+export function useRouteBreadcrumb(breadcrumb: Breadcrumb) {
   const api = useContext(RouteBreadcrumbsContext);
 
   if (!api) {
@@ -30,7 +29,7 @@ export function useRouteBreadcrumb(breadcrumb: Breadcrumb | Breadcrumb[]) {
     matchedRoute.current = match?.route;
 
     if (matchedRoute.current) {
-      api.set(matchedRoute.current, castArray(breadcrumb));
+      api.set(matchedRoute.current, [breadcrumb]);
     }
 
     return () => {
@@ -38,6 +37,5 @@ export function useRouteBreadcrumb(breadcrumb: Breadcrumb | Breadcrumb[]) {
         api.unset(matchedRoute.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [matchedRoute.current, match?.route]);
+  }, [match?.route, breadcrumb, api]);
 }
