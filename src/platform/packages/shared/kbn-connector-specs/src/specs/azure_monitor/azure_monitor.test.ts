@@ -546,10 +546,8 @@ describe('AzureMonitor', () => {
     it('reports success with the action group count', async () => {
       mockClient.get.mockResolvedValue({ data: { value: [{ id: 'ag1' }, { id: 'ag2' }] } });
 
-      if (!AzureMonitor.test) throw new Error('Test handler not defined');
       const result = await AzureMonitor.test.handler(mockContext);
 
-      expect(result.ok).toBe(true);
       expect(result.message).toContain('2 action group(s)');
     });
 

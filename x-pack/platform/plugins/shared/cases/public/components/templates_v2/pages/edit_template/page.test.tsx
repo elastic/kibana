@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { EditTemplatePage } from './page';
-import * as i18n from '../../translations';
 
 const mockUseTemplateViewParams = jest.fn();
 const mockNavigateToCasesTemplates = jest.fn();
@@ -73,9 +72,11 @@ describe('EditTemplatePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockMutateAsync.mockResolvedValue(undefined);
-    mockTemplateFormLayout.mockImplementation(({ title, isLoading }) => (
+    mockTemplateFormLayout.mockImplementation(({ initialMetadata, isLoading }) => (
       <div>
-        <div data-test-subj="layout-title">{title}</div>
+        {/* The editor renders the template's own name as an editable page title, so the layout is
+            handed the metadata rather than a static heading. */}
+        <div data-test-subj="layout-title">{initialMetadata?.name}</div>
         <div data-test-subj={isLoading ? 'layout-loading' : 'layout-loaded'} />
         <div data-test-subj="template-yaml-editor" />
       </div>
@@ -101,7 +102,7 @@ describe('EditTemplatePage', () => {
 
     render(<EditTemplatePage />);
 
-    expect(screen.getByTestId('layout-title')).toHaveTextContent(i18n.EDIT_TEMPLATE_TITLE);
+    expect(screen.getByTestId('layout-title')).toHaveTextContent('Test Template');
     expect(screen.getByTestId('layout-loaded')).toBeInTheDocument();
     expect(screen.getByTestId('template-yaml-editor')).toBeInTheDocument();
   });

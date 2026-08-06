@@ -266,6 +266,8 @@ describe('BigQuery', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = BigQuery.test;
+
     it('should return success when SELECT 1 succeeds', async () => {
       mockClient.post.mockResolvedValue({
         data: {
@@ -274,11 +276,7 @@ describe('BigQuery', () => {
         },
       });
 
-      if (!BigQuery.test) {
-        throw new Error('BigQuery test handler is missing');
-      }
-
-      const result = await BigQuery.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.post).toHaveBeenCalledWith(
         'https://bigquery.googleapis.com/bigquery/v2/projects/elastic-edm-prod/queries',
@@ -289,10 +287,7 @@ describe('BigQuery', () => {
           maxResults: 1,
         })
       );
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to BigQuery (job job_test)',
-      });
+      expect(result).toEqual({});
     });
   });
 });

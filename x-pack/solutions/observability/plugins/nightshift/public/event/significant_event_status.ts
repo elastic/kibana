@@ -15,44 +15,31 @@ import { getInvestigationProgressStatusLabel } from '../common/investigation_pro
 export { getInvestigationProgressStatusLabel };
 
 /**
- * Nightshift surfaces two triage buckets derived from `@kbn/significant-events-schema`
+ * Nightshift surfaces two events buckets derived from `@kbn/significant-events-schema`
  * statuses:
  * - Needs action: `open`
  * - Resolved: `closed` and `dismissed`
- *
- * `pending` is excluded from Nightshift fetches (see significant-events API default
- * filters) and is not shown in these lists. The grouping helpers below still map
- * `pending` to needs-action for type exhaustiveness if it ever appears in a response.
  *
  * The "Investigating" / "Investigated" badge is derived separately from
  * `event.investigations` (see `getInvestigationStatusLabel`).
  */
 type StatusGroup = 'needsAction' | 'resolved';
 
-type SignificantEventStatusOptions = Exclude<SignificantEventStatus, 'pending'>;
-
-const STATUS_GROUP: Record<SignificantEventStatusOptions, StatusGroup> = {
+const STATUS_GROUP: Record<SignificantEventStatus, StatusGroup> = {
   open: 'needsAction',
   closed: 'resolved',
   dismissed: 'resolved',
 };
 
-const isReviewedSignificantEventStatus = (
-  status: SignificantEventStatus
-): status is SignificantEventStatusOptions => status !== 'pending';
-
 export const NEEDS_ACTION_STATUSES: SignificantEventStatus[] =
-  SIGNIFICANT_EVENT_STATUS_OPTIONS.filter(
-    (status) => isReviewedSignificantEventStatus(status) && STATUS_GROUP[status] === 'needsAction'
-  );
+  SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((status) => STATUS_GROUP[status] === 'needsAction');
 export const RESOLVED_STATUSES: SignificantEventStatus[] = SIGNIFICANT_EVENT_STATUS_OPTIONS.filter(
-  (status) => isReviewedSignificantEventStatus(status) && STATUS_GROUP[status] === 'resolved'
+  (status) => STATUS_GROUP[status] === 'resolved'
 );
 
 export type StatusColor = 'danger' | 'success';
 
-const getStatusGroup = (status: SignificantEventStatus): StatusGroup =>
-  isReviewedSignificantEventStatus(status) ? STATUS_GROUP[status] : 'needsAction';
+const getStatusGroup = (status: SignificantEventStatus): StatusGroup => STATUS_GROUP[status];
 
 export const isNeedsActionStatus = (status: SignificantEventStatus): boolean =>
   getStatusGroup(status) === 'needsAction';

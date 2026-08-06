@@ -136,9 +136,7 @@ export function messagesToOpenAI({
       case MessageRole.Assistant:
         const assistantMessage: ChatCompletionAssistantMessageParam = {
           role: 'assistant',
-          // Omitted rather than null: OpenAI accepts either, but Elasticsearch's
-          // UnifiedCompletionRequest parser rejects a null assistant content.
-          content: message.content || undefined,
+          content: message.content ?? '',
           tool_calls: message.toolCalls?.map((toolCall) => {
             return {
               function: {
@@ -217,8 +215,9 @@ function mergeConsecutiveMessages(
       } else if (message.role === 'assistant' && previous.role === 'assistant') {
         const prevContent = (previous as ChatCompletionAssistantMessageParam).content ?? '';
         const curContent = (message as ChatCompletionAssistantMessageParam).content ?? '';
-        (previous as ChatCompletionAssistantMessageParam).content =
-          [prevContent, curContent].filter(Boolean).join('\n') || undefined;
+        (previous as ChatCompletionAssistantMessageParam).content = [prevContent, curContent]
+          .filter(Boolean)
+          .join('\n');
         const prevCalls = (previous as ChatCompletionAssistantMessageParam).tool_calls;
         const curCalls = (message as ChatCompletionAssistantMessageParam).tool_calls;
         if (curCalls?.length) {

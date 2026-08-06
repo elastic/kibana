@@ -66,7 +66,7 @@ pageLoadAssetSize:
   esql: 29469
   esqlDataGrid: 10209
   esUiShared: 101220
-  evals: 8650
+  evals: 9654
   eventAnnotation: 22334
   eventAnnotationListing: 13164
   exploratoryView: 45042
@@ -134,7 +134,7 @@ pageLoadAssetSize:
   nightshift: 7911
   noDataPage: 1749
   notificationCenter: 1791
-  observability: 118253
+  observability: 116568
   observabilityAgentBuilder: 10178
   observabilityAIAssistant: 67295
   observabilityAIAssistantApp: 17100

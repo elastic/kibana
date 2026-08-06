@@ -22,10 +22,11 @@ import {
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
+  useIsDarkMode,
 } from '@elastic/eui';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import { capitalize } from 'lodash';
-import { getInteractivePanelStyles } from './interactive_panel_styles';
+import { getContrastTextColor, getInteractivePanelStyles } from './interactive_panel_styles';
 
 interface DownsamplingPhaseProps {
   downsample: DownsampleStep;
@@ -54,8 +55,11 @@ export const DownsamplingPhase = ({
   disableInteractions = false,
 }: DownsamplingPhaseProps) => {
   const { euiTheme } = useEuiTheme();
+  const isDarkMode = useIsDarkMode();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const intervalLabel = downsample.fixed_interval;
+  const backgroundColor = color ?? euiTheme.colors.backgroundBasePlain;
+  const textColor = getContrastTextColor(backgroundColor, euiTheme, isDarkMode);
   const popoverTitleId = useGeneratedHtmlId({
     prefix: `streamsDownsamplingPopoverTitle-${stepNumber}`,
   });
@@ -97,7 +101,8 @@ export const DownsamplingPhase = ({
       onClick={handleClick}
       css={getInteractivePanelStyles({
         euiTheme,
-        backgroundColor: color ?? euiTheme.colors.backgroundBasePlain,
+        isDarkMode,
+        backgroundColor,
         isPopoverOpen: isPopoverOpen || isBeingEdited,
         minHeight: '30px',
         fullSize: true,
@@ -116,15 +121,15 @@ export const DownsamplingPhase = ({
       >
         <EuiText
           size="xs"
-          color={euiTheme.colors.plainDark}
-          data-test-subj={`downsamplingPhase-${intervalLabel}-interval`}
-          style={{
+          css={{
+            color: textColor,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
             maxWidth: '100%',
             fontWeight: euiTheme.font.weight.semiBold,
           }}
+          data-test-subj={`downsamplingPhase-${intervalLabel}-interval`}
         >
           {downsample.fixed_interval}{' '}
           {i18n.translate('xpack.streams.downsamplingPhaseBar.b.intervalLabel', {
