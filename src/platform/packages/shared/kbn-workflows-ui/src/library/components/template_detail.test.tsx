@@ -178,16 +178,16 @@ describe('TemplateDetail', () => {
     expect(screen.getByTestId('workflowLibraryTemplateDetail-version')).toHaveTextContent('1.2.0');
   });
 
-  it('should render the solution logo and humanized tag badges under the title', () => {
+  it('should render the solution logo and localized tag badges under the title', () => {
     renderDetail();
     expect(screen.getByText('Solutions')).toBeInTheDocument();
     // Solutions render as product logos (name shown on hover), not text.
     expect(
       screen.getByTestId('workflowLibraryTemplateDetail-solution-security')
     ).toBeInTheDocument();
-    // Categories render as tags under the title (humanized).
+    // Categories render as tags under the title, using the localized vocabulary name.
     const tags = screen.getByTestId('workflowLibraryTemplateDetail-tags');
-    expect(within(tags).getByText('Threat Intel')).toBeInTheDocument();
+    expect(within(tags).getByText('Threat intelligence')).toBeInTheDocument();
     expect(within(tags).getByText('Enrichment')).toBeInTheDocument();
   });
 
@@ -258,5 +258,22 @@ describe('TemplateDetail', () => {
     mockUseTemplate.mockReturnValue({ data: undefined, isLoading: false, isError: true });
     renderDetail();
     expect(screen.getByTestId('workflowLibraryTemplateDetail-error')).toBeInTheDocument();
+  });
+
+  it('should render an in-memory template without fetching by slug', () => {
+    // No slug and no fetch result — the query must not be consulted.
+    mockUseTemplate.mockReturnValue({ data: undefined, isLoading: true, isError: true });
+
+    render(
+      <WorkflowsUiServicesProvider services={createMockWorkflowsUiServices()}>
+        <TemplateDetail template={TEMPLATE_BODY} installMode="custom" />
+      </WorkflowsUiServicesProvider>
+    );
+
+    expect(mockUseTemplate).toHaveBeenCalledWith(undefined);
+    expect(screen.getByRole('heading', { name: 'My Template' })).toBeInTheDocument();
+    expect(screen.getByTestId('workflowLibraryTemplateDetail-preview')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowLibraryTemplateDetail-loading')).toBeNull();
+    expect(screen.queryByTestId('workflowLibraryTemplateDetail-error')).toBeNull();
   });
 });

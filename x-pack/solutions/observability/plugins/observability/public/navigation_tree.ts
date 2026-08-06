@@ -65,7 +65,7 @@ function createNavTree({
       ...(significantEventsAvailable
         ? [
             {
-              link: 'observability-overview:nightshift' as const,
+              link: 'nightshift' as const,
               icon: NightshiftNavigationIcon,
             },
           ]
