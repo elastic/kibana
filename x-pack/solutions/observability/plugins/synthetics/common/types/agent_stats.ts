@@ -11,7 +11,7 @@
  * private locations table and the monitor "Location agents" section.
  */
 export interface AgentStat {
-  /** Agent `host.name` (lowercased). */
+  /** Agent `host.name` in original case (empty when the agent reports none). */
   host: string;
   lastCheckin: number | null;
   /** Whether Fleet reports the agent as online. */
@@ -33,7 +33,7 @@ export interface AgentStat {
    * `metrics-system.cpu-*` (System integration only). Null when unavailable.
    */
   cpuPct: number | null;
-  /** Fleet agent identity/metadata for the freshest agent on this host, powering the flyout. */
+  /** Fleet agent id — unique row key for this stats payload. */
   agentId: string | null;
   agentVersion: string | null;
   agentStatus: string | null;

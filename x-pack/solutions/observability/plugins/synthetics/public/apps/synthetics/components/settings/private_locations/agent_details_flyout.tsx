@@ -18,6 +18,7 @@ import {
   EuiFlyoutHeader,
   EuiHealth,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
@@ -63,8 +64,7 @@ export const AgentDetailsFlyout = ({
   const { basePath } = useSyntheticsSettingsContext();
   const { canReadAgents } = useFleetPermissions();
 
-  // Prefer agent id — `agent.host` is lowercased and won't match Fleet's
-  // case-sensitive `local_metadata.host.hostname` keyword (e.g. Windows hosts).
+  // Prefer agent id for Fleet deep-links (exact match).
   const fleetAgentHref = agent.agentId
     ? `${basePath}/app/fleet/agents/${encodeURIComponent(agent.agentId)}`
     : `${basePath}/app/fleet/agents?kuery=${encodeURIComponent(`policy_id:"${agentPolicyId}"`)}`;
@@ -143,8 +143,13 @@ export const AgentDetailsFlyout = ({
     <EuiFlyout onClose={onClose} size="s" data-test-subj="syntheticsAgentDetailsFlyout">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2>{agent.host}</h2>
+          <h2>{agent.host || agent.agentId || '—'}</h2>
         </EuiTitle>
+        {agent.host && agent.agentId && (
+          <EuiText size="s" color="subdued">
+            {agent.agentId}
+          </EuiText>
+        )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiTitle size="xxs">

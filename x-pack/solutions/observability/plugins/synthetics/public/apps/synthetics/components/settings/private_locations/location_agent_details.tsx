@@ -100,14 +100,19 @@ export const LocationAgentDetails = ({
           <EuiFlexItem grow={false}>
             <EuiIcon type="node" size="s" aria-hidden={true} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
             <EuiLink
               data-test-subj="syntheticsAgentDetailsLink"
               onClick={() => setFlyoutAgent(agent)}
               title={VIEW_AGENT_DETAILS}
             >
-              <strong>{host}</strong>
+              <strong>{host || agent.agentId || '—'}</strong>
             </EuiLink>
+            {agent.agentId && (
+              <EuiText size="xs" color="subdued" className="eui-textTruncate" title={agent.agentId}>
+                {agent.agentId}
+              </EuiText>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       ),

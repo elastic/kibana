@@ -112,13 +112,11 @@ describe('getPrivateLocationAgentStats route', () => {
     const result = await run(routeContext);
     const agentStat = result[0].agents[0];
 
-    // Metrics are joined despite the uppercase host name (the case-sensitivity fix).
-    expect(agentStat.host).toBe('win-server01');
+    expect(agentStat.host).toBe('WIN-Server01');
+    expect(agentStat.agentId).toBe('agent-1');
     expect(agentStat.usedMemoryPct).toBe(0.25);
     expect(agentStat.cpuPct).toBe(0.1);
 
-    // The ES query must filter host.name with the ORIGINAL case, or the
-    // case-sensitive keyword join silently drops mixed-case hosts.
     const query = search.mock.calls[0][0].query;
     const termsFilter = query.bool.filter.find((f: any) => f.terms?.['host.name']);
     expect(termsFilter.terms['host.name']).toEqual(['WIN-Server01']);
@@ -126,13 +124,11 @@ describe('getPrivateLocationAgentStats route', () => {
 
   it('caps usedMemoryMib at totalMemoryMib', async () => {
     const listAgents = jest.fn().mockResolvedValue({
-      // host.memory reports 4 GiB total…
       agents: [agent({ local_metadata: { host: { name: 'host-a', memory: 4 * GIB } } })],
       total: 1,
     });
     const { routeContext } = makeContext({
       listAgentsImpl: listAgents,
-      // …but the metricset momentarily reports 6 GiB used.
       buckets: [bucket('host-a', { used: 6 * GIB, usedPct: 0.99 })],
     });
 
@@ -143,7 +139,7 @@ describe('getPrivateLocationAgentStats route', () => {
     expect(agentStat.usedMemoryMib).toBe(4 * 1024); // capped, not 6144
   });
 
-  it('keeps the freshest agent identity when several agents share a host name', async () => {
+  it('returns one row per agent id when several agents share a host name', async () => {
     const listAgents = jest.fn().mockResolvedValue({
       agents: [
         agent({
@@ -169,9 +165,9 @@ describe('getPrivateLocationAgentStats route', () => {
 
     const result = await run(routeContext);
 
-    expect(result[0].agents).toHaveLength(1);
-    expect(result[0].agents[0].agentId).toBe('freshest');
-    expect(result[0].agents[0].agentVersion).toBe('9.6.0');
+    expect(result[0].agents).toHaveLength(2);
+    expect(result[0].agents.map((a) => a.agentId).sort()).toEqual(['freshest', 'stale']);
+    expect(result[0].agents.every((a) => a.host === 'host-c')).toBe(true);
   });
 
   it('paginates using the reported total across multiple pages', async () => {
@@ -193,7 +189,7 @@ describe('getPrivateLocationAgentStats route', () => {
     const result = await run(routeContext);
 
     expect(listAgents).toHaveBeenCalledTimes(2);
-    expect(result[0].agents.map((a) => a.host).sort()).toEqual(['host-a', 'host-b', 'host-c']);
+    expect(result[0].agents.map((a) => a.agentId).sort()).toEqual(['a', 'b', 'c']);
   });
 
   it('resolves the agent policy display name', async () => {

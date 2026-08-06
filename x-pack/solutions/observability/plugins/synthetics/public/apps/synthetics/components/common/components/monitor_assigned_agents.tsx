@@ -67,13 +67,12 @@ export const MonitorAssignedAgents = ({
                 </EuiText>
               )}
               {stats.agents.map((agent) => {
-                // Prefer agent id — `agent.host` is lowercased and won't match
-                // Fleet's case-sensitive `local_metadata.host.hostname` keyword.
                 const hostHref = agent.agentId
                   ? `${basePath}/app/fleet/agents/${encodeURIComponent(agent.agentId)}`
                   : `${basePath}/app/fleet/agents?kuery=${encodeURIComponent(
                       `policy_id:"${stats.agentPolicyId}"`
                     )}`;
+                const label = agent.host || agent.agentId || '—';
                 return (
                   <EuiHealth
                     key={agent.agentId ?? agent.host}
@@ -85,11 +84,18 @@ export const MonitorAssignedAgents = ({
                         href={hostHref}
                         target="_blank"
                         external
+                        title={agent.agentId ?? label}
                       >
-                        {agent.host}
+                        {label}
                       </EuiLink>
                     ) : (
-                      agent.host
+                      label
+                    )}
+                    {agent.host && agent.agentId && (
+                      <EuiText size="xs" color="subdued" component="span">
+                        {' '}
+                        ({agent.agentId})
+                      </EuiText>
                     )}
                   </EuiHealth>
                 );

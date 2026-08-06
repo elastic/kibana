@@ -52,7 +52,7 @@ describe('LocationAgentDetails', () => {
   it('renders the overview stats and a per-agent row for a healthy location', () => {
     render(
       <LocationAgentDetails
-        stats={stats([agent(), agent({ host: 'agent-b' })])}
+        stats={stats([agent(), agent({ host: 'agent-b', agentId: 'agent-b-id' })])}
         loading={false}
         agentPolicyId="policy-1"
         locationLabel="Local Docker PL"
@@ -63,9 +63,11 @@ describe('LocationAgentDetails', () => {
     // Overview panel is present.
     expect(screen.getByTestId('locationAgentDetails')).toBeInTheDocument();
 
-    // Both agents render in the per-agent table.
+    // Both agents render in the per-agent table (host + id in the agent column).
     expect(screen.getByText('agent-a')).toBeInTheDocument();
+    expect(screen.getByText('agent-a-id')).toBeInTheDocument();
     expect(screen.getByText('agent-b')).toBeInTheDocument();
+    expect(screen.getByText('agent-b-id')).toBeInTheDocument();
 
     // Healthy agents stat reads 2/2 and there is no "Needs attention" callout.
     expect(screen.getByText('2/2')).toBeInTheDocument();
@@ -80,7 +82,12 @@ describe('LocationAgentDetails', () => {
       <LocationAgentDetails
         stats={stats([
           agent(),
-          agent({ host: 'agent-down', healthy: false, agentStatus: 'offline' }),
+          agent({
+            host: 'agent-down',
+            agentId: 'agent-down-id',
+            healthy: false,
+            agentStatus: 'offline',
+          }),
         ])}
         loading={false}
         agentPolicyId="policy-1"
