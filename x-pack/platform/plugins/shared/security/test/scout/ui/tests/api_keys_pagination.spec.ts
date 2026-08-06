@@ -17,7 +17,9 @@ import {
 } from '../fixtures';
 
 const PAGE_SIZE = 25;
-const KEY_COUNT = 30;
+// Well clear of one page: batch-seeded keys share creation timestamps, and the grid's exclusive
+// `search_after` cursor drops tied rows, so page 2 needs slack to stay non-empty.
+const KEY_COUNT = 40;
 const KEY_PREFIX = 'pagination-test-key';
 const SEED_BATCH_SIZE = 10;
 
@@ -64,17 +66,21 @@ test.describe('API keys grid pagination', { tag: tags.stateful.classic }, () => 
 
     await test.step('the last page holds different keys and cannot go forward', async () => {
       await apiKeys.goToNextPage();
-      await expect(apiKeys.nextPageButton).toBeDisabled();
+      // Both paging buttons are also disabled while the fetch is in flight, and the table keeps the
+      // previous rows until it resolves, so a vanished row is the only reliable page-turn signal.
+      await expect(apiKeys.rowByName(firstPage[0])).toBeHidden();
 
       const secondPage = await apiKeys.visibleApiKeyNames();
       expect(secondPage.length).toBeGreaterThan(0);
       expect(secondPage.filter((name) => firstPage.includes(name))).toStrictEqual([]);
 
       await expect(apiKeys.previousPageButton).toBeEnabled();
+      await expect(apiKeys.nextPageButton).toBeDisabled();
     });
 
     await test.step('going back restores the first page', async () => {
       await apiKeys.goToPreviousPage();
+      await expect(apiKeys.rowByName(firstPage[0])).toBeVisible();
 
       await expect(apiKeys.anyRowName).toHaveCount(PAGE_SIZE);
       expect(await apiKeys.visibleApiKeyNames()).toStrictEqual(firstPage);
