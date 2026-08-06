@@ -111,12 +111,14 @@ export const nameColumn = ({
         href={href}
         onClick={(event) => {
           if (hasActiveModifierKey(event)) return;
-          if (navigateToUrl || onBackgroundSearchOpened) {
-            event.preventDefault();
-          }
           trackAction?.();
-          navigateToUrl?.(href);
+          // The handler can take over opening the session (e.g. Discover restores
+          // it in a new tab) by preventing the default behavior.
           onBackgroundSearchOpened?.({ session, event });
+          if (navigateToUrl && !event.defaultPrevented) {
+            event.preventDefault();
+            navigateToUrl(href);
+          }
         }}
       >
         <TableText data-test-subj="sessionManagementNameCol">

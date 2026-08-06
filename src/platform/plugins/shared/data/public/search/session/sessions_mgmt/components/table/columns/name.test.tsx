@@ -12,7 +12,7 @@ import { nameColumn } from './name';
 import { render, screen } from '@testing-library/react';
 import { getUiSessionMock } from '../../../__mocks__';
 import { SearchSessionStatus } from '../../../../../../../common';
-import type { UISession } from '../../../types';
+import type { BackgroundSearchOpenedHandler, UISession } from '../../../types';
 import userEvent from '@testing-library/user-event';
 
 const setup = ({
@@ -86,7 +86,22 @@ describe('name column', () => {
           event: expect.any(Object),
           session: mockSession,
         });
-        expect(onBackgroundSearchOpened.mock.calls[0][0].event.defaultPrevented).toBe(true);
+      });
+
+      it('should NOT navigate in app when onBackgroundSearchOpened prevents the default behavior', async () => {
+        // Given
+        const mockSession = getUiSessionMock({ status: SearchSessionStatus.COMPLETE });
+        const onBackgroundSearchOpened = jest.fn<void, Parameters<BackgroundSearchOpenedHandler>>(
+          ({ event }) => event.preventDefault()
+        );
+
+        // When
+        const { user, navigateToUrl } = setup({ uiSession: mockSession, onBackgroundSearchOpened });
+        await user.click(screen.getByText(mockSession.name));
+
+        // Then
+        expect(onBackgroundSearchOpened).toHaveBeenCalled();
+        expect(navigateToUrl).not.toHaveBeenCalled();
       });
     });
   });
