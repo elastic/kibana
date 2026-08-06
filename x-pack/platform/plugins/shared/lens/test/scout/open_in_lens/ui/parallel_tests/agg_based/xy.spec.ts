@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
-  testData,
   canConvertToLensByTitle,
   convertToLensByTitle,
   createOpenInLensSuiteSetup,
+  spaceTest,
+  testData,
 } from '../../fixtures';
 
 spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentAgnostic }, () => {

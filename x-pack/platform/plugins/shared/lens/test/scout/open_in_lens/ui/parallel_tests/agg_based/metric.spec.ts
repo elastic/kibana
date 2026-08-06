@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
-  testData,
   canConvertToLensByTitle,
   convertToLensByTitle,
   createOpenInLensSuiteSetup,
+  spaceTest,
+  testData,
 } from '../../fixtures';
 
 spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploymentAgnostic }, () => {
@@ -56,7 +57,7 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploym
     await lens.waitForVisualization('mtrVis');
     expect(await lens.getLayerCount()).toBe(1);
 
-    await expect(lens.getDimensionTriggerLocator()).toHaveCount(1);
+    await expect(lens.dimensionTriggerLocator).toHaveCount(1);
     const dimensions = await lens.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Average machine.ram');
 
@@ -84,7 +85,7 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploym
     await lens.waitForVisualization('mtrVis');
     expect(await lens.getLayerCount()).toBe(1);
 
-    await expect(lens.getDimensionTriggerLocator()).toHaveCount(2);
+    await expect(lens.dimensionTriggerLocator).toHaveCount(2);
     const dimensions = await lens.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Overall Max of Count');
     await expect(dimensions[1]).toHaveText('@timestamp');
@@ -123,7 +124,7 @@ spaceTest.describe('Lens open in Lens — agg-based Metric', { tag: tags.deploym
     await lens.waitForVisualization('mtrVis');
     expect(await lens.getLayerCount()).toBe(1);
 
-    await expect(lens.getDimensionTriggerLocator()).toHaveCount(2);
+    await expect(lens.dimensionTriggerLocator).toHaveCount(2);
     const dimensions = await lens.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Average machine.ram');
     await expect(dimensions[1]).toHaveText('machine.os.raw: Descending');

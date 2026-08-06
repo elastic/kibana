@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData, createOpenInLensSuiteSetup } from '../../fixtures';
+import { testData, createOpenInLensSuiteSetup, spaceTest } from '../../fixtures';
 
 spaceTest.describe('TSVB Metric - Open in Lens', { tag: tags.deploymentAgnostic }, () => {
   const openInLensSuite = createOpenInLensSuiteSetup({
