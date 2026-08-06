@@ -52,6 +52,8 @@ export function getStreamsUsers(config: ScoutTestConfig): Record<string, KibanaR
         ],
         indices: [
           { names: ['logs*'], privileges: ['all'] },
+          // Query-stream ES|QL views are named `$.logs…`; `logs*` does not match the `$.` prefix.
+          { names: ['$.logs*'], privileges: ['all'] },
           { names: ['.ds-logs*'], privileges: ['all'] },
           { names: ['.streams*'], privileges: ['all'] },
           { names: ['.kibana_streams*'], privileges: ['all'] },
@@ -72,6 +74,7 @@ export function getStreamsUsers(config: ScoutTestConfig): Record<string, KibanaR
         cluster: ['monitor'],
         indices: [
           { names: ['logs*'], privileges: ['read', 'view_index_metadata'] },
+          { names: ['$.logs*'], privileges: ['read', 'view_index_metadata'] },
           { names: ['.ds-logs*'], privileges: ['read', 'view_index_metadata'] },
           { names: ['.kibana_streams*'], privileges: ['read', 'view_index_metadata'] },
           { names: ['.significant_events*'], privileges: ['read', 'view_index_metadata'] },

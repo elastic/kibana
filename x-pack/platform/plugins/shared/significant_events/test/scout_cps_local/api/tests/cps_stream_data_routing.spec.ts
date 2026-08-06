@@ -12,9 +12,11 @@ import type { EsClient } from '@kbn/scout';
 import { LOG_SAMPLES_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import { significantEventsCpsApiTest as apiTest, COMMON_API_HEADERS } from '../fixtures';
 
-// Must not match the `logs` data-stream-only index template; we create a plain index with
-// explicit mappings so both projects share identical field types for cross-project ES|QL.
-const CPS_TEST_INDEX = 'cps-se-ki-test';
+// `logs-*` so streamsAdmin's existing `logs*` index privilege covers the data read. The
+// matching `logs` template is data-stream-only, so we create an explicit data stream (with our
+// own higher-priority template) rather than a plain index.
+const CPS_TEST_INDEX = 'logs-cps-se-ki-test';
+const CPS_TEST_TEMPLATE = 'cps-se-ki-test-template';
 const VIEW_PREFIX = '$.';
 const ROOT_STREAM = 'logs.otel';
 const PARENT_STREAM = `${ROOT_STREAM}.cpsse`;
@@ -26,10 +28,10 @@ const WINDOW_START = NOW - 10 * 60_000;
 const WINDOW_END = NOW + 60 * 60_000;
 
 /**
- * Both copies of the test index are created up front with identical mappings. Cross-project
- * ES|QL resolves a field once across all projects, so letting one copy be dynamically mapped
- * would make `cps_se_marker` a `text` field on one side and a `keyword` on the other, and the
- * `KEEP` clause would then fail on a conflicting column type.
+ * Both copies of the test data stream are created up front with identical mappings.
+ * Cross-project ES|QL resolves a field once across all projects, so letting one copy be
+ * dynamically mapped would make `cps_se_marker` a `text` field on one side and a `keyword` on
+ * the other, and the `KEEP` clause would then fail on a conflicting column type.
  */
 const CPS_INDEX_MAPPINGS: estypes.MappingTypeMapping = {
   properties: {
@@ -48,6 +50,23 @@ interface ComputedFeature {
 interface IdentifyComputedResponse {
   computedFeatures: ComputedFeature[];
   computedFeaturesCount: number;
+}
+
+async function ensureTestDataStream(esClient: EsClient) {
+  await esClient.indices.putIndexTemplate({
+    name: CPS_TEST_TEMPLATE,
+    index_patterns: [CPS_TEST_INDEX],
+    data_stream: {},
+    // Higher than the built-in `logs` template so our explicit field types win.
+    priority: 1000,
+    template: { mappings: CPS_INDEX_MAPPINGS },
+  });
+  await esClient.indices.createDataStream({ name: CPS_TEST_INDEX });
+}
+
+async function deleteTestDataStream(esClient: EsClient) {
+  await esClient.indices.deleteDataStream({ name: CPS_TEST_INDEX }, { ignore: [404] });
+  await esClient.indices.deleteIndexTemplate({ name: CPS_TEST_TEMPLATE }, { ignore: [404] });
 }
 
 async function ingestMarkerOnLinked(
@@ -85,16 +104,13 @@ apiTest.describe(
         eq: 'cps-se-test',
       });
 
-      // The index has to exist on both projects before the query stream is created, because
+      // The data stream has to exist on both projects before the query stream is created, because
       // Kibana validates the desired stream state by running the ES|QL query against the origin
       // project and rejects an unknown index. The origin copy deliberately stays empty: every
       // matching document lives on the linked project, so the marker can only reach the identify
       // response if the read fans out across projects.
-      await esClient.indices.create({ index: CPS_TEST_INDEX, mappings: CPS_INDEX_MAPPINGS });
-      await linkedProject.esClient.indices.create({
-        index: CPS_TEST_INDEX,
-        mappings: CPS_INDEX_MAPPINGS,
-      });
+      await ensureTestDataStream(esClient);
+      await ensureTestDataStream(linkedProject.esClient);
 
       await streamsTest.createEsqlView(PARENT_VIEW, `FROM ${CPS_TEST_INDEX}`);
 
@@ -108,8 +124,8 @@ apiTest.describe(
       await streamsTest.deleteEsqlView(PARENT_VIEW);
       await streamsTest.cleanupTestStreams(PARENT_STREAM);
       await streamsTest.disableQueryStreams();
-      await esClient.indices.delete({ index: CPS_TEST_INDEX }, { ignore: [404] });
-      await linkedProject.esClient.indices.delete({ index: CPS_TEST_INDEX }, { ignore: [404] });
+      await deleteTestDataStream(esClient);
+      await deleteTestDataStream(linkedProject.esClient);
     });
 
     apiTest(
@@ -121,9 +137,9 @@ apiTest.describe(
           new Date(NOW - 5 * 60_000).toISOString()
         );
 
-        // Negative control: the origin copy of the index is empty, so an origin-only read cannot
-        // see the marker. This is what makes the assertions below evidence of cross-project
-        // routing rather than of the data simply being available locally.
+        // Negative control: the origin copy of the data stream is empty, so an origin-only read
+        // cannot see the marker. This is what makes the assertions below evidence of
+        // cross-project routing rather than of the data simply being available locally.
         const originHits = await esClient.search({
           index: CPS_TEST_INDEX,
           query: { term: { cps_se_marker: markerValue } },
