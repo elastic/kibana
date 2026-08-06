@@ -19,7 +19,8 @@
     "@kbn/shared-ux-router",
     "@kbn/features-plugin",
     "@kbn/kibana-react-plugin",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/app-header"
   ],
   "exclude": [
     "target/**/*",

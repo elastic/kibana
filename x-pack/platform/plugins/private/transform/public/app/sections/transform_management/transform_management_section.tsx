@@ -5,25 +5,10 @@
  * 2.0.
  */
 
-import React, {
-  type FC,
-  type MouseEventHandler,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 
-import {
-  EuiButtonEmpty,
-  EuiModal,
-  EuiPageTemplate,
-  EuiSkeletonText,
-  EuiSpacer,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiButtonEmpty, EuiPageTemplate, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -38,6 +23,7 @@ import {
 
 import { useAppDependencies } from '../../app_dependencies';
 import type { TransformListRow } from '../../common';
+import type { TransformFunction } from '../../../../common/constants';
 import { isTransformStats } from '../../../../common/types/transform_stats';
 import { useGetTransformsStats } from '../../hooks/use_get_transform_stats';
 import { useEnabledFeatures } from '../../serverless_context';
@@ -50,12 +36,11 @@ import {
   useGetTransforms,
   useGetTransformNodes,
 } from '../../hooks';
-import { RedirectToCreateTransform } from '../../common/navigation';
 import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 import { ToastNotificationText } from '../../components/toast_notification_text';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
+import { SECTION_SLUG } from '../../common/constants';
 
-import { SearchSelection } from './components/search_selection';
 import { TransformList } from './components/transform_list';
 import { TransformStatsBar } from './components/transform_list/transforms_stats_bar';
 import {
@@ -66,17 +51,6 @@ import {
 import { DanglingTasksWarning } from './components/dangling_task_warning/dangling_task_warning';
 
 const CPS_UNSUPPORTED_CALLOUT_STORAGE_KEY = 'transform.cpsUnsupportedCalloutDismissed';
-
-const useStyles = () => {
-  const { euiTheme } = useEuiTheme();
-
-  return {
-    dialog: css`
-      width: calc(${euiTheme.size.l} * 30);
-      min-height: calc(${euiTheme.size.l} * 25);
-    `,
-  };
-};
 
 const getDefaultTransformListState = (): ListingPageUrlState => ({
   pageIndex: 0,
@@ -111,8 +85,8 @@ const ErrorMessageCallout: FC<{
 export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
   const { showNodeInfo } = useEnabledFeatures();
-  const { dataViewEditor, cps, storage } = useAppDependencies();
-  const styles = useStyles();
+  const { cps, storage } = useAppDependencies();
+  const history = useHistory();
   const [transformPageState, setTransformPageState] = usePageUrlState<PageUrlState>(
     'transform',
     getDefaultTransformListState()
@@ -212,77 +186,12 @@ export const TransformManagement: FC = () => {
     );
   }, [transforms, canStartStopTransform]);
 
-  const [isSearchSelectionVisible, setIsSearchSelectionVisible] = useState(false);
-  const [savedObjectId, setSavedObjectId] = useState<string | null>(null);
-
-  const createTransformTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const setTriggerFromEvent = useCallback<MouseEventHandler<HTMLButtonElement>>((event) => {
-    createTransformTriggerRef.current = event.currentTarget;
-  }, []);
-  const focusTrigger = useCallback(() => {
-    const trigger = createTransformTriggerRef.current;
-    if (!trigger || !trigger.isConnected) {
-      return;
-    }
-
-    requestAnimationFrame(() => trigger.focus());
-  }, []);
-
-  const closeModal = useCallback(
-    ({ restoreFocus }: { restoreFocus: boolean }) => {
-      setIsSearchSelectionVisible(false);
-      if (restoreFocus) {
-        focusTrigger();
-      }
+  const onCreateTransform = useCallback(
+    (transformFunction: TransformFunction) => {
+      history.push(`/${SECTION_SLUG.CREATE_TRANSFORM}?transformFunction=${transformFunction}`);
     },
-    [focusTrigger]
+    [history]
   );
-
-  const onCloseModal = useCallback(() => closeModal({ restoreFocus: true }), [closeModal]);
-  const onOpenModal: MouseEventHandler<HTMLButtonElement> = useCallback(
-    (event) => {
-      setTriggerFromEvent(event);
-      setIsSearchSelectionVisible(true);
-    },
-    [setTriggerFromEvent]
-  );
-
-  const onSearchSelected = useCallback((id: string, type: string) => {
-    setSavedObjectId(id);
-  }, []);
-
-  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
-
-  const closeDataViewEditorRef = useRef<() => void | undefined>();
-
-  const createNewDataView = useCallback(() => {
-    closeModal({ restoreFocus: false });
-    closeDataViewEditorRef.current = dataViewEditor?.openEditor({
-      onSave: async (dataView) => {
-        if (dataView.id) {
-          onSearchSelected(dataView.id, 'index-pattern');
-        } else {
-          focusTrigger();
-        }
-      },
-      onCancel: focusTrigger,
-
-      allowAdHocDataView: true,
-    });
-  }, [closeModal, dataViewEditor, focusTrigger, onSearchSelected]);
-
-  useEffect(function cleanUpDataViewEditorFlyout() {
-    return () => {
-      // Close the editor when unmounting
-      if (closeDataViewEditorRef.current) {
-        closeDataViewEditorRef.current();
-      }
-    };
-  }, []);
-
-  if (savedObjectId !== null) {
-    return <RedirectToCreateTransform savedObjectId={savedObjectId} />;
-  }
 
   const docsLink = (
     <EuiButtonEmpty
@@ -401,7 +310,7 @@ export const TransformManagement: FC = () => {
               {(transformNodes > 0 || transforms.length > 0) && (
                 <TransformList
                   isLoading={transformsWithoutStatsLoading}
-                  onCreateTransform={onOpenModal}
+                  onCreateTransform={onCreateTransform}
                   transformNodes={transformNodes}
                   transforms={transforms}
                   transformsLoading={transformsWithoutStatsLoading}
@@ -415,26 +324,6 @@ export const TransformManagement: FC = () => {
           </>
         )}
       </EuiPageTemplate.Section>
-
-      {isSearchSelectionVisible && (
-        <EuiModal
-          onClose={onCloseModal}
-          css={styles.dialog}
-          aria-label={i18n.translate(
-            'xpack.transform.transformList.createTransformSearchModalTitle',
-            {
-              defaultMessage: 'Create Transform - Select Data Source',
-            }
-          )}
-          data-test-subj="transformSelectSourceModal"
-        >
-          <SearchSelection
-            onSearchSelected={onSearchSelected}
-            canEditDataView={canEditDataView}
-            createNewDataView={createNewDataView}
-          />
-        </EuiModal>
-      )}
     </>
   );
 };

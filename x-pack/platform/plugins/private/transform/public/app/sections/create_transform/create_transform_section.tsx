@@ -8,11 +8,13 @@
 import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
+import { parse } from 'query-string';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiButtonEmpty, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
+import { TRANSFORM_FUNCTION, type TransformFunction } from '../../../../common/constants';
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useSearchItems } from '../../hooks/use_search_items';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
@@ -20,8 +22,16 @@ import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 
 import { Wizard } from './components/wizard';
 
-type Props = RouteComponentProps<{ savedObjectId: string }>;
-export const CreateTransformSection: FC<Props> = ({ match }) => {
+type Props = RouteComponentProps<{ savedObjectId?: string }>;
+
+const getInitialTransformFunction = (search: string): TransformFunction => {
+  const { transformFunction } = parse(search, { sort: false });
+  return transformFunction === TRANSFORM_FUNCTION.LATEST
+    ? TRANSFORM_FUNCTION.LATEST
+    : TRANSFORM_FUNCTION.PIVOT;
+};
+
+export const CreateTransformSection: FC<Props> = ({ location, match }) => {
   // Set breadcrumb and page title
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(BREADCRUMB_SECTION.CREATE_TRANSFORM);
@@ -30,7 +40,12 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
 
   const { esTransform } = useDocumentationLinks();
 
-  const { error: searchItemsError, searchItems } = useSearchItems(match.params.savedObjectId);
+  const initialTransformFunction = getInitialTransformFunction(location.search);
+  const {
+    error: searchItemsError,
+    searchItems,
+    setSavedObjectId,
+  } = useSearchItems(match.params.savedObjectId);
 
   const docsLink = (
     <EuiButtonEmpty
@@ -76,7 +91,11 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
             <EuiSpacer size="l" />
           </>
         )}
-        {searchItems !== undefined && <Wizard searchItems={searchItems} />}
+        <Wizard
+          initialTransformFunction={initialTransformFunction}
+          searchItems={searchItems}
+          setSavedObjectId={setSavedObjectId}
+        />
       </EuiPageTemplate.Section>
     </CapabilitiesWrapper>
   );

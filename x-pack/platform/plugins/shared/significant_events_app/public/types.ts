@@ -12,11 +12,13 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SignificantEventsPublicPluginStart } from '@kbn/significant-events-plugin/public';
-import type { SignificantEventsAvailabilityResponse } from '@kbn/significant-events-plugin/common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type React from 'react';
 import type { Observable } from 'rxjs';
-import type { SignificantEventsAppLocator } from '../common/locators';
+
+export type KnowledgeIndicatorsPanelComponent = React.ComponentType<{ streamName: string }>;
 
 export interface SignificantEventsAppSetupDependencies {
   share: SharePluginSetup;
@@ -27,7 +29,8 @@ export interface SignificantEventsAppStartDependencies {
   data: DataPublicPluginStart;
   licensing: LicensingPluginStart;
   share: SharePluginStart;
-  significant_events: SignificantEventsPublicPluginStart;
+  significantEvents: SignificantEventsPublicPluginStart;
+  streams: StreamsPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   cloud?: CloudStart;
@@ -46,13 +49,9 @@ export interface SignificantEventsAppPublicStart {
    */
   availability$: Observable<boolean>;
   /**
-   * Server-side availability probe (`GET /internal/significant_events/availability`).
-   * Rejects on transport errors; callers decide how to degrade.
+   * Factory for the embeddable Knowledge Indicators panel used in streams_app's
+   * stream overview. Call once per render tree; the returned component carries
+   * its own QueryClient and KibanaContext so no extra wrapping is needed.
    */
-  fetchAvailability(signal?: AbortSignal): Promise<SignificantEventsAvailabilityResponse>;
-  /**
-   * Typed locator for linking into the app (registered under
-   * SIGNIFICANT_EVENTS_APP_LOCATOR_ID).
-   */
-  locator: SignificantEventsAppLocator;
+  getKnowledgeIndicatorsPanel: () => KnowledgeIndicatorsPanelComponent;
 }

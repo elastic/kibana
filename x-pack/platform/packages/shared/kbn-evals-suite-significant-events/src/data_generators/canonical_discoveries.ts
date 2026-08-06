@@ -39,7 +39,7 @@ export const canonicalDiscoveryFromGroundTruth = ({
     '@timestamp': discovery['@timestamp'] ?? CANONICAL_TIMESTAMP,
     event_uuid: discovery.event_uuid ?? `${scenarioId}-canonical`,
     event_id: discovery.event_id ?? `${normalizeEventIdSegment(scenarioId)}__canonical`,
-    status: discovery.status ?? 'pending',
+    status: discovery.status ?? 'open',
     stream_names: streamNames,
     symptom_hypothesis: discovery.symptom_hypothesis ?? '',
     title: discovery.title ?? '',

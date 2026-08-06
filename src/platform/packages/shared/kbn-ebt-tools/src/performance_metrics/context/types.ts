@@ -27,6 +27,7 @@ type StreamsDetailAdvancedPageId = 'streams_detail_advanced';
 type StreamsDetailAttachmentsPageId = 'streams_detail_attachments';
 type StreamsDetailReferencesPageId = 'streams_detail_references';
 type SyntheticsPageId = 'synthetics';
+type ObsOverviewPageId = 'observability_overview';
 
 export type Key =
   | `${AlertDetailsPageId}`
@@ -48,6 +49,7 @@ export type Key =
   | `${StreamsDetailAdvancedPageId}`
   | `${StreamsDetailAttachmentsPageId}`
   | `${StreamsDetailReferencesPageId}`
-  | `${SyntheticsPageId}`;
+  | `${SyntheticsPageId}`
+  | `${ObsOverviewPageId}`;
 
 export type DescriptionWithPrefix = `[ttfmp_${Key}] ${string}`;
