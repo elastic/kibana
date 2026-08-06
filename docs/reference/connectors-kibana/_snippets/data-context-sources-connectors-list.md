@@ -39,7 +39,7 @@
 - [OneDrive](/reference/connectors-kibana/one-drive-action-type.md): Search files and folders, browse drives, read file content, and list files shared with you in Microsoft OneDrive.
 - [OpenSearch](/reference/connectors-kibana/opensearch-aws-opensearch-service-action-type.md): Acknowledge and search alerts, run and manage monitors, handle Security Analytics detector alerts, and search and index documents.
 - [Outlook](/reference/connectors-kibana/outlook-action-type.md): Search emails, list folders, and read messages and attachments in Microsoft Outlook.
-- [PagerDuty (MCP)](/reference/connectors-kibana/pagerduty-mcp-action-type.md): Access incidents, escalation policies, schedules, on-calls, users, and teams in PagerDuty.
+- [PagerDuty](/reference/connectors-kibana/pagerduty-mcp-action-type.md): Access and manage incidents, escalation policies, schedules, on-calls, users, and teams in PagerDuty — including triggering, acknowledging, resolving, and updating incidents, adding responders, and running response plays.
 - [PostHog](/reference/connectors-kibana/posthog-action-type.md): Triage error-tracking issues, run HogQL queries, and control feature flags.
 - [Prometheus](/reference/connectors-kibana/prometheus-action-type.md): Run PromQL queries, and read, silence, and manage alerts and alert groups in Alertmanager.
 - [Rootly](/reference/connectors-kibana/rootly-action-type.md): Declare and drive incidents through their lifecycle.
