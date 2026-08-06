@@ -60,6 +60,7 @@ export const createConversationClientMock = (): ConversationClientMock => {
     getByOrigin: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
+    updateRoundFeedback: jest.fn(),
     list: jest.fn(),
     delete: jest.fn(),
   };

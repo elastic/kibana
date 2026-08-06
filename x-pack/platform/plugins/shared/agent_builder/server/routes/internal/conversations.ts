@@ -97,4 +97,36 @@ export function registerInternalConversationRoutes({
       });
     })
   );
+
+  // submit round feedback
+  router.post(
+    {
+      path: `${internalApiPath}/conversations/{conversation_id}/rounds/{round_id}/_feedback`,
+      validate: {
+        params: schema.object({
+          conversation_id: schema.string({ maxLength: 256 }),
+          round_id: schema.string({ maxLength: 256 }),
+        }),
+        body: schema.object({
+          vote: schema.oneOf([schema.literal('up'), schema.literal('down')]),
+          chips: schema.maybe(schema.arrayOf(schema.string({ maxLength: 256 }))),
+          comment: schema.maybe(schema.string({ maxLength: 5000 })),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId, round_id: roundId } = request.params;
+      const { vote, chips, comment } = request.body;
+
+      const client = await conversationsService.getScopedClient({ request });
+      await client.updateRoundFeedback(conversationId, roundId, { vote, chips, comment });
+
+      return response.noContent();
+    })
+  );
 }

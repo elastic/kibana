@@ -7,7 +7,11 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ConversationOrigin, ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type {
+  ConversationOrigin,
+  ConversationWithoutRounds,
+  ConversationRoundFeedback,
+} from '@kbn/agent-builder-common';
 import {
   type UserIdAndName,
   type Conversation,
@@ -49,6 +53,11 @@ export interface ConversationClient {
     conversation: ConversationUpdateRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
+  updateRoundFeedback(
+    conversationId: string,
+    roundId: string,
+    feedback: { vote: 'up' | 'down'; chips?: string[]; comment?: string }
+  ): Promise<void>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
   delete(conversationId: string): Promise<boolean>;
 }
@@ -230,6 +239,61 @@ class ConversationClientImpl implements ConversationClient {
     return updatedConversation;
   }
 
+  async updateRoundFeedback(
+    conversationId: string,
+    roundId: string,
+    feedback: { vote: 'up' | 'down'; chips?: string[]; comment?: string }
+  ): Promise<void> {
+    return this._updateRoundFeedbackWithRetry(conversationId, roundId, feedback, false);
+  }
+
+  private async _updateRoundFeedbackWithRetry(
+    conversationId: string,
+    roundId: string,
+    userFeedback: { vote: 'up' | 'down'; chips?: string[]; comment?: string },
+    isRetry: boolean
+  ): Promise<void> {
+    const document = await this.getDocumentWithAccess({ conversationId, access: 'owner' });
+    const rounds = document._source!.conversation_rounds ?? [];
+    const roundIndex = rounds.findIndex((r) => r.id === roundId);
+
+    if (roundIndex === -1) {
+      throw createConversationNotFoundError({ conversationId });
+    }
+
+    const round = rounds[roundIndex];
+    const enrichedFeedback: ConversationRoundFeedback = {
+      vote: userFeedback.vote,
+      chips: userFeedback.chips ?? [],
+      comment: userFeedback.comment ?? '',
+      submitted_at: new Date().toISOString(),
+      connector_id: round.model_usage?.connector_id,
+      model: round.model_usage?.model,
+      trace_id: Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id,
+    };
+
+    const updatedRounds = [
+      ...rounds.slice(0, roundIndex),
+      { ...round, feedback: enrichedFeedback },
+      ...rounds.slice(roundIndex + 1),
+    ];
+
+    try {
+      await this.storage.getClient().index({
+        id: conversationId,
+        document: { ...document._source!, conversation_rounds: updatedRounds },
+        if_seq_no: document._seq_no,
+        if_primary_term: document._primary_term,
+      });
+    } catch (err: unknown) {
+      const httpErr = err as { statusCode?: number };
+      if (!isRetry && httpErr?.statusCode === 409) {
+        return this._updateRoundFeedbackWithRetry(conversationId, roundId, userFeedback, true);
+      }
+      throw err;
+    }
+  }
+
   async delete(conversationId: string): Promise<boolean> {
     await this.getDocumentWithAccess({ conversationId, access: 'owner' });
 
@@ -249,6 +313,7 @@ class ConversationClientImpl implements ConversationClient {
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
+      seq_no_primary_term: true,
       query: {
         bool: {
           filter: [createSpaceDslFilter(this.space), { term: { _id: conversationId } }],
