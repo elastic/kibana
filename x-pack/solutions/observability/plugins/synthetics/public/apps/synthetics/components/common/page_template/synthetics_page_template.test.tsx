@@ -12,6 +12,7 @@ import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import type { EuiPageHeaderProps } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { render as rtlRender } from '@testing-library/react';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { render } from '../../../utils/testing';
 import { WrappedPageTemplate } from './synthetics_page_template';
 import type { ClientPluginsStart } from '../../../../../plugin';
@@ -29,10 +30,15 @@ describe('WrappedPageTemplate', () => {
     const defaultChrome = coreMock.createStart().chrome;
     const receivedPageHeaders: Array<EuiPageHeaderProps | undefined> = [];
 
-    const PageTemplate = ({ pageHeader }: { pageHeader?: EuiPageHeaderProps }) => {
-      receivedPageHeaders.push(pageHeader);
-      return null;
+    const PageTemplate = (props: LazyObservabilityPageTemplateProps) => {
+      receivedPageHeaders.push(props.pageHeader);
+      return <div />;
     };
+    const observabilityShared = {
+      navigation: { PageTemplate, registerSections: jest.fn() },
+      locators: {} as unknown as ClientPluginsStart['observabilityShared']['locators'],
+      updateGlobalNavigation: jest.fn(),
+    } as unknown as ClientPluginsStart['observabilityShared'];
 
     render<Pick<ClientPluginsStart, 'observabilityShared'>>(
       <WrappedPageTemplate
@@ -46,7 +52,7 @@ describe('WrappedPageTemplate', () => {
             getChromeStyle$: () => new BehaviorSubject<ChromeStyle>(chromeStyle).asObservable(),
             next: { ...defaultChrome.next, isEnabled: isNextChromeEnabled },
           },
-          observabilityShared: { navigation: { PageTemplate } },
+          observabilityShared,
         },
       }
     );
@@ -81,13 +87,22 @@ describe('WrappedPageTemplate', () => {
 
   it('keeps the in-page breadcrumbs when chrome is missing from services', () => {
     const receivedPageHeaders: Array<EuiPageHeaderProps | undefined> = [];
-    const PageTemplate = ({ pageHeader }: { pageHeader?: EuiPageHeaderProps }) => {
-      receivedPageHeaders.push(pageHeader);
-      return null;
+    const PageTemplate = (props: LazyObservabilityPageTemplateProps) => {
+      receivedPageHeaders.push(props.pageHeader);
+      return <div />;
     };
+    const observabilityShared = {
+      navigation: { PageTemplate, registerSections: jest.fn() },
+      locators: {} as unknown as ClientPluginsStart['observabilityShared']['locators'],
+      updateGlobalNavigation: jest.fn(),
+    } as unknown as ClientPluginsStart['observabilityShared'];
 
     rtlRender(
-      <KibanaContextProvider services={{ observabilityShared: { navigation: { PageTemplate } } }}>
+      <KibanaContextProvider
+        services={{
+          observabilityShared,
+        }}
+      >
         <WrappedPageTemplate
           pageHeader={{ pageTitle: 'Monitor name', breadcrumbs: inPageBreadcrumbs }}
         />
