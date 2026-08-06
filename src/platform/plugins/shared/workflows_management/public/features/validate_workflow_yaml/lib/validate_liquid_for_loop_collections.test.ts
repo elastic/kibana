@@ -13,11 +13,13 @@ import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_p
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
 import {
+  FOR_LOOP_EMPTY_ARRAY_IDIOM_YAML,
   FOR_LOOP_ESQL_CELL_YAML,
   FOR_LOOP_FOLDED_ONLY_YAML,
   FOR_LOOP_NESTED_YAML,
   FOR_LOOP_RUNTIME_JSON_YAML,
   FOR_LOOP_VALIDATION_YAML,
+  forLoopEmptyArrayIdiomWorkflowDefinition,
   forLoopEsqlCellWorkflowDefinition,
   forLoopFoldedOnlyWorkflowDefinition,
   forLoopNestedWorkflowDefinition,
@@ -192,6 +194,25 @@ steps:
         (r) => r.severity === 'warning' && r.message === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE
       )
     ).toBe(true);
+  });
+
+  it('does not error when the collection resolves to a string literal via assign filters', () => {
+    const idiomDoc = parseDocument(FOR_LOOP_EMPTY_ARRAY_IDIOM_YAML);
+    const idiomModel = createFakeMonacoModel(FOR_LOOP_EMPTY_ARRAY_IDIOM_YAML);
+    const idiomGraph = WorkflowGraph.fromWorkflowDefinition(
+      forLoopEmptyArrayIdiomWorkflowDefinition
+    );
+
+    const idiomResults = validateLiquidForLoopCollections(
+      FOR_LOOP_EMPTY_ARRAY_IDIOM_YAML,
+      idiomDoc,
+      idiomModel,
+      idiomGraph,
+      forLoopEmptyArrayIdiomWorkflowDefinition
+    );
+
+    expect(idiomResults.filter((r) => r.severity === 'error')).toHaveLength(0);
+    expect(idiomResults.some((r) => r.message?.includes('Invalid collection path'))).toBe(false);
   });
 
   it.each([
