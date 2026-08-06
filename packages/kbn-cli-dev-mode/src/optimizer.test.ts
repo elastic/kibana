@@ -438,7 +438,6 @@ describe('rspack path', () => {
       ...defaultOptions,
     });
 
-    const error = jest.fn();
     subscriptions.push(optimizer.run$.subscribe({ error }));
 
     await flushPromises();

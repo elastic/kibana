@@ -236,7 +236,7 @@ export function runRspackCli(options: CliOptions = {}): void {
                                       Note: --watch is ignored in profile mode
 
           Environment Variables:
-            KBN_USE_RSPACK=true       Use RSPack optimizer instead of webpack
+            KBN_USE_RSPACK=false      Use legacy webpack optimizer instead of default RSPack
             KBN_HMR=false             Disable HMR (RSPack only, alternative to --no-hmr)
             KBN_HMR_PORT=5678         Override the HMR SSE server port (RSPack only, default: 5678)
         `,
