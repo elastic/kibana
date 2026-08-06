@@ -60,9 +60,13 @@ export const BriefPage: React.FC = () => {
 
   const sortedEvents = useMemo(
     () =>
-      investigations
-        .filter(isQueueRow)
-        .sort((a, b) => (b.priorityScore ?? 0) - (a.priorityScore ?? 0)),
+      investigations.filter(isQueueRow).sort((a, b) => {
+        const priorityDiff = (b.priorityScore ?? 0) - (a.priorityScore ?? 0);
+        if (priorityDiff !== 0) {
+          return priorityDiff;
+        }
+        return b.updatedAt.localeCompare(a.updatedAt);
+      }),
     [investigations]
   );
 
