@@ -7,10 +7,9 @@
 
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
-import { test as baseTest } from '@kbn/scout';
-import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import type { LensPageObjects } from './page_objects';
-import { extendPageObjects } from './page_objects';
+import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import type { LensPageObjects, LensTestFixtures } from '../../../common/ui/fixtures';
+import { test as lensTest } from '../../../common/ui/fixtures';
 
 export const TSDB_DATA_VIEW_ID = '0ae0bc7a-e4ca-405c-ab67-f2b5913f2a51';
 export const TSDB_DOWNSAMPLED_DATA_VIEW_ID = 'lens-tsdb-downsampled-data-view';
@@ -102,8 +101,7 @@ export interface TsdbScenario {
   ) => Promise<{ expectedDocumentCountBeforeRollover: number }>;
 }
 
-interface LensUiTestFixtures extends ScoutTestFixtures {
-  pageObjects: LensPageObjects;
+interface LensUiTestFixtures extends LensTestFixtures {
   tsdbScenario: TsdbScenario;
 }
 
@@ -196,13 +194,7 @@ const getTsdbMapping = ({
  * kept here (rather than duplicated in `./index.ts`) so `export *` doesn't have to pick between
  * two same-named `test` exports.
  */
-export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
-  pageObjects: async (
-    { pageObjects, page }: { pageObjects: LensPageObjects; page: ScoutPage },
-    use: (pageObjects: LensPageObjects) => Promise<void>
-  ) => {
-    await use(extendPageObjects(pageObjects, page));
-  },
+export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
   tsdbHelper: [
     async ({ esClient, log }, use) => {
       const deleteDataStream = async (stream: string): Promise<void> => {

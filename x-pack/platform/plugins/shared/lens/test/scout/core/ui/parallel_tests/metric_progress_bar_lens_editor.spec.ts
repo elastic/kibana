@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import type { ScoutPage } from '@kbn/scout';
-import type { LensPageObjects } from '../fixtures/page_objects';
+import type { LensPageObjects } from '../fixtures';
 import { spaceTest, testData } from '../fixtures';
 
 const STATIC_MAX_VALUE = '100000';
