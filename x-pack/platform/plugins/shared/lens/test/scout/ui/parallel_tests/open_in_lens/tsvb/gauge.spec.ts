@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData, createOpenInLensSuiteSetup } from '../../../fixtures';
+import { createOpenInLensSuiteSetup, spaceTest, testData } from '../../../fixtures';
 
 spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }, () => {
   const openInLensSuite = createOpenInLensSuiteSetup({

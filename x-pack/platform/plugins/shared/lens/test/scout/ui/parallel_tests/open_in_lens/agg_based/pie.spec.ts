@@ -7,14 +7,14 @@
 
 import type { DebugState } from '@elastic/charts';
 import { MISSING_TOKEN } from '@kbn/field-formats-common';
-import { spaceTest, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
-  testData,
   canConvertToLensByTitle,
   convertToLensByTitle,
   createOpenInLensSuiteSetup,
-  getChartDebugData,
+  spaceTest,
+  testData,
 } from '../../../fixtures';
 
 function getPieChartLabels(debugState: DebugState): string[] {
@@ -69,7 +69,7 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.deployment
     await lens.waitForVisualization('partitionVisChart');
     expect(await lens.getLayerCount()).toBe(1);
 
-    await expect(lens.getDimensionTriggerLocator()).toHaveCount(2);
+    await expect(lens.dimensionTriggerLocator).toHaveCount(2);
 
     const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel', 0);
     const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel', 0);
@@ -77,14 +77,14 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.deployment
     expect(sizeByText).toBe('Sum of machine.ram');
   });
 
-  spaceTest('should convert terms to slice by', async ({ page, pageObjects }) => {
+  spaceTest('should convert terms to slice by', async ({ pageObjects }) => {
     const { dashboard, lens } = pageObjects;
     const expectedLabels = ['ios', 'osx', 'win 7', 'win 8', 'win xp'];
 
     await convertToLensByTitle({ dashboard }, 'Pie - Basic count');
     await lens.waitForVisualization('partitionVisChart');
 
-    await expect(lens.getDimensionTriggerLocator()).toHaveCount(2);
+    await expect(lens.dimensionTriggerLocator).toHaveCount(2);
 
     const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel', 0);
     const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel', 0);
@@ -93,7 +93,8 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.deployment
 
     await expect
       .poll(
-        async () => getPieChartLabels(await getChartDebugData(page, 'partitionVisChart')).sort(),
+        async () =>
+          getPieChartLabels(await lens.getCurrentChartDebugState('partitionVisChart')).sort(),
         { timeout: 20_000 }
       )
       .toStrictEqual([...expectedLabels].sort());

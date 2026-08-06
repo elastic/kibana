@@ -100,6 +100,7 @@ export const PaginationControls = ({
     >
       <EuiFlexItem grow={false}>
         <EuiPopover
+          aria-label={rowsPerPageLabel}
           button={button}
           isOpen={isPopoverOpen}
           closePopover={closePopover}
