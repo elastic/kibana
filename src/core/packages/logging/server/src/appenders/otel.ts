@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Attributes } from '@opentelemetry/api';
+
 import type { LayoutConfigType } from '../layout';
 
 /**
@@ -116,8 +118,8 @@ export interface OtelAppenderConfig {
    * cloud/k8s/process/host fields excluded.
    *
    * An explicit allowlist fully governs the resource: a listed key is kept even if
-   * {@link OtelAppenderConfig.fieldDrops} also names it (`fieldDrops` still removes that key from
-   * the per-record attributes). `fieldDrops` only shapes the resource in the default `['*']` case.
+   * {@link OtelAppenderProgrammaticConfig.dropResourceAttributes} also names it.
+   * `dropResourceAttributes` only shapes the resource in the default `['*']` case.
    */
   includeResources?: string[];
   /**
@@ -133,53 +135,42 @@ export interface OtelAppenderConfig {
    * Optional TLS settings for HTTPS/gRPC to the OTLP endpoint, including mutual TLS (client certificates).
    */
   ssl?: OtelAppenderTlsConfig;
+}
+
+/**
+ * Transforms the flattened per-record OTel attributes of a log record before it is emitted.
+ * Receives the fully flattened attributes (including promoted resource attributes and flattened
+ * `log.meta` for pattern layout) and returns the attributes to emit.
+ *
+ * Only usable on the programmatic configuration path — see
+ * {@link OtelAppenderProgrammaticConfig.transformAttributes}.
+ *
+ * @public
+ */
+export type OtelAttributesTransform = (attributes: Attributes) => Attributes;
+
+/**
+ * Programmatic-only extension of {@link OtelAppenderConfig}.
+ *
+ * These options cannot be expressed in YAML, so they are accepted exclusively through the
+ * programmatic logging configuration path ({@link LoggingServiceSetup.configure}). They are
+ * rejected by the appender's YAML config schema.
+ *
+ * @public
+ */
+export interface OtelAppenderProgrammaticConfig extends OtelAppenderConfig {
   /**
-   * Optional map of source attribute paths to target attribute path(s) applied after meta fields are
-   * flattened into OTel attributes. Use this to rename or fan-out fields without changing the
-   * upstream `AuditEvent` / `LogRecord` shape.
-   *
-   * - Single target: `{ 'kibana.space_id': 'kibana.space.id' }` — rename in place.
-   * - Multiple targets: `{ 'client.ip': ['source.address', 'source.ip'] }` — copy value to all
-   *   listed keys and remove the original.
-   *
-   * Keys absent from the log record are silently skipped. With JSON layout, meta-sourced keys
-   * (e.g. `kibana.*`, `client.ip`) are part of the structured body and not repeated as individual
-   * attributes, so renames targeting those fields have no effect under that layout.
+   * Callback applied to the flattened per-record OTel attributes after layout/meta flattening
+   * and resource-attribute promotion, just before the record is emitted. Use for output-shaping
+   * that is too specific to belong in a serializable config (e.g. audit log field mappings).
    */
-  fieldRenames?: Record<string, string | string[]>;
+  transformAttributes?: OtelAttributesTransform;
   /**
-   * Optional list of attribute keys to remove from the OTLP output. Always applied to the per-record
-   * log attributes. Also applied to the resource attributes **only** when
-   * {@link OtelAppenderConfig.includeResources} is `['*']` (the default) — an explicit
-   * `includeResources` allowlist takes precedence for the resource. Keys absent from the output are
-   * silently skipped. Injected programmatically (e.g. by the audit service to satisfy Serverless
-   * field exclusions).
+   * Resource-attribute keys removed from the OTLP resource at appender construction. Applied
+   * only when {@link OtelAppenderConfig.includeResources} is `['*']` (the default) — an explicit
+   * `includeResources` allowlist fully governs the resource and takes precedence. Keys absent
+   * from the resource are silently skipped. Async-detected values (e.g. `host.id`) are preserved
+   * for the SDK to resolve at export time unless explicitly dropped here.
    */
-  fieldDrops?: string[];
-  /**
-   * Optional default attribute values written only when the key is not already present in the log
-   * record attributes. Applied after `fieldRenames`, `fieldAdditions`, and `fieldDrops`. Use to fill
-   * in fields that are absent from some event types (e.g. `event.type` on authentication events).
-   * Values may be a string or an array of strings.
-   */
-  fieldDefaults?: Record<string, string | string[]>;
-  /**
-   * Optional list of attribute keys whose string values should be uppercased at emit time.
-   * Applied after all other field transforms. Use for fields where OTel semantic conventions
-   * require uppercase but the upstream event carries lowercase (e.g. `http.request.method`).
-   * Non-string values and absent keys are silently skipped.
-   */
-  fieldUppercase?: string[];
-  /**
-   * Optional map of target attribute key → template string used to add derived attributes at emit
-   * time. Templates reference other flattened attributes with `{field.path}` placeholders, resolved
-   * from the current record attributes. Applied after `fieldRenames` and before `fieldDrops`, so a
-   * template may reference fields that are subsequently dropped (e.g. build `url.original` from
-   * `url.scheme`/`url.domain`/`url.path`, then drop those components).
-   *
-   * Templates may only reference scalar fields. The addition is skipped when any referenced field is
-   * missing/nullish/empty or array/object-valued, so events that do not carry the source fields (e.g.
-   * non-http events) don't receive a degenerate value, and array attributes aren't silently joined.
-   */
-  fieldAdditions?: Record<string, string>;
+  dropResourceAttributes?: string[];
 }

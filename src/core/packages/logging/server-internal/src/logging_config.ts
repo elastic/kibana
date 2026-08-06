@@ -15,9 +15,13 @@ import {
   getLoggerContext,
   getParentLoggerContext,
 } from '@kbn/core-logging-common-internal';
-import type { AppenderConfigType, LoggerConfigType } from '@kbn/core-logging-server';
+import type {
+  AppenderConfigType,
+  LoggerConfigType,
+  ProgrammaticAppenderConfigType,
+} from '@kbn/core-logging-server';
 import type { MetaFilterConfig } from '@kbn/logging';
-import { Appenders } from './appenders/appenders';
+import { Appenders, programmaticAppendersSchema } from './appenders/appenders';
 
 // We need this helper for the types to be correct
 // (otherwise it assumes an array of A|B instead of a tuple [A,B])
@@ -126,7 +130,7 @@ export const config = {
 
 /** @internal */
 export type LoggingConfigType = Pick<TypeOf<typeof config.schema>, 'loggers' | 'root'> & {
-  appenders: Map<string, AppenderConfigType>;
+  appenders: Map<string, ProgrammaticAppenderConfigType>;
 };
 
 type LoggingConfigLoggerType = LoggingConfigType['loggers'][number];
@@ -158,6 +162,31 @@ export const loggerContextConfigSchema = schema.object({
 export type LoggerContextConfigType = TypeOf<typeof loggerContextConfigSchema>;
 
 /**
+ * Runtime variant of {@link loggerContextConfigSchema} used to validate the programmatic
+ * {@link LoggingServiceSetup.configure} inputs. Identical to the strict schema except that OTel
+ * appenders additionally accept the programmatic-only options of
+ * {@link OtelAppenderProgrammaticConfig} (e.g. an attribute-transform callback), which cannot be
+ * expressed in YAML.
+ *
+ * @internal
+ */
+export const loggerContextProgrammaticConfigSchema = schema.object({
+  appenders: schema.mapOf(schema.string(), programmaticAppendersSchema, {
+    defaultValue: new Map<string, ProgrammaticAppenderConfigType>(),
+  }),
+
+  loggers: schema.arrayOf(loggerSchema, { defaultValue: [], maxSize: 100 }),
+});
+
+/** @internal */
+export type LoggerContextProgrammaticConfigType = Pick<
+  TypeOf<typeof loggerContextProgrammaticConfigSchema>,
+  'loggers'
+> & {
+  appenders: Map<string, ProgrammaticAppenderConfigType>;
+};
+
+/**
  * Describes the config used to fully setup logging subsystem.
  * @internal
  */
@@ -184,7 +213,7 @@ export class LoggingConfig {
   /**
    * Map of the appender unique arbitrary key and its corresponding config.
    */
-  public readonly appenders: Map<string, AppenderConfigType> = new Map([
+  public readonly appenders: Map<string, ProgrammaticAppenderConfigType> = new Map([
     [
       'default',
       {
@@ -219,7 +248,7 @@ export class LoggingConfig {
    *
    * @param contextConfig
    */
-  public extend(contextConfig: LoggerContextConfigType) {
+  public extend(contextConfig: LoggerContextProgrammaticConfigType) {
     // Use a Map to de-dupe any loggers for the same context. contextConfig overrides existing config.
     const mergedLoggers = new Map<string, LoggerConfigType>([
       ...this.configType.loggers.map((l) => [l.name, l] as [string, LoggerConfigType]),

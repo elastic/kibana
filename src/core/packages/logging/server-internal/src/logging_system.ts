@@ -15,10 +15,10 @@ import { Appenders } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
 import { BaseLogger } from './logger';
 import { LoggerAdapter } from './logger_adapter';
-import type { LoggingConfigType, LoggerContextConfigType } from './logging_config';
+import type { LoggingConfigType, LoggerContextProgrammaticConfigType } from './logging_config';
 import {
   LoggingConfig,
-  loggerContextConfigSchema,
+  loggerContextProgrammaticConfigSchema,
   config as loggingConfig,
 } from './logging_config';
 
@@ -43,7 +43,7 @@ export class LoggingSystem implements ILoggingSystem {
   private readonly appenders: Map<string, DisposableAppender> = new Map();
   private readonly bufferAppender = new BufferAppender();
   private readonly loggers: Map<string, LoggerAdapter> = new Map();
-  private readonly contextConfigs = new Map<string, LoggerContextConfigType>();
+  private readonly contextConfigs = new Map<string, LoggerContextProgrammaticConfigType>();
   private globalContext: Partial<LogMeta> = {};
 
   constructor() {}
@@ -103,7 +103,11 @@ export class LoggingSystem implements ILoggingSystem {
    */
   public async setContextConfig(baseContextParts: string[], rawConfig: LoggerContextConfigInput) {
     const context = LoggingConfig.getLoggerContext(baseContextParts);
-    const contextConfig = loggerContextConfigSchema.validate(rawConfig);
+    // The runtime schema is used here (not the strict loggerContextConfigSchema) so that
+    // programmatic-only appender options — e.g. the OTel appender's transformAttributes
+    // callback — are accepted on this code path while remaining rejected in YAML configs.
+    // Validation fails fast, before any appender is recreated.
+    const contextConfig = loggerContextProgrammaticConfigSchema.validate(rawConfig);
     this.contextConfigs.set(context, {
       ...contextConfig,
       // Automatically prepend the base context to the logger sub-contexts

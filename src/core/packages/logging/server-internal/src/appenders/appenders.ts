@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { assertNever } from '@kbn/std';
 import type { DisposableAppender } from '@kbn/logging';
-import type { AppenderConfigType } from '@kbn/core-logging-server';
+import type { ProgrammaticAppenderConfigType } from '@kbn/core-logging-server';
 
 import { Layouts } from '../layouts/layouts';
 import { ConsoleAppender } from './console/console_appender';
@@ -33,6 +33,22 @@ export const appendersSchema = schema.oneOf([
   RollingFileAppender.configSchema,
 ]);
 
+/**
+ * Runtime variant of {@link appendersSchema} used to validate programmatic logging context configs
+ * ({@link LoggingServiceSetup.configure}). Identical to the strict schema except that OTel appenders
+ * additionally accept the programmatic-only options of {@link OtelAppenderProgrammaticConfig}
+ * (e.g. an attribute-transform callback). Never wired into YAML config validation.
+ *
+ * @internal
+ */
+export const programmaticAppendersSchema = schema.oneOf([
+  ConsoleAppender.configSchema,
+  FileAppender.configSchema,
+  OtelAppender.runtimeConfigSchema,
+  RewriteAppender.configSchema,
+  RollingFileAppender.configSchema,
+]);
+
 /** @internal */
 export class Appenders {
   public static configSchema = appendersSchema;
@@ -42,7 +58,7 @@ export class Appenders {
    * @param config Configuration specific to a particular `Appender` implementation.
    * @returns Fully constructed `Appender` instance.
    */
-  public static create(config: AppenderConfigType): DisposableAppender {
+  public static create(config: ProgrammaticAppenderConfigType): DisposableAppender {
     switch (config.type) {
       case 'console':
         return new ConsoleAppender(Layouts.create(config.layout));
