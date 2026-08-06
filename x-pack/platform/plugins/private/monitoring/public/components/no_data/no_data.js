@@ -144,7 +144,7 @@ export function NoData(props) {
                 cloudConnectUrl={cloudConnectUrl}
                 onConnectClick={handleConnectClick}
                 hasCloudConnectPermission={hasCloudConnectPermission}
-                overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
+                style={{ margin: `0 ${euiTheme.size.l}` }}
               />
               <EuiSpacer size="m" />
             </>
@@ -198,7 +198,7 @@ export function NoData(props) {
               cloudConnectUrl={cloudConnectUrl}
               onConnectClick={handleConnectClick}
               hasCloudConnectPermission={hasCloudConnectPermission}
-              overrideCalloutProps={{ style: { margin: `0 ${euiTheme.size.l}` } }}
+              style={{ margin: `0 ${euiTheme.size.l}` }}
             />
             <EuiSpacer size="m" />
           </>

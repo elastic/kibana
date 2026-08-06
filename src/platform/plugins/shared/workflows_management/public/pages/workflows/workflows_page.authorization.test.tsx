@@ -10,6 +10,7 @@
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useShowManagedWorkflowsSetting, useWorkflows } from '@kbn/workflows-ui';
@@ -99,9 +100,11 @@ function mockCapabilities(
   {
     readWorkflow = true,
     readManagedWorkflow = true,
+    manageConnectors = true,
   }: {
     readWorkflow?: boolean;
     readManagedWorkflow?: boolean;
+    manageConnectors?: boolean;
   } = {}
 ): void {
   mockNavigateToApp = jest.fn();
@@ -115,7 +118,18 @@ function mockCapabilities(
             readManagedWorkflow,
             updateWorkflow,
           },
+          management: {
+            insightsAndAlerting: {
+              triggersActionsConnectors: manageConnectors,
+            },
+          },
         },
+        getUrlForApp: jest.fn((appId: string, options?: { deepLinkId?: string; path?: string }) => {
+          const deepLinkPath = options?.deepLinkId
+            ? `/insightsAndAlerting/${options.deepLinkId}`
+            : '';
+          return `/app/${appId}${deepLinkPath}${options?.path ?? ''}`;
+        }),
         navigateToApp: mockNavigateToApp,
       },
       featureFlags: {
@@ -182,7 +196,7 @@ describe('WorkflowsPage authorization', () => {
 
       if (expectImport) {
         // Import is an overflow menu item; open the overflow popover to reveal it.
-        fireEvent.click(await screen.findByTestId('app-menu-overflow-button'));
+        await openAppMenuOverflow();
         expect(await screen.findByTestId('importWorkflowsButton')).toBeInTheDocument();
       } else {
         expect(screen.queryByTestId('importWorkflowsButton')).not.toBeInTheDocument();
@@ -205,6 +219,28 @@ describe('WorkflowsPage authorization', () => {
       path: '?query=security',
       replace: true,
     });
+  });
+
+  it('links to connector management from the overflow menu', async () => {
+    mockCapabilities(true, true);
+
+    renderPage();
+
+    await openAppMenuOverflow();
+    expect(await screen.findByTestId('workflowAddConnectorsLink')).toHaveAttribute(
+      'href',
+      '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors'
+    );
+    expect(screen.queryByText('Add integrations')).not.toBeInTheDocument();
+  });
+
+  it('hides connector management when the capability is missing', async () => {
+    mockCapabilities(true, true, { manageConnectors: false });
+
+    renderPage();
+
+    await openAppMenuOverflow();
+    expect(screen.queryByTestId('workflowAddConnectorsLink')).not.toBeInTheDocument();
   });
 
   it('hides the managed filter when the setting is disabled', () => {
