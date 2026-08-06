@@ -97,15 +97,18 @@ jest.mock('./workflows_utility_bar', () => ({
   WorkflowsUtilityBar: () => <div data-test-subj="workflows-utility-bar">{'Utility Bar'}</div>,
 }));
 
-jest.mock('../../../components', () => ({
-  AgenticFirstEmptyState: ({ onStartManually }: { onStartManually?: () => void }) => (
+jest.mock('../../../components', () => {
+  const EmptyState = ({ onStartManually }: { onStartManually?: () => void }) => (
     <div data-test-subj="workflows-empty-state">
       <button type="button" onClick={onStartManually}>
         {'Create Workflow'}
       </button>
     </div>
-  ),
-}));
+  );
+  // `WorkflowList` renders the `Live` variant; keep both exported so the mock
+  // stays valid if the component swaps back.
+  return { AgenticFirstEmptyState: EmptyState, AgenticFirstEmptyStateLive: EmptyState };
+});
 
 jest.mock('../../../components/workflows_empty_state/workflows_empty_state', () => ({
   WorkflowsEmptyStateReadOnly: () => <div data-test-subj="workflows-empty-state-readonly" />,

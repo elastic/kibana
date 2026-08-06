@@ -135,6 +135,13 @@ export interface PublicEmbeddableConversationInputProps {
    * Agent the input is bound to. Defaults to `agentBuilderDefaultAgentId` when omitted.
    */
   agentId?: string;
+  /**
+   * Optional override for the submit action. When provided, submitting the
+   * input calls this handler with the message instead of navigating to the
+   * Agent Builder app. Use this when embedding the input in a host UI that
+   * wants to handle the message locally (e.g. via `openChat`).
+   */
+  onSubmit?: (message: string) => void;
 }
 
 /**

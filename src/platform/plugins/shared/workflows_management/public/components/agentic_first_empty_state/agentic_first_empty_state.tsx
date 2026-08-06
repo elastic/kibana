@@ -188,16 +188,6 @@ export function AgenticFirstEmptyState({
                     }
                   }}
                   data-test-subj="agenticFirstPromptInput"
-                  css={css`
-                    border: none;
-                    box-shadow: none;
-                    background: transparent;
-                    padding: 0;
-                    &:focus {
-                      box-shadow: none;
-                      outline: none;
-                    }
-                  `}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -36,6 +36,13 @@ interface UseAgentBuilderIntegrationParams {
   workflowId?: string;
   workflowName?: string;
   validationErrors?: YamlValidationResult[] | null;
+  /**
+   * When set, the auto-open path opens the sidebar with this message and
+   * `autoSendInitialMessage: true` — used by the "agentic first" landing on
+   * `/workflows/create` to hand the user's typed prompt off to the workflow
+   * editor's chat integration.
+   */
+  initialAgentMessage?: string;
 }
 
 interface OpenAgentChatOptions {
@@ -66,6 +73,7 @@ export const useAgentBuilderIntegration = ({
   workflowId,
   workflowName,
   validationErrors,
+  initialAgentMessage,
 }: UseAgentBuilderIntegrationParams): UseAgentBuilderIntegrationReturn => {
   const { workflowsManagement } = useKibana().services;
   const agentBuilder = workflowsManagement?.agentBuilder;
@@ -368,8 +376,19 @@ export const useAgentBuilderIntegration = ({
     if (workflowId != null && !shouldRestoreForSavedWorkflow) return;
 
     hasAutoOpenedRef.current = true;
-    openAgentChat({ isAutoOpen: true });
-  }, [isEditorMounted, agentBuilder, isExperimentalEnabled, workflowId, openAgentChat]);
+    openAgentChat({
+      isAutoOpen: true,
+      initialMessage: initialAgentMessage,
+      autoSendInitialMessage: Boolean(initialAgentMessage),
+    });
+  }, [
+    isEditorMounted,
+    agentBuilder,
+    isExperimentalEnabled,
+    workflowId,
+    openAgentChat,
+    initialAgentMessage,
+  ]);
 
   // Close the sidebar on unmount (leaving the workflow scope). Empty deps so
   // it does not fire on prop changes. `application.navigateToApp` remounts

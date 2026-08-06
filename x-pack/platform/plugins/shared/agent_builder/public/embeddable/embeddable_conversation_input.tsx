@@ -29,21 +29,30 @@ export interface EmbeddableConversationInputInternalProps
 
 /**
  * Rendered inside the embeddable provider stack. Reads attachments from
- * context and on submit navigates to the Agent Builder app with the message
- * and attachments preserved in location state, where the message auto-sends.
+ * context and on submit either invokes the caller-supplied `onSubmit` (host
+ * handles the message locally) or navigates to the Agent Builder app with the
+ * message and attachments preserved in location state, where the message
+ * auto-sends.
  */
-const SubmitInterceptor: React.FC<{ agentId: string }> = ({ agentId }) => {
+const SubmitInterceptor: React.FC<{
+  agentId: string;
+  onSubmit?: (message: string) => void;
+}> = ({ agentId, onSubmit }) => {
   const { attachments } = useConversationContext();
   const { navigateToAgentBuilderUrl } = useNavigation();
 
   const handleSubmit = useCallback(
     (message: string) => {
+      if (onSubmit) {
+        onSubmit(message);
+        return;
+      }
       navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }), undefined, {
         initialMessage: message,
         attachments: attachments ?? [],
       });
     },
-    [attachments, agentId, navigateToAgentBuilderUrl]
+    [attachments, agentId, navigateToAgentBuilderUrl, onSubmit]
   );
 
   return <ConversationInput onSubmitOverride={handleSubmit} />;
@@ -52,7 +61,7 @@ const SubmitInterceptor: React.FC<{ agentId: string }> = ({ agentId }) => {
 export const EmbeddableConversationInputInternal = forwardRef<
   EmbeddableConversationInputRef,
   EmbeddableConversationInputInternalProps
->(({ agentId, services, coreStart }, ref) => {
+>(({ agentId, onSubmit, services, coreStart }, ref) => {
   const targetAgentId = agentId ?? agentBuilderDefaultAgentId;
   // Captures the callbacks the provider registers on mount so we can invoke
   // them imperatively from outside the provider tree (i.e. via `ref`).
@@ -81,7 +90,7 @@ export const EmbeddableConversationInputInternal = forwardRef<
       ariaLabelledBy="agent-builder-embeddable-conversation-input"
       onRegisterCallbacks={handleRegisterCallbacks}
     >
-      <SubmitInterceptor agentId={targetAgentId} />
+      <SubmitInterceptor agentId={targetAgentId} onSubmit={onSubmit} />
     </EmbeddableConversationsProvider>
   );
 });

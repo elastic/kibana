@@ -75,9 +75,16 @@ const WorkflowVisualEditor = React.lazy(() =>
 
 interface WorkflowDetailEditorProps {
   highlightDiff?: boolean;
+  /**
+   * Prompt handed off from the agentic-first landing on `/workflows/create`.
+   * Forwarded to the YAML editor's Agent Builder integration so the auto-open
+   * fires with this message and `autoSendInitialMessage: true`.
+   */
+  initialAgentMessage?: string;
 }
 
-export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ highlightDiff }) => {
+export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props) => {
+  const { highlightDiff, initialAgentMessage } = props;
   const styles = useMemoCss(componentStyles);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const openActionsRef = useRef<(() => void) | null>(null);
@@ -366,6 +373,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
                 hideEditorTools={isVisualEditorEnabled}
                 openActionsRef={openActionsRef}
                 onToggleEditorMode={() => handleEditorViewChange(showGraph ? 'yaml' : 'graph')}
+                initialAgentMessage={initialAgentMessage}
               />
             </React.Suspense>
           </div>

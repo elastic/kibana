@@ -77,6 +77,13 @@ jest.mock('./workflow_not_found_page', () => ({
   ),
 }));
 
+// The `/create` agentic-first landing renders `AppHeader` directly (not via
+// `WorkflowDetailHeader`), and it needs a real ChromeServiceProvider.
+jest.mock('@kbn/app-header', () => ({
+  __esModule: true,
+  AppHeader: () => null,
+}));
+
 jest.mock('./workflow_detail_header', () => ({
   WorkflowDetailHeader: () => <div data-test-subj="workflow-detail-header">{'Header'}</div>,
 }));

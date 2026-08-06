@@ -166,6 +166,12 @@ export interface WorkflowYAMLEditorProps {
    * control bar (e.g. WorkflowDetailBottomBar) already owns those buttons.
    */
   hideEditorTools?: boolean;
+  /**
+   * Optional prompt to hand off to the Agent Builder chat when the editor
+   * auto-opens on `/workflows/create`. Used by the agentic-first landing to
+   * carry the user's typed message into the workflow-scoped chat session.
+   */
+  initialAgentMessage?: string;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -176,6 +182,7 @@ export const WorkflowYAMLEditor = ({
   openActionsRef,
   onToggleEditorMode,
   hideEditorTools = false,
+  initialAgentMessage,
 }: WorkflowYAMLEditorProps) => {
   const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
     WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -346,6 +353,7 @@ export const WorkflowYAMLEditor = ({
     workflowId: workflow?.id,
     workflowName: workflow?.name ?? workflowDefinition?.name,
     validationErrors,
+    initialAgentMessage,
   });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {

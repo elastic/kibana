@@ -8,19 +8,20 @@
  */
 
 import {
-  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
+  EuiPageTemplate,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import { AppHeader } from '@kbn/app-header';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { workflowDefaultYaml } from './workflow_default_yml';
@@ -31,10 +32,10 @@ import { WorkflowDetailLoadingState } from './workflow_detail_loading_state';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
 import { WorkflowNotFoundPage } from './workflow_not_found_page';
-import { PLUGIN_ID } from '../../../../common';
+import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import type { WorkflowDetailTab } from '../../../common/lib/telemetry/events/workflows/ui/types';
 import { AgenticFirstEmptyStateLive } from '../../../components';
-import { WorkflowsDeepLinks } from '../../../deep_links';
+import { WorkflowsPageName } from '../../../deep_links';
 import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
 import {
   selectActiveTab,
@@ -74,6 +75,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const telemetry = useTelemetry();
   const { application } = useKibana().services;
   const location = useLocation<WorkflowDetailRouteState | undefined>();
+  const { euiTheme } = useEuiTheme();
 
   const isReady = !isLoadingWorkflow && !isLoadingConnectors;
 
@@ -151,10 +153,24 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   // `?startBlank=true` in the URL skips the landing (used by "Start manually" on
   // the empty workflow list — otherwise the user would land on the same screen).
   const startBlank = new URLSearchParams(location.search).get('startBlank') === 'true';
-  const [showAgenticLanding, setShowAgenticLanding] = useState(!id && !startBlank);
+  // The prompt handed off from the landing (either this page's own landing on
+  // submit, or the empty workflows list via `location.state.initialAgentMessage`).
+  // Forwarded to the editor's Agent Builder integration so the auto-open chat
+  // fires with `initialMessage` + `autoSendInitialMessage: true`.
+  const [pendingInitialAgentMessage, setPendingInitialAgentMessage] = useState<string | undefined>(
+    () => (!id ? location.state?.initialAgentMessage : undefined)
+  );
+  const [showAgenticLanding, setShowAgenticLanding] = useState(
+    !id && !startBlank && !pendingInitialAgentMessage
+  );
   useEffect(() => {
-    setShowAgenticLanding(!id && !startBlank);
-  }, [id, startBlank]);
+    setShowAgenticLanding(!id && !startBlank && !pendingInitialAgentMessage);
+  }, [id, startBlank, pendingInitialAgentMessage]);
+
+  const handleLandingSubmit = useCallback((message: string) => {
+    setPendingInitialAgentMessage(message);
+    setShowAgenticLanding(false);
+  }, []);
 
   const onCloseExecutionDetail = useCallback(() => {
     setSelectedExecution(null);
@@ -196,50 +212,45 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
 
   if (!id && showAgenticLanding) {
     return (
-      <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
-        <EuiFlexItem grow={false}>
-          <div css={css({ padding: '8px 24px 12px' })}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="arrowLeft"
-              onClick={onBackToWorkflows}
-              flush="left"
-              data-test-subj="newWorkflowBackToWorkflows"
-            >
-              <FormattedMessage
-                id="workflows.newWorkflow.backToWorkflows"
-                defaultMessage="Back to Workflows"
-              />
-            </EuiButtonEmpty>
-            <EuiSpacer size="xs" />
-            <EuiTitle size="s">
-              <h1>
-                <FormattedMessage
-                  id="workflows.newWorkflow.title"
-                  defaultMessage="New automation flow"
-                />
-              </h1>
-            </EuiTitle>
-          </div>
-        </EuiFlexItem>
-        <EuiFlexItem>
+      <EuiPageTemplate
+        offset={0}
+        css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}
+        data-test-subj="newWorkflowPage"
+      >
+        <AppHeader
+          title={i18n.translate('workflows.newWorkflow.title', {
+            defaultMessage: 'New workflow',
+          })}
+          back={{
+            href: `/app/${PLUGIN_ID}`,
+            label: i18n.translate('workflows.newWorkflow.backLinkLabel', {
+              defaultMessage: 'Workflows',
+            }),
+            onClick: (event) => {
+              event.preventDefault();
+              onBackToWorkflows();
+            },
+          }}
+          docLink={WORKFLOWS_DOCUMENTATION_URL}
+          showAddIntegrations
+        />
+        <EuiPageTemplate.Section restrictWidth={false} grow>
           <AgenticFirstEmptyStateLive
-            withDotBackground
-            onSubmitPrompt={() => setShowAgenticLanding(false)}
+            onSubmitPrompt={handleLandingSubmit}
             onStartManually={() => setShowAgenticLanding(false)}
             onSelectExample={() => setShowAgenticLanding(false)}
             onSelectTemplate={(template) =>
               application.navigateToApp(PLUGIN_ID, {
-                deepLinkId: WorkflowsDeepLinks.library,
+                deepLinkId: WorkflowsPageName.library,
                 path: template.slug,
               })
             }
             onExploreLibrary={() =>
-              application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsDeepLinks.library })
+              application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library })
             }
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </EuiPageTemplate.Section>
+      </EuiPageTemplate>
     );
   }
 
@@ -257,7 +268,12 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           <WorkflowDetailLoadingState />
         ) : (
           <WorkflowEditorLayout
-            editor={<WorkflowDetailEditor highlightDiff={highlightDiff} />}
+            editor={
+              <WorkflowDetailEditor
+                highlightDiff={highlightDiff}
+                initialAgentMessage={pendingInitialAgentMessage}
+              />
+            }
             executionList={
               id &&
               activeTab === 'executions' &&

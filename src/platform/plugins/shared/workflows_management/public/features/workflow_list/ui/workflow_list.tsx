@@ -32,7 +32,7 @@ import { WorkflowsUtilityBar } from './workflows_utility_bar';
 import { PLUGIN_ID } from '../../../../common';
 import { AgenticFirstEmptyStateLive } from '../../../components';
 import { WorkflowsEmptyStateReadOnly } from '../../../components/workflows_empty_state/workflows_empty_state';
-import { WorkflowsDeepLinks } from '../../../deep_links';
+import { WorkflowsPageName } from '../../../deep_links';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
@@ -329,19 +329,24 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     }
     return (
       <AgenticFirstEmptyStateLive
-        onSubmitPrompt={onCreateWorkflow}
+        onSubmitPrompt={(message) =>
+          application.navigateToApp(PLUGIN_ID, {
+            path: '/create',
+            state: { initialAgentMessage: message },
+          })
+        }
         onStartManually={() =>
           application.navigateToApp(PLUGIN_ID, { path: '/create?startBlank=true' })
         }
         onSelectExample={() => onCreateWorkflow?.()}
         onSelectTemplate={(template) =>
           application.navigateToApp(PLUGIN_ID, {
-            deepLinkId: WorkflowsDeepLinks.library,
+            deepLinkId: WorkflowsPageName.library,
             path: template.slug,
           })
         }
         onExploreLibrary={() =>
-          application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsDeepLinks.library })
+          application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library })
         }
       />
     );
