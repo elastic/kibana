@@ -5,24 +5,44 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { EntityType } from '@kbn/entity-store/common';
+import type { Entity, EntityType } from '@kbn/entity-store/common';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK } from '../../../../common/constants';
+import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
 import { getSecurityMlJobIds } from './get_security_ml_job_ids';
 import type { AnomalyHit, RawAnomalyRecord } from './types';
+
+// A missing/empty selection means "no severity filter", which defaults to the
+// standard threshold of 1 rather than truly unbounded (record_score 0 anomalies are noise).
+export const buildScoreRangeFilter = (
+  scoreRanges?: AnomalyScoreRange[]
+): QueryDslQueryContainer => {
+  if (!scoreRanges || scoreRanges.length === 0) {
+    return { range: { record_score: { gte: 1 } } };
+  }
+
+  return {
+    bool: {
+      should: scoreRanges.map(({ min_score: min, max_score: max }) => ({
+        range: {
+          record_score: { gte: Math.max(min, 1), ...(max !== undefined ? { lt: max } : {}) },
+        },
+      })),
+      minimum_should_match: 1,
+    },
+  };
+};
 
 interface RequiredHit {
   _id: string;
   _source: Required<RawAnomalyRecord>;
-  fields?: Record<string, unknown>;
 }
 
-const mapToAnomalyHit = (hit: RequiredHit): AnomalyHit | undefined => {
+const mapToAnomalyHit = (hit: RequiredHit, entityId: string): AnomalyHit => {
   const { _id: id, _source: src } = hit;
-  const entityId = (hit.fields?.entity_id as string[] | undefined)?.[0];
-  if (!entityId) return undefined;
   return {
     _id: id,
     entityId,
@@ -63,10 +83,10 @@ const DEFAULT_SORT_SPEC: Array<{ field: AnomalySortField; order: AnomalySortOrde
 export interface SearchEntityAnomaliesOpts {
   entityType: EntityType;
   entityId: string;
+  entityRecord: Entity;
   fromMs?: number;
   toMs?: number;
-  minScore?: number;
-  maxScore?: number;
+  scoreRanges?: AnomalyScoreRange[];
   jobIds?: string[];
   sort?: Array<{ field: AnomalySortField; order: AnomalySortOrder }>;
   from?: number;
@@ -86,10 +106,10 @@ export interface SearchEntityAnomaliesResult {
 export const searchEntityAnomalies = async ({
   entityType,
   entityId,
+  entityRecord,
   fromMs,
   toMs,
-  minScore,
-  maxScore,
+  scoreRanges,
   jobIds: filterJobIds,
   sort = DEFAULT_SORT_SPEC,
   from = 0,
@@ -114,29 +134,26 @@ export const searchEntityAnomalies = async ({
 
   if (effectiveJobIds.length === 0) return empty;
 
+  const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(entityType, entityRecord);
+  if (!entityFilter) {
+    logger.warn(
+      `Cannot build entity filter for "${entityId}" (type: ${entityType}): entity record lacks identity fields`
+    );
+    return empty;
+  }
+
   try {
     const resp = await mlSystem.mlAnomalySearch<RawAnomalyRecord>(
       {
         from,
         size,
         track_total_hits: true,
-        runtime_mappings: {
-          entity_id: euid.painless.getEuidRuntimeMapping(entityType),
-        },
-        fields: ['entity_id'],
         query: {
           bool: {
             filter: [
               { term: { result_type: 'record' } },
               { term: { is_interim: false } },
-              {
-                range: {
-                  record_score: {
-                    gte: minScore || 1,
-                    ...(maxScore !== undefined ? { lt: maxScore } : {}),
-                  },
-                },
-              },
+              buildScoreRangeFilter(scoreRanges),
               {
                 range: {
                   timestamp: {
@@ -145,7 +162,7 @@ export const searchEntityAnomalies = async ({
                   },
                 },
               },
-              { term: { entity_id: entityId } },
+              entityFilter,
               { terms: { job_id: effectiveJobIds } },
             ],
           },
@@ -164,11 +181,9 @@ export const searchEntityAnomalies = async ({
           hit._id != null &&
           hit._source?.actual?.[0] != null &&
           hit._source?.typical?.[0] != null &&
-          hit._source?.detector_index != null &&
-          (hit.fields?.entity_id as string[] | undefined)?.[0] != null
+          hit._source?.detector_index != null
       )
-      .map(mapToAnomalyHit)
-      .filter((hit): hit is AnomalyHit => hit != null);
+      .map((hit) => mapToAnomalyHit(hit, entityId));
 
     return { hits, total };
   } catch (error) {

@@ -6,14 +6,13 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { EuiFieldText } from '@elastic/eui';
 import moment from 'moment';
 import { ConditionalSnoozePanel } from './conditional_snooze_panel';
 import { SNOOZE_DATE_DISPLAY_FORMAT } from './constants';
-import { DataConditionType, type DataConditionTypeDescriptor } from './types';
-import { fieldChangeDescriptor, severityEqualsDescriptor } from './built_in_data_conditions';
+import { DataConditionType } from './types';
 
 const MOCKED_NOW = '2026-03-09T19:05:00.000Z';
 
@@ -40,9 +39,23 @@ jest.mock('../utils/duration_validation', () => {
   };
 });
 
+// A known set of `field_change` field names, passed via `fieldOptions`, so tests
+// can select a field without wiring up any fetching.
+const FIELD_OPTIONS: string[] = ['status', 'a'.repeat(80)];
+
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );
+
+/** Selects a value in a `field_change` condition's field combobox. */
+const selectFieldChangeField = async (id: string, value: string) => {
+  const user = userEvent.setup({ pointerEventsCheck: 0 });
+  const combo = within(await screen.findByTestId(`dataConditionField-${id}`)).getByTestId(
+    'comboBoxSearchInput'
+  );
+  await user.click(combo);
+  await user.click(await screen.findByText(value));
+};
 
 describe('ConditionalSnoozePanel', () => {
   const onScheduleChangeMock = jest.fn();
@@ -185,13 +198,17 @@ describe('ConditionalSnoozePanel', () => {
     });
 
     it('truncates very long field names in the preview sentence', async () => {
-      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
+      render(
+        <ConditionalSnoozePanel
+          onScheduleChange={onScheduleChangeMock}
+          fieldOptions={FIELD_OPTIONS}
+        />,
+        { wrapper }
+      );
 
       const longField = 'a'.repeat(80);
       fireEvent.click(await screen.findByTestId('addDataCondition'));
-      fireEvent.change(await screen.findByTestId(`dataConditionField-dc-1`), {
-        target: { value: longField },
-      });
+      await selectFieldChangeField('dc-1', longField);
       fireEvent.click(await screen.findByTestId(`confirmDataCondition-dc-1`));
 
       const previewEl = await screen.findByTestId('conditionsPreviewText');
@@ -269,7 +286,13 @@ describe('ConditionalSnoozePanel', () => {
     });
 
     it('shows preview text combining multiple confirmed conditions with ANY', async () => {
-      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
+      render(
+        <ConditionalSnoozePanel
+          onScheduleChange={onScheduleChangeMock}
+          fieldOptions={FIELD_OPTIONS}
+        />,
+        { wrapper }
+      );
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
       fireEvent.change(await screen.findByTestId(`dataConditionType-dc-1`), {
@@ -278,9 +301,7 @@ describe('ConditionalSnoozePanel', () => {
       fireEvent.click(await screen.findByTestId(`confirmDataCondition-dc-1`));
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
-      fireEvent.change(await screen.findByTestId(`dataConditionField-dc-2`), {
-        target: { value: 'status' },
-      });
+      await selectFieldChangeField('dc-2', 'status');
       fireEvent.click(await screen.findByTestId(`confirmDataCondition-dc-2`));
 
       expect(await screen.findByTestId('conditionsPreviewText')).toHaveTextContent(
@@ -289,7 +310,13 @@ describe('ConditionalSnoozePanel', () => {
     });
 
     it('updates preview text to ALL when separator is toggled', async () => {
-      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
+      render(
+        <ConditionalSnoozePanel
+          onScheduleChange={onScheduleChangeMock}
+          fieldOptions={FIELD_OPTIONS}
+        />,
+        { wrapper }
+      );
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
       fireEvent.change(await screen.findByTestId(`dataConditionType-dc-1`), {
@@ -298,9 +325,7 @@ describe('ConditionalSnoozePanel', () => {
       fireEvent.click(await screen.findByTestId(`confirmDataCondition-dc-1`));
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
-      fireEvent.change(await screen.findByTestId(`dataConditionField-dc-2`), {
-        target: { value: 'status' },
-      });
+      await selectFieldChangeField('dc-2', 'status');
       fireEvent.click(await screen.findByTestId(`confirmDataCondition-dc-2`));
 
       fireEvent.click(await screen.findByTestId('logicalOperator'));
@@ -311,7 +336,13 @@ describe('ConditionalSnoozePanel', () => {
     });
 
     it('reports schedule with conditionOperator all when ALL separator is used', async () => {
-      render(<ConditionalSnoozePanel onScheduleChange={onScheduleChangeMock} />, { wrapper });
+      render(
+        <ConditionalSnoozePanel
+          onScheduleChange={onScheduleChangeMock}
+          fieldOptions={FIELD_OPTIONS}
+        />,
+        { wrapper }
+      );
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
       fireEvent.change(await screen.findByTestId(`dataConditionType-dc-1`), {
@@ -320,9 +351,7 @@ describe('ConditionalSnoozePanel', () => {
       fireEvent.click(await screen.findByTestId(`confirmDataCondition-dc-1`));
 
       fireEvent.click(await screen.findByTestId('addDataCondition'));
-      fireEvent.change(await screen.findByTestId(`dataConditionField-dc-2`), {
-        target: { value: 'status' },
-      });
+      await selectFieldChangeField('dc-2', 'status');
       fireEvent.click(await screen.findByTestId(`confirmDataCondition-dc-2`));
 
       fireEvent.click(await screen.findByTestId('logicalOperator'));
@@ -454,132 +483,6 @@ describe('ConditionalSnoozePanel', () => {
       expect(offeredOptions).not.toContain(DataConditionType.SEVERITY_CHANGE);
       expect(offeredOptions).toContain(DataConditionType.FIELD_CHANGE);
       expect(offeredOptions).toContain(DataConditionType.SEVERITY_EQUALS);
-    });
-  });
-
-  describe('custom `dataConditionTypes` prop', () => {
-    const customAlwaysCompleteDescriptor: DataConditionTypeDescriptor = {
-      id: 'custom_field_present',
-      label: 'Custom: field present',
-      isComplete: () => true,
-      renderInput: (entry, onChange) => (
-        <EuiFieldText
-          value={entry.field}
-          onChange={(e) => onChange({ ...entry, field: e.target.value })}
-          placeholder="my custom field"
-          data-test-subj={`customDescriptorInput-${entry.id}`}
-        />
-      ),
-      renderConfirmedSummary: () => null,
-      getPreviewText: (entry) => `custom field "${entry.field}" exists`,
-      serialize: (entry) => ({
-        type: 'custom_field_present',
-        field: entry.field,
-        marker: 'custom',
-      }),
-    };
-
-    it('only renders dropdown options for descriptors passed in `dataConditionTypes`', async () => {
-      render(
-        <ConditionalSnoozePanel
-          onScheduleChange={onScheduleChangeMock}
-          dataConditionTypes={[fieldChangeDescriptor, customAlwaysCompleteDescriptor]}
-        />,
-        { wrapper }
-      );
-
-      fireEvent.click(await screen.findByTestId('addDataCondition'));
-      const typeSelect = (await screen.findByTestId('dataConditionType-dc-1')) as HTMLSelectElement;
-      const offered = Array.from(typeSelect.options).map((o) => o.value);
-
-      expect(offered).toEqual([DataConditionType.FIELD_CHANGE, 'custom_field_present']);
-      expect(offered).not.toContain(DataConditionType.SEVERITY_CHANGE);
-      expect(offered).not.toContain(DataConditionType.SEVERITY_EQUALS);
-    });
-
-    it('emits the custom condition shape returned by the descriptor', async () => {
-      render(
-        <ConditionalSnoozePanel
-          onScheduleChange={onScheduleChangeMock}
-          dataConditionTypes={[fieldChangeDescriptor, customAlwaysCompleteDescriptor]}
-        />,
-        { wrapper }
-      );
-
-      fireEvent.click(await screen.findByTestId('addDataCondition'));
-      fireEvent.change(await screen.findByTestId('dataConditionType-dc-1'), {
-        target: { value: 'custom_field_present' },
-      });
-      fireEvent.change(await screen.findByTestId('customDescriptorInput-dc-1'), {
-        target: { value: 'host.name' },
-      });
-      fireEvent.click(await screen.findByTestId('confirmDataCondition-dc-1'));
-
-      expect(onScheduleChangeMock).toHaveBeenLastCalledWith({
-        conditions: [{ type: 'custom_field_present', field: 'host.name', marker: 'custom' }],
-        conditionOperator: 'any',
-      });
-    });
-
-    it('renders the custom descriptor’s preview text in the live preview', async () => {
-      render(
-        <ConditionalSnoozePanel
-          onScheduleChange={onScheduleChangeMock}
-          dataConditionTypes={[fieldChangeDescriptor, customAlwaysCompleteDescriptor]}
-        />,
-        { wrapper }
-      );
-
-      fireEvent.click(await screen.findByTestId('addDataCondition'));
-      fireEvent.change(await screen.findByTestId('dataConditionType-dc-1'), {
-        target: { value: 'custom_field_present' },
-      });
-      fireEvent.change(await screen.findByTestId('customDescriptorInput-dc-1'), {
-        target: { value: 'host.name' },
-      });
-      fireEvent.click(await screen.findByTestId('confirmDataCondition-dc-1'));
-
-      expect(await screen.findByTestId('conditionsPreviewText')).toHaveTextContent(
-        'Alert will unsnooze if custom field "host.name" exists.'
-      );
-    });
-
-    it('uses the first descriptor in the list as the default type for new rows', async () => {
-      render(
-        <ConditionalSnoozePanel
-          onScheduleChange={onScheduleChangeMock}
-          dataConditionTypes={[severityEqualsDescriptor, fieldChangeDescriptor]}
-        />,
-        { wrapper }
-      );
-
-      fireEvent.click(await screen.findByTestId('addDataCondition'));
-
-      const typeSelect = (await screen.findByTestId('dataConditionType-dc-1')) as HTMLSelectElement;
-      expect(typeSelect.value).toBe(DataConditionType.SEVERITY_EQUALS);
-    });
-
-    it('surfaces a custom descriptor’s `getWarning` message in the warning callout', async () => {
-      const alwaysWarningDescriptor: DataConditionTypeDescriptor = {
-        ...customAlwaysCompleteDescriptor,
-        id: 'always_warns',
-        label: 'Always warns',
-        getPreviewText: () => 'always warns',
-        serialize: (entry) => ({ type: 'always_warns', field: entry.field }),
-        getWarning: () => 'this descriptor always complains',
-      };
-
-      render(
-        <ConditionalSnoozePanel
-          onScheduleChange={onScheduleChangeMock}
-          dataConditionTypes={[alwaysWarningDescriptor]}
-        />,
-        { wrapper }
-      );
-
-      expect(await screen.findByTestId('conflictingSeverityEqualsWarning')).toHaveTextContent(
-        'this descriptor always complains'
-      );
     });
   });
 

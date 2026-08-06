@@ -5,89 +5,48 @@
  * 2.0.
  */
 
-import type { Client as EsClient } from '@elastic/elasticsearch';
-import type { ScoutLogger } from '@kbn/scout';
+import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
-import { expect } from '@kbn/scout/api';
-import type { AlertAction } from '../../../../server/resources/datastreams/alert_actions';
-import { ALERT_ACTIONS_DATA_STREAM, POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants';
+import type { CreateActivateAlertActionBody } from '@kbn/alerting-v2-schemas';
+import { COMMON_HEADERS } from '../constants';
+import { getActivateAlertActionUrl } from '../urls';
 
-export interface AlertActionsFilter {
-  ruleId?: string;
-  actionTypes?: ReadonlyArray<AlertAction['action_type']>;
+export interface ActivateAlertActionParams extends CreateActivateAlertActionBody {
+  /** The group hash of the alert episode to activate. */
+  groupHash: string;
 }
 
 /**
- * Test-time accessor for the alerting_v2 `.alert-actions` data stream.
+ * Test-time client for the alerting_v2 `.alert-actions` HTTP surface. Only
+ * the routes we consume from tests live here — grow the surface on demand
+ * rather than mirroring every route up front.
+ *
+ * For direct data-stream access (seeding audit rows, asserting on persisted
+ * documents, wiping the stream between tests), use
+ * {@link AlertActionsEventsService} instead.
  */
 export interface AlertActionsApiService {
-  /** Bulk-seed historical actions (e.g. ack/snooze/deactivate) to the data stream. */
-  seed: (actions: AlertAction[]) => Promise<void>;
-  /** Search the data stream by rule id and/or one or more action types. */
-  find: (filter?: AlertActionsFilter) => Promise<AlertAction[]>;
-  /** Polls `find(...)` until at least `min` matching actions exist. */
-  waitForAtLeast: (min: number, filter?: AlertActionsFilter) => Promise<void>;
-  /** Removes every document from the `.alert-actions` data stream. */
-  cleanUp: () => Promise<void>;
+  /**
+   * Hits `POST /api/alerting_v2/alerts/{groupHash}/_activate`. The route
+   * returns 204 on success.
+   */
+  activate: (params: ActivateAlertActionParams) => Promise<void>;
 }
 
 export const getAlertActionsApiService = ({
   log,
-  esClient,
+  kbnClient,
 }: {
   log: ScoutLogger;
-  esClient: EsClient;
-}): AlertActionsApiService => {
-  const find: AlertActionsApiService['find'] = (filter = {}) =>
-    measurePerformanceAsync(log, 'alertActions.find', async () => {
-      await esClient.indices.refresh({ index: ALERT_ACTIONS_DATA_STREAM });
-
-      const must: object[] = [];
-      if (filter.ruleId) must.push({ term: { rule_id: filter.ruleId } });
-      if (filter.actionTypes) must.push({ terms: { action_type: [...filter.actionTypes] } });
-
-      const result = await esClient.search<AlertAction>({
-        index: ALERT_ACTIONS_DATA_STREAM,
-        query: must.length === 0 ? { match_all: {} } : { bool: { filter: must } },
-        sort: [{ '@timestamp': 'asc' }],
-        size: 100,
+  kbnClient: KbnClient;
+}): AlertActionsApiService => ({
+  activate: ({ groupHash, ...body }) =>
+    measurePerformanceAsync(log, 'alertActions.activate', async () => {
+      await kbnClient.request({
+        method: 'POST',
+        path: getActivateAlertActionUrl(groupHash),
+        headers: COMMON_HEADERS,
+        body,
       });
-      return result.hits.hits.map((hit) => hit._source as AlertAction);
-    });
-
-  const seed: AlertActionsApiService['seed'] = (actions) =>
-    measurePerformanceAsync(log, 'alertActions.seed', async () => {
-      if (actions.length === 0) return;
-      await esClient.bulk({
-        operations: actions.flatMap((doc) => [
-          { create: { _index: ALERT_ACTIONS_DATA_STREAM } },
-          doc,
-        ]),
-        refresh: true,
-      });
-    });
-
-  const waitForAtLeast: AlertActionsApiService['waitForAtLeast'] = (min, filter) =>
-    expect
-      .poll(() => find(filter).then((actions) => actions.length), {
-        timeout: POLL_TIMEOUT_MS,
-        intervals: [POLL_INTERVAL_MS],
-      })
-      .toBeGreaterThanOrEqual(min);
-
-  const cleanUp: AlertActionsApiService['cleanUp'] = () =>
-    measurePerformanceAsync(log, `dataStream[${ALERT_ACTIONS_DATA_STREAM}].cleanUp`, async () => {
-      await esClient.deleteByQuery(
-        {
-          index: ALERT_ACTIONS_DATA_STREAM,
-          query: { match_all: {} },
-          refresh: true,
-          wait_for_completion: true,
-          conflicts: 'proceed',
-        },
-        { ignore: [404] }
-      );
-    });
-
-  return { seed, find, waitForAtLeast, cleanUp };
-};
+    }),
+});

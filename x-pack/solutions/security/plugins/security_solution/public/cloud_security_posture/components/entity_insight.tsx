@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import {
   buildEuidCspPreviewOptions,
   inferEntityTypeFromIdentityFields,
@@ -21,11 +21,10 @@ import type { IdentityFields } from '../../flyout/document_details/shared/utils'
 import { MisconfigurationsPreview } from './misconfiguration/misconfiguration_preview';
 import { VulnerabilitiesPreview } from './vulnerabilities/vulnerabilities_preview';
 import { AlertsPreview } from './alerts/alerts_preview';
-import { useGlobalTime } from '../../common/containers/use_global_time';
+import { useAlertTimeRange } from '../../entity_analytics/hooks/use_alert_time_range';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/components/detection_response/alerts_by_status/types';
 import { useNonClosedAlerts } from '../hooks/use_non_closed_alerts';
 import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { useUiSetting } from '../../common/lib/kibana';
 import type { EntityStoreRecord } from '../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
 export type CloudPostureEntityIdentifier =
@@ -44,6 +43,7 @@ export const EntityInsight = <T,>({
   entityType,
   entityRecord,
   hideHeaderIcons,
+  scopeId,
 }: {
   identityFields: IdentityFields;
   isPreviewMode: boolean;
@@ -53,10 +53,15 @@ export const EntityInsight = <T,>({
   entityRecord?: EntityStoreRecord | null;
   /** When true, hides the chevron icons in the section headers. Used by the v2 flyout. */
   hideHeaderIcons?: boolean;
+  /**
+   * Scope ID of the table or panel that opened this flyout. When the scope has
+   * a registered time-range override in {@link SCOPE_ALERT_TIME_RANGE_OVERRIDES}
+   * that window is used for the alerts query instead of the global time range.
+   */
+  scopeId?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   const euidApi = useEntityStoreEuidApi();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const insightContent: React.ReactElement[] = [];
 
   const cspPreviewEntityType = inferEntityTypeFromIdentityFields(identityFields);
@@ -66,14 +71,12 @@ export const EntityInsight = <T,>({
     failedFindings,
   } = useHasMisconfigurations(
     buildEuidCspPreviewOptions(cspPreviewEntityType, entityRecord, euidApi, {
-      entityStoreV2Enabled,
       legacyIdentityFields: identityFields,
     })
   );
 
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
     buildEuidCspPreviewOptions(cspPreviewEntityType, entityRecord, euidApi, {
-      entityStoreV2Enabled,
       legacyIdentityFields: identityFields,
     })
   );
@@ -81,7 +84,7 @@ export const EntityInsight = <T,>({
   const showVulnerabilitiesPreview =
     hasVulnerabilitiesFindings && Object.keys(identityFields).length > 0;
 
-  const { to, from } = useGlobalTime();
+  const { from, to } = useAlertTimeRange(scopeId);
 
   const { hasNonClosedAlerts: showAlertsPreview, filteredAlertsData } = useNonClosedAlerts({
     identityFields,
@@ -126,6 +129,7 @@ export const EntityInsight = <T,>({
           entityRecord={entityRecord}
           isPreviewMode={isPreviewMode}
           openDetailsPanel={openDetailsPanel}
+          hideHeaderIcons={hideHeaderIcons}
         />
         <EuiSpacer size="s" />
       </>

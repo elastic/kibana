@@ -108,7 +108,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
   const form = useFormContext();
   const { updateFieldValues } = form;
   const [{ config }] = useFormData({
-    watch: ['config.service', 'config.hasAuth'],
+    watch: ['config.service', 'config.hasAuth', 'config.allowHtml'],
   });
 
   const emailFieldConfig = useMemo(
@@ -116,9 +116,11 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
     [docLinks.links.alerting.emailActionConfig, validateEmailAddresses]
   );
 
-  const { service = null, hasAuth = false } = config ?? {};
+  const { service = null, hasAuth = false, allowHtml = false } = config ?? {};
 
   const disableServiceConfig = shouldDisableEmailConfiguration(service);
+  const showAllowHtmlConfig =
+    !isEmpty(service) && service !== AdditionalEmailServices.ELASTIC_CLOUD;
   const { isLoading, getEmailServiceConfig } = useEmailConfig({ http, toasts });
   const initialService = useRef(service);
 
@@ -155,6 +157,16 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
 
     fetchConfig();
   }, [updateFieldValues, getEmailServiceConfig, service]);
+
+  useEffect(() => {
+    if (service === AdditionalEmailServices.ELASTIC_CLOUD && allowHtml) {
+      updateFieldValues({
+        config: {
+          allowHtml: false,
+        },
+      });
+    }
+  }, [allowHtml, service, updateFieldValues]);
 
   return (
     <>
@@ -198,6 +210,28 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      {showAllowHtmlConfig && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <UseField
+              path="config.allowHtml"
+              component={ToggleField}
+              config={{
+                defaultValue: false,
+                helpText: i18n.ALLOW_HTML_HELP,
+              }}
+              componentProps={{
+                euiFieldProps: {
+                  'data-test-subj': 'emailAllowHtmlSwitch',
+                  label: i18n.ALLOW_HTML_LABEL,
+                  disabled: readOnly,
+                  readOnly,
+                },
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       {service === AdditionalEmailServices.EXCHANGE && <ExchangeFormFields readOnly={readOnly} />}
 
       {!isEmpty(service) && service !== AdditionalEmailServices.EXCHANGE && (

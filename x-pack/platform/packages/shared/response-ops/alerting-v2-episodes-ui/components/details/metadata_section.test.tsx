@@ -12,6 +12,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { runEsqlAsyncSearch } from '../../utils/run_esql_async_search';
 import { useAlertingEpisodeSourceDataView } from '../../hooks/use_alerting_episode_source_data_view';
 import {
@@ -29,6 +30,7 @@ jest.mock('@kbn/discover-utils', () => ({
 }));
 
 const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
+const buildDataTableRecordMock = jest.mocked(buildDataTableRecord);
 const useAlertingEpisodeSourceDataViewMock = jest.mocked(useAlertingEpisodeSourceDataView);
 
 const mockTableRender = jest.fn(() => <div data-test-subj="mock-doc-viewer-table" />);
@@ -168,6 +170,44 @@ describe('AlertEpisodeMetadataSection', () => {
           raw: { _source: { threshold_met: true } },
         }),
         dataView: expect.objectContaining({ id: 'mock-data-view' }),
+      })
+    );
+  });
+
+  it('strips _id/_index/_score/_ignored metadata fields from the rendered hit', async () => {
+    // Mirrors what flattenHit actually does for a synthetic (non-search) hit: it merges the data
+    // view's metaFields into `flattened` even though this hit never had real values for them.
+    buildDataTableRecordMock.mockReturnValueOnce({
+      id: 'mock-id',
+      raw: { _source: { threshold_met: true } },
+      flattened: {
+        threshold_met: true,
+        _id: undefined,
+        _index: undefined,
+        _score: undefined,
+        _ignored: undefined,
+      },
+    });
+
+    runEsqlAsyncSearchMock
+      .mockResolvedValueOnce(mockEpisodeEventsResponse)
+      .mockResolvedValueOnce(buildEventDataResponse(JSON.stringify({ threshold_met: true })));
+    mockHttp.get.mockResolvedValueOnce(mockRule);
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeMetadataSection episodeId="ep-1" services={mockServices} />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    await waitFor(() => expect(screen.getByTestId('mock-doc-viewer-table')).toBeInTheDocument());
+
+    expect(mockTableRender).toHaveBeenCalledWith(
+      expect.objectContaining({
+        hit: expect.objectContaining({
+          flattened: { threshold_met: true },
+        }),
       })
     );
   });

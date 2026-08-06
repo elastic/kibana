@@ -13,6 +13,7 @@ import {
   LifecyclePreviewProvider,
   useLifecyclePreview,
 } from '../../common/hooks/lifecycle_preview';
+import { LifecycleFlyoutCoordinationProvider } from '../../common/hooks/lifecycle_flyout_coordination';
 import { useEditFailedLifecycleFlyout } from './use_edit_failed_lifecycle_flyout';
 
 let mockInheritedValue: unknown = null;
@@ -133,11 +134,13 @@ const renderHarness = (
   const updateFailureStore = jest.fn().mockResolvedValue(undefined);
   render(
     <LifecyclePreviewProvider>
-      <Harness
-        isServerless={isServerless}
-        updateFailureStore={updateFailureStore}
-        failureStoreConfig={createFailureStoreConfig(failureStoreConfigOverrides)}
-      />
+      <LifecycleFlyoutCoordinationProvider>
+        <Harness
+          isServerless={isServerless}
+          updateFailureStore={updateFailureStore}
+          failureStoreConfig={createFailureStoreConfig(failureStoreConfigOverrides)}
+        />
+      </LifecycleFlyoutCoordinationProvider>
     </LifecyclePreviewProvider>
   );
   return { updateFailureStore };
@@ -328,12 +331,14 @@ describe('useEditFailedLifecycleFlyout - saveMainFlyout', () => {
 
     render(
       <LifecyclePreviewProvider>
-        <Harness
-          isServerless={false}
-          updateFailureStore={updateFailureStore}
-          failureStoreConfig={createFailureStoreConfig()}
-          toasts={toasts}
-        />
+        <LifecycleFlyoutCoordinationProvider>
+          <Harness
+            isServerless={false}
+            updateFailureStore={updateFailureStore}
+            failureStoreConfig={createFailureStoreConfig()}
+            toasts={toasts}
+          />
+        </LifecycleFlyoutCoordinationProvider>
       </LifecyclePreviewProvider>
     );
 
@@ -363,13 +368,15 @@ describe('useEditFailedLifecycleFlyout - saveMainFlyout', () => {
 
     render(
       <LifecyclePreviewProvider>
-        <Harness
-          isServerless={false}
-          updateFailureStore={updateFailureStore}
-          failureStoreConfig={createFailureStoreConfig()}
-          refreshDefinition={refreshDefinition}
-          toasts={toasts}
-        />
+        <LifecycleFlyoutCoordinationProvider>
+          <Harness
+            isServerless={false}
+            updateFailureStore={updateFailureStore}
+            failureStoreConfig={createFailureStoreConfig()}
+            refreshDefinition={refreshDefinition}
+            toasts={toasts}
+          />
+        </LifecycleFlyoutCoordinationProvider>
       </LifecyclePreviewProvider>
     );
 
@@ -383,5 +390,46 @@ describe('useEditFailedLifecycleFlyout - saveMainFlyout', () => {
     // A refresh failure after a successful ES update must not be surfaced as a
     // failed save.
     expect(toasts.addError).not.toHaveBeenCalled();
+  });
+});
+
+describe('useEditFailedLifecycleFlyout - flyout coordination', () => {
+  beforeEach(() => {
+    mockInheritedValue = null;
+    mockInheritedLoading = false;
+  });
+
+  it('blocks opening the delete-phase flyout while the main flyout is open', () => {
+    renderHarness(false, { failureStoreEnabled: true });
+
+    fireEvent.click(screen.getByTestId('openMainFlyout'));
+    expect(screen.getByTestId('streamsEditFailedDataLifecycleFlyout')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('openDeletePhaseFlyout'));
+
+    expect(screen.queryByTestId('streamsEditFailedDeletePhaseFlyout')).not.toBeInTheDocument();
+  });
+
+  it('blocks opening the main flyout while the delete-phase flyout is open', () => {
+    renderHarness(false, { failureStoreEnabled: true });
+
+    fireEvent.click(screen.getByTestId('openDeletePhaseFlyout'));
+    expect(screen.getByTestId('streamsEditFailedDeletePhaseFlyout')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('openMainFlyout'));
+
+    expect(screen.queryByTestId('streamsEditFailedDataLifecycleFlyout')).not.toBeInTheDocument();
+  });
+
+  it('allows opening the delete-phase flyout once the main flyout is closed', () => {
+    renderHarness(false, { failureStoreEnabled: true });
+
+    fireEvent.click(screen.getByTestId('openMainFlyout'));
+    fireEvent.click(screen.getByTestId('dataLifecycleFlyoutCancelButton'));
+    expect(screen.queryByTestId('streamsEditFailedDataLifecycleFlyout')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('openDeletePhaseFlyout'));
+
+    expect(screen.getByTestId('streamsEditFailedDeletePhaseFlyout')).toBeInTheDocument();
   });
 });

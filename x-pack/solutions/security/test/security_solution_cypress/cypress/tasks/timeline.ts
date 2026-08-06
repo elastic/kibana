@@ -14,6 +14,13 @@ import {
   EQL_QUERY_VALIDATION_LABEL,
   EQL_QUERY_VALIDATION_SPINNER,
 } from '../screens/create_new_rule';
+import {
+  CREATE_CASE_FLYOUT,
+  DESCRIPTION_INPUT as CASE_DESCRIPTION_INPUT,
+  SUBMIT_BTN as CREATE_CASE_SUBMIT_BTN,
+  TITLE_INPUT as CASE_TITLE_INPUT,
+  VIEW_CASE_TOASTER_LINK,
+} from '../screens/create_new_case';
 
 import {
   ACTIVE_TIMELINE_BOTTOM_BAR,
@@ -290,13 +297,42 @@ export const attachTimelineToExistingCase = () => {
   cy.get(ATTACH_TIMELINE_TO_EXISTING_CASE_ICON).click();
 };
 
-export const closeTimeline = () => {
-  // Retry closing the timeline until the overlay mask gets the --hidden class.
-  // Each iteration first checks whether the overlay is already hidden to avoid
-  // clicking a button that is no longer in the visible portal. When the overlay is
-  // still open, .should('be.visible') retries until the close button is actionable,
-  // letting any concurrent React re-renders (e.g. from markAsFavorite's Redux
-  // dispatches) settle before the click is issued.
+/**
+ * Reads `xpack.cases.attachments.enabled` from the server-injected browser config so a spec
+ * can assert the actual runtime behavior: the legacy markdown link (flag off) or the
+ * `security.timeline` case attachment (flag on). Follows the real flag instead of pinning it
+ * per CI lane, so the spec passes whether or not the flag has been flipped.
+ */
+export const getCasesAttachmentsEnabled = (): Cypress.Chainable<boolean> =>
+  cy
+    .get('kbn-injected-metadata')
+    .invoke('attr', 'data')
+    .then((data) => {
+      const { uiPlugins = [] } = JSON.parse(data ?? '{}');
+      const casesPlugin = uiPlugins.find((plugin: { id: string }) => plugin.id === 'cases');
+      return Boolean(casesPlugin?.config?.attachments?.enabled);
+    });
+
+/**
+ * Fills and submits the create-case flyout opened by the unified attachments flow.
+ */
+export const createCaseFromTimelineFlyout = () => {
+  cy.get(CREATE_CASE_FLYOUT).should('be.visible');
+  cy.get(CASE_TITLE_INPUT).type('Timeline case');
+  cy.get(CASE_DESCRIPTION_INPUT).type('Timeline case description');
+  cy.get(CREATE_CASE_SUBMIT_BTN).click();
+};
+
+export const navigateToCaseFromSuccessToaster = () => {
+  cy.get(VIEW_CASE_TOASTER_LINK).click();
+};
+
+/**
+ * Retry until the timeline overlay mask is hidden. When the overlay is still open,
+ * click the close button so concurrent React re-renders (e.g. from markAsFavorite's
+ * timelines refresh) can settle before the next attempt.
+ */
+export const ensureTimelineOverlayHidden = () => {
   recurse(
     () => {
       return cy.get(TIMELINE_WRAPPER).then(($wrapper) => {
@@ -308,6 +344,10 @@ export const closeTimeline = () => {
     },
     ($timelineWrapper) => $timelineWrapper.hasClass('timeline-portal-overlay-mask--hidden')
   );
+};
+
+export const closeTimeline = () => {
+  ensureTimelineOverlayHidden();
 };
 
 export const createNewTimeline = () => {

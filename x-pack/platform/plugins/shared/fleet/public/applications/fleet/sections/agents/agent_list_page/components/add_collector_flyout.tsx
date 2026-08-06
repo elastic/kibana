@@ -31,6 +31,9 @@ import {
   EuiFieldText,
   EuiTextArea,
   EuiLink,
+  EuiFilterGroup,
+  EuiFilterButton,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -147,7 +150,12 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   onClickViewAgents,
 }) => {
   const instanceUid = useRef(uuidv4());
-  const { cloud, docLinks } = useStartServices();
+  const { cloud, docLinks, application } = useStartServices();
+  // api_keys.save maps to manage_own_api_key, which is necessary but not sufficient —
+  // the server also requires apm event:write. In the rare case where a user has
+  // manage_own_api_key but not apm event:write the button is enabled and the server
+  // returns a 403; the error handler in use_managed_otlp surfaces the server's message.
+  const canCreateApiKey = Boolean(application.capabilities.api_keys?.save);
 
   const esApiKey = useGetCreateApiKey();
   const motlp = useManagedOtlp();
@@ -177,7 +185,6 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   // space instead of the current one. See https://github.com/elastic/kibana/issues/275528
   const isSpaceResolved = spaceId !== undefined;
   const { enrolledAgentIds } = usePollingAgentCount(getOpAMPPolicyId(spaceId), {
-    noLowerTimeLimit: true,
     pollImmediately: true,
     enabled: isSpaceResolved,
   });
@@ -193,6 +200,10 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   });
 
   const error = queryError?.message ?? null;
+
+  const [collectorRuntime, setCollectorRuntime] = useState<'elastic-agent' | 'otelcol-contrib'>(
+    'elastic-agent'
+  );
 
   // Form state
   const [groupDisplayName, setGroupDisplayName] = useState('OTel Collector Group');
@@ -593,18 +604,36 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
               <EuiSpacer size="s" />
               <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    onClick={onCreateApiKey}
-                    isLoading={isCreatingApiKey}
-                    isDisabled={!!apiKeyEncoded}
-                    iconType={apiKeyEncoded ? 'check' : undefined}
-                    color={apiKeyEncoded ? 'success' : 'primary'}
+                  <EuiToolTip
+                    content={
+                      !canCreateApiKey
+                        ? i18n.translate(
+                            'xpack.fleet.addCollectorFlyout.createApiKeyNoPermissionTooltip',
+                            {
+                              defaultMessage:
+                                "You don't have permission to create API keys. Contact your administrator.",
+                            }
+                          )
+                        : undefined
+                    }
                   >
-                    <FormattedMessage
-                      id="xpack.fleet.addCollectorFlyout.createApiKeyButton"
-                      defaultMessage="Create API key"
-                    />
-                  </EuiButton>
+                    <EuiButton
+                      onClick={onCreateApiKey}
+                      isLoading={isCreatingApiKey}
+                      isDisabled={!!apiKeyEncoded || !canCreateApiKey}
+                      // aria-disabled keeps the button focusable and sets pointer-events:none so
+                      // the EuiToolTip anchor span receives hover events cross-browser.
+                      // Scoped to !canCreateApiKey only — the apiKeyEncoded case has no tooltip.
+                      hasAriaDisabled={!canCreateApiKey}
+                      iconType={apiKeyEncoded ? 'check' : undefined}
+                      color={apiKeyEncoded ? 'success' : 'primary'}
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.addCollectorFlyout.createApiKeyButton"
+                        defaultMessage="Create API key"
+                      />
+                    </EuiButton>
+                  </EuiToolTip>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
@@ -661,11 +690,41 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
           <p>
             <FormattedMessage
               id="xpack.fleet.addCollectorFlyout.runCollectorInstruction"
-              defaultMessage="Run your collector. The following command uses the OTel contrib collector:"
+              defaultMessage="Select a runtime and run your collector:"
             />
           </p>
-          <EuiCodeBlock isCopyable language="yaml" paddingSize="m">
-            {'./otelcol-contrib --config ./otel-opamp.yaml '}
+          <EuiFilterGroup>
+            <EuiFilterButton
+              isToggle
+              isSelected={collectorRuntime === 'elastic-agent'}
+              hasActiveFilters={collectorRuntime === 'elastic-agent'}
+              onClick={() => setCollectorRuntime('elastic-agent')}
+            >
+              {i18n.translate('xpack.fleet.addCollectorFlyout.runtimeElasticAgent', {
+                defaultMessage: 'Elastic Agent',
+              })}
+            </EuiFilterButton>
+            <EuiFilterButton
+              isToggle
+              isSelected={collectorRuntime === 'otelcol-contrib'}
+              hasActiveFilters={collectorRuntime === 'otelcol-contrib'}
+              onClick={() => setCollectorRuntime('otelcol-contrib')}
+            >
+              {i18n.translate('xpack.fleet.addCollectorFlyout.runtimeOtelContrib', {
+                defaultMessage: 'OTel Contrib Collector',
+              })}
+            </EuiFilterButton>
+          </EuiFilterGroup>
+          <EuiSpacer size="m" />
+          <EuiCodeBlock
+            isCopyable
+            language="bash"
+            paddingSize="m"
+            data-test-subj="runCollectorCommand"
+          >
+            {collectorRuntime === 'elastic-agent'
+              ? './otelcol --config ./otel-opamp.yaml'
+              : './otelcol-contrib --config ./otel-opamp.yaml'}
           </EuiCodeBlock>
         </EuiText>
       ),

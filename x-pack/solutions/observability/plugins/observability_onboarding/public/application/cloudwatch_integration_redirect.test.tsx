@@ -56,11 +56,12 @@ describe('CloudwatchIntegrationRedirect', () => {
     });
 
     await waitFor(() =>
-      expect(navigateToApp).toHaveBeenCalledWith('fleet', {
-        path: '/integrations/aws_cloudwatch_input_otel-0.2.1/add-integration',
+      expect(navigateToApp).toHaveBeenCalledWith('integrations', {
+        path: '/detail/aws_cloudwatch_input_otel-0.2.1/add-integration',
         state: {
           onCancelNavigateTo: ['observabilityOnboarding', { path: '?category=cloud' }],
           onCancelUrl: '/app/observabilityOnboarding?category=cloud',
+          telemetrySource: 'aws_quickstart',
         },
         replace: true,
       })
@@ -126,9 +127,9 @@ describe('CloudwatchIntegrationRedirect', () => {
 
     await waitFor(() =>
       expect(navigateToApp).toHaveBeenCalledWith(
-        'fleet',
+        'integrations',
         expect.objectContaining({
-          path: '/integrations/aws_cloudwatch_input_otel-0.2.1/add-integration',
+          path: '/detail/aws_cloudwatch_input_otel-0.2.1/add-integration',
         })
       )
     );

@@ -41,7 +41,7 @@ export async function stepInstallKibanaAssets(context: InstallContext) {
 }
 
 export async function stepInstallKibanaAssetsWithStreaming(context: InstallContext) {
-  const { savedObjectsClient, packageInstallContext, spaceId } = context;
+  const { savedObjectsClient, packageInstallContext, spaceId, installedPkg } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName } = packageInfo;
 
@@ -53,6 +53,7 @@ export async function stepInstallKibanaAssetsWithStreaming(context: InstallConte
         pkgName,
         packageInstallContext,
         spaceId,
+        installedPkg,
       })
   );
 

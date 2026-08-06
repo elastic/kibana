@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { EuiStepStatus } from '@elastic/eui';
 import {
   EuiFlyout,
@@ -21,13 +21,22 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+
 import { AGENTS_PREFIX, FLEET_CONNECTORS_PACKAGE, MAX_FLYOUT_WIDTH } from '../../constants';
-import type { Agent } from '../../types';
-import { sendGetAgents, useStartServices, useGetPackageInfoByKeyQuery } from '../../hooks';
+
+import {
+  useGetAgentsQuery,
+  useStartServices,
+  useGetPackageInfoByKeyQuery,
+  useFleetStatus,
+} from '../../hooks';
+import { getDashboardsCount, buildDashboardsListLink } from '../../services';
 
 import { AgentlessStepConfirmEnrollment } from './step_confirm_enrollment';
 import { AgentlessStepConfirmData } from './step_confirm_data';
 import { AgentlessStepConfigureConnector } from './step_configure_connector';
+import { AgentlessStepViewDashboards } from './step_view_dashboards';
 import type { AgentlessEnrollmentFlyoutProps } from './types';
 import { resolveIntegrationTitle } from './utils';
 
@@ -56,60 +65,43 @@ export const AgentlessEnrollmentFlyout = ({
 }: AgentlessEnrollmentFlyoutProps) => {
   const core = useStartServices();
   const { notifications } = core;
+  const { spaceId = DEFAULT_SPACE_ID } = useFleetStatus();
+
   const [confirmEnrollmentStatus, setConfirmEnrollmentStatus] = useState<EuiStepStatus>('loading');
   const [confirmDataStatus, setConfirmDataStatus] = useState<EuiStepStatus>('disabled');
-  const [agentData, setAgentData] = useState<Agent>();
+  const [viewDashboardsStatus, setViewDashboardsStatus] = useState<EuiStepStatus>('disabled');
+  const [agentOnline, setAgentOnline] = useState(false);
 
-  // Clear agent data polling
-  // Called when component is unmounted or when agent is healthy
-  const agentDataInterval = useRef<NodeJS.Timeout>();
-  const clearAgentDataPolling = useMemo(() => {
-    return () => {
-      if (agentDataInterval.current) {
-        clearInterval(agentDataInterval.current);
-      }
-    };
-  }, [agentDataInterval]);
+  // Fetch agent for the policy identified by `policyId`, polling every 30s until online.
+  const agentKuery = `${AGENTS_PREFIX}.policy_id: "${policyId}"`;
+  const { data: agentsData } = useGetAgentsQuery(
+    { kuery: agentKuery },
+    { refetchInterval: agentOnline ? false : REFRESH_INTERVAL_MS }
+  );
+  const agentData = agentsData?.data?.items?.[0];
+  const agentsError = agentsData?.error;
 
-  // Fetch agent(s) data for the agent policy identified by the `policyId` prop
-  // Polls every 30 seconds until agent is found and healthy
   useEffect(() => {
-    const fetchAgents = async () => {
-      const { data: agentsData, error } = await sendGetAgents({
-        kuery: `${AGENTS_PREFIX}.policy_id: "${policyId}"`,
+    if (agentsError) {
+      notifications.toasts.addError(agentsError as Error, {
+        title: i18n.translate(
+          'xpack.fleet.epm.packageDetails.integrationList.agentlessStatusError',
+          { defaultMessage: 'Error fetching managed integration status information' }
+        ),
       });
+    }
+  }, [agentsError, notifications.toasts]);
 
-      if (error) {
-        notifications.toasts.addError(error, {
-          title: i18n.translate(
-            'xpack.fleet.epm.packageDetails.integrationList.agentlessStatusError',
-            {
-              defaultMessage: 'Error fetching agentless status information',
-            }
-          ),
-        });
-      }
-
-      if (agentsData?.items?.[0]) {
-        setAgentData(agentsData.items?.[0]);
-      }
-    };
-
-    fetchAgents();
-    agentDataInterval.current = setInterval(() => {
-      fetchAgents();
-    }, REFRESH_INTERVAL_MS);
-
-    return () => clearAgentDataPolling();
-  }, [clearAgentDataPolling, notifications.toasts, policyId]);
-
-  // Watches agent data and updates step statuses and clears polling when agent is healthy
+  // Derive step statuses from agent status; stop polling once the agent is online.
+  // Once online, ignore subsequent poll results so transient errors or refetchOnWindowFocus
+  // can't reset completed steps back to loading.
   useEffect(() => {
+    if (agentOnline) return;
     if (agentData) {
       if (agentData.status === 'online') {
+        setAgentOnline(true);
         setConfirmEnrollmentStatus('complete');
         setConfirmDataStatus('loading');
-        clearAgentDataPolling();
       } else if (agentData.status === 'error' || agentData.status === 'degraded') {
         setConfirmEnrollmentStatus('danger');
         setConfirmDataStatus('disabled');
@@ -121,7 +113,16 @@ export const AgentlessEnrollmentFlyout = ({
       setConfirmEnrollmentStatus('loading');
       setConfirmDataStatus('disabled');
     }
-  }, [agentData, clearAgentDataPolling]);
+  }, [agentOnline, agentData]);
+
+  // Activate the "View dashboards" step as soon as data is confirmed
+  useEffect(() => {
+    if (confirmDataStatus === 'complete') {
+      setViewDashboardsStatus('complete');
+    } else {
+      setViewDashboardsStatus('disabled');
+    }
+  }, [confirmDataStatus]);
 
   // Calculate integration title from the base package info
   const { data: packageInfoData } = useGetPackageInfoByKeyQuery(
@@ -147,6 +148,22 @@ export const AgentlessEnrollmentFlyout = ({
   // so the "Confirm incoming data" step is reframed as a connector setup step.
   const isConnector = packageInfo.name === FLEET_CONNECTORS_PACKAGE;
 
+  // Compute dashboards availability and link for the 3rd step.
+  // Only shown for non-connector integrations that actually ship dashboards.
+  const dashboardsCount = useMemo(() => {
+    const installationInfo = packageInfoData?.item?.installationInfo;
+    if (!installationInfo) return 0;
+    return getDashboardsCount(installationInfo, spaceId);
+  }, [packageInfoData, spaceId]);
+
+  const dashboardsLink = useMemo(() => {
+    const title = packageInfoData?.item?.title;
+    if (!title) return undefined;
+    return buildDashboardsListLink(core.http.basePath, title);
+  }, [packageInfoData, core.http.basePath]);
+
+  const showDashboardsStep = !isConnector && dashboardsCount > 0;
+
   return (
     <EuiFlyout
       data-test-subj="agentlessEnrollmentFlyout"
@@ -166,7 +183,7 @@ export const AgentlessEnrollmentFlyout = ({
               title: i18n.translate(
                 'xpack.fleet.agentlessEnrollmentFlyout.stepConfirmEnrollmentTitle',
                 {
-                  defaultMessage: 'Confirm agentless enrollment',
+                  defaultMessage: 'Confirm managed integration enrollment',
                 }
               ),
               children: (
@@ -213,6 +230,25 @@ export const AgentlessEnrollmentFlyout = ({
                 ),
               status: confirmDataStatus,
             },
+            ...(showDashboardsStep && dashboardsLink
+              ? [
+                  {
+                    title: i18n.translate(
+                      'xpack.fleet.agentlessEnrollmentFlyout.stepViewDashboardsTitle',
+                      {
+                        defaultMessage: 'View dashboards',
+                      }
+                    ),
+                    children:
+                      viewDashboardsStatus === 'complete' ? (
+                        <AgentlessStepViewDashboards dashboardsLink={dashboardsLink} />
+                      ) : (
+                        <></>
+                      ),
+                    status: viewDashboardsStatus,
+                  },
+                ]
+              : []),
           ]}
         />
       </EuiFlyoutBody>

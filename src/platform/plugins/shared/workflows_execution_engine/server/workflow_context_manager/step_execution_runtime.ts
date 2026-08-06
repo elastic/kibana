@@ -23,7 +23,7 @@ import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import { toExecutionError } from '../step/errors';
 import type { RunStepResult } from '../step/node_implementation';
-import { extractTokenUsage, parseDuration } from '../utils';
+import { extractConnectorId, extractTokenUsage, parseDuration } from '../utils';
 
 import type { IWorkflowEventLogger, WorkflowEventFlushOptions } from '../workflow_event_logger';
 
@@ -112,6 +112,11 @@ export class StepExecutionRuntime {
     this.node = stepExecutionRuntimeInit.node;
     this.stepExecutionId = stepExecutionRuntimeInit.stepExecutionId;
     this.stackFrames = stepExecutionRuntimeInit.stackFrames;
+  }
+
+  public get error(): ExecutionError | undefined {
+    const errorInStep = this.workflowExecutionState.getStepExecution(this.stepExecutionId)?.error;
+    return errorInStep ? new ExecutionError(errorInStep) : undefined;
   }
 
   public stepExecutionExists(): boolean {
@@ -233,7 +238,6 @@ export class StepExecutionRuntime {
     // `details` is persisted (`KibanaApiCallError` deliberately limits this to the safe `status`).
     // (Covered by `step_execution_runtime.test.ts` > failStep > "persists status in details ...".)
     const executionError = toExecutionError(error);
-    const serializedError = executionError.toSerializableObject();
 
     this.workflowExecutionState.setLastFailedStepContext({
       stepId: this.node.stepId,
@@ -248,18 +252,14 @@ export class StepExecutionRuntime {
       : undefined;
 
     const usage = this.recordTokenUsage(partialOutput);
-
-    this.workflowExecutionState.updateWorkflowExecution({
-      error: serializedError,
-    });
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
       stepId: this.node.stepId,
       stepType: this.node.stepType,
       status: ExecutionStatus.FAILED,
       scopeStack: this.stackFrames,
+      error: executionError.toSerializableObject(),
       finishedAt,
-      error: serializedError,
       ...(usage ? { usage } : {}),
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
@@ -314,14 +314,22 @@ export class StepExecutionRuntime {
 
   /**
    * Normalizes any LLM token usage the step reported (`output.metadata.usage`)
-   * and rolls it into the per-execution total. Returns the normalized usage so
-   * the caller can also persist it on the step execution. No-op (returns
-   * `undefined`) for steps that don't report usage. Shared by `finishStep`
-   * (full output) and `failStep` (partial output before a failure).
+   * into both the per-execution total and a per-step entry. Returns the
+   * normalized usage so the caller can persist it on the step execution. No-op
+   * (returns `undefined`) for steps that don't report usage. Shared by
+   * `finishStep` (full output) and `failStep` (partial output before a failure).
    */
   private recordTokenUsage(stepOutput: unknown): WorkflowTokenUsage | undefined {
     const usage = extractTokenUsage(stepOutput);
     this.workflowExecutionState.accumulateUsage(usage);
+    if (usage) {
+      const connectorId = extractConnectorId(stepOutput);
+      this.workflowExecutionState.recordStepUsage({
+        stepId: this.node.stepId,
+        ...(connectorId ? { connectorId } : {}),
+        ...usage,
+      });
+    }
     return usage;
   }
 

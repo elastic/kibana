@@ -5,73 +5,135 @@
  * 2.0.
  */
 
-import type { Discovery, SignificantEvent } from '@kbn/significant-events-schema';
+import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
+import type { ConverseStep } from '@kbn/evals';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 
-/**
- * The discovery investigator/judge agents have no emit tool and no enforced `structured_output` on
- * the public converse API, so (per their instructions) they return their result as a single JSON
- * object in the final agent message. These helpers recover that array. Conformance of each
- * item is graded separately by the `schema_validity` evaluator, so parsing casts loosely and returns
- * `[]` when the message is missing or not valid JSON.
- */
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
+interface EventsWriteToolResult {
+  data?: {
+    results?: EventsWriteItemResult[];
+  };
 }
 
-/**
- * Try to parse a JSON object from a text candidate (fenced block content or raw message).
- * Tolerates stray prose by slicing between the outermost braces.
- */
-function tryParseJsonObject(candidate: string): Record<string, unknown> | undefined {
-  const start = candidate.indexOf('{');
-  const end = candidate.lastIndexOf('}');
-  if (start === -1 || end === -1 || end < start) {
-    return undefined;
-  }
-  try {
-    const parsed = JSON.parse(candidate.slice(start, end + 1));
-    return isRecord(parsed) ? parsed : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-/**
- * Extract the first top-level JSON object from an agent message. Scans all ```json fenced
- * blocks in order and returns the first that parses as a valid JSON object, falling back to the
- * raw message. This prevents a preamble code fence (e.g. a tool-call example) from shadowing the
- * actual JSON payload when it appears later in the message.
- */
-function extractJsonObject(message: string): Record<string, unknown> | undefined {
-  if (!message) {
-    return undefined;
-  }
-
-  const fenceRegex = /```(?:json)?\s*([\s\S]*?)```/gi;
-  let match: RegExpExecArray | null;
-  while ((match = fenceRegex.exec(message)) !== null) {
-    const parsed = tryParseJsonObject(match[1]);
-    if (parsed) {
-      return parsed;
+type EventsWriteItemResult =
+  | {
+      index: number;
+      event_uuid: string;
+      event_id: string;
+      written: true;
     }
+  | {
+      index: number;
+      event_id: string;
+      written: false;
+      reason: 'duplicate_within_window' | 'bulk_error' | 'duplicate_key';
+      existing_event_id?: string;
+    };
+
+const toolCallSteps = (steps: ConverseStep[], toolId: string) =>
+  steps.filter((step) => step.type === 'tool_call' && step.tool_id === toolId && step.params);
+
+const getBulkItems = (params: Record<string, unknown> | undefined): Partial<SignificantEvent>[] => {
+  if (!Array.isArray(params?.items)) {
+    return [];
+  }
+  return params.items as Partial<SignificantEvent>[];
+};
+
+const getAlignedResults = (
+  items: Partial<SignificantEvent>[],
+  results: EventsWriteItemResult[] | undefined
+): EventsWriteItemResult[] | undefined => {
+  if (!Array.isArray(results) || results.length !== items.length) {
+    return undefined;
+  }
+  if (results.some((result, index) => result.index !== index)) {
+    return undefined;
+  }
+  return results;
+};
+
+const parseEventsWriteStep = (
+  step: ConverseStep
+): { items: Partial<SignificantEvent>[]; results: EventsWriteItemResult[] } | undefined => {
+  const items = getBulkItems(step.params);
+  const rawResults = (step.results?.[0] as EventsWriteToolResult | undefined)?.data?.results;
+
+  if (items.length > 0) {
+    const alignedResults = getAlignedResults(items, rawResults);
+    return alignedResults ? { items, results: alignedResults } : undefined;
   }
 
-  return tryParseJsonObject(message);
-}
+  // Tool schema may accept a bare item object, but converse steps keep the raw LLM args.
+  if (!Array.isArray(rawResults) || rawResults.length === 0) {
+    return undefined;
+  }
+  if (rawResults.some((result, index) => result.index !== index)) {
+    return undefined;
+  }
 
-function parseArrayProperty<T>(message: string, key: string): T[] {
-  const obj = extractJsonObject(message);
-  const value = obj?.[key];
-  return Array.isArray(value) ? (value as T[]) : [];
-}
+  return {
+    items: rawResults.map(() => ({})),
+    results: rawResults,
+  };
+};
 
-/** Parse the investigator's `{ "discoveries": [...] }` message into `Discovery[]`. */
-export function parseDiscoveries(message: string): Discovery[] {
-  return parseArrayProperty<Discovery>(message, 'discoveries');
-}
+/**
+ * Extract discoveries from `events_write` tool call steps.
+ */
+export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): SignificantEvent[] =>
+  toolCallSteps(steps, platformSignificantEventsTools.eventsWrite).flatMap((step) => {
+    const parsed = parseEventsWriteStep(step);
+    if (!parsed) {
+      return [];
+    }
 
-/** Parse the judge's `{ "significant_events": [...] }` message into `SignificantEvent[]`. */
-export function parseSignificantEvents(message: string): SignificantEvent[] {
-  return parseArrayProperty<SignificantEvent>(message, 'significant_events');
-}
+    const { items, results } = parsed;
+    return results
+      .map((result, index) =>
+        !result.written && result.reason !== 'duplicate_within_window'
+          ? undefined
+          : ({
+              ...items[index],
+              event_id: result.event_id,
+            } as SignificantEvent)
+      )
+      .filter((event): event is SignificantEvent => event !== undefined);
+  });
+
+/**
+ * Extract only event IDs explicitly supplied by the agent to `events_write`.
+ * Unlike `extractDiscoveriesFromToolCall`, this intentionally ignores handler-generated IDs so
+ * evaluators can distinguish the agent's continuation routing from the final write outcome.
+ */
+export const extractRequestedEventIdsFromToolCall = (steps: ConverseStep[]): string[] =>
+  toolCallSteps(steps, platformSignificantEventsTools.eventsWrite).flatMap((step) =>
+    getBulkItems(step.params)
+      .map((item) => item.event_id)
+      .filter((eventId): eventId is string => typeof eventId === 'string' && eventId.length > 0)
+  );
+
+/**
+ * Extract significant events from `events_write` tool call steps.
+ * Merges generated identifiers from successful tool results into their corresponding inputs.
+ */
+export const extractSignificantEventsFromToolCall = (steps: ConverseStep[]): SignificantEvent[] =>
+  toolCallSteps(steps, platformSignificantEventsTools.eventsWrite).flatMap((step) => {
+    const parsed = parseEventsWriteStep(step);
+    if (!parsed) {
+      return [];
+    }
+
+    const { items, results } = parsed;
+    return results
+      .map((result, index) =>
+        result.written
+          ? ({
+              ...items[index],
+              event_id: result.event_id,
+              event_uuid: result.event_uuid,
+            } as SignificantEvent)
+          : undefined
+      )
+      .filter((event): event is SignificantEvent => event !== undefined);
+  });

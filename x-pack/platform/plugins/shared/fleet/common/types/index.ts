@@ -49,6 +49,9 @@ export interface FleetConfigType {
     customIntegrations?: {
       enabled?: boolean;
     };
+    managedBulk?: {
+      enabled: boolean;
+    };
   };
   spaceSettings?: Array<{
     space_id: string;

@@ -14,13 +14,15 @@
       "taskManager",
       "dataViews",
       "security",
-      "licensing"
+      "licensing",
+      "workflowsExtensions"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects"
     ],
     "extraPublicDirs": [
-      "common"
+      "common",
+      "common/entity_summary"
     ]
   }
 }

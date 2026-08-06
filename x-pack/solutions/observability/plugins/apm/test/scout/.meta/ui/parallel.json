@@ -1,5 +1,9 @@
 {
-  "sha1": "8c844ab70e8016fb2a0d69aead3008bc7c9d0e90",
+  "sha1": "6dcaccd5666b44cbefcc77a3b35e40fdbdf6b4fd",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "b24d1ecdbd533dc-9b4248bf82e44c0",
@@ -13,7 +17,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 14,
+        "line": 6,
         "column": 1
       }
     },
@@ -29,7 +33,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 28,
+        "line": 6,
         "column": 1
       }
     },
@@ -43,8 +47,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_apm.spec.ts",
-        "line": 87,
-        "column": 7
+        "line": 80,
+        "column": 40
       }
     },
     {
@@ -57,8 +61,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_apm.spec.ts",
-        "line": 93,
-        "column": 7
+        "line": 82,
+        "column": 13
       }
     },
     {
@@ -71,8 +75,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 72,
-        "column": 7
+        "line": 82,
+        "column": 43
       }
     },
     {
@@ -85,8 +89,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 78,
-        "column": 7
+        "line": 82,
+        "column": 66
       }
     },
     {
@@ -99,8 +103,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 84,
-        "column": 7
+        "line": 85,
+        "column": 5
       }
     },
     {
@@ -114,7 +118,35 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
         "line": 90,
-        "column": 7
+        "column": 5
+      }
+    },
+    {
+      "id": "a8b772722b95dac-50d08881b842a4a",
+      "title": "Alert details - Chart layout Stateful - Anomaly alert renders callout and badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
+        "line": 96,
+        "column": 5
+      }
+    },
+    {
+      "id": "a8b772722b95dac-8c2921a8df389fc",
+      "title": "Alert details - Chart layout Serverless - Anomaly alert renders callout and badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
+        "line": 102,
+        "column": 5
       }
     },
     {
@@ -129,8 +161,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
-        "line": 95,
-        "column": 7
+        "line": 88,
+        "column": 23
       }
     },
     {
@@ -143,8 +175,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
-        "line": 138,
-        "column": 7
+        "line": 119,
+        "column": 15
       }
     },
     {
@@ -157,8 +189,40 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/error_count.spec.ts",
-        "line": 144,
-        "column": 7
+        "line": 125,
+        "column": 13
+      }
+    },
+    {
+      "id": "26c90b8a3c74c3a-0bbe884a31191b9",
+      "title": "Correlations shows the latency correlations results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/correlations/correlations.spec.ts",
+        "line": 24,
+        "column": 26
+      }
+    },
+    {
+      "id": "26c90b8a3c74c3a-e1f46d8af9ad188",
+      "title": "Correlations shows the failed transaction correlations results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/correlations/correlations.spec.ts",
+        "line": 37,
+        "column": 11
       }
     },
     {
@@ -173,8 +237,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependencies_inventory.spec.ts",
-        "line": 23,
-        "column": 9
+        "line": 19,
+        "column": 25
       }
     },
     {
@@ -189,8 +253,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependencies_inventory.spec.ts",
-        "line": 31,
-        "column": 9
+        "line": 23,
+        "column": 62
       }
     },
     {
@@ -205,8 +269,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependencies_inventory.spec.ts",
-        "line": 42,
-        "column": 9
+        "line": 29,
+        "column": 7
       }
     },
     {
@@ -221,8 +285,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 16,
+        "column": 80
       }
     },
     {
@@ -237,8 +301,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 38,
-        "column": 9
+        "line": 23,
+        "column": 15
       }
     },
     {
@@ -253,8 +317,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 57,
-        "column": 9
+        "line": 40,
+        "column": 20
       }
     },
     {
@@ -269,7 +333,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 71,
+        "line": 48,
         "column": 9
       }
     },
@@ -285,8 +349,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 87,
-        "column": 9
+        "line": 61,
+        "column": 15
       }
     },
     {
@@ -301,8 +365,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 99,
-        "column": 9
+        "line": 71,
+        "column": 10
       }
     },
     {
@@ -317,8 +381,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
-        "line": 22,
-        "column": 9
+        "line": 19,
+        "column": 25
       }
     },
     {
@@ -333,8 +397,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
-        "line": 44,
-        "column": 9
+        "line": 32,
+        "column": 15
       }
     },
     {
@@ -349,8 +413,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
-        "line": 57,
-        "column": 9
+        "line": 44,
+        "column": 62
       }
     },
     {
@@ -365,8 +429,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operations.spec.ts",
-        "line": 76,
-        "column": 9
+        "line": 59,
+        "column": 20
       }
     },
     {
@@ -381,8 +445,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_overview.spec.ts",
-        "line": 20,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -397,8 +461,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_overview.spec.ts",
-        "line": 40,
-        "column": 9
+        "line": 28,
+        "column": 13
       }
     },
     {
@@ -413,8 +477,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_overview.spec.ts",
-        "line": 63,
-        "column": 9
+        "line": 45,
+        "column": 13
       }
     },
     {
@@ -429,8 +493,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_overview.spec.ts",
-        "line": 83,
-        "column": 9
+        "line": 64,
+        "column": 11
       }
     },
     {
@@ -445,8 +509,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/service_dependencies.spec.ts",
-        "line": 23,
-        "column": 9
+        "line": 19,
+        "column": 48
       }
     },
     {
@@ -461,8 +525,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/service_dependencies.spec.ts",
-        "line": 46,
-        "column": 9
+        "line": 33,
+        "column": 15
       }
     },
     {
@@ -477,8 +541,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/service_dependencies.spec.ts",
-        "line": 60,
-        "column": 9
+        "line": 46,
+        "column": 62
       }
     },
     {
@@ -493,8 +557,104 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/service_dependencies.spec.ts",
-        "line": 81,
+        "line": 61,
+        "column": 11
+      }
+    },
+    {
+      "id": "625603af8b5f584-52f5ac1cec57ac1",
+      "title": "Diagnostics shows OK status badges on the summary tab as a superuser",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/diagnostics/diagnostics.spec.ts",
+        "line": 25,
+        "column": 38
+      }
+    },
+    {
+      "id": "625603af8b5f584-aca338c942b75ad",
+      "title": "Diagnostics imports a diagnostics bundle and can remove it as a superuser",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/diagnostics/diagnostics.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "625603af8b5f584-33af5af8106860d",
+      "title": "Diagnostics shows the imported bundle in the summary and template/data stream/index tabs as a superuser",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/diagnostics/diagnostics.spec.ts",
+        "line": 42,
+        "column": 13
+      }
+    },
+    {
+      "id": "625603af8b5f584-e08574201af08a6",
+      "title": "Diagnostics shows a missing-privileges warning on the summary tab as a viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/diagnostics/diagnostics.spec.ts",
+        "line": 66,
         "column": 9
+      }
+    },
+    {
+      "id": "625603af8b5f584-e91ac48db20025d",
+      "title": "Diagnostics hides the tabs that require cluster privileges as a viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/diagnostics/diagnostics.spec.ts",
+        "line": 75,
+        "column": 15
+      }
+    },
+    {
+      "id": "625603af8b5f584-c639866bc3f3fe0",
+      "title": "Diagnostics shows the imported bundle documents tab as a viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/diagnostics/diagnostics.spec.ts",
+        "line": 86,
+        "column": 13
       }
     },
     {
@@ -509,8 +669,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -525,8 +685,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
-        "line": 41,
-        "column": 9
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -541,8 +701,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
-        "line": 99,
-        "column": 9
+        "line": 81,
+        "column": 12
       }
     },
     {
@@ -557,8 +717,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
-        "line": 142,
-        "column": 9
+        "line": 119,
+        "column": 15
       }
     },
     {
@@ -573,8 +733,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
-        "line": 160,
-        "column": 9
+        "line": 129,
+        "column": 93
       }
     },
     {
@@ -589,8 +749,144 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/errors/errors.spec.ts",
-        "line": 181,
-        "column": 9
+        "line": 144,
+        "column": 20
+      }
+    },
+    {
+      "id": "27648e9ce9af3cf-febd0481d1f90aa",
+      "title": "APM feature controls - rules opens the latency rule flyout and shows the related dashboards section on details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_rules.spec.ts",
+        "line": 17,
+        "column": 86
+      }
+    },
+    {
+      "id": "d0a7175fa7b7926-d52dc0e9a9ea223",
+      "title": "APM feature controls - security with global apm all privileges shows the Applications nav link and can navigate to APM",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_security.spec.ts",
+        "line": 60,
+        "column": 22
+      }
+    },
+    {
+      "id": "d0a7175fa7b7926-fabc3c54101dbd0",
+      "title": "APM feature controls - security with global apm all privileges does not show the read-only badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_security.spec.ts",
+        "line": 65,
+        "column": 13
+      }
+    },
+    {
+      "id": "d0a7175fa7b7926-8b3c99636f14619",
+      "title": "APM feature controls - security with global apm read-only privileges can navigate to APM and shows the read-only badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_security.spec.ts",
+        "line": 73,
+        "column": 18
+      }
+    },
+    {
+      "id": "d0a7175fa7b7926-b0d42fb0e7c0a47",
+      "title": "APM feature controls - security with no apm privileges renders the no-permission page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_security.spec.ts",
+        "line": 81,
+        "column": 32
+      }
+    },
+    {
+      "id": "f2b6e65a02304c6-a93a3647325e6eb",
+      "title": "APM feature controls - spaces shows the Applications nav link when no features are disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_spaces.spec.ts",
+        "line": 33,
+        "column": 23
+      }
+    },
+    {
+      "id": "f2b6e65a02304c6-e33a000753f9181",
+      "title": "APM feature controls - spaces can navigate to the APM app when no features are disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_spaces.spec.ts",
+        "line": 39,
+        "column": 5
+      }
+    },
+    {
+      "id": "f2b6e65a02304c6-0cc3a11a3edfa3f",
+      "title": "APM feature controls - spaces does not show the Applications nav link when apm is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_spaces.spec.ts",
+        "line": 42,
+        "column": 56
+      }
+    },
+    {
+      "id": "f2b6e65a02304c6-40426faeb9bb050",
+      "title": "APM feature controls - spaces renders the not-found page when navigating to APM directly when apm is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/feature_controls/apm_spaces.spec.ts",
+        "line": 47,
+        "column": 16
       }
     },
     {
@@ -605,8 +901,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
-        "line": 20,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -621,8 +917,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
-        "line": 39,
-        "column": 9
+        "line": 32,
+        "column": 17
       }
     },
     {
@@ -637,8 +933,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
-        "line": 54,
-        "column": 9
+        "line": 41,
+        "column": 11
       }
     },
     {
@@ -653,8 +949,388 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/infrastructure/infrastructure.spec.ts",
-        "line": 69,
-        "column": 9
+        "line": 54,
+        "column": 10
+      }
+    },
+    {
+      "id": "d4a0acb07394110-8c4723b2be096bf",
+      "title": "Mobile Service Overview - Most used charts shows the most used charts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/mobile/mobile_most_used_charts.spec.ts",
+        "line": 32,
+        "column": 10
+      }
+    },
+    {
+      "id": "d4a0acb07394110-ed04e360617531e",
+      "title": "Mobile Service Overview - Most used charts shows \"No results found\" when the selected range has no data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/mobile/mobile_most_used_charts.spec.ts",
+        "line": 35,
+        "column": 7
+      }
+    },
+    {
+      "id": "4c78d31f55fd6ea-0fc3005919d541f",
+      "title": "Mobile transaction details page opens the action menu popup when clicking the investigate button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/mobile/mobile_transaction_details.spec.ts",
+        "line": 21,
+        "column": 13
+      }
+    },
+    {
+      "id": "e2338018afb2d99-016b359a61c05e8",
+      "title": "Mobile transactions page shows the correct table for each tab when clicking on it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/mobile/mobile_transactions.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "b7f16da4428f80d-8a951059776150b",
+      "title": "Applications deep links for \"apm\" keyword navigates to Applications / Service inventory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
+        "line": 35,
+        "column": 52
+      }
+    },
+    {
+      "id": "b7f16da4428f80d-a9388f1d458263a",
+      "title": "Applications deep links for \"apm\" keyword navigates to Applications / Service groups",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
+        "line": 35,
+        "column": 52
+      }
+    },
+    {
+      "id": "b7f16da4428f80d-7792d40d140033f",
+      "title": "Applications deep links for \"apm\" keyword navigates to Applications / Traces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
+        "line": 35,
+        "column": 52
+      }
+    },
+    {
+      "id": "b7f16da4428f80d-6c535f612f3ba4e",
+      "title": "Applications deep links for \"apm\" keyword navigates to Applications / Service map",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
+        "line": 35,
+        "column": 52
+      }
+    },
+    {
+      "id": "b7f16da4428f80d-df2ec252209fc7e",
+      "title": "Applications deep links for \"apm\" keyword navigates to Applications / Dependencies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
+        "line": 35,
+        "column": 52
+      }
+    },
+    {
+      "id": "b7f16da4428f80d-bab704da673efc8",
+      "title": "Applications deep links for \"apm\" keyword navigates to Applications / Settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
+        "line": 35,
+        "column": 52
+      }
+    },
+    {
+      "id": "b7f16da4428f80d-03a2e53f25523c1",
+      "title": "Applications deep links for \"applications\" keyword navigates to Applications / Service inventory",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
+        "line": 35,
+        "column": 52
+      }
+    },
+    {
+      "id": "b7f16da4428f80d-1e7cf599c0381a5",
+      "title": "Applications deep links for \"applications\" keyword navigates to Applications / Service groups",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
+        "line": 35,
+        "column": 52
+      }
+    },
+    {
+      "id": "b7f16da4428f80d-50d741c8a3aee76",
+      "title": "Applications deep links for \"applications\" keyword navigates to Applications / Traces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
+        "line": 35,
+        "column": 52
+      }
+    },
+    {
+      "id": "b7f16da4428f80d-5fa63cae35406c6",
+      "title": "Applications deep links for \"applications\" keyword navigates to Applications / Service map",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
+        "line": 35,
+        "column": 52
+      }
+    },
+    {
+      "id": "b7f16da4428f80d-cfd417733bd024b",
+      "title": "Applications deep links for \"applications\" keyword navigates to Applications / Dependencies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
+        "line": 35,
+        "column": 52
+      }
+    },
+    {
+      "id": "b7f16da4428f80d-8a30ff809e9049d",
+      "title": "Applications deep links for \"applications\" keyword navigates to Applications / Settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/deep_links.spec.ts",
+        "line": 35,
+        "column": 52
+      }
+    },
+    {
+      "id": "02fc0b693c2ef07-29aaee9ada2b98b",
+      "title": "APM 404 shows the 404 page for an unknown APM route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/navigation/not_found.spec.ts",
+        "line": 18,
+        "column": 25
+      }
+    },
+    {
+      "id": "1e9d89df8fa3bed-56e3bcd6f695e91",
+      "title": "APM Onboarding includes a section for APM Agents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/onboarding.spec.ts",
+        "line": 51,
+        "column": 11
+      }
+    },
+    {
+      "id": "1e9d89df8fa3bed-82ff61d9f945c54",
+      "title": "APM Onboarding navigates between agent tabs and shows the install snippet",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/onboarding.spec.ts",
+        "line": 57,
+        "column": 42
+      }
+    },
+    {
+      "id": "1e9d89df8fa3bed-57de2cb5352c2a0",
+      "title": "APM Onboarding shows the agent status success callout when APM data is present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/onboarding.spec.ts",
+        "line": 75,
+        "column": 20
+      }
+    },
+    {
+      "id": "1e9d89df8fa3bed-901947da27a7740",
+      "title": "APM Onboarding creates an API key successfully with the right privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/onboarding.spec.ts",
+        "line": 82,
+        "column": 13
+      }
+    },
+    {
+      "id": "1e9d89df8fa3bed-c8f5962c1fbdcdc",
+      "title": "APM Onboarding shows a warning callout when API key privileges are missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/onboarding.spec.ts",
+        "line": 96,
+        "column": 18
+      }
+    },
+    {
+      "id": "aa5fa6620320cc6-d62b31383d96ed1",
+      "title": "APM tutorial includes the section for the APM Server",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/tutorial.spec.ts",
+        "line": 55,
+        "column": 60
+      }
+    },
+    {
+      "id": "aa5fa6620320cc6-3c90a363e3886f4",
+      "title": "APM tutorial includes the section for the APM agents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/onboarding/tutorial.spec.ts",
+        "line": 61,
+        "column": 5
       }
     },
     {
@@ -669,8 +1345,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_dashboards/service_dashboards.spec.ts",
-        "line": 73,
-        "column": 9
+        "line": 68,
+        "column": 26
       }
     },
     {
@@ -685,8 +1361,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_dashboards/service_dashboards.spec.ts",
-        "line": 95,
-        "column": 9
+        "line": 83,
+        "column": 15
       }
     },
     {
@@ -701,8 +1377,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_groups/service_groups.spec.ts",
-        "line": 25,
-        "column": 9
+        "line": 19,
+        "column": 89
       }
     },
     {
@@ -717,8 +1393,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 24,
-        "column": 9
+        "line": 18,
+        "column": 13
       }
     },
     {
@@ -733,8 +1409,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 49,
-        "column": 9
+        "line": 40,
+        "column": 15
       }
     },
     {
@@ -749,8 +1425,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 57,
+        "line": 46,
         "column": 9
+      }
+    },
+    {
+      "id": "0d134541f1c6605-db638c12980196a",
+      "title": "Service inventory navigates to the next page when clicking the pagination button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
+        "line": 61,
+        "column": 29
       }
     },
     {
@@ -765,7 +1457,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 68,
+        "line": 67,
         "column": 9
       }
     },
@@ -781,8 +1473,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 27,
-        "column": 9
+        "line": 21,
+        "column": 13
       }
     },
     {
@@ -797,8 +1489,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 44,
-        "column": 9
+        "line": 37,
+        "column": 17
       }
     },
     {
@@ -813,8 +1505,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 94,
-        "column": 9
+        "line": 79,
+        "column": 15
       }
     },
     {
@@ -827,8 +1519,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_alert_badge.spec.ts",
-        "line": 143,
-        "column": 7
+        "line": 133,
+        "column": 9
       }
     },
     {
@@ -841,8 +1533,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_alert_badge.spec.ts",
-        "line": 149,
-        "column": 7
+        "line": 137,
+        "column": 15
       }
     },
     {
@@ -857,13 +1549,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 36,
-        "column": 9
+        "line": 34,
+        "column": 7
       }
     },
     {
-      "id": "6a80f754a8758b3-bd179c28cf90db2",
-      "title": "Service map - nodes, edges and popovers shows popover when clicking on a service node",
+      "id": "6a80f754a8758b3-25c386966627348",
+      "title": "Service map - nodes, edges and popovers shows flyout when clicking on a service node",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -873,13 +1565,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 67,
-        "column": 9
+        "line": 60,
+        "column": 15
       }
     },
     {
-      "id": "6a80f754a8758b3-0c21e23b58b1030",
-      "title": "Service map - nodes, edges and popovers dismisses popover when clicking outside",
+      "id": "6a80f754a8758b3-ea39ae38f3b41ed",
+      "title": "Service map - nodes, edges and popovers dismisses service flyout when clicking the close button",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -889,8 +1581,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 81,
-        "column": 9
+        "line": 80,
+        "column": 14
       }
     },
     {
@@ -905,7 +1597,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 93,
+        "line": 95,
         "column": 9
       }
     },
@@ -921,13 +1613,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 105,
-        "column": 9
+        "line": 103,
+        "column": 13
       }
     },
     {
-      "id": "6a80f754a8758b3-39e157c4c45a87f",
-      "title": "Service map - nodes, edges and popovers navigates to Service Details from popover",
+      "id": "6a80f754a8758b3-e0bd84c24095102",
+      "title": "Service map - nodes, edges and popovers navigates to Discover (traces) from flyout footer actions",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -937,13 +1629,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 119,
-        "column": 9
+        "line": 111,
+        "column": 13
       }
     },
     {
-      "id": "6a80f754a8758b3-cfea2cecad5e86a",
-      "title": "Service map - nodes, edges and popovers navigates to Focus Map from popover",
+      "id": "6a80f754a8758b3-02d98c7a0ea5036",
+      "title": "Service map - nodes, edges and popovers navigates to Discover (logs) from flyout footer actions",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -953,8 +1645,56 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 137,
-        "column": 9
+        "line": 123,
+        "column": 20
+      }
+    },
+    {
+      "id": "6a80f754a8758b3-be54d3b49115fd0",
+      "title": "Service map - nodes, edges and popovers navigates to Observability Alerts from flyout footer actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
+        "line": 132,
+        "column": 14
+      }
+    },
+    {
+      "id": "6a80f754a8758b3-aced03aeab6c955",
+      "title": "Service map - nodes, edges and popovers navigates to SLOs from flyout footer actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
+        "line": 138,
+        "column": 67
+      }
+    },
+    {
+      "id": "6a80f754a8758b3-a8099ee2dd2f330",
+      "title": "Service map - nodes, edges and popovers navigates to Service Details from flyout title and page loads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
+        "line": 149,
+        "column": 22
       }
     },
     {
@@ -969,8 +1709,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 154,
-        "column": 9
+        "line": 155,
+        "column": 65
       }
     },
     {
@@ -985,8 +1725,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
-        "line": 57,
-        "column": 9
+        "line": 43,
+        "column": 23
       }
     },
     {
@@ -1001,8 +1741,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
-        "line": 255,
-        "column": 9
+        "line": 236,
+        "column": 16
       }
     },
     {
@@ -1017,13 +1757,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
-      "id": "431bbf1927933f1-9d4b191090eb231",
-      "title": "Service map shows a detailed service map",
+      "id": "431bbf1927933f1-84486d1480fb64c",
+      "title": "Service map navigates from the contextual map to the global map with service context",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1033,8 +1773,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 33,
-        "column": 9
+        "line": 25,
+        "column": 13
       }
     },
     {
@@ -1049,8 +1789,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 46,
-        "column": 9
+        "line": 37,
+        "column": 15
       }
     },
     {
@@ -1065,8 +1805,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 57,
-        "column": 9
+        "line": 47,
+        "column": 25
       }
     },
     {
@@ -1081,8 +1821,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/alerts_tab.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 23,
+        "column": 22
       }
     },
     {
@@ -1097,7 +1837,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/alerts_tab.spec.ts",
-        "line": 38,
+        "line": 35,
         "column": 9
       }
     },
@@ -1113,8 +1853,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/alerts_tab.spec.ts",
-        "line": 71,
-        "column": 9
+        "line": 62,
+        "column": 15
       }
     },
     {
@@ -1129,8 +1869,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts",
-        "line": 23,
-        "column": 9
+        "line": 20,
+        "column": 25
       }
     },
     {
@@ -1145,7 +1885,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts",
-        "line": 54,
+        "line": 43,
         "column": 9
       }
     },
@@ -1161,8 +1901,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1177,8 +1917,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1193,8 +1933,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1209,8 +1949,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1225,8 +1965,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1241,8 +1981,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1257,8 +1997,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1273,8 +2013,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1289,8 +2029,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1305,8 +2045,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1321,8 +2061,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1337,8 +2077,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1353,8 +2093,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1369,8 +2109,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1385,8 +2125,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1401,8 +2141,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1417,8 +2157,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 217,
-        "column": 11
+        "line": 239,
+        "column": 28
       }
     },
     {
@@ -1433,8 +2173,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_instrumentation_switching.spec.ts",
-        "line": 26,
-        "column": 9
+        "line": 23,
+        "column": 25
       }
     },
     {
@@ -1449,8 +2189,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_instrumentation_switching.spec.ts",
-        "line": 84,
-        "column": 9
+        "line": 70,
+        "column": 26
       }
     },
     {
@@ -1465,8 +2205,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_instrumentation_switching.spec.ts",
-        "line": 133,
-        "column": 9
+        "line": 112,
+        "column": 26
       }
     },
     {
@@ -1481,8 +2221,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_non_dashboard.spec.ts",
-        "line": 31,
-        "column": 9
+        "line": 28,
+        "column": 25
       }
     },
     {
@@ -1497,7 +2237,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_non_dashboard.spec.ts",
-        "line": 72,
+        "line": 59,
         "column": 9
       }
     },
@@ -1513,8 +2253,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_non_dashboard.spec.ts",
-        "line": 112,
-        "column": 9
+        "line": 96,
+        "column": 15
+      }
+    },
+    {
+      "id": "e0eb65a41d5f693-35707d9b1cdbad6",
+      "title": "Mobile Service Overview - Contextual service map renders the contextual service map section with controls and focal service",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/mobile_service_overview_contextual_service_map.spec.ts",
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -1529,8 +2285,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_aws_lambda.spec.ts",
-        "line": 20,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -1545,8 +2301,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_azure_functions.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -1561,8 +2317,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_components.spec.ts",
-        "line": 20,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -1577,8 +2333,40 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_components.spec.ts",
-        "line": 70,
-        "column": 9
+        "line": 69,
+        "column": 17
+      }
+    },
+    {
+      "id": "9e3e33081ada713-079eb3ce768808d",
+      "title": "Service Overview - Contextual service map renders the contextual service map section with controls and focal service",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_contextual_service_map.spec.ts",
+        "line": 22,
+        "column": 25
+      }
+    },
+    {
+      "id": "9e3e33081ada713-d1824802ee46158",
+      "title": "Service Overview - Contextual service map reveals hidden dependencies when hops are reduced and expand is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_contextual_service_map.spec.ts",
+        "line": 48,
+        "column": 26
       }
     },
     {
@@ -1593,8 +2381,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_edot.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -1609,8 +2397,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_edot.spec.ts",
-        "line": 57,
-        "column": 9
+        "line": 49,
+        "column": 15
       }
     },
     {
@@ -1625,8 +2413,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_edot.spec.ts",
-        "line": 74,
-        "column": 9
+        "line": 61,
+        "column": 13
       }
     },
     {
@@ -1641,8 +2429,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_edot.spec.ts",
-        "line": 94,
-        "column": 9
+        "line": 78,
+        "column": 13
       }
     },
     {
@@ -1657,8 +2445,56 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_edot.spec.ts",
-        "line": 113,
-        "column": 9
+        "line": 90,
+        "column": 99
+      }
+    },
+    {
+      "id": "db759c2ef161e71-ce08fd300cdc285",
+      "title": "Service Overview - Error Details opbeans-java overview errors table is populated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
+        "line": 18,
+        "column": 25
+      }
+    },
+    {
+      "id": "db759c2ef161e71-eecb91c304f15d4",
+      "title": "Service Overview - Error Details opbeans-java overview \"View errors\" link navigates to the errors page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
+        "line": 34,
+        "column": 20
+      }
+    },
+    {
+      "id": "db759c2ef161e71-98730f50bd089d1",
+      "title": "Service Overview - Error Details opbeans-java overview clicking an error navigates to the error detail page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
+        "line": 54,
+        "column": 15
       }
     },
     {
@@ -1673,8 +2509,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 76,
+        "column": 58
       }
     },
     {
@@ -1689,8 +2525,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 44,
-        "column": 9
+        "line": 93,
+        "column": 22
       }
     },
     {
@@ -1705,8 +2541,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 72,
-        "column": 9
+        "line": 116,
+        "column": 20
       }
     },
     {
@@ -1721,8 +2557,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 99,
-        "column": 9
+        "line": 142,
+        "column": 10
       }
     },
     {
@@ -1737,8 +2573,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 122,
-        "column": 9
+        "line": 156,
+        "column": 20
       }
     },
     {
@@ -1753,8 +2589,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_error_details.spec.ts",
-        "line": 169,
-        "column": 9
+        "line": 192,
+        "column": 10
       }
     },
     {
@@ -1769,8 +2605,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_filters.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -1785,7 +2621,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_filters.spec.ts",
-        "line": 51,
+        "line": 41,
         "column": 9
       }
     },
@@ -1801,7 +2637,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_filters.spec.ts",
-        "line": 75,
+        "line": 58,
         "column": 9
       }
     },
@@ -1817,8 +2653,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_filters.spec.ts",
-        "line": 96,
-        "column": 9
+        "line": 77,
+        "column": 22
       }
     },
     {
@@ -1833,8 +2669,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_filters.spec.ts",
-        "line": 116,
-        "column": 9
+        "line": 96,
+        "column": 61
       }
     },
     {
@@ -1849,7 +2685,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_filters.spec.ts",
-        "line": 133,
+        "line": 109,
         "column": 9
       }
     },
@@ -1865,8 +2701,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -1881,8 +2717,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
-        "line": 44,
-        "column": 9
+        "line": 32,
+        "column": 15
       }
     },
     {
@@ -1897,8 +2733,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
-        "line": 67,
-        "column": 9
+        "line": 48,
+        "column": 13
+      }
+    },
+    {
+      "id": "a193bb7a321f948-0910d8bd14f9c2f",
+      "title": "Service Overview - Mobile Services mobile service overview header renders the environment filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
+        "line": 68,
+        "column": 20
       }
     },
     {
@@ -1914,7 +2766,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
         "line": 90,
-        "column": 9
+        "column": 10
       }
     },
     {
@@ -1929,8 +2781,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_navigation.spec.ts",
-        "line": 20,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -1945,8 +2797,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_navigation.spec.ts",
-        "line": 46,
-        "column": 9
+        "line": 34,
+        "column": 15
       }
     },
     {
@@ -1961,8 +2813,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_navigation.spec.ts",
-        "line": 66,
-        "column": 9
+        "line": 49,
+        "column": 11
       }
     },
     {
@@ -1977,8 +2829,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_navigation.spec.ts",
-        "line": 91,
-        "column": 9
+        "line": 68,
+        "column": 20
       }
     },
     {
@@ -1993,8 +2845,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_otel.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -2009,8 +2861,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_otel.spec.ts",
-        "line": 57,
-        "column": 9
+        "line": 49,
+        "column": 15
       }
     },
     {
@@ -2025,8 +2877,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_otel.spec.ts",
-        "line": 74,
-        "column": 9
+        "line": 61,
+        "column": 13
       }
     },
     {
@@ -2041,8 +2893,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_otel.spec.ts",
-        "line": 104,
-        "column": 9
+        "line": 80,
+        "column": 20
       }
     },
     {
@@ -2057,7 +2909,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_otel.spec.ts",
-        "line": 124,
+        "line": 101,
         "column": 9
       }
     },
@@ -2073,8 +2925,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_otel.spec.ts",
-        "line": 143,
-        "column": 9
+        "line": 114,
+        "column": 13
       }
     },
     {
@@ -2089,8 +2941,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -2105,8 +2957,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
-        "line": 49,
-        "column": 9
+        "line": 42,
+        "column": 13
       }
     },
     {
@@ -2121,8 +2973,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
-        "line": 67,
-        "column": 9
+        "line": 53,
+        "column": 13
       }
     },
     {
@@ -2137,7 +2989,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
-        "line": 106,
+        "line": 84,
         "column": 9
       }
     },
@@ -2153,8 +3005,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
-        "line": 134,
-        "column": 9
+        "line": 112,
+        "column": 20
       }
     },
     {
@@ -2169,50 +3021,56 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_transaction_details.spec.ts",
-        "line": 156,
+        "line": 128,
+        "column": 15
+      }
+    },
+    {
+      "id": "0a381925faebc88-6f937acb840d537",
+      "title": "Service Overview - Time Comparison enables comparison by default with the day-before offset",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/time_comparison.spec.ts",
+        "line": 21,
+        "column": 25
+      }
+    },
+    {
+      "id": "0a381925faebc88-396995de5ec5356",
+      "title": "Service Overview - Time Comparison changes the comparison type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/time_comparison.spec.ts",
+        "line": 32,
         "column": 9
       }
     },
     {
-      "id": "89c8ff66ee766e0-93d765a7c716612",
-      "title": "Agent Configuration Viewer should not be able to modify settings",
+      "id": "0a381925faebc88-cca2fee977c2628",
+      "title": "Service Overview - Time Comparison toggling comparison off disables the comparison select",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_configuration.spec.ts",
-        "line": 13,
-        "column": 7
-      }
-    },
-    {
-      "id": "89c8ff66ee766e0-09b8159d2323da0",
-      "title": "Agent Configuration APM All Privileges Without Write Settings should not be able to modify settings",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_configuration.spec.ts",
-        "line": 23,
-        "column": 7
-      }
-    },
-    {
-      "id": "89c8ff66ee766e0-9ba74430ee8ac12",
-      "title": "Agent Configuration Privileged user should be able to configure, create and delete an agent configuration with all services and production environment",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_configuration.spec.ts",
-        "line": 33,
-        "column": 7
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/time_comparison.spec.ts",
+        "line": 43,
+        "column": 22
       }
     },
     {
@@ -2225,8 +3083,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
-        "line": 13,
-        "column": 7
+        "line": 12,
+        "column": 14
       }
     },
     {
@@ -2239,8 +3097,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
-        "line": 27,
-        "column": 7
+        "line": 22,
+        "column": 54
       }
     },
     {
@@ -2253,8 +3111,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
-        "line": 42,
-        "column": 7
+        "line": 31,
+        "column": 9
       }
     },
     {
@@ -2267,8 +3125,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_explorer.spec.ts",
-        "line": 61,
-        "column": 7
+        "line": 40,
+        "column": 5
       }
     },
     {
@@ -2283,8 +3141,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_keys.spec.ts",
-        "line": 16,
-        "column": 9
+        "line": 17,
+        "column": 10
       }
     },
     {
@@ -2299,93 +3157,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/agent_keys.spec.ts",
-        "line": 26,
-        "column": 9
+        "line": 20,
+        "column": 7
       }
     },
     {
-      "id": "01ea78763124721-b5f438e39d8d665",
-      "title": "Anomaly Detection Viewer should not be able to modify settings",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
-        "line": 17,
-        "column": 9
-      }
-    },
-    {
-      "id": "01ea78763124721-33d6a15705dd230",
-      "title": "Anomaly Detection Privileged User should be able to modify settings",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
-        "line": 27,
-        "column": 9
-      }
-    },
-    {
-      "id": "01ea78763124721-c5bb5d1bcaddc75",
-      "title": "Anomaly Detection Admin should be able to modify settings",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
-        "line": 47,
-        "column": 9
-      }
-    },
-    {
-      "id": "01ea78763124721-9785a7919050c13",
-      "title": "Anomaly Detection APM Read Privileges With Write Settings should be able to modify settings",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
-        "line": 65,
-        "column": 9
-      }
-    },
-    {
-      "id": "01ea78763124721-46465c39e998aa3",
-      "title": "Anomaly Detection APM All Privileges Without Write Settings should not be able to modify settings",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/anomaly_detection.spec.ts",
-        "line": 90,
-        "column": 9
-      }
-    },
-    {
-      "id": "b1d9732f2022f52-21e57a8269d0449",
-      "title": "Custom links template validation template URL with filters — create from settings, verify in transaction, delete",
+      "id": "b1d9732f2022f52-e38f26ba0a27447",
+      "title": "Custom links template validation creates custom link with template URL and filters from settings",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -2395,13 +3173,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 29,
-        "column": 9
+        "line": 34,
+        "column": 66
       }
     },
     {
-      "id": "b1d9732f2022f52-4eb454b9f6d8aaf",
-      "title": "Custom links template validation default URL flow — create link from transaction details with prefilled filters, delete",
+      "id": "b1d9732f2022f52-d1ee5684a339cc1",
+      "title": "Custom links template validation populates template variables in transaction custom link URLs",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -2411,8 +3189,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 102,
-        "column": 9
+        "line": 38,
+        "column": 26
+      }
+    },
+    {
+      "id": "b1d9732f2022f52-8a31f7adeef282e",
+      "title": "Custom links template validation creates custom link from transaction details with prefilled filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
+        "line": 53,
+        "column": 62
       }
     },
     {
@@ -2427,8 +3221,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links.spec.ts",
-        "line": 54,
-        "column": 9
+        "line": 45,
+        "column": 40
       }
     },
     {
@@ -2443,8 +3237,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links.spec.ts",
-        "line": 68,
-        "column": 9
+        "line": 55,
+        "column": 39
       }
     },
     {
@@ -2460,7 +3254,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/general_settings.spec.ts",
         "line": 16,
-        "column": 9
+        "column": 10
       }
     },
     {
@@ -2475,8 +3269,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/general_settings.spec.ts",
-        "line": 30,
-        "column": 9
+        "line": 23,
+        "column": 26
       }
     },
     {
@@ -2489,8 +3283,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/indices.spec.ts",
-        "line": 26,
-        "column": 7
+        "line": 21,
+        "column": 21
       }
     },
     {
@@ -2503,8 +3297,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/indices.spec.ts",
-        "line": 40,
-        "column": 7
+        "line": 27,
+        "column": 33
       }
     },
     {
@@ -2517,8 +3311,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/serverless_settings.spec.ts",
-        "line": 17,
-        "column": 7
+        "line": 13,
+        "column": 8
       }
     },
     {
@@ -2531,8 +3325,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/serverless_settings.spec.ts",
-        "line": 26,
-        "column": 7
+        "line": 15,
+        "column": 5
       }
     },
     {
@@ -2545,8 +3339,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/serverless_settings.spec.ts",
-        "line": 38,
-        "column": 7
+        "line": 19,
+        "column": 32
       }
     },
     {
@@ -2559,8 +3353,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer_functionality.spec.ts",
-        "line": 25,
-        "column": 7
+        "line": 20,
+        "column": 28
       }
     },
     {
@@ -2575,8 +3369,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer_permissions.spec.ts",
-        "line": 20,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -2591,8 +3385,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 31,
-        "column": 9
+        "line": 28,
+        "column": 25
       }
     },
     {
@@ -2607,8 +3401,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 77,
-        "column": 9
+        "line": 68,
+        "column": 15
       }
     },
     {
@@ -2623,8 +3417,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 114,
-        "column": 9
+        "line": 99,
+        "column": 17
       }
     },
     {
@@ -2639,8 +3433,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 151,
-        "column": 9
+        "line": 134,
+        "column": 24
       }
     },
     {
@@ -2655,8 +3449,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_links.spec.ts",
-        "line": 186,
-        "column": 9
+        "line": 163,
+        "column": 48
       }
     },
     {
@@ -2671,8 +3465,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_stacktrace.spec.ts",
-        "line": 25,
-        "column": 9
+        "line": 22,
+        "column": 25
       }
     },
     {
@@ -2687,8 +3481,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_stacktrace.spec.ts",
-        "line": 53,
-        "column": 9
+        "line": 40,
+        "column": 13
       }
     },
     {
@@ -2703,8 +3497,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
-        "line": 39,
-        "column": 9
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -2719,8 +3513,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
-        "line": 89,
-        "column": 9
+        "line": 71,
+        "column": 15
       }
     },
     {
@@ -2735,8 +3529,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
-        "line": 101,
-        "column": 9
+        "line": 79,
+        "column": 15
       }
     },
     {
@@ -2751,8 +3545,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 26,
-        "column": 9
+        "line": 20,
+        "column": 26
       }
     },
     {
@@ -2767,8 +3561,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 48,
-        "column": 9
+        "line": 33,
+        "column": 15
       }
     },
     {
@@ -2783,7 +3577,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 71,
+        "line": 56,
         "column": 9
       }
     },
@@ -2799,8 +3593,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 93,
-        "column": 9
+        "line": 73,
+        "column": 45
       }
     },
     {
@@ -2815,8 +3609,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transactions_overview/transactions_overview.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -2831,8 +3625,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transactions_overview/transactions_overview.spec.ts",
-        "line": 35,
-        "column": 9
+        "line": 32,
+        "column": 24
       }
     }
   ]

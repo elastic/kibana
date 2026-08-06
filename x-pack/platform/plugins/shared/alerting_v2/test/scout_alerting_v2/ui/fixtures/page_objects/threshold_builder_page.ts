@@ -6,22 +6,24 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { EuiComboBoxWrapper } from '@kbn/scout';
 
 export class ThresholdBuilderPage {
   public readonly timeFieldSelect: Locator;
   public readonly addStatButton: Locator;
 
-  private readonly indexComboBox: EuiComboBoxWrapper;
+  private readonly indexComboBox;
 
   constructor(private readonly page: ScoutPage) {
     this.timeFieldSelect = this.page.testSubj.locator('ruleBuilderTimeField');
     this.addStatButton = this.page.testSubj.locator('ruleBuilderAddStat');
-    this.indexComboBox = new EuiComboBoxWrapper(page, 'ruleBuilderIndexField');
+    this.indexComboBox = page.components.comboBox('ruleBuilderIndexField');
   }
 
   async setIndex(pattern: string) {
-    await this.indexComboBox.setCustomSingleOption(pattern, { settleTimeoutMs: 10_000 });
+    // Index source list is fetched async (ES|QL sources) and the combo supports onCreateOption;
+    // setCustomSelectedOptions types the pattern and commits it via onCreateOption (it won't
+    // pre-exist as a selectable option).
+    await this.indexComboBox.setCustomSelectedOptions([pattern]);
   }
 
   statAggSelect(idx: number): Locator {

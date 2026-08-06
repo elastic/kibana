@@ -8,22 +8,23 @@
  */
 
 import type { EuiIconProps, IconType } from '@elastic/eui';
-import { EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { Suspense, useMemo } from 'react';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
-import { getBaseConnectorType } from './get_base_connector_type';
 import { getStepIconType } from './get_step_icon_type';
+import { HardcodedIcons } from './hardcoded_icons';
 import { resolveRegisteredStepIcon } from './resolve_registered_step_icon';
 import { useWorkflowsUiServices } from '../../context';
 
-/** Bare trigger `type` values (e.g. `manual`, `alert`, `scheduled`) mapped to an EUI icon. */
+/** Bare trigger `type` values (e.g. `manual`, `alert`, `scheduled`) mapped to workflow icons. */
 const TRIGGER_TYPE_ICONS: Record<string, IconType> = {
-  manual: 'play',
-  alert: 'warning',
-  scheduled: 'clock',
+  manual: HardcodedIcons.manual,
+  alert: HardcodedIcons.alert,
+  scheduled: HardcodedIcons.scheduled,
 };
 
-const DEFAULT_TRIGGER_ICON: IconType = 'bolt';
+const DEFAULT_TRIGGER_ICON: IconType = HardcodedIcons.trigger;
 
 function resolveTriggerIconType(
   triggerType: string,
@@ -52,7 +53,20 @@ export interface TypeIconProps extends Omit<EuiIconProps, 'type'> {
  * {@link useWorkflowsUiServices}, so consumers must be wrapped in a
  * `WorkflowsUiServicesProvider`. The tooltip shows the raw `type`.
  */
+/*
+ * EuiToolTip's default anchor is an inline-block with a normal line box, which
+ * verticals the masked-span glyphs and `<svg>` icons differently (baseline vs
+ * middle) and makes mixed icon rows look misaligned. Anchor to a zero-line-box
+ * flex span instead — same idiom as the plugin's `withTooltip`.
+ */
+const tooltipAnchorStyle = css({
+  display: 'inline-flex',
+  alignItems: 'center',
+  lineHeight: 0,
+});
+
 export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, ...rest }) => {
+  const { euiTheme } = useEuiTheme();
   const { workflowsExtensions, triggersActionsUi } = useWorkflowsUiServices();
 
   const iconType = useMemo(
@@ -62,14 +76,29 @@ export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, ...rest 
         : resolveRegisteredStepIcon(type, {
             workflowsExtensions,
             actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
-          }) ?? getStepIconType(getBaseConnectorType(type)),
+          }) ?? getStepIconType(type),
     [kind, type, workflowsExtensions, triggersActionsUi]
   );
 
   const label = title ?? type;
 
   const icon =
-    typeof iconType === 'string' ? (
+    typeof iconType === 'string' && iconType.startsWith('data:') ? (
+      <span
+        css={css`
+          display: inline-block;
+          width: 16px;
+          height: 16px;
+          mask-image: url('${iconType}');
+          mask-size: contain;
+          mask-repeat: no-repeat;
+          mask-position: center;
+          background-color: ${euiTheme.colors.textParagraph};
+        `}
+        aria-hidden={true}
+        data-test-subj="workflowTypeIconDataUrl"
+      />
+    ) : typeof iconType === 'string' ? (
       <EuiIcon type={iconType} size="m" {...rest} />
     ) : (
       <Suspense fallback={<EuiLoadingSpinner size="s" />}>
@@ -77,6 +106,12 @@ export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, ...rest 
       </Suspense>
     );
 
-  return <EuiToolTip content={label}>{icon}</EuiToolTip>;
+  return (
+    <EuiToolTip content={label} anchorProps={{ css: css({ display: 'inline-flex' }) }}>
+      <span css={tooltipAnchorStyle} tabIndex={0}>
+        {icon}
+      </span>
+    </EuiToolTip>
+  );
 });
 TypeIcon.displayName = 'TypeIcon';

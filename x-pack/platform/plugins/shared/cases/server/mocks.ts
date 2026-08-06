@@ -778,6 +778,7 @@ export const mockCasesContract = (): CasesServerStart => ({
   getUnifiedAttachmentTypeRegistry: jest.fn(),
   config: {
     enabled: true,
+    assigneeIdentity: { enabled: true },
     stack: {
       enabled: true,
     },
@@ -804,6 +805,9 @@ export const mockCasesContract = (): CasesServerStart => ({
       taskStartDelayMinutes: 10,
     },
     templates: {
+      enabled: true,
+    },
+    chat: {
       enabled: true,
     },
     casesRedesign: {

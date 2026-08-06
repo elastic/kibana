@@ -396,5 +396,112 @@ describe('FeatureFlagsService Browser', () => {
       ).toEqual(true);
       expect(getBooleanValueSpy).not.toHaveBeenCalled();
     });
+
+    describe('usage counter reporting', () => {
+      test('does not report repeated evaluations of the same value', () => {
+        startContract.getBooleanValue('my-flag', false);
+        startContract.getBooleanValue('my-flag', false);
+        startContract.getBooleanValue('my-flag', false);
+
+        expect(http.post).toHaveBeenCalledTimes(1);
+        expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
+          body: JSON.stringify({ value: false }),
+        });
+      });
+
+      test('does not retry the same value after a failed best-effort report', () => {
+        http.post.mockRejectedValueOnce(new Error('Counter request failed'));
+
+        startContract.getBooleanValue('my-flag', false);
+        startContract.getBooleanValue('my-flag', false);
+
+        expect(http.post).toHaveBeenCalledTimes(1);
+        expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
+          body: JSON.stringify({ value: false }),
+        });
+      });
+
+      test('does not report repeated NaN evaluations', () => {
+        startContract.getNumberValue('my-flag', NaN);
+        startContract.getNumberValue('my-flag', NaN);
+
+        expect(http.post).toHaveBeenCalledTimes(1);
+        expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
+          body: JSON.stringify({ value: NaN }),
+        });
+      });
+
+      test('reports again when the evaluated value changes', () => {
+        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+        getBooleanValueSpy.mockReturnValueOnce(true).mockReturnValueOnce(false);
+
+        expect(startContract.getBooleanValue('my-flag', false)).toEqual(true);
+        expect(http.post).toHaveBeenCalledTimes(1);
+        expect(http.post).toHaveBeenLastCalledWith('/internal/feature-flags/my-flag/counter', {
+          body: JSON.stringify({ value: true }),
+        });
+
+        expect(startContract.getBooleanValue('my-flag', false)).toEqual(false);
+        expect(http.post).toHaveBeenCalledTimes(2);
+        expect(http.post).toHaveBeenLastCalledWith('/internal/feature-flags/my-flag/counter', {
+          body: JSON.stringify({ value: false }),
+        });
+      });
+
+      test('does not report repeated evaluations of the same override value', () => {
+        startContract.getBooleanValue('my-overridden-flag', false);
+        startContract.getBooleanValue('my-overridden-flag', false);
+
+        expect(http.post).toHaveBeenCalledTimes(1);
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/feature-flags/my-overridden-flag/counter',
+          {
+            body: JSON.stringify({ value: true }),
+          }
+        );
+      });
+
+      test('treats values of different types as distinct for the same flag name', () => {
+        startContract.getStringValue('my-flag', '1');
+        startContract.getNumberValue('my-flag', 1);
+
+        expect(http.post).toHaveBeenCalledTimes(2);
+        expect(http.post).toHaveBeenNthCalledWith(1, '/internal/feature-flags/my-flag/counter', {
+          body: JSON.stringify({ value: '1' }),
+        });
+        expect(http.post).toHaveBeenNthCalledWith(2, '/internal/feature-flags/my-flag/counter', {
+          body: JSON.stringify({ value: 1 }),
+        });
+      });
+
+      test('observable does not report again when reevaluated value is unchanged', () => {
+        const flag$ = startContract.getBooleanValue$('my-flag', false);
+        const subscription = flag$.subscribe();
+        expect(http.post).toHaveBeenCalledTimes(1);
+
+        addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
+
+        expect(http.post).toHaveBeenCalledTimes(1);
+        subscription.unsubscribe();
+      });
+
+      test('observable reports again when the evaluated value changes', () => {
+        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+        getBooleanValueSpy.mockReturnValue(true);
+
+        const flag$ = startContract.getBooleanValue$('my-flag', false);
+        const subscription = flag$.subscribe();
+        expect(http.post).toHaveBeenCalledTimes(1);
+
+        getBooleanValueSpy.mockReturnValue(false);
+        addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
+
+        expect(http.post).toHaveBeenCalledTimes(2);
+        expect(http.post).toHaveBeenLastCalledWith('/internal/feature-flags/my-flag/counter', {
+          body: JSON.stringify({ value: false }),
+        });
+        subscription.unsubscribe();
+      });
+    });
   });
 });

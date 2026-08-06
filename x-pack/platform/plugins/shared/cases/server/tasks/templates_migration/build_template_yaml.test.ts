@@ -8,6 +8,8 @@
 import { parse as parseYaml } from 'yaml';
 import { buildTemplateYaml } from './build_template_yaml';
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
+import { ConnectorTypes } from '../../../common/types/domain/connector/v1';
+import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 const logger = loggingSystemMock.createLogger();
@@ -20,11 +22,14 @@ interface ParsedField {
 }
 
 interface ParsedTemplate {
-  name: string;
+  name?: string;
   description?: string;
   tags?: string[];
   severity?: string;
   category?: string | null;
+  assignees?: Array<{ uid: string }>;
+  connector?: { type: string; id: string; fields: Record<string, unknown> | null };
+  settings?: { syncAlerts: boolean; extractObservables?: boolean };
   fields: ParsedField[];
 }
 
@@ -33,9 +38,11 @@ const parse = (input: string) => parseYaml(input) as ParsedTemplate;
 const makeRef = (key: string): Map<string, string> => new Map([[key, key]]);
 
 describe('buildTemplateYaml', () => {
-  it('includes the template name', () => {
+  it('uses legacy template name as top-level case title fallback', () => {
     const yaml = buildTemplateYaml({ key: 'k', name: 'My Template', caseFields: null }, new Map());
-    expect(parse(yaml).name).toBe('My Template');
+    expect(parse(yaml)).toHaveProperty('name', 'My Template');
+    expect(parse(yaml)).not.toHaveProperty('description');
+    expect(parse(yaml)).not.toHaveProperty('tags');
   });
 
   it('produces an empty fields array when there are no caseFields', () => {
@@ -43,85 +50,300 @@ describe('buildTemplateYaml', () => {
     expect(parse(yaml).fields).toEqual([]);
   });
 
-  describe('description', () => {
-    it('uses template-level description when present', () => {
+  describe('case defaults', () => {
+    it('includes case title, description, tags, severity, category, and assignees as top-level defaults', () => {
       const yaml = buildTemplateYaml(
         {
           key: 'k',
           name: 'T',
-          description: 'top-level',
-          caseFields: { description: 'case-level' },
+          caseFields: {
+            title: 'Case title',
+            description: 'case-level',
+            tags: ['triage', 'security'],
+            severity: 'high',
+            category: null,
+            assignees: [{ uid: 'analyst-1' }],
+          },
         },
         new Map()
       );
-      expect(parse(yaml).description).toBe('top-level');
+      expect(parse(yaml)).toMatchObject({
+        name: 'Case title',
+        description: 'case-level',
+        tags: ['triage', 'security'],
+        severity: 'high',
+        category: null,
+        assignees: [{ uid: 'analyst-1' }],
+      });
     });
 
-    it('falls back to caseFields.description', () => {
+    it('preserves multiline markdown in the case-default description through the YAML round-trip', () => {
+      // Legacy case descriptions are authored as markdown; the migration must carry the raw markdown
+      // (headings, lists, code fences, links) into the v2 definition unchanged so it renders in the
+      // markdown editor rather than as escaped plain text.
+      const markdownDescription = [
+        '# Investigation steps',
+        '',
+        '1. Review the **source** host',
+        '2. Check `auth.log` for anomalies',
+        '',
+        'See [the runbook](https://example.com/runbook).',
+      ].join('\n');
+
       const yaml = buildTemplateYaml(
-        { key: 'k', name: 'T', caseFields: { description: 'case-level' } },
+        {
+          key: 'k',
+          name: 'T',
+          caseFields: {
+            title: 'Case title',
+            description: markdownDescription,
+          },
+        },
         new Map()
       );
-      expect(parse(yaml).description).toBe('case-level');
+
+      expect(parse(yaml).description).toBe(markdownDescription);
+
+      const result = ParsedTemplateDefinitionSchema.safeParse(parse(yaml));
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.description).toBe(markdownDescription);
+      }
     });
 
-    it('omits description when neither is present', () => {
-      const yaml = buildTemplateYaml({ key: 'k', name: 'T', caseFields: null }, new Map());
-      expect(parse(yaml)).not.toHaveProperty('description');
+    it('keeps an explicit empty assignees list in YAML', () => {
+      const yaml = buildTemplateYaml(
+        {
+          key: 'k',
+          name: 'T',
+          caseFields: {
+            assignees: [],
+          },
+        },
+        new Map()
+      );
+
+      expect(parse(yaml).assignees).toEqual([]);
     });
   });
 
-  describe('tags', () => {
-    it('uses template-level tags when present', () => {
+  describe('connector', () => {
+    it('carries a Jira connector across as type + id + fields (dropping name)', () => {
       const yaml = buildTemplateYaml(
-        { key: 'k', name: 'T', tags: ['a', 'b'], caseFields: { tags: ['c'] } },
+        {
+          key: 'k',
+          name: 'T',
+          caseFields: {
+            connector: {
+              id: 'jira-1',
+              name: 'My Jira',
+              type: ConnectorTypes.jira,
+              fields: { issueType: '10001', priority: 'High', parent: null },
+            },
+          },
+        },
         new Map()
       );
-      expect(parse(yaml).tags).toEqual(['a', 'b']);
+      expect(parse(yaml).connector).toEqual({
+        type: '.jira',
+        id: 'jira-1',
+        fields: { issueType: '10001', priority: 'High', parent: null },
+      });
+      expect(parse(yaml).connector).not.toHaveProperty('name');
     });
 
-    it('falls back to caseFields.tags', () => {
+    it('carries a ServiceNow ITSM connector with its fields', () => {
       const yaml = buildTemplateYaml(
-        { key: 'k', name: 'T', caseFields: { tags: ['c'] } },
+        {
+          key: 'k',
+          name: 'T',
+          caseFields: {
+            connector: {
+              id: 'sn-1',
+              name: 'My SN',
+              type: ConnectorTypes.serviceNowITSM,
+              fields: {
+                impact: '2',
+                severity: '1',
+                urgency: '2',
+                category: 'software',
+                subcategory: null,
+              },
+            },
+          },
+        },
         new Map()
       );
-      expect(parse(yaml).tags).toEqual(['c']);
+      expect(parse(yaml).connector?.type).toBe('.servicenow');
+      expect(parse(yaml).connector?.id).toBe('sn-1');
     });
 
-    it('omits tags when neither is present', () => {
+    it('omits the .none connector (it is the implicit default)', () => {
+      const yaml = buildTemplateYaml(
+        {
+          key: 'k',
+          name: 'T',
+          caseFields: {
+            connector: { id: 'none', name: 'None', type: ConnectorTypes.none, fields: null },
+          },
+        },
+        new Map()
+      );
+      expect(parse(yaml)).not.toHaveProperty('connector');
+    });
+
+    it('omits connector when absent', () => {
       const yaml = buildTemplateYaml({ key: 'k', name: 'T', caseFields: null }, new Map());
-      expect(parse(yaml)).not.toHaveProperty('tags');
+      expect(parse(yaml)).not.toHaveProperty('connector');
     });
   });
 
-  describe('severity', () => {
-    it('includes severity from caseFields', () => {
+  describe('settings', () => {
+    it('carries syncAlerts and extractObservables across', () => {
       const yaml = buildTemplateYaml(
-        { key: 'k', name: 'T', caseFields: { severity: 'high' } },
+        {
+          key: 'k',
+          name: 'T',
+          caseFields: { settings: { syncAlerts: false, extractObservables: true } },
+        },
         new Map()
       );
-      expect(parse(yaml).severity).toBe('high');
+      expect(parse(yaml).settings).toEqual({ syncAlerts: false, extractObservables: true });
     });
 
-    it('omits severity when absent', () => {
+    it('omits settings when absent', () => {
       const yaml = buildTemplateYaml({ key: 'k', name: 'T', caseFields: null }, new Map());
-      expect(parse(yaml)).not.toHaveProperty('severity');
+      expect(parse(yaml)).not.toHaveProperty('settings');
     });
   });
 
-  describe('category', () => {
-    it('includes category including null', () => {
+  describe('connector — full sub-field fidelity', () => {
+    it('carries every Jira sub-field, including otherFields, without loss', () => {
+      const fields = {
+        issueType: '10002',
+        priority: 'Highest',
+        parent: 'PROJ-42',
+        otherFields: '{"customfield_10010":"squad-blue","labels":["triage","p1"]}',
+      };
       const yaml = buildTemplateYaml(
-        { key: 'k', name: 'T', caseFields: { category: null } },
+        {
+          key: 'k',
+          name: 'T',
+          caseFields: {
+            connector: { id: 'jira-1', name: 'My Jira', type: ConnectorTypes.jira, fields },
+          },
+        },
         new Map()
       );
-      expect(parse(yaml)).toHaveProperty('category');
-      expect(parse(yaml).category).toBeNull();
+      // Every sub-field (including the free-form otherFields JSON) survives verbatim.
+      expect(parse(yaml).connector).toEqual({ type: '.jira', id: 'jira-1', fields });
     });
 
-    it('omits category when absent', () => {
-      const yaml = buildTemplateYaml({ key: 'k', name: 'T', caseFields: null }, new Map());
-      expect(parse(yaml)).not.toHaveProperty('category');
+    it('carries every ServiceNow SIR sub-field (mixed string/boolean) without loss', () => {
+      const fields = {
+        category: 'Privilege Escalation',
+        destIp: true,
+        malwareHash: false,
+        malwareUrl: true,
+        priority: '1 - Critical',
+        sourceIp: true,
+        subcategory: 'Local',
+        additionalFields: '{"assignment_group":"soc"}',
+      };
+      const yaml = buildTemplateYaml(
+        {
+          key: 'k',
+          name: 'T',
+          caseFields: {
+            connector: { id: 'sir-1', name: 'My SIR', type: ConnectorTypes.serviceNowSIR, fields },
+          },
+        },
+        new Map()
+      );
+      expect(parse(yaml).connector).toEqual({ type: '.servicenow-sir', id: 'sir-1', fields });
+    });
+  });
+
+  describe('round-trips through ParsedTemplateDefinitionSchema', () => {
+    it('produces a definition that parses with connector + settings preserved', () => {
+      const yaml = buildTemplateYaml(
+        {
+          key: 'k',
+          name: 'T',
+          caseFields: {
+            severity: 'high',
+            connector: {
+              id: 'jira-1',
+              name: 'My Jira',
+              type: ConnectorTypes.jira,
+              fields: { issueType: '10001', priority: 'High', parent: null },
+            },
+            settings: { syncAlerts: true, extractObservables: false },
+          },
+        },
+        new Map()
+      );
+
+      const result = ParsedTemplateDefinitionSchema.safeParse(parseYaml(yaml));
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.severity).toEqual('high');
+        expect(result.data.connector).toEqual({
+          type: '.jira',
+          id: 'jira-1',
+          fields: { issueType: '10001', priority: 'High', parent: null },
+        });
+        expect(result.data.settings).toEqual({ syncAlerts: true, extractObservables: false });
+      }
+    });
+
+    it('a fully-fleshed template (all case defaults + full Jira connector + settings + a $ref field) is schema-valid and lossless', () => {
+      const connectorFields = {
+        issueType: '10002',
+        priority: 'Highest',
+        parent: 'PROJ-42',
+        otherFields: '{"labels":["triage"]}',
+      };
+      const yaml = buildTemplateYaml(
+        {
+          key: 'k',
+          name: 'Legacy template identity',
+          caseFields: {
+            title: 'Investigate suspicious login',
+            description: 'Default case description for the blueprint',
+            tags: ['security', 'triage'],
+            severity: 'critical',
+            category: 'Security',
+            assignees: [{ uid: 'analyst-1' }, { uid: 'analyst-2' }],
+            connector: {
+              id: 'jira-1',
+              name: 'My Jira',
+              type: ConnectorTypes.jira,
+              fields: connectorFields,
+            },
+            settings: { syncAlerts: true, extractObservables: true },
+            customFields: [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'preset' }],
+          },
+        },
+        makeRef('cf_text')
+      );
+
+      const result = ParsedTemplateDefinitionSchema.safeParse(parseYaml(yaml));
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toMatchObject({
+          name: 'Investigate suspicious login',
+          description: 'Default case description for the blueprint',
+          tags: ['security', 'triage'],
+          severity: 'critical',
+          category: 'Security',
+          assignees: [{ uid: 'analyst-1' }, { uid: 'analyst-2' }],
+          connector: { type: '.jira', id: 'jira-1', fields: connectorFields },
+          settings: { syncAlerts: true, extractObservables: true },
+        });
+        expect(result.data.fields).toHaveLength(1);
+      }
     });
   });
 
@@ -171,7 +393,7 @@ describe('buildTemplateYaml', () => {
       expect(parse(yaml).fields[0].metadata?.default).toBe(7);
     });
 
-    it('includes TOGGLE default as string in $ref metadata', () => {
+    it('includes TOGGLE default as boolean in $ref metadata', () => {
       const yaml = buildTemplateYaml(
         {
           key: 'k',
@@ -182,10 +404,12 @@ describe('buildTemplateYaml', () => {
         },
         makeRef('cf_toggle')
       );
-      expect(parse(yaml).fields[0].metadata?.default).toBe('true');
+      expect(parse(yaml).fields[0].metadata?.default).toBe(true);
     });
 
-    it('omits $ref metadata when value is null', () => {
+    it('emits an explicit null TEXT default when the legacy value is null (cleared field)', () => {
+      // A cleared v1 template field must stay empty in v2, not inherit the field-library default.
+      // `default: null` is the explicit "clear" marker; an absent override would inherit instead.
       const yaml = buildTemplateYaml(
         {
           key: 'k',
@@ -196,7 +420,56 @@ describe('buildTemplateYaml', () => {
         },
         makeRef('cf_text')
       );
+      expect(parse(yaml).fields[0].metadata).toEqual({ default: null });
+    });
+
+    it('emits an explicit null NUMBER default when the legacy value is null (cleared field)', () => {
+      const yaml = buildTemplateYaml(
+        {
+          key: 'k',
+          name: 'T',
+          caseFields: {
+            customFields: [{ key: 'cf_num', type: CustomFieldTypes.NUMBER, value: null }],
+          },
+        },
+        makeRef('cf_num')
+      );
+      expect(parse(yaml).fields[0].metadata).toEqual({ default: null });
+    });
+
+    it('omits $ref metadata for a TOGGLE with a null value (toggles cannot be cleared)', () => {
+      const yaml = buildTemplateYaml(
+        {
+          key: 'k',
+          name: 'T',
+          caseFields: {
+            customFields: [{ key: 'cf_toggle', type: CustomFieldTypes.TOGGLE, value: null }],
+          },
+        },
+        makeRef('cf_toggle')
+      );
       expect(parse(yaml).fields[0].metadata).toBeUndefined();
+    });
+
+    it('emits a null default that round-trips through ParsedTemplateDefinitionSchema', () => {
+      const yaml = buildTemplateYaml(
+        {
+          key: 'k',
+          name: 'T',
+          caseFields: {
+            customFields: [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: null }],
+          },
+        },
+        makeRef('cf_text')
+      );
+      const result = ParsedTemplateDefinitionSchema.safeParse(parseYaml(yaml));
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.fields[0]).toMatchObject({
+          $ref: 'cf_text',
+          metadata: { default: null },
+        });
+      }
     });
 
     it('skips unmatched custom field key and logs a warning', () => {

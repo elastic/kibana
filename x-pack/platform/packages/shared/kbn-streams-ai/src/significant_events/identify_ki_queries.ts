@@ -10,13 +10,12 @@ import type { QueryType } from '@kbn/significant-events-schema';
 import type { Feature, QueryFeature } from '@kbn/significant-events-schema';
 import {
   deriveQueryType,
-  ensureMetadata,
   getSourcesForStream,
   getStatsQueryHints,
   normalizeEsqlSafe,
   replaceFromSources,
 } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   ChatCompletionTokenCount,
@@ -32,6 +31,7 @@ import { sumTokens } from '../helpers/sum_tokens';
 import { getComputedFeatureInstructions } from '../features/computed';
 import {
   SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES,
+  QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
   getFeatureQueryFromToolArgs,
   resolveFeatureTypeFilters,
   toFeatureForLlmContext,
@@ -42,6 +42,106 @@ import {
 } from './tools/tool_usage';
 
 export const DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT = 50;
+
+export const DEFAULT_QUERY_VALIDATION_TIMEOUT_MS = 10_000;
+
+/**
+ * Window the volume probe measures over, and the floor for the derived
+ * validation lookback. Kept short so the probe itself is cheap.
+ */
+const PROBE_WINDOW_MINUTES = 10;
+
+/**
+ * Approximate document budget validation should touch. The lookback is
+ * sized so that, at the rate observed by the probe, roughly this many
+ * documents fall inside the window regardless of how dense or sparse the
+ * stream is - dense streams get a narrow (fast) window, sparse streams get a
+ * wider one so validation still runs against real data.
+ */
+const TARGET_VALIDATION_DOCS = 100_000;
+
+/**
+ * Upper bound on how far the lookback can widen for a stream with little to
+ * no data in the probe window, so a near-empty stream doesn't push
+ * validation queries against unbounded history.
+ */
+const MAX_LOOKBACK_MINUTES = 10_080; // 7 days
+
+/**
+ * Timeout for the volume probe itself, kept short and independent of
+ * `queryValidationTimeoutMs` (which is tunable down to 1s). If the probe
+ * shared that budget, a generally slow cluster would make the probe the
+ * first thing to time out, silently regressing every call back to the
+ * fallback window and defeating the point of probing at all.
+ */
+const PROBE_TIMEOUT_MS = 5_000;
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+/**
+ * Sizes the `@timestamp` lookback used to validate candidate KI queries.
+ *
+ * `sources` may be an ES|QL view (query streams resolve to a `$.`-prefixed
+ * view with no backing index - see `getSourcesForStream`), so volume is
+ * probed via ES|QL rather than the `_count` API, which cannot resolve views.
+ *
+ * @internal Exported for testing purposes only
+ */
+export async function computeValidationLookback({
+  esClient,
+  sources,
+  signal,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  sources: string[];
+  signal: AbortSignal;
+  logger: Logger;
+}): Promise<string> {
+  const probeWindow = `now-${PROBE_WINDOW_MINUTES}m`;
+  try {
+    const response = (await esClient.esql.query(
+      {
+        query: `FROM ${sources.join(', ')} | STATS total = COUNT(*)`,
+        filter: {
+          range: {
+            '@timestamp': {
+              gte: probeWindow,
+              lte: 'now',
+            },
+          },
+        },
+      },
+      { signal, requestTimeout: PROBE_TIMEOUT_MS }
+    )) as unknown as ESQLSearchResponse;
+
+    const total = Number(response.values[0]?.[0] ?? 0);
+    if (total <= 0) {
+      return `now-${MAX_LOOKBACK_MINUTES}m`;
+    }
+
+    const ratePerMinute = total / PROBE_WINDOW_MINUTES;
+    const lookbackMinutes = Math.min(
+      MAX_LOOKBACK_MINUTES,
+      Math.max(PROBE_WINDOW_MINUTES, Math.round(TARGET_VALIDATION_DOCS / ratePerMinute))
+    );
+    return `now-${lookbackMinutes}m`;
+  } catch (error) {
+    // Unlike a confirmed total of 0 (real evidence the stream is quiet, so
+    // widening is justified), an error tells us nothing about density -
+    // there's no basis to guess wide, only to not regress from the fixed
+    // window this probe replaces.
+    logger.debug(
+      () =>
+        `Failed to probe validation volume for [${sources.join(
+          ', '
+        )}]; falling back to ${probeWindow}: ${getErrorMessage(error)}`
+    );
+    return probeWindow;
+  }
+}
 
 export interface ExistingQuerySummary {
   id: string;
@@ -69,10 +169,6 @@ interface ParsedToolQuery {
   features: QueryFeature[];
 }
 
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
 /**
  * Generate KI queries using a reasoning agent that fetches
  * stream features (including computed dataset analysis) via tool calls.
@@ -90,6 +186,7 @@ export async function identifyKIQueries({
   existingQueries,
   maxExistingQueriesForContext = DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
   maxSteps,
+  queryValidationTimeoutMs = DEFAULT_QUERY_VALIDATION_TIMEOUT_MS,
 }: {
   stream: Streams.all.Definition;
   esClient: ElasticsearchClient;
@@ -112,6 +209,7 @@ export async function identifyKIQueries({
    * tools (e.g. code grounding) add round-trips.
    */
   maxSteps?: number;
+  queryValidationTimeoutMs?: number;
 }): Promise<{
   queries: ParsedToolQuery[];
   tokensUsed: ChatCompletionTokenCount;
@@ -123,6 +221,13 @@ export async function identifyKIQueries({
 
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt, additionalTools });
   const targetSources = getSourcesForStream(stream);
+
+  const validationLookback = await computeValidationLookback({
+    esClient,
+    sources: targetSources,
+    signal,
+    logger,
+  });
 
   const existingQueriesList = existingQueries ?? [];
 
@@ -148,7 +253,9 @@ export async function identifyKIQueries({
         name: stream.name,
         description: stream.description,
         available_feature_types: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '),
-        computed_feature_instructions: getComputedFeatureInstructions(),
+        computed_feature_instructions: getComputedFeatureInstructions(
+          QUERY_GENERATION_EXCLUDED_FEATURE_TYPES
+        ),
         existing_queries: existingQueriesContext,
       },
       maxSteps: maxSteps ?? (additionalToolCallbacks ? 6 : 4),
@@ -254,11 +361,7 @@ export async function identifyKIQueries({
                   run_id: returnedFeatureMap.get(id),
                 }));
 
-                const sourceRewritten = replaceFromSources(query.esql, targetSources);
-                const rewritten =
-                  derivedType === QUERY_TYPE_STATS
-                    ? sourceRewritten
-                    : ensureMetadata(sourceRewritten);
+                const rewritten = replaceFromSources(query.esql, targetSources);
 
                 if (normalizedStoredEsqls.has(normalizeEsqlSafe(rewritten))) {
                   return {
@@ -279,9 +382,17 @@ export async function identifyKIQueries({
                 await esClient.esql.query(
                   {
                     query: `${rewritten}\n| LIMIT 0`,
+                    filter: {
+                      range: {
+                        '@timestamp': {
+                          gte: validationLookback,
+                          lte: 'now',
+                        },
+                      },
+                    },
                     format: 'json',
                   },
-                  { signal, requestTimeout: '10s' }
+                  { signal, requestTimeout: queryValidationTimeoutMs }
                 );
 
                 validatedQueries.push({
@@ -310,6 +421,10 @@ export async function identifyKIQueries({
                 };
               } catch (error) {
                 hasFailures = true;
+                logger.debug(
+                  () =>
+                    `ES|QL validation for query "${query.title}" failed: ${getErrorMessage(error)}`
+                );
                 return {
                   query,
                   valid: false,

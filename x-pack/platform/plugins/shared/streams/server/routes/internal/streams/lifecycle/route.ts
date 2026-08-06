@@ -29,6 +29,10 @@ import {
   simulateClassicStreamTemplate,
 } from '../../../../lib/streams/data_streams/manage_data_streams';
 import {
+  getDataStreamGlobalRetention,
+  type DataStreamGlobalRetention,
+} from '../../../../lib/streams/lifecycle/global_retention';
+import {
   buildPolicyUsage,
   normalizeIlmPhases,
   type IlmPoliciesResponse,
@@ -402,8 +406,8 @@ const lifecycleIlmPoliciesRoute = createServerRoute({
 });
 
 const ilmPhaseSchema = z.looseObject({
-  min_age: z.string().optional(),
-  actions: z.record(z.string(), z.any()).optional(),
+  min_age: z.string().max(64).optional(),
+  actions: z.record(z.string().max(1000), z.any()).optional(),
 });
 
 const lifecycleIlmPoliciesUpdateRoute = createServerRoute({
@@ -418,7 +422,7 @@ const lifecycleIlmPoliciesUpdateRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      name: z.string(),
+      name: z.string().max(1000),
       phases: z.object({
         hot: ilmPhaseSchema.optional(),
         warm: ilmPhaseSchema.optional(),
@@ -426,9 +430,9 @@ const lifecycleIlmPoliciesUpdateRoute = createServerRoute({
         frozen: ilmPhaseSchema.optional(),
         delete: ilmPhaseSchema.optional(),
       }),
-      meta: z.record(z.string(), z.any()).optional(),
+      meta: z.record(z.string().max(1000), z.any()).optional(),
       deprecated: z.boolean().optional(),
-      source_policy_name: z.string().optional(),
+      source_policy_name: z.string().max(1000).optional(),
     }),
     query: z.object({
       allow_overwrite: BooleanFromString.optional().default(false),
@@ -509,8 +513,39 @@ const lifecycleSnapshotRepositoriesRoute = createServerRoute({
   },
 });
 
+const lifecycleGlobalRetentionRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{name}/lifecycle/_global_retention',
+  options: {
+    access: 'internal',
+    summary: 'Get data stream global retention',
+    description:
+      'Gets the cluster-wide default and maximum data retention that apply to a stream lifecycle',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+  }),
+  handler: async ({ params, request, getScopedClients }): Promise<DataStreamGlobalRetention> => {
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { name } = params.path;
+
+    // Verifies read privileges and that the stream exists.
+    await streamsClient.getStream(name);
+
+    return getDataStreamGlobalRetention({
+      esClient: scopedClusterClient.asCurrentUser,
+      name,
+    });
+  },
+});
+
 export const internalLifecycleRoutes = {
   ...lifecycleStatsRoute,
+  ...lifecycleGlobalRetentionRoute,
   ...lifecycleDslPhaseStatsRoute,
   ...lifecycleIlmExplainRoute,
   ...lifecycleInheritedRoute,

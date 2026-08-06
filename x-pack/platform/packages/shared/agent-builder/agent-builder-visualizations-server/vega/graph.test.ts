@@ -46,14 +46,28 @@ describe('createVegaGraph', () => {
 
   let logger: Logger;
   let invoke: jest.Mock;
+  /** Structured-output selector used by the reference-example selection node. */
+  let selectInvoke: jest.Mock;
+  let withStructuredOutput: jest.Mock;
   let modelProvider: ModelProvider;
 
   beforeEach(() => {
     jest.clearAllMocks();
     logger = createMockLogger();
     invoke = jest.fn();
+    // Default: the model selects no reference example, so authoring proceeds
+    // without a REFERENCE EXAMPLES block. Individual tests override this.
+    selectInvoke = jest.fn().mockResolvedValue({ exampleIds: [] });
+    withStructuredOutput = jest.fn(() => ({ invoke: selectInvoke }));
+    // The default and low-effort models share a connector so the default-model
+    // fallback in `generateVisualizationEsql` stays out of these tests.
+    const scopedModel = {
+      connector: { connectorId: 'default-connector' },
+      chatModel: { invoke, withStructuredOutput },
+    };
     modelProvider = {
-      getDefaultModel: jest.fn().mockResolvedValue({ chatModel: { invoke } }),
+      getDefaultModel: jest.fn().mockResolvedValue(scopedModel),
+      selectModel: jest.fn().mockResolvedValue(scopedModel),
     } as unknown as ModelProvider;
     mockedGenerateEsql.mockResolvedValue({ query: GENERATED_ESQL } as Awaited<
       ReturnType<typeof generateEsql>
@@ -76,22 +90,110 @@ describe('createVegaGraph', () => {
       currentAttempt: 0,
       actions: [],
       spec: null,
+      title: null,
       error: null,
     });
   };
 
   it('generates ES|QL then authors and normalizes a spec', async () => {
-    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar', encoding: { x: { field: 'status' } } }));
+    const authoringNote = 'Created a bar chart of counts by status with a concise title.';
+    invoke.mockResolvedValue(
+      asCodeBlock({
+        title: 'Counts by status',
+        authoring_note: authoringNote,
+        spec: { mark: 'bar', encoding: { x: { field: 'status' } } },
+      })
+    );
 
     const state = await run();
 
     expect(mockedGenerateEsql).toHaveBeenCalledTimes(1);
     expect(state.error).toBeNull();
+    expect(state.title).toBe('Counts by status');
+    expect(state.authoringNote).toBe(authoringNote);
     const spec = JSON.parse(state.spec!);
     expect(spec.$schema).toBe(VEGA_LITE_SCHEMA);
-    expect(spec.data).toEqual({ url: { '%type%': 'esql', query: GENERATED_ESQL } });
+    expect(spec.data).toEqual({
+      url: { '%type%': 'esql', '%context%': true, query: GENERATED_ESQL },
+    });
     expect(spec.mark).toBe('bar');
     expect(state.esqlQuery).toBe(GENERATED_ESQL);
+  });
+
+  it('accepts a valid spec when the authoring note is missing', async () => {
+    invoke.mockResolvedValue(asCodeBlock({ spec: { mark: 'bar' } }));
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+    expect(state.error).toBeNull();
+    expect(JSON.parse(state.spec!).mark).toBe('bar');
+    expect(state.authoringNote).toBeNull();
+  });
+
+  it('keeps panel title out of a faceted Vega-Lite nested spec', async () => {
+    invoke.mockResolvedValue(
+      asCodeBlock({
+        title: 'Latency by region',
+        spec: {
+          facet: { field: 'region', type: 'nominal' },
+          spec: { mark: 'bar', encoding: { x: { field: 'latency' } } },
+        },
+      })
+    );
+
+    const state = await run({ esqlQuery: PROVIDED_ESQL });
+
+    expect(state.title).toBe('Latency by region');
+    const spec = JSON.parse(state.spec!);
+    expect(spec.facet).toEqual({ field: 'region', type: 'nominal' });
+    expect(spec.spec.mark).toBe('bar');
+    expect(spec).not.toHaveProperty('title');
+  });
+
+  it('injects the model-selected reference example into the authoring prompt', async () => {
+    // The selection node picks an example; its structural block must reach the
+    // author prompt (bodies loaded only for the selected id).
+    selectInvoke.mockResolvedValue({ exampleIds: ['scatter_bubble'] });
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'point' }));
+
+    await run();
+
+    const authorPrompt = JSON.stringify(invoke.mock.calls[0][0]);
+    expect(authorPrompt).toContain('REFERENCE EXAMPLES');
+    expect(authorPrompt).toContain('Scatter / bubble plot (encoded size)');
+  });
+
+  it('selects reference examples once and reuses them across authoring retries', async () => {
+    selectInvoke.mockResolvedValue({ exampleIds: ['heatmap'] });
+    invoke
+      .mockResolvedValueOnce('not json at all')
+      .mockResolvedValueOnce(asCodeBlock({ mark: 'rect' }));
+
+    await run();
+
+    // Two authoring attempts, but selection ran exactly once before the loop.
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(selectInvoke).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not author a spec when ES|QL resolution fails, despite selecting examples in parallel', async () => {
+    mockedGenerateEsql.mockResolvedValue({
+      query: 'FROM logs-*',
+      error: 'verification_exception: boom',
+    } as Awaited<ReturnType<typeof generateEsql>>);
+
+    await run();
+
+    expect(selectInvoke).toHaveBeenCalledTimes(1);
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
+  it('authors without a reference block when selection returns none', async () => {
+    invoke.mockResolvedValue(asCodeBlock({ mark: 'bar' }));
+
+    await run();
+
+    expect(JSON.stringify(invoke.mock.calls[0][0])).not.toContain('REFERENCE EXAMPLES');
   });
 
   it('seeds ES|QL generation with the existing query as context when editing', async () => {
@@ -166,13 +268,14 @@ describe('createVegaGraph', () => {
 
   it('rejects an authored spec with no renderable view and retries', async () => {
     invoke
-      .mockResolvedValueOnce(asCodeBlock({ title: 'no mark here' }))
-      .mockResolvedValueOnce(asCodeBlock({ mark: 'arc' }));
+      .mockResolvedValueOnce(asCodeBlock({ title: 'no mark here', spec: { description: 'empty' } }))
+      .mockResolvedValueOnce(asCodeBlock({ title: 'Arc chart', spec: { mark: 'arc' } }));
 
     const state = await run({ esqlQuery: PROVIDED_ESQL });
 
     expect(invoke).toHaveBeenCalledTimes(2);
     expect(state.error).toBeNull();
+    expect(state.title).toBe('Arc chart');
     expect(JSON.parse(state.spec!).mark).toBe('arc');
   });
 

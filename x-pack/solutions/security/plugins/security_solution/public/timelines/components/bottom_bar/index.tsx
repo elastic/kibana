@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import * as i18n from './translations';
 import type { State } from '../../../common/store';
 import { selectTitleByTimelineById } from '../../store/selectors';

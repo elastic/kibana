@@ -13,6 +13,7 @@ import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
   EXAMPLE_MANAGED_WORKFLOW_ID,
+  SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
@@ -41,6 +42,9 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   },
   [SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID]: {
     detectionIntervalMinutes: 30,
+    detectionBucketIntervalMinutes: 1,
+    detectionLookbackMinutes: 40,
+    targetCoverageMinutes: 30,
   },
   [SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID]: {
     reviewIntervalMinutes: 10,
@@ -120,6 +124,11 @@ describe('managedWorkflowDefinitions', () => {
   it('contains unique workflow ids', () => {
     const ids = managedWorkflowDefinitions.map(({ id }) => id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('contains the Security alert analysis workflow', () => {
+    const ids = managedWorkflowDefinitions.map(({ id }) => id);
+    expect(ids).toContain(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID);
   });
 
   it.each(managedDefinitionsById)('%s uses the reserved system- id prefix', (id) => {

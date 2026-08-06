@@ -36,6 +36,7 @@ const mockProductDocBase = {
     }),
     install: jest.fn().mockResolvedValue({}),
     uninstall: jest.fn().mockResolvedValue({}),
+    getDefaultInferenceId: jest.fn().mockResolvedValue('.elser-2-elasticsearch'),
   },
 };
 

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import type { ServiceMapServiceDependencyInfoResponse } from '@kbn/apm-api-shared';
 import {
-  calculateThroughputWithRange,
   calculateFailedTransactionRate,
+  calculateThroughputWithRange,
   getOutcomeAggregation,
 } from '@kbn/apm-data-access-plugin/server/utils';
-import { getFailedTransactionRateTimeSeries } from '../../lib/helpers/transaction_error_rate';
+import type { NodeStats } from '@kbn/apm-types';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../common/document_type';
 import {
   SERVICE_NAME,
@@ -20,12 +21,12 @@ import {
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
 } from '../../../common/es_fields/apm';
-import type { NodeStats } from '../../../common/service_map';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
+import { getFailedTransactionRateTimeSeries } from '../../lib/helpers/transaction_error_rate';
 import { withApmSpan } from '../../utils/with_apm_span';
 
 interface Options {
@@ -159,11 +160,6 @@ function getServiceMapDependencyNodeInfoForTimeRange({
       },
     };
   });
-}
-
-export interface ServiceMapServiceDependencyInfoResponse {
-  currentPeriod: NodeStats;
-  previousPeriod: NodeStats | undefined;
 }
 
 export async function getServiceMapDependencyNodeInfo({

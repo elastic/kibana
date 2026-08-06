@@ -11,37 +11,21 @@ import {
   testData,
   canConvertToLensByTitle,
   convertToLensByTitle,
-  enableElasticChartDebug,
-  getChartDebugData,
-  getImportedDashboardId,
+  createOpenInLensSuiteSetup,
 } from '../../../fixtures';
 
-spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.stateful.classic }, () => {
-  let xyDashboardId: string;
-
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    const imported = await scoutSpace.savedObjects.load(
-      testData.KBN_ARCHIVES.OPEN_IN_LENS_AGG_BASED.XY
-    );
-    xyDashboardId = getImportedDashboardId(imported, testData.OPEN_IN_LENS_DASHBOARDS.XY);
-
-    await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_ID.LOGSTASH);
-    await scoutSpace.uiSettings.set({
-      'dateFormat:tz': 'UTC',
-      'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
-    });
+spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.deploymentAgnostic }, () => {
+  const openInLensSuite = createOpenInLensSuiteSetup({
+    archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.XY,
+    dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.XY,
+    enableChartDebug: true,
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, context, pageObjects }) => {
-    await enableElasticChartDebug(context);
-    await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.dashboard.openDashboardWithIdInEditMode(xyDashboardId);
-  });
+  spaceTest.beforeAll(openInLensSuite.beforeAll);
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.beforeEach(openInLensSuite.beforeEach);
+
+  spaceTest.afterAll(openInLensSuite.afterAll);
 
   spaceTest('should check Convert to Lens action availability', async ({ pageObjects }) => {
     const { dashboard } = pageObjects;
@@ -203,7 +187,7 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.stateful.cl
     expect(await lens.getSelectedAxisSide()).toBe('Right');
   });
 
-  spaceTest('should convert split series', async ({ page, pageObjects }) => {
+  spaceTest('should convert split series', async ({ pageObjects }) => {
     const { dashboard, lens } = pageObjects;
     const expectedLegend = ['win 8', 'win xp', 'win 7', 'ios', 'osx'];
 
@@ -218,13 +202,15 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.stateful.cl
     await expect
       .poll(
         async () =>
-          (await getChartDebugData(page, 'xyVisChart')).legend?.items.map((item) => item.name),
+          (
+            await lens.getCurrentChartDebugState('xyVisChart')
+          ).legend?.items.map((item) => item.name),
         { timeout: 20_000 }
       )
       .toStrictEqual(expectedLegend);
   });
 
-  spaceTest('should convert x-axis', async ({ page, pageObjects }) => {
+  spaceTest('should convert x-axis', async ({ pageObjects }) => {
     const { dashboard, lens } = pageObjects;
     const expectedLegend = ['Count'];
 
@@ -239,7 +225,9 @@ spaceTest.describe('Lens open in Lens — agg-based XY', { tag: tags.stateful.cl
     await expect
       .poll(
         async () =>
-          (await getChartDebugData(page, 'xyVisChart')).legend?.items.map((item) => item.name),
+          (
+            await lens.getCurrentChartDebugState('xyVisChart')
+          ).legend?.items.map((item) => item.name),
         { timeout: 20_000 }
       )
       .toStrictEqual(expectedLegend);

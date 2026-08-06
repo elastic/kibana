@@ -90,6 +90,7 @@ describe('getConnectorSpecRoute', () => {
           secrets: { type: 'object', properties: {} },
         },
       },
+      isTestable: true,
     };
     const responseBody = {
       metadata: {
@@ -101,6 +102,7 @@ describe('getConnectorSpecRoute', () => {
         is_technical_preview: true,
       },
       schema: clientResult.schema,
+      is_testable: true,
     };
     actionsClient.getConnectorSpec.mockResolvedValue(clientResult as never);
 
@@ -121,6 +123,40 @@ describe('getConnectorSpecRoute', () => {
     expect(actionsClient.getConnectorSpec).toHaveBeenCalledWith({
       id: 'test-connector',
       configurationUtilities: actionsConfigUtils,
+    });
+  });
+
+  it('maps isTestable false to is_testable false in the response body', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const actionsConfigUtils = createActionsConfigUtilsMock();
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getConnectorSpec.mockResolvedValue({
+      metadata: {
+        id: 'test-connector',
+        displayName: 'Test Connector',
+        description: 'A test connector',
+        minimumLicense: 'basic',
+        supportedFeatureIds: ['alerting'],
+      },
+      schema: {},
+      isTestable: false,
+    } as never);
+
+    getConnectorSpecRoute(router, licenseState, actionsConfigUtils);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      { params: { id: 'test-connector' } },
+      ['ok', 'notFound']
+    );
+
+    const result = await handler(context, req, res);
+
+    expect(result).toEqual({
+      body: expect.objectContaining({ is_testable: false }),
     });
   });
 

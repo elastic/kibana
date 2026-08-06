@@ -7,7 +7,7 @@
 
 export * from './routes';
 export { validateFleetSavedObjectId } from './validate_fleet_id';
-export { isValidDuration } from './validate_duration';
+export { isValidDuration, isValidEnrollmentKeyExpiration } from './validate_duration';
 export * as AgentStatusKueryHelper from './agent_status';
 export * from './package_helpers';
 export {
@@ -54,6 +54,7 @@ export {
 export {
   syncDataStreamTypeFromVar,
   toNewAgentlessPolicy,
+  agentlessPolicyToPackagePolicy,
 } from './simplified_package_policy_helper';
 export {
   addUseAPMVarIfNotPresent,
@@ -163,3 +164,12 @@ export {
   packagePolicyHasOtelInputs,
   OTEL_INPUTS_MINIMUM_VERSION,
 } from './otelcol_helpers';
+
+export {
+  hasVersionSuffix,
+  removeVersionSuffixFromPolicyId,
+  buildPolicyIdOrVariantsKuery,
+  buildPolicyIdsOrVariantsKuery,
+  buildPolicyBaseIdWithFallbackKuery,
+  buildPolicyBaseIdsWithFallbackKuery,
+} from './version_specific_policies_utils';

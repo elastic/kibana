@@ -31,6 +31,12 @@ export default createTestConfig('spaces_only', {
   kbnServerArgs: [
     '--xpack.cases.analyticsV2.enabled=true',
     '--xpack.cases.analyticsV2.enableAdminRoutes=true',
+    // Pin the attachments feature flag OFF so `tests/trial/analytics_v2/attachments.ts`
+    // keeps exercising the legacy `cases-comments` -> unified analytics-doc live
+    // mapping it was written for, independent of the plugin default. With the flag
+    // ON the same assertions pass but silently cover the unified-source path only
+    // (already covered by the `attachments_schema_drift` unit tests).
+    '--xpack.cases.attachments.enabled=false',
     // Tighten Task Manager's poll interval (default 3s). reconcile /
     // reset task latency dominates `runReconcileSoon` and
     // `waitForResetComplete`; 500ms cuts the worst-case wait ~6×.

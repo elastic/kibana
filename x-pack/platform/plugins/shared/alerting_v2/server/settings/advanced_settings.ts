@@ -36,7 +36,7 @@ export const alertingAdvancedSettings = {
     type: 'boolean',
     value: false,
     description: i18n.translate('xpack.alertingVTwo.enabledSettingDescription', {
-      defaultMessage: 'Enables the alerting V2 engine, APIs, and UI.',
+      defaultMessage: 'Enables the alerting V2 APIs and UI.',
     }),
     schema: schema.boolean(),
     requiresPageReload: true,

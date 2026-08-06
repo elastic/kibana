@@ -50,15 +50,23 @@ export const useObservedHost = (
 
   const { indexPatterns } = useSecurityDefaultPatterns();
 
-  const useEntityStoreObservedData = Boolean(
-    entityFromStore?.entityRecord ?? entityFromStore?.entity
-  );
+  // Use `isInitialLoading` (react-query v4 `isLoading && isFetching`), not raw `isLoading`: an idle or
+  // disabled store query reports `isLoading: true` forever in v4, which would otherwise skip the
+  // observed query and hang the panel spinner permanently.
+  const entityStoreInitialLoading = Boolean(entityFromStore?.isInitialLoading);
+  const hasEntityStoreRecord = Boolean(entityFromStore?.entityRecord ?? entityFromStore?.entity);
+  // While the entity-store record is actively resolving, keep the entity-store branch (base) so the
+  // observed query is skipped and does not flash the broad `host.name` fallback before the scoped query.
+  const useEntityStoreObservedData =
+    Boolean(entityFromStore) && (entityStoreInitialLoading || hasEntityStoreRecord);
 
   const [isLoading, { hostDetails, inspect: inspectObservedHost, refetch: refetchHostDetails }] =
     useHostDetails({
       endDate: to,
       hostName,
-      entityId: useEntityStoreObservedData ? entityFromStore?.entityRecord?.entity?.id : undefined,
+      entityId: hasEntityStoreRecord ? entityFromStore?.entityRecord?.entity?.id : undefined,
+      entityRecord: hasEntityStoreRecord ? entityFromStore?.entityRecord : undefined,
+      entityStoreInitialLoading,
       indexNames: indexPatterns,
       id: HOST_PANEL_RISK_SCORE_QUERY_ID,
       skip: isInitializing,
@@ -95,8 +103,12 @@ export const useObservedHost = (
   return useMemo((): ObservedHostResult => {
     if (useEntityStoreObservedData && entityFromStore) {
       return {
-        // merge with entity store record
-        details: deepmerge(hostDetails, entityFromStore.entityRecord ?? {}),
+        // merge with entity store record; deduplicate arrays because both sources
+        // derive from the same events and would otherwise duplicate scalar fields
+        // like host.ip and host.mac.
+        details: deepmerge(hostDetails, entityFromStore.entityRecord ?? {}, {
+          arrayMerge: (target, source) => [...new Set([...target, ...source])],
+        }),
         isLoading: isLoading || entityFromStore.isLoading,
         firstSeen: {
           date: entityFromStore.firstSeen ?? undefined,

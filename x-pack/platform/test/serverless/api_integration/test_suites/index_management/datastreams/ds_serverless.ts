@@ -63,6 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
           delete_index: true,
           manage_data_stream_lifecycle: true,
           read_failure_store: true,
+          manage: true,
         },
         timeStampField: { name: '@timestamp' },
         indices: [
@@ -106,6 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
           delete_index: true,
           manage_data_stream_lifecycle: true,
           read_failure_store: true,
+          manage: true,
         },
         timeStampField: { name: '@timestamp' },
         indices: [

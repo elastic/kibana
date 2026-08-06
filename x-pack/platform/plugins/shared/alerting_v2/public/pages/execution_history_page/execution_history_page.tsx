@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
-import { ExperimentalBadge } from '../../components/experimental_badge';
+import { experimentalBadge } from '../../components/experimental_badge';
 import { ActionPolicyDetailsFlyoutContainer } from '../../components/action_policy/details_flyout/action_policy_details_flyout_container';
 import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -25,14 +25,6 @@ type TabId = typeof POLICIES_TAB_ID | typeof RULES_TAB_ID;
 const EXECUTION_HISTORY_PAGE_TITLE = i18n.translate('xpack.alertingV2.executionHistory.pageTitle', {
   defaultMessage: 'Execution history',
 });
-
-const EXECUTION_HISTORY_DENORMALIZATION_TOOLTIP = i18n.translate(
-  'xpack.alertingV2.executionHistory.denormalizationTooltip',
-  {
-    defaultMessage:
-      'Pagination is by event. A single event may show as multiple rows, one per rule referenced by the event.',
-  }
-);
 
 const getExecutionHistoryTabs = ({
   selectedTabId,
@@ -57,10 +49,6 @@ const getExecutionHistoryTabs = ({
     }),
     isSelected: selectedTabId === POLICIES_TAB_ID,
     onClick: () => onSelect(POLICIES_TAB_ID),
-    badge: {
-      iconType: 'info',
-      tooltip: EXECUTION_HISTORY_DENORMALIZATION_TOOLTIP,
-    },
     'data-test-subj': 'executionHistoryPoliciesTab',
   },
 ];
@@ -89,19 +77,23 @@ export const ExecutionHistoryPage = () => {
   );
 
   return (
-    <>
+    <div data-test-subj="executionHistoryPage">
       <AppHeader
         sticky={false}
         title={EXECUTION_HISTORY_PAGE_TITLE}
-        titleAppend={<ExperimentalBadge />}
-        padding={{ bleed: 'l' }}
+        badges={[experimentalBadge]}
+        spacing="bleed"
         tabs={tabs}
       />
       <EuiSpacer size="m" />
       {selectedTabId === RULES_TAB_ID ? (
         <RulesTabContent onRuleClick={handleRuleClick} />
       ) : (
-        <PoliciesTabContent onPolicyClick={handlePolicyClick} onRuleClick={handleRuleClick} />
+        <PoliciesTabContent
+          onPolicyClick={handlePolicyClick}
+          onRuleClick={handleRuleClick}
+          activeRuleId={ruleToViewId}
+        />
       )}
       {policyToViewId && (
         <ActionPolicyDetailsFlyoutContainer
@@ -124,6 +116,6 @@ export const ExecutionHistoryPage = () => {
         />
       )}
       {composeFlyout}
-    </>
+    </div>
   );
 };

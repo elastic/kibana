@@ -8,6 +8,7 @@
 import type { RouteDependencies } from '../../../types';
 
 import { registerGetOneRoute, registerGetAllRoute } from './register_get_route';
+import { registerGetFailureStoreSettingsRoute } from './register_get_failure_store_settings_route';
 import { registerDeleteRoute } from './register_delete_route';
 import {
   registerPutDataRetention,
@@ -23,6 +24,7 @@ export function registerDataStreamRoutes(dependencies: RouteDependencies) {
   registerPostOneApplyLatestMappings(dependencies);
   registerPostOneRollover(dependencies);
   registerGetAllRoute(dependencies);
+  registerGetFailureStoreSettingsRoute(dependencies);
   registerDeleteRoute(dependencies);
   registerPutDataRetention(dependencies);
   registerPutDataLifecycle(dependencies);

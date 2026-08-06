@@ -76,7 +76,7 @@ spaceTest.describe.skip(
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
         await managementPage.toggleEntityAnalytics();
-        await apiServices.entityAnalytics.waitForEntityStoreStatusV2('running', 180000);
+        await apiServices.entityAnalytics.waitForEntityStoreStatus('running', 180000);
 
         await expect(managementPage.riskScoreSaveButton).toBeHidden();
 
@@ -94,7 +94,7 @@ spaceTest.describe.skip(
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
         await managementPage.toggleEntityAnalytics();
-        await apiServices.entityAnalytics.waitForEntityStoreStatusV2('running', 180000);
+        await apiServices.entityAnalytics.waitForEntityStoreStatus('running', 180000);
 
         await expect(managementPage.riskScoreSaveButton).toBeHidden();
 
@@ -112,7 +112,7 @@ spaceTest.describe.skip(
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
         await managementPage.toggleEntityAnalytics();
-        await apiServices.entityAnalytics.waitForEntityStoreStatusV2('running', 180000);
+        await apiServices.entityAnalytics.waitForEntityStoreStatus('running', 180000);
 
         await expect(managementPage.includeClosedAlertsSwitch).not.toBeChecked();
 
@@ -135,7 +135,7 @@ spaceTest.describe.skip(
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
         await managementPage.toggleEntityAnalytics();
-        await apiServices.entityAnalytics.waitForEntityStoreStatusV2('running', 180000);
+        await apiServices.entityAnalytics.waitForEntityStoreStatus('running', 180000);
 
         await expect(managementPage.includeClosedAlertsSwitch).not.toBeChecked();
 

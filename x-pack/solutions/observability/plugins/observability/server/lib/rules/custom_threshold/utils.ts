@@ -6,7 +6,6 @@
  */
 
 import { isError } from 'lodash';
-import { schema } from '@kbn/config-schema';
 import type { Logger, LogMeta } from '@kbn/logging';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import { addSpaceIdToPath } from '@kbn/core-spaces-common';
@@ -35,12 +34,6 @@ const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.IP,
   ES_FIELD_TYPES.BOOLEAN,
 ];
-
-export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
-  schema.string({
-    validate: (value) =>
-      arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
-  });
 
 export const createScopedLogger = (
   logger: Logger,

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { instancesSortFieldRt, type InstancesSortField } from '@kbn/apm-types';
+export { instancesSortFieldSchema, type InstancesSortField } from '@kbn/apm-types';

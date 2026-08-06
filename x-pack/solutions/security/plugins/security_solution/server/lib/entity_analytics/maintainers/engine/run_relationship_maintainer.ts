@@ -15,9 +15,9 @@ import type { EntityUpdateClient, EntityMetadataClient } from '@kbn/entity-store
 
 import type {
   RelationshipIntegrationConfig,
+  RelationshipMaintainerName,
   CompositeAfterKey,
   CompositeBucket,
-  EntityRelationshipRecord,
 } from './types';
 import {
   buildActorDiscoveryQuery,
@@ -26,12 +26,16 @@ import {
 } from './build_actor_discovery_query';
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
-import { writeEntityIds, type WriteEntityIdsResult } from './update_entities';
+import {
+  writeEntityIds,
+  type WriteEntityIdsResult,
+  type WriteEntityIdsPageState,
+} from './update_entities';
 import {
   writeRelationshipMetadatas,
   type WriteRelationshipMetadatasResult,
 } from './write_relationship_metadatas';
-import { LOOKBACK_WINDOW, MAX_ITERATIONS } from './constants';
+import { LOOKBACK_WINDOW, MAX_ITERATIONS, DEFAULT_ESQL_TIMEOUT_MS } from './constants';
 import { assertValidNamespace } from './validate_namespace';
 import type {
   RelationshipMaintainerSourceResult,
@@ -72,6 +76,17 @@ function errMsg(err: unknown): string {
   return err instanceof Error ? err.message : JSON.stringify(err);
 }
 
+function mergeRelTypeApplied(
+  a: Record<string, number>,
+  b: Record<string, number>
+): Record<string, number> {
+  const merged = { ...a };
+  for (const [k, v] of Object.entries(b)) {
+    merged[k] = (merged[k] ?? 0) + v;
+  }
+  return merged;
+}
+
 /** Returns the actor page on success, null to stop iteration (index missing or aborted), throws on real error. */
 async function fetchActorPage(
   config: RelationshipIntegrationConfig,
@@ -79,8 +94,9 @@ async function fetchActorPage(
   logger: Logger,
   namespace: string,
   afterKey: CompositeAfterKey | undefined,
-  transportOpts: { signal: AbortSignal } | undefined,
-  abortController: AbortController | undefined
+  transportOpts: { signal?: AbortSignal; requestTimeout?: number } | undefined,
+  signal: AbortSignal | undefined,
+  logPrefix: string
 ): Promise<{ buckets: CompositeBucket[]; newAfterKey: CompositeAfterKey | undefined } | null> {
   try {
     const result = await esClient.search(
@@ -94,14 +110,14 @@ async function fetchActorPage(
     };
   } catch (err) {
     if (isIndexNotFound(err)) {
-      logger.info(`[${config.id}] Index "${config.indexPattern(namespace)}" not found, skipping`);
+      logger.info(`${logPrefix} Index "${config.indexPattern(namespace)}" not found, skipping`);
       return null;
     }
-    if (abortController?.signal.aborted) {
-      logger.info(`[${config.id}] Aborted during composite aggregation`);
+    if (signal?.aborted) {
+      logger.info(`${logPrefix} Aborted during composite aggregation`);
       return null;
     }
-    logger.error(`[${config.id}] Composite aggregation failed: ${errMsg(err)}`);
+    logger.error(`${logPrefix} Composite aggregation failed: ${errMsg(err)}`);
     throw err;
   }
 }
@@ -113,8 +129,9 @@ async function fetchTargetsForActors(
   logger: Logger,
   namespace: string,
   buckets: CompositeBucket[],
-  transportOpts: { signal: AbortSignal } | undefined,
-  abortController: AbortController | undefined
+  transportOpts: { signal?: AbortSignal; requestTimeout?: number } | undefined,
+  signal: AbortSignal | undefined,
+  logPrefix: string
 ): Promise<EsqlQueryResult | null> {
   const esqlFilter = {
     bool: {
@@ -133,34 +150,30 @@ async function fetchTargetsForActors(
     const typed = result as unknown as Partial<EsqlQueryResult>;
     if (!Array.isArray(typed.columns) || !Array.isArray(typed.values)) {
       logger.warn(
-        `[${config.id}] ES|QL returned unexpected response shape (columns or values not arrays); skipping page`
+        `${logPrefix} ES|QL returned unexpected response shape (columns or values not arrays); skipping page`
       );
       return null;
     }
 
     return { columns: typed.columns, values: typed.values };
   } catch (err) {
-    if (abortController?.signal.aborted) {
-      logger.info(`[${config.id}] Aborted during ES|QL query`);
+    if (signal?.aborted) {
+      logger.info(`${logPrefix} Aborted during ES|QL query`);
       return null;
     }
-    logger.error(`[${config.id}] ES|QL query failed: ${errMsg(err)}`);
+    logger.error(`${logPrefix} ES|QL query failed: ${errMsg(err)}`);
     throw err;
   }
 }
 
 /**
- * Runs Step 1 + Step 2 + write for one integration end-to-end. Writes the
- * integration's records to the entity store before returning, so the engine
- * never holds more than one integration's records in memory.
+ * Runs Step 1 + Step 2 + write for one integration end-to-end. Writes each
+ * page's records to the entity store immediately after parsing, so the engine
+ * never holds more than one page of records in memory at a time.
  *
- * Memory bound: previously the engine accumulated `allRecords` across all
- * integrations × all pages before a single write, with theoretical max
- * ≈ COMPOSITE_PAGE_SIZE × MAX_ITERATIONS × #integrations ≈ 14M records.
- * Streaming per-integration drops that to one integration's records.
+ * Memory bound: one page's records at a time (≤ COMPOSITE_PAGE_SIZE per page).
  *
- * Abort semantics: returns the count of records actually written for this
- * integration. If the abort fires mid-pagination, the partial records
+ * Abort semantics: if the abort fires mid-pagination, the partial records
  * collected so far are still written before returning (best-effort
  * persistence — the records are derived from the run, not authoritative,
  * and partial writes are no worse than a re-run).
@@ -172,8 +185,10 @@ async function runIntegration(
   namespace: string,
   crudClient: EntityUpdateClient,
   entityMetadataClient: EntityMetadataClient,
-  abortController: AbortController | undefined,
-  metadataContext: { scanId: string; observedAt: string }
+  signal: AbortSignal | undefined,
+  metadataContext: { scanId: string; observedAt: string },
+  requestTimeoutMs: number | undefined,
+  logPrefix: string
 ): Promise<{
   buckets: number;
   recordsCount: number;
@@ -187,20 +202,34 @@ async function runIntegration(
   let iterations = 0;
   let truncated = false;
   let totalBuckets = 0;
-  const records: EntityRelationshipRecord[] = [];
-  const transportOpts = abortController ? { signal: abortController.signal } : undefined;
+  let totalRecordsCount = 0;
+  const timeoutMs = requestTimeoutMs ?? DEFAULT_ESQL_TIMEOUT_MS;
+  const transportOpts: { signal?: AbortSignal; requestTimeout?: number } = {
+    requestTimeout: timeoutMs,
+  };
+  if (signal) transportOpts.signal = signal;
   let outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error' = 'producing';
+
+  // Per-page write accumulators — initialized before the loop, accumulated inside.
+  let totalWriteResult: WriteEntityIdsResult = {
+    updated: 0,
+    notFound: 0,
+    errors: 0,
+    droppedTargets: 0,
+    relationshipTypeApplied: {},
+  };
+  let totalMetadataResult: WriteRelationshipMetadatasResult = { docsAttempted: 0, docsApplied: 0 };
 
   try {
     do {
-      if (abortController?.signal.aborted) {
-        logger.info(`[${config.id}] Aborted during pagination`);
+      if (signal?.aborted) {
+        logger.info(`${logPrefix} Aborted during pagination`);
         outcome = totalBuckets === 0 ? 'empty' : 'partial';
         break;
       }
       iterations++;
       if (iterations > MAX_ITERATIONS) {
-        logger.warn(`[${config.id}] Reached MAX_ITERATIONS (${MAX_ITERATIONS}), stopping`);
+        logger.warn(`${logPrefix} Reached MAX_ITERATIONS (${MAX_ITERATIONS}), stopping`);
         outcome = 'partial';
         truncated = true;
         break;
@@ -213,19 +242,16 @@ async function runIntegration(
         namespace,
         afterKey,
         transportOpts,
-        abortController
+        signal,
+        logPrefix
       );
       if (actorPage === null) {
-        outcome = abortController?.signal.aborted
-          ? totalBuckets === 0
-            ? 'empty'
-            : 'partial'
-          : 'index_missing';
+        outcome = signal?.aborted ? (totalBuckets === 0 ? 'empty' : 'partial') : 'index_missing';
         break;
       }
 
       const { buckets, newAfterKey } = actorPage;
-      logger.info(`[${config.id}] Found ${buckets.length} user buckets`);
+      logger.info(`${logPrefix} Found ${buckets.length} user buckets`);
       totalBuckets += buckets.length;
       if (buckets.length === 0) {
         if (iterations === 1) outcome = 'empty';
@@ -239,7 +265,8 @@ async function runIntegration(
         namespace,
         buckets,
         transportOpts,
-        abortController
+        signal,
+        logPrefix
       );
       if (esqlResult === null) {
         outcome = 'partial';
@@ -248,8 +275,72 @@ async function runIntegration(
 
       const { columns, values } = esqlResult;
       const pageRecords = parseTargetsPerActorRows(columns, values, config, logger);
-      records.push(...pageRecords);
-      logger.debug(`[${config.id}] Produced ${pageRecords.length} records`);
+      logger.debug(`${logPrefix} Produced ${pageRecords.length} records`);
+      totalRecordsCount += pageRecords.length;
+
+      // Stream per-page: write entity IDs immediately after parsing each page.
+      // Both writes are inside the loop so any transport failure sets outcome:
+      // 'error' and the outer loop continues to other integrations.
+      if (pageRecords.length > 0) {
+        const pageWrite: WriteEntityIdsResult & WriteEntityIdsPageState = await writeEntityIds(
+          crudClient,
+          logger,
+          pageRecords,
+          esClient,
+          namespace,
+          config.validateTargetIds
+        );
+        // Accumulate the entity write immediately — BEFORE the metadata write,
+        // which can throw. These entities are already durable in the store, so
+        // the counter must reflect them even if the rest of this page fails.
+        totalWriteResult = {
+          updated: totalWriteResult.updated + pageWrite.updated,
+          notFound: totalWriteResult.notFound + pageWrite.notFound,
+          errors: totalWriteResult.errors + pageWrite.errors,
+          droppedTargets: totalWriteResult.droppedTargets + pageWrite.droppedTargets,
+          relationshipTypeApplied: mergeRelTypeApplied(
+            totalWriteResult.relationshipTypeApplied,
+            pageWrite.relationshipTypeApplied
+          ),
+        };
+
+        const { validTargetIds, succeededEntityIds } = pageWrite;
+        // Only write metadata for actors that actually landed in the latest index.
+        // When bulkUpdateEntity returns a 404 (actor not yet extracted), we skip
+        // the metadata write for that actor so the two stores stay in sync.
+        const actorFiltered = pageRecords.filter(
+          (r) => r.entityId !== null && succeededEntityIds.has(r.entityId)
+        );
+        // When target validation also ran, further restrict to the validated target set.
+        const metadataRecords = validTargetIds
+          ? actorFiltered.flatMap((r) => {
+              const filteredRels: Record<string, string[]> = {};
+              for (const [relType, targetEuids] of Object.entries(r.relationships)) {
+                const valid = targetEuids.filter((id) => validTargetIds.has(id));
+                if (valid.length > 0) filteredRels[relType] = valid;
+              }
+              return Object.keys(filteredRels).length > 0
+                ? [{ ...r, relationships: filteredRels }]
+                : [];
+            })
+          : actorFiltered;
+        const pageMetadata = await writeRelationshipMetadatas(
+          entityMetadataClient,
+          logger,
+          metadataRecords,
+          {
+            scanId: metadataContext.scanId,
+            lookbackWindow: config.disableLookbackWindow ? '' : LOOKBACK_WINDOW,
+            entitySource: config.id,
+            observedAt: metadataContext.observedAt,
+          }
+        );
+
+        totalMetadataResult = {
+          docsAttempted: totalMetadataResult.docsAttempted + pageMetadata.docsAttempted,
+          docsApplied: totalMetadataResult.docsApplied + pageMetadata.docsApplied,
+        };
+      }
 
       // Composite agg's documented termination contract is "stop when after_key
       // is absent." Trust newAfterKey directly rather than inferring termination
@@ -259,78 +350,33 @@ async function runIntegration(
       afterKey = newAfterKey;
     } while (afterKey);
 
-    // Stream per-integration: write latest entities first, then metadata.
-    // Both writes are inside the try so any transport failure sets outcome:
-    // 'error' and the outer loop continues to other integrations.
-    const write = await writeEntityIds(
-      crudClient,
-      logger,
-      records,
-      esClient,
-      namespace,
-      config.validateTargetIds
-    );
-    // Only write metadata for actors that actually landed in the latest index.
-    // When bulkUpdateEntity returns a 404 (actor not yet extracted), we skip
-    // the metadata write for that actor so the two stores stay in sync.
-    const { validTargetIds, succeededEntityIds } = write;
-    const actorFilteredRecords = records.filter(
-      (r) => r.entityId !== null && succeededEntityIds.has(r.entityId)
-    );
-
-    // When target validation also ran, further restrict to the validated target set.
-    const metadataRecords = validTargetIds
-      ? actorFilteredRecords.flatMap((r) => {
-          const filteredRels: Record<string, string[]> = {};
-          for (const [relType, targetEuids] of Object.entries(r.relationships)) {
-            const valid = targetEuids.filter((id) => validTargetIds.has(id));
-            if (valid.length > 0) filteredRels[relType] = valid;
-          }
-          return Object.keys(filteredRels).length > 0
-            ? [{ ...r, relationships: filteredRels }]
-            : [];
-        })
-      : actorFilteredRecords;
-    const metadata = await writeRelationshipMetadatas(
-      entityMetadataClient,
-      logger,
-      metadataRecords,
-      {
-        scanId: metadataContext.scanId,
-        lookbackWindow: config.disableLookbackWindow ? '' : LOOKBACK_WINDOW,
-        entitySource: config.id,
-        observedAt: metadataContext.observedAt,
-      }
-    );
     // When truncated, the final loop pass incremented `iterations` before
     // breaking without fetching a page — clamp to actual pages completed.
     const completedIterations = truncated ? MAX_ITERATIONS : iterations;
     return {
       buckets: totalBuckets,
-      recordsCount: records.length,
-      write,
-      metadata,
+      recordsCount: totalRecordsCount,
+      write: totalWriteResult,
+      metadata: totalMetadataResult,
       outcome,
       iterations: completedIterations,
       truncated,
     };
   } catch (err) {
-    logger.error(`[${config.id}] Integration failed: ${errMsg(err)}`);
+    logger.error(`${logPrefix} Integration failed: ${errMsg(err)}`);
+    // Return the counters accumulated so far, NOT zeros. Writes stream per page,
+    // so pages 1..N-1 are already durable in the entity store when a later page
+    // throws (e.g. requestTimeoutMs firing during esql.query or writeEntityIds).
+    // Reporting zeros here would tell operators `written=0 records=<big>` during
+    // exactly the timeout scenario the configurable timeout exists to surface.
     return {
       buckets: totalBuckets,
-      recordsCount: records.length,
-      write: {
-        updated: 0,
-        notFound: 0,
-        errors: 0,
-        droppedTargets: 0,
-        relationshipTypeApplied: {},
-        succeededEntityIds: new Set(),
-      },
-      metadata: { docsAttempted: 0, docsApplied: 0 },
+      recordsCount: totalRecordsCount,
+      write: totalWriteResult,
+      metadata: totalMetadataResult,
       outcome: 'error',
       iterations,
-      truncated: false,
+      truncated,
     };
   }
 }
@@ -358,7 +404,9 @@ export const runRelationshipMaintainer = async ({
   crudClient,
   entityMetadataClient,
   integrations,
-  abortController,
+  maintainerName,
+  signal,
+  requestTimeoutMs,
   telemetryCollector,
 }: {
   esClient: ElasticsearchClient;
@@ -368,7 +416,11 @@ export const runRelationshipMaintainer = async ({
   crudClient: EntityUpdateClient;
   entityMetadataClient: EntityMetadataClient;
   integrations: RelationshipIntegrationConfig[];
-  abortController?: AbortController;
+  /** Identifies which maintainer is running — embedded in per-integration completion logs for unambiguous attribution. */
+  maintainerName: RelationshipMaintainerName;
+  signal?: AbortSignal;
+  /** Per-request timeout in milliseconds for ES client calls (search + esql.query). Defaults to DEFAULT_ESQL_TIMEOUT_MS (60s). */
+  requestTimeoutMs?: number;
   /**
    * Optional. Engine populates one entry per integration into `sources` and
    * accumulates per-rel-type applied counts in `relationshipTypeApplied` for callers
@@ -430,11 +482,13 @@ export const runRelationshipMaintainer = async ({
   let truncated = false;
 
   for (const config of integrations) {
-    if (abortController?.signal.aborted) {
+    if (signal?.aborted) {
       logger.info('Relationship maintainer aborted, skipping remaining integrations');
       break;
     }
-    logger.info(`[${config.id}] Processing integration: ${config.name}`);
+    const logPrefix = `[${maintainerName}][${config.id}]`;
+    logger.info(`${logPrefix} Processing integration: ${config.name}`);
+    const integrationStartMs = Date.now();
     const {
       buckets,
       recordsCount,
@@ -450,24 +504,44 @@ export const runRelationshipMaintainer = async ({
       namespace,
       crudClient,
       entityMetadataClient,
-      abortController,
-      metadataContext
+      signal,
+      metadataContext,
+      requestTimeoutMs,
+      logPrefix
+    );
+
+    const durationMs = Date.now() - integrationStartMs;
+    logger.info(
+      `${logPrefix} Integration complete: ` +
+        `outcome=${outcome} slices=${iterations} records=${recordsCount} ` +
+        `written=${write.updated} notFound=${write.notFound} errors=${write.errors} ` +
+        `truncated=${integrationTruncated} durationMs=${durationMs}`
     );
 
     totalIterations += iterations;
     if (integrationTruncated) truncated = true;
 
+    // Accumulate unconditionally, including `outcome: 'error'`. Because writes
+    // stream per page, a failed integration has still durably persisted every
+    // page that completed before the throw — those entities are in the store
+    // whether or not the integration finished. Excluding them would make the
+    // run-level totals under-report real work and contradict the per-integration
+    // completion log. `outcome` is reported separately (log + telemetry
+    // `sources[].outcome`), so callers can still distinguish a clean run from a
+    // partial one without the counters lying about what was written.
     if (outcome === 'error') {
-      logger.warn(`[${config.id}] Integration failed; skipping totals accumulation for this run`);
-    } else {
-      totalBuckets += buckets;
-      totalRecords += recordsCount;
-      totalWritten += write.updated;
-      totalNotFound += write.notFound;
-      totalWriteErrors += write.errors;
-      totalMetadataDocsApplied += metadata.docsApplied;
-      totalDroppedTargets += write.droppedTargets;
+      logger.warn(
+        `${logPrefix} Integration failed after persisting ${write.updated} entities across ` +
+          `${iterations} page(s); counting them toward run totals`
+      );
     }
+    totalBuckets += buckets;
+    totalRecords += recordsCount;
+    totalWritten += write.updated;
+    totalNotFound += write.notFound;
+    totalWriteErrors += write.errors;
+    totalMetadataDocsApplied += metadata.docsApplied;
+    totalDroppedTargets += write.droppedTargets;
 
     if (telemetryCollector) {
       telemetryCollector.sources.push({

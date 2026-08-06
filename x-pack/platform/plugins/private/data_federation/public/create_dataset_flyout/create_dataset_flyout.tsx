@@ -28,7 +28,7 @@ import {
 import { useController, useForm } from 'react-hook-form';
 
 import type { DataSetWithName, DataSource } from '../../common';
-import { DATA_SOURCE_TYPES_TO_HELP_TEXT } from '../../common';
+import { DATA_SOURCE_TYPES_TO_HELP_TEXT, validateIndexNameRules } from '../../common';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import {
   buildDatasetSettingsFromFormValues,
@@ -111,6 +111,11 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
         const trimmed = value.trim();
         if (!trimmed) {
           return createDatasetFlyoutStrings.nameRequired();
+        }
+
+        const nameValidation = validateIndexNameRules(trimmed);
+        if (nameValidation) {
+          return nameValidation.message;
         }
 
         const normalized = trimmed.toLowerCase();

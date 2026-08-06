@@ -465,4 +465,70 @@ describe('syncNamespaceTemplates', () => {
       ])
     );
   });
+
+  it('deletes an ILM component template on opt-out only when it is tracked in installed_es', async () => {
+    mockInstalledPackage();
+    // The Fleet-owned ILM component template for the removed namespace is tracked.
+    mockedGetInstallation.mockResolvedValue({
+      installed_es: [
+        {
+          id: 'logs-nginx.access@namespace.staging',
+          type: ElasticsearchAssetType.componentTemplate,
+        },
+      ],
+    } as any);
+    const esClient = makeEsClientWithTemplate();
+
+    await syncNamespaceTemplates({
+      soClient,
+      esClient,
+      packageName: 'nginx',
+      addedNamespaces: [],
+      removedNamespaces: ['staging'],
+    });
+
+    expect(esClient.cluster.deleteComponentTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'logs-nginx.access@namespace.staging' }),
+      expect.anything()
+    );
+
+    const assetsToRemoveCall = mockedUpdateEsAssetReferences.mock.calls.find(
+      (c) => c[3]?.assetsToRemove
+    );
+    expect(assetsToRemoveCall?.[3].assetsToRemove).toEqual(
+      expect.arrayContaining([
+        {
+          id: 'logs-nginx.access@namespace.staging',
+          type: ElasticsearchAssetType.componentTemplate,
+        },
+      ])
+    );
+  });
+
+  it('does not delete a same-named component template that Fleet does not track', async () => {
+    mockInstalledPackage();
+    // No component template tracked in installed_es for the removed namespace.
+    mockedGetInstallation.mockResolvedValue({ installed_es: [] } as any);
+    const esClient = makeEsClientWithTemplate();
+
+    await syncNamespaceTemplates({
+      soClient,
+      esClient,
+      packageName: 'nginx',
+      addedNamespaces: [],
+      removedNamespaces: ['staging'],
+    });
+
+    expect(esClient.cluster.deleteComponentTemplate).not.toHaveBeenCalled();
+
+    const assetsToRemoveCall = mockedUpdateEsAssetReferences.mock.calls.find(
+      (c) => c[3]?.assetsToRemove
+    );
+    // The index template is still removed, but no component template entry is.
+    expect(assetsToRemoveCall?.[3].assetsToRemove).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: ElasticsearchAssetType.componentTemplate }),
+      ])
+    );
+  });
 });

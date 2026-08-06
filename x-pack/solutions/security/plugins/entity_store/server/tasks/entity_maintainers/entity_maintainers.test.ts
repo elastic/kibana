@@ -31,6 +31,9 @@ jest.mock('./entity_maintainers_registry', () => ({
     hasId: jest.fn(),
   },
 }));
+jest.mock('../should_delete_orphaned_task', () => ({
+  shouldDeleteOrphanedEntityStoreTask: jest.fn().mockResolvedValue(false),
+}));
 
 const registryMock = jest.requireMock('./entity_maintainers_registry')
   .entityMaintainersRegistry as {
@@ -58,6 +61,7 @@ function createMockDeps() {
   const coreStart = {
     savedObjects: {
       createInternalRepository: mockCreateInternalRepository.mockReturnValue({}),
+      getScopedClient: jest.fn().mockReturnValue({}),
     },
     elasticsearch: {
       client: {
@@ -317,7 +321,7 @@ describe('entity_maintainer task', () => {
           status: expect.objectContaining({
             state: {},
           }),
-          abortController: expect.any(AbortController),
+          signal: expect.any(AbortSignal),
           logger: expect.anything(),
           fakeRequest: expect.anything(),
           esClient: expect.anything(),

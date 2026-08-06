@@ -19,6 +19,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import {
+  CLOUD_SUBSCRIPTION_FEATURES_URL,
+  CONTACT_US_URL,
+  SUBSCRIPTION_FEATURES_URL,
+} from '@kbn/data-lifecycle-phases';
 import { DlmPhasesSelector } from '../../../../data_lifecycle';
 import type { DlmPhasesSelectorProps, SerializedDlmPhases } from '../../../../data_lifecycle';
 import { resolveLogisticsLifecycle } from '../../../../../../../common/lib';
@@ -40,8 +45,6 @@ import { logisticsFormSchema } from './step_logistics_schema';
 
 const UseField = getUseField({ component: Field });
 const FormRow = getFormRow({ titleTag: 'h3' });
-
-const SUBSCRIPTION_FEATURES_URL = 'https://www.elastic.co/subscriptions/cloud';
 
 interface Props {
   defaultValue: { [key: string]: any; lifecycle?: DataRetention; _meta?: Record<string, unknown> };
@@ -104,7 +107,12 @@ const useDlmEnterpriseConfig = (): DlmPhasesSelectorProps['enterprise'] => {
     isCloudEnabled: Boolean(cloud?.isCloudEnabled),
     canManageLicense: Boolean(application?.capabilities?.management?.stack?.license_management),
     trialDaysLeft: cloud?.trialDaysLeft?.(),
-    subscriptionFeaturesUrl: SUBSCRIPTION_FEATURES_URL,
+    subscriptionFeaturesUrl: cloud?.isCloudEnabled
+      ? CLOUD_SUBSCRIPTION_FEATURES_URL
+      : SUBSCRIPTION_FEATURES_URL,
+    onUpgrade: cloud?.isCloudEnabled
+      ? undefined
+      : () => window.open(CONTACT_US_URL, '_blank', 'noopener'),
   };
 };
 
@@ -123,6 +131,7 @@ const StatefulDlmPhasesSelector = ({ defaultValue, onChange }: DlmPhasesSelector
       hasEnterpriseLicense={isAtLeastEnterprise()}
       hasDefaultSnapshotRepository={Boolean(snapshotRepositories?.hasDefaultRepository)}
       canCreateDefaultSnapshotRepository={Boolean(snapshotRepositories?.canCreateRepository)}
+      hasExistingRepositories={Boolean(snapshotRepositories?.hasRepositories)}
       defaultSnapshotRepository={snapshotRepositories?.defaultRepository}
       manageRepositoriesUrl={manageRepositoriesUrl}
       createDefaultRepositoryUrl={createDefaultRepositoryUrl}

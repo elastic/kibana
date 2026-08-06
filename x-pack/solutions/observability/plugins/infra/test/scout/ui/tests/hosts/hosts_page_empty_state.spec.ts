@@ -14,9 +14,31 @@ test.describe(
   'Hosts Page - Empty State',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage } }) => {
-      await browserAuth.loginAsViewer();
-      await hostsPage.goToHostsPage({ skipLoadWait: true });
+    test.beforeEach(async ({ browserAuth, page, pageObjects: { hostsPage } }) => {
+      await test.step('mock metrics has-data response', async () => {
+        await page.route(
+          (url) => url.pathname.includes('/api/metrics/source/hasData'),
+          (route) =>
+            route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify({ hasData: false }),
+            })
+        );
+      });
+
+      await test.step('log in as viewer', async () => {
+        await browserAuth.loginAsViewer();
+      });
+
+      await test.step('navigate to hosts and wait for has-data request', async () => {
+        const hasDataResponse = page.waitForResponse(
+          (response) => response.url().includes('/api/metrics/source/hasData'),
+          { timeout: EXTENDED_TIMEOUT }
+        );
+        await hostsPage.goToHostsPage({ skipLoadWait: true });
+        await hasDataResponse;
+      });
     });
 
     test('should show onboarding page when no data is present', async ({

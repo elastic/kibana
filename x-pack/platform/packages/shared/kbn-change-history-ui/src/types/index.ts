@@ -37,7 +37,9 @@ export type {
   RestoreChangeParams,
   ChangeHistoryRestoreTelemetryParams,
 } from './restore_change_params';
+export type { ChangeHistoryPendingChange } from './change_history_pending_change';
 export type {
   ChangeHistoryHttpClient,
   ChangeHistoryHttpGetOptions,
+  ChangeHistoryHttpPostOptions,
 } from './change_history_http_client';

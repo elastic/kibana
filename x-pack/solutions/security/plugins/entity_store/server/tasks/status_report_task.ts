@@ -25,12 +25,15 @@ import type { GetStatusResult } from '../domain/types';
 import {
   ENTITY_STORE_HEALTH_REPORT_EVENT,
   ENTITY_STORE_METADATA_USAGE_EVENT,
+  ENTITY_STORE_RESOLUTION_STATE_EVENT,
   ENTITY_STORE_USAGE_EVENT,
   createReportEvent,
   type TelemetryReporter,
 } from '../telemetry/events';
 import { getMetadataEntitiesDataStreamName } from '../domain/asset_manager/metadata_data_stream';
+import { executeEsqlQuery } from '../infra/elasticsearch/esql';
 import { wrapTaskRun } from '../telemetry/traces';
+import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 
 const config = TasksConfig[EntityStoreTaskType.enum.statusReport];
 
@@ -49,6 +52,44 @@ const getStoreSize = (
     },
     { signal }
   );
+
+export const getResolutionState = async (
+  esClient: ElasticsearchClient,
+  index: string,
+  entityType: EntityType,
+  signal: AbortSignal
+): Promise<{
+  resolvedEntities: number;
+  targetEntities: number;
+  maxGroupSize: number;
+  avgGroupSize: number;
+}> => {
+  // Target: canonical entity (no `resolved_to`). Alias: entity with `resolved_to` set.
+  // Resolution group = one target + its aliases. Query counts aliases only; target via +1 below.
+  const query = `FROM ${index}
+    | WHERE entity.EngineMetadata.Type == "${entityType}" AND entity.relationships.resolution.resolved_to IS NOT NULL
+    | STATS aliasCount = COUNT(*) BY entity.relationships.resolution.resolved_to
+    | STATS resolvedEntities = SUM(aliasCount), resolutionGroups = COUNT(*), maxGroupAliases = MAX(aliasCount)`;
+
+  const { columns, values } = await executeEsqlQuery({ esClient, query, signal });
+
+  // No aliases: ES returns null for SUM/MAX; report as 0. Look up by column name, not position.
+  const row = values[0] ?? [];
+  const readSummaryValue = (columnName: string): number => {
+    const idx = columns.findIndex((c) => c.name === columnName);
+    const value = idx === -1 ? null : row[idx];
+    return typeof value === 'number' ? value : 0;
+  };
+
+  const resolvedEntities = readSummaryValue('resolvedEntities');
+  // One group per distinct resolution target, so resolutionGroups === targetEntities by construction.
+  const targetEntities = readSummaryValue('resolutionGroups');
+  // Group size includes the target (+1). avg: (resolvedEntities / targetEntities) + 1 per group.
+  const maxGroupSize = targetEntities > 0 ? readSummaryValue('maxGroupAliases') + 1 : 0;
+  const avgGroupSize = targetEntities > 0 ? resolvedEntities / targetEntities + 1 : 0;
+
+  return { resolvedEntities, targetEntities, maxGroupSize, avgGroupSize };
+};
 
 const toHealthReportPayload = (statusResult: GetStatusResult) => {
   if (statusResult.status === ENTITY_STORE_STATUS.NOT_INSTALLED) {
@@ -91,7 +132,7 @@ const toHealthReportPayload = (statusResult: GetStatusResult) => {
 async function runTask({
   taskInstance,
   fakeRequest,
-  abortController,
+  signal,
   logger,
   core,
   telemetryReporter,
@@ -99,12 +140,22 @@ async function runTask({
   logger: Logger;
   core: EntityStoreCoreSetup;
   telemetryReporter: TelemetryReporter;
-  abortController: AbortController;
 }): Promise<RunResult> {
   const namespace = taskInstance.state.namespace as string | undefined;
 
   if (!namespace) {
     throw new Error('Namespace is required for status report task');
+  }
+
+  const [coreStart] = await core.getStartServices();
+  if (
+    await shouldDeleteOrphanedEntityStoreTask({
+      coreStart,
+      namespace,
+      logger,
+    })
+  ) {
+    return { state: { namespace }, shouldDeleteTask: true };
   }
 
   if (!fakeRequest) {
@@ -123,17 +174,31 @@ async function runTask({
     isServerless: false,
   });
   const index = getLatestEntitiesIndexName(namespace);
-  const abortSignal = abortController.signal;
 
-  // Report Entity Store usage per entity type
+  // Report Entity Store usage and resolution state per entity type
   await Promise.all(
     ALL_ENTITY_TYPES.map(async (entityType) => {
       try {
-        const { count: storeSize } = await getStoreSize(esClient, index, entityType, abortSignal);
+        const { count: storeSize } = await getStoreSize(esClient, index, entityType, signal);
         telemetryReporter.reportEvent(ENTITY_STORE_USAGE_EVENT, {
           storeSize,
           entityType,
           namespace,
+        });
+
+        const { resolvedEntities, targetEntities, maxGroupSize, avgGroupSize } =
+          await getResolutionState(esClient, index, entityType, signal);
+        const standaloneEntities = Math.max(0, storeSize - resolvedEntities - targetEntities);
+        telemetryReporter.reportEvent(ENTITY_STORE_RESOLUTION_STATE_EVENT, {
+          entityType,
+          namespace,
+          totalEntities: storeSize,
+          resolvedEntities,
+          targetEntities,
+          standaloneEntities,
+          resolutionGroups: targetEntities,
+          avgGroupSize,
+          maxGroupSize,
         });
       } catch (e) {
         logger.error(`Error reporting store usage for ${entityType}: ${getErrorMessage(e)}`);
@@ -146,7 +211,7 @@ async function runTask({
   try {
     const { count: docCount } = await esClient.count(
       { index: getMetadataEntitiesDataStreamName(namespace) },
-      { signal: abortSignal }
+      { signal }
     );
     telemetryReporter.reportEvent(ENTITY_STORE_METADATA_USAGE_EVENT, { namespace, docCount });
   } catch (e) {
@@ -190,7 +255,13 @@ export function registerStatusReportTask({
       [config.type]: {
         title: config.title,
         timeout: config.timeout,
-        createTaskRunner: ({ taskInstance, fakeRequest, abortController, executionUuid }) => ({
+        createTaskRunner: ({
+          taskInstance,
+          fakeRequest,
+          signal,
+          executionUuid,
+          setCustomTaskRunEventFields,
+        }) => ({
           run: () =>
             wrapTaskRun({
               spanName: 'entityStore.task.status_report.run',
@@ -202,8 +273,9 @@ export function registerStatusReportTask({
                 runTask({
                   taskInstance,
                   fakeRequest,
-                  abortController,
+                  signal,
                   executionUuid,
+                  setCustomTaskRunEventFields,
                   logger: logger.get(taskInstance.id),
                   core,
                   telemetryReporter,

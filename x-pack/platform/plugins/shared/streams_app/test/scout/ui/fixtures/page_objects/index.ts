@@ -7,15 +7,18 @@
 
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
+import { DocViewer } from '@kbn/unified-doc-viewer/test/scout/ui/fixtures/page_objects';
 import { StreamsApp } from './streams_app';
 
 export interface StreamsPageObjects extends PageObjects {
+  docViewer: DocViewer;
   streams: StreamsApp;
 }
 
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): StreamsPageObjects {
   return {
     ...pageObjects,
+    docViewer: createLazyPageObject(DocViewer, page),
     streams: createLazyPageObject(StreamsApp, page),
   };
 }

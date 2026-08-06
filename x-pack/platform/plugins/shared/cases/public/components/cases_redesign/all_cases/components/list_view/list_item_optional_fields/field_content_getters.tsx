@@ -10,9 +10,13 @@ import { EuiLink } from '@elastic/eui';
 import { CaseStatuses } from '@kbn/cases-components';
 
 import type { CaseUI, CaseUICustomField } from '../../../../../../../common/ui/types';
+import type { InlineField } from '../../../../../../../common/types/domain/template/fields';
+import { getFieldCamelKey } from '../../../../../../../common/utils';
 import { FormattedRelativePreferenceDate } from '../../../../../formatted_date';
-import { getExtendedFieldDisplayLabels } from '../../../../../all_cases/utils/extended_fields_column_utils';
-import { ExtendedFieldsListItemContent } from './extended_fields_content';
+import {
+  getExtendedFieldColumnKey,
+  renderExtendedFieldValue,
+} from '../../../../../all_cases/extended_field_columns';
 import type { ListItemFieldContent } from './types';
 import * as i18n from '../../../translations';
 
@@ -86,6 +90,24 @@ const getCustomFieldContent = (field: string, theCase: CaseUI): ListItemFieldCon
   };
 };
 
+// Templates v2 renders global/extended fields (keyed `<name>_as_<type>`) instead of legacy
+// customFields. Values live on `theCase.extendedFields` under the camelCased key; empty values are
+// omitted so the card doesn't show a dangling label.
+export const getExtendedFieldContent = (
+  field: InlineField,
+  theCase: CaseUI
+): ListItemFieldContent | null => {
+  const rawValue = theCase.extendedFields?.[getFieldCamelKey(field.name, field.type)];
+  if (rawValue == null || rawValue === '') {
+    return null;
+  }
+  return {
+    label: field.label ?? field.name,
+    content: renderExtendedFieldValue(field, rawValue),
+    testSubj: `cases-list-item-field-${getExtendedFieldColumnKey(field)}`,
+  };
+};
+
 const listItemFieldContentGetters: Record<
   string,
   (theCase: CaseUI) => ListItemFieldContent | null
@@ -153,25 +175,6 @@ const listItemFieldContentGetters: Record<
       label: i18n.DESCRIPTION,
       content: truncatedDescription,
       testSubj: 'cases-list-item-field-description',
-    };
-  },
-  extendedFields: (theCase) => {
-    const labels = getExtendedFieldDisplayLabels(
-      theCase.extendedFields,
-      theCase.extendedFieldsLabels
-    );
-    if (labels.length === 0) {
-      return null;
-    }
-    return {
-      label: i18n.EXTENDED_FIELDS,
-      content: (
-        <ExtendedFieldsListItemContent
-          extendedFields={theCase.extendedFields}
-          extendedFieldsLabels={theCase.extendedFieldsLabels}
-        />
-      ),
-      testSubj: 'cases-list-item-field-extended-fields',
     };
   },
 };

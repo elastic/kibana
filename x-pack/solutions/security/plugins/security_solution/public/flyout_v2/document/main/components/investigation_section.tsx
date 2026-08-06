@@ -6,41 +6,33 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
+import { EuiLink } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
-import { defaultToolsFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { EventKind } from '../constants/event_kinds';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useFlyoutApi } from '../../../use_flyout_api';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { InvestigationGuide } from './investigation_guide';
-import { InvestigationGuide as InvestigationGuideToolsFlyout } from '../../tools/investigation_guide';
-import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import { HighlightedFields } from './highlighted_fields';
+import { HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID } from './test_ids';
+import { EVENT_SOURCE_FIELD_DESCRIPTOR } from '../../../../common/components/event_details/translations';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
-import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { OpenFlyoutLinkProps } from '../../../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
-import { HOST_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
+import {
+  LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
+  SIGNAL_RULE_NAME_FIELD_NAME,
+} from '../../../../timelines/components/timeline/body/renderers/constants';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import { INVESTIGATION_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
-
-export const INVESTIGATION_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.document.investigation.sectionTitle',
-  {
-    defaultMessage: 'Investigation',
-  }
-);
 
 const LOCAL_STORAGE_SECTION_KEY = 'investigation';
 
@@ -62,12 +54,7 @@ export interface InvestigationSectionProps {
  */
 export const InvestigationSection = memo(
   ({ hit, renderCellActions }: InvestigationSectionProps) => {
-    const { services } = useKibana();
-    const { overlays } = services;
-    const store = useStore();
-    const history = useHistory();
-    const isInSecurityApp = useIsInSecurityApp();
-    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const { openDocumentInvestigationGuide, openDocumentFlyoutFromIndex } = useFlyoutApi();
 
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -101,26 +88,49 @@ export const InvestigationSection = memo(
     });
 
     const onShowInvestigationGuide = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <InvestigationGuideToolsFlyout hit={hit} />,
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'start',
-        }
-      );
-    }, [history, historyKey, hit, overlays, services, store]);
+      openDocumentInvestigationGuide({ hit, origin: FLYOUT_ORIGIN.INVESTIGATION_GUIDE });
+    }, [openDocumentInvestigationGuide, hit]);
 
     const renderFlyoutLink = useCallback(
-      (props: OpenFlyoutLinkProps) => (
-        <OpenFlyoutLink {...props} asParent={props.field === HOST_NAME_FIELD_NAME} />
-      ),
-      []
+      (props: OpenFlyoutLinkProps) => {
+        // Source event: open the ancestor document in a new flyout. The value is the ancestor
+        // document id and the index comes from `signal.ancestors.index`. Uses the same open method
+        // as the sibling host/user/rule links in this table so the navigation behaves consistently.
+        // Render plain text when either piece is missing.
+        if (props.field === EVENT_SOURCE_FIELD_DESCRIPTOR) {
+          if (!props.value || !ancestorsIndexName) {
+            return <>{props.children}</>;
+          }
+          return (
+            <EuiLink
+              onClick={() =>
+                openDocumentFlyoutFromIndex({
+                  documentId: props.value,
+                  indexName: ancestorsIndexName,
+                  origin: FLYOUT_ORIGIN.FLYOUT_FIELD_LINK,
+                })
+              }
+              data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}
+            >
+              {props.children}
+            </EuiLink>
+          );
+        }
+        // Rule name fields: substitute the rule UUID as the link target (the flyout is keyed by
+        // UUID) while keeping the rule name as the displayed text. When no UUID is available,
+        // render plain text to avoid opening the rule flyout with an invalid id.
+        if (
+          props.field === SIGNAL_RULE_NAME_FIELD_NAME ||
+          props.field === LEGACY_SIGNAL_RULE_NAME_FIELD_NAME
+        ) {
+          if (!ruleId) {
+            return <>{props.children}</>;
+          }
+          return <OpenFlyoutLink {...props} value={ruleId} />;
+        }
+        return <OpenFlyoutLink {...props} />;
+      },
+      [ruleId, ancestorsIndexName, openDocumentFlyoutFromIndex]
     );
 
     return (

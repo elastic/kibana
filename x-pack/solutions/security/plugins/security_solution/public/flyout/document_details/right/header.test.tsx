@@ -9,7 +9,7 @@ import React from 'react';
 import { renderWithI18n as render } from '@kbn/test-jest-helpers';
 
 import { PanelHeader } from './header';
-import { allThreeTabs } from './hooks/use_tabs';
+import { allThreeTabs } from './tabs';
 import { useBasicDataFromDetailsData } from '../shared/hooks/use_basic_data_from_details_data';
 import { useDocumentDetailsContext } from '../shared/context';
 

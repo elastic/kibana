@@ -65,6 +65,14 @@ const configSchema = schema.object({
         'Useful for observability but adds to document size. Disabled by default for performance.',
     },
   }),
+  /**
+   * External HITL resume (API-key public routes + channel notifications).
+   * Disable via `workflowsExecutionEngine.hitlExternalResume.enabled` and
+   * `workflowsManagement.hitlExternalResume.enabled` in `kibana.yml`.
+   */
+  hitlExternalResume: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
 });
 
 export type EventTriggersConfig = TypeOf<typeof EventTriggersConfigSchema>;

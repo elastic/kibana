@@ -8,6 +8,7 @@
  */
 
 export const storybookAliases = {
+  agent_builder: 'x-pack/platform/plugins/shared/agent_builder/.storybook',
   ai_assistant: 'x-pack/platform/packages/shared/kbn-ai-assistant/.storybook',
   alerting_v2: 'x-pack/platform/plugins/shared/alerting_v2/.storybook',
   alerting_v2_rule_form:
@@ -17,6 +18,7 @@ export const storybookAliases = {
   cases: 'src/platform/packages/shared/kbn-cases-components/.storybook',
   cell_actions: 'src/platform/packages/shared/kbn-cell-actions/.storybook',
   chart_icons: 'src/platform/packages/shared/kbn-chart-icons/.storybook',
+  change_history_ui: 'x-pack/platform/packages/shared/kbn-change-history-ui/.storybook',
   cloud_security_posture_graph:
     'x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/.storybook',
   cloud: 'src/platform/packages/shared/cloud/.storybook',
@@ -56,7 +58,6 @@ export const storybookAliases = {
   lists: 'x-pack/solutions/security/plugins/lists/.storybook',
   management: 'src/platform/packages/shared/kbn-management/storybook/config',
   metrics_data_access: 'x-pack/solutions/observability/plugins/metrics_data_access/.storybook',
-  nightshift: 'x-pack/solutions/observability/packages/kbn-nightshift/.storybook',
   observability_ai_assistant_app:
     'x-pack/solutions/observability/plugins/observability_ai_assistant_app/.storybook',
   observability_ai_assistant:

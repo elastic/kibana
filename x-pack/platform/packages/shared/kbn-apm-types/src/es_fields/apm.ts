@@ -128,6 +128,7 @@ export const ERROR_CODE = 'error.code';
 
 // ANOMALY
 export const ANOMALY_DETECTOR_TYPE = 'anomaly.detector_type';
+export const ANOMALY_TIMESTAMP = 'anomaly.timestamp';
 
 // METRICS
 export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
@@ -184,6 +185,10 @@ export const FAAS_TRIGGER_TYPE = 'faas.trigger.type';
 export const FAAS_DURATION = 'faas.duration';
 export const FAAS_COLDSTART_DURATION = 'faas.coldstart_duration';
 export const FAAS_BILLED_DURATION = 'faas.billed_duration';
+
+// ECS Gen AI fields — https://www.elastic.co/docs/reference/ecs/ecs-gen_ai
+export const GEN_AI_USAGE_INPUT_TOKENS = 'gen_ai.usage.input_tokens';
+export const GEN_AI_USAGE_OUTPUT_TOKENS = 'gen_ai.usage.output_tokens';
 
 // OpenTelemetry Metrics
 export const METRIC_OTEL_SYSTEM_CPU_UTILIZATION = 'system.cpu.utilization';

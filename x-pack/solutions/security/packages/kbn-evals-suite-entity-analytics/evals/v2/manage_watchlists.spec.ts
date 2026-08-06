@@ -82,7 +82,7 @@ evaluate.describe(
       });
     });
 
-    evaluate.afterAll(async ({ log, supertest, quickApiClient }) => {
+    evaluate.afterAll(async ({ log, supertest }) => {
       // Best-effort cleanup. Failures here are non-fatal — the next beforeAll
       // is idempotent and will clear leftover seeded watchlists by name.
       try {
@@ -90,7 +90,7 @@ evaluate.describe(
       } catch (err) {
         log.warning(`Watchlist cleanup failed during teardown: ${(err as Error).message}`);
       }
-      await deleteEntityEngines({ quickApiClient, log });
+      await deleteEntityEngines({ supertest, log });
     });
 
     evaluate('manage watchlists: create / update / delete flows', async ({ evaluateDataset }) => {

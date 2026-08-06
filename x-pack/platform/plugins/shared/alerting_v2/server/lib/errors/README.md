@@ -6,10 +6,10 @@ All HTTP routes emit error responses that conform to the shared
 
 ```jsonc
 {
-  "code": "RULE_NOT_FOUND",         
-  "error": "Not Found",              
-  "message": "Rule with id=foo …",  
-  "details": { "rule_id": "foo" }  
+  "code": "RULE_NOT_FOUND",
+  "error": "Not Found",
+  "message": "Rule with id=foo …",
+  "details": { "rule_id": "foo" }
 }
 ```
 
@@ -50,52 +50,60 @@ backwards compatible. Renaming or removing a code is a breaking change.
 
 ### Rules (`server/lib/rules_client/`)
 
-| Code                          | Status | When                                                                 | `details`                                  |
-| ----------------------------- | ------ | -------------------------------------------------------------------- | ------------------------------------------ |
-| `RULE_NOT_FOUND`              | 404    | `getRule` / `updateRule` / `deleteRule` cannot find a rule by id     | `{ rule_id }`                              |
-| `RULE_ALREADY_EXISTS`         | 409    | `createRule` collides with an existing id                            | `{ rule_id }`                              |
-| `RULE_VERSION_CONFLICT`       | 409    | An update / delete races another writer (`if_seq_no` mismatch)       | `{ rule_id }`                              |
-| `INVALID_RULE_DATA`           | 400    | The submitted body fails the domain-level schema check               | `{ context, errors }` (tree-shaped errors) |
-| `INVALID_STATE_TRANSITION`    | 400    | `state_transition` is incompatible with the rule's `kind`            | `{ rule_id, kind, transition }`            |
-| `INVALID_BULK_PARAMS`         | 400    | Bulk operation combines `ids` with `filter` / `search` / `match_all` | `{ params }`                               |
-| `IMMUTABLE_FIELDS_CHANGED`    | 400    | PUT (upsert) request changes a field flagged as immutable            | `{ fields }`                               |
-| `INVALID_FILTER_FIELD`        | 400    | The `filter` references a field that is not in the allow-list        | `{ field, allowed_fields }`                |
-| `UNSUPPORTED_FILTER_FUNCTION` | 400    | The `filter` uses a KQL function we do not translate yet             | `{ function }`                             |
-| `SCHEDULE_INTERVAL_TOO_SHORT` | 400    | `schedule.every` is below `xpack.alerting_v2.rules.minimumScheduleInterval` | `{ interval, minimumScheduleInterval }`    |
-| `MAX_SCHEDULES_PER_MINUTE_EXCEEDED` | 400 | Scheduling the rule would exceed `xpack.alerting_v2.rules.maxScheduledPerMinute` | `{ interval, maxScheduledPerMinute }` |
+| Code                                | Status | When                                                                                                                                | `details`                                  |
+| ----------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `RULE_NOT_FOUND`                    | 404    | `getRule` / `updateRule` / `deleteRule` cannot find a rule by id                                                                    | `{ rule_id }`                              |
+| `RULE_ALREADY_EXISTS`               | 409    | `createRule` collides with an existing id                                                                                           | `{ rule_id }`                              |
+| `RULE_VERSION_CONFLICT`             | 409    | An update / delete races another writer (`if_seq_no` mismatch)                                                                      | `{ rule_id }`                              |
+| `INVALID_RULE_DATA`                 | 400    | The submitted body fails the domain-level schema check                                                                              | `{ context, errors }` (tree-shaped errors) |
+| `INVALID_STATE_TRANSITION`          | 400    | `state_transition` is incompatible with the rule's `kind`                                                                           | `{ rule_id, kind, transition }`            |
+| `BULK_QUERY_MATCH_LIMIT_EXCEEDED`   | 400    | By-query bulk operation with `force: true` matched more resources than the per-request cap; rejected before any resource is mutated | `{ match_count, limit }`                   |
+| `IMMUTABLE_FIELDS_CHANGED`          | 400    | PUT (upsert) request changes a field flagged as immutable                                                                           | `{ fields }`                               |
+| `INVALID_FILTER_FIELD`              | 400    | The `filter` references a field that is not in the allow-list                                                                       | `{ field, allowed_fields }`                |
+| `UNSUPPORTED_FILTER_FUNCTION`       | 400    | The `filter` uses a KQL function we do not translate yet                                                                            | `{ function }`                             |
+| `SCHEDULE_INTERVAL_TOO_SHORT`       | 400    | `schedule.every` is below `xpack.alerting_v2.rules.minimumScheduleInterval`                                                         | `{ interval, minimumScheduleInterval }`    |
+| `MAX_SCHEDULES_PER_MINUTE_EXCEEDED` | 400    | Scheduling the rule would exceed `xpack.alerting_v2.rules.maxScheduledPerMinute`                                                    | `{ interval, maxScheduledPerMinute }`      |
+| `RULE_DISABLED`                     | 400    | `runRuleNow` was called for a disabled rule (it has no executor task to run)                                                        | `{ rule_id }`                              |
+| `RULE_ALREADY_RUNNING`              | 409    | `runRuleNow` targeted a rule whose executor task is already running                                                                 | `{ rule_id }`                              |
+| `RULE_RUN_CONFLICT`                 | 409    | `runRuleNow` raced another writer updating the executor task; retry                                                                 | `{ rule_id }`                              |
+| `RULE_RUN_ERROR`                    | 500    | `runRuleNow` failed for an unexpected reason (e.g. executor task missing)                                                           | `{ rule_id }`                              |
 
 ### Action policies (`server/lib/action_policy_client/`)
 
-| Code                              | Status | When                                                                | `details`              |
-| --------------------------------- | ------ | ------------------------------------------------------------------- | ---------------------- |
-| `ACTION_POLICY_NOT_FOUND`         | 404    | `get` / `update` / `delete` cannot find an action policy by id      | `{ action_policy_id }` |
-| `ACTION_POLICY_ALREADY_EXISTS`    | 409    | `createActionPolicy` collides with an existing id                   | `{ action_policy_id }` |
-| `ACTION_POLICY_VERSION_CONFLICT`  | 409    | An update / delete races another writer                             | `{ action_policy_id }` |
-| `INVALID_ACTION_POLICY_DATA`      | 400    | The submitted body fails the domain-level schema check              | `{ context, errors }`  |
-| `INVALID_DATE_STRING`             | 400    | A user-supplied date (e.g. `snoozed_until`) fails ISO-8601 parsing  | `{ value }`            |
+| Code                             | Status         | When                                                                                                                                                                                                              | `details`              |
+| -------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `ACTION_POLICY_NOT_FOUND`        | 404            | `get` / `update` / `delete` cannot find an action policy by id                                                                                                                                                    | `{ action_policy_id }` |
+| `ACTION_POLICY_ALREADY_EXISTS`   | 409            | `createActionPolicy` collides with an existing id                                                                                                                                                                 | `{ action_policy_id }` |
+| `ACTION_POLICY_VERSION_CONFLICT` | 409            | An update / delete races another writer                                                                                                                                                                           | `{ action_policy_id }` |
+| `INVALID_ACTION_POLICY_DATA`     | 400            | The submitted body fails the domain-level schema check                                                                                                                                                            | `{ context, errors }`  |
+| `INVALID_DATE_STRING`            | 400            | A user-supplied date (e.g. `snoozed_until`) fails ISO-8601 parsing                                                                                                                                                | `{ value }`            |
+| `API_KEY_INVALIDATION_FAILED`    | 500 / 200 (per-item) | Delete-only. The policy's API key could not be queued for invalidation, so the policy was deliberately left in place — deleting it would strand a valid key with nothing referencing it. Safe to retry. The single delete returns 500; bulk delete reports it per item. | `{ action_policy_id }` (single delete) |
 
 ### Alert actions (`server/lib/alert_actions_client/`)
 
-| Code                    | Status | When                                                                     | `details`                     |
-| ----------------------- | ------ | ------------------------------------------------------------------------ | ----------------------------- |
-| `ALERT_EVENT_NOT_FOUND` | 404    | No alert event matches the supplied `group_hash` (+ optional `episode_id`) | `{ group_hash, episode_id? }` |
+| Code                               | Status               | When                                                                                                                                                                                                                                                     | `details`                                                 |
+| ---------------------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `ALERT_EVENT_NOT_FOUND`            | 404                  | No alert event matches the supplied `group_hash` (+ optional `episode_id`). Single-action route.                                                                                                                                                         | `{ group_hash, episode_id? }`                             |
+| `ALERT_GROUP_NOT_FOUND`            | 200 (per-item)       | Bulk-only. No alert event matches an item's `group_hash`. Reported per item in the `errors[]` array; the request still succeeds for the rest of the batch.                                                                                               | `{ group_hash }`                                          |
+| `ALERT_EPISODE_NOT_FOUND`          | 200 (per-item)       | Bulk-only. The item's `group_hash` resolved, but its `episode_id` did not match the group's latest episode (superseded). Reported per item in the `errors[]` array.                                                                                      | `{ group_hash, episode_id }`                              |
+| `INVALID_EPISODE_STATE_TRANSITION` | 400 / 200 (per-item) | The requested action is a no-op against the current lifecycle state: `activate` of an already-`active` episode, or `deactivate` of an already-`inactive` episode. Every other transition is allowed. Single route returns 400; bulk reports it per item. | `{ group_hash, episode_id, episode_status, action_type }` |
 
 ### Rule doctor insights (`server/lib/rule_doctor_insights_client/`)
 
-| Code                | Status | When                                                          | `details`        |
-| ------------------- | ------ | ------------------------------------------------------------- | ---------------- |
+| Code                | Status | When                                                              | `details`        |
+| ------------------- | ------ | ----------------------------------------------------------------- | ---------------- |
 | `INSIGHT_NOT_FOUND` | 404    | `getInsight` / `updateInsightStatus` cannot find an insight by id | `{ insight_id }` |
 
 ### Engine state (`server/routes/base_alerting_route.ts`)
 
-| Code                   | Status | When                                                                                                                                                                          | `details` |
-| ---------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `ALERTING_DISABLED` | 503    | `BaseAlertingRoute.handle` short-circuits when `alerting:v2:enabled` is off so every route refuses requests until the operator turns the engine back on.                       | _(none)_  |
+| Code                | Status | When                                                                                                                                                     | `details` |
+| ------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `ALERTING_DISABLED` | 503    | `BaseAlertingRoute.handle` short-circuits when `alerting:v2:enabled` is off so every route refuses requests until the operator turns the engine back on. | _(none)_  |
 
 ### Generic fallback codes
 
-| Code                    | Status | When                                                                        |
-| ----------------------- | ------ | --------------------------------------------------------------------------- |
+| Code                    | Status | When                                                                                 |
+| ----------------------- | ------ | ------------------------------------------------------------------------------------ |
 | `INTERNAL_SERVER_ERROR` | 5xx    | Catch-all when the handler boomifies an unexpected error and no domain code applies. |
 
 ## Common error responses (every route)
@@ -103,12 +111,12 @@ backwards compatible. Renaming or removing a code is a breaking change.
 `BaseAlertingRoute` declares a `commonResponses` block that `static get
 validate()` merges into each subclass's `schemas.response`. Every route therefore documents these four OAS responses without restating them:
 
-| HTTP status | When                                                                                                  |
-| ----------- | ----------------------------------------------------------------------------------------------------- |
-| `401`       | The request was not authenticated.                                                                    |
-| `403`       | The caller lacks the route's `requiredPrivileges`.                                                    |
-| `500`       | Any uncaught throw boomifies to 500.                                                                  |
-| `503`       | Alerting is administratively disabled via the `alerting:v2:enabled` advanced setting (kill switch).|
+| HTTP status | When                                                                                                |
+| ----------- | --------------------------------------------------------------------------------------------------- |
+| `401`       | The request was not authenticated.                                                                  |
+| `403`       | The caller lacks the route's `requiredPrivileges`.                                                  |
+| `500`       | Any uncaught throw boomifies to 500.                                                                |
+| `503`       | Alerting is administratively disabled via the `alerting:v2:enabled` advanced setting (kill switch). |
 
 Important distinction:
 

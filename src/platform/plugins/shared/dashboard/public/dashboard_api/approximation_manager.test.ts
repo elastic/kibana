@@ -18,7 +18,7 @@ describe('approximationManager', () => {
       ...getSampleDashboardState({ esql_approximation }),
     });
 
-  test('initializes with false when isApproximate is not set', () => {
+  test('initializes with false when esql_approximation is not set', () => {
     const manager = initializeApproximationManager(getSampleDashboardState());
     expect(manager.api.isApproximate$.value).toBe(false);
   });
@@ -30,40 +30,40 @@ describe('approximationManager', () => {
     expect(manager.api.isApproximate$.value).toBe(true);
   });
 
-  test('setIsApproximate updates the subject', () => {
+  test('setEsqlApproximation updates the subject', () => {
     const manager = initializeApproximationManager(getSampleDashboardState());
 
-    manager.api.setIsApproximate(true);
+    manager.api.setEsqlApproximation(true);
     expect(manager.api.isApproximate$.value).toBe(true);
 
-    manager.api.setIsApproximate(false);
+    manager.api.setEsqlApproximation(false);
     expect(manager.api.isApproximate$.value).toBe(false);
   });
 
-  test('setIsApproximate does not emit when value is unchanged', () => {
+  test('setEsqlApproximation does not emit when value is unchanged', () => {
     const manager = initializeApproximationManager(
       getSampleDashboardState({ esql_approximation: true })
     );
     const emissions: boolean[] = [];
     manager.api.isApproximate$.subscribe((v) => emissions.push(v));
 
-    manager.api.setIsApproximate(true);
+    manager.api.setEsqlApproximation(true);
     expect(emissions).toHaveLength(1); // only the initial emission
   });
 
-  test('getState returns current isApproximate value', () => {
+  test('getState returns current esql_approximation value', () => {
     const manager = initializeApproximationManager(getSampleDashboardState());
 
-    manager.api.setIsApproximate(true);
+    manager.api.setEsqlApproximation(true);
     expect(manager.internalApi.getState()).toEqual({ esql_approximation: true });
   });
 
-  test('reset restores isApproximate from last saved state', () => {
+  test('reset restores esql_approximation from last saved state', () => {
     const manager = initializeApproximationManager(
       getSampleDashboardState({ esql_approximation: true })
     );
 
-    manager.api.setIsApproximate(false);
+    manager.api.setEsqlApproximation(false);
     expect(manager.api.isApproximate$.value).toBe(false);
 
     manager.internalApi.reset(getSampleDashboardState({ esql_approximation: true }));
@@ -79,7 +79,7 @@ describe('approximationManager', () => {
       done();
     });
 
-    manager.api.setIsApproximate(true);
+    manager.api.setEsqlApproximation(true);
   });
 
   test('startComparing emits empty object when value matches saved state', (done) => {
@@ -93,6 +93,6 @@ describe('approximationManager', () => {
       done();
     });
 
-    manager.api.setIsApproximate(true);
+    manager.api.setEsqlApproximation(true);
   });
 });

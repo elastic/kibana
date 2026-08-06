@@ -50,6 +50,7 @@ export const usePollingAgentCount = (
 ): { enrolledAgentIds: string[] } => {
   const [agentIds, setAgentIds] = useState<string[]>([]);
   const [didPollInitially, setDidPollInitially] = useState(false);
+
   const timeout = useRef<number | undefined>(undefined);
 
   const enabled = opts?.enabled ?? true;

@@ -13,21 +13,13 @@ import {
   queryTypeSchema,
   type StreamQuery,
 } from '../../queries';
-import type { Discovery } from '../../significant_events/discoveries';
-import type { Detection } from '../../significant_events/detections';
+import {
+  MAX_ID_LENGTH,
+  MAX_TEXT_LENGTH,
+  MAX_TITLE_LENGTH,
+} from '../../significant_events/constants';
+import type { ChangePointType } from '../../significant_events/detections';
 import type { SignificantEvent } from '../../significant_events/events';
-
-/**
- * SignificantEvents Get Response
- */
-type ChangePointsType =
-  | 'dip'
-  | 'distribution_change'
-  | 'non_stationary'
-  | 'spike'
-  | 'stationary'
-  | 'step_change'
-  | 'trend_change';
 
 type ChangePointsValue = Partial<{
   p_value: number;
@@ -42,10 +34,12 @@ interface SignificantEventOccurrence {
 }
 
 type QueryWithOccurrences = StreamQuery & {
+  /** Alerting rule UUID (`QueryLink.rule_id`); optional during rolling upgrades. */
+  rule_uuid?: string;
   stream_name: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {
-    type: Partial<Record<ChangePointsType, ChangePointsValue>>;
+    type: Partial<Record<ChangePointType, ChangePointsValue>>;
   };
   rule_backed: boolean;
 };
@@ -57,12 +51,12 @@ interface QueryOccurrencesResponse {
 
 export const generatedSignificantEventQuerySchema = z.object({
   type: queryTypeSchema,
-  title: z.string(),
+  title: z.string().max(MAX_TITLE_LENGTH),
   esql: esqlQuerySchema,
   severity_score: z.number().min(0).max(100),
-  description: z.string(),
-  evidence: z.array(z.string()).optional(),
-  replaces: z.string().optional(),
+  description: z.string().max(MAX_TEXT_LENGTH),
+  evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
+  replaces: z.string().max(MAX_ID_LENGTH).optional(),
   features: z.array(queryFeatureSchema),
 });
 
@@ -75,16 +69,16 @@ interface SignificantEventsQueriesGenerationResult {
 
 interface LifecycleDetection {
   detection_id: string;
-  rule_name?: string;
-  stream_name?: string;
-  change_point_type?: string;
-  kind: Extract<Detection['kind'], 'detection' | 'quiet'>;
+  rule_name: string;
+  /** Alerting rule that produced the detection; used to match event evidence. */
+  rule_uuid?: string;
+  stream_name: string;
+  change_point_type: ChangePointType;
   '@timestamp': string;
 }
 
 interface EventLifecycleResponse {
   detections: LifecycleDetection[];
-  discoveries: Discovery[];
   events: SignificantEvent[];
 }
 

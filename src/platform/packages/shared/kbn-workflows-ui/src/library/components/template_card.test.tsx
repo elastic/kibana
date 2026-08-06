@@ -36,8 +36,10 @@ describe('TemplateCard', () => {
 
     expect(screen.getByText('IP Reputation Check')).toBeInTheDocument();
     expect(screen.getByText('Assess the reputation of an IP address.')).toBeInTheDocument();
-    expect(screen.getByText('enrichment')).toBeInTheDocument();
-    expect(screen.getByText('threat-intel')).toBeInTheDocument();
+    // Tags render in both the visible row and the off-screen measuring row used
+    // to compute one-line overflow, so there can be more than one match.
+    expect(screen.getAllByText('enrichment').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('threat-intel').length).toBeGreaterThan(0);
   });
 
   it('sets the expected data-test-subj', () => {

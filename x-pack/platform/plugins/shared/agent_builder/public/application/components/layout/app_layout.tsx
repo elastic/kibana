@@ -9,8 +9,11 @@ import React, { useCallback, useState } from 'react';
 
 import { EuiWindowEvent, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { isMac } from '@kbn/shared-ux-utility';
+
+import { useKibana } from '../../hooks/use_kibana';
 
 import {
   CONDENSED_SIDEBAR_WIDTH,
@@ -24,14 +27,32 @@ interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { analytics },
+  } = useKibana();
   const [isCondensed, setIsCondensed] = useState(false);
 
-  const onKeyDown = useCallback((event: KeyboardEvent) => {
-    if ((event.code === 'Period' || event.key === '.') && (isMac ? event.metaKey : event.ctrlKey)) {
-      event.preventDefault();
-      setIsCondensed((v) => !v);
-    }
-  }, []);
+  const onKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (
+        (event.code === 'Period' || event.key === '.') &&
+        (isMac ? event.metaKey : event.ctrlKey)
+      ) {
+        event.preventDefault();
+        const nextIsCondensed = !isCondensed;
+        analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
+          ebt_element: AGENT_BUILDER_UI_EBT.element.sidebar,
+          ebt_action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_TOGGLE,
+          ebt_detail: nextIsCondensed
+            ? AGENT_BUILDER_UI_EBT.detail.sidebarToggle.CONDENSE
+            : AGENT_BUILDER_UI_EBT.detail.sidebarToggle.EXPAND,
+          element_kind: 'other',
+        });
+        setIsCondensed(nextIsCondensed);
+      }
+    },
+    [analytics, isCondensed]
+  );
 
   const sidebarStyles = css`
     @media (max-width: ${euiTheme.breakpoint.m - 1}px) {

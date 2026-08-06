@@ -14,20 +14,24 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
-import type { AppHeaderBadge, AppHeaderMenu } from '@kbn/app-header';
+import type { AppHeaderBadge, AppHeaderMenu, AppHeaderMetadataItems } from '@kbn/app-header';
 import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
+import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { UserCapabilities } from '../../services/user_capabilities';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useRuleAuditMetadata } from '../../hooks/use_rule_audit_metadata';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
+import { useRunRule } from '../../hooks/use_run_rule';
 import { paths } from '../../constants';
 import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_modal';
-import { RuleHeaderDescription, RuleKindBadge } from './rule_header_description';
+import { RuleKindBadge } from './rule_summary_header';
 import { RuleOverviewSection } from './overview';
 import { RuleSidebar } from './sidebar/rule_sidebar';
 import { useRule } from './rule_context';
@@ -66,6 +70,7 @@ const getRuleDetailMenu = ({
   isToggleLoading,
   onClone,
   onDelete,
+  onRun,
 }: {
   rule: RuleApiResponse;
   onEdit: () => void;
@@ -73,6 +78,7 @@ const getRuleDetailMenu = ({
   isToggleLoading: boolean;
   onClone: () => void;
   onDelete: () => void;
+  onRun: () => void;
 }): AppHeaderMenu => ({
   primaryActionItem: {
     id: 'editRule',
@@ -100,12 +106,29 @@ const getRuleDetailMenu = ({
   },
   items: [
     {
+      id: 'runRule',
+      label: i18n.translate('xpack.alertingV2.ruleDetails.runRuleButtonLabel', {
+        defaultMessage: 'Run rule',
+      }),
+      iconType: 'play',
+      order: 0,
+      run: onRun,
+      testId: 'ruleDetailsRunButton',
+      overflow: true,
+      disableButton: !rule.enabled,
+      tooltipContent: rule.enabled
+        ? undefined
+        : i18n.translate('xpack.alertingV2.ruleDetails.runRuleDisabledTooltip', {
+            defaultMessage: 'Enable the rule to run it',
+          }),
+    },
+    {
       id: 'cloneRule',
       label: i18n.translate('xpack.alertingV2.ruleDetails.cloneRuleButtonLabel', {
         defaultMessage: 'Clone rule',
       }),
       iconType: 'copy',
-      order: 0,
+      order: 1,
       run: onClone,
       testId: 'ruleDetailsCloneButton',
       overflow: true,
@@ -116,11 +139,10 @@ const getRuleDetailMenu = ({
         defaultMessage: 'Delete rule',
       }),
       iconType: 'trash',
-      order: 1,
+      order: 2,
       run: onDelete,
       testId: 'ruleDetailsDeleteButton',
       overflow: true,
-      separator: 'above',
     },
   ],
 });
@@ -130,12 +152,15 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name });
   const { euiTheme } = useEuiTheme();
 
+  const canWrite = useService(UserCapabilities).canWrite('rules');
+
   const smallMediaQuery = useEuiMaxBreakpoint('s');
   const largeMediaQuery = useEuiMinBreakpoint('m');
 
   const history = useHistory();
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
   const { mutate: toggleRuleEnabled, isLoading: isToggling } = useToggleRuleEnabled();
+  const { mutate: runRule } = useRunRule();
   const { flyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
 
@@ -170,7 +195,42 @@ export const RuleDetailPage: React.FunctionComponent = () => {
     openCloneFlyout(rule);
   }, [openCloneFlyout, rule]);
 
+  const handleRunRule = React.useCallback(() => {
+    runRule({ id: rule.id });
+  }, [runRule, rule.id]);
+
+  const { createdByDisplay, createdAtFormatted, updatedByDisplay, updatedAtFormatted } =
+    useRuleAuditMetadata(rule);
+
   const badges = React.useMemo(() => getRuleDetailBadges(rule), [rule]);
+
+  const headerMetadata = React.useMemo<AppHeaderMetadataItems>(
+    () => [
+      {
+        type: 'text',
+        label: i18n.translate('xpack.alertingV2.ruleDetails.header.createdBy', {
+          defaultMessage: 'Created by',
+        }),
+        value: i18n.translate('xpack.alertingV2.ruleDetails.header.createdByValue', {
+          defaultMessage: '{user} on {date}',
+          values: { user: createdByDisplay, date: createdAtFormatted },
+        }),
+        'data-test-subj': 'ruleDetailsCreatedByMetadata',
+      },
+      {
+        type: 'text',
+        label: i18n.translate('xpack.alertingV2.ruleDetails.header.updatedBy', {
+          defaultMessage: 'Last updated by',
+        }),
+        value: i18n.translate('xpack.alertingV2.ruleDetails.header.updatedByValue', {
+          defaultMessage: '{user} on {date}',
+          values: { user: updatedByDisplay, date: updatedAtFormatted },
+        }),
+        'data-test-subj': 'ruleDetailsUpdatedByMetadata',
+      },
+    ],
+    [createdByDisplay, createdAtFormatted, updatedByDisplay, updatedAtFormatted]
+  );
 
   const menu = React.useMemo(
     () =>
@@ -181,8 +241,17 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         isToggleLoading: isToggling,
         onClone,
         onDelete: showDeleteConfirmationModal,
+        onRun: handleRunRule,
       }),
-    [rule, onEdit, handleToggleEnabled, isToggling, onClone, showDeleteConfirmationModal]
+    [
+      rule,
+      onEdit,
+      handleToggleEnabled,
+      isToggling,
+      onClone,
+      showDeleteConfirmationModal,
+      handleRunRule,
+    ]
   );
 
   return (
@@ -207,8 +276,9 @@ export const RuleDetailPage: React.FunctionComponent = () => {
           }),
         }}
         badges={badges}
-        menu={menu}
-        padding="none"
+        metadata={headerMetadata}
+        menu={canWrite ? menu : undefined}
+        spacing="flush"
         sticky={false}
       />
       <KibanaPageTemplate.Section
@@ -217,6 +287,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         restrictWidth={false}
         css={css`
           min-height: 0;
+          margin-block-start: ${euiTheme.border.width.thin};
         `}
         contentProps={{
           css: css`
@@ -225,8 +296,6 @@ export const RuleDetailPage: React.FunctionComponent = () => {
           `,
         }}
       >
-        {/* Tags render as header badges above (see getRuleDetailBadges), so skip them here. */}
-        <RuleHeaderDescription showTags={false} />
         <EuiSplitPanel.Outer
           direction="row"
           hasBorder={false}
@@ -274,6 +343,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
                 height: 100%;
                 overflow-y: auto;
                 padding: ${euiTheme.size.l};
+                ${logicalCSS('padding-right', '0')}
                 border-left: ${euiTheme.border.thin};
               }
             `}

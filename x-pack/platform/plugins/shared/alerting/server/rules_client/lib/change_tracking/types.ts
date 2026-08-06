@@ -64,16 +64,17 @@ export interface IScopedChangeTrackingService {
     module: RuleTypeSolution,
     spaceId: string,
     ruleId: string,
-    opts: GetChangeHistoryOptions
+    opts: Omit<GetChangeHistoryOptions, 'spanLabels'>
   ): Promise<GetHistoryResult>;
 }
 
 /**
  * Per-call options for a request-scoped change tracking client. The wrapper
- * resolves `username`, `userProfileId` from the bound request,
- * so callers must not provide them.
+ * resolves `username`, `userProfileId` from the bound request, and always
+ * sets `spanLabels` itself based on the target module, so callers must not
+ * provide any of them.
  */
 export type ScopedLogChangeHistoryOptions = Omit<
   LogChangeHistoryOptions,
-  'username' | 'userProfileId'
+  'username' | 'userProfileId' | 'spanLabels'
 >;

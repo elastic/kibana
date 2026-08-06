@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type { ConversationOrigin, ConversationWithoutRounds } from '@kbn/agent-builder-common';
 import {
   type UserIdAndName,
   type Conversation,
@@ -29,6 +29,7 @@ import type {
   ConversationListOptions,
 } from './types';
 import { createSpaceDslFilter } from '../../../utils/spaces';
+import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
 import {
@@ -43,6 +44,7 @@ import {
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;
   exists(conversationId: string): Promise<boolean>;
+  getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
   update(
     conversation: ConversationUpdateRequest,
@@ -114,7 +116,9 @@ class ConversationClientImpl implements ConversationClient {
         'updated_at',
         'status',
         'read',
+        'pinned',
         'access_control',
+        'origin',
       ],
       query: {
         bool: {
@@ -136,14 +140,39 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async exists(conversationId: string): Promise<boolean> {
+    const document = await this._get(conversationId);
+
+    return document !== undefined;
+  }
+
+  async getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined> {
+    const response = await this.storage.getClient().search({
+      track_total_hits: false,
+      size: 1,
+      terminate_after: 1,
+      query: {
+        bool: {
+          filter: [
+            createSpaceDslFilter(this.space),
+            { term: { 'origin.external_conversation_id': origin.external_conversation_id } },
+          ],
+        },
+      },
+    });
+
+    const hit = response.hits.hits[0] as Document | undefined;
+    if (!hit || !hit._id) {
+      return undefined;
+    }
+
     try {
-      await this.getDocumentWithAccess({ conversationId, access: 'converse' });
-      return true;
+      return fromEs(
+        await this.getDocumentWithAccess({ conversationId: hit._id, access: 'converse' })
+      );
     } catch (error) {
       if (isConversationNotFoundError(error)) {
-        return false;
+        return undefined;
       }
-
       throw error;
     }
   }
@@ -159,10 +188,19 @@ class ConversationClientImpl implements ConversationClient {
       space: this.space,
     });
 
-    await this.storage.getClient().index({
-      id,
-      document: attributes,
-    });
+    try {
+      await this.storage.getClient().index({
+        id,
+        document: attributes,
+        op_type: 'create',
+      });
+    } catch (error) {
+      if (isVersionConflictError(error)) {
+        throw createConversationNotFoundError({ conversationId: id });
+      }
+
+      throw error;
+    }
 
     return this.get(id);
   }

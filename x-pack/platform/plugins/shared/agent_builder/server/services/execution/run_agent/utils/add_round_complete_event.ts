@@ -12,6 +12,7 @@ import type {
   RoundCompleteEvent,
   RoundInput,
   ConversationRound,
+  ConversationRoundAuthor,
   ConversationRoundStep,
   ReasoningEvent,
   ToolCallEvent,
@@ -26,6 +27,7 @@ import type {
   TodosStep,
   UserQuestionAskedEvent,
 } from '@kbn/agent-builder-common';
+import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
@@ -52,6 +54,7 @@ import {
   isUserQuestionAnsweredEvent,
   isAskUserQuestionStep,
   createAskUserQuestionStep,
+  createRelevantSkillsStep,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationInternalState,
@@ -67,6 +70,8 @@ import { getCurrentTraceId } from '../../../../tracing';
 import type { ConvertedEvents } from '../convert_graph_events';
 import { isFinalStateEvent } from '../events';
 import type { CompactedConversation } from './conversation_compactor';
+import type { RelevantSkillSelection } from './relevant_skills/select_relevant_skills';
+import { formatAttachmentsMetadata } from './attachment_presentation';
 
 type SourceEvents = ConvertedEvents;
 
@@ -88,6 +93,8 @@ const isStepEvent = (event: SourceEvents): event is StepEvents => {
 export const addRoundCompleteEvent = ({
   pendingRound,
   userInput,
+  origin,
+  author,
   startTime,
   endTime,
   getConversationState,
@@ -98,10 +105,21 @@ export const addRoundCompleteEvent = ({
   compactionResult,
   roundId: providedRoundId,
   initialTodos,
+  relevantSkillsSelection,
   getWorkspaceId,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
+  /**
+   * External origin that initiated this execution. Stamps `origin.type` on newly created
+   * rounds; resumed rounds keep their original origin.
+   */
+  origin?: ExecutionConversationOrigin;
+  /**
+   * Resolved author for the round input (external author, or the Kibana user for public
+   * conversations). Stamped on newly created rounds; resumed rounds keep their original author.
+   */
+  author?: ConversationRoundAuthor;
   startTime: Date;
   modelProvider: ModelProvider;
   stateManager: ConversationStateManager;
@@ -115,6 +133,8 @@ export const addRoundCompleteEvent = ({
   roundId?: string;
   /** Todo list at round start; used as fallback when the agent never called todoWrite this round */
   initialTodos?: TodoItem[];
+  /** Skills selected as relevant this round; persisted as a `relevant_skills` step (fresh rounds only) */
+  relevantSkillsSelection?: RelevantSkillSelection;
   /** Returns the workspace_id used in this round, if any */
   getWorkspaceId?: () => string | undefined;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
@@ -142,6 +162,8 @@ export const addRoundCompleteEvent = ({
                 roundId: providedRoundId,
                 events,
                 input: userInput,
+                origin,
+                author,
                 startTime,
                 endTime,
                 modelProvider,
@@ -149,9 +171,20 @@ export const addRoundCompleteEvent = ({
                 configurationOverrides,
                 compactionResult,
                 initialTodos,
+                relevantSkillsSelection,
               });
 
           round.state = buildRoundState({ round, events, stateManager });
+
+          if (round.input.attachment_refs && round.input.attachment_refs.length > 0) {
+            const attachmentContext = formatAttachmentsMetadata(
+              round.input.attachment_refs,
+              attachmentStateManager
+            );
+            if (attachmentContext) {
+              round.input = { ...round.input, attachment_context: attachmentContext };
+            }
+          }
 
           const workspaceId = getWorkspaceId?.();
           const event: RoundCompleteEvent = {
@@ -265,6 +298,8 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
     time_to_last_token: previous.time_to_last_token + next.time_to_last_token,
     model_usage: mergeModelUsage(previous.model_usage, next.model_usage),
     response: next.response,
+    origin: previous.origin,
+    author: previous.author,
     configuration_overrides: next.configuration_overrides ?? previous.configuration_overrides,
   };
 
@@ -281,7 +316,7 @@ const mergeRoundInput = (previous: RoundInput, next: RoundInput): RoundInput => 
   };
 };
 
-const mergeAttachmentRefs = (
+export const mergeAttachmentRefs = (
   previous?: AttachmentVersionRef[],
   next?: AttachmentVersionRef[]
 ): AttachmentVersionRef[] | undefined => {
@@ -306,6 +341,8 @@ const createRound = ({
   roundId: providedRoundId,
   events,
   input,
+  origin,
+  author,
   startTime,
   endTime = new Date(),
   modelProvider,
@@ -313,10 +350,13 @@ const createRound = ({
   configurationOverrides,
   compactionResult,
   initialTodos,
+  relevantSkillsSelection,
 }: {
   roundId?: string;
   events: SourceEvents[];
   input: RoundInput;
+  origin?: ExecutionConversationOrigin;
+  author?: ConversationRoundAuthor;
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
@@ -324,6 +364,7 @@ const createRound = ({
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
   initialTodos?: TodoItem[];
+  relevantSkillsSelection?: RelevantSkillSelection;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent);
   const toolProgressions = events.filter(isToolProgressEvent);
@@ -403,6 +444,14 @@ const createRound = ({
     steps.push(compactionStep);
   }
 
+  // Relevant-skills step is placed before the event-derived steps so, on replay, its notification
+  // renders right after the round's user input and before the round's tool calls.
+  if (relevantSkillsSelection && relevantSkillsSelection.skills.length > 0) {
+    steps.push(
+      createRelevantSkillsStep({ skills: relevantSkillsSelection.skills, source: 'implicit' })
+    );
+  }
+
   steps.push(...stepEvents.flatMap(eventToStep));
 
   const todosForStep = lastTodosData ?? carriedOverTodos(initialTodos);
@@ -424,9 +473,13 @@ const createRound = ({
     state: undefined,
     input: {
       ...input,
-      ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
+      ...(attachmentRefs.length > 0
+        ? { attachment_refs: mergeAttachmentRefs(input.attachment_refs, attachmentRefs) }
+        : {}),
     },
     steps,
+    ...(origin ? { origin: { type: origin.type } } : {}),
+    ...(author ? { author } : {}),
     trace_id: getCurrentTraceId(),
     started_at: startTime.toISOString(),
     time_to_first_token: timeToFirstToken,

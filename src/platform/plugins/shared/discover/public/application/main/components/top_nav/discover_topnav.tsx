@@ -230,14 +230,14 @@ export const DiscoverTopNav = ({
       if (needsSave) {
         setInitialCopyOnSave(false);
         onSaveCbRef.current = () => {
-          dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
+          dispatch(transitionFromESQLToDataView({ dataView }));
         };
         setIsSaveModalVisible(true);
         return;
       }
-      dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
+      dispatch(transitionFromESQLToDataView({ dataView }));
     },
-    [dataView.id, dispatch, services, transitionFromESQLToDataView]
+    [dataView, dispatch, services, transitionFromESQLToDataView]
   );
 
   const onOpenSaveModal = useCallback(() => {
@@ -446,12 +446,12 @@ export const DiscoverTopNav = ({
         esqlQueryStats={esqlQueryStats}
         onOpenQueryInNewTab={onOpenQueryInNewTab}
         esqlApproximation={
-          isEsqlMode && services.discoverFeatureFlags.getEsqlApproximationEnabled()
+          isEsqlMode
             ? {
                 isApproximate,
                 onChange: onUseApproximationChange,
                 additionalText: i18n.translate('discover.esqlApproximationToggle.additionalText', {
-                  defaultMessage: 'Only applies to queries that use exactly one STATS command.',
+                  defaultMessage: 'Only applies to queries that use one STATS command.',
                 }),
               }
             : undefined

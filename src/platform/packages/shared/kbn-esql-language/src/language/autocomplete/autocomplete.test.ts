@@ -556,9 +556,9 @@ describe('autocomplete', () => {
     ]);
 
     // WHERE argument comparison
-    testSuggestions(
-      'FROM index1 | WHERE keywordField i/',
-      getFunctionSignaturesByReturnType(
+    testSuggestions('FROM index1 | WHERE keywordField i/', [
+      ': $0',
+      ...getFunctionSignaturesByReturnType(
         Location.WHERE,
         'boolean',
         {
@@ -567,13 +567,13 @@ describe('autocomplete', () => {
         },
         ['keyword'],
         ['and', 'or', 'not']
-      )
-    );
+      ),
+    ]);
 
     // WHERE function <suggest>
-    testSuggestions(
-      'FROM index1 | WHERE ABS(integerField) i/',
-      getFunctionSignaturesByReturnType(
+    testSuggestions('FROM index1 | WHERE ABS(integerField) i/', [
+      ': $0',
+      ...getFunctionSignaturesByReturnType(
         Location.WHERE,
         'any',
         {
@@ -582,8 +582,8 @@ describe('autocomplete', () => {
         },
         ['integer'],
         ['and', 'or', 'not']
-      )
-    );
+      ),
+    ]);
   });
 
   describe('advancing the cursor and opening the suggestion menu automatically ✨', () => {
@@ -994,9 +994,9 @@ describe('autocomplete', () => {
     ]);
 
     // WHERE argument comparison (keyword fields get only string operators)
-    testSuggestions(
-      'FROM a | WHERE keywordField /',
-      getFunctionSignaturesByReturnType(
+    testSuggestions('FROM a | WHERE keywordField /', [
+      ': $0',
+      ...getFunctionSignaturesByReturnType(
         Location.WHERE,
         'boolean',
         {
@@ -1004,8 +1004,8 @@ describe('autocomplete', () => {
           skipAssign: true,
         },
         ['keyword']
-      ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s)))
-    );
+      ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s))),
+    ]);
 
     describe('field lists', () => {
       describe('METADATA <field>', () => {
@@ -1238,6 +1238,33 @@ describe('autocomplete', () => {
         [{ text: 'field.name.foo', rangeToReplace: { start: 20, end: 32 } }],
         undefined,
         [[{ name: 'field.name.foo', type: 'double', userDefined: false }]]
+      );
+      testSuggestions(
+        'FROM numeric_index | KEEP /',
+        [{ text: 'system.cpu.load_average.`1`' }],
+        undefined,
+        [
+          [{ name: 'system.cpu.load_average.1', type: 'double', userDefined: false }],
+          [{ name: 'numeric_index', hidden: false }],
+        ]
+      );
+      testSuggestions(
+        'FROM numeric_index | EVAL system.cpu.load_average.`1` < 0 | KEEP /',
+        [{ text: '`system.cpu.load_average.``1`` < 0`' }, { text: 'system.cpu.load_average.`1`' }],
+        undefined,
+        [
+          [{ name: 'system.cpu.load_average.1', type: 'double', userDefined: false }],
+          [{ name: 'numeric_index', hidden: false }],
+        ]
+      );
+      testSuggestions(
+        'FROM index_a | EVAL field.name > 0 | KEEP /',
+        [{ text: '`field.name > 0`' }, { text: 'field.name' }],
+        undefined,
+        [
+          [{ name: 'field.name', type: 'double', userDefined: false }],
+          [{ name: 'index_a', hidden: false }],
+        ]
       );
       // whitespace — we can't support this case yet because
       // we are relying on string checking instead of the AST :(

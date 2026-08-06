@@ -27,7 +27,7 @@ import {
  * readiness prevents `index_not_found_exception` races in tests that immediately
  * seed or refresh the latest alias after install.
  *
- * NOTE: `apiServices.entityAnalytics.waitForEntityStoreStatusV2()` checks only
+ * NOTE: `apiServices.entityAnalytics.waitForEntityStoreStatus()` checks only
  * the top-level status field, not per-component `installed` flags. This function
  * extends that check with component-level readiness and cannot be replaced by the
  * existing service without modifying the shared package.

@@ -15,8 +15,8 @@ import { INSIGHTS_CORRELATIONS_TEST_ID } from '../constants/test_ids';
 export interface CorrelationsOverviewProps {
   /** Alert IDs belonging to the attack; the count is displayed as related alerts. */
   alertIds: string[];
-  /** Optional callback to show the related alerts. When undefined, the title renders as plain text. */
-  onShowCorrelations?: () => void;
+  /** Callback to open the Correlations tool flyout. */
+  onShowCorrelations: () => void;
 }
 
 /**
@@ -28,18 +28,15 @@ export const CorrelationsOverview: React.FC<CorrelationsOverviewProps> = memo(
     const relatedAlertsCount = alertIds.length;
 
     const link = useMemo(
-      () =>
-        onShowCorrelations
-          ? {
-              callback: onShowCorrelations,
-              tooltip: (
-                <FormattedMessage
-                  id="xpack.securitySolution.flyoutV2.attack.overview.insights.correlationsLinkTooltip"
-                  defaultMessage="Show related alerts"
-                />
-              ),
-            }
-          : undefined,
+      () => ({
+        callback: onShowCorrelations,
+        tooltip: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyoutV2.attack.overview.insights.correlationsLinkTooltip"
+            defaultMessage="Show related alerts"
+          />
+        ),
+      }),
       [onShowCorrelations]
     );
 

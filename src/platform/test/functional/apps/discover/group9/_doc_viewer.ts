@@ -52,6 +52,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. The core filtering logic is covered at the unit level in src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_table/test_filters.test.ts. All we need here is a check that the search is actually wired up to the UI.
+     */
     describe('search', function () {
       beforeEach(async () => {
         await dataGrid.clickRowToggle();
@@ -77,59 +80,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
         });
       });
-
-      it('should be able to search by wildcard', async function () {
-        await discover.findFieldByNameOrValueInDocViewer('relatedContent*image');
-        await retry.waitFor('updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
-        });
-      });
-
-      it('should be able to search with spaces as wildcard', async function () {
-        await discover.findFieldByNameOrValueInDocViewer('relatedContent image');
-        await retry.waitFor('updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
-        });
-      });
-
-      it('should be able to search with fuzzy search (1 typo)', async function () {
-        await discover.findFieldByNameOrValueInDocViewer('rel4tedContent.art');
-
-        await retry.waitFor('updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 3;
-        });
-      });
-
-      it('should ignore empty search', async function () {
-        await discover.findFieldByNameOrValueInDocViewer('   '); // only spaces
-
-        await retry.waitFor('the clear button', async () => {
-          return await testSubjects.exists('clearSearchButton');
-        });
-
-        // expect no changes in the list
-        await retry.waitFor('all items', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
-        });
-      });
-
-      it('should be able to search by field value', async function () {
-        await discover.findFieldByNameOrValueInDocViewer('time');
-
-        await retry.waitFor('updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 5;
-        });
-      });
-
-      it('should be able to search by field raw value', async function () {
-        await discover.findFieldByNameOrValueInDocViewer('2015-09-22T23:50:13.253Z');
-
-        await retry.waitFor('updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 3;
-        });
-      });
     });
 
+    /**
+     * Migration recommendation: pare down to one test for ES|QL. This is covered well in test_filters.test.ts and field_type_filter.test.tsx.
+     */
     describe('filter by field type', function () {
       beforeEach(async () => {
         await dataGrid.clickRowToggle();
@@ -157,7 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('typeFilter-number');
 
         await retry.waitFor('second updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 7;
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 8;
         });
 
         await testSubjects.click('unifiedDocViewerFieldsTableFieldTypeFilterClearAll');
@@ -193,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
 
         const initialFieldsCount = (await find.allByCssSelector('.kbnDocViewer__fieldName')).length;
-        const numberFieldsCount = 6;
+        const numberFieldsCount = 7;
 
         expect(initialFieldsCount).to.above(numberFieldsCount);
 
@@ -214,6 +169,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: delete. This is covered in unit tests: src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_table/table.test.tsx
+     */
     describe('hide null values switch - ES|QL mode', function () {
       beforeEach(async () => {
         await discover.selectTextBaseLang();
@@ -254,6 +212,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. This verifies the interaction between null values filter and another filter. Maybe move this to ES|QL.
+     */
     describe('hide null values switch - data view mode', function () {
       it('should hide fields with null values when toggled', async function () {
         if (!(await testSubjects.exists('select-text-based-language-btn'))) {
@@ -290,6 +251,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIXED. The second test is fine as a smoke test.
+     */
     describe('show only selected fields in ES|QL mode', function () {
       beforeEach(async () => {
         await discover.selectTextBaseLang();
@@ -297,6 +261,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilSearchingHasFinished();
       });
 
+      /**
+       * Migration recommendation: DELETE. This is a test for basic show-hide functionality which is best covered at the component level.
+       */
       it('should disable the switch when no fields are selected', async function () {
         const testQuery = 'from logstash-* | sort @timestamp | limit 10';
         await monacoEditor.setCodeEditorValue(testQuery);
@@ -319,6 +286,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ).to.be(true);
       });
 
+      /**
+       * Migration recommendation: MIGRATE TO SCOUT. Fine as an integration test.
+       */
       it('should allow toggling the switch', async function () {
         const testQuery = 'from logstash-* | sort @timestamp | limit 10';
         await monacoEditor.setCodeEditorValue(testQuery);
@@ -435,6 +405,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. But, make it shorter.
+     */
     describe('pinning fields', function () {
       it('should be able to pin and unpin fields', async function () {
         await dataGrid.clickRowToggle();
@@ -471,6 +444,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    /**
+     * Migration recommendation: MIGRATE TO SCOUT. Keyboard navigation and focus can't really be covered well outside a browser.
+     */
     describe('flyout', () => {
       let originalScreenSize = { width: 0, height: 0 };
 

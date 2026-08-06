@@ -26,18 +26,14 @@ export interface AlertSubtitleProps {
 
 export function AlertSubtitle({ alert }: AlertSubtitleProps) {
   const { http } = useKibana().services;
-  const authorizedToReadRuleType = useAuthorizedToReadRuleType();
+  const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
 
   const ruleId = alert.fields[ALERT_RULE_UUID];
   const ruleLink = http.basePath.prepend(paths.observability.ruleDetails(ruleId));
   const ruleTypeBreached = getAlertSubtitle(alert.fields[ALERT_RULE_CATEGORY]);
-
-  // Rule read is authorized per rule type (and consumer), so gate the "View rule"
-  // link on the specific rule behind this alert rather than a coarse "any rules" flag.
-  const alertRuleTypeId = alert.fields[ALERT_RULE_TYPE_ID];
-  const alertConsumer = alert.fields[ALERT_RULE_CONSUMER];
-  const canReadAlertRule = Boolean(
-    alertRuleTypeId && authorizedToReadRuleType(alertRuleTypeId, alertConsumer)
+  const canReadAlertRule = authorizedToReadRuleType(
+    alert.fields[ALERT_RULE_TYPE_ID],
+    alert.fields[ALERT_RULE_CONSUMER]
   );
 
   return (

@@ -220,11 +220,30 @@ describe('computeSuccessfulLifecycleFlyoutPreview', () => {
     }
   });
 
-  it('keeps per-phase size on the ILM preview', () => {
+  it('omits per-phase size and docs when inheriting a DSL lifecycle', () => {
+    const preview = computeSuccessfulLifecycleFlyoutPreview(
+      buildArgs({
+        inheritLifecycle: true,
+        inheritedEffectiveLifecycle: { dsl: { data_retention: '30d', frozen_after: '7d' } },
+      })
+    );
+
+    expect(preview.action).toBe('apply');
+    if (preview.action === 'apply') {
+      for (const phase of preview.timelineModel.phases) {
+        expect('size' in phase ? phase.size : undefined).toBeUndefined();
+        expect(phase.sizeInBytes).toBeUndefined();
+        expect(phase.docsCount).toBeUndefined();
+      }
+    }
+  });
+
+  it('omits per-phase size and docs from the ILM preview, even when previewing the applied policy', () => {
     const preview = computeSuccessfulLifecycleFlyoutPreview(
       buildArgs({
         method: 'ilm',
         selectedIlmPolicyName: 'my-policy',
+        effectiveLifecycle: { ilm: { policy: 'my-policy' } },
         ilmPolicies: [
           {
             name: 'my-policy',
@@ -232,14 +251,41 @@ describe('computeSuccessfulLifecycleFlyoutPreview', () => {
             serializedPolicy: ilmSerializedPolicy,
           },
         ],
-        stats: { size: '1.2 MB', sizeBytes: 1200000, totalDocs: 42 },
       })
     );
 
     expect(preview.action).toBe('apply');
     if (preview.action === 'apply') {
-      const hot = preview.timelineModel.phases.find((phase) => phase.label === 'hot');
-      expect(hot && 'size' in hot ? hot.size : undefined).toBe('1.2 MB');
+      for (const phase of preview.timelineModel.phases) {
+        expect('size' in phase ? phase.size : undefined).toBeUndefined();
+        expect(phase.sizeInBytes).toBeUndefined();
+        expect(phase.docsCount).toBeUndefined();
+      }
+    }
+  });
+
+  it('omits per-phase size and docs when inheriting an ILM policy', () => {
+    const preview = computeSuccessfulLifecycleFlyoutPreview(
+      buildArgs({
+        inheritLifecycle: true,
+        inheritedEffectiveLifecycle: { ilm: { policy: 'my-policy' } },
+        ilmPolicies: [
+          {
+            name: 'my-policy',
+            phases: ilmSerializedPolicy.phases,
+            serializedPolicy: ilmSerializedPolicy,
+          },
+        ],
+      })
+    );
+
+    expect(preview.action).toBe('apply');
+    if (preview.action === 'apply') {
+      for (const phase of preview.timelineModel.phases) {
+        expect('size' in phase ? phase.size : undefined).toBeUndefined();
+        expect(phase.sizeInBytes).toBeUndefined();
+        expect(phase.docsCount).toBeUndefined();
+      }
     }
   });
 

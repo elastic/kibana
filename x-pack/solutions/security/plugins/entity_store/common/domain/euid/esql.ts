@@ -13,9 +13,11 @@ import type {
   FieldEvaluation,
   EntityType,
   EuidAttribute,
+  FieldEvaluationWhenClauseFieldMappingThen,
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import {
   esqlIsNotNullOrEmpty,
   esqlIsNullOrEmpty,
@@ -204,6 +206,23 @@ export function buildSourcePickerEsql(sourceVariablesBaseName: string, count: nu
 }
 
 /**
+ * Builds a CASE expression that maps a field's value through an explicit lookup table.
+ * Returns NULL when the field is absent or its value is not in the mapping — allowing
+ * the outer COALESCE to fall through to the next whenClause arm.
+ */
+function buildFieldMappingEsql(then: FieldEvaluationWhenClauseFieldMappingThen): string {
+  const arms = Object.entries(then.mapping)
+    .map(
+      ([from, to]) =>
+        `MV_FIRST(TO_STRING(${then.field})) == "${escapeEsqlString(from)}", "${escapeEsqlString(
+          to
+        )}"`
+    )
+    .join(', ');
+  return `CASE(${arms})`;
+}
+
+/**
  * Returns the destination field assignment expression and any boolean precompute columns it needs.
  *
  * Without `whenClauses`: a simple fallback/pass-through CASE.
@@ -236,7 +255,11 @@ export function buildDestinationFieldEsql(
       conditionPrecomputes.push({ colName, esql: conditionToESQL(clause.condition) });
       condition = `COALESCE(${colName}, FALSE)`;
     }
-    coalesceArms.push(`CASE(${condition}, "${escapeEsqlString(clause.then)}")`);
+    const thenExpr =
+      typeof clause.then === 'string'
+        ? `"${escapeEsqlString(clause.then)}"`
+        : buildFieldMappingEsql(clause.then);
+    coalesceArms.push(`CASE(${condition}, ${thenExpr})`);
   }
   coalesceArms.push(
     `CASE(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == "", ${fallbackExpression})`
@@ -324,6 +347,36 @@ function buildSourceClauseEsql(evaluation: FieldEvaluation, spec: SourceMatchSpe
 
 export function getFieldEvaluationsEsql(entityType: EntityType): string | undefined {
   return getFieldEvaluationsEsqlFromDefinition(getEntityDefinitionWithoutId(entityType));
+}
+
+/** `field` is present and non-empty, referencing the raw field (no TO_STRING cast). */
+function esqlRawFieldNonEmpty(field: string): string {
+  return `(\`${field}\` IS NOT NULL AND \`${field}\` != "")`;
+}
+
+/** Fields composing the host-scoped user EUID, per the `entity.namespace == 'local'` ranking branch. */
+const HOST_SCOPED_USER_FIELDS = ['user.name', 'host.id'] as const;
+
+/**
+ * ES|QL fragments for the host-scoped (non-IDP) user EUID:
+ * `user:<user.name>@<host.id>@local`.
+ *
+ * Mirrors the `entity.namespace == 'local'` branch of
+ * `userEntityDefinition.identityField.euidRanking`, but hardcodes the namespace
+ * instead of deriving `entity.namespace`.
+ */
+export function getHostScopedUserEuidEsql(): {
+  /** RHS for `| EVAL <col> = …` producing the host-scoped user EUID. */
+  evalAssignment: string;
+  /** `WHERE` gate requiring every field this EUID composes. */
+  presenceGate: string;
+} {
+  const [userField, hostField] = HOST_SCOPED_USER_FIELDS;
+
+  return {
+    evalAssignment: `CONCAT("user:", TO_STRING(\`${userField}\`), "@", TO_STRING(\`${hostField}\`), "@${USER_ENTITY_NAMESPACE.Local}")`,
+    presenceGate: HOST_SCOPED_USER_FIELDS.map(esqlRawFieldNonEmpty).join(' AND '),
+  };
 }
 
 /**

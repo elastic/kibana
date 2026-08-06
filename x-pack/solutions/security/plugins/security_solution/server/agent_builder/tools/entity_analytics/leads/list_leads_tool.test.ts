@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { ExperimentalFeatures } from '../../../../../common';
-import { createToolHandlerContext, createToolTestMocks } from '../../../__mocks__/test_helpers';
-import { listLeadsTool } from './list_leads_tool';
+import {
+  createToolHandlerContext,
+  createToolTestMocks,
+  setupMockCoreStartServices,
+} from '../../../__mocks__/test_helpers';
+import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
+import { listLeadsTool, SECURITY_LIST_LEADS_TOOL_ID } from './list_leads_tool';
 import { createLeadDataClient } from '../../../../lib/entity_analytics/lead_generation/lead_data_client';
 import { getUserLeadPrivileges } from '../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges';
 import type { Lead } from '../../../../../common/entity_analytics/lead_generation/types';
@@ -54,9 +60,11 @@ describe('listLeadsTool', () => {
 
   let mockFindLeads: jest.Mock;
   let mockGetStatus: jest.Mock;
+  let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
 
     mockFindLeads = jest.fn();
     mockGetStatus = jest.fn();
@@ -208,6 +216,74 @@ describe('listLeadsTool', () => {
       expect(mockCreateLeadDataClient).toHaveBeenCalledWith(
         expect.objectContaining({ esClient: mockEsClient.asCurrentUser })
       );
+    });
+
+    describe('telemetry', () => {
+      it('reports success=true with resultCount matching the returned leads length', async () => {
+        mockFindLeads.mockResolvedValue({
+          leads: [makeTestLead(), makeTestLead({ id: 'lead-2' })],
+          total: 2,
+          page: 1,
+          perPage: 20,
+        });
+        mockGetStatus.mockResolvedValue(makeStatusResult({ totalLeads: 2 }));
+
+        await tool.handler({}, handlerContext());
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_LIST_LEADS_TOOL_ID,
+            actionType: 'read',
+            spaceId: 'default',
+            success: true,
+            resultCount: 2,
+            errorMessage: undefined,
+          }
+        );
+      });
+
+      it('reports success=false when the caller lacks read privilege', async () => {
+        mockGetUserLeadPrivileges.mockResolvedValue({
+          adhoc: { has_read_permissions: false, has_write_permissions: false },
+          scheduled: { has_read_permissions: false, has_write_permissions: false },
+          has_all_required: false,
+          privileges: {},
+        });
+
+        await tool.handler({}, handlerContext());
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_LIST_LEADS_TOOL_ID,
+            actionType: 'read',
+            spaceId: 'default',
+            success: false,
+            resultCount: 0,
+            errorMessage: 'You do not have permission to read leads in this space.',
+          }
+        );
+      });
+
+      it('reports success=false and errorMessage when findLeads throws', async () => {
+        mockFindLeads.mockRejectedValue(new Error('boom'));
+        mockGetStatus.mockResolvedValue(makeStatusResult());
+
+        await tool.handler({}, handlerContext());
+
+        expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+          ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+          {
+            toolId: SECURITY_LIST_LEADS_TOOL_ID,
+            actionType: 'read',
+            spaceId: 'default',
+            success: false,
+            resultCount: 0,
+            errorMessage: 'boom',
+          }
+        );
+      });
     });
   });
 });

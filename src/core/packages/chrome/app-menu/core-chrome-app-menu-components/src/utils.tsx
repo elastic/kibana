@@ -8,19 +8,20 @@
  */
 
 import React, { type MouseEvent, type ReactNode } from 'react';
+import { css } from '@emotion/react';
 import { isArray, isFunction, upperFirst } from 'lodash';
 import {
   type EuiButtonColor,
   type EuiThemeComputed,
   type EuiContextMenuPanelDescriptor,
   type EuiContextMenuPanelItemDescriptor,
+  type UseEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiSwitch,
   EuiToolTip,
 } from '@elastic/eui';
-import { getRouterLinkProps } from '@kbn/router-utils';
 import { AppMenuBadge } from './components/app_menu_badge';
 import { AppMenuPopoverActionButtons } from './components/app_menu_popover_action_buttons';
 import type {
@@ -34,8 +35,43 @@ import type {
 import { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
 import { APP_MENU_TEST_SUBJECTS, getAppMenuItemTestSubj } from './test_subjects';
 
-const sortByOrder = <T extends { order: number }>(items: T[]): T[] =>
-  [...items].sort((a, b) => a.order - b.order);
+const isModifiedEvent = (event: MouseEvent) =>
+  !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
+
+const isLeftClickEvent = (event: MouseEvent) => event.button === 0;
+
+/**
+ * Returns href/onClick props that let elements behave as in-app links:
+ * left-click without modifiers runs onClick (and preventDefault);
+ * modified/middle clicks keep native browser link behavior.
+ */
+export const getLinkProps = <E extends Element = Element>({
+  href,
+  onClick,
+}: {
+  href?: string;
+  onClick: (event: MouseEvent<E>) => void;
+}) => {
+  const guardedClickHandler = (event: MouseEvent<E>) => {
+    if (event.defaultPrevented) {
+      return;
+    }
+
+    if (isModifiedEvent(event) || !isLeftClickEvent(event)) {
+      return;
+    }
+
+    // Prevent regular link behavior, which causes a browser refresh.
+    event.preventDefault();
+
+    onClick(event);
+  };
+
+  return { href, onClick: guardedClickHandler };
+};
+
+const sortByOrder = <T extends { order?: number }>(items: T[]): T[] =>
+  [...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
 /**
  * Calculate how many items can be displayed.
@@ -206,12 +242,14 @@ export const mapAppMenuItemToPanelItem = (
   };
 
   const hasClickHandler = childPanelId === undefined;
-  const routerLinkProps =
+  const linkProps =
     item?.href && item?.run && hasClickHandler
-      ? getRouterLinkProps({ href: item.href, onClick: handleClick })
+      ? getLinkProps({ href: item.href, onClick: handleClick })
       : { onClick: hasClickHandler ? handleClick : undefined };
 
   const itemTestSubj = item.testId ?? getAppMenuItemTestSubj(item.id);
+
+  const showAsSelected = Boolean(item.isSelected);
 
   const itemName: ReactNode = item.labelBadgeText ? (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -232,7 +270,7 @@ export const mapAppMenuItemToPanelItem = (
     ) : (
       item?.iconType
     ),
-    ...routerLinkProps,
+    ...linkProps,
     href: item?.href,
     target: item?.href ? item?.target : undefined,
     disabled: isDisabled(item?.disableButton) || loading,
@@ -243,6 +281,11 @@ export const mapAppMenuItemToPanelItem = (
     },
     ...(childPanelId !== undefined && { panel: childPanelId }),
     ...(item?.isDestructive && { color: 'danger' }),
+    ...(showAsSelected && {
+      css: ({ euiTheme }: UseEuiTheme) => css`
+        background-color: ${getIsSelectedColor({ color: 'text', euiTheme, isFilled: false })};
+      `,
+    }),
   };
 };
 
@@ -388,7 +431,7 @@ export const getPopoverPanels = ({
   }) => {
     const panelItems: EuiContextMenuPanelItemDescriptor[] = [];
 
-    const sortedItems = [...itemsToProcess].sort((a, b) => a.order - b.order);
+    const sortedItems = sortByOrder(itemsToProcess);
 
     sortedItems.forEach((item) => {
       if (item.separator === 'above') {
