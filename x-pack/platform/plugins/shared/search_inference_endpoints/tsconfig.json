@@ -52,7 +52,8 @@
     "@kbn/analytics",
     "@kbn/datemath",
     "@kbn/core-http-browser",
-    "@kbn/es-errors"
+    "@kbn/es-errors",
+    "@kbn/ui-callout"
   ],
   "exclude": [
     "target/**/*"

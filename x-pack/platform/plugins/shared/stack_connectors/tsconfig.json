@@ -58,6 +58,7 @@
     "@kbn/actions-utils",
     "@kbn/mcp-client",
     "@kbn/std",
+    "@kbn/ui-callout",
   ],
   "exclude": [
     "target/**/*",
