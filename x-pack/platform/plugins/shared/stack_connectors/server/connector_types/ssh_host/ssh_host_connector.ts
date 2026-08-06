@@ -1,10 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { exec } from 'child_process';
@@ -15,25 +13,25 @@ import { promisify } from 'util';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type {
-  SshHostConfig,
-  SshHostDownloadFileParams,
-  SshHostExecAsyncParams,
-  SshHostExecFileAsyncParams,
-  SshHostExecParams,
-  SshHostGetExecStatusParams,
-  SshHostKillExecParams,
-  SshHostSecrets,
-  SshHostUploadFileParams,
-} from './schemas';
+  Config,
+  Secrets,
+  ExecParams,
+  ExecAsyncParams,
+  GetExecStatusParams,
+  DownloadFileParams,
+  UploadFileParams,
+  ExecFileAsyncParams,
+  KillExecParams,
+} from '@kbn/connector-schemas/ssh_host';
 import {
-  SshHostDownloadFileParamsSchema,
-  SshHostExecAsyncParamsSchema,
-  SshHostExecFileAsyncParamsSchema,
-  SshHostExecParamsSchema,
-  SshHostGetExecStatusParamsSchema,
-  SshHostKillExecParamsSchema,
-  SshHostUploadFileParamsSchema,
-} from './schemas';
+  ExecParamsSchema,
+  ExecAsyncParamsSchema,
+  GetExecStatusParamsSchema,
+  DownloadFileParamsSchema,
+  UploadFileParamsSchema,
+  ExecFileAsyncParamsSchema,
+  KillExecParamsSchema,
+} from '@kbn/connector-schemas/ssh_host';
 
 const execPromise = promisify(exec);
 
@@ -52,50 +50,50 @@ const parseHost = (host: string): { hostname: string; port: number } => {
   return { hostname: host.slice(0, lastColon), port };
 };
 
-export class SshHostConnector extends SubActionConnector<SshHostConfig, SshHostSecrets> {
-  constructor(params: ServiceParams<SshHostConfig, SshHostSecrets>) {
+export class SshHostConnector extends SubActionConnector<Config, Secrets> {
+  constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
 
     this.registerSubAction({
       name: 'exec',
       method: 'exec',
-      schema: SshHostExecParamsSchema,
+      schema: ExecParamsSchema,
     });
 
     this.registerSubAction({
       name: 'execAsync',
       method: 'execAsync',
-      schema: SshHostExecAsyncParamsSchema,
+      schema: ExecAsyncParamsSchema,
     });
 
     this.registerSubAction({
       name: 'getExecStatus',
       method: 'getExecStatus',
-      schema: SshHostGetExecStatusParamsSchema,
+      schema: GetExecStatusParamsSchema,
     });
 
     this.registerSubAction({
       name: 'downloadFile',
       method: 'downloadFile',
-      schema: SshHostDownloadFileParamsSchema,
+      schema: DownloadFileParamsSchema,
     });
 
     this.registerSubAction({
       name: 'uploadFile',
       method: 'uploadFile',
-      schema: SshHostUploadFileParamsSchema,
+      schema: UploadFileParamsSchema,
     });
 
     this.registerSubAction({
       name: 'execFileAsync',
       method: 'execFileAsync',
-      schema: SshHostExecFileAsyncParamsSchema,
+      schema: ExecFileAsyncParamsSchema,
     });
 
     this.registerSubAction({
       name: 'killExec',
       method: 'killExec',
-      schema: SshHostKillExecParamsSchema,
+      schema: KillExecParamsSchema,
     });
   }
 
@@ -103,13 +101,11 @@ export class SshHostConnector extends SubActionConnector<SshHostConfig, SshHostS
     return (error.response?.data as { message?: string })?.message ?? error.message;
   }
 
-  public async exec(
-    params: SshHostExecParams
-  ): Promise<{ stdout: string; stderr: string; code: number }> {
+  public async exec(params: ExecParams): Promise<{ stdout: string; stderr: string; code: number }> {
     return this.execCommand(params);
   }
 
-  public async execAsync(params: SshHostExecAsyncParams): Promise<{
+  public async execAsync(params: ExecAsyncParams): Promise<{
     commandId: string;
     status: 'DONE' | 'RUNNING';
     stderr?: string;
@@ -205,9 +201,7 @@ echo "STATUS=RUNNING"
     };
   }
 
-  public async execFileAsync(
-    params: SshHostExecFileAsyncParams
-  ): ReturnType<typeof this.execAsync> {
+  public async execFileAsync(params: ExecFileAsyncParams): ReturnType<typeof this.execAsync> {
     const { executable, args, env = {}, cwd, outputFiles, signal } = params;
 
     const b64 = (s: string) => Buffer.from(s).toString('base64');
@@ -229,7 +223,7 @@ echo "STATUS=RUNNING"
     return this.execAsync({ script, signal });
   }
 
-  public async getExecStatus(params: SshHostGetExecStatusParams): Promise<{
+  public async getExecStatus(params: GetExecStatusParams): Promise<{
     commandId: string;
     status: 'DONE' | 'RUNNING';
     stderr?: string;
@@ -294,7 +288,7 @@ fi`;
     };
   }
 
-  public async killExec(params: SshHostKillExecParams): Promise<void> {
+  public async killExec(params: KillExecParams): Promise<void> {
     const { commandId } = params;
     const { tmpDir } = this.getCommandData(commandId);
     const killScript = `
@@ -309,7 +303,7 @@ rm -rf "$TMP_DIR"
   }
 
   public async downloadFile(
-    params: SshHostDownloadFileParams
+    params: DownloadFileParams
   ): Promise<{ content: string; encoding: 'base64' }> {
     const { remotePath } = params;
     const { hostname, port } = parseHost(this.config.host);
@@ -369,7 +363,7 @@ rm -rf "$TMP_DIR"
     }
   }
 
-  public async uploadFile(params: SshHostUploadFileParams): Promise<void> {
+  public async uploadFile(params: UploadFileParams): Promise<void> {
     const { remotePath, content } = params;
     const remoteDir = remotePath.substring(0, remotePath.lastIndexOf('/'));
     const mkdirPart = remoteDir ? `mkdir -p "${remoteDir}" && ` : '';
@@ -383,7 +377,7 @@ rm -rf "$TMP_DIR"
   }
 
   private async execCommand(
-    params: SshHostExecParams
+    params: ExecParams
   ): Promise<{ stdout: string; stderr: string; code: number }> {
     const { script, signal } = params;
     const { hostname, port } = parseHost(this.config.host);

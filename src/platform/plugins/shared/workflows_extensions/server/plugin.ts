@@ -22,7 +22,6 @@ import type {
   WorkflowsClient,
   WorkflowsClientProvider,
 } from '@kbn/workflows/server/types';
-import { getSshHostConnectorType } from './connectors/ssh_host';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
 import { ServerStepRegistry } from './step_registry';
@@ -62,7 +61,7 @@ export class WorkflowsExtensionsServerPlugin
 
   public setup(
     core: CoreSetup<WorkflowsExtensionsServerPluginStartDeps>,
-    plugins: WorkflowsExtensionsServerPluginSetupDeps
+    _plugins: WorkflowsExtensionsServerPluginSetupDeps
   ): WorkflowsExtensionsServerPluginSetup {
     // Register the workflows client provider to the workflows request context
     core.http.registerRouteHandlerContext<WorkflowsExtensionsRequestHandlerContext, 'workflows'>(
@@ -79,8 +78,6 @@ export class WorkflowsExtensionsServerPlugin
 
     registerGetStepDefinitionsRoute(router, this.stepRegistry, this.logger);
     registerGetTriggerDefinitionsRoute(router, this.triggerRegistry);
-
-    plugins.actions.registerSubActionConnectorType(getSshHostConnectorType());
 
     registerInternalStepDefinitions(this.stepRegistry, {
       getActionsStart: () => this.actionsStart,

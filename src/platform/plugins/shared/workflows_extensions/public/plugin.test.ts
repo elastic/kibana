@@ -16,11 +16,7 @@ jest.mock('./steps', () => ({
 
 const { registerInternalStepDefinitions } = jest.requireMock('./steps');
 
-const mockSetupDeps = {
-  triggersActionsUi: {
-    actionTypeRegistry: { register: jest.fn() },
-  },
-} as any;
+const mockSetupDeps = {} as any;
 
 const createPlugin = () => {
   const initContext = coreMock.createPluginInitializerContext();
