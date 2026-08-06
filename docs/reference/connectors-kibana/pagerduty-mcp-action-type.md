@@ -1,7 +1,7 @@
 ---
 navigation_title: "PagerDuty"
 type: reference
-description: "Use the PagerDuty data source to access and manage incidents, escalation policies, schedules, on-calls, users, and teams using the PagerDuty MCP server."
+description: "Use the PagerDuty data source to access and manage incidents, escalation policies, schedules, on-calls, users, and teams in PagerDuty."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -17,7 +17,7 @@ You add and configure the PagerDuty data source when setting up a data or contex
 
 ## Get API credentials [pagerduty-mcp-api-credentials]
 
-To use the PagerDuty data source, you need a PagerDuty **API token** (REST API). This is not the same as an integration key used for the alerting connector.
+To use the PagerDuty data source, you need a PagerDuty **API token**. This is not the same as an integration key used for the alerting connector.
 
 1. Log in to [PagerDuty](https://www.pagerduty.com/).
 2. Go to **Integrations** > **Developer Tools** > **API Access Keys** (or **User Settings** > **API Access** in some layouts).

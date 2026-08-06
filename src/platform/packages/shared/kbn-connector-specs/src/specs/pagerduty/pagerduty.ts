@@ -141,7 +141,7 @@ export const PagerdutyConnector: ConnectorSpec = {
     triggerIncident: {
       isTool: true,
       description:
-        'Create a new PagerDuty incident via the REST Incidents API. Requires a service ID (use listServices to find one), an incident title, and the from email of the acting user (call getUserData to retrieve it). Returns the full incident object including incident.id, which downstream steps can use to acknowledge, resolve, or update the incident. Optionally accepts urgency, a detailed body, an escalation policy override, and direct user assignments.',
+        'Create a new PagerDuty incident. Requires a service ID (use listServices to find one), an incident title, and the from email of the acting user (call getUserData to retrieve it). Returns the full incident object including incident.id, which downstream steps can use to acknowledge, resolve, or update the incident. Optionally accepts urgency, a detailed body, an escalation policy override, and direct user assignments.',
       input: TriggerIncidentInputSchema,
       handler: async (ctx, input: TriggerIncidentInput) => {
         const incidentPayload: Record<string, unknown> = {
@@ -440,14 +440,14 @@ export const PagerdutyConnector: ConnectorSpec = {
   test: {
     enabled: true,
     description: i18n.translate('connectorSpecs.pagerduty.test.description', {
-      defaultMessage: 'Verifies connection to the PagerDuty MCP server by listing available tools.',
+      defaultMessage: 'Verifies the PagerDuty connection.',
     }),
     handler: async (ctx) => {
       return withMcpClient(ctx, async (mcp) => {
         const { tools } = await mcp.listTools();
         return {
           ok: true,
-          message: `Connected to PagerDuty MCP server. ${tools.length} tools available.`,
+          message: `Connected to PagerDuty. ${tools.length} tools available.`,
         };
       });
     },
