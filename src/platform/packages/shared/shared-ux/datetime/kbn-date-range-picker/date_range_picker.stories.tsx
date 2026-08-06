@@ -192,7 +192,7 @@ function StatefulDateRangePicker(props: DateRangePickerProps) {
       onPresetSave?.(option);
       setPresets((prev) => {
         const deduped = prev.filter((p) => timeRangeKey(p) !== timeRangeKey(option));
-        return [...deduped, { ...option, isDeletable: true }];
+        return [{ ...option, isDeletable: true }, ...deduped];
       });
     },
     [onPresetSave]

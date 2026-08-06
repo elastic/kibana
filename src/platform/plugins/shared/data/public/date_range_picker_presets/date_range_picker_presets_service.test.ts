@@ -85,6 +85,19 @@ describe('DateRangePickerPresetsService', () => {
       ]);
     });
 
+    it('emits the most recently saved preset at the top of the list', async () => {
+      const { core, service } = setup();
+      const newest: PresetItem = { start: 'now-1h', end: 'now', label: 'Last hour' };
+      const oldest: PresetItem = { start: 'now-2h', end: 'now', label: 'Last 2 hours' };
+      core.userStorage.get$.mockReturnValue(of(storedPresets([newest, oldest])));
+
+      expect(await firstValueFrom(service.getPresets$())).toEqual([
+        { ...newest, isDeletable: true },
+        { ...oldest, isDeletable: true },
+        ...lockedQuickRangePresets,
+      ]);
+    });
+
     it('emits only the locked quick ranges when nothing is stored', async () => {
       const { core, service } = setup();
       core.userStorage.get$.mockReturnValue(of(DEFAULT_STORED_PRESETS));
@@ -133,7 +146,7 @@ describe('DateRangePickerPresetsService', () => {
   });
 
   describe('savePreset', () => {
-    it('persists a new preset appended to the stored presets', async () => {
+    it('persists a new preset', async () => {
       const { core, service } = setup();
       core.userStorage.peek.mockReturnValue(storedPresets([]));
       const preset: PresetItem = { start: 'now-1h', end: 'now', label: 'Last hour' };
@@ -142,6 +155,19 @@ describe('DateRangePickerPresetsService', () => {
       expect(core.userStorage.set).toHaveBeenCalledWith(
         DATE_RANGE_PICKER_PRESETS_KEY,
         storedPresets([preset])
+      );
+    });
+
+    it('prepends a new preset so the newest is stored first', async () => {
+      const { core, service } = setup();
+      const existing: PresetItem = { start: 'now-2h', end: 'now', label: 'Last 2 hours' };
+      core.userStorage.peek.mockReturnValue(storedPresets([existing]));
+      const preset: PresetItem = { start: 'now-1h', end: 'now', label: 'Last hour' };
+
+      await service.savePreset(preset);
+      expect(core.userStorage.set).toHaveBeenCalledWith(
+        DATE_RANGE_PICKER_PRESETS_KEY,
+        storedPresets([preset, existing])
       );
     });
 

@@ -98,7 +98,8 @@ export class DateRangePickerPresetsService implements IDateRangePickerPresetsSer
       return 'limit-reached';
     }
 
-    await this.persist([...base, preset]);
+    // Stored newest first, so a saved preset lands at the top of the displayed list.
+    await this.persist([preset, ...base]);
     return 'saved';
   }
 
