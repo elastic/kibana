@@ -102,13 +102,14 @@ export const createMissingEntities = async ({
 
   const requests: CreateEntityFromSourceRequest[] = [];
   for (const score of missingScores) {
-    const source = alertDocs.get(score.id_value);
-    if (source) {
+    const alertDoc = alertDocs.get(score.id_value);
+    if (alertDoc) {
       requests.push({
         type: entityType,
-        source,
+        source: alertDoc.source,
         expectedEntityId: score.id_value,
         createdBy: ENTITY_CREATED_BY.RiskScoreMaintainer,
+        firstSeen: alertDoc.firstSeen,
         fields: {
           'entity.risk.calculated_level': score.calculated_level,
           'entity.risk.calculated_score': score.calculated_score,

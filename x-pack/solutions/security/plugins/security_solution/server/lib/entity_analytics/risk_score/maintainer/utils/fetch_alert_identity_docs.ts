@@ -39,35 +39,38 @@ interface EuidTermsAggBucket {
       hits: Array<{ _source?: Record<string, unknown> }>;
     };
   };
+  first_seen: {
+    value_as_string?: string;
+  };
+}
+
+/** One missing EUID's representative alert, plus the earliest qualifying alert timestamp seen for it. */
+export interface AlertIdentityDoc {
+  source: Record<string, unknown>;
+  /**
+   * Earliest `@timestamp` seen for this EUID among alerts matching `alertFilters` — an upper
+   * bound on the entity's true first-seen, not the true value. See the `firstSeen` rationale on
+   * {@link buildEntityFromSource} for why that approximation is an acceptable, recoverable trade
+   * rather than a silent inaccuracy.
+   */
+  firstSeen?: string;
 }
 
 /**
  * Fetches one representative alert `_source` per missing EUID, to drive the create-if-missing
- * policy (`getEntityCreationCandidate`). The maintainer's own EUID can't be trusted for gating
- * (the ES|QL base-scoring query applies only `documentsFilter`, not `postAggFilter` — see
- * `score_base_entities.ts`), so creation re-derives everything (namespace, identity fields,
- * `event.outcome`) from a real source document rather than the composite-agg's bucket key.
+ * policy (`getEntityCreationCandidate`).Excludes `event.outcome: failure` from the `top_hits` selection
  *
  * Reuses the same `entity_id` Painless runtime mapping and `alertFilters` as
  * `getEuidCompositeQuery` so the `terms` filter below only matches documents that would
- * legitimately compute one of the requested EUIDs.
+ * legitimately compute one of the requested EUIDs. TODO: Reconsider this once elastic/security-team#18624 is resolved.
  *
- * Excludes `event.outcome: failure` from the `top_hits` selection itself: without this, the
- * single newest alert per EUID could be a failure alert even when an older, eligible alert for
- * the same EUID exists, which would make `getEntityCreationCandidate` reject a candidate that
- * should have been accepted. The in-memory policy check in `getEntityCreationCandidate` stays as
- * the authoritative gate — this query filter is only an optimization of the selection.
- *
- * Fetches the full `_source` (not a trimmed field list): the creation policy's field
- * evaluations (e.g. the user `entity.namespace` derivation) read fields beyond the identity
- * composition itself (`event.kind`, `event.category`, `event.type`, `cloud.provider`, ...), and
- * a partial document risks misclassifying an IdP alert as local. Requests are chunked to
- * {@link ALERT_IDENTITY_DOCS_CHUNK_SIZE} EUIDs each (see that constant), so the number of
+ * Requests are chunked to {@link ALERT_IDENTITY_DOCS_CHUNK_SIZE} EUIDs, so the number of
  * documents fetched per request is bounded independently of the page's missing-EUID count.
  *
- * Skips the query entirely for an entity type with no `creatableFromDocument` (currently
- * `generic`): every candidate would be rejected with `entity_type_not_creatable` regardless of
- * the source document, so fetching one is wasted work.
+ * Also collects, per EUID, the earliest `@timestamp` among matching alerts (`first_seen` sub-agg)
+ * to seed `entity.lifecycle.first_seen` on creation — see the `firstSeen` field on {@link AlertIdentityDoc} for the caveat on what that value actually represents.
+ *
+ * Skips the query entirely for an entity type with no `creatableFromDocument` (currently `generic`)
  */
 export const fetchAlertIdentityDocs = async ({
   esClient,
@@ -77,8 +80,8 @@ export const fetchAlertIdentityDocs = async ({
   euids,
   logger,
   abortSignal,
-}: FetchAlertIdentityDocsParams): Promise<Map<string, Record<string, unknown>>> => {
-  const result = new Map<string, Record<string, unknown>>();
+}: FetchAlertIdentityDocsParams): Promise<Map<string, AlertIdentityDoc>> => {
+  const result = new Map<string, AlertIdentityDoc>();
   if (euids.length === 0 || !isEntityTypeCreatableFromDocument(entityType)) {
     return result;
   }
@@ -111,8 +114,21 @@ export const fetchAlertIdentityDocs = async ({
                   top_hits: {
                     size: 1,
                     sort: [{ '@timestamp': { order: 'desc' } }],
+                    // 500 buckets each carrying a full alert `_source` can be a multi-MB
+                    // response. None of the creation policy's field evaluations read these
+                    // paths, so excluding them shrinks the response without changing what the
+                    // policy sees.
+                    _source: {
+                      excludes: [
+                        'kibana.alert.rule.parameters',
+                        'kibana.alert.ancestors',
+                        'kibana.alert.original_event',
+                        'kibana.alert.rule.execution.*',
+                      ],
+                    },
                   },
                 },
+                first_seen: { min: { field: '@timestamp' } },
               },
             },
           },
@@ -127,7 +143,7 @@ export const fetchAlertIdentityDocs = async ({
       for (const bucket of buckets) {
         const source = bucket.latest.hits.hits[0]?._source;
         if (source) {
-          result.set(bucket.key, source);
+          result.set(bucket.key, { source, firstSeen: bucket.first_seen.value_as_string });
         }
       }
     } catch (error) {

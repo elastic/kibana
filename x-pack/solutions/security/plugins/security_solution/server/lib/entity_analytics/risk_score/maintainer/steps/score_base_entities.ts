@@ -41,10 +41,11 @@ interface ScoreBaseEntitiesParams {
   /**
    * Create-if-missing opt-in, forwarded to `fetchEntitiesByIds` as `strict`: with creation
    * enabled, a lookup failure must not be silently treated as "every score on this page is
-   * missing" (see `fetchEntitiesByIds`). Defaults to false (best-effort lookup), matching
-   * pre-existing behaviour when the flag is off.
+   * missing" (see `fetchEntitiesByIds`). Required (not defaulted) so every call site makes a
+   * conscious choice about a path that mints entities, rather than silently inheriting
+   * best-effort lookups by omitting the parameter.
    */
-  createMissingEntities?: boolean;
+  createMissingEntities: boolean;
 }
 
 interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
@@ -132,7 +133,7 @@ export const calculateBaseEntityScores = async function* ({
   watchlistConfigs,
   calculationRunId,
   abortSignal,
-  createMissingEntities = false,
+  createMissingEntities,
 }: ScoreBaseEntitiesParams): AsyncGenerator<ScoredEntityPage> {
   let afterKey: Record<string, string> | undefined;
   let previousPageUpperBound: string | undefined;

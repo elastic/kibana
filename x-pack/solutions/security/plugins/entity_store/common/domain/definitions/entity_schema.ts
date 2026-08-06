@@ -164,28 +164,16 @@ export type CreationRejectionReason = z.infer<typeof creationRejectionReasonSche
 
 /**
  * Opt-in gate for out-of-band creation from a single representative document (e.g.
- * `createEntitiesFromSource`, seeded from a representative alert `_source`). A type with no
+ * `createEntitiesFromSource`, seeded from a representative document `_source`). A type with no
  * `creatableFromDocument` is never created this way — this is the only place that decides it.
- *
- * Unlike every other condition in this schema, `requires` has no ESQL or Painless target: it is
- * evaluated in memory only, against the document after `fieldEvaluations`,
- * `whenConditionTrueSetFieldsPreAgg`, and `whenConditionTrueSetFieldsAfterStats` have been applied.
- * It cannot reuse `postAggFilter` directly because that filter short-circuits on
- * `entity.id already exists`, which trivially passes for a synthetic doc that already carries the
- * candidate id.
- *
- * Modeled as a union rather than two independently-optional fields so the `rejectionReason` <->
- * `requires` pairing is enforced by the type checker at every definition call site, not only by a
- * runtime `.refine()` that nothing ever calls `.parse()` against (see `registry.test.ts`).
+ * The union shape is to enforce that when both `requires` and `rejectionReason` are present, when
+ * a conditional logic is needed, when not needed it must be empty.
  */
 const creatableFromDocumentSchema = z.union([
   z.strictObject({
     requires: streamlangConditionSchema,
     rejectionReason: creationRejectionReasonSchema,
   }),
-  // No extra requirement beyond the shared `entity_type_not_creatable` / `event_outcome_failure`
-  // gates (e.g. `service`). `.strictObject` rejects a lone `requires` or `rejectionReason` here,
-  // which would otherwise silently match this branch as an unknown/ignored key.
   z.strictObject({}),
 ]);
 export type CreatableFromDocument = z.infer<typeof creatableFromDocumentSchema>;

@@ -22,13 +22,25 @@ const buildLogger = (): ScopedLogger =>
     error: jest.fn(),
   } as unknown as ScopedLogger);
 
-const mockAggResponse = (docsByEuid: Record<string, Record<string, unknown>>) => ({
+interface MockBucketSpec {
+  source: Record<string, unknown>;
+  firstSeen?: string;
+}
+
+const DEFAULT_FIRST_SEEN = '2026-01-01T00:00:00.000Z';
+
+const mockAggResponse = (docsByEuid: Record<string, Record<string, unknown> | MockBucketSpec>) => ({
   aggregations: {
     by_entity_id: {
-      buckets: Object.entries(docsByEuid).map(([key, source]) => ({
-        key,
-        latest: { hits: { hits: [{ _source: source }] } },
-      })),
+      buckets: Object.entries(docsByEuid).map(([key, value]) => {
+        const spec: MockBucketSpec =
+          'source' in value ? (value as MockBucketSpec) : { source: value };
+        return {
+          key,
+          latest: { hits: { hits: [{ _source: spec.source }] } },
+          first_seen: { value_as_string: spec.firstSeen ?? DEFAULT_FIRST_SEEN },
+        };
+      }),
     },
   },
 });
@@ -79,10 +91,43 @@ describe('fetchAlertIdentityDocs', () => {
     expect(query.bool.must_not).toEqual([{ term: { 'event.outcome': 'failure' } }]);
   });
 
-  it('returns the representative document per EUID from the terms+top_hits aggregation', async () => {
+  it('excludes known bulk alert paths from the top_hits _source', async () => {
+    (esClient.search as jest.Mock).mockResolvedValueOnce(
+      mockAggResponse({ 'host:host-1': { host: { id: 'host-1' } } })
+    );
+
+    await fetchAlertIdentityDocs({ esClient, logger, ...baseParams, euids: ['host:host-1'] });
+
+    const topHits = (esClient.search as jest.Mock).mock.calls[0][0].aggs.by_entity_id.aggs.latest
+      .top_hits;
+    expect(topHits._source.excludes).toEqual(
+      expect.arrayContaining([
+        'kibana.alert.rule.parameters',
+        'kibana.alert.ancestors',
+        'kibana.alert.original_event',
+        'kibana.alert.rule.execution.*',
+      ])
+    );
+  });
+
+  it('requests a first_seen min aggregation alongside the top_hits', async () => {
+    (esClient.search as jest.Mock).mockResolvedValueOnce(
+      mockAggResponse({ 'host:host-1': { host: { id: 'host-1' } } })
+    );
+
+    await fetchAlertIdentityDocs({ esClient, logger, ...baseParams, euids: ['host:host-1'] });
+
+    const aggs = (esClient.search as jest.Mock).mock.calls[0][0].aggs.by_entity_id.aggs;
+    expect(aggs.first_seen).toEqual({ min: { field: '@timestamp' } });
+  });
+
+  it('returns the representative document and firstSeen per EUID from the aggregation', async () => {
     (esClient.search as jest.Mock).mockResolvedValueOnce(
       mockAggResponse({
-        'host:host-1': { host: { id: 'host-1' } },
+        'host:host-1': {
+          source: { host: { id: 'host-1' } },
+          firstSeen: '2025-06-01T00:00:00.000Z',
+        },
         'host:host-2': { host: { id: 'host-2' } },
       })
     );
@@ -95,7 +140,14 @@ describe('fetchAlertIdentityDocs', () => {
     });
 
     expect(result.size).toBe(2);
-    expect(result.get('host:host-1')).toEqual({ host: { id: 'host-1' } });
+    expect(result.get('host:host-1')).toEqual({
+      source: { host: { id: 'host-1' } },
+      firstSeen: '2025-06-01T00:00:00.000Z',
+    });
+    expect(result.get('host:host-2')).toEqual({
+      source: { host: { id: 'host-2' } },
+      firstSeen: DEFAULT_FIRST_SEEN,
+    });
   });
 
   it('chunks euids into sequential requests bounded by ALERT_IDENTITY_DOCS_CHUNK_SIZE', async () => {

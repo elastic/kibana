@@ -121,6 +121,12 @@ export interface CreateEntityFromSourceRequest {
   expectedEntityId: string;
   /** Provenance stamp written to `entity.created_by`. */
   createdBy: EntityCreatedBy;
+  /**
+   * Earliest known `@timestamp` for this EUID, written to `entity.lifecycle.first_seen`. Omit
+   * when unknown — see `buildEntityFromSource` for why leaving it unset (rather than guessing) is
+   * preferable in that case.
+   */
+  firstSeen?: string;
   /** Additional dot-path fields to merge onto the created doc (e.g. `entity.risk.calculated_score`). */
   fields?: Record<string, unknown>;
 }
@@ -581,6 +587,7 @@ export class CRUDClient {
         candidate,
         source: request.source,
         createdBy: request.createdBy,
+        firstSeen: request.firstSeen,
         fields: request.fields,
       });
 

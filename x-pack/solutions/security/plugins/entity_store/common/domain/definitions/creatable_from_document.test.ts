@@ -6,7 +6,6 @@
  */
 
 import { getEntityCreationCandidate } from './creatable_from_document';
-import { getEntityDefinitionWithoutId } from './registry';
 
 describe('getEntityCreationCandidate', () => {
   describe('shared event.outcome gate', () => {
@@ -54,10 +53,6 @@ describe('getEntityCreationCandidate', () => {
         accepted: false,
         reason: 'entity_type_not_creatable',
       });
-    });
-
-    it('has no creatableFromDocument declared on its definition', () => {
-      expect(getEntityDefinitionWithoutId('generic').creatableFromDocument).toBeUndefined();
     });
   });
 

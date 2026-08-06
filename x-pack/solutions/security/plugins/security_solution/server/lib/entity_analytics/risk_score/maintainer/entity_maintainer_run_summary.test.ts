@@ -152,7 +152,6 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
           scoresCalculatedBase: 12,
           scoresDroppedNotInStore: 3,
           scoresMissingFromStoreBase: 3,
-          entitiesCreateSkipped: 3,
           scoresWrittenRiskIndexBase: 7,
           scoresWrittenEntityStoreBase: 7,
           scoresFailedBase: 2,
@@ -231,8 +230,10 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
         metrics: emptyMetrics({
           scoresCalculatedBase: 6,
           // 2 EUIDs were absent from the store; both had a representative alert document and
-          // passed policy (so neither is skipped), but one hit `euid_mismatch` on write.
+          // passed policy (so neither is skipped), but one hit `euid_mismatch` on write, which
+          // still counts toward `scoresDroppedNotInStore` (it never reached the risk index).
           scoresMissingFromStoreBase: 2,
+          scoresDroppedNotInStore: 1,
           entitiesCreated: 1,
           entitiesCreateFailed: 1,
           scoresWrittenRiskIndexBase: 5,
@@ -248,6 +249,33 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
       applied: 5,
       skipped: 0,
       failed: 1,
+    });
+  });
+
+  it('keeps the funnel balanced with create-if-missing disabled (skipped = raw not-in-store misses)', () => {
+    // With the flag off, `scoreBaseEntities` never attempts a create, so every
+    // `entitiesCreate*` metric stays 0 and `scoresDroppedNotInStore` collapses to the raw
+    // not-in-store miss count — this is the scenario the funnel used to lose track of.
+    expect(
+      buildRiskScoreEntityMaintainerRunSummary({
+        entityType: 'host',
+        metrics: emptyMetrics({
+          scoresCalculatedBase: 10,
+          scoresMissingFromStoreBase: 4,
+          scoresDroppedNotInStore: 4,
+          scoresWrittenRiskIndexBase: 6,
+          scoresWrittenEntityStoreBase: 6,
+          scoresFailedBase: 0,
+          pagesProcessed: 3,
+        }),
+        stages: [],
+      }).funnel
+    ).toEqual({
+      scanned: 10,
+      qualified: 6,
+      applied: 6,
+      skipped: 4,
+      failed: 0,
     });
   });
 });

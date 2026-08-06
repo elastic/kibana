@@ -87,7 +87,15 @@ describe('score_base_entities', () => {
       values: [esqlRow('user:a@okta')],
     });
 
-    await collectPages(calculateBaseEntityScores({ esClient, crudClient, logger, ...baseParams }));
+    await collectPages(
+      calculateBaseEntityScores({
+        esClient,
+        crudClient,
+        logger,
+        createMissingEntities: false,
+        ...baseParams,
+      })
+    );
 
     expect(esClient.search as jest.Mock).toHaveBeenCalledTimes(1);
     expect(esClient.esql.query as jest.Mock).toHaveBeenCalledTimes(1);
@@ -113,7 +121,15 @@ describe('score_base_entities', () => {
       })
       .mockResolvedValueOnce({ values: [esqlRow('user:003@okta')] });
 
-    await collectPages(calculateBaseEntityScores({ esClient, crudClient, logger, ...baseParams }));
+    await collectPages(
+      calculateBaseEntityScores({
+        esClient,
+        crudClient,
+        logger,
+        createMissingEntities: false,
+        ...baseParams,
+      })
+    );
 
     expect(esClient.search as jest.Mock).toHaveBeenCalledTimes(2);
     const secondCompositeCall = (esClient.search as jest.Mock).mock.calls[1][0];
@@ -141,6 +157,7 @@ describe('score_base_entities', () => {
         esClient,
         crudClient,
         logger,
+        createMissingEntities: false,
         ...baseParams,
         abortSignal: controller.signal,
       })
@@ -156,7 +173,15 @@ describe('score_base_entities', () => {
       values: [esqlRow('user:a@okta'), esqlRow('user:b@okta')],
     });
 
-    await collectPages(calculateBaseEntityScores({ esClient, crudClient, logger, ...baseParams }));
+    await collectPages(
+      calculateBaseEntityScores({
+        esClient,
+        crudClient,
+        logger,
+        createMissingEntities: false,
+        ...baseParams,
+      })
+    );
 
     expect(crudClient.listEntities as jest.Mock).toHaveBeenCalledTimes(1);
     const fetchArgs = (crudClient.listEntities as jest.Mock).mock.calls[0][0];
@@ -168,7 +193,15 @@ describe('score_base_entities', () => {
   it('terminates without scoring when the composite agg returns zero buckets', async () => {
     mockCompositeAggPage(esClient, []);
 
-    await collectPages(calculateBaseEntityScores({ esClient, crudClient, logger, ...baseParams }));
+    await collectPages(
+      calculateBaseEntityScores({
+        esClient,
+        crudClient,
+        logger,
+        createMissingEntities: false,
+        ...baseParams,
+      })
+    );
 
     expect(esClient.search as jest.Mock).toHaveBeenCalledTimes(1);
     expect(esClient.esql.query as jest.Mock).not.toHaveBeenCalled();
@@ -310,6 +343,7 @@ describe('score_base_entities', () => {
               {
                 key: 'user:new@okta',
                 latest: { hits: { hits: [{ _source: { user: { name: 'new' } } }] } },
+                first_seen: { value_as_string: '2026-01-01T00:00:00.000Z' },
               },
             ],
           },
@@ -362,6 +396,7 @@ describe('score_base_entities', () => {
               {
                 key: 'user:raced@okta',
                 latest: { hits: { hits: [{ _source: { user: { name: 'raced' } } }] } },
+                first_seen: { value_as_string: '2026-01-01T00:00:00.000Z' },
               },
             ],
           },
@@ -409,6 +444,7 @@ describe('score_base_entities', () => {
               {
                 key: 'user:rejected@okta',
                 latest: { hits: { hits: [{ _source: { user: { name: 'rejected' } } }] } },
+                first_seen: { value_as_string: '2026-01-01T00:00:00.000Z' },
               },
             ],
           },
@@ -454,6 +490,7 @@ describe('score_base_entities', () => {
               {
                 key: 'user:mismatched@okta',
                 latest: { hits: { hits: [{ _source: { user: { name: 'mismatched' } } }] } },
+                first_seen: { value_as_string: '2026-01-01T00:00:00.000Z' },
               },
             ],
           },

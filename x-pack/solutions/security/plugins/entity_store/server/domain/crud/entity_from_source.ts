@@ -25,6 +25,7 @@ import {
 import { ENTITY_SOURCE_FIELD } from '../../../common/domain/definitions/common_fields';
 import type { EntityCreatedBy } from '../../../common/domain/definitions/common_fields';
 import type { EntityCreationAccepted } from '../../../common/domain/definitions/creatable_from_document';
+import { ENTITY_TYPE_FIELD } from '../logs_extraction/query_builder_commons';
 
 export interface BuildEntityFromSourceParams {
   entityType: EntityType;
@@ -32,6 +33,12 @@ export interface BuildEntityFromSourceParams {
   /** Representative source document (e.g. an alert `_source`) the candidate was derived from. */
   source: unknown;
   createdBy: EntityCreatedBy;
+  /**
+   * Earliest known `@timestamp` for this EUID (e.g. `fetchAlertIdentityDocs`'s `first_seen`
+   * min-agg), written to `entity.lifecycle.first_seen` when provided. See the caveat on that
+   * value below — it is an upper bound, not the entity's true first-seen.
+   */
+  firstSeen?: string;
   /** Additional dot-path fields to merge onto the document (e.g. `entity.risk.calculated_score`). */
   fields?: Record<string, unknown>;
 }
@@ -40,15 +47,16 @@ export interface BuildEntityFromSourceParams {
  * Builds a new entity document from a representative source document and an already-accepted
  * {@link EntityCreationAccepted} candidate (see `getEntityCreationCandidate`). Populates the
  * fields a real `createEntity` caller would send: `entity.id` plus its identity source fields,
- * `entity.name`, entity type scoping (`entity.EngineMetadata.*`), provenance (`entity.created_by`),
- * `entity.source`, and an initial `entity.lifecycle.last_seen` (see rationale below for why
- * `first_seen` is deliberately left unset). `@timestamp` is left to `validateAndTransformDoc`.
+ * `entity.name`, `entity.type`, entity type scoping (`entity.EngineMetadata.*`), provenance
+ * (`entity.created_by`), `entity.source`, and `entity.lifecycle.last_seen` (see below for
+ * `first_seen`). `@timestamp` is left to `validateAndTransformDoc`.
  */
 export function buildEntityFromSource({
   entityType,
   candidate,
   source,
   createdBy,
+  firstSeen,
   fields,
 }: BuildEntityFromSourceParams): Entity {
   const doc = getDocument(source);
@@ -64,6 +72,12 @@ export function buildEntityFromSource({
   set(built, 'entity.EngineMetadata.Type', entityType);
   set(built, 'entity.EngineMetadata.UntypedId', untypedId);
   set(built, 'entity.created_by', createdBy);
+  // Parity with extraction's own fallback (`entity.type = COALESCE(entity.type,
+  // "<entityTypeFallback>")`): without this, a maintainer-created entity has no type until the
+  // next extraction run, which may never happen for an entity that only ever appears in alerts.
+  if (definition.entityTypeFallback) {
+    set(built, ENTITY_TYPE_FIELD, definition.entityTypeFallback);
+  }
 
   const { name, confidence } = deriveEntityNameAndConfidence(definition, doc, built);
   // Matches extraction's own fallback (`entity.name = CASE(..., recent.entity.EngineMetadata.UntypedId)`)
@@ -78,15 +92,26 @@ export function buildEntityFromSource({
     set(built, ENTITY_SOURCE_FIELD, entitySource);
   }
 
-  // Only `last_seen` is set from the representative document's `@timestamp`. That document is
-  // deliberately the *newest* matching alert (see `fetchAlertIdentityDocs`), so it would make a
-  // wrong and permanent `first_seen`: logs extraction merges lifecycle bounds as
-  // `first_seen = COALESCE(first_seen, recent…)`, so once a value is stored here it wins on every
-  // subsequent extraction run. Leaving `first_seen` unset lets extraction populate it correctly
-  // from the entity's actual history on its next run.
+  // `last_seen` is set from the representative document's `@timestamp` — that document is
+  // deliberately the *newest* matching alert (see `fetchAlertIdentityDocs`), so it's an accurate
+  // last-seen bound.
   const timestamp = getFieldValue(doc, '@timestamp');
   if (timestamp !== undefined) {
     set(built, 'entity.lifecycle.last_seen', timestamp);
+  }
+
+  // `first_seen`, by contrast, is only ever an *upper bound*: the caller's `firstSeen` (see
+  // `fetchAlertIdentityDocs`'s `first_seen` min-agg) is the earliest matching alert within the
+  // maintainer's configured lookback window, not the entity's true first appearance, and logs
+  // extraction merges lifecycle bounds as `first_seen = COALESCE(first_seen, recent…)`, so
+  // whatever is stored here becomes permanent. That's a deliberate trade against leaving
+  // `first_seen` unset — resolution maintainers (`automated_resolution`, alias resolution) filter
+  // and sort on it, so an entity with no value is invisible to them, possibly forever if it only
+  // ever appears in alerts and extraction never runs over it. `entity.created_by` is what makes
+  // this trade recoverable rather than merely tolerable: it's an exact selector for entities
+  // whose `first_seen` is window-bounded, so a future correction can target precisely that set.
+  if (firstSeen !== undefined) {
+    set(built, 'entity.lifecycle.first_seen', firstSeen);
   }
 
   if (fields) {

@@ -101,8 +101,12 @@ export const buildRiskScorePhase0EntityMaintainerRunSummary = ({
  *               successfully created/raced, or policy-eligible but write-failed (write failures
  *               stay qualified — they were never rejected up front, see `failed` below)
  * - applied   = successful existing-entity updates plus successful creates, counted exactly once
- * - skipped   = not_in_store scores the create-if-missing path never attempted to write (no
- *               representative alert document, or the creation policy rejected the candidate)
+ * - skipped   = `scoresDroppedNotInStore` minus create-if-missing write failures (already
+ *               counted in `failed` below, so subtracted here to avoid double-counting). With
+ *               the flag on this equals `entitiesCreateSkipped` exactly (write failures are the
+ *               only other contributor to `scoresDroppedNotInStore`); with the flag off — where
+ *               nothing is ever attempted, so `entitiesCreateFailed` is always 0 — this is the
+ *               raw not-in-store miss count, keeping the funnel balanced in both states
  * - failed    = entity-store update failures plus create-if-missing write failures
  *               (`euid_mismatch`, `reserved_field`, `bulk_create_failed`)
  *
@@ -120,7 +124,7 @@ export const buildRiskScoreEntityMaintainerRunSummary = ({
   metrics: RunMetrics;
   stages: RiskScoreFrameworkStageSummary[];
 }): EntityMaintainerRunSummary => {
-  const skipped = metrics.entitiesCreateSkipped;
+  const skipped = metrics.scoresDroppedNotInStore - metrics.entitiesCreateFailed;
   const qualifiedBase = metrics.scoresCalculatedBase - skipped;
   const appliedBase = metrics.scoresWrittenEntityStoreBase + metrics.entitiesCreated;
   const failedBase = metrics.scoresFailedBase + metrics.entitiesCreateFailed;

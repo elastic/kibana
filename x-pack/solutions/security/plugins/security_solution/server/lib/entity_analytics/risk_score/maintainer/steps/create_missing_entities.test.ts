@@ -39,7 +39,10 @@ const buildScore = (
     ...overrides,
   } as unknown as EntityRiskScoreRecord);
 
-// Mocks a `by_entity_id` terms+top_hits aggregation response for fetchAlertIdentityDocs.
+const DEFAULT_MOCK_FIRST_SEEN = '2025-12-01T00:00:00.000Z';
+
+// Mocks a `by_entity_id` terms+top_hits(+first_seen min-agg) aggregation response for
+// fetchAlertIdentityDocs.
 const mockAlertDocsResponse = (
   esClient: ElasticsearchClient,
   docsByEuid: Record<string, Record<string, unknown>>
@@ -50,6 +53,7 @@ const mockAlertDocsResponse = (
         buckets: Object.entries(docsByEuid).map(([key, source]) => ({
           key,
           latest: { hits: { hits: [{ _source: source }] } },
+          first_seen: { value_as_string: DEFAULT_MOCK_FIRST_SEEN },
         })),
       },
     },
@@ -110,7 +114,7 @@ describe('createMissingEntities', () => {
     expect(crudClient.createEntitiesFromSource).not.toHaveBeenCalled();
   });
 
-  it('forwards a create request per resolved document with the risk fields, provenance stamp, and expectedEntityId', async () => {
+  it('forwards a create request per resolved document with the risk fields, provenance stamp, expectedEntityId, and firstSeen', async () => {
     const source = { user: { name: 'alice' }, host: { id: 'host-1' } };
     mockAlertDocsResponse(esClient, { 'user:alice@host-1@local': source });
     (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
@@ -140,6 +144,7 @@ describe('createMissingEntities', () => {
         source,
         expectedEntityId: 'user:alice@host-1@local',
         createdBy: 'risk_score_maintainer',
+        firstSeen: DEFAULT_MOCK_FIRST_SEEN,
         fields: {
           'entity.risk.calculated_level': 'High',
           'entity.risk.calculated_score': 80,
