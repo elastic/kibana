@@ -32,7 +32,7 @@ describe('open_significant_event_in_chat', () => {
     expect(options).toEqual(
       expect.objectContaining({
         newConversation: true,
-        autoSendInitialMessage: true,
+        autoSendInitialMessage: false,
         initialMessage: 'Explain this significant event: Latency spike',
         attachments: [
           expect.objectContaining({
