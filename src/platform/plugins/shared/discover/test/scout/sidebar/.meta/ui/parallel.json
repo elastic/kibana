@@ -1,0 +1,389 @@
+{
+  "sha1": "9be9ca64b4df7e1d296d8530825cbb887c268f70",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "8bea2bd5c95a6e4-d82a0020fae5469",
+      "title": "Teardown Discover sidebar tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
+      }
+    },
+    {
+      "id": "a38a9adb5e6f0a9-62c28ccadd9bbd7",
+      "title": "Setup Discover sidebar tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/global.setup.ts",
+        "line": 7,
+        "column": 1
+      }
+    },
+    {
+      "id": "ee79b7ded0533e5-f09cc026ca3cd2a",
+      "title": "Discover sidebar collapse collapses and expands the field list sidebar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_collapse.spec.ts",
+        "line": 20,
+        "column": 23
+      }
+    },
+    {
+      "id": "63f18de62370464-70fd013e9a28908",
+      "title": "Discover sidebar data view switching shows an empty field list for a data view whose index is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_data_view_switching.spec.ts",
+        "line": 33,
+        "column": 23
+      }
+    },
+    {
+      "id": "63f18de62370464-25b9175c8d2706c",
+      "title": "Discover sidebar data view switching updates the sidebar when switching data views",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_data_view_switching.spec.ts",
+        "line": 44,
+        "column": 14
+      }
+    },
+    {
+      "id": "63f18de62370464-f46a866771f7767",
+      "title": "Discover sidebar data view switching updates available fields when the time range includes matching documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_data_view_switching.spec.ts",
+        "line": 62,
+        "column": 13
+      }
+    },
+    {
+      "id": "e3523283f0f3234-164236d931d4b44",
+      "title": "Discover sidebar field filtering in ES|QL shows type filters and filters by type in ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_filtering_esql.spec.ts",
+        "line": 23,
+        "column": 25
+      }
+    },
+    {
+      "id": "e3523283f0f3234-ea133b1c456e60b",
+      "title": "Discover sidebar field filtering in ES|QL shows empty fields for a KEEP query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_filtering_esql.spec.ts",
+        "line": 31,
+        "column": 99
+      }
+    },
+    {
+      "id": "ea10afc385cb870-e71d2957b196fa2",
+      "title": "Discover sidebar field filtering filters the field list by field type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_filtering.spec.ts",
+        "line": 20,
+        "column": 23
+      }
+    },
+    {
+      "id": "5b5a317c1c39186-93427f4c11de796",
+      "title": "Discover sidebar field groups in ES|QL updates selected fields for transformational ES|QL and returns to data view mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_groups_esql.spec.ts",
+        "line": 23,
+        "column": 25
+      }
+    },
+    {
+      "id": "f8b28b67a00765a-668ab1e7987f62f",
+      "title": "Discover sidebar field groups shows available and meta field groups",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_groups.spec.ts",
+        "line": 22,
+        "column": 5
+      }
+    },
+    {
+      "id": "f8b28b67a00765a-7f751025b8326f1",
+      "title": "Discover sidebar field groups tracks selected and popular fields across refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_groups.spec.ts",
+        "line": 33,
+        "column": 81
+      }
+    },
+    {
+      "id": "f8b28b67a00765a-5eab1f1684aaaa0",
+      "title": "Discover sidebar field groups passes filters down to field stats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_groups.spec.ts",
+        "line": 77,
+        "column": 22
+      }
+    },
+    {
+      "id": "ee7673d5afd6d61-4da5ebae0a1c079",
+      "title": "Discover sidebar field search narrows available fields when searching by name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_search.spec.ts",
+        "line": 20,
+        "column": 23
+      }
+    },
+    {
+      "id": "f575b1eb9ca5317-925f769b9788d5d",
+      "title": "Discover sidebar field stats in ES|QL does not show field stats for ES|QL columns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_stats_esql.spec.ts",
+        "line": 23,
+        "column": 52
+      }
+    },
+    {
+      "id": "f575b1eb9ca5317-5e2064497e82b00",
+      "title": "Discover sidebar field stats in ES|QL adds an is not null filter from the date field popover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_stats_esql.spec.ts",
+        "line": 32,
+        "column": 7
+      }
+    },
+    {
+      "id": "66a5926fc2a2734-bb93658c388d018",
+      "title": "Discover sidebar field stats with filters updates top values for regular and pinned filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_stats_filters.spec.ts",
+        "line": 24,
+        "column": 25
+      }
+    },
+    {
+      "id": "c1b71358feda141-e2d338cb477732d",
+      "title": "Discover sidebar field stats popover shows top values for a keyword field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_field_stats_popover.spec.ts",
+        "line": 23,
+        "column": 25
+      }
+    },
+    {
+      "id": "ae4cc0973b08b8e-f92539c0ab315ea",
+      "title": "Discover sidebar many fields loads a data view with thousands of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_many_fields.spec.ts",
+        "line": 22,
+        "column": 23
+      }
+    },
+    {
+      "id": "4f8da0ded6413ff-6607a913e7bfe85",
+      "title": "Discover sidebar runtime fields supports ad-hoc data views with runtime field create, relabel, and remove",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_runtime_fields.spec.ts",
+        "line": 38,
+        "column": 88
+      }
+    },
+    {
+      "id": "4f8da0ded6413ff-f69c959977336ad",
+      "title": "Discover sidebar runtime fields keeps the sidebar rendered when document retrieval fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_runtime_fields.spec.ts",
+        "line": 62,
+        "column": 66
+      }
+    },
+    {
+      "id": "4f8da0ded6413ff-f014996d1dc25ac",
+      "title": "Discover sidebar runtime fields removes the data grid column after a runtime field is deleted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_runtime_fields.spec.ts",
+        "line": 81,
+        "column": 23
+      }
+    }
+  ]
+}
