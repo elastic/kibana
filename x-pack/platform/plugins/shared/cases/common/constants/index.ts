@@ -400,6 +400,15 @@ export const CASES_LIST_PAGE_VIEW_EVENT_TYPE = 'cases_list_page_view' as const;
 export const CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE =
   'case_view_attachment_accordion_opened' as const;
 
+export const CASE_VIEW_ATTACH_BUTTON_CLICKED_EVENT_TYPE =
+  'case_view_attach_button_clicked' as const;
+
+export const CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE =
+  'case_view_attach_menu_item_clicked' as const;
+
+export const CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE =
+  'case_markdown_editor_plugin_clicked' as const;
+
 /**
  * Cases list view toggle. Defined in `common` (rather than the redesign UI package) so that
  * non-UI consumers, such as the analytics/EBT layer, can depend on it without reaching into a
@@ -416,3 +425,4 @@ export type ViewToggleId = typeof VIEW_TOGGLE_LIST_ID | typeof VIEW_TOGGLE_TABLE
  */
 export const CASE_EXTENDED_FIELDS = 'extended_fields' as const;
 export const CASE_EXTENDED_FIELDS_LABELS = 'extended_fields_labels' as const;
+export const CASE_EXTENDED_FIELDS_CONTROLS = 'extended_fields_controls' as const;

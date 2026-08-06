@@ -1,6 +1,6 @@
 version: "1"
 name: "Significant Events Scheduled Review"
-description: "Runs bounded Significant Events discovery and triage passes on a schedule for the current space."
+description: "Runs bounded Significant Events discovery passes on a schedule for the current space."
 enabled: false
 tags:
   - observability
@@ -21,16 +21,17 @@ triggers:
 steps:
   - name: run_review_until_drained
     type: while
-    # Re-run while a child found work this pass. A child error is deliberately
-    # NOT part of this condition and the child steps have no `on-failure: continue`,
+    # Re-run while discovery found work this pass. A child error is deliberately
+    # NOT part of this condition and the child step has no `on-failure: continue`,
     # so the first failing pass bails out of the loop and fails the run — surfacing
     # the error instead of spinning until `max-iterations` is exhausted.
     # Do-while semantics: the first pass always runs; an empty follow-up pass exits.
-    condition: "${{ steps.discover.output.hasWork == true or steps.triage.output.hasWork == true }}"
+    condition: "${{ steps.discover.output.hasWork == true }}"
     max-iterations: __MAX_REVIEW_PASSES__
-    # Bound each pass to discovery (20m) + triage (30m) worst case instead of
-    # capping the whole loop with a single, necessarily-too-small workflow-level
-    # timeout.
+    # Bound each pass to discovery (45m) worst case + 5m buffer instead of capping
+    # the whole loop with a single, necessarily-too-small workflow-level timeout.
+    # The buffer ensures the iteration does not race with the child workflow's own
+    # 45m hard timeout if discovery runs right to its limit.
     iteration-timeout: "50m"
     steps:
       - name: discover
@@ -39,10 +40,3 @@ steps:
           workflow-id: "system-significant-events-discovery"
           inputs:
             detectionBatchMax: __DISCOVERY_BATCH_SIZE__
-
-      - name: triage
-        type: workflow.execute
-        with:
-          workflow-id: "system-significant-events-triage"
-          inputs:
-            discoveryBatchMax: __TRIAGE_BATCH_SIZE__

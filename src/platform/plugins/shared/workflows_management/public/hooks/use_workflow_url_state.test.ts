@@ -120,6 +120,14 @@ describe('useWorkflowUrlState', () => {
     expect(result.current.shouldAutoResume).toBe(false);
   });
 
+  it('should parse replayExecutionId from URL', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?replayExecutionId=exec-1']),
+    });
+
+    expect(result.current.replayExecutionId).toBe('exec-1');
+  });
+
   it('should update URL when setActiveTab is called', () => {
     const { result } = renderHook(() => useWorkflowUrlState(), {
       wrapper: createWrapper([
@@ -198,6 +206,18 @@ describe('useWorkflowUrlState', () => {
     });
 
     expect(result.current.shouldAutoResume).toBe(false);
+  });
+
+  it('should clear replayExecutionId when clearReplayExecutionId is called', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?replayExecutionId=exec-1']),
+    });
+
+    act(() => {
+      result.current.clearReplayExecutionId();
+    });
+
+    expect(result.current.replayExecutionId).toBeUndefined();
   });
 
   it('should support updateUrlState for arbitrary updates', () => {

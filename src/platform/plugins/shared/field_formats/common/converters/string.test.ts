@@ -9,11 +9,15 @@
 
 import { EMPTY_LABEL, NULL_LABEL } from '@kbn/field-formats-common';
 import { StringFormat } from './string';
+import { highlightTags } from '../utils/highlight/highlight_tags';
 import {
   expectReactElementWithNull,
   expectReactElementWithBlank,
   expectReactElementAsArray,
+  renderReactNode,
 } from '../test_utils';
+
+const hl = (word: string) => `${highlightTags.pre}${word}${highlightTags.post}`;
 
 describe('String Format', () => {
   test('convert a string to lower case', () => {
@@ -128,13 +132,76 @@ describe('String Format', () => {
         highlight: { foo: ['@kibana-highlighted-field@<img />@/kibana-highlighted-field@'] },
       },
     };
-    expect(string.convertToReact('<img />', options)).toMatchInlineSnapshot(`
-      <mark
-        className="ffSearch__highlight"
-      >
-        &lt;img /&gt;
-      </mark>
-    `);
+    const container = renderReactNode(string.convertToReact('<img />', options));
+    expect(container.querySelector('mark')).toHaveTextContent('<img />');
+    expect(container.querySelector('img')).not.toBeInTheDocument();
+  });
+
+  describe('highlighting with transforms', () => {
+    const highlight = (
+      value: string,
+      transform: string | false,
+      snippets: string[],
+      fieldName = 'foo'
+    ) => {
+      const string = new StringFormat(transform ? { transform } : {}, jest.fn());
+      return renderReactNode(
+        string.convertToReact(value, {
+          field: { name: fieldName },
+          hit: { highlight: { [fieldName]: snippets } },
+        })
+      );
+    };
+
+    test('highlights while applying the lower case transform', () => {
+      const container = highlight('Hello World', 'lower', [`Hello ${hl('World')}`]);
+      expect(container).toHaveTextContent('hello world');
+      expect(container.querySelector('mark')).toHaveTextContent('world');
+    });
+
+    test('highlights while applying the upper case transform', () => {
+      const container = highlight('Hello World', 'upper', [`Hello ${hl('World')}`]);
+      expect(container).toHaveTextContent('HELLO WORLD');
+      expect(container.querySelector('mark')).toHaveTextContent('WORLD');
+    });
+
+    test('highlights while applying the title case transform', () => {
+      const container = highlight('hello world', 'title', [`hello ${hl('world')}`]);
+      expect(container).toHaveTextContent('Hello World');
+      expect(container.querySelector('mark')).toHaveTextContent('World');
+    });
+
+    test('highlights a sub-word match while applying the title case transform', () => {
+      const container = highlight('paymentprocessor', 'title', [`${hl('pay')}mentprocessor`]);
+      expect(container).toHaveTextContent('Paymentprocessor');
+      expect(container.querySelector('mark')).toHaveTextContent('Pay');
+    });
+
+    test('does not highlight short-dots values', () => {
+      // Short Dots removes characters, so a transformed snippet can no longer be located within
+      // the shortened value; highlighting is dropped rather than shown at the wrong position.
+      const container = highlight('dot.notated.string', 'short', [hl('dot.notated.string')]);
+      expect(container).toHaveTextContent('d.n.string');
+      expect(container.querySelector('mark')).not.toBeInTheDocument();
+    });
+
+    test('does not highlight base64-decoded values', () => {
+      const container = highlight('Zm9vYmFy', 'base64', [hl('Zm9vYmFy')]);
+      expect(container).toHaveTextContent('foobar');
+      expect(container.querySelector('mark')).not.toBeInTheDocument();
+    });
+
+    test('does not highlight url-param-decoded values', () => {
+      const container = highlight('%20foo', 'urlparam', [hl('%20foo')]);
+      expect(container.textContent).toBe(' foo');
+      expect(container.querySelector('mark')).not.toBeInTheDocument();
+    });
+
+    test('highlights with no transform configured', () => {
+      const container = highlight('lorem ipsum', false, [`lorem ${hl('ipsum')}`]);
+      expect(container).toHaveTextContent('lorem ipsum');
+      expect(container.querySelector('mark')).toHaveTextContent('ipsum');
+    });
   });
 
   test('convertToReact returns raw string for unhighlighted content (React escapes at render)', () => {
