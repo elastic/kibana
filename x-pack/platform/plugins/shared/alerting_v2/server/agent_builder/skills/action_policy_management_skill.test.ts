@@ -65,4 +65,23 @@ describe('createActionPolicyManagementSkill', () => {
     expect(payloadRef?.content).toContain('`rules`');
     expect(payloadRef?.content).toContain('`episode_status`');
   });
+
+  it('exposes granular concept references instead of a monolithic concepts entry', () => {
+    const skill = createActionPolicyManagementSkill(createDeps());
+    const refNames = (skill.referencedContent ?? []).map((entry) => entry.name);
+
+    expect(refNames).toEqual(
+      expect.arrayContaining([
+        'action-policy-overview',
+        'workflows',
+        'connectors',
+        'dispatch-flow',
+      ])
+    );
+    expect(refNames).not.toContain('concepts');
+    expect(skill.content).toContain('./references/action-policy-overview.md');
+    expect(skill.content).toContain('./references/workflows.md');
+    expect(skill.content).toContain('./references/connectors.md');
+    expect(skill.content).toContain('./references/dispatch-flow.md');
+  });
 });

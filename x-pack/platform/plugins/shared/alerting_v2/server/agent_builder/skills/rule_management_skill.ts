@@ -26,34 +26,33 @@ export const createRuleManagementSkill = () =>
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
     referencedContent: [
       {
-        name: 'concepts',
+        name: 'rule-kind',
         relativePath: './references',
-        content: `# Alerting V2 Concepts
-
-## Rule Kind: Alert vs Signal
+        content: `# Rule Kind: Alert vs Signal
 
 Rules declare a \`kind\` of \`alert\` or \`signal\`. This is the most important behavioral split in the system.
 
-### Alert (\`kind: alert\`)
+## Alert (\`kind: alert\`)
 - **Stateful alerting** with full episode lifecycle: pending, active, recovering, inactive.
 - Supports state transitions (\`pending_count\` / \`recovering_count\`), recovery detection, and notification dispatch.
 - Produces \`type: 'alert'\` events that participate in the dispatcher pipeline.
 - UI label: **"Alert"**.
 - Use when the user wants to be **notified**, needs **lifecycle tracking**, or wants **recovery detection**.
 
-### Signal (\`kind: signal\`)
+## Signal (\`kind: signal\`)
 - **Stateless detection** (observation-only).
 - Produces \`type: 'signal'\` events but **skips** episode lifecycle and dispatcher processing entirely.
 - No notifications, no recovery, no state transitions.
 - UI label: **"Signal"**.
 - Use for logging or detection without automated action.
 
-### Immutability
-\`kind\` is **immutable on persisted rules** — it can only be set at creation time. The update API rejects changes to \`kind\`. For draft (in-memory) rules, \`set_kind\` can change it freely.
-
----
-
-## Episode Lifecycle
+## Immutability
+\`kind\` is **immutable on persisted rules** — it can only be set at creation time. The update API rejects changes to \`kind\`. For draft (in-memory) rules, \`set_kind\` can change it freely.`,
+      },
+      {
+        name: 'episode-lifecycle',
+        relativePath: './references',
+        content: `# Episode Lifecycle
 
 Episodes are the unit of alert state. Each unique group (by \`group_hash\`) has its own episode.
 
@@ -64,11 +63,12 @@ Episodes are the unit of alert state. Each unique group (by \`group_hash\`) has 
 | \`recovering\` | Breach stopped but not yet fully recovered |
 | \`inactive\` | Fully recovered |
 
-Only \`kind: alert\` rules produce episodes. \`kind: signal\` rules write raw signal events with no episode tracking.
-
----
-
-## Notifications via Action Policies
+Only \`kind: alert\` rules produce episodes. \`kind: signal\` rules write raw signal events with no episode tracking.`,
+      },
+      {
+        name: 'notifications-overview',
+        relativePath: './references',
+        content: `# Notifications via Action Policies
 
 Notifications are not configured on the rule itself. Alert episodes are matched and dispatched by **action policies** (notification policies) — space-scoped saved objects that send matched episodes to workflow destinations.
 
@@ -87,7 +87,10 @@ When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${
     ],
     content: `## Domain Knowledge
 
-For questions about alerting concepts — rule kinds (alert vs signal), episode lifecycle, or how notifications relate to rules — consult the [concepts reference](./references/concepts.md).
+For questions about alerting concepts:
+- Rule kinds (alert vs signal) — consult the [rule-kind reference](./references/rule-kind.md).
+- Episode lifecycle — consult the [episode-lifecycle reference](./references/episode-lifecycle.md).
+- How notifications relate to rules — consult the [notifications-overview reference](./references/notifications-overview.md).
 
 ---
 
@@ -123,6 +126,7 @@ When a user asks about existing rules:
 Build the request for ${ALERTING_TOOL_IDS.manageRule} as an ordered \`operations\` array. Operations run in sequence.
 
 For a new rule, start with \`set_metadata\` (name required), then \`set_kind\`, \`set_schedule\`, and \`set_query\`.
+See the [rule-kind reference](./references/rule-kind.md) when choosing between \`alert\` and \`signal\`.
 
 For an existing rule, pass the \`ruleAttachmentId\` and only include the operations needed for the changes requested.
 
@@ -147,18 +151,18 @@ For an existing rule, pass the \`ruleAttachmentId\` and only include the operati
 
 ## State Transition
 
-Use \`set_state_transition\` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes.
+Use \`set_state_transition\` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes. Episode statuses (\`pending\`, \`active\`, \`recovering\`, \`inactive\`) are explained in the [episode-lifecycle reference](./references/episode-lifecycle.md).
 
 - \`pending_count: N\` — breaches required before transitioning from pending to active (e.g. \`pending_count: 3\` means 3 consecutive breach cycles).
 - \`pending_timeframe\` — optional time window for the pending evaluation (e.g. \`"15m"\`).
 - \`recovering_count: N\` — non-breach cycles required before transitioning from recovering to inactive.
 - \`recovering_timeframe\` — optional time window for the recovering evaluation.
 
-State transition is only allowed on \`kind: alert\` rules. Refer to the [rule-operations-schema reference](./references/rule-operations-schema.md) for the full field schema.
+State transition is only allowed on \`kind: alert\` rules ([rule-kind reference](./references/rule-kind.md)). Refer to the [rule-operations-schema reference](./references/rule-operations-schema.md) for the full field schema.
 
 ## Recovery Strategy
 
-\`recovery_strategy\` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive. Signal rules (\`kind: signal\`) cannot set \`recovery_strategy\`.
+\`recovery_strategy\` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./references/episode-lifecycle.md)). Signal rules (\`kind: signal\`) cannot set \`recovery_strategy\` ([rule-kind reference](./references/rule-kind.md)).
 
 When using \`recovery_strategy: 'query'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:
 - **Composed**: \`recovery: { segment: 'WHERE cpu < 0.5' }\`
@@ -180,7 +184,7 @@ Refer to the [rule-schema reference](./references/rule-schema.md) for allowed va
 When setting \`no_data_strategy\` to anything other than \`'none'\`, add a \`no_data\` block to the standalone query:
 \`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }\`. For composed query format, the \`base\` query is used as the data query.
 
-Signal rules cannot set \`no_data_strategy\`.
+Signal rules cannot set \`no_data_strategy\` ([rule-kind reference](./references/rule-kind.md)).
 Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.
 
 ## Final Validation
@@ -215,7 +219,7 @@ where \`attachmentId\` is \`ruleAttachment.id\` and \`version\` is \`version\` f
 
 ## Notifications Require Alert Kind
 
-Action policies only process alert episodes. Signal rules (\`kind: signal\`) do not participate in episode lifecycle or notification dispatch.
+Action policies only process alert episodes. Signal rules (\`kind: signal\`) do not participate in episode lifecycle or notification dispatch. See the [rule-kind reference](./references/rule-kind.md), [episode-lifecycle reference](./references/episode-lifecycle.md), and [notifications-overview reference](./references/notifications-overview.md).
 
 When a user asks for notifications on a rule that is currently \`kind: signal\` (or when composing a new rule where the user wants notifications):
 
@@ -234,6 +238,6 @@ After composing a complete **alert** rule (has name, query, schedule, and \`kind
 Do not offer notifications if the rule is still incomplete (missing name, query, or schedule).
 If the rule's kind is \`signal\`, follow the "Notifications Require Alert Kind" guidance above before proceeding.
 
-If the user agrees (or asks for notifications directly), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill via \`filestore.read\` (path: \`skills/platform/alerting/${ACTION_POLICY_MANAGEMENT_SKILL_ID}/SKILL.md\`) and let that skill own the workflow + action policy setup. Do **not** compose action policies or notification workflows from this skill.`,
+If the user agrees (or asks for notifications directly), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill via \`filestore.read\` (path: \`skills/platform/alerting/${ACTION_POLICY_MANAGEMENT_SKILL_ID}/SKILL.md\`) and let that skill own the workflow + action policy setup (see [notifications-overview reference](./references/notifications-overview.md)). Do **not** compose action policies or notification workflows from this skill.`,
     getInlineTools: () => [manageRuleTool()],
   });

@@ -52,4 +52,17 @@ describe('createRuleManagementSkill', () => {
     expect(skill.content).not.toContain('Part 2: Action Policies');
     expect(skill.content).not.toContain('Part 3: Default Notification Setup');
   });
+
+  it('exposes granular concept references instead of a monolithic concepts entry', () => {
+    const skill = createRuleManagementSkill();
+    const refNames = (skill.referencedContent ?? []).map((entry) => entry.name);
+
+    expect(refNames).toEqual(
+      expect.arrayContaining(['rule-kind', 'episode-lifecycle', 'notifications-overview'])
+    );
+    expect(refNames).not.toContain('concepts');
+    expect(skill.content).toContain('./references/rule-kind.md');
+    expect(skill.content).toContain('./references/episode-lifecycle.md');
+    expect(skill.content).toContain('./references/notifications-overview.md');
+  });
 });
