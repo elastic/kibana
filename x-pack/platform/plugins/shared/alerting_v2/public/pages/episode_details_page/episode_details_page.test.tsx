@@ -29,10 +29,19 @@ const WRITE_CAPABILITIES = { alerting_v2_alerts: { read: true, all: true } };
 const READ_ONLY_CAPABILITIES = { alerting_v2_alerts: { read: true, all: false } };
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
 let mockCanReadExecutionHistory = true;
+const mockFocusedEpisodeService = {
+  setFocusedEpisode: jest.fn(),
+  clearFocusedEpisode: jest.fn(),
+  getFocusedEpisode: jest.fn(),
+  focusedEpisode$: { subscribe: jest.fn() },
+};
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
     '../../services/user_capabilities'
+  );
+  const { FocusedEpisodeService: ActualFocusedEpisodeService } = jest.requireActual(
+    '../../services/focused_episode_service'
   );
   return {
     useService: (token: unknown) => {
@@ -46,6 +55,9 @@ jest.mock('@kbn/core-di-browser', () => {
               ? mockCanReadExecutionHistory
               : capabilities.canRead(feature),
         };
+      }
+      if (token === ActualFocusedEpisodeService) {
+        return mockFocusedEpisodeService;
       }
       return {};
     },
@@ -440,5 +452,53 @@ describe('EpisodeDetailsPage', () => {
     renderPage();
 
     expect(screen.getByTestId('episodeDetailsErrorPrompt')).toBeInTheDocument();
+  });
+
+  describe('Agent Builder focus', () => {
+    it('sets the focused episode when the episode loads', () => {
+      renderPage();
+
+      expect(mockFocusedEpisodeService.setFocusedEpisode).toHaveBeenCalledWith(mockEpisode);
+    });
+
+    it('clears the focused episode on unmount with the episode id', () => {
+      const { unmount } = renderPage();
+
+      unmount();
+
+      expect(mockFocusedEpisodeService.clearFocusedEpisode).toHaveBeenCalledWith('ep-1');
+    });
+
+    it('re-sets focus when the episode id changes', () => {
+      const { rerender } = render(
+        <MockChromeContextProvider>
+          <TestProviders>
+            <MemoryRouter>
+              <EpisodeDetailsPage />
+            </MemoryRouter>
+          </TestProviders>
+        </MockChromeContextProvider>
+      );
+
+      const nextEpisode = { ...mockEpisode, 'episode.id': 'ep-2' };
+      mockUseParams.mockReturnValue({ episodeId: 'ep-2' });
+      mockUseFetchEpisodeQuery.mockReturnValue({
+        ...episodeQuery,
+        data: nextEpisode,
+      } as unknown as EpisodeQueryResult);
+
+      rerender(
+        <MockChromeContextProvider>
+          <TestProviders>
+            <MemoryRouter>
+              <EpisodeDetailsPage />
+            </MemoryRouter>
+          </TestProviders>
+        </MockChromeContextProvider>
+      );
+
+      expect(mockFocusedEpisodeService.clearFocusedEpisode).toHaveBeenCalledWith('ep-1');
+      expect(mockFocusedEpisodeService.setFocusedEpisode).toHaveBeenLastCalledWith(nextEpisode);
+    });
   });
 });
