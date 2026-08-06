@@ -12,7 +12,10 @@ export {
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from './constants/execution_indexes';
 
-export { createOrUpdateIndex, createIndexWithMappings } from './init/create_or_update_index';
+export {
+  createOrUpdateIndex,
+  createIndexWithMappings,
+} from './implementations/plain_index/helpers/create_index';
 
 export { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from './mappings/workflow_executions_mappings';
 export { WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS } from './mappings/step_executions_mappings';
