@@ -56,7 +56,10 @@ export function registerInitMaintainers(router: EntityStorePluginRouter) {
           entityStoreStatus === 'running'
             ? EntityMaintainerTaskStatus.STARTED
             : EntityMaintainerTaskStatus.STOPPED;
-        await entityMaintainersClient.init(req, { autoStart: req.body?.autoStart, maintainersStatus });
+        await entityMaintainersClient.init(req, {
+          autoStart: req.body?.autoStart,
+          maintainersStatus,
+        });
 
         return res.ok({ body: { ok: true } });
       })
