@@ -72,6 +72,25 @@ export class ConversationsService {
     );
   }
 
+  async submitRoundFeedback({
+    conversationId,
+    roundId,
+    vote,
+    chips,
+    comment,
+  }: {
+    conversationId: string;
+    roundId: string;
+    vote: 'up' | 'down';
+    chips?: string[];
+    comment?: string;
+  }): Promise<void> {
+    await this.http.post(
+      `${internalApiPath}/conversations/${conversationId}/rounds/${roundId}/_feedback`,
+      { body: JSON.stringify({ vote, chips, comment }) }
+    );
+  }
+
   async readWorkspaceFile({
     conversationId,
     path,
