@@ -53,7 +53,7 @@ export const MetricDetailPage = () => {
     timeRange: parsedTimeRange,
   });
 
-  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(nodeType);
+  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions();
   useMetricsBreadcrumbs(
     [
       {

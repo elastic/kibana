@@ -52,7 +52,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   useHostAttachmentConfig();
 
   const parentBreadcrumbResolver = useParentBreadcrumbResolver();
-  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(entity.type);
+  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions();
   useMetricsBreadcrumbs(
     [
       {

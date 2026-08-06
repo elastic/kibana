@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common/inventory_models/types';
 import type { RouteState } from '@kbn/metrics-data-access-plugin/public';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useLocation } from 'react-router-dom';
@@ -55,7 +54,7 @@ export function useParentBreadcrumbResolver() {
   // Intentional `as Partial<RouteState>` type assertion as react-router location.state is untyped at the history boundary;
   const locationState = state as Partial<RouteState> | undefined;
 
-  function getBreadcrumbOptions(_nodeType: InventoryItemType) {
+  function getBreadcrumbOptions() {
     const option = resolveParentBreadcrumbOption({
       originPathname: locationState?.originPathname,
       breadcrumbMap,
