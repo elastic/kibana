@@ -30,7 +30,11 @@ export const assertDataDriftPageContent = async ({
 
   // For time-based sources the Analyze button is not mounted until both histogram
   // brushes exist (see data_drift_view requiresWindowParameters empty prompt).
-  if ('chartClickCoordinates' in testData) {
+  // Wait for loaded doc counts before clicking so the histogram has real bars
+  // (empty/loading charts have zero-height buckets that ignore element clicks).
+  if ('chartClickCoordinates' in testData && 'totalDocCount' in testData) {
+    await dataDrift.waitForTotalDocumentCount('Reference', testData.totalDocCount);
+    await dataDrift.waitForTotalDocumentCount('Comparison', testData.totalDocCount);
     await dataDrift.clickDocumentCountChart('Reference', testData.chartClickCoordinates);
     await dataDrift.clickDocumentCountChart('Comparison', testData.comparisonChartClickCoordinates);
   }

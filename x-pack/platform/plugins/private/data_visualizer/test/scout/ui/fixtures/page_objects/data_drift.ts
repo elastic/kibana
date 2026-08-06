@@ -203,7 +203,8 @@ export class DataDrift {
     await chart
       .locator('.echChartStatus[data-ech-render-complete="true"]')
       .waitFor({ state: 'attached', timeout: 30_000 });
-    const canvas = chart.locator('canvas');
+    // Match FTR elasticChart.getCanvas(): top interactive canvas layer.
+    const canvas = chart.locator('canvas:last-of-type');
     await canvas.waitFor({ state: 'visible', timeout: 30_000 });
     const box = await canvas.boundingBox();
 
@@ -212,10 +213,12 @@ export class DataDrift {
     }
 
     // FTR WebDriver Actions used canvas-center as origin, so [0, 0] meant center.
-    // Playwright positions are top-left relative — treat [0, 0] as "use center".
+    // Playwright positions are top-left relative. The doc-count chart is only ~60px
+    // tall: geometric center often misses short bars when the y-scale is dominated by
+    // a spike. Aim below mid-height (still above the x-axis) so shorter bars are hit.
     const [x, y]: [number, number] =
       chartClickCoordinates[0] === 0 && chartClickCoordinates[1] === 0
-        ? [Math.max(Math.floor(box.width / 2), 1), Math.max(Math.floor(box.height / 2), 1)]
+        ? [Math.max(Math.floor(box.width / 2), 1), Math.max(Math.floor(box.height * 0.7), 1)]
         : chartClickCoordinates;
 
     await canvas.click({
@@ -225,7 +228,7 @@ export class DataDrift {
 
     await this.page.testSubj
       .locator(`dataDriftBrush-${id}`)
-      .waitFor({ state: 'attached', timeout: 10_000 });
+      .waitFor({ state: 'attached', timeout: 30_000 });
   }
 
   async waitForDataDriftTable() {
