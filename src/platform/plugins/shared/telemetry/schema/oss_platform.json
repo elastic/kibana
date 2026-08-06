@@ -12331,13 +12331,13 @@
         "agentBuilder:tracing:includeRealIds": {
           "type": "boolean",
           "_meta": {
-            "description": "Whether to include real conversation, workflow, and user IDs in traces."
+            "description": "Whether to include real conversation and workflow IDs in traces."
           }
         },
         "agentBuilder:tracing:includeRealNames": {
           "type": "boolean",
           "_meta": {
-            "description": "Whether to include real agent, tool, conversation, and user names in traces."
+            "description": "Whether to include real agent and tool names in traces."
           }
         },
         "agentBuilder:tracing:includeSystemPrompt": {
@@ -12350,6 +12350,12 @@
           "type": "boolean",
           "_meta": {
             "description": "Whether to include tool call arguments and results in traces."
+          }
+        },
+        "agentBuilder:tracing:includeUserData": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Whether to include real user IDs and usernames in traces."
           }
         },
         "agentBuilder:tracing:includeUserPrompts": {

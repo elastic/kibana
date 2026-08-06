@@ -41,6 +41,7 @@ export interface TracingPrivacySettings {
   includeSystemPrompt: boolean;
   includeRealNames: boolean;
   includeRealIds: boolean;
+  includeUserData: boolean;
 }
 
 interface AgentBuilderSpanProcessorOpts {
@@ -53,7 +54,6 @@ interface AgentBuilderSpanProcessorOpts {
  * Hashes security-sensitive identifiers on span attributes before export.
  * Built-in agent IDs are kept in plain text; user-owned IDs are hashed
  * using the same scheme as EBT telemetry (SHA-256, 16-char hex prefix).
- * Real `user.id` is replaced with SemConv `user.hash` when real IDs are disabled.
  */
 function hashSensitiveAttributes(attributes: Record<string, unknown>): Record<string, unknown> {
   const result = { ...attributes };
@@ -78,6 +78,16 @@ function hashSensitiveAttributes(attributes: Record<string, unknown>): Record<st
     result['elastic.workflow.execution_id'] = toHashedId(String(workflowExecId));
   }
 
+  return result;
+}
+
+/**
+ * Replaces real `user.id` with SemConv `user.hash` and strips `user.name`
+ * when user-identity attributes are disabled.
+ */
+function anonymizeUserData(attributes: Record<string, unknown>): Record<string, unknown> {
+  const { [UserAttributes.UserName]: _userName, ...result } = attributes;
+
   const userId = result[UserAttributes.UserId];
   if (userId != null) {
     result[UserAttributes.UserHash] = toHashedId(String(userId));
@@ -90,9 +100,9 @@ function hashSensitiveAttributes(attributes: Record<string, unknown>): Record<st
 /**
  * Replaces user-created tool, agent, and workflow names with 'custom' to avoid
  * leaking user-chosen identifiers. Built-in tools and agents keep their real names.
- * `gen_ai.tool.definitions`, `gen_ai.tool.description`, conversation titles, and
- * user names are stripped entirely because they embed free-form user-chosen text
- * that cannot be selectively anonymized.
+ * `gen_ai.tool.definitions`, `gen_ai.tool.description`, and conversation titles
+ * are stripped entirely because they embed free-form user-chosen text that cannot
+ * be selectively anonymized.
  * Returns the anonymized attributes and the (possibly rewritten) span name.
  */
 function anonymizeNames(
@@ -103,7 +113,6 @@ function anonymizeNames(
     [GenAISemanticConventions.GenAIToolDefinitions]: _defs,
     [GenAISemanticConventions.GenAIToolDescription]: _desc,
     [ElasticGenAIAttributes.ConversationTitle]: _title,
-    [UserAttributes.UserName]: _userName,
     ...result
   } = attributes;
   let finalSpanName = spanName;
@@ -307,6 +316,10 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
     let processedAttributes: Record<string, unknown> = settings.includeRealIds
       ? cleanAttributes
       : hashSensitiveAttributes(cleanAttributes);
+
+    processedAttributes = settings.includeUserData
+      ? processedAttributes
+      : anonymizeUserData(processedAttributes);
 
     processedAttributes = settings.includeToolDetails
       ? processedAttributes

@@ -20,6 +20,7 @@ import {
   AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
+  AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
 } from '@kbn/management-settings-ids';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
@@ -160,11 +161,11 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
 
     [AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID]: {
       name: i18n.translate('xpack.agentBuilder.uiSettings.tracing.realNames.name', {
-        defaultMessage: 'Include real tool, agent, conversation, and user names in traces',
+        defaultMessage: 'Include real tool, agent, and conversation names in traces',
       }),
       description: i18n.translate('xpack.agentBuilder.uiSettings.tracing.realNames.description', {
         defaultMessage:
-          'Tool, agent, and user names are anonymized by default. Conversation titles are omitted by default.',
+          'Tool and agent names are anonymized by default. Conversation titles are omitted by default.',
       }),
       schema: schema.boolean(),
       value: false,
@@ -174,10 +175,24 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
     },
     [AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID]: {
       name: i18n.translate('xpack.agentBuilder.uiSettings.tracing.realIds.name', {
-        defaultMessage: 'Include real conversation, workflow, and user IDs in traces',
+        defaultMessage: 'Include real conversation and workflow IDs in traces',
       }),
       description: i18n.translate('xpack.agentBuilder.uiSettings.tracing.realIds.description', {
-        defaultMessage: 'Conversation, workflow, and user IDs are anonymized by default.',
+        defaultMessage: 'Conversation and workflow IDs are anonymized by default.',
+      }),
+      schema: schema.boolean(),
+      value: false,
+      requiresPageReload: false,
+      readonly: true,
+      readonlyMode: 'ui',
+    },
+    [AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID]: {
+      name: i18n.translate('xpack.agentBuilder.uiSettings.tracing.userData.name', {
+        defaultMessage: 'Include user data in traces',
+      }),
+      description: i18n.translate('xpack.agentBuilder.uiSettings.tracing.userData.description', {
+        defaultMessage:
+          'Real user IDs and usernames are omitted by default. A stable user.hash is kept for correlation.',
       }),
       schema: schema.boolean(),
       value: false,
