@@ -21,6 +21,7 @@ import {
   IacProvisionerRenderError,
   IacProvisionerUnavailableError,
 } from '../../errors';
+import { getErrorMessage } from '../../errors/utils';
 import type { FleetRequestHandler } from '../../types';
 import type { RenderIacTemplateRequestSchema } from '../../types/rest_spec/iac_provisioner';
 
@@ -163,7 +164,7 @@ export const renderIacTemplateHandler: FleetRequestHandler<
       });
     }
 
-    logger.error(`Failed to render IaC template: ${error.message}`);
+    logger.error(`Failed to render IaC template: ${getErrorMessage(error)}`);
     reportIacProvisionerRenderCompleted({
       flow,
       success: false,
@@ -171,9 +172,12 @@ export const renderIacTemplateHandler: FleetRequestHandler<
       errorCodes: [],
       latencyMs,
     });
+    // The raw error may carry internal details (hostnames, stack context) or
+    // be undefined for non-Error throws — keep it in the log and return a
+    // stable, generic message to the client.
     return response.customError({
       statusCode: 500,
-      body: { message: error.message },
+      body: { message: 'An unexpected error occurred while rendering the IaC template' },
     });
   }
 };

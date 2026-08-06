@@ -375,9 +375,18 @@ describe('renderIacTemplateHandler', () => {
       response
     );
 
+    // The client gets a stable, generic message — the raw error (which may
+    // carry internal details) stays in the server log only.
     expect(response.customError).toHaveBeenCalledWith(
       expect.objectContaining({
         statusCode: 500,
+        body: expect.objectContaining({
+          message: 'An unexpected error occurred while rendering the IaC template',
+        }),
+      })
+    );
+    expect(response.customError).not.toHaveBeenCalledWith(
+      expect.objectContaining({
         body: expect.objectContaining({ message: expect.stringContaining('unexpected boom') }),
       })
     );
