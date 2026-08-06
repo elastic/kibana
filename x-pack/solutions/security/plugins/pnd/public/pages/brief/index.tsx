@@ -20,7 +20,7 @@ import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
-import * as i18n from './translations';
+import { BRIEFING_PAGE_INFO } from './translations';
 import { BriefingContainer } from '../../components/briefing_container';
 import { BRIEF_CONTAINER_BUCKETS } from '../../components/briefing_container/translations';
 
@@ -36,7 +36,7 @@ const isAutoResolved = (investigation: Investigation): boolean =>
 export const BriefPage: React.FC = () => {
   const { data, isLoading, error } = useInvestigations();
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
-  usePndDocTitle(i18n.PAGE_TITLE);
+  usePndDocTitle(BRIEFING_PAGE_INFO.pageTitle);
 
   const investigations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
 
@@ -101,18 +101,20 @@ export const BriefPage: React.FC = () => {
       <PndPageHeader
         title={
           <>
-            {i18n.GREETING_PREFIX}{' '}
+            {BRIEFING_PAGE_INFO.greetingPrefix}{' '}
             <span
               css={css`
                 font-weight: 700;
               `}
             >
-              {i18n.greetingEmphasis(sortedEvents.length)}
+              {BRIEFING_PAGE_INFO.greetingEmphasis(sortedEvents.length)}
             </span>
           </>
         }
         subtitle={
-          autoResolvedCount > 0 ? i18n.autonomousSubline(autoResolvedCount) : i18n.CLEAR_SUBLINE
+          autoResolvedCount > 0
+            ? BRIEFING_PAGE_INFO.autonomousSubline(autoResolvedCount)
+            : BRIEFING_PAGE_INFO.clearSubline
         }
       />
 
@@ -124,7 +126,7 @@ export const BriefPage: React.FC = () => {
             wrap
             responsive={false}
             alignItems="center"
-            aria-label={i18n.AFFECTED_SURFACES}
+            aria-label={BRIEFING_PAGE_INFO.affectedSurfaces}
           >
             {surfaces.map((surface) => (
               <EuiFlexItem key={surface} grow={false}>
@@ -148,15 +150,20 @@ export const BriefPage: React.FC = () => {
       {isLoading ? (
         <EuiFlexGroup justifyContent="center" style={{ minHeight: 200 }}>
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" aria-label={i18n.LOADING} />
+            <EuiLoadingSpinner size="xl" aria-label={BRIEFING_PAGE_INFO.loading} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : null}
 
-      {error ? <EuiEmptyPrompt iconType="alert" title={<h2>{i18n.LOAD_ERROR}</h2>} /> : null}
+      {error ? (
+        <EuiEmptyPrompt iconType="alert" title={<h2>{BRIEFING_PAGE_INFO.loadError}</h2>} />
+      ) : null}
 
       {!isLoading && !error && filteredQueueItems.length === 0 ? (
-        <EuiEmptyPrompt iconType="visTagCloud" title={<h2>{i18n.EMPTY_BRIEFING_QUEUE}</h2>} />
+        <EuiEmptyPrompt
+          iconType="visTagCloud"
+          title={<h2>{BRIEFING_PAGE_INFO.emptyBriefingQueue}</h2>}
+        />
       ) : null}
 
       {!isLoading && !error
