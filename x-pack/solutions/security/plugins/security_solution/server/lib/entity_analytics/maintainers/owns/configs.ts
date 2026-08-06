@@ -23,12 +23,12 @@ const OWNERS = 'entityanalytics_entra_id.device.registered_owners';
 const OWNER_MAIL_FIELD = `${OWNERS}.mail`;
 const OWNER_ID_FIELD = `${OWNERS}.id`;
 
-// owns.host.id is an Okta device id. Device entities now key on host.id (set by
-// device.yml `set_host_id` tag), so a device's entity.id is `host:<device.id>`.
-// This makes host.id directly resolvable as a host EUID — unlike AD's host.id
-// which carries an LDAP DN.
-// owns.host.name (device display name) is NOT a resolvable identifier: device
-// entities are keyed by id, not display name, so we resolve only host.id.
+// Okta: owns.host.id is an Okta device id. Device entities now key on host.id
+// (set by device.yml `set_host_id` tag), so a device's entity.id is
+// `host:<device.id>`. This makes host.id directly resolvable as a host EUID —
+// unlike AD's host.id which carries an LDAP DN.
+// Okta: owns.host.name (device display name) is NOT a resolvable identifier:
+// device entities are keyed by id, not display name, so we resolve only host.id.
 const OKTA_OWNS_RULES: DirectEuidRule[] = [{ field: 'host.id', euidType: 'host' }];
 
 /**

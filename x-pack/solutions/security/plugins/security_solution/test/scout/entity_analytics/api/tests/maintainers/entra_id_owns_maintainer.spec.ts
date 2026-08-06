@@ -161,6 +161,41 @@ apiTest.describe(
     );
 
     apiTest(
+      'resolves an owner that has no mail via the id fallback',
+      async ({ apiClient, esClient }) => {
+        // Non-mailbox-enabled accounts carry no registered_owners.mail, so the
+        // CASE guard in the union must fall back to registered_owners.id alone.
+        // The entity-store user EUID ranking is email > id, so an entity minted
+        // without an email is keyed user:<id>@entra_id.
+        const runId = randomUUID().slice(0, 8);
+        const ownerId = `nomail-owner-${runId}`;
+        const deviceId = `nomail-device-${runId}`;
+        const entityId = `user:${ownerId}@${ENTRA_ID_NAMESPACE}`;
+
+        await seedUserEntity(esClient, {
+          entityId,
+          namespace: ENTRA_ID_NAMESPACE,
+          // Not the identity used for the EUID here — the entity is keyed on id.
+          email: `unused.${runId}@example.com`,
+          entitySource: 'entityanalytics_entra_id',
+        });
+
+        await seedEntraIdDeviceLog(esClient, {
+          deviceId,
+          deviceName: `NOMAIL-WS-${runId}`,
+          owners: [{ id: ownerId }],
+        });
+
+        await triggerMaintainerRun(apiClient, internalHeaders, MAINTAINER_ID, { sync: true });
+
+        await waitForRelationshipIds(esClient, RELATIONSHIP_KEY, entityId, `host:${deviceId}`);
+
+        const ids = await getRelationshipIds(esClient, RELATIONSHIP_KEY, entityId);
+        expect(ids).toStrictEqual([`host:${deviceId}`]);
+      }
+    );
+
+    apiTest(
       'writes no edge for a device with no registered owners',
       async ({ apiClient, esClient }) => {
         const runId = randomUUID().slice(0, 8);

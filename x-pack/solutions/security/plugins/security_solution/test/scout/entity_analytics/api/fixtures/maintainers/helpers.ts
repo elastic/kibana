@@ -504,6 +504,10 @@ export const seedEntraIdDeviceLog = async (
 
   await esClient.index({
     index: ENTRA_ID_LOG_INDEX,
+    // logs-* is claimed by the built-in `logs` composable index template with
+    // `data_stream: {}`.  Plain index requests are REJECTED for data-stream
+    // targets — op_type: 'create' is required to write into a data stream.
+    op_type: 'create',
     refresh: 'wait_for',
     document: {
       '@timestamp': ts,
