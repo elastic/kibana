@@ -32,6 +32,10 @@ export const useReorderGlobalFieldDefinitions = () => {
         queryClient.invalidateQueries(casesQueriesKeys.fieldDefinitions);
       },
       onError: (error: ServerError) => {
+        // The parallel PUTs are not atomic: some may have committed before another failed, so
+        // refetch to reconcile the list with what was actually persisted — rolling back to the
+        // cached order would show an order the server no longer has.
+        queryClient.invalidateQueries(casesQueriesKeys.fieldDefinitions);
         showErrorToast(error, { title: i18n.ERROR_REORDERING_GLOBAL_FIELD_DEFINITIONS });
       },
     }

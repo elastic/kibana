@@ -150,7 +150,18 @@ export class FieldDefinitionsService {
       {
         ...input,
         fieldDefinitionId: id,
-        ...(globalFieldDefinitions ? { displayOrder: globalFieldDefinitions.total } : {}),
+        // Append after the highest existing order, not at `total`: after a deletion the count
+        // no longer equals max(displayOrder) + 1, and reusing a taken order makes the sort fall
+        // back to find-order tie-breaking, landing the new field somewhere arbitrary.
+        ...(globalFieldDefinitions
+          ? {
+              displayOrder:
+                globalFieldDefinitions.fieldDefinitions.reduce(
+                  (max, { displayOrder }) => Math.max(max, displayOrder ?? -1),
+                  -1
+                ) + 1,
+            }
+          : {}),
       },
       { id }
     );
