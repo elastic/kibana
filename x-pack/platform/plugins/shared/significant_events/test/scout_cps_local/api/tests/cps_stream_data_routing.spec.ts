@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { EsClient } from '@kbn/scout';
 import { LOG_SAMPLES_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import { significantEventsCpsApiTest as apiTest, COMMON_API_HEADERS } from '../fixtures';
 
-const CPS_LINKED_INDEX = 'logs-cps-se-ki-test';
+const CPS_TEST_INDEX = 'logs-cps-se-ki-test';
 const VIEW_PREFIX = '$.';
 const ROOT_STREAM = 'logs.otel';
 const PARENT_STREAM = `${ROOT_STREAM}.cpsse`;
@@ -21,6 +22,21 @@ const PARENT_VIEW = `${VIEW_PREFIX}${PARENT_STREAM}`;
 const NOW = Date.now();
 const WINDOW_START = NOW - 10 * 60_000;
 const WINDOW_END = NOW + 60 * 60_000;
+
+/**
+ * Both copies of the test index are created up front with identical mappings. Cross-project
+ * ES|QL resolves a field once across all projects, so letting one copy be dynamically mapped
+ * would make `cps_se_marker` a `text` field on one side and a `keyword` on the other, and the
+ * `KEEP` clause would then fail on a conflicting column type.
+ */
+const CPS_INDEX_MAPPINGS: estypes.MappingTypeMapping = {
+  properties: {
+    '@timestamp': { type: 'date' },
+    cps_se_marker: { type: 'keyword' },
+    message: { type: 'text' },
+    service: { properties: { name: { type: 'keyword' } } },
+  },
+};
 
 interface ComputedFeature {
   type: string;
@@ -38,7 +54,7 @@ async function ingestMarkerOnLinked(
   timestamp: string
 ) {
   await linkedEsClient.index({
-    index: CPS_LINKED_INDEX,
+    index: CPS_TEST_INDEX,
     refresh: 'wait_for',
     document: {
       '@timestamp': timestamp,
@@ -56,7 +72,7 @@ apiTest.describe(
     const markerValue = `cps_marker_${Date.now()}`;
     let cookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ samlAuth, streamsTest }) => {
+    apiTest.beforeAll(async ({ samlAuth, streamsTest, esClient, linkedProject }) => {
       const credentials = await samlAuth.asStreamsAdmin();
       cookieHeader = credentials.cookieHeader;
 
@@ -67,7 +83,18 @@ apiTest.describe(
         eq: 'cps-se-test',
       });
 
-      await streamsTest.createEsqlView(PARENT_VIEW, `FROM ${CPS_LINKED_INDEX}`);
+      // The index has to exist on both projects before the query stream is created, because
+      // Kibana validates the desired stream state by running the ES|QL query against the origin
+      // project and rejects an unknown index. The origin copy deliberately stays empty: every
+      // matching document lives on the linked project, so the marker can only reach the identify
+      // response if the read fans out across projects.
+      await esClient.indices.create({ index: CPS_TEST_INDEX, mappings: CPS_INDEX_MAPPINGS });
+      await linkedProject.esClient.indices.create({
+        index: CPS_TEST_INDEX,
+        mappings: CPS_INDEX_MAPPINGS,
+      });
+
+      await streamsTest.createEsqlView(PARENT_VIEW, `FROM ${CPS_TEST_INDEX}`);
 
       await streamsTest.createQueryStream(
         QUERY_STREAM,
@@ -75,11 +102,12 @@ apiTest.describe(
       );
     });
 
-    apiTest.afterAll(async ({ streamsTest, linkedProject }) => {
+    apiTest.afterAll(async ({ streamsTest, esClient, linkedProject }) => {
       await streamsTest.deleteEsqlView(PARENT_VIEW);
       await streamsTest.cleanupTestStreams(PARENT_STREAM);
       await streamsTest.disableQueryStreams();
-      await linkedProject.esClient.indices.delete({ index: CPS_LINKED_INDEX }, { ignore: [404] });
+      await esClient.indices.delete({ index: CPS_TEST_INDEX }, { ignore: [404] });
+      await linkedProject.esClient.indices.delete({ index: CPS_TEST_INDEX }, { ignore: [404] });
     });
 
     apiTest(
@@ -91,13 +119,12 @@ apiTest.describe(
           new Date(NOW - 5 * 60_000).toISOString()
         );
 
-        // Negative control: origin-only routing must not see linked-only data.
-        // The index exists solely on the linked project, so origin has to tolerate
-        // it being missing instead of failing with index_not_found_exception.
+        // Negative control: the origin copy of the index is empty, so an origin-only read cannot
+        // see the marker. This is what makes the assertions below evidence of cross-project
+        // routing rather than of the data simply being available locally.
         const originHits = await esClient.search({
-          index: CPS_LINKED_INDEX,
+          index: CPS_TEST_INDEX,
           query: { term: { cps_se_marker: markerValue } },
-          ignore_unavailable: true,
         });
         expect(originHits.hits.hits).toHaveLength(0);
 
