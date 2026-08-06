@@ -347,13 +347,10 @@ describe('Trello', () => {
   });
 
   describe('test.handler', () => {
-    if (!Trello.test) {
-      throw new Error('Test handler not defined');
-    }
-    const testHandler = Trello.test.handler;
+    const { handler: testHandler, enabled } = Trello.test;
 
     it('has enabled: true so the connector is testable in Kibana', () => {
-      expect(Trello.test?.enabled).toBe(true);
+      expect(enabled).toBe(true);
     });
 
     it('returns the member data on success', async () => {
