@@ -55,9 +55,10 @@ const setCasesMigratedFlag = async (
 /**
  * Backfills one space's cases using an Elasticsearch Point-In-Time cursor (skip-safe, and not
  * subject to the from/size result-window limit that breaks past ~10k docs). Fills only the
- * `extended_fields` keys a case is missing or holds empty (never overwriting a real value) and stops when the
- * space is exhausted, the per-run scan budget is hit, or the task is cancelled — returning where to
- * resume in each of those cases.
+ * `extended_fields` keys a case does not have at all (absent or `null` — never overwriting any
+ * existing entry, including an explicit `''` clear) and stops when the space is exhausted, the
+ * per-run scan budget is hit, or the task is cancelled — returning where to resume in each of
+ * those cases.
  */
 const backfillCasesForSpace = async (
   repo: ISavedObjectsRepository,
@@ -173,6 +174,12 @@ const backfillCasesForSpace = async (
           attributes: {
             extended_fields: { ...(caseSO.attributes.extended_fields ?? {}), ...additions },
           },
+          // Optimistic concurrency: the merged map above was computed from the PIT snapshot, and
+          // an unguarded write would silently replace a user update that landed between the read
+          // and this write. With the snapshot version a concurrent update turns into a 409, which
+          // lands in the retryable branch below — the space stays unflagged and the next run
+          // recomputes from a fresh read.
+          version: caseSO.version,
           ...(nsOption ? { namespace: nsOption } : {}),
         },
       ];
@@ -185,6 +192,8 @@ const backfillCasesForSpace = async (
         // A 404 means the case can't be resolved for update — it was deleted between the scan and the
         // update, or its stored id/namespace don't line up (e.g. synthetic data inserted straight
         // into ES). Retrying never succeeds, so skip these rather than blocking the space forever.
+        // Everything else — including a 409 version conflict from the optimistic-concurrency guard
+        // above — is retryable: the space stays unflagged and is rescanned fresh on a later run.
         const notRetryable = failed.filter((s) => s.error?.statusCode === 404);
         const retryable = failed.filter((s) => s.error?.statusCode !== 404);
         const distinctReasons = (list: typeof failed) =>

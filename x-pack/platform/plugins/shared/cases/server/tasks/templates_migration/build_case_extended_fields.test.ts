@@ -64,9 +64,11 @@ describe('buildExtendedFieldsBackfill', () => {
     expect(result).toEqual({ count_as_integer: '9' });
   });
 
-  it('repairs a key whose extended_fields value is empty ("" or null)', () => {
-    // The v2 UI stores '' for untouched/cleared fields; an empty mirror key must not
-    // permanently block the legacy value from being backfilled.
+  it('never overwrites an empty-string entry (a possible deliberate v2 clear) but fills null', () => {
+    // '' is ambiguous: the v2 UI writes it both for untouched fields and for explicit clears,
+    // and users can clear values while the space's backfill is still pending — so '' always
+    // wins over the legacy mirror. null cannot come from any user-facing write path, so it is
+    // treated as "no v2 value" and filled.
     const result = buildExtendedFieldsBackfill(
       [
         { key: 'summary', type: CustomFieldTypes.TEXT, value: 'from-legacy' },
@@ -74,7 +76,7 @@ describe('buildExtendedFieldsBackfill', () => {
       ],
       { summary_as_keyword: '', count_as_integer: null }
     );
-    expect(result).toEqual({ summary_as_keyword: 'from-legacy', count_as_integer: '9' });
+    expect(result).toEqual({ count_as_integer: '9' });
   });
 
   it('treats a null extended_fields the same as empty', () => {

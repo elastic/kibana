@@ -1048,6 +1048,120 @@ describe('TemplatesMigrationTaskManager', () => {
       ]);
     });
 
+    it('preserves a v2 value deliberately cleared while the space was still unflagged', async () => {
+      // Field definitions become visible before a space's backfill completes (phase 1 runs
+      // first, and the configure mirror hook can create them even earlier), so a user can clear
+      // a v2 value ('' write) while legacyCasesMigrated is still unset — including between
+      // backfill retries or across restarts. The '' must win over the stale legacy value.
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
+      const caseSO = buildCaseSO(
+        'case-1',
+        [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'stale-legacy' }],
+        { cf_text_as_keyword: '' }
+      );
+      mockFindByType(configSO, [caseSO]);
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      // Nothing to fill — the cleared value is preserved — and the space still completes.
+      expect(repo.bulkUpdate).not.toHaveBeenCalled();
+      expect(repo.update).toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configSO.id,
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
+    });
+
+    it('retries from fresh data when a case changes after the PIT read (409 version conflict)', async () => {
+      // The backfill computes its merged extended_fields map from a PIT snapshot; without the
+      // snapshot version an update landing between the read and the write would be silently
+      // replaced. The write must carry the version, the 409 must not flag the space, and the
+      // retry must recompute from fresh data so the user's value survives.
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
+      const legacyCustomFields = [
+        { key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'stale-legacy' },
+      ];
+      let scan = 0;
+      repo.find.mockImplementation((opts: { type: string }) => {
+        if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [configSO], total: 1 });
+        }
+        if (opts.type === CASE_SAVED_OBJECT) {
+          scan++;
+          if (scan === 1) {
+            // First scan: the case has no v2 value yet, at version v1.
+            return Promise.resolve({
+              saved_objects: [
+                { ...buildCaseSO('case-1', legacyCustomFields), version: 'v1', sort: [1] },
+              ],
+              total: 1,
+              pit_id: 'pit-1',
+            });
+          }
+          // Retry scan: a user set their own value in the meantime (version bumped).
+          return Promise.resolve({
+            saved_objects: [
+              {
+                ...buildCaseSO('case-1', legacyCustomFields, { cf_text_as_keyword: 'user-value' }),
+                version: 'v2',
+                sort: [1],
+              },
+            ],
+            total: 1,
+            pit_id: 'pit-2',
+          });
+        }
+        return Promise.resolve({ saved_objects: [], total: 0 });
+      });
+      repo.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'case-1',
+            type: CASE_SAVED_OBJECT,
+            error: { statusCode: 409, message: 'version conflict' },
+          },
+        ],
+      });
+
+      const manager = await buildAndSchedule();
+      const first = await getTaskRunner(manager).run();
+
+      // The guarded write carried the snapshot version...
+      expect(repo.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(repo.bulkUpdate.mock.calls[0][0]).toEqual([
+        expect.objectContaining({ id: 'case-1', version: 'v1' }),
+      ]);
+      // ...and the conflict left the space unflagged, rescheduling a retry.
+      expect(repo.update).not.toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configSO.id,
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
+      expect(first).toEqual(expect.objectContaining({ runAt: expect.any(Date) }));
+
+      // The retry recomputes from a fresh read: the user's value is present, so nothing is
+      // written over it and the space completes.
+      await getTaskRunner(manager).run();
+      expect(repo.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(repo.update).toHaveBeenCalledWith(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configSO.id,
+        { legacyCasesMigrated: true },
+        expect.anything()
+      );
+    });
+
     it('does not update cases that already have all their extended_fields', async () => {
       const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
       const caseSO = buildCaseSO(

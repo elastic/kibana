@@ -316,10 +316,12 @@ describe('customFields → extended_fields adapter utilities', () => {
       expect(result).toEqual({ x_as_keyword: 'v' });
     });
 
-    it('fills a key whose existing value is the empty string', () => {
-      // FAILURE SCENARIO: the v2 UI persists '' for untouched/cleared fields on create; a
-      // migrated case with a legacy value behind such a key must still receive the value —
-      // '' means "no v2 value", not a v2 value that should win over the legacy mirror.
+    it('does NOT fill a key whose existing value is the empty string (deliberate clear preserved)', () => {
+      // The v2 UI persists '' both for untouched fields and for fields the user explicitly
+      // cleared, and the migration runs asynchronously — field definitions become visible
+      // before a space's backfill completes, so a '' observed at backfill time may be a
+      // deliberate clear. It is ambiguous, so it must never be overwritten with the stale
+      // legacy value.
       const result = buildExtendedFieldsBackfill(
         [{ key: 'priority', type: 'text', value: 'low' }],
         {
@@ -327,7 +329,7 @@ describe('customFields → extended_fields adapter utilities', () => {
         }
       );
 
-      expect(result).toEqual({ priority_as_keyword: 'low' });
+      expect(result).toEqual({});
     });
 
     it('fills a key whose existing value is null', () => {

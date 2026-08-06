@@ -191,33 +191,32 @@ export const getV2FieldType = (legacyType: string): 'integer' | 'boolean' | 'key
 };
 
 /**
- * Whether an `extended_fields` entry counts as "no v2 value" for backfill purposes. The v2
- * system stores the empty string for a field the user never touched or explicitly cleared
- * (the create form serializes untouched fields as `''`, and the case view treats `''` as
- * empty — see `sanitizeExistingValue`), so an empty-string mirror key must not block the
- * legacy value from being copied over.
+ * Whether an `extended_fields` entry counts as "no v2 value" for backfill purposes: the key is
+ * absent, or holds `null`/`undefined` (which no user-facing write path produces — the API and
+ * UI only write strings — so a `null` can only come from synthetic/hand-inserted data).
+ *
+ * The empty string is deliberately NOT included. The v2 UI persists `''` both for fields the
+ * user never touched AND for fields the user explicitly cleared (see `sanitizeExistingValue` /
+ * the create-form serialization), and the migration task runs asynchronously: field definitions
+ * become visible (phase 1, or the configure mirror hook) before a space's case backfill
+ * (phase 2) completes, so a user can clear a value while the space is still unflagged. A `''`
+ * observed at backfill time is therefore ambiguous, and filling it could silently restore a
+ * stale legacy value over a deliberate clear — so it is always preserved.
  */
-const isEmptyExtendedFieldValue = (value: unknown): boolean => value == null || value === '';
+const isEmptyExtendedFieldValue = (value: unknown): boolean => value == null;
 
 /**
  * Computes the `extended_fields` entries to add to a case from its legacy `customFields`.
  *
- * Semantics — **existing non-empty value wins, nulls skipped**:
- * - A key present in `existingExtendedFields` with a non-empty value is left as-is (a value set
- *   through the v2 system takes precedence over the legacy mirror).
- * - A key that is absent, `null`, or the empty string counts as "no v2 value" and is filled from
- *   the legacy custom field. The v2 UI persists `''` for untouched/cleared fields, so treating
- *   `''` as a value would permanently strand the legacy value (the one-shot backfill flags the
- *   space as migrated and never revisits it).
+ * Semantics — **any existing entry wins (including `''`), nulls filled, absent filled**:
+ * - A key present in `existingExtendedFields` with a string value — including the empty
+ *   string — is left as-is: a value (or explicit clear) written through the v2 system takes
+ *   precedence over the legacy mirror. See {@link isEmptyExtendedFieldValue} for why `''`
+ *   must never be treated as fillable.
+ * - A key that is absent or `null` counts as "no v2 value" and is filled from the legacy
+ *   custom field.
  * - A `customFields` entry whose value is `null` or `undefined` is skipped — the case left the
  *   field empty; the v2 field then renders empty rather than being forced to a value.
- *
- * SCOPE — first migration only. Treating `''` as fillable is only safe because this runs at most
- * once per space: during the space's initial one-shot migration, before users have meaningfully
- * interacted with the v2 fields. A space flagged `legacyCasesMigrated` is never rescanned
- * (see `configureNeedsCaseBackfill`) — by then an empty mirror key is ambiguous (untouched vs
- * deliberately cleared through the v2 update path), and refilling it would silently restore a
- * stale legacy value over a user's explicit clear.
  *
  * Returns only the entries to write (keys missing or empty). Callers are responsible for
  * spreading the result over the existing map; see {@link mergeCustomFieldsIntoExtendedFields}
