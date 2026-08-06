@@ -82,6 +82,21 @@ export const EDITOR_STEP_ACTIONS_DESCRIPTION = i18n.translate(
   }
 );
 
+export const EDITOR_STEP_NAME_TITLE = i18n.translate(
+  'xpack.cases.templates.editorTour.name.title',
+  {
+    defaultMessage: 'Name your template',
+  }
+);
+
+export const EDITOR_STEP_NAME_DESCRIPTION = i18n.translate(
+  'xpack.cases.templates.editorTour.name.description',
+  {
+    defaultMessage:
+      'The template name is the page title — click it to rename. A name is required before you can save.',
+  }
+);
+
 export const EDITOR_STEP_CONFIG_TITLE = i18n.translate(
   'xpack.cases.templates.editorTour.config.title',
   {

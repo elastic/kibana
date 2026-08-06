@@ -7,7 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import * as i18n from './translations';
 
 interface ActivityCollapseControls {
@@ -60,13 +60,30 @@ export const useRegisterActivityCollapseControls = (controls: ActivityCollapseCo
   }, [setControls, canCollapse, allCollapsed, allExpanded, collapseAll, expandAll]);
 };
 
-/** Renders the feed's collapse-all/expand-all pair, or nothing when there is nothing to collapse. */
+/**
+ * Explains a disabled control on hover. A disabled EuiButtonEmpty does not fire pointer events, so
+ * the tooltip has to wrap it from the outside to be reachable at all.
+ */
+const DisabledReason: FC<PropsWithChildren<{ show: boolean }>> = ({ show, children }) =>
+  show ? (
+    <EuiToolTip content={i18n.NOTHING_TO_COLLAPSE} display="inlineBlock">
+      {/* Focusable so the explanation is reachable by keyboard: a disabled button is not. */}
+      <span tabIndex={0}>{children}</span>
+    </EuiToolTip>
+  ) : (
+    <>{children}</>
+  );
+
+DisabledReason.displayName = 'DisabledReason';
+
+/**
+ * The feed's collapse-all/expand-all pair. Always rendered — disabled with an explanation when there
+ * is nothing to collapse, rather than disappearing. A control that comes and goes depending on the
+ * contents of the feed reads as instability; a disabled one that says why does not.
+ */
 export const ActivityCollapseControls: FC = () => {
   const controls = useContext(ActivityCollapseContext)?.controls;
-
-  if (!controls?.canCollapse) {
-    return null;
-  }
+  const canCollapse = controls?.canCollapse === true;
 
   return (
     <>
@@ -74,26 +91,30 @@ export const ActivityCollapseControls: FC = () => {
           gesture looks the same, and sits in the same place, on both tabs. */}
       <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
-            iconType="fold"
-            onClick={controls.collapseAll}
-            disabled={controls.allCollapsed}
-            data-test-subj="case-user-actions-collapse-all"
-          >
-            {i18n.COLLAPSE_ALL_ACTIVITIES}
-          </EuiButtonEmpty>
+          <DisabledReason show={!canCollapse}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType="fold"
+              onClick={controls?.collapseAll}
+              disabled={!canCollapse || controls.allCollapsed}
+              data-test-subj="case-user-actions-collapse-all"
+            >
+              {i18n.COLLAPSE_ALL_ACTIVITIES}
+            </EuiButtonEmpty>
+          </DisabledReason>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
-            iconType="unfold"
-            onClick={controls.expandAll}
-            disabled={controls.allExpanded}
-            data-test-subj="case-user-actions-expand-all"
-          >
-            {i18n.EXPAND_ALL_ACTIVITIES}
-          </EuiButtonEmpty>
+          <DisabledReason show={!canCollapse}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType="unfold"
+              onClick={controls?.expandAll}
+              disabled={!canCollapse || controls.allExpanded}
+              data-test-subj="case-user-actions-expand-all"
+            >
+              {i18n.EXPAND_ALL_ACTIVITIES}
+            </EuiButtonEmpty>
+          </DisabledReason>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

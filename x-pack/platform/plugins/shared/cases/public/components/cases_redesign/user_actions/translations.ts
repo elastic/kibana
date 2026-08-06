@@ -58,3 +58,10 @@ export const SHOW_MORE_ACTIVITY = i18n.translate(
     defaultMessage: 'Show more',
   }
 );
+
+export const NOTHING_TO_COLLAPSE = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.nothingToCollapse',
+  {
+    defaultMessage: 'No comments or attachments to collapse',
+  }
+);

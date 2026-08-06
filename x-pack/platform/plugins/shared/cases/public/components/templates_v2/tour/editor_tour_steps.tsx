@@ -18,10 +18,19 @@ const wrap = (text: string) => (
   </EuiText>
 );
 
-// The tour intentionally starts with the Configuration tab: its anchor is the tab header (a stable,
-// non-layout element), which avoids EuiWrappingPopover reparenting a layout-critical editor panel on
-// start — that reparenting would otherwise yank the validation-errors bar to the top of the page.
+// After the name, the tour sticks to tab headers and other stable, non-layout anchors: anchoring to
+// a layout-critical editor panel makes EuiWrappingPopover reparent it on open, which yanks the
+// validation-errors bar to the top of the page.
 export const TEMPLATE_EDITOR_TOUR_STEPS: CasesTourStep[] = [
+  {
+    // First, because the name is the one field a template cannot be saved without, and it moved out
+    // of the Configuration tab into the page title where it is easy to walk straight past.
+    stepId: 'name',
+    title: i18n.EDITOR_STEP_NAME_TITLE,
+    anchor: '[data-test-subj="appHeaderTitleButton"]',
+    anchorPosition: 'downLeft',
+    content: wrap(i18n.EDITOR_STEP_NAME_DESCRIPTION),
+  },
   {
     stepId: 'config',
     title: i18n.EDITOR_STEP_CONFIG_TITLE,
