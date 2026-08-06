@@ -99,8 +99,12 @@
   {
     "id": "cloud-services",
     "name": "Cloud Services",
+    "areas": [
+      "security"
+    ],
     "github": {
-      "team": "elastic/cloud-services"
+      "team": "elastic/cloud-services",
+      "label": "Team:Security-Cloud Services"
     }
   },
   {
@@ -187,17 +191,6 @@
     "github": {
       "team": "elastic/fleet",
       "label": "Team:Fleet"
-    }
-  },
-  {
-    "id": "integration-experience",
-    "name": "Security Integrations Integration Experience",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/integration-experience",
-      "label": "Team:Integration-Experience"
     }
   },
   {
@@ -593,29 +586,9 @@
     ]
   },
   {
-    "id": "obs-presentation",
-    "name": "Obs UX: Presentation",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-presentation-team",
-      "label": "Team:obs-presentation"
-    },
-    "responsibilities": [
-      "APM",
-      "Hosts",
-      "Infrastructure",
-      "Universal Profiling",
-      "Observability Overview"
-    ]
-  },
-  {
     "id": "obs-signals-metrics",
-    "name": "Obs UX: Signals & Metrics",
-    "areas": [
-      "observability"
-    ],
+    "name": "Observability signals: Metrics",
+    "areas": ["observability"],
     "github": {
       "team": "elastic/obs-signals-metrics-team",
       "label": "Team:obs-signals-metrics"

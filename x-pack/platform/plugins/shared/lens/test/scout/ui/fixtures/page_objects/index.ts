@@ -8,14 +8,17 @@
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 import { Inspector } from '@kbn/inspector-plugin/test/scout/ui/fixtures/page_objects';
+import { LensEditorApp } from './lens';
 
-export type LensPageObjects = PageObjects & {
+export type LensPageObjects = Omit<PageObjects, 'lens'> & {
+  lens: LensEditorApp;
   inspector: Inspector;
 };
 
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): LensPageObjects {
   return {
     ...pageObjects,
+    lens: createLazyPageObject(LensEditorApp, page),
     inspector: createLazyPageObject(Inspector, page),
   };
 }

@@ -74,7 +74,10 @@ describe('registerInternalConversationRoutes - _mark_read', () => {
       kibanaResponseFactory
     );
 
-    expect(update).toHaveBeenCalledWith({ id: 'conv-1', read: true }, { access: 'converse' });
+    expect(update).toHaveBeenCalledWith(
+      { id: 'conv-1', read: true },
+      { access: 'converse', retryOnConflict: true }
+    );
     expect(response.status).toBe(200);
     expect(response.payload).toMatchObject({ id: 'conv-1', read: true });
   });
@@ -139,7 +142,10 @@ describe('registerInternalConversationRoutes - _set_pinned', () => {
       kibanaResponseFactory
     );
 
-    expect(update).toHaveBeenCalledWith({ id: 'conv-1', pinned: true }, { access: 'converse' });
+    expect(update).toHaveBeenCalledWith(
+      { id: 'conv-1', pinned: true },
+      { access: 'converse', retryOnConflict: true }
+    );
     expect(response.status).toBe(200);
     expect(response.payload).toMatchObject({ id: 'conv-1', pinned: true });
   });
