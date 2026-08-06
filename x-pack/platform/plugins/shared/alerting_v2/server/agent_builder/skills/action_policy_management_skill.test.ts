@@ -71,12 +71,7 @@ describe('createActionPolicyManagementSkill', () => {
     const refNames = (skill.referencedContent ?? []).map((entry) => entry.name);
 
     expect(refNames).toEqual(
-      expect.arrayContaining([
-        'action-policy-overview',
-        'workflows',
-        'connectors',
-        'dispatch-flow',
-      ])
+      expect.arrayContaining(['action-policy-overview', 'workflows', 'connectors', 'dispatch-flow'])
     );
     expect(refNames).not.toContain('concepts');
     expect(skill.content).toContain('./references/action-policy-overview.md');
