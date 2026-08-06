@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import type { UseFormReturn } from 'react-hook-form';
 import { useController, type Control, Controller } from 'react-hook-form';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { i18n } from '@kbn/i18n';
 import {
   type FilterOperatorLiteral,
@@ -47,7 +48,13 @@ interface FilterSelectionInputProps {
 interface FilterInputStandardSelectProps
   extends Pick<
     EuiSuperSelectProps,
-    'compressed' | 'disabled' | 'placeholder' | 'aria-label' | 'fullWidth' | 'isInvalid'
+    | 'compressed'
+    | 'disabled'
+    | 'placeholder'
+    | 'aria-label'
+    | 'fullWidth'
+    | 'isInvalid'
+    | 'popoverProps'
   > {
   control: Control<Exclude<FilterInput, { tagValue: undefined }>>;
   name: Exclude<keyof FilterInput, 'tagValue'>;
@@ -237,6 +244,8 @@ export function FilterSelectionInput({
         }
       };
 
+      const panelMinWidth = calculateWidthFromEntries(filterValues, ['label']);
+
       const isDisabled =
         !anchoringFilteringTagName || !filteringOperator || isExistenceCheckOperator;
 
@@ -264,6 +273,8 @@ export function FilterSelectionInput({
                 })
           }
           inputRef={ref}
+          truncationProps={{ truncation: 'middle' as const }}
+          inputPopoverProps={{ panelMinWidth, anchorPosition: 'downRight' }}
           compressed
           fullWidth
         />
@@ -337,6 +348,7 @@ export function FilterSelectionInput({
         placeholder={i18n.translate('cpsUtils.projectPicker.filterBox.selectDimension', {
           defaultMessage: 'Select a tag',
         })}
+        popoverProps={{ anchorPosition: 'downLeft' }}
         compressed
         fullWidth
       />
@@ -346,6 +358,7 @@ export function FilterSelectionInput({
         options={filterOperators}
         disabled={!anchoringFilteringTagName}
         fullWidth={false}
+        popoverProps={{ anchorPosition: 'downRight' }}
         compressed
       />
       <Controller
