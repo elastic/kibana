@@ -13,19 +13,14 @@ import { RulesApi } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
 import { enrichHttpErrorMessage } from '../utils/enrich_http_error';
 import { getFriendlyRuleHttpErrorToastMessage } from '../utils/friendly_http_error';
-
-const ERROR_TITLE = i18n.translate('xpack.alertingV2.hooks.useCreateRule.errorMessage', {
-  defaultMessage: 'Rule not created',
-});
+import {
+  CREATE_RULE_ERROR_TITLE,
+  runRuleMutationErrorToast,
+  type OnRuleMutationErrorToast,
+} from './rule_mutation_error_toast';
 
 interface UseCreateRuleOptions {
-  /**
-   * Overrides the default error toast. Call `showDefaultToast` to fall back to
-   * the enriched addError toast for statuses the caller does not handle.
-   * Temporary escape hatch for compose-discover save UX; prefer removing once
-   * conditionless alert queries are saveable again.
-   */
-  onErrorToast?: (error: Error, showDefaultToast: () => void) => void;
+  onErrorToast?: OnRuleMutationErrorToast;
 }
 
 export const useCreateRule = ({ onErrorToast }: UseCreateRuleOptions = {}) => {
@@ -45,17 +40,17 @@ export const useCreateRule = ({ onErrorToast }: UseCreateRuleOptions = {}) => {
       queryClient.invalidateQueries(ruleKeys.lists());
       queryClient.invalidateQueries(ruleKeys.tags());
     },
-    onError: (error: Error) => {
-      const showDefaultToast = () =>
-        toasts.addError(enrichHttpErrorMessage(error), {
-          title: ERROR_TITLE,
-          toastMessage: getFriendlyRuleHttpErrorToastMessage(error),
-        });
-      if (onErrorToast) {
-        onErrorToast(error, showDefaultToast);
-        return;
-      }
-      showDefaultToast();
+    onError: (error: Error, variables: CreateRuleData) => {
+      runRuleMutationErrorToast(
+        onErrorToast,
+        error,
+        () =>
+          toasts.addError(enrichHttpErrorMessage(error), {
+            title: CREATE_RULE_ERROR_TITLE,
+            toastMessage: getFriendlyRuleHttpErrorToastMessage(error),
+          }),
+        variables.query
+      );
     },
   });
 };

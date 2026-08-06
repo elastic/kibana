@@ -33,15 +33,23 @@ jest.mock('@kbn/react-kibana-mount', () => ({
 jest.mock('./use_create_rule', () => ({
   useCreateRule: (
     options: {
-      onErrorToast?: (error: Error, showDefaultToast: () => void) => void;
+      onErrorToast?: (
+        error: Error,
+        showDefaultToast: () => void,
+        query?: { format?: string; breach?: { segment?: string } }
+      ) => void;
     } = {}
   ) => ({
-    mutateAsync: async (...args: unknown[]) => {
+    mutateAsync: async (payload: {
+      query?: { format?: string; breach?: { segment?: string } };
+    }) => {
       try {
-        return await mockCreateMutateAsync(...args);
+        return await mockCreateMutateAsync(payload);
       } catch (error) {
-        options.onErrorToast?.(error as Error, () =>
-          mockAddError(error, { title: 'Rule not created' })
+        options.onErrorToast?.(
+          error as Error,
+          () => mockAddError(error, { title: 'Rule not created' }),
+          payload.query
         );
         throw error;
       }
@@ -52,15 +60,24 @@ jest.mock('./use_create_rule', () => ({
 jest.mock('./use_update_rule', () => ({
   useUpdateRule: (
     options: {
-      onErrorToast?: (error: Error, showDefaultToast: () => void) => void;
+      onErrorToast?: (
+        error: Error,
+        showDefaultToast: () => void,
+        query?: { format?: string; breach?: { segment?: string } }
+      ) => void;
     } = {}
   ) => ({
-    mutateAsync: async (...args: unknown[]) => {
+    mutateAsync: async (vars: {
+      id: string;
+      payload: { query?: { format?: string; breach?: { segment?: string } } };
+    }) => {
       try {
-        return await mockUpdateMutateAsync(...args);
+        return await mockUpdateMutateAsync(vars);
       } catch (error) {
-        options.onErrorToast?.(error as Error, () =>
-          mockAddError(error, { title: 'Edits not saved' })
+        options.onErrorToast?.(
+          error as Error,
+          () => mockAddError(error, { title: 'Edits not saved' }),
+          vars.payload.query
         );
         throw error;
       }
@@ -236,20 +253,67 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
     });
   });
 
-  it('shows a Review query toast action on create 400 and rethrows', async () => {
+  it('shows a Review query toast on create 400 when the composed breach segment is missing', async () => {
     const error = Object.assign(new Error('bad request'), {
       response: { status: 400 },
     });
     mockCreateMutateAsync.mockRejectedValue(error);
 
     await renderAndOpenCreate(REDIRECT_PATH);
-    await expect(callOnCreateRule(undefined)).rejects.toBe(error);
+    const onCreateRule = capturedFlyoutProps.onCreateRule as (
+      payload: unknown,
+      notifications?: unknown
+    ) => Promise<void>;
+    await expect(
+      act(async () => {
+        await onCreateRule({
+          kind: 'alert',
+          metadata: { name: 'My rule' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-* | STATS count = COUNT(*)',
+            breach: { segment: '' },
+          },
+        });
+      })
+    ).rejects.toBe(error);
 
     expect(mockAddDanger).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'Rule not created',
       })
     );
+    expect(mockAddError).not.toHaveBeenCalled();
+    expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+  });
+
+  it('uses the default toast on create 400 when the query has a breach segment', async () => {
+    const error = Object.assign(new Error('bad request'), {
+      response: { status: 400 },
+    });
+    mockCreateMutateAsync.mockRejectedValue(error);
+
+    await renderAndOpenCreate(REDIRECT_PATH);
+    const onCreateRule = capturedFlyoutProps.onCreateRule as (
+      payload: unknown,
+      notifications?: unknown
+    ) => Promise<void>;
+    await expect(
+      act(async () => {
+        await onCreateRule({
+          kind: 'alert',
+          metadata: { name: 'My rule' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-* | STATS count = COUNT(*)',
+            breach: { segment: 'WHERE count > 0' },
+          },
+        });
+      })
+    ).rejects.toBe(error);
+
+    expect(mockAddDanger).not.toHaveBeenCalled();
+    expect(mockAddError).toHaveBeenCalledWith(error, { title: 'Rule not created' });
     expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
   });
 });

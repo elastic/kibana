@@ -13,19 +13,14 @@ import { RulesApi } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
 import { enrichHttpErrorMessage } from '../utils/enrich_http_error';
 import { getFriendlyRuleHttpErrorToastMessage } from '../utils/friendly_http_error';
-
-const ERROR_TITLE = i18n.translate('xpack.alertingV2.hooks.useUpdateRule.errorMessage', {
-  defaultMessage: 'Edits not saved',
-});
+import {
+  UPDATE_RULE_ERROR_TITLE,
+  runRuleMutationErrorToast,
+  type OnRuleMutationErrorToast,
+} from './rule_mutation_error_toast';
 
 interface UseUpdateRuleOptions {
-  /**
-   * Overrides the default error toast. Call `showDefaultToast` to fall back to
-   * the enriched addError toast for statuses the caller does not handle.
-   * Temporary escape hatch for compose-discover save UX; prefer removing once
-   * conditionless alert queries are saveable again.
-   */
-  onErrorToast?: (error: Error, showDefaultToast: () => void) => void;
+  onErrorToast?: OnRuleMutationErrorToast;
 }
 
 export const useUpdateRule = ({ onErrorToast }: UseUpdateRuleOptions = {}) => {
@@ -47,17 +42,17 @@ export const useUpdateRule = ({ onErrorToast }: UseUpdateRuleOptions = {}) => {
       queryClient.invalidateQueries(ruleKeys.tags());
       queryClient.invalidateQueries(ruleKeys.detail(variables.id));
     },
-    onError: (error: Error) => {
-      const showDefaultToast = () =>
-        toasts.addError(enrichHttpErrorMessage(error), {
-          title: ERROR_TITLE,
-          toastMessage: getFriendlyRuleHttpErrorToastMessage(error),
-        });
-      if (onErrorToast) {
-        onErrorToast(error, showDefaultToast);
-        return;
-      }
-      showDefaultToast();
+    onError: (error: Error, variables: { id: string; payload: UpdateRuleData }) => {
+      runRuleMutationErrorToast(
+        onErrorToast,
+        error,
+        () =>
+          toasts.addError(enrichHttpErrorMessage(error), {
+            title: UPDATE_RULE_ERROR_TITLE,
+            toastMessage: getFriendlyRuleHttpErrorToastMessage(error),
+          }),
+        variables.payload.query
+      );
     },
   });
 };

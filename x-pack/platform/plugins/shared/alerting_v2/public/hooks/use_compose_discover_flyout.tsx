@@ -12,7 +12,6 @@ import type {
 } from '@kbn/alerting-v2-rule-form';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
 import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
-import type { IHttpFetchError } from '@kbn/core/public';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -27,6 +26,13 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { RuleApiResponse } from '../services/rules_api';
+import { isBadRequestError } from '../utils/is_bad_request_error';
+import { isConditionlessComposedAlertQuery } from '../utils/is_conditionless_composed_alert_query';
+import {
+  CREATE_RULE_ERROR_TITLE,
+  UPDATE_RULE_ERROR_TITLE,
+  type OnRuleMutationErrorToast,
+} from './rule_mutation_error_toast';
 import { useCreateRule } from './use_create_rule';
 import { useSetupRuleNotifications } from './use_setup_rule_notifications';
 import { useUpdateRule } from './use_update_rule';
@@ -76,19 +82,26 @@ export const useComposeDiscoverFlyout = ({
 
   /*
    * Temporary: until composed alerts can persist an empty breach segment, a
-   * conditionless alert save 400s. Offer a Review query action that jumps back
-   * to step 0; everything else uses the hook's default enriched toast.
+   * conditionless alert save 400s. Offer a Review query action only for that
+   * shape; every other failure uses the hook's default enriched toast.
+   * `query` comes from the mutation variables (the payload that just failed).
    */
-  const handleCreateErrorToast = useCallback(
-    (error: Error, showDefaultToast: () => void) => {
-      if ((error as IHttpFetchError).response?.status !== 400) {
+  const showBadRequestReviewQueryToast = useCallback(
+    (
+      title: string,
+      error: Error,
+      showDefaultToast: () => void,
+      query?: {
+        format?: string;
+        breach?: { segment?: string };
+      }
+    ) => {
+      if (!isBadRequestError(error) || !isConditionlessComposedAlertQuery(query)) {
         showDefaultToast();
         return;
       }
       notifications.toasts.addDanger({
-        title: i18n.translate('xpack.alertingV2.hooks.useCreateRule.errorMessage', {
-          defaultMessage: 'Rule not created',
-        }),
+        title,
         text: toMountPoint(
           <FormattedMessage
             id="xpack.alertingV2.useComposeDiscoverFlyout.badRequestToast"
@@ -113,38 +126,15 @@ export const useComposeDiscoverFlyout = ({
     [i18nStart, notifications.toasts, theme]
   );
 
-  const handleUpdateErrorToast = useCallback(
-    (error: Error, showDefaultToast: () => void) => {
-      if ((error as IHttpFetchError).response?.status !== 400) {
-        showDefaultToast();
-        return;
-      }
-      notifications.toasts.addDanger({
-        title: i18n.translate('xpack.alertingV2.hooks.useUpdateRule.errorMessage', {
-          defaultMessage: 'Edits not saved',
-        }),
-        text: toMountPoint(
-          <FormattedMessage
-            id="xpack.alertingV2.useComposeDiscoverFlyout.badRequestToast"
-            defaultMessage="The rule could not be saved because some fields are invalid. {reviewQuery}"
-            values={{
-              reviewQuery: (
-                <EuiLink
-                  data-test-subj="composeDiscoverReviewQueryToastAction"
-                  onClick={() => navigateToQueryStepRef.current?.()}
-                >
-                  {i18n.translate('xpack.alertingV2.useComposeDiscoverFlyout.reviewQueryAction', {
-                    defaultMessage: 'Review query',
-                  })}
-                </EuiLink>
-              ),
-            }}
-          />,
-          { i18n: i18nStart, theme }
-        ),
-      });
-    },
-    [i18nStart, notifications.toasts, theme]
+  const handleCreateErrorToast = useCallback<OnRuleMutationErrorToast>(
+    (error, showDefaultToast, query) =>
+      showBadRequestReviewQueryToast(CREATE_RULE_ERROR_TITLE, error, showDefaultToast, query),
+    [showBadRequestReviewQueryToast]
+  );
+  const handleUpdateErrorToast = useCallback<OnRuleMutationErrorToast>(
+    (error, showDefaultToast, query) =>
+      showBadRequestReviewQueryToast(UPDATE_RULE_ERROR_TITLE, error, showDefaultToast, query),
+    [showBadRequestReviewQueryToast]
   );
 
   const createRuleMutation = useCreateRule({ onErrorToast: handleCreateErrorToast });

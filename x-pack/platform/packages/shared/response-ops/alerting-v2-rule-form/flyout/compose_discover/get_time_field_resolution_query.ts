@@ -6,6 +6,7 @@
  */
 
 import type { RuleQuery } from '../../form/types';
+import { getBreachQuery } from '../../form/utils/query_helpers';
 
 const FROM_QUERY_PATTERN = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i;
 
@@ -24,7 +25,7 @@ export function getTimeFieldResolutionQuery(
   queryCommitted: boolean
 ): string {
   const baseQuery = query.format === 'composed' ? query.base : '';
-  const fullQuery = query.format === 'standalone' ? query.breach.query : '';
+  const fullQuery = getBreachQuery(query);
   // Prefer composed base for alerts; YAML-only standalone alerts only have breach.query.
   const candidate = isAlert ? baseQuery || fullQuery : fullQuery;
   return FROM_QUERY_PATTERN.test(candidate) && queryCommitted ? candidate : '';

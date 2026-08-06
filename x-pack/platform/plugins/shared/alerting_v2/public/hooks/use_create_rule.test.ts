@@ -152,7 +152,7 @@ describe('useCreateRule', () => {
   it('should let onErrorToast override the default toast and call showDefaultToast when asked', async () => {
     const error = new Error('bad request');
     mockCreateRule.mockRejectedValue(error);
-    const onErrorToast = jest.fn((_error: Error, showDefaultToast: () => void) => {
+    const onErrorToast = jest.fn((_error: Error, showDefaultToast: () => void, _query: unknown) => {
       showDefaultToast();
     });
     const { result } = renderHook(() => useCreateRule({ onErrorToast }), {
@@ -162,7 +162,11 @@ describe('useCreateRule', () => {
     result.current.mutate(mockCreatePayload);
 
     await waitFor(() => {
-      expect(onErrorToast).toHaveBeenCalledTimes(1);
+      expect(onErrorToast).toHaveBeenCalledWith(
+        error,
+        expect.any(Function),
+        mockCreatePayload.query
+      );
       expect(mockAddError).toHaveBeenCalledTimes(1);
     });
   });
@@ -178,7 +182,11 @@ describe('useCreateRule', () => {
     result.current.mutate(mockCreatePayload);
 
     await waitFor(() => {
-      expect(onErrorToast).toHaveBeenCalledTimes(1);
+      expect(onErrorToast).toHaveBeenCalledWith(
+        error,
+        expect.any(Function),
+        mockCreatePayload.query
+      );
       expect(mockAddError).not.toHaveBeenCalled();
     });
   });

@@ -151,13 +151,10 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
   });
 
   /*
-   * Always return a render function that mounts via createElement. Passing the
-   * EsqlRecoveryContent FC itself and invoking it as a plain function would
-   * attribute its hooks to RecoveryConditionStep and crash when Custom recovery
-   * toggles on (more hooks than the previous render).
+   * Pass a component (or registry render function). RecoveryConditionStep mounts
+   * it with createElement so hook-using recovery content keeps its own fiber.
    */
-  const renderCustomRecovery =
-    definition?.renderRecoveryStep ?? ((props) => React.createElement(EsqlRecoveryContent, props));
+  const renderCustomRecovery = definition?.renderRecoveryStep ?? EsqlRecoveryContent;
 
   return { steps, renderCustomRecovery };
 };
