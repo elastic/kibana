@@ -7,12 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type ComponentProps, useMemo } from 'react';
+import React, { useState, type ComponentProps, useMemo, useEffect } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiPopover, EuiTourStep, EuiButton, EuiSkeletonRectangle } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { type Observable, of, concat, map, catchError } from 'rxjs';
+import {
+  type Observable,
+  of,
+  concat,
+  map,
+  catchError,
+  BehaviorSubject,
+  switchMap,
+  distinctUntilChanged,
+  EMPTY,
+} from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { useProjectPickerTour } from './use_project_picker_tour';
 import { strings } from './strings';
@@ -47,16 +57,30 @@ export const ProjectPicker = ({
   const styles = useMemoCss(projectPickerStyles);
   const { isTourOpen, closeTour } = useProjectPickerTour();
 
+  const [isEnabled$] = useState(() => new BehaviorSubject(!isDisabled));
+
+  useEffect(() => {
+    isEnabled$.next(!isDisabled);
+  }, [isDisabled, isEnabled$]);
+
   const projectsState$ = useMemo(
     () =>
-      concat(
-        of({ isLoading: true, data: null as ProjectsData | null }),
-        getActiveRouteProjects$().pipe(
-          map((data) => ({ isLoading: false, data })),
-          catchError(() => of({ isLoading: false, data: null }))
-        )
+      isEnabled$.pipe(
+        distinctUntilChanged(),
+        switchMap((enabled) => {
+          if (!enabled) {
+            return EMPTY;
+          }
+          return concat(
+            of({ isLoading: true, data: null as ProjectsData | null }),
+            getActiveRouteProjects$().pipe(
+              map((data) => ({ isLoading: false, data })),
+              catchError(() => of({ isLoading: false, data: null }))
+            )
+          );
+        })
       ),
-    [getActiveRouteProjects$]
+    [isEnabled$, getActiveRouteProjects$]
   );
 
   const { isLoading, data: projects } = useObservable(projectsState$, {
@@ -71,9 +95,22 @@ export const ProjectPicker = ({
 
     return [
       projects.origin,
-      ...projects.linkedProjects.sort((a, b) => a._alias.localeCompare(b._alias)),
+      ...projects.linkedProjects.slice(0).sort((a, b) => a._alias.localeCompare(b._alias)),
     ];
   }, [projects?.origin, projects?.linkedProjects]);
+
+  const projectPickerPopoverTriggerButton = (
+    <ProjectPickerButton
+      // @ts-expect-error - EuiButtonProps xs size is supported, types just say otherwise
+      size="xs"
+      onClick={() => setShowPopover(!showPopover)}
+      isDisabled={isDisabled}
+    />
+  );
+
+  if (isDisabled) {
+    return projectPickerPopoverTriggerButton;
+  }
 
   if (isLoading) {
     return <ProjectPickerSkeleton />;
@@ -84,15 +121,6 @@ export const ProjectPicker = ({
   }
 
   const originProject = projects!.origin!;
-
-  const projectPickerPopoverTriggerButton = (
-    <ProjectPickerButton
-      // @ts-expect-error - EuiButtonProps xs size is supported, types just say otherwise
-      size="xs"
-      onClick={() => setShowPopover(!showPopover)}
-      isDisabled={isDisabled}
-    />
-  );
 
   const projectPickerPopover = (
     <ProjectPickerStateProvider
@@ -121,10 +149,6 @@ export const ProjectPicker = ({
       </EuiPopover>
     </ProjectPickerStateProvider>
   );
-
-  if (isDisabled) {
-    return projectPickerPopover;
-  }
 
   return (
     <EuiTourStep

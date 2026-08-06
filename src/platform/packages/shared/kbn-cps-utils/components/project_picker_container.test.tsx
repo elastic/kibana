@@ -134,8 +134,13 @@ describe('ProjectPickerContainer', () => {
     });
 
     it('should have DISABLED access when on a different app', async () => {
+      const fetchProjects = jest.fn().mockResolvedValue({
+        origin: mockOriginProject,
+        linkedProjects: mockLinkedProjects,
+      });
       await renderProjectPicker({
         cpsManager: {
+          fetchProjects,
           getProjectPickerAccess$: jest.fn(
             () => new BehaviorSubject(ProjectRoutingAccess.DISABLED)
           ),
@@ -143,6 +148,7 @@ describe('ProjectPickerContainer', () => {
       });
       const button = screen.getByTestId('cps-project-picker-button-disabled');
       expect(button).toHaveAttribute('disabled');
+      expect(fetchProjects).not.toHaveBeenCalled();
     });
 
     it('should have READONLY access when on Lens editor page', async () => {

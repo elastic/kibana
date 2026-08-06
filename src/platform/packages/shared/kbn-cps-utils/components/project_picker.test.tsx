@@ -181,11 +181,13 @@ describe('ProjectPicker', () => {
   });
 
   it('should render a disabled button when isDisabled is true', async () => {
-    await renderProjectPicker({ isDisabled: true });
+    const getActiveRouteProjects$ = jest.fn(() => of(mockProjectsData));
+    await renderProjectPicker({ isDisabled: true, getActiveRouteProjects$ });
 
     const button = screen.getByTestId('cps-project-picker-button-disabled');
     expect(button).toBeDisabled();
     expect(screen.queryByTestId('cps-project-picker-button-label')).not.toBeInTheDocument();
+    expect(getActiveRouteProjects$).not.toHaveBeenCalled();
   });
 
   it('should support keyboard navigation to open the popover', async () => {

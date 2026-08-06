@@ -205,14 +205,16 @@ describe('ProjectPickerStateProvider', () => {
     });
 
     describe('snapshot', () => {
-      it('calls onProjectRoutingChange with no id clauses when there are no exclusions', async () => {
+      it('calls onProjectRoutingChange with clauses for all projects when there are no exclusions', async () => {
         const onProjectRoutingChange = jest.fn();
         renderProjectPicker({
           projectRoutingStrategy: 'snapshot',
           onProjectRoutingChange,
         });
 
-        expect(onProjectRoutingChange).not.toHaveBeenCalled();
+        expect(onProjectRoutingChange).toHaveBeenCalledWith(
+          '_id:origin AND _id:linked1 AND _id:linked2'
+        );
       });
 
       it('omits deselected projects from the explicit id clauses once exclusions exist', async () => {
@@ -234,7 +236,7 @@ describe('ProjectPickerStateProvider', () => {
         });
       });
 
-      it('includes encoded filter expressions without explicit id clauses until a project is excluded', async () => {
+      it('includes encoded filter expressions with explicit id clauses that omit a project when it is excluded', async () => {
         const user = userEvent.setup();
         let currentRouting: ProjectRouting = '';
         const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
@@ -258,10 +260,15 @@ describe('ProjectPickerStateProvider', () => {
           </ProjectPickerStateProvider>
         );
 
+        expect(onProjectRoutingChange).toHaveBeenCalledWith(
+          '_id:origin AND _id:linked1 AND _id:linked2'
+        );
+
         await user.click(screen.getByTestId('addFilterExpression'));
 
         await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_type:security');
+          // the _type:security clause is added to the filter expression, which excludes project with id linked2
+          expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_type:security AND _id:linked1');
         });
       });
     });
