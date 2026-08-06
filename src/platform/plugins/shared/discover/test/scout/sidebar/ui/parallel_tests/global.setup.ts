@@ -8,25 +8,26 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
+import {
+  INDEX_PATTERN_WITHOUT_TIMEFIELD_ES_ARCHIVE,
+  LOGSTASH_ES_ARCHIVE,
+  MANY_FIELDS_ES_ARCHIVE,
+} from '../fixtures';
 
 globalSetupHook('Setup Discover sidebar tests data', async ({ esArchiver, log }) => {
   log.debug('[setup:logstash] loading logstash_functional ES data (only if it does not exist)...');
-  await esArchiver.loadIfNeeded(
-    'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-  );
+  await esArchiver.loadIfNeeded(LOGSTASH_ES_ARCHIVE);
   log.debug('[setup:logstash] logstash_functional ES data ready');
 
   log.debug(
     '[setup:index_pattern_without_timefield] loading index_pattern_without_timefield ES data (only if it does not exist)...'
   );
-  await esArchiver.loadIfNeeded(
-    'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
-  );
+  await esArchiver.loadIfNeeded(INDEX_PATTERN_WITHOUT_TIMEFIELD_ES_ARCHIVE);
   log.debug(
     '[setup:index_pattern_without_timefield] index_pattern_without_timefield ES data ready'
   );
 
   log.debug('[setup:many_fields] loading many_fields ES data (only if it does not exist)...');
-  await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/many_fields');
+  await esArchiver.loadIfNeeded(MANY_FIELDS_ES_ARCHIVE);
   log.debug('[setup:many_fields] many_fields ES data ready');
 });

@@ -28,8 +28,14 @@ export const MANY_FIELDS_ES_ARCHIVE =
 export const MANY_FIELDS_KBN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/many_fields_data_view';
 
+export const INDEX_PATTERN_WITHOUT_TIMEFIELD_ES_ARCHIVE =
+  'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield';
+
 export const INDEX_PATTERN_WITHOUT_TIMEFIELD_KBN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield';
+
+export const LOGSTASH_ES_ARCHIVE =
+  'src/platform/test/functional/fixtures/es_archiver/logstash_functional';
 
 /**
  * Saved searches exercising ES|QL column rendering (initial/custom columns for
