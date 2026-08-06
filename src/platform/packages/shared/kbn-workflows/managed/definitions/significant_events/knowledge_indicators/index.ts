@@ -63,7 +63,7 @@ export const SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW = {
 export const SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 7,
+  version: 8,
   billable: false,
   yaml: ONBOARDING_YAML,
   management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,

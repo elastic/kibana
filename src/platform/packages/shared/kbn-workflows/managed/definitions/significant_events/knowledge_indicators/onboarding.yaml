@@ -82,8 +82,10 @@ triggers:
       - name: runOrigin
         type: string
         description: "Root origin of the run, forwarded by the invoking workflow for attribution. Defaults to this execution's own trigger."
-consts:
 steps:
+  # -----------------------------------------------------------------------
+  # Step 0: Initialize variables.
+  # -----------------------------------------------------------------------
   - name: init
     type: data.set
     with:
@@ -97,6 +99,11 @@ steps:
       queriesConnectorUsed: ""
       cycleStartedAt: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.000Z" }}'
 
+  # -----------------------------------------------------------------------
+  # Step 1: Recency check — auto-skip features if recently identified.
+  #         When skipQueries=true we always want to identify features,
+  #         so the recency optimization is skipped in that case.
+  # -----------------------------------------------------------------------
   - name: check_should_identify
     type: if
     condition: "${{ variables.skipFeatures == false and inputs.skipQueries == false }}"
@@ -117,6 +124,9 @@ steps:
             with:
               skipFeatures: true
 
+  # -----------------------------------------------------------------------
+  # Step 2: Features identification (unless skipped or recent)
+  # -----------------------------------------------------------------------
   - name: run_features
     type: if
     condition: "${{ variables.skipFeatures == false }}"
@@ -145,6 +155,9 @@ steps:
           featuresTokensUsed: "${{ steps.identify_features.output.tokensUsed }}"
           featuresConnectorUsed: "${{ steps.identify_features.output.connectorId }}"
 
+  # -----------------------------------------------------------------------
+  # Step 3: Queries generation (unless skipped)
+  # -----------------------------------------------------------------------
   - name: run_queries
     type: if
     condition: "${{ inputs.skipQueries == false }}"
@@ -165,6 +178,11 @@ steps:
           queriesTokensUsed: "${{ steps.generate_queries.output.tokensUsed }}"
           queriesConnectorUsed: "${{ steps.generate_queries.output.connectorId }}"
 
+  # -----------------------------------------------------------------------
+  # Step 4: Keep-alive — re-stamp persistent KIs (durable ones, plus excluded
+  #         features whose exclusion must be remembered) not refreshed this
+  #         cycle so DSL retention does not physically delete them.
+  # -----------------------------------------------------------------------
   - name: keep_alive_persistent
     type: kibana.request
     with:
@@ -175,6 +193,9 @@ steps:
       body:
         lastRefreshedBefore: "${{ variables.cycleStartedAt }}"
 
+  # -----------------------------------------------------------------------
+  # Step 5: Output summary
+  # -----------------------------------------------------------------------
   - name: output_result
     type: workflow.output
     with:

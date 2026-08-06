@@ -47,6 +47,9 @@ triggers:
       additionalProperties: false
 
 steps:
+  # Records a pending investigation on the Significant Event as soon as the workflow starts,
+  # so the UI can show an in-progress indicator before the agent step finishes.
+  # Only runs when a sig-event context was supplied (discovery or chat-agent paths).
   - name: attach_pending_to_significant_event
     type: kibana.request
     if: '${{ inputs.context.event_uuid != null }}'

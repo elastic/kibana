@@ -100,6 +100,9 @@ steps:
           processedCount: '${{ steps.compute_batch_size.output.processedCount }}'
           hasWork: false
 
+  # -----------------------------------------------------------------------
+  # Correlate detections into discoveries.
+  # -----------------------------------------------------------------------
   - name: run_discovery_agent
     type: ai.agent
     agent-id: "significant-events.discovery"
@@ -225,6 +228,11 @@ steps:
             on-failure:
               continue: true
 
+  # -----------------------------------------------------------------------
+  # Trigger root-cause investigation for newly-opened high-severity events.
+  # The discovery agent owns the event decision and events_write; deterministic
+  # queue advancement stays in the workflow and does not consume agent turns.
+  # -----------------------------------------------------------------------
 
   # Eviction-safe snapshot — ai.agent outputs are evictable; data.set outputs are not.
   - name: check_discovery_agent_output
