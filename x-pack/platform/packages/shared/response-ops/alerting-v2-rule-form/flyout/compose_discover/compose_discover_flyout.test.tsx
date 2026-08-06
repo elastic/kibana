@@ -1032,14 +1032,15 @@ describe('ComposeDiscoverFlyout', () => {
       expect(readCommittedQuery?.()).toEqual(manualSplitQuery);
     });
 
-    it('falls back to conditionless standalone when manual split is applied with an empty alert condition', () => {
+    it('keeps composed with an empty segment when manual split is applied without an alert condition', () => {
       renderFlyout({ mode: 'create' });
       openSandbox();
 
       act(() => {
         sandboxFlyoutProps?.onQueryChange?.({
-          format: 'standalone',
-          breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
+          format: 'composed',
+          base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+          breach: { segment: '' },
         });
       });
       clickSplitBaseAndAlert();
@@ -1056,11 +1057,12 @@ describe('ComposeDiscoverFlyout', () => {
         fireEvent.click(screen.getByTestId('mockSandboxApply'));
       });
 
+      // Do not coerce to standalone — empty segment is rejected at save for alerts.
       expect(readCommittedQuery?.()).toEqual({
-        format: 'standalone',
-        breach: { query: 'FROM logs-* | STATS count = COUNT(*) BY host.name' },
+        format: 'composed',
+        base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+        breach: { segment: '' },
       });
-      expect(readNoDataStrategy?.()).toBe('none');
     });
 
     it('preserves custom recovery when applying manual split edits', () => {

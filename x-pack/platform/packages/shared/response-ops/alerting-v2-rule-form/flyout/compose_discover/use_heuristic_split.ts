@@ -160,13 +160,13 @@ export interface SplitRuleQueryResult {
  * Maps a unified ES|QL query into the rule query shape for an alert rule,
  * alongside an outcome that drives the form summary copy/callouts.
  *
- * - `success` (base + alert condition) → `composed` (base + breach segment).
- * - `no_alert_condition` (base only, no WHERE) → `standalone`: the whole query
- *   is the breach query, so every returned row is a breach. The rule data schema
- *   permits `alert + standalone` (only `signal` is forced to standalone), so this
- *   is a first-class, savable rule rather than a blocked dead-end.
- * - `split_failed` / `empty` → `composed` so the summary can flag the state; these
- *   do not produce a savable base-only rule.
+ * Always returns `composed`. A missing alert condition is an empty
+ * `breach.segment` — the schema rejects that at save, so alert queries keep
+ * a distinct structure from signal's `standalone` format.
+ *
+ * - `success` (base + alert condition) → composed with both filled.
+ * - `no_alert_condition` (base only, no WHERE) → composed with empty segment.
+ * - `split_failed` / `empty` → composed so the summary can flag the state.
  */
 export function splitResultToRuleQuery(fullQuery: string): SplitRuleQueryResult {
   const { base, alertBlock } = splitQuery(fullQuery);
@@ -182,7 +182,7 @@ export function splitResultToRuleQuery(fullQuery: string): SplitRuleQueryResult 
   }
   if (hasBase) {
     return {
-      query: { format: 'standalone', breach: { query: base } },
+      query: { format: 'composed', base, breach: { segment: '' } },
       outcome: 'no_alert_condition',
     };
   }
@@ -194,7 +194,7 @@ export function splitResultToRuleQuery(fullQuery: string): SplitRuleQueryResult 
 /**
  * After a create-mode unified-editor Apply, merges heuristic split output with
  * any recovery block from the sandbox when the query format is unchanged.
- * A format change (e.g. standalone no_where → composed after adding WHERE) drops recovery.
+ * A format change (e.g. signal standalone → composed after switching to alert) drops recovery.
  */
 export function resolveUnifiedAlertApplyQuery(
   sandboxQuery: RuleQuery,

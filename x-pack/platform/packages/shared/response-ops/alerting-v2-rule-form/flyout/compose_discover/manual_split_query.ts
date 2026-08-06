@@ -40,14 +40,11 @@ export const enterManualSplitQuery = (sourceQuery: RuleQuery): RuleQuery => {
     return preserveRecoveryBlock(sourceQuery, query);
   }
 
-  const pipeline =
-    outcome === 'no_alert_condition' && query.format === 'standalone'
-      ? query.breach.query
-      : fullQuery;
-
+  // no_alert_condition / split_failed / empty — whole pipeline in base, empty segment
+  // so the user can carve out the alert condition manually.
   return preserveRecoveryBlock(sourceQuery, {
     format: 'composed',
-    base: pipeline,
+    base: fullQuery,
     breach: { segment: '' },
   });
 };

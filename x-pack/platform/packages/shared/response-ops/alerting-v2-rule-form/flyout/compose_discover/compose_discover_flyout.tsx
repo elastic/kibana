@@ -623,8 +623,8 @@ export function ComposeDiscoverFlyout({
       if (kind === 'alert') {
         const full = getBreachQuery(methods.getValues('query'));
         /*
-         * A query with no alert condition (no_where) maps to a standalone breach
-         * query (every row is a breach); a real split yields a composed query.
+         * A query with no alert condition stays composed with an empty breach
+         * segment (rejected at save); a real split yields base + segment.
          */
         const alertQuery = splitResultToRuleQuery(full).query;
         setSandboxQuery(alertQuery);
@@ -850,11 +850,9 @@ export function ComposeDiscoverFlyout({
     if (shouldRunHeuristicSplit) {
       const split = splitResultToRuleQuery(getBreachQuery(sandboxQuery)).query;
       queryToCommit = resolveUnifiedAlertApplyQuery(sandboxQuery, split);
-    } else if (queryToCommit.format === 'composed' && !queryToCommit.breach.segment.trim()) {
-      // Manual split with an empty alert condition: fall back to conditionless standalone.
-      // The schema rejects composed+empty-segment at save; standalone with no WHERE is valid.
-      queryToCommit = { format: 'standalone', breach: { query: queryToCommit.base } };
     }
+    // Manual split with an empty alert condition stays composed + empty segment —
+    // the schema rejects that at save; do not coerce to standalone.
     setSandboxQuery(queryToCommit);
 
     methods.setValue('query', queryToCommit, { shouldDirty: true });
