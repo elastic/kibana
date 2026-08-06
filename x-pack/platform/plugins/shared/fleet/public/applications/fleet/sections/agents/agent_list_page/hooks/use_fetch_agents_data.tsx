@@ -251,7 +251,9 @@ export function useFetchAgentsData() {
         errorActionIds: items
           .filter((action) => (action.latestErrors?.length ?? 0) > 0)
           .map((action) => action.actionId),
-        scheduledActionsCount: items.filter(isScheduledAction).length,
+        scheduledActionsCount: items
+          .filter((action) => action.type === 'UNENROLL' && isScheduledAction(action))
+          .reduce((sum, action) => sum + (action.nbAgentsActioned ?? 0), 0),
       };
     },
   });

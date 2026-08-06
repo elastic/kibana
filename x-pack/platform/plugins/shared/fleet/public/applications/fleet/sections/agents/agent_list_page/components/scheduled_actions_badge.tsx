@@ -6,6 +6,7 @@
  */
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
@@ -30,7 +31,9 @@ export const ScheduledActionsBadge: React.FunctionComponent<{
       <EuiBadge
         color="warning"
         onClick={onClick}
-        onClickAriaLabel={`Open the Agent activity flyout to review scheduled unenrollment`}
+        onClickAriaLabel={i18n.translate('xpack.fleet.agentList.scheduledActionsBadge.ariaLabel', {
+          defaultMessage: 'Open the Agent activity flyout to review scheduled unenrollment',
+        })}
         iconType="clock"
         data-test-subj="scheduledActionsBadge"
       >
