@@ -34474,6 +34474,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, delete the package even if it has active package policies
           in: query
@@ -34546,6 +34547,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, returns the package even if the signature cannot be verified
           in: query
@@ -34653,6 +34655,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, allow installing prerelease versions
           in: query
@@ -34768,6 +34771,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -75166,6 +75170,7 @@ components:
                   type: object
                   properties:
                     baseTemplateName:
+                      maxLength: 1000
                       type: string
                     conflictingTemplates:
                       items:
@@ -75179,6 +75184,7 @@ components:
                               - overridden_by_fleet
                             type: string
                           name:
+                            maxLength: 1000
                             type: string
                           priority:
                             type: number
@@ -75189,10 +75195,13 @@ components:
                       maxItems: 100
                       type: array
                     dataStreamName:
+                      maxLength: 1000
                       type: string
                     namespace:
+                      maxLength: 255
                       type: string
                     nsTemplateName:
+                      maxLength: 1000
                       type: string
                   required:
                     - dataStreamName
@@ -99339,6 +99348,7 @@ components:
             type: object
             properties:
               baseTemplateName:
+                maxLength: 1000
                 type: string
               conflictingTemplates:
                 items:
@@ -99352,6 +99362,7 @@ components:
                         - overridden_by_fleet
                       type: string
                     name:
+                      maxLength: 1000
                       type: string
                     priority:
                       type: number
@@ -99362,10 +99373,13 @@ components:
                 maxItems: 100
                 type: array
               dataStreamName:
+                maxLength: 1000
                 type: string
               namespace:
+                maxLength: 255
                 type: string
               nsTemplateName:
+                maxLength: 1000
                 type: string
             required:
               - dataStreamName
