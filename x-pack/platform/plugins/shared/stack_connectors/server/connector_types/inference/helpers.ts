@@ -122,11 +122,36 @@ export function chunksIntoMessage(obs$: Observable<UnifiedChatCompleteResponse>)
 }
 
 /**
- * Checks for 429 error due to user exceeding thier quote and creates and throws a user error if appropriate.
- * This is a temporary measure until the backend is updated to return the original error code instead of a general 400 (https://github.com/elastic/elasticsearch/issues/139710).
+ * Status codes that represent a permanent, client-side condition: the request will
+ * never succeed on retry without a configuration or entitlement change.
+ *
+ * - 401: the credentials the connector presents are rejected.
+ * - 403: the org/deployment is not authorized for the requested model.
+ * - 404: the referenced inference endpoint does not exist.
+ */
+const PERMANENT_CLIENT_ERROR_STATUS_CODES = [401, 403, 404];
+
+const hasStatusCode = (error: string, statusCode: number) =>
+  error.includes(`status [${statusCode}]`);
+
+/**
+ * Classifies inference errors that are caused by the user's configuration rather than by a
+ * transient framework/platform failure, and throws them tagged as `TaskErrorSource.USER` so
+ * they are not retried.
+ *
+ * Covers 429 quota exhaustion, plus permanent client errors (401/403/404).
+ * The 429 branch is a temporary measure until the backend is updated to return the original
+ * error code instead of a general 400 (https://github.com/elastic/elasticsearch/issues/139710).
  */
 export const detectandThrowUserError = (error: string) => {
   if (error.includes('status [429]') && error.includes('quota')) {
+    throw createTaskRunError(new Error(error), TaskErrorSource.USER);
+  }
+
+  // Permanent client errors must not be retried. Without this, they are classified as
+  // framework errors and the task is retried indefinitely against a condition that
+  // cannot resolve on its own.
+  if (PERMANENT_CLIENT_ERROR_STATUS_CODES.some((code) => hasStatusCode(error, code))) {
     throw createTaskRunError(new Error(error), TaskErrorSource.USER);
   }
 };
