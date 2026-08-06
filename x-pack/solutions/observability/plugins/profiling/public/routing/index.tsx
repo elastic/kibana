@@ -33,7 +33,7 @@ import { DifferentialTopNFunctionsView } from '../views/functions/differential_t
 import { TopNFunctionsView } from '../views/functions/topn';
 import { ProfilingNotEnabledView } from '../views/profiling_not_enabled';
 import { Settings } from '../views/settings';
-import { StackTracesView } from '../views/stack_traces_view';
+import { StackTracesView, StackTracesViewWrapper } from '../views/stack_traces_view';
 import { StorageExplorerView } from '../views/storage_explorer';
 import { RouteBreadcrumb } from './route_breadcrumb';
 
@@ -100,42 +100,62 @@ const routes = {
       },
       '/': {
         children: {
-          '/stacktraces/{topNType}': {
-            element: <StackTracesView />,
-            params: t.type({
-              path: t.type({
-                topNType: t.union([
-                  t.literal(TopNType.Containers),
-                  t.literal(TopNType.Deployments),
-                  t.literal(TopNType.Executables),
-                  t.literal(TopNType.Hosts),
-                  t.literal(TopNType.Threads),
-                  t.literal(TopNType.Traces),
-                ]),
-              }),
-              query: t.type({
-                displayAs: t.union([
-                  t.literal(StackTracesDisplayOption.StackTraces),
-                  t.literal(StackTracesDisplayOption.Percentage),
-                ]),
-                limit: toNumberRt,
-              }),
-            }),
-            defaults: {
-              query: {
-                displayAs: StackTracesDisplayOption.StackTraces,
-                limit: '10',
+          '/stacktraces': {
+            element: (
+              <RouteBreadcrumb
+                title={i18n.translate('xpack.profiling.breadcrumb.stacktraces', {
+                  defaultMessage: 'Stacktraces',
+                })}
+                href="/stacktraces"
+              >
+                <StackTracesViewWrapper>
+                  <Outlet />
+                </StackTracesViewWrapper>
+              </RouteBreadcrumb>
+            ),
+            children: {
+              '/stacktraces/{topNType}': {
+                element: <StackTracesView />,
+                params: t.type({
+                  path: t.type({
+                    topNType: t.union([
+                      t.literal(TopNType.Containers),
+                      t.literal(TopNType.Deployments),
+                      t.literal(TopNType.Executables),
+                      t.literal(TopNType.Hosts),
+                      t.literal(TopNType.Threads),
+                      t.literal(TopNType.Traces),
+                    ]),
+                  }),
+                  query: t.type({
+                    displayAs: t.union([
+                      t.literal(StackTracesDisplayOption.StackTraces),
+                      t.literal(StackTracesDisplayOption.Percentage),
+                    ]),
+                    limit: toNumberRt,
+                  }),
+                }),
+                defaults: {
+                  query: {
+                    displayAs: StackTracesDisplayOption.StackTraces,
+                    limit: '10',
+                  },
+                },
               },
             },
           },
-          '/stacktraces': {
-            element: <RedirectTo pathname="/stacktraces/executables" />,
-          },
           '/flamegraphs': {
             element: (
-              <FlameGraphsView>
-                <Outlet />
-              </FlameGraphsView>
+              <RouteBreadcrumb
+                title={i18n.translate('xpack.profiling.breadcrumb.flamegraphs', {
+                  defaultMessage: 'Flamegraphs',
+                })}
+                href="/flamegraphs"
+              >
+                <FlameGraphsView>
+                  <Outlet />
+                </FlameGraphsView>
+              </RouteBreadcrumb>
             ),
             children: {
               '/flamegraphs/flamegraph': {
@@ -202,9 +222,16 @@ const routes = {
           },
           '/functions': {
             element: (
-              <FunctionsView>
-                <Outlet />
-              </FunctionsView>
+              <RouteBreadcrumb
+                title={i18n.translate('xpack.profiling.breadcrumb.functions', {
+                  defaultMessage: 'Functions',
+                })}
+                href="/functions"
+              >
+                <FunctionsView>
+                  <Outlet />
+                </FunctionsView>
+              </RouteBreadcrumb>
             ),
             params: t.type({
               query: t.type({
