@@ -17,6 +17,7 @@ project:
   owner: '@elastic/obs-signals-logs-team'
   sourceRoot: x-pack/platform/plugins/shared/logs_shared
 dependsOn:
+  - '@kbn/cloud-plugin'
   - '@kbn/core'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
