@@ -27,7 +27,7 @@ Org URL
 :   Base URL of your Okta organization, for example `https://your-okta-domain.okta.com` or `https://your-okta-domain.oktapreview.com`. Custom domains are supported. Do not include `/api/v1`.
 
 Authentication
-:   **Recommended:** OAuth 2.0 client credentials with private-key JWT. Provide the Token URL (`https://your-okta-domain.okta.com/oauth2/v1/token`), Client ID, Key ID (`kid`), and PEM private key. The connector requests scopes `okta.users.manage`, `okta.groups.manage`, and `okta.logs.read`. The Token URL must use `https://` (two slashes after `https:`).
+:   **Recommended:** OAuth 2.0 client credentials with private-key JWT. Provide the Token URL (`https://your-okta-domain.okta.com/oauth2/v1/token`), Client ID, Key ID (`kid`), and PEM private key. The connector requests scopes `okta.users.manage`, `okta.groups.manage`, and `okta.logs.read`.
 :   **Fallback:** SSWS API token from **Security > API > Tokens**. Paste the raw token value; the connector sends `Authorization: SSWS` automatically. Token privileges must allow the same user lifecycle, group, and System Log operations as the OAuth scopes above.
 
 ## Available actions [okta-available-actions]
