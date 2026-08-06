@@ -14,26 +14,5 @@ export const DASHBOARD_ARTIFACT_TYPE = 'dashboard';
 /** Default maximum length for a string field inside an artifact's `data` record. */
 export const DEFAULT_ARTIFACT_DATA_FIELD_LIMIT = 1024;
 
-/**
- * Type-specific length limits for individual fields of an artifact's `data`.
- *
- * To raise or add a limit for a new artifact type, add an entry here.
- * The framework schema resolves:
- * `ARTIFACT_DATA_FIELD_LIMITS[type]?.[field] ?? DEFAULT_ARTIFACT_DATA_FIELD_LIMIT`
- * for every string field, so no framework code changes are needed — only this map.
- */
-export const ARTIFACT_DATA_FIELD_LIMITS: Readonly<
-  Record<string, Readonly<Record<string, number>>>
-> = {
-  [RUNBOOK_ARTIFACT_TYPE]: { content: 50_000 },
-};
-
-/**
- * Type-specific `data` fields that must be present and hold a non-empty string.
- *
- * Enforcement is opt-in per type.
- */
-export const ARTIFACT_REQUIRED_DATA_FIELDS: Readonly<Record<string, readonly string[]>> = {
-  [RUNBOOK_ARTIFACT_TYPE]: ['content'],
-  [DASHBOARD_ARTIFACT_TYPE]: ['dashboardId'],
-};
+/** Maximum length for a runbook artifact's `data.content` field. */
+export const RUNBOOK_CONTENT_LIMIT = 50_000;

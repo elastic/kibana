@@ -112,6 +112,12 @@ describe('migrateRuleArtifactsToData', () => {
     expect(() => ruleSavedObjectAttributesSchemaV3.validate(attributes)).not.toThrow();
   });
 
+  it('produces attributes that satisfy the schema for an unknown type carrying a blank value', () => {
+    const attributes = migrate([{ id: 'host-1', type: 'host', value: '' }]);
+
+    expect(() => ruleSavedObjectAttributesSchemaV3.validate(attributes)).not.toThrow();
+  });
+
   /**
    * Documents the accepted trade-off of dropping `value`: model version 3 is no
    * longer able to read a migrated rule that has artifacts. Its

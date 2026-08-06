@@ -161,6 +161,8 @@ describe('rule template create-rule schema coupling', () => {
                     "additionalProperties": Object {},
                     "description": "Structured artifact data.",
                     "propertyNames": Object {
+                      "maxLength": 256,
+                      "minLength": 1,
                       "type": "string",
                     },
                     "type": "object",

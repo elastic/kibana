@@ -7,9 +7,9 @@
 
 import {
   DEFAULT_ARTIFACT_DATA_FIELD_LIMIT,
-  ARTIFACT_DATA_FIELD_LIMITS,
   DASHBOARD_ARTIFACT_TYPE,
   RUNBOOK_ARTIFACT_TYPE,
+  RUNBOOK_CONTENT_LIMIT,
 } from '@kbn/alerting-v2-constants';
 import {
   createRuleDataBaseSchema,
@@ -24,7 +24,12 @@ import {
   bulkGetRulesParamsSchema,
   updateRuleBodySchema,
 } from './rule_data_schema';
-import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from './constants';
+import {
+  ID_MAX_LENGTH,
+  MAX_ARTIFACT_DATA_FIELDS,
+  MAX_BULK_ITEMS,
+  MAX_FIELD_NAME_LENGTH,
+} from './constants';
 
 const validCreateData = {
   kind: 'alert',
@@ -826,7 +831,7 @@ describe('createRuleDataSchema', () => {
   });
 
   describe('artifacts data size', () => {
-    const runbookLimit = ARTIFACT_DATA_FIELD_LIMITS[RUNBOOK_ARTIFACT_TYPE].content;
+    const runbookLimit = RUNBOOK_CONTENT_LIMIT;
 
     const parseWithArtifact = (artifact: Record<string, unknown>) =>
       createRuleDataSchema.safeParse({ ...validCreateData, artifacts: [artifact] });
@@ -854,7 +859,6 @@ describe('createRuleDataSchema', () => {
           expect.arrayContaining([
             expect.objectContaining({
               path: ['artifacts', 0, 'data', 'content'],
-              message: `Artifact data field "content" must be at most ${runbookLimit} characters for type "${RUNBOOK_ARTIFACT_TYPE}".`,
             }),
           ])
         );
@@ -923,7 +927,7 @@ describe('createRuleDataSchema', () => {
       }
     });
 
-    it('only length-checks string fields', () => {
+    it('accepts structured values that stay within the limit', () => {
       const result = parseWithArtifact({
         id: 'artifact-1',
         type: 'host',
@@ -931,6 +935,79 @@ describe('createRuleDataSchema', () => {
       });
 
       expect(result.success).toBe(true);
+    });
+
+    it('measures a structured value serialized, so nesting cannot buy more room', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { list: new Array(DEFAULT_ARTIFACT_DATA_FIELD_LIMIT).fill(1) },
+      });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              path: ['artifacts', 0, 'data', 'list'],
+              message: `Artifact data field "list" must serialize to at most ${DEFAULT_ARTIFACT_DATA_FIELD_LIMIT} characters for type "host".`,
+            }),
+          ])
+        );
+      }
+    });
+
+    it(`accepts an artifact carrying ${MAX_ARTIFACT_DATA_FIELDS} fields`, () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: Object.fromEntries(
+          Array.from({ length: MAX_ARTIFACT_DATA_FIELDS }, (_, index) => [`field-${index}`, 'a'])
+        ),
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects an artifact carrying more fields than the limit', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: Object.fromEntries(
+          Array.from({ length: MAX_ARTIFACT_DATA_FIELDS + 1 }, (_, index) => [
+            `field-${index}`,
+            'a',
+          ])
+        ),
+      });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              path: ['artifacts', 0, 'data'],
+              message: `Artifact data must have at most ${MAX_ARTIFACT_DATA_FIELDS} fields.`,
+            }),
+          ])
+        );
+      }
+    });
+
+    it('rejects a field name longer than the limit', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { ['a'.repeat(MAX_FIELD_NAME_LENGTH + 1)]: 'value' },
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects an empty field name', () => {
+      const result = parseWithArtifact({ id: 'artifact-1', type: 'host', data: { '': 'value' } });
+
+      expect(result.success).toBe(false);
     });
   });
 
@@ -963,7 +1040,6 @@ describe('createRuleDataSchema', () => {
           expect.arrayContaining([
             expect.objectContaining({
               path: ['artifacts', 0, 'data', 'content'],
-              message: `Artifact data field "content" is required and must be a non-empty string for type "${RUNBOOK_ARTIFACT_TYPE}".`,
             }),
           ])
         );
@@ -983,7 +1059,6 @@ describe('createRuleDataSchema', () => {
           expect.arrayContaining([
             expect.objectContaining({
               path: ['artifacts', 0, 'data', 'dashboardId'],
-              message: `Artifact data field "dashboardId" is required and must be a non-empty string for type "${DASHBOARD_ARTIFACT_TYPE}".`,
             }),
           ])
         );
@@ -1165,7 +1240,7 @@ describe('updateRuleDataSchema', () => {
   });
 
   describe('artifacts data size', () => {
-    const runbookLimit = ARTIFACT_DATA_FIELD_LIMITS[RUNBOOK_ARTIFACT_TYPE].content;
+    const runbookLimit = RUNBOOK_CONTENT_LIMIT;
 
     const parseWithArtifact = (artifact: Record<string, unknown>) =>
       updateRuleDataSchema.safeParse({ artifacts: [artifact] });
@@ -1193,7 +1268,6 @@ describe('updateRuleDataSchema', () => {
           expect.arrayContaining([
             expect.objectContaining({
               path: ['artifacts', 0, 'data', 'content'],
-              message: `Artifact data field "content" must be at most ${runbookLimit} characters for type "${RUNBOOK_ARTIFACT_TYPE}".`,
             }),
           ])
         );

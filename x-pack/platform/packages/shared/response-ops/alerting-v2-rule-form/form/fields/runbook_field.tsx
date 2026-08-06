@@ -21,18 +21,13 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { useController, useFormContext } from 'react-hook-form';
-import {
-  RUNBOOK_ARTIFACT_TYPE,
-  ARTIFACT_DATA_FIELD_LIMITS,
-  DEFAULT_ARTIFACT_DATA_FIELD_LIMIT,
-} from '@kbn/alerting-v2-constants';
+import { RUNBOOK_ARTIFACT_TYPE, RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../types';
 import { getRunbookContent } from '../utils/artifact_data';
 import { resolveArtifactId } from '../utils/artifact_mappers';
 
 const RUNBOOK_ROW_ID = 'ruleV2FormRunbookField';
-const RUNBOOK_MAX_LENGTH =
-  ARTIFACT_DATA_FIELD_LIMITS[RUNBOOK_ARTIFACT_TYPE]?.content ?? DEFAULT_ARTIFACT_DATA_FIELD_LIMIT;
+const RUNBOOK_MAX_LENGTH = RUNBOOK_CONTENT_LIMIT;
 
 export interface RunbookFieldProps {
   isOpen: boolean;
