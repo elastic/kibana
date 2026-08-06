@@ -1,5 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`OWNS_INTEGRATION_RELATIONSHIP_CONFIGS entityanalytics_entra_id (log-based) targets-per-actor ES|QL is locked 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM logs-entityanalytics_entra_id.entity-__namespace__
+| WHERE data_stream.dataset == \\"entityanalytics_entra_id.device\\"
+    AND host.id IS NOT NULL
+    AND (entityanalytics_entra_id.device.registered_owners.mail IS NOT NULL OR entityanalytics_entra_id.device.registered_owners.id IS NOT NULL)
+| EVAL targetEntityId = CONCAT(\\"host:\\", TO_STRING(host.id))
+| EVAL ownerKey = CASE(entityanalytics_entra_id.device.registered_owners.mail IS NULL, entityanalytics_entra_id.device.registered_owners.id, entityanalytics_entra_id.device.registered_owners.id IS NULL, entityanalytics_entra_id.device.registered_owners.mail, MV_APPEND(entityanalytics_entra_id.device.registered_owners.mail, entityanalytics_entra_id.device.registered_owners.id))
+| MV_EXPAND ownerKey
+| EVAL actorUserId = CONCAT(\\"user:\\", ownerKey, \\"@entra_id\\")
+| WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
+    AND actorUserId != \\"user:@entra_id\\"
+    AND actorUserId RLIKE \\".+:.+@.+\\"
+| STATS owns = VALUES(targetEntityId) BY actorUserId
+| LIMIT 3500"
+`;
+
+exports[`OWNS_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots entityanalytics_entra_id: targets-per-actor ES|QL is locked (no watermark) 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM logs-entityanalytics_entra_id.entity-__namespace__
+| WHERE data_stream.dataset == \\"entityanalytics_entra_id.device\\"
+    AND host.id IS NOT NULL
+    AND (entityanalytics_entra_id.device.registered_owners.mail IS NOT NULL OR entityanalytics_entra_id.device.registered_owners.id IS NOT NULL)
+| EVAL targetEntityId = CONCAT(\\"host:\\", TO_STRING(host.id))
+| EVAL ownerKey = CASE(entityanalytics_entra_id.device.registered_owners.mail IS NULL, entityanalytics_entra_id.device.registered_owners.id, entityanalytics_entra_id.device.registered_owners.id IS NULL, entityanalytics_entra_id.device.registered_owners.mail, MV_APPEND(entityanalytics_entra_id.device.registered_owners.mail, entityanalytics_entra_id.device.registered_owners.id))
+| MV_EXPAND ownerKey
+| EVAL actorUserId = CONCAT(\\"user:\\", ownerKey, \\"@entra_id\\")
+| WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
+    AND actorUserId != \\"user:@entra_id\\"
+    AND actorUserId RLIKE \\".+:.+@.+\\"
+| STATS owns = VALUES(targetEntityId) BY actorUserId
+| LIMIT 3500"
+`;
+
 exports[`OWNS_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots entityanalytics_okta: targets-per-actor ES|QL is locked (no watermark) 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM .entities.v2.latest.security___namespace__-*

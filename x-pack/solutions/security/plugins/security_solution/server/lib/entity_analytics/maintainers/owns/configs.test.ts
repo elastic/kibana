@@ -24,6 +24,7 @@ const oktaConfig = OWNS_INTEGRATION_RELATIONSHIP_CONFIGS.find(
 describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
   it('ships exactly the expected integrations', () => {
     expect(OWNS_INTEGRATION_RELATIONSHIP_CONFIGS.map((c) => c.id).sort()).toEqual([
+      'entityanalytics_entra_id',
       'entityanalytics_okta',
     ]);
   });
@@ -196,12 +197,127 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     );
 
     it('entityanalytics_okta: targets-per-actor ES|QL with watermark is locked', () => {
-      const config = buildOwnsConfigs(
-        '2026-06-01T00:00:00.000Z'
-      ).find(
+      const config = buildOwnsConfigs('2026-06-01T00:00:00.000Z').find(
         (c): c is OverrideRelationshipIntegrationConfig => c.id === OKTA_ID
       )!;
       expect(config.esqlQueryOverride('__namespace__')).toMatchSnapshot();
+    });
+  });
+
+  describe('entityanalytics_entra_id (log-based)', () => {
+    const ENTRA_ID = 'entityanalytics_entra_id';
+    const OWNERS_FIELD = 'entityanalytics_entra_id.device.registered_owners';
+
+    const entraConfig = () =>
+      buildOwnsConfigs().find(
+        (c): c is OverrideRelationshipIntegrationConfig => c.id === ENTRA_ID
+      )!;
+
+    it('is shipped alongside the okta config', () => {
+      expect(
+        buildOwnsConfigs()
+          .map((c) => c.id)
+          .sort()
+      ).toEqual(['entityanalytics_entra_id', 'entityanalytics_okta']);
+    });
+
+    it('reads the Entra ID log index, not the entity index', () => {
+      expect(entraConfig().indexPattern('myns')).toBe('logs-entityanalytics_entra_id.entity-myns');
+      expect(entraConfig().indexPattern('default')).not.toContain('.entities.v2.latest');
+    });
+
+    it('does NOT disable the lookback window (log index uses the engine 30d @timestamp filter)', () => {
+      expect(entraConfig().disableLookbackWindow).toBeUndefined();
+    });
+
+    it('does NOT validate target ids (host:<device.id> target is never ambiguous)', () => {
+      expect(entraConfig().validateTargetIds).toBe(false);
+    });
+
+    it('discovers actors from both flattened owner identifier fields', () => {
+      expect(entraConfig().customActor?.fields).toEqual([
+        `${OWNERS_FIELD}.mail`,
+        `${OWNERS_FIELD}.id`,
+      ]);
+    });
+
+    it('Step 1 narrows to device documents, requires host.id, and gates on owner presence', () => {
+      const filters = entraConfig().compositeAggAdditionalFilters ?? [];
+      expect(filters).toContainEqual({
+        term: { 'data_stream.dataset': 'entityanalytics_entra_id.device' },
+      });
+      expect(filters).toContainEqual({ exists: { field: 'host.id' } });
+
+      const ownerGate = filters.find((f) => JSON.stringify(f).includes('registered_owners'));
+      expect(JSON.stringify(ownerGate)).toContain(`${OWNERS_FIELD}.mail`);
+      expect(JSON.stringify(ownerGate)).toContain(`${OWNERS_FIELD}.id`);
+    });
+
+    it('Step 1 applies the engine @timestamp lookback (log index)', () => {
+      const query = buildActorDiscoveryQuery(entraConfig(), undefined) as {
+        query: { bool: { filter: unknown[] } };
+      };
+      const hasTimestampRange = query.query.bool.filter.some((f) =>
+        JSON.stringify(f).includes('"@timestamp"')
+      );
+      expect(hasTimestampRange).toBe(true);
+    });
+
+    it('Step 2 emits the engine column contract (actorUserId + owns)', () => {
+      const query = buildTargetsPerActorQuery(entraConfig(), 'default');
+      expect(query).toContain('STATS owns = VALUES(targetEntityId) BY actorUserId');
+    });
+
+    it('Step 2 guards MV_APPEND against nulls before expanding owners', () => {
+      const query = entraConfig().esqlQueryOverride('default');
+      // MV_APPEND(null, x) returns null in ES|QL, so each field is appended only
+      // when the accumulator is non-null. Without the CASE, every owner missing
+      // either field would be silently dropped.
+      expect(query).toContain('CASE(');
+      expect(query).toContain('MV_APPEND(');
+      expect(query).toContain('MV_EXPAND ownerKey');
+      // The expand must come after the union and before the actor CONCAT.
+      expect(query.indexOf('MV_APPEND(')).toBeLessThan(query.indexOf('MV_EXPAND ownerKey'));
+      expect(query.indexOf('MV_EXPAND ownerKey')).toBeLessThan(
+        query.indexOf('CONCAT("user:", ownerKey')
+      );
+    });
+
+    it('Step 2 builds namespace-suffixed actor EUIDs and a namespace-less host target', () => {
+      const query = entraConfig().esqlQueryOverride('default');
+      expect(query).toContain('CONCAT("user:", ownerKey, "@entra_id")');
+      expect(query).toContain('CONCAT("host:", TO_STRING(host.id))');
+    });
+
+    it('Step 2 rejects empty-value actor EUIDs', () => {
+      const query = entraConfig().esqlQueryOverride('default');
+      // An empty owner value would otherwise yield the invalid id "user:@entra_id".
+      expect(query).toContain('actorUserId != "user:@entra_id"');
+      expect(query).toContain('actorUserId RLIKE ".+:.+@.+"');
+    });
+
+    it('never reads registered_users (a separate concept from registered_owners)', () => {
+      const query = entraConfig().esqlQueryOverride('default');
+      expect(query).not.toContain('registered_users');
+      expect(JSON.stringify(entraConfig().compositeAggAdditionalFilters)).not.toContain(
+        'registered_users'
+      );
+    });
+
+    it('ignores the watermark (log-based config re-scans the trailing lookback window)', () => {
+      const withWatermark = buildOwnsConfigs('2026-06-01T00:00:00.000Z').find(
+        (c): c is OverrideRelationshipIntegrationConfig => c.id === ENTRA_ID
+      )!;
+      expect(withWatermark.esqlQueryOverride('default')).toBe(
+        entraConfig().esqlQueryOverride('default')
+      );
+      expect(JSON.stringify(withWatermark.compositeAggAdditionalFilters)).not.toContain(
+        'entity.lifecycle.last_seen'
+      );
+    });
+
+    it('targets-per-actor ES|QL is locked', () => {
+      expect(buildTargetsPerActorQuery(entraConfig(), '__namespace__')).toMatchSnapshot();
     });
   });
 });
