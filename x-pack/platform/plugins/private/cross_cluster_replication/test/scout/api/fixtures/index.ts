@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
-  describe('cross-cluster replication', () => {
-    loadTestFile(require.resolve('./auto_follow_pattern'));
-    loadTestFile(require.resolve('./follower_indices'));
-  });
-}
+export { apiTest } from '@kbn/scout';
+export * as testData from './constants';
+export {
+  registerSelfReferentialRemote,
+  removeRemote,
+  REMOTE_CONNECT_TIMEOUT_MS,
+} from './remote_cluster';
