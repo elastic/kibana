@@ -143,7 +143,11 @@ export const createExecuteConnectorSubActionTool = ({
         return context.prompts.askForConfirmation({
           id: confirmId,
           title: `Confirm: ${subAction}`,
-          message: `The '${subAction}' action may have irreversible side effects. Do you want to proceed?`,
+          message: `The '${subAction}' action may have irreversible side effects.\n\n**Parameters:**\n\`\`\`json\n${JSON.stringify(
+            params ?? {},
+            null,
+            2
+          )}\n\`\`\`\n\nDo you want to proceed?`,
           confirm_text: 'Proceed',
           cancel_text: 'Cancel',
         });

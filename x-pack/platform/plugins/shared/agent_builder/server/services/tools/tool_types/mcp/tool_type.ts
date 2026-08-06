@@ -223,7 +223,13 @@ export const getMcpToolType = ({
                 return context.prompts.askForConfirmation({
                   id: confirmId,
                   title: `Confirm: ${config.tool_name}`,
-                  message: `The '${config.tool_name}' action may have irreversible side effects. Do you want to proceed?`,
+                  message: `The '${
+                    config.tool_name
+                  }' action may have irreversible side effects.\n\n**Parameters:**\n\`\`\`json\n${JSON.stringify(
+                    params,
+                    null,
+                    2
+                  )}\n\`\`\`\n\nDo you want to proceed?`,
                   confirm_text: 'Proceed',
                   cancel_text: 'Cancel',
                 });
