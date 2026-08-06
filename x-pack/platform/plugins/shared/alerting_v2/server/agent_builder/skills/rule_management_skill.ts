@@ -84,7 +84,9 @@ When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${
 
 Severity is a per-event property on alert events and episodes, not a rule-level field. It is extracted at execution time from a column named \`severity\` in the ES|QL breach query output.
 
-- **Valid values**: ${getSeverityValues().map((v) => `\`${v}\``).join(', ')} (case-insensitive).
+- **Valid values**: ${getSeverityValues()
+          .map((v) => `\`${v}\``)
+          .join(', ')} (case-insensitive).
 - If the breach query does not produce a \`severity\` column, alert events have no severity.
 - Different groups can produce different severities in the same rule execution (the value comes from each row).
 - Action policies can match on \`severity\` to route high-severity episodes differently (e.g. PagerDuty for critical, email for low).
