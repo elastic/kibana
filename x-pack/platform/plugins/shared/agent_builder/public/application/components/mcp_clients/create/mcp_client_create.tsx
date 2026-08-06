@@ -34,11 +34,20 @@ import { labels } from '../../../utils/i18n';
 import illustrationGenai from '../assets/illustration_genai.svg';
 import { McpClientForm } from './mcp_client_form';
 import { toCreateOAuthClientPayload } from './mcp_client_transform';
+import { loadDefaultLogoDataUrl } from './mcp_logo_options';
 
 const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
   background-color: ${euiTheme.colors.backgroundBasePlain};
   border-block-end: none;
 `;
+
+const resolveDefaultLogoDataUrl = async (): Promise<string | undefined> => {
+  try {
+    return await loadDefaultLogoDataUrl();
+  } catch {
+    return undefined;
+  }
+};
 
 export const McpClientCreate = () => {
   const { navigateToAgentBuilderUrl } = useNavigation();
@@ -67,7 +76,11 @@ export const McpClientCreate = () => {
   const handleCreate = useCallback(
     async (data: McpClientFormData) => {
       try {
-        const response = await createOAuthClient(toCreateOAuthClientPayload(data));
+        const fallbackLogoDataUrl =
+          data.clientLogo.type === 'none' ? await resolveDefaultLogoDataUrl() : undefined;
+        const response = await createOAuthClient(
+          toCreateOAuthClientPayload(data, fallbackLogoDataUrl)
+        );
 
         addSuccessToast({
           title: labels.tools.mcpClients.form.createSuccessToast(data.clientName),
