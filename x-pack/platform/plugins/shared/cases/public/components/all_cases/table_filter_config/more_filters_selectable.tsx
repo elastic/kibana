@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { MultiSelectFilterOption } from '../multi_select_filter';
 import * as i18n from '../translations';
@@ -22,7 +21,6 @@ export const MoreFiltersSelectable = ({
   isLoading: boolean;
   onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
 }) => {
-  const { euiTheme } = useEuiTheme();
   return (
     <MultiSelectFilter
       // `controlsHorizontal`, not a plus: this control both adds and removes which filters are
@@ -38,12 +36,9 @@ export const MoreFiltersSelectable = ({
       options={options}
       selectedOptionKeys={activeFilters}
       isLoading={isLoading}
-      // The nudge sits on the anchor, not the button: on the button it moved the button out of
-      // alignment with its cell, so the hover and selected backgrounds painted 4px off from the
-      // filter group's border. On the anchor, button and background move together.
-      anchorCss={css`
-        margin-left: -${euiTheme.size.xs};
-      `}
+      // No nudge: shifting this control overlapped the neighbouring filter's cell, so hovering one
+      // tinted a strip of the other. EuiFilterGroup already collapses the borders between adjacent
+      // filters, so each cell owns its own hover area without any offset.
       // EuiFilterButton always renders a label span before its icon, and spaces the icon from it
       // with a margin on the icon itself (not a flex gap). With no label that leaves an empty 8px
       // box and a 4px margin ahead of the glyph, pushing it off-centre in an otherwise symmetrically

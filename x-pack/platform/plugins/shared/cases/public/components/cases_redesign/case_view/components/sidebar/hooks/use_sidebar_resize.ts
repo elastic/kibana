@@ -37,6 +37,9 @@ export const useSidebarResize = () => {
 
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<{ startX: number; startWidth: number; width: number } | null>(null);
+  // Coalesces pointer moves to one layout per frame — see onPointerMove.
+  const frameRef = useRef<number | null>(null);
+  const pendingWidthRef = useRef<number | null>(null);
 
   const applyWidth = useCallback((nextWidth: number) => {
     if (sidebarRef.current) {
@@ -54,7 +57,22 @@ export const useSidebarResize = () => {
       // Dragging left grows the sidebar: it is anchored to the end of the row.
       const next = clampSidebarWidth(dragState.startWidth + (dragState.startX - event.clientX));
       dragState.width = next;
-      applyWidth(next);
+      pendingWidthRef.current = next;
+
+      // Writing the width is what makes the whole case view re-lay-out: the content column changes
+      // size, the markdown feed re-wraps, and every embeddable's ResizeObserver fires. Pointer moves
+      // arrive faster than the screen refreshes, so writing on each one meant several full reflows
+      // per frame. Coalescing to at most one write per frame keeps the drag smooth and drops nothing
+      // — only the latest position matters.
+      if (frameRef.current != null) {
+        return;
+      }
+      frameRef.current = requestAnimationFrame(() => {
+        frameRef.current = null;
+        if (pendingWidthRef.current != null) {
+          applyWidth(pendingWidthRef.current);
+        }
+      });
     },
     [applyWidth]
   );
@@ -62,10 +80,23 @@ export const useSidebarResize = () => {
   const onPointerUp = useCallback(() => {
     const dragState = dragStateRef.current;
     dragStateRef.current = null;
+
+    if (frameRef.current != null) {
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = null;
+    }
+    pendingWidthRef.current = null;
+
+    // Let the page take pointer events again (see onPointerDown).
+    document.body.style.removeProperty('cursor');
+    document.body.style.removeProperty('user-select');
+
     if (dragState) {
+      // Land on the final position even if the last frame never ran.
+      applyWidth(dragState.width);
       setStoredWidth(dragState.width);
     }
-  }, [setStoredWidth]);
+  }, [applyWidth, setStoredWidth]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -80,12 +111,22 @@ export const useSidebarResize = () => {
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
       window.removeEventListener('pointercancel', onPointerUp);
+      if (frameRef.current != null) {
+        cancelAnimationFrame(frameRef.current);
+      }
     };
   }, [onPointerMove, onPointerUp]);
 
   const onPointerDown = useCallback(
     (event: ReactPointerEvent<HTMLButtonElement>) => {
       dragStateRef.current = { startX: event.clientX, startWidth: width, width };
+
+      // Capture keeps every move on the rail, so the drag survives the pointer passing over an
+      // embeddable or an iframe in the feed. Suppressing selection and pinning the cursor stops the
+      // browser doing text-selection and hover work on a page that is re-laying-out every frame.
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+      document.body.style.setProperty('cursor', 'col-resize');
+      document.body.style.setProperty('user-select', 'none');
     },
     [width]
   );

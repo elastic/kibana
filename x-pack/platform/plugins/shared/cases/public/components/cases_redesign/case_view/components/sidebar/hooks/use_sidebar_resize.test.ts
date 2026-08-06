@@ -22,7 +22,12 @@ jest.mock('../../../../../../common/use_cases_local_storage', () => ({
 }));
 
 const pointerDown = (clientX: number) =>
-  ({ clientX } as unknown as ReactPointerEvent<HTMLButtonElement>);
+  ({
+    clientX,
+    pointerId: 1,
+    // The rail captures the pointer so the drag survives passing over an embeddable.
+    currentTarget: { setPointerCapture: jest.fn() },
+  } as unknown as ReactPointerEvent<HTMLButtonElement>);
 
 const arrowKey = (key: string, preventDefault = jest.fn()) =>
   ({ key, preventDefault } as unknown as ReactKeyboardEvent<HTMLButtonElement>);
@@ -141,6 +146,9 @@ describe('useSidebarResize', () => {
 
     act(() => result.current.onPointerDown(pointerDown(800)));
     act(() => dragTo(770));
+    // Mid-drag the write is coalesced onto an animation frame; releasing lands the final position
+    // regardless of whether that frame has run.
+    act(() => endDrag());
 
     expect(node.style.flexBasis).toBe(`${DEFAULT_SIDEBAR_WIDTH + 30}px`);
   });
