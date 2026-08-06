@@ -8,17 +8,29 @@
  */
 
 import { css } from '@emotion/react';
-import type { UseEuiTheme } from '@elastic/eui';
+import { getEuiButtonColorValues, type UseEuiTheme } from '@elastic/eui';
 
-export const filterBadgeStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
-  container: css({
-    width: 'fit-content',
-    '& [data-is-negated="true"]:before': {
-      content: 'attr(data-negation-string)',
-      display: 'inline-block',
-      color: euiTheme.colors.danger,
-      fontWeight: euiTheme.font.weight.bold,
-      paddingRight: euiTheme.size.xs,
-    },
-  }),
-});
+export const filterBadgeStyles = (euiThemeContext: UseEuiTheme) => {
+  const { euiTheme } = euiThemeContext;
+  const disabledColors = getEuiButtonColorValues(euiThemeContext, 'disabled');
+
+  return {
+    container: css({
+      width: 'fit-content',
+      '& [data-is-negated="true"]:before': {
+        content: 'attr(data-negation-string)',
+        display: 'inline-block',
+        color: euiTheme.colors.danger,
+        fontWeight: euiTheme.font.weight.bold,
+        paddingRight: euiTheme.size.xs,
+      },
+    }),
+    inactive: css({
+      '--euiBadgeTextColor': disabledColors.color,
+      '--euiBadgeBackgroundColor': disabledColors.backgroundColor,
+      '--euiBadgeBackgroundHoverColor': disabledColors.backgroundHover,
+      '--euiBadgeBackgroundActiveColor': disabledColors.backgroundActive,
+      borderColor: disabledColors.borderColor || 'transparent',
+    }),
+  };
+};

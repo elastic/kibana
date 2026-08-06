@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBadge, type DistributiveOmit, type EuiBadgeProps, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, type EuiBadgeProps, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   isNegatedOperator,
@@ -17,13 +17,25 @@ import {
 } from '../../utils/filter_input_codec';
 import { filterBadgeStyles } from './filter_badge.styles';
 
-type FilterBadgeProps = DistributiveOmit<EuiBadgeProps, 'color'> & {
+type FilterBadgeProps = EuiBadgeProps & {
   filter: FilterExpressionValue;
+  /**
+   * Applies EUI disabled-badge colors without setting isDisabled, so the badge
+   * remains clickable (e.g. toggled-off filters that still open the menu).
+   */
+  isInactive?: boolean;
 };
 
-export function FilterBadge({ filter, css, iconType, ...props }: FilterBadgeProps) {
-  const { euiTheme } = useEuiTheme();
-  const styles = useMemo(() => filterBadgeStyles(euiTheme), [euiTheme]);
+export function FilterBadge({
+  filter,
+  css,
+  iconType,
+  color,
+  isInactive,
+  ...props
+}: FilterBadgeProps) {
+  const euiThemeContext = useEuiTheme();
+  const styles = useMemo(() => filterBadgeStyles(euiThemeContext), [euiThemeContext]);
   const isNegated = isNegatedOperator(filter.operator);
   const expression = String.prototype.slice.apply(filterExpressionCodec.encode(filter), [
     isNegated ? 1 : 0,
@@ -31,12 +43,12 @@ export function FilterBadge({ filter, css, iconType, ...props }: FilterBadgeProp
 
   return (
     <EuiBadge
-      css={[styles.container, css]}
+      css={[styles.container, isInactive && styles.inactive, css]}
       data-is-negated={isNegated}
       data-negation-string={i18n.translate('cpsUtils.filterBadge.negationString', {
         defaultMessage: 'NOT',
       })}
-      color="hollow"
+      color={color ?? 'hollow'}
       iconType={iconType === 'empty' ? undefined : iconType}
       {...props}
     >
