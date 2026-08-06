@@ -481,16 +481,16 @@
         "yaml",
         "@types/js-search"
       ],
-      "reviewers": ["team:fleet"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Fleet"],
+      "addLabels": ["Team:streams-ui"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
     {
       "groupName": "tar",
       "matchDepNames": ["tar"],
-      "reviewers": ["team:fleet", "team:kibana-operations"],
+      "reviewers": ["team:streams-ui", "team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -665,7 +665,7 @@
     {
       "groupName": "react-virtualized",
       "matchDepNames": ["react-virtualized", "@types/react-virtualized"],
-      "reviewers": ["team:kibana-management", "team:fleet"],
+      "reviewers": ["team:kibana-management", "team:streams-ui"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Kibana Management", "Team:Monitoring"],
       "enabled": true,
@@ -674,7 +674,7 @@
     {
       "groupName": "react-window",
       "matchDepNames": ["react-window", "@types/react-window"],
-      "reviewers": ["team:kibana-management", "team:fleet"],
+      "reviewers": ["team:kibana-management", "team:streams-ui"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Kibana Management", "Team:Monitoring"],
       "enabled": true,
@@ -1218,7 +1218,7 @@
     {
       "groupName": "hjson",
       "matchDepNames": ["@types/hjson", "hjson"],
-      "reviewers": ["team:kibana-visualizations", "team:fleet"],
+      "reviewers": ["team:kibana-visualizations", "team:streams-ui"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Feature:Vega", "Team:Visualizations"],
       "minimumReleaseAge": "14 days",
@@ -1796,7 +1796,7 @@
     {
       "groupName": "p-limit",
       "matchDepNames": ["p-limit"],
-      "reviewers": ["team:fleet", "team:actionable-obs-team", "team:security-solution"],
+      "reviewers": ["team:streams-ui", "team:actionable-obs-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "allowedVersions": "<4.0.0",
       "minimumReleaseAge": "14 days",
@@ -1805,7 +1805,7 @@
     {
       "groupName": "p-map - ESM Required",
       "matchDepNames": ["p-map"],
-      "reviewers": ["team:fleet", "team:actionable-obs-team", "team:security-solution"],
+      "reviewers": ["team:streams-ui", "team:actionable-obs-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "addLabels": ["effort:low", "blocked"],
       "minimumReleaseAge": "14 days",
@@ -1814,7 +1814,7 @@
     {
       "groupName": "p-retry - ESM Required",
       "matchDepNames": ["p-retry"],
-      "reviewers": ["team:fleet", "team:actionable-obs-team", "team:security-solution"],
+      "reviewers": ["team:streams-ui", "team:actionable-obs-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "addLabels": ["blocked", "effort:low"],
       "minimumReleaseAge": "14 days",
@@ -2019,7 +2019,7 @@
         "team:response-ops",
         "team:contextual-security-apps",
         "team:security-asset-management",
-        "team:fleet",
+        "team:streams-ui",
         "team:awp-platform",
         "team:security-onboarding-and-lifecycle-mgt"
       ],
