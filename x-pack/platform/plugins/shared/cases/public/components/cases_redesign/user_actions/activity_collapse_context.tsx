@@ -7,7 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import * as i18n from './translations';
 
 /**
@@ -116,39 +116,36 @@ export const ActivityCollapseControls: FC = () => {
   const expandAll = () => collapsible.forEach((p) => p.expandAll());
 
   return (
-    <>
-      {/* Right-aligned and icon-led, matching the attachments tab's equivalent control so the same
-          gesture looks the same, and sits in the same place, on both tabs. */}
-      <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <DisabledReason show={!canCollapse}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="fold"
-              onClick={collapseAll}
-              disabled={!canCollapse || allCollapsed}
-              data-test-subj="case-user-actions-collapse-all"
-            >
-              {i18n.COLLAPSE_ALL_ACTIVITIES}
-            </EuiButtonEmpty>
-          </DisabledReason>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <DisabledReason show={!canCollapse}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="unfold"
-              onClick={expandAll}
-              disabled={!canCollapse || allExpanded}
-              data-test-subj="case-user-actions-expand-all"
-            >
-              {i18n.EXPAND_ALL_ACTIVITIES}
-            </EuiButtonEmpty>
-          </DisabledReason>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-    </>
+    /* Right-aligned and icon-led, matching the attachments tab's equivalent control so the same
+       gesture looks the same, and sits in the same place, on both tabs. */
+    <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
+      <EuiFlexItem grow={false}>
+        <DisabledReason show={!canCollapse}>
+          <EuiButtonEmpty
+            size="xs"
+            iconType="fold"
+            onClick={collapseAll}
+            disabled={!canCollapse || allCollapsed}
+            data-test-subj="case-user-actions-collapse-all"
+          >
+            {i18n.COLLAPSE_ALL_ACTIVITIES}
+          </EuiButtonEmpty>
+        </DisabledReason>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <DisabledReason show={!canCollapse}>
+          <EuiButtonEmpty
+            size="xs"
+            iconType="unfold"
+            onClick={expandAll}
+            disabled={!canCollapse || allExpanded}
+            data-test-subj="case-user-actions-expand-all"
+          >
+            {i18n.EXPAND_ALL_ACTIVITIES}
+          </EuiButtonEmpty>
+        </DisabledReason>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

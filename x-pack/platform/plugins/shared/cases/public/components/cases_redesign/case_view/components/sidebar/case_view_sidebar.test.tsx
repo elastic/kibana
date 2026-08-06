@@ -40,6 +40,8 @@ import { useGetCaseConfiguration } from '../../../../../containers/configure/use
 import { useGetCurrentUserProfile } from '../../../../../containers/user_profiles/use_get_current_user_profile';
 import { useReplaceCustomField } from '../../../../../containers/use_replace_custom_field';
 import { KibanaServices } from '../../../../../common/lib/kibana';
+import { useGetTemplate } from '../../../../templates_v2/hooks/use_get_template';
+import { useGetFieldDefinitions } from '../../../../field_library/hooks/use_get_field_definitions';
 
 jest.mock('../../../../case_view/components/template_fields', () => ({
   TemplateFields: () => <div data-test-subj="case-view-template-fields" />,
@@ -51,6 +53,10 @@ jest.mock('../../../../case_view/components/global_case_fields', () => ({
 
 jest.mock('../../../../templates_v2/hooks/use_get_template', () => ({
   useGetTemplate: jest.fn().mockReturnValue({ data: undefined }),
+}));
+
+jest.mock('../../../../field_library/hooks/use_get_field_definitions', () => ({
+  useGetFieldDefinitions: jest.fn(),
 }));
 
 jest.mock('../../../../../containers/configure/use_get_supported_action_connectors');
@@ -100,6 +106,8 @@ const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
 const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
 const useReplaceCustomFieldMock = useReplaceCustomField as jest.Mock;
+const useGetTemplateMock = useGetTemplate as jest.Mock;
+const useGetFieldDefinitionsMock = useGetFieldDefinitions as jest.Mock;
 
 describe('CaseViewSidebar (redesign)', () => {
   const caseConnectors = getCaseConnectorsMockResponse();
@@ -132,6 +140,11 @@ describe('CaseViewSidebar (redesign)', () => {
     localStorage.clear();
     useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: caseUsers });
     useCasesFeaturesMock.mockReturnValue(useGetCasesFeaturesRes);
+    useGetTemplateMock.mockReturnValue({ data: undefined });
+    useGetFieldDefinitionsMock.mockReturnValue({
+      data: { fieldDefinitions: [{ id: 'global-field-1' }] },
+      isLoading: false,
+    });
   });
 
   it('should render the sidebar with tags, categories, and connector', async () => {
@@ -538,6 +551,7 @@ describe('CaseViewSidebar (redesign)', () => {
         .mockReturnValue({ templates: { enabled: true } } as ReturnType<
           typeof KibanaServices.getConfig
         >);
+      useGetTemplateMock.mockReturnValue({ data: { name: 'SLA breach response' } });
 
       const caseDataWithTemplate: CaseUI = {
         ...caseData,
@@ -549,14 +563,17 @@ describe('CaseViewSidebar (redesign)', () => {
       expect(await screen.findByTestId('case-view-sidebar-template-fields')).toBeInTheDocument();
       expect(screen.getByTestId('case-view-template-fields')).toBeInTheDocument();
       expect(screen.getByTestId('case-view-sidebar-template-fields-settings')).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('case-view-sidebar-no-template-selected')
-      ).not.toBeInTheDocument();
+      // The section keeps its stable title; the applied template is named in the subtitle.
+      expect(screen.getByText('Custom fields')).toBeInTheDocument();
+      expect(screen.getByTestId('case-view-sidebar-applied-template')).toHaveTextContent(
+        'Template: SLA breach response'
+      );
+      expect(screen.queryByTestId('case-view-sidebar-no-template-applied')).not.toBeInTheDocument();
       // Global fields render alongside the applied template's fields.
       expect(screen.getByTestId('case-view-global-case-fields')).toBeInTheDocument();
     });
 
-    it('shows a "No template selected" placeholder when templates v2 is enabled but no template is applied', async () => {
+    it('shows the no-template subtitle when no template is applied', async () => {
       jest
         .spyOn(KibanaServices, 'getConfig')
         .mockReturnValue({ templates: { enabled: true } } as ReturnType<
@@ -565,12 +582,32 @@ describe('CaseViewSidebar (redesign)', () => {
 
       renderWithTestingProviders(<CaseViewSidebar caseData={caseData} />);
 
-      expect(
-        await screen.findByTestId('case-view-sidebar-no-template-selected')
-      ).toBeInTheDocument();
+      expect(await screen.findByTestId('case-view-sidebar-no-template-applied')).toHaveTextContent(
+        'No template applied'
+      );
       expect(screen.queryByTestId('case-view-template-fields')).not.toBeInTheDocument();
-      // Global fields apply regardless of whether a template is selected.
+      // Global fields apply regardless of whether a template is selected, and their presence
+      // means the section body has content — so no empty state.
       expect(screen.getByTestId('case-view-global-case-fields')).toBeInTheDocument();
+      expect(screen.queryByTestId('case-view-sidebar-fields-empty')).not.toBeInTheDocument();
+    });
+
+    it('shows an empty state when no template is applied and no global fields exist', async () => {
+      jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+      useGetFieldDefinitionsMock.mockReturnValue({
+        data: { fieldDefinitions: [] },
+        isLoading: false,
+      });
+
+      renderWithTestingProviders(<CaseViewSidebar caseData={caseData} />);
+
+      expect(await screen.findByTestId('case-view-sidebar-fields-empty')).toHaveTextContent(
+        'Apply a template to see its fields here.'
+      );
     });
 
     it('does not render the template settings popover for users without update permissions', async () => {

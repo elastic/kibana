@@ -24,6 +24,11 @@ const INLINE_PADDING_VAR = '--casesSidebarSectionInlinePadding';
 interface SidebarAccordionSectionProps {
   id: SidebarAccordionId;
   title: ReactNode;
+  /**
+   * Optional second line of the trigger, rendered under the title and pinned with it —
+   * a permanent slot for section-level context (e.g. which template a section reflects).
+   */
+  subtitle?: ReactNode;
   extraAction?: ReactNode;
   isOpen: boolean;
   onToggle: (id: SidebarAccordionId, isOpen: boolean) => void;
@@ -36,6 +41,7 @@ interface SidebarAccordionSectionProps {
 export const SidebarAccordionSection: FC<SidebarAccordionSectionProps> = ({
   id,
   title,
+  subtitle,
   extraAction,
   isOpen,
   onToggle,
@@ -87,6 +93,16 @@ export const SidebarAccordionSection: FC<SidebarAccordionSectionProps> = ({
           background: isEditing
             ? euiTheme.colors.backgroundBaseSubdued
             : euiTheme.colors.backgroundBasePlain,
+        },
+        // Let the trigger shrink below its content so a long subtitle (e.g. a template name)
+        // can truncate with an ellipsis instead of widening the header past the panel. The
+        // buttonContent wrapper is a span, so it also needs a block context for truncation.
+        '& > .euiAccordion__triggerWrapper > .euiAccordion__button': {
+          minInlineSize: 0,
+        },
+        '& .euiAccordion__buttonContent': {
+          display: 'block',
+          minInlineSize: 0,
         },
       }),
       // In edit mode the save row becomes a second line of the header. `extraAction` is the only slot
@@ -159,9 +175,12 @@ export const SidebarAccordionSection: FC<SidebarAccordionSectionProps> = ({
           )
         }
         buttonContent={
-          <EuiTitle size="xs">
-            <h3>{title}</h3>
-          </EuiTitle>
+          <>
+            <EuiTitle size="xs">
+              <h3>{title}</h3>
+            </EuiTitle>
+            {subtitle}
+          </>
         }
       >
         <EuiSpacer size="m" />

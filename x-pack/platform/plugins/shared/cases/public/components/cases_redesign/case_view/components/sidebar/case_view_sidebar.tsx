@@ -17,6 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import type { CaseUI } from '../../../../../../common';
 import type { CaseConnector } from '../../../../../../common/types/domain';
@@ -43,6 +44,7 @@ import { useGetCaseConnectors } from '../../../../../containers/use_get_case_con
 import { useGetCaseConfiguration } from '../../../../../containers/configure/use_get_case_configuration';
 import { useGetSupportedActionConnectors } from '../../../../../containers/configure/use_get_supported_action_connectors';
 import { useGetTemplate } from '../../../../templates_v2/hooks/use_get_template';
+import { useGetFieldDefinitions } from '../../../../field_library/hooks/use_get_field_definitions';
 import { KibanaServices } from '../../../../../common/lib/kibana';
 import { useShowLegacyCustomFields } from '../../../../../common/use_show_old_custom_fields';
 import { CustomFieldsDeprecationCallout } from '../../../../case_form_fields/custom_fields_deprecation_callout';
@@ -154,7 +156,56 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
   const { data: templateData } = useGetTemplate(caseData.template?.id, caseData.template?.version, {
     includeDeleted: true,
   });
-  const templateFieldsTitle = templateData?.name ?? redesignI18n.TEMPLATE_FIELDS_TITLE;
+
+  // Same query GlobalCaseFields issues (React Query deduplicates them): the section needs to
+  // tell "no template and no global fields" apart from "global fields render below" so it can
+  // show a designed empty state instead of an empty body. Disabled while templates v2 is off,
+  // since the section that needs it never renders.
+  const { data: globalFieldDefinitions, isLoading: isLoadingGlobalFieldDefinitions } =
+    useGetFieldDefinitions({
+      owner: isTemplatesV2Enabled ? caseData.owner : undefined,
+      isGlobal: true,
+      staleTime: Infinity,
+    });
+  const hasGlobalFields = (globalFieldDefinitions?.fieldDefinitions?.length ?? 0) > 0;
+  const showFieldsEmptyState =
+    !caseData.template?.id && !isLoadingGlobalFieldDefinitions && !hasGlobalFields;
+
+  // The name — not the "Template:" label — is what the reader scans for, so it carries the
+  // emphasis while the label stays subdued.
+  const templateNameStyles = useMemo(() => css({ color: euiTheme.colors.textHeading }), [euiTheme]);
+
+  // A permanent subtitle slot under the section title: the second line always names the
+  // template state, so status never has to masquerade as body content between the fields.
+  const fieldsSubtitle = caseData.template?.id ? (
+    templateData?.name ? (
+      <EuiText
+        size="xs"
+        color="subdued"
+        className="eui-textTruncate"
+        // Long names truncate with an ellipsis, so expose the full name on hover.
+        title={templateData.name}
+        data-test-subj="case-view-sidebar-applied-template"
+      >
+        <FormattedMessage
+          id="xpack.cases.casesRedesign.details.fieldsSectionTemplateSubtitle"
+          defaultMessage="Template: {name}"
+          values={{
+            name: <strong css={templateNameStyles}>{templateData.name}</strong>,
+          }}
+        />
+      </EuiText>
+    ) : null
+  ) : (
+    <EuiText
+      size="xs"
+      color="subdued"
+      className="eui-textTruncate"
+      data-test-subj="case-view-sidebar-no-template-applied"
+    >
+      {redesignI18n.NO_TEMPLATE_APPLIED}
+    </EuiText>
+  );
 
   const { onUpdateField, onSubmitCustomField, isCustomFieldsLoading } = useTemplateFieldsActions({
     caseData,
@@ -293,7 +344,8 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
                 <SidebarAccordionSection
                   withDivider
                   id="templateFields"
-                  title={templateFieldsTitle}
+                  title={redesignI18n.CUSTOM_FIELDS_SECTION_TITLE}
+                  subtitle={fieldsSubtitle}
                   extraAction={
                     permissions.update ? (
                       <TemplateSettingsPopover
@@ -309,6 +361,20 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
                   {/* Global fields and template fields are separate forms but one section to the
                   reader, so one edit mode and one Save cover both. */}
                   <EuiFlexGroup direction="column" responsive={false} css={fieldsGroupStyles}>
+                    {/* Template status lives in the section's subtitle, so the body only speaks
+                      when it would otherwise be empty — and points at the action that fills it
+                      rather than restating the subtitle. */}
+                    {showFieldsEmptyState ? (
+                      // Matches the sibling empty state in this sidebar (assignees_field): subdued
+                      // body text, no icon, no italics.
+                      <EuiText
+                        size="s"
+                        color="subdued"
+                        data-test-subj="case-view-sidebar-fields-empty"
+                      >
+                        <p>{redesignI18n.APPLY_TEMPLATE_TO_SEE_FIELDS}</p>
+                      </EuiText>
+                    ) : null}
                     {/* Global (isGlobal) fields apply to every case regardless of the template.
                       Redesign accordion already labels this section — hide Extended fields heading. */}
                     <GlobalCaseFields
@@ -322,15 +388,7 @@ export const CaseViewSidebar = ({ caseData }: CaseViewSidebarProps) => {
                         onUpdateField={onUpdateField}
                         showHeader={false}
                       />
-                    ) : (
-                      <EuiText
-                        size="s"
-                        color="subdued"
-                        data-test-subj="case-view-sidebar-no-template-selected"
-                      >
-                        {redesignI18n.NO_TEMPLATE_SELECTED}
-                      </EuiText>
-                    )}
+                    ) : null}
                   </EuiFlexGroup>
                 </SidebarAccordionSection>
               </SectionEditProvider>

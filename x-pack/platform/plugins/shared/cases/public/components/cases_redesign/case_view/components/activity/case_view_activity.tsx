@@ -66,6 +66,7 @@ export const CaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
               params={userActivityQueryParams}
               userActionsStats={userActionsStats}
               isLoading={isLoadingUserActionsStats}
+              rightAction={<ActivityCollapseControls />}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -73,8 +74,6 @@ export const CaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        {/* Directly under the filter row, the same place the attachments tab puts its pair. */}
-        <ActivityCollapseControls />
         <Description
           isLoadingDescription={isLoadingDescription}
           caseData={caseData}
