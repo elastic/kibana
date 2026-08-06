@@ -142,6 +142,7 @@ dependsOn:
   - '@kbn/telemetry'
   - '@kbn/embeddable-plugin'
   - '@kbn/storybook'
+  - '@kbn/context-engine-plugin'
 tags:
   - plugin
   - prod
