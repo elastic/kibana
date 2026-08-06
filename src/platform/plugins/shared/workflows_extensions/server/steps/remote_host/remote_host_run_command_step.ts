@@ -20,6 +20,8 @@ import { createPollServerStepDefinition } from '../../step_registry/types';
 
 const StateSchema = z.object({
   commandId: z.string(),
+  stdoutOffset: z.number().default(0),
+  stderrOffset: z.number().default(0),
 });
 
 const parseScriptOutput = (raw: string | undefined): unknown => {
@@ -68,7 +70,13 @@ export const createRemoteHostRunCommandStepDefinition = ({ getActionsStart }: De
       if (result.stderr) context.logger.warn(result.stderr);
 
       if (result.status === 'running') {
-        return { state: { commandId: result.commandId } };
+        return {
+          state: {
+            commandId: result.commandId,
+            stdoutOffset: result.stdoutOffset,
+            stderrOffset: result.stderrOffset,
+          },
+        };
       }
 
       if (result.exitCode !== 0) {
@@ -92,13 +100,21 @@ export const createRemoteHostRunCommandStepDefinition = ({ getActionsStart }: De
         request: contextManager.getFakeRequest(),
         actionsStart: getActionsStart(),
         commandId: state.commandId,
+        stdoutOffset: state.stdoutOffset,
+        stderrOffset: state.stderrOffset,
       });
 
       if (result.stdout) context.logger.info(result.stdout);
       if (result.stderr) context.logger.warn(result.stderr);
 
       if (result.status === 'running') {
-        return undefined;
+        return {
+          state: {
+            commandId: state.commandId,
+            stdoutOffset: result.stdoutOffset,
+            stderrOffset: result.stderrOffset,
+          },
+        };
       }
 
       if (result.exitCode !== 0) {

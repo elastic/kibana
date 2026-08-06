@@ -45,6 +45,8 @@ export const ExecAsyncParamsSchema = lazySchema(() =>
 export const GetExecStatusParamsSchema = lazySchema(() =>
   z.object({
     commandId: z.string().min(1).max(256),
+    stdoutOffset: z.number().int().min(0).max(104857600).optional(),
+    stderrOffset: z.number().int().min(0).max(104857600).optional(),
     signal: z.any().optional(),
   })
 );

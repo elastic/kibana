@@ -221,24 +221,36 @@ echo "STATUS=RUNNING"
   public async getExecStatus(params: GetExecStatusParams): Promise<{
     commandId: string;
     status: 'DONE' | 'RUNNING';
-    stderr?: string;
     stdout?: string;
+    stderr?: string;
+    stdoutOffset: number;
+    stderrOffset: number;
     exitCode?: number;
     files?: Array<{ file: string; content: string }>;
   }> {
-    const { commandId, signal } = params;
+    const { commandId, signal, stdoutOffset = 0, stderrOffset = 0 } = params;
     const { tmpDir, stdoutFile, stderrFile, codeFile } = this.getCommandData(commandId);
 
     const command = `#!/bin/bash
-_b64() { base64 -w 0 "$1" 2>/dev/null || openssl base64 -A "$1" 2>/dev/null || echo ''; }
+_b64_from() {
+  local off="$1" f="$2"
+  tail -c +$(( off + 1 )) "$f" 2>/dev/null | base64 -w 0 2>/dev/null \
+    || tail -c +$(( off + 1 )) "$f" 2>/dev/null | openssl base64 -A 2>/dev/null \
+    || echo ''
+}
+_fsize() { wc -c < "$1" 2>/dev/null | tr -d ' ' || echo '0'; }
 if [ -f "${codeFile}" ]; then
   EXIT_CODE=$(cat "${codeFile}" 2>/dev/null || echo '0')
-  STDOUT=$(_b64 "${stdoutFile}")
-  STDERR=$(_b64 "${stderrFile}")
+  STDOUT=$(_b64_from ${stdoutOffset} "${stdoutFile}")
+  STDERR=$(_b64_from ${stderrOffset} "${stderrFile}")
+  STDOUT_SIZE=$(_fsize "${stdoutFile}")
+  STDERR_SIZE=$(_fsize "${stderrFile}")
   echo "STATUS=DONE"
   echo "EXIT_CODE=$EXIT_CODE"
   echo "STDOUT=$STDOUT"
   echo "STDERR=$STDERR"
+  echo "STDOUT_SIZE=$STDOUT_SIZE"
+  echo "STDERR_SIZE=$STDERR_SIZE"
   FILES_LIST=""
   for _f in "${tmpDir}"/*; do
     [ -f "$_f" ] || continue
@@ -249,16 +261,20 @@ if [ -f "${codeFile}" ]; then
     [ -n "$FILES_LIST" ] && FILES_LIST="$FILES_LIST,"
     FILES_LIST="$FILES_LIST$_fname"
     _key=$(echo "$_fname" | sed 's/[^a-zA-Z0-9]/_/g')
-    echo "FILE_\${_key}=$(_b64 "$_f")"
+    echo "FILE_\${_key}=$(_b64_from 0 "$_f")"
   done
   echo "FILES=$FILES_LIST"
   rm -rf "${tmpDir}"
 else
-  STDOUT=$(_b64 "${stdoutFile}")
-  STDERR=$(_b64 "${stderrFile}")
+  STDOUT=$(_b64_from ${stdoutOffset} "${stdoutFile}")
+  STDERR=$(_b64_from ${stderrOffset} "${stderrFile}")
+  STDOUT_SIZE=$(_fsize "${stdoutFile}")
+  STDERR_SIZE=$(_fsize "${stderrFile}")
   echo "STATUS=RUNNING"
   echo "STDOUT=$STDOUT"
   echo "STDERR=$STDERR"
+  echo "STDOUT_SIZE=$STDOUT_SIZE"
+  echo "STDERR_SIZE=$STDERR_SIZE"
 fi`;
 
     const { stdout } = await this.execCommand({ script: command, signal });
@@ -266,6 +282,8 @@ fi`;
     const exitCode = parseInt(stdout.match(/^EXIT_CODE=(\d+)$/m)?.[1] ?? '0', 10);
     const stdoutB64 = stdout.match(/^STDOUT=(.*)$/m)?.[1] ?? '';
     const stderrB64 = stdout.match(/^STDERR=(.*)$/m)?.[1] ?? '';
+    const newStdoutOffset = parseInt(stdout.match(/^STDOUT_SIZE=(\d+)$/m)?.[1] ?? '0', 10);
+    const newStderrOffset = parseInt(stdout.match(/^STDERR_SIZE=(\d+)$/m)?.[1] ?? '0', 10);
     const fileNames = (stdout.match(/^FILES=(.*)$/m)?.[1] ?? '').split(',').filter(Boolean);
     const files = fileNames.map((name) => {
       const key = name.replace(/[^a-zA-Z0-9]/g, '_');
@@ -277,8 +295,10 @@ fi`;
       commandId,
       status: status === 'DONE' ? 'DONE' : 'RUNNING',
       exitCode,
-      stdout: Buffer.from(stdoutB64, 'base64').toString('utf-8').trim(),
-      stderr: Buffer.from(stderrB64, 'base64').toString('utf-8').trim(),
+      stdout: Buffer.from(stdoutB64, 'base64').toString('utf-8'),
+      stderr: Buffer.from(stderrB64, 'base64').toString('utf-8'),
+      stdoutOffset: newStdoutOffset,
+      stderrOffset: newStderrOffset,
       files: files.length > 0 ? files : undefined,
     };
   }

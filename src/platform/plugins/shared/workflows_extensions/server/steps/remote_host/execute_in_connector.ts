@@ -16,6 +16,8 @@ export interface RemoteCommandOutput {
   commandId: string;
   stdout: string;
   stderr: string;
+  stdoutOffset: number;
+  stderrOffset: number;
   exitCode: number;
   /** Content of output.txt written by the script via SCRIPT_OUTPUT= */
   output?: string;
@@ -80,11 +82,15 @@ export async function executeCommandInConnector(params: {
   });
 
   const outputFile = result.files?.find((f) => f.file === 'output.txt');
+  const stdout = result.stdout ?? '';
+  const stderr = result.stderr ?? '';
   return {
     status: result.status === 'RUNNING' ? 'running' : 'terminated',
     commandId: result.commandId,
-    stdout: result.stdout ?? '',
-    stderr: result.stderr ?? '',
+    stdout,
+    stderr,
+    stdoutOffset: stdout.length,
+    stderrOffset: stderr.length,
     exitCode: result.exitCode ?? 0,
     output: outputFile?.content,
   };
@@ -95,15 +101,20 @@ export async function tryExtractCommandOutputFromConnector(params: {
   request: KibanaRequest<unknown, unknown, unknown>;
   actionsStart: ActionsPluginStartContract | undefined;
   commandId: string;
+  stdoutOffset?: number;
+  stderrOffset?: number;
   abortSignal?: AbortSignal;
 }): Promise<RemoteCommandOutput> {
-  const { connectorId, request, actionsStart, commandId, abortSignal } = params;
+  const { connectorId, request, actionsStart, commandId, stdoutOffset, stderrOffset, abortSignal } =
+    params;
 
   const result = await executeSubAction<{
     commandId: string;
     status: 'DONE' | 'RUNNING';
     stdout?: string;
     stderr?: string;
+    stdoutOffset: number;
+    stderrOffset: number;
     exitCode?: number;
     files?: Array<{ file: string; content: string }>;
   }>({
@@ -111,7 +122,7 @@ export async function tryExtractCommandOutputFromConnector(params: {
     request,
     actionsStart,
     subAction: 'getExecStatus',
-    subActionParams: { commandId },
+    subActionParams: { commandId, stdoutOffset, stderrOffset },
     abortSignal,
   });
 
@@ -121,6 +132,8 @@ export async function tryExtractCommandOutputFromConnector(params: {
     status: result.status === 'DONE' ? 'terminated' : 'running',
     stdout: result.stdout ?? '',
     stderr: result.stderr ?? '',
+    stdoutOffset: result.stdoutOffset,
+    stderrOffset: result.stderrOffset,
     exitCode: result.exitCode ?? 0,
     output: outputFile?.content,
   };
