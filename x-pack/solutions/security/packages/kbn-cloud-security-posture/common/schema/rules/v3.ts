@@ -42,18 +42,7 @@ export const BENCHMARK_VERSION_MAX_LENGTH = 64;
 // sync with Fleet's PackagePolicy schema.
 export const PACKAGE_POLICY_ID_MAX_LENGTH = 255;
 
-// Rule name, section name, and other short display labels.
-const RULE_NAME_MAX_LENGTH = 1_024;
-
-// Version strings (e.g. "1.4.1", "v1.0.0") — 64 chars is very generous.
-const RULE_VERSION_MAX_LENGTH = 64;
-
-// Long free-text fields: description, audit, rationale, remediation, impact,
-// default_value, references, profile_applicability — up to 10 KB.
-const RULE_TEXT_MAX_LENGTH = 10_240;
-
-// Per-rule tag strings — tags are short labels.
-const RULE_TAG_MAX_LENGTH = 256;
+// Since version 8.7.0
 
 export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
 
@@ -62,31 +51,31 @@ export type CspBenchmarkRuleMetadata = TypeOf<typeof cspBenchmarkRuleMetadataSch
 export type CspBenchmarkRule = TypeOf<typeof cspBenchmarkRuleSchema>;
 
 export const cspBenchmarkRuleMetadataSchema = schema.object({
-  audit: schema.string({ maxLength: RULE_TEXT_MAX_LENGTH }),
+  audit: schema.string(),
   benchmark: schema.object({
-    name: schema.string({ maxLength: RULE_NAME_MAX_LENGTH }),
+    name: schema.string(),
     posture_type: schema.maybe(
       schema.oneOf([schema.literal(CSPM_POLICY_TEMPLATE), schema.literal(KSPM_POLICY_TEMPLATE)])
     ),
-    id: schema.string({ maxLength: RULE_ID_MAX_LENGTH }),
-    version: schema.string({ maxLength: RULE_VERSION_MAX_LENGTH }),
-    rule_number: schema.maybe(schema.string({ maxLength: RULE_NUMBER_MAX_LENGTH })),
+    id: schema.string(),
+    version: schema.string(),
+    rule_number: schema.maybe(schema.string()),
   }),
-  default_value: schema.maybe(schema.string({ maxLength: RULE_TEXT_MAX_LENGTH })),
-  description: schema.string({ maxLength: RULE_TEXT_MAX_LENGTH }),
-  id: schema.string({ maxLength: RULE_ID_MAX_LENGTH }),
-  impact: schema.maybe(schema.string({ maxLength: RULE_TEXT_MAX_LENGTH })),
-  name: schema.string({ maxLength: RULE_NAME_MAX_LENGTH }),
-  profile_applicability: schema.string({ maxLength: RULE_TEXT_MAX_LENGTH }),
-  rationale: schema.string({ maxLength: RULE_TEXT_MAX_LENGTH }),
-  references: schema.maybe(schema.string({ maxLength: RULE_TEXT_MAX_LENGTH })),
-  reference: schema.maybe(schema.string({ maxLength: RULE_TEXT_MAX_LENGTH })),
-  rego_rule_id: schema.string({ maxLength: RULE_ID_MAX_LENGTH }),
-  remediation: schema.string({ maxLength: RULE_TEXT_MAX_LENGTH }),
-  section: schema.string({ maxLength: RULE_SECTION_MAX_LENGTH }),
+  default_value: schema.maybe(schema.string()),
+  description: schema.string(),
+  id: schema.string(),
+  impact: schema.maybe(schema.string()),
+  name: schema.string(),
+  profile_applicability: schema.string(),
+  rationale: schema.string(),
+  references: schema.maybe(schema.string()),
+  reference: schema.maybe(schema.string()),
+  rego_rule_id: schema.string(),
+  remediation: schema.string(),
+  section: schema.string(),
   // maxSize is set to 100 as it's not expected to have more than 100 tags per rule
-  tags: schema.arrayOf(schema.string({ maxLength: RULE_TAG_MAX_LENGTH }), { maxSize: 100 }),
-  version: schema.string({ maxLength: RULE_VERSION_MAX_LENGTH }),
+  tags: schema.arrayOf(schema.string(), { maxSize: 100 }),
+  version: schema.string(),
 });
 
 export const cspBenchmarkRuleSchema = schema.object({
