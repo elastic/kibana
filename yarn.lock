@@ -9082,6 +9082,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-flyout-info-blocks@link:src/platform/packages/shared/shared-ux/flyout/info-blocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-label-formatter@link:src/platform/packages/shared/shared-ux/label_formatter":
   version "0.0.0"
   uid ""
