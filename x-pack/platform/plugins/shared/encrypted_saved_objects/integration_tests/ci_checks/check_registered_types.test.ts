@@ -136,6 +136,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "alert|11",
         "alert|10",
         "alert|1",
+        "alerting_action_policy|2",
         "alerting_action_policy|1",
         "anonymization-salt|1",
         "api_key_pending_invalidation|2",
