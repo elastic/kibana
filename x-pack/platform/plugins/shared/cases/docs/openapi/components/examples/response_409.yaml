@@ -1,0 +1,7 @@
+summary: A resource conflict occurred.
+value:
+  {
+    "error": "Conflict",
+    "message": "Template name \"Security incident\" already exists for owner \"cases\"",
+    "statusCode": 409
+  }
