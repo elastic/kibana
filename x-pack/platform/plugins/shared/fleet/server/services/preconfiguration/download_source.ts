@@ -17,7 +17,8 @@ import { agentPolicyService } from '../agent_policy';
 export function getPreconfiguredDownloadSourcesFromConfig(
   config?: FleetConfigType
 ): PreconfiguredDownloadSource[] {
-  return ((config?.binaryDownloadSource ?? []) as PreconfiguredDownloadSource[]).map((ds) => ({
+  if (!config) return [];
+  return (config.binaryDownloadSource as PreconfiguredDownloadSource[]).map((ds) => ({
     ...ds,
     is_preconfigured: true,
   }));

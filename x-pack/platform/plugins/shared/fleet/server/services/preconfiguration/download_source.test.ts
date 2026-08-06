@@ -29,8 +29,8 @@ describe('getPreconfiguredDownloadSourcesFromConfig', () => {
     expect(result).toEqual([]);
   });
 
-  it('should return empty array when binaryDownloadSource is not set', () => {
-    const result = getPreconfiguredDownloadSourcesFromConfig({} as any);
+  it('should return empty array when binaryDownloadSource is empty', () => {
+    const result = getPreconfiguredDownloadSourcesFromConfig({ binaryDownloadSource: [] } as any);
     expect(result).toEqual([]);
   });
 

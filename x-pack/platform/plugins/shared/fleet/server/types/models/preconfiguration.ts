@@ -265,7 +265,7 @@ export const PreconfiguredDownloadSourcesSchema = schema.arrayOf(
     proxy_id: schema.maybe(schema.nullable(schema.string())),
     ssl: schema.maybe(
       schema.object({
-        certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+        certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
         certificate: schema.maybe(schema.string()),
         key: schema.maybe(schema.string()),
       })
