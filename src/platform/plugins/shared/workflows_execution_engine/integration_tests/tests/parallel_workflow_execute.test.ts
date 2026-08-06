@@ -16,9 +16,12 @@ const PARENT_EXECUTION_ID = 'fake_workflow_execution_id';
 const SPACE_ID = 'fake_space_id';
 const COVERAGE_GAP_WORKFLOW_ID = 'child-coverage-gap';
 const CORRELATION_WORKFLOW_ID = 'child-correlation';
-const CHILD_WORKFLOW_IDS = [COVERAGE_GAP_WORKFLOW_ID, CORRELATION_WORKFLOW_ID];
-
-const childExecutionId = (workflowId: string) => `child-exec-${workflowId}`;
+const PIPELINE_WORKFLOW_ID = 'child-report-pipeline';
+const CHILD_WORKFLOW_IDS = [
+  COVERAGE_GAP_WORKFLOW_ID,
+  CORRELATION_WORKFLOW_ID,
+  PIPELINE_WORKFLOW_ID,
+];
 
 const getExecution = (fixture: WorkflowRunFixture) =>
   fixture.workflowExecutionRepositoryMock.workflowExecutions.get(PARENT_EXECUTION_ID);
@@ -26,6 +29,12 @@ const getExecution = (fixture: WorkflowRunFixture) =>
 const stepExecutionsFor = (fixture: WorkflowRunFixture, stepId: string) =>
   Array.from(fixture.stepExecutionRepositoryMock.stepExecutions.values()).filter(
     (se) => se.stepId === stepId
+  );
+
+/** Dynamic fan-out invokes one workflow id many times, so look children up by workflow. */
+const childExecutionsOf = (fixture: WorkflowRunFixture, workflowId: string) =>
+  Array.from(fixture.workflowExecutionRepositoryMock.workflowExecutions.values()).filter(
+    (execution) => execution.workflowId === workflowId
   );
 
 /**
@@ -67,7 +76,8 @@ const childWorkflowSource = (workflowId: string) => ({
   },
 });
 
-const workflowYaml = `
+/** Static scatter-gather: two named branches, each a different child workflow. */
+const staticBranchYaml = `
 steps:
   - name: fanOut
     type: parallel
@@ -95,10 +105,36 @@ steps:
       message: 'joined'
 `;
 
+/** Dynamic fan-out: the same child workflow once per runtime item, concurrently. */
+const dynamicFanOutYaml = (maxConcurrency: number) => `
+steps:
+  - name: fanOutReports
+    type: parallel
+    concurrency:
+      max: ${maxConcurrency}
+    foreach:
+      - report-1
+      - report-2
+      - report-3
+    steps:
+      - name: reportPipeline
+        type: workflow.execute
+        with:
+          workflow-id: ${PIPELINE_WORKFLOW_ID}
+          inputs:
+            reportId: '{{ foreach.item }}'
+  - name: afterJoin
+    type: slack
+    connector-id: ${FakeConnectors.slack1.name}
+    with:
+      message: 'joined'
+`;
+
 /**
  * Wires the child-workflow lookup (an ES search behind `WorkflowRepository`) and
  * makes `executeWorkflow` register a RUNNING child execution the sync strategy
- * can later read back, standing in for a real child run.
+ * can later read back, standing in for a real child run. Execution ids are
+ * per-invocation so dynamic fan-out can start the same workflow several times.
  */
 const createFixture = () => {
   const fixture = new WorkflowRunFixture();
@@ -115,9 +151,10 @@ const createFixture = () => {
     };
   });
 
+  let invocation = 0;
   (fixture.workflowsExecutionEngineMock.executeWorkflow as jest.Mock).mockImplementation(
     async (workflow: WorkflowExecutionEngineModel) => {
-      const workflowExecutionId = childExecutionId(workflow.id);
+      const workflowExecutionId = `child-exec-${workflow.id}-${invocation++}`;
       await fixture.workflowExecutionRepositoryMock.createWorkflowExecution({
         id: workflowExecutionId,
         spaceId: SPACE_ID,
@@ -132,21 +169,28 @@ const createFixture = () => {
   return fixture;
 };
 
-const completeChild = async (fixture: WorkflowRunFixture, workflowId: string) => {
-  await fixture.workflowExecutionRepositoryMock.updateWorkflowExecution({
-    id: childExecutionId(workflowId),
-    status: ExecutionStatus.COMPLETED,
-    context: { output: { ranFor: workflowId } },
-  } as never);
+const settleChildren = async (
+  fixture: WorkflowRunFixture,
+  workflowId: string,
+  status: ExecutionStatus,
+  error?: { type: string; message: string }
+) => {
+  for (const child of childExecutionsOf(fixture, workflowId)) {
+    await fixture.workflowExecutionRepositoryMock.updateWorkflowExecution({
+      id: child.id,
+      status,
+      ...(error ? { error } : { context: { output: { ranFor: workflowId } } }),
+    } as never);
+  }
 };
 
 describe('parallel step fanning out to sync sub-workflows', () => {
-  describe('while both children are still running', () => {
+  describe('static branches, while both children are still running', () => {
     let fixture: WorkflowRunFixture;
 
     beforeAll(async () => {
       fixture = createFixture();
-      await fixture.runWorkflow({ workflowYaml });
+      await fixture.runWorkflow({ workflowYaml: staticBranchYaml });
     });
 
     it('parks the parent execution', () => {
@@ -170,14 +214,14 @@ describe('parallel step fanning out to sync sub-workflows', () => {
     });
   });
 
-  describe('after both children complete', () => {
+  describe('static branches, after both children complete', () => {
     let fixture: WorkflowRunFixture;
 
     beforeAll(async () => {
       fixture = createFixture();
-      await fixture.runWorkflow({ workflowYaml });
-      await completeChild(fixture, COVERAGE_GAP_WORKFLOW_ID);
-      await completeChild(fixture, CORRELATION_WORKFLOW_ID);
+      await fixture.runWorkflow({ workflowYaml: staticBranchYaml });
+      await settleChildren(fixture, COVERAGE_GAP_WORKFLOW_ID, ExecutionStatus.COMPLETED);
+      await settleChildren(fixture, CORRELATION_WORKFLOW_ID, ExecutionStatus.COMPLETED);
       await driveToTerminal(fixture);
     });
 
@@ -190,23 +234,83 @@ describe('parallel step fanning out to sync sub-workflows', () => {
     });
   });
 
-  describe('when one child fails', () => {
+  describe('static branches, when one child fails', () => {
     let fixture: WorkflowRunFixture;
 
     beforeAll(async () => {
       fixture = createFixture();
-      await fixture.runWorkflow({ workflowYaml });
-      await completeChild(fixture, COVERAGE_GAP_WORKFLOW_ID);
-      await fixture.workflowExecutionRepositoryMock.updateWorkflowExecution({
-        id: childExecutionId(CORRELATION_WORKFLOW_ID),
-        status: ExecutionStatus.FAILED,
-        error: { type: 'Error', message: 'correlation child blew up' },
-      } as never);
+      await fixture.runWorkflow({ workflowYaml: staticBranchYaml });
+      await settleChildren(fixture, COVERAGE_GAP_WORKFLOW_ID, ExecutionStatus.COMPLETED);
+      await settleChildren(fixture, CORRELATION_WORKFLOW_ID, ExecutionStatus.FAILED, {
+        type: 'Error',
+        message: 'correlation child blew up',
+      });
       await driveToTerminal(fixture);
     });
 
     it('fails the parent execution', () => {
       expect(getExecution(fixture)?.status).toBe(ExecutionStatus.FAILED);
+    });
+  });
+
+  describe('dynamic fan-out, while every item is still running', () => {
+    let fixture: WorkflowRunFixture;
+
+    beforeAll(async () => {
+      fixture = createFixture();
+      await fixture.runWorkflow({ workflowYaml: dynamicFanOutYaml(3) });
+    });
+
+    it('starts one child per item concurrently', () => {
+      expect(childExecutionsOf(fixture, PIPELINE_WORKFLOW_ID)).toHaveLength(3);
+    });
+
+    it('passes the per-item input to each child', () => {
+      expect(fixture.workflowsExecutionEngineMock.executeWorkflow).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ inputs: expect.objectContaining({ reportId: 'report-2' }) }),
+        expect.anything()
+      );
+    });
+
+    it('parks the parent execution', () => {
+      expect(getExecution(fixture)?.status).toBe(ExecutionStatus.WAITING);
+    });
+
+    it('does not run the step after the join', () => {
+      expect(stepExecutionsFor(fixture, 'afterJoin')).toHaveLength(0);
+    });
+  });
+
+  describe('dynamic fan-out, after every item completes', () => {
+    let fixture: WorkflowRunFixture;
+
+    beforeAll(async () => {
+      fixture = createFixture();
+      await fixture.runWorkflow({ workflowYaml: dynamicFanOutYaml(3) });
+      await settleChildren(fixture, PIPELINE_WORKFLOW_ID, ExecutionStatus.COMPLETED);
+      await driveToTerminal(fixture);
+    });
+
+    it('completes the parent execution', () => {
+      expect(getExecution(fixture)?.status).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('runs the step after the join exactly once', () => {
+      expect(stepExecutionsFor(fixture, 'afterJoin')).toHaveLength(1);
+    });
+  });
+
+  describe('dynamic fan-out, when the concurrency cap is below the item count', () => {
+    let fixture: WorkflowRunFixture;
+
+    beforeAll(async () => {
+      fixture = createFixture();
+      await fixture.runWorkflow({ workflowYaml: dynamicFanOutYaml(2) });
+    });
+
+    it('holds the third item until a slot frees up', () => {
+      expect(childExecutionsOf(fixture, PIPELINE_WORKFLOW_ID)).toHaveLength(2);
     });
   });
 });
