@@ -61,6 +61,7 @@ dependsOn:
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/zod'
   - '@kbn/zod-helpers'
+  - '@kbn/test-jest-helpers'
 tags:
   - plugin
   - prod
