@@ -68,3 +68,8 @@ export const COLLAPSE_ALL_ATTACHMENTS = i18n.translate(
 export const EXPAND_ALL_ATTACHMENTS = i18n.translate('xpack.cases.caseView.attachments.expandAll', {
   defaultMessage: 'Expand all',
 });
+
+export const NO_COLLAPSIBLE_ATTACHMENTS = i18n.translate(
+  'xpack.cases.caseView.attachments.noCollapsibleAttachments',
+  { defaultMessage: 'No collapsible attachments available' }
+);

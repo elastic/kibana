@@ -6,11 +6,16 @@
  */
 
 import type { FC, PropsWithChildren } from 'react';
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import * as i18n from './translations';
 
-interface ActivityCollapseControls {
+/**
+ * One collapsible region of the activity column — the description, or the feed as a whole. Each
+ * reports whether it has anything to collapse and whether it is currently fully collapsed or fully
+ * expanded, so the shared control can aggregate across all of them.
+ */
+export interface ActivityCollapseParticipant {
   canCollapse: boolean;
   allCollapsed: boolean;
   allExpanded: boolean;
@@ -19,8 +24,8 @@ interface ActivityCollapseControls {
 }
 
 interface ActivityCollapseContextValue {
-  controls: ActivityCollapseControls | undefined;
-  setControls: (controls: ActivityCollapseControls | undefined) => void;
+  participants: Record<string, ActivityCollapseParticipant>;
+  setParticipant: (id: string, participant: ActivityCollapseParticipant | undefined) => void;
 }
 
 const ActivityCollapseContext = createContext<ActivityCollapseContextValue | undefined>(undefined);
@@ -33,8 +38,23 @@ const ActivityCollapseContext = createContext<ActivityCollapseContextValue | und
  * registers the handlers here instead of the state being lifted out of it.
  */
 export const ActivityCollapseProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [controls, setControls] = useState<ActivityCollapseControls | undefined>();
-  const value = useMemo(() => ({ controls, setControls }), [controls]);
+  const [participants, setParticipants] = useState<Record<string, ActivityCollapseParticipant>>({});
+
+  const setParticipant = useCallback(
+    (id: string, participant: ActivityCollapseParticipant | undefined) => {
+      setParticipants((previous) => {
+        if (!participant) {
+          if (!(id in previous)) return previous;
+          const { [id]: _removed, ...rest } = previous;
+          return rest;
+        }
+        return { ...previous, [id]: participant };
+      });
+    },
+    []
+  );
+
+  const value = useMemo(() => ({ participants, setParticipant }), [participants, setParticipant]);
 
   return (
     <ActivityCollapseContext.Provider value={value}>{children}</ActivityCollapseContext.Provider>
@@ -43,21 +63,23 @@ export const ActivityCollapseProvider: FC<PropsWithChildren> = ({ children }) =>
 
 ActivityCollapseProvider.displayName = 'ActivityCollapseProvider';
 
-/** Publishes the feed's controls. A no-op outside the provider, so the legacy view is unaffected. */
-export const useRegisterActivityCollapseControls = (controls: ActivityCollapseControls) => {
-  const context = useContext(ActivityCollapseContext);
-  const { setControls } = context ?? {};
-  const { canCollapse, allCollapsed, allExpanded, collapseAll, expandAll } = controls;
+/** Joins a region to the shared control. A no-op outside the provider, so the legacy view is unaffected. */
+export const useRegisterActivityCollapseControls = (
+  id: string,
+  participant: ActivityCollapseParticipant
+) => {
+  const { setParticipant } = useContext(ActivityCollapseContext) ?? {};
+  const { canCollapse, allCollapsed, allExpanded, collapseAll, expandAll } = participant;
 
   useEffect(() => {
-    if (!setControls) {
+    if (!setParticipant) {
       return;
     }
 
-    setControls({ canCollapse, allCollapsed, allExpanded, collapseAll, expandAll });
+    setParticipant(id, { canCollapse, allCollapsed, allExpanded, collapseAll, expandAll });
 
-    return () => setControls(undefined);
-  }, [setControls, canCollapse, allCollapsed, allExpanded, collapseAll, expandAll]);
+    return () => setParticipant(id, undefined);
+  }, [setParticipant, id, canCollapse, allCollapsed, allExpanded, collapseAll, expandAll]);
 };
 
 /**
@@ -82,8 +104,16 @@ DisabledReason.displayName = 'DisabledReason';
  * contents of the feed reads as instability; a disabled one that says why does not.
  */
 export const ActivityCollapseControls: FC = () => {
-  const controls = useContext(ActivityCollapseContext)?.controls;
-  const canCollapse = controls?.canCollapse === true;
+  const participants = Object.values(useContext(ActivityCollapseContext)?.participants ?? {});
+  const collapsible = participants.filter((participant) => participant.canCollapse);
+
+  const canCollapse = collapsible.length > 0;
+  // Enabled while any region is still expanded, and vice versa, so one control governs the whole
+  // column rather than only the region that happens to disagree.
+  const allCollapsed = canCollapse && collapsible.every((p) => p.allCollapsed);
+  const allExpanded = canCollapse && collapsible.every((p) => p.allExpanded);
+  const collapseAll = () => collapsible.forEach((p) => p.collapseAll());
+  const expandAll = () => collapsible.forEach((p) => p.expandAll());
 
   return (
     <>
@@ -95,8 +125,8 @@ export const ActivityCollapseControls: FC = () => {
             <EuiButtonEmpty
               size="xs"
               iconType="fold"
-              onClick={controls?.collapseAll}
-              disabled={!canCollapse || controls.allCollapsed}
+              onClick={collapseAll}
+              disabled={!canCollapse || allCollapsed}
               data-test-subj="case-user-actions-collapse-all"
             >
               {i18n.COLLAPSE_ALL_ACTIVITIES}
@@ -108,8 +138,8 @@ export const ActivityCollapseControls: FC = () => {
             <EuiButtonEmpty
               size="xs"
               iconType="unfold"
-              onClick={controls?.expandAll}
-              disabled={!canCollapse || controls.allExpanded}
+              onClick={expandAll}
+              disabled={!canCollapse || allExpanded}
               data-test-subj="case-user-actions-expand-all"
             >
               {i18n.EXPAND_ALL_ACTIVITIES}

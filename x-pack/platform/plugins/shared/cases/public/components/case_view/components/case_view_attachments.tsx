@@ -14,6 +14,7 @@ import {
   EuiImage,
   EuiSpacer,
   EuiSuperUpdateButton,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -41,6 +42,7 @@ import {
   CLEAR_FILTERS,
   COLLAPSE_ALL_ATTACHMENTS,
   EXPAND_ALL_ATTACHMENTS,
+  NO_COLLAPSIBLE_ATTACHMENTS,
 } from './translations';
 import { SidebarToggleButton } from '../../cases_redesign/case_view/components/sidebar/sidebar_toggle_button';
 
@@ -50,6 +52,22 @@ interface CaseViewAttachmentsProps {
   searchTerm?: string;
   onUpdateField: (args: OnUpdateFields) => void;
 }
+
+/** Explains the disabled pair on hover; a disabled button fires no pointer events of its own. */
+const CollapseDisabledReason: React.FC<React.PropsWithChildren<{ show: boolean }>> = ({
+  show,
+  children,
+}) =>
+  show ? (
+    <EuiToolTip content={NO_COLLAPSIBLE_ATTACHMENTS} display="inlineBlock">
+      {/* Focusable so the explanation is reachable by keyboard: a disabled button is not. */}
+      <span tabIndex={0}>{children}</span>
+    </EuiToolTip>
+  ) : (
+    <>{children}</>
+  );
+
+CollapseDisabledReason.displayName = 'CollapseDisabledReason';
 
 export const CaseViewAttachments = ({
   caseData,
@@ -170,6 +188,9 @@ export const CaseViewAttachments = ({
     ],
     [attachmentSections, hasVisibleObservables]
   );
+  // More than one, matching the activity feed: collapsing a single item is what its own toggle is
+  // for, so a bulk control would be redundant rather than useful.
+  const hasCollapsibleAttachments = visibleAttachmentIds.length > 1;
   const allAttachmentsCollapsed =
     visibleAttachmentIds.length > 0 &&
     visibleAttachmentIds.every((id) => collapsedAttachmentIds.has(id));
@@ -260,37 +281,38 @@ export const CaseViewAttachments = ({
         ) : (
           <EuiSpacer size="m" />
         )}
-        {visibleAttachmentIds.length > 1 && (
-          <>
-            {/* Right-aligned and icon-led, matching the activity feed's equivalent control so the
-                same gesture looks the same on both tabs. */}
-            <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="fold"
-                  onClick={collapseAllAttachments}
-                  disabled={allAttachmentsCollapsed}
-                  data-test-subj="case-view-attachments-collapse-all"
-                >
-                  {COLLAPSE_ALL_ATTACHMENTS}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="unfold"
-                  onClick={expandAllAttachments}
-                  disabled={allAttachmentsExpanded}
-                  data-test-subj="case-view-attachments-expand-all"
-                >
-                  {EXPAND_ALL_ATTACHMENTS}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-          </>
-        )}
+        {/* Always present, never appearing and disappearing with the contents of the tab: a control
+            that comes and goes reads as instability. Disabled with a reason when there is nothing to
+            collapse. Right-aligned and icon-led, matching the activity feed's equivalent pair. */}
+        <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <CollapseDisabledReason show={!hasCollapsibleAttachments}>
+              <EuiButtonEmpty
+                size="xs"
+                iconType="fold"
+                onClick={collapseAllAttachments}
+                disabled={!hasCollapsibleAttachments || allAttachmentsCollapsed}
+                data-test-subj="case-view-attachments-collapse-all"
+              >
+                {COLLAPSE_ALL_ATTACHMENTS}
+              </EuiButtonEmpty>
+            </CollapseDisabledReason>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <CollapseDisabledReason show={!hasCollapsibleAttachments}>
+              <EuiButtonEmpty
+                size="xs"
+                iconType="unfold"
+                onClick={expandAllAttachments}
+                disabled={!hasCollapsibleAttachments || allAttachmentsExpanded}
+                data-test-subj="case-view-attachments-expand-all"
+              >
+                {EXPAND_ALL_ATTACHMENTS}
+              </EuiButtonEmpty>
+            </CollapseDisabledReason>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
         {showNoResults ? (
           <EuiEmptyPrompt
             data-test-subj="case-view-attachments-no-search-results"

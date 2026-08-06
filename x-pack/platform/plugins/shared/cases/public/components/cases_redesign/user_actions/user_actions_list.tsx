@@ -214,7 +214,7 @@ export const UserActionsList = React.memo(
 
     // Published rather than rendered here: the pair belongs directly under the filter row, which is
     // where the attachments tab puts it. See ActivityCollapseControls.
-    useRegisterActivityCollapseControls({
+    useRegisterActivityCollapseControls('feed', {
       canCollapse: hasCollapsibleComments,
       allCollapsed,
       allExpanded,

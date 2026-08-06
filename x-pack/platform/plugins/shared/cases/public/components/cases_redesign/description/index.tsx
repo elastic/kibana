@@ -11,7 +11,6 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
-  EuiIcon,
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
@@ -31,6 +30,7 @@ import type { CaseUI } from '../../../containers/types';
 import type { OnUpdateFields } from '../../case_view/types';
 import { schema } from './schema';
 import { useLensDraftDescription } from './hooks/use_lens_draft_description';
+import { useRegisterActivityCollapseControls } from '../user_actions/activity_collapse_context';
 
 export type { DescriptionMarkdownRefObject } from './types';
 
@@ -46,6 +46,17 @@ export const Description = ({
   isLoadingDescription,
 }: DescriptionProps) => {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+
+  // The description is part of the activity column, so the column's Collapse all / Expand all owns
+  // it too — a bulk control sitting directly above the largest block on the page that skipped it
+  // read as broken.
+  useRegisterActivityCollapseControls('description', {
+    canCollapse: true,
+    allCollapsed: isCollapsed,
+    allExpanded: !isCollapsed,
+    collapseAll: useCallback(() => setIsCollapsed(true), []),
+    expandAll: useCallback(() => setIsCollapsed(false), []),
+  });
   const [isEditable, setIsEditable] = useState<boolean>(false);
 
   const descriptionRef = useRef(null);
@@ -183,31 +194,40 @@ export const Description = ({
                   {i18n.DESCRIPTION}
                 </EuiText>
               ) : (
-                <button
-                  type="button"
-                  onClick={toggleCollapse}
-                  aria-expanded={!isCollapsed}
-                  aria-label={isCollapsed ? i18n.EXPAND_DESCRIPTION : i18n.COLLAPSE_DESCRIPTION}
-                  data-test-subj="description-collapse-icon"
+                <EuiText
+                  data-test-subj="description-title"
                   css={styles.titleButton}
+                  component="span"
                 >
-                  <EuiIcon
-                    type={isCollapsed ? 'arrowRight' : 'arrowDown'}
-                    size="s"
-                    aria-hidden={true}
-                  />
-                  <span data-test-subj="description-title">{i18n.DESCRIPTION}</span>
-                </button>
+                  {i18n.DESCRIPTION}
+                </EuiText>
               )}
             </EuiFlexItem>
             <EuiFlexItem grow />
+            {!isEditable ? (
+              <EuiFlexItem grow={false}>
+                {/* Same glyph, same corner as every comment and attachment, so one gesture reads the
+                    same everywhere in the column. */}
+                <EuiToolTip
+                  content={isCollapsed ? i18n.EXPAND_DESCRIPTION : i18n.COLLAPSE_DESCRIPTION}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    aria-label={isCollapsed ? i18n.EXPAND_DESCRIPTION : i18n.COLLAPSE_DESCRIPTION}
+                    aria-expanded={!isCollapsed}
+                    iconType={isCollapsed ? 'unfold' : 'fold'}
+                    onClick={toggleCollapse}
+                    data-test-subj="description-collapse-icon"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            ) : null}
             {permissions.update && !isEditable ? (
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={i18n.EDIT_DESCRIPTION} disableScreenReaderOutput>
                   <EuiButtonIcon
                     aria-label={i18n.EDIT_DESCRIPTION}
                     iconType="pencil"
-                    color="text"
                     onClick={() => setIsEditable(true)}
                     data-test-subj="description-edit-icon"
                   />
