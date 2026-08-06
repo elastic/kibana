@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -60,9 +62,20 @@ export interface GenAiFields {
 
 const GEN_AI_PATTERN = /(^|\.)gen[_.]ai[._]/;
 
-/** Returns true if the metadata record contains any gen_ai field. */
+/**
+ * Returns true if the metadata record contains any gen_ai field with an
+ * actual value. Key presence alone is not enough: Discover records can carry
+ * null/undefined-valued gen_ai keys for documents without GenAI data (ES|QL
+ * rows are zip-padded with every result column, and _source-built records
+ * keep explicit nulls).
+ */
 export function hasGenAiData(metadata: Record<string, unknown>): boolean {
-  return Object.keys(metadata).some((key) => GEN_AI_PATTERN.test(key));
+  return Object.entries(metadata).some(
+    ([key, value]) =>
+      GEN_AI_PATTERN.test(key) &&
+      value != null &&
+      (!Array.isArray(value) || value.some((element) => element != null))
+  );
 }
 
 /**
@@ -73,16 +86,18 @@ export function hasGenAiData(metadata: Record<string, unknown>): boolean {
  *   3. labels.gen_ai_*      — APM Server ingest (dots → underscores)
  */
 function rawValue(metadata: Record<string, unknown>, key: string): unknown {
+  // Null values (present on Discover records for absent fields) must not
+  // shadow the fallback key shapes, so treat them like missing keys.
   const direct = metadata[key];
-  if (direct !== undefined) return direct;
+  if (direct != null) return direct;
 
   if (key.startsWith('attributes.')) {
     const bare = key.slice('attributes.'.length); // gen_ai.request.model
     const fromBare = metadata[bare];
-    if (fromBare !== undefined) return fromBare;
+    if (fromBare != null) return fromBare;
 
     const labelsKey = 'labels.' + bare.replace(/\./g, '_'); // labels.gen_ai_request_model
-    return metadata[labelsKey];
+    return metadata[labelsKey] ?? undefined;
   }
 
   return undefined;
@@ -90,15 +105,17 @@ function rawValue(metadata: Record<string, unknown>, key: string): unknown {
 
 function first<T>(metadata: Record<string, unknown>, key: string): T | undefined {
   const val = rawValue(metadata, key);
-  if (val === undefined) return undefined;
-  return (Array.isArray(val) ? val[0] : val) as T | undefined;
+  if (val == null) return undefined;
+  const element = Array.isArray(val) ? val.find((item) => item != null) : val;
+  return element == null ? undefined : (element as T);
 }
 
-/** Like `first`, but preserves every element of a multi-valued field. */
+/** Like `first`, but preserves every (non-null) element of a multi-valued field. */
 function allValues<T>(metadata: Record<string, unknown>, key: string): T[] | undefined {
   const val = rawValue(metadata, key);
-  if (val === undefined) return undefined;
-  return (Array.isArray(val) ? val : [val]) as T[];
+  if (val == null) return undefined;
+  const values = (Array.isArray(val) ? val : [val]).filter((element) => element != null);
+  return values.length > 0 ? (values as T[]) : undefined;
 }
 
 export function parseGenAiMessages(raw: string[] | undefined): GenAiMessage[] {
@@ -177,11 +194,9 @@ export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
       // Multi-valued: one finish reason per choice — keep every element.
       finish_reasons: allValues<string>(metadata, ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS),
     },
-    inputMessages: parseGenAiMessages(
-      metadata[ATTRIBUTE_GEN_AI_INPUT_MESSAGES] as string[] | undefined
-    ),
+    inputMessages: parseGenAiMessages(allValues<string>(metadata, ATTRIBUTE_GEN_AI_INPUT_MESSAGES)),
     outputMessages: parseGenAiMessages(
-      metadata[ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES] as string[] | undefined
+      allValues<string>(metadata, ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES)
     ),
     systemInstructions: f(ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS) as string | undefined,
   };

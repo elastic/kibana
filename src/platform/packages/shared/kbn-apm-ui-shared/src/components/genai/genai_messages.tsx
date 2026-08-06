@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -16,11 +18,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getEbtProps, type EbtClickAttrsElementOnly } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { GenAiMessage } from './get_genai_fields';
 import { getMessageCopyText } from './get_genai_fields';
 import { GenAiMessageContent } from './genai_message_content';
+import { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';
 
 /**
  * Fixed-size role avatar using EUI semantic background tokens so the circle
@@ -48,16 +52,36 @@ interface Props {
   inputMessages: GenAiMessage[];
   outputMessages: GenAiMessage[];
   systemInstructions?: string;
+  /** When provided, copy-button clicks are tracked via `data-ebt-*` attributes. */
+  ebt?: EbtClickAttrsElementOnly;
 }
 
-// Base style applied to every comment: smooth background transition.
+// Base style applied to every comment: smooth background transition, plus
+// overflow handling so messages always fit their container's width.
 const messageCss = css`
+  /* The event column is a flex child: with the default min-width: auto it
+     cannot shrink below the intrinsic width of its widest content (a long
+     unbroken code line, URL, etc.), pushing the copy button and part of the
+     message outside the container — which offers no horizontal scrolling.
+     Let it shrink so long content wraps vertically instead. */
+  .euiTimelineItemEvent {
+    min-width: 0;
+  }
+
   .euiCommentEvent__body {
     transition: background-color 150ms ease;
+    overflow-wrap: anywhere;
+  }
+
+  /* Wrap long code lines instead of overflowing horizontally. */
+  .euiCommentEvent__body pre,
+  .euiCommentEvent__body code {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
 `;
 
-export function GenAiMessages({ inputMessages, outputMessages, systemInstructions }: Props) {
+export function GenAiMessages({ inputMessages, outputMessages, systemInstructions, ebt }: Props) {
   const { euiTheme } = useEuiTheme();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
@@ -78,7 +102,7 @@ export function GenAiMessages({ inputMessages, outputMessages, systemInstruction
 
   return (
     <EuiCommentList
-      aria-label={i18n.translate('xpack.apm.genAi.messages.conversationAriaLabel', {
+      aria-label={i18n.translate('apmUiShared.genAi.messages.conversationAriaLabel', {
         defaultMessage: 'GenAI conversation',
       })}
     >
@@ -95,7 +119,7 @@ export function GenAiMessages({ inputMessages, outputMessages, systemInstruction
             <EuiCopy textToCopy={getMessageCopyText(msg)}>
               {(copy) => (
                 <EuiToolTip
-                  content={i18n.translate('xpack.apm.genAi.messages.copyMessage', {
+                  content={i18n.translate('apmUiShared.genAi.messages.copyMessage', {
                     defaultMessage: 'Copy message',
                   })}
                 >
@@ -103,7 +127,14 @@ export function GenAiMessages({ inputMessages, outputMessages, systemInstruction
                     iconType="copyClipboard"
                     color="text"
                     data-test-subj={`genAiMessageCopy-${i}`}
-                    aria-label={i18n.translate('xpack.apm.genAi.messages.copyMessageAriaLabel', {
+                    {...(ebt
+                      ? getEbtProps({
+                          action: GENAI_EBT_CLICK_ACTIONS.COPY_MESSAGE,
+                          element: ebt.element,
+                          detail: msg.role,
+                        })
+                      : {})}
+                    aria-label={i18n.translate('apmUiShared.genAi.messages.copyMessageAriaLabel', {
                       defaultMessage: 'Copy {role} message',
                       values: { role: msg.role },
                     })}

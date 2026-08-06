@@ -70,7 +70,7 @@ describe('useSaveRegionPolicy', () => {
     });
   });
 
-  it('shows success toast and invalidates query cache on success', async () => {
+  it('shows success toast and writes the saved policy directly to the query cache', async () => {
     const responseData = {
       region_policy: { allowed_regions: [{ csp: 'aws', region: 'eu-west-1' }] },
       created_at: '2026-01-01',
@@ -78,7 +78,6 @@ describe('useSaveRegionPolicy', () => {
     mockPut.mockResolvedValue(responseData);
 
     const { queryClient } = createWrapper();
-    const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useSaveRegionPolicy(), {
       wrapper: ({ children }) =>
@@ -94,9 +93,7 @@ describe('useSaveRegionPolicy', () => {
     expect(mockAddSuccess).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'Region preferences saved' })
     );
-    expect(invalidateQueriesSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ queryKey: [REGION_POLICY_QUERY_KEY] })
-    );
+    expect(queryClient.getQueryData([REGION_POLICY_QUERY_KEY])).toEqual(responseData);
   });
 
   it('shows error toast on error', async () => {

@@ -1,5 +1,6 @@
 .artifacts
 docs/**/.artifacts
+docs-dev/**/.artifacts
 /.superset
 .aws-config.json
 .bk.yaml
