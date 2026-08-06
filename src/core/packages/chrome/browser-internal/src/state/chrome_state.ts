@@ -22,7 +22,7 @@ import type {
   ChromeNavLink,
   GlobalHeaderAiButton,
   ChromeUserBanner,
-  AppHeaderConfig,
+  ChromeAppHeaderConfig,
 } from '@kbn/core-chrome-browser';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 
@@ -72,7 +72,7 @@ export interface ChromeState {
   contextSwitcher: State<ReactNode>;
   projectPicker: State<ReactNode>;
   inlineAppHeader: State<boolean>;
-  appHeader: State<AppHeaderConfig | undefined>;
+  appHeader: State<ChromeAppHeaderConfig | undefined>;
   userMenu: State<ReactNode>;
 
   /** Help system */
@@ -129,7 +129,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const contextSwitcher = createState<ReactNode>(null);
   const projectPicker = createState<ReactNode>(null);
   const inlineAppHeader = createState<boolean>(false);
-  const appHeader = createState<AppHeaderConfig | undefined>(undefined);
+  const appHeader = createState<ChromeAppHeaderConfig | undefined>(undefined);
   const userMenu = createState<ReactNode>(null);
 
   // Help System

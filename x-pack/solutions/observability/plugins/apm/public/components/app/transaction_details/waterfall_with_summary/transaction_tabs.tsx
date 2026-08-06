@@ -11,12 +11,14 @@ import { apmTraceLogsDefaultColumns, ProcessorEvent } from '@kbn/observability-p
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { LazySavedSearchComponent, type SavedSearchTableConfig } from '@kbn/saved-search-component';
+import { getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
 import { getTimestampUs } from '../../../../../common/utils/get_timestamp_us';
 import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useDiscoverHref } from '../../../shared/links/discover_links/use_discover_href';
 import { getGenAiTabContent } from '../../../shared/genai_tab/get_genai_tab_content';
+import { getGenAiTabEbt } from '../../../shared/genai_tab/ebt_constants';
 import { useGenAiData } from '../../../shared/genai_tab/use_genai_data';
 import { TransactionMetadata } from '../../../shared/metadata_table/transaction_metadata';
 import { UnifiedWaterfallContainer } from './waterfall_container/unified_waterfall_container';
@@ -26,6 +28,7 @@ import {
   isDiscoverDefaultLogColumns,
   shouldPersistTraceLogsColumnsToUrl,
 } from '../distribution/get_trace_logs_columns';
+import { TRACE_SAMPLE_EBT_ELEMENTS } from './ebt_constants';
 
 const EMPTY_TRACE_LOGS_DEFAULT_COLUMNS: string[] = [];
 
@@ -41,6 +44,7 @@ interface TabContentDefinition {
   component: React.ReactNode;
   prepend?: React.ReactNode;
   dataTestSubj?: string;
+  ebt?: EbtClickAttrs;
 }
 
 interface Props {
@@ -79,7 +83,11 @@ export function TransactionTabs({
   });
 
   const tabs: Partial<Record<TransactionTab, TabContentDefinition>> = useMemo(() => {
-    const genAiTabContent = getGenAiTabContent({ isGenAiSpan, genAi });
+    const genAiTabContent = getGenAiTabContent({
+      isGenAiSpan,
+      genAi,
+      ebt: { element: TRACE_SAMPLE_EBT_ELEMENTS.TABS },
+    });
 
     return {
       [TransactionTab.timeline]: {
@@ -137,6 +145,7 @@ export function TransactionTabs({
               component: genAiTabContent.content,
               prepend: genAiTabContent.prepend,
               dataTestSubj: genAiTabContent['data-test-subj'],
+              ebt: getGenAiTabEbt(TRACE_SAMPLE_EBT_ELEMENTS.TABS),
             },
           }
         : {}),
@@ -167,7 +176,7 @@ export function TransactionTabs({
     <>
       <EuiTabs>
         {(Object.keys(tabs) as TransactionTab[]).map((key) => {
-          const { label, prepend, dataTestSubj } = tabs[key]!;
+          const { label, prepend, dataTestSubj, ebt } = tabs[key]!;
           return (
             <EuiTab
               onClick={() => {
@@ -177,6 +186,7 @@ export function TransactionTabs({
               key={key}
               prepend={prepend}
               data-test-subj={dataTestSubj}
+              {...(ebt ? getEbtProps(ebt) : {})}
             >
               {label}
             </EuiTab>

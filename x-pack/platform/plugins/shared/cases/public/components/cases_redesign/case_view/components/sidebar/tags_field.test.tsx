@@ -56,50 +56,36 @@ describe('TagsField', () => {
     expect(screen.queryByTestId('tag-list-edit-button')).not.toBeInTheDocument();
   });
 
-  it('does not call onSubmit until the change is confirmed', async () => {
+  it('persists an added tag immediately, with no confirm step', async () => {
     renderWithTestingProviders(<TagsField {...defaultProps} />);
 
     await user.click(await screen.findByRole('combobox'));
     await user.paste(`${sampleTags[0]}`);
     await user.keyboard('{enter}');
 
-    expect(onSubmit).not.toHaveBeenCalled();
-    expect(await screen.findByTestId('template-field-confirm-tags')).toBeInTheDocument();
-    expect(screen.getByTestId('template-field-cancel-tags')).toBeInTheDocument();
-
-    await user.click(screen.getByTestId('template-field-confirm-tags'));
-
     await waitFor(() => expect(onSubmit).toBeCalledWith([sampleTags[0]]));
+    expect(screen.queryByTestId('template-field-confirm-tags')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('template-field-cancel-tags')).not.toBeInTheDocument();
   });
 
-  it('trims the tags on confirm', async () => {
+  it('trims the tags before submitting', async () => {
     renderWithTestingProviders(<TagsField {...defaultProps} />);
 
     await user.click(await screen.findByRole('combobox'));
     await user.paste('dude      ');
     await user.keyboard('{enter}');
 
-    await user.click(await screen.findByTestId('template-field-confirm-tags'));
-
     await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
   });
 
-  it('reverts the pending change when cancel is clicked', async () => {
-    renderWithTestingProviders(<TagsField {...defaultProps} />);
+  it('adds a new tag to the tags already on the case', async () => {
+    renderWithTestingProviders(<TagsField {...defaultProps} tags={['a']} />);
 
     await user.click(await screen.findByRole('combobox'));
     await user.paste('new');
     await user.keyboard('{enter}');
 
-    expect(await screen.findByTestId('comboBoxInput')).toHaveTextContent('new');
-
-    await user.click(await screen.findByTestId('template-field-cancel-tags'));
-
-    await waitFor(() => {
-      expect(onSubmit).not.toBeCalled();
-    });
-
-    expect(screen.queryByTestId('template-field-confirm-tags')).not.toBeInTheDocument();
+    await waitFor(() => expect(onSubmit).toBeCalledWith(['a', 'new']));
   });
 
   it('shows error when tag is empty', async () => {
@@ -136,7 +122,7 @@ describe('TagsField', () => {
     expect(await screen.findByTestId('comboBoxSearchInput')).toBeDisabled();
   });
 
-  it('reflects tags updated externally after mount when there is no pending edit', async () => {
+  it('reflects tags updated externally after mount', async () => {
     const { rerender } = renderWithTestingProviders(<TagsField {...defaultProps} tags={['a']} />);
 
     expect(await screen.findByTestId('comboBoxInput')).toHaveTextContent('a');
@@ -148,36 +134,19 @@ describe('TagsField', () => {
     });
   });
 
-  it('does not clobber a pending edit when the tags prop changes externally', async () => {
-    const { rerender } = renderWithTestingProviders(<TagsField {...defaultProps} tags={['a']} />);
-
-    await user.click(await screen.findByRole('combobox'));
-    await user.paste('new');
-    await user.keyboard('{enter}');
-
-    expect(await screen.findByTestId('comboBoxInput')).toHaveTextContent('new');
-
-    rerender(<TagsField {...defaultProps} tags={['a', 'c']} />);
-
-    expect(screen.getByTestId('comboBoxInput')).toHaveTextContent('new');
-    expect(screen.getByTestId('template-field-confirm-tags')).toBeInTheDocument();
-  });
-
-  it('reverts to the last confirmed tags rather than assuming success if the update never persists', async () => {
+  it('keeps showing the committed tags rather than assuming success if the update never persists', async () => {
     renderWithTestingProviders(<TagsField {...defaultProps} tags={['a']} />);
 
     await user.click(await screen.findByRole('combobox'));
     await user.paste('new');
     await user.keyboard('{enter}');
-    await user.click(await screen.findByTestId('template-field-confirm-tags'));
 
-    expect(onSubmit).toHaveBeenCalledWith(['a', 'new']);
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(['a', 'new']));
 
-    // onSubmit is fire-and-forget from the field's perspective; the `tags` prop here never
-    // updates (as if the mutation failed), so the field must fall back to the last-known-good
-    // value instead of continuing to display the unconfirmed, optimistic one.
+    // onSubmit is fire-and-forget from the field's perspective; the `tags` prop here never updates
+    // (as if the mutation failed), so the field keeps displaying the last-known-good value rather
+    // than an optimistic one that was never stored.
     expect(screen.getByTestId('comboBoxInput')).toHaveTextContent('a');
     expect(screen.getByTestId('comboBoxInput')).not.toHaveTextContent('new');
-    expect(screen.queryByTestId('template-field-confirm-tags')).not.toBeInTheDocument();
   });
 });

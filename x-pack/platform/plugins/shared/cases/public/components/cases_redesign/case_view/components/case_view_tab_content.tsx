@@ -68,10 +68,14 @@ const CaseViewTabContentInner: FC<CaseViewTabContentProps> = ({
       <CaseViewTabs caseData={caseData} activeTab={activeTabId} />
       <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`}>
         <EuiFlexItem
-          grow={isSidebarOpen ? 6 : true}
+          grow={true}
+          // The sidebar owns a pixel width, so the content column is simply "the rest". A
+          // percentage cap here would fight the dragged width. `min-width: 0` plus a break
+          // anywhere keeps an unbreakable token in an activity entry (a long field value pasted
+          // without spaces) from pushing the column out from under the panel beside it.
           css={css`
-            max-width: ${isSidebarOpen ? '75%' : '100%'};
-            transition: max-width 300ms ease;
+            min-width: 0;
+            overflow-wrap: anywhere;
           `}
         >
           {activeTabId === CASE_VIEW_PAGE_TABS.ACTIVITY && (
