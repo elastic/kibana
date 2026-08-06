@@ -14,7 +14,7 @@ import type {
   ErrorResponse,
   RuleResponse,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../../lib/errors/error_codes';
 import { getRuleNotFoundMessage } from '../../lib/errors/rule_error_messages';
 import { invalidResponseExample } from '../oas_utils';
 import type { OasExampleEntry } from '../oas_types';
@@ -98,7 +98,7 @@ export const RULE_NOT_FOUND_RESPONSE: OasExampleEntry = {
   name: 'ruleNotFound',
   summary: 'No rule exists for the given ID',
   value: {
-    code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
+    code: ALERTING_ERROR_CODES.RULE_NOT_FOUND,
     error: 'Not Found',
     message: getRuleNotFoundMessage(RULE_RESPONSE.id),
     details: { rule_id: RULE_RESPONSE.id },

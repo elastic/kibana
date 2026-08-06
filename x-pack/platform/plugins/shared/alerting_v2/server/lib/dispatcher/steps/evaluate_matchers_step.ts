@@ -12,7 +12,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type {
   ActionPolicy,
   ActionPolicyId,
@@ -82,7 +82,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
           this.logger.warn({
             message: () =>
               `Failed to evaluate KQL matcher for policy ${policy.id} (episode ${episode.episode_id}): ${reason}. Matcher: ${truncatedMatcher}. Treating as no-match.`,
-            code: ALERTING_V2_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
+            code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
           });
           continue;
         }

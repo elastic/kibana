@@ -9,7 +9,7 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MaintenanceWindowAttributes } from '@kbn/maintenance-windows-plugin/common';
 import { createLoggerService } from '../logger_service/logger_service.mock';
-import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { MaintenanceWindowService } from './maintenance_window_service';
 
 const buildSo = (
@@ -144,7 +144,7 @@ describe('MaintenanceWindowService', () => {
     expect(mockLogger.error).toHaveBeenCalledWith(
       'boom',
       expect.objectContaining({
-        labels: { code: ALERTING_V2_LOG_CODES.MAINTENANCE_WINDOW_FETCH_FAILED },
+        labels: { code: ALERTING_LOG_CODES.MAINTENANCE_WINDOW_FETCH_FAILED },
       })
     );
     expect(close).toHaveBeenCalledTimes(1);
@@ -171,7 +171,7 @@ describe('MaintenanceWindowService', () => {
 
     expect(result.map((mw) => mw.id)).toEqual(['mw-ok']);
     expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), {
-      labels: { code: ALERTING_V2_LOG_CODES.MAINTENANCE_WINDOW_PIT_CLOSE_FAILED },
+      labels: { code: ALERTING_LOG_CODES.MAINTENANCE_WINDOW_PIT_CLOSE_FAILED },
     });
   });
 
@@ -195,7 +195,7 @@ describe('MaintenanceWindowService', () => {
 
     expect(result.map((mw) => mw.id)).toEqual(['mw-ok']);
     expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), {
-      labels: { code: ALERTING_V2_LOG_CODES.MAINTENANCE_WINDOW_DOCUMENT_INVALID },
+      labels: { code: ALERTING_LOG_CODES.MAINTENANCE_WINDOW_DOCUMENT_INVALID },
     });
   });
 

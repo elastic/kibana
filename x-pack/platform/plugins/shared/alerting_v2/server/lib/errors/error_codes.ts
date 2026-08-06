@@ -8,11 +8,11 @@
 /**
  * This file hosts two distinct catalogs:
  *
- * - {@link ALERTING_V2_ERROR_CODES} — codes that travel out over HTTP. Part
+ * - {@link ALERTING_ERROR_CODES} — codes that travel out over HTTP. Part
  *   of the public API contract; see the README at
  *   `x-pack/platform/plugins/shared/alerting_v2/server/lib/errors/README.md`
  *   for status / details shape per code.
- * - {@link ALERTING_V2_LOG_CODES} — codes attached to `logger.error(...)` /
+ * - {@link ALERTING_LOG_CODES} — codes attached to `logger.error(...)` /
  *   `logger.warn(...)` calls for fire-and-forget failure paths (degraded but
  *   recoverable). Stable identifiers for log-based monitoring; never
  *   serialized into HTTP responses.
@@ -21,7 +21,7 @@
  * downstream consumers (API clients in one case, observability tooling in
  * the other). Adding new codes is backwards compatible.
  */
-export const ALERTING_V2_ERROR_CODES = {
+export const ALERTING_ERROR_CODES = {
   // ────────────────────────── Rules ──────────────────────────
   /** A rule with the given identifier does not exist. */
   RULE_NOT_FOUND: 'RULE_NOT_FOUND',
@@ -118,8 +118,7 @@ export const ALERTING_V2_ERROR_CODES = {
   INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
 } as const;
 
-export type AlertingV2ErrorCode =
-  (typeof ALERTING_V2_ERROR_CODES)[keyof typeof ALERTING_V2_ERROR_CODES];
+export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALERTING_ERROR_CODES];
 
 /**
  * Catalog of stable, machine-readable codes attached to `logger.error(...)` /
@@ -133,7 +132,7 @@ export type AlertingV2ErrorCode =
  * `*_LOOKUP_FAILED` — the page was still returned, just without that piece
  * of enrichment).
  */
-export const ALERTING_V2_LOG_CODES = {
+export const ALERTING_LOG_CODES = {
   // ─────────────── Execution history (graceful degradation) ──────────────
   /**
    * One or more `task-run` hits returned by Elasticsearch on the rule
@@ -316,4 +315,4 @@ export const ALERTING_V2_LOG_CODES = {
   TASKS_TELEMETRY_RUN_FAILED: 'TASKS_TELEMETRY_RUN_FAILED',
 } as const;
 
-export type AlertingV2LogCode = (typeof ALERTING_V2_LOG_CODES)[keyof typeof ALERTING_V2_LOG_CODES];
+export type AlertingV2LogCode = (typeof ALERTING_LOG_CODES)[keyof typeof ALERTING_LOG_CODES];

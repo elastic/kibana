@@ -28,7 +28,7 @@ import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
-import { ALERTING_V2_ERROR_CODES, ALERTING_V2_LOG_CODES } from '../errors/error_codes';
+import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   getInvalidRuleDataMessage,
   getRuleAlreadyExistsMessage,
@@ -90,12 +90,12 @@ const DEFAULT_PER_PAGE = 20;
  */
 const bulkErrorCodeForStatus = (statusCode: number): string => {
   if (statusCode === 404) {
-    return ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND;
+    return ALERTING_ERROR_CODES.RULE_NOT_FOUND;
   }
   if (statusCode === 409) {
-    return ALERTING_V2_ERROR_CODES.RULE_VERSION_CONFLICT;
+    return ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT;
   }
-  return ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR;
+  return ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR;
 };
 
 const toBulkError = (
@@ -114,7 +114,7 @@ const toBulkError = (
  */
 const toTaskManagerDriftError = (id: string, message: string): BulkOperationError => ({
   id,
-  error: { code: ALERTING_V2_ERROR_CODES.TASK_MANAGER_DRIFT, message },
+  error: { code: ALERTING_ERROR_CODES.TASK_MANAGER_DRIFT, message },
 });
 
 const errorMessage = (err: unknown): string => (err instanceof Error ? err.message : String(err));
@@ -204,7 +204,7 @@ export class RulesClient {
       throw Boom.badRequest(
         `Rule schedule interval of "${every}" is shorter than the allowed minimum of "${minimumScheduleInterval}"`,
         {
-          code: ALERTING_V2_ERROR_CODES.SCHEDULE_INTERVAL_TOO_SHORT,
+          code: ALERTING_ERROR_CODES.SCHEDULE_INTERVAL_TOO_SHORT,
           details: { interval: every, minimumScheduleInterval },
         }
       );
@@ -247,7 +247,7 @@ export class RulesClient {
       throw Boom.badRequest(
         `Rule schedule of "${updatedEvery}" would exceed the limit of ${maxScheduledPerMinute} rule runs per minute`,
         {
-          code: ALERTING_V2_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
+          code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
           details: { interval: updatedEvery, maxScheduledPerMinute },
         }
       );
@@ -262,7 +262,7 @@ export class RulesClient {
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
       throw Boom.badRequest(getInvalidRuleDataMessage(context, stringifyZodError(parsed.error)), {
-        code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
+        code: ALERTING_ERROR_CODES.INVALID_RULE_DATA,
         details: { context, errors: treeifyError(parsed.error) },
       });
     }
@@ -278,7 +278,7 @@ export class RulesClient {
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(getRuleNotFoundMessage(id), {
-          code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
+          code: ALERTING_ERROR_CODES.RULE_NOT_FOUND,
           details: { rule_id: id },
         });
       }
@@ -320,7 +320,7 @@ export class RulesClient {
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(getRuleVersionConflictMessage(id), {
-          code: ALERTING_V2_ERROR_CODES.RULE_VERSION_CONFLICT,
+          code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT,
           details: { rule_id: id },
         });
       }
@@ -360,7 +360,7 @@ export class RulesClient {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
         throw Boom.conflict(getRuleAlreadyExistsMessage(conflictId), {
-          code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_EXISTS,
+          code: ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS,
           details: { rule_id: conflictId },
         });
       }
@@ -404,7 +404,7 @@ export class RulesClient {
       })
     ) {
       throw Boom.badRequest('stateTransition is only allowed for rules of kind "alert".', {
-        code: ALERTING_V2_ERROR_CODES.INVALID_STATE_TRANSITION,
+        code: ALERTING_ERROR_CODES.INVALID_STATE_TRANSITION,
         details: { rule_id: id, rule_kind: existingAttrs.kind },
       });
     }
@@ -521,7 +521,7 @@ export class RulesClient {
 
     if (!attrs.enabled) {
       throw Boom.badRequest(`Rule with id "${id}" is disabled and cannot be run`, {
-        code: ALERTING_V2_ERROR_CODES.RULE_DISABLED,
+        code: ALERTING_ERROR_CODES.RULE_DISABLED,
         details: { rule_id: id },
       });
     }
@@ -534,7 +534,7 @@ export class RulesClient {
     } catch (e) {
       if (e instanceof TaskAlreadyRunningError) {
         throw Boom.conflict(`Rule with id "${id}" is already running`, {
-          code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_RUNNING,
+          code: ALERTING_ERROR_CODES.RULE_ALREADY_RUNNING,
           details: { rule_id: id },
         });
       }
@@ -547,7 +547,7 @@ export class RulesClient {
         : undefined;
 
       throw Boom.internal(`Failed to run rule with id "${id}"`, {
-        code: existingCode ?? ALERTING_V2_ERROR_CODES.RULE_RUN_ERROR,
+        code: existingCode ?? ALERTING_ERROR_CODES.RULE_RUN_ERROR,
         details: { rule_id: id },
       });
     }
@@ -557,7 +557,7 @@ export class RulesClient {
       // rejected with a 409 — the task was not actually rescheduled. Surface
       // as a soft conflict so the caller can retry.
       throw Boom.conflict(`Running rule with id "${id}" conflicted, please retry`, {
-        code: ALERTING_V2_ERROR_CODES.RULE_RUN_CONFLICT,
+        code: ALERTING_ERROR_CODES.RULE_RUN_CONFLICT,
         details: { rule_id: id },
       });
     }
@@ -751,7 +751,7 @@ export class RulesClient {
 
     this.logger.error({
       error: new Error(message),
-      code: ALERTING_V2_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
+      code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
     });
 
     errors?.push(...driftedRuleIds.map((id) => toTaskManagerDriftError(id, message)));
@@ -893,7 +893,7 @@ export class RulesClient {
 
         this.logger.error({
           error: new Error(message),
-          code: ALERTING_V2_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
+          code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
         });
 
         for (const id of driftedRuleIds) {
@@ -1055,7 +1055,7 @@ export class RulesClient {
       throw Boom.badRequest(
         `Filter matches ${total} rules, exceeding the maximum of ${BULK_FILTER_MAX_RESOURCES} per request. Narrow the filter or split the operation into multiple requests.`,
         {
-          code: ALERTING_V2_ERROR_CODES.BULK_QUERY_MATCH_LIMIT_EXCEEDED,
+          code: ALERTING_ERROR_CODES.BULK_QUERY_MATCH_LIMIT_EXCEEDED,
           details: { match_count: total, limit: BULK_FILTER_MAX_RESOURCES },
         }
       );

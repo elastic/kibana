@@ -20,7 +20,7 @@ logger.forSubsystem(name); // → LoggerServiceContract
 | Param | Notes |
 | ----- | ----- |
 | `message` | `string` or `() => string`. Use the lazy form for `debug` in hot paths; it costs nothing when the level is disabled. Optional on `error`, where it defaults to the error's own message. |
-| `code` | Required on `warn` / `error`. Must come from `ALERTING_V2_LOG_CODES` (`../../errors/error_codes.ts`). Emitted as ECS `labels.code`. |
+| `code` | Required on `warn` / `error`. Must come from `ALERTING_LOG_CODES` (`../../errors/error_codes.ts`). Emitted as ECS `labels.code`. |
 | `labels` | Optional entity identifiers from `AlertingLabels`. IDs only — never names, user input, counts, or durations. |
 | `error` | `unknown`. Non-`Error` values are wrapped internally, so `catch (err)` blocks pass `err` straight through. Emitted as ECS `error.{message,type,stack_trace}`, with `type` taken from the exception's constructor name. |
 
@@ -31,7 +31,7 @@ The message names a *class* of event; everything variable belongs in `labels`:
 ```ts
 this.logger.warn({
   message: 'Workflow not found, skipping dispatch',
-  code: ALERTING_V2_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND,
+  code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND,
   labels: { workflow_id: workflowId, group_id: group.id, policy_id: group.policyId },
 });
 ```
@@ -47,7 +47,7 @@ user input (KQL / ES|QL parser errors quote the offending fragment):
 this.logger.error({
   message: 'Rule query failed to parse or verify',
   error: err,
-  code: ALERTING_V2_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED,
+  code: ALERTING_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED,
   labels: { rule_id: input.ruleId },
 });
 ```
@@ -77,7 +77,7 @@ to the same mock, so assertions hold regardless of scoping:
 const { loggerService, mockLogger } = createLoggerService();
 
 expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), {
-  labels: { code: ALERTING_V2_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND },
+  labels: { code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND },
 });
 ```
 
@@ -85,7 +85,7 @@ expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), {
 
 Adding a code, a label, or a subsystem is a deliberate one-line type change:
 
-- **Code** — add an entry to `ALERTING_V2_LOG_CODES` (`../../errors/error_codes.ts`)
+- **Code** — add an entry to `ALERTING_LOG_CODES` (`../../errors/error_codes.ts`)
   with a JSDoc describing when it fires and what degraded. Renaming or removing
   one is a breaking change for log-based monitoring.
 - **Label** — add a key to `AlertingLabels` (`types.ts`). Keys are snake_case;

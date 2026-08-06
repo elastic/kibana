@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerService } from '../../services/logger_service/logger_service';
 import type { WorkflowService } from '../../services/workflow_service/workflow_service';
 import {
@@ -97,7 +97,7 @@ describe('AlertActionWorkflowSubscriber', () => {
       expect(mockLogger.error).toHaveBeenCalledWith('workflows unreachable', {
         labels: {
           event_type: EPISODE_ASSIGNED_EVENT_TYPE,
-          code: ALERTING_V2_LOG_CODES.ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILURE,
+          code: ALERTING_LOG_CODES.ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILURE,
         },
         error: expect.objectContaining({ message: 'workflows unreachable' }),
       });

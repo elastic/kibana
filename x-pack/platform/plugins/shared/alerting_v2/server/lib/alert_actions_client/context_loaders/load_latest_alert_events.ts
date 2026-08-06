@@ -10,7 +10,7 @@ import { esql } from '@elastic/esql';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { BulkCreateAlertActionItemBody } from '@kbn/alerting-v2-schemas';
 import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/datastreams/alert_events';
-import { ALERTING_V2_ERROR_CODES } from '../../errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { getAlertEventNotFoundMessage } from '../../errors/alert_error_messages';
 import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
@@ -173,7 +173,7 @@ export const loadLastAlertEventOrThrow = async ({
 
   if (events.length === 0) {
     throw Boom.notFound(getAlertEventNotFoundMessage(groupHash, episodeId), {
-      code: ALERTING_V2_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
+      code: ALERTING_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
       details: {
         group_hash: groupHash,
         ...(episodeId ? { episode_id: episodeId } : {}),

@@ -1,7 +1,7 @@
 # Alerting v2 — Error contract
 
-> This document covers `ALERTING_V2_ERROR_CODES` — the codes that travel out
-> over HTTP. `error_codes.ts` hosts a second catalog, `ALERTING_V2_LOG_CODES`,
+> This document covers `ALERTING_ERROR_CODES` — the codes that travel out
+> over HTTP. `error_codes.ts` hosts a second catalog, `ALERTING_LOG_CODES`,
 > which is never serialized into a response; those codes are attached to
 > `logger.warn(...)` / `logger.error(...)` and are documented in
 > [`../services/logger_service/README.md`](../services/logger_service/README.md).
@@ -27,7 +27,7 @@ on `code`. The `message` field is intentionally NOT part of the API contract. Do
 - Branch on `code`, not on `message`.
 - Treat `message` as human-facing text only.
 - Treat `details` as structured context whose shape depends on `code`.
-- Prefer a domain-specific code from `ALERTING_V2_ERROR_CODES` over a generic
+- Prefer a domain-specific code from `ALERTING_ERROR_CODES` over a generic
   fallback.
 
 ## How error codes are produced
@@ -43,7 +43,7 @@ on `code`. The `message` field is intentionally NOT part of the API contract. Do
 
 Two helper sources of codes:
 
-- `server/lib/errors/error_codes.ts` — `ALERTING_V2_ERROR_CODES`: the
+- `server/lib/errors/error_codes.ts` — `ALERTING_ERROR_CODES`: the
   authoritative catalog of domain-specific codes.
 - `server/routes/derive_error_code.ts` — `deriveErrorCodeFromStatus(statusCode)`:
   the floor mapping from HTTP status to a generic code (`NOT_FOUND`,
@@ -160,10 +160,10 @@ site:
 
 ```ts
 import Boom from '@hapi/boom';
-import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 
 throw Boom.notFound(`Rule with id=${id} not found`, {
-  code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
+  code: ALERTING_ERROR_CODES.RULE_NOT_FOUND,
   details: { rule_id: id },
 });
 ```
@@ -173,7 +173,7 @@ the standard body. No additional route-layer mapping is needed.
 
 ## How to add a new code
 
-1. Add a new entry to `ALERTING_V2_ERROR_CODES` in `error_codes.ts`. Use
+1. Add a new entry to `ALERTING_ERROR_CODES` in `error_codes.ts`. Use
    `UPPER_SNAKE_CASE`. Add a one-line JSDoc explaining when it fires.
 2. Use it via `Boom.<status>(msg, { code, details })` at the throw site.
 3. Add a unit test that asserts the boomified error carries the expected

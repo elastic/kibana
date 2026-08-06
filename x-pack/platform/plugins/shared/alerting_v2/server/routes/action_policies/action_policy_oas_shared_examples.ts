@@ -12,7 +12,7 @@ import type {
   CreateActionPolicyDataInput,
   ErrorResponse,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../../lib/errors/error_codes';
 import {
   getActionPolicyNotFoundMessage,
   getActionPolicyVersionConflictMessage,
@@ -74,7 +74,7 @@ export const invalidActionPolicyDataResponse = (
 ): OasExampleEntry =>
   invalidResponseExample({
     summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
-    code: ALERTING_V2_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
+    code: ALERTING_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
     message: getInvalidActionPolicyDataMessage(
       context,
       'name: Invalid input: expected string, received undefined'
@@ -104,7 +104,7 @@ export const INVALID_QUERY_PARAMETERS_RESPONSE: OasExampleEntry = invalidRespons
 });
 
 const ACTION_POLICY_VERSION_CONFLICT_VALUE: ErrorResponse = {
-  code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT,
+  code: ALERTING_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT,
   error: 'Conflict',
   message: getActionPolicyVersionConflictMessage(SAMPLE_ACTION_POLICY_ID),
   details: { action_policy_id: SAMPLE_ACTION_POLICY_ID },
@@ -114,7 +114,7 @@ export const ACTION_POLICY_NOT_FOUND_RESPONSE: OasExampleEntry = {
   name: 'actionPolicyNotFound',
   summary: ACTION_POLICY_NOT_FOUND_DESCRIPTION,
   value: {
-    code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
+    code: ALERTING_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
     error: 'Not Found',
     message: getActionPolicyNotFoundMessage(SAMPLE_ACTION_POLICY_ID),
     details: { action_policy_id: SAMPLE_ACTION_POLICY_ID },

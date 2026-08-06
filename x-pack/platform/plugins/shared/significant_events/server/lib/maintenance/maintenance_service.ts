@@ -10,7 +10,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { ALERTING_V2_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type {
   SignificantEventsMaintenanceFailure,
@@ -152,7 +152,7 @@ const setV2RulesEnabled = async (
     ? await rulesClient.bulkEnableRules({ ids })
     : await rulesClient.bulkDisableRules({ ids });
   const fatalErrors = errors.filter(
-    (error) => error.error.code !== ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND
+    (error) => error.error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND
   );
   const erroredIds = new Set(errors.map((error) => error.id));
   return {

@@ -6,7 +6,7 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -102,7 +102,7 @@ export class AlertActionWorkflowSubscriber {
     } catch (err) {
       this.logger.error({
         error: err,
-        code: ALERTING_V2_LOG_CODES.ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILURE,
+        code: ALERTING_LOG_CODES.ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILURE,
         labels: { event_type: trigger.eventType },
       });
     }

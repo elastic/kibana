@@ -6,7 +6,7 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { ALERTING_V2_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { compileMatchCountBreachQuery } from '../../../significant_events/rules/match_count_query_compiler';
 import {
   METRIC_SERIES_GROUPING_FIELDS,
@@ -58,7 +58,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   async bulkDeleteRules(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
     const { errors } = await this.rulesClient.bulkDeleteRules({ ids });
-    const fatal = errors.filter((e) => e.error.code !== ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND);
+    const fatal = errors.filter((e) => e.error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND);
     if (fatal.length > 0) {
       const detail = fatal.map((e) => `${e.id}: ${e.error.message}`).join('; ');
       throw new Error(`V2 bulk delete failed for ${fatal.length} rule(s): ${detail}`);

@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { createLoggerService } from './logger_service.mock';
 import { LoggerService } from './logger_service';
 
@@ -69,18 +69,18 @@ describe('LoggerService', () => {
 
       loggerService.warn({
         message,
-        code: ALERTING_V2_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND,
+        code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND,
       });
 
       expect(mockLogger.warn).toHaveBeenCalledWith(message, {
-        labels: { code: ALERTING_V2_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND },
+        labels: { code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND },
       });
     });
 
     it('should merge labels with the code', () => {
       loggerService.warn({
         message: 'Test warn message',
-        code: ALERTING_V2_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND,
+        code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND,
         labels: { workflow_id: 'workflow-1', group_id: 'group-1' },
       });
 
@@ -88,7 +88,7 @@ describe('LoggerService', () => {
         labels: {
           workflow_id: 'workflow-1',
           group_id: 'group-1',
-          code: ALERTING_V2_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND,
+          code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND,
         },
       });
     });
@@ -98,12 +98,12 @@ describe('LoggerService', () => {
 
       loggerService.warn({
         message: 'Test warn message',
-        code: ALERTING_V2_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
+        code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
         error,
       });
 
       expect(mockLogger.warn).toHaveBeenCalledWith('Test warn message', {
-        labels: { code: ALERTING_V2_LOG_CODES.POLICY_MATCHER_KQL_INVALID },
+        labels: { code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID },
         error: {
           message: error.message,
           stack_trace: error.stack,
@@ -115,7 +115,7 @@ describe('LoggerService', () => {
     it('should preserve a lazy message', () => {
       const message = () => 'Lazy warn message';
 
-      loggerService.warn({ message, code: ALERTING_V2_LOG_CODES.DISPATCH_WORKFLOW_DISABLED });
+      loggerService.warn({ message, code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_DISABLED });
 
       expect(mockLogger.warn).toHaveBeenCalledWith(message, expect.anything());
     });
@@ -125,11 +125,11 @@ describe('LoggerService', () => {
     it('should default the message to the error message and emit the code as a label', () => {
       const error = new Error('Test error');
 
-      loggerService.error({ error, code: ALERTING_V2_LOG_CODES.RESOURCES_BOOTSTRAP_FAILED });
+      loggerService.error({ error, code: ALERTING_LOG_CODES.RESOURCES_BOOTSTRAP_FAILED });
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
       expect(mockLogger.error).toHaveBeenCalledWith(error.message, {
-        labels: { code: ALERTING_V2_LOG_CODES.RESOURCES_BOOTSTRAP_FAILED },
+        labels: { code: ALERTING_LOG_CODES.RESOURCES_BOOTSTRAP_FAILED },
         error: {
           message: error.message,
           stack_trace: error.stack,
@@ -143,7 +143,7 @@ describe('LoggerService', () => {
 
       loggerService.error({
         error,
-        code: ALERTING_V2_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
+        code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
         labels: { step: 'fetch_rule', rule_id: 'rule-1' },
       });
 
@@ -153,7 +153,7 @@ describe('LoggerService', () => {
           labels: {
             step: 'fetch_rule',
             rule_id: 'rule-1',
-            code: ALERTING_V2_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
+            code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
           },
         })
       );
@@ -163,7 +163,7 @@ describe('LoggerService', () => {
       class QueryTimeoutError extends Error {}
       const error = new QueryTimeoutError('Test error');
 
-      loggerService.error({ error, code: ALERTING_V2_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED });
+      loggerService.error({ error, code: ALERTING_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED });
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         error.message,
@@ -180,7 +180,7 @@ describe('LoggerService', () => {
     ])('should normalize %s thrown value', (_, thrown, expectedMessage) => {
       loggerService.error({
         error: thrown,
-        code: ALERTING_V2_LOG_CODES.STORAGE_BULK_INDEX_FAILED,
+        code: ALERTING_LOG_CODES.STORAGE_BULK_INDEX_FAILED,
       });
 
       expect(mockLogger.error).toHaveBeenCalledWith(
@@ -197,11 +197,11 @@ describe('LoggerService', () => {
       loggerService.error({
         message: 'Rule query failed to parse or verify',
         error,
-        code: ALERTING_V2_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED,
+        code: ALERTING_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED,
       });
 
       expect(mockLogger.error).toHaveBeenCalledWith('Rule query failed to parse or verify', {
-        labels: { code: ALERTING_V2_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED },
+        labels: { code: ALERTING_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED },
         error: {
           message: 'Rule query failed to parse or verify',
           stack_trace: error.stack,
@@ -216,7 +216,7 @@ describe('LoggerService', () => {
       loggerService.error({
         message: () => 'Lazy error message',
         error,
-        code: ALERTING_V2_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED,
+        code: ALERTING_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED,
       });
 
       expect(mockLogger.error).toHaveBeenCalledWith('Lazy error message', expect.anything());
@@ -248,7 +248,7 @@ describe('LoggerService', () => {
 
       child.warn({
         message: 'Test warn message',
-        code: ALERTING_V2_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
+        code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
       });
 
       expect(mockLogger.get).toHaveBeenCalledWith('ruleExecutor');

@@ -15,7 +15,7 @@ import {
   type BulkResponse,
   type CreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import {
   ALERT_ACTIONS_DATA_STREAM,
   type AlertAction,
@@ -93,7 +93,7 @@ const preconditionErrorToItem = (
     error.data != null && typeof error.data === 'object' ? (error.data as AlertActionBoomData) : {};
 
   return toBulkAlertActionError(action, {
-    code: data.code ?? ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR,
+    code: data.code ?? ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR,
     message: error.message,
     details: data.details,
   });
@@ -282,7 +282,7 @@ export class AlertActionsClient {
       if (!alertEvent) {
         errors.push(
           toBulkAlertActionError(action, {
-            code: ALERTING_V2_ERROR_CODES.ALERT_GROUP_NOT_FOUND,
+            code: ALERTING_ERROR_CODES.ALERT_GROUP_NOT_FOUND,
             message: `No alert event found for group [${action.group_hash}]`,
           })
         );
@@ -296,7 +296,7 @@ export class AlertActionsClient {
       if ('episode_id' in action && alertEvent.episode_id !== action.episode_id) {
         errors.push(
           toBulkAlertActionError(action, {
-            code: ALERTING_V2_ERROR_CODES.ALERT_EPISODE_NOT_FOUND,
+            code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_FOUND,
             message: `Episode [${action.episode_id}] is not the latest episode for group [${action.group_hash}]`,
           })
         );

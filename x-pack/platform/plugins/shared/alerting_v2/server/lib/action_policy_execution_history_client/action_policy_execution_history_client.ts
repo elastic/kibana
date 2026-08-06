@@ -27,7 +27,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
-import { ALERTING_V2_LOG_CODES, type AlertingV2LogCode } from '../errors/error_codes';
+import { ALERTING_LOG_CODES, type AlertingV2LogCode } from '../errors/error_codes';
 import type { AlertingServerStartDependencies } from '../../types';
 import type { ResolvedSearchIds } from './build_execution_history_item';
 import {
@@ -154,11 +154,11 @@ export class ActionPolicyExecutionHistoryClient {
 
     const policies = this.unwrapFindResult(
       policiesRes,
-      ALERTING_V2_LOG_CODES.EXECUTION_HISTORY_SEARCH_POLICY_LOOKUP_FAILED
+      ALERTING_LOG_CODES.EXECUTION_HISTORY_SEARCH_POLICY_LOOKUP_FAILED
     );
     const rules = this.unwrapFindResult(
       rulesRes,
-      ALERTING_V2_LOG_CODES.EXECUTION_HISTORY_SEARCH_RULE_LOOKUP_FAILED
+      ALERTING_LOG_CODES.EXECUTION_HISTORY_SEARCH_RULE_LOOKUP_FAILED
     );
 
     const policyIds = new Set<string>(policies.items.map((p) => p.id));
@@ -188,15 +188,15 @@ export class ActionPolicyExecutionHistoryClient {
 
     const policies = this.unwrapArray(
       policiesRes,
-      ALERTING_V2_LOG_CODES.EXECUTION_HISTORY_POLICY_LOOKUP_FAILED
+      ALERTING_LOG_CODES.EXECUTION_HISTORY_POLICY_LOOKUP_FAILED
     );
     const rules = this.unwrapArray(
       rulesRes,
-      ALERTING_V2_LOG_CODES.EXECUTION_HISTORY_RULE_LOOKUP_FAILED
+      ALERTING_LOG_CODES.EXECUTION_HISTORY_RULE_LOOKUP_FAILED
     );
     const workflows = this.unwrapArray(
       workflowsRes,
-      ALERTING_V2_LOG_CODES.EXECUTION_HISTORY_WORKFLOW_LOOKUP_FAILED
+      ALERTING_LOG_CODES.EXECUTION_HISTORY_WORKFLOW_LOOKUP_FAILED
     );
 
     return {

@@ -16,7 +16,7 @@ import type { Logger } from '@kbn/logging';
 import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import { BaseAlertingRoute, type AlertingRouteSchemas } from './base_alerting_route';
-import { ALERTING_V2_ERROR_CODES } from '../lib/errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../lib/errors/error_codes';
 import type { MockUiSettingsClient } from '../lib/services/settings_service/settings_service.mock';
 import { deriveErrorCodeFromStatus } from './derive_error_code';
 import { createRouteDependencies } from './test_utils';
@@ -81,7 +81,7 @@ describe('BaseAlertingRoute', () => {
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 503,
         body: {
-          code: ALERTING_V2_ERROR_CODES.ALERTING_DISABLED,
+          code: ALERTING_ERROR_CODES.ALERTING_DISABLED,
           error: 'Service Unavailable',
           message: 'Alerting is disabled.',
         },

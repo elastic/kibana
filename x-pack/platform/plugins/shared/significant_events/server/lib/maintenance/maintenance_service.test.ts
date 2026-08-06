@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERTING_V2_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
+import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
@@ -435,7 +435,7 @@ describe('SignificantEventsMaintenanceService', () => {
         disableErrors: [
           {
             id: 'rule-2',
-            error: { code: ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR, message: 'boom' },
+            error: { code: ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR, message: 'boom' },
           },
         ],
       });
@@ -457,7 +457,7 @@ describe('SignificantEventsMaintenanceService', () => {
         disableErrors: [
           {
             id: 'rule-2',
-            error: { code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND, message: 'not found' },
+            error: { code: ALERTING_ERROR_CODES.RULE_NOT_FOUND, message: 'not found' },
           },
         ],
       });
@@ -885,7 +885,7 @@ describe('SignificantEventsMaintenanceService', () => {
         enableErrors: [
           {
             id: 'rule-1',
-            error: { code: ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR, message: 'boom' },
+            error: { code: ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR, message: 'boom' },
           },
         ],
       });

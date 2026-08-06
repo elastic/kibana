@@ -7,7 +7,7 @@
 
 import { collectStreamResults, createRulePipelineState } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { MetricCollectorImpl } from './metric_collector';
 import { MetricsMiddleware } from './metrics_middleware';
 import type { MetricRecorder } from './types';
@@ -193,7 +193,7 @@ describe('MetricsMiddleware', () => {
     expect(ok).toHaveBeenCalledTimes(1);
     expect(mockLogger.warn).toHaveBeenCalledWith(
       expect.stringContaining('recorder "boom" failed at step "step1"'),
-      { labels: { code: ALERTING_V2_LOG_CODES.RULE_EXECUTION_METRICS_RECORDER_FAILED } }
+      { labels: { code: ALERTING_LOG_CODES.RULE_EXECUTION_METRICS_RECORDER_FAILED } }
     );
   });
 });

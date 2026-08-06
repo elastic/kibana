@@ -12,7 +12,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 
 /**
  * Middleware that provides centralized error handling for all steps.
@@ -42,7 +42,7 @@ export class ErrorHandlingMiddleware implements RuleExecutionMiddleware {
       } catch (error) {
         self.logger.error({
           error,
-          code: ALERTING_V2_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
+          code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
           labels: { step: ctx.step.name },
         });
 

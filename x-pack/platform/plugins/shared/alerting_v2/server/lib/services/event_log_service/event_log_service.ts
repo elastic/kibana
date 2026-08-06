@@ -18,7 +18,7 @@ import type { PolicyExecutionOutcome } from '@kbn/alerting-v2-schemas';
 import type { AlertingServerSetupDependencies } from '../../../types';
 import { EsServiceInternalToken } from '../es_service/tokens';
 import { LoggerServiceToken, type LoggerServiceContract } from '../logger_service/logger_service';
-import { ALERTING_V2_LOG_CODES } from '../../errors/error_codes';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { EventLoggerToken } from './tokens';
 import { buildFindActionPolicyEventsQuery } from './queries/action_policy_events_query';
 import { buildRuleExecutionsQuery } from './queries/rule_executions_query';
@@ -144,7 +144,7 @@ export class EventLogService implements EventLogServiceContract {
         error: new Error(
           `Dropped ${droppedCount} of ${response.hits.hits.length} task-run hit(s) on the rule executions read path. The normalizer rejected rows the ES query is supposed to have excluded. Investigate Task Manager schema drift or rule_executions_query filter coverage.`
         ),
-        code: ALERTING_V2_LOG_CODES.EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS,
+        code: ALERTING_LOG_CODES.EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS,
       });
     }
 
