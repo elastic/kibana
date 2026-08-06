@@ -20823,7 +20823,6 @@
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchApiDocLink": "Search API",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchApiDocumentationLink": "Weitere Informationen zu Search API",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchTemplateDocLink": "Suchvorlage",
-    "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.searchApiLearnMore": "{searchApiDocumentation}",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.title": "Was ist die Search API?",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step1.setUpSearchtemplate.description": "Ihre Suchanwendung verwendet ein {searchTemplateDocLink}, um die Arten von Abfragen zu steuern, die es akzeptiert. Führen Sie den folgenden Befehl aus, um Ihre aktuelle Suchvorlage anzuzeigen:",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step1.setUpSearchtemplate.searchTemplateDocLink": "Suchvorlage",

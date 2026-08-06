@@ -20893,7 +20893,6 @@
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchApiDocLink": "搜索 API",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchApiDocumentationLink": "详细了解搜索 API",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchTemplateDocLink": "搜索模板",
-    "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.searchApiLearnMore": "{searchApiDocumentation}",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.title": "什么是搜索 API？",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step1.setUpSearchtemplate.description": "搜索应用程序使用{searchTemplateDocLink}来控制它接受的查询类型。请运行以下命令以查看最新搜索模板：",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step1.setUpSearchtemplate.searchTemplateDocLink": "搜索模板",

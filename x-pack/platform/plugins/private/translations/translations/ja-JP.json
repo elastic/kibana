@@ -20885,7 +20885,6 @@
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchApiDocLink": "Search API",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchApiDocumentationLink": "Search APIの詳細",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchTemplateDocLink": "検索テンプレート",
-    "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.searchApiLearnMore": "{searchApiDocumentation}",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.title": "Search APIの概要",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step1.setUpSearchtemplate.description": "検索アプリケーションは{searchTemplateDocLink}を使用して、許可されるクエリのタイプを制御します。次のコマンドを実行し、現在の検索テンプレートを確認してください。",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step1.setUpSearchtemplate.searchTemplateDocLink": "検索テンプレート",

@@ -20787,7 +20787,6 @@
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchApiDocLink": "API de recherche",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchApiDocumentationLink": "En savoir plus sur l'API de recherche",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.body.searchTemplateDocLink": "modèle de recherche",
-    "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.searchApiLearnMore": "{searchApiDocumentation}",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.searchApiCallout.title": "Qu’est-ce qu’un API de recherche ?",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step1.setUpSearchtemplate.description": "Votre application de recherche utilise un {searchTemplateDocLink} pour contrôler le types de requête qu’elle accepte. Exécutez la commande suivante pour afficher votre modèle de recherche actuel :",
     "xpack.enterpriseSearch.searchApplications.searchApplication.searchApi.step1.setUpSearchtemplate.searchTemplateDocLink": "modèle de recherche",
