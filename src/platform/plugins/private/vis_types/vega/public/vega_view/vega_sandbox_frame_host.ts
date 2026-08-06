@@ -9,7 +9,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type { VegaSandboxMessage } from '@kbn/vega-sandbox';
-import { VEGA_SANDBOX_ROUTE_PATH } from '../../common/constants';
+import { VEGA_SANDBOX_ROUTE_PATH } from '../constants';
 
 const SANDBOX_ATTRIBUTE = 'allow-scripts';
 const DISALLOWED_SANDBOX_TOKENS = ['allow-same-origin', 'allow-top-navigation', 'allow-popups'];

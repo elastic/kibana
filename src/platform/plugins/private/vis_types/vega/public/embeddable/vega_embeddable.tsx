@@ -50,10 +50,16 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_EVENT_APPLY_FILTER } from '../constants';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
+import {
+  VEGA_EMBEDDABLE_TYPE,
+  VEGA_EVENT_APPLY_FILTER,
+  VEGA_SANDBOXED_RENDERING_FLAG,
+  VEGA_SANDBOX_ROUTE_PATH,
+} from '../constants';
 import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
-import type { VegaParser } from '../data_model/vega_parser';
+import type { VegaRenderDescriptor } from '../data_model/types';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_overrides';
 import { specUsesEsql } from '../lib/spec_uses_esql';
@@ -73,13 +79,13 @@ const parseSpec = (specString: string) => {
 };
 
 /**
- * Everything `VegaVisComponent` needs for one render, captured together so that `showWarnings` can
+ * Everything `VegaVisComponent` needs for one render, captured together so that `renderMode` can
  * only change alongside a new `visData` identity. The component rebuilds its Vega view when
- * `showWarnings` changes but only draws when `visData` changes, so the two must move as a pair.
+ * `renderMode` changes but only draws when `visData` changes, so the two must move as a pair.
  */
 interface VegaRenderInput {
-  showWarnings: boolean;
-  visData: VegaParser;
+  renderMode: RenderMode;
+  visData: VegaRenderDescriptor;
 }
 
 /**
@@ -268,7 +274,7 @@ export const vegaEmbeddableFactory = (
       rendered$.next(true);
     };
 
-    const fetchSubscription = combineLatest([spec$, fetch$(api)])
+    const fetchSubscription = combineLatest([spec$, fetch$(api), core.theme.theme$])
       .pipe(
         switchMap(async ([spec, data]) => {
           abortController.abort();
@@ -308,9 +314,8 @@ export const vegaEmbeddableFactory = (
             if (signal.aborted) {
               return;
             }
-            // Show warnings only in edit mode matching the legacy vega behavior.
             renderInput$.next({
-              showWarnings: getInheritedViewMode(api) === 'edit',
+              renderMode: getInheritedViewMode(api) === 'edit' ? 'edit' : 'view',
               visData,
             });
           } catch (error) {
@@ -374,8 +379,14 @@ export const vegaEmbeddableFactory = (
                   deps={deps.visualizationDependencies}
                   fireEvent={fireEvent}
                   renderComplete={onRenderComplete}
-                  showWarnings={renderInput.showWarnings}
+                  renderMode={renderInput.renderMode}
+                  inspectorAdapters={inspectorAdapters}
                   visData={renderInput.visData}
+                  useSandbox={
+                    core.featureFlags.getBooleanValue(VEGA_SANDBOXED_RENDERING_FLAG, false) &&
+                    !renderInput.visData.useMap
+                  }
+                  sandboxFrameSrc={core.http.basePath.prepend(VEGA_SANDBOX_ROUTE_PATH)}
                 />
               </Suspense>
             ) : null}

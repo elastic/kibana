@@ -16,7 +16,7 @@ import type { KibanaExecutionContext } from '@kbn/core-execution-context-common'
 import type { VegaVisualizationDependencies } from './plugin';
 import { reportVegaRender } from './lib/vega_render_telemetry';
 import type { RenderValue } from './vega_fn';
-import { VEGA_SANDBOX_ROUTE_PATH, VEGA_SANDBOXED_RENDERING_FLAG } from '../common/constants';
+import { VEGA_SANDBOX_ROUTE_PATH, VEGA_SANDBOXED_RENDERING_FLAG } from './constants';
 const LazyVegaVisComponent = lazy(() =>
   import('./async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
 );

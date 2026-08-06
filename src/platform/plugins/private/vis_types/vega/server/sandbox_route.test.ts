@@ -12,7 +12,7 @@ import {
   getImgSrcSourcesFromPolicy,
   registerSandboxRoute,
 } from './sandbox_route';
-import { VEGA_SANDBOX_ROUTE_PATH } from '../common/constants';
+import { VEGA_SANDBOX_ROUTE_PATH } from '../public/constants';
 
 describe('Vega sandbox route CSP helpers', () => {
   test('maps broad allow-all policy to wildcard image source when there are no deny rules', () => {
