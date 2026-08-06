@@ -109,8 +109,11 @@ export const useSuggestAutomation = ({
         }
 
         const currentAiIndexId = aiIndexIdRef.current;
+        if (!currentAiIndexId) {
+          return;
+        }
+
         if (
-          currentAiIndexId &&
           !successfulResults.some(
             (result) => getAutomationToolAiIndexId(result) === currentAiIndexId
           )

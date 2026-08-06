@@ -9,9 +9,13 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../../../../common/agent_builder_attachments';
 import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
-import { AiIndexManagedError } from '../../../ai_indices/errors';
+import { AiIndexConflictError, AiIndexManagedError } from '../../../ai_indices/errors';
 import type { AiIndexService } from '../../../ai_indices/service';
-import { resolveAiIndexIdFromAttachments, saveAutomationHandler } from './handler';
+import {
+  resolveAiIndexIdFromAttachments,
+  saveAutomationHandler,
+  getSaveAutomationErrorMessage,
+} from './handler';
 
 jest.mock('../../assert_context_engine_write_access', () => ({
   assertContextEngineWriteAccess: jest.fn().mockResolvedValue(undefined),
@@ -77,12 +81,41 @@ describe('resolveAiIndexIdFromAttachments', () => {
   });
 });
 
+describe('getSaveAutomationErrorMessage', () => {
+  it('returns domain error messages', () => {
+    expect(getSaveAutomationErrorMessage(new AiIndexManagedError('my-ai-index'))).toBe(
+      "AI index 'my-ai-index' is managed and cannot be modified via the API"
+    );
+    expect(getSaveAutomationErrorMessage(new AiIndexConflictError('my-ai-index'))).toContain(
+      'my-ai-index'
+    );
+  });
+
+  it('returns a generic message for internal errors', () => {
+    expect(
+      getSaveAutomationErrorMessage(
+        Object.assign(new Error('search failed'), { statusCode: 500, meta: {} })
+      )
+    ).toBe('An unexpected error occurred while saving the workflow automation.');
+    expect(getSaveAutomationErrorMessage('boom')).toBe(
+      'An unexpected error occurred while saving the workflow automation.'
+    );
+  });
+
+  it('returns expected business error messages', () => {
+    expect(
+      getSaveAutomationErrorMessage(new Error("Workflow 'wf-1' was not found in this space."))
+    ).toBe("Workflow 'wf-1' was not found in this space.");
+  });
+});
+
 describe('saveAutomationHandler', () => {
   const request = httpServerMock.createKibanaRequest();
   const getCoreStart = jest.fn();
   const getSecurityStart = jest.fn().mockResolvedValue(undefined);
   let aiIndexService: jest.Mocked<Pick<AiIndexService, 'get' | 'put'>>;
   let workflowsManagement: {
+    getWorkflow: jest.Mock;
     createWorkflow: jest.Mock;
     updateWorkflow: jest.Mock;
   };
@@ -93,6 +126,7 @@ describe('saveAutomationHandler', () => {
       put: jest.fn(),
     };
     workflowsManagement = {
+      getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-new' }),
       createWorkflow: jest.fn(),
       updateWorkflow: jest.fn(),
     };
@@ -183,7 +217,48 @@ describe('saveAutomationHandler', () => {
       workflowId: 'wf-new',
       status: 'attached',
     });
+    expect(workflowsManagement.getWorkflow).toHaveBeenCalledWith('wf-new', 'default');
     expect(workflowsManagement.createWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('rejects attaching a workflow id that does not exist', async () => {
+    aiIndexService.get.mockResolvedValue(baseAiIndex);
+    workflowsManagement.getWorkflow.mockResolvedValue(null);
+
+    await expect(
+      saveAutomationHandler({
+        params: { workflowId: 'wf-missing' },
+        request,
+        spaceId: 'default',
+        attachments: createAttachmentStateManager() as never,
+        getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+        getCoreStart,
+        getSecurityStart,
+        getWorkflowsManagement: () => workflowsManagement as never,
+      })
+    ).rejects.toThrow(/Workflow 'wf-missing' was not found/);
+  });
+
+  it('rejects when updateOrigin fails after creating a workflow', async () => {
+    aiIndexService.get.mockResolvedValue(baseAiIndex);
+    aiIndexService.put.mockResolvedValue('updated');
+    workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'pilot' });
+
+    const attachments = createAttachmentStateManager();
+    attachments.updateOrigin.mockResolvedValue(false);
+
+    await expect(
+      saveAutomationHandler({
+        params: { workflowAttachmentId: WORKFLOW_ATTACHMENT_ID },
+        request,
+        spaceId: 'default',
+        attachments: attachments as never,
+        getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+        getCoreStart,
+        getSecurityStart,
+        getWorkflowsManagement: () => workflowsManagement as never,
+      })
+    ).rejects.toThrow(/Failed to record workflow origin/);
   });
 
   it('returns already_attached when the workflow is already linked', async () => {

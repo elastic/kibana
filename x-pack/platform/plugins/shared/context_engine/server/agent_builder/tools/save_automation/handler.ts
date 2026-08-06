@@ -10,14 +10,18 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import type { CoreStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
   AI_INDEX_ATTACHMENT_TYPE,
   WORKFLOW_YAML_ATTACHMENT_TYPE,
 } from '../../../../common/agent_builder_attachments';
 import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
-import { AiIndexManagedError, AiIndexNotFoundError } from '../../../ai_indices/errors';
+import {
+  AiIndexConflictError,
+  AiIndexManagedError,
+  AiIndexNotFoundError,
+} from '../../../ai_indices/errors';
 import type { AiIndexService } from '../../../ai_indices/service';
-import type { ContextEngineWorkflowsManagementApi } from '../../../types';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 
 export interface SaveAutomationParams {
@@ -32,7 +36,7 @@ export interface SaveAutomationResult {
   status: 'saved_and_attached' | 'attached' | 'already_attached';
 }
 
-type WorkflowsManagementApi = ContextEngineWorkflowsManagementApi;
+type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
 interface WorkflowYamlAttachmentData {
   yaml: string;
@@ -116,6 +120,21 @@ export const resolveWorkflowYamlFromAttachments = (
   };
 };
 
+const assertWorkflowExists = async ({
+  workflowId,
+  spaceId,
+  workflowsManagement,
+}: {
+  workflowId: string;
+  spaceId: string;
+  workflowsManagement: WorkflowsManagementApi;
+}): Promise<void> => {
+  const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId);
+  if (!workflow) {
+    throw new Error(`Workflow '${workflowId}' was not found in this space.`);
+  }
+};
+
 const attachWorkflowToAiIndex = async ({
   aiIndexId,
   workflowId,
@@ -173,14 +192,21 @@ export const saveAutomationHandler = async ({
   getAiIndexService: () => AiIndexService;
   getCoreStart: () => Promise<CoreStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
-  getWorkflowsManagement: () => WorkflowsManagementApi | undefined;
+  getWorkflowsManagement: () => WorkflowsManagementApi;
 }): Promise<SaveAutomationResult> => {
   await assertContextEngineWriteAccess({ request, spaceId, getCoreStart, getSecurityStart });
 
+  const workflowsManagement = getWorkflowsManagement();
   const aiIndexAttachments = flattenAiIndexAttachments(attachments);
   const aiIndexId = resolveAiIndexIdFromAttachments(aiIndexAttachments, params.aiIndexId);
 
   if (params.workflowId) {
+    await assertWorkflowExists({
+      workflowId: params.workflowId,
+      spaceId,
+      workflowsManagement,
+    });
+
     const attachStatus = await attachWorkflowToAiIndex({
       aiIndexId,
       workflowId: params.workflowId,
@@ -196,11 +222,6 @@ export const saveAutomationHandler = async ({
 
   if (!params.workflowAttachmentId) {
     throw new Error('Provide either workflowAttachmentId or workflowId.');
-  }
-
-  const workflowsManagement = getWorkflowsManagement();
-  if (!workflowsManagement) {
-    throw new Error('Workflows management is not available in this Kibana deployment.');
   }
 
   const {
@@ -221,11 +242,16 @@ export const saveAutomationHandler = async ({
       request
     );
     savedWorkflowId = created.id;
-    await attachments.updateOrigin(
+    const originUpdated = await attachments.updateOrigin(
       params.workflowAttachmentId,
       savedWorkflowId,
       ATTACHMENT_REF_ACTOR.agent
     );
+    if (!originUpdated) {
+      throw new Error(
+        `Failed to record workflow origin for attachment '${params.workflowAttachmentId}'.`
+      );
+    }
   }
 
   const attachStatus = await attachWorkflowToAiIndex({
@@ -241,12 +267,26 @@ export const saveAutomationHandler = async ({
   };
 };
 
+const SAVE_AUTOMATION_DOMAIN_ERRORS = [
+  AiIndexNotFoundError,
+  AiIndexManagedError,
+  AiIndexConflictError,
+] as const;
+
+const isInternalError = (error: Error): boolean => 'statusCode' in error || 'meta' in error;
+
 export const getSaveAutomationErrorMessage = (error: unknown): string => {
-  if (error instanceof AiIndexNotFoundError || error instanceof AiIndexManagedError) {
-    return error.message;
+  if (SAVE_AUTOMATION_DOMAIN_ERRORS.some((ErrorType) => error instanceof ErrorType)) {
+    return (error as Error).message;
   }
+
   if (error instanceof Error) {
+    if (isInternalError(error)) {
+      return 'An unexpected error occurred while saving the workflow automation.';
+    }
+
     return error.message;
   }
-  return 'Unknown error';
+
+  return 'An unexpected error occurred while saving the workflow automation.';
 };

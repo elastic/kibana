@@ -70,7 +70,7 @@ export class ContextEnginePlugin
             const [, startDeps] = await coreSetup.getStartServices();
             return startDeps.security;
           },
-          getWorkflowsManagement: () => setupDeps.workflowsManagement?.management,
+          getWorkflowsManagement: () => setupDeps.workflowsManagement.management,
           getAiIndexService: () => {
             if (!this.aiIndexService) {
               throw new Error('AI index service not available — plugin has not started');

@@ -8,9 +8,11 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AiIndexService } from '../../ai_indices/service';
-import type { ContextEngineWorkflowsManagementSetup } from '../../types';
 import { createSaveAutomationTool } from './save_automation/tool';
+
+type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
 export const registerAgentBuilderTools = ({
   agentBuilder,
@@ -23,11 +25,9 @@ export const registerAgentBuilderTools = ({
   getAiIndexService: () => AiIndexService;
   getCoreStart: () => Promise<CoreStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
-  getWorkflowsManagement: () => ContextEngineWorkflowsManagementSetup['management'] | undefined;
+  getWorkflowsManagement: () => WorkflowsManagementApi;
 }): void => {
-  const register = agentBuilder.tools.register as (tool: unknown) => void;
-
-  register(
+  agentBuilder.tools.register(
     createSaveAutomationTool({
       getAiIndexService,
       getCoreStart,

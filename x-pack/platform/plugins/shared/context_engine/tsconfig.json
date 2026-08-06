@@ -46,6 +46,7 @@
     "@kbn/agent-builder-common",
     "@kbn/zod",
     "@kbn/shared-ux-ai-components",
-    "@kbn/security-plugin"
+    "@kbn/security-plugin",
+    "@kbn/workflows-management-plugin"
   ]
 }

@@ -75,8 +75,10 @@ describe('kiAutomationGenerationSkill', () => {
 
     expect(referencedToolIds.length).toBeGreaterThan(0);
 
-    const attachmentTypeIds = new Set(['platform.context_engine.ai_index']);
-    const attachmentScopedToolIds = new Set(['platform.context_engine.save_automation']);
+    const attachmentTypeIds = new Set([`${internalNamespaces.platformContextEngine}.ai_index`]);
+    const attachmentScopedToolIds = new Set([
+      `${internalNamespaces.platformContextEngine}.save_automation`,
+    ]);
     const unboundReferences = referencedToolIds.filter(
       (toolId) =>
         !attachmentTypeIds.has(toolId) &&

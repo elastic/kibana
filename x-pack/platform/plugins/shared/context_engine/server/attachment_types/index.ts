@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { createAiIndexAttachmentType } from './ai_index';
 
 export const registerAttachmentTypes = (agentBuilder: AgentBuilderPluginSetup) => {
-  const attachmentType: AttachmentTypeDefinition =
-    createAiIndexAttachmentType() as AttachmentTypeDefinition;
-  agentBuilder.attachments.registerType(attachmentType);
+  agentBuilder.attachments.registerType(
+    createAiIndexAttachmentType() as Parameters<
+      typeof agentBuilder.attachments.registerType
+    >[0]
+  );
 };

@@ -9,27 +9,9 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { CoreStart } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AiIndexProperties } from '../common/http_api/ai_indices';
-
-export interface ContextEngineWorkflowsManagementApi {
-  createWorkflow: (
-    workflow: { yaml: string; id?: string },
-    spaceId: string,
-    request: KibanaRequest
-  ) => Promise<{ id: string }>;
-  updateWorkflow: (
-    id: string,
-    workflow: { yaml: string },
-    spaceId: string,
-    request: KibanaRequest
-  ) => Promise<unknown>;
-}
-
-export interface ContextEngineWorkflowsManagementSetup {
-  management: ContextEngineWorkflowsManagementApi;
-}
 
 export interface ContextEnginePluginSetup {
   registerAiIndex: (id: string, properties: AiIndexProperties) => void;
@@ -45,7 +27,7 @@ export interface ContextEnginePluginStart {}
 
 export interface ContextEngineSetupDependencies {
   features: FeaturesPluginSetup;
-  workflowsManagement?: ContextEngineWorkflowsManagementSetup;
+  workflowsManagement: WorkflowsServerPluginSetup;
 }
 
 export interface ContextEngineStartDependencies {

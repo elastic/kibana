@@ -18,6 +18,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { Logger } from '@kbn/logging';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { from, map, switchMap } from 'rxjs';
 import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
@@ -48,8 +49,11 @@ export class ContextEnginePlugin
     >
 {
   private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> | undefined;
+  private readonly logger: Logger;
 
-  constructor(_context: PluginInitializerContext) {}
+  constructor(context: PluginInitializerContext) {
+    this.logger = context.logger.get();
+  }
 
   setup(
     core: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>
@@ -109,8 +113,20 @@ export class ContextEnginePlugin
       this.agentBuilderPromise = core.plugins
         .onStart<{ agentBuilder: AgentBuilderPluginStart }>('agentBuilder')
         .then(({ agentBuilder }) => (agentBuilder.found ? agentBuilder.contract : undefined))
-        .catch(() => undefined);
-    } catch {
+        .catch((error) => {
+          this.logger.warn(
+            `Failed to resolve Agent Builder start contract: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+          return undefined;
+        });
+    } catch (error) {
+      this.logger.warn(
+        `Failed to subscribe to Agent Builder start: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       this.agentBuilderPromise = Promise.resolve(undefined);
     }
   }

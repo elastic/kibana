@@ -18,8 +18,8 @@ import {
   MAX_AI_INDEX_ID_LENGTH,
 } from '../../../../common/constants';
 import { validateAiIndexId } from '../../../../common/validation';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AiIndexService } from '../../../ai_indices/service';
-import type { ContextEngineWorkflowsManagementApi } from '../../../types';
 import { getSaveAutomationErrorMessage, saveAutomationHandler } from './handler';
 
 const MAX_ATTACHMENT_ID_LENGTH = 256;
@@ -76,7 +76,7 @@ const saveAutomationSchema = z
     }
   });
 
-type WorkflowsManagementApi = ContextEngineWorkflowsManagementApi;
+type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
 export const createSaveAutomationTool = ({
   getAiIndexService,
@@ -87,7 +87,7 @@ export const createSaveAutomationTool = ({
   getAiIndexService: () => AiIndexService;
   getCoreStart: () => Promise<CoreStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
-  getWorkflowsManagement: () => WorkflowsManagementApi | undefined;
+  getWorkflowsManagement: () => WorkflowsManagementApi;
 }): BuiltinToolDefinition<typeof saveAutomationSchema> => ({
   id: CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
   type: ToolType.builtin,
@@ -122,7 +122,9 @@ export const createSaveAutomationTool = ({
       };
     } catch (error) {
       const message = getSaveAutomationErrorMessage(error);
-      logger.error(`Error running ${CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID}: ${message}`);
+      logger.error(`Error running ${CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID}: ${message}`, {
+        error,
+      });
       return {
         results: [
           {
