@@ -1,5 +1,5 @@
 {
-  "sha1": "a03024b52c6856475b6c250ec741170f8e512a7f",
+  "sha1": "b8a76dbf72b3ef7de0081f0d36baea3581f07223",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 103,
+        "line": 134,
         "column": 9
       }
     },
@@ -27,7 +27,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 188,
+        "line": 219,
         "column": 9
       }
     },
@@ -40,7 +40,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 253,
+        "line": 284,
         "column": 9
       }
     },
@@ -53,7 +53,20 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 311,
+        "line": 342,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-fa08c7c1ae41791",
+      "title": "ComposeDiscoverFlyout — create and edit flows create flow: manually selected sandbox time field holds and persists (#281806)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 398,
         "column": 9
       }
     },
@@ -66,7 +79,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 367,
+        "line": 450,
         "column": 9
       }
     },
@@ -79,7 +92,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 406,
+        "line": 489,
         "column": 9
       }
     },
@@ -92,7 +105,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 449,
+        "line": 532,
         "column": 9
       }
     },
@@ -105,7 +118,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 513,
+        "line": 596,
         "column": 9
       }
     },
@@ -118,7 +131,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 543,
+        "line": 626,
         "column": 9
       }
     },
@@ -131,7 +144,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 564,
+        "line": 647,
         "column": 9
       }
     },
@@ -144,7 +157,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 593,
+        "line": 676,
         "column": 9
       }
     },
@@ -157,7 +170,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 615,
+        "line": 698,
         "column": 9
       }
     },
