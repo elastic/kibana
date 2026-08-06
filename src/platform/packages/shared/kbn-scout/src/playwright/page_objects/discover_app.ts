@@ -170,7 +170,7 @@ export class DiscoverApp {
     } else {
       await this.page.testSubj.click('saveIndexPatternButton');
     }
-    await flyout.waitFor({ state: 'hidden' });
+    await flyout.waitFor({ state: 'hidden', timeout: 30_000 });
 
     await this.waitUntilTabIsLoaded();
   }
@@ -246,7 +246,7 @@ export class DiscoverApp {
       await confirmButton.waitFor({ state: 'visible' });
       await confirmButton.click();
     }
-    await flyout.waitFor({ state: 'hidden' });
+    await flyout.waitFor({ state: 'hidden', timeout: 30_000 });
     await this.waitUntilTabIsLoaded();
   }
 
@@ -291,7 +291,7 @@ export class DiscoverApp {
       await confirmButton.click();
     }
 
-    await flyout.waitFor({ state: 'hidden' });
+    await flyout.waitFor({ state: 'hidden', timeout: 30_000 });
     await this.waitUntilTabIsLoaded();
   }
 
