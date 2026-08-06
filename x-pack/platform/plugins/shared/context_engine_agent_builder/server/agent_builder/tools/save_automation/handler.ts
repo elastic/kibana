@@ -14,14 +14,14 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import {
   AI_INDEX_ATTACHMENT_TYPE,
   WORKFLOW_YAML_ATTACHMENT_TYPE,
-} from '../../../../common/agent_builder_attachments';
-import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
+} from '@kbn/context-engine-plugin/common/agent_builder_attachments';
+import { MAX_AI_INDEX_AUTOMATIONS } from '@kbn/context-engine-plugin/common/constants';
 import {
   AiIndexConflictError,
   AiIndexManagedError,
   AiIndexNotFoundError,
-} from '../../../ai_indices/errors';
-import type { AiIndexService } from '../../../ai_indices/service';
+} from '@kbn/context-engine-plugin/server/ai_indices/errors';
+import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 
 export interface SaveAutomationParams {

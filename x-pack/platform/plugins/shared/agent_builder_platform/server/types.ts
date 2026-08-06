@@ -14,7 +14,6 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
@@ -22,7 +21,6 @@ export interface PluginSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
   agentBuilderSml: AgentBuilderSmlPluginSetup;
   actions: ActionsPluginSetup;
-  contextEngine?: ContextEnginePluginSetup;
 }
 
 export interface PluginStartDependencies {

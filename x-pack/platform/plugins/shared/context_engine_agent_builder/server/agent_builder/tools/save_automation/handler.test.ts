@@ -7,10 +7,13 @@
 
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { AI_INDEX_ATTACHMENT_TYPE } from '../../../../common/agent_builder_attachments';
-import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
-import { AiIndexConflictError, AiIndexManagedError } from '../../../ai_indices/errors';
-import type { AiIndexService } from '../../../ai_indices/service';
+import { AI_INDEX_ATTACHMENT_TYPE } from '@kbn/context-engine-plugin/common/agent_builder_attachments';
+import { MAX_AI_INDEX_AUTOMATIONS } from '@kbn/context-engine-plugin/common/constants';
+import {
+  AiIndexConflictError,
+  AiIndexManagedError,
+} from '@kbn/context-engine-plugin/server/ai_indices/errors';
+import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import {
   resolveAiIndexIdFromAttachments,
   saveAutomationHandler,

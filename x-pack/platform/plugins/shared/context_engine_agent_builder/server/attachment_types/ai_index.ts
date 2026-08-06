@@ -10,8 +10,8 @@ import {
   AI_INDEX_ATTACHMENT_TYPE,
   aiIndexAttachmentDataSchema,
   type AiIndexAttachmentData,
-} from '../../common/agent_builder_attachments';
-import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../common/agent_builder_tools';
+} from '@kbn/context-engine-plugin/common/agent_builder_attachments';
+import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '@kbn/context-engine-plugin/common/agent_builder_tools';
 
 /**
  * Server-side definition for the `ai_index` attachment type — a read-only snapshot

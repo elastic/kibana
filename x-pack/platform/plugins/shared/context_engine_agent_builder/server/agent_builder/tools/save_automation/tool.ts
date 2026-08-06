@@ -12,14 +12,14 @@ import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../../../common/agent_builder_tools';
+import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '@kbn/context-engine-plugin/common/agent_builder_tools';
 import {
   MAX_AI_INDEX_AUTOMATION_LENGTH,
   MAX_AI_INDEX_ID_LENGTH,
-} from '../../../../common/constants';
-import { validateAiIndexId } from '../../../../common/validation';
+} from '@kbn/context-engine-plugin/common/constants';
+import { validateAiIndexId } from '@kbn/context-engine-plugin/common/validation';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { AiIndexService } from '../../../ai_indices/service';
+import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import { getSaveAutomationErrorMessage, saveAutomationHandler } from './handler';
 
 const MAX_ATTACHMENT_ID_LENGTH = 256;

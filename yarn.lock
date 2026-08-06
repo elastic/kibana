@@ -5018,6 +5018,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/context-engine-agent-builder-plugin@link:x-pack/platform/plugins/shared/context_engine_agent_builder":
+  version "0.0.0"
+  uid ""
+
 "@kbn/context-engine-plugin@link:x-pack/platform/plugins/shared/context_engine":
   version "0.0.0"
   uid ""

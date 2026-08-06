@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../common/agent_builder_tools';
+import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '@kbn/context-engine-plugin/common/agent_builder_tools';
 import { createAiIndexAttachmentType } from './ai_index';
 
 describe('createAiIndexAttachmentType', () => {

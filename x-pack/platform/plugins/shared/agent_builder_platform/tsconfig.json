@@ -36,6 +36,5 @@
     "@kbn/logging-mocks",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/agent-builder-plugin",
-    "@kbn/context-engine-plugin",
   ]
 }

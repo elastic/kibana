@@ -48,11 +48,6 @@ export class AgentBuilderPlatformPlugin
       coreSetup,
       setupDeps,
     });
-    setupDeps.contextEngine?.registerAgentBuilderAttachments(setupDeps.agentBuilder);
-    setupDeps.contextEngine?.registerAgentBuilderTools(setupDeps.agentBuilder, async () => {
-      const [coreStart] = await coreSetup.getStartServices();
-      return coreStart;
-    });
     const getActionsStart = async () => {
       const [, startDeps] = await coreSetup.getStartServices();
       return startDeps.actions;

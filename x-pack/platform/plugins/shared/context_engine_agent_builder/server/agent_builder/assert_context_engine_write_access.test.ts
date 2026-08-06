@@ -9,7 +9,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { apiPrivileges } from '../../common/features';
+import { apiPrivileges } from '@kbn/context-engine-plugin/common/features';
 import { assertContextEngineWriteAccess } from './assert_context_engine_write_access';
 
 describe('assertContextEngineWriteAccess', () => {

@@ -9,7 +9,7 @@ import type { CoreStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { apiPrivileges } from '../../common/features';
+import { apiPrivileges } from '@kbn/context-engine-plugin/common/features';
 
 export const assertContextEngineWriteAccess = async ({
   request,

@@ -9,7 +9,7 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { AiIndexService } from '../../ai_indices/service';
+import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import { createSaveAutomationTool } from './save_automation/tool';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
