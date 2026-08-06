@@ -740,6 +740,9 @@ export class SettingsPageObject extends FtrService {
     let alertText;
     await this.retry.try(async () => {
       this.log.debug('click delete index pattern button');
+      // Best-effort: dismiss any lingering toasts before opening the flyout, while no
+      // overlay blocks the toast close buttons.
+      await this.toasts.dismissAll();
       await this.clickDeletePattern();
     });
     await this.retry.try(async () => {
@@ -748,12 +751,10 @@ export class SettingsPageObject extends FtrService {
     });
     await this.retry.try(async () => {
       this.log.debug('acceptConfirmation');
-      // A lingering/animating success toast can overlap the flyout's bottom-right Delete
-      // button and intercept the click. Drain toasts, click via a short-retry element handle
-      // (so an interception surfaces here instead of being swallowed by the click's own long
-      // internal retry), then gate success on the flyout actually closing so an intercepted
-      // click re-drains toasts and retries.
-      await this.toasts.dismissAllWithChecks();
+      // Click via a short-retry element handle so an interception surfaces here instead of
+      // being swallowed by testSubjects.click's own long internal retry. Gate success on
+      // the flyout actually closing so an intercepted click causes the outer retry to
+      // re-try with a fresh state.
       const confirmButton = await this.testSubjects.find('confirmFlyoutConfirmButton');
       await confirmButton.click();
       await this.testSubjects.missingOrFail('confirmFlyoutConfirmButton');
