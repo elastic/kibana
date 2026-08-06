@@ -6,10 +6,7 @@
  */
 
 import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import {
-  ACTION_POLICY_SAVED_OBJECT_TYPE,
-  RULE_SAVED_OBJECT_TYPE,
-} from '../../../../../common/saved_object_types';
+import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../../../common/saved_object_types';
 import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,

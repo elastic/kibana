@@ -188,14 +188,34 @@ describe('buildExecutionHistoryItem', () => {
     expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS)).toEqual(null);
   });
 
-  it('returns null when policy has no rules referenced', () => {
+  it('returns an item with empty rules when policy has no rules referenced and no narrowing filter is active', () => {
     const event = buildEvent({
       kibana: {
         saved_objects: [{ type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' }],
         alerting_v2: { dispatcher: {} },
       },
     });
-    expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS)).toEqual(null);
+    expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS)).toMatchObject({
+      policy: { id: 'policy-1' },
+      rules: [],
+      totalRuleCount: 0,
+    });
+  });
+
+  it('returns null when policy has no rules referenced and a narrowing filter is active', () => {
+    const event = buildEvent({
+      kibana: {
+        saved_objects: [{ type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' }],
+        alerting_v2: { dispatcher: {} },
+      },
+    });
+    const narrowingSearch = {
+      policyIds: [],
+      ruleIds: ['rule-other'],
+      hasMatches: true,
+      matches: null,
+    };
+    expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, narrowingSearch)).toEqual(null);
   });
 
   it('combines ref-based rule ids with spillover dispatcher.rule_ids', () => {

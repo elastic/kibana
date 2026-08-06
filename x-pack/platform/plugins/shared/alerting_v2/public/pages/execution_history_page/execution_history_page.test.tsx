@@ -126,6 +126,7 @@ const buildItem = (
   totalRuleCount: 1,
   outcome: 'dispatched',
   episode_count: 3,
+  episodes: [],
   action_group_count: 2,
   workflows: [{ id: 'wf-1', name: 'My Workflow' }],
   ...overrides,
@@ -313,7 +314,7 @@ describe('ExecutionHistoryPage', () => {
       expect(screen.getByText('My Policy')).toBeInTheDocument();
       expect(screen.getByText('My Rule')).toBeInTheDocument();
       expect(screen.getByText('My Workflow')).toBeInTheDocument();
-      expect(screen.getByText('dispatched')).toBeInTheDocument();
+      expect(screen.getAllByText('Dispatched').length).toBeGreaterThan(0);
     });
 
     it('falls back to ids when names are missing', async () => {

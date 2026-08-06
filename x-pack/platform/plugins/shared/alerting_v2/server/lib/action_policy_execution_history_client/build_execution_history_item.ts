@@ -9,6 +9,7 @@ import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import {
   MAX_EMBEDDED_RULES_PER_ITEM,
   MAX_EMBEDDED_EPISODES_PER_ITEM,
+  type DispatchFailureReason,
   type PolicyExecutionHistoryItem,
   type PolicyExecutionOutcome,
   type SearchMatchCounts,
@@ -178,7 +179,7 @@ export function buildExecutionHistoryItem(
     rules,
     totalRuleCount,
     workflows,
-    ...(failureReason !== undefined ? { failure_reason: failureReason as string } : {}),
+    ...(failureReason !== undefined ? { failure_reason: failureReason as DispatchFailureReason } : {}),
     ...(errorMessage !== undefined ? { error: { message: errorMessage } } : {}),
   };
 }

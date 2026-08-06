@@ -46,6 +46,7 @@ const buildItem = (
   totalRuleCount: 1,
   outcome: 'dispatched',
   episode_count: 3,
+  episodes: [],
   action_group_count: 2,
   workflows: [{ id: 'wf-1', name: 'My Workflow' }],
   ...overrides,
@@ -86,7 +87,7 @@ describe('PoliciesExecutionHistoryTable', () => {
 
     expect(screen.getByText('My Policy')).toBeInTheDocument();
     expect(screen.getByText('My Rule')).toBeInTheDocument();
-    expect(screen.getByText('dispatched')).toBeInTheDocument();
+    expect(screen.getByText('Dispatched')).toBeInTheDocument();
     expect(screen.getByText('My Workflow')).toBeInTheDocument();
     expect(screen.getByText(/2026-05-05/)).toBeInTheDocument();
   });
