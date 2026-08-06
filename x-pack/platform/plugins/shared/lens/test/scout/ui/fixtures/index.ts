@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage, ScoutParallelTestFixtures, ScoutParallelWorkerFixtures } from '@kbn/scout';
+import type { ScoutParallelTestFixtures, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { spaceTest as baseSpaceTest } from '@kbn/scout';
 import type { LensPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
@@ -13,6 +13,8 @@ import { extendPageObjects } from './page_objects';
 export * as testData from './constants';
 export * from './helpers';
 export * from './open_in_lens_helpers';
+export * from './saved_object_helpers';
+// Re-exports the non-parallel `test` fixture (pageObjects + tsdbHelper/tsdbScenario).
 export * from './tsdb_helpers';
 
 export interface LensParallelTestFixtures extends ScoutParallelTestFixtures {
@@ -23,16 +25,7 @@ export const spaceTest = baseSpaceTest.extend<
   LensParallelTestFixtures,
   ScoutParallelWorkerFixtures
 >({
-  pageObjects: async (
-    {
-      pageObjects,
-      page,
-    }: {
-      pageObjects: LensPageObjects;
-      page: ScoutPage;
-    },
-    use: (pageObjects: LensPageObjects) => Promise<void>
-  ) => {
+  pageObjects: async ({ pageObjects, page }, use) => {
     await use(extendPageObjects(pageObjects, page));
   },
 });

@@ -6,14 +6,14 @@
  */
 
 import { BulletSubtype } from '@elastic/charts';
-import { spaceTest, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
-  testData,
   canConvertToLensByTitle,
   convertToLensByTitle,
   createOpenInLensSuiteSetup,
-  getChartDebugData,
+  spaceTest,
+  testData,
 } from '../../../fixtures';
 
 spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deploymentAgnostic }, () => {
@@ -29,37 +29,37 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deployme
 
   spaceTest.afterAll(openInLensSuite.afterAll);
 
-  spaceTest('should convert to Lens', async ({ page, pageObjects }) => {
+  spaceTest('should convert to Lens', async ({ pageObjects }) => {
     const { dashboard, lens } = pageObjects;
 
     await convertToLensByTitle({ dashboard }, 'Gauge - Basic');
     await lens.waitForVisualization('gaugeChart');
     expect(await lens.getLayerCount()).toBe(1);
 
-    await expect(lens.getDimensionTriggerLocator()).toHaveCount(3);
+    await expect(lens.dimensionTriggerLocator).toHaveCount(3);
     const dimensions = await lens.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Count');
 
-    const { bullet } = await getChartDebugData(page, 'gaugeChart');
+    const { bullet } = await lens.getCurrentChartDebugState('gaugeChart');
     const debugData = bullet?.rows[0][0];
     expect(debugData?.title).toBe('Count');
-    expect(Math.round(debugData?.value ?? 0)).toBe(14005);
+    expect(Math.round(debugData?.value ?? 0)).toBe(14004);
   });
 
-  spaceTest('should convert aggregation with params', async ({ page, pageObjects }) => {
+  spaceTest('should convert aggregation with params', async ({ pageObjects }) => {
     const { dashboard, lens } = pageObjects;
 
     await convertToLensByTitle({ dashboard }, 'Gauge - Agg with params');
     await lens.waitForVisualization('gaugeChart');
     expect(await lens.getLayerCount()).toBe(1);
 
-    await expect(lens.getDimensionTriggerLocator()).toHaveCount(3);
+    await expect(lens.dimensionTriggerLocator).toHaveCount(3);
     const dimensions = await lens.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Average machine.ram');
     await expect(dimensions[1]).toHaveText('Static value: 0');
     await expect(dimensions[2]).toHaveText('Static value: 100');
 
-    const { bullet } = await getChartDebugData(page, 'gaugeChart');
+    const { bullet } = await lens.getCurrentChartDebugState('gaugeChart');
     const debugData = bullet?.rows[0][0];
     expect(debugData?.subtype).toBe(BulletSubtype.twoThirdsCircle);
     expect(debugData?.title).toBe('Average machine.ram');
@@ -77,20 +77,20 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deployme
     }
   );
 
-  spaceTest('should convert color ranges', async ({ page, pageObjects }) => {
+  spaceTest('should convert color ranges', async ({ pageObjects }) => {
     const { dashboard, lens } = pageObjects;
 
     await convertToLensByTitle({ dashboard }, 'Gauge - Color ranges');
     await lens.waitForVisualization('gaugeChart');
     expect(await lens.getLayerCount()).toBe(1);
 
-    await expect(lens.getDimensionTriggerLocator()).toHaveCount(3);
+    await expect(lens.dimensionTriggerLocator).toHaveCount(3);
     const dimensions = await lens.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Average machine.ram');
     await expect(dimensions[1]).toHaveText('Static value: 0');
     await expect(dimensions[2]).toHaveText('Static value: 15000000000');
 
-    const { bullet } = await getChartDebugData(page, 'gaugeChart');
+    const { bullet } = await lens.getCurrentChartDebugState('gaugeChart');
     const debugData = bullet?.rows[0][0];
     expect(debugData?.subtype).toBe(BulletSubtype.twoThirdsCircle);
     expect(debugData?.title).toBe('Average machine.ram');

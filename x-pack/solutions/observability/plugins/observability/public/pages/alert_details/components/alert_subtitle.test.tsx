@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { fireEvent } from '@testing-library/react';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { render } from '../../../utils/test_helper';
 import { alert } from '../mock/alert';
 import { useKibana } from '../../../utils/kibana_react';
@@ -31,7 +33,7 @@ const mockKibana = () => {
       ...kibanaStartMock.startContract().services,
       http: {
         basePath: {
-          prepend: jest.fn(),
+          prepend: jest.fn((path: string) => path),
         },
       },
     },
@@ -78,5 +80,40 @@ describe('Alert subtitle', () => {
 
     expect(result.queryByText('View rule')).not.toBeInTheDocument();
     expect(result.queryByTestId('o11yAlertRuleLink')).not.toBeInTheDocument();
+  });
+
+  it('should show deleted rule UI and open modal when rule name is clicked', async () => {
+    const result = renderComponent({ alert, ruleStatus: 'deleted' });
+
+    expect(result.queryByText('View rule')).not.toBeInTheDocument();
+    expect(result.queryByTestId('o11yAlertRuleLink')).not.toBeInTheDocument();
+    expect(result.getByTestId('alertSubtitleRuleUnavailableBadge')).toBeInTheDocument();
+    expect(result.getByTestId('alertSubtitleRuleId')).toHaveTextContent(
+      `Rule ID: ${alert.fields[ALERT_RULE_UUID]}`
+    );
+    expect(result.queryByTestId('ruleDeletedModal')).not.toBeInTheDocument();
+
+    fireEvent.click(result.getByTestId('alertSubtitleRuleNameLink'));
+
+    expect(result.getByTestId('ruleDeletedModal')).toBeInTheDocument();
+  });
+
+  it('should show disabled rule UI with a link to the rule details', async () => {
+    const result = renderComponent({ alert, ruleStatus: 'disabled' });
+
+    expect(result.queryByText('View rule')).not.toBeInTheDocument();
+    expect(result.queryByTestId('o11yAlertRuleLink')).not.toBeInTheDocument();
+    expect(result.getByTestId('alertSubtitleRuleUnavailableBadge')).toBeInTheDocument();
+    expect(result.getByTestId('alertSubtitleRuleId')).toHaveTextContent(
+      `Rule ID: ${alert.fields[ALERT_RULE_UUID]}`
+    );
+    expect(result.getByTestId('alertSubtitleRuleNameLink')).toHaveTextContent(
+      alert.fields[ALERT_RULE_NAME] as string
+    );
+    expect(result.getByTestId('alertSubtitleRuleNameLink')).toHaveAttribute(
+      'href',
+      expect.stringContaining(alert.fields[ALERT_RULE_UUID] as string)
+    );
+    expect(result.queryByTestId('ruleDeletedModal')).not.toBeInTheDocument();
   });
 });

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
   openDimensionEditorAndWaitForFlyout,
   openInlineEditorAndWaitVisible,
+  spaceTest,
   testData,
 } from '../fixtures';
 
@@ -29,7 +29,7 @@ const expectMetricPanelHasNotCrashed = async (page: import('@kbn/scout').ScoutPa
 
 spaceTest.describe(
   'Lens ES|QL table to metric trendline editing',
-  { tag: tags.stateful.classic },
+  { tag: '@local-stateful-classic' },
   () => {
     let dashboardId: string;
     let panelId: string;
@@ -125,8 +125,8 @@ spaceTest.describe(
         await spaceTest.step(
           'remove timestamp breakdown and keep a single metric trendline',
           async () => {
-            await lens.getSecondaryFlyoutBackButton().click();
-            await expect(lens.getSecondaryFlyoutBackButton()).toBeHidden();
+            await lens.secondaryFlyoutBackButton.click();
+            await expect(lens.secondaryFlyoutBackButton).toBeHidden();
 
             const breakdownPanel = page.getByTestId('lnsMetric_breakdownByDimensionPanel');
             await breakdownPanel.hover();

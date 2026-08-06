@@ -157,6 +157,7 @@
     "@kbn/core-security-server",
     "@kbn/core-http-server",
     "@kbn/field-formats-common",
+    "@kbn/ui-callout",
   ],
   "exclude": ["target/**/*"]
 }

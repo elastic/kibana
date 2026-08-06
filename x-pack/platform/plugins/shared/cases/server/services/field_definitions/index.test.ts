@@ -9,6 +9,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import {
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
+  MAX_EXTENDED_FIELD_VALUE_BYTES,
   MAX_FIELD_DEFINITIONS_PER_OWNER,
 } from '../../../common/constants';
 import { FieldDefinitionsService } from '.';
@@ -28,6 +29,9 @@ const makeFieldDefinitionSO = (
     ...overrides,
   },
 });
+
+const definitionWithDefault = (defaultValue: string): string =>
+  `name: my_field\ncontrol: INPUT_TEXT\ntype: keyword\nmetadata:\n  default: ${defaultValue}\n`;
 
 describe('FieldDefinitionsService', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
@@ -127,6 +131,30 @@ describe('FieldDefinitionsService', () => {
       );
       expect(result.fieldDefinitions).toHaveLength(1);
       expect(result.fieldDefinitions[0].name).toBe('my_field');
+    });
+
+    it('orders global fields by their persisted display order', async () => {
+      const secondField = makeFieldDefinitionSO({
+        name: 'second',
+        isGlobal: true,
+        displayOrder: 1,
+      });
+      const firstField = makeFieldDefinitionSO({
+        fieldDefinitionId: 'fd-2',
+        name: 'first',
+        isGlobal: true,
+        displayOrder: 0,
+      });
+      soClient.find.mockResolvedValue({
+        saved_objects: [secondField, firstField],
+        total: 2,
+        per_page: MAX_FIELD_DEFINITIONS_PER_OWNER,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+
+      const result = await service.getFieldDefinitions('securitySolution', { isGlobal: true });
+
+      expect(result.fieldDefinitions.map(({ name }) => name)).toEqual(['first', 'second']);
     });
 
     it('returns all definitions when isGlobal is false (no filtering)', async () => {
@@ -250,6 +278,30 @@ describe('FieldDefinitionsService', () => {
       expect((attributes as FieldDefinition).fieldDefinitionId).toBe(options!.id);
     });
 
+    it('appends a new global field after the existing global fields', async () => {
+      const existingField = makeFieldDefinitionSO({ isGlobal: true, displayOrder: 0 });
+      soClient.find.mockResolvedValue({
+        saved_objects: [existingField],
+        total: 1,
+        per_page: MAX_FIELD_DEFINITIONS_PER_OWNER,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+      soClient.create.mockResolvedValue(makeFieldDefinitionSO({ isGlobal: true, displayOrder: 1 }));
+
+      await service.createFieldDefinition({
+        name: 'my_field',
+        owner: 'securitySolution',
+        definition: 'name: my_field\ncontrol: INPUT_TEXT\ntype: keyword\n',
+        isGlobal: true,
+      });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        expect.objectContaining({ displayOrder: 1, isGlobal: true }),
+        expect.anything()
+      );
+    });
+
     it('refreshes the analytics v2 data view after creating', async () => {
       soClient.create.mockResolvedValue(makeFieldDefinitionSO());
 
@@ -260,6 +312,68 @@ describe('FieldDefinitionsService', () => {
       });
 
       expect(refreshAnalyticsV2DataView).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      ['a library reference', '$ref: existing_field\n'],
+      [
+        'an invalid typed default',
+        'name: my_field\ncontrol: TOGGLE\ntype: boolean\nmetadata:\n  default: "true"\n',
+      ],
+    ])('rejects %s before creating', async (_description, definition) => {
+      await expect(
+        service.createFieldDefinition({
+          name: 'my_field',
+          owner: 'securitySolution',
+          definition,
+        })
+      ).rejects.toThrow('Invalid field definition:');
+
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects malformed YAML before creating', async () => {
+      await expect(
+        service.createFieldDefinition({
+          name: 'my_field',
+          owner: 'securitySolution',
+          definition: ': {not valid yaml',
+        })
+      ).rejects.toThrow('Invalid YAML definition');
+
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects a default that exceeds the extended-field byte limit', async () => {
+      const defaultValue = '界'.repeat(Math.floor(MAX_EXTENDED_FIELD_VALUE_BYTES / 3) + 1);
+
+      await expect(
+        service.createFieldDefinition({
+          name: 'my_field',
+          owner: 'securitySolution',
+          definition: definitionWithDefault(defaultValue),
+        })
+      ).rejects.toThrow(
+        `Field definition "my_field" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('allows a multibyte default exactly at the extended-field byte limit', async () => {
+      const cjkCharacter = '界';
+      const defaultValue = cjkCharacter.repeat(
+        MAX_EXTENDED_FIELD_VALUE_BYTES / new TextEncoder().encode(cjkCharacter).byteLength
+      );
+      soClient.create.mockResolvedValue(makeFieldDefinitionSO());
+
+      await service.createFieldDefinition({
+        name: 'my_field',
+        owner: 'securitySolution',
+        definition: definitionWithDefault(defaultValue),
+      });
+
+      expect(soClient.create).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -296,6 +410,22 @@ describe('FieldDefinitionsService', () => {
       });
 
       expect(refreshAnalyticsV2DataView).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects an updated default that exceeds the extended-field byte limit', async () => {
+      const defaultValue = '界'.repeat(Math.floor(MAX_EXTENDED_FIELD_VALUE_BYTES / 3) + 1);
+
+      await expect(
+        service.updateFieldDefinition('fd-1', {
+          name: 'my_field',
+          owner: 'securitySolution',
+          definition: definitionWithDefault(defaultValue),
+        })
+      ).rejects.toThrow(
+        `Field definition "my_field" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+
+      expect(soClient.update).not.toHaveBeenCalled();
     });
   });
 

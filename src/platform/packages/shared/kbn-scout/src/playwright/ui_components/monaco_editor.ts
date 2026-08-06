@@ -51,6 +51,10 @@ export class KibanaCodeEditorWrapper {
     await expect(editor).toBeVisible();
   }
 
+  getCodeEditorContent(dataTestSubjId: string = 'ESQLEditor'): Locator {
+    return this.page.getByTestId(dataTestSubjId).locator('.view-lines');
+  }
+
   /**
    * Returns the current value of the Monaco editor model at the given index.
    *
@@ -266,5 +270,56 @@ export class KibanaCodeEditorWrapper {
       const editors = monacoEnv.monaco.editor.getEditors() as MonacoEditorInstance[];
       return editors[index]?.getScrollTop() ?? editors[0]?.getScrollTop() ?? 0;
     }, editorIndex);
+  }
+
+  /**
+   * Locator for a Monaco *inline decoration* rendered via `inlineClassName`
+   * (e.g. the ES|QL editor's lookup-join badges). These are plain `<span>`s
+   * injected by Monaco's decoration API, not React elements, so they can't
+   * carry a `data-test-subj` — a CSS class is the correct way to target them.
+   */
+  getDecoration(decorationClassName: string): Locator {
+    return this.page.locator(`.${decorationClassName}`);
+  }
+
+  private getHoverPopover(): Locator {
+    return this.page.locator('.monaco-hover');
+  }
+
+  /**
+   * Hovers a Monaco inline decoration (see {@link getDecoration}) and returns
+   * the text of its `hoverMessage` tooltip once the popover has rendered.
+   */
+  async getDecorationHoverText(decorationClassName: string): Promise<string> {
+    // Reset the pointer first so a stale hover from a previous action doesn't
+    // mask the popover this call is waiting for.
+    await this.page.mouse.move(0, 0);
+    await this.getDecoration(decorationClassName).hover();
+
+    const hover = this.getHoverPopover();
+    await hover.waitFor({ state: 'visible' });
+    const rows = hover.locator('.hover-row');
+    await rows.waitFor({ state: 'visible' });
+
+    const texts = await rows.allInnerTexts();
+    return texts.join(' ').trim();
+  }
+
+  /**
+   * Hovers a Monaco inline decoration and clicks the hover-popover row whose
+   * text contains `optionText` (e.g. an "Edit lookup index" action link).
+   */
+  async selectDecorationHoverOption(
+    decorationClassName: string,
+    optionText: string
+  ): Promise<void> {
+    await this.page.mouse.move(0, 0);
+    await this.getDecoration(decorationClassName).hover();
+
+    const hover = this.getHoverPopover();
+    await hover.waitFor({ state: 'visible' });
+    const option = hover.locator('.hover-row', { hasText: optionText });
+    await option.waitFor({ state: 'visible' });
+    await option.click();
   }
 }

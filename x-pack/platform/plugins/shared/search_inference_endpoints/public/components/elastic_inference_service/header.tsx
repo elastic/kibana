@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities';
-import { useInferencePreferencesEnabled } from '../../feature_flag';
 
 interface ElasticInferenceServiceModelsHeaderProps {
   onManageRegions: () => void;
@@ -26,7 +25,7 @@ export const ElasticInferenceServiceModelsHeader = ({
   } = useKibana();
   const { canManage } = useInferenceCapabilities();
 
-  const showManageRegions = useInferencePreferencesEnabled() && canManage;
+  const showManageRegions = canManage;
 
   const [billingUrl, setBillingUrl] = useState<string>();
 
@@ -98,7 +97,7 @@ export const ElasticInferenceServiceModelsHeader = ({
               >
                 {i18n.translate(
                   'xpack.searchInferenceEndpoints.eisModelsPage.manageRegionsButton',
-                  { defaultMessage: 'Manage regions' }
+                  { defaultMessage: 'Region preferences' }
                 )}
               </EuiButtonEmpty>,
             ]

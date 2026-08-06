@@ -84,7 +84,7 @@ describe('getToolCallCount', () => {
 });
 
 describe('summarizePersistenceCalls', () => {
-  const persistenceToolId = platformSignificantEventsTools.discoveryWrite;
+  const persistenceToolId = platformSignificantEventsTools.eventsWrite;
 
   it('accepts one persistence call', () => {
     expect(
