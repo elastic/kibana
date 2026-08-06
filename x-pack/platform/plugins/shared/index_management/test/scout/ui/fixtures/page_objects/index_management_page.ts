@@ -7,12 +7,23 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { type ScoutPage, EuiFieldTextWrapper } from '@kbn/scout';
+import { type ScoutPage, EuiFieldTextWrapper, EuiToastWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 export class AbstractPageObject {
   constructor(public readonly page: ScoutPage) {}
 }
+
+const commonPrefix = (values: string[]) => {
+  const [first, ...rest] = values;
+  let end = first.length;
+  for (const value of rest) {
+    while (end > 0 && !value.startsWith(first.slice(0, end))) {
+      end--;
+    }
+  }
+  return first.slice(0, end);
+};
 
 export class IndexManagement extends AbstractPageObject {
   async goto() {
@@ -97,6 +108,80 @@ export class IndexManagement extends AbstractPageObject {
     await this.page.testSubj.locator('nextButton').click();
   }
 
+  async clickTemplateDetailsLink(name: string) {
+    const searchBar = this.page.getByRole('searchbox', { name: /results lower in the page/ });
+    await expect(async () => {
+      await searchBar.fill(name);
+      await expect(searchBar).toHaveValue(name);
+    }).toPass({ timeout: 15_000 });
+    await this.page.testSubj
+      .locator('templateDetailsLink')
+      .and(this.page.getByRole('button', { name, exact: true }))
+      .dispatchEvent('click');
+    await expect(this.page.testSubj.locator('templateDetails')).toBeVisible();
+  }
+
+  async clickDataStreamNameLink(name: string) {
+    await this.page.testSubj.fill('dataStreamSearch', name);
+    await this.page.testSubj
+      .locator('nameLink')
+      .and(this.page.getByRole('button', { name, exact: true }))
+      .dispatchEvent('click');
+    await expect(this.page.testSubj.locator('dataStreamDetailPanel')).toBeVisible();
+  }
+
+  async openDataStreamLifecycleFlyout(name: string) {
+    await this.clickDataStreamNameLink(name);
+    await this.page.testSubj.locator('manageDataStreamButton').click();
+    await this.page.testSubj.locator('editDataLifecycleButton').click();
+    await expect(this.page.testSubj.locator('editDataLifecycleFlyoutApplyButton')).toBeVisible();
+  }
+
+  async applyDataStreamLifecycleChange() {
+    await this.page.testSubj.locator('editDataLifecycleFlyoutApplyButton').click();
+    await expect(this.page.testSubj.locator('editDataLifecycleFlyoutApplyButton')).toBeHidden({
+      timeout: 30_000,
+    });
+    await new EuiToastWrapper(this.page, { dataTestSubj: 'globalToastList' }).closeAllToasts();
+  }
+
+  async stopInheritingDataStreamLifecycle() {
+    const inherit = this.page.testSubj.locator('dataLifecycleInheritCheckbox');
+    if ((await inherit.count()) > 0 && (await inherit.isChecked())) {
+      await inherit.click();
+    }
+  }
+
+  async openBulkEditDataRetention(dataStreamNames: string[]) {
+    await this.page.testSubj.fill('dataStreamSearch', commonPrefix(dataStreamNames));
+    for (const name of dataStreamNames) {
+      await this.page.testSubj.locator(`checkboxSelectRow-${name}`).check();
+    }
+    await this.page.testSubj.locator('dataStreamActionsPopoverButton').click();
+    await this.page.testSubj.locator('bulkEditDataRetentionButton').click();
+  }
+
+  private enrichPolicyRow(name: string) {
+    return this.page.getByRole('row', { name: new RegExp(`\\b${name}\\b`) });
+  }
+
+  async clickEnrichPolicy(name: string) {
+    await this.page.testSubj
+      .locator('enrichPolicyDetailsLink')
+      .and(this.page.getByRole('link', { name, exact: true }))
+      .click();
+  }
+
+  async executeEnrichPolicy(name: string) {
+    await this.enrichPolicyRow(name).getByTestId('executePolicyButton').click();
+    await this.page.testSubj.locator('confirmModalConfirmButton').click();
+  }
+
+  async deleteEnrichPolicy(name: string) {
+    await this.enrichPolicyRow(name).getByTestId('deletePolicyButton').click();
+    await this.page.testSubj.locator('confirmModalConfirmButton').click();
+  }
+
   async changeMappingsEditorTab(tab: 'fields' | 'advancedOptions' | 'templates') {
     const tabMap = {
       fields: 'fieldsTab',
@@ -115,6 +200,16 @@ export class IndexManagement extends AbstractPageObject {
   };
 
   indexTemplateWizard = {
+    // `nameField` and `indexPatternsField` carry the test subject on their EuiFormRow wrapper, so
+    // the inner input is driven via the EUI field wrapper.
+    open: async (name: string, indexPattern: string) => {
+      await this.page.testSubj.locator('createTemplateButton').click();
+      await new EuiFieldTextWrapper(this.page, { dataTestSubj: 'nameField' }).fill(name);
+      await new EuiFieldTextWrapper(this.page, { dataTestSubj: 'indexPatternsField' }).fill(
+        indexPattern
+      );
+    },
+
     completeStepOne: async () => {
       const nameField = new EuiFieldTextWrapper(this.page, { dataTestSubj: 'nameField' });
       await nameField.fill('test-index-template');
@@ -128,13 +223,6 @@ export class IndexManagement extends AbstractPageObject {
     },
   };
 
-  /**
-   * Reads the Stack Management sidebar section composition. Uses the stable `data-test-subj`
-   * attributes set by `managementSidebarNav` (`item.id` is forwarded as `data-test-subj` on
-   * every EuiSideNav item). Returns the visible sections and the link IDs nested within each.
-   *
-   * Call this after navigating to `/app/management` and waiting for the sidebar to appear.
-   */
   async readSidebarSections(): Promise<Array<{ sectionId: string; sectionLinks: string[] }>> {
     // Evaluate in-page to avoid the `nth()` Playwright anti-pattern; reads the full section
     // + link structure in one call to the DOM.
