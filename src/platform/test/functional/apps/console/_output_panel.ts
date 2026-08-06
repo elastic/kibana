@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const toasts = getService('toasts');
   const browser = getService('browser');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'console']);
   const testSubjects = getService('testSubjects');
 
@@ -38,8 +39,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await asyncForEach(requests, async (request) => {
         await PageObjects.console.enterText(request);
       });
-      await PageObjects.console.selectAllRequests();
-      await PageObjects.console.clickPlayAndWaitForResults();
+      // The console parses requests asynchronously in a web worker, so selecting all and
+      // playing immediately after typing can race the parser and run a single request,
+      // which renders no "# <line>:" header. Retry select-all + play (clearing stale output
+      // first) until the multi-request output actually renders.
+      await retry.try(async () => {
+        await PageObjects.console.clickClearOutput();
+        await PageObjects.console.selectAllRequests();
+        await PageObjects.console.clickPlayAndWaitForResults();
+        const response = await PageObjects.console.getOutputText();
+        if (!/# \d+:/.test(response)) {
+          throw new Error(
+            `Expected multi-request output with "# <line>:" headers, got: ${response}`
+          );
+        }
+      });
     };
 
     it('should be able to copy the response of a request', async () => {
