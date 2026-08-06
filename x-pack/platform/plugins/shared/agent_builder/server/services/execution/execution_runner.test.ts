@@ -298,7 +298,7 @@ describe('collectAndWriteEvents', () => {
     data: {
       conversation_id: 'conversation-1',
       title: 'Conversation',
-      access_control: { access_mode: ConversationAccessControlMode.Public },
+      access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
     },
   };
 

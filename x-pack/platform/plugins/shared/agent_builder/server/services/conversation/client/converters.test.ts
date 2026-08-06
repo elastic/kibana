@@ -8,6 +8,7 @@
 import type { Conversation } from '@kbn/agent-builder-common';
 import {
   ConversationAccessControlMode,
+  ConversationAccessControlRole,
   ConversationRoundStatus,
   ConversationOriginType,
   ToolOrigin,
@@ -23,6 +24,7 @@ import {
   fromEs,
   toEs,
   createRequestToEs,
+  updateConversation,
   type Document as ConversationDocument,
 } from './converters';
 import { expect } from '@kbn/scout/ui';
@@ -110,6 +112,7 @@ describe('conversation model converters', () => {
         },
         access_control: {
           access_mode: ConversationAccessControlMode.Private,
+          entries: [],
         },
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
@@ -178,6 +181,7 @@ describe('conversation model converters', () => {
         },
         access_control: {
           access_mode: ConversationAccessControlMode.Private,
+          entries: [],
         },
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
@@ -475,10 +479,11 @@ describe('conversation model converters', () => {
 
       expect(deserialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Private,
+        entries: [],
       });
     });
 
-    it('deserializes conversation access control', () => {
+    it('defaults access control entries to an empty array when absent from the document', () => {
       const serialized = documentBase();
       serialized._source!.access_control = {
         access_mode: ConversationAccessControlMode.Public,
@@ -488,6 +493,22 @@ describe('conversation model converters', () => {
 
       expect(deserialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Public,
+        entries: [],
+      });
+    });
+
+    it('deserializes conversation access control', () => {
+      const serialized = documentBase();
+      serialized._source!.access_control = {
+        access_mode: ConversationAccessControlMode.Public,
+        entries: [{ type: 'user', name: 'alice', role: ConversationAccessControlRole.Member }],
+      };
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Public,
+        entries: [{ type: 'user', name: 'alice', role: ConversationAccessControlRole.Member }],
       });
     });
 
@@ -602,6 +623,7 @@ describe('conversation model converters', () => {
         rounds: undefined,
         access_control: {
           access_mode: ConversationAccessControlMode.Private,
+          entries: [],
         },
       });
       // Verify rounds is not present
@@ -704,12 +726,41 @@ describe('conversation model converters', () => {
       const conversation = conversationBase();
       conversation.access_control = {
         access_mode: ConversationAccessControlMode.Public,
+        entries: [],
       };
 
       const serialized = toEs(conversation, 'space');
 
       expect(serialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Public,
+        entries: [],
+      });
+    });
+
+    it('defaults access control to private with no entries when the conversation has none', () => {
+      const conversation = conversationBase();
+      conversation.access_control = undefined;
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [],
+      });
+    });
+
+    it('preserves access control entries when serializing', () => {
+      const conversation = conversationBase();
+      conversation.access_control = {
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [{ type: 'user', name: 'alice', role: ConversationAccessControlRole.Member }],
+      };
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [{ type: 'user', name: 'alice', role: ConversationAccessControlRole.Member }],
       });
     });
 
@@ -746,6 +797,37 @@ describe('conversation model converters', () => {
         id: 'U123',
         full_name: 'Jane Doe',
         username: 'jane',
+      });
+    });
+  });
+
+  describe('updateConversation', () => {
+    it('preserves access control entries when updating a conversation', () => {
+      const conversation: Conversation = {
+        id: 'conv_id',
+        agent_id: 'agent_id',
+        user: { id: 'user_id', username: 'user_name' },
+        title: 'conv_title',
+        created_at: creationDate,
+        updated_at: updateDate,
+        rounds: [],
+        access_control: {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [{ type: 'user', name: 'alice', role: ConversationAccessControlRole.Member }],
+        },
+      };
+
+      const updated = updateConversation({
+        conversation,
+        update: { id: 'conv_id', title: 'new_title' },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      expect(updated.title).toEqual('new_title');
+      expect(updated.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [{ type: 'user', name: 'alice', role: ConversationAccessControlRole.Member }],
       });
     });
   });
@@ -802,6 +884,7 @@ describe('conversation model converters', () => {
 
       expect(serialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Private,
+        entries: [],
       });
     });
 
@@ -812,6 +895,7 @@ describe('conversation model converters', () => {
         rounds: [],
         access_control: {
           access_mode: ConversationAccessControlMode.Public,
+          entries: [],
         },
       };
 
@@ -824,6 +908,7 @@ describe('conversation model converters', () => {
 
       expect(serialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Public,
+        entries: [],
       });
     });
 

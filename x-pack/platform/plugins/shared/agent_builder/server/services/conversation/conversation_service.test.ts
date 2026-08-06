@@ -45,7 +45,7 @@ describe('ConversationServiceImpl', () => {
       const author = await service.getConversationRoundAuthor({
         request,
         conversation: createEmptyConversation({
-          access_control: { access_mode: ConversationAccessControlMode.Public },
+          access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
         }),
         origin: {
           type: ConversationOriginType.Slack,
@@ -64,7 +64,7 @@ describe('ConversationServiceImpl', () => {
       const author = await service.getConversationRoundAuthor({
         request,
         conversation: createEmptyConversation({
-          access_control: { access_mode: ConversationAccessControlMode.Public },
+          access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
         }),
         origin: {
           type: ConversationOriginType.Slack,
@@ -81,7 +81,7 @@ describe('ConversationServiceImpl', () => {
       const author = await service.getConversationRoundAuthor({
         request,
         conversation: createEmptyConversation({
-          access_control: { access_mode: ConversationAccessControlMode.Public },
+          access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
         }),
       });
 
@@ -95,7 +95,7 @@ describe('ConversationServiceImpl', () => {
       const author = await service.getConversationRoundAuthor({
         request,
         conversation: createEmptyConversation({
-          access_control: { access_mode: ConversationAccessControlMode.Public },
+          access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
         }),
       });
 
@@ -108,7 +108,7 @@ describe('ConversationServiceImpl', () => {
       const author = await service.getConversationRoundAuthor({
         request,
         conversation: createEmptyConversation({
-          access_control: { access_mode: ConversationAccessControlMode.Private },
+          access_control: { access_mode: ConversationAccessControlMode.Private, entries: [] },
         }),
       });
 
@@ -122,7 +122,7 @@ describe('ConversationServiceImpl', () => {
       const author = await service.getConversationRoundAuthor({
         request,
         conversation: createEmptyConversation({
-          access_control: { access_mode: ConversationAccessControlMode.Private },
+          access_control: { access_mode: ConversationAccessControlMode.Private, entries: [] },
         }),
         origin: {
           type: ConversationOriginType.Slack,

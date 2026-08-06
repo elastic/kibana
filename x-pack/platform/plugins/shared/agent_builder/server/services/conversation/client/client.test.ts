@@ -148,6 +148,7 @@ describe('ConversationClient', () => {
         expect.objectContaining({
           access_control: {
             access_mode: ConversationAccessControlMode.Public,
+            entries: [],
           },
           origin,
         })

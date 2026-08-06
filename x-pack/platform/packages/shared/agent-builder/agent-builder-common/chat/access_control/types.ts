@@ -10,10 +10,36 @@ export enum ConversationAccessControlMode {
   Public = 'public',
 }
 
+/** Conversations have a single flat role: rename, delete and manage-access stay owner-only. */
+export enum ConversationAccessControlRole {
+  Member = 'member',
+}
+
+export type ConversationAccessControlPrincipalType = 'user';
+
+export interface ConversationAccessControlEntry {
+  type: ConversationAccessControlPrincipalType;
+  name: string;
+  role: ConversationAccessControlRole;
+}
+
 export interface ConversationAccessControl {
   access_mode: ConversationAccessControlMode;
+  entries: ConversationAccessControlEntry[];
 }
 
 export const getDefaultConversationAccessControl = (): ConversationAccessControl => ({
   access_mode: ConversationAccessControlMode.Private,
+  entries: [],
 });
+
+export const normalizeConversationAccessControl = (
+  accessControl: Partial<ConversationAccessControl> | undefined
+): ConversationAccessControl => {
+  const defaults = getDefaultConversationAccessControl();
+
+  return {
+    access_mode: accessControl?.access_mode ?? defaults.access_mode,
+    entries: accessControl?.entries ?? defaults.entries,
+  };
+};

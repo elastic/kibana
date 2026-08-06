@@ -6,6 +6,7 @@
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { Optional } from '@kbn/utility-types';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
@@ -41,6 +42,13 @@ const storageSettings = {
       access_control: types.object({
         properties: {
           access_mode: types.keyword({}),
+          entries: types.nested({
+            properties: {
+              type: types.keyword({}),
+              name: types.keyword({}),
+              role: types.keyword({}),
+            },
+          }),
         },
         dynamic: false,
       }),
@@ -69,7 +77,7 @@ export interface ConversationProperties {
   read?: boolean;
   pinned?: boolean;
   workspace_id?: string;
-  access_control?: ConversationAccessControl;
+  access_control?: Optional<ConversationAccessControl, 'entries'>;
   origin?: ConversationOrigin;
   // legacy field
   rounds?: PersistentConversationRound[];
