@@ -24,11 +24,25 @@ paths:
           application/json:
             schema:
               type: object
+              description: >-
+                Only the supplied fields are changed; omitted fields keep their
+                current value. Send an empty `tags` array or a null `maturity`
+                to clear them.
               properties:
                 description:
                   type: string
-              required:
-                - description
+                  maxLength: 2048
+                tags:
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/DatasetTags'
+                # Inlined rather than $ref'd to DatasetMaturity because only this
+                # request can clear the field, and a $ref cannot be made nullable.
+                maturity:
+                  type: string
+                  nullable: true
+                  enum:
+                    - raw
+                    - cleaned
+                    - golden
       responses:
         '200':
           description: Successful response
@@ -43,6 +57,10 @@ paths:
                     type: string
                   description:
                     type: string
+                  tags:
+                    $ref: '../common_attributes.schema.yaml#/components/schemas/DatasetTags'
+                  maturity:
+                    $ref: '../common_attributes.schema.yaml#/components/schemas/DatasetMaturity'
                   created_at:
                     type: string
                   updated_at:
