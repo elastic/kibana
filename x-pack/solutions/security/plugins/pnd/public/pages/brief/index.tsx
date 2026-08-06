@@ -9,8 +9,6 @@ import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,16 +23,10 @@ import { useInvestigations } from '../../hooks/use_investigations_api';
 import * as i18n from './translations';
 import { BriefingContainer } from '../../components/briefing_container';
 import { BRIEF_CONTAINER_BUCKETS } from '../../components/briefing_container/translations';
+import { CategoryFilter } from '../../components/filters/category_filter';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 const AUTO_RESOLVED_STATUSES = new Set(['auto-resolved', 'closed']);
-
-const BUCKET_COLORS: Record<RecommendedAction, string> = {
-  contain: 'danger',
-  escalate: 'warning',
-  investigate: 'primary',
-  tune: 'accent',
-};
 
 const isQueueRow = (investigation: Investigation): boolean =>
   QUEUE_STATUSES.has(investigation.status ?? 'open');
@@ -111,7 +103,7 @@ export const BriefPage: React.FC = () => {
         if (surfaceFilter && investigation.affectedSurface !== surfaceFilter) return false;
         return true;
       }),
-    [sortedEvents, selectedBucket, surfaceFilter]
+    [sortedEvents, surfaceFilter, selectedBucket]
   );
 
   const groupedBriefingItems = useMemo(() => {
@@ -151,32 +143,11 @@ export const BriefPage: React.FC = () => {
         }
       />
 
-      <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            color={selectedBucket === 'all' ? 'primary' : 'text'}
-            flush="both"
-            onClick={() => setSelectedBucket('all')}
-          >
-            {i18n.ALL_BUCKET}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        {BRIEF_CONTAINER_BUCKETS.map((bucket) => (
-          <EuiFlexItem key={bucket.id} grow={false}>
-            <EuiButton
-              size="s"
-              color={BUCKET_COLORS[bucket.id] as 'danger' | 'warning' | 'primary' | 'accent'}
-              fill={selectedBucket === bucket.id}
-              onClick={() =>
-                setSelectedBucket((current) => (current === bucket.id ? 'all' : bucket.id))
-              }
-            >
-              {bucket.label} {bucketCounts[bucket.id]}
-            </EuiButton>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
+      <CategoryFilter
+        selectedBucket={selectedBucket}
+        bucketCounts={bucketCounts}
+        onChange={setSelectedBucket}
+      />
 
       {surfaces.length > 0 ? (
         <>

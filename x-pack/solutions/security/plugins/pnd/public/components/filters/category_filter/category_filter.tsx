@@ -1,0 +1,56 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { RecommendedAction } from '@kbn/pnd-common';
+import { BRIEF_CONTAINER_BUCKETS } from '../../briefing_container/translations';
+import { ALL_CATEGORIES } from './translations';
+
+const BUCKET_COLORS: Record<RecommendedAction, 'danger' | 'warning' | 'primary' | 'accent'> = {
+  contain: 'danger',
+  escalate: 'warning',
+  investigate: 'primary',
+  tune: 'accent',
+};
+
+interface CategoryFilterProps {
+  selectedBucket: 'all' | RecommendedAction;
+  bucketCounts: Record<RecommendedAction, number>;
+  onChange: (bucket: 'all' | RecommendedAction) => void;
+}
+
+export const CategoryFilter: React.FC<CategoryFilterProps> = ({
+  selectedBucket,
+  bucketCounts,
+  onChange,
+}) => (
+  <EuiFlexGroup gutterSize="s" wrap responsive={false}>
+    <EuiFlexItem grow={false}>
+      <EuiButtonEmpty
+        size="s"
+        color={selectedBucket === 'all' ? 'primary' : 'text'}
+        flush="both"
+        onClick={() => onChange('all')}
+      >
+        {ALL_CATEGORIES}
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    {BRIEF_CONTAINER_BUCKETS.map((bucket) => (
+      <EuiFlexItem key={bucket.id} grow={false}>
+        <EuiButton
+          size="s"
+          color={BUCKET_COLORS[bucket.id]}
+          fill={selectedBucket === bucket.id}
+          onClick={() => onChange(selectedBucket === bucket.id ? 'all' : bucket.id)}
+        >
+          {bucket.label} {bucketCounts[bucket.id]}
+        </EuiButton>
+      </EuiFlexItem>
+    ))}
+  </EuiFlexGroup>
+);
