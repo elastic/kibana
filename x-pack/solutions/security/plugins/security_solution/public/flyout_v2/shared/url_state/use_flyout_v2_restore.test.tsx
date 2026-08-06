@@ -340,6 +340,48 @@ describe('useFlyoutV2RestoreFromUrl', () => {
     expect(mockFlyoutApi.openHostFlyout).toHaveBeenCalledTimes(1);
   });
 
+  it('does not open a doc-fetch stack from history while the initial URL open is still loading', () => {
+    // Unrelated history.replace (e.g. global query sync) can preserve flyoutV2 while useEsDocSearch
+    // is still in flight. Opening from history with empty context would hit the document fallback
+    // for NEEDS_DOC_HIT kinds; the initial URL path must wait for the hit and open the real tool.
+    const stack: FlyoutV2UrlParamValue = [
+      {
+        kind: 'documentCorrelations',
+        documentId: 'doc-1',
+        indexName: '.internal.alerts-security.alerts-default-000001',
+        scopeId: '',
+      },
+      {
+        kind: 'document',
+        documentId: 'doc-1',
+        indexName: '.internal.alerts-security.alerts-default-000001',
+      },
+    ];
+    loadingHit();
+    const { history, rerender } = renderRestore(buildUrl(stack));
+
+    act(() => {
+      // Unrelated URL write that keeps the same flyoutV2 (e.g. useSyncGlobalQueryString).
+      history.replace(`${buildUrl(stack)}&timerange=(global:(linkTo:!(),timerange:()))`);
+      jest.runAllTimers();
+    });
+
+    expect(mockFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
+    expect(mockFlyoutApi.openDocumentFlyoutFromIndexAsChild).not.toHaveBeenCalled();
+    expect(mockFlyoutApi.openDocumentCorrelations).not.toHaveBeenCalled();
+
+    withHit(docSearchHit);
+    rerender();
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(mockFlyoutApi.openDocumentCorrelations).toHaveBeenCalledTimes(1);
+    expect(mockFlyoutApi.openDocumentFlyoutFromIndexAsChild).toHaveBeenCalledTimes(1);
+    // No empty-context document fallback for the tool entry.
+    expect(mockFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
+  });
+
   it('reopens when history navigates to a different flyoutV2 chain', () => {
     const { history } = renderRestore(
       buildUrl([{ kind: 'host', hostName: 'web-01', entityId: 'host:web-01' }])

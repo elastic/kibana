@@ -169,7 +169,8 @@ Two invariants worth understanding before you touch this file:
    `openDescriptorAsChild`, deferred to a macrotask (`setTimeout(…, 0)`) to avoid z-index races with Timeline restore.
 4. **Same-app deep links:** `history.listen` opens when an *external* navigation writes a new `flyoutV2` value
    (e.g. Agent Builder redirects). Writer
-   self-updates are ignored via `markFlyoutV2UrlWrite` / `consumeFlyoutV2UrlWrite`.
+   self-updates are ignored via `markFlyoutV2UrlWrite` / `consumeFlyoutV2UrlWrite`. Unrelated `history.replace`
+   calls that preserve the initial URL stack are ignored until that stack has been opened.
 
 `openDescriptorAsStart` / `openDescriptorAsChild` are the exhaustive `switch` mapping each descriptor kind back to the
 right `useFlyoutApi()` method. **When you add a descriptor kind, you must add a case here** (and the child variant, or

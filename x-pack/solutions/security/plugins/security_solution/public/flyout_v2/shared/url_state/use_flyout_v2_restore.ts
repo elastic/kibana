@@ -707,9 +707,11 @@ export const openDescriptorAsChild = (
  * Also handles same-app deep links while Security stays mounted (Like from Agent Builder redirects):
  *  - `history.listen` opens when an external navigation writes a new `flyoutV2` value
  *  - writer self-updates are ignored via {@link consumeFlyoutV2UrlWrite}
+ *  - unrelated `history.replace` that preserves the initial URL stack is ignored until that
+ *    stack has been opened (after any required fetches)
  *
- * Gated on `useIsNewFlyoutEnabled()`. Mount restore runs at most once; same-app opens may fire
- * whenever the URL changes to a different descriptor chain.
+ * Gated on `useIsNewFlyoutEnabled()`. The initial URL stack is opened at most once; same-app opens
+ * may fire whenever the URL changes to a different descriptor chain.
  *
  * Mount this hook in the Security Solution app shell, analogous to `useUrlState()` in
  * `app/home/index.tsx`. The `useFlyoutApi()` contract requires the Redux store, router, and
@@ -720,10 +722,6 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
   const history = useHistory();
   const flyoutApi = useFlyoutApi();
   const hasRestoredRef = useRef(false);
-
-  // Last decoded flyoutV2 stack we treated as open
-  // history.listen compares against this and skips open when the URL shows the same stack again
-  const lastOpenedStackRef = useRef<FlyoutV2UrlParamValue | null>(null);
 
   // Read URL param exactly once (useState initializer runs on the first render only).
   // Rule preview documents are stored in a transient index that no longer exists after the page
@@ -742,6 +740,10 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
     ) as FlyoutV2UrlParamValue;
     return filtered.length > 0 ? filtered : null;
   });
+
+  // Seeded from the initial URL so history.listen can ignore unrelated replaces of the same stack
+  // while we are still fetching data needed to open it (empty-context opens would flash the wrong flyout).
+  const lastOpenedStackRef = useRef<FlyoutV2UrlParamValue | null>(descriptors);
 
   // Detect a malformed param (raw present but decode failed) to strip it.
   const [isMalformed] = useState<boolean>(() => {
@@ -789,6 +791,13 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
         return;
       }
 
+      // Same stack as on page load, and that open has not finished yet — do not open here
+      // with empty context; the effect that resolves doc/attack hits will open it.
+      if (descriptors && !hasRestoredRef.current && areSameFlyoutV2Descriptors(next, descriptors)) {
+        lastOpenedStackRef.current = next;
+        return;
+      }
+
       openFromExternalNavigation(next);
     });
 
@@ -796,7 +805,7 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
       unlistenHistory();
       clearTimeout(pendingOpen);
     };
-  }, [flyoutApi, history, isNewFlyoutEnabled, urlParamKey]);
+  }, [descriptors, flyoutApi, history, isNewFlyoutEnabled, urlParamKey]);
 
   // Strip malformed param once on mount.
   useEffect(() => {
