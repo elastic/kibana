@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type {
   CoreSetup,
   CoreStart,
@@ -21,6 +22,7 @@ import type {
   WorkflowsClient,
   WorkflowsClientProvider,
 } from '@kbn/workflows/server/types';
+import { getSshHostConnectorType } from './connectors/ssh_host';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
 import { ServerStepRegistry } from './step_registry';
@@ -50,6 +52,7 @@ export class WorkflowsExtensionsServerPlugin
   private readonly managedWorkflowPluginIds = new Set<string>();
   private workflowsClientProvider: WorkflowsClientProvider | undefined;
   private managedWorkflowsSystemApiProvider: ManagedWorkflowsSystemApiProvider | undefined;
+  private actionsStart: ActionsPluginStartContract | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -77,7 +80,11 @@ export class WorkflowsExtensionsServerPlugin
     registerGetStepDefinitionsRoute(router, this.stepRegistry, this.logger);
     registerGetTriggerDefinitionsRoute(router, this.triggerRegistry);
 
-    registerInternalStepDefinitions(this.stepRegistry);
+    plugins.actions.registerSubActionConnectorType(getSshHostConnectorType());
+
+    registerInternalStepDefinitions(this.stepRegistry, {
+      getActionsStart: () => this.actionsStart,
+    });
     registerInternalTriggerDefinitions(this.triggerRegistry);
 
     return {
@@ -110,8 +117,9 @@ export class WorkflowsExtensionsServerPlugin
 
   public start(
     _core: CoreStart,
-    _plugins: WorkflowsExtensionsServerPluginStartDeps
+    plugins: WorkflowsExtensionsServerPluginStartDeps
   ): WorkflowsExtensionsServerPluginStart {
+    this.actionsStart = plugins.actions;
     this.triggerRegistry.freeze();
 
     return {

@@ -111,7 +111,7 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
     let nextPollAtOverride: Date | undefined;
     let customState = stepState.customState;
 
-    if (pollResult?.output || pollResult?.error) {
+    if (pollResult && ('output' in pollResult || 'error' in pollResult)) {
       return {
         input,
         output: pollResult.output,

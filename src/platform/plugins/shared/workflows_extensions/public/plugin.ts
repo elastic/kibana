@@ -9,6 +9,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { PublicStepRegistry } from './step_registry';
+import { getConnectorType as getSshHostConnectorType } from './connectors/ssh_host/ssh_host_connector_type';
 import { registerInternalStepDefinitions } from './steps';
 import { PublicTriggerRegistry } from './trigger_registry';
 import { registerInternalTriggerDefinitions } from './triggers';
@@ -38,8 +39,10 @@ export class WorkflowsExtensionsPublicPlugin
 
   public setup(
     _core: CoreSetup,
-    _plugins: WorkflowsExtensionsPublicPluginSetupDeps
+    plugins: WorkflowsExtensionsPublicPluginSetupDeps
   ): WorkflowsExtensionsPublicPluginSetup {
+    plugins.triggersActionsUi.actionTypeRegistry.register(getSshHostConnectorType());
+
     registerInternalStepDefinitions(this.stepRegistry);
     registerInternalTriggerDefinitions(this.triggerRegistry);
 

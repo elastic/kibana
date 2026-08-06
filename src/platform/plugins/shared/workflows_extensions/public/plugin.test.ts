@@ -16,6 +16,12 @@ jest.mock('./steps', () => ({
 
 const { registerInternalStepDefinitions } = jest.requireMock('./steps');
 
+const mockSetupDeps = {
+  triggersActionsUi: {
+    actionTypeRegistry: { register: jest.fn() },
+  },
+} as any;
+
 const createPlugin = () => {
   const initContext = coreMock.createPluginInitializerContext();
   return new WorkflowsExtensionsPublicPlugin(initContext);
@@ -29,14 +35,15 @@ describe('WorkflowsExtensionsPublicPlugin', () => {
   describe('setup', () => {
     it('calls registerInternalStepDefinitions', () => {
       const plugin = createPlugin();
-      plugin.setup(coreMock.createSetup(), {});
+      plugin.setup(coreMock.createSetup(), mockSetupDeps);
 
       expect(registerInternalStepDefinitions).toHaveBeenCalledTimes(1);
+      expect(registerInternalStepDefinitions).toHaveBeenCalledWith(expect.anything());
     });
 
     it('returns registerStepDefinition that delegates to step registry', () => {
       const plugin = createPlugin();
-      const setup = plugin.setup(coreMock.createSetup(), {});
+      const setup = plugin.setup(coreMock.createSetup(), mockSetupDeps);
 
       const definition = { id: 'test.step' } as any;
       setup.registerStepDefinition(definition);
@@ -47,7 +54,7 @@ describe('WorkflowsExtensionsPublicPlugin', () => {
 
     it('returns registerTriggerDefinition that delegates to trigger registry', () => {
       const plugin = createPlugin();
-      const setup = plugin.setup(coreMock.createSetup(), {});
+      const setup = plugin.setup(coreMock.createSetup(), mockSetupDeps);
 
       const definition = { id: 'test.trigger' } as any;
       setup.registerTriggerDefinition(definition);
@@ -59,7 +66,7 @@ describe('WorkflowsExtensionsPublicPlugin', () => {
   describe('start', () => {
     it('returns step registry accessors', () => {
       const plugin = createPlugin();
-      const setup = plugin.setup(coreMock.createSetup(), {});
+      const setup = plugin.setup(coreMock.createSetup(), mockSetupDeps);
       const definition = { id: 'my.step' } as any;
       setup.registerStepDefinition(definition);
 
@@ -77,7 +84,7 @@ describe('WorkflowsExtensionsPublicPlugin', () => {
 
     it('returns trigger registry accessors', () => {
       const plugin = createPlugin();
-      const setup = plugin.setup(coreMock.createSetup(), {});
+      const setup = plugin.setup(coreMock.createSetup(), mockSetupDeps);
       const definition = { id: 'my.trigger' } as any;
       setup.registerTriggerDefinition(definition);
 
@@ -94,7 +101,7 @@ describe('WorkflowsExtensionsPublicPlugin', () => {
 
     it('isReady resolves when both registries have settled', async () => {
       const plugin = createPlugin();
-      plugin.setup(coreMock.createSetup(), {});
+      plugin.setup(coreMock.createSetup(), mockSetupDeps);
       const start = plugin.start(coreMock.createStart(), {});
 
       // No async loaders registered, should resolve immediately
@@ -103,7 +110,7 @@ describe('WorkflowsExtensionsPublicPlugin', () => {
 
     it('isReady waits for async step loaders', async () => {
       const plugin = createPlugin();
-      const setup = plugin.setup(coreMock.createSetup(), {});
+      const setup = plugin.setup(coreMock.createSetup(), mockSetupDeps);
 
       let resolveLoader!: (def: any) => void;
       const loaderPromise = new Promise<any>((resolve) => {

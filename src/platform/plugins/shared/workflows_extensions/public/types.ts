@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import type { z } from '@kbn/zod/v4';
 import type { PublicStepDefinition } from './step_registry/types';
 import type { PublicTriggerDefinition } from './trigger_registry/types';
@@ -76,8 +77,9 @@ export type WorkflowsExtensionsPublicPluginStart =
 /**
  * Dependencies for the public plugin setup phase.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsExtensionsPublicPluginSetupDeps {}
+export interface WorkflowsExtensionsPublicPluginSetupDeps {
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+}
 
 /**
  * Dependencies for the public plugin start phase.
