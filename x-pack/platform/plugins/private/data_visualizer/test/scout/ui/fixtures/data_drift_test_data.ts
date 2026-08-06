@@ -10,7 +10,7 @@ export const farequoteKQLFiltersDataDriftTestData = {
   isSavedSearch: true,
   dateTimeField: '@timestamp',
   sourceIndexOrSavedSearch: 'ft_farequote_filter_and_kuery',
-  // [0, 0] → page object picks mid-x / below mid-height (must hit a histogram bar).
+  // [0, 0] = FTR-style center of `.echCanvasRenderer` (must hit a histogram bar).
   chartClickCoordinates: [0, 0] as [number, number],
   comparisonChartClickCoordinates: [0, 0] as [number, number],
   dataViewName: 'ft_farequote',
@@ -21,7 +21,7 @@ export const dataViewCreationTestData = {
   suiteTitle: 'from data view creation mode',
   isSavedSearch: true,
   dateTimeField: '@timestamp',
-  // [0, 0] → page object picks mid-x / below mid-height (must hit a histogram bar).
+  // [0, 0] = FTR-style center of `.echCanvasRenderer` (must hit a histogram bar).
   chartClickCoordinates: [0, 0] as [number, number],
   comparisonChartClickCoordinates: [0, 0] as [number, number],
   totalDocCount: '86,274',

@@ -203,28 +203,19 @@ export class DataDrift {
     await chart
       .locator('.echChartStatus[data-ech-render-complete="true"]')
       .waitFor({ state: 'attached', timeout: 30_000 });
-    // Match FTR elasticChart.getCanvas(): top interactive canvas layer.
-    const canvas = chart.locator('canvas:last-of-type');
-    await canvas.waitFor({ state: 'visible', timeout: 30_000 });
-    const box = await canvas.boundingBox();
+
+    // FTR `elasticChart.getCanvas(testSubj)` returns `.echCanvasRenderer` and clicks
+    // with WebDriver Actions using the element center as origin ([0, 0] = center).
+    const renderer = chart.locator('.echCanvasRenderer');
+    await renderer.waitFor({ state: 'visible', timeout: 30_000 });
+    const box = await renderer.boundingBox();
 
     if (!box) {
       throw new Error(`Chart dataDriftDocCountChart-${id} has no bounding box`);
     }
 
-    // FTR WebDriver Actions used canvas-center as origin, so [0, 0] meant center.
-    // Playwright positions are top-left relative. The doc-count chart is only ~60px
-    // tall: geometric center often misses short bars when the y-scale is dominated by
-    // a spike. Aim below mid-height (still above the x-axis) so shorter bars are hit.
-    const [x, y]: [number, number] =
-      chartClickCoordinates[0] === 0 && chartClickCoordinates[1] === 0
-        ? [Math.max(Math.floor(box.width / 2), 1), Math.max(Math.floor(box.height * 0.7), 1)]
-        : chartClickCoordinates;
-
-    await canvas.click({
-      position: { x, y },
-      timeout: 10_000,
-    });
+    const [offsetX, offsetY] = chartClickCoordinates;
+    await this.page.mouse.click(box.x + box.width / 2 + offsetX, box.y + box.height / 2 + offsetY);
 
     await this.page.testSubj
       .locator(`dataDriftBrush-${id}`)
