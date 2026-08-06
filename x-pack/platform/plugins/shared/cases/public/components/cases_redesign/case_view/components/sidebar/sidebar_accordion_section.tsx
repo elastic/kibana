@@ -84,6 +84,13 @@ export const SidebarAccordionSection: FC<SidebarAccordionSectionProps> = ({
           minBlockSize: SECTION_HEADER_BLOCK_SIZE,
           marginInline: `calc(-1 * var(${INLINE_PADDING_VAR}))`,
           paddingInline: `var(${INLINE_PADDING_VAR})`,
+          // The gap between the header and the first field belongs to the pinned band, not to the
+          // scrolling content: a spacer below the trigger scrolls away with the fields, letting
+          // rows butt against the subtitle's baseline once the header is stuck. Carrying the same
+          // gap as opaque padding keeps the resting layout identical while guaranteeing the
+          // clearance survives scrolling. Only while open — a collapsed section has no content
+          // below its title to hold clear of.
+          paddingBlockEnd: isOpen && !isEditing ? euiTheme.size.m : undefined,
           // Editing turns the header into a tinted band while the fields below stay on the panel's
           // normal surface — the inverse of tinting the body, and the only pairing that holds up in
           // both colour modes: `backgroundBaseHighlighted` resolves to the *same* value as
@@ -144,7 +151,7 @@ export const SidebarAccordionSection: FC<SidebarAccordionSectionProps> = ({
         paddingBlockStart: 0,
       }),
     }),
-    [euiTheme, withDivider, isEditing]
+    [euiTheme, withDivider, isEditing, isOpen]
   );
 
   return (
@@ -183,7 +190,9 @@ export const SidebarAccordionSection: FC<SidebarAccordionSectionProps> = ({
           </>
         }
       >
-        <EuiSpacer size="m" />
+        {/* While editing, the header closes with a rule (see `editingAccordion`), so the gap below
+            it returns to the content; otherwise the pinned band carries it as padding. */}
+        {isEditing ? <EuiSpacer size="m" /> : null}
         {children}
       </EuiAccordion>
     </div>
