@@ -77,7 +77,7 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
   }
 
   private async init(esClient: ElasticsearchClient, logger: Logger): Promise<ElasticsearchClient> {
-    const initAttempts = 3;
+    const initAttempts = 10;
     for (let attempt = 1; attempt <= initAttempts; attempt++) {
       try {
         await Promise.all([
