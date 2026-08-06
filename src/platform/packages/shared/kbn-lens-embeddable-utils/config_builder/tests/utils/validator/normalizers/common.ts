@@ -57,15 +57,10 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 
 const COMMON_STATE_IGNORE_PATHS = [
   'savedObjectId', // panel-level SO reference, not part of LensAttributes
-  // 'state.filters', // remove for now
   'state.visualization.title', // removed by-value nested title
   // TODO: check missing properties striped out in transforms
   'state.datasourceStates.formBased.layers.*.indexPatternId',
   'state.datasourceStates.formBased.currentIndexPatternId',
-  // TODO: check DSL differing properties changed in transforms
-  // Broad `…columns.*.params` is intentionally NOT skipped — keep comparing params so we can
-  // investigate Custom Rank By / `orderAgg` (and other residual params diffs) under strict compare.
-  'state.datasourceStates.formBased.layers.*.columns.*.params.orderAgg',
   // TODO: check missing ES|QL column properties stripped out in transforms
   'state.datasourceStates.textBased.layers.*.columns.*.inMetricDimension', // dropped at state -> API and only applied from API -> State if explicitly set
   'state.datasourceStates.textBased.layers.*.columns.*.meta', // meta is inferred by the transform -> originals may have it, miss it, or have different values
@@ -517,6 +512,13 @@ const normalizeTermsColumnParams = (
 ): void => {
   const { params } = col;
 
+  // `orderAgg`: only meaningful for a custom `orderBy` (`terms/index.tsx` writes
+  // `orderBy.type === 'custom' ? orderAgg : undefined`, and the transform only reconstructs it for
+  // custom ordering). A leftover `null`/absent value under a non-custom `orderBy` is dead residue.
+  if (params.orderAgg == null) {
+    delete params.orderAgg;
+  }
+
   // `secondaryFields`: dropped when empty exactly like an absent value; a non-empty list is preserved verbatim.
   if (!params.secondaryFields?.length) {
     delete params.secondaryFields;
@@ -735,6 +737,38 @@ const normalizeEmptyFormatOnlyParams = (col: GenericIndexPatternColumn): void =>
   if ('params' in col && col.params && Object.keys(col.params).length === 0) {
     delete col.params;
   }
+};
+
+/**
+ * Canonicalize a `terms` column's custom `orderAgg` (the nested rank-function metric).
+ *
+ * The order-agg is rebuilt from scratch, so only render-affecting state survives the round-trip:
+ * - `scale`: derived OperationMetadata, re-computed at load.
+ * - `label`/`customLabel`: display residue. The transform always emits a bare `label: ''` and never a
+ *   `customLabel`, mirroring `getCustomOrderAgg` (the nested rank editor has no custom-label input).
+ * - `filter`: dead — the terms agg builds the order-agg inline and never wraps it in an
+ *   `aggFilteredMetric`, so the filter never reaches the aggregation and the transform drops it.
+ * - `emptyAsNull`: dead on an order-agg for every op. Its agg param has a no-op writer
+ *   (`metric_agg_type.ts`), so it never reaches Elasticsearch (buckets are ordered by the raw metric
+ *   value), and an order-agg is never tabified (it only sorts terms), so the `getValue` `0 → null`
+ *   post-processing never runs for it either. The transform emits none, so drop the persisted flag.
+ */
+const normalizeOrderAgg = (orderAgg: GenericIndexPatternColumn): void => {
+  delete orderAgg.scale;
+
+  orderAgg.label = '';
+  delete orderAgg.customLabel;
+
+  if ('filter' in orderAgg) {
+    delete orderAgg.filter;
+  }
+
+  const { params } = orderAgg as { params?: { emptyAsNull?: unknown } };
+  if (params && 'emptyAsNull' in params) {
+    delete params.emptyAsNull;
+  }
+
+  normalizeEmptyFormatOnlyParams(orderAgg);
 };
 
 const isLastValueColumn = (col: GenericIndexPatternColumn): col is LastValueIndexPatternColumn =>
@@ -1349,6 +1383,11 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               // Canonicalize terms `params` empty defaults the transform never round-trips
               if (isTermsColumn(col)) {
                 normalizeTermsColumnParams(col, innerRefColumnIds);
+
+                // Canonicalize a custom `orderAgg` (rank function) rebuilt by the transform
+                if (col.params.orderAgg) {
+                  normalizeOrderAgg(col.params.orderAgg);
+                }
               }
 
               // Canonicalize range-column params
