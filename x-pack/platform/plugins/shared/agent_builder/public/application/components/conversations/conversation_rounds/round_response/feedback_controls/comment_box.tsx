@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTextArea, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -15,15 +15,24 @@ export const MAX_CHARS = 500;
 interface CommentBoxProps {
   value: string;
   onChange: (value: string) => void;
+  shouldFocus?: boolean;
 }
 
-export const CommentBox: React.FC<CommentBoxProps> = ({ value, onChange }) => {
+export const CommentBox: React.FC<CommentBoxProps> = ({ value, onChange, shouldFocus }) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const remaining = MAX_CHARS - value.length;
+
+  useEffect(() => {
+    if (shouldFocus) {
+      textareaRef.current?.focus();
+    }
+  }, [shouldFocus]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
         <EuiTextArea
+          inputRef={textareaRef}
           placeholder={i18n.translate('xpack.agentBuilder.feedback.commentPlaceholder', {
             defaultMessage: 'Add a comment (optional)',
           })}

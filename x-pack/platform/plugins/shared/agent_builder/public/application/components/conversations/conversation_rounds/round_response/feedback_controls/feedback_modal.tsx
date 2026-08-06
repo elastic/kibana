@@ -18,7 +18,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ChipRow } from './chip_row';
+import { ChipRow, CHIP_OTHER } from './chip_row';
 import { CommentBox } from './comment_box';
 
 const labels = {
@@ -70,7 +70,11 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
       <EuiModalBody>
         <ChipRow vote={vote} selected={chips} onToggle={onToggleChip} />
         <EuiSpacer size="m" />
-        <CommentBox value={comment} onChange={onCommentChange} />
+        <CommentBox
+          value={comment}
+          onChange={onCommentChange}
+          shouldFocus={chips.includes(CHIP_OTHER)}
+        />
       </EuiModalBody>
 
       <EuiModalFooter>
