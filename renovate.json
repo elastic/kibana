@@ -120,7 +120,7 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "@elastic/appex-ai-infra dependencies",
+      "groupName": "@elastic/search-ml-ux dependencies",
       "matchDepNames": [
         "@arizeai/openinference-semantic-conventions",
         "@smithy/eventstream-serde-node",
@@ -452,7 +452,7 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "@elastic/ml-ui dependencies",
+      "groupName": "@elastic/search-ml-ux dependencies",
       "matchDepNames": [
         "@types/async",
         "@types/he",

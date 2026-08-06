@@ -75,7 +75,7 @@ All paths relative to `x-pack/solutions/security/plugins/security_solution/`.
 |---|---|---|---|
 | `@elastic/kibana-cases` | `team:kibana-cases` | `x-pack/platform/plugins/shared/cases/` | "Add to Case" actions, case attachments |
 | `@elastic/kibana-visualizations` | `team:kibana-visualizations` | `x-pack/platform/plugins/shared/lens/` | "Open in Lens" errors |
-| `@elastic/ml-ui` | `team:ml-ui` | `x-pack/platform/plugins/shared/ml/` | Anomaly detection jobs |
+| `@elastic/search-ml-ux` | `team:ml-ui` | `x-pack/platform/plugins/shared/ml/` | Anomaly detection jobs |
 | `@elastic/fleet` | `Team:Fleet` | `x-pack/platform/plugins/shared/fleet/` | Agent policies, integrations |
 | `@elastic/response-ops` | `team:response-ops` | `x-pack/platform/plugins/shared/alerting/`, `actions/`, `task_manager/` | Alert actions, connectors |
 | `@elastic/kibana-data-discovery` | `team:kibana-data-discovery` | `src/platform/plugins/shared/discover/` | "Investigate in Discover" |

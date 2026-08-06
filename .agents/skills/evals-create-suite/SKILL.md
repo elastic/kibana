@@ -14,7 +14,7 @@ Eval suites live in dedicated `kbn-evals-suite-<name>` packages. Each suite is a
 
 - **Suite name** (kebab-case, e.g. `my-feature`)
 - **Parent directory** under `x-pack/` (e.g. `x-pack/platform/packages/shared/ai-infra/` or `x-pack/solutions/security/test/`)
-- **Owner** GitHub team handle (e.g. `@elastic/appex-ai-infra`)
+- **Owner** GitHub team handle (e.g. `@elastic/search-ml-ux`)
 - **Group** (`platform`, `security`, `observability`, `search`)
 - **Visibility** (`shared` or `private`)
 - **Whether custom fixtures are needed** (chat client, esArchiver, supertest, etc.)
