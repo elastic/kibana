@@ -131,7 +131,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
         // Get alert state from task document
-        let state: any = await getTaskState(ruleId);
+        let state: any = await getTaskState(ruleId, 0);
         expect(state.alertInstances.alertA.state.patternIndex).to.equal(0);
         expect(state.alertInstances.alertB.state.patternIndex).to.equal(0);
         expect(state.alertInstances.alertC.state.patternIndex).to.equal(0);
@@ -222,7 +222,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
         // Get alert state from task document
-        state = await getTaskState(ruleId);
+        state = await getTaskState(ruleId, 1);
         expect(state.alertInstances.alertA.state.patternIndex).to.equal(1);
         expect(state.alertInstances.alertB).to.be(undefined);
         expect(state.alertInstances.alertC).to.be(undefined);
@@ -380,7 +380,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
 
         // Get alert state from task document
-        state = await getTaskState(ruleId);
+        state = await getTaskState(ruleId, 2);
         expect(state.alertInstances.alertA.state.patternIndex).to.equal(2);
         expect(state.alertInstances.alertB).to.be(undefined);
         expect(state.alertInstances.alertC.state.patternIndex).to.equal(2);
@@ -536,6 +536,9 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
   }
 
   async function queryForAlertDocs<T>(ruleId?: string): Promise<Array<SearchHit<T>>> {
+    // `es.search` is not realtime and the alerts-as-data bulk write isn't refresh-forced,
+    // so refresh first to make the docs written during the just-completed run searchable.
+    await es.indices.refresh({ index: alertsAsDataIndex });
     const query: any = ruleId
       ? {
           bool: {
@@ -557,13 +560,22 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
     return searchResult.hits.hits as Array<SearchHit<T>>;
   }
 
-  async function getTaskState(ruleId: string) {
-    const task = await es.get<TaskManagerDoc>({
-      id: `task:${ruleId}`,
-      index: '.kibana_task_manager',
-    });
+  async function getTaskState(ruleId: string, expectedAlertAPatternIndex: number) {
+    // The `execute` event log doc is written before Task Manager persists the updated task
+    // state, so the `execute` count is not a valid barrier for this read. Poll the task doc
+    // until alertA's patternIndex reaches the just-completed run's value.
+    return await retry.try(async () => {
+      const task = await es.get<TaskManagerDoc>({
+        id: `task:${ruleId}`,
+        index: '.kibana_task_manager',
+      });
 
-    return JSON.parse(task._source!.task.state);
+      const state = JSON.parse(task._source!.task.state);
+      expect(state.alertInstances?.alertA?.state?.patternIndex).to.equal(
+        expectedAlertAPatternIndex
+      );
+      return state;
+    });
   }
 
   async function waitForEventLogDocs(
