@@ -42,6 +42,7 @@ env:
 
 imports:
   - .github/workflows/buildkite-cli-setup.md
+  - .github/workflows/shared/app-dex-agents-otel.md
 
 engine:
   id: claude
@@ -51,7 +52,6 @@ engine:
   env:
     ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
     ANTHROPIC_BASE_URL: https://openrouter.ai/api
-    ENABLE_PROMPT_CACHING_1H: '1'
     ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-4.8[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
     ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
@@ -150,6 +150,8 @@ Investigate the test failure(s) using the `flaky-test-investigator` skill (path:
 Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.). Review the **issue timeline** as part of this — its reopen history and any prior fix PRs that referenced this issue tell you whether an earlier fix already tried and failed.
 
 Every conclusion must cite specific evidence. Do not guess.
+
+Before classifying a UI failure as test-side, read the application code that renders the awaited element and confirm the state the test waits for is actually reachable.
 
 ## Environment constraints
 
@@ -354,7 +356,7 @@ Explain _why_ it failed in a few tight sentences or bullets, each anchored to a 
 
 Omit this section unless it changes what the reader does next. When present, keep it to a couple of one-line bullets:
 
-- **Ruled out:** the dismissed alternatives in a **single** bullet — not one bullet per hypothesis.
+- **Ruled out:** the dismissed alternatives in a **single** bullet — not one bullet per hypothesis. Scope each rule-out to the evidence layer it actually covers — e.g. server logs can't rule out a client-side rendering bug.
 - **Verification:** the one command or step that reproduces the failure or confirms the fix.
 - **Open questions:** a blocker to a definitive fix (e.g. "no trace or screenshot was uploaded").
 

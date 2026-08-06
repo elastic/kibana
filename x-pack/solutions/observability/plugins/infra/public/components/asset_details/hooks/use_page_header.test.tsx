@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RouteState } from '@kbn/metrics-data-access-plugin/public';
 import { renderHook } from '@testing-library/react';
 import { usePageHeader } from './use_page_header';
 import { useTabSwitcherContext } from './use_tab_switcher';
@@ -14,14 +15,33 @@ import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { ContentTabIds, type Tab } from '../types';
 
+interface MockHistory {
+  goBack: jest.Mock;
+  length: number;
+}
+
+interface MockLocation {
+  state: RouteState | null;
+}
+
+const mockOriginRouteState: RouteState = {
+  originAppId: 'metrics',
+  originPathname: '/hosts',
+  originSearch: '?kuery=host.name:%20foo',
+};
+
+const mockUseHistory = jest.fn<MockHistory, []>(() => ({
+  goBack: jest.fn(),
+  length: 0,
+}));
+const mockUseLocation = jest.fn<MockLocation, []>(() => ({
+  state: null,
+}));
+const mockChromeNextIsEnabled = jest.fn<boolean, []>(() => false);
+
 jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
-    goBack: jest.fn(),
-    length: 0,
-  }),
-  useLocation: () => ({
-    state: null,
-  }),
+  useHistory: () => mockUseHistory(),
+  useLocation: () => mockUseLocation(),
 }));
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -33,6 +53,13 @@ jest.mock('../../../hooks/use_kibana', () => ({
     services: {
       application: {
         navigateToApp: jest.fn(),
+      },
+      chrome: {
+        next: {
+          get isEnabled() {
+            return mockChromeNextIsEnabled();
+          },
+        },
       },
     },
   }),
@@ -72,6 +99,15 @@ const mockOverviewTab: Tab = {
 describe('usePageHeader', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockUseHistory.mockReturnValue({
+      goBack: jest.fn(),
+      length: 0,
+    });
+    mockUseLocation.mockReturnValue({
+      state: null,
+    });
+    mockChromeNextIsEnabled.mockReturnValue(false);
 
     useTabSwitcherContextMock.mockReturnValue({
       showTab: jest.fn(),
@@ -180,6 +216,31 @@ describe('usePageHeader', () => {
       }
 
       expect(showTabMock).toHaveBeenCalledWith(ContentTabIds.PROFILING);
+    });
+  });
+
+  describe('return breadcrumb visibility', () => {
+    it('should hide the Return breadcrumb when Chrome Next is enabled', () => {
+      mockChromeNextIsEnabled.mockReturnValue(true);
+      mockUseLocation.mockReturnValue({
+        state: mockOriginRouteState,
+      });
+
+      const { result } = renderHook(() => usePageHeader([mockOverviewTab], []));
+
+      expect(result.current.breadcrumbs).toEqual([]);
+    });
+
+    it('should show the Return breadcrumb for classic chrome when origin state exists', () => {
+      mockChromeNextIsEnabled.mockReturnValue(false);
+      mockUseLocation.mockReturnValue({
+        state: mockOriginRouteState,
+      });
+
+      const { result } = renderHook(() => usePageHeader([mockOverviewTab], []));
+
+      expect(result.current.breadcrumbs).toHaveLength(1);
+      expect(result.current.breadcrumbs[0]['data-test-subj']).toBe('infraAssetDetailsReturnButton');
     });
   });
 });

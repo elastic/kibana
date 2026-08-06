@@ -15,9 +15,14 @@ import type {
   RuleResponse,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
-import { getRuleNotFoundMessage } from '../../lib/errors/rule_error_messages';
+import {
+  getRuleNotFoundMessage,
+  getRuleVersionConflictMessage,
+} from '../../lib/errors/rule_error_messages';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import { invalidResponseExample } from '../oas_utils';
 import type { OasExampleEntry } from '../oas_types';
+import { RULE_VERSION_CONFLICT_DESCRIPTION } from './rule_response_descriptions';
 
 const SAMPLE_RULE_DATA = {
   kind: 'alert' as const,
@@ -93,6 +98,20 @@ export const INVALID_BULK_BY_QUERY_RESPONSE = invalidResponseExample({
   },
 });
 
+/** Shared 400 body for invalid path/query parameters. */
+export const INVALID_QUERY_PARAMETERS_RESPONSE: OasExampleEntry = invalidResponseExample({
+  summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+  message: 'page: Too small: expected number to be >=1',
+  details: {
+    errors: {
+      errors: [],
+      properties: {
+        page: { errors: ['Too small: expected number to be >=1'] },
+      },
+    },
+  },
+});
+
 /** Shared 404 body for single-rule routes (get/update/delete/upsert). */
 export const RULE_NOT_FOUND_RESPONSE: OasExampleEntry = {
   name: 'ruleNotFound',
@@ -101,6 +120,55 @@ export const RULE_NOT_FOUND_RESPONSE: OasExampleEntry = {
     code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
     error: 'Not Found',
     message: getRuleNotFoundMessage(RULE_RESPONSE.id),
+    details: { rule_id: RULE_RESPONSE.id },
+  } satisfies ErrorResponse,
+};
+
+/** Shared 409 body for single-rule mutate routes. */
+export const RULE_VERSION_CONFLICT_RESPONSE: OasExampleEntry = {
+  name: 'ruleVersionConflict',
+  summary: RULE_VERSION_CONFLICT_DESCRIPTION,
+  value: {
+    code: ALERTING_V2_ERROR_CODES.RULE_VERSION_CONFLICT,
+    error: 'Conflict',
+    message: getRuleVersionConflictMessage(RULE_RESPONSE.id),
+    details: { rule_id: RULE_RESPONSE.id },
+  } satisfies ErrorResponse,
+};
+
+/** Shared 400 body when enabling a rule would exceed the schedule limit. */
+export const MAX_SCHEDULES_PER_MINUTE_EXCEEDED_RESPONSE: OasExampleEntry = {
+  name: 'maxSchedulesPerMinuteExceeded',
+  summary:
+    'Indicates the request is invalid, for example enabling the rule would exceed the configured schedule limit.',
+  value: {
+    code: ALERTING_V2_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
+    error: 'Bad Request',
+    message: `Rule schedule of "1m" would exceed the limit of 400 rule runs per minute`,
+    details: { interval: '1m', maxScheduledPerMinute: 400 },
+  } satisfies ErrorResponse,
+};
+
+/** Shared 400 body when running a disabled rule. */
+export const RULE_DISABLED_RESPONSE: OasExampleEntry = {
+  name: 'ruleDisabled',
+  summary: 'Indicates the rule is disabled and cannot be run.',
+  value: {
+    code: ALERTING_V2_ERROR_CODES.RULE_DISABLED,
+    error: 'Bad Request',
+    message: `Rule with id "${RULE_RESPONSE.id}" is disabled and cannot be run`,
+    details: { rule_id: RULE_RESPONSE.id },
+  } satisfies ErrorResponse,
+};
+
+/** Shared 409 body when a rule is already running. */
+export const RULE_ALREADY_RUNNING_RESPONSE: OasExampleEntry = {
+  name: 'ruleAlreadyRunning',
+  summary: 'Indicates the rule is already running or the run request conflicted.',
+  value: {
+    code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_RUNNING,
+    error: 'Conflict',
+    message: `Rule with id "${RULE_RESPONSE.id}" is already running`,
     details: { rule_id: RULE_RESPONSE.id },
   } satisfies ErrorResponse,
 };
