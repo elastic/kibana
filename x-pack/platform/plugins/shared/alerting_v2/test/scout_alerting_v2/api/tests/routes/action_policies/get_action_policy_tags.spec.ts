@@ -110,11 +110,18 @@ apiTest.describe('Get action policy tags API', { tag: '@local-stateful-classic' 
   );
 
   apiTest('cap: should return at most 20 tags', async ({ apiClient, apiServices }) => {
-    const policy = buildCreateActionPolicyData({
-      name: 'many-tags-policy',
-      tags: Array.from({ length: 25 }, (_, i) => `tag-${String(i).padStart(2, '0')}`),
-    });
-    await apiServices.alertingV2.actionPolicies.create(policy);
+    // Each action policy may have at most 20 tags, so create 21 policies each with a distinct tag
+    // to produce 21 unique tags in total — enough to exercise the aggregation cap.
+    await Promise.all(
+      Array.from({ length: 21 }, (_, i) =>
+        apiServices.alertingV2.actionPolicies.create(
+          buildCreateActionPolicyData({
+            name: `cap-policy-${i}`,
+            tags: [`tag-${String(i).padStart(2, '0')}`],
+          })
+        )
+      )
+    );
 
     const response = await apiClient.get(TAGS_URL, { headers: readerHeaders });
 
