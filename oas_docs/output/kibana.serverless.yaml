@@ -1071,6 +1071,7 @@ paths:
                       description: Array of AI indices to associate with the agent.
                       items:
                         description: AI indices to associate with the agent.
+                        maxLength: 256
                         type: string
                       maxItems: 100
                       type: array
@@ -1588,6 +1589,7 @@ paths:
                       description: Array of AI indices to associate with the agent.
                       items:
                         description: AI indices to associate with the agent.
+                        maxLength: 256
                         type: string
                       maxItems: 100
                       type: array
