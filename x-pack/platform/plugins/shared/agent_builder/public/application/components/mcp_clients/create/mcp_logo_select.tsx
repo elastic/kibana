@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiBadge, EuiComboBox, EuiFormPrepend, EuiIcon } from '@elastic/eui';
+import { EuiBadge, EuiComboBox, EuiFormPrepend, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { useFormContext } from 'react-hook-form';
 import { labels } from '../../../utils/i18n';
@@ -31,6 +31,8 @@ const EMPTY_ICON_URLS: ReadonlyMap<string, string> = new Map();
 
 export const McpLogoSelect = ({ value, onChange }: McpLogoSelectProps) => {
   const { clearErrors } = useFormContext<McpClientFormData>();
+  const { colorMode } = useEuiTheme();
+  const isDarkMode = colorMode === 'DARK';
 
   // The combobox needs to reflect the new selection immediately, but the
   // committed `value` only flows back after the async dataUrl fetch resolves.
@@ -42,12 +44,14 @@ export const McpLogoSelect = ({ value, onChange }: McpLogoSelectProps) => {
 
   const { value: iconUrls = EMPTY_ICON_URLS } = useAbortableAsync(async () => {
     const entries = await Promise.all(
-      Object.entries(LOGO_OPTIONS).map(
-        async ([id, option]): Promise<readonly [string, string]> => [id, await option.loadIconUrl()]
-      )
+      Object.entries(LOGO_OPTIONS).map(async ([id, option]): Promise<readonly [string, string]> => {
+        const loadForTheme =
+          isDarkMode && option.loadIconUrlDark ? option.loadIconUrlDark : option.loadIconUrl;
+        return [id, await loadForTheme()];
+      })
     );
     return new Map<string, string>(entries);
-  }, []);
+  }, [isDarkMode]);
 
   const options = useMemo<LogoComboBoxOption[]>(
     () =>
@@ -94,7 +98,10 @@ export const McpLogoSelect = ({ value, onChange }: McpLogoSelectProps) => {
 
       setPendingId(id);
 
-      const url = iconUrls.get(id) ?? (await option.loadIconUrl());
+      // Deliberately resolved from the option instead of the themed `iconUrls`
+      // map: the image persisted to UIAM must not vary with the creator's color
+      // mode, since it is written once and rendered on a surface we don't own.
+      const url = await option.loadIconUrl();
       if (signal.aborted) return;
 
       const dataUrl = await fetchAsDataUrl(url, signal);
@@ -104,7 +111,7 @@ export const McpLogoSelect = ({ value, onChange }: McpLogoSelectProps) => {
       onChange({ id, dataUrl });
       setPendingId(null);
     },
-    [iconUrls, onChange, clearErrors]
+    [onChange, clearErrors]
   );
 
   return (

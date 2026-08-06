@@ -18,7 +18,7 @@ import type { WorkflowInsightType } from '../../../endpoint/types/workflow_insig
 
 const MAX_DATE_LENGTH = 64; // ISO-8601 date/time strings
 const MAX_ID_LENGTH = 256; // IDs and other short identifier-like strings (incl. record keys, tags)
-const MAX_NAME_LENGTH = 256; // exception-list item name / description
+export const MAX_NAME_LENGTH = 256; // exception-list item name / description
 const MAX_NOTE_VALUE_LENGTH = 1000; // short per-record annotation values
 const MAX_URL_LENGTH = 2048; // remediation link
 const MAX_FREE_TEXT_LENGTH = 10000; // general free-text (messages, descriptions)
