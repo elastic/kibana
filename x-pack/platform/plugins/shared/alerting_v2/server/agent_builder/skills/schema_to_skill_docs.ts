@@ -296,9 +296,6 @@ export const generateRuleOperationsDoc = (): string =>
     schema: ruleOperationSchema,
   });
 
-/**
- * Returns the list of valid severity values from the alertEventSeveritySchema.
- */
 export const getSeverityValues = (): string[] => alertEventSeveritySchema.options;
 
 /**
