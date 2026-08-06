@@ -15,12 +15,6 @@
 export const APP_HEADER_TEST_SUBJECTS = {
   root: 'appHeader',
   title: 'appHeaderTitle',
-  /**
-   * Stable wrapper around the title (read and edit modes). Anchor popovers/tours here rather than
-   * to `titleButton`: anchors get reparented by `EuiWrappingPopover`, and the button is swapped
-   * for the input when editing starts, which crashes React if the button was moved.
-   */
-  titleContainer: 'appHeaderTitleContainer',
   titleInput: 'appHeaderTitleInput',
   titleError: 'appHeaderTitleError',
   titleButton: 'appHeaderTitleButton',
