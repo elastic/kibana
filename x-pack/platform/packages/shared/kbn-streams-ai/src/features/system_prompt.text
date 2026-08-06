@@ -22,7 +22,6 @@ Include every required field in each feature:
 High-level, stable system components — the logical service/component, not individual instances.
 
 - Example subtypes: `service`, `database`, `message_queue`, `cache`, `api_gateway`, `load_balancer`, `storage`
-- Carry technology and infrastructure context on the entity via `properties`/`meta`
 - Create an entity for every distinct named component — including remote components (services, brokers, databases) that emit no logs themselves but are named in another component's logs (see Inference & Confidence). Omit only when no component name is observed
 - Represent pods, containers, nodes, and hosts through their high-level service rather than as separate entities, keeping features stable as instances change
 
