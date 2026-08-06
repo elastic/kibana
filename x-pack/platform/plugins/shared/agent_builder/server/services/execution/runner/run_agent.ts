@@ -152,6 +152,11 @@ export const runAgent = async ({
   });
   manager.deps.agentConfiguration = effectiveConfiguration;
 
+  // TODO: remove before committing
+  manager.deps.logger?.info(
+    `effective ai_indices: ${JSON.stringify(effectiveConfiguration?.ai_indices)}`
+  );
+
   const chatModel = (await manager.deps.modelProvider.getDefaultModel()).chatModel;
   const providerName = getConnectorProvider(chatModel.getConnector());
 
