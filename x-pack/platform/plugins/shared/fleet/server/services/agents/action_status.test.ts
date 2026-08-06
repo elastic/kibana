@@ -137,9 +137,7 @@ describe('getActionStatuses with scheduledOnly', () => {
 
     const call = (esClient.search as jest.Mock).mock.calls[0][0];
     const filters: object[] = call.query.bool.filter ?? [];
-    const hasStartTimeFilter = filters.some(
-      (f: any) => f?.range?.start_time?.gt === 'now'
-    );
+    const hasStartTimeFilter = filters.some((f: any) => f?.range?.start_time?.gt === 'now');
     expect(hasStartTimeFilter).toBe(true);
   });
 
@@ -154,9 +152,7 @@ describe('getActionStatuses with scheduledOnly', () => {
 
     const call = (esClient.search as jest.Mock).mock.calls[0][0];
     const filters: object[] = call.query.bool.filter ?? [];
-    const hasStartTimeFilter = filters.some(
-      (f: any) => f?.range?.start_time !== undefined
-    );
+    const hasStartTimeFilter = filters.some((f: any) => f?.range?.start_time !== undefined);
     expect(hasStartTimeFilter).toBe(false);
   });
 
