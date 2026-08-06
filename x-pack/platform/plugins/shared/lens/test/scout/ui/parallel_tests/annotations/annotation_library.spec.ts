@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
   createLogstashLensEditorSuiteSetup,
   deleteAnnotationGroupFromLibrary,
+  spaceTest,
   testData,
 } from '../../fixtures';
 
@@ -93,7 +93,7 @@ spaceTest.describe('Lens annotation library', { tag: '@local-stateful-classic' }
           // click), unlike opening a previously-saved one.
           await dashboard.ensureEditMode();
           await dashboard.clickPanelAction('embeddablePanelAction-editPanel', FIRST_VIS_TITLE);
-          await expect(lens.getInlineEditor()).toBeVisible();
+          await expect(lens.inlineEditor).toBeVisible();
 
           // Unlike the standalone editor, the inline flyout mounts a fresh Lens editor frame
           // asynchronously, so the layer tabs may not exist yet; `activateLayerTab` polls for

@@ -128,7 +128,7 @@ export function DetectionFlyout({
   const handleOpenInChat = useCallback(() => {
     agentBuilder?.openChat({
       newConversation: true,
-      autoSendInitialMessage: true,
+      autoSendInitialMessage: false,
       initialMessage: i18n.translate('xpack.nightshift.detectionFlyout.chatPrompt', {
         defaultMessage: 'Tell me about the {ruleName} detection',
         values: { ruleName: title },
