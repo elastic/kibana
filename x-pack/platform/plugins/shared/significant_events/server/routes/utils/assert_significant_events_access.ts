@@ -11,7 +11,7 @@ import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { SignificantEventsAvailabilityResponse } from '../../../common';
 import {
   SIGNIFICANT_EVENTS_REQUIRED_PLUGINS,
-  STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
+  SIGNIFICANT_EVENTS_TIERED_FEATURE,
   type SignificantEventsRequiredPlugin,
   type SignificantEventsUnavailableReason,
 } from '../../../common';
@@ -83,7 +83,7 @@ const significantEventsRequirements: Record<SignificantEventsUnavailableReason, 
             'Significant events is only available in Observability projects.'
           ),
     pricing_tier: async ({ server }) =>
-      server.core.pricing.isFeatureAvailable(STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id)
+      server.core.pricing.isFeatureAvailable(SIGNIFICANT_EVENTS_TIERED_FEATURE.id)
         ? undefined
         : new FeatureNotEnabledError(
             'Significant events is not available on the current pricing tier.'
