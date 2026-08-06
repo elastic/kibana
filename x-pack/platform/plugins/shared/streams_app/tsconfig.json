@@ -17,7 +17,6 @@
   "kbn_references": [
     "@kbn/agent-builder-browser",
     "@kbn/app-header",
-    "@kbn/calculate-auto",
     "@kbn/charts-plugin",
     "@kbn/charts-theme",
     "@kbn/classic-stream-flyout",
