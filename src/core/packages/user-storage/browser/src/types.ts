@@ -24,30 +24,14 @@ export type UserStorageUpdate<T = unknown> =
   | { type: 'remove'; key: string; oldValue: T | undefined };
 
 /**
- * Load state for a lazily-fetched key, as emitted by {@link IUserStorageClient.getState$}.
- *
- * - `'loading'`: the effective value is not yet known; `value` is the caller-supplied
- *   fallback/default and should not be treated as the real stored value.
- * - `'resolved'`: `value` is the true effective value (stored override or registered default).
- * - `'error'`: the lazy fetch failed; `value` is the fallback/default and `error` describes
- *   the failure. Safe to display, but destructive/write actions should stay disabled.
- *
- * @public
- */
-export type UserStorageValue<T> =
-  | { status: 'loading'; value: T }
-  | { status: 'resolved'; value: T }
-  | { status: 'error'; value: T; error: Error };
-
-/**
  * Browser-side user storage client, backed by an in-memory cache that is
  * seeded from preloaded (server-injected) metadata at first paint and
  * refreshed by `set` / `remove` after the corresponding HTTP write completes.
  *
  * `peek` is the only purely synchronous read (cache-only, no side effects).
- * `get`, `get$`, and `getState$` may trigger a lazy HTTP fetch for keys that
- * were not preloaded; `get` and `update` are `Promise`-based so they can await
- * that fetch, while `get$` / `getState$` surface it reactively.
+ * `get`, `get$`, and `update` may trigger a lazy HTTP fetch for keys that were
+ * not preloaded; `get` and `update` are `Promise`-based so they can await that
+ * fetch, while `get$` surfaces it reactively.
  *
  * Distinct from the server-side `IUserStorageClient` (in
  * `@kbn/core-user-storage-common`), which is fully Promise-based for every
@@ -102,21 +86,12 @@ export interface IUserStorageClient {
    * exists and no `defaultValue` is provided. Suitable for React subscriptions.
    *
    * The first emission is a synchronous cache snapshot (like `peek`) — it may be
-   * a temporary default for a non-preloaded key that hasn't hydrated yet. Use
-   * {@link getState$} if you need to distinguish that from a resolved value.
+   * a temporary default for a non-preloaded key that hasn't hydrated yet, followed
+   * by the hydrated value once the fetch resolves. A failed fetch neither errors
+   * nor completes the stream; use `get()` when a read failure must be observed.
    */
   get$<T = unknown>(key: string): Observable<T | undefined>;
   get$<T = unknown>(key: string, defaultValue: T): Observable<T>;
-
-  /**
-   * Observable load-state stream for a key: emits `{status:'loading', value: default}`
-   * immediately if the key isn't cached yet (triggering the lazy fetch), then
-   * `{status:'resolved', value}` once hydrated, or `{status:'error', value: default, error}`
-   * if the fetch fails. If already cached, emits `{status:'resolved', value}` immediately.
-   * Lets UI render a fallback while disabling destructive/write actions until resolved.
-   */
-  getState$<T = unknown>(key: string): Observable<UserStorageValue<T | undefined>>;
-  getState$<T = unknown>(key: string, defaultValue: T): Observable<UserStorageValue<T>>;
 
   /**
    * Persists a new value via `PUT /internal/user_storage/{key}`. Returns the

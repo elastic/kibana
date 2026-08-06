@@ -11,11 +11,7 @@ import { cloneDeep } from 'lodash';
 import { Observable, Subject, concat, defer, of } from 'rxjs';
 import { filter, map } from 'rxjs';
 
-import type {
-  IUserStorageClient,
-  UserStorageUpdate,
-  UserStorageValue,
-} from '@kbn/core-user-storage-browser';
+import type { IUserStorageClient, UserStorageUpdate } from '@kbn/core-user-storage-browser';
 import type { UserStorageApi } from './user_storage_api';
 
 export interface UserStorageClientParams {
@@ -31,14 +27,14 @@ export interface UserStorageClientParams {
  * server-injected values for `preload: true` keys, with HTTP-backed writes and
  * per-key lazy fetching for the rest.
  *
- * - A cache miss on `get` / `get$` / `getState$` triggers one `GET` that
- *   concurrent callers for that key share.
+ * - A cache miss on `get` / `get$` triggers one `GET` that concurrent callers
+ *   for that key share.
  * - `cache[key] === undefined` means "not yet fetched": registration rejects
  *   schemas accepting `undefined`/`null` and requires a valid `defaultValue`,
  *   so a hydrated entry is never `undefined`.
  * - Fetch failures go to `getHttpError$` and leave the cache absent so the next
- *   read retries. `get$` neither errors nor completes; `get()` rejects and
- *   `getState$` emits `{status:'error'}`.
+ *   read retries. `get()` rejects; `get$` neither errors nor completes, so a
+ *   subscriber stays on its default until a later read succeeds.
  * - `getUpdate$()` emits for `set`/`remove` only, never for lazy hydration.
  * - When `isAvailable()` is `false` nothing is injected and every route answers
  *   403, so no request is made: reads resolve to `defaultValue`, writes reject.
@@ -126,44 +122,6 @@ export class UserStorageClient implements IUserStorageClient {
         };
       })
     );
-  }
-
-  public getState$<T = unknown>(key: string): Observable<UserStorageValue<T | undefined>>;
-  public getState$<T = unknown>(key: string, defaultValue: T): Observable<UserStorageValue<T>>;
-  public getState$<T = unknown>(
-    key: string,
-    defaultValue?: T
-  ): Observable<UserStorageValue<T | undefined>> {
-    return new Observable<UserStorageValue<T | undefined>>((subscriber) => {
-      const emitResolved = () => {
-        const cached = this.cache[key];
-        const resolved = cached !== undefined ? (cached as T) : defaultValue;
-        subscriber.next({ status: 'resolved', value: resolved });
-      };
-
-      if (this.cache[key] !== undefined) {
-        emitResolved();
-      } else {
-        subscriber.next({ status: 'loading', value: defaultValue });
-        this.startFetch(key).then(
-          () => {
-            if (subscriber.closed) return;
-            emitResolved();
-          },
-          (error: Error) => {
-            if (subscriber.closed) return;
-            subscriber.next({ status: 'error', value: defaultValue, error });
-          }
-        );
-      }
-
-      // Re-emit the resolved value on every subsequent explicit write.
-      const writeSub = this.update$
-        .pipe(filter((u) => u.key === key))
-        .subscribe(() => emitResolved());
-
-      return () => writeSub.unsubscribe();
-    });
   }
 
   public async set<T = unknown>(key: string, value: T): Promise<T> {

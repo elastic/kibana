@@ -61,18 +61,18 @@ describe('UserStorageClient', () => {
       expect(api.get).not.toHaveBeenCalled();
     });
 
-    it('settles getState$ on resolved (not error) without issuing a request', async () => {
+    it('emits the default once from get$ and never publishes an http error', async () => {
       const { client, api } = buildClient({}, false);
-      const states: Array<{ status: string; value?: unknown }> = [];
-      client.getState$('key', 'fallback').subscribe((s) => states.push(s));
+      const emissions: unknown[] = [];
+      const httpErrors = jest.fn();
+      client.getHttpError$().subscribe(httpErrors);
+      client.get$('key', 'fallback').subscribe((v) => emissions.push(v));
 
       await flushMicrotasks();
 
-      expect(states).toEqual([
-        { status: 'loading', value: 'fallback' },
-        { status: 'resolved', value: 'fallback' },
-      ]);
+      expect(emissions).toEqual(['fallback']);
       expect(api.get).not.toHaveBeenCalled();
+      expect(httpErrors).not.toHaveBeenCalled();
     });
 
     it('rejects set() locally without issuing a request or publishing an http error', async () => {
@@ -281,96 +281,6 @@ describe('UserStorageClient', () => {
     });
   });
 
-  describe('getState$', () => {
-    it('emits resolved immediately when the key is already cached', async () => {
-      const { client, api } = buildClient({ key: 'cached' });
-
-      await expect(firstValueFrom(client.getState$<string>('key'))).resolves.toEqual({
-        status: 'resolved',
-        value: 'cached',
-      });
-      expect(api.get).not.toHaveBeenCalled();
-    });
-
-    it('emits loading then resolved for an uncached key', async () => {
-      const { client, api } = buildClient({});
-      let resolveFetch!: (v: string) => void;
-      api.get.mockReturnValue(new Promise<string>((resolve) => (resolveFetch = resolve)));
-
-      const emissions = lastValueFrom(
-        client.getState$<string>('key', 'default').pipe(take(2), toArray())
-      );
-
-      resolveFetch('resolved-value');
-      await Promise.resolve();
-
-      expect(await emissions).toEqual([
-        { status: 'loading', value: 'default' },
-        { status: 'resolved', value: 'resolved-value' },
-      ]);
-    });
-
-    it('emits loading then error when the fetch fails', async () => {
-      const { client, api } = buildClient({});
-      const error = new Error('boom');
-      let rejectFetch!: (e: Error) => void;
-      api.get.mockReturnValue(new Promise<string>((_resolve, reject) => (rejectFetch = reject)));
-
-      const emissions = lastValueFrom(
-        client.getState$<string>('key', 'default').pipe(take(2), toArray())
-      );
-
-      rejectFetch(error);
-      await Promise.resolve();
-
-      expect(await emissions).toEqual([
-        { status: 'loading', value: 'default' },
-        { status: 'error', value: 'default', error },
-      ]);
-    });
-
-    it('emits the resolved state to every subscriber of the same observable', () => {
-      const { client } = buildClient({ key: 'cached' });
-      const state$ = client.getState$<string>('key');
-      const first = jest.fn();
-      const second = jest.fn();
-
-      state$.subscribe(first);
-      state$.subscribe(second);
-
-      expect(first).toHaveBeenCalledWith({ status: 'resolved', value: 'cached' });
-      expect(second).toHaveBeenCalledWith({ status: 'resolved', value: 'cached' });
-    });
-
-    it('emits loading to every subscriber of an uncached key while sharing one request', () => {
-      const { client, api } = buildClient({});
-      const state$ = client.getState$<string>('key', 'default');
-      const first = jest.fn();
-      const second = jest.fn();
-
-      state$.subscribe(first);
-      state$.subscribe(second);
-
-      expect(first).toHaveBeenCalledWith({ status: 'loading', value: 'default' });
-      expect(second).toHaveBeenCalledWith({ status: 'loading', value: 'default' });
-      expect(api.get).toHaveBeenCalledTimes(1);
-    });
-
-    it('re-emits resolved after an explicit write', async () => {
-      const { client, api } = buildClient({ key: 'first' });
-      api.set.mockResolvedValue('second');
-
-      const emissions = lastValueFrom(client.getState$<string>('key').pipe(take(2), toArray()));
-
-      await client.set('key', 'second');
-
-      expect(await emissions).toEqual([
-        { status: 'resolved', value: 'first' },
-        { status: 'resolved', value: 'second' },
-      ]);
-    });
-  });
-
   describe('set', () => {
     it('updates cache and emits on update$ after a successful HTTP call', async () => {
       const { client, api } = buildClient({ key: 'old' });
@@ -473,8 +383,8 @@ describe('UserStorageClient', () => {
 
       const httpErrors = jest.fn();
       client.getHttpError$().subscribe(httpErrors);
-      const states: Array<{ status: string; value?: unknown }> = [];
-      client.getState$<string>('key', 'default').subscribe((s) => states.push(s));
+      const emissions: unknown[] = [];
+      client.get$<string>('key', 'default').subscribe((v) => emissions.push(v));
 
       const getPromise = client.get<string>('key');
       await client.set('key', 'written');
@@ -484,8 +394,7 @@ describe('UserStorageClient', () => {
       await flushMicrotasks();
 
       expect(httpErrors).not.toHaveBeenCalled();
-      expect(states.some((s) => s.status === 'error')).toBe(false);
-      expect(states.at(-1)).toEqual({ status: 'resolved', value: 'written' });
+      expect(emissions.at(-1)).toBe('written');
     });
 
     it('does not resurrect a removed value; later readers start a post-remove GET for the default', async () => {

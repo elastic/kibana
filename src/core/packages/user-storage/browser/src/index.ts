@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { IUserStorageClient, UserStorageUpdate, UserStorageValue } from './types';
+export type { IUserStorageClient, UserStorageUpdate } from './types';
 export { UserStorageProvider } from './user_storage_provider';
 export type { UserStorageProviderProps } from './user_storage_provider';
 export { useUserStorage, useUserStorageClient } from './use_user_storage';
-export type { UserStorageSetter, UserStorageHookState } from './use_user_storage';
+export type { UserStorageSetter } from './use_user_storage';

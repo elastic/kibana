@@ -10,7 +10,7 @@
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import type { IUserStorageClient, UserStorageValue } from './types';
+import type { IUserStorageClient } from './types';
 import { UserStorageProvider } from './user_storage_provider';
 import { useUserStorage, useUserStorageClient } from './use_user_storage';
 
@@ -33,11 +33,6 @@ const buildClient = (initial: Record<string, unknown> = {}): IUserStorageClient 
         cache[key] !== undefined ? cache[key] : defaultValue
       ).asObservable();
     }) as IUserStorageClient['get$'],
-    getState$: ((key: string, defaultValue?: unknown) =>
-      new BehaviorSubject({
-        status: 'resolved' as const,
-        value: cache[key] !== undefined ? cache[key] : defaultValue,
-      }).asObservable()) as IUserStorageClient['getState$'],
     set: jest.fn(async (key: string, value: unknown) => {
       cache[key] = value;
       subject$.next({ ...cache });
@@ -103,30 +98,25 @@ describe('useUserStorage', () => {
     );
   });
 
-  it('returns the cached value as the initial render, with resolved status', () => {
+  it('returns the cached value on the initial render', () => {
     const client = buildClient({ 'navigation:layout': { hidden: ['discover'] } });
 
     const { result } = renderHook(() => useUserStorage<{ hidden: string[] }>('navigation:layout'), {
       wrapper: wrapper(client),
     });
 
-    const [value, , state] = result.current;
-    expect(value).toEqual({ hidden: ['discover'] });
-    expect(state).toEqual({ status: 'resolved' });
+    expect(result.current[0]).toEqual({ hidden: ['discover'] });
   });
 
-  it('is resolved on the initial render for a preloaded key, without awaiting a subscription emit', () => {
+  it('uses the peeked value for a preloaded key, without awaiting a subscription emit', () => {
     const client = buildClient({ 'navigation:layout': { hidden: ['discover'] } });
-    // A getState$ that never emits isolates the pre-subscription initial status.
-    client.getState$ = jest
-      .fn()
-      .mockReturnValue(new Subject()) as unknown as IUserStorageClient['getState$'];
+    // A get$ that never emits isolates the pre-subscription initial value.
+    client.get$ = jest.fn().mockReturnValue(new Subject()) as IUserStorageClient['get$'];
 
     const { result } = renderHook(() => useUserStorage<{ hidden: string[] }>('navigation:layout'), {
       wrapper: wrapper(client),
     });
 
-    expect(result.current[2]).toEqual({ status: 'resolved' });
     expect(result.current[0]).toEqual({ hidden: ['discover'] });
   });
 
@@ -155,29 +145,25 @@ describe('useUserStorage', () => {
     expect(client.set).toHaveBeenCalledWith('counter', 7);
   });
 
-  it('reports loading, then resolved, for a lazily-hydrating key', async () => {
+  it('shows the default until a lazy key hydrates, then the fetched value', () => {
     const client = buildClient();
-    const state$ = new Subject<UserStorageValue<string>>();
-    client.getState$ = jest
-      .fn()
-      .mockReturnValue(state$) as unknown as IUserStorageClient['getState$'];
+    const value$ = new Subject<string>();
+    client.get$ = jest.fn().mockReturnValue(value$) as IUserStorageClient['get$'];
 
     const { result } = renderHook(() => useUserStorage<string>('lazy', 'default'), {
       wrapper: wrapper(client),
     });
 
-    expect(result.current[2]).toEqual({ status: 'loading' });
     expect(result.current[0]).toBe('default');
 
-    act(() => state$.next({ status: 'resolved', value: 'hydrated' }));
+    act(() => value$.next('hydrated'));
 
-    expect(result.current[2]).toEqual({ status: 'resolved' });
     expect(result.current[0]).toBe('hydrated');
   });
 
   it('does not re-subscribe when re-rendered with a fresh-but-equal defaultValue literal', () => {
     const client = buildClient();
-    const getState$ = jest.spyOn(client, 'getState$');
+    const get$ = jest.spyOn(client, 'get$');
 
     const { rerender } = renderHook(
       // A new object literal each render — reference changes, value does not.
@@ -188,24 +174,19 @@ describe('useUserStorage', () => {
     rerender();
     rerender();
 
-    expect(getState$).toHaveBeenCalledTimes(1);
+    expect(get$).toHaveBeenCalledTimes(1);
   });
 
-  it('reports an error status (without discarding the fallback value) when the lazy fetch fails', () => {
+  it('stays on the default when the lazy fetch fails (get$ neither errors nor completes)', () => {
     const client = buildClient();
-    const state$ = new Subject<UserStorageValue<string>>();
-    client.getState$ = jest
-      .fn()
-      .mockReturnValue(state$) as unknown as IUserStorageClient['getState$'];
-    const error = new Error('boom');
+    const value$ = new Subject<string>();
+    client.get$ = jest.fn().mockReturnValue(value$) as IUserStorageClient['get$'];
 
     const { result } = renderHook(() => useUserStorage<string>('lazy', 'default'), {
       wrapper: wrapper(client),
     });
 
-    act(() => state$.next({ status: 'error', value: 'default', error }));
-
-    expect(result.current[2]).toEqual({ status: 'error', error });
+    // A failed fetch is silent on get$ — no emission at all.
     expect(result.current[0]).toBe('default');
   });
 });

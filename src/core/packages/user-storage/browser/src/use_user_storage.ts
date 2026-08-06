@@ -11,7 +11,7 @@ import { useCallback, useContext, useMemo, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import deepEqual from 'fast-deep-equal';
 import type { Observable } from 'rxjs';
-import type { IUserStorageClient, UserStorageValue } from './types';
+import type { IUserStorageClient } from './types';
 import { UserStorageContext } from './user_storage_context';
 
 const PROVIDER_MISSING_MESSAGE =
@@ -35,55 +35,35 @@ export const useUserStorageClient = (): IUserStorageClient => {
 export type UserStorageSetter<T> = (newValue: T) => Promise<T>;
 
 /**
- * Load state of the value returned by {@link useUserStorage}, mirroring
- * {@link UserStorageValue}'s `status` without repeating its `value`.
- *
- * - `'loading'`: a non-preloaded key's lazy fetch hasn't resolved yet — the
- *   returned value is a temporary fallback/default, not the true stored value.
- * - `'resolved'`: the returned value is the true effective value.
- * - `'error'`: the lazy fetch failed; `error` describes the failure. The
- *   returned value is still the fallback/default — safe to display, but
- *   consumers should avoid enabling destructive actions while in this state.
- *
- * @public
- */
-export type UserStorageHookState =
-  | { status: 'loading' }
-  | { status: 'resolved' }
-  | { status: 'error'; error: Error };
-
-/**
- * Subscribes to a single user-storage key and returns a `[value, setter, state]`
- * tuple. The value re-renders on every cache change; `state.status` lets
- * callers distinguish a temporary fallback (`'loading'`) from the resolved
- * value, and disable destructive actions until it settles. The setter
- * persists via HTTP and updates the cache on success.
+ * Subscribes to a single user-storage key and returns a `[value, setter]`
+ * tuple. The value re-renders on every cache change; the setter persists via
+ * HTTP and updates the cache on success.
  *
  * When called without a `defaultValue` the first element of the tuple is
  * `T | undefined` — it is `undefined` when the key has no cached value.
  * When called with a `defaultValue` it is always `T`.
  *
+ * For a `preload: false` key the value is the default until the lazy fetch
+ * resolves, and stays the default if that fetch fails. Read through
+ * `useUserStorageClient().get()` when a caller must tell a placeholder apart
+ * from a stored value, or observe a failed read.
+ *
  * @example
  * ```tsx
- * const [layout, setLayout, { status }] = useUserStorage<NavLayout>(
- *   'navigation:layout',
- *   defaultLayout
- * );
+ * const [layout, setLayout] = useUserStorage<NavLayout>('navigation:layout', defaultLayout);
  * ```
  *
  * @public
  */
-export function useUserStorage<T = unknown>(
-  key: string
-): [T | undefined, UserStorageSetter<T>, UserStorageHookState];
+export function useUserStorage<T = unknown>(key: string): [T | undefined, UserStorageSetter<T>];
 export function useUserStorage<T = unknown>(
   key: string,
   defaultValue: T
-): [T, UserStorageSetter<T>, UserStorageHookState];
+): [T, UserStorageSetter<T>];
 export function useUserStorage<T = unknown>(
   key: string,
   defaultValue?: T
-): [T | undefined, UserStorageSetter<T>, UserStorageHookState] {
+): [T | undefined, UserStorageSetter<T>] {
   const client = useUserStorageClient();
 
   // Stabilize by structural identity so an inline default literal doesn't re-subscribe each render.
@@ -93,29 +73,24 @@ export function useUserStorage<T = unknown>(
   }
   const stableDefault = defaultValueRef.current;
 
-  const state$: Observable<UserStorageValue<T | undefined>> = useMemo(
+  const value$: Observable<T | undefined> = useMemo(
     () =>
-      stableDefault !== undefined
-        ? client.getState$<T>(key, stableDefault)
-        : client.getState$<T>(key),
+      stableDefault !== undefined ? client.get$<T>(key, stableDefault) : client.get$<T>(key),
     [client, key, stableDefault]
   );
 
   // peek() is side-effect-free, so it's safe to read during render under concurrent mode.
-  // A cached (e.g. preloaded) key is resolved on the first render; a missing one starts loading.
+  // It supplies the pre-subscription value; a preloaded key is already correct on first render.
   const cached = client.peek<T>(key);
-  const state = useObservable<UserStorageValue<T | undefined>>(state$, {
-    status: cached !== undefined ? 'resolved' : 'loading',
-    value: cached !== undefined ? cached : stableDefault,
-  });
+  const value = useObservable<T | undefined>(
+    value$,
+    cached !== undefined ? cached : stableDefault
+  );
 
   const set = useCallback<UserStorageSetter<T>>(
     (newValue) => client.set<T>(key, newValue),
     [client, key]
   );
 
-  const hookState: UserStorageHookState =
-    state.status === 'error' ? { status: 'error', error: state.error } : { status: state.status };
-
-  return [state.value, set, hookState];
+  return [value, set];
 }
