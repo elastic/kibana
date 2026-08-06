@@ -88,6 +88,9 @@ export const useFeedback = (
       const prev = voteRef.current;
 
       if (prev === next) {
+        if (conversationId) {
+          conversationsService.submitRoundFeedback({ conversationId, roundId, vote: null });
+        }
         reset();
         return;
       }
