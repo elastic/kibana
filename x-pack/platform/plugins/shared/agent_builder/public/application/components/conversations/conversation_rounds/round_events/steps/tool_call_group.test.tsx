@@ -32,7 +32,7 @@ const toolStep = (id: string, toolId: string, results: ToolResult[] = []) =>
   createToolCallStep({ tool_call_id: id, tool_id: toolId, params: {}, results });
 
 describe('ToolCallGroup', () => {
-  it('shows "N tools ran." once every step in the group has a result', () => {
+  it('shows "N tools ran" once every step in the group has a result', () => {
     renderWithProviders(
       <ToolCallGroup
         steps={[
@@ -42,7 +42,7 @@ describe('ToolCallGroup', () => {
         ]}
       />
     );
-    expect(screen.getByText('3 tools ran.')).toBeInTheDocument();
+    expect(screen.getByText('3 tools ran')).toBeInTheDocument();
   });
 
   it('shows "N tools running…" while at least one step is still in progress', () => {
@@ -64,15 +64,15 @@ describe('ToolCallGroup', () => {
         ]}
       />
     );
-    await user.click(screen.getByText('2 tools ran.'));
+    await user.click(screen.getByText('2 tools ran'));
     const childStatuses = screen
       .getAllByRole('status')
-      .filter((el) => el.textContent !== '2 tools ran.');
+      .filter((el) => el.textContent !== '2 tools ran');
     expect(childStatuses.map((el) => el.querySelector('.euiBadge')?.textContent)).toEqual([
       'tool: search',
       'tool: read',
     ]);
-    expect(childStatuses.every((el) => el.textContent?.includes('ran.'))).toBe(true);
+    expect(childStatuses.every((el) => /(^|\s)ran(\s|$)/.test(el.textContent ?? ''))).toBe(true);
 
     await user.click(screen.getAllByRole('button')[1]);
     expect(screen.getByRole('dialog')).toBeInTheDocument();

@@ -6,8 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { isErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
@@ -20,7 +19,6 @@ interface ToolCallGroupProps {
 }
 
 export const ToolCallGroup: React.FC<ToolCallGroupProps> = ({ steps }) => {
-  const { euiTheme } = useEuiTheme();
   const [isExpanded, setIsExpanded] = useState(false);
   const onToggle = () => setIsExpanded((v) => !v);
 
