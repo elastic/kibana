@@ -186,9 +186,7 @@ safe-outputs:
     protected-files: fallback-to-issue
     patch-format: am
     max: 1
-  # Refreshes the PR title/body when a pushed revision invalidates them (see
-  # "Pushing a revised fix"); no `required-labels` guard because gh-aw 0.81.6
-  # silently drops it here — the `flaky-test-fixer` activation gate scopes us.
+  # Refreshes the PR title/body when a pushed revision invalidates them (see "Pushing a revised fix").
   update-pull-request:
     operation: replace
     footer: false
