@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
+/* eslint-disable complexity,@typescript-eslint/no-non-null-assertion */
 
 import type { Client } from '@elastic/elasticsearch';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
@@ -13,7 +13,10 @@ import { basename } from 'path';
 import { encode } from '@kbn/cbor';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { endpointActionResponseCodes } from '../../../public/management/components/endpoint_responder/lib/endpoint_action_response_codes';
-import { isCancelAction } from '../../../common/endpoint/service/response_actions/type_guards';
+import {
+  isCancelAction,
+  isKillProcessAction,
+} from '../../../common/endpoint/service/response_actions/type_guards';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -32,6 +35,9 @@ import type {
   ResponseActionScanOutputContent,
   ResponseActionRunScriptOutputContent,
   LogsEndpointAction,
+  KillProcessActionOutputContent,
+  ResponseActionParametersWithPid,
+  ResponseActionParametersWithEntityId,
 } from '../../../common/endpoint/types';
 import { getFileDownloadId } from '../../../common/endpoint/service/response_actions/get_file_download_id';
 import {
@@ -165,6 +171,22 @@ export const sendEndpointActionResponse = async (
       }
     }
 
+    // `kill-process --kill-descendants`: add list of descendants killed
+    if (
+      isKillProcessAction(action) &&
+      (action.parameters as ResponseActionParametersWithEntityId | ResponseActionParametersWithPid)
+        ?.kill_descendants
+    ) {
+      const tree = endpointActionGenerator.createProcessDescendants(
+        action.parameters?.pid ?? endpointActionGenerator.randomN(50)
+      );
+
+      (
+        endpointResponse.EndpointActions.data.output!
+          .content as unknown as KillProcessActionOutputContent
+      ).descendants = tree;
+    }
+
     await esClient
       .index({
         index: ENDPOINT_ACTION_RESPONSES_INDEX,
@@ -291,7 +313,6 @@ export const sendEndpointActionResponse = async (
 
     // For `cancel` of an `agentType` of `endpoint` - also send a response for the action that was canceled
     if (isCancelAction(action) && state !== 'failure') {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const canceledActionId = action.parameters!.id;
       const canceledActionCommandName = await esClient
         .search<LogsEndpointAction>({

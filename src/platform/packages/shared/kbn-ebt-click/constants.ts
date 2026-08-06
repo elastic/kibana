@@ -52,6 +52,8 @@ export const EBT_CLICK_ACTIONS = {
   VIEW_ANOMALIES: 'viewAnomalies',
   /** User intends to open an actions menu to explore available actions. */
   OPEN_ACTIONS: 'openActions',
+  /** User intends to add data to their (empty) cluster. Commonly used from empty data prompts and similar components */
+  ADD_DATA: 'addData',
 } as const;
 
 /**

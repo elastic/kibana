@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
-  describe('cross-cluster replication', () => {
-    loadTestFile(require.resolve('./auto_follow_pattern'));
-    loadTestFile(require.resolve('./follower_indices'));
-  });
-}
+export { evaluate } from './src/evaluate';
+export { createEvaluateDataset, type EvaluateDataset } from './src/evaluate_dataset';

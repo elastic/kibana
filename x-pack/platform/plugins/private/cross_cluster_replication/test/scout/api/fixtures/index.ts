@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export const API_BASE_PATH = '/api/cross_cluster_replication';
-export const REMOTE_CLUSTERS_API_BASE_PATH = '/api/remote_clusters';
-export const REMOTE_CLUSTER_NAME = 'ccr-api-integration-tests-cluster';
+export { apiTest } from '@kbn/scout';
+export * as testData from './constants';
+export {
+  registerSelfReferentialRemote,
+  removeRemote,
+  REMOTE_CONNECT_TIMEOUT_MS,
+} from './remote_cluster';
