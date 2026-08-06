@@ -333,6 +333,13 @@ export const allowedExperimentalValues = Object.freeze({
    * from the locally stored kibana mappings after a MITRE version bump.
    */
   mitreAttackUpdatesUIEnabled: true,
+
+  /**
+   * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
+   * creation policy but has no entity store record, create the entity (with its risk score)
+   * instead of silently dropping the score.
+   */
+  riskScoreCreateMissingEntitiesEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

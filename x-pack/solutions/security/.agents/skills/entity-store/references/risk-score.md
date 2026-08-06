@@ -8,14 +8,13 @@ The risk score maintainer (`id: 'risk-score'`) is registered by `security_soluti
 |------|------|----------|---------|
 | `entityAnalyticsEntityStoreV2` | Experimental feature (`kibana.dev.yml` / `enableExperimental`) | Whether the maintainer is registered at all, checked in `security_solution`'s `plugin.ts` at setup. Requires Kibana restart. | `true` |
 | `securitySolution:entityStoreEnableV2` | UI setting | Runtime `idBasedRiskScoringEnabled` — entity store dual-write (read via `getIsIdBasedRiskScoringEnabled()`) | `true`, `readonly: true` |
-| `xpack.securitySolution.entityAnalytics.riskEngine.createMissingEntities` | Kibana config (`config.ts`) | Opt-in for the create-if-missing path only (see below) | `false` |
+| `riskScoreCreateMissingEntitiesEnabled` | Experimental feature (`kibana.dev.yml` / `enableExperimental`) | Opt-in for the create-if-missing path only (see below). Requires Kibana restart. | `false` |
 
-`createMissingEntities` is ANDed with the UI setting in `loadRunConfiguration` — **both** must be on for creation to occur, so it can be disabled independently without turning off dual-write:
+`riskScoreCreateMissingEntitiesEnabled` is ANDed with the UI setting in `loadRunConfiguration` — **both** must be on for creation to occur, so it can be disabled independently without turning off dual-write:
 
 ```typescript
 const createMissingEntitiesEnabled =
-  idBasedRiskScoringEnabled &&
-  (entityAnalyticsConfig?.riskEngine?.createMissingEntities ?? false);
+  idBasedRiskScoringEnabled && experimentalFeatures.riskScoreCreateMissingEntitiesEnabled;
 ```
 
 ## Score Sources

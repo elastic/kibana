@@ -118,7 +118,7 @@ x-pack/solutions/security/plugins/entity_store/
    - Defaults to `true` in `common/experimental_features.ts`
    - The **risk score maintainer** only registers when this flag is `true` (checked in `plugin.ts` at setup)
 
-A third, narrower gate — `xpack.securitySolution.entityAnalytics.riskEngine.createMissingEntities` (Kibana config, defaults to `false`) — controls only the risk score maintainer's create-if-missing path. See [references/risk-score.md](references/risk-score.md).
+A third, narrower gate — the `riskScoreCreateMissingEntitiesEnabled` experimental feature flag (defaults to `false`) — controls only the risk score maintainer's create-if-missing path. See [references/risk-score.md](references/risk-score.md).
 
 ## Risk Score Architecture (v2)
 

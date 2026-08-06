@@ -185,12 +185,6 @@ export const configSchema = schema.object({
   entityAnalytics: schema.object({
     riskEngine: schema.object({
       alertSampleSizePerShard: schema.number({ defaultValue: 10_000 }),
-      /**
-       * Opt-in switch for the risk score maintainer's create-if-missing path: when an alert's
-       * EUID passes the entity type's creation policy but has no entity store record, create
-       * the entity (with its risk score) instead of silently dropping the score.
-       */
-      createMissingEntities: schema.boolean({ defaultValue: false }),
     }),
     assetCriticality: schema.object({
       csvUpload: schema.object({

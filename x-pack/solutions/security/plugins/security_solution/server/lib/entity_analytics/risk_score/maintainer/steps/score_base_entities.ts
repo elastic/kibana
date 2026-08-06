@@ -45,9 +45,9 @@ interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
   idBasedRiskScoringEnabled: boolean;
   /**
    * Create-if-missing opt-in (`idBasedRiskScoringEnabled &&
-   * xpack.securitySolution.entityAnalytics.riskEngine.createMissingEntities`, computed by the
-   * caller, both default to enabling dual-write only). When false, scores for EUIDs absent from
-   * the entity store are dropped, matching pre-existing behaviour.
+   * riskScoreCreateMissingEntitiesEnabled`, computed by the caller, both default to enabling
+   * dual-write only). When false, scores for EUIDs absent from the entity store are dropped,
+   * matching pre-existing behaviour.
    */
   createMissingEntities: boolean;
   refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];

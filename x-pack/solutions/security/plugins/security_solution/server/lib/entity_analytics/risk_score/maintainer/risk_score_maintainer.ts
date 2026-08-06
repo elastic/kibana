@@ -10,6 +10,7 @@ import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 import { v4 as uuidv4 } from 'uuid';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import type { EntityType } from '../../../../../common/entity_analytics/types';
 import type {
   EntityAnalyticsConfig,
@@ -55,6 +56,7 @@ import {
 export interface RiskScoreMaintainerDeps {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   entityAnalyticsConfig: EntityAnalyticsConfig;
+  experimentalFeatures: ExperimentalFeatures;
   kibanaVersion: string;
   logger: Logger;
   auditLogger: AuditLogger | undefined;
@@ -95,9 +97,8 @@ interface LoadedRunConfig {
   idBasedRiskScoringEnabled: boolean;
   /**
    * Gates the risk score maintainer's create-if-missing path (Phase 1 base scoring only).
-   * Requires both `idBasedRiskScoringEnabled` and the
-   * `xpack.securitySolution.entityAnalytics.riskEngine.createMissingEntities` opt-in setting, so
-   * creation can be enabled independently of dual-write.
+   * Requires both `idBasedRiskScoringEnabled` and the `riskScoreCreateMissingEntitiesEnabled`
+   * experimental feature flag, so creation can be enabled independently of dual-write.
    */
   createMissingEntitiesEnabled: boolean;
   watchlistConfigs: Awaited<ReturnType<typeof fetchWatchlistConfigs>>;
@@ -110,6 +111,7 @@ interface LoadedRunConfig {
 export const createRiskScoreMaintainer = ({
   getStartServices,
   entityAnalyticsConfig,
+  experimentalFeatures,
   kibanaVersion,
   logger,
   auditLogger,
@@ -177,6 +179,7 @@ export const createRiskScoreMaintainer = ({
         namespace: runContext.namespace,
         logger,
         entityAnalyticsConfig,
+        experimentalFeatures,
       });
 
       const calculationRunId = uuidv4();
@@ -398,6 +401,7 @@ const loadRunConfiguration = async ({
   namespace,
   logger,
   entityAnalyticsConfig,
+  experimentalFeatures,
 }: {
   coreStart: CoreStart;
   soClient: ReturnType<typeof buildScopedInternalSavedObjectsClientUnsafe>;
@@ -407,6 +411,7 @@ const loadRunConfiguration = async ({
   namespace: string;
   logger: Logger;
   entityAnalyticsConfig: EntityAnalyticsConfig;
+  experimentalFeatures: ExperimentalFeatures;
 }): Promise<LoadedRunConfig> => {
   const configuration: RiskEngineConfiguration =
     (await getConfiguration({ savedObjectsClient: soClient, logger, namespace })) ??
@@ -416,8 +421,7 @@ const loadRunConfiguration = async ({
   const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
   const idBasedRiskScoringEnabled = await getIsIdBasedRiskScoringEnabled(uiSettingsClient);
   const createMissingEntitiesEnabled =
-    idBasedRiskScoringEnabled &&
-    (entityAnalyticsConfig?.riskEngine?.createMissingEntities ?? false);
+    idBasedRiskScoringEnabled && experimentalFeatures.riskScoreCreateMissingEntitiesEnabled;
   const watchlistConfigs = await fetchWatchlistConfigs({
     soClient: internalSoClient,
     esClient,
