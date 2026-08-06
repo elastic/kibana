@@ -41,7 +41,7 @@ export const ConfirmDeleteRegionPolicyModal: React.FC<ConfirmDeleteRegionPolicyM
         defaultMessage: 'Reset region preferences to default?',
       })}
       onCancel={onCancel}
-      onConfirm={() => onConfirm()}
+      onConfirm={onConfirm}
       cancelButtonText={i18n.translate(
         'xpack.searchInferenceEndpoints.manageRegions.deleteConfirm.cancelButtonLabel',
         { defaultMessage: 'Cancel' }
