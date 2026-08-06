@@ -6,12 +6,13 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { createMemoryHistory } from 'history';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { render } from '../utils/testing';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Route } from '@kbn/shared-ux-router';
-import { OVERVIEW_ROUTE } from '../../../../common/constants';
+import { MONITORS_ROUTE, OVERVIEW_ROUTE } from '../../../../common/constants';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { SyntheticsUrlParams } from '../utils/url_params/get_supported_url_params';
 import { getSupportedUrlParams } from '../utils/url_params/get_supported_url_params';
@@ -21,21 +22,21 @@ import { BehaviorSubject } from 'rxjs';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 
 describe('useBreadcrumbs', () => {
-  it('sets the given breadcrumbs', () => {
-    const [getBreadcrumbs, core] = mockCore();
+  const expectedCrumbs: ChromeBreadcrumb[] = [
+    {
+      text: 'Crumb: ',
+      'data-test-subj': 'http://href.example.net',
+      href: 'http://href.example.net',
+    },
+    {
+      text: 'Crumb II: Son of Crumb',
+      'data-test-subj': 'http://href2.example.net',
+      href: 'http://href2.example.net',
+    },
+  ];
 
-    const expectedCrumbs: ChromeBreadcrumb[] = [
-      {
-        text: 'Crumb: ',
-        'data-test-subj': 'http://href.example.net',
-        href: 'http://href.example.net',
-      },
-      {
-        text: 'Crumb II: Son of Crumb',
-        'data-test-subj': 'http://href2.example.net',
-        href: 'http://href2.example.net',
-      },
-    ];
+  const renderAtRoute = (route: string, url: string = route) => {
+    const [getBreadcrumbs, core] = mockCore();
 
     const Component = () => {
       useBreadcrumbs(expectedCrumbs);
@@ -50,7 +51,7 @@ describe('useBreadcrumbs', () => {
 
     render(
       <KibanaContextProvider services={{ ...core }}>
-        <Route path={OVERVIEW_ROUTE}>
+        <Route path={route}>
           <SyntheticsSettingsContext.Provider
             value={{
               darkMode: false,
@@ -68,8 +69,21 @@ describe('useBreadcrumbs', () => {
             <Component />
           </SyntheticsSettingsContext.Provider>
         </Route>
-      </KibanaContextProvider>
+      </KibanaContextProvider>,
+      { history: createMemoryHistory({ initialEntries: [url] }) }
     );
+
+    return getBreadcrumbs;
+  };
+
+  const getSyntheticsCrumb = (breadcrumbs: ChromeBreadcrumb[]) =>
+    breadcrumbs.find(
+      (crumb) =>
+        (crumb as { 'data-test-subj'?: string })['data-test-subj'] === 'syntheticsPathBreadcrumb'
+    );
+
+  it('sets the given breadcrumbs', () => {
+    const getBreadcrumbs = renderAtRoute(MONITORS_ROUTE);
 
     const urlParams: SyntheticsUrlParams = getSupportedUrlParams({});
     expect(JSON.stringify(getBreadcrumbs())).toEqual(
@@ -80,6 +94,24 @@ describe('useBreadcrumbs', () => {
         ].concat(expectedCrumbs)
       )
     );
+  });
+
+  it('does not link the Synthetics crumb on the app root, where it would point at the current page', () => {
+    const getBreadcrumbs = renderAtRoute(OVERVIEW_ROUTE);
+
+    const syntheticsCrumb = getSyntheticsCrumb(getBreadcrumbs());
+
+    expect(syntheticsCrumb).toBeDefined();
+    expect(syntheticsCrumb?.href).toBeUndefined();
+  });
+
+  it('does not link the Synthetics crumb when the root has an empty pathname', () => {
+    const getBreadcrumbs = renderAtRoute(OVERVIEW_ROUTE, '');
+
+    const syntheticsCrumb = getSyntheticsCrumb(getBreadcrumbs());
+
+    expect(syntheticsCrumb).toBeDefined();
+    expect(syntheticsCrumb?.href).toBeUndefined();
   });
 });
 

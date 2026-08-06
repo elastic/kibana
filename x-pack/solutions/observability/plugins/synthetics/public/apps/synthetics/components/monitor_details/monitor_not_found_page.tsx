@@ -13,12 +13,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useParams } from 'react-router-dom';
 import { CreateMonitorButton } from '../monitors_page/create_monitor_button';
+import { useMonitorListBreadcrumbs } from '../monitors_page/hooks/use_breadcrumbs';
 import { PLUGIN } from '../../../../../common/constants/plugin';
 import type { ClientPluginsStart } from '../../../../plugin';
 
 export const MonitorNotFoundPage: React.FC = () => {
   const { application } = useKibana<ClientPluginsStart>().services;
   const { monitorId } = useParams<{ monitorId: string }>();
+
+  useMonitorListBreadcrumbs([{ text: NOT_FOUND_TITLE }]);
 
   return (
     <NotFoundPrompt

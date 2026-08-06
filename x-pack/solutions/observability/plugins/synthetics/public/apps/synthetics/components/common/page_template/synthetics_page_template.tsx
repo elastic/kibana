@@ -6,17 +6,37 @@
  */
 
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { of } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { ClientPluginsStart } from '../../../../../plugin';
 
 export const WrappedPageTemplate = (props: LazyObservabilityPageTemplateProps) => {
-  const { observabilityShared } = useKibana<ClientPluginsStart>().services;
+  const { chrome, observabilityShared } = useKibana<ClientPluginsStart>().services;
   const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
 
-  return <PageTemplateComponent {...props} />;
+  const chromeStyle$ = useMemo(
+    () => chrome?.getChromeStyle$() ?? of<ChromeStyle>('classic'),
+    [chrome]
+  );
+  // Seeded synchronously, otherwise the breadcrumbs paint once before the subscription drops them.
+  const chromeStyle = useObservable<ChromeStyle>(
+    chromeStyle$,
+    chrome?.getChromeStyle() ?? 'classic'
+  );
+
+  // The chrome header renders its own back button, so in-page breadcrumbs would duplicate it.
+  const hasChromeBackButton = Boolean(chrome?.next.isEnabled) && chromeStyle === 'project';
+  const pageHeader =
+    hasChromeBackButton && props.pageHeader
+      ? { ...props.pageHeader, breadcrumbs: undefined }
+      : props.pageHeader;
+
+  return <PageTemplateComponent {...props} pageHeader={pageHeader} />;
 };
 
 export const SyntheticsPageTemplateComponent = euiStyled(WrappedPageTemplate)`
