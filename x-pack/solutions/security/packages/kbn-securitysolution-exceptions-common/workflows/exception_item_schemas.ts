@@ -82,7 +82,7 @@ export const exceptionEntrySchema = z
     field: z.string().min(1).max(1024),
     operator: exceptionEntryOperatorSchema,
     value: z.string().min(1).max(1024).optional(),
-    values: z.array(z.string().min(1).max(1024)).min(1).optional(),
+    values: z.array(z.string().min(1).max(1024)).min(1).max(1000).optional(),
     list: z
       .object({
         id: z.string().min(1),
@@ -147,6 +147,7 @@ const LIST_OPERATORS: ReadonlyArray<z.infer<typeof exceptionEntryOperatorSchema>
 const entriesArraySchema = z
   .array(exceptionEntrySchema)
   .min(1)
+  .max(100)
   .superRefine((entries, ctx) => {
     const hasListEntry = entries.some((entry) => LIST_OPERATORS.includes(entry.operator));
     const hasNonListEntry = entries.some((entry) => !LIST_OPERATORS.includes(entry.operator));
@@ -181,8 +182,8 @@ export const exceptionItemBaseSchema = z.object({
   // ISO 8601 datetime after which the exception no longer applies. Kept a
   // plain string so template expressions pass workflow validation; the
   // exceptions API enforces the format.
-  expire_time: z.string().min(1).optional(),
-  comments: z.array(z.string().min(1)).optional(),
+  expire_time: z.string().min(1).max(256).optional(),
+  comments: z.array(z.string().min(1).max(1024)).max(50).optional(),
 });
 
 /**
