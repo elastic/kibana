@@ -6,8 +6,12 @@
  */
 
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
+import type { Adapters } from '@kbn/inspector-plugin/public';
+import type { AnyAction } from 'redux-v4';
+import type { ThunkDispatch } from 'redux-thunk-v2';
 import { MapAdapter, VectorTileAdapter } from '../inspector';
 import { getShowMapsInspectorAdapter } from '../kibana_services';
+import type { MapStoreState } from './store';
 
 const REGISTER_CANCEL_CALLBACK = 'REGISTER_CANCEL_CALLBACK';
 const UNREGISTER_CANCEL_CALLBACK = 'UNREGISTER_CANCEL_CALLBACK';
@@ -15,8 +19,55 @@ const SET_EVENT_HANDLERS = 'SET_EVENT_HANDLERS';
 const SET_CHARTS_PALETTE_SERVICE_GET_COLOR = 'SET_CHARTS_PALETTE_SERVICE_GET_COLOR';
 const SET_ON_MAP_MOVE = 'SET_ON_MAP_MOVE';
 
+export interface NonSerializableState {
+  inspectorAdapters: Adapters;
+  cancelRequestCallbacks: Map<symbol, () => {}>; // key is request token, value is cancel callback
+  eventHandlers: Partial<EventHandlers>;
+  chartsPaletteServiceGetColor: (value: string) => string | null;
+  onMapMove?: (lat: number, lon: number, zoom: number) => void;
+}
+
+export interface ResultMeta {
+  featuresCount?: number;
+}
+
+export interface EventHandlers {
+  /**
+   * Take action on data load.
+   */
+  onDataLoad: ({ layerId, dataId }: { layerId: string; dataId: string }) => void;
+  /**
+   * Take action on data load end.
+   */
+  onDataLoadEnd: ({
+    layerId,
+    dataId,
+    resultMeta,
+  }: {
+    layerId: string;
+    dataId: string;
+    resultMeta: ResultMeta;
+  }) => void;
+  /**
+   * Take action on data load error.
+   */
+  onDataLoadError: ({
+    layerId,
+    dataId,
+    errorMessage,
+  }: {
+    layerId: string;
+    dataId: string;
+    errorMessage: string;
+  }) => void;
+}
+
 function createInspectorAdapters() {
-  const inspectorAdapters = {
+  const inspectorAdapters: {
+    requests: RequestAdapter;
+    vectorTiles: VectorTileAdapter;
+    map?: MapAdapter;
+  } = {
     requests: new RequestAdapter(),
     vectorTiles: new VectorTileAdapter(),
   };
@@ -27,7 +78,10 @@ function createInspectorAdapters() {
 }
 
 // Reducer
-export function nonSerializableInstances(state, action = {}) {
+export function nonSerializableInstancesReducers(
+  state: NonSerializableState,
+  action: Record<string, any> = {}
+) {
   if (!state) {
     return {
       inspectorAdapters: createInspectorAdapters(),
@@ -72,28 +126,28 @@ export function nonSerializableInstances(state, action = {}) {
 }
 
 // Selectors
-export const getInspectorAdapters = ({ nonSerializableInstances }) => {
+export const getInspectorAdapters = ({ nonSerializableInstances }: MapStoreState) => {
   return nonSerializableInstances.inspectorAdapters;
 };
 
-export const getCancelRequestCallbacks = ({ nonSerializableInstances }) => {
+export const getCancelRequestCallbacks = ({ nonSerializableInstances }: MapStoreState) => {
   return nonSerializableInstances.cancelRequestCallbacks;
 };
 
-export const getEventHandlers = ({ nonSerializableInstances }) => {
+export const getEventHandlers = ({ nonSerializableInstances }: MapStoreState) => {
   return nonSerializableInstances.eventHandlers;
 };
 
-export function getChartsPaletteServiceGetColor({ nonSerializableInstances }) {
+export function getChartsPaletteServiceGetColor({ nonSerializableInstances }: MapStoreState) {
   return nonSerializableInstances.chartsPaletteServiceGetColor;
 }
 
-export function getOnMapMove({ nonSerializableInstances }) {
+export function getOnMapMove({ nonSerializableInstances }: MapStoreState) {
   return nonSerializableInstances.onMapMove;
 }
 
 // Actions
-export const registerCancelCallback = (requestToken, callback) => {
+export const registerCancelCallback = (requestToken: symbol, callback: () => void) => {
   return {
     type: REGISTER_CANCEL_CALLBACK,
     requestToken,
@@ -101,15 +155,18 @@ export const registerCancelCallback = (requestToken, callback) => {
   };
 };
 
-export const unregisterCancelCallback = (requestToken) => {
+export const unregisterCancelCallback = (requestToken: symbol) => {
   return {
     type: UNREGISTER_CANCEL_CALLBACK,
     requestToken,
   };
 };
 
-export const cancelRequest = (requestToken) => {
-  return (dispatch, getState) => {
+export const cancelRequest = (requestToken: symbol) => {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
     if (!requestToken) {
       return;
     }
@@ -129,14 +186,16 @@ export const setEventHandlers = (eventHandlers = {}) => {
   };
 };
 
-export function setChartsPaletteServiceGetColor(chartsPaletteServiceGetColor) {
+export function setChartsPaletteServiceGetColor(
+  chartsPaletteServiceGetColor: ((value: string) => string) | null
+) {
   return {
     type: SET_CHARTS_PALETTE_SERVICE_GET_COLOR,
     chartsPaletteServiceGetColor,
   };
 }
 
-export function setOnMapMove(onMapMove) {
+export function setOnMapMove(onMapMove: (lat: number, lon: number, zoom: number) => void) {
   return {
     type: SET_ON_MAP_MOVE,
     onMapMove,
