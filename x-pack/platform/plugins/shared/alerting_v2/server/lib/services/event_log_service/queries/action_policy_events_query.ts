@@ -20,7 +20,8 @@ import {
  * Filter inputs shared by the action-policy event queries.
  *
  * `outcomes` narrows `event.action` to the provided actions (`dispatched` |
- * `throttled`). When omitted or empty, both are matched. `policyIds` /
+ * `throttled` | `dispatch_failed`). When omitted or empty, all three are
+ * matched. `policyIds` /
  * `ruleIds`, when provided, must match an entry in the nested
  * `kibana.saved_objects` array — or, for rules only, in the top-level
  * `kibana.alerting_v2.dispatcher.rule_ids` spillover field that the
@@ -83,7 +84,7 @@ export const buildFindActionPolicyEventsQuery = (
  * The query reads documents emitted by `store_execution_history_step.ts`:
  *
  *  - `event.provider` is always `alerting_v2`.
- *  - `event.action` is one of `dispatched` / `throttled`.
+ *  - `event.action` is one of `dispatched` / `throttled` / `dispatch_failed`.
  *  - `kibana.space_ids: [spaceId]` for cross-space isolation.
  *  - `kibana.saved_objects` (nested) holds policy + rule refs.
  *  - `kibana.alerting_v2.dispatcher.rule_ids` (top-level keyword) holds the
@@ -129,7 +130,11 @@ const actionFilter = (outcomes: PolicyExecutionOutcome[] | undefined): QueryDslQ
   const actions =
     outcomes && outcomes.length > 0
       ? outcomes
-      : [ACTION_POLICY_EVENT_ACTIONS.DISPATCHED, ACTION_POLICY_EVENT_ACTIONS.THROTTLED];
+      : [
+          ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
+          ACTION_POLICY_EVENT_ACTIONS.THROTTLED,
+          ACTION_POLICY_EVENT_ACTIONS.DISPATCH_FAILED,
+        ];
 
   return { terms: { 'event.action': actions } };
 };

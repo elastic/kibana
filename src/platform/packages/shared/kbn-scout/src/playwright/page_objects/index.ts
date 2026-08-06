@@ -45,6 +45,7 @@ export {
   FilterBar,
   DataGrid,
   DataViewsManagementPage,
+  LensApp,
   QueryBar,
   UnifiedTabs,
   ListingTable,

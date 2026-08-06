@@ -9,6 +9,7 @@
 
 import type {
   AnalyticsServiceStart,
+  DocLinksStart,
   I18nStart,
   ThemeServiceStart,
   UserProfileService,
@@ -22,6 +23,7 @@ export interface ConfigSchema {
 
 export interface DevToolsStartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
+  docLinks: DocLinksStart;
   i18n: I18nStart;
   theme: Pick<ThemeServiceStart, 'theme$'>;
   userProfile: UserProfileService;
