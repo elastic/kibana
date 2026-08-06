@@ -14,6 +14,8 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { Investigation, RecommendedAction } from '@kbn/pnd-common';
 import { PndPageSection } from '../../components/layout/pnd_page_section';
@@ -34,6 +36,7 @@ const isAutoResolved = (investigation: Investigation): boolean =>
   AUTO_RESOLVED_STATUSES.has(investigation.status ?? '');
 
 export const BriefPage: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
   const { data, isLoading, error } = useInvestigations();
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
   usePndDocTitle(BRIEFING_PAGE_INFO.pageTitle);
@@ -122,7 +125,7 @@ export const BriefPage: React.FC = () => {
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup
-            gutterSize="m"
+            gutterSize="s"
             wrap
             responsive={false}
             alignItems="center"
@@ -131,13 +134,16 @@ export const BriefPage: React.FC = () => {
             {surfaces.map((surface) => (
               <EuiFlexItem key={surface} grow={false}>
                 <EuiBadge
+                  style={{
+                    padding: euiTheme.size.s,
+                  }}
                   color={surfaceFilter === surface ? 'primary' : 'hollow'}
                   onClick={() =>
                     setSurfaceFilter((current) => (current === surface ? null : surface))
                   }
                   onClickAriaLabel={surface}
                 >
-                  {surface}
+                  <EuiText size="xs">{surface}</EuiText>
                 </EuiBadge>
               </EuiFlexItem>
             ))}
