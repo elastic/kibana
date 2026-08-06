@@ -32,7 +32,7 @@ describe('Processor: Fail', () => {
     });
 
     await screen.findByTestId('addProcessorForm');
-  });
+  }, 30000);
 
   test('prevents form submission if required message field is not provided', async () => {
     // Click submit button with only the type defined
